@@ -117,15 +117,12 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         while (hasMoreData)
         {
             var encodedResult = await _backend.ReadConfigAsync(page, cancellationToken).ConfigureAwait(false);
-            
-            Console.WriteLine($"[OTP DEBUG] ReadConfig page {page}: received {encodedResult.Length} bytes: {Convert.ToHexString(encodedResult.ToArray())}");
-            
+
             if (encodedResult.Length < 1)
                 throw new BadResponseException($"Empty response for page {page}");
                 
             if (encodedResult.Length - 1 != encodedResult[0])
             {
-                Console.WriteLine($"[OTP DEBUG] Invalid length: encodedResult[0]={encodedResult[0]}, encodedResult.Length={encodedResult.Length}, expected={encodedResult[0] + 1}");
                 throw new BadResponseException("Invalid length");
             }
 

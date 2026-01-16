@@ -146,23 +146,20 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
 
     /// <summary>
     /// Waits for the device to be ready to read (ReadPending flag set) or command complete.
-    /// Uses exponential backoff like legacy C# WaitFor.
+    /// Uses tight polling - the write-side delays provide sufficient device processing time.
     /// </summary>
     private async Task<(ReadOnlyMemory<byte> Report, bool HasData)> WaitForReadyToReadAsync(
         int programmingSequence,
         CancellationToken cancellationToken)
     {
         const int timeLimitMs = 1023; // Same as legacy SDK short timeout
-        var sleepDurationMs = 1;
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-        // Read immediately first, then delay on subsequent iterations
         while (stopwatch.ElapsedMilliseconds < timeLimitMs)
         {
             var report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
             var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
 
-            Console.WriteLine($"[OTP DEBUG] WaitForRead: status=0x{statusByte:X2}, data={Convert.ToHexString(report.Span)}");
             _logger.LogTrace("WaitForReadyToRead: statusByte=0x{Status:X2}, report={Report}",
                 statusByte, Convert.ToHexString(report.Span));
 
@@ -203,15 +200,11 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
 
                 // Sequence hasn't changed - device still processing, keep polling
                 _logger.LogTrace("Device still processing (seq unchanged), continuing poll");
-                await Task.Delay(sleepDurationMs, cancellationToken).ConfigureAwait(false);
-                sleepDurationMs = Math.Min(sleepDurationMs * 2, 64); // Cap at 64ms
                 continue;
             }
 
             // WritePending or other flags - device is busy, keep polling
             _logger.LogTrace("Device busy (statusByte=0x{Status:X2}), continuing poll", statusByte);
-            await Task.Delay(sleepDurationMs, cancellationToken).ConfigureAwait(false);
-            sleepDurationMs = Math.Min(sleepDurationMs * 2, 64);
         }
 
         await ResetStateAsync(cancellationToken).ConfigureAwait(false);
@@ -269,58 +262,6 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
             rawResponse.Length, Convert.ToHexString(rawResponse));
 
         return rawResponse;
-    }
-
-    /// <summary>
-    /// Waits for the ReadPending flag to be set, indicating device has response data.
-    /// Returns the first report that indicates completion (either with data or status-only).
-    /// </summary>
-    private async Task<(ReadOnlyMemory<byte> Report, bool IsDataPacket)> WaitForReadPendingAsync(CancellationToken cancellationToken)
-    {
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        const int timeLimitMs = 1023; // Same as legacy SDK short timeout
-        var sleepDurationMs = 1;
-
-        while (stopwatch.ElapsedMilliseconds < timeLimitMs)
-        {
-            await Task.Delay(sleepDurationMs, cancellationToken).ConfigureAwait(false);
-            sleepDurationMs *= 2; // Exponential backoff like legacy SDK
-
-            var report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
-            var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
-
-            _logger.LogTrace("WaitForReadPending: statusByte=0x{Status:X2}, report={Report}", 
-                statusByte, Convert.ToHexString(report.Span));
-
-            // Check for touch pending
-            if ((statusByte & OtpConstants.ResponseTimeoutWaitFlag) != 0)
-            {
-                _logger.LogDebug("Touch pending detected, waiting longer...");
-                await WaitForTouchCompleteAsync(cancellationToken).ConfigureAwait(false);
-                // After touch completes, read again to get actual response
-                var touchReport = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
-                var touchStatus = touchReport.Span[OtpConstants.FeatureReportDataSize];
-                return (touchReport, (touchStatus & OtpConstants.ResponsePendingFlag) != 0);
-            }
-
-            // Check if ReadPending is set - this is the first data packet (seq=0)
-            if ((statusByte & OtpConstants.ResponsePendingFlag) != 0)
-            {
-                _logger.LogDebug("ReadPending flag detected after {Ms}ms, seq={Seq}", 
-                    stopwatch.ElapsedMilliseconds, statusByte & OtpConstants.SequenceMask);
-                return (report, true);  // isDataPacket = true
-            }
-            
-            // Status-only response (no data, but command was processed)
-            if (statusByte == 0)
-            {
-                var progSeq = report.Span[OtpConstants.StatusOffsetProgSeq];
-                _logger.LogDebug("Got status-only response: progSeq={ProgSeq}", progSeq);
-                return (report, false);  // isDataPacket = false
-            }
-        }
-
-        throw new TimeoutException($"Timeout waiting for ReadPending flag after {stopwatch.ElapsedMilliseconds}ms");
     }
 
     /// <summary>
@@ -394,45 +335,24 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
 
     /// <summary>
     /// Waits for the WRITE flag to be cleared (device ready to receive).
+    /// Uses "sleep-first" pattern: delay BEFORE checking the flag.
+    /// This gives the device time to process each frame before we poll.
     /// </summary>
     private async Task AwaitReadyToWriteAsync(CancellationToken cancellationToken)
     {
         for (var i = 0; i < 20; i++)
         {
+            // Sleep first - give device time to clear write flag
+            await Task.Delay(50, cancellationToken).ConfigureAwait(false);
+
             var report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
             if ((report.Span[OtpConstants.FeatureReportDataSize] & OtpConstants.SlotWriteFlag) == 0)
             {
                 return;
             }
-
-            await Task.Delay(50, cancellationToken).ConfigureAwait(false);
         }
 
         throw new TimeoutException("Timeout waiting for YubiKey to become ready to receive");
-    }
-
-    /// <summary>
-    /// Determines if a packet should be sent (all-zero packets are skipped except first and last).
-    /// NOTE: Disabled on Linux - send all packets for compatibility.
-    /// </summary>
-    private static bool ShouldSend(ReadOnlySpan<byte> packet, byte seq)
-    {
-        // Always send all packets - skipping doesn't work reliably on all platforms
-        return true;
-        
-        // Original optimization (disabled):
-        // if (seq == 0 || seq == 9)
-        // {
-        //     return true;
-        // }
-        // for (var i = 0; i < 7; i++)
-        // {
-        //     if (packet[i] != 0)
-        //     {
-        //         return true;
-        //     }
-        // }
-        // return false;
     }
 
     /// <summary>
@@ -440,7 +360,6 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     /// </summary>
     private async Task<int> SendFrameAsync(byte slot, byte[] payload, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"[OTP DEBUG] SendFrameAsync: slot=0x{slot:X2}, payloadLen={payload.Length}");
         _logger.LogDebug("SendFrameAsync: slot=0x{Slot:X2}, payloadLen={Len}", slot, payload.Length);
         _logger.LogTrace("Sending payload to slot 0x{Slot:X2}: {Payload}", slot, Convert.ToHexString(payload));
 
@@ -454,14 +373,12 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         BinaryPrimitives.WriteUInt16LittleEndian(frame.AsSpan(OtpConstants.SlotDataSize + 1), crc);
         // Last 3 bytes are filler (already zero)
 
-        Console.WriteLine($"[OTP DEBUG] Frame (70 bytes): {Convert.ToHexString(frame.AsSpan(60, 10))}... (last 10 bytes)");
         _logger.LogTrace("Frame (70 bytes): {Frame}", Convert.ToHexString(frame));
 
         // Get current programming sequence
         var statusReport = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
         var programmingSequence = statusReport.Span[OtpConstants.StatusOffsetProgSeq];
-        
-        Console.WriteLine($"[OTP DEBUG] Initial status: {Convert.ToHexString(statusReport.Span)}, progSeq={programmingSequence}");
+
         _logger.LogDebug("Initial programming sequence: {ProgSeq}, statusReport: {Report}",
             programmingSequence, Convert.ToHexString(statusReport.Span));
 
@@ -478,190 +395,20 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
             Array.Clear(report, 0, OtpConstants.FeatureReportDataSize);
             Array.Copy(frame, frameOffset, report, 0, bytesToCopy);
 
-            if (ShouldSend(report, seq))
-            {
-                // Set sequence with write flag
-                report[OtpConstants.FeatureReportDataSize] = (byte)(OtpConstants.SlotWriteFlag | seq);
-                await AwaitReadyToWriteAsync(cancellationToken).ConfigureAwait(false);
-                _logger.LogTrace("Sending report #{Count} (seq={Seq}): {Report}", 
-                    sentCount, seq, Convert.ToHexString(report));
-                await WriteFeatureReportAsync(report, cancellationToken).ConfigureAwait(false);
-                sentCount++;
-            }
+            // Set sequence with write flag
+            report[OtpConstants.FeatureReportDataSize] = (byte)(OtpConstants.SlotWriteFlag | seq);
+            await AwaitReadyToWriteAsync(cancellationToken).ConfigureAwait(false);
+            _logger.LogTrace("Sending report #{Count} (seq={Seq}): {Report}", 
+                sentCount, seq, Convert.ToHexString(report));
+            await WriteFeatureReportAsync(report, cancellationToken).ConfigureAwait(false);
+            sentCount++;
 
             frameOffset += OtpConstants.FeatureReportDataSize;
             seq++;
         }
 
-        Console.WriteLine($"[OTP DEBUG] Sent {sentCount} reports, progSeq={programmingSequence}");
         _logger.LogDebug("Sent {Count} reports, returning programmingSequence={ProgSeq}", sentCount, programmingSequence);
         return programmingSequence;
-    }
-
-    /// <summary>
-    /// Reads one frame response.
-    /// </summary>
-    /// <param name="programmingSequence">The programming sequence before the command was sent.</param>
-    /// <param name="firstReport">The first report already read by WaitForReadPending.</param>
-    /// <param name="isDataPacket">True if firstReport is a data packet, false if status-only.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    private async Task<ReadOnlyMemory<byte>> ReadFrameAsync(
-        int programmingSequence, 
-        ReadOnlyMemory<byte> firstReport, 
-        bool isDataPacket,
-        CancellationToken cancellationToken)
-    {
-        using var stream = new MemoryStream();
-        byte seq = 0;
-        var needsTouch = false;
-        var readCount = 0;
-
-        _logger.LogDebug("ReadFrameAsync starting, programmingSequence={ProgSeq}, isDataPacket={IsData}", 
-            programmingSequence, isDataPacket);
-
-        // Process the first report that was already read by WaitForReadPending
-        ReadOnlyMemory<byte> report = firstReport;
-        var processFirstReport = true;
-
-        while (true)
-        {
-            if (!processFirstReport)
-            {
-                report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
-            }
-            processFirstReport = false;
-            
-            readCount++;
-            var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
-
-            _logger.LogTrace("ReadFrameAsync: report #{Count}, statusByte=0x{Status:X2}, data={Data}",
-                readCount, statusByte, Convert.ToHexString(report.Span));
-
-            if ((statusByte & OtpConstants.ResponsePendingFlag) != 0)
-            {
-                // Response packet
-                var packetSeq = statusByte & OtpConstants.SequenceMask;
-                _logger.LogTrace("Response packet, packetSeq={PacketSeq}, expected={Expected}", packetSeq, seq);
-                
-                if (seq == packetSeq)
-                {
-                    // Correct sequence
-                    stream.Write(report.Span[..OtpConstants.FeatureReportDataSize]);
-                    seq++;
-                }
-                else if (packetSeq == 0 && seq > 0)
-                {
-                    // Transmission complete (got seq=0 again after receiving data)
-                    await ResetStateAsync(cancellationToken).ConfigureAwait(false);
-                    var rawResponse = stream.ToArray();
-                    _logger.LogDebug("{Length} bytes read over HID in {Count} reports: {Response}", 
-                        rawResponse.Length, readCount, Convert.ToHexString(rawResponse));
-                    return ExtractPayloadFromFrame(rawResponse);
-                }
-            }
-            else if ((statusByte & ~OtpConstants.SequenceMask) == 0)
-            {
-                // Status response (no ResponsePending, no WritePending, no TouchPending)
-                var nextSeq = report.Span[OtpConstants.StatusOffsetProgSeq];
-                var touchLow = report.Span[OtpConstants.StatusOffsetTouchLow];
-                
-                _logger.LogDebug("Status response: nextSeq={NextSeq}, programmingSequence={ProgSeq}, streamLen={StreamLen}, touchLow=0x{TouchLow:X2}",
-                    nextSeq, programmingSequence, stream.Length, touchLow);
-                
-                // If we have data in the buffer, we successfully received data and this is end-of-chain
-                if (stream.Length > 0)
-                {
-                    var rawResponse = stream.ToArray();
-                    _logger.LogDebug("{Length} bytes read (end of chain): {Response}", 
-                        rawResponse.Length, Convert.ToHexString(rawResponse));
-                    return ExtractPayloadFromFrame(rawResponse);
-                }
-
-                if (nextSeq == programmingSequence + 1 ||
-                    (nextSeq == 0 && programmingSequence > 0 &&
-                     (touchLow & OtpConstants.ConfigSlotsProgrammedMask) == 0))
-                {
-                    // Sequence updated, return status
-                    var status = report.Slice(1, 6).ToArray();
-                    _logger.LogDebug("HID programming sequence updated. New status: {Status}", Convert.ToHexString(status));
-                    return status;
-                }
-
-                if (needsTouch)
-                {
-                    throw new TimeoutException("Timed out waiting for touch");
-                }
-
-                throw new InvalidOperationException(
-                    $"No data returned from YubiKey (progSeq={programmingSequence}, nextSeq={nextSeq}, statusByte=0x{statusByte:X2})");
-            }
-            else
-            {
-                // Need to wait
-                _logger.LogTrace("Waiting: statusByte=0x{Status:X2}", statusByte);
-                if ((statusByte & OtpConstants.ResponseTimeoutWaitFlag) != 0)
-                {
-                    needsTouch = true;
-                    await Task.Delay(100, cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    await Task.Delay(20, cancellationToken).ConfigureAwait(false);
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// Extracts and validates the response payload from a raw frame.
-    /// </summary>
-    /// <param name="frame">The raw 70-byte frame data.</param>
-    /// <returns>The extracted payload data.</returns>
-    private ReadOnlyMemory<byte> ExtractPayloadFromFrame(byte[] frame)
-    {
-        if (frame.Length < OtpConstants.FrameSize)
-        {
-            _logger.LogWarning("Frame too short: {Length} bytes, expected {Expected}", 
-                frame.Length, OtpConstants.FrameSize);
-            // Return what we have in the data portion
-            return frame.AsMemory(0, Math.Min(frame.Length, OtpConstants.SlotDataSize));
-        }
-
-        // Get response length from byte 64
-        var responseLength = frame[OtpConstants.ResponseLengthOffset];
-        
-        _logger.LogDebug("Frame response length: {Length}, frameLen={FrameLen}", responseLength, frame.Length);
-
-        if (responseLength > OtpConstants.SlotDataSize)
-        {
-            _logger.LogWarning("Invalid response length {Length}, capping at {Max}", 
-                responseLength, OtpConstants.SlotDataSize);
-            responseLength = OtpConstants.SlotDataSize;
-        }
-
-        // Verify CRC over payload + length byte
-        var crcSpan = frame.AsSpan(0, OtpConstants.ResponseLengthOffset + 1);
-        var storedCrc = BinaryPrimitives.ReadUInt16LittleEndian(
-            frame.AsSpan(OtpConstants.ResponseCrcOffset, 2));
-        var calculatedCrc = ChecksumUtils.CalculateCrc(crcSpan.ToArray(), crcSpan.Length);
-        
-        // Include stored CRC in calculation for residue check
-        var fullCrc = ChecksumUtils.CalculateCrc(
-            frame.AsSpan(0, OtpConstants.ResponseCrcOffset + 2).ToArray(),
-            OtpConstants.ResponseCrcOffset + 2);
-
-        _logger.LogDebug("CRC check: stored=0x{Stored:X4}, calculated=0x{Calculated:X4}, residue=0x{Residue:X4}",
-            storedCrc, calculatedCrc, fullCrc);
-
-        // Valid CRC residue is 0xF0B8
-        if (fullCrc != ChecksumUtils.ValidResidue)
-        {
-            _logger.LogWarning("CRC mismatch! Residue=0x{Residue:X4}, expected=0x{Expected:X4}", 
-                fullCrc, ChecksumUtils.ValidResidue);
-            // Return data anyway - some implementations don't check CRC
-        }
-
-        return frame.AsMemory(0, responseLength);
     }
 
     /// <summary>

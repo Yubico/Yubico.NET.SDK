@@ -14,7 +14,6 @@
 
 using System.Threading.Channels;
 using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core;
 

@@ -1,5 +1,6 @@
 using NSubstitute;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 

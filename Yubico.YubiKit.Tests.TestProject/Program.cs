@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 using TestProject;
-using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 

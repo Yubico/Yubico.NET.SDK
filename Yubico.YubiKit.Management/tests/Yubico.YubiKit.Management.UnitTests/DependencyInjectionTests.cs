@@ -1,8 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
-using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Management.UnitTests;
 

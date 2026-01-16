@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Hid;
+using Yubico.YubiKit.Core.Hid.Fido;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 
@@ -38,10 +39,30 @@ public class
             // Skip test if no FIDO HID interface found
             return;
 
-        await using var connection = await fidoDevice.ConnectAsync<IFidoConnection>();
+        await using var connection = await fidoDevice.ConnectAsync<IFidoHidConnection>();
         using var mgmtSession = await ManagementSession.CreateAsync(connection);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
+        Assert.NotEqual(0, deviceInfo.SerialNumber);
+    }
+    
+    [Fact]
+    public async Task CreateManagementSession_with_HidFido_CreateAsync() // TODO verify this works
+    {
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
+        var fidoDevice = devices[0];
+    
+        var deviceInfo = await fidoDevice.GetDeviceInfoAsync();
+        Assert.NotEqual(0, deviceInfo.SerialNumber);
+    }
+    
+    [Fact]
+    public async Task CreateManagementSession_with_HidOtp_CreateAsync() // TODO verify this works
+    {
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidOtp);
+        var fidoDevice = devices[0];
+    
+        var deviceInfo = await fidoDevice.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
     }
 
@@ -60,7 +81,7 @@ public class
             // Skip test if no FIDO HID interface found
             return;
 
-        await using var connection = await fidoDevice.ConnectAsync<IFidoConnection>();
+        await using var connection = await fidoDevice.ConnectAsync<IFidoHidConnection>();
         using var mgmtSession = await ManagementSession.CreateAsync(connection);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();

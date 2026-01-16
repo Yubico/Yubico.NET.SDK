@@ -34,16 +34,16 @@ public static class HidInterfaceClassifier
     /// Determines the YubiKey interface type from HID descriptor information.
     /// </summary>
     /// <param name="descriptorInfo">Raw HID descriptor data.</param>
-    /// <returns>The classified interface type, or <see cref="YubiKeyHidInterfaceType.Unknown"/> if not recognized.</returns>
-    public static YubiKeyHidInterfaceType Classify(HidDescriptorInfo descriptorInfo)
+    /// <returns>The classified interface type, or <see cref="HidInterfaceType.Unknown"/> if not recognized.</returns>
+    public static HidInterfaceType Classify(HidDescriptorInfo descriptorInfo)
     {
         ArgumentNullException.ThrowIfNull(descriptorInfo);
         
         return (descriptorInfo.UsagePage, descriptorInfo.Usage) switch
         {
-            (UsagePageFido, UsageU2fDevice) => YubiKeyHidInterfaceType.Fido,
-            (UsagePageGenericDesktop, UsageKeyboard) => YubiKeyHidInterfaceType.Otp,
-            _ => YubiKeyHidInterfaceType.Unknown
+            (UsagePageFido, UsageU2fDevice) => HidInterfaceType.Fido,
+            (UsagePageGenericDesktop, UsageKeyboard) => HidInterfaceType.Otp,
+            _ => HidInterfaceType.Unknown
         };
     }
     
@@ -55,7 +55,7 @@ public static class HidInterfaceClassifier
     public static bool IsSupported(HidDescriptorInfo descriptorInfo)
     {
         ArgumentNullException.ThrowIfNull(descriptorInfo);
-        return Classify(descriptorInfo) != YubiKeyHidInterfaceType.Unknown;
+        return Classify(descriptorInfo) != HidInterfaceType.Unknown;
     }
     
     /// <summary>
@@ -64,11 +64,11 @@ public static class HidInterfaceClassifier
     /// <param name="interfaceType">The YubiKey HID interface type.</param>
     /// <returns>The HID report type to use for communication.</returns>
     /// <exception cref="ArgumentException">Thrown when the interface type is not supported.</exception>
-    public static HidReportType GetReportType(YubiKeyHidInterfaceType interfaceType) =>
+    public static HidReportType GetReportType(HidInterfaceType interfaceType) =>
         interfaceType switch
         {
-            YubiKeyHidInterfaceType.Fido => HidReportType.InputOutput,
-            YubiKeyHidInterfaceType.Otp => HidReportType.Feature,
+            HidInterfaceType.Fido => HidReportType.InputOutput,
+            HidInterfaceType.Otp => HidReportType.Feature,
             _ => throw new ArgumentException($"Unsupported interface type: {interfaceType}", nameof(interfaceType))
         };
 }

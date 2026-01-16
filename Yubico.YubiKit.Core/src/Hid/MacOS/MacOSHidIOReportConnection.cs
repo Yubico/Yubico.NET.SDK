@@ -29,7 +29,7 @@ namespace Yubico.YubiKit.Core.Hid.MacOS;
 ///     macOS implementation of the FIDO IO report connection.
 /// </summary>
 [SupportedOSPlatform("macos")]
-internal sealed class MacOSHidIOReportConnection : IHidConnectionSync
+internal sealed class MacOSHidIOReportConnection : IHidConnection
 {
     private readonly long _entryId;
     private readonly nint _loopId;

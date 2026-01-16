@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.Core.Hid;
 /// </summary>
 /// <remarks>
 /// These values follow the HID Usage Tables specification (USB-IF).
-/// Do not use these values directly for business logic - use <see cref="YubiKeyHidInterfaceType"/> instead.
+/// Do not use these values directly for business logic - use <see cref="HidInterfaceType"/> instead.
 /// </remarks>
 public sealed record HidDescriptorInfo
 {

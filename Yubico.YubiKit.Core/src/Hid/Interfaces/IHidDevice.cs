@@ -1,4 +1,4 @@
-﻿// Copyright 2025 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using Yubico.YubiKit.Core.Hid.Constants;
 using Yubico.YubiKit.Core.Interfaces;
 
 namespace Yubico.YubiKit.Core.Hid.Interfaces;
 
 /// <summary>
-///     Represents a HID device.
+/// Represents a HID device.
 /// </summary>
 public interface IHidDevice : IDevice
 {
@@ -27,43 +25,19 @@ public interface IHidDevice : IDevice
     /// Raw HID descriptor information as reported by the operating system.
     /// </summary>
     HidDescriptorInfo DescriptorInfo { get; }
-    
+
     /// <summary>
     /// The classified YubiKey HID interface type.
     /// </summary>
-    YubiKeyHidInterfaceType InterfaceType { get; }
-    
-    /// <summary>
-    /// Vendor ID.
-    /// </summary>
-    [Obsolete("Use DescriptorInfo.VendorId instead")]
-    short VendorId { get; }
-    
-    /// <summary>
-    /// Product ID.
-    /// </summary>
-    [Obsolete("Use DescriptorInfo.ProductId instead")]
-    short ProductId { get; }
-    
-    /// <summary>
-    /// HID Usage value.
-    /// </summary>
-    [Obsolete("Use DescriptorInfo.Usage instead")]
-    short Usage { get; }
-    
-    /// <summary>
-    /// HID Usage Page value.
-    /// </summary>
-    [Obsolete("Use InterfaceType instead. This property is misleading - use HidInterfaceClassifier.Classify() for proper interface type detection.")]
-    HidUsagePage UsagePage { get; }
+    HidInterfaceType InterfaceType { get; }
 
     /// <summary>
-    ///     Establishes an active connection to the HID device for the transmittal of data through feature reports.
+    /// Establishes an active connection to the HID device for the transmittal of data through feature reports.
     /// </summary>
-    IHidConnectionSync ConnectToFeatureReports();
+    IHidConnection ConnectToFeatureReports();
 
     /// <summary>
-    ///     Establishes an active connection to the HID device for the transmittal of data through I/O reports.
+    /// Establishes an active connection to the HID device for the transmittal of data through I/O reports.
     /// </summary>
-    IHidConnectionSync ConnectToIOReports();
+    IHidConnection ConnectToIOReports();
 }

@@ -41,28 +41,7 @@ internal sealed class MacOSHidDevice : IHidDevice
     /// <summary>
     /// The classified YubiKey HID interface type.
     /// </summary>
-    public YubiKeyHidInterfaceType InterfaceType { get; }
-    
-    // Obsolete properties for backward compatibility
-    #pragma warning disable CS0618 // Type or member is obsolete
-    public short VendorId => DescriptorInfo.VendorId;
-    public short ProductId => DescriptorInfo.ProductId;
-    public short Usage => (short)DescriptorInfo.Usage;
-    
-    public HidUsagePage UsagePage
-    {
-        get
-        {
-            // Map new types back to old enum for backward compatibility
-            return InterfaceType switch
-            {
-                YubiKeyHidInterfaceType.Fido => HidUsagePage.Fido,
-                YubiKeyHidInterfaceType.Otp => HidUsagePage.Keyboard,
-                _ => HidUsagePage.Unknown
-            };
-        }
-    }
-    #pragma warning restore CS0618
+    public HidInterfaceType InterfaceType { get; }
 
     internal MacOSHidDevice(long entryId, HidDescriptorInfo descriptorInfo)
     {
@@ -136,7 +115,7 @@ internal sealed class MacOSHidDevice : IHidDevice
     /// <returns>
     ///     An active connection object.
     /// </returns>
-    public IHidConnectionSync ConnectToFeatureReports() =>
+    public IHidConnection ConnectToFeatureReports() =>
         new MacOSHidFeatureReportConnection(_entryId);
 
     /// <summary>
@@ -145,7 +124,7 @@ internal sealed class MacOSHidDevice : IHidDevice
     /// <returns>
     ///     An active connection object.
     /// </returns>
-    public IHidConnectionSync ConnectToIOReports() =>
+    public IHidConnection ConnectToIOReports() =>
         new MacOSHidIOReportConnection(_entryId);
 
     internal static long GetEntryId(IntPtr device)

@@ -1,4 +1,4 @@
-// Copyright 2025 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -16,13 +16,11 @@ using Yubico.YubiKit.Core.Interfaces;
 
 namespace Yubico.YubiKit.Core.Hid.Interfaces;
 
-/// <summary>
-///     Async wrapper for HID connections for use in the new SDK architecture.
-/// </summary>
 public interface IHidConnection : IConnection
 {
     int InputReportSize { get; }
     int OutputReportSize { get; }
-    Task SetReportAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default);
-    Task<ReadOnlyMemory<byte>> GetReportAsync(CancellationToken cancellationToken = default);
+
+    void SetReport(byte[] report);
+    byte[] GetReport();
 }

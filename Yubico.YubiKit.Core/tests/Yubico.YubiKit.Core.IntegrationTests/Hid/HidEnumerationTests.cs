@@ -51,8 +51,8 @@ public class HidEnumerationTests
 
         foreach (var device in devices)
         {
-            _output.WriteLine($"  VID={device.VendorId:X4} PID={device.ProductId:X4} " +
-                            $"Usage={device.Usage:X4} UsagePage={device.UsagePage}");
+            _output.WriteLine($"  VID={device.DescriptorInfo.VendorId:X4} PID={device.DescriptorInfo.ProductId:X4} " +
+                            $"Usage={device.DescriptorInfo.Usage:X4} UsagePage={device.DescriptorInfo.UsagePage}");
         }
 
         Assert.True(devices.Count >= 0, "Should not fail even if no devices present");

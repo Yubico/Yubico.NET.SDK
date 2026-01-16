@@ -18,7 +18,7 @@ namespace Yubico.YubiKit.Core.Hid;
 /// Represents the type of YubiKey HID interface.
 /// This is determined from the HID descriptor UsagePage and Usage combination.
 /// </summary>
-public enum YubiKeyHidInterfaceType
+public enum HidInterfaceType
 {
     /// <summary>
     /// Unknown or unsupported HID interface type.

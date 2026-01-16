@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.Core.Hid.Constants;
 /// the Generic Desktop usage page (0x01), not a keyboard specifically. A keyboard is identified by
 /// the combination of UsagePage=0x01 AND Usage=0x06.
 /// <para>
-/// Use <see cref="YubiKeyHidInterfaceType"/> and <see cref="HidInterfaceClassifier"/> instead for
+/// Use <see cref="HidInterfaceType"/> and <see cref="HidInterfaceClassifier"/> instead for
 /// proper YubiKey interface type detection.
 /// </para>
 /// </remarks>

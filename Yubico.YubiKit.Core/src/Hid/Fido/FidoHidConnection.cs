@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Hid.Constants;
 using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.Interfaces;
 
@@ -21,11 +22,11 @@ namespace Yubico.YubiKit.Core.Hid.Fido;
 /// Wraps a synchronous HID IO report connection for FIDO/CTAP communication.
 /// Provides async interface for 64-byte FIDO HID packets.
 /// </summary>
-internal class FidoHidConnection(IHidConnectionSync syncConnection) : IFidoHidConnection
+internal class FidoHidConnection(IHidConnection connection) : IFidoHidConnection
 {
     private bool _disposed;
 
-    public int PacketSize => 64;
+    public int PacketSize => CtapConstants.PacketSize;
     public ConnectionType Type => ConnectionType.HidFido;
 
     public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default)
@@ -36,7 +37,7 @@ internal class FidoHidConnection(IHidConnectionSync syncConnection) : IFidoHidCo
             throw new ArgumentException($"FIDO packet must be exactly {PacketSize} bytes, got {packet.Length}",
                 nameof(packet));
 
-        syncConnection.SetReport(packet.ToArray());
+        connection.SetReport(packet.ToArray());
         return Task.CompletedTask;
     }
 
@@ -44,7 +45,7 @@ internal class FidoHidConnection(IHidConnectionSync syncConnection) : IFidoHidCo
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        var report = syncConnection.GetReport();
+        var report = connection.GetReport();
         if (report.Length != PacketSize)
             throw new InvalidOperationException($"Expected {PacketSize}-byte packet, got {report.Length} bytes");
 
@@ -55,7 +56,7 @@ internal class FidoHidConnection(IHidConnectionSync syncConnection) : IFidoHidCo
     {
         if (_disposed) return;
 
-        syncConnection.Dispose();
+        connection.Dispose();
         _disposed = true;
     }
 

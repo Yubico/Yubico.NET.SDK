@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Core.Hid.Linux;
 ///     Linux implementation of the FIDO IO report connection using hidraw.
 /// </summary>
 [SupportedOSPlatform("linux")]
-internal sealed class LinuxHidIOReportConnection : IHidConnectionSync
+internal sealed class LinuxHidIOReportConnection : IHidConnection
 {
     private const int FidoReportSize = 64;
 

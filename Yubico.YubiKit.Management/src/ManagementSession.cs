@@ -235,22 +235,22 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     private static (IProtocol protocol, IManagementBackend backend) CreateFidoBackend(
         IFidoHidConnection connection)
     {
-        var protocol = FidoProtocolFactory<IFidoHidConnection>
+        var protocol = FidoProtocolFactory
             .Create()
             .Create(connection);
-        
-        var backend = new FidoBackend(protocol as IFidoHidProtocol ?? throw new InvalidOperationException());
+
+        var backend = new FidoBackend(protocol);
         return (protocol, backend);
     }
 
     private static (IProtocol protocol, IManagementBackend backend) CreateOtpBackend(
         IOtpHidConnection connection)
     {
-        var protocol = OtpProtocolFactory<IOtpHidConnection>
+        var protocol = OtpProtocolFactory
             .Create()
             .Create(connection);
-        
-        var backend = new OtpBackend(protocol as IOtpHidProtocol ?? throw new InvalidOperationException());
+
+        var backend = new OtpBackend(protocol);
         return (protocol, backend);
     }
 

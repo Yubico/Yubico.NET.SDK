@@ -26,11 +26,11 @@ public static class ConnectionTypeMapper
     /// </summary>
     /// <param name="interfaceType">The YubiKey HID interface type.</param>
     /// <returns>The corresponding <see cref="ConnectionType"/>.</returns>
-    public static ConnectionType ToConnectionType(YubiKeyHidInterfaceType interfaceType) =>
+    public static ConnectionType ToConnectionType(HidInterfaceType interfaceType) =>
         interfaceType switch
         {
-            YubiKeyHidInterfaceType.Fido => ConnectionType.HidFido,
-            YubiKeyHidInterfaceType.Otp => ConnectionType.HidOtp,
+            HidInterfaceType.Fido => ConnectionType.HidFido,
+            HidInterfaceType.Otp => ConnectionType.HidOtp,
             _ => ConnectionType.Hid
         };
     
@@ -41,12 +41,12 @@ public static class ConnectionTypeMapper
     /// <param name="connectionType">The requested connection type.</param>
     /// <returns><c>true</c> if the interface supports the connection type; otherwise, <c>false</c>.</returns>
     public static bool SupportsConnectionType(
-        YubiKeyHidInterfaceType interfaceType, 
+        HidInterfaceType interfaceType, 
         ConnectionType connectionType) =>
         (interfaceType, connectionType) switch
         {
-            (YubiKeyHidInterfaceType.Fido, ConnectionType.HidFido) => true,
-            (YubiKeyHidInterfaceType.Otp, ConnectionType.HidOtp) => true,
+            (HidInterfaceType.Fido, ConnectionType.HidFido) => true,
+            (HidInterfaceType.Otp, ConnectionType.HidOtp) => true,
             _ => false
         };
 }

@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Core.Hid.Linux;
 ///     Linux implementation of the keyboard feature report connection using hidraw ioctl.
 /// </summary>
 [SupportedOSPlatform("linux")]
-internal sealed class LinuxHidFeatureReportConnection : IHidConnectionSync
+internal sealed class LinuxHidFeatureReportConnection : IHidConnection
 {
     private const int FeatureReportSize = 8;
 

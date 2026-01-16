@@ -21,11 +21,11 @@ namespace Yubico.YubiKit.Core.Hid.Otp;
 /// Wraps a synchronous HID feature report connection for OTP/Keyboard communication.
 /// Provides async interface for 8-byte OTP feature reports.
 /// </summary>
-internal class OtpHidConnection(IHidConnectionSync syncConnection) : IOtpHidConnection
+internal class OtpHidConnection(IHidConnection connection) : IOtpHidConnection
 {
     private bool _disposed;
 
-    public int FeatureReportSize => 8;
+    public int FeatureReportSize => OtpConstants.FeatureReportSize;
     public ConnectionType Type => ConnectionType.HidOtp;
 
     public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default)
@@ -37,7 +37,7 @@ internal class OtpHidConnection(IHidConnectionSync syncConnection) : IOtpHidConn
                 $"OTP feature report must be exactly {FeatureReportSize} bytes, got {report.Length}",
                 nameof(report));
 
-        syncConnection.SetReport(report.ToArray());
+        connection.SetReport(report.ToArray());
         return Task.CompletedTask;
     }
 
@@ -45,7 +45,7 @@ internal class OtpHidConnection(IHidConnectionSync syncConnection) : IOtpHidConn
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        var report = syncConnection.GetReport();
+        var report = connection.GetReport();
         if (report.Length != FeatureReportSize)
             throw new InvalidOperationException(
                 $"Expected {FeatureReportSize}-byte report, got {report.Length} bytes");
@@ -57,7 +57,7 @@ internal class OtpHidConnection(IHidConnectionSync syncConnection) : IOtpHidConn
     {
         if (_disposed) return;
 
-        syncConnection.Dispose();
+        connection.Dispose();
         _disposed = true;
     }
 

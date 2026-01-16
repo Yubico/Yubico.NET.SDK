@@ -25,7 +25,7 @@ namespace Yubico.YubiKit.Core.Hid.MacOS;
 ///     macOS implementation of the keyboard feature report connection.
 /// </summary>
 [SupportedOSPlatform("macos")]
-internal sealed class MacOSHidFeatureReportConnection : IHidConnectionSync
+internal sealed class MacOSHidFeatureReportConnection : IHidConnection
 {
     private readonly long _entryId;
     private nint _deviceHandle;

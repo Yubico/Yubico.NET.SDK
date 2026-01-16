@@ -60,9 +60,9 @@ public class
     public async Task CreateManagementSession_with_HidOtp_CreateAsync() // TODO verify this works
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidOtp);
-        var fidoDevice = devices[0];
+        var otpDevice = devices[0];
     
-        var deviceInfo = await fidoDevice.GetDeviceInfoAsync();
+        var deviceInfo = await otpDevice.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
     }
 

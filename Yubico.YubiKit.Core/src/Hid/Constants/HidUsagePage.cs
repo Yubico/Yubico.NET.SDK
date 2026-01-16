@@ -14,9 +14,22 @@
 
 namespace Yubico.YubiKit.Core.Hid.Constants;
 
+/// <summary>
+/// HID Usage Page enumeration.
+/// </summary>
+/// <remarks>
+/// <strong>OBSOLETE:</strong> This enum is misleading. The value "Keyboard = 1" actually represents
+/// the Generic Desktop usage page (0x01), not a keyboard specifically. A keyboard is identified by
+/// the combination of UsagePage=0x01 AND Usage=0x06.
+/// <para>
+/// Use <see cref="YubiKeyHidInterfaceType"/> and <see cref="HidInterfaceClassifier"/> instead for
+/// proper YubiKey interface type detection.
+/// </para>
+/// </remarks>
+[Obsolete("This enum is misleading. Use YubiKeyHidInterfaceType and HidInterfaceClassifier instead for proper interface type detection.")]
 public enum HidUsagePage 
 {
     Unknown = 0,
     Fido = 0xF1D0,  // 61904 - FIDO CTAP HID usage page
-    Keyboard = 1
+    Keyboard = 1    // WARNING: This is actually Generic Desktop (0x01), not specifically a keyboard!
 }

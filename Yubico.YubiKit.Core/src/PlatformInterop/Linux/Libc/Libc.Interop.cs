@@ -106,7 +106,7 @@ internal static class NativeMethods
     // Write the count bytes in inputBuffer.
     [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "write", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern int write(int handle,
+    public static extern int write(LinuxFileSafeHandle handle,
         [MarshalAs(UnmanagedType.LPArray)] byte[] inputBuffer,
         int count);
 

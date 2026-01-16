@@ -12,22 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.InteropServices;
+namespace Yubico.YubiKit.Core.Hid;
 
-namespace Yubico.YubiKit.Core.PlatformInterop.Linux.Libc;
-
-// This class represents the libc file descriptor, the return from a call to
-// open.
-internal class LinuxFileSafeHandle : SafeHandle
+/// <summary>
+/// Type of HID report used for communication.
+/// </summary>
+public enum HidReportType
 {
-    public LinuxFileSafeHandle()
-        : base(new IntPtr(-1), true)
-    {
-    }
-
-    // On Linux, open() returns -1 on failure.
-    // We also treat 0 as invalid since fd 0 is stdin.
-    public override bool IsInvalid => handle == new IntPtr(-1) || handle == IntPtr.Zero;
-
-    protected override bool ReleaseHandle() => NativeMethods.close(handle) == 0;
+    /// <summary>
+    /// Input/Output reports (used for FIDO).
+    /// Typically 64-byte packets for CTAPHID protocol.
+    /// </summary>
+    InputOutput,
+    
+    /// <summary>
+    /// Feature reports (used for OTP).
+    /// Typically 8-byte packets for YubiOTP protocol.
+    /// </summary>
+    Feature
 }

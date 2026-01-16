@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Hid.Fido;
+using Yubico.YubiKit.Core.Hid.Interfaces;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;
 
@@ -102,7 +104,7 @@ public static class IYubiKeyExtensions
             ProtocolConfiguration? configuration = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken).ConfigureAwait(false);
+            var connection = await yubiKey.ConnectAsync(cancellationToken);
             return await ManagementSession.CreateAsync(
                     connection,
                     configuration,
@@ -110,5 +112,19 @@ public static class IYubiKeyExtensions
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
+
+        public async Task<IConnection> ConnectAsync(CancellationToken cancellationToken) // TODO let's try this
+            =>
+                yubiKey.ConnectionType switch
+                {
+                    ConnectionType.Ccid => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
+                        .ConfigureAwait(false),
+                    ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
+                        .ConfigureAwait(false),
+                    ConnectionType.HidOtp => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
+                        .ConfigureAwait(false),
+                    _ => throw new NotSupportedException(
+                        $"Connection type {yubiKey.ConnectionType} is not supported for management session creation."),
+                };
     }
 }

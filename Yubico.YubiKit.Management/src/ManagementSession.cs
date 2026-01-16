@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Hid.Fido;
+using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
@@ -56,6 +57,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         {
             ISmartCardConnection sc => CreateSmartCardBackend(sc),
             IFidoHidConnection fido => CreateFidoBackend(fido),
+            // IOtpHidConnection otp => CreateOtpBackend(otp),
             _ => throw new NotSupportedException(
                 $"The connection type {connection.GetType().Name} is not supported by ManagementSession. " +
                 $"Supported types: ISmartCardConnection, IFidoConnection.")

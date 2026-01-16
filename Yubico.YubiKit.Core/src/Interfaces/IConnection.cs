@@ -12,18 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Interfaces;
+namespace Yubico.YubiKit.Core.Interfaces;
 
-namespace Yubico.YubiKit.Core.IntegrationTests.Core;
-
-public class MonitorService_Enabled_Tests()
-    : IntegrationTestBase(options => options.EnableAutoDiscovery = true)
+/// <summary>
+///     Base interface for all device connections.
+/// </summary>
+/// <remarks>
+///     Implements both <see cref="IDisposable" /> and <see cref="IAsyncDisposable" /> to support
+///     both synchronous and asynchronous disposal patterns. Prefer <c>await using</c> for async code.
+/// </remarks>
+public interface IConnection : IDisposable, IAsyncDisposable
 {
-    [Fact]
-    public async Task WhenEnabledMonitor_WithDisabledManualScan_FindsDevices()
-    {
-        SkipDeviceRepositoryManualScan(true);
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
-        Assert.NotEmpty(devices);
-    }
+    ConnectionType Type { get; }
+}
+
+public enum ConnectionType
+{
+    Unknown,
+    Hid,
+    HidFido,
+    HidOtp,
+    Ccid,
+    All
 }

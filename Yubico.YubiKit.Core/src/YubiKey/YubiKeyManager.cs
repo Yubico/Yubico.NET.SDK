@@ -1,4 +1,6 @@
-﻿namespace Yubico.YubiKit.Core.YubiKey;
+﻿using Yubico.YubiKit.Core.Interfaces;
+
+namespace Yubico.YubiKit.Core.YubiKey;
 
 public interface IYubiKeyManager
 {

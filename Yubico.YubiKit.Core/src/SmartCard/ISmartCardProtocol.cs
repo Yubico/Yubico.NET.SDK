@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Interfaces;
+
 namespace Yubico.YubiKit.Core.SmartCard;
 
 /// <summary>

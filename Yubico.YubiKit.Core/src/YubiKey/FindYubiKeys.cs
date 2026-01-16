@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Hid;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.Core.YubiKey;
@@ -30,7 +31,7 @@ public class FindYubiKeys(
     #region IFindYubiKeys Members
 
     public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(
-        ConnectionType type = ConnectionType.Ccid,
+        ConnectionType type = ConnectionType.All,
         CancellationToken cancellationToken = default)
     {
         var yubiKeys = new List<IYubiKey>();
@@ -52,13 +53,13 @@ public class FindYubiKeys(
 
     #endregion
 
-    public async Task<IReadOnlyList<IYubiKey>> FindAllHid(CancellationToken cancellationToken = default)
+    private async Task<IReadOnlyList<IYubiKey>> FindAllHid(CancellationToken cancellationToken = default)
     {
         var hidDevices = await findHidService.FindAllAsync(cancellationToken);
         return hidDevices.Select(yubiKeyFactory.Create).ToList();
     }
 
-    public async Task<IReadOnlyList<IYubiKey>> FindAllCcid(CancellationToken cancellationToken = default)
+    private async Task<IReadOnlyList<IYubiKey>> FindAllCcid(CancellationToken cancellationToken = default)
     {
         var pcscDevices = await findPcscService.FindAllAsync(cancellationToken);
         return pcscDevices.Select(yubiKeyFactory.Create).ToList();

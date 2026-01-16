@@ -1,4 +1,4 @@
-// Copyright 2025 Yubico AB
+// Copyright 2026 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -12,18 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.YubiKey;
 
-namespace Yubico.YubiKit.Core.IntegrationTests.Core;
+namespace Yubico.YubiKit.Core.Interfaces;
 
-public class MonitorService_Enabled_Tests()
-    : IntegrationTestBase(options => options.EnableAutoDiscovery = true)
+public interface IApplicationSession : IDisposable
 {
-    [Fact]
-    public async Task WhenEnabledMonitor_WithDisabledManualScan_FindsDevices()
-    {
-        SkipDeviceRepositoryManualScan(true);
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
-        Assert.NotEmpty(devices);
-    }
+    FirmwareVersion FirmwareVersion { get; }
+    bool IsInitialized { get; }
+    bool IsAuthenticated { get; }
+    bool IsSupported(Feature feature);
+    void EnsureSupports(Feature feature);
 }

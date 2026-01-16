@@ -19,22 +19,21 @@ namespace Yubico.YubiKit.Core;
 
 public static class YubiKitLogging
 {
-    private static ILoggerFactory _loggerFactory = NullLoggerFactory.Instance;
-    private static readonly object _lock = new();
+    private static readonly Lock _lock = new();
 
     public static ILoggerFactory LoggerFactory
     {
         get
         {
             lock (_lock)
-                return _loggerFactory;
+                return field;
         }
         set
         {
             lock (_lock)
-                _loggerFactory = value ?? NullLoggerFactory.Instance;
+                field = value;
         }
-    }
+    } = NullLoggerFactory.Instance;
 
     internal static ILogger<T> CreateLogger<T>() => LoggerFactory.CreateLogger<T>();
     internal static ILogger CreateLogger(string categoryName) => LoggerFactory.CreateLogger(categoryName);

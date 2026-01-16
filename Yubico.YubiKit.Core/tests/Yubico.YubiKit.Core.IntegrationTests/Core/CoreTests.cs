@@ -1,3 +1,5 @@
+using Yubico.YubiKit.Core.Interfaces;
+
 namespace Yubico.YubiKit.Core.IntegrationTests.Core;
 
 public class CoreTests : IntegrationTestBase

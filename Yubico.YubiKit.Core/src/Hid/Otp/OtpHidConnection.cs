@@ -1,11 +1,11 @@
 // Copyright 2025 Yubico AB
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,30 +15,41 @@
 using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.Interfaces;
 
-namespace Yubico.YubiKit.Core.Hid;
+namespace Yubico.YubiKit.Core.Hid.Otp;
 
-internal class HidConnection(IHidConnectionSync syncConnection) : IHidConnection
+/// <summary>
+/// Wraps a synchronous HID feature report connection for OTP/Keyboard communication.
+/// Provides async interface for 8-byte OTP feature reports.
+/// </summary>
+internal class OtpHidConnection(IHidConnectionSync syncConnection) : IOtpHidConnection
 {
     private bool _disposed;
 
-    public int InputReportSize => syncConnection.InputReportSize;
-    public int OutputReportSize => syncConnection.OutputReportSize;
+    public int FeatureReportSize => 8;
+    public ConnectionType Type => ConnectionType.HidOtp;
 
-    public ConnectionType Type => ConnectionType.Hid;
-
-    public Task SetReportAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default)
+    public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (report.Length != FeatureReportSize)
+            throw new ArgumentException(
+                $"OTP feature report must be exactly {FeatureReportSize} bytes, got {report.Length}",
+                nameof(report));
 
         syncConnection.SetReport(report.ToArray());
         return Task.CompletedTask;
     }
 
-    public Task<ReadOnlyMemory<byte>> GetReportAsync(CancellationToken cancellationToken = default)
+    public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         var report = syncConnection.GetReport();
+        if (report.Length != FeatureReportSize)
+            throw new InvalidOperationException(
+                $"Expected {FeatureReportSize}-byte report, got {report.Length} bytes");
+
         return Task.FromResult<ReadOnlyMemory<byte>>(report);
     }
 

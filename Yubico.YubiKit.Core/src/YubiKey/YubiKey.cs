@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Runtime.CompilerServices;
+using Yubico.YubiKit.Core.Interfaces;
 
 namespace Yubico.YubiKit.Core.YubiKey;
 

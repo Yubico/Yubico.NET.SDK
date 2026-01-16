@@ -15,6 +15,8 @@
 using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Yubico.YubiKit.Core.Hid.Interfaces;
+using Yubico.YubiKit.Core.Hid.MacOS;
 
 namespace Yubico.YubiKit.Core.Hid;
 

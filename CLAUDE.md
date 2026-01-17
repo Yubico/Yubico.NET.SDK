@@ -174,6 +174,60 @@ dotnet test --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 - Protocol-specific sessions (e.g., `ManagementSession<TConnection>`)
 - Generic over connection type
 
+### Property Conventions
+
+**Immutability Preference:**
+- ✅ `{ get; init; }` - Immutable properties set only at construction
+- ✅ `{ get; private set; }` - Properties modified only within the class
+- ⚠️ `{ get; set; }` - Use sparingly, only for configuration/mutable DTOs
+
+**Property Initialization:**
+- Validate in constructor or via dedicated `Validate()` method
+- Use `ArgumentNullException.ThrowIfNull()` for required parameters
+- Use `ArgumentOutOfRangeException.ThrowIfNegative()` for numeric constraints
+
+**Computed Properties:**
+```csharp
+// ✅ Expression-bodied for simple computations
+public bool IsValid => _data.Length > 0 && _version >= MinVersion;
+
+// ✅ Traditional getter for complex logic
+public ReadOnlySpan<byte> Data
+{
+    get
+    {
+        ThrowIfDisposed();
+        return _data.AsSpan();
+    }
+}
+```
+
+### Logging Conventions
+
+**Use Static LoggingFactory - NEVER inject ILogger:**
+```csharp
+// ✅ CORRECT: Static logger from factory
+public class FidoSession
+{
+    private static readonly ILogger Logger = LoggingFactory.CreateLogger<FidoSession>();
+}
+
+// ❌ WRONG: Injected logger (breaks consistency)
+public class FidoSession(ILogger<FidoSession> logger) { }
+```
+
+**Log Levels:**
+- `Trace` - Raw APDU/CBOR bytes, detailed protocol steps
+- `Debug` - Protocol-level operations, state transitions
+- `Info` - Session creation, major operations (enroll, authenticate)
+- `Warning` - Recoverable errors, fallback behavior
+- `Error` - Operation failures, exceptions
+
+**Logging Sensitive Data:**
+- ❌ NEVER log PINs, keys, or credentials
+- ✅ Log credential IDs as hex (public identifier)
+- ✅ Log lengths, not contents, of sensitive buffers
+
 ### Multi-targeting
 
 Projects target `net8` and `net10.0` with `LangVersion=preview` for:

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Formats.Cbor;
 using Yubico.YubiKit.Core.Hid.Fido;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
@@ -20,6 +21,7 @@ using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Fido2.Backend;
 using Yubico.YubiKit.Fido2.Cbor;
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 
 namespace Yubico.YubiKit.Fido2;
@@ -177,6 +179,334 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         await SendCborAsync(CtapCommand.Reset, null, cancellationToken).ConfigureAwait(false);
         _logger.LogInformation("FIDO application reset completed");
     }
+    
+    /// <inheritdoc />
+    public async Task<MakeCredentialResponse> MakeCredentialAsync(
+        ReadOnlyMemory<byte> clientDataHash,
+        PublicKeyCredentialRpEntity rp,
+        PublicKeyCredentialUserEntity user,
+        IReadOnlyList<PublicKeyCredentialParameters> pubKeyCredParams,
+        MakeCredentialOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(rp);
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(pubKeyCredParams);
+        
+        if (clientDataHash.Length != 32)
+        {
+            throw new ArgumentException(
+                "Client data hash must be exactly 32 bytes (SHA-256).", 
+                nameof(clientDataHash));
+        }
+        
+        if (pubKeyCredParams.Count == 0)
+        {
+            throw new ArgumentException(
+                "At least one credential parameter must be specified.",
+                nameof(pubKeyCredParams));
+        }
+        
+        EnsureInitialized();
+        
+        var request = BuildMakeCredentialRequest(
+            clientDataHash, rp, user, pubKeyCredParams, options);
+        
+        _logger.LogDebug("MakeCredential for RP: {RpId}", rp.Id);
+        
+        var response = await _backend!.SendCborAsync(request, cancellationToken)
+            .ConfigureAwait(false);
+        
+        var result = MakeCredentialResponse.Decode(response);
+        
+        _logger.LogInformation(
+            "Credential created. Format: {Format}, CredentialId length: {Length}",
+            result.Format,
+            result.GetCredentialId().Length);
+        
+        return result;
+    }
+    
+    /// <inheritdoc />
+    public async Task<GetAssertionResponse> GetAssertionAsync(
+        string rpId,
+        ReadOnlyMemory<byte> clientDataHash,
+        GetAssertionOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(rpId);
+        
+        if (clientDataHash.Length != 32)
+        {
+            throw new ArgumentException(
+                "Client data hash must be exactly 32 bytes (SHA-256).",
+                nameof(clientDataHash));
+        }
+        
+        EnsureInitialized();
+        
+        var request = BuildGetAssertionRequest(rpId, clientDataHash, options);
+        
+        _logger.LogDebug("GetAssertion for RP: {RpId}", rpId);
+        
+        var response = await _backend!.SendCborAsync(request, cancellationToken)
+            .ConfigureAwait(false);
+        
+        var result = GetAssertionResponse.Decode(response);
+        
+        _logger.LogInformation(
+            "Assertion obtained. NumberOfCredentials: {Count}",
+            result.NumberOfCredentials ?? 1);
+        
+        return result;
+    }
+    
+    /// <inheritdoc />
+    public async Task<GetAssertionResponse> GetNextAssertionAsync(
+        CancellationToken cancellationToken = default)
+    {
+        EnsureInitialized();
+        
+        var request = CtapRequestBuilder.Create(CtapCommand.GetNextAssertion).Build();
+        
+        var response = await _backend!.SendCborAsync(request, cancellationToken)
+            .ConfigureAwait(false);
+        
+        return GetAssertionResponse.Decode(response);
+    }
+    
+    private static byte[] BuildMakeCredentialRequest(
+        ReadOnlyMemory<byte> clientDataHash,
+        PublicKeyCredentialRpEntity rp,
+        PublicKeyCredentialUserEntity user,
+        IReadOnlyList<PublicKeyCredentialParameters> pubKeyCredParams,
+        MakeCredentialOptions? options)
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        
+        // Count required parameters + optional ones
+        var paramCount = 4; // clientDataHash, rp, user, pubKeyCredParams
+        if (options?.ExcludeList is { Count: > 0 }) paramCount++;
+        if (options?.Extensions is { Length: > 0 }) paramCount++;
+        if (HasMakeCredentialOptions(options)) paramCount++;
+        if (options?.PinUvAuthParam is { Length: > 0 }) paramCount += 2; // param + protocol
+        if (options?.EnterpriseAttestation.HasValue == true) paramCount++;
+        
+        writer.WriteStartMap(paramCount);
+        
+        // 0x01: clientDataHash
+        writer.WriteInt32(1);
+        writer.WriteByteString(clientDataHash.Span);
+        
+        // 0x02: rp
+        writer.WriteInt32(2);
+        rp.Encode(writer);
+        
+        // 0x03: user
+        writer.WriteInt32(3);
+        user.Encode(writer);
+        
+        // 0x04: pubKeyCredParams
+        writer.WriteInt32(4);
+        writer.WriteStartArray(pubKeyCredParams.Count);
+        foreach (var param in pubKeyCredParams)
+        {
+            param.Encode(writer);
+        }
+        writer.WriteEndArray();
+        
+        // 0x05: excludeList (optional)
+        if (options?.ExcludeList is { Count: > 0 })
+        {
+            writer.WriteInt32(5);
+            writer.WriteStartArray(options.ExcludeList.Count);
+            foreach (var cred in options.ExcludeList)
+            {
+                cred.Encode(writer);
+            }
+            writer.WriteEndArray();
+        }
+        
+        // 0x06: extensions (optional)
+        if (options?.Extensions is { Length: > 0 })
+        {
+            writer.WriteInt32(6);
+            writer.WriteEncodedValue(options.Extensions.Value.Span);
+        }
+        
+        // 0x07: options (optional)
+        if (HasMakeCredentialOptions(options))
+        {
+            writer.WriteInt32(7);
+            WriteMakeCredentialOptions(writer, options!);
+        }
+        
+        // 0x08: pinUvAuthParam (optional)
+        if (options?.PinUvAuthParam is { Length: > 0 })
+        {
+            writer.WriteInt32(8);
+            writer.WriteByteString(options.PinUvAuthParam.Value.Span);
+            
+            // 0x09: pinUvAuthProtocol
+            writer.WriteInt32(9);
+            writer.WriteInt32(options.PinUvAuthProtocol ?? 2);
+        }
+        
+        // 0x0A: enterpriseAttestation (optional)
+        if (options?.EnterpriseAttestation.HasValue == true)
+        {
+            writer.WriteInt32(10);
+            writer.WriteInt32(options.EnterpriseAttestation.Value);
+        }
+        
+        writer.WriteEndMap();
+        
+        // Prepend command byte
+        var cbor = writer.Encode();
+        var result = new byte[1 + cbor.Length];
+        result[0] = CtapCommand.MakeCredential;
+        cbor.CopyTo(result, 1);
+        
+        return result;
+    }
+    
+    private static bool HasMakeCredentialOptions(MakeCredentialOptions? options)
+    {
+        return options?.ResidentKey.HasValue == true ||
+               options?.UserPresence.HasValue == true ||
+               options?.UserVerification.HasValue == true;
+    }
+    
+    private static void WriteMakeCredentialOptions(CborWriter writer, MakeCredentialOptions options)
+    {
+        var count = 0;
+        if (options.ResidentKey.HasValue) count++;
+        if (options.UserPresence.HasValue) count++;
+        if (options.UserVerification.HasValue) count++;
+        
+        writer.WriteStartMap(count);
+        
+        // Keys must be sorted for canonical CBOR: "rk" < "up" < "uv"
+        if (options.ResidentKey.HasValue)
+        {
+            writer.WriteTextString("rk");
+            writer.WriteBoolean(options.ResidentKey.Value);
+        }
+        if (options.UserPresence.HasValue)
+        {
+            writer.WriteTextString("up");
+            writer.WriteBoolean(options.UserPresence.Value);
+        }
+        if (options.UserVerification.HasValue)
+        {
+            writer.WriteTextString("uv");
+            writer.WriteBoolean(options.UserVerification.Value);
+        }
+        
+        writer.WriteEndMap();
+    }
+    
+    private static byte[] BuildGetAssertionRequest(
+        string rpId,
+        ReadOnlyMemory<byte> clientDataHash,
+        GetAssertionOptions? options)
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        
+        // Count required parameters + optional ones
+        var paramCount = 2; // rpId, clientDataHash
+        if (options?.AllowList is { Count: > 0 }) paramCount++;
+        if (options?.Extensions is { Length: > 0 }) paramCount++;
+        if (HasGetAssertionOptions(options)) paramCount++;
+        if (options?.PinUvAuthParam is { Length: > 0 }) paramCount += 2; // param + protocol
+        
+        writer.WriteStartMap(paramCount);
+        
+        // 0x01: rpId
+        writer.WriteInt32(1);
+        writer.WriteTextString(rpId);
+        
+        // 0x02: clientDataHash
+        writer.WriteInt32(2);
+        writer.WriteByteString(clientDataHash.Span);
+        
+        // 0x03: allowList (optional)
+        if (options?.AllowList is { Count: > 0 })
+        {
+            writer.WriteInt32(3);
+            writer.WriteStartArray(options.AllowList.Count);
+            foreach (var cred in options.AllowList)
+            {
+                cred.Encode(writer);
+            }
+            writer.WriteEndArray();
+        }
+        
+        // 0x04: extensions (optional)
+        if (options?.Extensions is { Length: > 0 })
+        {
+            writer.WriteInt32(4);
+            writer.WriteEncodedValue(options.Extensions.Value.Span);
+        }
+        
+        // 0x05: options (optional)
+        if (HasGetAssertionOptions(options))
+        {
+            writer.WriteInt32(5);
+            WriteGetAssertionOptions(writer, options!);
+        }
+        
+        // 0x06: pinUvAuthParam (optional)
+        if (options?.PinUvAuthParam is { Length: > 0 })
+        {
+            writer.WriteInt32(6);
+            writer.WriteByteString(options.PinUvAuthParam.Value.Span);
+            
+            // 0x07: pinUvAuthProtocol
+            writer.WriteInt32(7);
+            writer.WriteInt32(options.PinUvAuthProtocol ?? 2);
+        }
+        
+        writer.WriteEndMap();
+        
+        // Prepend command byte
+        var cbor = writer.Encode();
+        var result = new byte[1 + cbor.Length];
+        result[0] = CtapCommand.GetAssertion;
+        cbor.CopyTo(result, 1);
+        
+        return result;
+    }
+    
+    private static bool HasGetAssertionOptions(GetAssertionOptions? options)
+    {
+        return options?.UserPresence.HasValue == true ||
+               options?.UserVerification.HasValue == true;
+    }
+    
+    private static void WriteGetAssertionOptions(CborWriter writer, GetAssertionOptions options)
+    {
+        var count = 0;
+        if (options.UserPresence.HasValue) count++;
+        if (options.UserVerification.HasValue) count++;
+        
+        writer.WriteStartMap(count);
+        
+        // Keys must be sorted for canonical CBOR: "up" < "uv"
+        if (options.UserPresence.HasValue)
+        {
+            writer.WriteTextString("up");
+            writer.WriteBoolean(options.UserPresence.Value);
+        }
+        if (options.UserVerification.HasValue)
+        {
+            writer.WriteTextString("uv");
+            writer.WriteBoolean(options.UserVerification.Value);
+        }
+        
+        writer.WriteEndMap();
+    }
+
     
     /// <summary>
     /// Sends a CTAP CBOR command to the authenticator.

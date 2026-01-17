@@ -474,6 +474,54 @@ public sealed class PublicKeyCredentialParameters
     /// </summary>
     public CoseAlgorithmIdentifier Algorithm { get; init; }
     
+    /// <summary>
+    /// Creates a new credential parameters instance.
+    /// </summary>
+    public PublicKeyCredentialParameters()
+    {
+    }
+    
+    /// <summary>
+    /// Creates a new credential parameters instance with the specified algorithm.
+    /// </summary>
+    /// <param name="algorithm">The COSE algorithm identifier.</param>
+    public PublicKeyCredentialParameters(CoseAlgorithmIdentifier algorithm)
+    {
+        Algorithm = algorithm;
+    }
+    
+    /// <summary>
+    /// Creates ES256 credential parameters.
+    /// </summary>
+    public static PublicKeyCredentialParameters CreateES256() => new(CoseAlgorithmIdentifier.ES256);
+    
+    /// <summary>
+    /// Creates RS256 credential parameters.
+    /// </summary>
+    public static PublicKeyCredentialParameters CreateRS256() => new(CoseAlgorithmIdentifier.RS256);
+    
+    /// <summary>
+    /// Creates EdDSA credential parameters.
+    /// </summary>
+    public static PublicKeyCredentialParameters CreateEdDSA() => new(CoseAlgorithmIdentifier.EdDSA);
+    
+    /// <summary>
+    /// Encodes this parameters object as CBOR.
+    /// </summary>
+    /// <param name="writer">The CBOR writer.</param>
+    public void Encode(CborWriter writer)
+    {
+        writer.WriteStartMap(2);
+        
+        writer.WriteTextString("type");
+        writer.WriteTextString(Type);
+        
+        writer.WriteTextString("alg");
+        writer.WriteInt32((int)Algorithm);
+        
+        writer.WriteEndMap();
+    }
+    
     internal static PublicKeyCredentialParameters Parse(CborReader reader)
     {
         var mapLength = reader.ReadStartMap();

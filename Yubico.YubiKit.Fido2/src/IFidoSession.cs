@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 
 namespace Yubico.YubiKit.Fido2;
@@ -67,4 +68,75 @@ public interface IFidoSession : IApplicationSession
     /// device insertion.
     /// </exception>
     Task ResetAsync(CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Creates a new credential on the authenticator.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This method implements the CTAP2 authenticatorMakeCredential command.
+    /// User presence is required (user must touch the authenticator).
+    /// </para>
+    /// <para>
+    /// For discoverable credentials, set <see cref="MakeCredentialOptions.ResidentKey"/> to true.
+    /// </para>
+    /// </remarks>
+    /// <param name="clientDataHash">SHA-256 hash of the client data (32 bytes).</param>
+    /// <param name="rp">Relying party entity.</param>
+    /// <param name="user">User entity.</param>
+    /// <param name="pubKeyCredParams">Supported credential parameters in preference order.</param>
+    /// <param name="options">Optional parameters including exclude list, extensions, etc.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The created credential response with attestation.</returns>
+    /// <exception cref="CtapException">
+    /// Thrown with <see cref="CtapStatus.CredentialExcluded"/> if a credential in the exclude list exists.
+    /// </exception>
+    Task<MakeCredentialResponse> MakeCredentialAsync(
+        ReadOnlyMemory<byte> clientDataHash,
+        PublicKeyCredentialRpEntity rp,
+        PublicKeyCredentialUserEntity user,
+        IReadOnlyList<PublicKeyCredentialParameters> pubKeyCredParams,
+        MakeCredentialOptions? options = null,
+        CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Gets an assertion for authentication.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This method implements the CTAP2 authenticatorGetAssertion command.
+    /// User presence is required (user must touch the authenticator).
+    /// </para>
+    /// <para>
+    /// If multiple credentials match, use <see cref="GetNextAssertionAsync"/> to retrieve
+    /// additional assertions.
+    /// </para>
+    /// </remarks>
+    /// <param name="rpId">Relying party identifier.</param>
+    /// <param name="clientDataHash">SHA-256 hash of the client data (32 bytes).</param>
+    /// <param name="options">Optional parameters including allow list, extensions, etc.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The first assertion response.</returns>
+    /// <exception cref="CtapException">
+    /// Thrown with <see cref="CtapStatus.NoCredentials"/> if no matching credential is found.
+    /// </exception>
+    Task<GetAssertionResponse> GetAssertionAsync(
+        string rpId,
+        ReadOnlyMemory<byte> clientDataHash,
+        GetAssertionOptions? options = null,
+        CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Gets the next assertion when multiple credentials match.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Call this method when <see cref="GetAssertionResponse.NumberOfCredentials"/> is greater than 1.
+    /// This must be called immediately after <see cref="GetAssertionAsync"/> or a previous
+    /// <see cref="GetNextAssertionAsync"/> call.
+    /// </para>
+    /// </remarks>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The next assertion response.</returns>
+    Task<GetAssertionResponse> GetNextAssertionAsync(CancellationToken cancellationToken = default);
 }

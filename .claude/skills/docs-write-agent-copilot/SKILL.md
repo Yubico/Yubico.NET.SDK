@@ -1,6 +1,6 @@
 ---
 name: write-agent-copilot
-description: Use when creating custom agents for GitHub Copilot CLI - ensures proper .agent.md format and invocation triggers
+description: REQUIRED before creating Copilot CLI agents - NEVER create .github/agents/ files manually
 ---
 
 # Writing Copilot CLI Agents
@@ -13,15 +13,17 @@ Agents are specialized personas with domain expertise invoked via `@agent-name` 
 
 ## Use when
 
-**Use this skill when:**
-- Creating a new Copilot CLI custom agent
+**MANDATORY - invoke this skill when:**
+- Creating ANY new Copilot CLI agent in `.github/agents/`
 - Task requires deep domain expertise and judgment calls
-- Task spans multiple tools and adapts to context
 - Need a "specialist persona" for complex work
 
+**DO NOT manually create `.github/agents/*.agent.md` files.** Always invoke this skill first.
+
 **Don't use when:**
-- Task is a repeatable checklist (use a skill instead)
+- Task is a repeatable checklist (use `write-skill` instead)
 - Creating Claude Code agents (use `write-agent-claudecode` instead)
+- Creating for both platforms (use `write-agent` instead)
 - Task is simple enough for inline instructions
 
 ## File Location and Naming

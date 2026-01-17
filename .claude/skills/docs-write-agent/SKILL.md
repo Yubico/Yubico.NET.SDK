@@ -1,6 +1,6 @@
 ---
 name: write-agent
-description: Use when creating custom agents - creates mirrored agents for both Copilot CLI and Claude Code by default
+description: REQUIRED before creating any agent file - creates mirrored agents for both Copilot CLI and Claude Code
 ---
 
 # Writing Custom Agents
@@ -13,13 +13,15 @@ This skill creates custom agents that work across both GitHub Copilot CLI and Cl
 
 ## Use when
 
-**Use this skill when:**
-- Creating a new custom agent for the project
+**MANDATORY - invoke this skill when:**
+- Creating ANY new agent file (for either platform)
 - Need agent to work in both Copilot CLI and Claude Code
 - Want consistent agent behavior across AI tools
 
+**DO NOT manually create agent files.** Always invoke this skill (or platform-specific variant) first.
+
 **Don't use when:**
-- Creating platform-specific agent (use `write-agent-copilot` or `write-agent-claudecode` directly)
+- Creating platform-specific agent only (use `write-agent-copilot` or `write-agent-claudecode` directly)
 - Creating a repeatable workflow (use `write-skill` instead)
 - Task doesn't require agent-level expertise
 

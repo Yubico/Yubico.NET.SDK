@@ -51,6 +51,20 @@ Project skills in `.claude/skills/`:
 | `verification-before-completion` | Verify work before claiming done |
 | `yubikit-codebase-comparison` | Compare Java and C# implementations |
 | `dotnet-script-experiments` | Create experiment scripts |
+| `write-skill` | **REQUIRED** before creating skill files |
+| `write-agent` | **REQUIRED** before creating agent files |
+
+### Mandatory Skills
+
+**NEVER create these files manually. ALWAYS invoke the corresponding skill first:**
+
+| Action | Required Skill | Rationale |
+|--------|----------------|-----------|
+| Creating files in `.claude/skills/` | `write-skill` | Ensures proper frontmatter, structure, naming |
+| Creating files in `.github/agents/` | `write-agent` or `write-agent-copilot` | Ensures proper format for platform |
+| Creating files in `.claude/agents/` | `write-agent` or `write-agent-claudecode` | Ensures proper format for platform |
+
+**Violations:** If you create skill/agent files without invoking the skill, delete them and start over using the skill.
 
 ## Agents
 

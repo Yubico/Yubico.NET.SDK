@@ -1,6 +1,6 @@
 ---
 name: write-skill
-description: Use when crafting skills for Claude Code or Copilot CLI - ensures proper structure and invocation triggers
+description: REQUIRED before creating any skill file - NEVER create .claude/skills/ files manually
 ---
 
 # Writing Skills
@@ -13,13 +13,15 @@ Skills are reusable workflows invoked via `/skillname` in Claude Code or through
 
 ## Use when
 
-**Use this skill when:**
-- Creating a new skill for repetitive tasks (performed >3 times)
+**MANDATORY - invoke this skill when:**
+- Creating ANY new skill file in `.claude/skills/`
 - Updating an existing skill that isn't being invoked correctly
 - Converting ad-hoc instructions into a reusable workflow
 
+**DO NOT manually create skill files.** Always invoke this skill first.
+
 **Don't use when:**
-- Task requires judgment/adaptation (use an agent instead)
+- Task requires judgment/adaptation (use `write-agent` instead)
 - Task is one-time or exploratory
 - Task spans multiple unrelated domains
 

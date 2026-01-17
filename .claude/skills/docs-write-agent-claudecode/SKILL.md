@@ -1,6 +1,6 @@
 ---
 name: write-agent-claudecode
-description: Use when creating custom agents for Claude Code - ensures proper .md format with model/color and isolated context
+description: REQUIRED before creating Claude Code agents - NEVER create .claude/agents/ files manually
 ---
 
 # Writing Claude Code Agents
@@ -13,15 +13,17 @@ Claude Code agents are specialized subagents that run in isolated contexts, spaw
 
 ## Use when
 
-**Use this skill when:**
-- Creating a new Claude Code custom agent
+**MANDATORY - invoke this skill when:**
+- Creating ANY new Claude Code agent in `.claude/agents/`
 - Task requires deep, isolated work (long-running, parallel)
 - Need a specialist subagent that can be spawned multiple times
-- Want to delegate complex tasks to a focused context
+
+**DO NOT manually create `.claude/agents/*.md` files.** Always invoke this skill first.
 
 **Don't use when:**
 - Creating Copilot CLI agents (use `write-agent-copilot` instead)
-- Task is a repeatable checklist (use a skill instead)
+- Creating for both platforms (use `write-agent` instead)
+- Task is a repeatable checklist (use `write-skill` instead)
 - Task needs access to parent conversation context
 
 ## File Location and Naming

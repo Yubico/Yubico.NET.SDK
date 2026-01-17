@@ -126,7 +126,7 @@ public static class EncryptedMetadataDecryptor
         {
             // Decrypt using AES-128-ECB (YubiKey uses ECB for these small values)
             using var aes = Aes.Create();
-            aes.Key = key.ToArray();
+            aes.SetKey(key);
             aes.Mode = CipherMode.ECB;
             aes.Padding = PaddingMode.None;
             

@@ -6,29 +6,18 @@ description: Guidance for writing effective Ralph Loop prompts with proper verif
 
 # Writing Ralph Loop Prompts
 
-## Overview
-
-This skill provides expert guidance for creating Ralph Loop prompts that enforce proper verification, phased exit criteria, and robust completion requirements. It ensures that Copilot CLI agents iteratively refine their work and only complete when all requirements are met and verified.
+This skill provides guidance for creating Ralph Loop prompts that enforce proper verification, phased exit criteria, and robust completion requirements.
 
 **Reference:** `.claude/skills/ralph-loop/SKILL.md` (loop semantics + required autonomy injection).
 
-**Logs/state:** the loop writes `state.md`, `iteration-*.log`, and learning artifacts under `./docs/ralph-loop/`.
+**Logs/state:** `./docs/ralph-loop/` (state-YYMMDDhhmmss.md, iteration-*.log, learning artifacts).
 
-**Preferred workflow:** produce a prompt file and run `ralph-loop` with `--prompt-file` (avoids shell escaping issues).
-
-**Offer to save the plan/prompt file to:** `./docs/plans/ralph-loop/YYYY-MM-DD-<feature-name>.md` (create directories as needed).
-
-**Always end by printing the one-liner to start the loop:**
-
-```bash
-bun .claude/skills/ralph-loop/ralph-loop.ts --prompt-file ./docs/plans/ralph-loop/<plan-file>.md --completion-promise "<PROMISE_TOKEN>" --max-iterations 20 --learn
-```
+**Save location:** `./docs/plans/ralph-loop/YYYY-MM-DD-<feature-name>.md` (offer to save; create directories as needed).
 
 ## When to Use
 - Creating a new Ralph Loop prompt for a coding task
 - Ensuring a Ralph Loop does not complete prematurely
 - Enforcing build/test verification before completion
-- Improving prompt quality for iterative agent workflows
 
 ## Core Principles
 
@@ -90,70 +79,101 @@ bun .claude/skills/ralph-loop/ralph-loop.ts --prompt-file ./docs/plans/ralph-loo
 - Hardware tests are best-effort; document and skip after 2-3 failures.
 - Mark with `[Trait("RequiresHardware", "true")]`. Unit tests MUST pass.
 
-## Template: Ralph Loop Prompt
+### 7. One Phase Per Iteration
+- Design prompts so the agent completes **one phase**, verifies, and commits per iteration.
+- This keeps iterations short, maximizing fresh context window for each phase.
+- Avoids context compaction and "context rot" from overly long sessions.
+- The ralph-loop will restart with full context on the next iteration.
+- Example phase boundaries:
+  ```markdown
+  ## Phase 1: Create interfaces
+  Files: IFoo.cs, IBar.cs
+  Verify: `dotnet build.cs build`
+  Commit: "feat(core): add IFoo and IBar interfaces"
+  → Output <promise>PHASE_1_DONE</promise>
+
+  ## Phase 2: Implement classes
+  Files: Foo.cs, Bar.cs
+  Verify: `dotnet build.cs build`
+  Commit: "feat(core): implement Foo and Bar"
+  → Output <promise>PHASE_2_DONE</promise>
+
+  ## Phase 3: Add tests
+  Files: FooTests.cs, BarTests.cs
+  Verify: `dotnet build.cs test`
+  Commit: "test(core): add Foo and Bar tests"
+  → Output <promise>ALL_DONE</promise>
+  ```
+
+## Prompt Template
+
 ```markdown
-# [Task Title]
+# [Feature Name] Implementation Plan (Ralph Loop)
 
-**Goal:** [One-sentence goal]
-**Scope:** [What's in/out of scope]
+**Goal:** [One sentence describing what this builds]
+**Architecture:** [2-3 sentences about approach]
+**Tech Stack:** [Key technologies/libraries]
+**Completion Promise:** <PROMISE_TOKEN>
 
 ---
-## Context
-[Background, reference files, architecture notes]
----
-## Tasks
-- [ ] Task 1: [Name]
-- [ ] Task 2: [Name]
----
-## Build & Test Commands
+
+## Task 1: [Component]
+
+**Files:**
+- Create: `exact/path/to/file.cs`
+- Modify: `exact/path/to/existing.cs:123-145`
+- Test: `tests/exact/path/to/test.cs`
+
+**Step 1: Write the failing test**
+- Include complete test code (no placeholders)
+
+**Step 2: Run test to confirm failure**
+Run: `dotnet build.cs test --filter "FullyQualifiedName~TestName"`
+Expected: FAIL (describe expected failure)
+
+**Step 3: Minimal implementation**
+- Include complete implementation code
+
+**Step 4: Re-run test to confirm pass**
+Run: `dotnet build.cs test --filter "FullyQualifiedName~TestName"`
+Expected: PASS
+
+**Step 5: Commit**
 ```bash
-dotnet build.cs build
-dotnet build.cs test
+git add <paths>
+git commit -m "feat: <message>"
 ```
+
 ---
-## Verification Checklist
-- [ ] Build exits 0
-- [ ] All tests pass
-- [ ] No regressions
-- [ ] CLAUDE.md guidelines followed
+
+## Verification Requirements (MUST PASS BEFORE COMPLETION)
+
+1. Build: `dotnet build.cs build` (must exit 0)
+2. Test: `dotnet build.cs test` (all tests must pass)
+3. No regressions: existing tests pass, new code covered
+
+Only after ALL pass, output <promise>{COMPLETION_PROMISE}</promise>.
+If any fail, fix and re-verify.
+
 ---
-## Completion
-Only after ALL verification passes, output:
-<promise>DONE</promise>
-If verification fails: fix and re-verify.
+
+## Autonomy Injection (REQUIRED)
+
+CONTEXT: You are in NON-INTERACTIVE mode. The user is not present. Do not ask for clarification. If a decision is ambiguous, select the standard industry pattern and EXECUTE immediately. Output <promise>{COMPLETION_PROMISE}</promise> ONLY when the specific objective is verified.
 ```
 
 ## Anti-Patterns to Avoid
 - Vague completion criteria ("when finished")
 - Missing test requirement ("when code compiles")
-- Wrong commands ("dotnet test" instead of build.cs)
+- Wrong commands (`dotnet test` instead of `dotnet build.cs test`)
 - No failure guidance
+- Using `git add .` or `git add -A` blindly
+- **Cramming multiple phases into one iteration** (causes context rot)
 
-## Example: Fixing a Weak Prompt
-**Before (weak):**
-```markdown
-# Add HID Support
-Implement HID device support for macOS.
-Output <promise>DONE</promise> when all tasks verified.
-```
-**After (strong):**
-```markdown
-# Add HID Support
-**Goal:** Implement HID device support for macOS.
-## Tasks
-1. Create MacOSHidDevice.cs
-2. Create MacOSHidConnection.cs
-3. Add unit tests
-4. Integrate with FindYubiKeys
-## Verification
+## Handoff (ALWAYS END WITH THIS)
+
+After presenting (and optionally saving) the plan, print the exact one-liner to start the loop:
+
 ```bash
-dotnet build.cs build
-dotnet build.cs test
-```
-Checklist:
-- [ ] Build passes
-- [ ] All unit tests pass
-- [ ] CLAUDE.md patterns followed
-Only after verification passes:
-<promise>DONE</promise>
+bun .claude/skills/ralph-loop/ralph-loop.ts --prompt-file ./docs/plans/ralph-loop/<plan-file>.md --completion-promise "<PROMISE_TOKEN>" --max-iterations 20 --learn --model claude-opus-4.5
 ```

@@ -87,14 +87,30 @@
   - Total: 160 unit tests passing
 
 ### Phase 7: WebAuthn/CTAP Extensions
-- [ ] Task 7.1: Implement hmac-secret extension
-- [ ] Task 7.2: Implement hmac-secret-mc extension
-- [ ] Task 7.3: Implement credProtect extension
-- [ ] Task 7.4: Implement credBlob extension
-- [ ] Task 7.5: Implement largeBlob extension
-- [ ] Task 7.6: Implement minPinLength extension
-- [ ] Task 7.7: Implement prf extension
-- [ ] Task 7.8: Add extension tests
+- [x] Task 7.1: Implement hmac-secret extension - Iteration 5
+  - HmacSecretInput for ECDH key agreement and encrypted salts
+  - HmacSecretOutput for encrypted output parsing
+- [x] Task 7.2: Implement hmac-secret-mc extension - Iteration 5
+  - Support in ExtensionBuilder via WithHmacSecretMakeCredential()
+- [x] Task 7.3: Implement credProtect extension - Iteration 5
+  - CredProtectPolicy enum with 3 protection levels
+- [x] Task 7.4: Implement credBlob extension - Iteration 5
+  - CredBlobInput for storing credential blob
+  - CredBlobMakeCredentialOutput and CredBlobAssertionOutput
+- [x] Task 7.5: Implement largeBlob extension - Iteration 5
+  - LargeBlobInput and LargeBlobAssertionInput
+  - LargeBlobOutput with key and written status
+  - LargeBlobSupport enum
+- [x] Task 7.6: Implement minPinLength extension - Iteration 5
+  - MinPinLengthInput and MinPinLengthOutput
+- [x] Task 7.7: Implement prf extension - Iteration 5
+  - PrfInput with salt computation per WebAuthn spec
+  - PrfInputValues for per-credential inputs
+  - PrfOutput for decrypted secrets
+- [x] Task 7.8: Add extension tests - Iteration 5
+  - ExtensionTypesTests.cs (35 tests)
+  - ExtensionBuilderTests.cs (9 tests)
+  - Total: 204 unit tests passing
 
 ### Phase 8: BioEnrollment (P1)
 - [ ] Task 8.1: Implement BioEnrollment (FW 5.2+)
@@ -126,10 +142,28 @@
 
 ## Session Notes
 
-### Current Iteration: 4
-**Status:** Phase 5 and Phase 6 complete
+### Current Iteration: 5
+**Status:** Phase 7 complete - WebAuthn/CTAP Extensions implemented
 
 ### Completed Work
+
+#### Iteration 5 (2026-01-17)
+- Implemented Phase 7: WebAuthn/CTAP Extensions
+- Created Extensions/ directory with:
+  - ExtensionIdentifiers.cs: Constants for all extension names
+  - CredProtectPolicy.cs: Enum for protection levels (1-3)
+  - HmacSecretInput.cs: Input and output types for hmac-secret
+  - CredBlobExtension.cs: credBlob input and output types
+  - LargeBlobExtension.cs: largeBlob input, assertion input, and output types
+  - MinPinLengthExtension.cs: minPinLength input and output types
+  - PrfExtension.cs: PRF extension with WebAuthn salt computation
+  - ExtensionBuilder.cs: Fluent builder for CBOR extension encoding
+  - ExtensionOutput.cs: Parser for extension outputs from responses
+- Created comprehensive unit tests:
+  - ExtensionTypesTests.cs (35 tests)
+  - ExtensionBuilderTests.cs (9 tests)
+- All 204 unit tests passing
+- Build passes with 0 errors
 
 #### Iteration 4 (2026-01-17)
 - Implemented Phase 5: MakeCredential & GetAssertion
@@ -216,6 +250,19 @@
 
 ### Files Created/Modified
 
+#### Iteration 5 - Phase 7 (Extensions)
+- `Yubico.YubiKit.Fido2/src/Extensions/ExtensionIdentifiers.cs`
+- `Yubico.YubiKit.Fido2/src/Extensions/CredProtectPolicy.cs`
+- `Yubico.YubiKit.Fido2/src/Extensions/HmacSecretInput.cs`
+- `Yubico.YubiKit.Fido2/src/Extensions/CredBlobExtension.cs`
+- `Yubico.YubiKit.Fido2/src/Extensions/LargeBlobExtension.cs`
+- `Yubico.YubiKit.Fido2/src/Extensions/MinPinLengthExtension.cs`
+- `Yubico.YubiKit.Fido2/src/Extensions/PrfExtension.cs`
+- `Yubico.YubiKit.Fido2/src/Extensions/ExtensionBuilder.cs`
+- `Yubico.YubiKit.Fido2/src/Extensions/ExtensionOutput.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Extensions/ExtensionTypesTests.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Extensions/ExtensionBuilderTests.cs`
+
 #### Iteration 4 - Phase 5 (Credentials)
 - `Yubico.YubiKit.Fido2/src/Credentials/AuthenticatorData.cs`
 - `Yubico.YubiKit.Fido2/src/Credentials/AttestedCredentialData.cs`
@@ -269,8 +316,7 @@
 - `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/CtapExceptionTests.cs`
 - `Directory.Packages.props` (added System.Formats.Cbor)
 
-### Next Steps (Iteration 5)
-- Task 7.1: Start Phase 7 - WebAuthn/CTAP Extensions
-- Task 7.2: Implement hmac-secret extension
-- Task 7.3: Implement credProtect extension
-- Task 7.4: Add extension tests
+### Next Steps (Iteration 6)
+- Task 8.1: Start Phase 8 - BioEnrollment (P1)
+- Task 9.1: Implement authenticatorConfig (P1)
+- Continue with remaining phases

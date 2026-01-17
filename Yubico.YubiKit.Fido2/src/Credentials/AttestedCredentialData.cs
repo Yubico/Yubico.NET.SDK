@@ -113,64 +113,6 @@ public sealed class AttestedCredentialData
         return new AttestedCredentialData(aaguid, credentialId, credentialPublicKey);
     }
     
-    /// <summary>
-    /// Gets the COSE key type from the credential public key.
-    /// </summary>
-    /// <returns>The COSE key type (kty) value, or null if parsing fails.</returns>
-    public int? GetKeyType()
-    {
-        try
-        {
-            var reader = new CborReader(CredentialPublicKey, CborConformanceMode.Lax);
-            var mapLength = reader.ReadStartMap();
-            
-            for (var i = 0; i < mapLength; i++)
-            {
-                var key = reader.ReadInt32();
-                if (key == 1) // kty
-                {
-                    return reader.ReadInt32();
-                }
-                reader.SkipValue();
-            }
-            
-            return null;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-    
-    /// <summary>
-    /// Gets the COSE algorithm from the credential public key.
-    /// </summary>
-    /// <returns>The COSE algorithm (alg) value, or null if parsing fails.</returns>
-    public int? GetAlgorithm()
-    {
-        try
-        {
-            var reader = new CborReader(CredentialPublicKey, CborConformanceMode.Lax);
-            var mapLength = reader.ReadStartMap();
-            
-            for (var i = 0; i < mapLength; i++)
-            {
-                var key = reader.ReadInt32();
-                if (key == 3) // alg
-                {
-                    return reader.ReadInt32();
-                }
-                reader.SkipValue();
-            }
-            
-            return null;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-    
     private static Guid ParseAaguid(ReadOnlySpan<byte> bytes)
     {
         // AAGUID is stored in big-endian (network byte order) format

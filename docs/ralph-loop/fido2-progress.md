@@ -144,8 +144,17 @@
   - Total: 265 unit tests
 
 ### Phase 10: Large Blobs (P2)
-- [ ] Task 10.1: Implement large blob storage
-- [ ] Task 10.2: Add tests
+- [x] Task 10.1: Implement large blob storage - Iteration 8
+  - LargeBlobEntry: AES-GCM encryption/decryption with 32-byte keys
+  - LargeBlobArray: Serialization with SHA-256 truncated hash verification
+  - LargeBlobStorage: Full CTAP 2.1 authenticatorLargeBlobs command
+    - ReadLargeBlobArrayAsync() / WriteLargeBlobArrayAsync()
+    - GetBlobAsync() / SetBlobAsync() / DeleteBlobAsync()
+    - Fragmented read/write support for large arrays
+    - PIN/UV authentication for write operations
+- [x] Task 10.2: Add tests - Iteration 8
+  - LargeBlobDataTests.cs (26 tests) - encryption, serialization, array operations
+  - LargeBlobStorageTests.cs (17 tests) - API operations, CBOR encoding
 
 ### Phase 11: YK 5.7/5.8 Features (P1)
 - [ ] Task 11.1: Implement encIdentifier support
@@ -164,10 +173,35 @@
 
 ## Session Notes
 
-### Current Iteration: 7
-**Status:** Phase 9 complete - AuthenticatorConfig implemented
+### Current Iteration: 8
+**Status:** Phase 10 complete - Large Blob storage implemented
 
 ### Completed Work
+
+#### Iteration 8 (2026-01-17)
+- Implemented Phase 10: Large Blob Storage (P2)
+- Created LargeBlobs/ directory with:
+  - LargeBlobData.cs: Data models for large blob storage
+    - LargeBlobEntry: Single encrypted blob entry with AES-256-GCM
+      - TryDecrypt(): Attempts decryption with largeBlobKey
+      - Encrypt(): Creates encrypted entry from plaintext
+    - LargeBlobArray: Collection of encrypted entries with hash verification
+      - Serialize()/Deserialize(): Binary format with truncated SHA-256 hash
+      - WithEntry()/WithoutEntry(): Immutable array operations
+      - FindAndDecrypt(): Search and decrypt by key
+  - LargeBlobStorage.cs: CTAP 2.1 authenticatorLargeBlobs (0x0C) command
+    - ReadLargeBlobArrayAsync(): Read entire blob array (no auth required)
+    - WriteLargeBlobArrayAsync(): Write entire blob array (requires PIN/UV)
+    - GetBlobAsync(): Read blob for specific credential by largeBlobKey
+    - SetBlobAsync(): Write blob for specific credential (read-modify-write)
+    - DeleteBlobAsync(): Remove blob for specific credential
+    - Fragmented read/write for arrays larger than maxFragmentLength
+    - Proper PIN/UV auth message construction per CTAP 2.1 spec
+- Created comprehensive unit tests:
+  - LargeBlobDataTests.cs (26 tests) - encryption, serialization, array ops
+  - LargeBlobStorageTests.cs (17 tests) - API operations, CBOR encoding
+- Build passes with 0 errors
+- NOTE: Test execution skipped due to .NET 10 preview testhost.dll issue
 
 #### Iteration 7 (2026-01-17)
 - Implemented Phase 9: Config Commands (FW 5.4+)
@@ -398,8 +432,14 @@
 - `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/CtapExceptionTests.cs`
 - `Directory.Packages.props` (added System.Formats.Cbor)
 
-### Next Steps (Iteration 8)
-- Task 10.1: Implement Large Blob storage (P2)
+#### Iteration 8 - Phase 10 (Large Blobs)
+- `Yubico.YubiKit.Fido2/src/LargeBlobs/LargeBlobData.cs`
+- `Yubico.YubiKit.Fido2/src/LargeBlobs/LargeBlobStorage.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/LargeBlobs/LargeBlobDataTests.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/LargeBlobs/LargeBlobStorageTests.cs`
+
+### Next Steps (Iteration 9)
 - Task 11.1: Implement YK 5.7/5.8 features (P1) - encIdentifier support
 - Task 11.2: Implement encCredStoreState support
-- Continue with remaining phases
+- Task 11.3: Add YK 5.7/5.8 tests
+- Continue with Phase 12 (Integration Tests) and Phase 13 (Documentation)

@@ -49,36 +49,55 @@ Skills are reusable workflows that Claude Code invokes with `/skillname`. They p
 **Directory structure:**
 ```
 .claude/skills/
-├── my-skill/
-│   └── SKILL.md          # Skill definition (required)
-├── complex-skill/
-│   ├── SKILL.md          # Skill definition (required)
-│   └── helper.ts         # Supporting script (optional)
+├── {category}-{topic}/       # kebab-case with category prefix
+│   └── SKILL.md              # Skill definition (required)
+├── workflow-tdd/
+│   └── SKILL.md
+├── tool-build/
+│   ├── SKILL.md
+│   └── helper.ts             # Supporting script (optional)
 ```
+
+**Category prefixes:**
+
+| Category | Purpose | Example |
+|----------|---------|---------|
+| `workflow-` | Multi-step development processes | `workflow-tdd`, `workflow-debug` |
+| `tool-` | Wrapper around specific tools | `tool-build`, `tool-import-skill` |
+| `docs-` | Documentation creation | `docs-module`, `docs-write-skill` |
+| `agent-` | Agent orchestration patterns | `agent-dispatch`, `agent-ralph-loop` |
+| `domain-` | Domain-specific knowledge | `domain-yubikit-compare` |
+| `jira-` | Jira operations | `jira-create`, `jira-search` |
+| `review-` | Code review workflows | `review-request`, `review-receive` |
 
 **Template:**
 ```markdown
 ---
-name: skill-name
-description: Brief description of what this skill does and when to use it
+name: verb-object-form
+description: Use when [trigger condition] - [what it does]
 ---
 
-# Skill Name
+# Skill Title
+
+## Overview
 
 Brief description (1-2 sentences).
 
-## When to Use
+**Core principle:** [The guiding philosophy in one sentence]
+
+## Use when
 
 **Use this skill when:**
 - Trigger condition 1
 - Trigger condition 2
-- etc.
 
-**DO NOT use when:**
+**Don't use when:**
 - Exception 1
 - Exception 2
 
-## Process
+## [Main Process Section]
+
+Name this section for the domain (e.g., "The Pattern", "Red-Green-Refactor Cycle", "Core Command").
 
 1. **Step Name**
    Description of what to do.
@@ -86,25 +105,29 @@ Brief description (1-2 sentences).
 2. **Step Name**
    Description of what to do.
 
-## Output
+## Common Mistakes (optional)
 
-What the skill produces (e.g., file, commit, report).
+**❌ Bad:** Description
+**✅ Good:** Description
 
-## Examples (optional)
+## Verification
 
-Concrete usage examples with expected outcomes.
+How to confirm the skill completed successfully:
+- [ ] Checklist item 1
+- [ ] Checklist item 2
 
 ## Related Skills (optional)
 
-- skill-a - When X
-- skill-b - When Y
+- `skill-a` - When X
+- `skill-b` - When Y
 ```
 
 **Key requirements:**
-- YAML frontmatter with `name` and `description` (required)
-- "When to Use" section (critical - Claude uses this to decide when to invoke)
-- Clear numbered steps in "Process"
-- Keep descriptions concise; avoid walls of text
+- YAML frontmatter with `name` (verb-object form) and `description` (starts with "Use when")
+- `## Overview` section with **Core principle**
+- `## Use when` section (lowercase "when" - Claude uses this to decide when to invoke)
+- `## Verification` section with checklist or success criteria
+- Keep descriptions concise; use tables, bullets, code blocks for scannability
 
 ### 2. Agents (`.github/agents/<name>.agent.md`)
 
@@ -311,8 +334,9 @@ These files serve as entry points for specific AI tools and should primarily ref
 
 | Type | Convention | Example |
 |------|------------|---------|
-| Skill directory | `kebab-case` | `.claude/skills/test-driven-development/` |
-| Skill file | `SKILL.md` | `.claude/skills/test-driven-development/SKILL.md` |
+| Skill directory | `{category}-{topic}` in kebab-case | `.claude/skills/workflow-tdd/` |
+| Skill frontmatter name | verb-object form | `tdd`, `write-skill`, `dispatch-agents` |
+| Skill file | `SKILL.md` | `.claude/skills/workflow-tdd/SKILL.md` |
 | Agent file | `kebab-case.agent.md` | `.github/agents/code-reviewer.agent.md` |
 | Context file | `CLAUDE.md` | Always `CLAUDE.md` |
 
@@ -387,8 +411,10 @@ See [Memory Management](../CLAUDE.md#memory-management-hierarchy) in root CLAUDE
 
 When creating or updating AI documentation:
 
-- [ ] **Skills** have YAML frontmatter with `name` and `description`
-- [ ] **Skills** have "When to Use" section
+- [ ] **Skills** have YAML frontmatter with `name` (verb-object) and `description` (starts with "Use when")
+- [ ] **Skills** have `## Overview` with **Core principle**
+- [ ] **Skills** have `## Use when` section (lowercase)
+- [ ] **Skills** have `## Verification` section
 - [ ] **Agents** have YAML frontmatter with `name` and `description`
 - [ ] **Agents** have "Use When" and "Capabilities" sections
 - [ ] **Submodule CLAUDE.md** links to root CLAUDE.md at top
@@ -399,40 +425,61 @@ When creating or updating AI documentation:
 
 ## Examples
 
-### Good Skill: systematic-debugging
+### Good Skill: workflow-tdd
 
 ```markdown
 ---
-name: systematic-debugging
-description: Use when encountering any bug, test failure, or unexpected behavior
+name: tdd
+description: Use when implementing features or fixes - write failing test first, then minimal code to pass
 ---
 
-# Systematic Debugging
+# Test-Driven Development (TDD)
 
-## When to Use
+## Overview
 
-Use for ANY technical issue:
-- Test failures
-- Bugs in production
-- Unexpected behavior
+Write the test first. Watch it fail. Write minimal code to pass.
 
-**Use this ESPECIALLY when:**
-- You've already tried multiple fixes
-- You don't fully understand the issue
+**Core principle:** If you didn't watch the test fail, you don't know if it tests the right thing.
 
-## Process
+## Use when
 
-1. **Root Cause Investigation**
-   Read errors, reproduce, trace data flow.
+**Always:**
+- New features
+- Bug fixes
+- Refactoring
 
-2. **Pattern Analysis**
-   Find working examples, compare differences.
+**Exceptions (ask your human partner):**
+- Throwaway prototypes
+- Generated code
 
-3. **Hypothesis Testing**
-   Form theory, test minimally.
+## Red-Green-Refactor Cycle
 
-4. **Implementation**
-   Create failing test, fix, verify.
+### RED - Write Failing Test
+
+Write one minimal test showing what should happen.
+
+### Verify RED - Watch It Fail
+
+**MANDATORY. Never skip.**
+
+```bash
+dotnet build.cs test --filter "FullyQualifiedName~MyTest"
+```
+
+### GREEN - Minimal Code
+
+Write simplest code to pass the test. Don't add features beyond the test.
+
+### REFACTOR - Clean Up
+
+After green only: remove duplication, improve names.
+
+## Verification
+
+- [ ] Every new function has a test
+- [ ] Watched each test fail before implementing
+- [ ] All tests pass
+- [ ] No warnings in output
 ```
 
 ### Good Submodule CLAUDE.md: SecurityDomain

@@ -539,13 +539,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         return await _backend!.SendCborAsync(request, cancellationToken).ConfigureAwait(false);
     }
     
-    /// <summary>
-    /// Sends a CTAP CBOR request built with <see cref="CtapRequestBuilder"/>.
-    /// </summary>
-    /// <param name="request">The serialized request (command byte + CBOR).</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The CBOR-encoded response data.</returns>
-    internal async Task<ReadOnlyMemory<byte>> SendCborRequestAsync(
+    /// <inheritdoc />
+    public async Task<ReadOnlyMemory<byte>> SendCborRequestAsync(
         ReadOnlyMemory<byte> request,
         CancellationToken cancellationToken = default)
     {

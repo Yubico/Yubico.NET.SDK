@@ -38,9 +38,10 @@ namespace Yubico.YubiKit.Fido2.BioEnrollment;
 /// </remarks>
 public sealed class FingerprintBioEnrollment
 {
-    private readonly IBioEnrollmentCommands _commands;
+    private readonly IFidoSession _session;
     private readonly IPinUvAuthProtocol _protocol;
     private readonly ReadOnlyMemory<byte> _pinUvAuthToken;
+    private readonly byte _command;
     
     /// <summary>
     /// Initializes a new instance of the <see cref="FingerprintBioEnrollment"/> class.
@@ -53,29 +54,20 @@ public sealed class FingerprintBioEnrollment
     /// Default is false to use the standard command (0x09).
     /// </param>
     public FingerprintBioEnrollment(
-        FidoSession session,
+        IFidoSession session,
         IPinUvAuthProtocol protocol,
         ReadOnlyMemory<byte> pinUvAuthToken,
         bool usePreviewCommand = false)
-        : this(new SessionBioEnrollmentCommands(session, usePreviewCommand), protocol, pinUvAuthToken)
     {
         ArgumentNullException.ThrowIfNull(session);
-    }
-    
-    /// <summary>
-    /// Initializes a new instance of the <see cref="FingerprintBioEnrollment"/> class for testing.
-    /// </summary>
-    /// <param name="commands">The command interface for sending bio enrollment commands.</param>
-    /// <param name="protocol">The PIN/UV auth protocol to use.</param>
-    /// <param name="pinUvAuthToken">The PIN/UV auth token with bio enrollment permission.</param>
-    internal FingerprintBioEnrollment(
-        IBioEnrollmentCommands commands,
-        IPinUvAuthProtocol protocol,
-        ReadOnlyMemory<byte> pinUvAuthToken)
-    {
-        _commands = commands ?? throw new ArgumentNullException(nameof(commands));
-        _protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
+        ArgumentNullException.ThrowIfNull(protocol);
+        
+        _session = session;
+        _protocol = protocol;
         _pinUvAuthToken = pinUvAuthToken;
+        _command = usePreviewCommand 
+            ? CtapCommand.PrototypeBioEnrollment 
+            : CtapCommand.BioEnrollment;
     }
     
     /// <summary>
@@ -285,7 +277,12 @@ public sealed class FingerprintBioEnrollment
         ReadOnlyMemory<byte> payload,
         CancellationToken cancellationToken)
     {
-        return await _commands.SendBioEnrollmentCommandAsync(payload, cancellationToken)
+        // Build request with command byte prefix
+        var request = new byte[1 + payload.Length];
+        request[0] = _command;
+        payload.CopyTo(request.AsMemory(1));
+        
+        return await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
     }
     
@@ -573,31 +570,6 @@ public sealed class FingerprintBioEnrollment
         writer.WriteTextString(friendlyName);
         writer.WriteEndMap();
         return writer.Encode();
-    }
-}
-
-/// <summary>
-/// Implementation of IBioEnrollmentCommands that wraps a FidoSession.
-/// </summary>
-file sealed class SessionBioEnrollmentCommands : IBioEnrollmentCommands
-{
-    private readonly FidoSession _session;
-    private readonly byte _command;
-    
-    public SessionBioEnrollmentCommands(FidoSession session, bool usePreviewCommand)
-    {
-        _session = session;
-        _command = usePreviewCommand 
-            ? CtapCommand.PrototypeBioEnrollment 
-            : CtapCommand.BioEnrollment;
-    }
-    
-    public async Task<ReadOnlyMemory<byte>> SendBioEnrollmentCommandAsync(
-        ReadOnlyMemory<byte> payload,
-        CancellationToken cancellationToken = default)
-    {
-        return await _session.SendCborAsync(_command, payload, cancellationToken)
-            .ConfigureAwait(false);
     }
 }
 

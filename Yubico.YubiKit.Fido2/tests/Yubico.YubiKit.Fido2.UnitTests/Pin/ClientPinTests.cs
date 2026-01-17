@@ -23,34 +23,34 @@ namespace Yubico.YubiKit.Fido2.UnitTests.Pin;
 /// Unit tests for the <see cref="ClientPin"/> class.
 /// </summary>
 /// <remarks>
-/// These tests use NSubstitute to mock the IClientPinCommands.
+/// These tests use NSubstitute to mock the IFidoSession.
 /// Tests that require protocol mocking use a concrete FakePinUvAuthProtocol.
 /// </remarks>
 public sealed class ClientPinTests : IDisposable
 {
-    private readonly IClientPinCommands _mockCommands;
+    private readonly IFidoSession _mockSession;
     private readonly FakePinUvAuthProtocol _fakeProtocol;
     private bool _disposed;
     
     public ClientPinTests()
     {
-        _mockCommands = Substitute.For<IClientPinCommands>();
+        _mockSession = Substitute.For<IFidoSession>();
         _fakeProtocol = new FakePinUvAuthProtocol();
     }
     
-    private ClientPin CreateClientPin() => new(_mockCommands, _fakeProtocol);
+    private ClientPin CreateClientPin() => new(_mockSession, _fakeProtocol);
     
     [Fact]
     public void Constructor_WithNullCommands_ThrowsArgumentNullException()
     {
         var protocol = Substitute.For<IPinUvAuthProtocol>();
-        Assert.Throws<ArgumentNullException>(() => new ClientPin((IClientPinCommands)null!, protocol));
+        Assert.Throws<ArgumentNullException>(() => new ClientPin((IFidoSession)null!, protocol));
     }
     
     [Fact]
     public void Constructor_WithNullProtocol_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>(() => new ClientPin(_mockCommands, null!));
+        Assert.Throws<ArgumentNullException>(() => new ClientPin(_mockSession, null!));
     }
     
     [Fact]
@@ -142,13 +142,13 @@ public sealed class ClientPinTests : IDisposable
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var emptyResponse = CreateEmptyResponse();
         
-        _mockCommands.SendRequestAsync(default, default)
+        _mockSession.SendCborRequestAsync(default, default)
             .ReturnsForAnyArgs(keyAgreementResponse, emptyResponse);
         
         await clientPin.SetPinAsync("1234");
         
         // Verify two commands were sent (GetKeyAgreement and SetPin)
-        await _mockCommands.ReceivedWithAnyArgs(2).SendRequestAsync(default, default);
+        await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, default);
     }
     
     [Fact]
@@ -160,13 +160,13 @@ public sealed class ClientPinTests : IDisposable
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var emptyResponse = CreateEmptyResponse();
         
-        _mockCommands.SendRequestAsync(default, default)
+        _mockSession.SendCborRequestAsync(default, default)
             .ReturnsForAnyArgs(keyAgreementResponse, emptyResponse);
         
         await clientPin.ChangePinAsync("oldpin1234", "newpin5678");
         
         // Verify two commands were sent (GetKeyAgreement and ChangePin)
-        await _mockCommands.ReceivedWithAnyArgs(2).SendRequestAsync(default, default);
+        await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, default);
     }
     
     [Theory]
@@ -190,7 +190,7 @@ public sealed class ClientPinTests : IDisposable
         var encryptedToken = new byte[32];
         var tokenResponse = CreatePinTokenResponse(encryptedToken);
         
-        _mockCommands.SendRequestAsync(default, default)
+        _mockSession.SendCborRequestAsync(default, default)
             .ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
         
         var token = await clientPin.GetPinTokenAsync("1234");
@@ -218,7 +218,7 @@ public sealed class ClientPinTests : IDisposable
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var tokenResponse = CreatePinTokenResponse(new byte[32]);
         
-        _mockCommands.SendRequestAsync(default, default)
+        _mockSession.SendCborRequestAsync(default, default)
             .ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
         
         var token = await clientPin.GetPinUvAuthTokenUsingPinAsync(
@@ -247,7 +247,7 @@ public sealed class ClientPinTests : IDisposable
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var tokenResponse = CreatePinTokenResponse(new byte[32]);
         
-        _mockCommands.SendRequestAsync(default, default)
+        _mockSession.SendCborRequestAsync(default, default)
             .ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
         
         var token = await clientPin.GetPinUvAuthTokenUsingUvAsync(
@@ -301,14 +301,14 @@ public sealed class ClientPinTests : IDisposable
         await clientPin.GetPinRetriesAsync();
         
         // Verify the request was sent
-        await _mockCommands.ReceivedWithAnyArgs(1).SendRequestAsync(default, default);
+        await _mockSession.ReceivedWithAnyArgs(1).SendCborRequestAsync(default, default);
     }
     
     // Helper methods
     
     private void SetupMockResponse(ReadOnlyMemory<byte> response)
     {
-        _mockCommands.SendRequestAsync(default, default)
+        _mockSession.SendCborRequestAsync(default, default)
             .ReturnsForAnyArgs(response);
     }
     

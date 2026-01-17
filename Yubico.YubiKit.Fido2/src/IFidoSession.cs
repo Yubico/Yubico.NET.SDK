@@ -30,6 +30,26 @@ namespace Yubico.YubiKit.Fido2;
 public interface IFidoSession : IApplicationSession
 {
     /// <summary>
+    /// Sends a raw CTAP CBOR request to the authenticator.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is a low-level method for advanced scenarios. Most users should use the
+    /// higher-level methods like <see cref="MakeCredentialAsync"/> and <see cref="GetAssertionAsync"/>.
+    /// </para>
+    /// <para>
+    /// The request must include the CTAP command byte as the first byte, followed by
+    /// the CBOR-encoded parameters (if any).
+    /// </para>
+    /// </remarks>
+    /// <param name="request">The serialized CTAP request (command byte + CBOR payload).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The CBOR-encoded response data (without status byte).</returns>
+    Task<ReadOnlyMemory<byte>> SendCborRequestAsync(
+        ReadOnlyMemory<byte> request,
+        CancellationToken cancellationToken = default);
+    
+    /// <summary>
     /// Gets authenticator information. Always fetches fresh data from device.
     /// </summary>
     /// <remarks>

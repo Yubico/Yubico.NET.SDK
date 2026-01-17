@@ -25,18 +25,18 @@ namespace Yubico.YubiKit.Fido2.UnitTests.BioEnrollment;
 /// </summary>
 public class FingerprintBioEnrollmentTests
 {
-    private readonly IBioEnrollmentCommands _mockCommands;
+    private readonly IFidoSession _mockSession;
     private readonly FakeBioPinUvAuthProtocol _fakeProtocol;
     private readonly byte[] _pinUvAuthToken = new byte[32];
     
     public FingerprintBioEnrollmentTests()
     {
-        _mockCommands = Substitute.For<IBioEnrollmentCommands>();
+        _mockSession = Substitute.For<IFidoSession>();
         _fakeProtocol = new FakeBioPinUvAuthProtocol();
     }
     
     private FingerprintBioEnrollment CreateBioEnrollment() => 
-        new(_mockCommands, _fakeProtocol, _pinUvAuthToken);
+        new(_mockSession, _fakeProtocol, _pinUvAuthToken);
     
     [Fact]
     public void Constructor_WithNullCommands_ThrowsArgumentNullException()
@@ -44,7 +44,7 @@ public class FingerprintBioEnrollmentTests
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
             new FingerprintBioEnrollment(
-                (IBioEnrollmentCommands)null!,
+                (IFidoSession)null!,
                 _fakeProtocol,
                 _pinUvAuthToken));
     }
@@ -55,7 +55,7 @@ public class FingerprintBioEnrollmentTests
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
             new FingerprintBioEnrollment(
-                _mockCommands,
+                _mockSession,
                 null!,
                 _pinUvAuthToken));
     }
@@ -65,7 +65,7 @@ public class FingerprintBioEnrollmentTests
     {
         // Arrange
         var sensorInfoResponse = CreateSensorInfoResponse(FingerprintKind.Touch, 5);
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(sensorInfoResponse));
@@ -87,7 +87,7 @@ public class FingerprintBioEnrollmentTests
         var sensorInfoResponse = CreateSensorInfoResponse(FingerprintKind.Touch, 5);
         ReadOnlyMemory<byte> capturedPayload = default;
         
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Do<ReadOnlyMemory<byte>>(p => capturedPayload = p),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(sensorInfoResponse));
@@ -111,7 +111,7 @@ public class FingerprintBioEnrollmentTests
         // Arrange
         var templateId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
         var enrollResponse = CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 4);
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(enrollResponse));
@@ -136,7 +136,7 @@ public class FingerprintBioEnrollmentTests
         var enrollResponse = CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 4);
         
         ReadOnlyMemory<byte> capturedPayload = default;
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Do<ReadOnlyMemory<byte>>(p => capturedPayload = p),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(enrollResponse));
@@ -174,7 +174,7 @@ public class FingerprintBioEnrollmentTests
         // Arrange
         var templateId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
         var enrollResponse = CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 3);
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(enrollResponse));
@@ -199,7 +199,7 @@ public class FingerprintBioEnrollmentTests
             FingerprintSampleStatus.TooFast, 
             3); // Remaining doesn't decrease
         
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(enrollResponse));
@@ -217,7 +217,7 @@ public class FingerprintBioEnrollmentTests
     public async Task EnrollCancelAsync_SendsCommand()
     {
         // Arrange
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(ReadOnlyMemory<byte>.Empty));
@@ -228,7 +228,7 @@ public class FingerprintBioEnrollmentTests
         await bioEnroll.EnrollCancelAsync();
         
         // Assert
-        await _mockCommands.Received(1).SendBioEnrollmentCommandAsync(
+        await _mockSession.Received(1).SendCborRequestAsync(
             Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Any<CancellationToken>());
     }
@@ -240,7 +240,7 @@ public class FingerprintBioEnrollmentTests
         var templateId = new byte[] { 0xAB, 0xCD };
         var templateResponse = CreateTemplateInfoResponse(templateId, "My Finger");
         
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(templateResponse));
@@ -260,7 +260,7 @@ public class FingerprintBioEnrollmentTests
     public async Task EnumerateEnrollmentsAsync_WhenNoTemplates_ReturnsEmptyList()
     {
         // Arrange
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns<ReadOnlyMemory<byte>>(x => throw new CtapException(CtapStatus.InvalidCommand, "No templates"));
@@ -281,7 +281,7 @@ public class FingerprintBioEnrollmentTests
         var templateId = new byte[] { 0x01, 0x02 };
         var friendlyName = "Right Index Finger";
         
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(ReadOnlyMemory<byte>.Empty));
@@ -292,7 +292,7 @@ public class FingerprintBioEnrollmentTests
         await bioEnroll.SetFriendlyNameAsync(templateId, friendlyName);
         
         // Assert
-        await _mockCommands.Received(1).SendBioEnrollmentCommandAsync(
+        await _mockSession.Received(1).SendCborRequestAsync(
             Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Any<CancellationToken>());
     }
@@ -336,7 +336,7 @@ public class FingerprintBioEnrollmentTests
         // Arrange
         var templateId = new byte[] { 0x01, 0x02, 0x03 };
         
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(ReadOnlyMemory<byte>.Empty));
@@ -347,7 +347,7 @@ public class FingerprintBioEnrollmentTests
         await bioEnroll.RemoveEnrollmentAsync(templateId);
         
         // Assert
-        await _mockCommands.Received(1).SendBioEnrollmentCommandAsync(
+        await _mockSession.Received(1).SendCborRequestAsync(
             Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Any<CancellationToken>());
     }
@@ -359,7 +359,7 @@ public class FingerprintBioEnrollmentTests
         var templateId = new byte[] { 0x01 };
         var enrollResponse = CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 4);
         
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(enrollResponse));
@@ -389,7 +389,7 @@ public class FingerprintBioEnrollmentTests
             CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 0) // Complete!
         ]);
         
-        _mockCommands.SendBioEnrollmentCommandAsync(
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(x => Task.FromResult<ReadOnlyMemory<byte>>(responses.Dequeue()));

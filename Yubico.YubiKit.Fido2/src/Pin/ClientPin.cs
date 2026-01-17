@@ -46,7 +46,7 @@ public sealed class ClientPin : IDisposable
     private const int PinMaxLength = 63;
     private const int PinBlockSize = 64;
     
-    private readonly IClientPinCommands _commands;
+    private readonly IFidoSession _session;
     private readonly IPinUvAuthProtocol _protocol;
     private bool _disposed;
     
@@ -56,24 +56,12 @@ public sealed class ClientPin : IDisposable
     /// <param name="session">The FIDO session to use for commands.</param>
     /// <param name="protocol">The PIN/UV auth protocol to use.</param>
     /// <exception cref="ArgumentNullException">If session or protocol is null.</exception>
-    public ClientPin(FidoSession session, IPinUvAuthProtocol protocol)
-        : this(new FidoSessionClientPinCommands(session ?? throw new ArgumentNullException(nameof(session))), protocol)
+    public ClientPin(IFidoSession session, IPinUvAuthProtocol protocol)
     {
-    }
-    
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ClientPin"/> class with custom commands.
-    /// </summary>
-    /// <param name="commands">The command sender to use.</param>
-    /// <param name="protocol">The PIN/UV auth protocol to use.</param>
-    /// <exception cref="ArgumentNullException">If commands or protocol is null.</exception>
-    /// <remarks>This constructor is primarily used for unit testing.</remarks>
-    internal ClientPin(IClientPinCommands commands, IPinUvAuthProtocol protocol)
-    {
-        ArgumentNullException.ThrowIfNull(commands);
+        ArgumentNullException.ThrowIfNull(session);
         ArgumentNullException.ThrowIfNull(protocol);
         
-        _commands = commands;
+        _session = session;
         _protocol = protocol;
     }
     
@@ -103,7 +91,7 @@ public sealed class ClientPin : IDisposable
             .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetRetries)
             .Build();
         
-        var response = await _commands.SendRequestAsync(request, cancellationToken)
+        var response = await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
         
         return ParsePinRetriesResponse(response);
@@ -130,7 +118,7 @@ public sealed class ClientPin : IDisposable
             .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetUvRetries)
             .Build();
         
-        var response = await _commands.SendRequestAsync(request, cancellationToken)
+        var response = await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
         
         return ParseUvRetriesResponse(response);
@@ -172,7 +160,7 @@ public sealed class ClientPin : IDisposable
                 .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam)
                 .Build();
             
-            await _commands.SendRequestAsync(request, cancellationToken)
+            await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -231,7 +219,7 @@ public sealed class ClientPin : IDisposable
                 .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam)
                 .Build();
             
-            await _commands.SendRequestAsync(request, cancellationToken)
+            await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -278,7 +266,7 @@ public sealed class ClientPin : IDisposable
                 .WithBytes(ClientPinParam.PinHashEnc, pinHashEnc)
                 .Build();
             
-            var response = await _commands.SendRequestAsync(request, cancellationToken)
+            var response = await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
             
             var encryptedToken = ParsePinTokenResponse(response);
@@ -350,7 +338,7 @@ public sealed class ClientPin : IDisposable
             }
             
             var request = builder.Build();
-            var response = await _commands.SendRequestAsync(request, cancellationToken)
+            var response = await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
             
             var encryptedToken = ParsePinTokenResponse(response);
@@ -416,7 +404,7 @@ public sealed class ClientPin : IDisposable
             }
             
             var request = builder.Build();
-            var response = await _commands.SendRequestAsync(request, cancellationToken)
+            var response = await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
             
             var encryptedToken = ParsePinTokenResponse(response);
@@ -443,7 +431,7 @@ public sealed class ClientPin : IDisposable
             .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetKeyAgreement)
             .Build();
         
-        var response = await _commands.SendRequestAsync(request, cancellationToken)
+        var response = await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
         
         return ParseKeyAgreementResponse(response);

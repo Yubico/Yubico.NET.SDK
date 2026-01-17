@@ -21,18 +21,23 @@ The `ralph-loop` skill forces a sub-instance of GitHub Copilot to enter a recurs
 | :--- | :--- | :--- | :--- |
 | `[PROMPT]` | `string` | **Yes** (or via file) | The objective string passed as an argument. |
 | `--prompt-file` | `path` | **Yes** (alternative) | Read the prompt from a file. **Preferred for complex instructions** to avoid shell escaping issues. |
-| `--completion-promise` | `string` | **Yes** | A unique string (e.g., `"DONE_V1"`) that signals success. |
+| `--completion-promise` | `string` | Recommended | A unique string (e.g., `"DONE_V1"`) that signals success. Without this, the loop runs until `--max-iterations`. |
 | `--max-iterations` | `number` | No | Safety limit. Default: `0` (unlimited). |
 | `--delay` | `number` | No | Seconds between loops. Default: `2`. |
 | `--learn` | `flag` | No | Enable to generate a `review.md` post-mortem analysis. |
+| `--model` | `string` | No | LLM model to use. Recommended: `claude-sonnet-4.5` (balanced), `claude-haiku-4.5` (fast/cheap), or `claude-opus-4.5` (highest quality). |
 
 **Outputs:** State + logs are written under `./docs/ralph-loop/` (e.g., `state.md`, `iteration-*.log`, and learning artifacts under `./docs/ralph-loop/learning/`).
 
-## 3. Autonomy Injection (CRITICAL)
+## 3. Autonomy Directives (Auto-Injected)
 
-The script is passive by default. To ensure the agent is truly autonomous and never asks the user for input, you **MUST** append the following text block to the end of your prompt (whether passed via string or file):
+The script automatically appends autonomy directives to your prompt, instructing the agent to:
+- Operate in non-interactive mode without asking questions
+- Execute immediately on ambiguous decisions using standard patterns
+- Use git to explore the codebase and check previous work
+- Output the completion promise only when the objective is fully verified
 
-> "CONTEXT: You are in NON-INTERACTIVE mode. The user is not present. Do not ask for clarification. If a decision is ambiguous, select the standard industry pattern and EXECUTE immediately. Output <promise>{COMPLETION_PROMISE}</promise> ONLY when the specific objective is verified."
+**You do not need to add these instructions to your prompt manually.**
 
 ## 4. Usage Examples
 
@@ -40,33 +45,32 @@ The script is passive by default. To ensure the agent is truly autonomous and ne
 **Goal:** Quick scaffolding or simple refactor.
 
 ```bash
-bun .claude/skills/ralph-loop/ralph-loop.ts "Create a 'Hello World' Express server in src/app.ts and a test in src/app.test.ts. CONTEXT: You are in NON-INTERACTIVE mode. Do not ask questions. Output <promise>DONE</promise> when files are created." \
+bun .claude/skills/ralph-loop/ralph-loop.ts \
+  "Create a 'Hello World' Express server in src/app.ts and a test in src/app.test.ts." \
   --completion-promise "DONE"
 ```
 
 ### Example 2: Using a Prompt File (Recommended for Complex Tasks)
-**Goal:** Complex refactor defined in a generated markdown file.
+**Goal:** Complex refactor defined in a markdown file.
 
-Create a temporary file task_prompt.md containing the objective AND the Autonomy Injection text.
-
-Run the loop pointing to that file.
+Create a file `task_prompt.md` containing your objective (autonomy directives are auto-injected).
 
 ```bash
-
 bun .claude/skills/ralph-loop/ralph-loop.ts --prompt-file task_prompt.md \
   --completion-promise "REFACTOR_COMPLETE" \
   --max-iterations 20 \
   --learn
 ```
+
 ### Example 3: Autonomous Debugging
 **Goal:** Fix a failing test suite by iterating on the code.
 
 ```bash
-
-bun .claude/skills/ralph-loop/ralph-loop.ts "Run 'npm test'. Analyze the stderr output. Locate the failing code in src/. Apply fixes. Re-run 'npm test'. Repeat until passing. CONTEXT: You are in NON-INTERACTIVE mode. The user is not present. Do not ask for clarification. If a decision is ambiguous, select the standard industry pattern and EXECUTE immediately. Output <promise>TESTS_PASSED</promise> ONLY when the specific objective is verified." \
+bun .claude/skills/ralph-loop/ralph-loop.ts \
+  "Run 'npm test'. Analyze the stderr output. Locate the failing code in src/. Apply fixes. Re-run 'npm test'. Repeat until passing." \
   --completion-promise "TESTS_PASSED" \
   --max-iterations 12 \
-  --delay 2
+  --model claude-sonnet-4.5
 ```
 ## 5. Success Criteria
 **Success:** The process exits with code 0 and logs ✅ Ralph loop: Detected <promise>...</promise>.

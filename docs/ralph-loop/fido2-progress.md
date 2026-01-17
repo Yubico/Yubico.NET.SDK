@@ -71,21 +71,30 @@
   - CredentialResponseTests.cs (14 tests)
   - Total: 149 unit tests passing
 
-### Phase 7: WebAuthn/CTAP Extensions
-- [ ] Task 6.1: Implement hmac-secret extension
-- [ ] Task 6.2: Implement hmac-secret-mc extension
-- [ ] Task 6.3: Implement credProtect extension
-- [ ] Task 6.4: Implement credBlob extension
-- [ ] Task 6.5: Implement largeBlob extension
-- [ ] Task 6.6: Implement minPinLength extension
-- [ ] Task 6.7: Implement prf extension
-- [ ] Task 6.8: Add extension tests
-
 ### Phase 6: CredentialManagement (P1)
-- [ ] Task 7.1: Implement CredentialManagement API
-- [ ] Task 7.2: Add credential enumeration
-- [ ] Task 7.3: Add credential deletion
-- [ ] Task 7.4: Add tests
+- [x] Task 6.1: Create credential management data models - Iteration 4
+  - CredManagementSubCommand constants
+  - CredentialMetadata, RelyingPartyInfo, StoredCredentialInfo
+- [x] Task 6.2: Implement CredentialManagement class - Iteration 4
+  - GetCredentialsMetadataAsync
+  - EnumerateRelyingPartiesAsync
+  - EnumerateCredentialsAsync
+- [x] Task 6.3: Implement credential operations - Iteration 4
+  - DeleteCredentialAsync
+  - UpdateUserInformationAsync
+- [x] Task 6.4: Add tests - Iteration 4
+  - CredentialManagementModelsTests.cs (11 tests)
+  - Total: 160 unit tests passing
+
+### Phase 7: WebAuthn/CTAP Extensions
+- [ ] Task 7.1: Implement hmac-secret extension
+- [ ] Task 7.2: Implement hmac-secret-mc extension
+- [ ] Task 7.3: Implement credProtect extension
+- [ ] Task 7.4: Implement credBlob extension
+- [ ] Task 7.5: Implement largeBlob extension
+- [ ] Task 7.6: Implement minPinLength extension
+- [ ] Task 7.7: Implement prf extension
+- [ ] Task 7.8: Add extension tests
 
 ### Phase 8: BioEnrollment (P1)
 - [ ] Task 8.1: Implement BioEnrollment (FW 5.2+)
@@ -118,7 +127,7 @@
 ## Session Notes
 
 ### Current Iteration: 4
-**Status:** Phase 5 complete
+**Status:** Phase 5 and Phase 6 complete
 
 ### Completed Work
 
@@ -134,11 +143,22 @@
 - Updated FidoSession with MakeCredentialAsync, GetAssertionAsync, GetNextAssertionAsync
 - Added Encode() method and constructors to PublicKeyCredentialParameters
 - Fixed nullable ReadOnlyMemory<byte>? handling in AttestationStatement.Decode
+
+- Implemented Phase 6: CredentialManagement
+- Created credential management files in CredentialManagement/ subdirectory:
+  - CredManagementSubCommand.cs: CTAP2 sub-command constants
+  - CredentialManagementModels.cs: CredentialMetadata, RelyingPartyInfo, StoredCredentialInfo
+  - CredentialManagement.cs: Full API for credential management
+    - GetCredentialsMetadataAsync
+    - EnumerateRelyingPartiesAsync
+    - EnumerateCredentialsAsync
+    - DeleteCredentialAsync
+    - UpdateUserInformationAsync
+- Fixed nullable ReadOnlyMemory<byte>? handling in StoredCredentialInfo.Decode
 - Created comprehensive unit tests:
-  - AuthenticatorDataTests.cs (10 tests)
-  - PublicKeyCredentialTypesTests.cs (19 tests)
-  - CredentialResponseTests.cs (14 tests)
-- All 149 unit tests passing
+  - Phase 5: 43 tests (AuthenticatorData, PublicKeyCredentialTypes, CredentialResponse)
+  - Phase 6: 11 tests (CredentialManagementModels)
+- All 160 unit tests passing
 - Build passes with 0 errors
 
 #### Iteration 3 (2026-01-17)
@@ -196,7 +216,7 @@
 
 ### Files Created/Modified
 
-#### Iteration 4
+#### Iteration 4 - Phase 5 (Credentials)
 - `Yubico.YubiKit.Fido2/src/Credentials/AuthenticatorData.cs`
 - `Yubico.YubiKit.Fido2/src/Credentials/AttestedCredentialData.cs`
 - `Yubico.YubiKit.Fido2/src/Credentials/MakeCredentialResponse.cs`
@@ -209,6 +229,12 @@
 - `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Credentials/AuthenticatorDataTests.cs`
 - `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Credentials/PublicKeyCredentialTypesTests.cs`
 - `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Credentials/CredentialResponseTests.cs`
+
+#### Iteration 4 - Phase 6 (CredentialManagement)
+- `Yubico.YubiKit.Fido2/src/CredentialManagement/CredManagementSubCommand.cs`
+- `Yubico.YubiKit.Fido2/src/CredentialManagement/CredentialManagement.cs`
+- `Yubico.YubiKit.Fido2/src/CredentialManagement/CredentialManagementModels.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/CredentialManagement/CredentialManagementModelsTests.cs`
 
 #### Iteration 3
 - `Yubico.YubiKit.Fido2/src/Pin/ClientPin.cs`
@@ -244,7 +270,7 @@
 - `Directory.Packages.props` (added System.Formats.Cbor)
 
 ### Next Steps (Iteration 5)
-- Task 6.1: Start Phase 6 - CredentialManagement implementation
-- Task 6.2: Implement credential enumeration
-- Task 6.3: Implement credential deletion
-- Task 6.4: Add comprehensive tests
+- Task 7.1: Start Phase 7 - WebAuthn/CTAP Extensions
+- Task 7.2: Implement hmac-secret extension
+- Task 7.3: Implement credProtect extension
+- Task 7.4: Add extension tests

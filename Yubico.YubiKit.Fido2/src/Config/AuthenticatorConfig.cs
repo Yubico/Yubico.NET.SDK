@@ -38,7 +38,7 @@ namespace Yubico.YubiKit.Fido2.Config;
 /// </remarks>
 public sealed class AuthenticatorConfig
 {
-    private readonly FidoSession _session;
+    private readonly IFidoSession _session;
     private readonly IPinUvAuthProtocol _protocol;
     private readonly ReadOnlyMemory<byte> _pinUvAuthToken;
     
@@ -50,7 +50,7 @@ public sealed class AuthenticatorConfig
     /// <param name="pinUvAuthToken">The PIN/UV auth token with authenticator config permission.</param>
     /// <exception cref="ArgumentNullException">Thrown when session or protocol is null.</exception>
     public AuthenticatorConfig(
-        FidoSession session,
+        IFidoSession session,
         IPinUvAuthProtocol protocol,
         ReadOnlyMemory<byte> pinUvAuthToken)
     {
@@ -163,7 +163,12 @@ public sealed class AuthenticatorConfig
         ReadOnlyMemory<byte> payload,
         CancellationToken cancellationToken)
     {
-        await _session.SendCborAsync(CtapCommand.Config, payload, cancellationToken)
+        // Build full request: command byte + payload
+        var request = new byte[1 + payload.Length];
+        request[0] = CtapCommand.Config;
+        payload.CopyTo(request.AsMemory(1));
+        
+        await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
     }
     

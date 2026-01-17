@@ -55,7 +55,7 @@ public sealed class LargeBlobStorage
     // Hash size at the end of serialized array
     private const int ArrayHashSize = 16;
     
-    private readonly FidoSession _session;
+    private readonly IFidoSession _session;
     private readonly IPinUvAuthProtocol? _protocol;
     private readonly ReadOnlyMemory<byte> _pinUvAuthToken;
     private readonly int _maxFragmentLength;
@@ -69,7 +69,7 @@ public sealed class LargeBlobStorage
     /// Use this constructor when only reading large blobs.
     /// Writing requires PIN/UV authentication.
     /// </remarks>
-    public LargeBlobStorage(FidoSession session, int maxFragmentLength = 1024)
+    public LargeBlobStorage(IFidoSession session, int maxFragmentLength = 1024)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _maxFragmentLength = maxFragmentLength > 0 
@@ -89,7 +89,7 @@ public sealed class LargeBlobStorage
     /// <see cref="PinUvAuthTokenPermissions.LargeBlobWrite"/> permission.
     /// </remarks>
     public LargeBlobStorage(
-        FidoSession session,
+        IFidoSession session,
         IPinUvAuthProtocol protocol,
         ReadOnlyMemory<byte> pinUvAuthToken,
         int maxFragmentLength = 1024)
@@ -312,9 +312,14 @@ public sealed class LargeBlobStorage
         
         writer.WriteEndMap();
         
-        var response = await _session.SendCborAsync(
-            CtapCommand.LargeBlobs,
-            writer.Encode(),
+        // Build full request: command byte + CBOR payload
+        var payload = writer.Encode();
+        var request = new byte[1 + payload.Length];
+        request[0] = CtapCommand.LargeBlobs;
+        payload.CopyTo(request.AsMemory(1));
+        
+        var response = await _session.SendCborRequestAsync(
+            request,
             cancellationToken).ConfigureAwait(false);
         
         // Parse response - should have config (0x01) with the data
@@ -403,9 +408,14 @@ public sealed class LargeBlobStorage
         
         writer.WriteEndMap();
         
-        await _session.SendCborAsync(
-            CtapCommand.LargeBlobs,
-            writer.Encode(),
+        // Build full request: command byte + CBOR payload
+        var payload = writer.Encode();
+        var request = new byte[1 + payload.Length];
+        request[0] = CtapCommand.LargeBlobs;
+        payload.CopyTo(request.AsMemory(1));
+        
+        await _session.SendCborRequestAsync(
+            request,
             cancellationToken).ConfigureAwait(false);
     }
     

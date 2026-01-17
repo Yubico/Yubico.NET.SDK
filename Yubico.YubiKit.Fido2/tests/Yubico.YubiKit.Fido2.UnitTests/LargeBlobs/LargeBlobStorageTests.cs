@@ -26,13 +26,13 @@ namespace Yubico.YubiKit.Fido2.UnitTests.LargeBlobs;
 /// </summary>
 public class LargeBlobStorageTests
 {
-    private readonly FidoSession _mockSession;
+    private readonly IFidoSession _mockSession;
     private readonly TestPinUvAuthProtocol _testProtocol;
     private readonly byte[] _pinUvAuthToken;
     
     public LargeBlobStorageTests()
     {
-        _mockSession = Substitute.For<FidoSession>();
+        _mockSession = Substitute.For<IFidoSession>();
         _testProtocol = new TestPinUvAuthProtocol();
         _pinUvAuthToken = new byte[32];
         RandomNumberGenerator.Fill(_pinUvAuthToken);
@@ -97,16 +97,14 @@ public class LargeBlobStorageTests
     public async Task ReadLargeBlobArrayAsync_SendsCorrectCommand()
     {
         // Arrange
-        byte capturedCommand = 0;
-        byte[]? capturedPayload = null;
+        byte[]? capturedRequest = null;
         
         // Create empty array response
         var emptyArray = LargeBlobArray.CreateEmpty().Serialize();
         var response = CreateReadResponse(emptyArray);
         
-        _mockSession.SendCborAsync(
-                Arg.Do<byte>(x => capturedCommand = x),
-                Arg.Do<ReadOnlyMemory<byte>>(x => capturedPayload = x.ToArray()),
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(response));
         
@@ -116,11 +114,11 @@ public class LargeBlobStorageTests
         await storage.ReadLargeBlobArrayAsync();
         
         // Assert
-        Assert.Equal(0x0C, capturedCommand); // LargeBlobs command
-        Assert.NotNull(capturedPayload);
+        Assert.NotNull(capturedRequest);
+        Assert.Equal(0x0C, capturedRequest![0]); // LargeBlobs command
         
-        // Verify CBOR structure
-        var reader = new CborReader(capturedPayload);
+        // Verify CBOR structure - skip command byte
+        var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
         var mapCount = reader.ReadStartMap();
         Assert.Equal(2, mapCount);
         
@@ -138,8 +136,7 @@ public class LargeBlobStorageTests
     public async Task ReadLargeBlobArrayAsync_ReturnsEmptyArrayWhenNoData()
     {
         // Arrange
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
@@ -181,12 +178,10 @@ public class LargeBlobStorageTests
     public async Task WriteLargeBlobArrayAsync_SendsCorrectCommand()
     {
         // Arrange
-        byte capturedCommand = 0;
-        byte[]? capturedPayload = null;
+        byte[]? capturedRequest = null;
         
-        _mockSession.SendCborAsync(
-                Arg.Do<byte>(x => capturedCommand = x),
-                Arg.Do<ReadOnlyMemory<byte>>(x => capturedPayload = x.ToArray()),
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
@@ -197,11 +192,11 @@ public class LargeBlobStorageTests
         await storage.WriteLargeBlobArrayAsync(array);
         
         // Assert
-        Assert.Equal(0x0C, capturedCommand); // LargeBlobs command
-        Assert.NotNull(capturedPayload);
+        Assert.NotNull(capturedRequest);
+        Assert.Equal(0x0C, capturedRequest![0]); // LargeBlobs command
         
         // Verify CBOR structure has set, offset, length, pinUvAuthParam, pinUvAuthProtocol
-        var reader = new CborReader(capturedPayload);
+        var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
         var mapCount = reader.ReadStartMap();
         Assert.Equal(5, mapCount); // First fragment includes length
     }
@@ -223,8 +218,7 @@ public class LargeBlobStorageTests
     {
         // Arrange
         var emptyArray = LargeBlobArray.CreateEmpty().Serialize();
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(CreateReadResponse(emptyArray)));
@@ -270,8 +264,7 @@ public class LargeBlobStorageTests
     {
         // Arrange
         var emptyArray = LargeBlobArray.CreateEmpty().Serialize();
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(CreateReadResponse(emptyArray)));
@@ -291,11 +284,10 @@ public class LargeBlobStorageTests
     public async Task WriteLargeBlobArrayAsync_IncludesCorrectProtocolVersion()
     {
         // Arrange
-        byte[]? capturedPayload = null;
+        byte[]? capturedRequest = null;
         
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
-                Arg.Do<ReadOnlyMemory<byte>>(x => capturedPayload = x.ToArray()),
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
@@ -306,10 +298,10 @@ public class LargeBlobStorageTests
         await storage.WriteLargeBlobArrayAsync(array);
         
         // Assert
-        Assert.NotNull(capturedPayload);
+        Assert.NotNull(capturedRequest);
         
-        // Find pinUvAuthProtocol in the CBOR
-        var reader = new CborReader(capturedPayload);
+        // Find pinUvAuthProtocol in the CBOR - skip command byte
+        var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
         reader.ReadStartMap();
         
         var foundProtocol = false;
@@ -333,11 +325,10 @@ public class LargeBlobStorageTests
     public async Task WriteLargeBlobArrayAsync_IncludesPinUvAuthParam()
     {
         // Arrange
-        byte[]? capturedPayload = null;
+        byte[]? capturedRequest = null;
         
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
-                Arg.Do<ReadOnlyMemory<byte>>(x => capturedPayload = x.ToArray()),
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
@@ -348,10 +339,10 @@ public class LargeBlobStorageTests
         await storage.WriteLargeBlobArrayAsync(array);
         
         // Assert
-        Assert.NotNull(capturedPayload);
+        Assert.NotNull(capturedRequest);
         
-        // Find pinUvAuthParam in the CBOR
-        var reader = new CborReader(capturedPayload);
+        // Find pinUvAuthParam in the CBOR - skip command byte
+        var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
         reader.ReadStartMap();
         
         var foundAuthParam = false;

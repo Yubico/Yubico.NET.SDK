@@ -85,10 +85,10 @@ public class FingerprintBioEnrollmentTests
     {
         // Arrange
         var sensorInfoResponse = CreateSensorInfoResponse(FingerprintKind.Touch, 5);
-        ReadOnlyMemory<byte> capturedPayload = default;
+        ReadOnlyMemory<byte> capturedRequest = default;
         
         _mockSession.SendCborRequestAsync(
-                Arg.Do<ReadOnlyMemory<byte>>(p => capturedPayload = p),
+                Arg.Do<ReadOnlyMemory<byte>>(p => capturedRequest = p),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(sensorInfoResponse));
         
@@ -97,8 +97,11 @@ public class FingerprintBioEnrollmentTests
         // Act
         await bioEnroll.GetFingerprintSensorInfoAsync();
         
-        // Assert - payload should contain modality = 1 (fingerprint)
-        var reader = new CborReader(capturedPayload, CborConformanceMode.Lax);
+        // Assert - request format is [command][cbor_payload]
+        // First byte is command, rest is CBOR
+        Assert.True(capturedRequest.Length > 1, "Request should have command + payload");
+        var payload = capturedRequest.Slice(1); // Skip command byte
+        var reader = new CborReader(payload, CborConformanceMode.Lax);
         var mapCount = reader.ReadStartMap() ?? 0;
         Assert.Equal(1, mapCount);
         Assert.Equal(1, reader.ReadInt32()); // modality key
@@ -135,9 +138,9 @@ public class FingerprintBioEnrollmentTests
         var templateId = new byte[] { 0x01 };
         var enrollResponse = CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 4);
         
-        ReadOnlyMemory<byte> capturedPayload = default;
+        ReadOnlyMemory<byte> capturedRequest = default;
         _mockSession.SendCborRequestAsync(
-                Arg.Do<ReadOnlyMemory<byte>>(p => capturedPayload = p),
+                Arg.Do<ReadOnlyMemory<byte>>(p => capturedRequest = p),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(enrollResponse));
         
@@ -146,8 +149,10 @@ public class FingerprintBioEnrollmentTests
         // Act
         await bioEnroll.EnrollBeginAsync(timeout: 15000);
         
-        // Assert - payload should contain timeout value
-        var reader = new CborReader(capturedPayload, CborConformanceMode.Lax);
+        // Assert - request format is [command][cbor_payload], skip command byte
+        Assert.True(capturedRequest.Length > 1, "Request should have command + payload");
+        var payload = capturedRequest.Slice(1);
+        var reader = new CborReader(payload, CborConformanceMode.Lax);
         var mapCount = reader.ReadStartMap() ?? 0;
         
         var hasTimeout = false;

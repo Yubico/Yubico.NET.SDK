@@ -25,14 +25,14 @@ namespace Yubico.YubiKit.Fido2.UnitTests.Config;
 /// </summary>
 public class AuthenticatorConfigTests
 {
-    private readonly FidoSession _mockSession;
+    private readonly IFidoSession _mockSession;
     private readonly TestPinUvAuthProtocol _testProtocol;
     private readonly byte[] _pinUvAuthToken;
     private readonly AuthenticatorConfig _config;
     
     public AuthenticatorConfigTests()
     {
-        _mockSession = Substitute.For<FidoSession>();
+        _mockSession = Substitute.For<IFidoSession>();
         _testProtocol = new TestPinUvAuthProtocol();
         _pinUvAuthToken = new byte[] { 0x01, 0x02, 0x03, 0x04 };
         
@@ -90,10 +90,9 @@ public class AuthenticatorConfigTests
     public async Task EnableEnterpriseAttestationAsync_SendsCorrectCommand()
     {
         // Arrange
-        byte[]? capturedPayload = null;
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
-                Arg.Do<ReadOnlyMemory<byte>>(x => capturedPayload = x.ToArray()),
+        byte[]? capturedRequest = null;
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
@@ -101,9 +100,9 @@ public class AuthenticatorConfigTests
         await _config.EnableEnterpriseAttestationAsync();
         
         // Assert
-        Assert.NotNull(capturedPayload);
+        Assert.NotNull(capturedRequest);
         
-        var reader = new CborReader(capturedPayload);
+        var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
         var mapCount = reader.ReadStartMap();
         Assert.Equal(3, mapCount);
         
@@ -116,10 +115,9 @@ public class AuthenticatorConfigTests
     public async Task ToggleAlwaysUvAsync_SendsCorrectCommand()
     {
         // Arrange
-        byte[]? capturedPayload = null;
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
-                Arg.Do<ReadOnlyMemory<byte>>(x => capturedPayload = x.ToArray()),
+        byte[]? capturedRequest = null;
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
@@ -127,9 +125,9 @@ public class AuthenticatorConfigTests
         await _config.ToggleAlwaysUvAsync();
         
         // Assert
-        Assert.NotNull(capturedPayload);
+        Assert.NotNull(capturedRequest);
         
-        var reader = new CborReader(capturedPayload);
+        var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
         reader.ReadStartMap();
         
         // Verify subCommand is 0x02 (ToggleAlwaysUv)
@@ -141,10 +139,9 @@ public class AuthenticatorConfigTests
     public async Task SetMinPinLengthAsync_SendsCorrectCommand()
     {
         // Arrange
-        byte[]? capturedPayload = null;
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
-                Arg.Do<ReadOnlyMemory<byte>>(x => capturedPayload = x.ToArray()),
+        byte[]? capturedRequest = null;
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
@@ -152,9 +149,9 @@ public class AuthenticatorConfigTests
         await _config.SetMinPinLengthAsync(8);
         
         // Assert
-        Assert.NotNull(capturedPayload);
+        Assert.NotNull(capturedRequest);
         
-        var reader = new CborReader(capturedPayload);
+        var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
         var mapCount = reader.ReadStartMap();
         Assert.Equal(4, mapCount); // subCommand, params, protocol, authParam
         
@@ -177,10 +174,9 @@ public class AuthenticatorConfigTests
     {
         // Arrange
         var rpIds = new[] { "example.com", "test.com" };
-        byte[]? capturedPayload = null;
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
-                Arg.Do<ReadOnlyMemory<byte>>(x => capturedPayload = x.ToArray()),
+        byte[]? capturedRequest = null;
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
@@ -188,9 +184,9 @@ public class AuthenticatorConfigTests
         await _config.SetMinPinLengthAsync(6, rpIds);
         
         // Assert
-        Assert.NotNull(capturedPayload);
+        Assert.NotNull(capturedRequest);
         
-        var reader = new CborReader(capturedPayload);
+        var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
         reader.ReadStartMap();
         
         // Skip to params
@@ -206,10 +202,9 @@ public class AuthenticatorConfigTests
     public async Task SetMinPinLengthAsync_WithForceChangePin_IncludesForceChangePinInParams()
     {
         // Arrange
-        byte[]? capturedPayload = null;
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
-                Arg.Do<ReadOnlyMemory<byte>>(x => capturedPayload = x.ToArray()),
+        byte[]? capturedRequest = null;
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
@@ -217,9 +212,9 @@ public class AuthenticatorConfigTests
         await _config.SetMinPinLengthAsync(6, forceChangePin: true);
         
         // Assert
-        Assert.NotNull(capturedPayload);
+        Assert.NotNull(capturedRequest);
         
-        var reader = new CborReader(capturedPayload);
+        var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
         reader.ReadStartMap();
         
         // Skip to params
@@ -249,8 +244,7 @@ public class AuthenticatorConfigTests
     public async Task SetMinPinLengthAsync_AcceptsMinimumValue()
     {
         // Arrange
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
@@ -263,8 +257,7 @@ public class AuthenticatorConfigTests
     public async Task SetMinPinLengthAsync_AcceptsMaximumValue()
     {
         // Arrange
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
@@ -277,10 +270,9 @@ public class AuthenticatorConfigTests
     public async Task EnableEnterpriseAttestationAsync_UsesCorrectCommandByte()
     {
         // Arrange
-        byte capturedCommand = 0;
-        _mockSession.SendCborAsync(
-                Arg.Do<byte>(x => capturedCommand = x),
-                Arg.Any<ReadOnlyMemory<byte>>(),
+        byte[]? capturedRequest = null;
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
@@ -288,17 +280,16 @@ public class AuthenticatorConfigTests
         await _config.EnableEnterpriseAttestationAsync();
         
         // Assert
-        Assert.Equal(0x0D, capturedCommand); // Config command
+        Assert.Equal(0x0D, capturedRequest![0]); // Config command
     }
     
     [Fact]
     public async Task EnableEnterpriseAttestationAsync_UsesCorrectProtocolVersion()
     {
         // Arrange
-        byte[]? capturedPayload = null;
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
-                Arg.Do<ReadOnlyMemory<byte>>(x => capturedPayload = x.ToArray()),
+        byte[]? capturedRequest = null;
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
@@ -306,9 +297,9 @@ public class AuthenticatorConfigTests
         await _config.EnableEnterpriseAttestationAsync();
         
         // Assert
-        Assert.NotNull(capturedPayload);
+        Assert.NotNull(capturedRequest);
         
-        var reader = new CborReader(capturedPayload);
+        var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
         reader.ReadStartMap();
         
         reader.ReadInt32(); // key 0x01
@@ -323,10 +314,9 @@ public class AuthenticatorConfigTests
     public async Task EnableEnterpriseAttestationAsync_IncludesPinUvAuthParam()
     {
         // Arrange
-        byte[]? capturedPayload = null;
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
-                Arg.Do<ReadOnlyMemory<byte>>(x => capturedPayload = x.ToArray()),
+        byte[]? capturedRequest = null;
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
@@ -334,9 +324,9 @@ public class AuthenticatorConfigTests
         await _config.EnableEnterpriseAttestationAsync();
         
         // Assert
-        Assert.NotNull(capturedPayload);
+        Assert.NotNull(capturedRequest);
         
-        var reader = new CborReader(capturedPayload);
+        var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
         reader.ReadStartMap();
         
         reader.ReadInt32(); // key 0x01
@@ -354,8 +344,7 @@ public class AuthenticatorConfigTests
     public async Task AuthenticatesOverCorrectMessage_EnableEnterpriseAttestation()
     {
         // Arrange
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
@@ -375,8 +364,7 @@ public class AuthenticatorConfigTests
     public async Task AuthenticatesOverCorrectMessage_ToggleAlwaysUv()
     {
         // Arrange
-        _mockSession.SendCborAsync(
-                Arg.Any<byte>(),
+        _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));

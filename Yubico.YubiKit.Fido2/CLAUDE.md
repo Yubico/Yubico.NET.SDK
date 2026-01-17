@@ -289,6 +289,35 @@ public void AuthenticatorInfo_Decode_ParsesVersions()
 }
 ```
 
+### CBOR Test Mock Patterns
+
+When testing classes that send CBOR commands via `IFidoSession`:
+
+```csharp
+// 1. Mock IFidoSession (not FidoSession - it's sealed)
+var session = Substitute.For<IFidoSession>();
+
+// 2. Mock SendCborRequestAsync with the 2-arg signature
+session.SendCborRequestAsync(
+    Arg.Any<ReadOnlyMemory<byte>>(), 
+    Arg.Any<CancellationToken>())
+    .Returns(mockResponse);
+
+// 3. When capturing request for assertions:
+ReadOnlyMemory<byte> capturedRequest = default;
+session.SendCborRequestAsync(
+    Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x),
+    Arg.Any<CancellationToken>())
+    .Returns(mockResponse);
+
+// 4. Request format: [command_byte][cbor_payload]
+// Skip byte 0 when parsing the CBOR payload:
+var cborPayload = capturedRequest.Slice(1);  // Skip command byte
+var reader = new CborReader(cborPayload, CborConformanceMode.Ctap2Canonical);
+```
+
+**Common gotcha:** Tests may fail if they parse `capturedRequest` directly without skipping the command byte prefix.
+
 ### Hardware Integration Tests
 
 Tests requiring user presence must be marked and excluded:

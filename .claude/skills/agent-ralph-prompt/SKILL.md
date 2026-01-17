@@ -83,6 +83,7 @@ This skill provides guidance for creating Ralph Loop prompts that enforce proper
 - This keeps iterations short, maximizing fresh context window for each phase.
 - Avoids context compaction and "context rot" from overly long sessions.
 - The ralph-loop will restart with full context on the next iteration.
+- **Exception:** If phases are small and related, the agent may complete multiple per iteration.
 - Example phase boundaries:
   ```markdown
   ## Phase 1: Create interfaces
@@ -158,6 +159,33 @@ If any fail, fix and re-verify.
 
 > **Note:** Autonomy directives are auto-injected by `ralph-loop.ts`. Do not add them manually.
 
+### 8. Test Audit for Refactoring Phases
+
+When a phase involves interface changes, signature changes, or dependency refactoring, add a test audit step:
+
+```markdown
+**Step 0: Audit Test Impact**
+Before modifying any class constructor or interface:
+```bash
+grep -r "Mock<.*ClassName>" tests/ --include="*.cs"
+grep -r "Substitute.For<ClassName>" tests/ --include="*.cs"
+```
+Document which tests need mock updates BEFORE making code changes.
+```
+
+### 9. Phase Deferral Documentation
+
+If a phase should be deferred, document clearly:
+
+```markdown
+**Phase N: [Name] - DEFERRED**
+- **Reason:** [low priority / requires hardware / needs investigation / blocked by X]
+- **What's needed to complete:** [specific requirements]
+- **Blocks completion?** [Yes/No - if No, other phases can complete]
+```
+
+This prevents ambiguity about what "skipped" means and whether the overall task can still complete.
+
 ## Anti-Patterns to Avoid
 - Vague completion criteria ("when finished")
 - Missing test requirement ("when code compiles")
@@ -165,6 +193,7 @@ If any fail, fix and re-verify.
 - No failure guidance
 - Using `git add .` or `git add -A` blindly
 - **Cramming multiple phases into one iteration** (causes context rot)
+- **Skipping test audit** before interface/signature changes (causes reactive test fixing)
 
 ## Handoff (ALWAYS END WITH THIS)
 

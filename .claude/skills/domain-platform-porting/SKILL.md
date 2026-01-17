@@ -1,17 +1,30 @@
-# Platform Porting Prompt Template
+---
+name: platform-porting-template
+description: Use when planning platform ports - reusable prompt template for Ralph Loop autonomous porting
+---
 
-Reusable template for creating Ralph Loop prompts that port platform-specific functionality.
+# Platform Porting Template
 
-## When to Use
+Reusable template for creating Ralph Loop prompts that autonomously port platform-specific functionality across Windows, macOS, and Linux.
 
-Use this template when:
-- Porting device support to a new platform (Windows, Linux, macOS)
-- Adding new transport types (HID, NFC, Bluetooth)
-- Implementing platform-specific P/Invoke code
+**Core principle:** Standardize Ralph Loop prompts for platform work so autonomous agents have clear reference implementations, critical patterns, and verification criteria.
 
-## Template
+## Use when
 
-Copy and customize the following:
+**Use this skill when:**
+- Planning a Ralph Loop for porting device support (HID, NFC, Bluetooth)
+- Adding new transport types to a new platform
+- Need to guide an autonomous agent through multi-platform implementation
+- Creating platform-specific P/Invoke or device connection code
+
+**Don't use when:**
+- Making ad-hoc platform changes (just use pinvoke-porting skill)
+- Non-platform work (use domain-specific skills)
+- One-off experiments (use workflow-experiment instead)
+
+## Template Structure
+
+Use this template by copying and customizing each section:
 
 ```markdown
 # Port {Feature} to {Platform}
@@ -29,7 +42,7 @@ Try first, but if failure due to contention, Do NOT block on hardware operations
 
 ### Git Commits
 Only commit files YOU create or modify. Do NOT use `git add .` or `git add -A`.
-See `.github/agents/COMMIT_GUIDELINES.md`.
+See `docs/COMMIT_GUIDELINES.md`.
 
 ---
 
@@ -74,11 +87,12 @@ See `.github/agents/COMMIT_GUIDELINES.md`.
 
 ## Critical Patterns to PRESERVE
 
-**From legacy - DO NOT modify these patterns:**
+From legacy - DO NOT modify these patterns:
 
 1. **GCHandle Pinning** - Buffers in callbacks MUST be pinned
 2. **Delegate Storage** - Callback delegates MUST be instance fields
-3. **{Platform-specific pattern}** - {Description and reason}
+3. **CFRunLoop Timeouts** - Preserve empirically tested timeout values
+4. **{Platform-specific pattern}** - {Description and reason}
 
 ---
 
@@ -198,11 +212,12 @@ dotnet build.cs test --filter "FullyQualifiedName~{Platform}"
 - If a hardware test fails 2-3 times, document and skip
 - Do NOT block completion on hardware tests
 - Mark with `[Trait("RequiresHardware", "true")]`
-```
 
-## Usage Example
+---
 
-For adding Windows HID support:
+## Example: Porting HID to Windows
+
+For reference, here's a completed template instance for Windows HID support:
 
 ```markdown
 # Port HID to Windows
@@ -232,3 +247,9 @@ For adding Windows HID support:
 - Platform-specific code goes in platform-named files
 - Service layer code is platform-agnostic with runtime checks
 - DI registration happens once per service, not per platform
+
+## Related Skills
+
+- `pinvoke-porting` - Detailed guide for P/Invoke porting patterns
+- `agent-ralph-loop` - Launching autonomous agents with this template
+- `workflow-plan` - Creating implementation plans

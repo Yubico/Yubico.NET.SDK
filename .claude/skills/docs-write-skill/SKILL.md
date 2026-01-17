@@ -50,6 +50,18 @@ The `name` field is what appears in tool listings and invocation. Use verb-objec
 
 ## Skill Structure
 
+### File Naming - CRITICAL
+
+**The skill markdown file MUST be named `SKILL.md`** - not `CLAUDE.md`, not `README.md`, not any other name.
+
+```
+.claude/skills/
+└── domain-example-skill/
+    └── SKILL.md          ← ✅ REQUIRED - file must be named exactly SKILL.md
+```
+
+This is how Claude Code and Copilot CLI discover and load skills.
+
 ### Required Elements
 
 ```markdown
@@ -237,6 +249,8 @@ Skill completed successfully when:
 
 ## Template
 
+Create a new directory with the format `.claude/skills/{category}-{topic}/` and create a file **named exactly `SKILL.md`** inside it:
+
 ```markdown
 ---
 name: verb-object
@@ -286,10 +300,14 @@ Content with code examples:
 - `skill-name` - When to use instead
 ```
 
+**Remember:** The file MUST be named `SKILL.md` for Claude to discover it.
+
 ## Verification
 
 Skill is ready when:
 
+- [ ] **File is named `SKILL.md`** (not CLAUDE.md, not README.md - exactly `SKILL.md`)
+- [ ] Directory follows format: `.claude/skills/{category}-{topic}/`
 - [ ] Frontmatter has `name` (verb-object form) and `description` (starts with "Use when")
 - [ ] "Use when" section has concrete trigger conditions
 - [ ] "Don't use when" lists exceptions

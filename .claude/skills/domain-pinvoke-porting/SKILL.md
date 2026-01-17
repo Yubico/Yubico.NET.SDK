@@ -1,18 +1,28 @@
-# Platform P/Invoke Porting Skill
+---
+name: pinvoke-porting
+description: Use when porting platform-specific P/Invoke code - legacy to modern C# with safety patterns
+---
+
+# Platform P/Invoke Porting
 
 Specialized skill for porting legacy platform-specific P/Invoke code to modern C# SDK with safety and pattern updates.
 
-## When to Use
+**Core principle:** Platform interop must preserve safety-critical patterns (GCHandle pinning, delegate storage, CFRunLoop timeouts) while modernizing to file-scoped namespaces and C# 14 patterns.
 
-Triggers:
-- "Port {class} from legacy SDK"
-- "Add platform interop for {feature}"
-- "Implement {feature} for macOS/Windows/Linux"
-- Porting HID, NFC, Bluetooth, or other platform-specific device code
+## Use when
 
-## Workflow
+**Use this skill when:**
+- Porting HID, NFC, Bluetooth, or device-specific P/Invoke from legacy SDK
+- Adding platform interop for Windows/macOS/Linux
+- Implementing platform-specific device connections (e.g., MacOSHidIOReportConnection)
+- Moving code from `./legacy-develop/Yubico.Core/src/Yubico/PlatformInterop/` to modern SDK
 
-### 1. Identify Sources
+**Don't use when:**
+- Creating non-platform code (use standard refactoring instead)
+- Adding business logic above platform layer (use domain-specific skills)
+- Writing new protocols or specifications
+
+## Identify Sources
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -30,7 +40,7 @@ Triggers:
 └─────────────────────────────────────────────────────────┘
 ```
 
-### 2. Check Existing Infrastructure
+## Check Existing Infrastructure
 
 Before creating new P/Invoke, verify what exists:
 
@@ -44,11 +54,12 @@ grep -r "DllImport" Yubico.YubiKit.Core/src/PlatformInterop/
 
 **DO NOT duplicate existing P/Invoke signatures.**
 
-### 3. Critical Patterns to PRESERVE
+## Critical Patterns to PRESERVE
 
-These patterns are safety-critical and must NOT be changed:
+These patterns are **safety-critical** and must NOT be changed:
 
-#### GCHandle Pinning for Callbacks
+### GCHandle Pinning for Callbacks
+
 ```csharp
 // REQUIRED: Pin buffers passed to native callbacks
 private GCHandle _bufferHandle;
@@ -67,7 +78,8 @@ public void Dispose()
 }
 ```
 
-#### Delegate Field Storage (Prevent GC Collection)
+### Delegate Field Storage (Prevent GC Collection)
+
 ```csharp
 // REQUIRED: Store delegate as field to prevent GC collection
 private readonly IOHIDReportCallback _callback;
@@ -79,11 +91,12 @@ public MyConnection()
     NativeMethod(_callback); // Safe - delegate won't be collected
 }
 
-// WRONG - delegate may be collected before native code calls it:
+// ❌ WRONG - delegate may be collected before native code calls it:
 // NativeMethod(new IOHIDReportCallback(OnReport));
 ```
 
-#### CFRunLoop/Event Loop Patterns
+### CFRunLoop/Event Loop Patterns
+
 ```csharp
 // Preserve timeout values from legacy (empirically tested)
 private const double RunLoopTimeout = 6.0; // seconds
@@ -100,20 +113,20 @@ finally
 }
 ```
 
-### 4. Modernization REQUIRED
+## Modernization REQUIRED
 
 These updates ARE required:
 
-| Legacy Pattern | Modern Pattern |
-|----------------|----------------|
-| `namespace X.Y.Z { }` | `namespace X.Y.Z;` (file-scoped) |
-| `#region ... #endregion` | Remove entirely |
-| `== null` / `!= null` | `is null` / `is not null` |
-| `if/else` chains | Switch expressions where appropriate |
-| Manual null checks | `ArgumentNullException.ThrowIfNull()` |
-| `throw new ObjectDisposedException()` | `ObjectDisposedException.ThrowIf(_disposed, this)` |
+| Legacy Pattern | Modern Pattern | Reason |
+|---|---|---|
+| `namespace X.Y.Z { }` | `namespace X.Y.Z;` | File-scoped (C# 11+) |
+| `#region ... #endregion` | Remove entirely | Modern IDE supports collapsing |
+| `== null` / `!= null` | `is null` / `is not null` | Modern pattern |
+| `if/else` chains | Switch expressions | Cleaner, more maintainable |
+| Manual null checks | `ArgumentNullException.ThrowIfNull()` | Standard helper |
+| `throw new ObjectDisposedException()` | `ObjectDisposedException.ThrowIf(_disposed, this)` | Standard helper |
 
-### 5. Platform Attributes
+## Platform Attributes
 
 Always add platform support attributes:
 
@@ -139,7 +152,17 @@ public sealed class LinuxHidDevice : IHidDevice
 }
 ```
 
-### 6. Verification
+## Port Workflow
+
+1. **Analyze legacy code** - Read the full legacy implementation
+2. **Check existing P/Invoke** - Don't duplicate signatures
+3. **Preserve safety patterns** - Keep GCHandle, delegates, timeouts
+4. **Apply modernization** - File-scoped namespace, `is null`, switch expressions
+5. **Add platform attributes** - `[SupportedOSPlatform(...)]`
+6. **Verify build** - `dotnet build.cs build` must pass
+7. **Commit carefully** - Only YOUR modified files
+
+### Verification
 
 After porting:
 
@@ -151,20 +174,9 @@ dotnet build.cs build
 dotnet build.cs build 2>&1 | grep -i warning
 ```
 
-### 7. Commit Pattern
-
-```bash
-# Platform layer commits
-git add Yubico.YubiKit.Core/src/Hid/MacOSHidDevice.cs
-git commit -m "feat(hid): add MacOSHidDevice ported from legacy SDK"
-
-git add Yubico.YubiKit.Core/src/Hid/MacOSHidIOReportConnection.cs
-git commit -m "feat(hid): add MacOSHidIOReportConnection for FIDO HID"
-```
-
 ## Example: Porting MacOSHidDevice
 
-### Legacy Code Analysis
+### Legacy Code
 ```csharp
 // legacy-develop/.../MacOSHidDevice.cs
 namespace Yubico.Core.Devices.Hid
@@ -204,7 +216,18 @@ public sealed class MacOSHidDevice : IHidDevice
 }
 ```
 
-## Checklist
+## Commit Pattern
+
+```bash
+# Platform layer commits
+git add Yubico.YubiKit.Core/src/Hid/MacOSHidDevice.cs
+git commit -m "feat(hid): add MacOSHidDevice ported from legacy SDK"
+
+git add Yubico.YubiKit.Core/src/Hid/MacOSHidIOReportConnection.cs
+git commit -m "feat(hid): add MacOSHidIOReportConnection for FIDO HID"
+```
+
+## Verification Checklist
 
 Before completing a platform port:
 
@@ -219,3 +242,9 @@ Before completing a platform port:
 - [ ] `ObjectDisposedException.ThrowIf` used
 - [ ] Build passes with no errors
 - [ ] Commit message follows convention
+
+## Related Skills
+
+- `domain-build` - Building and verifying the project
+- `workflow-tdd` - Writing tests for new platform implementations
+- `review-request` - Getting code review before merging

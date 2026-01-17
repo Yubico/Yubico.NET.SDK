@@ -113,9 +113,23 @@
   - Total: 204 unit tests passing
 
 ### Phase 8: BioEnrollment (P1)
-- [ ] Task 8.1: Implement BioEnrollment (FW 5.2+)
-- [ ] Task 8.2: Implement FingerprintBioEnrollment
-- [ ] Task 8.3: Add tests
+- [x] Task 8.1: Implement BioEnrollment (FW 5.2+) - Iteration 6
+  - Created: BioEnrollmentSubCommand.cs with all sub-command constants
+  - Created: BioEnrollmentModels.cs with FingerprintSensorInfo, EnrollmentSampleResult, TemplateInfo, etc.
+  - Created: IBioEnrollmentCommands.cs interface for testability
+  - Created: FingerprintBioEnrollment.cs with full enrollment API
+    - GetFingerprintSensorInfoAsync()
+    - EnrollBeginAsync() / EnrollCaptureNextSampleAsync() / EnrollCancelAsync()
+    - EnumerateEnrollmentsAsync()
+    - SetFriendlyNameAsync() / RemoveEnrollmentAsync()
+- [x] Task 8.2: Implement FingerprintBioEnrollment - Iteration 6
+  - Fingerprint enrollment with timeout support
+  - Support for standard (0x09) and preview (0x40) commands
+  - PIN/UV auth token authentication for protected operations
+- [x] Task 8.3: Add tests - Iteration 6
+  - Created: BioEnrollmentModelsTests.cs (26 tests)
+  - Created: FingerprintBioEnrollmentTests.cs (18 tests)
+  - Total: 248 unit tests passing
 
 ### Phase 9: Config Commands (P1)
 - [ ] Task 9.1: Implement authenticatorConfig
@@ -142,10 +156,37 @@
 
 ## Session Notes
 
-### Current Iteration: 5
-**Status:** Phase 7 complete - WebAuthn/CTAP Extensions implemented
+### Current Iteration: 6
+**Status:** Phase 8 complete - BioEnrollment implemented
 
 ### Completed Work
+
+#### Iteration 6 (2026-01-17)
+- Implemented Phase 8: BioEnrollment (FW 5.2+)
+- Created BioEnrollment/ directory with:
+  - BioEnrollmentSubCommand.cs: CTAP2.1 sub-command constants for bio enrollment
+  - BioEnrollmentModels.cs: Data models including:
+    - FingerprintSensorInfo: Sensor capabilities (touch/swipe, max samples)
+    - FingerprintKind enum: Touch vs Swipe sensors
+    - FingerprintSampleStatus enum: All 14 sample status codes
+    - EnrollmentSampleResult: Result of enrollment capture
+    - TemplateInfo: Enrolled template information with friendly name
+    - EnrollmentEnumerationResult: List of enrolled templates
+  - IBioEnrollmentCommands.cs: Interface for testability
+  - FingerprintBioEnrollment.cs: Complete fingerprint enrollment API
+    - GetFingerprintSensorInfoAsync(): Query sensor capabilities
+    - EnrollBeginAsync(): Start new fingerprint enrollment
+    - EnrollCaptureNextSampleAsync(): Capture additional samples
+    - EnrollCancelAsync(): Cancel ongoing enrollment
+    - EnumerateEnrollmentsAsync(): List enrolled templates
+    - SetFriendlyNameAsync(): Set template friendly name
+    - RemoveEnrollmentAsync(): Delete enrolled template
+    - Support for both standard (0x09) and preview (0x40) commands
+- Created comprehensive unit tests:
+  - BioEnrollmentModelsTests.cs (26 tests) - model parsing tests
+  - FingerprintBioEnrollmentTests.cs (18 tests) - API operation tests
+- All 248 unit tests passing
+- Build passes with 0 errors
 
 #### Iteration 5 (2026-01-17)
 - Implemented Phase 7: WebAuthn/CTAP Extensions
@@ -250,6 +291,14 @@
 
 ### Files Created/Modified
 
+#### Iteration 6 - Phase 8 (BioEnrollment)
+- `Yubico.YubiKit.Fido2/src/BioEnrollment/BioEnrollmentSubCommand.cs`
+- `Yubico.YubiKit.Fido2/src/BioEnrollment/BioEnrollmentModels.cs`
+- `Yubico.YubiKit.Fido2/src/BioEnrollment/IBioEnrollmentCommands.cs`
+- `Yubico.YubiKit.Fido2/src/BioEnrollment/FingerprintBioEnrollment.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/BioEnrollment/BioEnrollmentModelsTests.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/BioEnrollment/FingerprintBioEnrollmentTests.cs`
+
 #### Iteration 5 - Phase 7 (Extensions)
 - `Yubico.YubiKit.Fido2/src/Extensions/ExtensionIdentifiers.cs`
 - `Yubico.YubiKit.Fido2/src/Extensions/CredProtectPolicy.cs`
@@ -316,7 +365,8 @@
 - `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/CtapExceptionTests.cs`
 - `Directory.Packages.props` (added System.Formats.Cbor)
 
-### Next Steps (Iteration 6)
-- Task 8.1: Start Phase 8 - BioEnrollment (P1)
+### Next Steps (Iteration 7)
 - Task 9.1: Implement authenticatorConfig (P1)
+- Task 10.1: Implement Large Blob storage (P2)
+- Task 11.1: Implement YK 5.7/5.8 features (P1)
 - Continue with remaining phases

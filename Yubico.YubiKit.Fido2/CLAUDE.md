@@ -14,8 +14,12 @@ This file provides Claude-specific guidance for working with the FIDO2 module. *
 The FIDO2 module implements CTAP 2.1/2.3 (Client to Authenticator Protocol) for YubiKey authenticators. This module supports passkey creation, authentication, and advanced FIDO2 features like credential management, biometric enrollment, and WebAuthn extensions.
 
 **Transports Supported:**
-- SmartCard (CCID) via ISO 7816-4 APDUs
-- FIDO HID protocol over USB
+- FIDO HID protocol over USB (primary transport)
+- SmartCard (CCID) via NFC only (USB CCID is NOT supported for FIDO2)
+
+> **Important:** FIDO2 over USB uses the HID FIDO interface, NOT the CCID/SmartCard interface. 
+> The SmartCard transport only works over NFC. Attempting to create a FidoSession with a USB CCID 
+> connection will throw `NotSupportedException`.
 
 ## Architecture Overview
 
@@ -32,7 +36,8 @@ Yubico.YubiKit.Fido2/
 │   │   ├── FidoHidBackend.cs       # HID transport
 │   │   └── SmartCardFidoBackend.cs # SmartCard/CCID transport
 │   ├── Cbor/                       # CBOR serialization
-│   │   └── CtapRequestBuilder.cs   # Fluent CBOR builder
+│   │   ├── CtapRequestBuilder.cs   # Fluent CBOR request builder
+│   │   └── CtapResponseParser.cs   # CBOR response parsing utilities
 │   ├── Config/                     # authenticatorConfig (FW 5.4+)
 │   │   ├── ConfigSubCommand.cs
 │   │   └── AuthenticatorConfig.cs
@@ -66,7 +71,6 @@ Yubico.YubiKit.Fido2/
 │   ├── BioEnrollment/              # Fingerprint enrollment (FW 5.2+)
 │   │   ├── BioEnrollmentSubCommand.cs
 │   │   ├── BioEnrollmentModels.cs
-│   │   ├── IBioEnrollmentCommands.cs
 │   │   └── FingerprintBioEnrollment.cs
 │   ├── LargeBlobs/                 # Large blob storage
 │   │   ├── LargeBlobData.cs        # Entry/Array types
@@ -77,7 +81,6 @@ Yubico.YubiKit.Fido2/
 │       ├── PinUvAuthProtocolV2.cs
 │       ├── ClientPin.cs
 │       ├── ClientPinSubCommand.cs
-│       ├── IClientPinCommands.cs
 │       └── PinUvAuthTokenPermissions.cs
 └── tests/
     ├── Yubico.YubiKit.Fido2.UnitTests/
@@ -135,6 +138,22 @@ var authParam = protocol.Authenticate(pinToken, messageHash);
 
 ### Extensions (WebAuthn)
 
+The SDK uses the **ExtensionBuilder** fluent pattern for all WebAuthn/CTAP extensions. Extensions are NOT implemented as separate classes that you instantiate—instead, you compose them via the builder.
+
+#### Available Extensions
+
+| Extension | Builder Method | Description | YubiKey FW |
+|-----------|---------------|-------------|------------|
+| credProtect | `.WithCredProtect()` | Credential protection level | 5.2+ |
+| hmac-secret | `.WithHmacSecret()` | CTAP2 symmetric secret derivation | 5.2+ |
+| hmac-secret-mc | `.WithHmacSecretMc()` | hmac-secret during MakeCredential | 5.4+ |
+| credBlob | `.WithCredBlob()` | Per-credential blob storage (32-64 bytes) | 5.5+ |
+| largeBlob | `.WithLargeBlobKey()` | Large blob storage key | 5.5+ |
+| minPinLength | `.WithMinPinLength()` | Require minimum PIN length | 5.4+ |
+| prf | `.WithPrf()` | WebAuthn PRF extension (wraps hmac-secret) | 5.2+ |
+
+#### Example Usage
+
 ```csharp
 // Build extensions for MakeCredential
 var extensions = ExtensionBuilder.Create()
@@ -147,7 +166,41 @@ var options = new MakeCredentialOptions
     Extensions = extensions,
     ResidentKey = true
 };
+
+// For GetAssertion with PRF
+var prfExtensions = ExtensionBuilder.Create()
+    .WithPrf(salt1, salt2)  // WebAuthn PRF extension
+    .Build();
 ```
+
+#### hmac-secret vs PRF Extension
+
+These extensions serve similar purposes but operate at different protocol levels:
+
+| Aspect | hmac-secret (CTAP2) | PRF (WebAuthn) |
+|--------|---------------------|----------------|
+| Protocol | CTAP2 native | WebAuthn wrapper |
+| Salt encoding | Raw bytes | Base64url encoded |
+| Output | Raw HMAC bytes | eval/evalByCredential |
+| Use case | Direct authenticator access | Browser/WebAuthn API |
+
+**When to use which:**
+- Use **hmac-secret** when building CTAP2-level tools or when you need direct authenticator interaction
+- Use **PRF** when implementing WebAuthn APIs or browser-compatible flows
+
+```csharp
+// CTAP2 hmac-secret (direct)
+var hmacExtensions = ExtensionBuilder.Create()
+    .WithHmacSecret(salt1, salt2)
+    .Build();
+
+// WebAuthn PRF (browser-compatible)
+var prfExtensions = ExtensionBuilder.Create()
+    .WithPrf(salt1, salt2)
+    .Build();
+```
+
+Internally, PRF extension serializes using hmac-secret wire format but presents the WebAuthn PRF input/output model.
 
 ### Credential Management
 

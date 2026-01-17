@@ -157,9 +157,15 @@
   - LargeBlobStorageTests.cs (17 tests) - API operations, CBOR encoding
 
 ### Phase 11: YK 5.7/5.8 Features (P1)
-- [ ] Task 11.1: Implement encIdentifier support
-- [ ] Task 11.2: Implement encCredStoreState support
-- [ ] Task 11.3: Add tests
+- [x] Task 11.1: Implement encIdentifier support - Iteration 8
+  - Created Crypto/ directory with EncryptedMetadataDecryptor
+  - HKDF-SHA256 key derivation from PPUAT
+  - AES-128-ECB decryption for encrypted metadata
+- [x] Task 11.2: Implement encCredStoreState support - Iteration 8
+  - DecryptCredStoreState() using different HKDF info context
+- [x] Task 11.3: Add tests - Iteration 8
+  - EncryptedMetadataDecryptorTests.cs (18 tests)
+  - DeriveKey tests, DecryptIdentifier tests, DecryptCredStoreState tests
 
 ### Phase 12: Integration Tests (P0, Ongoing)
 - [ ] Task 12.1: Create integration test suite
@@ -197,9 +203,17 @@
     - DeleteBlobAsync(): Remove blob for specific credential
     - Fragmented read/write for arrays larger than maxFragmentLength
     - Proper PIN/UV auth message construction per CTAP 2.1 spec
+- Implemented Phase 11: YK 5.7/5.8 Features (P1)
+- Created Crypto/ directory with:
+  - EncryptedMetadataDecryptor.cs: Decrypt encIdentifier/encCredStoreState
+    - DeriveKey(): HKDF-SHA256 with zero salt, context-specific info
+    - DecryptIdentifier(): Decrypt encIdentifier using "encIdentifier" info
+    - DecryptCredStoreState(): Decrypt encCredStoreState using "encCredStoreState" info
+    - AES-128-ECB decryption for small encrypted values
 - Created comprehensive unit tests:
   - LargeBlobDataTests.cs (26 tests) - encryption, serialization, array ops
   - LargeBlobStorageTests.cs (17 tests) - API operations, CBOR encoding
+  - EncryptedMetadataDecryptorTests.cs (18 tests) - HKDF, decryption
 - Build passes with 0 errors
 - NOTE: Test execution skipped due to .NET 10 preview testhost.dll issue
 
@@ -432,14 +446,19 @@
 - `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/CtapExceptionTests.cs`
 - `Directory.Packages.props` (added System.Formats.Cbor)
 
-#### Iteration 8 - Phase 10 (Large Blobs)
+#### Iteration 8 - Phase 10 (Large Blobs) & Phase 11 (YK 5.7/5.8)
 - `Yubico.YubiKit.Fido2/src/LargeBlobs/LargeBlobData.cs`
 - `Yubico.YubiKit.Fido2/src/LargeBlobs/LargeBlobStorage.cs`
+- `Yubico.YubiKit.Fido2/src/Crypto/EncryptedMetadataDecryptor.cs`
 - `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/LargeBlobs/LargeBlobDataTests.cs`
 - `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/LargeBlobs/LargeBlobStorageTests.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Crypto/EncryptedMetadataDecryptorTests.cs`
 
 ### Next Steps (Iteration 9)
-- Task 11.1: Implement YK 5.7/5.8 features (P1) - encIdentifier support
-- Task 11.2: Implement encCredStoreState support
-- Task 11.3: Add YK 5.7/5.8 tests
-- Continue with Phase 12 (Integration Tests) and Phase 13 (Documentation)
+- Task 12.1: Create integration test suite (P0)
+- Task 12.2: Hardware tests (best effort)
+- Task 13.1: Complete API documentation (P1)
+- Task 13.2: Set up dependency injection
+- Task 13.3: Create extension methods
+- Task 13.4: Document architecture
+- Remaining deferred: Task 2.3 (CBOR utilities), Task 4.5 (PPUAT decryption)

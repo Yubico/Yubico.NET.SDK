@@ -36,7 +36,7 @@ The script fails immediately if the API key is missing.
 ## Core Command
 
 ```bash
-bun scripts/perplexity-search.ts "your question here"
+bun .claude/skills/tool-perplexity-search/perplexity-search.ts "your question here"
 ```
 
 ## Options Reference
@@ -63,32 +63,32 @@ bun scripts/perplexity-search.ts "your question here"
 ### Basic Query
 
 ```bash
-bun scripts/perplexity-search.ts "What are the latest C# 14 features?"
+bun .claude/skills/tool-perplexity-search/perplexity-search.ts "What are the latest C# 14 features?"
 ```
 
 ### Technical Research
 
 ```bash
-bun scripts/perplexity-search.ts "FIDO2 WebAuthn browser support 2024" -m sonar-reasoning
+bun .claude/skills/tool-perplexity-search/perplexity-search.ts "FIDO2 WebAuthn browser support 2024" -m sonar-reasoning
 ```
 
 ### Code-Focused Query
 
 ```bash
-bun scripts/perplexity-search.ts "SCP03 secure channel implementation patterns" \
+bun .claude/skills/tool-perplexity-search/perplexity-search.ts "SCP03 secure channel implementation patterns" \
   --system "You are a cryptography expert. Provide code examples in C#."
 ```
 
 ### API Documentation
 
 ```bash
-bun scripts/perplexity-search.ts "Perplexity API rate limits and pricing"
+bun .claude/skills/tool-perplexity-search/perplexity-search.ts "Perplexity API rate limits and pricing"
 ```
 
 ### Debug Mode
 
 ```bash
-bun scripts/perplexity-search.ts "test query" --verbose
+bun .claude/skills/tool-perplexity-search/perplexity-search.ts "test query" --verbose
 ```
 
 ## Output Format
@@ -117,7 +117,7 @@ The script exits with code 1 on:
 
 ```bash
 # Research current spec
-bun scripts/perplexity-search.ts "CTAP2 authenticatorGetInfo response fields 2024" \
+bun .claude/skills/tool-perplexity-search/perplexity-search.ts "CTAP2 authenticatorGetInfo response fields 2024" \
   -m sonar-reasoning \
   --system "Focus on the data structure and required vs optional fields"
 ```

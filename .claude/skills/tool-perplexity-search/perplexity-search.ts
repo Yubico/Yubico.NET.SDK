@@ -13,19 +13,19 @@
  * USAGE EXAMPLES:
  *
  * 1. Simple search (positional argument):
- *    $ bun scripts/perplexity-search.ts "What is the capital of Estonia?"
+ *    $ bun .claude/skills/tool-perplexity-search/perplexity-search.ts "What is the capital of Estonia?"
  *
  * 2. Using flags for precision:
- *    $ bun scripts/perplexity-search.ts -q "Explain String Theory" -m sonar-reasoning
+ *    $ bun .claude/skills/tool-perplexity-search/perplexity-search.ts -q "Explain String Theory" -m sonar-reasoning
  *
  * 3. Custom system prompt (roleplay or formatting constraints):
- *    $ bun scripts/perplexity-search.ts "Write a Python script" --system "You are a senior backend engineer. Output code only."
+ *    $ bun .claude/skills/tool-perplexity-search/perplexity-search.ts "Write a Python script" --system "You are a senior backend engineer. Output code only."
  *
  * 4. Verbose mode (debug configuration):
- *    $ bun scripts/perplexity-search.ts "Test" --verbose
+ *    $ bun .claude/skills/tool-perplexity-search/perplexity-search.ts "Test" --verbose
  *
  * 5. View Help:
- *    $ bun scripts/perplexity-search.ts --help
+ *    $ bun .claude/skills/tool-perplexity-search/perplexity-search.ts --help
  *
  * ==============================================================================
  */
@@ -82,7 +82,7 @@ if (values.help) {
   console.log(`
 🤖 Perplexity CLI Help
 ----------------------
-Usage: bun scripts/perplexity-search.ts [query] [options]
+Usage: bun .claude/skills/tool-perplexity-search/perplexity-search.ts [query] [options]
 
 Options:
   -q, --query <text>    The question to ask (or use positional arg)
@@ -103,7 +103,7 @@ const query = values.query || positionals.slice(2).join(" ");
 
 if (!query) {
   console.error("❌ Error: No query provided.");
-  console.error("Try: bun scripts/perplexity-search.ts --help");
+  console.error("Try: bun .claude/skills/tool-perplexity-search/perplexity-search.ts --help");
   process.exit(1);
 }
 
@@ -144,11 +144,14 @@ async function runPerplexitySearch(queryText: string): Promise<string> {
   // Conditionally add max_tokens only if user requested it
   if (values.tokens) {
     const tokens = parseInt(values.tokens as string, 10);
-    if (isNaN(tokens)) throw new Error("Invalid token count provided.");
+    if (isNaN(tokens) || tokens <= 0) throw new Error("Invalid token count provided. Must be a positive integer.");
     body.max_tokens = tokens;
   }
 
-  // Network Request (Native Fetch)
+  // Network Request (Native Fetch) with 30s timeout
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  
   const response = await fetch(PPLX_API_URL, {
     method: "POST",
     headers: {
@@ -156,7 +159,10 @@ async function runPerplexitySearch(queryText: string): Promise<string> {
       Authorization: `Bearer ${PPLX_API_KEY}`,
     },
     body: JSON.stringify(body),
+    signal: controller.signal,
   });
+  
+  clearTimeout(timeout);
 
   // Error Handling
   if (!response.ok) {

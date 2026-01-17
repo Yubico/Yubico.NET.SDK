@@ -48,6 +48,20 @@
  *   dotnet build.cs publish --package-version 1.0.0-preview.1
  *   dotnet build.cs -- --help
  *
+ * XUNIT V2 VS V3 TEST RUNNER DETECTION:
+ *   This script automatically detects which test runner each project uses:
+ *
+ *   - xUnit v3 (Microsoft.Testing.Platform): Projects with
+ *     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+ *     These use: dotnet run --project <proj> -- --filter "..."
+ *
+ *   - xUnit v2 (traditional): Projects without that setting
+ *     These use: dotnet test <proj> --filter "..."
+ *
+ *   IMPORTANT: Always use "dotnet build.cs test" instead of invoking dotnet test
+ *   directly. The build script handles this detection automatically, preventing
+ *   failures from using the wrong command syntax for each test project.
+ *
  * See BUILD.md for full documentation.
  */
 

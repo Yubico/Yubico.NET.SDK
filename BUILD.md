@@ -124,3 +124,39 @@ The build script automatically discovers projects using glob patterns:
 - **Test projects**: All `Yubico.YubiKit.*.UnitTests/*.csproj` files under `tests/` directories
 
 This means you don't need to manually update the build script when adding new projects that follow the standard structure. Run `dotnet build.cs -- --help` to see the current list of discovered projects.
+
+## xUnit v2 vs v3 Test Runner Detection
+
+**IMPORTANT: Always use `dotnet build.cs test` instead of invoking `dotnet test` directly.**
+
+This codebase uses a mix of xUnit v2 and xUnit v3 test projects, which require different command-line invocation:
+
+| Runner | Detection | Command | Filter Syntax |
+|--------|-----------|---------|---------------|
+| **xUnit v3** (Microsoft.Testing.Platform) | `<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>` in .csproj | `dotnet run --project <proj>` | `-- --filter "..."` |
+| **xUnit v2** (traditional) | No such setting | `dotnet test <proj>` | `--filter "..."` |
+
+### Why This Matters
+
+If you invoke `dotnet test` on an xUnit v3 project, or use the wrong filter syntax, the tests will fail with confusing errors. The build script automatically detects which runner each project uses and invokes the correct command.
+
+### Examples
+
+```bash
+# ✅ CORRECT - Let the build script handle runner detection
+dotnet build.cs test
+dotnet build.cs test --project Core
+dotnet build.cs test --filter "FullyQualifiedName~MyTest"
+
+# ❌ WRONG - May fail if project uses xUnit v3
+dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Yubico.YubiKit.Fido2.UnitTests.csproj
+```
+
+### For AI Agents / Automation
+
+When writing scripts or automation that runs tests:
+
+1. **Always use `dotnet build.cs test`** - it handles the complexity for you
+2. **Never assume** `dotnet test` will work for all projects
+3. **Use `--project`** to filter to specific projects: `dotnet build.cs test --project Fido2`
+4. **Use `--filter`** for test filtering: `dotnet build.cs test --filter "Method~Sign"`

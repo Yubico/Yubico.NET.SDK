@@ -54,6 +54,11 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 - ✅ USE: `SHA256.HashData(data, outputSpan)` (Span-based)
 - ❌ AVOID: `SHA256.Create().ComputeHash(data)` (allocates array)
 
+**Testing:**
+- ✅ ALWAYS use `dotnet build.cs test` (handles xUnit v2/v3 runner differences automatically)
+- ❌ NEVER use `dotnet test` directly (fails on xUnit v3 projects with wrong syntax)
+- See `docs/TESTING.md` for full testing guidance
+
 ## Build and Test Commands
 
 **IMPORTANT: Use the build script (`build.cs`) for all build, test, and packaging operations.**
@@ -1206,7 +1211,7 @@ git add path/to/your/file.cs
 git commit -m "feat(scope): description"
 ```
 
-See `.github/agents/COMMIT_GUIDELINES.md` for detailed rules.
+See `docs/COMMIT_GUIDELINES.md` for detailed rules.
 
 ## Pre-Commit Checklist
 

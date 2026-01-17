@@ -44,27 +44,30 @@ Project skills in `.claude/skills/`:
 
 | Skill | Purpose |
 |-------|---------|
-| `build` | Build, test, package using `build.cs` |
-| `systematic-debugging` | Structured debugging process |
-| `test-driven-development` | TDD workflow |
-| `writing-plans` | Create implementation plans |
-| `verification-before-completion` | Verify work before claiming done |
-| `yubikit-codebase-comparison` | Compare Java and C# implementations |
-| `dotnet-script-experiments` | Create experiment scripts |
+| `build-project` | **REQUIRED** for building/compiling .NET code |
+| `test-project` | **REQUIRED** for running tests |
+| `debug` | Structured debugging process |
+| `tdd` | TDD workflow |
+| `write-plan` | Create implementation plans |
+| `verify` | Verify work before claiming done |
+| `yubikit-compare` | Compare Java and C# implementations |
+| `experiment` | Create experiment scripts |
 | `write-skill` | **REQUIRED** before creating skill files |
 | `write-agent` | **REQUIRED** before creating agent files |
 
 ### Mandatory Skills
 
-**NEVER create these files manually. ALWAYS invoke the corresponding skill first:**
+**NEVER perform these actions without invoking the corresponding skill:**
 
-| Action | Required Skill | Rationale |
+| Action | Required Skill | Violation |
 |--------|----------------|-----------|
-| Creating files in `.claude/skills/` | `write-skill` | Ensures proper frontmatter, structure, naming |
-| Creating files in `.github/agents/` | `write-agent` or `write-agent-copilot` | Ensures proper format for platform |
-| Creating files in `.claude/agents/` | `write-agent` or `write-agent-claudecode` | Ensures proper format for platform |
+| Building or compiling | `build-project` | NEVER use `dotnet build` directly |
+| Running tests | `test-project` | NEVER use `dotnet test` directly |
+| Creating files in `.claude/skills/` | `write-skill` | NEVER create skill files manually |
+| Creating files in `.github/agents/` | `write-agent` or `write-agent-copilot` | NEVER create agent files manually |
+| Creating files in `.claude/agents/` | `write-agent` or `write-agent-claudecode` | NEVER create agent files manually |
 
-**Violations:** If you create skill/agent files without invoking the skill, delete them and start over using the skill.
+**If you violate these rules:** Delete the files/output and start over using the correct skill.
 
 ## Agents
 

@@ -228,9 +228,9 @@ public class FidoSession(ILogger<FidoSession> logger) { }
 - ✅ Log credential IDs as hex (public identifier)
 - ✅ Log lengths, not contents, of sensitive buffers
 
-### Multi-targeting
+### Target Framework
 
-Projects target `net8` and `net10.0` with `LangVersion=preview` for:
+Projects target`net10.0` with `LangVersion=14.0` for:
 - Primary constructors
 - Collection expressions `[..]`
 - Extension types

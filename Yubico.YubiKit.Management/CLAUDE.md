@@ -788,7 +788,7 @@ internal interface IManagementBackend : IDisposable
 ### Implementations
 
 - **SmartCardBackend**: Encodes operations as ISO 7816 APDUs (INS: 0x1D, 0x1C, 0x16, 0x1F)
-- **ManagementFidoHidBackend**: Encodes operations as CTAP vendor commands (0xC2, 0xC3, 0xC0)
+- **FidoHidBackend**: Encodes operations as CTAP vendor commands (0xC2, 0xC3, 0xC0)
 
 ### Key Design Decisions
 

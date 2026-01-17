@@ -175,9 +175,11 @@ async function runPerplexitySearch(queryText: string): Promise<string> {
   // Response Parsing
   const data: any = await response.json();
 
-  // Perplexity structure usually: choices[0].message.content
-  // Fallback to dumping the JSON if the structure changes or is unexpected.
-  return data.choices?.[0]?.message?.content ?? JSON.stringify(data, null, 2);
+  // Perplexity structure: choices[0].message.content + citations array
+  const content = data.choices?.[0]?.message?.content ?? JSON.stringify(data, null, 2);
+  const citations: string[] = data.citations ?? [];
+  
+  return { content, citations };
 }
 
 // --- 6. Execution ---
@@ -186,9 +188,17 @@ async function runPerplexitySearch(queryText: string): Promise<string> {
   console.log(`🔍 Querying Perplexity: "${query}"...`);
 
   try {
-    const answer = await runPerplexitySearch(query);
+    const { content, citations } = await runPerplexitySearch(query);
     console.log("\n=== 💡 Perplexity Answer ===\n");
-    console.log(answer);
+    console.log(content);
+    
+    if (citations.length > 0) {
+      console.log("\n=== 📚 Citations ===\n");
+      citations.forEach((url, i) => {
+        console.log(`[${i + 1}] ${url}`);
+      });
+    }
+    
     console.log("\n============================");
   } catch (error) {
     console.error("\n❌ Fatal Error\n");

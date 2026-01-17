@@ -132,8 +132,16 @@
   - Total: 248 unit tests passing
 
 ### Phase 9: Config Commands (P1)
-- [ ] Task 9.1: Implement authenticatorConfig
-- [ ] Task 9.2: Add tests
+- [x] Task 9.1: Implement authenticatorConfig - Iteration 7
+  - Created: ConfigSubCommand.cs with all sub-command constants
+  - Created: AuthenticatorConfig.cs with:
+    - EnableEnterpriseAttestationAsync() - enable enterprise attestation
+    - ToggleAlwaysUvAsync() - toggle always-UV requirement
+    - SetMinPinLengthAsync() - set minimum PIN length with RP IDs
+    - Proper 0xff prefix for PIN/UV auth per CTAP 2.1 spec
+- [x] Task 9.2: Add tests - Iteration 7
+  - Created: AuthenticatorConfigTests.cs (17 tests)
+  - Total: 265 unit tests
 
 ### Phase 10: Large Blobs (P2)
 - [ ] Task 10.1: Implement large blob storage
@@ -156,10 +164,30 @@
 
 ## Session Notes
 
-### Current Iteration: 6
-**Status:** Phase 8 complete - BioEnrollment implemented
+### Current Iteration: 7
+**Status:** Phase 9 complete - AuthenticatorConfig implemented
 
 ### Completed Work
+
+#### Iteration 7 (2026-01-17)
+- Implemented Phase 9: Config Commands (FW 5.4+)
+- Created Config/ directory with:
+  - ConfigSubCommand.cs: CTAP2.1 sub-command constants
+    - EnableEnterpriseAttestation (0x01)
+    - ToggleAlwaysUv (0x02)
+    - SetMinPinLength (0x03)
+    - VendorPrototype (0x04)
+    - SetMinPinLengthRpIds (0x05)
+  - AuthenticatorConfig.cs: Complete config API
+    - EnableEnterpriseAttestationAsync(): Enable enterprise attestation for managed devices
+    - ToggleAlwaysUvAsync(): Toggle always-require-user-verification setting
+    - SetMinPinLengthAsync(): Set minimum PIN length with optional RP ID list and forceChangePin
+    - BuildCommandPayload(): Proper 0xff || subCommand message format per CTAP 2.1 spec
+    - PIN/UV auth param generation using protocol's Authenticate method
+- Created comprehensive unit tests:
+  - AuthenticatorConfigTests.cs (17 tests) using TestPinUvAuthProtocol pattern
+- Build passes with 0 errors
+- NOTE: Test execution skipped due to .NET 10 preview testhost.dll missing issue
 
 #### Iteration 6 (2026-01-17)
 - Implemented Phase 8: BioEnrollment (FW 5.2+)
@@ -291,6 +319,11 @@
 
 ### Files Created/Modified
 
+#### Iteration 7 - Phase 9 (Config)
+- `Yubico.YubiKit.Fido2/src/Config/ConfigSubCommand.cs`
+- `Yubico.YubiKit.Fido2/src/Config/AuthenticatorConfig.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Config/AuthenticatorConfigTests.cs`
+
 #### Iteration 6 - Phase 8 (BioEnrollment)
 - `Yubico.YubiKit.Fido2/src/BioEnrollment/BioEnrollmentSubCommand.cs`
 - `Yubico.YubiKit.Fido2/src/BioEnrollment/BioEnrollmentModels.cs`
@@ -365,8 +398,8 @@
 - `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/CtapExceptionTests.cs`
 - `Directory.Packages.props` (added System.Formats.Cbor)
 
-### Next Steps (Iteration 7)
-- Task 9.1: Implement authenticatorConfig (P1)
+### Next Steps (Iteration 8)
 - Task 10.1: Implement Large Blob storage (P2)
-- Task 11.1: Implement YK 5.7/5.8 features (P1)
+- Task 11.1: Implement YK 5.7/5.8 features (P1) - encIdentifier support
+- Task 11.2: Implement encCredStoreState support
 - Continue with remaining phases

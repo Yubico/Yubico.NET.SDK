@@ -39,12 +39,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var device = devices.FirstOrDefault();
-        
-        if (device is null)
-        {
-            // Skip test if no SmartCard device is found
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(device);
 
         await using var connection = await device.ConnectAsync<ISmartCardConnection>();
         await using var fidoSession = await FidoSession.CreateAsync(connection);
@@ -59,12 +54,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
         var fidoDevice = devices.FirstOrDefault();
-        
-        if (fidoDevice is null)
-        {
-            // Skip test if no FIDO HID device is found
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(fidoDevice);
         
         Assert.Equal(ConnectionType.HidFido, fidoDevice.ConnectionType);
 
@@ -81,11 +71,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
         var device = devices.FirstOrDefault();
-        
-        if (device is null)
-        {
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(device);
 
         await using var connection = await device.ConnectAsync<IFidoHidConnection>();
         await using var fidoSession = await FidoSession.CreateAsync(connection);
@@ -101,11 +87,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
         var device = devices.FirstOrDefault();
-        
-        if (device is null)
-        {
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(device);
 
         await using var connection = await device.ConnectAsync<IFidoHidConnection>();
         await using var fidoSession = await FidoSession.CreateAsync(connection);
@@ -122,11 +104,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
         var device = devices.FirstOrDefault();
-        
-        if (device is null)
-        {
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(device);
 
         await using var connection = await device.ConnectAsync<IFidoHidConnection>();
         await using var fidoSession = await FidoSession.CreateAsync(connection);
@@ -148,11 +126,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
         var device = devices.FirstOrDefault();
-        
-        if (device is null)
-        {
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(device);
 
         await using var connection = await device.ConnectAsync<IFidoHidConnection>();
         await using var fidoSession = await FidoSession.CreateAsync(connection);
@@ -173,11 +147,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
         var device = devices.FirstOrDefault();
-        
-        if (device is null)
-        {
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(device);
 
         await using var connection = await device.ConnectAsync<IFidoHidConnection>();
         await using var fidoSession = await FidoSession.CreateAsync(connection);
@@ -203,11 +173,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var device = devices.FirstOrDefault();
-        
-        if (device is null)
-        {
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(device);
         
         var sessionFactory = ServiceProvider.GetRequiredService<FidoSessionFactoryDelegate>();
 
@@ -223,11 +189,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
         var device = devices.FirstOrDefault();
-        
-        if (device is null)
-        {
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(device);
 
         await using var fidoSession = await device.CreateFidoSessionAsync();
 
@@ -241,11 +203,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
         var device = devices.FirstOrDefault();
-        
-        if (device is null)
-        {
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(device);
 
         var info = await device.GetFidoInfoAsync();
 
@@ -266,11 +224,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
         var device = devices.FirstOrDefault();
-        
-        if (device is null)
-        {
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(device);
 
         await using var connection = await device.ConnectAsync<IFidoHidConnection>();
         await using var fidoSession = await FidoSession.CreateAsync(connection);
@@ -288,11 +242,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
         var device = devices.FirstOrDefault();
-        
-        if (device is null)
-        {
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(device);
 
         await using var connection = await device.ConnectAsync<IFidoHidConnection>();
         await using var fidoSession = await FidoSession.CreateAsync(connection);

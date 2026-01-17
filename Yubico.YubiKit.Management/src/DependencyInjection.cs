@@ -47,7 +47,6 @@ public static class DependencyInjection
             services.TryAddSingleton<SmartCardManagementSessionFactoryDelegate>(
                 ManagementSession.CreateAsync);
 
-            services.AddYubiKeyManagerCore(configureOptions);
             return services;
         }
     }

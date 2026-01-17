@@ -108,7 +108,7 @@ public static class IYubiKeyExtensions
             ProtocolConfiguration? configuration = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectForFidoAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await yubiKey.ConnectAsync(cancellationToken).ConfigureAwait(false);
             return await FidoSession.CreateAsync(
                     connection,
                     configuration,
@@ -125,7 +125,7 @@ public static class IYubiKeyExtensions
         /// <exception cref="NotSupportedException">
         /// Thrown if the YubiKey's connection type is not supported for FIDO2.
         /// </exception>
-        private async Task<IConnection> ConnectForFidoAsync(CancellationToken cancellationToken)
+        private async Task<IConnection> ConnectAsync(CancellationToken cancellationToken)
             =>
                 yubiKey.ConnectionType switch
                 {

@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Formats.Cbor;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Hid.Fido;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
@@ -576,6 +577,17 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         ISmartCardConnection connection,
         CancellationToken cancellationToken)
     {
+        // FIDO2 over SmartCard (CCID) is only supported via NFC transport.
+        // Over USB, the YubiKey exposes FIDO2 via the HID FIDO interface, not CCID.
+        // Attempting to SELECT the FIDO2 AID over USB CCID will fail with SW=0x6A82.
+        if (connection.Transport != Transport.Nfc)
+        {
+            throw new NotSupportedException(
+                "FIDO2 over SmartCard is only supported via NFC transport. " +
+                "For USB connections, use IFidoHidConnection instead. " +
+                "The YubiKey exposes FIDO2 via the HID FIDO interface over USB, not CCID.");
+        }
+        
         var protocol = PcscProtocolFactory<ISmartCardConnection>
             .Create()
             .Create(connection);

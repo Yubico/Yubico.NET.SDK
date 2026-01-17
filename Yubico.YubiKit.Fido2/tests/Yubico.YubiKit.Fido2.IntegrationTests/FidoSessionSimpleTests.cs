@@ -34,19 +34,27 @@ public class FidoSessionSimpleTests : IntegrationTestBase
 {
     #region GetInfo Tests (No User Presence Required)
     
+    /// <summary>
+    /// Tests that creating a FidoSession over USB SmartCard (CCID) correctly throws NotSupportedException.
+    /// FIDO2 is only available over NFC SmartCard or USB HID FIDO interfaces.
+    /// </summary>
     [Fact]
-    public async Task CreateFidoSession_With_SmartCard_CreateAsync()
+    public async Task CreateFidoSession_With_UsbSmartCard_ThrowsNotSupportedException()
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var device = devices.FirstOrDefault();
         ArgumentNullException.ThrowIfNull(device);
 
         await using var connection = await device.ConnectAsync<ISmartCardConnection>();
-        await using var fidoSession = await FidoSession.CreateAsync(connection);
-
-        var info = await fidoSession.GetInfoAsync();
-        Assert.NotNull(info);
-        Assert.True(info.Versions.Count > 0, "AuthenticatorInfo.Versions should not be empty");
+        
+        // USB CCID does not support FIDO2 - only NFC SmartCard or USB HID FIDO
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(async () =>
+        {
+            await FidoSession.CreateAsync(connection);
+        });
+        
+        Assert.Contains("NFC transport", exception.Message);
+        Assert.Contains("IFidoHidConnection", exception.Message);
     }
     
     [Fact]
@@ -168,8 +176,11 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     
     #region Factory Method Tests
     
+    /// <summary>
+    /// Tests that the factory delegate also throws NotSupportedException for USB SmartCard connections.
+    /// </summary>
     [Fact]
-    public async Task CreateFidoSession_With_FactoryInstance()
+    public async Task CreateFidoSession_With_FactoryInstance_UsbSmartCard_ThrowsNotSupportedException()
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var device = devices.FirstOrDefault();
@@ -178,10 +189,12 @@ public class FidoSessionSimpleTests : IntegrationTestBase
         var sessionFactory = ServiceProvider.GetRequiredService<FidoSessionFactoryDelegate>();
 
         await using var connection = await device.ConnectAsync<ISmartCardConnection>();
-        await using var fidoSession = await sessionFactory(connection, configuration: null);
-
-        var info = await fidoSession.GetInfoAsync();
-        Assert.NotNull(info);
+        
+        // USB CCID does not support FIDO2
+        await Assert.ThrowsAsync<NotSupportedException>(async () =>
+        {
+            await sessionFactory(connection, configuration: null);
+        });
     }
     
     [Fact]

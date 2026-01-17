@@ -50,12 +50,28 @@
   - Total: 74 PIN/UV tests
 
 ### Phase 5: MakeCredential & GetAssertion
-- [ ] Task 5.1: Implement MakeCredentialAsync
-- [ ] Task 5.2: Implement GetAssertionAsync
-- [ ] Task 5.3: Implement credential data structures
-- [ ] Task 5.4: Add comprehensive tests
+- [x] Task 5.1: Create credential and assertion data models - Iteration 4
+  - AuthenticatorData with binary parsing and AuthenticatorDataFlags enum
+  - AttestedCredentialData with AAGUID and COSE key parsing
+  - MakeCredentialResponse with AttestationStatement parsing
+  - GetAssertionResponse with credential/user entity parsing
+  - PublicKeyCredentialDescriptor, RelyingPartyEntity, UserEntity
+  - MakeCredentialOptions/GetAssertionOptions for request parameters
+- [x] Task 5.2: Implement MakeCredentialAsync - Iteration 4
+  - Full CTAP2 authenticatorMakeCredential command
+  - Support for all options (rk, uv, up)
+  - Exclude list handling
+- [x] Task 5.3: Implement GetAssertionAsync - Iteration 4
+  - Full CTAP2 authenticatorGetAssertion command
+  - GetNextAssertionAsync for multiple credentials
+  - Allow list handling
+- [x] Task 5.4: Add comprehensive tests - Iteration 4
+  - AuthenticatorDataTests.cs (10 tests)
+  - PublicKeyCredentialTypesTests.cs (19 tests)
+  - CredentialResponseTests.cs (14 tests)
+  - Total: 149 unit tests passing
 
-### Phase 6: WebAuthn/CTAP Extensions
+### Phase 7: WebAuthn/CTAP Extensions
 - [ ] Task 6.1: Implement hmac-secret extension
 - [ ] Task 6.2: Implement hmac-secret-mc extension
 - [ ] Task 6.3: Implement credProtect extension
@@ -65,7 +81,7 @@
 - [ ] Task 6.7: Implement prf extension
 - [ ] Task 6.8: Add extension tests
 
-### Phase 7: CredentialManagement (P1)
+### Phase 6: CredentialManagement (P1)
 - [ ] Task 7.1: Implement CredentialManagement API
 - [ ] Task 7.2: Add credential enumeration
 - [ ] Task 7.3: Add credential deletion
@@ -101,10 +117,29 @@
 
 ## Session Notes
 
-### Current Iteration: 3
-**Status:** Phase 4, Task 4.4 complete
+### Current Iteration: 4
+**Status:** Phase 5 complete
 
 ### Completed Work
+
+#### Iteration 4 (2026-01-17)
+- Implemented Phase 5: MakeCredential & GetAssertion
+- Created credential data models in Credentials/ subdirectory:
+  - AuthenticatorData.cs: Binary parser for WebAuthn authenticator data
+  - AttestedCredentialData.cs: Parser for attested credential data
+  - MakeCredentialResponse.cs: CBOR response parsing + AttestationStatement
+  - GetAssertionResponse.cs: CBOR assertion response parsing
+  - PublicKeyCredentialTypes.cs: Descriptor, RP entity, user entity
+  - CredentialOptions.cs: MakeCredentialOptions, GetAssertionOptions
+- Updated FidoSession with MakeCredentialAsync, GetAssertionAsync, GetNextAssertionAsync
+- Added Encode() method and constructors to PublicKeyCredentialParameters
+- Fixed nullable ReadOnlyMemory<byte>? handling in AttestationStatement.Decode
+- Created comprehensive unit tests:
+  - AuthenticatorDataTests.cs (10 tests)
+  - PublicKeyCredentialTypesTests.cs (19 tests)
+  - CredentialResponseTests.cs (14 tests)
+- All 149 unit tests passing
+- Build passes with 0 errors
 
 #### Iteration 3 (2026-01-17)
 - Implemented ClientPin for PIN/UV token management:
@@ -161,6 +196,20 @@
 
 ### Files Created/Modified
 
+#### Iteration 4
+- `Yubico.YubiKit.Fido2/src/Credentials/AuthenticatorData.cs`
+- `Yubico.YubiKit.Fido2/src/Credentials/AttestedCredentialData.cs`
+- `Yubico.YubiKit.Fido2/src/Credentials/MakeCredentialResponse.cs`
+- `Yubico.YubiKit.Fido2/src/Credentials/GetAssertionResponse.cs`
+- `Yubico.YubiKit.Fido2/src/Credentials/PublicKeyCredentialTypes.cs`
+- `Yubico.YubiKit.Fido2/src/Credentials/CredentialOptions.cs`
+- `Yubico.YubiKit.Fido2/src/FidoSession.cs` (updated: MakeCredentialAsync, GetAssertionAsync)
+- `Yubico.YubiKit.Fido2/src/IFidoSession.cs` (updated: new method signatures)
+- `Yubico.YubiKit.Fido2/src/AuthenticatorInfo.cs` (updated: Encode method)
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Credentials/AuthenticatorDataTests.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Credentials/PublicKeyCredentialTypesTests.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Credentials/CredentialResponseTests.cs`
+
 #### Iteration 3
 - `Yubico.YubiKit.Fido2/src/Pin/ClientPin.cs`
 - `Yubico.YubiKit.Fido2/src/Pin/ClientPinSubCommand.cs`
@@ -194,6 +243,8 @@
 - `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/CtapExceptionTests.cs`
 - `Directory.Packages.props` (added System.Formats.Cbor)
 
-### Next Steps (Iteration 4)
-- Task 4.5: Implement PPUAT (Persistent PIN/UV Auth Token) decryption via HKDF
-- Task 5.1: Start Phase 5 - MakeCredential implementation
+### Next Steps (Iteration 5)
+- Task 6.1: Start Phase 6 - CredentialManagement implementation
+- Task 6.2: Implement credential enumeration
+- Task 6.3: Implement credential deletion
+- Task 6.4: Add comprehensive tests

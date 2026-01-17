@@ -7,9 +7,9 @@ description: Use when crafting Ralph Loop prompts - ensures proper verification 
 
 This skill provides guidance for creating Ralph Loop prompts that enforce proper verification, phased exit criteria, and robust completion requirements.
 
-**Reference:** `.claude/skills/ralph-loop/SKILL.md` (loop semantics + required autonomy injection).
+**Reference:** `.claude/skills/agent-ralph-loop/SKILL.md` (loop semantics + required autonomy injection).
 
-**Logs/state:** `./docs/ralph-loop/` (state-YYMMDDhhmmss.md, iteration-*.log, learning artifacts).
+**Logs/state:** `./docs/ralph-loop/` (state.md, iteration-*.log, and learning artifacts under `./docs/ralph-loop/learning/`).
 
 **Save location:** `./docs/plans/ralph-loop/YYYY-MM-DD-<feature-name>.md` (offer to save; create directories as needed).
 
@@ -154,12 +154,9 @@ git commit -m "feat: <message>"
 Only after ALL pass, output <promise>{COMPLETION_PROMISE}</promise>.
 If any fail, fix and re-verify.
 
----
-
-## Autonomy Injection (REQUIRED)
-
-CONTEXT: You are in NON-INTERACTIVE mode. The user is not present. Do not ask for clarification. If a decision is ambiguous, select the standard industry pattern and EXECUTE immediately. Output <promise>{COMPLETION_PROMISE}</promise> ONLY when the specific objective is verified.
 ```
+
+> **Note:** Autonomy directives are auto-injected by `ralph-loop.ts`. Do not add them manually.
 
 ## Anti-Patterns to Avoid
 - Vague completion criteria ("when finished")
@@ -174,5 +171,5 @@ CONTEXT: You are in NON-INTERACTIVE mode. The user is not present. Do not ask fo
 After presenting (and optionally saving) the plan, print the exact one-liner to start the loop:
 
 ```bash
-bun .claude/skills/ralph-loop/ralph-loop.ts --prompt-file ./docs/plans/ralph-loop/<plan-file>.md --completion-promise "<PROMISE_TOKEN>" --max-iterations 20 --learn --model claude-opus-4.5
+bun .claude/skills/agent-ralph-loop/ralph-loop.ts --prompt-file ./docs/plans/ralph-loop/<plan-file>.md --completion-promise "<PROMISE_TOKEN>" --max-iterations 20 --learn --model claude-opus-4.5
 ```

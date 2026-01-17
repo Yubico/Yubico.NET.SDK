@@ -23,7 +23,7 @@ The `ralph-loop` skill forces a sub-instance of GitHub Copilot to enter a recurs
 
 ## 2. Command Signature
 
-**Executable:** `bun .claude/skills/ralph-loop/ralph-loop.ts`
+**Executable:** `bun .claude/skills/agent-ralph-loop/ralph-loop.ts`
 
 ### Parameters
 
@@ -55,7 +55,7 @@ The script automatically appends autonomy directives to your prompt, instructing
 **Goal:** Quick scaffolding or simple refactor.
 
 ```bash
-bun .claude/skills/ralph-loop/ralph-loop.ts \
+bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
   "Create a 'Hello World' Express server in src/app.ts and a test in src/app.test.ts." \
   --completion-promise "DONE"
 ```
@@ -66,7 +66,7 @@ bun .claude/skills/ralph-loop/ralph-loop.ts \
 Create a file `task_prompt.md` containing your objective (autonomy directives are auto-injected).
 
 ```bash
-bun .claude/skills/ralph-loop/ralph-loop.ts --prompt-file task_prompt.md \
+bun .claude/skills/agent-ralph-loop/ralph-loop.ts --prompt-file task_prompt.md \
   --completion-promise "REFACTOR_COMPLETE" \
   --max-iterations 20 \
   --learn
@@ -76,7 +76,7 @@ bun .claude/skills/ralph-loop/ralph-loop.ts --prompt-file task_prompt.md \
 **Goal:** Fix a failing test suite by iterating on the code.
 
 ```bash
-bun .claude/skills/ralph-loop/ralph-loop.ts \
+bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
   "Run 'npm test'. Analyze the stderr output. Locate the failing code in src/. Apply fixes. Re-run 'npm test'. Repeat until passing." \
   --completion-promise "TESTS_PASSED" \
   --max-iterations 12 \

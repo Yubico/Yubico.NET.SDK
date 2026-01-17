@@ -20,7 +20,11 @@ namespace Yubico.YubiKit.Management;
 /// Backend implementation for Management operations over FIDO HID.
 /// Encodes operations as CTAP vendor commands.
 /// </summary>
-internal sealed class FidoBackend(IFidoHidProtocol hidProtocol) : IManagementBackend
+/// <remarks>
+/// Named ManagementFidoHidBackend to distinguish from Fido2.FidoHidBackend which serves
+/// a different purpose (FIDO2/CTAP2 operations vs Management vendor commands).
+/// </remarks>
+internal sealed class ManagementFidoHidBackend(IFidoHidProtocol hidProtocol) : IManagementBackend
 {
     private readonly IFidoHidProtocol _hidProtocol = hidProtocol ?? throw new ArgumentNullException(nameof(hidProtocol));
 

@@ -239,7 +239,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             .Create()
             .Create(connection);
 
-        var backend = new FidoBackend(protocol);
+        var backend = new ManagementFidoHidBackend(protocol);
         return (protocol, backend);
     }
 

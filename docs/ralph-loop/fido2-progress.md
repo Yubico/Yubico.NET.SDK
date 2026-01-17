@@ -31,12 +31,18 @@
   - Total: 29 tests passing
 
 ### Phase 4: PIN/UV Auth Protocols + PPUAT
-- [ ] Task 4.1: Implement PinUvAuthProtocol interface
-- [ ] Task 4.2: Implement PinUvAuthProtocolV1
-- [ ] Task 4.3: Implement PinUvAuthProtocolV2
+- [x] Task 4.1: Implement PinUvAuthProtocol interface - Iteration 2
+  - Created: IPinUvAuthProtocol.cs with full CTAP2 PIN/UV protocol contract
+- [x] Task 4.2: Implement PinUvAuthProtocolV1 - Iteration 2
+  - Created: PinUvAuthProtocolV1.cs (legacy support, SHA-256 KDF, zero IV)
+- [x] Task 4.3: Implement PinUvAuthProtocolV2 - Iteration 2
+  - Created: PinUvAuthProtocolV2.cs (HKDF-SHA-256, random IV, per CTAP2.1 spec)
 - [ ] Task 4.4: Implement ClientPin for PIN/UV token management
 - [ ] Task 4.5: Implement PPUAT (Persistent PIN/UV Auth Token) decryption via HKDF
-- [ ] Task 4.6: Add tests for PIN protocols
+- [x] Task 4.6: Add tests for PIN protocols - Iteration 2
+  - Created: PinUvAuthProtocolV1Tests.cs (24 tests)
+  - Created: PinUvAuthProtocolV2Tests.cs (29 tests)
+  - Total: 53 new PIN/UV Auth Protocol tests
 
 ### Phase 5: MakeCredential & GetAssertion
 - [ ] Task 5.1: Implement MakeCredentialAsync
@@ -90,10 +96,29 @@
 
 ## Session Notes
 
-### Current Iteration: 1
-**Status:** Phase 1 & Phase 2/3 (partial) complete
+### Current Iteration: 2
+**Status:** Phase 4, Tasks 4.1-4.3 and 4.6 complete
 
 ### Completed Work
+
+#### Iteration 2 (2026-01-17)
+- Implemented PIN/UV Auth Protocol infrastructure:
+  - IPinUvAuthProtocol interface with full CTAP2 contract
+  - PinUvAuthProtocolV2 (primary, CTAP2.1 compliant)
+    - ECDH P-256 key agreement with proper COSE key handling
+    - HKDF-SHA-256 KDF deriving separate HMAC and AES keys (64 bytes)
+    - AES-256-CBC encryption with random IV
+    - HMAC-SHA-256 authentication (full 32-byte output)
+    - Proper memory handling with CryptographicOperations.ZeroMemory
+  - PinUvAuthProtocolV1 (legacy support)
+    - SHA-256 KDF (32 bytes)
+    - AES-256-CBC with zero IV
+    - Truncated 16-byte HMAC-SHA-256
+- Created comprehensive unit tests:
+  - PinUvAuthProtocolV2Tests.cs (29 tests)
+  - PinUvAuthProtocolV1Tests.cs (24 tests)
+- All 82 unit tests passing
+- Build passes with 0 errors
 
 #### Iteration 1 (2026-01-17)
 - Created foundation project structure with all necessary directories
@@ -114,6 +139,15 @@
 - All tests passing, full build passing
 
 ### Files Created/Modified
+
+#### Iteration 2
+- `Yubico.YubiKit.Fido2/src/Pin/IPinUvAuthProtocol.cs`
+- `Yubico.YubiKit.Fido2/src/Pin/PinUvAuthProtocolV1.cs`
+- `Yubico.YubiKit.Fido2/src/Pin/PinUvAuthProtocolV2.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Pin/PinUvAuthProtocolV1Tests.cs`
+- `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Pin/PinUvAuthProtocolV2Tests.cs`
+
+#### Iteration 1
 - `Yubico.YubiKit.Fido2/src/Ctap/CtapCommand.cs`
 - `Yubico.YubiKit.Fido2/src/Ctap/CtapStatus.cs`
 - `Yubico.YubiKit.Fido2/src/Ctap/CtapException.cs`
@@ -132,9 +166,7 @@
 - `Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/CtapExceptionTests.cs`
 - `Directory.Packages.props` (added System.Formats.Cbor)
 
-### Next Steps (Iteration 2)
-- Complete Phase 4: PIN/UV Auth Protocols
-  - IPinUvAuthProtocol interface
-  - PinUvAuthProtocolV1 implementation
-  - PinUvAuthProtocolV2 implementation
+### Next Steps (Iteration 3)
+- Task 4.4: Implement ClientPin for PIN/UV token management
+- Task 4.5: Implement PPUAT (Persistent PIN/UV Auth Token) decryption via HKDF
   - ClientPin class for PIN management

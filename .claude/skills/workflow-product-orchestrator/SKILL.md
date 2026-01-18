@@ -11,6 +11,17 @@ This skill orchestrates the "Product Swarm" to automate the definition, validati
 
 **Core principle:** The orchestrator doesn't do the work—it delegates to specialized agents and manages state.
 
+## Path Rules (CRITICAL)
+
+**When spawning agents, ALWAYS include this directive in the prompt:**
+
+> "Use ONLY relative paths from the repository root (e.g., `./docs/specs/...`, `./.claude/skills/...`). NEVER construct absolute paths like `/home/*/...` or `/Users/*/...`."
+
+All paths in this workflow are relative to the repository root:
+- `./docs/specs/{slug}/` - PRD artifacts
+- `./.claude/skills/` - Skill definitions
+- `./Yubico.YubiKit.*/` - Source code
+
 ## Use when
 
 **Use this skill when:**

@@ -11,6 +11,23 @@ Orchestrates the porting of features from yubikit-android (Java) to Yubico.NET.S
 
 **Core principle:** Porting is not "just copying"—it's extracting implicit requirements, validating them against SDK patterns, and ensuring security compliance before implementation.
 
+## Path Rules (CRITICAL)
+
+**When spawning agents, ALWAYS include this directive in the prompt:**
+
+> "Use ONLY relative paths from the repository root (e.g., `./docs/specs/...`, `./.claude/skills/...`). NEVER construct absolute paths like `/home/*/...` or `/Users/*/...`."
+
+All paths in this workflow are relative:
+- `./docs/specs/{slug}/` - PRD artifacts (relative to repo root)
+- `./.claude/skills/` - Skill definitions (relative to repo root)
+- `./Yubico.YubiKit.*/` - Source code (relative to repo root)
+- `../yubikit-android/` - Java reference (sibling directory)
+- `../yubico-old/Yubico.NET.SDK/` - Old C# SDK reference (sibling directory)
+
+**Allowed external paths (siblings only):**
+- `../yubikit-android/` - Java YubiKit for porting reference
+- `../yubico-old/Yubico.NET.SDK/` - Legacy C# SDK for migration reference
+
 ## Use when
 
 **Use this skill when:**

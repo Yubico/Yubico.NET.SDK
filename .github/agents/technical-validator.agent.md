@@ -121,6 +121,18 @@ Create `docs/specs/{feature}/feasibility_report.md`:
 - Read `CLAUDE.md` for conventions
 - Read `BUILD.md` for build infrastructure
 
+## Path Rules (CRITICAL)
+
+**ALWAYS use relative paths from the repository root.** Never construct absolute paths.
+
+- ✅ `./docs/specs/{feature}/draft.md`
+- ✅ `./Yubico.YubiKit.Core/src/`
+- ✅ `./CLAUDE.md`
+- ❌ `/home/*/docs/...` (NEVER)
+- ❌ `/Users/*/...` (NEVER)
+
+If you need to read a file, use paths starting with `./` relative to the current working directory (repository root).
+
 ## Related Resources
 
 - [CLAUDE.md](../../CLAUDE.md) - SDK architecture overview

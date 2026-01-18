@@ -98,6 +98,17 @@ Create `docs/specs/{feature}/ux_audit.md`:
 - Read PRD from `docs/specs/{feature}/draft.md`
 - Read `ux-heuristics` skill for checklist details
 
+## Path Rules (CRITICAL)
+
+**ALWAYS use relative paths from the repository root.** Never construct absolute paths.
+
+- ✅ `./docs/specs/{feature}/draft.md`
+- ✅ `./.claude/skills/domain-ux-heuristics/SKILL.md`
+- ❌ `/home/*/docs/...` (NEVER)
+- ❌ `/Users/*/...` (NEVER)
+
+If you need to read a file, use paths starting with `./` relative to the current working directory (repository root).
+
 ## Related Resources
 
 - [ux-heuristics skill](../../.claude/skills/domain-ux-heuristics/SKILL.md)

@@ -123,6 +123,18 @@ Create `docs/specs/{feature}/dx_audit.md`:
 - Read `Yubico.YubiKit.*/` for existing patterns
 - Read `CLAUDE.md` for SDK conventions
 
+## Path Rules (CRITICAL)
+
+**ALWAYS use relative paths from the repository root.** Never construct absolute paths.
+
+- ✅ `./docs/specs/{feature}/draft.md`
+- ✅ `./.claude/skills/domain-api-design-standards/SKILL.md`
+- ✅ `./Yubico.YubiKit.Piv/src/PivSession.cs`
+- ❌ `/home/*/docs/...` (NEVER)
+- ❌ `/Users/*/...` (NEVER)
+
+If you need to read a file, use paths starting with `./` relative to the current working directory (repository root).
+
 ## Related Resources
 
 - [api-design-standards skill](../../.claude/skills/domain-api-design-standards/SKILL.md)

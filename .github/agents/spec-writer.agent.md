@@ -88,6 +88,18 @@ When given audit findings to fix:
 - Read existing PRDs in `docs/specs/` for style reference
 - Read `CLAUDE.md` for SDK patterns and conventions
 
+## Path Rules (CRITICAL)
+
+**ALWAYS use relative paths from the repository root.** Never construct absolute paths.
+
+- ✅ `./docs/specs/{slug}/draft.md`
+- ✅ `./.claude/skills/domain-spec-writing-standards/SKILL.md`
+- ✅ `./CLAUDE.md`
+- ❌ `/home/*/docs/...` (NEVER)
+- ❌ `/Users/*/...` (NEVER)
+
+If you need to read or create a file, use paths starting with `./` relative to the current working directory (repository root).
+
 ## Related Resources
 
 - [spec-writing-standards skill](../../.claude/skills/domain-spec-writing-standards/SKILL.md)

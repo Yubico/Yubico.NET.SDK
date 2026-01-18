@@ -245,6 +245,24 @@ if (slot == null) {
 - Existing C# patterns: `Yubico.YubiKit.*/`
 - SDK conventions: `CLAUDE.md`
 
+## Path Rules (CRITICAL)
+
+**ALWAYS use relative paths.** Never construct absolute paths.
+
+- ✅ `./docs/specs/{slug}/draft.md` (relative to repo root)
+- ✅ `./.claude/skills/domain-spec-writing-standards/SKILL.md`
+- ✅ `./Yubico.YubiKit.Piv/src/PivSession.cs`
+- ✅ `../yubikit-android/piv/src/main/java/...` (Java reference)
+- ✅ `../yubico-old/Yubico.NET.SDK/...` (old C# SDK reference)
+- ❌ `/home/*/docs/...` (NEVER)
+- ❌ `/Users/*/...` (NEVER)
+
+**Allowed external paths (sibling directories only):**
+- `../yubikit-android/` - Java YubiKit for porting reference
+- `../yubico-old/Yubico.NET.SDK/` - Legacy C# SDK for migration reference
+
+If you need to read or create a file, use paths starting with `./` relative to the current working directory (repository root).
+
 ## Related Resources
 
 - [spec-writing-standards skill](../../.claude/skills/domain-spec-writing-standards/SKILL.md)

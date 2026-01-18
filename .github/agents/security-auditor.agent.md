@@ -124,6 +124,18 @@ Create `docs/specs/{feature}/security_audit.md`:
 - Read `security-guidelines` skill for checklists
 - Read `CLAUDE.md` for security patterns
 
+## Path Rules (CRITICAL)
+
+**ALWAYS use relative paths from the repository root.** Never construct absolute paths.
+
+- ✅ `./docs/specs/{feature}/draft.md`
+- ✅ `./.claude/skills/domain-security-guidelines/SKILL.md`
+- ✅ `./CLAUDE.md`
+- ❌ `/home/*/docs/...` (NEVER)
+- ❌ `/Users/*/...` (NEVER)
+
+If you need to read a file, use paths starting with `./` relative to the current working directory (repository root).
+
 ## Related Resources
 
 - [security-guidelines skill](../../.claude/skills/domain-security-guidelines/SKILL.md)

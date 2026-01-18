@@ -301,15 +301,12 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
     }
 
 
-    public Task<X509Certificate2?> GetCertificateAsync(PivSlot slot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task StoreCertificateAsync(PivSlot slot, X509Certificate2 certificate, bool compress = false, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task DeleteCertificateAsync(PivSlot slot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
     public Task<PivPukMetadata> GetPukMetadataAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task<PivManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task<PivSlotMetadata?> GetSlotMetadataAsync(PivSlot slot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task<PivBioMetadata> GetBioMetadataAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<ReadOnlyMemory<byte>> GetObjectAsync(int objectId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task PutObjectAsync(int objectId, ReadOnlyMemory<byte>? data, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
     public Task SetManagementKeyAsync(PivManagementKeyType keyType, ReadOnlyMemory<byte> newKey, bool requireTouch = false, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 
     #endregion

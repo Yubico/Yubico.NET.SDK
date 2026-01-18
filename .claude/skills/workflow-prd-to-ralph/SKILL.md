@@ -7,243 +7,213 @@ description: Use when converting approved PRDs to Ralph Loop prompts - bridges p
 
 ## Overview
 
-Converts validated Product Requirements Documents (PRDs) from the `product-orchestrator` workflow into executable Ralph Loop prompts with proper TDD phases, verification requirements, and completion promises.
+Converts validated Product Requirements Documents (PRDs) from the `product-orchestrator` workflow into a dynamic **Living Specification** using the "Progress File" pattern.
 
-**Core principle:** Every user story becomes a testable phase; every acceptance criterion becomes a verification step.
+**Core Principle:**
+1. **Plan:** Create a dynamic `progress.md` file that acts as both a **Status Board** and a **Detailed Specification**.
+2. **Execute:** Dispatch an autonomous agent (`ralph-loop`) that follows the priorities (P0/P1/P2) defined in this file.
 
 ## Use when
 
 **Use this skill when:**
 - PRD has been approved (`final_spec.md` exists with APPROVED status)
 - Ready to begin implementation of a validated feature
-- Need to convert requirements into executable code tasks
-- Want autonomous implementation with proper checkpoints
+- Want robust autonomous execution that handles state/resumption automatically
 
 **Don't use when:**
-- PRD is still in DRAFT or VALIDATING status (complete validation first)
-- Feature is exploratory/experimental (use `experiment` skill instead)
-- Task is simple enough for manual implementation
-- PRD has unresolved CRITICAL findings
+- PRD is still in DRAFT or VALIDATING status
+- Feature is a simple one-off script (use `experiment` instead)
 
 ## Input Requirements
 
 Before starting, verify:
-
 1. **PRD Location:** `docs/specs/{feature-slug}/final_spec.md`
 2. **Status:** Must be `APPROVED`
 3. **Audit Reports:** All must show `PASS`
-   - `ux_audit.md`
-   - `dx_audit.md`
-   - `feasibility_report.md`
-   - `security_audit.md`
+   - `ux_audit.md`, `dx_audit.md`, `feasibility_report.md`, `security_audit.md`
 
 ## Process
 
 ### 1. Extract from PRD
 
-Read `final_spec.md` and extract:
+Read `final_spec.md` and extract the following:
 
-| PRD Section | Extract |
-|-------------|---------|
-| §1 Problem Statement | Goal summary (1 sentence) |
-| §2 User Stories | Phase definitions |
-| §2 Acceptance Criteria | Test assertions |
-| §3.1 Happy Path | Implementation steps |
-| §3.2 Error States | Error handling tests |
-| §3.3 Edge Cases | Edge case tests |
-| §5 Technical Constraints | Implementation constraints |
+| PRD Section | Extract | Maps To |
+|-------------|---------|---------|
+| §1 Problem Statement | Goal summary (1 sentence) | Progress File header |
+| §2 User Stories | Phase definitions | One Phase per story |
+| §2 Acceptance Criteria | Test assertions | `[ ] Task` items |
+| §3.1 Happy Path | Implementation steps | Core Implementation tasks |
+| §3.2 Error States | Error handling tests | Error Handling sub-section |
+| §3.3 Edge Cases | Edge case tests | Edge Cases sub-section |
+| §5 Technical Constraints | Implementation constraints | Notes in Phase |
 
-### 2. Map User Stories to Phases
+### 2. Create Progress File
 
-Each user story becomes one Ralph Loop phase:
+Create a file at `docs/ralph-loop/{feature}-progress.md`.
+**CRITICAL:** Use this exact rich template. It provides the context the autonomous agent needs.
 
 ```markdown
-## Phase N: [User Story Title]
+# {Feature Name} Implementation Progress
 
-**User Story:** As a [user], I want to [action], so that [benefit].
+**Started:** {YYYY-MM-DD}
+**PRD:** `docs/specs/{feature-slug}/final_spec.md`
+**Status:** In Progress
 
+## Workflow Instructions (For Autonomous Agent)
+
+**Role:** You are an autonomous .NET engineer.
+**Source of Truth:** THIS FILE. It contains your tasks, priorities, and rules.
+
+### The Loop
+1. **Read this file** to understand the current state.
+2. **Select Phase:** Find the highest priority incomplete Phase (P0 > P1 > P2).
+   - *Rule:* Finish the current phase completely before moving to the next.
+   - *Rule:* Within a phase, complete "Core Implementation" before "Edge Cases".
+3. **Execute Task:** Pick the next unchecked item `[ ]`.
+   - **Step 1: Write Failing Test (RED)**
+     - Create/Update the test file listed in the Phase.
+     - Write a test that asserts the specific criteria of the task.
+     - Run: `dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"` -> Expect FAILURE.
+   - **Step 2: Implement (GREEN)**
+     - Write minimal code in the implementation file.
+     - Follow patterns from `dx_audit.md` and `security_audit.md`.
+     - Run: `dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"` -> Expect SUCCESS.
+   - **Step 3: Refactor & Secure**
+     - Check: Is sensitive data zeroed? (See Security Protocol below).
+     - Check: Are public APIs documented?
+   - **Step 4: Commit**
+     - `git add {specific files only}`
+     - `git commit -m "feat({scope}): {task description}"`
+4. **Update Status:** Change `[ ]` to `[x]` in this file and add notes.
+5. **Loop:** Repeat.
+
+### Security Protocol (MUST FOLLOW)
+- **ZeroMemory:** Always zero sensitive data (PINs, Keys) using `CryptographicOperations.ZeroMemory`.
+- **No Logs:** Never log sensitive values.
+- **Validation:** Validate all input lengths and ranges.
+
+### Guidelines & Anti-Patterns
+- **❌ Skipping RED verification:** Tests must fail first to prove they test something.
+- **✅ Always verify RED:** Run tests before implementation.
+- **❌ One giant phase:** Do not tackle all stories in a single phase.
+- **✅ Vertical Slices:** Implement one story/feature completely (including errors) before moving on.
+- **❌ Missing security:** Forgetting requirements from `security_audit.md`.
+- **✅ Explicit Verification:** Build + Test + Security must pass before marking `[x]`.
+- **❌ Using `dotnet test`:** This will fail on mixed xUnit v2/v3 projects.
+- **✅ Use `dotnet build.cs test`:** Always use the build script.
+
+---
+
+## Phases
+
+### Phase 1: {Core Feature Name} (P0)
+
+**Goal:** {User Story from PRD}
 **Files:**
-- Create: `Yubico.YubiKit.{Module}/src/{Feature}.cs`
-- Test: `Yubico.YubiKit.{Module}/tests/{Feature}Tests.cs`
+- Src: `Yubico.YubiKit.{Module}/src/{Feature}.cs`
+- Tests: `Yubico.YubiKit.{Module}/tests/{Feature}Tests.cs`
 
-**Acceptance Criteria → Tests:**
-- [ ] Criterion 1 → `Test_Criterion1_ExpectedBehavior()`
-- [ ] Criterion 2 → `Test_Criterion2_ExpectedBehavior()`
-```
+**Tasks:**
+#### Core Implementation
+- [ ] 1.1: Create project/files and basic class structure
+- [ ] 1.2: Implement {First Function} (Happy Path)
+- [ ] 1.3: Implement {Second Function} (Happy Path)
 
-### 3. Convert to TDD Steps
+#### Error Handling (PRD §3.2)
+- [ ] 1.4: Handle {Error Condition 1} -> Throw {ExceptionType}
+- [ ] 1.5: Handle {Error Condition 2} -> Throw {ExceptionType}
 
-For each phase, follow the TDD cycle:
+#### Edge Cases (PRD §3.3)
+- [ ] 1.6: Handle {Edge Case 1} (e.g., empty input, max bounds)
 
-```markdown
-**Step 1: Write failing tests**
-Create tests for ALL acceptance criteria before implementation.
+---
 
-**Step 2: Verify RED**
-```bash
-dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"
-```
-Expected: All new tests FAIL (compilation or assertion)
+### Phase 2: {Next Feature / Extension} (P0)
 
-**Step 3: Minimal implementation**
-Implement just enough to pass the tests. Follow patterns from:
-- `feasibility_report.md` (architecture approach)
-- `dx_audit.md` (naming conventions)
-- `security_audit.md` (sensitive data handling)
+**Goal:** {User Story}
+**Files:** {Paths}
 
-**Step 4: Verify GREEN**
-```bash
-dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"
-```
-Expected: All tests PASS
+**Tasks:**
+- [ ] 2.1: ...
+- [ ] 2.2: ...
 
-**Step 5: Commit**
-```bash
-git add {specific files}
-git commit -m "feat({module}): {description}"
-```
+---
 
-→ Output `<promise>PHASE_N_DONE</promise>`
-```
+### Phase N: Security Verification (P0)
 
-### 4. Add Error State Tests
+**Goal:** Verify all security requirements from `security_audit.md`
 
-From PRD §3.2 Error States, create dedicated test phase:
+**Tasks:**
+- [ ] S.1: Audit: Verify all sensitive buffers are zeroed
+  ```bash
+  grep -r "ZeroMemory" Yubico.YubiKit.{Module}/src/
+  ```
+- [ ] S.2: Audit: Verify no secrets in logs
+  ```bash
+  grep -rE "(Log|Console).*([Pp]in|[Kk]ey|[Ss]ecret)" Yubico.YubiKit.{Module}/src/
+  # Should return nothing
+  ```
+- [ ] S.3: Audit: Verify PIN handling compliance
 
-```markdown
-## Phase N+1: Error Handling
+---
 
-**From PRD Error States:**
-| Condition | Expected Behavior | Test |
-|-----------|-------------------|------|
-| [From PRD] | [From PRD] | `Test_{Condition}_Throws{Exception}()` |
-
-**Step 1: Write error tests**
-[Test code for each error condition]
-
-**Step 2: Implement error handling**
-[Implementation that throws correct exceptions]
-```
-
-### 5. Add Edge Case Tests
-
-From PRD §3.3 Edge Cases:
-
-```markdown
-## Phase N+2: Edge Cases
-
-**From PRD Edge Cases:**
-| Scenario | Expected Behavior | Test |
-|----------|-------------------|------|
-| Empty/null input | [From PRD] | `Test_NullInput_...()` |
-| Maximum bounds | [From PRD] | `Test_MaxBounds_...()` |
-```
-
-### 6. Security Verification Phase
-
-From `security_audit.md`, add security checks:
-
-```markdown
-## Phase N+3: Security Verification
-
-**Required Checks (from security_audit.md):**
-- [ ] Sensitive data zeroed after use (`CryptographicOperations.ZeroMemory`)
-- [ ] No secrets in logs
-- [ ] PIN handling follows YubiKey constraints
-- [ ] Input validation on all public methods
-
-**Verification:**
-```bash
-# Check for ZeroMemory usage
-grep -r "ZeroMemory" Yubico.YubiKit.{Module}/src/
-
-# Check for logging of sensitive data (should return nothing)
-grep -rE "(Log|Console).*([Pp]in|[Kk]ey|[Ss]ecret)" Yubico.YubiKit.{Module}/src/
-```
-```
-
-### 7. Final Verification Requirements
-
-Always end with comprehensive verification:
-
-```markdown
 ## Verification Requirements (MUST PASS BEFORE COMPLETION)
 
 1. **Build:** `dotnet build.cs build` (must exit 0)
 2. **All Tests:** `dotnet build.cs test` (all tests must pass)
 3. **No Regressions:** Existing tests still pass
 4. **Coverage:** New code has test coverage
-5. **Security:** All security checks from Phase N+3 pass
+5. **Security:** All security checks from Phase N pass
 
 Only after ALL pass, output `<promise>{FEATURE}_COMPLETE</promise>`.
 If any fail, fix and re-verify.
+
+---
+
+## Session Notes
+* {Date}: Project initialized.
 ```
 
-## Output Format
+### 3. Map PRD to Phases (Detailed Instructions)
 
-Create file at: `docs/plans/ralph-loop/{date}-{feature-slug}.md`
+Read `final_spec.md` and populate the template above using these rules:
 
-```markdown
-# {Feature Name} Implementation Plan (Ralph Loop)
+1.  **Extract User Stories:** Each major User Story becomes a **Phase**.
+2.  **Assign Priority:**
+    *   **P0:** Core functionality, Security, Reliability.
+    *   **P1:** Extensions, Convenience APIs, Performance optimization.
+    *   **P2:** Nice-to-haves.
+3.  **Embed Requirements:**
+    *   Copy **Acceptance Criteria** directly into the `[ ] Tasks` list.
+    *   Copy **Error States (§3.2)** into the "Error Handling" sub-section of the relevant phase.
+    *   Copy **Edge Cases (§3.3)** into the "Edge Cases" sub-section.
+4.  **Define Files:** Explicitly list the `Src` and `Test` file paths for every phase so the agent doesn't guess.
 
-**Goal:** {One sentence from PRD Problem Statement}
-**PRD:** `docs/specs/{feature-slug}/final_spec.md`
-**Completion Promise:** `{FEATURE_SLUG}_COMPLETE`
+### 4. Generate Ralph Prompt
 
----
-
-## Phase 1: {First User Story Title}
-
-**User Story:** {From PRD}
-
-**Files:**
-- Create: {paths}
-- Test: {paths}
-
-**Step 1: Write failing tests**
-{Test code}
-
-**Step 2: Verify RED**
-{Command}
-
-**Step 3: Implement**
-{Implementation guidance}
-
-**Step 4: Verify GREEN**
-{Command}
-
-**Step 5: Commit**
-{Commit command}
-
-→ Output `<promise>PHASE_1_DONE</promise>`
-
----
-
-## Phase 2: {Next User Story}
-...
-
----
-
-## Phase N: Security Verification
-...
-
----
-
-## Verification Requirements (MUST PASS BEFORE COMPLETION)
-...
-
----
-
-## Handoff
+Construct the command. This prompt delegates the logic to the `progress.md` file we just created.
 
 ```bash
 bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
-  --prompt-file ./docs/plans/ralph-loop/{date}-{feature-slug}.md \
-  --completion-promise "{FEATURE_SLUG}_COMPLETE" \
-  --max-iterations 25 \
+  --prompt "You are an autonomous .NET engineer implementing {Feature Name}.
+  
+  **Your Source of Truth:** \`docs/ralph-loop/{feature}-progress.md\`
+  
+  **Your Mission:**
+  Follow the 'Workflow Instructions' defined in the progress file exactly.
+  
+  **Key Behaviors:**
+  1. **Read-First:** Always read the progress file first.
+  2. **Priority-Driven:** Execute P0 phases before P1.
+  3. **TDD-Strict:** Write the test *before* the implementation.
+  4. **State-Aware:** Update the progress file after *every* commit.
+  
+  Output <promise>{FEATURE}_COMPLETE</promise> only when ALL tasks in the progress file are marked [x]." \
+  --completion-promise "{FEATURE}_COMPLETE" \
+  --max-iterations 50 \
   --learn \
   --model claude-opus-4.5
-```
 ```
 
 ## Example: Converting a PRD
@@ -263,17 +233,30 @@ bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
 - [ ] Returns empty list when no credentials exist
 ```
 
-**Converted to Ralph Loop Phase:**
+**Converted to Progress File Phase:**
 ```markdown
-## Phase 1: Enumerate Resident Keys
+### Phase 1: Enumerate Resident Keys (P0)
 
-**User Story:** As a security administrator, I want to list all resident credentials...
-
+**Goal:** As a security administrator, I want to list all resident credentials on a YubiKey.
 **Files:**
-- Create: `Yubico.YubiKit.Fido2/src/CredentialManagement.cs`
-- Test: `Yubico.YubiKit.Fido2/tests/CredentialManagementTests.cs`
+- Src: `Yubico.YubiKit.Fido2/src/CredentialManagement.cs`
+- Tests: `Yubico.YubiKit.Fido2/tests/CredentialManagementTests.cs`
 
-**Step 1: Write failing tests**
+**Tasks:**
+#### Core Implementation
+- [ ] 1.1: Create `CredentialManagement.cs` and `CredentialManagementTests.cs`
+- [ ] 1.2: Implement `EnumerateCredentials` returns list with RP info
+- [ ] 1.3: Implement PIN verification flow
+
+#### Error Handling (PRD §3.2)
+- [ ] 1.4: Handle PIN blocked -> Throw `InvalidPinException(0)`
+- [ ] 1.5: Handle wrong PIN -> Throw `InvalidPinException(retriesRemaining)`
+
+#### Edge Cases (PRD §3.3)
+- [ ] 1.6: Handle no credentials -> Return empty list (not null)
+```
+
+**Example Test Code (for Task 1.2):**
 ```csharp
 public class CredentialManagementTests
 {
@@ -295,65 +278,63 @@ public class CredentialManagementTests
     [Fact]
     public void EnumerateCredentials_NoCredentials_ReturnsEmptyList()
     {
-        // ... test for empty case
+        // Arrange
+        using var session = new Fido2Session(freshDevice);
+        session.VerifyPin(testPin);
+        
+        // Act
+        var credentials = session.EnumerateCredentials();
+        
+        // Assert
+        Assert.NotNull(credentials);
+        Assert.Empty(credentials);
     }
 }
 ```
 
-**Step 2: Verify RED**
-```bash
-dotnet build.cs test --filter "FullyQualifiedName~CredentialManagementTests"
-```
-Expected: Compilation failure (CredentialManagement doesn't exist)
-
-**Step 3: Implement**
-Follow patterns from `Fido2Session.cs` for session methods.
-Use `EnumerateCredentials` naming per dx_audit.md.
-
-**Step 4: Verify GREEN**
-```bash
-dotnet build.cs test --filter "FullyQualifiedName~CredentialManagementTests"
-```
-
-**Step 5: Commit**
-```bash
-git add Yubico.YubiKit.Fido2/src/CredentialManagement.cs \
-        Yubico.YubiKit.Fido2/tests/CredentialManagementTests.cs
-git commit -m "feat(fido2): add credential enumeration"
-```
-
-→ Output `<promise>PHASE_1_DONE</promise>`
-```
-
 ## Common Mistakes
 
-**❌ Skipping RED verification:** Tests must fail first to prove they test something
-**✅ Always verify RED:** Run tests before implementation
+**❌ Skipping RED verification:** Tests must fail first to prove they test something.
+**✅ Always verify RED:** Run tests before implementation.
 
-**❌ One giant phase:** All stories in single phase
-**✅ One story per phase:** Keeps iterations short, maximizes fresh context
+**❌ One giant phase:** All stories in single phase.
+**✅ One story per phase:** Keeps iterations short, maximizes fresh context.
 
-**❌ Missing security phase:** Forgetting security_audit.md requirements
-**✅ Dedicated security phase:** Explicit verification of all security requirements
+**❌ Missing security phase:** Forgetting `security_audit.md` requirements.
+**✅ Dedicated security phase:** Explicit verification of all security requirements.
 
-**❌ Vague completion:** "Output DONE when finished"
-**✅ Explicit verification:** Build + test + security checks must all pass
+**❌ Vague completion:** "Output DONE when finished."
+**✅ Explicit verification:** Build + test + security checks must all pass.
 
-**❌ Missing error tests:** Only testing happy path
-**✅ Error states from PRD:** Every §3.2 error becomes a test
+**❌ Missing error tests:** Only testing happy path.
+**✅ Error states from PRD:** Every §3.2 error becomes a test.
 
-## Verification
+**❌ Using `dotnet test` directly:** Will fail on mixed xUnit v2/v3.
+**✅ Use `dotnet build.cs test`:** Always use the build script.
 
-Conversion is complete when:
+## Verification Criteria
 
-- [ ] All user stories from PRD mapped to phases
-- [ ] Each phase has TDD steps (RED → GREEN → Commit)
-- [ ] Error states (§3.2) have dedicated tests
-- [ ] Edge cases (§3.3) have dedicated tests
-- [ ] Security phase includes all requirements from security_audit.md
-- [ ] Final verification requires build + test + security
-- [ ] Handoff command is correct and ready to execute
-- [ ] File saved to `docs/plans/ralph-loop/{date}-{feature-slug}.md`
+The task is complete when:
+1.  **Progress File Exists:** `docs/ralph-loop/{feature}-progress.md`
+2.  **Rich Context:** The file includes detailed **Files** paths and **Goal** descriptions for each phase.
+3.  **Comprehensive Coverage:**
+    *   Happy Path tasks
+    *   Error Handling tasks (from PRD §3.2)
+    *   Edge Case tasks (from PRD §3.3)
+    *   Security tasks
+4.  **Prioritization:** Phases are explicitly marked (P0/P1/P2).
+
+## Final Verification Checklist (for the Agent)
+
+When the agent claims completion, ensure:
+1. **Build:** `dotnet build.cs build` (must exit 0)
+2. **All Tests:** `dotnet build.cs test` (all tests must pass)
+3. **No Regressions:** Existing tests still pass
+4. **Coverage:** New code has test coverage
+5. **Security:** All security checks from Phase N pass
+
+Only after ALL pass, output `<promise>{FEATURE}_COMPLETE</promise>`.
+If any fail, fix and re-verify.
 
 ## Related Skills
 

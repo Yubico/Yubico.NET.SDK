@@ -9,7 +9,7 @@ This skill provides guidance for creating Ralph Loop prompts that enforce proper
 
 **Reference:** `.claude/skills/agent-ralph-loop/SKILL.md` (loop semantics + required autonomy injection).
 
-**Logs/state:** `./docs/ralph-loop/` (state.md, iteration-*.log, and learning artifacts under `./docs/ralph-loop/learning/`).
+**Logs/state:** `./docs/ralph-loop/<session>/` (state.md, iteration-*.log, and learning artifacts under `./docs/ralph-loop/<session>/learning/`).
 
 **Save location:** `./docs/plans/ralph-loop/YYYY-MM-DD-<feature-name>.md` (offer to save; create directories as needed).
 

@@ -14,6 +14,7 @@
 
 using Xunit;
 using Yubico.YubiKit.Tests.Shared;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Piv.IntegrationTests;
 
@@ -30,7 +31,7 @@ public class PivResetTests
     [WithYubiKey]
     public async Task ResetAsync_RestoresToDefaults(YubiKeyTestState state)
     {
-        await using var session = await state.YubiKey.CreatePivSessionAsync();
+        await using var session = await state.Device.CreatePivSessionAsync();
         
         await session.ResetAsync();
         
@@ -42,10 +43,10 @@ public class PivResetTests
     }
 
     [Theory]
-    [WithYubiKey(MinimumFirmware = "5.3.0")]
+    [WithYubiKey(MinFirmware = "5.3.0")]
     public async Task ResetAsync_PinMetadataShowsDefault(YubiKeyTestState state)
     {
-        await using var session = await state.YubiKey.CreatePivSessionAsync();
+        await using var session = await state.Device.CreatePivSessionAsync();
         
         await session.ResetAsync();
         
@@ -59,7 +60,7 @@ public class PivResetTests
     [WithYubiKey]
     public async Task ResetAsync_ClearsAllSlots(YubiKeyTestState state)
     {
-        await using var session = await state.YubiKey.CreatePivSessionAsync();
+        await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         
         // Generate a key in a slot

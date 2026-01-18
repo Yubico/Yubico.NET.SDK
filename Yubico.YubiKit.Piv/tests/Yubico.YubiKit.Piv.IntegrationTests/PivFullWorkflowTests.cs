@@ -17,6 +17,7 @@ using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Tests.Shared;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Piv.IntegrationTests;
 
@@ -35,7 +36,7 @@ public class PivFullWorkflowTests
     [WithYubiKey]
     public async Task CompleteWorkflow_GenerateSignVerify(YubiKeyTestState state)
     {
-        await using var session = await state.YubiKey.CreatePivSessionAsync();
+        await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         
         // 1. Authenticate with management key
@@ -80,7 +81,7 @@ public class PivFullWorkflowTests
     [WithYubiKey]
     public async Task CompleteWorkflow_ECDHKeyAgreement(YubiKeyTestState state)
     {
-        await using var session = await state.YubiKey.CreatePivSessionAsync();
+        await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         
         // 1. Authenticate and generate key
@@ -98,7 +99,7 @@ public class PivFullWorkflowTests
         // 3. Generate ephemeral peer key
         using var peerKey = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
         var peerPublicKeyBytes = peerKey.PublicKey.ExportSubjectPublicKeyInfo();
-        var peerPublicKey = new ECPublicKey(peerPublicKeyBytes);
+        var peerPublicKey = ECPublicKey.CreateFromSubjectPublicKeyInfo(peerPublicKeyBytes);
         
         // 4. Calculate shared secret on YubiKey
         var yubiKeySecret = await session.CalculateSecretAsync(
@@ -123,10 +124,10 @@ public class PivFullWorkflowTests
     }
 
     [Theory]
-    [WithYubiKey(MinimumFirmware = "5.7.0")]
+    [WithYubiKey(MinFirmware = "5.7.0")]
     public async Task CompleteWorkflow_MoveKeyBetweenSlots(YubiKeyTestState state)
     {
-        await using var session = await state.YubiKey.CreatePivSessionAsync();
+        await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         
         // 1. Authenticate and generate key
@@ -154,10 +155,10 @@ public class PivFullWorkflowTests
     }
 
     [Theory]
-    [WithYubiKey(MinimumFirmware = "4.3.0")]
+    [WithYubiKey(MinFirmware = "4.3.0")]
     public async Task CompleteWorkflow_AttestGeneratedKey(YubiKeyTestState state)
     {
-        await using var session = await state.YubiKey.CreatePivSessionAsync();
+        await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         
         // 1. Authenticate and generate key

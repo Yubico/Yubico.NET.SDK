@@ -252,11 +252,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
 
     #region Not Yet Implemented Placeholder Methods
 
-    public Task<ReadOnlyMemory<byte>?> VerifyUvAsync(bool requestTemporaryPin = false, bool checkOnly = false, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task VerifyTemporaryPinAsync(ReadOnlyMemory<byte> temporaryPin, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task ChangePukAsync(ReadOnlyMemory<byte> oldPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task UnblockPinAsync(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task SetPinAttemptsAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
 
     /// <summary>
     /// Gets metadata about the PIV PIN.
@@ -302,12 +298,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
 
 
 
-    public Task<PivPukMetadata> GetPukMetadataAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<PivManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<PivSlotMetadata?> GetSlotMetadataAsync(PivSlot slot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<PivBioMetadata> GetBioMetadataAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
 
-    public Task SetManagementKeyAsync(PivManagementKeyType keyType, ReadOnlyMemory<byte> newKey, bool requireTouch = false, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 
     #endregion
 

@@ -795,6 +795,30 @@ _logger.LogDebug("PIN verification for slot {Slot}", slotNumber);
 _logger.LogDebug("Key operation completed, length: {Length}", privateKey.Length);
 ```
 
+### Security Audit Checklist
+
+When implementing or reviewing authentication/cryptographic code, run these verification commands:
+
+```bash
+# 1. Sensitive data cleanup - verify ZeroMemory usage
+grep -rn "ZeroMemory\|Clear()" src/ | wc -l
+# Expected: At least one per sensitive operation (PIN, key, PUK)
+
+# 2. Secret logging audit - ensure no values logged
+grep -rn "Log.*\(pin\|key\|puk\|secret\)" -i src/
+# Expected: No matches (or only variable names, never values)
+
+# 3. ArrayPool cleanup audit - verify finally blocks
+grep -A10 "ArrayPool.*Rent" src/ | grep -c "finally"
+# Expected: Every Rent should have corresponding finally block
+
+# 4. Input validation - ensure parameter checks
+grep -c "ArgumentNullException\|ArgumentException" src/
+# Expected: At least one per public method with parameters
+```
+
+Document any violations and fix before claiming security phase complete.
+
 ### APDU and Protocol Buffers
 
 **✅ Prefer Span for APDU data:**

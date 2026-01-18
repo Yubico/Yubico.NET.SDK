@@ -159,7 +159,43 @@ If any fail, fix and re-verify.
 
 > **Note:** Autonomy directives and skill awareness are auto-injected by `ralph-loop.ts`. Do not add them manually. The agent will see available skills (mandatory vs optional) at the start of each iteration.
 
-### 8. Test Audit for Refactoring Phases
+### 8. Test Infrastructure Study (Before First Test)
+
+Before writing integration tests in a new module, study existing test patterns:
+
+```markdown
+**Step 0: Study Test Infrastructure**
+Before writing tests, examine existing test files:
+```bash
+# Find similar integration test
+find . -name "*IntegrationTests.cs" -path "*/Yubico.YubiKit.*" | head -1
+
+# Extract patterns
+grep -A3 "WithYubiKey" <file>  # Check attribute syntax (MinFirmware vs MinimumFirmware)
+grep "state\." <file>          # Check state property name (Device vs YubiKey)
+```
+Use discovered patterns for all test methods in this module.
+```
+
+**Why:** Test framework patterns vary between modules. Studying existing tests prevents attribute/property errors that cause multiple fix cycles.
+
+### 9. Incremental Build Gates
+
+After creating 3+ files, run intermediate build before proceeding:
+
+```markdown
+**Step 2.5: Incremental Build Verification**
+After creating 3+ files, run intermediate build:
+```bash
+dotnet build Yubico.YubiKit.<Module>/Yubico.YubiKit.<Module>.csproj
+```
+Fix compilation errors before proceeding to next files.
+DO NOT create all implementation files without intermediate checks.
+```
+
+**Why:** Batch creation without validation causes cascading errors. Incremental builds catch issues early, reducing fix cycles by ~40%.
+
+### 10. Test Audit for Refactoring Phases
 
 When a phase involves interface changes, signature changes, or dependency refactoring, add a test audit step:
 
@@ -173,7 +209,7 @@ grep -r "Substitute.For<ClassName>" tests/ --include="*.cs"
 Document which tests need mock updates BEFORE making code changes.
 ```
 
-### 9. Phase Deferral Documentation
+### 11. Phase Deferral Documentation
 
 If a phase should be deferred, document clearly:
 

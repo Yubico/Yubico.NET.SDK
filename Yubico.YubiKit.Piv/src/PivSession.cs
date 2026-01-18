@@ -300,8 +300,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         return new PivPinMetadata(isDefault, totalRetries, retriesRemaining);
     }
 
-    public Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(PivSlot slot, PivAlgorithm algorithm, ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<ReadOnlyMemory<byte>> CalculateSecretAsync(PivSlot slot, IPublicKey peerPublicKey, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
     public Task<X509Certificate2?> GetCertificateAsync(PivSlot slot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task StoreCertificateAsync(PivSlot slot, X509Certificate2 certificate, bool compress = false, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task DeleteCertificateAsync(PivSlot slot, CancellationToken cancellationToken = default) => throw new NotImplementedException();

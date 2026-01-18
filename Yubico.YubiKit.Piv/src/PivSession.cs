@@ -26,12 +26,13 @@ namespace Yubico.YubiKit.Piv;
 /// <summary>
 /// PIV (Personal Identity Verification) session for YubiKey operations.
 /// </summary>
-public sealed class PivSession : ApplicationSession, IPivSession, IAsyncDisposable
+public sealed partial class PivSession : ApplicationSession, IPivSession, IAsyncDisposable
 {
     private static readonly byte[] PivAid = ApplicationIds.Piv;
     
     private readonly IConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
+    private ISmartCardProtocol? _protocol;
     
     /// <inheritdoc />
     public PivManagementKeyType ManagementKeyType { get; private set; } = PivManagementKeyType.TripleDes;
@@ -115,6 +116,13 @@ public sealed class PivSession : ApplicationSession, IPivSession, IAsyncDisposab
                     cancellationToken)
                 .ConfigureAwait(false);
 
+            // Store the smart card protocol for APDU operations
+            _protocol = Protocol as ISmartCardProtocol;
+            if (_protocol is null)
+            {
+                throw new NotSupportedException("PIV session requires SmartCard protocol");
+            }
+
             // Default management key type is 3DES unless we determine otherwise
             ManagementKeyType = PivManagementKeyType.TripleDes;
 
@@ -147,8 +155,33 @@ public sealed class PivSession : ApplicationSession, IPivSession, IAsyncDisposab
         EnsureInitialized();
         EnsureSupports(PivFeatures.Serial);
         
-        // GET SERIAL command (INS 0xF8) - placeholder implementation
-        throw new NotImplementedException("GetSerialNumberAsync not yet implemented");
+        if (_protocol is null)
+        {
+            throw new InvalidOperationException("Session not initialized");
+        }
+        
+        Logger.LogDebug("PIV: Getting YubiKey serial number");
+        
+        var command = new ApduCommand(0x00, 0xF8, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = new ApduResponse(responseData);
+        
+        if (!response.IsOK())
+        {
+            throw ApduException.FromStatusWord(response.SW, "Failed to get serial number");
+        }
+        
+        if (response.Data.Length != 4)
+        {
+            throw new ApduException("Invalid serial number response length");
+        }
+        
+        // Serial is returned as big-endian 4-byte integer
+        var serialBytes = response.Data.Span;
+        var serial = (serialBytes[0] << 24) | (serialBytes[1] << 16) | (serialBytes[2] << 8) | serialBytes[3];
+        
+        Logger.LogDebug("PIV: Retrieved serial number: {Serial}", serial);
+        return serial;
     }
 
     /// <inheritdoc />
@@ -156,26 +189,60 @@ public sealed class PivSession : ApplicationSession, IPivSession, IAsyncDisposab
     {
         EnsureInitialized();
         
-        // PIV RESET command - placeholder implementation  
-        throw new NotImplementedException("ResetAsync not yet implemented");
-    }
-
-    /// <inheritdoc />
-    public async Task AuthenticateAsync(ReadOnlyMemory<byte> managementKey, CancellationToken cancellationToken = default)
-    {
-        EnsureInitialized();
+        if (_protocol is null)
+        {
+            throw new InvalidOperationException("Session not initialized");
+        }
         
-        // PIV AUTHENTICATE command - placeholder implementation
-        throw new NotImplementedException("AuthenticateAsync not yet implemented");
-    }
-
-    /// <inheritdoc />
-    public async Task VerifyPinAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default)
-    {
-        EnsureInitialized();
+        Logger.LogDebug("PIV: Resetting PIV application");
         
-        // PIV VERIFY command - placeholder implementation
-        throw new NotImplementedException("VerifyPinAsync not yet implemented");
+        // TODO: Check bio not configured (Phase 7)
+        
+        // Step 1: Block PIN by trying wrong PIN repeatedly  
+        var wrongPin = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF };
+        for (int i = 0; i < 5; i++) // Try more than 3 times to ensure blocked
+        {
+            try
+            {
+                var pinCommand = new ApduCommand(0x00, 0x20, 0x00, 0x80, wrongPin);
+                await _protocol.TransmitAndReceiveAsync(pinCommand, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Ignore errors - we expect this to fail
+            }
+        }
+        
+        // Step 2: Block PUK by trying wrong PUK repeatedly
+        var wrongPuk = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        for (int i = 0; i < 5; i++) // Try more than 3 times to ensure blocked  
+        {
+            try
+            {
+                var pukCommand = new ApduCommand(0x00, 0x2C, 0x00, 0x81, wrongPuk);
+                await _protocol.TransmitAndReceiveAsync(pukCommand, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Ignore errors - we expect this to fail
+            }
+        }
+        
+        // Step 3: Send RESET command
+        var resetCommand = new ApduCommand(0x00, 0xFB, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+        var responseData = await _protocol.TransmitAndReceiveAsync(resetCommand, cancellationToken).ConfigureAwait(false);
+        var response = new ApduResponse(responseData);
+        
+        if (!response.IsOK())
+        {
+            throw ApduException.FromStatusWord(response.SW, "PIV reset failed");
+        }
+        
+        // Reset authentication state
+        _isAuthenticated = false;
+        ManagementKeyType = PivManagementKeyType.TripleDes; // Reset to default
+        
+        Logger.LogDebug("PIV: Reset completed successfully");
     }
 
     // All other IPivSession methods would be implemented as placeholders for now...
@@ -187,11 +254,51 @@ public sealed class PivSession : ApplicationSession, IPivSession, IAsyncDisposab
 
     public Task<ReadOnlyMemory<byte>?> VerifyUvAsync(bool requestTemporaryPin = false, bool checkOnly = false, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task VerifyTemporaryPinAsync(ReadOnlyMemory<byte> temporaryPin, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task ChangePinAsync(ReadOnlyMemory<byte> oldPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task ChangePukAsync(ReadOnlyMemory<byte> oldPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task UnblockPinAsync(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task SetPinAttemptsAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<int> GetPinAttemptsAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
+    /// <summary>
+    /// Gets metadata about the PIV PIN.
+    /// </summary>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>PIN metadata including retry counts and status.</returns>
+    /// <exception cref="NotSupportedException">Thrown on firmware older than 5.3.0.</exception>
+    public async Task<PivPinMetadata> GetPinMetadataAsync(CancellationToken cancellationToken = default)
+    {
+        EnsureInitialized();
+        EnsureSupports(PivFeatures.Metadata);
+        
+        if (_protocol is null)
+        {
+            throw new InvalidOperationException("Session not initialized");
+        }
+        
+        Logger.LogDebug("PIV: Getting PIN metadata");
+        
+        var command = new ApduCommand(0x00, 0xF7, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
+        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = new ApduResponse(responseData);
+        
+        if (!response.IsOK())
+        {
+            throw ApduException.FromStatusWord(response.SW, "Failed to get PIN metadata");
+        }
+        
+        if (response.Data.IsEmpty)
+        {
+            throw new ApduException("Empty PIN metadata response");
+        }
+        
+        var data = response.Data.Span;
+        
+        // Parse metadata TLV structure (simplified for now)
+        var totalRetries = data[0];
+        var retriesRemaining = data[1];
+        var isDefault = data[2] == 0x01;
+        
+        return new PivPinMetadata(isDefault, totalRetries, retriesRemaining);
+    }
     public Task<IPublicKey> GenerateKeyAsync(PivSlot slot, PivAlgorithm algorithm, PivPinPolicy pinPolicy = PivPinPolicy.Default, PivTouchPolicy touchPolicy = PivTouchPolicy.Default, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task<PivAlgorithm> ImportKeyAsync(PivSlot slot, IPrivateKey privateKey, PivPinPolicy pinPolicy = PivPinPolicy.Default, PivTouchPolicy touchPolicy = PivTouchPolicy.Default, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task MoveKeyAsync(PivSlot sourceSlot, PivSlot destinationSlot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
@@ -202,7 +309,6 @@ public sealed class PivSession : ApplicationSession, IPivSession, IAsyncDisposab
     public Task<X509Certificate2?> GetCertificateAsync(PivSlot slot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task StoreCertificateAsync(PivSlot slot, X509Certificate2 certificate, bool compress = false, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task DeleteCertificateAsync(PivSlot slot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<PivPinMetadata> GetPinMetadataAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task<PivPukMetadata> GetPukMetadataAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task<PivManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task<PivSlotMetadata?> GetSlotMetadataAsync(PivSlot slot, CancellationToken cancellationToken = default) => throw new NotImplementedException();

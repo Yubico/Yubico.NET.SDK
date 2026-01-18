@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI agents when working with code in this repository.
 
 **IMPORTANT:** If you are working in a subproject directory (e.g., `Yubico.YubiKit.SecurityDomain/`, `Yubico.YubiKit.Piv/`, etc.), you MUST also read that subproject's `CLAUDE.md` file if it exists. Subproject CLAUDE.md files contain specific patterns, test harness details, and context for that module.
 
@@ -15,6 +15,16 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 
 ## Quick Reference - Critical Rules
 
+**Skills to Apply When Coding in This Repository:**
+- .claude/skills/tool-codemapper/SKILL.md
+- .claude/skills/domain-build/SKILL.md
+- .claude/skills/domain-test/SKILL.md
+- .claude/skills/domain-yubikit-compare/SKILL.md
+- .claude/skills/workflow-interface-refactor/SKILL.md
+- .claude/skills/workflow-tdd/SKILL.md
+- .claude/skills/workflow-debug/SKILL.md
+- .claude/skills/tool-perplexity-search/SKILL.md
+   
 **Memory Management:**
 - ✅ Sync + ≤512 bytes → `Span<byte>` with `stackalloc`
 - ✅ Sync + >512 bytes → `ArrayPool<byte>.Shared.Rent()`

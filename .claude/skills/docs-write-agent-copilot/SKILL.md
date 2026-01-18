@@ -110,6 +110,11 @@ tools: ["read", "edit", "search", "terminal"]
 [What the agent produces - reports, code, recommendations]
 [Include template if output is structured]
 
+## Data Sources
+
+- [What files/directories to read]
+- [What skills to load for guidance]
+
 ## Related Resources
 
 - [Links to relevant documentation]

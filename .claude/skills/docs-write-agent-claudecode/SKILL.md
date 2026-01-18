@@ -117,7 +117,7 @@ You are [persona description - who this agent "is"].
 ## Data Sources
 
 - [What files/directories to scan]
-- [What systems to access]
+- [What skills to load for guidance]
 
 ## Output Format
 
@@ -136,6 +136,11 @@ _Output:_ [Expected result]
 
 - [Limitation 1 - e.g., "Do not modify source files"]
 - [Limitation 2 - e.g., "Only analyze, don't execute"]
+
+## Related Resources
+
+- [Links to relevant documentation]
+- [Links to related skills or agents]
 ```
 
 ## Key Differences from Copilot Agents

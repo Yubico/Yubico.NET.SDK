@@ -98,8 +98,10 @@ Verify both agents have equivalent:
 | When to use | ✅ Same triggers | Copilot: `## Use When`, Claude: `## Scope` |
 | Capabilities | ✅ Same expertise | Copilot: `## Capabilities`, Claude: within `## Scope` |
 | Process | ✅ Same workflow | Same section name |
+| Data Sources | ✅ Same references | Same section name |
 | Output Format | ✅ Same structure | Same section name |
 | Constraints | ✅ Same boundaries | Copilot: in `## Use When`, Claude: `## Constraints` |
+| Related Resources | ✅ Same links | Same section name |
 
 ### 5. Verify Both Agents
 

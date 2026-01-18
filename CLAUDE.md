@@ -61,7 +61,7 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 
 **Codebase Orientation:**
 - ✅ Run `codemapper .` to generate API surface maps (~1.5s for entire repo)
-- ✅ Maps output to `./codebase_ast/` - one file per project
+- ✅ Maps output to `./codebase_ast/` - one file per project (gitignored but readable by agents)
 - ✅ Find symbols: `grep -rn "IYubiKey" ./codebase_ast/`
 - ✅ Load context: `cat ./codebase_ast/Yubico.YubiKit.Core.txt`
 - See `.claude/skills/tool-codemapper/SKILL.md` for full usage

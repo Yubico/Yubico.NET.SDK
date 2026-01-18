@@ -553,3 +553,5 @@ cython_debug/
 # Coverage / Test Results 
 coveragereport/
 TestResults/
+# Codemapper AST output (gitignored but readable by agents)
+codebase_ast/

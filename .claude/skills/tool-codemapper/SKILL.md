@@ -38,6 +38,8 @@ Generate and query structural maps of C# codebases using CodeMapper. Maps show p
 
 Default: `./codebase_ast/` - one `.txt` file per project.
 
+**Note:** This directory is gitignored but agents can still read it. The `.gitignore` only prevents Git from tracking files—it doesn't prevent tools from reading them from the filesystem. Always check `./codebase_ast/` even though it's gitignored.
+
 ## Workflow 1: Codebase Orientation
 
 When starting work on a new area:

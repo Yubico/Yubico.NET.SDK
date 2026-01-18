@@ -74,12 +74,13 @@ public sealed partial class PivSession
     /// <summary>
     /// Verifies the user via biometric (fingerprint) and optionally retrieves a temporary PIN.
     /// </summary>
+    /// <param name="requestTemporaryPin">If true, requests a temporary PIN from the YubiKey.</param>
     /// <param name="checkOnly">If true, only checks UV status without retrieving temporary PIN.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>Temporary PIN if checkOnly is false, otherwise an empty span. WARNING: Caller MUST zero this immediately after use!</returns>
+    /// <returns>Temporary PIN if requestTemporaryPin is true, otherwise null. WARNING: Caller MUST zero this immediately after use!</returns>
     /// <exception cref="NotSupportedException">Thrown if biometrics are not supported or configured.</exception>
     /// <exception cref="InvalidOperationException">Thrown if biometric verification fails.</exception>
-    public async Task<Memory<byte>> VerifyUvAsync(bool checkOnly = false, CancellationToken cancellationToken = default)
+    public async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(bool requestTemporaryPin = false, bool checkOnly = false, CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
         
@@ -92,7 +93,7 @@ public sealed partial class PivSession
         
         // Build command data
         byte[] commandData;
-        if (checkOnly)
+        if (checkOnly || !requestTemporaryPin)
         {
             // TAG 0x02: Check only, don't return temporary PIN
             commandData = new byte[] { 0x02, 0x00 };
@@ -125,10 +126,10 @@ public sealed partial class PivSession
             throw ApduException.FromStatusWord(response.SW, "Failed to verify biometric");
         }
         
-        if (checkOnly)
+        if (checkOnly || !requestTemporaryPin)
         {
             Logger.LogDebug("PIV: Biometric verification succeeded (check only)");
-            return Memory<byte>.Empty;
+            return null;
         }
         
         // Parse temporary PIN from response
@@ -185,8 +186,8 @@ public sealed partial class PivSession
             {
                 var retriesRemaining = response.SW & 0x0F;
                 throw new InvalidPinException(
-                    $"Temporary PIN verification failed. {retriesRemaining} retries remaining.",
-                    retriesRemaining);
+                    retriesRemaining,
+                    $"Temporary PIN verification failed. {retriesRemaining} retries remaining.");
             }
             
             if (!response.IsOK())

@@ -197,25 +197,6 @@ public sealed partial class PivSession
         throw new NotImplementedException("GetManagementKeyMetadataAsync not yet implemented");
     }
 
-    public Task<PivBioMetadata> GetBioMetadataAsync(CancellationToken cancellationToken = default)
-    {
-        // TODO: Implement bio metadata retrieval (INS 0xF7, P2=0x96)
-        // Should throw NotSupportedException if not a Bio YubiKey
-        throw new NotImplementedException("GetBioMetadataAsync not yet implemented");
-    }
-
-    public Task<ReadOnlyMemory<byte>?> VerifyUvAsync(bool requestTemporaryPin = false, bool checkOnly = false, CancellationToken cancellationToken = default)
-    {
-        // TODO: Implement UV verification for Bio YubiKeys (INS 0x20, P2=0x96)
-        throw new NotImplementedException("VerifyUvAsync not yet implemented");
-    }
-
-    public Task VerifyTemporaryPinAsync(ReadOnlyMemory<byte> temporaryPin, CancellationToken cancellationToken = default)
-    {
-        // TODO: Implement temporary PIN verification (INS 0x20, P2=0x96)
-        throw new NotImplementedException("VerifyTemporaryPinAsync not yet implemented");
-    }
-
     public Task ChangePukAsync(ReadOnlyMemory<byte> oldPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default)
     {
         // TODO: Implement PUK change (INS 0x24, P2=0x81)

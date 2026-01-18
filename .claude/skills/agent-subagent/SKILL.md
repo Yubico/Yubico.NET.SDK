@@ -40,11 +40,31 @@ Execute plan by dispatching fresh subagent per task, with two-stage review after
 
 ## Prompt Templates
 
+### Skill Awareness Preamble
+
+**Include at the start of ALL subagent prompts:**
+
+```markdown
+BEFORE STARTING: Read CLAUDE.md and review .claude/skills/
+
+MANDATORY SKILLS (use these - NEVER use direct commands):
+- build-project: `dotnet build.cs build` - NEVER `dotnet build`
+- test-project: `dotnet build.cs test` - NEVER `dotnet test`
+- commit: Follow guidelines - NEVER `git add .`
+```
+
 ### Implementer Subagent
 
 Use Task tool with agent_type: "general-purpose":
 
 ```markdown
+BEFORE STARTING: Read CLAUDE.md and review .claude/skills/
+
+MANDATORY SKILLS:
+- build-project: `dotnet build.cs build` - NEVER `dotnet build`
+- test-project: `dotnet build.cs test` - NEVER `dotnet test`
+- commit: Follow guidelines - NEVER `git add .`
+
 You are implementing Task N: [task name]
 
 ## Task Description

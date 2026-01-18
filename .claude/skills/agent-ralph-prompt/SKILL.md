@@ -157,7 +157,7 @@ If any fail, fix and re-verify.
 
 ```
 
-> **Note:** Autonomy directives are auto-injected by `ralph-loop.ts`. Do not add them manually.
+> **Note:** Autonomy directives and skill awareness are auto-injected by `ralph-loop.ts`. Do not add them manually. The agent will see available skills (mandatory vs optional) at the start of each iteration.
 
 ### 8. Test Audit for Refactoring Phases
 

@@ -41,11 +41,14 @@ The `ralph-loop` skill forces a sub-instance of GitHub Copilot to enter a recurs
 
 ## 3. Autonomy Directives (Auto-Injected)
 
-The script automatically appends autonomy directives to your prompt, instructing the agent to:
+The script automatically prepends and appends directives to your prompt, instructing the agent to:
+- **Review available skills before starting** (with mandatory vs optional categorization)
 - Operate in non-interactive mode without asking questions
 - Execute immediately on ambiguous decisions using standard patterns
 - Use git to explore the codebase and check previous work
 - Output the completion promise only when the objective is fully verified
+
+**Skill awareness is automatic:** The script discovers all skills in `.claude/skills/*/SKILL.md` and injects a categorized list into each iteration prompt. Mandatory skills (build, test, commit) are highlighted with clear rules forbidding direct commands.
 
 **You do not need to add these instructions to your prompt manually.**
 

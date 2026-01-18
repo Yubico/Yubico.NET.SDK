@@ -1,8 +1,15 @@
 #!/usr/bin/env bun
 
-import { join, dirname } from "path";
+import { join, dirname, basename } from "path";
+import { readdirSync, existsSync, readFileSync } from "fs";
 
 // --- Configuration & Constants ---
+
+interface SkillInfo {
+  name: string;
+  description: string;
+  mandatory: boolean;
+}
 
 interface Config {
   promptParts: string[];
@@ -99,6 +106,67 @@ async function runCopilotWithTee(args: string[], logFile: string): Promise<strin
 
 // --- Main Class ---
 
+// --- Skill Discovery ---
+
+function discoverSkills(): SkillInfo[] {
+  const skillsDir = ".claude/skills";
+  if (!existsSync(skillsDir)) return [];
+
+  const skills: SkillInfo[] = [];
+  const dirs = readdirSync(skillsDir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
+
+  for (const dir of dirs) {
+    const skillFile = join(skillsDir, dir, "SKILL.md");
+    if (!existsSync(skillFile)) continue;
+
+    const content = readFileSync(skillFile, "utf-8");
+    
+    // Parse YAML frontmatter
+    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+    if (!frontmatterMatch) continue;
+
+    const frontmatter = frontmatterMatch[1];
+    const nameMatch = frontmatter.match(/^name:\s*(.+)$/m);
+    const descMatch = frontmatter.match(/^description:\s*(.+)$/m);
+
+    if (nameMatch && descMatch) {
+      const name = nameMatch[1].trim();
+      const description = descMatch[1].trim();
+      // Detect mandatory skills by keywords in description
+      const mandatory = description.toLowerCase().includes("required") || 
+                        description.toLowerCase().includes("never use");
+      skills.push({ name, description, mandatory });
+    }
+  }
+
+  return skills;
+}
+
+function formatSkillsForPrompt(skills: SkillInfo[]): string {
+  if (skills.length === 0) return "";
+
+  const mandatory = skills.filter(s => s.mandatory);
+  const optional = skills.filter(s => !s.mandatory);
+
+  let output = `[AVAILABLE SKILLS - REVIEW BEFORE STARTING]
+
+MANDATORY SKILLS (violating these is a critical error):
+${mandatory.map(s => `- ${s.name}: ${s.description}`).join("\n")}
+
+OTHER SKILLS:
+${optional.map(s => `- ${s.name}: ${s.description}`).join("\n")}
+
+SKILL RULES:
+- BEFORE any build/test/commit action, check if a skill covers it
+- Use \`skill invoke <name>\` or follow skill instructions
+- Mandatory skills MUST be used - direct commands (dotnet build, dotnet test, git add .) are FORBIDDEN
+`;
+
+  return output;
+}
+
 class RalphLoop {
   private config: Config;
   private prompt: string = "";
@@ -110,9 +178,11 @@ class RalphLoop {
   private iterationMetrics: IterationMetrics[] = [];
   private lastCommitHash: string = "";
   private isActive: boolean = true;
+  private skillsPrompt: string = "";
 
   constructor(config: Config) {
     this.config = config;
+    this.skillsPrompt = formatSkillsForPrompt(discoverSkills());
     this.setupSignalHandlers();
   }
 
@@ -213,6 +283,8 @@ ${this.prompt}
   }
 
   private printStartupBanner() {
+    const skillCount = discoverSkills().length;
+    const mandatoryCount = discoverSkills().filter(s => s.mandatory).length;
     console.log(`
 ${CONSTANTS.COLOR.CYAN}🔄 Ralph loop activated for Copilot CLI! (Bun Engine)${CONSTANTS.COLOR.RESET}
 
@@ -220,6 +292,7 @@ Max iterations: ${this.config.maxIterations > 0 ? this.config.maxIterations : "u
 Completion promise: ${this.config.completionPromise ? this.config.completionPromise : "none (runs forever)"}
 Model: ${this.config.model || "default"}
 Delay between iterations: ${this.config.delay}s
+Skills loaded: ${skillCount} (${mandatoryCount} mandatory)
 
 Press Ctrl+C to cancel at any time.
 
@@ -502,7 +575,8 @@ ${CONSTANTS.COLOR.CYAN}🔄 ═════════════════�
 
       const logFile = `./docs/ralph-loop/iteration-${this.iteration}.log`;
 
-      const iterationPrompt = `${this.prompt}
+      const iterationPrompt = `${this.skillsPrompt}
+${this.prompt}
 
 ---
 [Ralph Loop Context]
@@ -516,6 +590,7 @@ ${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}`
 3. If a decision is ambiguous, pick the most standard/reasonable option and EXECUTE it immediately.
 4. Use "git" to explore the codebase if you are lost.
 5. Check your previous work in files and git history. Continue from where you left off.
+6. REVIEW THE SKILLS LIST ABOVE before any build/test/commit operation.
 ---`;
 
       const copilotArgs = ["-p", iterationPrompt, "--allow-all-tools"];

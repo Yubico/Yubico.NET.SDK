@@ -68,8 +68,30 @@ Good agent prompts are:
 1. **Focused** - One clear problem domain
 2. **Self-contained** - All context needed to understand the problem
 3. **Specific about output** - What should the agent return?
+4. **Skill-aware** - Include mandatory skill reminders
+
+### Skill Awareness Preamble
+
+**Always include this at the start of agent prompts:**
 
 ```markdown
+BEFORE STARTING: Read CLAUDE.md and review available skills in .claude/skills/
+
+MANDATORY SKILLS (use these - NEVER use direct commands):
+- build-project: Use `dotnet build.cs build` - NEVER `dotnet build`
+- test-project: Use `dotnet build.cs test` - NEVER `dotnet test`
+- commit: Follow commit guidelines - NEVER use `git add .`
+```
+
+### Example Prompt
+
+```markdown
+BEFORE STARTING: Read CLAUDE.md and review available skills in .claude/skills/
+
+MANDATORY SKILLS:
+- build-project: Use `dotnet build.cs build` - NEVER `dotnet build`
+- test-project: Use `dotnet build.cs test` - NEVER `dotnet test`
+
 Fix the 3 failing tests in src/agents/agent-tool-abort.test.ts:
 
 1. "should abort tool with partial output capture" - expects 'interrupted at' in message

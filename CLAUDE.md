@@ -59,6 +59,13 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 - ❌ NEVER use `dotnet test` directly (fails on xUnit v3 projects with wrong syntax)
 - See `docs/TESTING.md` for full testing guidance
 
+**Codebase Orientation:**
+- ✅ Run `codemapper .` to generate API surface maps (~1.5s for entire repo)
+- ✅ Maps output to `./codebase_ast/` - one file per project
+- ✅ Find symbols: `grep -rn "IYubiKey" ./codebase_ast/`
+- ✅ Load context: `cat ./codebase_ast/Yubico.YubiKit.Core.txt`
+- See `.claude/skills/tool-codemapper/SKILL.md` for full usage
+
 ## Build and Test Commands
 
 **IMPORTANT: Use the build script (`build.cs`) for all build, test, and packaging operations.**

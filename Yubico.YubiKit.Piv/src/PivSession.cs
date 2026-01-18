@@ -299,11 +299,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         
         return new PivPinMetadata(isDefault, totalRetries, retriesRemaining);
     }
-    public Task<IPublicKey> GenerateKeyAsync(PivSlot slot, PivAlgorithm algorithm, PivPinPolicy pinPolicy = PivPinPolicy.Default, PivTouchPolicy touchPolicy = PivTouchPolicy.Default, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<PivAlgorithm> ImportKeyAsync(PivSlot slot, IPrivateKey privateKey, PivPinPolicy pinPolicy = PivPinPolicy.Default, PivTouchPolicy touchPolicy = PivTouchPolicy.Default, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task MoveKeyAsync(PivSlot sourceSlot, PivSlot destinationSlot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task DeleteKeyAsync(PivSlot slot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public Task<X509Certificate2> AttestKeyAsync(PivSlot slot, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
     public Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(PivSlot slot, PivAlgorithm algorithm, ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task<ReadOnlyMemory<byte>> CalculateSecretAsync(PivSlot slot, IPublicKey peerPublicKey, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public Task<X509Certificate2?> GetCertificateAsync(PivSlot slot, CancellationToken cancellationToken = default) => throw new NotImplementedException();

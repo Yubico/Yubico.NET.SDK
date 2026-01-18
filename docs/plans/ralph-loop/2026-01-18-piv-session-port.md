@@ -1,11 +1,3 @@
----
-active: false
-iteration: 6
-max_iterations: 50
-completion_promise: "PIV_SESSION_PORT_COMPLETE"
-started_at: "2026-01-18T02:40:01.812Z"
----
-
 # PivSession Port Implementation Plan (Ralph Loop)
 
 **Goal:** Port PIV (Personal Identity Verification) application support from Java yubikit-android to C# Yubico.YubiKit.Piv, enabling RSA/ECC cryptographic operations using YubiKey-stored private keys.

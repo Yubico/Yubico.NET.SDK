@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Diagnostics;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Tests.Shared;
@@ -390,6 +391,52 @@ public class ManagementSessionAdvancedTests
             Assert.Equal(serialNumber, deviceInfo.SerialNumber);
             Assert.Equal(firmwareVersion, deviceInfo.FirmwareVersion);
             Assert.Equal(formFactor, deviceInfo.FormFactor);
+        });
+    }
+
+    /// <summary>
+    ///     Transport-specific example: Only runs on CCID (SmartCard) connections.
+    ///     Demonstrates ConnectionType filtering for transport-specific operations.
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.Ccid)]
+    public async Task GetDeviceInfo_CcidOnly_UsesSmartCardConnection(YubiKeyTestState state)
+    {
+        // This test only runs on CCID (SmartCard) connections
+        Assert.Equal(ConnectionType.Ccid, state.ConnectionType);
+
+        await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+        {
+            var deviceInfo = await mgmt.GetDeviceInfoAsync();
+
+            // Verify we're getting valid device info over SmartCard
+            Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
+            Assert.Equal(state.FirmwareVersion, deviceInfo.FirmwareVersion);
+        });
+    }
+
+    /// <summary>
+    ///     Multi-transport example: Runs on all available connection types.
+    ///     Verifies device info consistency across different transports (CCID, HidFido, HidOtp).
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey]
+    public async Task GetDeviceInfo_AllTransports_ReturnsConsistentData(YubiKeyTestState state)
+    {
+        // This test runs on every transport type available for each device
+        // Same physical device will have multiple test runs (one per ConnectionType)
+
+        await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+        {
+            var deviceInfo = await mgmt.GetDeviceInfoAsync();
+
+            // Device info should be consistent regardless of transport
+            Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
+            Assert.Equal(state.FirmwareVersion, deviceInfo.FirmwareVersion);
+            Assert.Equal(state.FormFactor, deviceInfo.FormFactor);
+
+            // Log which transport was used for this test iteration
+            Assert.NotEqual(ConnectionType.Unknown, state.ConnectionType);
         });
     }
 }

@@ -1,52 +1,27 @@
 #!/usr/bin/env bun
 
-import { join, dirname, basename } from "path";
+import { join, dirname } from "path";
 import { readdirSync, existsSync, readFileSync } from "fs";
 
+// Import pure utility functions from the testable module
+import {
+  isProgressFile,
+  parseProgressFile,
+  formatProgressContext,
+  deriveSessionSlug,
+  formatSkillsForPrompt,
+  formatDuration,
+  detectPhaseFromCommits,
+  parseSkillFile,
+  parseArgs,
+  type Config,
+  type SkillInfo,
+  type ProgressFileState,
+  type ProgressPhase,
+  type ProgressTask,
+} from "./ralph-loop-utils";
+
 // --- Configuration & Constants ---
-
-interface SkillInfo {
-  name: string;
-  description: string;
-  mandatory: boolean;
-}
-
-interface ProgressTask {
-  id: string;
-  description: string;
-  completed: boolean;
-  lineNumber: number;
-}
-
-interface ProgressPhase {
-  name: string;
-  priority: number; // 0, 1, or 2
-  goal: string;
-  files: { src?: string; test?: string };
-  tasks: ProgressTask[];
-}
-
-interface ProgressFileState {
-  isProgressFile: boolean;
-  feature: string;
-  prd?: string;
-  status: string;
-  phases: ProgressPhase[];
-  currentPhase: ProgressPhase | null;
-  currentTask: ProgressTask | null;
-  rawContent: string;
-}
-
-interface Config {
-  promptParts: string[];
-  maxIterations: number;
-  completionPromise: string | null;
-  delay: number; // seconds
-  learningMode: boolean;
-  promptFile: string | null;
-  model: string | null;
-  session: string | null;
-}
 
 interface IterationMetrics {
   iteration: number;
@@ -74,212 +49,6 @@ const CONSTANTS = {
 // --- Helper Functions ---
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// --- Progress File Detection & Parsing ---
-
-function isProgressFile(content: string): boolean {
-  // Detect YAML frontmatter with type: progress
-  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-  if (!frontmatterMatch) return false;
-  return /^type:\s*progress\s*$/m.test(frontmatterMatch[1]);
-}
-
-function parseProgressFile(content: string): ProgressFileState {
-  const result: ProgressFileState = {
-    isProgressFile: false,
-    feature: "",
-    status: "in-progress",
-    phases: [],
-    currentPhase: null,
-    currentTask: null,
-    rawContent: content,
-  };
-
-  // Parse YAML frontmatter
-  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-  if (!frontmatterMatch) return result;
-  
-  const frontmatter = frontmatterMatch[1];
-  if (!/^type:\s*progress\s*$/m.test(frontmatter)) return result;
-  
-  result.isProgressFile = true;
-  
-  // Extract frontmatter fields
-  const featureMatch = frontmatter.match(/^feature:\s*(.+)$/m);
-  if (featureMatch) result.feature = featureMatch[1].trim();
-  
-  const prdMatch = frontmatter.match(/^prd:\s*(.+)$/m);
-  if (prdMatch) result.prd = prdMatch[1].trim();
-  
-  const statusMatch = frontmatter.match(/^status:\s*(.+)$/m);
-  if (statusMatch) result.status = statusMatch[1].trim();
-
-  // Parse phases - look for ## Phase N: Name (P0/P1/P2)
-  const lines = content.split("\n");
-  let currentPhase: ProgressPhase | null = null;
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    
-    // Phase header: ## Phase 1: Name (P0)
-    const phaseMatch = line.match(/^##\s+Phase\s+\d+:\s*(.+?)\s*\(P(\d)\)\s*$/i);
-    if (phaseMatch) {
-      if (currentPhase) result.phases.push(currentPhase);
-      currentPhase = {
-        name: phaseMatch[1].trim(),
-        priority: parseInt(phaseMatch[2], 10),
-        goal: "",
-        files: {},
-        tasks: [],
-      };
-      continue;
-    }
-    
-    if (!currentPhase) continue;
-    
-    // Goal line: **Goal:** text
-    const goalMatch = line.match(/^\*\*Goal:\*\*\s*(.+)$/);
-    if (goalMatch) {
-      currentPhase.goal = goalMatch[1].trim();
-      continue;
-    }
-    
-    // Files - Src: `path`
-    const srcMatch = line.match(/^-\s*Src:\s*`(.+)`/);
-    if (srcMatch) {
-      currentPhase.files.src = srcMatch[1];
-      continue;
-    }
-    
-    // Files - Test: `path`
-    const testMatch = line.match(/^-\s*Test:\s*`(.+)`/);
-    if (testMatch) {
-      currentPhase.files.test = testMatch[1];
-      continue;
-    }
-    
-    // Task: - [ ] 1.1: Description or - [x] S.1: Description (supports N.N or letter.N)
-    const taskMatch = line.match(/^-\s*\[([ x])\]\s*([A-Za-z0-9]+\.\d+):\s*(.+)$/);
-    if (taskMatch) {
-      currentPhase.tasks.push({
-        id: taskMatch[2],
-        description: taskMatch[3].trim(),
-        completed: taskMatch[1] === "x",
-        lineNumber: i,
-      });
-    }
-  }
-  
-  // Don't forget the last phase
-  if (currentPhase) result.phases.push(currentPhase);
-  
-  // Sort phases by priority
-  result.phases.sort((a, b) => a.priority - b.priority);
-  
-  // Find current phase (first with incomplete tasks)
-  for (const phase of result.phases) {
-    const incompleteTask = phase.tasks.find(t => !t.completed);
-    if (incompleteTask) {
-      result.currentPhase = phase;
-      result.currentTask = incompleteTask;
-      break;
-    }
-  }
-  
-  return result;
-}
-
-// Execution protocol injected for progress file mode
-const EXECUTION_PROTOCOL = `
-[EXECUTION PROTOCOL - FOLLOW EXACTLY]
-
-You are executing a task from a progress file. Follow this protocol for EVERY task:
-
-## TDD Loop
-1. **RED:** Write a failing test that asserts the task's expected behavior
-   - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
-   - Expect: FAILURE (test must fail first to prove it tests something)
-
-2. **GREEN:** Write minimal code to make the test pass
-   - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
-   - Expect: SUCCESS
-
-3. **REFACTOR:** Clean up code, verify security, add XML docs if public API
-
-4. **COMMIT:** 
-   - \`git add {specific files only}\` - NEVER use \`git add .\`
-   - \`git commit -m "feat(scope): task description"\`
-
-5. **UPDATE PROGRESS FILE:**
-   - Change \`- [ ]\` to \`- [x]\` for the completed task
-   - Add a note under ### Notes if relevant
-
-## Security Checklist (verify before marking task complete)
-- [ ] Sensitive data (PINs, keys) zeroed with \`CryptographicOperations.ZeroMemory\`
-- [ ] No secrets logged or printed
-- [ ] Input validation for lengths and ranges
-
-## Build Commands (MANDATORY - never use raw dotnet commands)
-- Build: \`dotnet build.cs build\`
-- Test: \`dotnet build.cs test\`
-- Test filtered: \`dotnet build.cs test --filter "..."\`
-
-## Rules
-- Complete ONE task fully before moving to next
-- Mark \`[x]\` ONLY after build + test pass
-- If stuck, add a note and move to next task (don't loop forever)
-`;
-
-function formatProgressContext(state: ProgressFileState): string {
-  if (!state.currentPhase || !state.currentTask) {
-    return `
-[PROGRESS FILE STATUS]
-All tasks complete! Verify everything passes, then output the completion promise.
-
-Final verification:
-1. Run: \`dotnet build.cs build\` - must exit 0
-2. Run: \`dotnet build.cs test\` - all tests must pass
-3. Check: No regressions in existing tests
-`;
-  }
-
-  return `
-[CURRENT TASK CONTEXT]
-**Phase:** ${state.currentPhase.name} (P${state.currentPhase.priority})
-**Goal:** ${state.currentPhase.goal}
-**Files:**
-- Src: \`${state.currentPhase.files.src || "TBD"}\`
-- Test: \`${state.currentPhase.files.test || "TBD"}\`
-
-**Current Task:** ${state.currentTask.id}: ${state.currentTask.description}
-
-**Progress File:** Re-read the progress file to see full context and update it after completing this task.
-
-**Remaining in this phase:**
-${state.currentPhase.tasks.filter(t => !t.completed).map(t => `- [ ] ${t.id}: ${t.description}`).join("\n")}
-`;
-}
-
-// Derive session slug from various sources
-function deriveSessionSlug(config: Config): string {
-  // Priority 1: Explicit --session flag
-  if (config.session) {
-    return config.session.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").slice(0, 50);
-  }
-  
-  // Priority 2: Extract from prompt file name
-  if (config.promptFile) {
-    const filename = basename(config.promptFile, ".md");
-    // Remove date prefix if present (e.g., "2026-01-18-feature-name" -> "feature-name")
-    const withoutDate = filename.replace(/^\d{4}-\d{2}-\d{2}-?/, "");
-    if (withoutDate) {
-      return withoutDate.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").slice(0, 50);
-    }
-  }
-  
-  // Priority 3: Timestamp fallback
-  return new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-}
 
 // Bun-native implementation of "tee" (pipe stream to console + file)
 async function runCopilotWithTee(args: string[], logFile: string): Promise<string> {
@@ -336,8 +105,6 @@ async function runCopilotWithTee(args: string[], logFile: string): Promise<strin
   return fullOutput;
 }
 
-// --- Main Class ---
-
 // --- Skill Discovery ---
 
 function discoverSkills(): SkillInfo[] {
@@ -354,50 +121,53 @@ function discoverSkills(): SkillInfo[] {
     if (!existsSync(skillFile)) continue;
 
     const content = readFileSync(skillFile, "utf-8");
-    
-    // Parse YAML frontmatter
-    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-    if (!frontmatterMatch) continue;
-
-    const frontmatter = frontmatterMatch[1];
-    const nameMatch = frontmatter.match(/^name:\s*(.+)$/m);
-    const descMatch = frontmatter.match(/^description:\s*(.+)$/m);
-
-    if (nameMatch && descMatch) {
-      const name = nameMatch[1].trim();
-      const description = descMatch[1].trim();
-      // Detect mandatory skills by keywords in description
-      const mandatory = description.toLowerCase().includes("required") || 
-                        description.toLowerCase().includes("never use");
-      skills.push({ name, description, mandatory });
-    }
+    const skill = parseSkillFile(content);
+    if (skill) skills.push(skill);
   }
 
   return skills;
 }
 
-function formatSkillsForPrompt(skills: SkillInfo[]): string {
-  if (skills.length === 0) return "";
+// Execution protocol injected for progress file mode
+const EXECUTION_PROTOCOL = `
+[EXECUTION PROTOCOL - FOLLOW EXACTLY]
 
-  const mandatory = skills.filter(s => s.mandatory);
-  const optional = skills.filter(s => !s.mandatory);
+You are executing a task from a progress file. Follow this protocol for EVERY task:
 
-  let output = `[AVAILABLE SKILLS - REVIEW BEFORE STARTING]
+## TDD Loop
+1. **RED:** Write a failing test that asserts the task's expected behavior
+   - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
+   - Expect: FAILURE (test must fail first to prove it tests something)
 
-MANDATORY SKILLS (violating these is a critical error):
-${mandatory.map(s => `- ${s.name}: ${s.description}`).join("\n")}
+2. **GREEN:** Write minimal code to make the test pass
+   - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
+   - Expect: SUCCESS
 
-OTHER SKILLS:
-${optional.map(s => `- ${s.name}: ${s.description}`).join("\n")}
+3. **REFACTOR:** Clean up code, verify security, add XML docs if public API
 
-SKILL RULES:
-- BEFORE any build/test/commit action, check if a skill covers it
-- Use \`skill invoke <name>\` or follow skill instructions
-- Mandatory skills MUST be used - direct commands (dotnet build, dotnet test, git add .) are FORBIDDEN
+4. **COMMIT:** 
+   - \`git add {specific files only}\` - NEVER use \`git add .\`
+   - \`git commit -m "feat(scope): task description"\`
+
+5. **UPDATE PROGRESS FILE:**
+   - Change \`- [ ]\` to \`- [x]\` for the completed task
+   - Add a note under ### Notes if relevant
+
+## Security Checklist (verify before marking task complete)
+- [ ] Sensitive data (PINs, keys) zeroed with \`CryptographicOperations.ZeroMemory\`
+- [ ] No secrets logged or printed
+- [ ] Input validation for lengths and ranges
+
+## Build Commands (MANDATORY - never use raw dotnet commands)
+- Build: \`dotnet build.cs build\`
+- Test: \`dotnet build.cs test\`
+- Test filtered: \`dotnet build.cs test --filter "..."\`
+
+## Rules
+- Complete ONE task fully before moving to next
+- Mark \`[x]\` ONLY after build + test pass
+- If stuck, add a note and move to next task (don't loop forever)
 `;
-
-  return output;
-}
 
 class RalphLoop {
   private config: Config;
@@ -569,19 +339,6 @@ ${this.config.learningMode ? `Learning mode: ENABLED - Review file: ${this.revie
     });
   }
 
-  private detectPhaseFromCommits(commits: Array<{ message: string }>): string | null {
-    for (const commit of commits) {
-      // Match patterns like "Phase 1", "phase 2", "PHASE_1_DONE"
-      const phaseMatch = commit.message.match(/phase[\s_-]*(\d+)/i);
-      if (phaseMatch) return `Phase ${phaseMatch[1]}`;
-      
-      // Match conventional commit scopes like "feat(core):", "test(piv):"
-      const scopeMatch = commit.message.match(/^(?:feat|fix|test|refactor|docs)\(([^)]+)\)/i);
-      if (scopeMatch) return scopeMatch[1];
-    }
-    return null;
-  }
-
   private getFileChangeStats(baseHash: string): { filesChanged: number; linesAdded: number; linesRemoved: number; fileList: string[] } {
     let linesAdded = 0, linesRemoved = 0, filesChanged = 0;
     let fileList: string[] = [];
@@ -635,7 +392,7 @@ ${this.config.learningMode ? `Learning mode: ENABLED - Review file: ${this.revie
 
   private captureIterationMetrics(iter: number, durationSeconds: number): IterationMetrics {
     const newCommits = this.getNewCommits(this.lastCommitHash);
-    const phase = this.detectPhaseFromCommits(newCommits);
+    const phase = detectPhaseFromCommits(newCommits);
     const commitMessage = newCommits.length > 0 ? newCommits[0].message : null;
     const stats = this.getFileChangeStats(this.lastCommitHash);
     
@@ -651,16 +408,6 @@ ${this.config.learningMode ? `Learning mode: ENABLED - Review file: ${this.revie
     };
   }
 
-  private formatDuration(seconds: number): string {
-    if (seconds < 60) return `${seconds}s`;
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    if (mins < 60) return `${mins}m ${secs}s`;
-    const hours = Math.floor(mins / 60);
-    const remainMins = mins % 60;
-    return `${hours}h ${remainMins}m`;
-  }
-
   // --- Learning Logic ---
 
   private async captureIterationLearning(iter: number, output: string, logFile: string, metrics: IterationMetrics) {
@@ -673,7 +420,7 @@ ${this.config.learningMode ? `Learning mode: ENABLED - Review file: ${this.revie
     const truncated = output.split("\n").length > 50;
     
     // Build metrics summary for log entry
-    const metricsLine = `Duration: ${this.formatDuration(metrics.durationSeconds)} | Files: ${metrics.filesChanged} | +${metrics.linesAdded}/-${metrics.linesRemoved}`;
+    const metricsLine = `Duration: ${formatDuration(metrics.durationSeconds)} | Files: ${metrics.filesChanged} | +${metrics.linesAdded}/-${metrics.linesRemoved}`;
     const phaseLine = metrics.phase ? `Phase: ${metrics.phase}` : "";
     const commitLine = metrics.commitMessage ? `Commit: "${metrics.commitMessage}"` : "";
     
@@ -731,7 +478,7 @@ ${this.iterationMetrics.map(m => {
   const commitCell = m.commitMessage 
     ? `"${escapeTableCell(m.commitMessage.slice(0, 40))}${m.commitMessage.length > 40 ? "..." : ""}"`
     : "-";
-  return `| ${m.iteration} | ${this.formatDuration(m.durationSeconds)} | ${escapeTableCell(m.phase || "-")} | ${m.filesChanged} | +${m.linesAdded} | -${m.linesRemoved} | ${commitCell} |`;
+  return `| ${m.iteration} | ${formatDuration(m.durationSeconds)} | ${escapeTableCell(m.phase || "-")} | ${m.filesChanged} | +${m.linesAdded} | -${m.linesRemoved} | ${commitCell} |`;
 }).join("\n")}`
       : "No metrics captured";
 
@@ -748,8 +495,8 @@ ${this.iterationMetrics.map(m => {
 
 Session Details:
 - Iterations: ${this.iteration}
-- Total Duration: ${this.formatDuration(duration)}
-- Average Iteration: ${this.formatDuration(avgDuration)}
+- Total Duration: ${formatDuration(duration)}
+- Average Iteration: ${formatDuration(avgDuration)}
 - Success: ${endReason}
 - Prompt: ${this.prompt}
 
@@ -913,7 +660,7 @@ ${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}`
       const metrics = this.captureIterationMetrics(this.iteration, iterationDuration);
       
       // Print iteration summary
-      console.log(`\n${CONSTANTS.COLOR.YELLOW}📊 Iteration ${this.iteration}: ${this.formatDuration(iterationDuration)} | ${metrics.filesChanged} files | +${metrics.linesAdded}/-${metrics.linesRemoved} lines${metrics.phase ? ` | ${metrics.phase}` : ""}${CONSTANTS.COLOR.RESET}`);
+      console.log(`\n${CONSTANTS.COLOR.YELLOW}📊 Iteration ${this.iteration}: ${formatDuration(iterationDuration)} | ${metrics.filesChanged} files | +${metrics.linesAdded}/-${metrics.linesRemoved} lines${metrics.phase ? ` | ${metrics.phase}` : ""}${CONSTANTS.COLOR.RESET}`);
       
       await this.captureIterationLearning(this.iteration, output, logFile, metrics);
 

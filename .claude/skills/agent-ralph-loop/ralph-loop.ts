@@ -11,6 +11,32 @@ interface SkillInfo {
   mandatory: boolean;
 }
 
+interface ProgressTask {
+  id: string;
+  description: string;
+  completed: boolean;
+  lineNumber: number;
+}
+
+interface ProgressPhase {
+  name: string;
+  priority: number; // 0, 1, or 2
+  goal: string;
+  files: { src?: string; test?: string };
+  tasks: ProgressTask[];
+}
+
+interface ProgressFileState {
+  isProgressFile: boolean;
+  feature: string;
+  prd?: string;
+  status: string;
+  phases: ProgressPhase[];
+  currentPhase: ProgressPhase | null;
+  currentTask: ProgressTask | null;
+  rawContent: string;
+}
+
 interface Config {
   promptParts: string[];
   maxIterations: number;
@@ -48,6 +74,191 @@ const CONSTANTS = {
 // --- Helper Functions ---
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// --- Progress File Detection & Parsing ---
+
+function isProgressFile(content: string): boolean {
+  // Detect YAML frontmatter with type: progress
+  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!frontmatterMatch) return false;
+  return /^type:\s*progress\s*$/m.test(frontmatterMatch[1]);
+}
+
+function parseProgressFile(content: string): ProgressFileState {
+  const result: ProgressFileState = {
+    isProgressFile: false,
+    feature: "",
+    status: "in-progress",
+    phases: [],
+    currentPhase: null,
+    currentTask: null,
+    rawContent: content,
+  };
+
+  // Parse YAML frontmatter
+  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!frontmatterMatch) return result;
+  
+  const frontmatter = frontmatterMatch[1];
+  if (!/^type:\s*progress\s*$/m.test(frontmatter)) return result;
+  
+  result.isProgressFile = true;
+  
+  // Extract frontmatter fields
+  const featureMatch = frontmatter.match(/^feature:\s*(.+)$/m);
+  if (featureMatch) result.feature = featureMatch[1].trim();
+  
+  const prdMatch = frontmatter.match(/^prd:\s*(.+)$/m);
+  if (prdMatch) result.prd = prdMatch[1].trim();
+  
+  const statusMatch = frontmatter.match(/^status:\s*(.+)$/m);
+  if (statusMatch) result.status = statusMatch[1].trim();
+
+  // Parse phases - look for ## Phase N: Name (P0/P1/P2)
+  const lines = content.split("\n");
+  let currentPhase: ProgressPhase | null = null;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    // Phase header: ## Phase 1: Name (P0)
+    const phaseMatch = line.match(/^##\s+Phase\s+\d+:\s*(.+?)\s*\(P(\d)\)\s*$/i);
+    if (phaseMatch) {
+      if (currentPhase) result.phases.push(currentPhase);
+      currentPhase = {
+        name: phaseMatch[1].trim(),
+        priority: parseInt(phaseMatch[2], 10),
+        goal: "",
+        files: {},
+        tasks: [],
+      };
+      continue;
+    }
+    
+    if (!currentPhase) continue;
+    
+    // Goal line: **Goal:** text
+    const goalMatch = line.match(/^\*\*Goal:\*\*\s*(.+)$/);
+    if (goalMatch) {
+      currentPhase.goal = goalMatch[1].trim();
+      continue;
+    }
+    
+    // Files - Src: `path`
+    const srcMatch = line.match(/^-\s*Src:\s*`(.+)`/);
+    if (srcMatch) {
+      currentPhase.files.src = srcMatch[1];
+      continue;
+    }
+    
+    // Files - Test: `path`
+    const testMatch = line.match(/^-\s*Test:\s*`(.+)`/);
+    if (testMatch) {
+      currentPhase.files.test = testMatch[1];
+      continue;
+    }
+    
+    // Task: - [ ] 1.1: Description or - [x] 1.1: Description
+    const taskMatch = line.match(/^-\s*\[([ x])\]\s*(\d+\.\d+):\s*(.+)$/);
+    if (taskMatch) {
+      currentPhase.tasks.push({
+        id: taskMatch[2],
+        description: taskMatch[3].trim(),
+        completed: taskMatch[1] === "x",
+        lineNumber: i,
+      });
+    }
+  }
+  
+  // Don't forget the last phase
+  if (currentPhase) result.phases.push(currentPhase);
+  
+  // Sort phases by priority
+  result.phases.sort((a, b) => a.priority - b.priority);
+  
+  // Find current phase (first with incomplete tasks)
+  for (const phase of result.phases) {
+    const incompleteTask = phase.tasks.find(t => !t.completed);
+    if (incompleteTask) {
+      result.currentPhase = phase;
+      result.currentTask = incompleteTask;
+      break;
+    }
+  }
+  
+  return result;
+}
+
+// Execution protocol injected for progress file mode
+const EXECUTION_PROTOCOL = `
+[EXECUTION PROTOCOL - FOLLOW EXACTLY]
+
+You are executing a task from a progress file. Follow this protocol for EVERY task:
+
+## TDD Loop
+1. **RED:** Write a failing test that asserts the task's expected behavior
+   - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
+   - Expect: FAILURE (test must fail first to prove it tests something)
+
+2. **GREEN:** Write minimal code to make the test pass
+   - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
+   - Expect: SUCCESS
+
+3. **REFACTOR:** Clean up code, verify security, add XML docs if public API
+
+4. **COMMIT:** 
+   - \`git add {specific files only}\` - NEVER use \`git add .\`
+   - \`git commit -m "feat(scope): task description"\`
+
+5. **UPDATE PROGRESS FILE:**
+   - Change \`- [ ]\` to \`- [x]\` for the completed task
+   - Add a note under ### Notes if relevant
+
+## Security Checklist (verify before marking task complete)
+- [ ] Sensitive data (PINs, keys) zeroed with \`CryptographicOperations.ZeroMemory\`
+- [ ] No secrets logged or printed
+- [ ] Input validation for lengths and ranges
+
+## Build Commands (MANDATORY - never use raw dotnet commands)
+- Build: \`dotnet build.cs build\`
+- Test: \`dotnet build.cs test\`
+- Test filtered: \`dotnet build.cs test --filter "..."\`
+
+## Rules
+- Complete ONE task fully before moving to next
+- Mark \`[x]\` ONLY after build + test pass
+- If stuck, add a note and move to next task (don't loop forever)
+`;
+
+function formatProgressContext(state: ProgressFileState): string {
+  if (!state.currentPhase || !state.currentTask) {
+    return `
+[PROGRESS FILE STATUS]
+All tasks complete! Verify everything passes, then output the completion promise.
+
+Final verification:
+1. Run: \`dotnet build.cs build\` - must exit 0
+2. Run: \`dotnet build.cs test\` - all tests must pass
+3. Check: No regressions in existing tests
+`;
+  }
+
+  return `
+[CURRENT TASK CONTEXT]
+**Phase:** ${state.currentPhase.name} (P${state.currentPhase.priority})
+**Goal:** ${state.currentPhase.goal}
+**Files:**
+- Src: \`${state.currentPhase.files.src || "TBD"}\`
+- Test: \`${state.currentPhase.files.test || "TBD"}\`
+
+**Current Task:** ${state.currentTask.id}: ${state.currentTask.description}
+
+**Progress File:** Re-read the progress file to see full context and update it after completing this task.
+
+**Remaining in this phase:**
+${state.currentPhase.tasks.filter(t => !t.completed).map(t => `- [ ] ${t.id}: ${t.description}`).join("\n")}
+`;
+}
 
 // Derive session slug from various sources
 function deriveSessionSlug(config: Config): string {
@@ -203,6 +414,7 @@ class RalphLoop {
   private sessionDir: string = "";
   private stateFile: string = "";
   private learningDir: string = "";
+  private progressState: ProgressFileState | null = null;
 
   constructor(config: Config) {
     this.config = config;
@@ -230,6 +442,9 @@ class RalphLoop {
         process.exit(1);
       }
       this.prompt = (await f.text()).trim();
+      
+      // Check if this is a progress file
+      this.progressState = parseProgressFile(this.prompt);
     } else {
       this.prompt = this.config.promptParts.join(" ");
     }
@@ -312,10 +527,17 @@ ${this.prompt}
   private printStartupBanner() {
     const skillCount = discoverSkills().length;
     const mandatoryCount = discoverSkills().filter(s => s.mandatory).length;
+    
+    // Detect progress file mode during init
+    const isProgressMode = this.progressState?.isProgressFile ?? false;
+    const modeStr = isProgressMode ? "PROGRESS FILE" : "AD-HOC";
+    const modeColor = isProgressMode ? CONSTANTS.COLOR.GREEN : CONSTANTS.COLOR.YELLOW;
+    
     console.log(`
 ${CONSTANTS.COLOR.CYAN}🔄 Ralph loop activated for Copilot CLI! (Bun Engine)${CONSTANTS.COLOR.RESET}
 
 Session: ${this.sessionDir}
+Mode: ${modeColor}${modeStr}${CONSTANTS.COLOR.RESET}${isProgressMode ? ` - ${this.progressState?.feature || "unknown feature"}` : ""}
 Max iterations: ${this.config.maxIterations > 0 ? this.config.maxIterations : "unlimited (infinite)"}
 Completion promise: ${this.config.completionPromise ? this.config.completionPromise : "none (runs forever)"}
 Model: ${this.config.model || "default"}
@@ -593,6 +815,15 @@ Output <promise>ANALYSIS_COMPLETE</promise> when done.`;
         return;
       }
 
+      // Re-read progress file each iteration to get updated state
+      if (this.config.promptFile) {
+        const fileContent = await Bun.file(this.config.promptFile).text();
+        this.progressState = parseProgressFile(fileContent);
+        if (this.progressState.isProgressFile) {
+          this.prompt = fileContent; // Update with latest content
+        }
+      }
+
       await this.updateStateFile();
 
       console.log(`
@@ -601,9 +832,52 @@ ${CONSTANTS.COLOR.CYAN}🔄 ═════════════════�
 🔄 ═══════════════════════════════════════════════════════════${CONSTANTS.COLOR.RESET}
 `);
 
+      // Log progress file status if applicable
+      if (this.progressState?.isProgressFile) {
+        if (this.progressState.currentTask) {
+          console.log(`${CONSTANTS.COLOR.YELLOW}📋 Progress: Phase "${this.progressState.currentPhase?.name}" | Task ${this.progressState.currentTask.id}: ${this.progressState.currentTask.description}${CONSTANTS.COLOR.RESET}\n`);
+        } else {
+          console.log(`${CONSTANTS.COLOR.GREEN}📋 Progress: All tasks complete - running final verification${CONSTANTS.COLOR.RESET}\n`);
+        }
+      }
+
       const logFile = join(this.sessionDir, `iteration-${this.iteration}.log`);
 
-      const iterationPrompt = `${this.skillsPrompt}
+      // Build iteration prompt - different for progress file vs ad-hoc mode
+      let iterationPrompt: string;
+      
+      if (this.progressState?.isProgressFile) {
+        // Progress file mode: inject full protocol + task context
+        iterationPrompt = `${this.skillsPrompt}
+
+[PROGRESS FILE MODE]
+You are executing tasks from a progress file. Read it carefully each iteration.
+
+**Progress File:** \`${this.config.promptFile}\`
+${this.progressState.prd ? `**Source PRD:** \`${this.progressState.prd}\`` : ""}
+
+${EXECUTION_PROTOCOL}
+
+${formatProgressContext(this.progressState)}
+
+---
+[Ralph Loop Context]
+Iteration: ${this.iteration}
+${this.config.completionPromise ? `Output <promise>${this.config.completionPromise}</promise> ONLY when ALL tasks in the progress file are marked [x] AND verification passes.` : ""}
+${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}` : ""}
+
+[AUTONOMY DIRECTIVES]
+1. You are in NON-INTERACTIVE mode. The user is not present.
+2. NEVER ask questions, NEVER ask for clarification, and NEVER say "Let me know if you want me to...".
+3. If a decision is ambiguous, pick the most standard/reasonable option and EXECUTE it immediately.
+4. Use "git" to explore the codebase if you are lost.
+5. Check your previous work in files and git history. Continue from where you left off.
+6. REVIEW THE SKILLS LIST ABOVE before any build/test/commit operation.
+7. After completing a task, UPDATE THE PROGRESS FILE to mark it [x].
+---`;
+      } else {
+        // Ad-hoc mode: original behavior
+        iterationPrompt = `${this.skillsPrompt}
 ${this.prompt}
 
 ---
@@ -620,6 +894,7 @@ ${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}`
 5. Check your previous work in files and git history. Continue from where you left off.
 6. REVIEW THE SKILLS LIST ABOVE before any build/test/commit operation.
 ---`;
+      }
 
       const copilotArgs = ["-p", iterationPrompt, "--allow-all-tools"];
       if (this.config.model) copilotArgs.push("--model", this.config.model);

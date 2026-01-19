@@ -21,7 +21,151 @@ The `ralph-loop` skill forces a sub-instance of GitHub Copilot to enter a recurs
 * **Iterative Debugging:** Running tests, reading errors, fixing code, and repeating until pass.
 * **Scaffolding:** Creating complex directory structures and boilerplates.
 
-## 2. Command Signature
+## 2. Operating Modes
+
+### Progress File Mode (Recommended)
+For structured, multi-phase work. The engine:
+- Detects progress file format via YAML frontmatter
+- Injects the full execution protocol automatically
+- Tracks phase/task state
+- Re-reads the file each iteration to find next task
+
+```bash
+bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
+  --prompt-file docs/ralph-loop/feature-progress.md \
+  --completion-promise "DONE" --max-iterations 30
+```
+
+### Ad-hoc Mode
+For quick, unstructured tasks. Provide a plain prompt (no progress file format).
+The engine injects skill awareness and autonomy directives only.
+
+```bash
+bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
+  "Fix the failing test in FooTests.cs" \
+  --completion-promise "FIXED"
+```
+
+---
+
+## 3. Progress File Format
+
+Progress files are **declarative** - they define WHAT to do, not HOW. The engine handles execution protocol.
+
+### YAML Frontmatter (Required for detection)
+
+```yaml
+---
+type: progress
+feature: feature-name
+prd: docs/specs/feature/final_spec.md  # optional, for traceability
+started: 2026-01-19
+status: in-progress  # in-progress | completed | blocked
+---
+```
+
+### Structure
+
+```markdown
+# {Feature Name} Progress
+
+## Phase 1: {Phase Name} (P0)
+
+**Goal:** {One sentence from user story}
+**Files:**
+- Src: `path/to/implementation.cs`
+- Test: `path/to/tests.cs`
+
+### Tasks
+- [ ] 1.1: {Task description}
+- [ ] 1.2: {Task description}
+- [x] 1.3: {Completed task} <!-- engine marks these -->
+
+### Notes
+<!-- Engine appends notes here after each task -->
+
+---
+
+## Phase 2: {Phase Name} (P1)
+...
+```
+
+### Priority Markers
+
+| Marker | Meaning | Order |
+|--------|---------|-------|
+| `(P0)` | Critical - must complete | First |
+| `(P1)` | Important - should complete | Second |
+| `(P2)` | Nice-to-have | Last |
+
+### Task Selection Rules
+
+1. Find highest priority incomplete phase (P0 → P1 → P2)
+2. Within phase, find first unchecked `[ ]` task
+3. Complete task fully before moving to next
+4. Mark `[x]` only after verification passes
+
+---
+
+## 4. Execution Protocol (Auto-Injected)
+
+When the engine detects a progress file, it injects these instructions automatically. **Do not add these to your progress file.**
+
+### TDD Loop (For each task)
+
+```
+1. RED: Write failing test asserting the task's behavior
+   Run: `dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"`
+   Expect: FAILURE
+
+2. GREEN: Write minimal code to pass
+   Run: `dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"`
+   Expect: SUCCESS
+
+3. REFACTOR: Clean up, check security, add docs
+
+4. COMMIT: `git add {specific files}` then `git commit -m "feat(scope): description"`
+
+5. UPDATE: Mark task `[x]` in progress file, add notes
+```
+
+### Security Protocol
+
+- **ZeroMemory:** Zero sensitive data (PINs, keys) using `CryptographicOperations.ZeroMemory`
+- **No Logs:** Never log sensitive values
+- **Validation:** Validate all input lengths and ranges
+
+### Git Discipline
+
+- **Explicit adds only:** `git add path/to/file.cs` - NEVER `git add .`
+- **Conventional commits:** `feat:`, `fix:`, `test:`, `refactor:`, `docs:`
+- **Commit per task:** One logical change per commit
+
+### Build Commands
+
+| Action | Command |
+|--------|---------|
+| Build | `dotnet build.cs build` |
+| Test | `dotnet build.cs test` |
+| Test filtered | `dotnet build.cs test --filter "..."` |
+
+**NEVER use `dotnet build` or `dotnet test` directly** - they fail on mixed xUnit v2/v3.
+
+---
+
+## 5. Creating Progress Files
+
+Progress files are created by converter skills:
+
+| Source | Converter | Output |
+|--------|-----------|--------|
+| PRD spec | `prd-to-ralph` | `docs/ralph-loop/{feature}-progress.md` |
+| Implementation plan | `plan-to-ralph` | `docs/ralph-loop/{feature}-progress.md` |
+| Manual | Direct creation | `docs/ralph-loop/{feature}-progress.md` |
+
+The engine never creates progress files - it only reads and updates them.
+
+## 6. Command Signature
 
 **Executable:** `bun .claude/skills/agent-ralph-loop/ralph-loop.ts`
 
@@ -30,7 +174,7 @@ The `ralph-loop` skill forces a sub-instance of GitHub Copilot to enter a recurs
 | Parameter | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | `[PROMPT]` | `string` | **Yes** (or via file) | The objective string passed as an argument. |
-| `--prompt-file` | `path` | **Yes** (alternative) | Read the prompt from a file. **Preferred for complex instructions** to avoid shell escaping issues. |
+| `--prompt-file` | `path` | **Yes** (alternative) | Read the prompt from a file. **Progress files detected automatically.** |
 | `--session` | `string` | No | Session name for output folder. Default: derived from prompt-file or timestamp. |
 | `--completion-promise` | `string` | Recommended | A unique string (e.g., `"DONE_V1"`) that signals success. Without this, the loop runs until `--max-iterations`. |
 | `--max-iterations` | `number` | No | Safety limit. Default: `0` (unlimited). |
@@ -48,22 +192,36 @@ The `ralph-loop` skill forces a sub-instance of GitHub Copilot to enter a recurs
 2. Slug from `--prompt-file` name (e.g., `2026-01-18-fido2-testing.md` → `fido2-testing`)
 3. Timestamp fallback (e.g., `2026-01-18T161244`)
 
-## 3. Autonomy Directives (Auto-Injected)
+## 7. Auto-Injected Directives
 
-The script automatically prepends and appends directives to your prompt, instructing the agent to:
-- **Review available skills before starting** (with mandatory vs optional categorization)
-- Operate in non-interactive mode without asking questions
-- Execute immediately on ambiguous decisions using standard patterns
-- Use git to explore the codebase and check previous work
-- Output the completion promise only when the objective is fully verified
+The script automatically injects directives based on the input type:
 
-**Skill awareness is automatic:** The script discovers all skills in `.claude/skills/*/SKILL.md` and injects a categorized list into each iteration prompt. Mandatory skills (build, test, commit) are highlighted with clear rules forbidding direct commands.
+### Always Injected (Both Modes)
+- **Skill awareness:** Categorized list of available skills (mandatory vs optional)
+- **Autonomy directives:** Non-interactive mode, no questions, execute on ambiguity
+- **Git exploration:** Use git to check previous work and continue
 
-**You do not need to add these instructions to your prompt manually.**
+### Progress File Mode (Additional)
+- **Execution protocol:** TDD loop, security rules, git discipline
+- **Task context:** Current phase, next task, file paths
+- **Update instructions:** How to mark tasks complete
 
-## 4. Usage Examples
+**You do not need to add these instructions manually.**
 
-### Example 1: Simple Command Line (Fastest)
+## 8. Usage Examples
+
+### Example 1: Progress File Mode (Recommended)
+**Goal:** Execute a structured implementation from a progress file.
+
+```bash
+bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
+  --prompt-file docs/ralph-loop/fido2-credential-mgmt-progress.md \
+  --completion-promise "DONE" \
+  --max-iterations 30 \
+  --learn
+```
+
+### Example 2: Simple Ad-hoc Command
 **Goal:** Quick scaffolding or simple refactor.
 
 ```bash
@@ -72,42 +230,39 @@ bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
   --completion-promise "DONE"
 ```
 
-### Example 2: Using a Prompt File (Recommended for Complex Tasks)
-**Goal:** Complex refactor defined in a markdown file.
-
-Create a file `task_prompt.md` containing your objective (autonomy directives are auto-injected).
+### Example 3: Ad-hoc with Prompt File
+**Goal:** Complex ad-hoc task (no progress file format).
 
 ```bash
-bun .claude/skills/agent-ralph-loop/ralph-loop.ts --prompt-file task_prompt.md \
+bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
+  --prompt-file task_prompt.md \
   --completion-promise "REFACTOR_COMPLETE" \
   --max-iterations 20 \
   --learn
 ```
-
-### Example 3: Explicit Session Name
-**Goal:** Control output folder name.
-
-```bash
-bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
-  --prompt-file ./docs/plans/ralph-loop/2026-01-18-fido2-testing.md \
-  --session "fido2-round-2" \
-  --completion-promise "TESTS_PASSED" \
-  --max-iterations 12
-```
-
-Output goes to `./docs/ralph-loop/fido2-round-2/`
 
 ### Example 4: Autonomous Debugging
 **Goal:** Fix a failing test suite by iterating on the code.
 
 ```bash
 bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
-  "Run 'npm test'. Analyze the stderr output. Locate the failing code in src/. Apply fixes. Re-run 'npm test'. Repeat until passing." \
+  "Run 'dotnet build.cs test'. Analyze failures. Fix code. Repeat until passing." \
   --completion-promise "TESTS_PASSED" \
   --max-iterations 12 \
   --model claude-sonnet-4.5
 ```
-## 5. Success Criteria
-**Success:** The process exits with code 0 and logs ✅ Ralph loop: Detected <promise>...</promise>.
 
-**Failure:** The process exits because max_iterations was reached. This indicates the agent got stuck or the prompt was too vague.
+## 9. Success Criteria
+
+**Success:** The process exits with code 0 and logs `✅ Ralph loop: Detected <promise>...</promise>`.
+
+**Failure:** The process exits because `max_iterations` was reached. This indicates the agent got stuck or the task was too complex.
+
+## 10. Related Skills
+
+| Skill | Relationship |
+|-------|--------------|
+| `prd-to-ralph` | Creates progress files from PRD specs |
+| `plan-to-ralph` | Creates progress files from implementation plans |
+| `write-ralph-prompt` | Guidance for ad-hoc mode prompts |
+| `write-plan` | Creates implementation plans (upstream of plan-to-ralph) |

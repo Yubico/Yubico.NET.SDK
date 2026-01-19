@@ -3,20 +3,30 @@ name: write-ralph-prompt
 description: Use when crafting Ralph Loop prompts - ensures proper verification and exit criteria
 ---
 
-# Writing Ralph Loop Prompts
+# Writing Ralph Loop Prompts (Ad-hoc Mode)
 
-This skill provides guidance for creating Ralph Loop prompts that enforce proper verification, phased exit criteria, and robust completion requirements.
+This skill provides guidance for creating Ralph Loop prompts **when NOT using a progress file**. For structured, multi-phase work, use `prd-to-ralph` or `plan-to-ralph` instead - they create progress files that auto-inject the execution protocol.
 
-**Reference:** `.claude/skills/agent-ralph-loop/SKILL.md` (loop semantics + required autonomy injection).
+**When to use this skill:**
+- Ad-hoc tasks without a progress file
+- Quick one-off tasks ("fix this test", "refactor these files")
+- Tasks that don't need phased tracking
+
+**When NOT to use this skill:**
+- PRD-driven implementation → use `prd-to-ralph`
+- Plan-driven implementation → use `plan-to-ralph` (or create progress file manually)
+- These create progress files with `type: progress` frontmatter, and `ralph-loop.ts` auto-injects the execution protocol.
+
+**Reference:** `.claude/skills/agent-ralph-loop/SKILL.md` (loop semantics + progress file format).
 
 **Logs/state:** `./docs/ralph-loop/<session>/` (state.md, iteration-*.log, and learning artifacts under `./docs/ralph-loop/<session>/learning/`).
 
 **Save location:** `./docs/plans/ralph-loop/YYYY-MM-DD-<feature-name>.md` (offer to save; create directories as needed).
 
 ## Use when
-- Creating a new Ralph Loop prompt for a coding task
-- Ensuring a Ralph Loop does not complete prematurely
-- Enforcing build/test verification before completion
+- Creating ad-hoc Ralph Loop prompts (no progress file)
+- Quick one-off automation tasks
+- Tasks that don't need progress tracking
 
 ## Core Principles
 

@@ -15,6 +15,7 @@
 using System.Reflection;
 using Xunit;
 using Xunit.Sdk;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -83,6 +84,12 @@ public class WithYubiKeyAttribute : DataAttribute
     ///     Gets or sets whether NFC transport is required.
     /// </summary>
     public bool RequireNfc { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the required connection type.
+    ///     Use ConnectionType.Unknown (default) to match any connection type.
+    /// </summary>
+    public ConnectionType ConnectionType { get; set; } = ConnectionType.Unknown;
 
     /// <summary>
     ///     Gets or sets the required capability (must be enabled).
@@ -161,6 +168,7 @@ public class WithYubiKeyAttribute : DataAttribute
             FormFactor,
             RequireUsb,
             RequireNfc,
+            ConnectionType,
             Capability,
             FipsCapable,
             FipsApproved,
@@ -173,6 +181,7 @@ public class WithYubiKeyAttribute : DataAttribute
                 FormFactor,
                 RequireUsb,
                 RequireNfc,
+                ConnectionType,
                 Capability,
                 FipsCapable,
                 FipsApproved,

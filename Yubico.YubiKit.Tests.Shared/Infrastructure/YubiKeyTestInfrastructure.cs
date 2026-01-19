@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
@@ -61,6 +62,7 @@ internal static class YubiKeyTestInfrastructure
     /// <param name="formFactor">Required form factor.</param>
     /// <param name="requireUsb">Whether USB transport is required.</param>
     /// <param name="requireNfc">Whether NFC transport is required.</param>
+    /// <param name="connectionType">Required connection type.</param>
     /// <param name="capability">Required capability.</param>
     /// <param name="fipsCapable">Required FIPS-capable capability.</param>
     /// <param name="fipsApproved">Required FIPS-approved capability.</param>
@@ -72,6 +74,7 @@ internal static class YubiKeyTestInfrastructure
         FormFactor formFactor,
         bool requireUsb,
         bool requireNfc,
+        ConnectionType connectionType,
         DeviceCapabilities capability,
         DeviceCapabilities fipsCapable,
         DeviceCapabilities fipsApproved,
@@ -98,6 +101,10 @@ internal static class YubiKeyTestInfrastructure
         // Filter by NFC transport
         if (requireNfc)
             filtered = filtered.Where(d => d.IsNfcTransport);
+
+        // Filter by connection type
+        if (connectionType != ConnectionType.Unknown)
+            filtered = filtered.Where(d => d.ConnectionType == connectionType);
 
         // Filter by capability
         if (capability != DeviceCapabilities.None)
@@ -130,6 +137,7 @@ internal static class YubiKeyTestInfrastructure
         FormFactor formFactor,
         bool requireUsb,
         bool requireNfc,
+        ConnectionType connectionType,
         DeviceCapabilities capability,
         DeviceCapabilities fipsCapable,
         DeviceCapabilities fipsApproved,
@@ -148,6 +156,9 @@ internal static class YubiKeyTestInfrastructure
 
         if (requireNfc)
             criteria.Add("Transport = NFC");
+
+        if (connectionType != ConnectionType.Unknown)
+            criteria.Add($"ConnectionType = {connectionType}");
 
         if (capability != DeviceCapabilities.None)
             criteria.Add($"Capability = {capability}");

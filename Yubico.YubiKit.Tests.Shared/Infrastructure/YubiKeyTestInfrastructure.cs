@@ -260,14 +260,14 @@ internal static class YubiKeyTestInfrastructure
                         if (AllowList.IsDeviceAllowed(deviceInfo.Value.SerialNumber))
                         {
                             // Get device info
-                            var testDevice = new YubiKeyTestState(device, deviceInfo.Value);
+                            var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.ConnectionType);
                             authorizedDevices.Add(testDevice);
 
                             // Add to cache for deserialization
                             YubiKeyDeviceCache.AddDevice(testDevice);
 
                             Console.WriteLine(
-                                $"[YubiKey Infrastructure] Device SN:{deviceInfo.Value.SerialNumber} authorized " +
+                                $"[YubiKey Infrastructure] Device SN:{deviceInfo.Value.SerialNumber} ({device.ConnectionType}) authorized " +
                                 $"(FW:{deviceInfo.Value.FirmwareVersion}, {deviceInfo.Value.FormFactor})");
                         }
                         else

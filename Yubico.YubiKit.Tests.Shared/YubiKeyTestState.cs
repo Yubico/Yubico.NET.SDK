@@ -53,10 +53,12 @@ public class YubiKeyTestState : IXunitSerializable
     /// </summary>
     /// <param name="device">The YubiKey device.</param>
     /// <param name="deviceInfo">The device information.</param>
-    public YubiKeyTestState(IYubiKey device, DeviceInfo deviceInfo)
+    /// <param name="connectionType">The connection type for this device instance.</param>
+    public YubiKeyTestState(IYubiKey device, DeviceInfo deviceInfo, ConnectionType connectionType)
     {
         Device = device ?? throw new ArgumentNullException(nameof(device));
         DeviceInfo = deviceInfo;
+        ConnectionType = connectionType;
     }
 
     /// <summary>
@@ -88,6 +90,11 @@ public class YubiKeyTestState : IXunitSerializable
     public int? SerialNumber => DeviceInfo.SerialNumber;
 
     /// <summary>
+    ///     Gets the connection type for this device instance.
+    /// </summary>
+    public ConnectionType ConnectionType { get; private set; }
+
+    /// <summary>
     ///     Gets whether the device supports USB transport.
     /// </summary>
     public bool IsUsbTransport => DeviceInfo.UsbSupported != DeviceCapabilities.None;
@@ -105,22 +112,23 @@ public class YubiKeyTestState : IXunitSerializable
     /// <param name="info">The serialization information.</param>
     /// <remarks>
     ///     xUnit calls this method to reconstruct the device for test execution.
-    ///     We store the serial number and look up the device from the global device list.
+    ///     We use serial number and connection type to look up the device from the global cache.
     /// </remarks>
     public void Deserialize(IXunitSerializationInfo info)
     {
         var serialNumber = info.GetValue<int>(nameof(SerialNumber));
+        var connectionType = info.GetValue<ConnectionType>(nameof(ConnectionType));
 
-        // Look up device from static cache by serial number
-        // This is set by YubiKeyTheoryDiscoverer during test discovery
-        var deviceFromCache = YubiKeyDeviceCache.GetDevice(serialNumber);
+        // Look up device from static cache using composite key
+        var deviceFromCache = YubiKeyDeviceCache.GetDevice(serialNumber, connectionType);
         if (deviceFromCache is null)
             throw new InvalidOperationException(
-                $"Device with serial number {serialNumber} not found in cache. " +
+                $"Device with serial number {serialNumber} and connection type {connectionType} not found in cache. " +
                 "This should not happen - device should be cached by YubiKeyTheoryDiscoverer.");
 
         Device = deviceFromCache.Device;
         DeviceInfo = deviceFromCache.DeviceInfo;
+        ConnectionType = deviceFromCache.ConnectionType;
     }
 
     /// <summary>
@@ -129,9 +137,13 @@ public class YubiKeyTestState : IXunitSerializable
     /// <param name="info">The serialization information.</param>
     /// <remarks>
     ///     xUnit calls this method during test discovery.
-    ///     We only serialize the serial number (not the entire device object).
+    ///     We serialize the serial number and connection type to create a composite cache key.
     /// </remarks>
-    public void Serialize(IXunitSerializationInfo info) => info.AddValue(nameof(SerialNumber), DeviceInfo.SerialNumber);
+    public void Serialize(IXunitSerializationInfo info)
+    {
+        info.AddValue(nameof(SerialNumber), DeviceInfo.SerialNumber);
+        info.AddValue(nameof(ConnectionType), ConnectionType);
+    }
 
     #endregion
 
@@ -139,10 +151,10 @@ public class YubiKeyTestState : IXunitSerializable
     ///     Returns a friendly string representation for test output.
     /// </summary>
     /// <returns>
-    ///     A formatted string like: <c>YubiKey(SN:12345678,FW:5.7.2,UsbAKeychain)</c>
+    ///     A formatted string like: <c>YubiKey(SN:12345678,FW:5.7.2,UsbAKeychain,Ccid)</c>
     /// </returns>
     public override string ToString() =>
-        $"YubiKey(SN:{DeviceInfo.SerialNumber},FW:{DeviceInfo.FirmwareVersion},{DeviceInfo.FormFactor})";
+        $"YubiKey(SN:{DeviceInfo.SerialNumber},FW:{DeviceInfo.FirmwareVersion},{DeviceInfo.FormFactor},{ConnectionType})";
 
     /// <summary>
     ///     Checks if the device is FIPS-capable for the specified capability.
@@ -172,12 +184,19 @@ public class YubiKeyTestState : IXunitSerializable
 /// </summary>
 /// <remarks>
 ///     xUnit serializes/deserializes test parameters, but we can't serialize IYubiKey objects.
-///     This cache stores devices by serial number so we can reconstruct them during deserialization.
+///     This cache stores devices by composite key (serial number + connection type) so we can 
+///     reconstruct them during deserialization.
 /// </remarks>
 internal static class YubiKeyDeviceCache
 {
-    private static readonly Dictionary<int, YubiKeyTestState> s_devices = new();
+    private static readonly Dictionary<string, YubiKeyTestState> s_devices = new();
     private static readonly object s_lock = new();
+
+    /// <summary>
+    ///     Gets the cache key for a device.
+    /// </summary>
+    private static string GetCacheKey(int serialNumber, ConnectionType connectionType) =>
+        $"{serialNumber}:{connectionType}";
 
     /// <summary>
     ///     Adds a device to the cache.
@@ -186,18 +205,20 @@ internal static class YubiKeyDeviceCache
     {
         lock (s_lock)
         {
-            s_devices[state.SerialNumber.GetValueOrDefault()] = state; // TODO change to ReaderName/ DeviceId
+            var key = GetCacheKey(state.SerialNumber.GetValueOrDefault(), state.ConnectionType);
+            s_devices[key] = state;
         }
     }
 
     /// <summary>
-    ///     Gets a device from the cache by serial number.
+    ///     Gets a device from the cache by serial number and connection type.
     /// </summary>
-    public static YubiKeyTestState? GetDevice(int serialNumber)
+    public static YubiKeyTestState? GetDevice(int serialNumber, ConnectionType connectionType)
     {
         lock (s_lock)
         {
-            return s_devices.GetValueOrDefault(serialNumber);
+            var key = GetCacheKey(serialNumber, connectionType);
+            return s_devices.GetValueOrDefault(key);
         }
     }
 

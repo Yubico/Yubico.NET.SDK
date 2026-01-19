@@ -312,23 +312,30 @@ public class ManagementSessionAdvancedTests
     /// <summary>
     ///     Real-world scenario: Verifying serial number consistency.
     ///     Ensures device identity remains stable across sessions.
+    ///     Uses WithManagementAsync to automatically select correct transport.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey]
     public async Task SerialNumber_MultipleReads_RemainsConsistent(YubiKeyTestState state)
     {
-        // Read serial number multiple times
-        using var connection1 = await state.Device.ConnectAsync<ISmartCardConnection>();
-        using var mgmt1 = await ManagementSession.CreateAsync(connection1);
-        var deviceInfo1 = await mgmt1.GetDeviceInfoAsync();
-        var serial1 = deviceInfo1.SerialNumber;
+        int? serial1 = null;
+        int? serial2 = null;
 
-        using var connection2 = await state.Device.ConnectAsync<ISmartCardConnection>();
-        using var mgmt2 = await ManagementSession.CreateAsync(connection2);
-        var deviceInfo2 = await mgmt2.GetDeviceInfoAsync();
-        var serial2 = deviceInfo2.SerialNumber;
+        // Read serial number first time
+        await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+        {
+            var deviceInfo = await mgmt.GetDeviceInfoAsync();
+            serial1 = deviceInfo.SerialNumber;
+        });
 
-        // Serial number should be consistent
+        // Read serial number second time
+        await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+        {
+            var deviceInfo = await mgmt.GetDeviceInfoAsync();
+            serial2 = deviceInfo.SerialNumber;
+        });
+
+        // Serial number should be consistent across reads and match cached state
         Assert.Equal(serial1, serial2);
         Assert.Equal(state.SerialNumber, serial1);
     }

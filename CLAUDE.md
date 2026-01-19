@@ -15,6 +15,10 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 
 ## Quick Reference - Critical Rules
 
+**Documentation & Research:**
+- ✅ ALWAYS use Context7 MCP (`context7-query-docs` tool) to look up library/API documentation, code patterns, setup/configuration steps, and framework usage without requiring explicit request
+- ✅ Use Perplexity AI (`.claude/skills/tool-perplexity-search/SKILL.md`) for current events, recent releases, or up-to-date web information
+
 **Skills to Apply When Coding in This Repository:**
 - .claude/skills/tool-codemapper/SKILL.md
 - .claude/skills/domain-build/SKILL.md

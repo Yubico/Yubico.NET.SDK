@@ -19,6 +19,7 @@ interface Config {
   learningMode: boolean;
   promptFile: string | null;
   model: string | null;
+  session: string | null;
 }
 
 interface IterationMetrics {
@@ -33,8 +34,7 @@ interface IterationMetrics {
 }
 
 const CONSTANTS = {
-  STATE_FILE: "./docs/ralph-loop/state.md",
-  LEARNING_DIR: "./docs/ralph-loop/learning",
+  BASE_DIR: "./docs/ralph-loop",
   COLOR: {
     RESET: "\x1b[0m",
     RED: "\x1b[31m",
@@ -48,6 +48,27 @@ const CONSTANTS = {
 // --- Helper Functions ---
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Derive session slug from various sources
+function deriveSessionSlug(config: Config): string {
+  // Priority 1: Explicit --session flag
+  if (config.session) {
+    return config.session.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").slice(0, 50);
+  }
+  
+  // Priority 2: Extract from prompt file name
+  if (config.promptFile) {
+    const filename = basename(config.promptFile, ".md");
+    // Remove date prefix if present (e.g., "2026-01-18-feature-name" -> "feature-name")
+    const withoutDate = filename.replace(/^\d{4}-\d{2}-\d{2}-?/, "");
+    if (withoutDate) {
+      return withoutDate.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").slice(0, 50);
+    }
+  }
+  
+  // Priority 3: Timestamp fallback
+  return new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+}
 
 // Bun-native implementation of "tee" (pipe stream to console + file)
 async function runCopilotWithTee(args: string[], logFile: string): Promise<string> {
@@ -179,6 +200,9 @@ class RalphLoop {
   private lastCommitHash: string = "";
   private isActive: boolean = true;
   private skillsPrompt: string = "";
+  private sessionDir: string = "";
+  private stateFile: string = "";
+  private learningDir: string = "";
 
   constructor(config: Config) {
     this.config = config;
@@ -221,18 +245,21 @@ class RalphLoop {
       process.exit(1);
     }
 
-    // 2. Setup State
-    // Create state dir
-    const stateDir = dirname(CONSTANTS.STATE_FILE);
-    await import("fs").then(fs => fs.mkdirSync(stateDir, { recursive: true }));
+    // 2. Setup Session Directory
+    const sessionSlug = deriveSessionSlug(this.config);
+    this.sessionDir = join(CONSTANTS.BASE_DIR, sessionSlug);
+    this.stateFile = join(this.sessionDir, "state.md");
+    this.learningDir = join(this.sessionDir, "learning");
+    
+    await import("fs").then(fs => fs.mkdirSync(this.sessionDir, { recursive: true }));
 
     // Capture initial commit hash for tracking new commits per iteration
     this.lastCommitHash = this.getCurrentCommitHash();
 
     if (this.config.learningMode) {
-      await import("fs").then(fs => fs.mkdirSync(CONSTANTS.LEARNING_DIR, { recursive: true }));
+      await import("fs").then(fs => fs.mkdirSync(this.learningDir, { recursive: true }));
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 15);
-      this.reviewFile = join(CONSTANTS.LEARNING_DIR, `review-${timestamp}.md`);
+      this.reviewFile = join(this.learningDir, `review-${timestamp}.md`);
       await this.initializeReviewFile();
     }
 
@@ -279,7 +306,7 @@ started_at: "${new Date(this.startTime).toISOString()}"
 
 ${this.prompt}
 `;
-    await Bun.write(CONSTANTS.STATE_FILE, yaml);
+    await Bun.write(this.stateFile, yaml);
   }
 
   private printStartupBanner() {
@@ -288,6 +315,7 @@ ${this.prompt}
     console.log(`
 ${CONSTANTS.COLOR.CYAN}🔄 Ralph loop activated for Copilot CLI! (Bun Engine)${CONSTANTS.COLOR.RESET}
 
+Session: ${this.sessionDir}
 Max iterations: ${this.config.maxIterations > 0 ? this.config.maxIterations : "unlimited (infinite)"}
 Completion promise: ${this.config.completionPromise ? this.config.completionPromise : "none (runs forever)"}
 Model: ${this.config.model || "default"}
@@ -296,7 +324,7 @@ Skills loaded: ${skillCount} (${mandatoryCount} mandatory)
 
 Press Ctrl+C to cancel at any time.
 
-To monitor: cat ${CONSTANTS.STATE_FILE}
+To monitor: cat ${this.stateFile}
 ${this.config.learningMode ? `Learning mode: ENABLED - Review file: ${this.reviewFile}` : ""}
 ═══════════════════════════════════════════════════════════`);
   }
@@ -519,7 +547,7 @@ ${fileSummary}
 
 Review file to update: ${this.reviewFile}
 
-Please analyze the iteration logs in ./docs/ralph-loop/iteration-*.log and:
+Please analyze the iteration logs in ${this.sessionDir}/iteration-*.log and:
 1. Fill in the '## Summary' section with key stats
 2. Fill in the '## Iteration Metrics' section with the metrics table above
 3. Under '## Suggested Skills', propose skills
@@ -536,7 +564,7 @@ Output <promise>ANALYSIS_COMPLETE</promise> when done.`;
     if (this.config.model) copilotArgs.push("--model", this.config.model);
 
     try {
-        await runCopilotWithTee(copilotArgs, join(CONSTANTS.LEARNING_DIR, "analysis.log"));
+        await runCopilotWithTee(copilotArgs, join(this.learningDir, "analysis.log"));
         console.log(`\n${CONSTANTS.COLOR.GREEN}📝 Learning review file ready: ${this.reviewFile}${CONSTANTS.COLOR.RESET}`);
     } catch (e) {
         console.error("Error running learning analysis:", e);
@@ -573,7 +601,7 @@ ${CONSTANTS.COLOR.CYAN}🔄 ═════════════════�
 🔄 ═══════════════════════════════════════════════════════════${CONSTANTS.COLOR.RESET}
 `);
 
-      const logFile = `./docs/ralph-loop/iteration-${this.iteration}.log`;
+      const logFile = join(this.sessionDir, `iteration-${this.iteration}.log`);
 
       const iterationPrompt = `${this.skillsPrompt}
 ${this.prompt}
@@ -647,8 +675,13 @@ OPTIONS:
   --delay <seconds>              Delay between iterations (default: 2)
   --learn                        Enable learning mode
   --prompt-file <file>           Read prompt from file
+  --session <name>               Session name for output folder (default: derived from prompt-file or timestamp)
   --model <model>                Copilot model to use
   -h, --help                     Show this help message
+
+OUTPUT:
+  Session files are written to ./docs/ralph-loop/<session>/
+  Session name priority: --session flag > prompt-file slug > timestamp
     `);
   }
 }
@@ -665,6 +698,7 @@ function parseArgs(): Config {
     learningMode: false,
     promptFile: null,
     model: null,
+    session: null,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -718,6 +752,13 @@ function parseArgs(): Config {
           process.exit(1);
         }
         config.model = args[++i];
+        break;
+      case "--session":
+        if (i + 1 >= args.length) {
+          console.error("Error: --session requires a session name");
+          process.exit(1);
+        }
+        config.session = args[++i];
         break;
       default:
         if (args[i].startsWith("-")) {

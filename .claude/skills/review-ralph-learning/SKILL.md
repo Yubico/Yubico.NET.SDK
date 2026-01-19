@@ -15,7 +15,7 @@ Analyze Ralph Loop learning review files and present a curated list of high-valu
 
 **Use this skill when:**
 - A Ralph Loop completed with `--learn` flag
-- Review file exists in `docs/ralph-loop/learning/`
+- Review file exists in `docs/ralph-loop/*/learning/`
 - User wants to assess learnings for potential incorporation
 
 **Don't use when:**
@@ -44,7 +44,7 @@ Analyze Ralph Loop learning review files and present a curated list of high-valu
 ### 1. Locate Latest Review
 
 ```bash
-ls -lt docs/ralph-loop/learning/review-*.md | head -1
+ls -lt docs/ralph-loop/*/learning/review-*.md | head -1
 ```
 
 Read from `## Summary` section onwards.

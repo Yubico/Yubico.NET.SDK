@@ -31,13 +31,22 @@ The `ralph-loop` skill forces a sub-instance of GitHub Copilot to enter a recurs
 | :--- | :--- | :--- | :--- |
 | `[PROMPT]` | `string` | **Yes** (or via file) | The objective string passed as an argument. |
 | `--prompt-file` | `path` | **Yes** (alternative) | Read the prompt from a file. **Preferred for complex instructions** to avoid shell escaping issues. |
+| `--session` | `string` | No | Session name for output folder. Default: derived from prompt-file or timestamp. |
 | `--completion-promise` | `string` | Recommended | A unique string (e.g., `"DONE_V1"`) that signals success. Without this, the loop runs until `--max-iterations`. |
 | `--max-iterations` | `number` | No | Safety limit. Default: `0` (unlimited). |
 | `--delay` | `number` | No | Seconds between loops. Default: `2`. |
 | `--learn` | `flag` | No | Enable to generate a `review.md` post-mortem analysis. |
 | `--model` | `string` | No | LLM model to use. Recommended: `claude-sonnet-4.5` (balanced), `claude-haiku-4.5` (fast/cheap), or `claude-opus-4.5` (highest quality). |
 
-**Outputs:** State + logs are written under `./docs/ralph-loop/` (e.g., `state.md`, `iteration-*.log`, and learning artifacts under `./docs/ralph-loop/learning/`).
+**Outputs:** Each session writes to `./docs/ralph-loop/<session>/` containing:
+- `state.md` - Current loop state
+- `iteration-*.log` - Output from each iteration
+- `learning/` - Learning artifacts (when `--learn` is enabled)
+
+**Session naming priority:**
+1. `--session` flag (explicit)
+2. Slug from `--prompt-file` name (e.g., `2026-01-18-fido2-testing.md` → `fido2-testing`)
+3. Timestamp fallback (e.g., `2026-01-18T161244`)
 
 ## 3. Autonomy Directives (Auto-Injected)
 
@@ -75,7 +84,20 @@ bun .claude/skills/agent-ralph-loop/ralph-loop.ts --prompt-file task_prompt.md \
   --learn
 ```
 
-### Example 3: Autonomous Debugging
+### Example 3: Explicit Session Name
+**Goal:** Control output folder name.
+
+```bash
+bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
+  --prompt-file ./docs/plans/ralph-loop/2026-01-18-fido2-testing.md \
+  --session "fido2-round-2" \
+  --completion-promise "TESTS_PASSED" \
+  --max-iterations 12
+```
+
+Output goes to `./docs/ralph-loop/fido2-round-2/`
+
+### Example 4: Autonomous Debugging
 **Goal:** Fix a failing test suite by iterating on the code.
 
 ```bash

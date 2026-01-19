@@ -232,6 +232,39 @@ If a phase should be deferred, document clearly:
 
 This prevents ambiguity about what "skipped" means and whether the overall task can still complete.
 
+### 12. Test-First Discipline
+
+For code changes, run existing tests BEFORE editing to establish baseline:
+
+```markdown
+## Test Discipline
+For each code change:
+1. ✅ Run existing test to see current behavior (baseline)
+2. ✅ Edit code to improve behavior
+3. ✅ Run test again to verify improvement
+4. ✅ Commit
+
+This ensures tests actually verify your changes, not just that code compiles.
+```
+
+**Why:** Build-then-test (reactive) catches errors late. Test-first (proactive) establishes baseline and validates the change actually improved behavior.
+
+### 13. Documentation Inline (Same Commit)
+
+Documentation is part of the feature, not a separate phase:
+
+```markdown
+## Documentation Updates
+When modifying infrastructure or public API:
+- Update relevant docs (TESTING.md, README.md) in the SAME commit as code
+- Add docstrings to new public methods
+- Update progress file immediately after each change
+
+Do NOT batch documentation into a separate phase.
+```
+
+**Why:** Separate documentation phases cause drift—details forgotten, examples outdated. Inline documentation captures intent while fresh.
+
 ## Anti-Patterns to Avoid
 - Vague completion criteria ("when finished")
 - Missing test requirement ("when code compiles")
@@ -240,6 +273,8 @@ This prevents ambiguity about what "skipped" means and whether the overall task 
 - Using `git add .` or `git add -A` blindly
 - **Cramming multiple phases into one iteration** (causes context rot)
 - **Skipping test audit** before interface/signature changes (causes reactive test fixing)
+- **Build-then-test** instead of test-first (catches errors late)
+- **Batching documentation** into separate phases (causes doc drift)
 
 ## Handoff (ALWAYS END WITH THIS)
 

@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Hid.Fido;
+using Yubico.YubiKit.Core.Hid.Interfaces;
+using Yubico.YubiKit.Core.SmartCard;
+
 namespace Yubico.YubiKit.Core.Interfaces;
 
 public interface IYubiKey
@@ -21,4 +25,17 @@ public interface IYubiKey
 
     Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection;
+    async Task<IConnection> ConnectAsync(CancellationToken cancellationToken = default)
+    =>
+        ConnectionType switch
+        {
+            ConnectionType.Ccid => await ConnectAsync<ISmartCardConnection>(cancellationToken)
+                .ConfigureAwait(false),
+            ConnectionType.HidFido => await ConnectAsync<IFidoHidConnection>(cancellationToken)
+                .ConfigureAwait(false),
+            ConnectionType.HidOtp => await ConnectAsync<IOtpHidConnection>(cancellationToken)
+                .ConfigureAwait(false),
+            _ => throw new NotSupportedException(
+                $"Connection type {ConnectionType} is not supported for management session creation."),
+        };
 }

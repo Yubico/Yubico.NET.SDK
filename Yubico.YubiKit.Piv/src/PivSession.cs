@@ -139,11 +139,6 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
     private static FirmwareVersion ParseVersionResponse(ReadOnlySpan<byte> response)
     {
         // Expected format: [major, minor, patch, 0x90, 0x00]
-        if (response.Length < 5 || response[3] != 0x90 || response[4] != 0x00)
-        {
-            throw new ApduException("Invalid firmware version response from PIV application");
-        }
-
         return new FirmwareVersion(response[0], response[1], response[2]);
     }
 
@@ -295,10 +290,6 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         
         return new PivPinMetadata(isDefault, totalRetries, retriesRemaining);
     }
-
-
-
-
 
     #endregion
 

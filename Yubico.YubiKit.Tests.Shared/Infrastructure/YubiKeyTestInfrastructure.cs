@@ -44,15 +44,26 @@ internal static class YubiKeyTestInfrastructure
         new AppSettingsAllowListProvider(),
         LoggerFactory.CreateLogger<AllowList>());
 
+    private static readonly Lazy<IReadOnlyList<YubiKeyTestState>> LazyAuthorizedDevices =
+        new(InitializeDevicesAsync, LazyThreadSafetyMode.ExecutionAndPublication);
+
+    /// <summary>
+    ///     Gets whether the device infrastructure has been initialized.
+    /// </summary>
+    /// <remarks>
+    ///     Returns true only if AllAuthorizedDevices has been accessed and initialization completed.
+    ///     Use this to check if we're in discovery mode (not yet initialized) vs execution mode.
+    /// </remarks>
+    public static bool IsInitialized => LazyAuthorizedDevices.IsValueCreated;
+
     /// <summary>
     ///     Gets all authorized YubiKey devices discovered during test run initialization.
     /// </summary>
     /// <remarks>
-    ///     Devices are discovered once per test run via lazy initialization.
+    ///     Devices are discovered lazily on first access (not during type loading).
     ///     Includes only devices that passed allow list verification.
     /// </remarks>
-    public static IReadOnlyList<YubiKeyTestState> AllAuthorizedDevices { get; } =
-        InitializeDevicesAsync();
+    public static IReadOnlyList<YubiKeyTestState> AllAuthorizedDevices => LazyAuthorizedDevices.Value;
 
     /// <summary>
     ///     Filters devices based on test attribute criteria.
@@ -329,7 +340,7 @@ internal static class YubiKeyTestInfrastructure
                     "═══════════════════════════════════════════════════════════════════════════";
 
                 Console.Error.WriteLine(errorMessage);
-                Environment.Exit(-1); // Hard fail
+                return []; // Return empty list - tests will be skipped during discovery
             }
 
             Console.WriteLine(
@@ -341,8 +352,7 @@ internal static class YubiKeyTestInfrastructure
         {
             Console.Error.WriteLine($"[YubiKey Infrastructure] FATAL: Device initialization failed: {ex.Message}");
             Console.Error.WriteLine(ex.StackTrace);
-            Environment.Exit(-1);
-            throw; // Unreachable, but needed for compiler
+            return []; // Return empty list - tests will be skipped during discovery
         }
     }
 

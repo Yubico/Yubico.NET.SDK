@@ -3,7 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
+    <!-- IMPORTANT: This is a test UTILITIES library, NOT a test project -->
+    <!-- Setting IsTestProject=false prevents VS Code Test Explorer from trying -->
+    <!-- to discover tests from this assembly (which causes discovery to abort) -->
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>

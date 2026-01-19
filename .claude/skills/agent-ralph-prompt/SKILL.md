@@ -265,6 +265,54 @@ Do NOT batch documentation into a separate phase.
 
 **Why:** Separate documentation phases cause drift—details forgotten, examples outdated. Inline documentation captures intent while fresh.
 
+### 14. Template Reference Mandate (Documentation Tasks)
+
+Before creating any documentation file, study existing patterns:
+
+```markdown
+## Documentation Creation Rules
+
+Before creating ANY documentation file:
+1. MUST view existing file of same type for pattern reference
+2. MUST replicate structure and style
+3. MUST adapt content to module context
+
+Template Locations:
+- README.md: See existing module README.md (e.g., Yubico.YubiKit.Core/README.md)
+- CLAUDE.md: See existing module CLAUDE.md (e.g., Yubico.YubiKit.Core/CLAUDE.md)
+- tests/CLAUDE.md: See existing tests/CLAUDE.md (e.g., Yubico.YubiKit.Management/tests/CLAUDE.md)
+```
+
+**Why:** Prevents style drift and ensures SDK-wide consistency. Agent naturally created consistent docs in audit session by studying templates first.
+
+### 15. Final Verification Checklist
+
+The final phase must include explicit verification steps:
+
+```markdown
+## Final Phase: Verification (MANDATORY)
+
+Before delivering completion promise:
+
+1. **Build Verification**
+   Run: `dotnet build.cs build`
+   Must: Exit 0 with no errors
+
+2. **Coverage Check** (for documentation tasks)
+   Verify all target files created/updated
+
+3. **Commit History**
+   Run: `git log --oneline -10`
+   Verify: One commit per phase, conventional format
+
+4. **Progress File**
+   All tasks marked [x] or [SKIPPED] with reason
+
+Only after ALL pass, deliver: <promise>COMPLETION_TOKEN</promise>
+```
+
+**Why:** Prevents premature completion claims. Explicit checklist catches missed steps.
+
 ## Anti-Patterns to Avoid
 - Vague completion criteria ("when finished")
 - Missing test requirement ("when code compiles")

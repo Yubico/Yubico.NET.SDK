@@ -158,8 +158,8 @@ function parseProgressFile(content: string): ProgressFileState {
       continue;
     }
     
-    // Task: - [ ] 1.1: Description or - [x] 1.1: Description
-    const taskMatch = line.match(/^-\s*\[([ x])\]\s*(\d+\.\d+):\s*(.+)$/);
+    // Task: - [ ] 1.1: Description or - [x] S.1: Description (supports N.N or letter.N)
+    const taskMatch = line.match(/^-\s*\[([ x])\]\s*([A-Za-z0-9]+\.\d+):\s*(.+)$/);
     if (taskMatch) {
       currentPhase.tasks.push({
         id: taskMatch[2],
@@ -525,8 +525,9 @@ ${this.prompt}
   }
 
   private printStartupBanner() {
-    const skillCount = discoverSkills().length;
-    const mandatoryCount = discoverSkills().filter(s => s.mandatory).length;
+    const skills = discoverSkills();
+    const skillCount = skills.length;
+    const mandatoryCount = skills.filter(s => s.mandatory).length;
     
     // Detect progress file mode during init
     const isProgressMode = this.progressState?.isProgressFile ?? false;
@@ -847,11 +848,11 @@ ${CONSTANTS.COLOR.CYAN}🔄 ═════════════════�
       let iterationPrompt: string;
       
       if (this.progressState?.isProgressFile) {
-        // Progress file mode: inject full protocol + task context
+        // Progress file mode: inject full protocol + task context + file content
         iterationPrompt = `${this.skillsPrompt}
 
 [PROGRESS FILE MODE]
-You are executing tasks from a progress file. Read it carefully each iteration.
+You are executing tasks from a progress file.
 
 **Progress File:** \`${this.config.promptFile}\`
 ${this.progressState.prd ? `**Source PRD:** \`${this.progressState.prd}\`` : ""}
@@ -859,6 +860,11 @@ ${this.progressState.prd ? `**Source PRD:** \`${this.progressState.prd}\`` : ""}
 ${EXECUTION_PROTOCOL}
 
 ${formatProgressContext(this.progressState)}
+
+[PROGRESS FILE CONTENT]
+\`\`\`markdown
+${this.prompt}
+\`\`\`
 
 ---
 [Ralph Loop Context]
@@ -994,7 +1000,7 @@ function parseArgs(): Config {
         }
         break;
       case "--completion-promise":
-        if (i + 1 >= args.length || args[i + 1] === "") {
+        if (i + 1 >= args.length || args[i + 1] === "" || args[i + 1].startsWith("-")) {
           console.error("Error: --completion-promise requires a non-empty value");
           process.exit(1);
         }

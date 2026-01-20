@@ -420,7 +420,9 @@ public class ManagementSessionAdvancedTests
     ///     Verifies device info consistency across different transports (CCID, HidFido, HidOtp).
     /// </summary>
     [SkippableTheory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.Ccid)]
+    [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
     public async Task GetDeviceInfo_AllTransports_ReturnsConsistentData(YubiKeyTestState state)
     {
         // This test runs on every transport type available for each device

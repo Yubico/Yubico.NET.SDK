@@ -207,7 +207,6 @@ grep -r "Mock<.*ClassName>" tests/ --include="*.cs"
 grep -r "Substitute.For<ClassName>" tests/ --include="*.cs"
 ```
 Document which tests need mock updates BEFORE making code changes.
-```
 
 ### 11. Phase Deferral Documentation
 
@@ -222,6 +221,200 @@ If a phase should be deferred, document clearly:
 
 This prevents ambiguity about what "skipped" means and whether the overall task can still complete.
 
+### 11a. Completion Integrity (CRITICAL)
+
+**You CANNOT claim completion if ANY task is skipped or incomplete:**
+
+```markdown
+## Completion Integrity Rules
+
+1. **Progress File Honesty:**
+   - Only check `[x]` for tasks you ACTUALLY completed with verification
+   - Skipped tasks remain `[ ]` - NEVER mark them complete
+   - Deferred tasks get `[DEFERRED]` tag but stay unchecked
+
+2. **Completion Promise:**
+   - ONLY emit `<promise>DONE</promise>` when ALL tasks are `[x]`
+   - If ANY task is unchecked → DO NOT emit promise
+   - Next iteration will continue the work
+
+3. **"Time Constraints" is NOT an excuse:**
+   - If you're running low on time, finish current task and stop
+   - Do NOT skip tasks and claim completion
+   - Do NOT mark progress file as complete with unchecked items
+
+**Anti-pattern (FORBIDDEN):**
+```
+- [x] Task 1: Create tests ✅
+- [ ] Task 2: Edge cases (skipped - time constraints)  ← UNCHECKED
+- [x] Task 3: Commit ✅
+<promise>DONE</promise>  ← FORBIDDEN - Task 2 incomplete!
+```
+
+**Correct behavior:**
+```
+- [x] Task 1: Create tests ✅
+- [ ] Task 2: Edge cases  ← Still unchecked
+(No promise emitted - next iteration will continue)
+```
+
+**Why:** Ralph cannot self-congratulate for skipping work. Incomplete progress files trigger another iteration.
+
+### 12. Test-First Discipline
+
+For code changes, run existing tests BEFORE editing to establish baseline:
+
+```markdown
+## Test Discipline
+For each code change:
+1. ✅ Run existing test to see current behavior (baseline)
+2. ✅ Edit code to improve behavior
+3. ✅ Run test again to verify improvement
+4. ✅ Commit
+
+This ensures tests actually verify your changes, not just that code compiles.
+```
+
+**Why:** Build-then-test (reactive) catches errors late. Test-first (proactive) establishes baseline and validates the change actually improved behavior.
+
+### 13. Documentation Inline (Same Commit)
+
+Documentation is part of the feature, not a separate phase:
+
+```markdown
+## Documentation Updates
+When modifying infrastructure or public API:
+- Update relevant docs (TESTING.md, README.md) in the SAME commit as code
+- Add docstrings to new public methods
+- Update progress file immediately after each change
+
+Do NOT batch documentation into a separate phase.
+```
+
+**Why:** Separate documentation phases cause drift—details forgotten, examples outdated. Inline documentation captures intent while fresh.
+
+### 14. Template Reference Mandate (Documentation Tasks)
+
+Before creating any documentation file, study existing patterns:
+
+```markdown
+## Documentation Creation Rules
+
+Before creating ANY documentation file:
+1. MUST view existing file of same type for pattern reference
+2. MUST replicate structure and style
+3. MUST adapt content to module context
+
+Template Locations:
+- README.md: See existing module README.md (e.g., Yubico.YubiKit.Core/README.md)
+- CLAUDE.md: See existing module CLAUDE.md (e.g., Yubico.YubiKit.Core/CLAUDE.md)
+- tests/CLAUDE.md: See existing tests/CLAUDE.md (e.g., Yubico.YubiKit.Management/tests/CLAUDE.md)
+```
+
+**Why:** Prevents style drift and ensures SDK-wide consistency. Agent naturally created consistent docs in audit session by studying templates first.
+
+### 15. Final Verification Checklist
+
+The final phase must include explicit verification steps:
+
+```markdown
+## Final Phase: Verification (MANDATORY)
+
+Before delivering completion promise:
+
+1. **Build Verification**
+   Run: `dotnet build.cs build`
+   Must: Exit 0 with no errors
+
+2. **Coverage Check** (for documentation tasks)
+   Verify all target files created/updated
+
+3. **Commit History**
+   Run: `git log --oneline -10`
+   Verify: One commit per phase, conventional format
+
+4. **Progress File**
+   All tasks marked [x] or [SKIPPED] with reason
+
+Only after ALL pass, deliver: <promise>COMPLETION_TOKEN</promise>
+```
+
+**Why:** Prevents premature completion claims. Explicit checklist catches missed steps.
+
+### 16. Build Error Baseline
+
+Before starting work, capture baseline build errors to distinguish pre-existing issues:
+
+```markdown
+## Build Error Baseline (Start of Session)
+
+Run BEFORE making any changes:
+```bash
+dotnet build.cs build 2>&1 | grep -E "error (CS|MSB)" | sort > /tmp/baseline-errors.txt || true
+```
+
+After each phase, compare:
+```bash
+dotnet build.cs build 2>&1 | grep -E "error (CS|MSB)" | sort > /tmp/current-errors.txt || true
+NEW_ERRORS=$(comm -13 /tmp/baseline-errors.txt /tmp/current-errors.txt)
+if [ -n "$NEW_ERRORS" ]; then
+    echo "⚠️ NEW BUILD ERRORS (fix before proceeding):"
+    echo "$NEW_ERRORS"
+fi
+```
+
+- Pre-existing errors: Ignore (not your responsibility)
+- New errors: Fix before proceeding
+```
+
+**Why:** Saves 2-3 minutes per iteration by eliminating manual error investigation. Prevents false attribution of pre-existing failures.
+
+### 17. Parallel Tool Calls for Exploration
+
+When exploring codebases, use PARALLEL tool calls for efficiency:
+
+```markdown
+## Efficient Exploration Pattern
+
+❌ SLOW (sequential):
+1. view file1.cs → wait
+2. view file2.cs → wait  
+3. view file3.cs → wait
+
+✅ FAST (parallel):
+Call view(file1.cs), view(file2.cs), view(file3.cs) in SAME response
+
+Apply to:
+- Viewing multiple test files for pattern discovery
+- Checking multiple API classes simultaneously
+- Reading related documentation files
+- Examining similar implementations across modules
+```
+
+**Why:** 30-40% reduction in exploration time (3-4 minutes saved per session).
+
+### 18. Priority Announcement at Session Start
+
+Announce priority decisions BEFORE starting implementation:
+
+```markdown
+## Priority Declaration (First Action)
+
+At the START of each iteration, BEFORE any implementation:
+
+1. Scan all phases and identify P0, P1, P2 priorities
+2. Announce: "Focusing on P0 phases: {list}. P1 phases ({list}) will be completed in subsequent iterations if time permits."
+3. Begin P0 work only
+
+If mid-session you realize time is constrained:
+- Finish current P0 task
+- Commit progress
+- Do NOT skip to completion
+- Let next iteration handle remaining tasks
+```
+
+**Why:** User can object to priority decisions early. Prevents mid-session justifications for skipped work.
+
 ## Anti-Patterns to Avoid
 - Vague completion criteria ("when finished")
 - Missing test requirement ("when code compiles")
@@ -230,6 +423,11 @@ This prevents ambiguity about what "skipped" means and whether the overall task 
 - Using `git add .` or `git add -A` blindly
 - **Cramming multiple phases into one iteration** (causes context rot)
 - **Skipping test audit** before interface/signature changes (causes reactive test fixing)
+- **Build-then-test** instead of test-first (catches errors late)
+- **Batching documentation** into separate phases (causes doc drift)
+- **Claiming completion with unchecked tasks** (violates completion integrity)
+- **Marking skipped tasks as complete** (dishonest progress tracking)
+- **Sequential file exploration** when parallel calls would work (wastes time)
 
 ## Handoff (ALWAYS END WITH THIS)
 

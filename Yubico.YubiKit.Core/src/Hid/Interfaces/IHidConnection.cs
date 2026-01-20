@@ -16,7 +16,7 @@ using Yubico.YubiKit.Core.Interfaces;
 
 namespace Yubico.YubiKit.Core.Hid.Interfaces;
 
-public interface IHidConnection : IConnection
+internal interface IHidConnection : IConnection
 {
     int InputReportSize { get; }
     int OutputReportSize { get; }

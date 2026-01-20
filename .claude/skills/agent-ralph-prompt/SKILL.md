@@ -394,6 +394,8 @@ When exploring codebases, use PARALLEL tool calls for efficiency:
 3. view file3.cs → wait
 
 ✅ FAST (parallel):
+Use codemapper (SKILL) to generate and query structural maps of C# codebases using CodeMapper. Maps show public/internal API surface with line numbers, enabling fast codebase orientation without reading every file.
+
 Call view(file1.cs), view(file2.cs), view(file3.cs) in SAME response
 
 Apply to:

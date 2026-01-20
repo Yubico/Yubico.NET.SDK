@@ -30,11 +30,20 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void GetEccP256SessionKeys_TouchNotRequired_ReturnsTrueAndSessionKeys()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();    
 
             // "default" credential does not require touch
             YhaTestUtilities.AddDefaultEccP256Credential(testDevice);
 
+            //Make a host-challenge (EPK-OCE) of 65 bytes
+            byte[] hostChallengeByte = YhaTestUtilities.CreateHostChallengeEccP256(testDevice);
+            if (hostChallengeByte.Length != 65)
+            {
+                throw new InvalidOperationException(
+                    $"Host challenge length incorrect: {hostChallengeByte.Length}");
+            }
+
+            ReadOnlyMemory<byte> hostChallenge = new ReadOnlyMemory<byte>(hostChallengeByte);
             SessionKeys keys;
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
@@ -45,7 +54,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 keys = yubiHsmAuthSession.GetEccP256SessionKeys(
                     YhaTestUtilities.DefaultCredLabel,
                     YhaTestUtilities.DefaultCredPassword,
-                    YhaTestUtilities.DefaultHostChallenge,
+                    hostChallenge,
                     YhaTestUtilities.DefaultHsmDeviceChallenge,
                     YhaTestUtilities.DefaultEccP256PublicKey,
                     YhaTestUtilities.cardCryptoDefault);

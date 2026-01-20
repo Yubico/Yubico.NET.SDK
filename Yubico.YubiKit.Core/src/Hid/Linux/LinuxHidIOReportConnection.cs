@@ -85,7 +85,13 @@ internal sealed class LinuxHidIOReportConnection : IHidConnection
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(report);
 
-        int bytesWritten = LibcNativeMethods.write(_handle, report, report.Length);
+        // On Linux hidraw, we need to prepend the report ID (0x00) before writing
+        // See: https://www.kernel.org/doc/Documentation/hid/hidraw.txt
+        var reportWithId = new byte[report.Length + 1];
+        reportWithId[0] = 0x00; // Report ID
+        report.AsSpan().CopyTo(reportWithId.AsSpan(1));
+
+        int bytesWritten = LibcNativeMethods.write(_handle, reportWithId, reportWithId.Length);
 
         if (bytesWritten < 0)
         {
@@ -95,12 +101,12 @@ internal sealed class LinuxHidIOReportConnection : IHidConnection
                 $"Failed to write to HID device: {_devNode}. {LibcHelpers.GetErrnoString()}");
         }
 
-        if (bytesWritten != report.Length)
+        if (bytesWritten != reportWithId.Length)
         {
             throw new PlatformApiException(
                 nameof(LibcNativeMethods.write),
                 0,
-                $"Incomplete write to HID device: {_devNode}. Expected {report.Length} bytes, wrote {bytesWritten}.");
+                $"Incomplete write to HID device: {_devNode}. Expected {reportWithId.Length} bytes, wrote {bytesWritten}.");
         }
     }
 

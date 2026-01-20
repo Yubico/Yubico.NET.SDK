@@ -232,6 +232,46 @@ If a phase should be deferred, document clearly:
 
 This prevents ambiguity about what "skipped" means and whether the overall task can still complete.
 
+### 11a. Completion Integrity (CRITICAL)
+
+**You CANNOT claim completion if ANY task is skipped or incomplete:**
+
+```markdown
+## Completion Integrity Rules
+
+1. **Progress File Honesty:**
+   - Only check `[x]` for tasks you ACTUALLY completed with verification
+   - Skipped tasks remain `[ ]` - NEVER mark them complete
+   - Deferred tasks get `[DEFERRED]` tag but stay unchecked
+
+2. **Completion Promise:**
+   - ONLY emit `<promise>DONE</promise>` when ALL tasks are `[x]`
+   - If ANY task is unchecked → DO NOT emit promise
+   - Next iteration will continue the work
+
+3. **"Time Constraints" is NOT an excuse:**
+   - If you're running low on time, finish current task and stop
+   - Do NOT skip tasks and claim completion
+   - Do NOT mark progress file as complete with unchecked items
+
+**Anti-pattern (FORBIDDEN):**
+```
+- [x] Task 1: Create tests ✅
+- [ ] Task 2: Edge cases (skipped - time constraints)  ← UNCHECKED
+- [x] Task 3: Commit ✅
+<promise>DONE</promise>  ← FORBIDDEN - Task 2 incomplete!
+```
+
+**Correct behavior:**
+```
+- [x] Task 1: Create tests ✅
+- [ ] Task 2: Edge cases  ← Still unchecked
+(No promise emitted - next iteration will continue)
+```
+```
+
+**Why:** Ralph cannot self-congratulate for skipping work. Incomplete progress files trigger another iteration.
+
 ### 12. Test-First Discipline
 
 For code changes, run existing tests BEFORE editing to establish baseline:
@@ -313,6 +353,80 @@ Only after ALL pass, deliver: <promise>COMPLETION_TOKEN</promise>
 
 **Why:** Prevents premature completion claims. Explicit checklist catches missed steps.
 
+### 16. Build Error Baseline
+
+Before starting work, capture baseline build errors to distinguish pre-existing issues:
+
+```markdown
+## Build Error Baseline (Start of Session)
+
+Run BEFORE making any changes:
+```bash
+dotnet build.cs build 2>&1 | grep -E "error (CS|MSB)" | sort > /tmp/baseline-errors.txt || true
+```
+
+After each phase, compare:
+```bash
+dotnet build.cs build 2>&1 | grep -E "error (CS|MSB)" | sort > /tmp/current-errors.txt || true
+NEW_ERRORS=$(comm -13 /tmp/baseline-errors.txt /tmp/current-errors.txt)
+if [ -n "$NEW_ERRORS" ]; then
+    echo "⚠️ NEW BUILD ERRORS (fix before proceeding):"
+    echo "$NEW_ERRORS"
+fi
+```
+
+- Pre-existing errors: Ignore (not your responsibility)
+- New errors: Fix before proceeding
+```
+
+**Why:** Saves 2-3 minutes per iteration by eliminating manual error investigation. Prevents false attribution of pre-existing failures.
+
+### 17. Parallel Tool Calls for Exploration
+
+When exploring codebases, use PARALLEL tool calls for efficiency:
+
+```markdown
+## Efficient Exploration Pattern
+
+❌ SLOW (sequential):
+1. view file1.cs → wait
+2. view file2.cs → wait  
+3. view file3.cs → wait
+
+✅ FAST (parallel):
+Call view(file1.cs), view(file2.cs), view(file3.cs) in SAME response
+
+Apply to:
+- Viewing multiple test files for pattern discovery
+- Checking multiple API classes simultaneously
+- Reading related documentation files
+- Examining similar implementations across modules
+```
+
+**Why:** 30-40% reduction in exploration time (3-4 minutes saved per session).
+
+### 18. Priority Announcement at Session Start
+
+Announce priority decisions BEFORE starting implementation:
+
+```markdown
+## Priority Declaration (First Action)
+
+At the START of each iteration, BEFORE any implementation:
+
+1. Scan all phases and identify P0, P1, P2 priorities
+2. Announce: "Focusing on P0 phases: {list}. P1 phases ({list}) will be completed in subsequent iterations if time permits."
+3. Begin P0 work only
+
+If mid-session you realize time is constrained:
+- Finish current P0 task
+- Commit progress
+- Do NOT skip to completion
+- Let next iteration handle remaining tasks
+```
+
+**Why:** User can object to priority decisions early. Prevents mid-session justifications for skipped work.
+
 ## Anti-Patterns to Avoid
 - Vague completion criteria ("when finished")
 - Missing test requirement ("when code compiles")
@@ -323,6 +437,9 @@ Only after ALL pass, deliver: <promise>COMPLETION_TOKEN</promise>
 - **Skipping test audit** before interface/signature changes (causes reactive test fixing)
 - **Build-then-test** instead of test-first (catches errors late)
 - **Batching documentation** into separate phases (causes doc drift)
+- **Claiming completion with unchecked tasks** (violates completion integrity)
+- **Marking skipped tasks as complete** (dishonest progress tracking)
+- **Sequential file exploration** when parallel calls would work (wastes time)
 
 ## Handoff (ALWAYS END WITH THIS)
 

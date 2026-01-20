@@ -167,6 +167,13 @@ You are executing a task from a progress file. Follow this protocol for EVERY ta
 - Complete ONE task fully before moving to next
 - Mark \`[x]\` ONLY after build + test pass
 - If stuck, add a note and move to next task (don't loop forever)
+
+## Completion Integrity (CRITICAL)
+- ONLY mark tasks \`[x]\` that you ACTUALLY completed with verification
+- Skipped tasks remain \`[ ]\` - NEVER mark skipped work as complete
+- Do NOT emit completion promise if ANY task is unchecked
+- "Time constraints" is NOT an excuse to skip work and claim completion
+- If running low on time: finish current task, commit, stop (next iteration continues)
 `;
 
 class RalphLoop {

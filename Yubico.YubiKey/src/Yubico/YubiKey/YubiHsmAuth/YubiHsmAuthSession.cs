@@ -142,5 +142,17 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             return KeyCollector;
         }
+
+        public byte [] CreateHostChallengeEccP256(EccP256CredentialWithSecrets credential)
+        {
+            var command = new CreateHostChallengeEccP256Command(credential);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+
+            return response.GetData().ToArray();
+        }
     }
 }

@@ -223,8 +223,11 @@ public class FidoGetInfoTests : IntegrationTestBase
         // FirmwareVersion may be null on some devices/configurations
         if (info.FirmwareVersion is not null)
         {
-            Assert.True(info.FirmwareVersion.Major >= 5,
-                $"FIDO2 requires firmware 5.0+, got {info.FirmwareVersion}");
+            // Beta/alpha keys report 0.0.1, production keys report 5.x+
+            var isBetaKey = info.FirmwareVersion is { Major: 0, Minor: 0, Patch: 1 };
+            var isProductionKey = info.FirmwareVersion.Major >= 5;
+            Assert.True(isBetaKey || isProductionKey,
+                $"Expected firmware 5.0+ or 0.0.1 (beta), got {info.FirmwareVersion}");
         }
     }
 

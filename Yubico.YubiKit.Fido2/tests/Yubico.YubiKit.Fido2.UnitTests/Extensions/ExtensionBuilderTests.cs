@@ -267,6 +267,178 @@ public class ExtensionBuilderTests
     }
     
     #endregion
+    
+    #region Edge Case Tests
+    
+    [Fact]
+    public void WithCredBlob_EmptyBlob_EncodesEmptyByteString()
+    {
+        // Arrange
+        var builder = new ExtensionBuilder()
+            .WithCredBlob(ReadOnlyMemory<byte>.Empty);
+        
+        // Act
+        var result = builder.Build();
+        
+        // Assert
+        Assert.NotNull(result);
+        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
+        reader.ReadStartMap();
+        Assert.Equal("credBlob", reader.ReadTextString());
+        var blob = reader.ReadByteString();
+        Assert.Empty(blob);
+    }
+    
+    [Theory]
+    [InlineData(CredProtectPolicy.UserVerificationOptional, 1)]
+    [InlineData(CredProtectPolicy.UserVerificationOptionalWithCredentialIdList, 2)]
+    [InlineData(CredProtectPolicy.UserVerificationRequired, 3)]
+    public void WithCredProtect_AllPolicies_EncodeCorrectValue(CredProtectPolicy policy, int expectedValue)
+    {
+        // Arrange
+        var builder = new ExtensionBuilder()
+            .WithCredProtect(policy);
+        
+        // Act
+        var result = builder.Build();
+        
+        // Assert
+        Assert.NotNull(result);
+        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
+        reader.ReadStartMap();
+        Assert.Equal("credProtect", reader.ReadTextString());
+        Assert.Equal(expectedValue, reader.ReadInt32());
+    }
+    
+    [Fact]
+    public void WithLargeBlob_PreferredSupport_EncodesPreferred()
+    {
+        // Arrange
+        var builder = new ExtensionBuilder()
+            .WithLargeBlob(LargeBlobSupport.Preferred);
+        
+        // Act
+        var result = builder.Build();
+        
+        // Assert
+        Assert.NotNull(result);
+        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
+        reader.ReadStartMap();
+        Assert.Equal("largeBlob", reader.ReadTextString());
+        reader.ReadStartMap();
+        Assert.Equal("support", reader.ReadTextString());
+        Assert.Equal("preferred", reader.ReadTextString());
+    }
+    
+    [Fact]
+    public void WithHmacSecret_InvalidSalt1Length_ThrowsArgumentException()
+    {
+        // Arrange
+        var protocol = new MockPinProtocol();
+        var sharedSecret = new byte[32];
+        var keyAgreement = new Dictionary<int, object?> { { 1, 2 } };
+        var invalidSalt1 = new byte[31]; // Wrong length, should be 32
+        
+        var builder = new ExtensionBuilder();
+        
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentException>(() =>
+            builder.WithHmacSecret(protocol, sharedSecret, keyAgreement, invalidSalt1));
+        
+        Assert.Contains("Salt1 must be exactly 32 bytes", exception.Message);
+    }
+    
+    [Fact]
+    public void WithHmacSecret_InvalidSalt2Length_ThrowsArgumentException()
+    {
+        // Arrange
+        var protocol = new MockPinProtocol();
+        var sharedSecret = new byte[32];
+        var keyAgreement = new Dictionary<int, object?> { { 1, 2 } };
+        var validSalt1 = new byte[32];
+        var invalidSalt2 = new byte[31]; // Wrong length, should be 32
+        
+        var builder = new ExtensionBuilder();
+        
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentException>(() =>
+            builder.WithHmacSecret(protocol, sharedSecret, keyAgreement, validSalt1, invalidSalt2));
+        
+        Assert.Contains("Salt2 must be exactly 32 bytes", exception.Message);
+    }
+    
+    #endregion
+}
+
+/// <summary>
+/// Mock PIN/UV auth protocol for unit testing.
+/// </summary>
+internal class MockPinProtocol : Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol
+{
+    public int Version => 2;
+    
+    public int AuthenticationTagLength => 16;
+    
+    public (Dictionary<int, object?> KeyAgreement, byte[] SharedSecret) Encapsulate(IReadOnlyDictionary<int, object?> peerCoseKey)
+    {
+        ArgumentNullException.ThrowIfNull(peerCoseKey);
+        
+        var keyAgreement = new Dictionary<int, object?>
+        {
+            { 1, 2 }, // kty = EC2
+            { 3, -25 }, // alg = ECDH-ES+HKDF-256
+            { -1, 1 }, // crv = P-256
+            { -2, new byte[32] }, // x
+            { -3, new byte[32] }  // y
+        };
+        var sharedSecret = new byte[32];
+        return (keyAgreement, sharedSecret);
+    }
+    
+    public byte[] Kdf(ReadOnlySpan<byte> z)
+    {
+        // Simple mock - return fixed key
+        return new byte[32];
+    }
+    
+    public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
+    {
+        // Simple XOR for testing
+        var ciphertext = new byte[plaintext.Length];
+        for (int i = 0; i < plaintext.Length; i++)
+        {
+            ciphertext[i] = (byte)(plaintext[i] ^ key[i % key.Length]);
+        }
+        return ciphertext;
+    }
+    
+    public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext)
+    {
+        // Simple XOR for testing (symmetric)
+        return Encrypt(key, ciphertext);
+    }
+    
+    public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
+    {
+        // Simple hash for testing
+        var auth = new byte[16];
+        for (int i = 0; i < message.Length; i++)
+        {
+            auth[i % auth.Length] ^= message[i];
+        }
+        return auth;
+    }
+    
+    public bool Verify(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message, ReadOnlySpan<byte> signature)
+    {
+        var expected = Authenticate(key, message);
+        return expected.AsSpan().SequenceEqual(signature);
+    }
+    
+    public void Dispose()
+    {
+        // No resources to dispose in mock
+    }
 }
 
 /// <summary>

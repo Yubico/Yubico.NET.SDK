@@ -279,12 +279,18 @@ public sealed class PublicKeyCredentialUserEntity
     /// <summary>
     /// Gets the human-readable user name.
     /// </summary>
-    public string Name { get; }
+    /// <remarks>
+    /// This may be null when parsing a GetAssertion response, as only the user ID is required.
+    /// </remarks>
+    public string? Name { get; }
     
     /// <summary>
     /// Gets the human-readable display name.
     /// </summary>
-    public string DisplayName { get; }
+    /// <remarks>
+    /// This may be null when parsing a GetAssertion response, as only the user ID is required.
+    /// </remarks>
+    public string? DisplayName { get; }
     
     /// <summary>
     /// Creates a new user entity.
@@ -307,6 +313,29 @@ public sealed class PublicKeyCredentialUserEntity
         }
         ArgumentException.ThrowIfNullOrEmpty(name);
         ArgumentException.ThrowIfNullOrEmpty(displayName);
+        
+        Id = id;
+        Name = name;
+        DisplayName = displayName;
+    }
+    
+    /// <summary>
+    /// Internal constructor for parsing responses where name/displayName may be absent.
+    /// </summary>
+    private PublicKeyCredentialUserEntity(
+        ReadOnlyMemory<byte> id,
+        string? name,
+        string? displayName,
+        bool fromParse)
+    {
+        if (id.IsEmpty)
+        {
+            throw new ArgumentException("User ID cannot be empty.", nameof(id));
+        }
+        if (id.Length > 64)
+        {
+            throw new ArgumentException("User ID cannot exceed 64 bytes.", nameof(id));
+        }
         
         Id = id;
         Name = name;
@@ -348,12 +377,13 @@ public sealed class PublicKeyCredentialUserEntity
         
         reader.ReadEndMap();
         
-        if (id is null || name is null || displayName is null)
+        if (id is null)
         {
-            throw new InvalidOperationException("User entity missing required fields.");
+            throw new InvalidOperationException("User entity missing required 'id' field.");
         }
         
-        return new PublicKeyCredentialUserEntity(id, name, displayName);
+        // Use private constructor since name/displayName are optional in GetAssertion responses
+        return new PublicKeyCredentialUserEntity(id, name, displayName, fromParse: true);
     }
     
     /// <summary>
@@ -362,16 +392,27 @@ public sealed class PublicKeyCredentialUserEntity
     /// <param name="writer">The CBOR writer.</param>
     public void Encode(CborWriter writer)
     {
-        writer.WriteStartMap(3);
+        // Count non-null fields
+        var fieldCount = 1; // id is always present
+        if (Name is not null) fieldCount++;
+        if (DisplayName is not null) fieldCount++;
+        
+        writer.WriteStartMap(fieldCount);
         
         writer.WriteTextString("id");
         writer.WriteByteString(Id.Span);
         
-        writer.WriteTextString("name");
-        writer.WriteTextString(Name);
+        if (Name is not null)
+        {
+            writer.WriteTextString("name");
+            writer.WriteTextString(Name);
+        }
         
-        writer.WriteTextString("displayName");
-        writer.WriteTextString(DisplayName);
+        if (DisplayName is not null)
+        {
+            writer.WriteTextString("displayName");
+            writer.WriteTextString(DisplayName);
+        }
         
         writer.WriteEndMap();
     }

@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Yubico.YubiKit.Piv.csproj"/>
+    <ProjectReference Include="..\..\..\Yubico.YubiKit.Piv\src\Yubico.YubiKit.Piv.csproj"/>
     <ProjectReference Include="..\..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj"/>
     <ProjectReference Include="..\..\..\Yubico.YubiKit.Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj"/>
   </ItemGroup>

@@ -13,7 +13,6 @@
     <!-- Package versions come from Directory.Packages.props -->
     <!-- When using Microsoft Testing Platform, DON'T use Microsoft.NET.Test.Sdk or xunit.runner.visualstudio -->
     <PackageReference Include="xunit.v3" />
-    <PackageReference Include="NSubstitute" />
   </ItemGroup>
 
   <ItemGroup>

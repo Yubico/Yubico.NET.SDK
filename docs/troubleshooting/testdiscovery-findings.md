@@ -225,3 +225,47 @@ grep -i -E "(error|fail|aborted)" [logfile]
 # CLI test discovery (works reliably)
 dotnet test path/to/project.csproj --list-tests
 ```
+
+---
+
+## Known Issues / Future Investigation
+
+### 1. ThreadAbortException During Debugging
+
+**Status**: Observed, not yet investigated
+
+**Symptom**: When step-debugging integration tests, occasionally get:
+```
+System.Threading.ThreadAbortException: 'System error.'
+   at YubiKeyTestInfrastructure.InitializeDevicesAsync() line 349
+   at System.Lazy`1.ViaFactory(LazyThreadSafetyMode mode)
+   at YubiKeyTestInfrastructure.get_AllAuthorizedDevices()
+   at YubiKeyTestState.BindToRealDevice()
+   at YubiKeyTestState.get_Device()
+```
+
+**Possible Causes**:
+- Test runner timeout during slow debugger stepping
+- Async/sync deadlock in `Lazy<T>.ViaFactory` calling async code
+- CancellationToken being triggered
+
+**To Investigate**:
+- Check if `InitializeDevicesAsync()` is being called synchronously (sync-over-async)
+- Review test runner timeout settings
+- Check for `CancellationToken` propagation issues
+
+### 2. ObjectDisposedException During Debugging
+
+**Status**: Observed intermittently, not reproducible on demand
+
+**Symptom**: Occasional `ObjectDisposedException` during test debugging sessions.
+
+**Possible Causes**:
+- Device connection being disposed while debugger paused
+- Race condition in device lifecycle management
+- USB connection timeout during long debug pauses
+
+**To Investigate**:
+- Identify which object is being disposed
+- Check device connection timeout settings
+- Review IDisposable patterns in connection classes

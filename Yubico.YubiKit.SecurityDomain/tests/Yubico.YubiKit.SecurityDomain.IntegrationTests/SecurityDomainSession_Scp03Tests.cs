@@ -1,3 +1,4 @@
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
@@ -114,7 +115,7 @@ public class SecurityDomainSession_Scp03Tests
             }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.4.3")]
+    [WithYubiKey(ConnectionType = ConnectionType.Ccid, MinFirmware = "5.4.3")]
     public async Task GetData_Succeeds(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionAsync(true,
             async session =>

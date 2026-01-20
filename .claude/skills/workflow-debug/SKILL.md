@@ -101,6 +101,7 @@ You MUST complete each phase before proceeding to the next.
    - If implementing pattern, read reference implementation COMPLETELY
    - Don't skim - read every line
    - Understand the pattern fully before applying
+   - Use Context7 MCP to research framework/library patterns and documentation if needed
 
 3. **Identify Differences**
    - What's different between working and broken?

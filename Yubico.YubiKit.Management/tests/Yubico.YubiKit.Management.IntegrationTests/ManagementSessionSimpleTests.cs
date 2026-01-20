@@ -28,12 +28,9 @@ public class
     public async Task CreateManagementSession_with_Hid_CreateAsync()
     {
         // Management over HID requires the FIDO interface (UsagePage 0xF1D0)
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
 
-        // Filter for FIDO devices - DeviceId contains FIDO usage
-        var fidoDevice =
-            devices.FirstOrDefault(d =>
-                d.DeviceId.Contains(":0001") || d.DeviceId.Contains(":F1D0")); // TODO refactor, bad pattern
+        var fidoDevice = devices.FirstOrDefault();
 
         if (fidoDevice is null)
             // Skip test if no FIDO HID interface found
@@ -75,11 +72,9 @@ public class
     {
         // Management over HID requires the FIDO interface (UsagePage 0xF1D0)
         // OTP/Keyboard interface does not support Management application
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
 
-        // Filter for FIDO devices only - DeviceId format is "hid:VID:PID:USAGE"
-        // FIDO usage page 0xF1D0, typical usage is 0x0001 -> "hid:1050:XXXX:0001"
-        var fidoDevice = devices.FirstOrDefault(d => d.DeviceId.Contains(":0001") || d.DeviceId.Contains(":F1D0"));
+        var fidoDevice = devices.FirstOrDefault();
 
         if (fidoDevice is null)
             // Skip test if no FIDO HID interface found

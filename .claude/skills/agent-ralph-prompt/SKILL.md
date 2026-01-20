@@ -3,20 +3,30 @@ name: write-ralph-prompt
 description: Use when crafting Ralph Loop prompts - ensures proper verification and exit criteria
 ---
 
-# Writing Ralph Loop Prompts
+# Writing Ralph Loop Prompts (Ad-hoc Mode)
 
-This skill provides guidance for creating Ralph Loop prompts that enforce proper verification, phased exit criteria, and robust completion requirements.
+This skill provides guidance for creating Ralph Loop prompts **when NOT using a progress file**. For structured, multi-phase work, use `prd-to-ralph` or `plan-to-ralph` instead - they create progress files that auto-inject the execution protocol.
 
-**Reference:** `.claude/skills/agent-ralph-loop/SKILL.md` (loop semantics + required autonomy injection).
+**When to use this skill:**
+- Ad-hoc tasks without a progress file
+- Quick one-off tasks ("fix this test", "refactor these files")
+- Tasks that don't need phased tracking
+
+**When NOT to use this skill:**
+- PRD-driven implementation → use `prd-to-ralph`
+- Plan-driven implementation → use `plan-to-ralph` (or create progress file manually)
+- These create progress files with `type: progress` frontmatter, and `ralph-loop.ts` auto-injects the execution protocol.
+
+**Reference:** `.claude/skills/agent-ralph-loop/SKILL.md` (loop semantics + progress file format).
 
 **Logs/state:** `./docs/ralph-loop/<session>/` (state.md, iteration-*.log, and learning artifacts under `./docs/ralph-loop/<session>/learning/`).
 
 **Save location:** `./docs/plans/ralph-loop/YYYY-MM-DD-<feature-name>.md` (offer to save; create directories as needed).
 
 ## Use when
-- Creating a new Ralph Loop prompt for a coding task
-- Ensuring a Ralph Loop does not complete prematurely
-- Enforcing build/test verification before completion
+- Creating ad-hoc Ralph Loop prompts (no progress file)
+- Quick one-off automation tasks
+- Tasks that don't need progress tracking
 
 ## Core Principles
 
@@ -159,7 +169,43 @@ If any fail, fix and re-verify.
 
 > **Note:** Autonomy directives and skill awareness are auto-injected by `ralph-loop.ts`. Do not add them manually. The agent will see available skills (mandatory vs optional) at the start of each iteration.
 
-### 8. Test Audit for Refactoring Phases
+### 8. Test Infrastructure Study (Before First Test)
+
+Before writing integration tests in a new module, study existing test patterns:
+
+```markdown
+**Step 0: Study Test Infrastructure**
+Before writing tests, examine existing test files:
+```bash
+# Find similar integration test
+find . -name "*IntegrationTests.cs" -path "*/Yubico.YubiKit.*" | head -1
+
+# Extract patterns
+grep -A3 "WithYubiKey" <file>  # Check attribute syntax (MinFirmware vs MinimumFirmware)
+grep "state\." <file>          # Check state property name (Device vs YubiKey)
+```
+Use discovered patterns for all test methods in this module.
+```
+
+**Why:** Test framework patterns vary between modules. Studying existing tests prevents attribute/property errors that cause multiple fix cycles.
+
+### 9. Incremental Build Gates
+
+After creating 3+ files, run intermediate build before proceeding:
+
+```markdown
+**Step 2.5: Incremental Build Verification**
+After creating 3+ files, run intermediate build:
+```bash
+dotnet build Yubico.YubiKit.<Module>/Yubico.YubiKit.<Module>.csproj
+```
+Fix compilation errors before proceeding to next files.
+DO NOT create all implementation files without intermediate checks.
+```
+
+**Why:** Batch creation without validation causes cascading errors. Incremental builds catch issues early, reducing fix cycles by ~40%.
+
+### 10. Test Audit for Refactoring Phases
 
 When a phase involves interface changes, signature changes, or dependency refactoring, add a test audit step:
 
@@ -173,7 +219,7 @@ grep -r "Substitute.For<ClassName>" tests/ --include="*.cs"
 Document which tests need mock updates BEFORE making code changes.
 ```
 
-### 9. Phase Deferral Documentation
+### 11. Phase Deferral Documentation
 
 If a phase should be deferred, document clearly:
 
@@ -186,6 +232,87 @@ If a phase should be deferred, document clearly:
 
 This prevents ambiguity about what "skipped" means and whether the overall task can still complete.
 
+### 12. Test-First Discipline
+
+For code changes, run existing tests BEFORE editing to establish baseline:
+
+```markdown
+## Test Discipline
+For each code change:
+1. ✅ Run existing test to see current behavior (baseline)
+2. ✅ Edit code to improve behavior
+3. ✅ Run test again to verify improvement
+4. ✅ Commit
+
+This ensures tests actually verify your changes, not just that code compiles.
+```
+
+**Why:** Build-then-test (reactive) catches errors late. Test-first (proactive) establishes baseline and validates the change actually improved behavior.
+
+### 13. Documentation Inline (Same Commit)
+
+Documentation is part of the feature, not a separate phase:
+
+```markdown
+## Documentation Updates
+When modifying infrastructure or public API:
+- Update relevant docs (TESTING.md, README.md) in the SAME commit as code
+- Add docstrings to new public methods
+- Update progress file immediately after each change
+
+Do NOT batch documentation into a separate phase.
+```
+
+**Why:** Separate documentation phases cause drift—details forgotten, examples outdated. Inline documentation captures intent while fresh.
+
+### 14. Template Reference Mandate (Documentation Tasks)
+
+Before creating any documentation file, study existing patterns:
+
+```markdown
+## Documentation Creation Rules
+
+Before creating ANY documentation file:
+1. MUST view existing file of same type for pattern reference
+2. MUST replicate structure and style
+3. MUST adapt content to module context
+
+Template Locations:
+- README.md: See existing module README.md (e.g., Yubico.YubiKit.Core/README.md)
+- CLAUDE.md: See existing module CLAUDE.md (e.g., Yubico.YubiKit.Core/CLAUDE.md)
+- tests/CLAUDE.md: See existing tests/CLAUDE.md (e.g., Yubico.YubiKit.Management/tests/CLAUDE.md)
+```
+
+**Why:** Prevents style drift and ensures SDK-wide consistency. Agent naturally created consistent docs in audit session by studying templates first.
+
+### 15. Final Verification Checklist
+
+The final phase must include explicit verification steps:
+
+```markdown
+## Final Phase: Verification (MANDATORY)
+
+Before delivering completion promise:
+
+1. **Build Verification**
+   Run: `dotnet build.cs build`
+   Must: Exit 0 with no errors
+
+2. **Coverage Check** (for documentation tasks)
+   Verify all target files created/updated
+
+3. **Commit History**
+   Run: `git log --oneline -10`
+   Verify: One commit per phase, conventional format
+
+4. **Progress File**
+   All tasks marked [x] or [SKIPPED] with reason
+
+Only after ALL pass, deliver: <promise>COMPLETION_TOKEN</promise>
+```
+
+**Why:** Prevents premature completion claims. Explicit checklist catches missed steps.
+
 ## Anti-Patterns to Avoid
 - Vague completion criteria ("when finished")
 - Missing test requirement ("when code compiles")
@@ -194,6 +321,8 @@ This prevents ambiguity about what "skipped" means and whether the overall task 
 - Using `git add .` or `git add -A` blindly
 - **Cramming multiple phases into one iteration** (causes context rot)
 - **Skipping test audit** before interface/signature changes (causes reactive test fixing)
+- **Build-then-test** instead of test-first (catches errors late)
+- **Batching documentation** into separate phases (causes doc drift)
 
 ## Handoff (ALWAYS END WITH THIS)
 

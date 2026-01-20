@@ -8,24 +8,28 @@ This file provides Claude-specific guidance for working with the PIV module. **R
 > - **Notable changes** to APIs, patterns, or behavior should be documented in both CLAUDE.md and README.md
 > - **New features** (e.g., new slot operations, key algorithms) should include usage examples in README.md and implementation guidance in CLAUDE.md
 > - **Breaking changes** require updates to both files with migration guidance
-> - **Migration progress** from legacy codebase should be tracked in CLAUDE.md
 > - **Test infrastructure changes** should be reflected in the test pattern sections below
 
 ## Module Context
 
-**IMPORTANT:** This module is currently being migrated from the legacy codebase (`legacy-develop/Yubico.YubiKey/src/Yubico/YubiKey/Piv/`) to the new modern structure. The legacy code is **production-ready and extensively tested**, serving as the authoritative reference implementation.
+The PIV module provides access to the PIV (Personal Identity Verification) application on YubiKeys, implementing FIPS 201 smart card standard for identity verification and cryptographic operations.
 
-**Current State:**
-- ✅ **Legacy Implementation**: Fully functional, located in `legacy-develop/`
-- 🚧 **Modern Implementation**: Being migrated to `Yubico.YubiKit.Piv/`
-- ✅ **Test Infrastructure**: PlaceholderTests in place, integration tests to be migrated
+**Key Components:**
+- `PivSession.cs` - Main session class and initialization
+- `PivSession.Authentication.cs` - PIN, PUK, and management key operations
+- `PivSession.KeyPairs.cs` - Key generation, import, and public key retrieval
+- `PivSession.Crypto.cs` - Sign, decrypt, and key agreement operations
+- `PivSession.Certificates.cs` - Certificate import, retrieval, and management
+- `PivSession.Metadata.cs` - Key and certificate metadata operations
+- `PivSession.DataObjects.cs` - PIV data object read/write operations
+- `PivSession.Bio.cs` - YubiKey Bio series biometric operations
 
-**Key Legacy Files (Reference):**
-- `legacy-develop/Yubico.YubiKey/src/Yubico/YubiKey/Piv/PivSession.cs` - Main session class
-- `PivSession.KeyPairs.cs` - Key generation, import, certificate management
-- `PivSession.Crypto.cs` - Sign, decrypt, key agreement operations
-- `PivSession.Pin.cs` - PIN, PUK, and management key operations
-- `PivSession.ManagementKey.cs` - Management key authentication
+**PIV Capabilities:**
+- **24 key slots**: 4 standard PIV slots + 20 retired key management slots + attestation slot
+- **Multiple algorithms**: RSA (1024, 2048, 3072, 4096), EC (P-256, P-384, P-521)
+- **Flexible authentication**: PIN, PUK, Management Key (3DES, AES-128, AES-192, AES-256)
+- **Policy enforcement**: PIN policy (Default, Never, Once, Always) and Touch policy (Default, Never, Always, Cached)
+- **Attestation**: Generate attestation statements for on-device key generation
 
 ## Critical Security Requirements
 
@@ -449,15 +453,15 @@ if (yubiKey.FirmwareVersion >= FirmwareVersion.V5_7_0)
 7. **Signing Slot**: Slot 0x9C (signing) typically requires PIN for each operation per PIV standard
 8. **Private Key Never Leaves Device**: Cannot export private keys - they're generated/imported and remain on device
 
-## Migration Notes
+## Implementation Notes
 
-When migrating code from legacy to modern structure:
+When implementing new PIV features:
 
-1. **Preserve Partial Class Organization**: Keep the logical separation (KeyPairs, Crypto, Pin, etc.)
-2. **Update to Modern Patterns**: Use `async`/`await`, `Memory<T>`, `Span<T>` where appropriate
-3. **Maintain KeyCollector Pattern**: This is fundamental to PIV and should remain unchanged
-4. **Test Coverage**: Migrate existing tests from `legacy-develop/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Piv/`
-5. **Keep Command/Response Pattern**: Low-level APDU commands are well-tested; preserve this architecture
+1. **Preserve Partial Class Organization**: Keep the logical separation (KeyPairs, Crypto, Authentication, Certificates, etc.)
+2. **Modern Patterns**: Use `async`/`await`, `Memory<T>`, `Span<T>` for all new code
+3. **Maintain KeyCollector Pattern**: This is fundamental to PIV security and should remain unchanged
+4. **Test Coverage**: Add both unit tests and integration tests for new operations
+5. **Command/Response Pattern**: Follow the established APDU command architecture
 
 ## Related Modules
 

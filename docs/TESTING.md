@@ -90,3 +90,114 @@ Name!=SkipMe                   Exclude tests named 'SkipMe'
 3. Use `--project` for module filtering
 4. Use `--filter` for test filtering
 5. When in doubt, run `dotnet build.cs test` without filters first
+
+---
+
+## Multi-Transport Test Infrastructure
+
+### Overview
+
+The test infrastructure supports testing YubiKeys across multiple connection types (transports) automatically. Each physical YubiKey can present multiple transports (CCID, HidFido, HidOtp), and tests run independently on each transport.
+
+### How It Works
+
+When you write a test using `[WithYubiKey]`, the infrastructure:
+1. Discovers all available devices and their transports
+2. Creates a separate `YubiKeyTestState` for each transport
+3. Runs your test once per transport per device
+
+Example: One YubiKey with CCID and HidFido → test runs twice.
+
+### ConnectionType Filtering
+
+Use the `ConnectionType` property to filter which transports your test runs on:
+
+```csharp
+// Run on all transports (default)
+[WithYubiKey]
+public async Task MyTest(YubiKeyTestState state) { }
+
+// Run only on CCID (SmartCard) connections
+[WithYubiKey(ConnectionType = ConnectionType.Ccid)]
+public async Task SmartCardOnly(YubiKeyTestState state) { }
+
+// Run only on HidFido connections
+[WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+public async Task FidoOnly(YubiKeyTestState state) { }
+```
+
+### Test Output Format
+
+Test output shows the ConnectionType:
+```
+Passed MyTest(state: YubiKey(SN:12345678,FW:5.7.2,UsbAKeychain,Ccid))
+Passed MyTest(state: YubiKey(SN:12345678,FW:5.7.2,UsbAKeychain,HidFido))
+```
+
+### Automatic Transport Selection
+
+The `WithManagementAsync` helper automatically uses the correct transport from `state.ConnectionType`:
+
+```csharp
+[WithYubiKey]
+public async Task MyTest(YubiKeyTestState state)
+{
+    await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+    {
+        // mgmt uses the transport from state.ConnectionType automatically
+        var deviceInfo = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
+    });
+}
+```
+
+### Transport-Specific Testing
+
+Test different transports explicitly using `ConnectionType` filtering:
+
+```csharp
+// This test runs ONLY on CCID connections
+[WithYubiKey(ConnectionType = ConnectionType.Ccid)]
+public async Task SmartCard_Operations(YubiKeyTestState state)
+{
+    Assert.Equal(ConnectionType.Ccid, state.ConnectionType);
+    await state.WithManagementAsync(async (mgmt, _) =>
+    {
+        // CCID-specific testing
+    });
+}
+
+// This test runs on ALL available transports
+[WithYubiKey]
+public async Task AllTransports_Consistency(YubiKeyTestState state)
+{
+    // Verifies behavior is consistent across transports
+    await state.WithManagementAsync(async (mgmt, _) =>
+    {
+        var info = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
+    });
+}
+```
+
+### Best Practices
+
+1. **Default to all transports**: Don't specify `ConnectionType` unless you have a transport-specific reason
+2. **Avoid DeviceId parsing**: Use `ConnectionType` filtering instead of parsing `DeviceId` strings
+3. **Use WithManagementAsync**: Let the infrastructure handle connection management
+4. **Test consistency**: Write tests that verify behavior is consistent across transports when possible
+
+### Migration from Old Patterns
+
+**Old (fragile):**
+```csharp
+var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
+var fidoDevice = devices.FirstOrDefault(d => 
+    d.DeviceId.Contains(":0001") || d.DeviceId.Contains(":F1D0"));
+```
+
+**New (robust):**
+```csharp
+var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
+var fidoDevice = devices.FirstOrDefault();
+```

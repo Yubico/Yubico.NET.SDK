@@ -2,6 +2,10 @@
 
 This file provides Claude-specific guidance for the Security Domain test infrastructure.
 
+## Required Reading
+
+**CRITICAL:** Read [`docs/TESTING.md`](../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet build.cs test` - NEVER use `dotnet test` directly.**
+
 ## Test Extension Methods
 
 ### Location

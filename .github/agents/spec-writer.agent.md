@@ -37,6 +37,7 @@ Create Product Requirements Documents (PRDs) from user feature requests. Focus o
 
 1. **Understand Request**
    Parse user's feature request. Identify the problem being solved.
+   Use Context7 MCP to research relevant frameworks, APIs, or domain patterns if needed.
 
 2. **Create Feature Slug**
    Derive kebab-case slug from feature name (max 50 chars).

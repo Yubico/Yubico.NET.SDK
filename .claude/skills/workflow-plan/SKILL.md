@@ -20,6 +20,8 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** This should be run after brainstorming has produced a validated design.
 
+**Research:** Use Context7 MCP to look up any library/API documentation, code patterns, or framework usage needed to understand the implementation requirements.
+
 **Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
 
 ## Bite-Sized Task Granularity

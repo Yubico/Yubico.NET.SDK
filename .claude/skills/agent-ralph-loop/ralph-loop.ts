@@ -1,26 +1,27 @@
 #!/usr/bin/env bun
 
-import { join, dirname, basename } from "path";
+import { join, dirname } from "path";
 import { readdirSync, existsSync, readFileSync } from "fs";
 
+// Import pure utility functions from the testable module
+import {
+  isProgressFile,
+  parseProgressFile,
+  formatProgressContext,
+  deriveSessionSlug,
+  formatSkillsForPrompt,
+  formatDuration,
+  detectPhaseFromCommits,
+  parseSkillFile,
+  parseArgs,
+  type Config,
+  type SkillInfo,
+  type ProgressFileState,
+  type ProgressPhase,
+  type ProgressTask,
+} from "./ralph-loop-utils";
+
 // --- Configuration & Constants ---
-
-interface SkillInfo {
-  name: string;
-  description: string;
-  mandatory: boolean;
-}
-
-interface Config {
-  promptParts: string[];
-  maxIterations: number;
-  completionPromise: string | null;
-  delay: number; // seconds
-  learningMode: boolean;
-  promptFile: string | null;
-  model: string | null;
-  session: string | null;
-}
 
 interface IterationMetrics {
   iteration: number;
@@ -48,27 +49,6 @@ const CONSTANTS = {
 // --- Helper Functions ---
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// Derive session slug from various sources
-function deriveSessionSlug(config: Config): string {
-  // Priority 1: Explicit --session flag
-  if (config.session) {
-    return config.session.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").slice(0, 50);
-  }
-  
-  // Priority 2: Extract from prompt file name
-  if (config.promptFile) {
-    const filename = basename(config.promptFile, ".md");
-    // Remove date prefix if present (e.g., "2026-01-18-feature-name" -> "feature-name")
-    const withoutDate = filename.replace(/^\d{4}-\d{2}-\d{2}-?/, "");
-    if (withoutDate) {
-      return withoutDate.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").slice(0, 50);
-    }
-  }
-  
-  // Priority 3: Timestamp fallback
-  return new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-}
 
 // Bun-native implementation of "tee" (pipe stream to console + file)
 async function runCopilotWithTee(args: string[], logFile: string): Promise<string> {
@@ -125,8 +105,6 @@ async function runCopilotWithTee(args: string[], logFile: string): Promise<strin
   return fullOutput;
 }
 
-// --- Main Class ---
-
 // --- Skill Discovery ---
 
 function discoverSkills(): SkillInfo[] {
@@ -143,50 +121,53 @@ function discoverSkills(): SkillInfo[] {
     if (!existsSync(skillFile)) continue;
 
     const content = readFileSync(skillFile, "utf-8");
-    
-    // Parse YAML frontmatter
-    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-    if (!frontmatterMatch) continue;
-
-    const frontmatter = frontmatterMatch[1];
-    const nameMatch = frontmatter.match(/^name:\s*(.+)$/m);
-    const descMatch = frontmatter.match(/^description:\s*(.+)$/m);
-
-    if (nameMatch && descMatch) {
-      const name = nameMatch[1].trim();
-      const description = descMatch[1].trim();
-      // Detect mandatory skills by keywords in description
-      const mandatory = description.toLowerCase().includes("required") || 
-                        description.toLowerCase().includes("never use");
-      skills.push({ name, description, mandatory });
-    }
+    const skill = parseSkillFile(content);
+    if (skill) skills.push(skill);
   }
 
   return skills;
 }
 
-function formatSkillsForPrompt(skills: SkillInfo[]): string {
-  if (skills.length === 0) return "";
+// Execution protocol injected for progress file mode
+const EXECUTION_PROTOCOL = `
+[EXECUTION PROTOCOL - FOLLOW EXACTLY]
 
-  const mandatory = skills.filter(s => s.mandatory);
-  const optional = skills.filter(s => !s.mandatory);
+You are executing a task from a progress file. Follow this protocol for EVERY task:
 
-  let output = `[AVAILABLE SKILLS - REVIEW BEFORE STARTING]
+## TDD Loop
+1. **RED:** Write a failing test that asserts the task's expected behavior
+   - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
+   - Expect: FAILURE (test must fail first to prove it tests something)
 
-MANDATORY SKILLS (violating these is a critical error):
-${mandatory.map(s => `- ${s.name}: ${s.description}`).join("\n")}
+2. **GREEN:** Write minimal code to make the test pass
+   - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
+   - Expect: SUCCESS
 
-OTHER SKILLS:
-${optional.map(s => `- ${s.name}: ${s.description}`).join("\n")}
+3. **REFACTOR:** Clean up code, verify security, add XML docs if public API
 
-SKILL RULES:
-- BEFORE any build/test/commit action, check if a skill covers it
-- Use \`skill invoke <name>\` or follow skill instructions
-- Mandatory skills MUST be used - direct commands (dotnet build, dotnet test, git add .) are FORBIDDEN
+4. **COMMIT:** 
+   - \`git add {specific files only}\` - NEVER use \`git add .\`
+   - \`git commit -m "feat(scope): task description"\`
+
+5. **UPDATE PROGRESS FILE:**
+   - Change \`- [ ]\` to \`- [x]\` for the completed task
+   - Add a note under ### Notes if relevant
+
+## Security Checklist (verify before marking task complete)
+- [ ] Sensitive data (PINs, keys) zeroed with \`CryptographicOperations.ZeroMemory\`
+- [ ] No secrets logged or printed
+- [ ] Input validation for lengths and ranges
+
+## Build Commands (MANDATORY - never use raw dotnet commands)
+- Build: \`dotnet build.cs build\`
+- Test: \`dotnet build.cs test\`
+- Test filtered: \`dotnet build.cs test --filter "..."\`
+
+## Rules
+- Complete ONE task fully before moving to next
+- Mark \`[x]\` ONLY after build + test pass
+- If stuck, add a note and move to next task (don't loop forever)
 `;
-
-  return output;
-}
 
 class RalphLoop {
   private config: Config;
@@ -203,6 +184,7 @@ class RalphLoop {
   private sessionDir: string = "";
   private stateFile: string = "";
   private learningDir: string = "";
+  private progressState: ProgressFileState | null = null;
 
   constructor(config: Config) {
     this.config = config;
@@ -230,6 +212,9 @@ class RalphLoop {
         process.exit(1);
       }
       this.prompt = (await f.text()).trim();
+      
+      // Check if this is a progress file
+      this.progressState = parseProgressFile(this.prompt);
     } else {
       this.prompt = this.config.promptParts.join(" ");
     }
@@ -310,12 +295,20 @@ ${this.prompt}
   }
 
   private printStartupBanner() {
-    const skillCount = discoverSkills().length;
-    const mandatoryCount = discoverSkills().filter(s => s.mandatory).length;
+    const skills = discoverSkills();
+    const skillCount = skills.length;
+    const mandatoryCount = skills.filter(s => s.mandatory).length;
+    
+    // Detect progress file mode during init
+    const isProgressMode = this.progressState?.isProgressFile ?? false;
+    const modeStr = isProgressMode ? "PROGRESS FILE" : "AD-HOC";
+    const modeColor = isProgressMode ? CONSTANTS.COLOR.GREEN : CONSTANTS.COLOR.YELLOW;
+    
     console.log(`
 ${CONSTANTS.COLOR.CYAN}🔄 Ralph loop activated for Copilot CLI! (Bun Engine)${CONSTANTS.COLOR.RESET}
 
 Session: ${this.sessionDir}
+Mode: ${modeColor}${modeStr}${CONSTANTS.COLOR.RESET}${isProgressMode ? ` - ${this.progressState?.feature || "unknown feature"}` : ""}
 Max iterations: ${this.config.maxIterations > 0 ? this.config.maxIterations : "unlimited (infinite)"}
 Completion promise: ${this.config.completionPromise ? this.config.completionPromise : "none (runs forever)"}
 Model: ${this.config.model || "default"}
@@ -344,19 +337,6 @@ ${this.config.learningMode ? `Learning mode: ENABLED - Review file: ${this.revie
       const [hash, ...rest] = line.split(" ");
       return { hash, message: rest.join(" ") };
     });
-  }
-
-  private detectPhaseFromCommits(commits: Array<{ message: string }>): string | null {
-    for (const commit of commits) {
-      // Match patterns like "Phase 1", "phase 2", "PHASE_1_DONE"
-      const phaseMatch = commit.message.match(/phase[\s_-]*(\d+)/i);
-      if (phaseMatch) return `Phase ${phaseMatch[1]}`;
-      
-      // Match conventional commit scopes like "feat(core):", "test(piv):"
-      const scopeMatch = commit.message.match(/^(?:feat|fix|test|refactor|docs)\(([^)]+)\)/i);
-      if (scopeMatch) return scopeMatch[1];
-    }
-    return null;
   }
 
   private getFileChangeStats(baseHash: string): { filesChanged: number; linesAdded: number; linesRemoved: number; fileList: string[] } {
@@ -412,7 +392,7 @@ ${this.config.learningMode ? `Learning mode: ENABLED - Review file: ${this.revie
 
   private captureIterationMetrics(iter: number, durationSeconds: number): IterationMetrics {
     const newCommits = this.getNewCommits(this.lastCommitHash);
-    const phase = this.detectPhaseFromCommits(newCommits);
+    const phase = detectPhaseFromCommits(newCommits);
     const commitMessage = newCommits.length > 0 ? newCommits[0].message : null;
     const stats = this.getFileChangeStats(this.lastCommitHash);
     
@@ -428,16 +408,6 @@ ${this.config.learningMode ? `Learning mode: ENABLED - Review file: ${this.revie
     };
   }
 
-  private formatDuration(seconds: number): string {
-    if (seconds < 60) return `${seconds}s`;
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    if (mins < 60) return `${mins}m ${secs}s`;
-    const hours = Math.floor(mins / 60);
-    const remainMins = mins % 60;
-    return `${hours}h ${remainMins}m`;
-  }
-
   // --- Learning Logic ---
 
   private async captureIterationLearning(iter: number, output: string, logFile: string, metrics: IterationMetrics) {
@@ -450,7 +420,7 @@ ${this.config.learningMode ? `Learning mode: ENABLED - Review file: ${this.revie
     const truncated = output.split("\n").length > 50;
     
     // Build metrics summary for log entry
-    const metricsLine = `Duration: ${this.formatDuration(metrics.durationSeconds)} | Files: ${metrics.filesChanged} | +${metrics.linesAdded}/-${metrics.linesRemoved}`;
+    const metricsLine = `Duration: ${formatDuration(metrics.durationSeconds)} | Files: ${metrics.filesChanged} | +${metrics.linesAdded}/-${metrics.linesRemoved}`;
     const phaseLine = metrics.phase ? `Phase: ${metrics.phase}` : "";
     const commitLine = metrics.commitMessage ? `Commit: "${metrics.commitMessage}"` : "";
     
@@ -508,7 +478,7 @@ ${this.iterationMetrics.map(m => {
   const commitCell = m.commitMessage 
     ? `"${escapeTableCell(m.commitMessage.slice(0, 40))}${m.commitMessage.length > 40 ? "..." : ""}"`
     : "-";
-  return `| ${m.iteration} | ${this.formatDuration(m.durationSeconds)} | ${escapeTableCell(m.phase || "-")} | ${m.filesChanged} | +${m.linesAdded} | -${m.linesRemoved} | ${commitCell} |`;
+  return `| ${m.iteration} | ${formatDuration(m.durationSeconds)} | ${escapeTableCell(m.phase || "-")} | ${m.filesChanged} | +${m.linesAdded} | -${m.linesRemoved} | ${commitCell} |`;
 }).join("\n")}`
       : "No metrics captured";
 
@@ -525,8 +495,8 @@ ${this.iterationMetrics.map(m => {
 
 Session Details:
 - Iterations: ${this.iteration}
-- Total Duration: ${this.formatDuration(duration)}
-- Average Iteration: ${this.formatDuration(avgDuration)}
+- Total Duration: ${formatDuration(duration)}
+- Average Iteration: ${formatDuration(avgDuration)}
 - Success: ${endReason}
 - Prompt: ${this.prompt}
 
@@ -593,6 +563,15 @@ Output <promise>ANALYSIS_COMPLETE</promise> when done.`;
         return;
       }
 
+      // Re-read progress file each iteration to get updated state
+      if (this.config.promptFile) {
+        const fileContent = await Bun.file(this.config.promptFile).text();
+        this.progressState = parseProgressFile(fileContent);
+        if (this.progressState.isProgressFile) {
+          this.prompt = fileContent; // Update with latest content
+        }
+      }
+
       await this.updateStateFile();
 
       console.log(`
@@ -601,9 +580,57 @@ ${CONSTANTS.COLOR.CYAN}🔄 ═════════════════�
 🔄 ═══════════════════════════════════════════════════════════${CONSTANTS.COLOR.RESET}
 `);
 
+      // Log progress file status if applicable
+      if (this.progressState?.isProgressFile) {
+        if (this.progressState.currentTask) {
+          console.log(`${CONSTANTS.COLOR.YELLOW}📋 Progress: Phase "${this.progressState.currentPhase?.name}" | Task ${this.progressState.currentTask.id}: ${this.progressState.currentTask.description}${CONSTANTS.COLOR.RESET}\n`);
+        } else {
+          console.log(`${CONSTANTS.COLOR.GREEN}📋 Progress: All tasks complete - running final verification${CONSTANTS.COLOR.RESET}\n`);
+        }
+      }
+
       const logFile = join(this.sessionDir, `iteration-${this.iteration}.log`);
 
-      const iterationPrompt = `${this.skillsPrompt}
+      // Build iteration prompt - different for progress file vs ad-hoc mode
+      let iterationPrompt: string;
+      
+      if (this.progressState?.isProgressFile) {
+        // Progress file mode: inject full protocol + task context + file content
+        iterationPrompt = `${this.skillsPrompt}
+
+[PROGRESS FILE MODE]
+You are executing tasks from a progress file.
+
+**Progress File:** \`${this.config.promptFile}\`
+${this.progressState.prd ? `**Source PRD:** \`${this.progressState.prd}\`` : ""}
+
+${EXECUTION_PROTOCOL}
+
+${formatProgressContext(this.progressState)}
+
+[PROGRESS FILE CONTENT]
+\`\`\`markdown
+${this.prompt}
+\`\`\`
+
+---
+[Ralph Loop Context]
+Iteration: ${this.iteration}
+${this.config.completionPromise ? `Output <promise>${this.config.completionPromise}</promise> ONLY when ALL tasks in the progress file are marked [x] AND verification passes.` : ""}
+${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}` : ""}
+
+[AUTONOMY DIRECTIVES]
+1. You are in NON-INTERACTIVE mode. The user is not present.
+2. NEVER ask questions, NEVER ask for clarification, and NEVER say "Let me know if you want me to...".
+3. If a decision is ambiguous, pick the most standard/reasonable option and EXECUTE it immediately.
+4. Use "git" to explore the codebase if you are lost.
+5. Check your previous work in files and git history. Continue from where you left off.
+6. REVIEW THE SKILLS LIST ABOVE before any build/test/commit operation.
+7. After completing a task, UPDATE THE PROGRESS FILE to mark it [x].
+---`;
+      } else {
+        // Ad-hoc mode: original behavior
+        iterationPrompt = `${this.skillsPrompt}
 ${this.prompt}
 
 ---
@@ -620,6 +647,7 @@ ${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}`
 5. Check your previous work in files and git history. Continue from where you left off.
 6. REVIEW THE SKILLS LIST ABOVE before any build/test/commit operation.
 ---`;
+      }
 
       const copilotArgs = ["-p", iterationPrompt, "--allow-all-tools"];
       if (this.config.model) copilotArgs.push("--model", this.config.model);
@@ -632,7 +660,7 @@ ${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}`
       const metrics = this.captureIterationMetrics(this.iteration, iterationDuration);
       
       // Print iteration summary
-      console.log(`\n${CONSTANTS.COLOR.YELLOW}📊 Iteration ${this.iteration}: ${this.formatDuration(iterationDuration)} | ${metrics.filesChanged} files | +${metrics.linesAdded}/-${metrics.linesRemoved} lines${metrics.phase ? ` | ${metrics.phase}` : ""}${CONSTANTS.COLOR.RESET}`);
+      console.log(`\n${CONSTANTS.COLOR.YELLOW}📊 Iteration ${this.iteration}: ${formatDuration(iterationDuration)} | ${metrics.filesChanged} files | +${metrics.linesAdded}/-${metrics.linesRemoved} lines${metrics.phase ? ` | ${metrics.phase}` : ""}${CONSTANTS.COLOR.RESET}`);
       
       await this.captureIterationLearning(this.iteration, output, logFile, metrics);
 
@@ -719,7 +747,7 @@ function parseArgs(): Config {
         }
         break;
       case "--completion-promise":
-        if (i + 1 >= args.length || args[i + 1] === "") {
+        if (i + 1 >= args.length || args[i + 1] === "" || args[i + 1].startsWith("-")) {
           console.error("Error: --completion-promise requires a non-empty value");
           process.exit(1);
         }

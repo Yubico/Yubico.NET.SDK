@@ -555,3 +555,5 @@ coveragereport/
 TestResults/
 # Codemapper AST output (gitignored but readable by agents)
 codebase_ast/
+
+docs/ralph-loop/

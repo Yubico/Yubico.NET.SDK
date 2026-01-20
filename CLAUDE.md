@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI agents when working with code in this repository.
 
 **IMPORTANT:** If you are working in a subproject directory (e.g., `Yubico.YubiKit.SecurityDomain/`, `Yubico.YubiKit.Piv/`, etc.), you MUST also read that subproject's `CLAUDE.md` file if it exists. Subproject CLAUDE.md files contain specific patterns, test harness details, and context for that module.
 
@@ -13,8 +13,51 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 - We actively use new .NET 10 library features, C# 14 language features, and SDK/tooling improvements
 - When implementing features, consult these docs to leverage the latest platform capabilities
 
+## Project Structure
+
+The SDK is organized into the following modules:
+
+**Core Infrastructure:**
+- `Yubico.YubiKit.Core/` - Device management, connection abstractions, APDU protocol handling, platform interop
+- `Yubico.YubiKit.Management/` - Device information queries, capability detection, firmware version
+
+**YubiKey Applications:**
+- `Yubico.YubiKit.Piv/` - PIV (Personal Identity Verification) smart card functionality
+- `Yubico.YubiKit.Fido2/` - FIDO2/WebAuthn authentication
+- `Yubico.YubiKit.Oath/` - TOTP/HOTP one-time password generation
+- `Yubico.YubiKit.YubiOtp/` - Yubico OTP configuration and generation
+- `Yubico.YubiKit.OpenPgp/` - OpenPGP card implementation
+- `Yubico.YubiKit.SecurityDomain/` - Secure Channel Protocol (SCP03), key management
+
+**Hardware Security Modules:**
+- `Yubico.YubiKit.YubiHsm/` - YubiHSM 2 hardware security module integration
+
+**Testing Infrastructure:**
+- `Yubico.YubiKit.Tests.Shared/` - Shared test utilities, multi-transport test harness
+- `Yubico.YubiKit.Tests.TestProject/` - xUnit v3 test project structure
+
+**Module-Specific Documentation:**
+Each module directory may contain:
+- `CLAUDE.md` - AI agent guidance for module-specific patterns and test infrastructure
+- `README.md` - Human-readable module documentation with usage examples
+- `tests/CLAUDE.md` - Test infrastructure and patterns for that module
+
 ## Quick Reference - Critical Rules
 
+**Documentation & Research:**
+- ✅ ALWAYS use Context7 MCP (`context7-query-docs` tool) to look up library/API documentation, code patterns, setup/configuration steps, and framework usage without requiring explicit request
+- ✅ Use Perplexity AI (`.claude/skills/tool-perplexity-search/SKILL.md`) for current events, recent releases, or up-to-date web information
+
+**Skills to Apply When Coding in This Repository:**
+- .claude/skills/tool-codemapper/SKILL.md
+- .claude/skills/domain-build/SKILL.md
+- .claude/skills/domain-test/SKILL.md
+- .claude/skills/domain-yubikit-compare/SKILL.md
+- .claude/skills/workflow-interface-refactor/SKILL.md
+- .claude/skills/workflow-tdd/SKILL.md
+- .claude/skills/workflow-debug/SKILL.md
+- .claude/skills/tool-perplexity-search/SKILL.md
+   
 **Memory Management:**
 - ✅ Sync + ≤512 bytes → `Span<byte>` with `stackalloc`
 - ✅ Sync + >512 bytes → `ArrayPool<byte>.Shared.Rent()`
@@ -794,6 +837,30 @@ _logger.LogDebug("Key: {Key}", Convert.ToBase64String(privateKey));
 _logger.LogDebug("PIN verification for slot {Slot}", slotNumber);
 _logger.LogDebug("Key operation completed, length: {Length}", privateKey.Length);
 ```
+
+### Security Audit Checklist
+
+When implementing or reviewing authentication/cryptographic code, run these verification commands:
+
+```bash
+# 1. Sensitive data cleanup - verify ZeroMemory usage
+grep -rn "ZeroMemory\|Clear()" src/ | wc -l
+# Expected: At least one per sensitive operation (PIN, key, PUK)
+
+# 2. Secret logging audit - ensure no values logged
+grep -rn "Log.*\(pin\|key\|puk\|secret\)" -i src/
+# Expected: No matches (or only variable names, never values)
+
+# 3. ArrayPool cleanup audit - verify finally blocks
+grep -A10 "ArrayPool.*Rent" src/ | grep -c "finally"
+# Expected: Every Rent should have corresponding finally block
+
+# 4. Input validation - ensure parameter checks
+grep -c "ArgumentNullException\|ArgumentException" src/
+# Expected: At least one per public method with parameters
+```
+
+Document any violations and fix before claiming security phase complete.
 
 ### APDU and Protocol Buffers
 

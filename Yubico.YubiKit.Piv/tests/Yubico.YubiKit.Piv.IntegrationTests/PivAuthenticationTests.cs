@@ -17,6 +17,8 @@ using Microsoft.Extensions.Logging;
 using Xunit;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
@@ -24,28 +26,35 @@ namespace Yubico.YubiKit.Piv.IntegrationTests;
 
 public class PivAuthenticationTests
 {
-    private static readonly byte[] DefaultManagementKey = new byte[]
+    private static readonly byte[] DefaultTripleDesManagementKey = new byte[]
     {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     };
+    
+    // TODO: Get exact default AES-192 key from ../yubikey-manager or yubikit-android for firmware >= 5.7.0
+    private static readonly byte[] DefaultAesManagementKey = new byte[24];
+    
     private static readonly byte[] DefaultPin = "123456"u8.ToArray();
 
+    private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
+        version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
+
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
     public async Task AuthenticateAsync_WithDefaultKey_Succeeds(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync(); // Ensure default state
         
-        await session.AuthenticateAsync(DefaultManagementKey);
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         
         Assert.True(session.IsAuthenticated);
     }
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
     public async Task AuthenticateAsync_WithWrongKey_ThrowsBadResponse(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -58,7 +67,7 @@ public class PivAuthenticationTests
     }
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
     public async Task VerifyPinAsync_WithCorrectPin_Succeeds(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -70,7 +79,7 @@ public class PivAuthenticationTests
     }
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
     public async Task VerifyPinAsync_WithWrongPin_ThrowsInvalidPinException(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -86,7 +95,7 @@ public class PivAuthenticationTests
     }
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
     public async Task GetPinAttemptsAsync_ReturnsCorrectCount(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -98,7 +107,7 @@ public class PivAuthenticationTests
     }
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
     public async Task ChangePinAsync_WithCorrectOldPin_Succeeds(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();

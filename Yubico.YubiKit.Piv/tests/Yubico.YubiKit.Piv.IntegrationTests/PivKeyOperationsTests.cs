@@ -13,7 +13,10 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using Xunit;
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
@@ -21,21 +24,28 @@ namespace Yubico.YubiKit.Piv.IntegrationTests;
 
 public class PivKeyOperationsTests
 {
-    private static readonly byte[] DefaultManagementKey = new byte[]
+    private static readonly byte[] DefaultTripleDesManagementKey = new byte[]
     {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     };
+    
+    // TODO: Get exact default AES-192 key from ../yubikey-manager or yubikit-android for firmware >= 5.7.0
+    private static readonly byte[] DefaultAesManagementKey = new byte[24];
+    
     private static readonly byte[] DefaultPin = "123456"u8.ToArray();
 
+    private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
+        version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
+
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
     public async Task GenerateKeyAsync_EccP256_ReturnsPublicKey(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        await session.AuthenticateAsync(DefaultManagementKey);
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         
         var publicKey = await session.GenerateKeyAsync(
             PivSlot.Authentication, 
@@ -46,12 +56,12 @@ public class PivKeyOperationsTests
     }
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.7.0")]
+    [WithYubiKey(Capability = DeviceCapabilities.Piv, MinFirmware = "5.7.0")]
     public async Task GenerateKeyAsync_Ed25519_ReturnsPublicKey(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        await session.AuthenticateAsync(DefaultManagementKey);
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         
         var publicKey = await session.GenerateKeyAsync(
             PivSlot.Signature, 
@@ -62,12 +72,12 @@ public class PivKeyOperationsTests
     }
 
     [Theory]
-    [WithYubiKey(MinFirmware = "4.3.0")]
+    [WithYubiKey(Capability = DeviceCapabilities.Piv, MinFirmware = "4.3.0")]
     public async Task AttestKeyAsync_GeneratedKey_ReturnsCertificate(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        await session.AuthenticateAsync(DefaultManagementKey);
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
         
         var attestation = await session.AttestKeyAsync(PivSlot.Authentication);
@@ -77,12 +87,12 @@ public class PivKeyOperationsTests
     }
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.7.0")]
+    [WithYubiKey(Capability = DeviceCapabilities.Piv, MinFirmware = "5.7.0")]
     public async Task MoveKeyAsync_MovesToNewSlot(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        await session.AuthenticateAsync(DefaultManagementKey);
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
         
         await session.MoveKeyAsync(PivSlot.Authentication, PivSlot.Retired1);

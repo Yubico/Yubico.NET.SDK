@@ -139,16 +139,24 @@ public class EncryptedMetadataDecryptorTests
         var plaintext = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                                       0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
         
-        // Encrypt first
+        // Encrypt with CBC mode (Java format: IV || CT)
         var key = EncryptedMetadataDecryptor.DeriveKey(ppuat, "encIdentifier"u8);
+        var iv = new byte[16];
+        RandomNumberGenerator.Fill(iv);
+        
         using var aes = Aes.Create();
         aes.Key = key;
-        aes.Mode = CipherMode.ECB;
+        aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
-        var ciphertext = aes.EncryptEcb(plaintext, PaddingMode.None);
+        var encrypted = aes.EncryptCbc(plaintext, iv, PaddingMode.None);
+        
+        // Prepend IV to ciphertext
+        var ivAndCiphertext = new byte[iv.Length + encrypted.Length];
+        Array.Copy(iv, 0, ivAndCiphertext, 0, iv.Length);
+        Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);
         
         // Act
-        var decrypted = EncryptedMetadataDecryptor.DecryptIdentifier(ppuat, ciphertext);
+        var decrypted = EncryptedMetadataDecryptor.DecryptIdentifier(ppuat, ivAndCiphertext);
         
         // Assert
         Assert.NotNull(decrypted);
@@ -164,16 +172,24 @@ public class EncryptedMetadataDecryptorTests
         var plaintext = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                                       0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
         
-        // Encrypt with correct PPUAT
+        // Encrypt with correct PPUAT (CBC mode)
         var key = EncryptedMetadataDecryptor.DeriveKey(correctPpuat, "encIdentifier"u8);
+        var iv = new byte[16];
+        RandomNumberGenerator.Fill(iv);
+        
         using var aes = Aes.Create();
         aes.Key = key;
-        aes.Mode = CipherMode.ECB;
+        aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
-        var ciphertext = aes.EncryptEcb(plaintext, PaddingMode.None);
+        var encrypted = aes.EncryptCbc(plaintext, iv, PaddingMode.None);
+        
+        // Prepend IV to ciphertext
+        var ivAndCiphertext = new byte[iv.Length + encrypted.Length];
+        Array.Copy(iv, 0, ivAndCiphertext, 0, iv.Length);
+        Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);
         
         // Act - decrypt with wrong PPUAT
-        var decrypted = EncryptedMetadataDecryptor.DecryptIdentifier(wrongPpuat, ciphertext);
+        var decrypted = EncryptedMetadataDecryptor.DecryptIdentifier(wrongPpuat, ivAndCiphertext);
         
         // Assert - decryption succeeds but result is garbage
         Assert.NotNull(decrypted);
@@ -220,16 +236,24 @@ public class EncryptedMetadataDecryptorTests
         var plaintext = new byte[] { 0xCA, 0xFE, 0xBA, 0xBE, 0xDE, 0xAD, 0xBE, 0xEF,
                                       0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
         
-        // Encrypt first
+        // Encrypt with CBC mode (Java format: IV || CT)
         var key = EncryptedMetadataDecryptor.DeriveKey(ppuat, "encCredStoreState"u8);
+        var iv = new byte[16];
+        RandomNumberGenerator.Fill(iv);
+        
         using var aes = Aes.Create();
         aes.Key = key;
-        aes.Mode = CipherMode.ECB;
+        aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
-        var ciphertext = aes.EncryptEcb(plaintext, PaddingMode.None);
+        var encrypted = aes.EncryptCbc(plaintext, iv, PaddingMode.None);
+        
+        // Prepend IV to ciphertext
+        var ivAndCiphertext = new byte[iv.Length + encrypted.Length];
+        Array.Copy(iv, 0, ivAndCiphertext, 0, iv.Length);
+        Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);
         
         // Act
-        var decrypted = EncryptedMetadataDecryptor.DecryptCredStoreState(ppuat, ciphertext);
+        var decrypted = EncryptedMetadataDecryptor.DecryptCredStoreState(ppuat, ivAndCiphertext);
         
         // Assert
         Assert.NotNull(decrypted);
@@ -244,23 +268,37 @@ public class EncryptedMetadataDecryptorTests
         var plaintext = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                                       0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
         
-        // Encrypt as identifier
+        // Encrypt as identifier (CBC mode)
         var identifierKey = EncryptedMetadataDecryptor.DeriveKey(ppuat, "encIdentifier"u8);
+        var iv1 = new byte[16];
+        RandomNumberGenerator.Fill(iv1);
+        
         using var aes1 = Aes.Create();
         aes1.Key = identifierKey;
-        aes1.Mode = CipherMode.ECB;
+        aes1.Mode = CipherMode.CBC;
         aes1.Padding = PaddingMode.None;
-        var identifierCiphertext = aes1.EncryptEcb(plaintext, PaddingMode.None);
+        var identifierEncrypted = aes1.EncryptCbc(plaintext, iv1, PaddingMode.None);
         
-        // Encrypt as credStoreState
+        var identifierCiphertext = new byte[iv1.Length + identifierEncrypted.Length];
+        Array.Copy(iv1, 0, identifierCiphertext, 0, iv1.Length);
+        Array.Copy(identifierEncrypted, 0, identifierCiphertext, iv1.Length, identifierEncrypted.Length);
+        
+        // Encrypt as credStoreState (CBC mode)
         var stateKey = EncryptedMetadataDecryptor.DeriveKey(ppuat, "encCredStoreState"u8);
+        var iv2 = new byte[16];
+        RandomNumberGenerator.Fill(iv2);
+        
         using var aes2 = Aes.Create();
         aes2.Key = stateKey;
-        aes2.Mode = CipherMode.ECB;
+        aes2.Mode = CipherMode.CBC;
         aes2.Padding = PaddingMode.None;
-        var stateCiphertext = aes2.EncryptEcb(plaintext, PaddingMode.None);
+        var stateEncrypted = aes2.EncryptCbc(plaintext, iv2, PaddingMode.None);
         
-        // Assert - different ciphertexts due to different derived keys
+        var stateCiphertext = new byte[iv2.Length + stateEncrypted.Length];
+        Array.Copy(iv2, 0, stateCiphertext, 0, iv2.Length);
+        Array.Copy(stateEncrypted, 0, stateCiphertext, iv2.Length, stateEncrypted.Length);
+        
+        // Assert - different ciphertexts due to different derived keys and IVs
         Assert.NotEqual(identifierCiphertext, stateCiphertext);
         
         // Verify each decrypts correctly with its own method
@@ -278,21 +316,29 @@ public class EncryptedMetadataDecryptorTests
     [Fact]
     public void RoundTrip_MultipleBlockSize()
     {
-        // Test with 32-byte plaintext (2 AES blocks)
+        // Test with 32-byte plaintext (2 AES blocks) using CBC
         var ppuat = CreateRandomPpuat();
         var plaintext = new byte[32];
         RandomNumberGenerator.Fill(plaintext);
         
-        // Encrypt
+        // Encrypt with CBC mode
         var key = EncryptedMetadataDecryptor.DeriveKey(ppuat, "encIdentifier"u8);
+        var iv = new byte[16];
+        RandomNumberGenerator.Fill(iv);
+        
         using var aes = Aes.Create();
         aes.Key = key;
-        aes.Mode = CipherMode.ECB;
+        aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
-        var ciphertext = aes.EncryptEcb(plaintext, PaddingMode.None);
+        var encrypted = aes.EncryptCbc(plaintext, iv, PaddingMode.None);
+        
+        // Prepend IV to ciphertext
+        var ivAndCiphertext = new byte[iv.Length + encrypted.Length];
+        Array.Copy(iv, 0, ivAndCiphertext, 0, iv.Length);
+        Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);
         
         // Decrypt
-        var decrypted = EncryptedMetadataDecryptor.DecryptIdentifier(ppuat, ciphertext);
+        var decrypted = EncryptedMetadataDecryptor.DecryptIdentifier(ppuat, ivAndCiphertext);
         
         // Assert
         Assert.NotNull(decrypted);
@@ -302,26 +348,118 @@ public class EncryptedMetadataDecryptorTests
     [Fact]
     public void RoundTrip_LargePpuat()
     {
-        // Test with larger PPUAT (64 bytes)
+        // Test with larger PPUAT (64 bytes) using CBC
         var ppuat = new byte[64];
         RandomNumberGenerator.Fill(ppuat);
         var plaintext = new byte[16];
         RandomNumberGenerator.Fill(plaintext);
         
-        // Encrypt
+        // Encrypt with CBC mode
         var key = EncryptedMetadataDecryptor.DeriveKey(ppuat, "encCredStoreState"u8);
+        var iv = new byte[16];
+        RandomNumberGenerator.Fill(iv);
+        
         using var aes = Aes.Create();
         aes.Key = key;
-        aes.Mode = CipherMode.ECB;
+        aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
-        var ciphertext = aes.EncryptEcb(plaintext, PaddingMode.None);
+        var encrypted = aes.EncryptCbc(plaintext, iv, PaddingMode.None);
+        
+        // Prepend IV to ciphertext
+        var ivAndCiphertext = new byte[iv.Length + encrypted.Length];
+        Array.Copy(iv, 0, ivAndCiphertext, 0, iv.Length);
+        Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);
         
         // Decrypt
-        var decrypted = EncryptedMetadataDecryptor.DecryptCredStoreState(ppuat, ciphertext);
+        var decrypted = EncryptedMetadataDecryptor.DecryptCredStoreState(ppuat, ivAndCiphertext);
         
         // Assert
         Assert.NotNull(decrypted);
         Assert.Equal(plaintext, decrypted);
+    }
+    
+    #endregion
+    
+    #region CBC Mode Tests (Java compatibility)
+    
+    [Fact]
+    public void DecryptIdentifier_CbcMode_ExtractsIvAndDecrypts()
+    {
+        // Arrange
+        var ppuat = CreateRandomPpuat();
+        var plaintext = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                                      0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
+        
+        // Encrypt with CBC mode: [IV (16 bytes) | ciphertext]
+        var key = EncryptedMetadataDecryptor.DeriveKey(ppuat, "encIdentifier"u8);
+        var iv = new byte[16];
+        RandomNumberGenerator.Fill(iv);
+        
+        using var aes = Aes.Create();
+        aes.Key = key;
+        aes.Mode = CipherMode.CBC;
+        aes.Padding = PaddingMode.None;
+        aes.IV = iv;
+        var encrypted = aes.EncryptCbc(plaintext, iv, PaddingMode.None);
+        
+        // Prepend IV to ciphertext (Java format: IV || CT)
+        var ivAndCiphertext = new byte[iv.Length + encrypted.Length];
+        Array.Copy(iv, 0, ivAndCiphertext, 0, iv.Length);
+        Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);
+        
+        // Act
+        var decrypted = EncryptedMetadataDecryptor.DecryptIdentifier(ppuat, ivAndCiphertext);
+        
+        // Assert
+        Assert.NotNull(decrypted);
+        Assert.Equal(plaintext, decrypted);
+    }
+    
+    [Fact]
+    public void DecryptCredStoreState_CbcMode_ExtractsIvAndDecrypts()
+    {
+        // Arrange
+        var ppuat = CreateRandomPpuat();
+        var plaintext = new byte[] { 0xCA, 0xFE, 0xBA, 0xBE, 0xDE, 0xAD, 0xBE, 0xEF,
+                                      0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
+        
+        // Encrypt with CBC mode: [IV (16 bytes) | ciphertext]
+        var key = EncryptedMetadataDecryptor.DeriveKey(ppuat, "encCredStoreState"u8);
+        var iv = new byte[16];
+        RandomNumberGenerator.Fill(iv);
+        
+        using var aes = Aes.Create();
+        aes.Key = key;
+        aes.Mode = CipherMode.CBC;
+        aes.Padding = PaddingMode.None;
+        aes.IV = iv;
+        var encrypted = aes.EncryptCbc(plaintext, iv, PaddingMode.None);
+        
+        // Prepend IV to ciphertext (Java format: IV || CT)
+        var ivAndCiphertext = new byte[iv.Length + encrypted.Length];
+        Array.Copy(iv, 0, ivAndCiphertext, 0, iv.Length);
+        Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);
+        
+        // Act
+        var decrypted = EncryptedMetadataDecryptor.DecryptCredStoreState(ppuat, ivAndCiphertext);
+        
+        // Assert
+        Assert.NotNull(decrypted);
+        Assert.Equal(plaintext, decrypted);
+    }
+    
+    [Fact]
+    public void DecryptIdentifier_CbcMode_TooShortInput_ReturnsNull()
+    {
+        // Arrange - input shorter than 16 bytes (minimum IV size)
+        var ppuat = CreateRandomPpuat();
+        var tooShort = new byte[15];
+        
+        // Act
+        var result = EncryptedMetadataDecryptor.DecryptIdentifier(ppuat, tooShort);
+        
+        // Assert
+        Assert.Null(result);
     }
     
     #endregion

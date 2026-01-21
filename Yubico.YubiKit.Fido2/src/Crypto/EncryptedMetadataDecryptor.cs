@@ -105,13 +105,24 @@ public static class EncryptedMetadataDecryptor
     
     private static byte[]? DecryptWithInfo(
         ReadOnlySpan<byte> ppuat, 
-        ReadOnlySpan<byte> ciphertext,
+        ReadOnlySpan<byte> encryptedData,
         ReadOnlySpan<byte> info)
     {
-        if (ppuat.IsEmpty || ciphertext.IsEmpty)
+        if (ppuat.IsEmpty || encryptedData.IsEmpty)
         {
             return null;
         }
+        
+        // Encrypted data format: [IV (16 bytes) | ciphertext]
+        // Minimum length is 16 bytes for IV (even if plaintext is empty)
+        if (encryptedData.Length < 16)
+        {
+            return null;
+        }
+        
+        // Extract IV from first 16 bytes
+        ReadOnlySpan<byte> iv = encryptedData[..16];
+        ReadOnlySpan<byte> ciphertext = encryptedData[16..];
         
         // Derive AES-128 key using HKDF-SHA256
         Span<byte> key = stackalloc byte[16];
@@ -124,14 +135,14 @@ public static class EncryptedMetadataDecryptor
         
         try
         {
-            // Decrypt using AES-128-ECB (YubiKey uses ECB for these small values)
+            // Decrypt using AES-128-CBC (Java YubiKit format)
             using var aes = Aes.Create();
             aes.SetKey(key);
-            aes.Mode = CipherMode.ECB;
+            aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.None;
             
             var plaintext = new byte[ciphertext.Length];
-            aes.DecryptEcb(ciphertext, plaintext, PaddingMode.None);
+            aes.DecryptCbc(ciphertext, iv, plaintext, PaddingMode.None);
             
             return plaintext;
         }

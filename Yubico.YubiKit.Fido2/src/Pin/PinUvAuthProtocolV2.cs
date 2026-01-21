@@ -277,13 +277,17 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         
-        if (key.Length != SharedSecretLength)
+        // Key can be either:
+        // - 32-byte PIN token (used for pinUvAuthParam computation)
+        // - 64-byte shared secret (HMAC key + AES key)
+        // In both cases, we use the first 32 bytes as the HMAC key
+        if (key.Length != HmacKeyLength && key.Length != SharedSecretLength)
         {
             throw new ArgumentException(
-                $"Key must be {SharedSecretLength} bytes (HMAC key + AES key).", nameof(key));
+                $"Key must be {HmacKeyLength} bytes (PIN token) or {SharedSecretLength} bytes (shared secret).", nameof(key));
         }
         
-        // Extract HMAC key from shared secret
+        // Use first 32 bytes as HMAC key (works for both token and shared secret)
         var hmacKey = key[..HmacKeyLength];
         
         // Compute HMAC-SHA-256 (full 32 bytes for V2)

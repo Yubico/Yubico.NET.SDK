@@ -235,10 +235,11 @@ public sealed class PinUvAuthProtocolV1 : IPinUvAuthProtocol
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         
-        if (key.Length != SharedSecretLength)
+        // V1 PIN token can be 16 or 32 bytes
+        if (key.Length != 16 && key.Length != SharedSecretLength)
         {
             throw new ArgumentException(
-                $"Key must be {SharedSecretLength} bytes.", nameof(key));
+                $"Key must be 16 or {SharedSecretLength} bytes.", nameof(key));
         }
         
         // Compute HMAC-SHA-256

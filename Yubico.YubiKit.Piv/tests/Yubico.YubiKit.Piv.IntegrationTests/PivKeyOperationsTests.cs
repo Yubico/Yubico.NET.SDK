@@ -15,6 +15,7 @@
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Tests.Shared;
@@ -44,7 +45,7 @@ public class PivKeyOperationsTests
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GenerateKeyAsync_EccP256_ReturnsPublicKey(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -60,7 +61,7 @@ public class PivKeyOperationsTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv, MinFirmware = "5.7.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task GenerateKeyAsync_Ed25519_ReturnsPublicKey(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -76,7 +77,7 @@ public class PivKeyOperationsTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv, MinFirmware = "4.3.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.0")]
     public async Task AttestKeyAsync_GeneratedKey_ReturnsCertificate(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -91,7 +92,7 @@ public class PivKeyOperationsTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv, MinFirmware = "5.7.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task MoveKeyAsync_MovesToNewSlot(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();

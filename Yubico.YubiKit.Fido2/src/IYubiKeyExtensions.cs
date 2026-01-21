@@ -76,7 +76,7 @@ public static class IYubiKeyExtensions
         /// </returns>
         /// <exception cref="NotSupportedException">
         /// Thrown if the YubiKey's connection type is not supported for FIDO2.
-        /// Supported types are <see cref="ConnectionType.Smartcard"/> (SmartCard) and 
+        /// Supported types are <see cref="ConnectionType.SmartCard"/> (SmartCard) and 
         /// <see cref="ConnectionType.HidFido"/>.
         /// </exception>
         /// <remarks>
@@ -129,7 +129,7 @@ public static class IYubiKeyExtensions
             =>
                 yubiKey.ConnectionType switch
                 {
-                    ConnectionType.Smartcard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
+                    ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
                         .ConfigureAwait(false),
                     ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
                         .ConfigureAwait(false),

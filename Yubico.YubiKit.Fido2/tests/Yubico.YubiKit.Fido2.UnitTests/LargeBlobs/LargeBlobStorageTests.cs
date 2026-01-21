@@ -111,7 +111,7 @@ public class LargeBlobStorageTests
         var storage = new LargeBlobStorage(_mockSession, 1024);
         
         // Act
-        await storage.ReadLargeBlobArrayAsync();
+        await storage.ReadLargeBlobArrayAsync(TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(capturedRequest);
@@ -144,7 +144,7 @@ public class LargeBlobStorageTests
         var storage = new LargeBlobStorage(_mockSession);
         
         // Act
-        var result = await storage.ReadLargeBlobArrayAsync();
+        var result = await storage.ReadLargeBlobArrayAsync(TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(result);
@@ -160,7 +160,7 @@ public class LargeBlobStorageTests
         
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => storage.WriteLargeBlobArrayAsync(array));
+            () => storage.WriteLargeBlobArrayAsync(array, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -171,7 +171,7 @@ public class LargeBlobStorageTests
         
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(
-            () => storage.WriteLargeBlobArrayAsync(null!));
+            () => storage.WriteLargeBlobArrayAsync(null!, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -189,7 +189,7 @@ public class LargeBlobStorageTests
         var array = LargeBlobArray.CreateEmpty();
         
         // Act
-        await storage.WriteLargeBlobArrayAsync(array);
+        await storage.WriteLargeBlobArrayAsync(array, TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(capturedRequest);
@@ -210,7 +210,7 @@ public class LargeBlobStorageTests
         
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(
-            () => storage.GetBlobAsync(invalidKey));
+            () => storage.GetBlobAsync(invalidKey, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -228,7 +228,7 @@ public class LargeBlobStorageTests
         RandomNumberGenerator.Fill(key);
         
         // Act
-        var result = await storage.GetBlobAsync(key);
+        var result = await storage.GetBlobAsync(key, TestContext.Current.CancellationToken);
         
         // Assert
         Assert.Null(result);
@@ -244,7 +244,7 @@ public class LargeBlobStorageTests
         
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(
-            () => storage.SetBlobAsync(invalidKey, data));
+            () => storage.SetBlobAsync(invalidKey, data, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -256,7 +256,7 @@ public class LargeBlobStorageTests
         
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(
-            () => storage.DeleteBlobAsync(invalidKey));
+            () => storage.DeleteBlobAsync(invalidKey, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -274,7 +274,7 @@ public class LargeBlobStorageTests
         RandomNumberGenerator.Fill(key);
         
         // Act
-        var result = await storage.DeleteBlobAsync(key);
+        var result = await storage.DeleteBlobAsync(key, TestContext.Current.CancellationToken);
         
         // Assert
         Assert.False(result);
@@ -295,7 +295,7 @@ public class LargeBlobStorageTests
         var array = LargeBlobArray.CreateEmpty();
         
         // Act
-        await storage.WriteLargeBlobArrayAsync(array);
+        await storage.WriteLargeBlobArrayAsync(array, TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(capturedRequest);
@@ -336,7 +336,7 @@ public class LargeBlobStorageTests
         var array = LargeBlobArray.CreateEmpty();
         
         // Act
-        await storage.WriteLargeBlobArrayAsync(array);
+        await storage.WriteLargeBlobArrayAsync(array, TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(capturedRequest);

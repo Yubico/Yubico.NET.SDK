@@ -16,6 +16,7 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Hid.Fido;
 using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Pin;
@@ -199,5 +200,42 @@ public static class FidoTestHelpers
         byte[] clientDataHash)
     {
         return protocol.Authenticate(pinToken, clientDataHash);
+    }
+    
+    /// <summary>
+    /// Creates a FIDO session from an NFC SmartCard connection.
+    /// </summary>
+    /// <remarks>
+    /// FIDO2 over SmartCard is only supported via NFC transport.
+    /// This method finds a device via CCID that reports NFC transport.
+    /// </remarks>
+    /// <param name="yubiKeyManager">The YubiKey manager.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The created FIDO session and SmartCard connection.</returns>
+    /// <exception cref="InvalidOperationException">No NFC-connected YubiKey found.</exception>
+    public static async Task<(FidoSession Session, ISmartCardConnection Connection)> CreateNfcSessionAsync(
+        IYubiKeyManager yubiKeyManager,
+        CancellationToken cancellationToken = default)
+    {
+        var devices = await yubiKeyManager.FindAllAsync(ConnectionType.SmartCard).ConfigureAwait(false);
+        
+        // Find a device that connects via NFC (not USB CCID)
+        foreach (var device in devices)
+        {
+            var connection = await device.ConnectAsync<ISmartCardConnection>().ConfigureAwait(false);
+            
+            if (connection.Transport == Transport.Nfc)
+            {
+                var session = await FidoSession.CreateAsync(connection, cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+                return (session, connection);
+            }
+            
+            // Not NFC - dispose and try next device
+            await connection.DisposeAsync().ConfigureAwait(false);
+        }
+        
+        throw new InvalidOperationException(
+            "No NFC-connected YubiKey found. Ensure an NFC reader is connected and a YubiKey is present on the reader.");
     }
 }

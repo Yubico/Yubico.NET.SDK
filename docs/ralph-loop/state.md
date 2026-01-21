@@ -1,9 +1,9 @@
 ---
 active: false
-iteration: 1
-max_iterations: 30
-completion_promise: "PIV_TESTS_FIXED"
-started_at: "2026-01-21T21:30:59.577Z"
+iteration: 2
+max_iterations: 10
+completion_promise: "PIV_SESSION_PORT_COMPLETE"
+started_at: "2026-01-18T14:40:09.637Z"
 ---
 
 # PIV Integration Tests Fix (Ralph Loop)

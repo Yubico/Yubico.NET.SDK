@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Xunit;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Tests.Shared;
@@ -40,7 +41,7 @@ public class PivResetTests
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ResetAsync_RestoresToDefaults(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -62,7 +63,7 @@ public class PivResetTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv, MinFirmware = "5.3.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task ResetAsync_PinMetadataShowsDefault(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -76,7 +77,7 @@ public class PivResetTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ResetAsync_ClearsAllSlots(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();

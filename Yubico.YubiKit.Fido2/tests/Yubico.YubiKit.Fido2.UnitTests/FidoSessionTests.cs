@@ -11,7 +11,7 @@ public class FidoSessionTests
     {
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(
-            () => FidoSession.CreateAsync(null!));
+            () => FidoSession.CreateAsync(null!, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -22,6 +22,6 @@ public class FidoSessionTests
         
         // Act & Assert
         await Assert.ThrowsAsync<NotSupportedException>(
-            () => FidoSession.CreateAsync(unsupportedConnection));
+            () => FidoSession.CreateAsync(unsupportedConnection, cancellationToken: TestContext.Current.CancellationToken));
     }
 }

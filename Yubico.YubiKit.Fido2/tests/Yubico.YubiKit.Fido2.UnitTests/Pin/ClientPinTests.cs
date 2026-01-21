@@ -70,7 +70,7 @@ public sealed class ClientPinTests : IDisposable
         var responseData = CreatePinRetriesResponse(5, false);
         SetupMockResponse(responseData);
         
-        var (retries, powerCycleRequired) = await clientPin.GetPinRetriesAsync();
+        var (retries, powerCycleRequired) = await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
         
         Assert.Equal(5, retries);
         Assert.False(powerCycleRequired);
@@ -84,7 +84,7 @@ public sealed class ClientPinTests : IDisposable
         var responseData = CreatePinRetriesResponse(0, true);
         SetupMockResponse(responseData);
         
-        var (retries, powerCycleRequired) = await clientPin.GetPinRetriesAsync();
+        var (retries, powerCycleRequired) = await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
         
         Assert.Equal(0, retries);
         Assert.True(powerCycleRequired);
@@ -98,7 +98,7 @@ public sealed class ClientPinTests : IDisposable
         var responseData = CreateUvRetriesResponse(3, false);
         SetupMockResponse(responseData);
         
-        var (retries, powerCycleRequired) = await clientPin.GetUvRetriesAsync();
+        var (retries, powerCycleRequired) = await clientPin.GetUvRetriesAsync(TestContext.Current.CancellationToken);
         
         Assert.Equal(3, retries);
         Assert.False(powerCycleRequired);
@@ -113,7 +113,7 @@ public sealed class ClientPinTests : IDisposable
     {
         using var clientPin = CreateClientPin();
         
-        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(shortPin));
+        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(shortPin, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -121,7 +121,7 @@ public sealed class ClientPinTests : IDisposable
     {
         using var clientPin = CreateClientPin();
         
-        await Assert.ThrowsAsync<ArgumentNullException>(() => clientPin.SetPinAsync(null!));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => clientPin.SetPinAsync(null!, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -130,7 +130,7 @@ public sealed class ClientPinTests : IDisposable
         using var clientPin = CreateClientPin();
         
         var longPin = new string('a', 64);
-        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(longPin));
+        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(longPin, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -142,13 +142,12 @@ public sealed class ClientPinTests : IDisposable
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var emptyResponse = CreateEmptyResponse();
         
-        _mockSession.SendCborRequestAsync(default, default)
-            .ReturnsForAnyArgs(keyAgreementResponse, emptyResponse);
+        _mockSession.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(keyAgreementResponse, emptyResponse);
         
-        await clientPin.SetPinAsync("1234");
+        await clientPin.SetPinAsync("1234", TestContext.Current.CancellationToken);
         
         // Verify two commands were sent (GetKeyAgreement and SetPin)
-        await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, default);
+        await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
     }
     
     [Fact]
@@ -160,13 +159,12 @@ public sealed class ClientPinTests : IDisposable
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var emptyResponse = CreateEmptyResponse();
         
-        _mockSession.SendCborRequestAsync(default, default)
-            .ReturnsForAnyArgs(keyAgreementResponse, emptyResponse);
+        _mockSession.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(keyAgreementResponse, emptyResponse);
         
-        await clientPin.ChangePinAsync("oldpin1234", "newpin5678");
+        await clientPin.ChangePinAsync("oldpin1234", "newpin5678", TestContext.Current.CancellationToken);
         
         // Verify two commands were sent (GetKeyAgreement and ChangePin)
-        await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, default);
+        await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
     }
     
     [Theory]
@@ -177,7 +175,7 @@ public sealed class ClientPinTests : IDisposable
     {
         using var clientPin = CreateClientPin();
         
-        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(currentPin, newPin));
+        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(currentPin, newPin, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -190,10 +188,9 @@ public sealed class ClientPinTests : IDisposable
         var encryptedToken = new byte[32];
         var tokenResponse = CreatePinTokenResponse(encryptedToken);
         
-        _mockSession.SendCborRequestAsync(default, default)
-            .ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
+        _mockSession.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
         
-        var token = await clientPin.GetPinTokenAsync("1234");
+        var token = await clientPin.GetPinTokenAsync("1234", TestContext.Current.CancellationToken);
         
         // Token is decrypted by the fake protocol
         Assert.NotNull(token);
@@ -206,7 +203,7 @@ public sealed class ClientPinTests : IDisposable
         using var clientPin = CreateClientPin();
         
         await Assert.ThrowsAsync<ArgumentException>(
-            () => clientPin.GetPinUvAuthTokenUsingPinAsync("1234", PinUvAuthTokenPermissions.None));
+            () => clientPin.GetPinUvAuthTokenUsingPinAsync("1234", PinUvAuthTokenPermissions.None, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -218,13 +215,9 @@ public sealed class ClientPinTests : IDisposable
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var tokenResponse = CreatePinTokenResponse(new byte[32]);
         
-        _mockSession.SendCborRequestAsync(default, default)
-            .ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
+        _mockSession.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
         
-        var token = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-            "1234",
-            PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion,
-            "example.com");
+        var token = await clientPin.GetPinUvAuthTokenUsingPinAsync("1234", PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion, "example.com", TestContext.Current.CancellationToken);
         
         Assert.NotNull(token);
     }
@@ -235,7 +228,7 @@ public sealed class ClientPinTests : IDisposable
         using var clientPin = CreateClientPin();
         
         await Assert.ThrowsAsync<ArgumentException>(
-            () => clientPin.GetPinUvAuthTokenUsingUvAsync(PinUvAuthTokenPermissions.None));
+            () => clientPin.GetPinUvAuthTokenUsingUvAsync(PinUvAuthTokenPermissions.None, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -247,12 +240,9 @@ public sealed class ClientPinTests : IDisposable
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var tokenResponse = CreatePinTokenResponse(new byte[32]);
         
-        _mockSession.SendCborRequestAsync(default, default)
-            .ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
+        _mockSession.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
         
-        var token = await clientPin.GetPinUvAuthTokenUsingUvAsync(
-            PinUvAuthTokenPermissions.BioEnrollment,
-            null);
+        var token = await clientPin.GetPinUvAuthTokenUsingUvAsync(PinUvAuthTokenPermissions.BioEnrollment, null, TestContext.Current.CancellationToken);
         
         Assert.NotNull(token);
     }
@@ -287,7 +277,7 @@ public sealed class ClientPinTests : IDisposable
         
         clientPin.Dispose();
         
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => clientPin.GetPinRetriesAsync());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -298,10 +288,10 @@ public sealed class ClientPinTests : IDisposable
         var responseData = CreatePinRetriesResponse(8, false);
         SetupMockResponse(responseData);
         
-        await clientPin.GetPinRetriesAsync();
+        await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
         
         // Verify the request was sent
-        await _mockSession.ReceivedWithAnyArgs(1).SendCborRequestAsync(default, default);
+        await _mockSession.ReceivedWithAnyArgs(1).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
     }
     
     // Helper methods

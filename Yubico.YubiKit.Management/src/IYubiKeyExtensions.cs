@@ -112,19 +112,5 @@ public static class IYubiKeyExtensions
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
-
-        public async Task<IConnection> ConnectAsync(CancellationToken cancellationToken) // TODO let's try this
-            =>
-                yubiKey.ConnectionType switch
-                {
-                    ConnectionType.Smartcard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-                        .ConfigureAwait(false),
-                    ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
-                        .ConfigureAwait(false),
-                    ConnectionType.HidOtp => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
-                        .ConfigureAwait(false),
-                    _ => throw new NotSupportedException(
-                        $"Connection type {yubiKey.ConnectionType} is not supported for management session creation."),
-                };
     }
 }

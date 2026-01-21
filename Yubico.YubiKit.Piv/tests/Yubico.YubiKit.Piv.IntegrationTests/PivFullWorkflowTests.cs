@@ -16,6 +16,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Tests.Shared;
@@ -45,7 +46,7 @@ public class PivFullWorkflowTests
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task CompleteWorkflow_GenerateSignVerify(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -90,7 +91,7 @@ public class PivFullWorkflowTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task CompleteWorkflow_ECDHKeyAgreement(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -136,7 +137,7 @@ public class PivFullWorkflowTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv, MinFirmware = "5.7.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task CompleteWorkflow_MoveKeyBetweenSlots(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -167,7 +168,7 @@ public class PivFullWorkflowTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv, MinFirmware = "4.3.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.0")]
     public async Task CompleteWorkflow_AttestGeneratedKey(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();

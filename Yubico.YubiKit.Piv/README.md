@@ -79,26 +79,26 @@ When generating or importing keys, you can specify:
 ```csharp
 using Yubico.YubiKit.Piv;
 
-// Create session from IYubiKey
-await using var session = await yubiKey.CreatePivSessionAsync();
+// Synchronous version
+using var session = new PivSession(yubiKeyDevice);
 
-// Or directly from SmartCard connection
-await using var session = await PivSession.CreateAsync(connection);
+// With key collector for PIN/management key
+session.KeyCollector = MyKeyCollectorDelegate;
 ```
 
 ### Key Generation
 
 ```csharp
 // Generate RSA 2048 key
-var publicKey = await session.GenerateKeyAsync(
+var publicKey = session.GenerateKeyPair(
     PivSlot.Authentication,
     PivAlgorithm.Rsa2048,
     PivPinPolicy.Default,
     PivTouchPolicy.Default);
 
 // Generate EC P-256 key
-var publicKey = await session.GenerateKeyAsync(
-    PivSlot.Signature,
+var publicKey = session.GenerateKeyPair(
+    PivSlot.Signing,
     PivAlgorithm.EccP256,
     PivPinPolicy.Always,    // PIN required every time
     PivTouchPolicy.Cached); // Touch required (15s cache)
@@ -108,69 +108,63 @@ var publicKey = await session.GenerateKeyAsync(
 
 ```csharp
 // Import certificate
-await session.StoreCertificateAsync(PivSlot.Authentication, certificate);
+session.ImportCertificate(PivSlot.Authentication, certificate);
 
 // Retrieve certificate
-var cert = await session.GetCertificateAsync(PivSlot.Authentication);
-
-// Delete certificate
-await session.DeleteCertificateAsync(PivSlot.Authentication);
+var cert = session.GetCertificate(PivSlot.Authentication);
 ```
 
 ### Cryptographic Operations
 
 ```csharp
-// Sign data (or decrypt for RSA)
-var hash = SHA256.HashData("data to sign"u8);
-var signature = await session.SignOrDecryptAsync(
-    PivSlot.Authentication, 
-    PivAlgorithm.EccP256,
-    hash);
+// Sign data
+byte[] dataToSign = ...;
+byte[] signature = session.Sign(PivSlot.Authentication, dataToSign);
+
+// Decrypt data (RSA)
+byte[] encryptedData = ...;
+byte[] decrypted = session.Decrypt(PivSlot.KeyManagement, encryptedData);
 
 // Key agreement (ECDH)
-var peerPublicKey = new ECPublicKey(peerKeyBytes);
-var sharedSecret = await session.CalculateSecretAsync(
+byte[] sharedSecret = session.KeyAgree(
     PivSlot.KeyManagement,
-    peerPublicKey);
+    otherPartyPublicKey);
 ```
 
 ### PIN Management
 
 ```csharp
 // Verify PIN
-await session.VerifyPinAsync(pin);
+bool verified = session.TryVerifyPin(pin);
 
 // Change PIN
-await session.ChangePinAsync(currentPin, newPin);
+session.ChangePin(currentPin, newPin);
 
-// Unblock PIN using PUK
-await session.UnblockPinAsync(puk, newPin);
+// Reset PIN using PUK
+session.ResetPin(puk, newPin);
 
 // Change PUK
-await session.ChangePukAsync(currentPuk, newPuk);
-
-// Get PIN retry count
-var attempts = await session.GetPinAttemptsAsync();
+session.ChangePuk(currentPuk, newPuk);
 ```
 
 ### Management Key Operations
 
 ```csharp
-// Authenticate with management key (3DES/AES)
-await session.AuthenticateAsync(managementKey);
+// Authenticate management key (3DES)
+bool authenticated = session.TryAuthenticateManagementKey(managementKey);
 
-// Set new management key
-await session.SetManagementKeyAsync(
-    newKey, 
-    PivManagementKeyType.Aes256,
-    PivTouchPolicy.Default);
+// Change management key
+session.ChangeManagementKey(currentKey, newKey, PivTouchPolicy.Default);
+
+// Set PIN-only mode (store management key on YubiKey)
+session.SetPinOnlyMode(pin, managementKey, PivTouchPolicy.Default);
 ```
 
 ### Factory Reset
 
 ```csharp
 // Reset PIV application to factory defaults
-await session.ResetAsync();
+session.ResetApplication();
 // After reset:
 // - PIN: 123456
 // - PUK: 12345678
@@ -200,16 +194,11 @@ Yubico.YubiKit.Piv/
 ### 1. Basic Authentication Setup
 
 ```csharp
-await using var session = await yubiKey.CreatePivSessionAsync();
-
-// Reset to ensure clean state
-await session.ResetAsync();
-
-// Authenticate with management key
-await session.AuthenticateAsync(defaultManagementKey);
+using var session = new PivSession(yubiKey);
+session.KeyCollector = MyKeyCollector;
 
 // Generate key pair
-var publicKey = await session.GenerateKeyAsync(
+var publicKey = session.GenerateKeyPair(
     PivSlot.Authentication,
     PivAlgorithm.EccP256);
 
@@ -217,151 +206,105 @@ var publicKey = await session.GenerateKeyAsync(
 var cert = GetCertificateFromCA(publicKey);
 
 // Import certificate
-await session.StoreCertificateAsync(PivSlot.Authentication, cert);
+session.ImportCertificate(PivSlot.Authentication, cert);
 ```
 
 ### 2. Signing with PIN Protection
 
 ```csharp
-await using var session = await yubiKey.CreatePivSessionAsync();
+using var session = new PivSession(yubiKey);
+session.KeyCollector = MyKeyCollector;
 
-// Authenticate and generate key with PIN always required
-await session.AuthenticateAsync(managementKey);
-var publicKey = await session.GenerateKeyAsync(
-    PivSlot.Signature,
+// Generate key with PIN always required
+var publicKey = session.GenerateKeyPair(
+    PivSlot.Signing,
     PivAlgorithm.Rsa2048,
     PivPinPolicy.Always);
 
-// Verify PIN
-await session.VerifyPinAsync(pin);
-
-// Sign (may prompt for PIN again if policy is Always)
-var hash = SHA256.HashData(dataToSign);
-var signature = await session.SignOrDecryptAsync(
-    PivSlot.Signature, 
-    PivAlgorithm.Rsa2048,
-    hash);
+// Sign (will prompt for PIN via KeyCollector)
+byte[] signature = session.Sign(PivSlot.Signing, dataToSign);
 ```
 
 ### 3. Secure Key Management Setup
 
 ```csharp
-await using var session = await yubiKey.CreatePivSessionAsync();
+using var session = new PivSession(yubiKey);
 
 // Change from default management key
-var newManagementKey = GenerateRandomKey(32); // 32 bytes for AES-256
-await session.AuthenticateAsync(defaultManagementKey);
-await session.SetManagementKeyAsync(
-    newManagementKey, 
-    PivManagementKeyType.Aes256);
+var newManagementKey = GenerateRandomKey(24); // 24 bytes for 3DES
+session.TryAuthenticateManagementKey(defaultManagementKey);
+session.ChangeManagementKey(defaultManagementKey, newManagementKey);
 
 // Change from default PIN
-await session.ChangePinAsync("123456"u8.ToArray(), newPin);
+session.ChangePin("123456", "NewSecurePin");
 
 // Change from default PUK
-await session.ChangePukAsync("12345678"u8.ToArray(), newPuk);
+session.ChangePuk("12345678", "NewSecurePuk");
 ```
 
-### 4. Complete Signing Workflow
+### 4. PIN-Only Mode (Convenience)
 
 ```csharp
-await using var session = await yubiKey.CreatePivSessionAsync();
-await session.ResetAsync(); // Start fresh
+using var session = new PivSession(yubiKey);
 
-// 1. Authenticate and generate key
-await session.AuthenticateAsync(defaultManagementKey);
-var publicKey = await session.GenerateKeyAsync(
-    PivSlot.Signature, 
-    PivAlgorithm.EccP256,
-    PivPinPolicy.Once);
+// Store management key on YubiKey, protected by PIN
+session.TryAuthenticateManagementKey(managementKey);
+session.SetPinOnlyMode(pin, managementKey);
 
-// 2. Store certificate
-var cert = CreateCertificate(publicKey);
-await session.StoreCertificateAsync(PivSlot.Signature, cert);
-
-// 3. Verify PIN
-await session.VerifyPinAsync(pin);
-
-// 4. Sign document
-var hash = SHA256.HashData(document);
-var signature = await session.SignOrDecryptAsync(
-    PivSlot.Signature, 
-    PivAlgorithm.EccP256, 
-    hash);
+// Now operations only require PIN, not management key
+session.TryVerifyPin(pin);
+session.GenerateKeyPair(PivSlot.Authentication, PivAlgorithm.EccP256);
+// No need to authenticate management key separately
 ```
 
 ### 5. Attestation
 
 ```csharp
-await using var session = await yubiKey.CreatePivSessionAsync();
+using var session = new PivSession(yubiKey);
 
-// Authenticate and generate key
-await session.AuthenticateAsync(managementKey);
-var publicKey = await session.GenerateKeyAsync(
+// Generate key
+var publicKey = session.GenerateKeyPair(
     PivSlot.Authentication,
     PivAlgorithm.EccP256);
 
 // Get attestation certificate
-var attestationCert = await session.AttestKeyAsync(PivSlot.Authentication);
+var attestationCert = session.GetAttestationCertificate(PivSlot.Authentication);
 
 // Verify key was generated on YubiKey hardware
 bool validAttestation = VerifyAttestation(attestationCert);
 ```
 
-### 6. ECDH Key Agreement
-
-```csharp
-await using var session = await yubiKey.CreatePivSessionAsync();
-
-// Generate key for key agreement
-await session.AuthenticateAsync(managementKey);
-var devicePublicKey = await session.GenerateKeyAsync(
-    PivSlot.KeyManagement,
-    PivAlgorithm.EccP256);
-
-// Perform key agreement with peer's public key
-await session.VerifyPinAsync(pin);
-var sharedSecret = await session.CalculateSecretAsync(
-    PivSlot.KeyManagement,
-    peerPublicKey);
-
-// Use shared secret for symmetric encryption
-```
-
 ## KeyCollector Pattern
 
-**Note:** This implementation uses direct async methods instead of the KeyCollector pattern. Credentials are passed directly to methods:
+The `KeyCollector` delegate is called when the SDK needs PIN, PUK, or management key:
 
 ```csharp
-await using var session = await yubiKey.CreatePivSessionAsync();
-
-// Authenticate with management key
-await session.AuthenticateAsync(managementKey);
-
-// Verify PIN
-await session.VerifyPinAsync(pin);
-
-// Operations now proceed with authenticated state
-var publicKey = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
-```
-
-For more complex scenarios, wrap these calls in your own credential management:
-
-```csharp
-async Task<PivSession> CreateAuthenticatedSession(IYubiKey yubiKey)
+bool MyKeyCollector(KeyEntryData keyEntryData)
 {
-    var session = await yubiKey.CreatePivSessionAsync();
-    
-    try
+    if (keyEntryData.IsRetry)
     {
-        var managementKey = await GetMgmtKeyFromSecureStorage();
-        await session.AuthenticateAsync(managementKey);
-        return session;
+        Console.WriteLine($"Previous attempt failed. Retries remaining: {keyEntryData.RetriesRemaining}");
     }
-    catch
+
+    switch (keyEntryData.Request)
     {
-        await session.DisposeAsync();
-        throw;
+        case KeyEntryRequest.Release:
+            // Clean up any resources
+            return true;
+
+        case KeyEntryRequest.VerifyPivPin:
+            Console.Write("Enter PIN: ");
+            byte[] pin = GetPinFromUser();
+            keyEntryData.SubmitValue(pin);
+            return true;
+
+        case KeyEntryRequest.AuthenticatePivManagementKey:
+            byte[] mgmtKey = GetManagementKeyFromSecureStorage();
+            keyEntryData.SubmitValue(mgmtKey);
+            return true;
+
+        default:
+            return false; // Cancel operation
     }
 }
 ```

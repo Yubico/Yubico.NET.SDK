@@ -97,7 +97,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
         // Act
-        await _config.EnableEnterpriseAttestationAsync();
+        await _config.EnableEnterpriseAttestationAsync(TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(capturedRequest);
@@ -122,7 +122,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
         // Act
-        await _config.ToggleAlwaysUvAsync();
+        await _config.ToggleAlwaysUvAsync(TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(capturedRequest);
@@ -146,7 +146,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
         // Act
-        await _config.SetMinPinLengthAsync(8);
+        await _config.SetMinPinLengthAsync(8, cancellationToken: TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(capturedRequest);
@@ -181,7 +181,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
         // Act
-        await _config.SetMinPinLengthAsync(6, rpIds);
+        await _config.SetMinPinLengthAsync(6, rpIds, cancellationToken: TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(capturedRequest);
@@ -209,7 +209,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
         // Act
-        await _config.SetMinPinLengthAsync(6, forceChangePin: true);
+        await _config.SetMinPinLengthAsync(6, forceChangePin: true, cancellationToken: TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(capturedRequest);
@@ -230,14 +230,14 @@ public class AuthenticatorConfigTests
     public async Task SetMinPinLengthAsync_ThrowsOnTooShort()
     {
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
-            () => _config.SetMinPinLengthAsync(3));
+            () => _config.SetMinPinLengthAsync(3, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     [Fact]
     public async Task SetMinPinLengthAsync_ThrowsOnTooLong()
     {
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
-            () => _config.SetMinPinLengthAsync(64));
+            () => _config.SetMinPinLengthAsync(64, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -250,7 +250,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
         // Act - should not throw
-        await _config.SetMinPinLengthAsync(4);
+        await _config.SetMinPinLengthAsync(4, cancellationToken: TestContext.Current.CancellationToken);
     }
     
     [Fact]
@@ -263,7 +263,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
         // Act - should not throw
-        await _config.SetMinPinLengthAsync(63);
+        await _config.SetMinPinLengthAsync(63, cancellationToken: TestContext.Current.CancellationToken);
     }
     
     [Fact]
@@ -277,7 +277,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
         // Act
-        await _config.EnableEnterpriseAttestationAsync();
+        await _config.EnableEnterpriseAttestationAsync(TestContext.Current.CancellationToken);
         
         // Assert
         Assert.Equal(0x0D, capturedRequest![0]); // Config command
@@ -294,7 +294,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
         // Act
-        await _config.EnableEnterpriseAttestationAsync();
+        await _config.EnableEnterpriseAttestationAsync(TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(capturedRequest);
@@ -321,7 +321,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
         // Act
-        await _config.EnableEnterpriseAttestationAsync();
+        await _config.EnableEnterpriseAttestationAsync(TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(capturedRequest);
@@ -350,7 +350,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
         // Act
-        await _config.EnableEnterpriseAttestationAsync();
+        await _config.EnableEnterpriseAttestationAsync(TestContext.Current.CancellationToken);
         
         // Assert - check what message was authenticated via our test protocol
         var capturedMessage = _testProtocol.LastAuthenticateMessage;
@@ -370,7 +370,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
         
         // Act
-        await _config.ToggleAlwaysUvAsync();
+        await _config.ToggleAlwaysUvAsync(TestContext.Current.CancellationToken);
         
         // Assert - check what message was authenticated via our test protocol
         var capturedMessage = _testProtocol.LastAuthenticateMessage;

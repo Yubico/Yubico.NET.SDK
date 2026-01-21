@@ -20,6 +20,6 @@ public enum ConnectionType
     Hid,
     HidFido,
     HidOtp,
-    Smartcard,
+    SmartCard,
     All
 }

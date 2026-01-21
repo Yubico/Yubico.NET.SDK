@@ -32,7 +32,7 @@ public class PivSessionTests
         // This will likely fail during actual PIV selection since it's a mock,
         // but it tests that the CreateAsync method exists and accepts the right parameters
         var exception = await Record.ExceptionAsync(() => 
-            PivSession.CreateAsync(mockConnection));
+            PivSession.CreateAsync(mockConnection, cancellationToken: TestContext.Current.CancellationToken));
         
         // We expect this to fail with an ApduException since the mock doesn't implement real protocol
         Assert.NotNull(exception);
@@ -42,7 +42,7 @@ public class PivSessionTests
     public async Task CreateAsync_WithNullConnection_ThrowsArgumentNullException()
     {
         await Assert.ThrowsAsync<ArgumentNullException>(
-            () => PivSession.CreateAsync((ISmartCardConnection)null!));
+            () => PivSession.CreateAsync((ISmartCardConnection)null!, cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]

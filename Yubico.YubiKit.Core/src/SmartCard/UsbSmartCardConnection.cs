@@ -46,7 +46,7 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
     private SCARD_PROTOCOL? _protocol;
     private bool _transactionActive;
 
-    public ConnectionType Type => ConnectionType.Smartcard;
+    public ConnectionType Type => ConnectionType.SmartCard;
 
     public async ValueTask InitializeAsync(CancellationToken cancellationToken)
     {

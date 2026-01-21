@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
@@ -39,7 +40,7 @@ public class SecurityDomainSession_DependencyInjectionTests
     ///     Verifies the DI factory creates a working session that can query the device.
     /// </summary>
     [Theory]
-    [WithYubiKey(MinFirmware = "5.4.3")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task Factory_WithRealConnection_CreatesWorkingSession(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionFromDIAsync(
             resetBeforeUse: true,
@@ -59,7 +60,7 @@ public class SecurityDomainSession_DependencyInjectionTests
     ///     Verifies the DI factory correctly passes SCP03 parameters for authentication.
     /// </summary>
     [Theory]
-    [WithYubiKey(MinFirmware = "5.4.3")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task Factory_WithScpParameters_Authenticates(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionFromDIAsync(
             resetBeforeUse: true,
@@ -75,7 +76,7 @@ public class SecurityDomainSession_DependencyInjectionTests
     ///     Verifies the DI factory creates unauthenticated sessions when no SCP params provided.
     /// </summary>
     [Theory]
-    [WithYubiKey(MinFirmware = "5.4.3")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task Factory_WithoutScpParameters_CreatesUnauthenticatedSession(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionFromDIAsync(
             resetBeforeUse: true,
@@ -93,7 +94,7 @@ public class SecurityDomainSession_DependencyInjectionTests
     ///     Verifies the DI factory correctly passes protocol configuration.
     /// </summary>
     [Theory]
-    [WithYubiKey(MinFirmware = "5.4.3")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task Factory_WithConfiguration_AppliesSettings(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionFromDIAsync(
             resetBeforeUse: true,
@@ -114,7 +115,7 @@ public class SecurityDomainSession_DependencyInjectionTests
     ///     Verifies the factory-created session can perform key operations.
     /// </summary>
     [Theory]
-    [WithYubiKey(MinFirmware = "5.4.3")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task Factory_CreatedSession_CanQueryKeyInfo(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionFromDIAsync(
             resetBeforeUse: true,
@@ -134,7 +135,7 @@ public class SecurityDomainSession_DependencyInjectionTests
     ///     Verifies the factory-created session can retrieve card recognition data.
     /// </summary>
     [Theory]
-    [WithYubiKey(MinFirmware = "5.4.3")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task Factory_CreatedSession_CanGetCardRecognitionData(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionFromDIAsync(
             resetBeforeUse: true,

@@ -7,7 +7,7 @@ description: Use when porting features from yubikit-android - orchestrates extra
 
 ## Overview
 
-Orchestrates the porting of features from yubikit-android (Java) to Yubico.NET.SDK (C#) with full validation rigor. Uses the same swarm topology as `product-orchestrator`, but with `porting-spec-writer` instead of `spec-writer`.
+Orchestrates the porting of features from yubikit-android (Java) to Yubico.NET.SDK (C#) with full validation rigor. Sometimes, it may be useful to look in the legacy Yubico.NET.SDK `../yubico-old/Yubico.NET.SDK/` to double-check implementation details. But you will rarely need to. Uses the same swarm topology as `product-orchestrator`, but with `porting-spec-writer` instead of `spec-writer`.
 
 **Core principle:** Porting is not "just copying"—it's extracting implicit requirements, validating them against SDK patterns, and ensuring security compliance before implementation.
 

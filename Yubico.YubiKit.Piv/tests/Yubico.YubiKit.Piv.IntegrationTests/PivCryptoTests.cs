@@ -15,6 +15,7 @@
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Tests.Shared;
@@ -44,7 +45,7 @@ public class PivCryptoTests
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task SignOrDecryptAsync_EccP256Sign_ProducesValidSignature(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -70,7 +71,7 @@ public class PivCryptoTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task CalculateSecretAsync_ECDH_ProducesSharedSecret(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -93,7 +94,7 @@ public class PivCryptoTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv, MinFirmware = "5.7.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task SignOrDecryptAsync_Ed25519_ProducesValidSignature(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();

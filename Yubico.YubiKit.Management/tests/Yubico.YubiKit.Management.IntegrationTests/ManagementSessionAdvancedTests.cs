@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Diagnostics;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Tests.Shared;
@@ -312,23 +313,30 @@ public class ManagementSessionAdvancedTests
     /// <summary>
     ///     Real-world scenario: Verifying serial number consistency.
     ///     Ensures device identity remains stable across sessions.
+    ///     Uses WithManagementAsync to automatically select correct transport.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey]
     public async Task SerialNumber_MultipleReads_RemainsConsistent(YubiKeyTestState state)
     {
-        // Read serial number multiple times
-        using var connection1 = await state.Device.ConnectAsync<ISmartCardConnection>();
-        using var mgmt1 = await ManagementSession.CreateAsync(connection1);
-        var deviceInfo1 = await mgmt1.GetDeviceInfoAsync();
-        var serial1 = deviceInfo1.SerialNumber;
+        int? serial1 = null;
+        int? serial2 = null;
 
-        using var connection2 = await state.Device.ConnectAsync<ISmartCardConnection>();
-        using var mgmt2 = await ManagementSession.CreateAsync(connection2);
-        var deviceInfo2 = await mgmt2.GetDeviceInfoAsync();
-        var serial2 = deviceInfo2.SerialNumber;
+        // Read serial number first time
+        await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+        {
+            var deviceInfo = await mgmt.GetDeviceInfoAsync();
+            serial1 = deviceInfo.SerialNumber;
+        });
 
-        // Serial number should be consistent
+        // Read serial number second time
+        await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+        {
+            var deviceInfo = await mgmt.GetDeviceInfoAsync();
+            serial2 = deviceInfo.SerialNumber;
+        });
+
+        // Serial number should be consistent across reads and match cached state
         Assert.Equal(serial1, serial2);
         Assert.Equal(state.SerialNumber, serial1);
     }
@@ -383,6 +391,54 @@ public class ManagementSessionAdvancedTests
             Assert.Equal(serialNumber, deviceInfo.SerialNumber);
             Assert.Equal(firmwareVersion, deviceInfo.FirmwareVersion);
             Assert.Equal(formFactor, deviceInfo.FormFactor);
+        });
+    }
+
+    /// <summary>
+    ///     Transport-specific example: Only runs on CCID (SmartCard) connections.
+    ///     Demonstrates ConnectionType filtering for transport-specific operations.
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+    public async Task GetDeviceInfo_CcidOnly_UsesSmartCardConnection(YubiKeyTestState state)
+    {
+        // This test only runs on CCID (SmartCard) connections
+        Assert.Equal(ConnectionType.SmartCard, state.ConnectionType);
+
+        await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+        {
+            var deviceInfo = await mgmt.GetDeviceInfoAsync();
+
+            // Verify we're getting valid device info over SmartCard
+            Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
+            Assert.Equal(state.FirmwareVersion, deviceInfo.FirmwareVersion);
+        });
+    }
+
+    /// <summary>
+    ///     Multi-transport example: Runs on all available connection types.
+    ///     Verifies device info consistency across different transports (CCID, HidFido, HidOtp).
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+    [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
+    public async Task GetDeviceInfo_AllTransports_ReturnsConsistentData(YubiKeyTestState state)
+    {
+        // This test runs on every transport type available for each device
+        // Same physical device will have multiple test runs (one per ConnectionType)
+
+        await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+        {
+            var deviceInfo = await mgmt.GetDeviceInfoAsync();
+
+            // Device info should be consistent regardless of transport
+            Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
+            Assert.Equal(state.FirmwareVersion, deviceInfo.FirmwareVersion);
+            Assert.Equal(state.FormFactor, deviceInfo.FormFactor);
+
+            // Log which transport was used for this test iteration
+            Assert.NotEqual(ConnectionType.Unknown, state.ConnectionType);
         });
     }
 }

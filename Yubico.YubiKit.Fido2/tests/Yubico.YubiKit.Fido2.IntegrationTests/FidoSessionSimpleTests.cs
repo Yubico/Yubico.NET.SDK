@@ -41,7 +41,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     [Fact]
     public async Task CreateFidoSession_With_UsbSmartCard_ThrowsNotSupportedException()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Smartcard);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
         var device = devices.FirstOrDefault();
         ArgumentNullException.ThrowIfNull(device);
 
@@ -182,7 +182,7 @@ public class FidoSessionSimpleTests : IntegrationTestBase
     [Fact]
     public async Task CreateFidoSession_With_FactoryInstance_UsbSmartCard_ThrowsNotSupportedException()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Smartcard);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
         var device = devices.FirstOrDefault();
         ArgumentNullException.ThrowIfNull(device);
         

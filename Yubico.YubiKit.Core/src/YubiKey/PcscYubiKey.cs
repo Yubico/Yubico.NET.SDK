@@ -41,7 +41,7 @@ internal class PcscYubiKey(
     #region IYubiKey Members
 
     public string DeviceId { get; } = $"pcsc:{pcscDevice.ReaderName}";
-    public ConnectionType ConnectionType => ConnectionType.Smartcard;
+    public ConnectionType ConnectionType => ConnectionType.SmartCard;
 
     public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection

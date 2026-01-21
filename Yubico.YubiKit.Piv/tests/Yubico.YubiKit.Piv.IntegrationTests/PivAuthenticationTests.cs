@@ -16,6 +16,7 @@ using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
@@ -46,7 +47,7 @@ public class PivAuthenticationTests
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task AuthenticateAsync_WithDefaultKey_Succeeds(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -58,7 +59,7 @@ public class PivAuthenticationTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task AuthenticateAsync_WithWrongKey_ThrowsBadResponse(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -71,7 +72,7 @@ public class PivAuthenticationTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task VerifyPinAsync_WithCorrectPin_Succeeds(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -83,7 +84,7 @@ public class PivAuthenticationTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task VerifyPinAsync_WithWrongPin_ThrowsInvalidPinException(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -99,7 +100,7 @@ public class PivAuthenticationTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetPinAttemptsAsync_ReturnsCorrectCount(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -111,7 +112,7 @@ public class PivAuthenticationTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ChangePinAsync_WithCorrectOldPin_Succeeds(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();

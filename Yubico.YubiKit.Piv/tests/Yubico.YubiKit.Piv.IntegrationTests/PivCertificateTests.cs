@@ -16,6 +16,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Tests.Shared;
@@ -43,7 +44,7 @@ public class PivCertificateTests
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task StoreCertificateAsync_GetCertificateAsync_RoundTrip(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -61,7 +62,7 @@ public class PivCertificateTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetCertificateAsync_EmptySlot_ReturnsNull(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -73,7 +74,7 @@ public class PivCertificateTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task DeleteCertificateAsync_IsIdempotent(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -85,7 +86,7 @@ public class PivCertificateTests
     }
 
     [Theory]
-    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetObjectAsync_EmptyObject_ReturnsEmpty(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();

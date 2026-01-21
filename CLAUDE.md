@@ -13,6 +13,35 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 - We actively use new .NET 10 library features, C# 14 language features, and SDK/tooling improvements
 - When implementing features, consult these docs to leverage the latest platform capabilities
 
+## Project Structure
+
+The SDK is organized into the following modules:
+
+**Core Infrastructure:**
+- `Yubico.YubiKit.Core/` - Device management, connection abstractions, APDU protocol handling, platform interop
+- `Yubico.YubiKit.Management/` - Device information queries, capability detection, firmware version
+
+**YubiKey Applications:**
+- `Yubico.YubiKit.Piv/` - PIV (Personal Identity Verification) smart card functionality
+- `Yubico.YubiKit.Fido2/` - FIDO2/WebAuthn authentication
+- `Yubico.YubiKit.Oath/` - TOTP/HOTP one-time password generation
+- `Yubico.YubiKit.YubiOtp/` - Yubico OTP configuration and generation
+- `Yubico.YubiKit.OpenPgp/` - OpenPGP card implementation
+- `Yubico.YubiKit.SecurityDomain/` - Secure Channel Protocol (SCP03), key management
+
+**Hardware Security Modules:**
+- `Yubico.YubiKit.YubiHsm/` - YubiHSM 2 hardware security module integration
+
+**Testing Infrastructure:**
+- `Yubico.YubiKit.Tests.Shared/` - Shared test utilities, multi-transport test harness
+- `Yubico.YubiKit.Tests.TestProject/` - xUnit v3 test project structure
+
+**Module-Specific Documentation:**
+Each module directory may contain:
+- `CLAUDE.md` - AI agent guidance for module-specific patterns and test infrastructure
+- `README.md` - Human-readable module documentation with usage examples
+- `tests/CLAUDE.md` - Test infrastructure and patterns for that module
+
 ## Quick Reference - Critical Rules
 
 **Documentation & Research:**

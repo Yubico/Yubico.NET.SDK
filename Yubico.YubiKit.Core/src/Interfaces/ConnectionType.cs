@@ -14,14 +14,12 @@
 
 namespace Yubico.YubiKit.Core.Interfaces;
 
-/// <summary>
-///     Base interface for all device connections.
-/// </summary>
-/// <remarks>
-///     Implements both <see cref="IDisposable" /> and <see cref="IAsyncDisposable" /> to support
-///     both synchronous and asynchronous disposal patterns. Prefer <c>await using</c> for async code.
-/// </remarks>
-public interface IConnection : IDisposable, IAsyncDisposable
+public enum ConnectionType
 {
-    ConnectionType Type { get; }
+    Unknown,
+    Hid,
+    HidFido,
+    HidOtp,
+    Smartcard,
+    All
 }

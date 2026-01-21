@@ -36,7 +36,7 @@ public class FindYubiKeys(
     {
         var yubiKeys = new List<IYubiKey>();
 
-        if (type.HasFlag(ConnectionType.Ccid))
+        if (type.HasFlag(ConnectionType.Smartcard))
         {
             var ccidKeys = await FindAllCcid(cancellationToken);
             yubiKeys.AddRange(ccidKeys);

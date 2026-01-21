@@ -13,7 +13,7 @@ public class
     [Fact]
     public async Task CreateManagementSession_with_CreateAsync()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Smartcard);
         var device = devices.FirstOrDefault();
         Assert.NotNull(device);
 
@@ -95,7 +95,7 @@ public class
     [Fact]
     public async Task CreateManagementSession_with_FactoryInstance()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Smartcard);
         var device = devices.First();
         var sessionFactory = ServiceProvider.GetRequiredService<ManagementSessionFactoryDelegate>();
 
@@ -109,7 +109,7 @@ public class
     [Fact]
     public async Task CreateManagementSession_with_FactoryMethod()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Smartcard);
         var device = devices.First();
 
         using var connection = await device.ConnectAsync<ISmartCardConnection>();
@@ -122,7 +122,7 @@ public class
     [Fact]
     public async Task CreateManagementSession_with_ExtensionMethod()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Smartcard);
         var device = devices[0];
 
         using var mgmtSession = await device.CreateManagementSessionAsync();
@@ -134,7 +134,7 @@ public class
     [Fact]
     public async Task GetDeviceInfoAsync_with_YubiKeyExtensionMethod()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Smartcard);
         var deviceInfo = await devices[0]!.GetDeviceInfoAsync();
 
         Assert.NotEqual(0, deviceInfo.SerialNumber);
@@ -143,7 +143,7 @@ public class
     [Fact]
     private async Task SetDeviceConfigAsync_with_ManagementSession()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Smartcard);
         var device = devices[0];
 
         using var mgmtSession = await device.CreateManagementSessionAsync();
@@ -174,7 +174,7 @@ public class
     [Fact]
     public async Task SetDeviceConfigAsync_with_YubiKeyExtensionMethod()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Smartcard);
         var device = devices[0];
 
         var originalInfo = await device.GetDeviceInfoAsync();
@@ -205,7 +205,7 @@ public class
     {
         // This test requires a YubiKey with default SCP03 keys configured (KVN 0xFF)
         // Skip this test if no suitable YubiKey is available
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Smartcard);
         var device = devices[0];
 
         // Create SCP03 key parameters using default keys
@@ -228,7 +228,7 @@ public class
     public async Task CreateManagementSession_with_SCP03_WrongKeys_ShouldFail()
     {
         // This test verifies that SCP authentication fails with wrong keys
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Smartcard);
         var device = devices.FirstOrDefault();
 
         if (device == null)

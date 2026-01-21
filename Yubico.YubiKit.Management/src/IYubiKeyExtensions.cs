@@ -117,7 +117,7 @@ public static class IYubiKeyExtensions
             =>
                 yubiKey.ConnectionType switch
                 {
-                    ConnectionType.Ccid => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
+                    ConnectionType.Smartcard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
                         .ConfigureAwait(false),
                     ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
                         .ConfigureAwait(false),

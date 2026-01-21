@@ -49,5 +49,5 @@ internal sealed class SharedSmartCardConnection(ISmartCardConnection connection)
         // Do nothing - connection lifecycle is managed by the owner
         default;
 
-    public ConnectionType Type { get; } = ConnectionType.Ccid;
+    public ConnectionType Type { get; } = ConnectionType.Smartcard;
 }

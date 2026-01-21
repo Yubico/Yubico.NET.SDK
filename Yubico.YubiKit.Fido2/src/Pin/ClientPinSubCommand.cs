@@ -151,4 +151,20 @@ public enum PinUvAuthTokenPermissions : uint
     
     /// <summary>Permission to execute authenticatorConfig.</summary>
     AuthenticatorConfig = 0x20,
+    
+    /// <summary>
+    /// Read-only permission for authenticatorCredentialManagement.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This permission allows listing credentials and retrieving metadata 
+    /// (including encrypted metadata like encIdentifier and encCredStoreState),
+    /// but does not allow deleting or modifying credentials.
+    /// </para>
+    /// <para>
+    /// Requires CTAP 2.2+ support. Used for decrypting encrypted metadata fields
+    /// in AuthenticatorInfo without requiring full credential management permission.
+    /// </para>
+    /// </remarks>
+    CredentialManagementRO = 0x40,
 }

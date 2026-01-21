@@ -54,6 +54,13 @@ public sealed class AuthenticatorInfo
     private const int KeyAttestationFormats = 0x16;
     private const int KeyUvCountSinceLastPinEntry = 0x17;
     private const int KeyLongTouchForReset = 0x18;
+    private const int KeyEncIdentifier = 0x19;
+    private const int KeyTransportsForReset = 0x1A;
+    private const int KeyPinComplexityPolicy = 0x1B;
+    private const int KeyPinComplexityPolicyUrl = 0x1C;
+    private const int KeyMaxPinLength = 0x1D;
+    private const int KeyEncCredStoreState = 0x1E;
+    private const int KeyAuthenticatorConfigCommands = 0x1F;
     
     /// <summary>
     /// Gets the CTAP versions supported by the authenticator.
@@ -186,6 +193,86 @@ public sealed class AuthenticatorInfo
     public bool? LongTouchForReset { get; init; }
     
     /// <summary>
+    /// Gets the encrypted credential identifier (YubiKey 5.7+).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This field contains an encrypted unique identifier for discoverable credentials.
+    /// It can be decrypted using the PPUAT (Persistent PIN/UV Auth Token) with the
+    /// <see cref="Crypto.EncryptedMetadataDecryptor.DecryptIdentifier"/> method.
+    /// </para>
+    /// <para>
+    /// Available on YubiKey firmware 5.7+ when a PPUAT is active.
+    /// </para>
+    /// </remarks>
+    public ReadOnlyMemory<byte>? EncIdentifier { get; init; }
+    
+    /// <summary>
+    /// Gets the transports available for authenticator reset (CTAP 2.3).
+    /// </summary>
+    /// <remarks>
+    /// This field indicates which transport methods can be used to reset the authenticator.
+    /// Common values include "usb", "nfc", and "ble".
+    /// </remarks>
+    public IReadOnlyList<string> TransportsForReset { get; init; } = [];
+    
+    /// <summary>
+    /// Gets whether PIN complexity policy is enforced (CTAP 2.3).
+    /// </summary>
+    /// <remarks>
+    /// When true, the authenticator enforces a PIN complexity policy as defined
+    /// by <see cref="PinComplexityPolicyUrl"/>.
+    /// </remarks>
+    public bool? PinComplexityPolicy { get; init; }
+    
+    /// <summary>
+    /// Gets the URL describing the PIN complexity policy (CTAP 2.3).
+    /// </summary>
+    /// <remarks>
+    /// This URL points to a human-readable description of the PIN complexity requirements
+    /// enforced by the authenticator.
+    /// </remarks>
+    public string? PinComplexityPolicyUrl { get; init; }
+    
+    /// <summary>
+    /// Gets the maximum PIN length supported by the authenticator (CTAP 2.3).
+    /// </summary>
+    /// <remarks>
+    /// This value indicates the maximum number of Unicode code points allowed in a PIN.
+    /// Complements <see cref="MinPinLength"/>.
+    /// </remarks>
+    public int? MaxPinLength { get; init; }
+    
+    /// <summary>
+    /// Gets the encrypted credential store state (YubiKey 5.8+).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This field contains encrypted metadata about the credential storage state.
+    /// It can be decrypted using the PPUAT (Persistent PIN/UV Auth Token) with the
+    /// <see cref="Crypto.EncryptedMetadataDecryptor.DecryptCredStoreState"/> method.
+    /// </para>
+    /// <para>
+    /// Available on YubiKey firmware 5.8+ when a PPUAT is active.
+    /// </para>
+    /// </remarks>
+    public ReadOnlyMemory<byte>? EncCredStoreState { get; init; }
+    
+    /// <summary>
+    /// Gets the authenticator config commands supported (CTAP 2.3).
+    /// </summary>
+    /// <remarks>
+    /// This list contains the subcommand values supported by the
+    /// authenticatorConfig command. Common values include:
+    /// <list type="bullet">
+    /// <item><description>0x01 - enableEnterpriseAttestation</description></item>
+    /// <item><description>0x02 - toggleAlwaysUv</description></item>
+    /// <item><description>0x03 - setMinPINLength</description></item>
+    /// </list>
+    /// </remarks>
+    public IReadOnlyList<int> AuthenticatorConfigCommands { get; init; } = [];
+    
+    /// <summary>
     /// Decodes an AuthenticatorInfo from CBOR-encoded data.
     /// </summary>
     /// <param name="data">The CBOR-encoded response data.</param>
@@ -227,6 +314,13 @@ public sealed class AuthenticatorInfo
         List<string>? attestationFormats = null;
         int? uvCountSinceLastPinEntry = null;
         bool? longTouchForReset = null;
+        byte[]? encIdentifier = null;
+        List<string>? transportsForReset = null;
+        bool? pinComplexityPolicy = null;
+        string? pinComplexityPolicyUrl = null;
+        int? maxPinLength = null;
+        byte[]? encCredStoreState = null;
+        List<int>? authenticatorConfigCommands = null;
         
         for (var i = 0; i < mapLength; i++)
         {
@@ -331,6 +425,36 @@ public sealed class AuthenticatorInfo
                     longTouchForReset = reader.ReadBoolean();
                     break;
                     
+                case KeyEncIdentifier:
+                    encIdentifier = reader.ReadByteString();
+                    break;
+                    
+                case KeyTransportsForReset:
+                    transportsForReset = ReadStringArray(reader);
+                    break;
+                    
+                case KeyPinComplexityPolicy:
+                    pinComplexityPolicy = reader.ReadBoolean();
+                    break;
+                    
+                case KeyPinComplexityPolicyUrl:
+                    // CBOR encodes as byte string (UTF-8), decode to string
+                    var policyUrlBytes = reader.ReadByteString();
+                    pinComplexityPolicyUrl = System.Text.Encoding.UTF8.GetString(policyUrlBytes);
+                    break;
+                    
+                case KeyMaxPinLength:
+                    maxPinLength = reader.ReadInt32();
+                    break;
+                    
+                case KeyEncCredStoreState:
+                    encCredStoreState = reader.ReadByteString();
+                    break;
+                    
+                case KeyAuthenticatorConfigCommands:
+                    authenticatorConfigCommands = ReadIntArray(reader);
+                    break;
+                    
                 default:
                     reader.SkipValue();
                     break;
@@ -368,7 +492,14 @@ public sealed class AuthenticatorInfo
             VendorPrototypeConfigCommands = vendorPrototypeConfigCommands ?? [],
             AttestationFormats = attestationFormats ?? [],
             UvCountSinceLastPinEntry = uvCountSinceLastPinEntry,
-            LongTouchForReset = longTouchForReset
+            LongTouchForReset = longTouchForReset,
+            EncIdentifier = encIdentifier,
+            TransportsForReset = transportsForReset ?? [],
+            PinComplexityPolicy = pinComplexityPolicy,
+            PinComplexityPolicyUrl = pinComplexityPolicyUrl,
+            MaxPinLength = maxPinLength,
+            EncCredStoreState = encCredStoreState,
+            AuthenticatorConfigCommands = authenticatorConfigCommands ?? []
         };
     }
     

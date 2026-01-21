@@ -217,4 +217,208 @@ public class AuthenticatorInfoTests
         // Assert
         info.Versions.Should().HaveCount(1);
     }
+    
+    #region CTAP 2.3 Encrypted Metadata Fields Tests
+    
+    [Fact]
+    public void Decode_WithEncIdentifier_ParsesByteString()
+    {
+        // Arrange
+        byte[] encIdentifier = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                                0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10];
+        
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(2);
+        writer.WriteInt32(0x01); // versions
+        writer.WriteStartArray(1);
+        writer.WriteTextString("FIDO_2_1");
+        writer.WriteEndArray();
+        writer.WriteInt32(0x19); // encIdentifier
+        writer.WriteByteString(encIdentifier);
+        writer.WriteEndMap();
+        var data = writer.Encode();
+        
+        // Act
+        var info = AuthenticatorInfo.Decode(data);
+        
+        // Assert
+        info.EncIdentifier.Should().NotBeNull();
+        info.EncIdentifier!.Value.ToArray().Should().BeEquivalentTo(encIdentifier);
+    }
+    
+    [Fact]
+    public void Decode_WithTransportsForReset_ParsesStringArray()
+    {
+        // Arrange
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(2);
+        writer.WriteInt32(0x01); // versions
+        writer.WriteStartArray(1);
+        writer.WriteTextString("FIDO_2_1");
+        writer.WriteEndArray();
+        writer.WriteInt32(0x1A); // transportsForReset
+        writer.WriteStartArray(2);
+        writer.WriteTextString("usb");
+        writer.WriteTextString("nfc");
+        writer.WriteEndArray();
+        writer.WriteEndMap();
+        var data = writer.Encode();
+        
+        // Act
+        var info = AuthenticatorInfo.Decode(data);
+        
+        // Assert
+        info.TransportsForReset.Should().HaveCount(2);
+        info.TransportsForReset.Should().Contain("usb");
+        info.TransportsForReset.Should().Contain("nfc");
+    }
+    
+    [Fact]
+    public void Decode_WithPinComplexityPolicy_ParsesTrue()
+    {
+        // Arrange
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(2);
+        writer.WriteInt32(0x01); // versions
+        writer.WriteStartArray(1);
+        writer.WriteTextString("FIDO_2_1");
+        writer.WriteEndArray();
+        writer.WriteInt32(0x1B); // pinComplexityPolicy
+        writer.WriteBoolean(true);
+        writer.WriteEndMap();
+        var data = writer.Encode();
+        
+        // Act
+        var info = AuthenticatorInfo.Decode(data);
+        
+        // Assert
+        info.PinComplexityPolicy.Should().BeTrue();
+    }
+    
+    [Fact]
+    public void Decode_WithPinComplexityPolicy_ParsesFalse()
+    {
+        // Arrange
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(2);
+        writer.WriteInt32(0x01); // versions
+        writer.WriteStartArray(1);
+        writer.WriteTextString("FIDO_2_1");
+        writer.WriteEndArray();
+        writer.WriteInt32(0x1B); // pinComplexityPolicy
+        writer.WriteBoolean(false);
+        writer.WriteEndMap();
+        var data = writer.Encode();
+        
+        // Act
+        var info = AuthenticatorInfo.Decode(data);
+        
+        // Assert
+        info.PinComplexityPolicy.Should().BeFalse();
+    }
+    
+    [Fact]
+    public void Decode_WithPinComplexityPolicyUrl_ParsesUtf8String()
+    {
+        // Arrange
+        string expectedUrl = "https://example.com/pin-policy";
+        byte[] urlBytes = System.Text.Encoding.UTF8.GetBytes(expectedUrl);
+        
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(2);
+        writer.WriteInt32(0x01); // versions
+        writer.WriteStartArray(1);
+        writer.WriteTextString("FIDO_2_1");
+        writer.WriteEndArray();
+        writer.WriteInt32(0x1C); // pinComplexityPolicyUrl
+        writer.WriteByteString(urlBytes); // CBOR spec: byte string (UTF-8)
+        writer.WriteEndMap();
+        var data = writer.Encode();
+        
+        // Act
+        var info = AuthenticatorInfo.Decode(data);
+        
+        // Assert
+        info.PinComplexityPolicyUrl.Should().Be(expectedUrl);
+    }
+    
+    [Fact]
+    public void Decode_WithMaxPinLength_ParsesInteger()
+    {
+        // Arrange
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(2);
+        writer.WriteInt32(0x01); // versions
+        writer.WriteStartArray(1);
+        writer.WriteTextString("FIDO_2_1");
+        writer.WriteEndArray();
+        writer.WriteInt32(0x1D); // maxPinLength
+        writer.WriteInt32(63);
+        writer.WriteEndMap();
+        var data = writer.Encode();
+        
+        // Act
+        var info = AuthenticatorInfo.Decode(data);
+        
+        // Assert
+        info.MaxPinLength.Should().Be(63);
+    }
+    
+    [Fact]
+    public void Decode_WithEncCredStoreState_ParsesByteString()
+    {
+        // Arrange
+        byte[] encCredStoreState = [0xCA, 0xFE, 0xBA, 0xBE, 0xDE, 0xAD, 0xBE, 0xEF,
+                                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
+        
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(2);
+        writer.WriteInt32(0x01); // versions
+        writer.WriteStartArray(1);
+        writer.WriteTextString("FIDO_2_1");
+        writer.WriteEndArray();
+        writer.WriteInt32(0x1E); // encCredStoreState
+        writer.WriteByteString(encCredStoreState);
+        writer.WriteEndMap();
+        var data = writer.Encode();
+        
+        // Act
+        var info = AuthenticatorInfo.Decode(data);
+        
+        // Assert
+        info.EncCredStoreState.Should().NotBeNull();
+        info.EncCredStoreState!.Value.ToArray().Should().BeEquivalentTo(encCredStoreState);
+    }
+    
+    [Fact]
+    public void Decode_WithAuthenticatorConfigCommands_ParsesIntegerArray()
+    {
+        // Arrange
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(2);
+        writer.WriteInt32(0x01); // versions
+        writer.WriteStartArray(1);
+        writer.WriteTextString("FIDO_2_1");
+        writer.WriteEndArray();
+        writer.WriteInt32(0x1F); // authenticatorConfigCommands
+        writer.WriteStartArray(3);
+        writer.WriteInt32(0x01); // enableEnterpriseAttestation
+        writer.WriteInt32(0x02); // toggleAlwaysUv
+        writer.WriteInt32(0x03); // setMinPINLength
+        writer.WriteEndArray();
+        writer.WriteEndMap();
+        var data = writer.Encode();
+        
+        // Act
+        var info = AuthenticatorInfo.Decode(data);
+        
+        // Assert
+        info.AuthenticatorConfigCommands.Should().HaveCount(3);
+        info.AuthenticatorConfigCommands.Should().Contain(0x01);
+        info.AuthenticatorConfigCommands.Should().Contain(0x02);
+        info.AuthenticatorConfigCommands.Should().Contain(0x03);
+    }
+    
+    #endregion
 }
+

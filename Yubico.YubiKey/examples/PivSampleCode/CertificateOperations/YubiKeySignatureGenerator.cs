@@ -141,15 +141,22 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                              InvalidAlgorithmMessage)),
             };
 
-            // If the algorithm is P-256, then make sure the digest is exactly 32
-            // bytes. If it's P-384, the digest must be exactly 48 bytes.
-            // We'll prepend 00 bytes if necessary.
+            _ = digester.TransformFinalBlock(data, 0, data.Length);
+            int digestSizeBytes = digester.HashSize / 8;
+
+            // For RSA, return the raw digest - padding happens in PadRsa.
+            // For ECC, the digest must match the curve size (e.g. 32 bytes for P-256,
+            // 48 bytes for P-384). Prepend 00 bytes if necessary.
+            if (_algorithm.IsRSA())
+            {
+                return (byte[])digester.Hash.Clone();
+            }
+
             int bufferSize = _algorithm.GetKeySizeBytes();
-
             byte[] digest = new byte[bufferSize];
-            int offset = bufferSize - (digester.HashSize / 8);
+            int offset = bufferSize - digestSizeBytes;
 
-            // If offset < 0, that means the digest is too big.
+            // If offset < 0, that means the digest is too big for this curve.
             if (offset < 0)
             {
                 throw new ArgumentException(
@@ -158,8 +165,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         InvalidAlgorithmMessage));
             }
 
-            _ = digester.TransformFinalBlock(data, 0, data.Length);
-            Array.Copy(digester.Hash, 0, digest, offset, digest.Length);
+            Array.Copy(digester.Hash, 0, digest, offset, digestSizeBytes);
 
             return digest;
         }

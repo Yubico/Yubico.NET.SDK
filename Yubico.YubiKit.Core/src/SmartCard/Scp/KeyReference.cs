@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// </summary>
 public readonly record struct KeyReference(byte Kid, byte Kvn)
 {
-    private readonly byte[] _bytes = [Kid, Kvn];
+    private readonly Memory<byte> _bytes = new byte[] { Kid, Kvn };
 
     /// <summary>
     ///     Gets the Key ID.
@@ -39,7 +39,7 @@ public readonly record struct KeyReference(byte Kid, byte Kvn)
     /// <returns>A two-byte array containing [Kid, Kvn].</returns>
     public ReadOnlyMemory<byte> AsMemory() => _bytes;
 
-    public ReadOnlySpan<byte> AsSpan() => _bytes;
+    public ReadOnlySpan<byte> AsSpan() => _bytes.Span;
 
     /// <summary>
     ///     Returns a string representation of this key reference.

@@ -73,7 +73,7 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act
-        var info = await bioEnroll.GetFingerprintSensorInfoAsync();
+        var info = await bioEnroll.GetFingerprintSensorInfoAsync(TestContext.Current.CancellationToken);
         
         // Assert
         Assert.Equal(FingerprintKind.Touch, info.FingerprintKind);
@@ -95,7 +95,7 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act
-        await bioEnroll.GetFingerprintSensorInfoAsync();
+        await bioEnroll.GetFingerprintSensorInfoAsync(TestContext.Current.CancellationToken);
         
         // Assert - request format is [command][cbor_payload]
         // First byte is command, rest is CBOR
@@ -122,7 +122,7 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act
-        var result = await bioEnroll.EnrollBeginAsync();
+        var result = await bioEnroll.EnrollBeginAsync(cancellationToken: TestContext.Current.CancellationToken);
         
         // Assert
         Assert.Equal(templateId, result.TemplateId.ToArray());
@@ -147,7 +147,7 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act
-        await bioEnroll.EnrollBeginAsync(timeout: 15000);
+        await bioEnroll.EnrollBeginAsync(timeout: 15000, cancellationToken: TestContext.Current.CancellationToken);
         
         // Assert - request format is [command][cbor_payload], skip command byte
         Assert.True(capturedRequest.Length > 1, "Request should have command + payload");
@@ -187,7 +187,7 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act
-        var result = await bioEnroll.EnrollCaptureNextSampleAsync(templateId);
+        var result = await bioEnroll.EnrollCaptureNextSampleAsync(templateId, cancellationToken: TestContext.Current.CancellationToken);
         
         // Assert
         Assert.Equal(3, result.RemainingSamples);
@@ -212,7 +212,7 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act
-        var result = await bioEnroll.EnrollCaptureNextSampleAsync(templateId);
+        var result = await bioEnroll.EnrollCaptureNextSampleAsync(templateId, cancellationToken: TestContext.Current.CancellationToken);
         
         // Assert
         Assert.Equal(FingerprintSampleStatus.TooFast, result.LastSampleStatus);
@@ -230,7 +230,7 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act
-        await bioEnroll.EnrollCancelAsync();
+        await bioEnroll.EnrollCancelAsync(TestContext.Current.CancellationToken);
         
         // Assert
         await _mockSession.Received(1).SendCborRequestAsync(
@@ -253,7 +253,7 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act
-        var templates = await bioEnroll.EnumerateEnrollmentsAsync();
+        var templates = await bioEnroll.EnumerateEnrollmentsAsync(TestContext.Current.CancellationToken);
         
         // Assert
         Assert.Single(templates);
@@ -273,7 +273,7 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act
-        var templates = await bioEnroll.EnumerateEnrollmentsAsync();
+        var templates = await bioEnroll.EnumerateEnrollmentsAsync(TestContext.Current.CancellationToken);
         
         // Assert
         Assert.Empty(templates);
@@ -294,7 +294,7 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act
-        await bioEnroll.SetFriendlyNameAsync(templateId, friendlyName);
+        await bioEnroll.SetFriendlyNameAsync(templateId, friendlyName, TestContext.Current.CancellationToken);
         
         // Assert
         await _mockSession.Received(1).SendCborRequestAsync(
@@ -310,7 +310,7 @@ public class FingerprintBioEnrollmentTests
         
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            bioEnroll.SetFriendlyNameAsync(new byte[] { 1, 2, 3 }, null!));
+            bioEnroll.SetFriendlyNameAsync(new byte[] { 1, 2, 3 }, null!, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -321,7 +321,7 @@ public class FingerprintBioEnrollmentTests
         
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            bioEnroll.SetFriendlyNameAsync(new byte[] { 1, 2, 3 }, ""));
+            bioEnroll.SetFriendlyNameAsync(new byte[] { 1, 2, 3 }, "", TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -332,7 +332,7 @@ public class FingerprintBioEnrollmentTests
         
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            bioEnroll.SetFriendlyNameAsync(new byte[] { 1, 2, 3 }, "   "));
+            bioEnroll.SetFriendlyNameAsync(new byte[] { 1, 2, 3 }, "   ", TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -349,7 +349,7 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act
-        await bioEnroll.RemoveEnrollmentAsync(templateId);
+        await bioEnroll.RemoveEnrollmentAsync(templateId, TestContext.Current.CancellationToken);
         
         // Assert
         await _mockSession.Received(1).SendCborRequestAsync(
@@ -372,7 +372,7 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act
-        await bioEnroll.EnrollBeginAsync();
+        await bioEnroll.EnrollBeginAsync(cancellationToken: TestContext.Current.CancellationToken);
         
         // Assert - FakePinUvAuthProtocol records calls
         Assert.True(_fakeProtocol.AuthenticateWasCalled);
@@ -402,13 +402,13 @@ public class FingerprintBioEnrollmentTests
         var bioEnroll = CreateBioEnrollment();
         
         // Act - simulate enrollment loop
-        var result = await bioEnroll.EnrollBeginAsync();
+        var result = await bioEnroll.EnrollBeginAsync(cancellationToken: TestContext.Current.CancellationToken);
         Assert.False(result.IsComplete);
         Assert.Equal(4, result.RemainingSamples);
         
         while (!result.IsComplete)
         {
-            result = await bioEnroll.EnrollCaptureNextSampleAsync(result.TemplateId);
+            result = await bioEnroll.EnrollCaptureNextSampleAsync(result.TemplateId, cancellationToken: TestContext.Current.CancellationToken);
         }
         
         // Assert

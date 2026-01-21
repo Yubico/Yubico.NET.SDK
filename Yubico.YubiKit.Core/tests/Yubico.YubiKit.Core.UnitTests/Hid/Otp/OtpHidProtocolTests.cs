@@ -66,7 +66,7 @@ public class OtpHidProtocolTests
         var oversizedPayload = new byte[65]; // Max is 64
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => protocol.SendAndReceiveAsync(0x13, oversizedPayload));
+            () => protocol.SendAndReceiveAsync(0x13, oversizedPayload, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -89,9 +89,9 @@ public class OtpHidProtocolTests
         // Response: sequence incremented (no data response)
         mock.QueueReport([0x00, 0x05, 0x04, 0x03, 0x02, 0x00, 0x00, 0x00]); // progSeq=2
 
-        var result = await protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty);
+        var result = await protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken);
 
-        Assert.NotNull(result);
+        Assert.Equal(0, result.Length); // No data in response
     }
 
     [Fact]
@@ -118,7 +118,7 @@ public class OtpHidProtocolTests
         // Queue status report for ReadStatusAsync
         mock.QueueReport([0x00, 0x05, 0x04, 0x03, 0x01, 0x02, 0x03, 0x00]);
 
-        var status = await protocol.ReadStatusAsync();
+        var status = await protocol.ReadStatusAsync(TestContext.Current.CancellationToken);
 
         // Should return bytes 1-6 (skip first and last)
         Assert.Equal(6, status.Length);
@@ -145,6 +145,6 @@ public class OtpHidProtocolTests
         protocol.Dispose();
 
         await Assert.ThrowsAsync<ObjectDisposedException>(
-            () => protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty));
+            () => protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
     }
 }

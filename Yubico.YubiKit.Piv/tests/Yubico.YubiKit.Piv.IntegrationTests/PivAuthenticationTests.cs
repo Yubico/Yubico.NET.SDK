@@ -33,8 +33,12 @@ public class PivAuthenticationTests
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     };
     
-    // TODO: Get exact default AES-192 key from ../yubikey-manager or yubikit-android for firmware >= 5.7.0
-    private static readonly byte[] DefaultAesManagementKey = new byte[24];
+    private static readonly byte[] DefaultAesManagementKey = new byte[]
+    {
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+    };
     
     private static readonly byte[] DefaultPin = "123456"u8.ToArray();
 

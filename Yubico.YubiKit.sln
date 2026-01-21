@@ -19,8 +19,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core.UnitTes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Management.UnitTests", "Yubico.YubiKit.Management\tests\Yubico.YubiKit.Management.UnitTests\Yubico.YubiKit.Management.UnitTests.csproj", "{580B62D6-CCF0-43B9-A414-FBD7F47136FB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{8A3EC2F1-975B-4628-ACE7-2A107C6103F0}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.Shared", "Yubico.YubiKit.Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj", "{C7A6467C-78A6-46BB-9FBA-DF8F1A94E2C7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{84F8A6A2-2296-4DD5-8CF7-04249163AA8B}"
@@ -88,6 +86,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.OpenPgp.UnitTests", "Yubico.YubiKit.OpenPgp\tests\Yubico.YubiKit.OpenPgp.UnitTests\Yubico.YubiKit.OpenPgp.UnitTests.csproj", "{1F9F7F46-43B4-4DB1-BAD8-AD508EB7B326}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.OpenPgp.IntegrationTests", "Yubico.YubiKit.OpenPgp\tests\Yubico.YubiKit.OpenPgp.IntegrationTests\Yubico.YubiKit.OpenPgp.IntegrationTests.csproj", "{64153330-5664-4099-A821-B33BD5B51ED5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.TestProject", "Yubico.YubiKit.Tests.TestProject\Yubico.YubiKit.Tests.TestProject.csproj", "{BE618201-B609-462D-B222-14C7A7F9EF45}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -435,6 +435,18 @@ Global
 		{64153330-5664-4099-A821-B33BD5B51ED5}.Release|x64.Build.0 = Release|Any CPU
 		{64153330-5664-4099-A821-B33BD5B51ED5}.Release|x86.ActiveCfg = Release|Any CPU
 		{64153330-5664-4099-A821-B33BD5B51ED5}.Release|x86.Build.0 = Release|Any CPU
+		{BE618201-B609-462D-B222-14C7A7F9EF45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE618201-B609-462D-B222-14C7A7F9EF45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE618201-B609-462D-B222-14C7A7F9EF45}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BE618201-B609-462D-B222-14C7A7F9EF45}.Debug|x64.Build.0 = Debug|Any CPU
+		{BE618201-B609-462D-B222-14C7A7F9EF45}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BE618201-B609-462D-B222-14C7A7F9EF45}.Debug|x86.Build.0 = Debug|Any CPU
+		{BE618201-B609-462D-B222-14C7A7F9EF45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE618201-B609-462D-B222-14C7A7F9EF45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE618201-B609-462D-B222-14C7A7F9EF45}.Release|x64.ActiveCfg = Release|Any CPU
+		{BE618201-B609-462D-B222-14C7A7F9EF45}.Release|x64.Build.0 = Release|Any CPU
+		{BE618201-B609-462D-B222-14C7A7F9EF45}.Release|x86.ActiveCfg = Release|Any CPU
+		{BE618201-B609-462D-B222-14C7A7F9EF45}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -446,7 +458,6 @@ Global
 		{77FE41B9-A511-4546-B546-622E549CF6DF} = {6BC51303-7F02-4271-99ED-4FB0EF4845D8}
 		{C344BDA9-9415-4F4A-9667-EBBE4EF6ABA6} = {6BC51303-7F02-4271-99ED-4FB0EF4845D8}
 		{580B62D6-CCF0-43B9-A414-FBD7F47136FB} = {29556DAF-D256-48EA-BE95-94E86BFE0D22}
-		{C7A6467C-78A6-46BB-9FBA-DF8F1A94E2C7} = {8A3EC2F1-975B-4628-ACE7-2A107C6103F0}
 		{41AA3C7D-DC51-44C2-A5C8-1E6543A0AEF5} = {FCB028EE-3C3B-4880-02AA-3A3FE9961568}
 		{A6C19E70-3600-4A43-ABFA-975F494B30A9} = {FCB028EE-3C3B-4880-02AA-3A3FE9961568}
 		{9495B036-DB74-48C3-9063-276915E1D9F5} = {FCB028EE-3C3B-4880-02AA-3A3FE9961568}

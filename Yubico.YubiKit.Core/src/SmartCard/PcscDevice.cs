@@ -1,4 +1,6 @@
-﻿namespace Yubico.YubiKit.Core.SmartCard;
+﻿using Yubico.YubiKit.Core.Interfaces;
+
+namespace Yubico.YubiKit.Core.SmartCard;
 
 /// <summary>
 ///     Represents an ISO 7816 compliant smart card, visible either through CCID or NFC.

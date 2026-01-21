@@ -35,11 +35,11 @@ public sealed class StaticKeys : IDisposable
     private static readonly byte[] DefaultKeyBytes =
         [0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F];
 
-    private byte[]? _dek;
+    private readonly byte[]? _dek;
     private bool _disposed;
 
-    private byte[]? _enc;
-    private byte[]? _mac;
+    private readonly byte[]? _enc;
+    private readonly byte[]? _mac;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="StaticKeys" /> class.
@@ -63,19 +63,18 @@ public sealed class StaticKeys : IDisposable
     /// <summary>
     ///     Gets the static encryption key.
     /// </summary>
-    internal ReadOnlySpan<byte> Enc => _enc;
+    public ReadOnlySpan<byte> Enc => _enc;
 
     /// <summary>
     ///     Gets the static MAC key.
     /// </summary>
-    internal ReadOnlySpan<byte> Mac => _mac;
+    public ReadOnlySpan<byte> Mac => _mac;
 
     /// <summary>
     ///     Gets the static DEK (Data Encryption Key), if available.
     /// </summary>
-    internal ReadOnlySpan<byte> Dek => _dek;
+    public ReadOnlySpan<byte> Dek => _dek;
 
-    #region IDisposable Members
 
     /// <summary>
     ///     Releases the resources used by this instance and securely zeroes all key material.
@@ -91,7 +90,6 @@ public sealed class StaticKeys : IDisposable
         _disposed = true;
     }
 
-    #endregion
 
     /// <summary>
     ///     Returns the default SCP03 key set.

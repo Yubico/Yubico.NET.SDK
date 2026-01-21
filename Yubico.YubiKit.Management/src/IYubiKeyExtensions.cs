@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core.Hid.Fido;
+using Yubico.YubiKit.Core.Hid.Interfaces;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;
 
@@ -30,8 +31,6 @@ namespace Yubico.YubiKit.Management;
 /// </remarks>
 public static class IYubiKeyExtensions
 {
-    #region Nested type: $extension
-
     extension(IYubiKey yubiKey)
     {
         /// <summary>
@@ -92,7 +91,7 @@ public static class IYubiKeyExtensions
         ///     Optional SCP (Secure Channel Protocol) key parameters necessary to establish
         ///     a secure session with the YubiKey device.
         /// </param>
-        /// <param name="loggerFactory">Optional logger factory used to create loggers for the session and protocol.</param>
+        /// <param name="configuration"></param>
         /// <param name="cancellationToken">
         ///     An optional token to cancel the operation.
         /// </param>
@@ -102,14 +101,16 @@ public static class IYubiKeyExtensions
         /// </returns>
         public async Task<ManagementSession> CreateManagementSessionAsync(
             ScpKeyParameters? scpKeyParams = null,
-            ILoggerFactory? loggerFactory = null,
+            ProtocolConfiguration? configuration = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken).ConfigureAwait(false);
-            return await ManagementSession.CreateAsync(connection, loggerFactory, scpKeyParams,
-                cancellationToken).ConfigureAwait(false);
+            var connection = await yubiKey.ConnectAsync(cancellationToken);
+            return await ManagementSession.CreateAsync(
+                    connection,
+                    configuration,
+                    scpKeyParams,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
         }
     }
-
-    #endregion
 }

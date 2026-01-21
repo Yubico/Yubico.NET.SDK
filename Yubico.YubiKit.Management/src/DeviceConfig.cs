@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System.Collections.ObjectModel;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Utils;
-using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;
 
@@ -24,8 +24,8 @@ namespace Yubico.YubiKit.Management;
 public sealed record DeviceConfig
 {
     // Flag constants
-    public const byte FlagEject = 0x80;
-    public const byte FlagRemoteWakeup = 0x40;
+    private const byte FlagEject = 0x80;
+    private const byte FlagRemoteWakeup = 0x40;
 
     // Internal TLV tags
     private const byte TagUsbEnabled = 0x03;

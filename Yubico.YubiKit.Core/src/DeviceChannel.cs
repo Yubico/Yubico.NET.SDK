@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Threading.Channels;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Interfaces;
 
 namespace Yubico.YubiKit.Core;
 

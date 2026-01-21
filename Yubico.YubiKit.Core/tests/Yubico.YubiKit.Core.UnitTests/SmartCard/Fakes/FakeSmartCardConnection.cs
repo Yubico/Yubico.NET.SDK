@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Fakes;
 
@@ -27,10 +27,16 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
 
     public bool SupportsExtendedApduValue { get; set; } = true;
     public List<ReadOnlyMemory<byte>> TransmittedCommands { get; } = [];
+    public ConnectionType Type { get; } = ConnectionType.SmartCard;
+
+    public void EnqueueResponse(ReadOnlyMemory<byte> response) => _responses.Enqueue(response);
 
     #region ISmartCardConnection Members
 
     public Transport Transport { get; set; } = Transport.Usb;
+
+    public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
 
     public bool SupportsExtendedApdu() => SupportsExtendedApduValue;
 
@@ -53,7 +59,10 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
 
     public void Dispose() => _disposed = true;
 
-    #endregion
+    public async ValueTask DisposeAsync()
+    {
+        // TODO release managed resources here
+    }
 
-    public void EnqueueResponse(ReadOnlyMemory<byte> response) => _responses.Enqueue(response);
+    #endregion
 }

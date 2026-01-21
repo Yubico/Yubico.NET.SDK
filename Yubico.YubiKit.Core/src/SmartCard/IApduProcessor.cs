@@ -17,7 +17,8 @@ namespace Yubico.YubiKit.Core.SmartCard;
 public interface IApduProcessor
 {
     IApduFormatter Formatter { get; }
+    // FirmwareVersion? FirmwareVersion { get; } // TODO Could be nice to be able to do additional version checks within the processors.
 
-    Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = true,
+    Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp,
         CancellationToken cancellationToken = default);
 }

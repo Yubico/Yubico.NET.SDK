@@ -1,34 +1,48 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 using TestProject;
-using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 AddJsonOptions(builder);
 
+// Register YubiKey services with DI
 builder.Services.AddYubiKeyManager(options =>
 {
     options.EnableAutoDiscovery = true;
 });
 
+// Register controllers for the DiTestController
+builder.Services.AddControllers();
+
 var app = builder.Build();
+
+// Minimal API endpoint - demonstrates the simplest integration pattern
 app.MapGet("/di-demo/minimal", async (
     [FromServices] IYubiKeyManager yubiKeyManager,
-    [FromServices] DependencyInjection.SmartCardManagementSessionFactoryDelegate sessionFactory
+    CancellationToken cancellationToken
 ) =>
 {
-    var yubiKeys = await yubiKeyManager.FindAllAsync();
-    var yubiKey = yubiKeys[0];
+    // Find all available YubiKeys
+    var yubiKeys = await yubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+    if (yubiKeys.Count == 0)
+        return Results.Problem("No YubiKey detected. Please connect a YubiKey and try again.", statusCode: 503);
 
-    using var smartCardConnection = await yubiKey.ConnectAsync<ISmartCardConnection>();
-    using var session = await sessionFactory(smartCardConnection);
-
-    var deviceInfo = await session.GetDeviceInfoAsync();
-    var yubiInfo = new YubiInfo(deviceInfo.SerialNumber.ToString("D8"), deviceInfo.FirmwareVersion.ToString());
-    return Results.Text($"YubiKey on Server:: {yubiInfo}");
+    var deviceInfo = await yubiKeys[0].GetDeviceInfoAsync(cancellationToken);
+    var yubiInfo = new YubiInfo(
+        deviceInfo.SerialNumber?.ToString() ?? "Unknown", 
+        deviceInfo.FirmwareVersion.ToString()
+    );
+    
+    return Results.Ok(new { 
+        Message = "Session type is ManagementSessionSimple",
+        YubiKey = yubiInfo 
+    });
 });
+
+// Controller-based endpoint is registered automatically via ASP.NET Core conventions
+app.MapControllers();
 
 app.Run();
 
@@ -44,14 +58,23 @@ void AddJsonOptions(WebApplicationBuilder webApplicationBuilder)
 
 namespace TestProject
 {
+    /// <summary>
+    ///     Data transfer object for YubiKey information.
+    /// </summary>
     public record YubiInfo(string serialNumber, string firmwareVersion);
 
+    /// <summary>
+    ///     JSON serialization context for AOT compilation support.
+    /// </summary>
     [JsonSerializable(typeof(YubiInfo))]
     [JsonSerializable(typeof(ProblemDetails))]
     internal partial class AppJsonSerializerContext : JsonSerializerContext
     {
     }
 
+    /// <summary>
+    ///     Entry point class required for WebApplicationFactory in tests.
+    /// </summary>
     public class Program
     {
     }

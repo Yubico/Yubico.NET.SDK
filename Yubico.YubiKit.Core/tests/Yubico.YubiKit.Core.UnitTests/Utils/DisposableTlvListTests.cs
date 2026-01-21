@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Utils;
-using System.Linq;
 
 namespace Yubico.YubiKit.Core.UnitTests.Utils;
 

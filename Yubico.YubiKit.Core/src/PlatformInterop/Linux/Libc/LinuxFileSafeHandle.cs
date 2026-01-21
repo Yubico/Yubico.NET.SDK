@@ -20,14 +20,14 @@ namespace Yubico.YubiKit.Core.PlatformInterop.Linux.Libc;
 // open.
 internal class LinuxFileSafeHandle : SafeHandle
 {
-    private const long InvalidHandle = 0x00000000FFFFFFFF;
-
     public LinuxFileSafeHandle()
-        : base(new IntPtr(0x00000000FFFFFFFF), true)
+        : base(new IntPtr(-1), true)
     {
     }
 
-    public override bool IsInvalid => handle.ToInt64() == InvalidHandle;
+    // On Linux, open() returns -1 on failure.
+    // We also treat 0 as invalid since fd 0 is stdin.
+    public override bool IsInvalid => handle == new IntPtr(-1) || handle == IntPtr.Zero;
 
     protected override bool ReleaseHandle() => NativeMethods.close(handle) == 0;
 }

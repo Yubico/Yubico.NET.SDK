@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Core.Cryptography;
 
@@ -92,7 +93,7 @@ public sealed class Curve25519PrivateKey : PrivateKey
     public static Curve25519PrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         (var privateKey, var keyType) = AsnPrivateKeyDecoder.GetCurve25519PrivateKeyData(pkcs8EncodedKey);
-        using var privateKeyHandle = new ZeroingMemoryHandle(privateKey);
+        using var privateKeyHandle = new DisposableBufferHandle(privateKey);
         return new Curve25519PrivateKey(privateKeyHandle.Data, keyType);
     }
 

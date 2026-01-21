@@ -1,0 +1,816 @@
+#!/usr/bin/env bun
+
+import { join, dirname } from "path";
+import { readdirSync, existsSync, readFileSync } from "fs";
+
+// Import pure utility functions from the testable module
+import {
+  isProgressFile,
+  parseProgressFile,
+  formatProgressContext,
+  deriveSessionSlug,
+  formatSkillsForPrompt,
+  formatDuration,
+  detectPhaseFromCommits,
+  parseSkillFile,
+  parseArgs,
+  type Config,
+  type SkillInfo,
+  type ProgressFileState,
+  type ProgressPhase,
+  type ProgressTask,
+} from "./ralph-loop-utils";
+
+// --- Configuration & Constants ---
+
+interface IterationMetrics {
+  iteration: number;
+  durationSeconds: number;
+  phase: string | null;
+  commitMessage: string | null;
+  filesChanged: number;
+  linesAdded: number;
+  linesRemoved: number;
+  fileList: string[];
+}
+
+const CONSTANTS = {
+  BASE_DIR: "./docs/ralph-loop",
+  COLOR: {
+    RESET: "\x1b[0m",
+    RED: "\x1b[31m",
+    GREEN: "\x1b[32m",
+    YELLOW: "\x1b[33m",
+    BLUE: "\x1b[34m",
+    CYAN: "\x1b[36m",
+  },
+};
+
+// --- Helper Functions ---
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Bun-native implementation of "tee" (pipe stream to console + file)
+async function runCopilotWithTee(args: string[], logFile: string): Promise<string> {
+  // Ensure directory exists
+  // Bun doesn't have mkdir -p on file write automatically, so we use shell or node compat
+  // using Bun's shell for ease:
+  const dir = dirname(logFile);
+  if (dir !== ".") await import("fs").then(fs => fs.mkdirSync(dir, { recursive: true }));
+
+  // Start Copilot
+  // We use "bash -c" to ensure complex args (like quotes) are handled if passed as a single string,
+  // but sticking to array args is safer with Bun.spawn
+  const proc = Bun.spawn(["copilot", ...args], {
+    stdout: "pipe",
+    stderr: "pipe", 
+  });
+
+  const file = Bun.file(logFile);
+  const writer = file.writer();
+  let fullOutput = "";
+
+  // Helper to read a stream and tee it
+  const readStream = async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
+    const decoder = new TextDecoder("utf-8", { fatal: false });
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        // Flush any remaining bytes
+        const final = decoder.decode(new Uint8Array(), { stream: false });
+        if (final) {
+          process.stdout.write(final);
+          writer.write(final);
+          fullOutput += final;
+        }
+        break;
+      }
+      const chunk = decoder.decode(value, { stream: true });
+      
+      process.stdout.write(chunk); // Stream to terminal
+      writer.write(chunk);         // Stream to file
+      fullOutput += chunk;
+    }
+  };
+
+  // Read stdout and stderr concurrently
+  const streamPromises: Promise<void>[] = [];
+  if (proc.stdout) streamPromises.push(readStream(proc.stdout.getReader()));
+  if (proc.stderr) streamPromises.push(readStream(proc.stderr.getReader()));
+
+  await Promise.all(streamPromises);
+  await proc.exited;
+  writer.end();
+  
+  return fullOutput;
+}
+
+// --- Skill Discovery ---
+
+function discoverSkills(): SkillInfo[] {
+  const skillsDir = ".claude/skills";
+  if (!existsSync(skillsDir)) return [];
+
+  const skills: SkillInfo[] = [];
+  const dirs = readdirSync(skillsDir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
+
+  for (const dir of dirs) {
+    const skillFile = join(skillsDir, dir, "SKILL.md");
+    if (!existsSync(skillFile)) continue;
+
+    const content = readFileSync(skillFile, "utf-8");
+    const skill = parseSkillFile(content);
+    if (skill) skills.push(skill);
+  }
+
+  return skills;
+}
+
+// Execution protocol injected for progress file mode
+const EXECUTION_PROTOCOL = `
+[EXECUTION PROTOCOL - FOLLOW EXACTLY]
+
+You are executing a task from a progress file. Follow this protocol for EVERY task:
+
+## TDD Loop
+1. **RED:** Write a failing test that asserts the task's expected behavior
+   - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
+   - Expect: FAILURE (test must fail first to prove it tests something)
+
+2. **GREEN:** Write minimal code to make the test pass
+   - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
+   - Expect: SUCCESS
+
+3. **REFACTOR:** Clean up code, verify security, add XML docs if public API
+
+4. **COMMIT:** 
+   - \`git add {specific files only}\` - NEVER use \`git add .\`
+   - \`git commit -m "feat(scope): task description"\`
+
+5. **UPDATE PROGRESS FILE:**
+   - Change \`- [ ]\` to \`- [x]\` for the completed task
+   - Add a note under ### Notes if relevant
+
+## Security Checklist (verify before marking task complete)
+- [ ] Sensitive data (PINs, keys) zeroed with \`CryptographicOperations.ZeroMemory\`
+- [ ] No secrets logged or printed
+- [ ] Input validation for lengths and ranges
+
+## Build Commands (MANDATORY - never use raw dotnet commands)
+- Build: \`dotnet build.cs build\`
+- Test: \`dotnet build.cs test\`
+- Test filtered: \`dotnet build.cs test --filter "..."\`
+
+## Rules
+- Complete ONE task fully before moving to next
+- Mark \`[x]\` ONLY after build + test pass
+- If stuck, add a note and move to next task (don't loop forever)
+
+## Completion Integrity (CRITICAL)
+- ONLY mark tasks \`[x]\` that you ACTUALLY completed with verification
+- Skipped tasks remain \`[ ]\` - NEVER mark skipped work as complete
+- Do NOT emit completion promise if ANY task is unchecked
+- "Time constraints" is NOT an excuse to skip work and claim completion
+- If running low on time: finish current task, commit, stop (next iteration continues)
+`;
+
+class RalphLoop {
+  private config: Config;
+  private prompt: string = "";
+  private iteration: number = 0;
+  private reviewFile: string = "";
+  private startTime: number = Date.now();
+  private toolPatterns: string[] = [];
+  private fileChanges: string[] = [];
+  private iterationMetrics: IterationMetrics[] = [];
+  private lastCommitHash: string = "";
+  private isActive: boolean = true;
+  private skillsPrompt: string = "";
+  private sessionDir: string = "";
+  private stateFile: string = "";
+  private learningDir: string = "";
+  private progressState: ProgressFileState | null = null;
+
+  constructor(config: Config) {
+    this.config = config;
+    this.skillsPrompt = formatSkillsForPrompt(discoverSkills());
+    this.setupSignalHandlers();
+  }
+
+  private setupSignalHandlers() {
+    // Bun uses the standard process signal handlers
+    process.on("SIGINT", async () => {
+      console.log(`\n${CONSTANTS.COLOR.RED}🛑 Ralph loop interrupted at iteration ${this.iteration}${CONSTANTS.COLOR.RESET}`);
+      await this.cleanup("interrupted");
+      process.exit(0);
+    });
+  }
+
+  // --- Initialization ---
+
+  public async init() {
+    // 1. Resolve Prompt
+    if (this.config.promptFile) {
+      const f = Bun.file(this.config.promptFile);
+      if (!(await f.exists())) {
+        console.error(`${CONSTANTS.COLOR.RED}❌ Error: Prompt file not found: ${this.config.promptFile}${CONSTANTS.COLOR.RESET}`);
+        process.exit(1);
+      }
+      this.prompt = (await f.text()).trim();
+      
+      // Check if this is a progress file
+      this.progressState = parseProgressFile(this.prompt);
+    } else {
+      this.prompt = this.config.promptParts.join(" ");
+    }
+
+    // Handle stdin piping if no prompt args
+    // Bun.stdin.stream() is the native way, but checking isTTY is easiest via process.stdin
+    if (!this.prompt && !process.stdin.isTTY) {
+      this.prompt = await Bun.stdin.text();
+    }
+
+    if (!this.prompt) {
+      this.showHelp();
+      process.exit(1);
+    }
+
+    // 2. Setup Session Directory
+    const sessionSlug = deriveSessionSlug(this.config);
+    this.sessionDir = join(CONSTANTS.BASE_DIR, sessionSlug);
+    this.stateFile = join(this.sessionDir, "state.md");
+    this.learningDir = join(this.sessionDir, "learning");
+    
+    await import("fs").then(fs => fs.mkdirSync(this.sessionDir, { recursive: true }));
+
+    // Capture initial commit hash for tracking new commits per iteration
+    this.lastCommitHash = this.getCurrentCommitHash();
+
+    if (this.config.learningMode) {
+      await import("fs").then(fs => fs.mkdirSync(this.learningDir, { recursive: true }));
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 15);
+      this.reviewFile = join(this.learningDir, `review-${timestamp}.md`);
+      await this.initializeReviewFile();
+    }
+
+    await this.updateStateFile();
+    this.printStartupBanner();
+  }
+
+  private async initializeReviewFile() {
+    const content = `# Ralph Loop Learning Review
+
+Generated: ${new Date().toISOString()}
+Prompt: ${this.prompt}
+Max Iterations: ${this.config.maxIterations > 0 ? this.config.maxIterations : "unlimited"}
+Completion Promise: ${this.config.completionPromise || "none"}
+
+---
+
+## Summary
+## Iteration Metrics
+## Suggested Skills
+## Tool Usage Patterns
+## File Modification Patterns
+## Successful Strategies
+## Failed Approaches
+## Proposed Improvements
+### To ralph-loop.sh
+### To Prompts
+
+---
+
+## Iteration Log
+`;
+    await Bun.write(this.reviewFile, content);
+  }
+
+  private async updateStateFile() {
+    const yaml = `---
+active: ${this.isActive}
+iteration: ${this.iteration}
+max_iterations: ${this.config.maxIterations}
+completion_promise: ${this.config.completionPromise ? `"${this.config.completionPromise}"` : "null"}
+started_at: "${new Date(this.startTime).toISOString()}"
+---
+
+${this.prompt}
+`;
+    await Bun.write(this.stateFile, yaml);
+  }
+
+  private printStartupBanner() {
+    const skills = discoverSkills();
+    const skillCount = skills.length;
+    const mandatoryCount = skills.filter(s => s.mandatory).length;
+    
+    // Detect progress file mode during init
+    const isProgressMode = this.progressState?.isProgressFile ?? false;
+    const modeStr = isProgressMode ? "PROGRESS FILE" : "AD-HOC";
+    const modeColor = isProgressMode ? CONSTANTS.COLOR.GREEN : CONSTANTS.COLOR.YELLOW;
+    
+    console.log(`
+${CONSTANTS.COLOR.CYAN}🔄 Ralph loop activated for Copilot CLI! (Bun Engine)${CONSTANTS.COLOR.RESET}
+
+Session: ${this.sessionDir}
+Mode: ${modeColor}${modeStr}${CONSTANTS.COLOR.RESET}${isProgressMode ? ` - ${this.progressState?.feature || "unknown feature"}` : ""}
+Max iterations: ${this.config.maxIterations > 0 ? this.config.maxIterations : "unlimited (infinite)"}
+Completion promise: ${this.config.completionPromise ? this.config.completionPromise : "none (runs forever)"}
+Model: ${this.config.model || "default"}
+Delay between iterations: ${this.config.delay}s
+Skills loaded: ${skillCount} (${mandatoryCount} mandatory)
+
+Press Ctrl+C to cancel at any time.
+
+To monitor: cat ${this.stateFile}
+${this.config.learningMode ? `Learning mode: ENABLED - Review file: ${this.reviewFile}` : ""}
+═══════════════════════════════════════════════════════════`);
+  }
+
+  // --- Git & Metrics Helpers ---
+
+  private getCurrentCommitHash(): string {
+    const proc = Bun.spawnSync(["git", "rev-parse", "HEAD"]);
+    return proc.success ? proc.stdout.toString().trim() : "";
+  }
+
+  private getNewCommits(sinceHash: string): Array<{ hash: string; message: string }> {
+    if (!sinceHash) return [];
+    const proc = Bun.spawnSync(["git", "log", `${sinceHash}..HEAD`, "--oneline", "--no-decorate"]);
+    if (!proc.success) return [];
+    return proc.stdout.toString().trim().split("\n").filter(Boolean).map(line => {
+      const [hash, ...rest] = line.split(" ");
+      return { hash, message: rest.join(" ") };
+    });
+  }
+
+  private getFileChangeStats(baseHash: string): { filesChanged: number; linesAdded: number; linesRemoved: number; fileList: string[] } {
+    let linesAdded = 0, linesRemoved = 0, filesChanged = 0;
+    let fileList: string[] = [];
+
+    // Strategy: Check both uncommitted changes AND committed changes since baseHash
+    // 1. First get uncommitted changes (working tree vs HEAD)
+    const uncommittedProc = Bun.spawnSync(["git", "diff", "--shortstat", "HEAD"]);
+    if (uncommittedProc.success) {
+      const stat = uncommittedProc.stdout.toString();
+      const filesMatch = stat.match(/(\d+)\s+file/);
+      const addMatch = stat.match(/(\d+)\s+insertion/);
+      const delMatch = stat.match(/(\d+)\s+deletion/);
+      filesChanged = filesMatch ? parseInt(filesMatch[1], 10) : 0;
+      linesAdded = addMatch ? parseInt(addMatch[1], 10) : 0;
+      linesRemoved = delMatch ? parseInt(delMatch[1], 10) : 0;
+    }
+
+    const uncommittedFilesProc = Bun.spawnSync(["git", "diff", "--name-only", "HEAD"]);
+    if (uncommittedFilesProc.success) {
+      fileList = uncommittedFilesProc.stdout.toString().trim().split("\n").filter(Boolean);
+    }
+
+    // 2. If we have a baseHash and it differs from HEAD, also get committed changes
+    if (baseHash) {
+      const currentHash = this.getCurrentCommitHash();
+      if (baseHash !== currentHash) {
+        const commitFilesProc = Bun.spawnSync(["git", "diff", "--name-only", `${baseHash}..HEAD`]);
+        if (commitFilesProc.success) {
+          const committedFiles = commitFilesProc.stdout.toString().trim().split("\n").filter(Boolean);
+          // Merge file lists, avoiding duplicates
+          fileList = [...new Set([...fileList, ...committedFiles])];
+        }
+
+        const commitStatProc = Bun.spawnSync(["git", "diff", "--shortstat", `${baseHash}..HEAD`]);
+        if (commitStatProc.success) {
+          const stat = commitStatProc.stdout.toString();
+          const addMatch = stat.match(/(\d+)\s+insertion/);
+          const delMatch = stat.match(/(\d+)\s+deletion/);
+          // Only add line counts (file count derived from deduplicated fileList)
+          linesAdded += addMatch ? parseInt(addMatch[1], 10) : 0;
+          linesRemoved += delMatch ? parseInt(delMatch[1], 10) : 0;
+        }
+      }
+    }
+
+    // Derive file count from deduplicated file list to avoid double-counting
+    filesChanged = fileList.length;
+
+    return { filesChanged, linesAdded, linesRemoved, fileList };
+  }
+
+  private captureIterationMetrics(iter: number, durationSeconds: number): IterationMetrics {
+    const newCommits = this.getNewCommits(this.lastCommitHash);
+    const phase = detectPhaseFromCommits(newCommits);
+    const commitMessage = newCommits.length > 0 ? newCommits[0].message : null;
+    const stats = this.getFileChangeStats(this.lastCommitHash);
+    
+    // Update last commit hash for next iteration
+    this.lastCommitHash = this.getCurrentCommitHash();
+
+    return {
+      iteration: iter,
+      durationSeconds,
+      phase,
+      commitMessage,
+      ...stats,
+    };
+  }
+
+  // --- Learning Logic ---
+
+  private async captureIterationLearning(iter: number, output: string, logFile: string, metrics: IterationMetrics) {
+    if (!this.config.learningMode) return;
+
+    // Store metrics
+    this.iterationMetrics.push(metrics);
+
+    const snippet = output.split("\n").slice(0, 50).join("\n");
+    const truncated = output.split("\n").length > 50;
+    
+    // Build metrics summary for log entry
+    const metricsLine = `Duration: ${formatDuration(metrics.durationSeconds)} | Files: ${metrics.filesChanged} | +${metrics.linesAdded}/-${metrics.linesRemoved}`;
+    const phaseLine = metrics.phase ? `Phase: ${metrics.phase}` : "";
+    const commitLine = metrics.commitMessage ? `Commit: "${metrics.commitMessage}"` : "";
+    
+    const entry = `
+### Iteration ${iter}
+
+**${metricsLine}**${phaseLine ? `\n${phaseLine}` : ""}${commitLine ? `\n${commitLine}` : ""}
+
+\`\`\`
+${snippet}
+${truncated ? `... (truncated, see ${logFile} for full output)` : ""}
+\`\`\`
+`;
+    // Append to file
+    const existingContent = await Bun.file(this.reviewFile).text();
+    await Bun.write(this.reviewFile, existingContent + entry);
+
+    // Track Tools (regex)
+    const toolRegex = /(bash|grep|view|edit|create|glob|git)/g;
+    const matches = output.match(toolRegex);
+    if (matches) {
+      const counts: Record<string, number> = {};
+      matches.forEach((m) => { counts[m] = (counts[m] || 0) + 1; });
+      const topTools = Object.entries(counts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(([k, v]) => `   - ${v} ${k}`)
+        .join("\n");
+      
+      this.toolPatterns.push(`Iteration ${iter}:\n${topTools}`);
+    }
+
+    // Track File Changes via Git (legacy format for backward compat)
+    if (metrics.fileList.length > 0) {
+      const files = metrics.fileList.slice(0, 10).map(f => `   - ${f}`).join("\n");
+      this.fileChanges.push(`Iteration ${iter}:\n${files}`);
+    }
+  }
+
+  private async generateLearningSummary(endReason: string) {
+    if (!this.config.learningMode) return;
+
+    const duration = Math.floor((Date.now() - this.startTime) / 1000);
+    const toolSummary = this.toolPatterns.join("\n");
+    const fileSummary = this.fileChanges.join("\n");
+
+    // Helper to escape pipe characters for markdown tables
+    const escapeTableCell = (s: string) => s.replace(/\|/g, "\\|");
+
+    // Build iteration metrics table for analysis prompt
+    const metricsTable = this.iterationMetrics.length > 0 
+      ? `| Iter | Duration | Phase | Files | +Lines | -Lines | Commit |
+|------|----------|-------|-------|--------|--------|--------|
+${this.iterationMetrics.map(m => {
+  const commitCell = m.commitMessage 
+    ? `"${escapeTableCell(m.commitMessage.slice(0, 40))}${m.commitMessage.length > 40 ? "..." : ""}"`
+    : "-";
+  return `| ${m.iteration} | ${formatDuration(m.durationSeconds)} | ${escapeTableCell(m.phase || "-")} | ${m.filesChanged} | +${m.linesAdded} | -${m.linesRemoved} | ${commitCell} |`;
+}).join("\n")}`
+      : "No metrics captured";
+
+    // Calculate aggregates
+    const totalFiles = this.iterationMetrics.reduce((sum, m) => sum + m.filesChanged, 0);
+    const totalAdded = this.iterationMetrics.reduce((sum, m) => sum + m.linesAdded, 0);
+    const totalRemoved = this.iterationMetrics.reduce((sum, m) => sum + m.linesRemoved, 0);
+    const avgDuration = this.iterationMetrics.length > 0 
+      ? Math.floor(this.iterationMetrics.reduce((sum, m) => sum + m.durationSeconds, 0) / this.iterationMetrics.length)
+      : 0;
+    const phases = [...new Set(this.iterationMetrics.map(m => m.phase).filter((p): p is string => p !== null))];
+
+    const analysisPrompt = `Analyze this Ralph Loop session and update the review file.
+
+Session Details:
+- Iterations: ${this.iteration}
+- Total Duration: ${formatDuration(duration)}
+- Average Iteration: ${formatDuration(avgDuration)}
+- Success: ${endReason}
+- Prompt: ${this.prompt}
+
+Aggregate Stats:
+- Total Files Changed: ${totalFiles}
+- Total Lines Added: ${totalAdded}
+- Total Lines Removed: ${totalRemoved}
+- Phases Worked: ${phases.length > 0 ? phases.join(", ") : "none detected"}
+
+Iteration Metrics:
+${metricsTable}
+
+Tool Patterns Observed:
+${toolSummary}
+
+Files Changed:
+${fileSummary}
+
+Review file to update: ${this.reviewFile}
+
+Please analyze the iteration logs in ${this.sessionDir}/iteration-*.log and:
+1. Fill in the '## Summary' section with key stats
+2. Fill in the '## Iteration Metrics' section with the metrics table above
+3. Under '## Suggested Skills', propose skills
+4. Under '## Tool Usage Patterns', document frequent combinations
+5. Under '## Successful Strategies', document what worked
+6. Under '## Proposed Improvements', suggest script/prompt changes
+
+IMPORTANT: Write all suggestions to ${this.reviewFile}. Do NOT auto-apply anything.
+Output <promise>ANALYSIS_COMPLETE</promise> when done.`;
+
+    console.log(`\n${CONSTANTS.COLOR.BLUE}🧠 Learning mode: Generating session analysis...${CONSTANTS.COLOR.RESET}\n`);
+
+    const copilotArgs = ["-p", analysisPrompt, "--allow-all-tools"];
+    if (this.config.model) copilotArgs.push("--model", this.config.model);
+
+    try {
+        await runCopilotWithTee(copilotArgs, join(this.learningDir, "analysis.log"));
+        console.log(`\n${CONSTANTS.COLOR.GREEN}📝 Learning review file ready: ${this.reviewFile}${CONSTANTS.COLOR.RESET}`);
+    } catch (e) {
+        console.error("Error running learning analysis:", e);
+    }
+  }
+
+  private async cleanup(reason: string) {
+    this.isActive = false;
+    await this.updateStateFile();
+    await this.generateLearningSummary(reason);
+  }
+
+  // --- The Loop ---
+
+  public async start() {
+    await this.init();
+
+    while (true) {
+      this.iteration++;
+      const iterationStartTime = Date.now();
+
+      if (this.config.maxIterations > 0 && this.iteration > this.config.maxIterations) {
+        console.log(`\n${CONSTANTS.COLOR.RED}🛑 Ralph loop: Max iterations (${this.config.maxIterations}) reached.${CONSTANTS.COLOR.RESET}`);
+        this.iteration--; 
+        await this.cleanup("max_iterations_reached");
+        return;
+      }
+
+      // Re-read progress file each iteration to get updated state
+      if (this.config.promptFile) {
+        const fileContent = await Bun.file(this.config.promptFile).text();
+        this.progressState = parseProgressFile(fileContent);
+        if (this.progressState.isProgressFile) {
+          this.prompt = fileContent; // Update with latest content
+        }
+      }
+
+      await this.updateStateFile();
+
+      console.log(`
+${CONSTANTS.COLOR.CYAN}🔄 ═══════════════════════════════════════════════════════════
+🔄 Ralph iteration ${this.iteration} starting...
+🔄 ═══════════════════════════════════════════════════════════${CONSTANTS.COLOR.RESET}
+`);
+
+      // Log progress file status if applicable
+      if (this.progressState?.isProgressFile) {
+        if (this.progressState.currentTask) {
+          console.log(`${CONSTANTS.COLOR.YELLOW}📋 Progress: Phase "${this.progressState.currentPhase?.name}" | Task ${this.progressState.currentTask.id}: ${this.progressState.currentTask.description}${CONSTANTS.COLOR.RESET}\n`);
+        } else {
+          console.log(`${CONSTANTS.COLOR.GREEN}📋 Progress: All tasks complete - running final verification${CONSTANTS.COLOR.RESET}\n`);
+        }
+      }
+
+      const logFile = join(this.sessionDir, `iteration-${this.iteration}.log`);
+
+      // Build iteration prompt - different for progress file vs ad-hoc mode
+      let iterationPrompt: string;
+      
+      if (this.progressState?.isProgressFile) {
+        // Progress file mode: inject full protocol + task context + file content
+        iterationPrompt = `${this.skillsPrompt}
+
+[PROGRESS FILE MODE]
+You are executing tasks from a progress file.
+
+**Progress File:** \`${this.config.promptFile}\`
+${this.progressState.prd ? `**Source PRD:** \`${this.progressState.prd}\`` : ""}
+
+${EXECUTION_PROTOCOL}
+
+${formatProgressContext(this.progressState)}
+
+[PROGRESS FILE CONTENT]
+\`\`\`markdown
+${this.prompt}
+\`\`\`
+
+---
+[Ralph Loop Context]
+Iteration: ${this.iteration}
+${this.config.completionPromise ? `Output <promise>${this.config.completionPromise}</promise> ONLY when ALL tasks in the progress file are marked [x] AND verification passes.` : ""}
+${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}` : ""}
+
+[AUTONOMY DIRECTIVES]
+1. You are in NON-INTERACTIVE mode. The user is not present.
+2. NEVER ask questions, NEVER ask for clarification, and NEVER say "Let me know if you want me to...".
+3. If a decision is ambiguous, pick the most standard/reasonable option and EXECUTE it immediately.
+4. Use "git" to explore the codebase if you are lost.
+5. Check your previous work in files and git history. Continue from where you left off.
+6. REVIEW THE SKILLS LIST ABOVE before any build/test/commit operation.
+7. After completing a task, UPDATE THE PROGRESS FILE to mark it [x].
+---`;
+      } else {
+        // Ad-hoc mode: original behavior
+        iterationPrompt = `${this.skillsPrompt}
+${this.prompt}
+
+---
+[Ralph Loop Context]
+Iteration: ${this.iteration}
+${this.config.completionPromise ? `Output <promise>${this.config.completionPromise}</promise> ONLY when the objective is fully verified complete.` : ""}
+${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}` : ""}
+
+[AUTONOMY DIRECTIVES]
+1. You are in NON-INTERACTIVE mode. The user is not present.
+2. NEVER ask questions, NEVER ask for clarification, and NEVER say "Let me know if you want me to...".
+3. If a decision is ambiguous, pick the most standard/reasonable option and EXECUTE it immediately.
+4. Use "git" to explore the codebase if you are lost.
+5. Check your previous work in files and git history. Continue from where you left off.
+6. REVIEW THE SKILLS LIST ABOVE before any build/test/commit operation.
+---`;
+      }
+
+      const copilotArgs = ["-p", iterationPrompt, "--allow-all-tools"];
+      if (this.config.model) copilotArgs.push("--model", this.config.model);
+
+      // Execute Copilot
+      const output = await runCopilotWithTee(copilotArgs, logFile);
+      
+      // Capture metrics after iteration completes
+      const iterationDuration = Math.floor((Date.now() - iterationStartTime) / 1000);
+      const metrics = this.captureIterationMetrics(this.iteration, iterationDuration);
+      
+      // Print iteration summary
+      console.log(`\n${CONSTANTS.COLOR.YELLOW}📊 Iteration ${this.iteration}: ${formatDuration(iterationDuration)} | ${metrics.filesChanged} files | +${metrics.linesAdded}/-${metrics.linesRemoved} lines${metrics.phase ? ` | ${metrics.phase}` : ""}${CONSTANTS.COLOR.RESET}`);
+      
+      await this.captureIterationLearning(this.iteration, output, logFile, metrics);
+
+      // Check Promise
+      if (this.config.completionPromise) {
+        const match = output.match(/<promise>(.*?)<\/promise>/s);
+        if (match) {
+          const promiseText = match[1].trim();
+          if (promiseText === this.config.completionPromise) {
+            console.log(`
+${CONSTANTS.COLOR.GREEN}✅ ═══════════════════════════════════════════════════════════
+✅ Ralph loop: Detected <promise>${this.config.completionPromise}</promise>
+✅ Task completed in ${this.iteration} iterations!
+✅ ═══════════════════════════════════════════════════════════${CONSTANTS.COLOR.RESET}`);
+            await this.cleanup("completed");
+            return;
+          }
+        }
+      }
+
+      console.log(`\n🔄 Iteration ${this.iteration} complete. Waiting ${this.config.delay}s...`);
+      await sleep(this.config.delay * 1000);
+    }
+  }
+
+  public showHelp() {
+    console.log(`
+Ralph Loop for Copilot CLI (Bun Version)
+
+USAGE:
+  bun ralph-loop.ts [PROMPT...] [OPTIONS]
+  ./ralph-loop.ts [PROMPT...] [OPTIONS]
+
+ARGUMENTS:
+  PROMPT...    Initial prompt to start the loop
+
+OPTIONS:
+  --max-iterations <n>           Maximum iterations (default: 0 = unlimited)
+  --completion-promise '<text>'  Phrase signaling completion
+  --delay <seconds>              Delay between iterations (default: 2)
+  --learn                        Enable learning mode
+  --prompt-file <file>           Read prompt from file
+  --session <name>               Session name for output folder (default: derived from prompt-file or timestamp)
+  --model <model>                Copilot model to use
+  -h, --help                     Show this help message
+
+OUTPUT:
+  Session files are written to ./docs/ralph-loop/<session>/
+  Session name priority: --session flag > prompt-file slug > timestamp
+    `);
+  }
+}
+
+// --- Entry Point ---
+
+function parseArgs(): Config {
+  const args = Bun.argv.slice(2);
+  const config: Config = {
+    promptParts: [],
+    maxIterations: 0,
+    completionPromise: null,
+    delay: 2,
+    learningMode: false,
+    promptFile: null,
+    model: null,
+    session: null,
+  };
+
+  for (let i = 0; i < args.length; i++) {
+    switch (args[i]) {
+      case "-h":
+      case "--help":
+        new RalphLoop(config).showHelp();
+        process.exit(0);
+      case "--max-iterations":
+        if (i + 1 >= args.length || args[i + 1].startsWith("-")) {
+          console.error("Error: --max-iterations requires a number");
+          process.exit(1);
+        }
+        config.maxIterations = parseInt(args[++i], 10);
+        if (isNaN(config.maxIterations)) {
+          console.error("Error: --max-iterations must be a valid number");
+          process.exit(1);
+        }
+        break;
+      case "--completion-promise":
+        if (i + 1 >= args.length || args[i + 1] === "" || args[i + 1].startsWith("-")) {
+          console.error("Error: --completion-promise requires a non-empty value");
+          process.exit(1);
+        }
+        config.completionPromise = args[++i];
+        break;
+      case "--delay":
+        if (i + 1 >= args.length || args[i + 1].startsWith("-")) {
+          console.error("Error: --delay requires a number");
+          process.exit(1);
+        }
+        config.delay = parseInt(args[++i], 10);
+        if (isNaN(config.delay) || config.delay < 0) {
+          console.error("Error: --delay must be a valid non-negative number");
+          process.exit(1);
+        }
+        break;
+      case "--learn":
+        config.learningMode = true;
+        break;
+      case "--prompt-file":
+        if (i + 1 >= args.length) {
+          console.error("Error: --prompt-file requires a file path");
+          process.exit(1);
+        }
+        config.promptFile = args[++i];
+        break;
+      case "--model":
+        if (i + 1 >= args.length) {
+          console.error("Error: --model requires a model name");
+          process.exit(1);
+        }
+        config.model = args[++i];
+        break;
+      case "--session":
+        if (i + 1 >= args.length) {
+          console.error("Error: --session requires a session name");
+          process.exit(1);
+        }
+        config.session = args[++i];
+        break;
+      default:
+        if (args[i].startsWith("-")) {
+          console.error(`Unknown option: ${args[i]}`);
+          process.exit(1);
+        }
+        config.promptParts.push(args[i]);
+    }
+  }
+  return config;
+}
+
+try {
+  const config = parseArgs();
+  const loop = new RalphLoop(config);
+  await loop.start();
+} catch (e) {
+  console.error((e as Error).message);
+  process.exit(1);
+}

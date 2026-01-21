@@ -42,16 +42,21 @@ internal static class ScpInitializer
         ScpKeyParameters keyParams,
         CancellationToken cancellationToken = default)
     {
+        if (baseProcessor is not ChainedResponseReceiver { FirmwareVersion: not null } mainProcessor)
+            throw new ArgumentException("Base processor must be a ChainedResponseReceiver",
+                nameof(baseProcessor)); // TODO. Could also put FirmwareVersion on the IApduProcessor interface
+
         try
         {
             return keyParams switch
             {
-                Scp03KeyParameters scp03 => await InitScp03Async(baseProcessor, scp03, cancellationToken)
-                    .ConfigureAwait(false),
-                Scp11KeyParameters scp11 => await InitScp11Async(baseProcessor, scp11, cancellationToken)
-                    .ConfigureAwait(false),
-                _ => throw new ArgumentException($"Unsupported ScpKeyParams type: {keyParams.GetType().Name}",
-                    nameof(keyParams))
+                Scp03KeyParameters scp03Parameters => mainProcessor.FirmwareVersion.IsAtLeast(5, 3, 0)
+                    ? await InitScp03Async(mainProcessor, scp03Parameters, cancellationToken)
+                    : throw new NotSupportedException("SCP03 only supported on YubiKey 5.3.0 and later"),
+                Scp11KeyParameters scp11Parameters => mainProcessor.FirmwareVersion.IsAtLeast(5, 7, 2)
+                    ? await InitScp11Async(mainProcessor, scp11Parameters, cancellationToken)
+                    : throw new NotSupportedException("SCP11 only supported on YubiKey 5.7.2 and later"),
+                _ => throw new ArgumentException("Unsupported SCP key parameters type")
             };
         }
         catch (ApduException ex) when (ex.SW == SWConstants.ClaNotSupported)
@@ -76,20 +81,18 @@ internal static class ScpInitializer
             .ConfigureAwait(false);
 
         // Create SCP processor with base processor's formatter
-        var scpProcessor = new ScpProcessor(baseProcessor, baseProcessor.Formatter, state);
+        var scpProcessor = new ScpProcessor(baseProcessor, state);
 
         // Send EXTERNAL AUTHENTICATE with host cryptogram
-        // NOTE: Command must have CLA with SM bit already set - MAC is computed over this CLA
-        // Matches Java: new Apdu(0x84, 0x82, 0x33, 0, pair.second)
         var authCommand = new ApduCommand(
             CLA_SECURE_MESSAGING,
             INS_EXTERNAL_AUTHENTICATE,
             SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC,
             0x00,
             hostCryptogram);
+
         var authResponse = await scpProcessor.TransmitAsync(authCommand, true, false, cancellationToken)
             .ConfigureAwait(false);
-
         if (authResponse.SW != SWConstants.Success)
             throw ApduException.FromResponse(authResponse, authCommand, "SCP03 EXTERNAL AUTHENTICATE failed");
 
@@ -113,7 +116,7 @@ internal static class ScpInitializer
             .ConfigureAwait(false);
 
         // Wrap base processor with SCP
-        var scpProcessor = new ScpProcessor(baseProcessor, baseProcessor.Formatter, state);
+        var scpProcessor = new ScpProcessor(baseProcessor, state);
 
         var dataEncryptor = state.GetDataEncryptor();
         return (scpProcessor, dataEncryptor);

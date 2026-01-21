@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core;
@@ -23,7 +24,7 @@ namespace Yubico.YubiKit.Core;
 public interface IDeviceRepository : IDisposable
 {
     IObservable<DeviceEvent> DeviceChanges { get; }
-    Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
     void UpdateCache(IEnumerable<IYubiKey> discoveredDevices);
 }
 
@@ -44,13 +45,54 @@ public class DeviceRepositoryCached(
     // Thread-safety for initialization
     private volatile bool _hasData;
 
+    // Ensures cache has data - performs sync scan if needed
+    private async Task EnsureDataAvailable(CancellationToken cancellationToken = default)
+    {
+        if (TEST_MONITORSERVICE_SKIP_MANUALSCAN)
+        {
+            await Task.Delay(500, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        if (_hasData)
+            return; // Fast path - data already available
+
+        await _initializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        if (_hasData)
+            return; // Double-check after acquiring lock
+
+        try
+        {
+            logger.LogInformation("Cache empty, performing synchronous device scan...");
+            var yubiKeys = await findYubiKeys.FindAllAsync(ConnectionType.All, cancellationToken)
+                .ConfigureAwait(false);
+            UpdateCache(yubiKeys);
+
+            logger.LogInformation("Synchronous scan completed, found {DeviceCount} devices", yubiKeys.Count);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Synchronous device scan failed");
+            // Even if sync scan fails, mark as initialized to prevent repeated attempts
+            _hasData = true;
+        }
+        finally
+        {
+            _initializationLock.Release();
+        }
+    }
+
+    private static bool DevicesAreEqual(IYubiKey device1, IYubiKey device2) =>
+        device1.DeviceId == device2.DeviceId;
+
     #region IDeviceRepository Members
 
     // Public API methods with guaranteed data availability
-    public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type = ConnectionType.All,
+        CancellationToken cancellationToken = default)
     {
         await EnsureDataAvailable(cancellationToken).ConfigureAwait(false);
-        return [.. _deviceCache.Values];
+        return [.. _deviceCache.Values.Where(d => d.ConnectionType == type || type == ConnectionType.All)];
     }
 
     public IObservable<DeviceEvent> DeviceChanges => _deviceChanges.AsObservable();
@@ -131,44 +173,4 @@ public class DeviceRepositoryCached(
     }
 
     #endregion
-
-    // Ensures cache has data - performs sync scan if needed
-    private async Task EnsureDataAvailable(CancellationToken cancellationToken = default)
-    {
-        if (TEST_MONITORSERVICE_SKIP_MANUALSCAN)
-        {
-            await Task.Delay(500, cancellationToken).ConfigureAwait(false);
-            return;
-        }
-
-        if (_hasData)
-            return; // Fast path - data already available
-
-        await _initializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-        if (_hasData)
-            return; // Double-check after acquiring lock
-
-        try
-        {
-            logger.LogInformation("Cache empty, performing synchronous device scan...");
-
-            var yubiKeys = await findYubiKeys.FindAllAsync(cancellationToken).ConfigureAwait(false);
-            UpdateCache(yubiKeys);
-
-            logger.LogInformation("Synchronous scan completed, found {DeviceCount} devices", yubiKeys.Count);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Synchronous device scan failed");
-            // Even if sync scan fails, mark as initialized to prevent repeated attempts
-            _hasData = true;
-        }
-        finally
-        {
-            _initializationLock.Release();
-        }
-    }
-
-    private static bool DevicesAreEqual(IYubiKey device1, IYubiKey device2) =>
-        device1.DeviceId == device2.DeviceId;
 }

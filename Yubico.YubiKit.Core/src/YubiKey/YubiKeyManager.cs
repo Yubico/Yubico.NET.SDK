@@ -1,23 +1,30 @@
-﻿namespace Yubico.YubiKit.Core.YubiKey;
+﻿using Yubico.YubiKit.Core.Interfaces;
+
+namespace Yubico.YubiKit.Core.YubiKey;
 
 public interface IYubiKeyManager
 {
     IObservable<DeviceEvent> DeviceChanges { get; }
-    Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type = ConnectionType.All,
+        CancellationToken cancellationToken = default);
 }
 
-public class YubiKeyManager(IDeviceRepository? deviceRepository = null) : IYubiKeyManager
+public class YubiKeyManager(IDeviceRepository? deviceRepository = null, YubiKitLoggingInitializer? _ = null) : IYubiKeyManager
 {
-    #region IYubiKeyManager Members
+    private readonly YubiKitLoggingInitializer? _loggingInitializer = _; // TODO what?
 
-    public Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default)
+
+    public Task<IReadOnlyList<IYubiKey>> FindAllAsync(
+        ConnectionType type = ConnectionType.All,
+        CancellationToken cancellationToken = default)
     {
         if (deviceRepository is null)
             return FindYubiKeys
                 .Create()
-                .FindAllAsync(cancellationToken);
+                .FindAllAsync(type, cancellationToken);
 
-        return deviceRepository.FindAllAsync(cancellationToken);
+        return deviceRepository.FindAllAsync(type, cancellationToken);
     }
 
     public IObservable<DeviceEvent> DeviceChanges
@@ -32,6 +39,4 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository = null) : IYubiK
             return deviceRepository.DeviceChanges;
         }
     }
-
-    #endregion
 }

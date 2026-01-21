@@ -11,11 +11,16 @@
  *
  * USAGE:
  *   dotnet build.cs [target] [options]
+ *   dotnet build.cs -- [target] [options]   (use -- if options conflict with dotnet)
+ *
+ * NOTE: Use -- separator when passing --help or if options aren't working:
+ *   dotnet build.cs -- --help               (--help requires --)
+ *   dotnet build.cs -- build --project Piv  (when in doubt, use --)
  *
  * TARGETS:
  *   clean      - Remove artifacts directory
  *   restore    - Restore NuGet dependencies
- *   build      - Build the solution
+ *   build      - Build the solution (or specific project with --project)
  *   test       - Run unit tests with summary output
  *   coverage   - Run tests with code coverage
  *   pack       - Create NuGet packages
@@ -30,17 +35,38 @@
  *   --include-docs                 Include XML documentation in packages
  *   --dry-run                      Show what would be published without publishing
  *   --clean                        Run dotnet clean before build
+ *   --filter <expression>          Test filter expression (e.g., "FullyQualifiedName~MyTest")
+ *   --project <name>               Build/test specific project only (partial match)
  *
  * EXAMPLES:
  *   dotnet build.cs build
+ *   dotnet build.cs build --project Piv
  *   dotnet build.cs test
+ *   dotnet build.cs test --filter "FullyQualifiedName~MyTestClass"
+ *   dotnet build.cs test --project Piv --filter "Method~Sign"
  *   dotnet build.cs coverage
  *   dotnet build.cs publish --package-version 1.0.0-preview.1
- *   dotnet build.cs publish --dry-run
+ *   dotnet build.cs -- --help
+ *
+ * XUNIT V2 VS V3 TEST RUNNER DETECTION:
+ *   This script automatically detects which test runner each project uses:
+ *
+ *   - xUnit v3 (Microsoft.Testing.Platform): Projects with
+ *     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+ *     These use: dotnet run --project <proj> -- --filter "..."
+ *
+ *   - xUnit v2 (traditional): Projects without that setting
+ *     These use: dotnet test <proj> --filter "..."
+ *
+ *   IMPORTANT: Always use "dotnet build.cs test" instead of invoking dotnet test
+ *   directly. The build script handles this detection automatically, preventing
+ *   failures from using the wrong command syntax for each test project.
  *
  * See BUILD.md for full documentation.
  */
 
+using System;
+using System.Collections.Generic;
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
@@ -54,6 +80,8 @@ var nugetFeedPath = GetArgument("--nuget-feed-path") ?? Path.Combine(repoRoot, "
 var includeDocs = HasFlag("--include-docs");
 var dryRun = HasFlag("--dry-run");
 var shouldClean = HasFlag("--clean");
+var testFilter = GetArgument("--filter");
+var testProject = GetArgument("--project");
 
 // Dynamically discover projects using glob patterns
 
@@ -65,13 +93,26 @@ var packableProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.All
     .OrderBy(p => p)
     .ToArray();
 
-// Test projects - all Yubico.YubiKit.*.UnitTests/*.csproj
-var testProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDirectories)
+// Unit test projects - all Yubico.YubiKit.*.UnitTests/*.csproj
+var unitTestProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDirectories)
     .Where(p => p.Contains($"{Path.DirectorySeparatorChar}tests{Path.DirectorySeparatorChar}") &&
                 p.Contains(".UnitTests") &&
                 p.Contains("Yubico.YubiKit."))
     .Select(p => Path.GetRelativePath(repoRoot, p))
     .OrderBy(p => p)
+    .ToArray();
+
+// Integration test projects - all Yubico.YubiKit.*.IntegrationTests/*.csproj
+var integrationTestProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDirectories)
+    .Where(p => p.Contains($"{Path.DirectorySeparatorChar}tests{Path.DirectorySeparatorChar}") &&
+                p.Contains(".IntegrationTests") &&
+                p.Contains("Yubico.YubiKit."))
+    .Select(p => Path.GetRelativePath(repoRoot, p))
+    .OrderBy(p => p)
+    .ToArray();
+
+var testProjects = unitTestProjects
+    .Concat(integrationTestProjects)
     .ToArray();
 
 var testProjectInfos = testProjects
@@ -108,9 +149,41 @@ Target("restore", DependsOn("clean"), () =>
 
 Target("build", DependsOn("restore"), () =>
 {
-    PrintHeader("Building solution");
-    Run("dotnet", $"build {solutionFile} -c {configuration} --no-restore");
-    PrintInfo($"Built {solutionFile} in {configuration} configuration");
+    PrintHeader("Building");
+    
+    if (!string.IsNullOrEmpty(testProject))
+    {
+        // Build specific project(s) matching the filter
+        var matchingProjects = packableProjects
+            .Where(p => Path.GetFileNameWithoutExtension(p)
+                .Contains(testProject, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        
+        if (matchingProjects.Count == 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"⚠ No projects match '{testProject}'");
+            Console.ResetColor();
+            Console.WriteLine("Available projects:");
+            foreach (var proj in packableProjects)
+                Console.WriteLine($"  - {Path.GetFileNameWithoutExtension(proj)}");
+            return;
+        }
+        
+        foreach (var project in matchingProjects)
+        {
+            var projectName = Path.GetFileNameWithoutExtension(project);
+            Console.WriteLine($"Building: {projectName}");
+            Run("dotnet", $"build {project} -c {configuration} --no-restore");
+        }
+        PrintInfo($"Built {matchingProjects.Count} project(s) matching '{testProject}'");
+    }
+    else
+    {
+        // Build entire solution
+        Run("dotnet", $"build {solutionFile} -c {configuration} --no-restore");
+        PrintInfo($"Built {solutionFile} in {configuration} configuration");
+    }
 });
 
 Target("test", DependsOn("build"), () =>
@@ -119,7 +192,27 @@ Target("test", DependsOn("build"), () =>
 
     var testResults = new List<(string Project, bool Passed, string? Error)>();
 
-    foreach (var projectInfo in testProjectInfos)
+    // Filter to specific project if --project specified
+    var projectsToTest = testProjectInfos.AsEnumerable();
+    if (!string.IsNullOrEmpty(testProject))
+    {
+        projectsToTest = projectsToTest.Where(p => 
+            Path.GetFileNameWithoutExtension(p.ProjectPath)
+                .Contains(testProject, StringComparison.OrdinalIgnoreCase));
+        
+        if (!projectsToTest.Any())
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"⚠ No test projects match '{testProject}'");
+            Console.ResetColor();
+            Console.WriteLine("Available test projects:");
+            foreach (var p in testProjectInfos)
+                Console.WriteLine($"  - {Path.GetFileNameWithoutExtension(p.ProjectPath)}");
+            return;
+        }
+    }
+
+    foreach (var projectInfo in projectsToTest)
     {
         var project = projectInfo.ProjectPath;
         var projectName = Path.GetFileNameWithoutExtension(project);
@@ -127,9 +220,21 @@ Target("test", DependsOn("build"), () =>
 
         try
         {
-            var command = projectInfo.UsesTestingPlatformRunner
-                ? $"run --project {project} -c {configuration} --no-build"
-                : $"test {project} -c {configuration} --no-build --logger \"console;verbosity=normal\"";
+            string command;
+            if (projectInfo.UsesTestingPlatformRunner)
+            {
+                // Microsoft.Testing.Platform uses -- to pass filter
+                command = $"run --project {project} -c {configuration} --no-build";
+                if (!string.IsNullOrEmpty(testFilter))
+                    command += $" -- --filter \"{testFilter}\"";
+            }
+            else
+            {
+                // xUnit/MSTest use --filter directly
+                command = $"test {project} -c {configuration} --no-build --logger \"console;verbosity=normal\"";
+                if (!string.IsNullOrEmpty(testFilter))
+                    command += $" --filter \"{testFilter}\"";
+            }
 
             Run("dotnet", command);
             testResults.Add((projectName, true, null));
@@ -141,7 +246,7 @@ Target("test", DependsOn("build"), () =>
         {
             testResults.Add((projectName, false, ex.Message));
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"✗ {projectName} - Tests failed");
+            Console.WriteLine($"✗ {projectName} - Tests failed");;
             Console.ResetColor();
         }
     }
@@ -199,7 +304,7 @@ Target("coverage", DependsOn("build"), () =>
 
     var testResults = new List<(string Project, bool Passed)>();
 
-    foreach (var project in testProjects)
+    foreach (var project in unitTestProjects)
     {
         var projectName = Path.GetFileNameWithoutExtension(project);
         Console.WriteLine($"\n{'='} Running coverage for: {projectName} {'='}");
@@ -362,7 +467,8 @@ if (args.Contains("--help") || args.Contains("-h"))
 }
 
 // Run Bullseye
-await RunTargetsAndExitAsync(args);
+var bullseyeArgs = FilterBullseyeArgs(args, "--project", "--filter");
+await RunTargetsAndExitAsync(bullseyeArgs);
 
 // Helper functions
 string GetRepoRoot()
@@ -400,12 +506,16 @@ Yubico.YubiKit Build Script
 
 USAGE:
   dotnet build.cs [target] [options]
-  dotnet build.cs -- --help    (use -- separator for help)
+  dotnet build.cs -- [target] [options]   (use -- if options conflict with dotnet)
+
+NOTE: The -- separator passes arguments to the script instead of dotnet:
+  dotnet build.cs -- --help               Required for --help
+  dotnet build.cs -- build --project Piv  Use when in doubt
 
 TARGETS:
   clean      - Remove artifacts directory
   restore    - Restore NuGet dependencies
-  build      - Build the solution
+  build      - Build the solution (or specific project with --project)
   test       - Run unit tests with summary output
   coverage   - Run tests with code coverage
   pack       - Create NuGet packages
@@ -420,14 +530,26 @@ OPTIONS:
   --include-docs                 Include XML documentation in packages
   --dry-run                      Show what would be published without publishing
   --clean                        Run dotnet clean before build
+  --filter <expression>          Test filter expression (e.g., ""FullyQualifiedName~MyTest"")
+  --project <name>               Build/test specific project only (partial match)
   -h, --help                     Show this help message
 
 EXAMPLES:
   dotnet build.cs build
+  dotnet build.cs build --project Piv
   dotnet build.cs test
+  dotnet build.cs test --filter ""FullyQualifiedName~MyTestClass""
+  dotnet build.cs test --project Piv --filter ""Method~Sign""
   dotnet build.cs coverage
   dotnet build.cs publish --package-version 1.0.0-preview.1
-  dotnet build.cs publish --dry-run
+  dotnet build.cs -- --help
+
+FILTER SYNTAX (for --filter):
+  FullyQualifiedName~MyClass     Tests containing 'MyClass' in full name
+  Name=MyTestMethod              Exact test method name
+  ClassName~Integration          Classes containing 'Integration'
+  Name!=SkipMe                   Exclude tests named 'SkipMe'
+  Category=Unit                  Tests with [Trait(""Category"", ""Unit"")]
 ");
 
     Console.ForegroundColor = ConsoleColor.Cyan;
@@ -460,6 +582,30 @@ static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPa
     var contents = File.ReadAllText(fullPath);
     return contents.Contains(
         "<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>",
-        StringComparison.OrdinalIgnoreCase);
+            StringComparison.OrdinalIgnoreCase);
 }
 
+string[] FilterBullseyeArgs(string[] args, params string[] optionNames)
+{
+    var options = new HashSet<string>(optionNames, StringComparer.OrdinalIgnoreCase);
+    var filtered = new List<string>();
+
+    for (var i = 0; i < args.Length; i++)
+    {
+        var arg = args[i];
+
+        if (options.Contains(arg))
+        {
+            if (i + 1 < args.Length)
+            {
+                i++;
+            }
+
+            continue;
+        }
+
+        filtered.Add(arg);
+    }
+
+    return filtered.ToArray();
+}

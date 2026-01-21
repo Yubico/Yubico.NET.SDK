@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// </summary>
 public static class ScpExtensions
 {
-    #region Nested type: <extension>
+    #region Nested type: $extension
 
     extension(ISmartCardProtocol protocol)
     {
@@ -46,7 +46,7 @@ public static class ScpExtensions
         /// var response = await protocol.TransmitAndReceiveAsync(command);
         /// </code>
         /// </example>
-        public async Task<ISmartCardProtocol> WithScpAsync(
+        public async Task<PcscProtocolScp> WithScpAsync(
             ScpKeyParameters keyParams,
             CancellationToken cancellationToken = default)
         {
@@ -59,15 +59,6 @@ public static class ScpExtensions
                     "Ensure the protocol was created via PcscProtocolFactory.",
                     nameof(protocol));
 
-            // Validate firmware version if available
-            if (pcscProtocol.FirmwareVersion is not null)
-                switch (keyParams)
-                {
-                    case Scp03KeyParameters when !pcscProtocol.FirmwareVersion.IsAtLeast(5, 3, 0):
-                        throw new NotSupportedException("SCP03 requires YubiKey firmware 5.3.0 or newer");
-                    case Scp11KeyParameters when !pcscProtocol.FirmwareVersion.IsAtLeast(5, 7, 2):
-                        throw new NotSupportedException("SCP11 requires YubiKey firmware 5.7.2 or newer");
-                }
 
             var (scpProcessor, encryptor) = await ScpInitializer.InitializeScpAsync(
                     pcscProtocol.GetBaseProcessor(),
@@ -75,7 +66,7 @@ public static class ScpExtensions
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            return new ScpProtocolAdapter(protocol, scpProcessor, encryptor);
+            return new PcscProtocolScp(protocol, scpProcessor, encryptor);
         }
     }
 

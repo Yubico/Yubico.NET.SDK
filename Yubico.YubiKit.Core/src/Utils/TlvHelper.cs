@@ -45,6 +45,8 @@ public static class TlvHelper
         return new DisposableTlvList(tlvs);
     }
 
+    public static DisposableTlvList DecodeList(ReadOnlyMemory<byte> tlvData) => DecodeList(tlvData.Span);
+
     /// <summary>
     ///     Decodes a sequence of BER-TLV encoded data into a mapping of Tag-Value pairs.
     ///     Iteration order is preserved. If the same tag occurs more than once only the latest will be kept.
@@ -64,44 +66,27 @@ public static class TlvHelper
         return tlvs;
     }
 
-    // /// <summary>
-    // ///     Decodes a sequence of BER-TLV encoded data into a mapping of Tag-Value pairs.
-    // ///     Iteration order is preserved. If the same tag occurs more than once only the latest will be kept.
-    // /// </summary>
-    // /// <param name="tlvData">Sequence of TLV encoded data</param>
-    // /// <returns>Dictionary of Tag-Value pairs</returns>
-    // public static DisposableTlvDictionary DecodeDictionary2(ReadOnlySpan<byte> tlvData)
-    // {
-    //     var tlvs = new DisposableTlvDictionary();
-    //     var buffer = tlvData;
-    //     while (!buffer.IsEmpty)
-    //     {
-    //         var tlv = Tlv.ParseData(ref buffer);
-    //         tlvs.Add(tlv.Tag, tlv.Value);
-    //     }
-    //
-    //     return tlvs;
-    // }
+    public static IDictionary<int, ReadOnlyMemory<byte>> DecodeDictionary(ReadOnlyMemory<byte> tlvData) =>
+        DecodeDictionary(tlvData.Span);
 
     /// <summary>
     ///     Encodes a list of Tlvs into a sequence of BER-TLV encoded data.
     /// </summary>
     /// <param name="tlvData">List of Tlvs to encode</param>
     /// <returns>BER-TLV encoded list</returns>
-    public static Memory<byte> EncodeList(ReadOnlySpan<Tlv> tlvData)
+    public static Memory<byte> EncodeList(Tlv[] tlvData)
     {
         // Calculate total size to avoid resizing
         var estimatedSize = 0;
-        foreach (var tlv in tlvData)
-        {
-            estimatedSize += tlv.AsMemory().Length;
-        }
+        var tlvSpan = tlvData.AsSpan();
+        foreach (var tlv in tlvSpan)
+            estimatedSize += tlv.TotalLength;
 
         var writer = new ArrayBufferWriter<byte>(estimatedSize);
 
-        foreach (var tlv in tlvData)
+        foreach (var tlv in tlvSpan)
         {
-            ReadOnlySpan<byte> tlvBytes = tlv.AsMemory().Span;
+            var tlvBytes = tlv.AsMemory().Span;
             tlvBytes.CopyTo(writer.GetSpan(tlvBytes.Length));
             writer.Advance(tlvBytes.Length);
         }
@@ -109,12 +94,12 @@ public static class TlvHelper
         return writer.WrittenMemory.ToArray();
     }
 
-    /// <summary>
-    ///     Encodes an array of Tlvs into a sequence of BER-TLV encoded data.
-    /// </summary>
-    /// <param name="tlvs">Array of Tlvs to encode</param>
-    /// <returns>BER-TLV encoded array</returns>
-    public static Memory<byte> EncodeMany(params ReadOnlySpan<Tlv> tlvs) => EncodeList(tlvs);
+    // /// <summary>
+    // ///     Encodes an array of Tlvs into a sequence of BER-TLV encoded data.
+    // /// </summary>
+    // /// <param name="tlvs">Array of Tlvs to encode</param>
+    // /// <returns>BER-TLV encoded array</returns>
+    // public static Memory<byte> EncodeMany(params Tlv[] tlvs) => EncodeList(tlvs);
 
     /// <summary>
     ///     Decode a single TLV encoded object, returning only the value.
@@ -129,6 +114,30 @@ public static class TlvHelper
         if (tlv.Tag != expectedTag)
             throw new InvalidOperationException($"Expected tag: {expectedTag:X2}, got {tlv.Tag:X2}");
         return tlv.Value.ToArray();
+    }
+
+    /// <summary>
+    ///     Searches a sequence of TLV encoded data for a specific tag and returns its value.
+    /// </summary>
+    /// <param name="tag">The tag to search for</param>
+    /// <param name="tlvData">Sequence of TLV encoded data</param>
+    /// <param name="value">The value of the first TLV with the matching tag, or default if not found</param>
+    /// <returns>True if the tag was found, false otherwise</returns>
+    public static bool TryFindValue(int tag, ReadOnlySpan<byte> tlvData, out Memory<byte> value)
+    {
+        var buffer = tlvData;
+        while (!buffer.IsEmpty)
+        {
+            var (currentTag, _, currentValue) = Tlv.ParseData(ref buffer);
+            if (currentTag == tag)
+            {
+                value = currentValue.ToArray();
+                return true;
+            }
+        }
+
+        value = default;
+        return false;
     }
 
     public static Memory<byte> EncodeDictionary(IReadOnlyDictionary<int, byte[]?> tlvData)

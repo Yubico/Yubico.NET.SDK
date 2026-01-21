@@ -41,7 +41,6 @@ _deps
 *.user
 *.userosscache
 *.sln.docstates
-.vscode
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -112,7 +111,6 @@ StyleCopReport.xml
 *.ipdb
 *.pgc
 *.pgd
-*.rsp
 *.sbr
 *.tlb
 *.tli
@@ -555,3 +553,7 @@ cython_debug/
 # Coverage / Test Results 
 coveragereport/
 TestResults/
+# Codemapper AST output (gitignored but readable by agents)
+codebase_ast/
+
+docs/ralph-loop/

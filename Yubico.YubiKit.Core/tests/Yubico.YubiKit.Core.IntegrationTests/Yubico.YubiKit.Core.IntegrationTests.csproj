@@ -39,4 +39,9 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- xUnit runner configuration - disable parallel execution for hardware tests -->
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

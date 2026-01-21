@@ -14,7 +14,7 @@
 
 using System.Buffers.Binary;
 using System.Text;
-using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Extensions;
 using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 
@@ -224,7 +224,7 @@ public readonly record struct DeviceInfo
     }
 }
 
-public static class CapabilityMapper // TODO internal
+internal static class CapabilityMapper
 {
     private static readonly (int Bit, DeviceCapabilities Cap)[] FipsMapping =
     [

@@ -15,6 +15,7 @@
 using System.Reflection;
 using Xunit;
 using Xunit.Sdk;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -85,6 +86,12 @@ public class WithYubiKeyAttribute : DataAttribute
     public bool RequireNfc { get; set; }
 
     /// <summary>
+    ///     Gets or sets the required connection type.
+    ///     Use ConnectionType.Unknown (default) to match any connection type.
+    /// </summary>
+    public ConnectionType ConnectionType { get; set; } = ConnectionType.Unknown;
+
+    /// <summary>
     ///     Gets or sets the required capability (must be enabled).
     ///     Use DeviceCapabilities.None (default) to skip capability filtering.
     /// </summary>
@@ -133,71 +140,63 @@ public class WithYubiKeyAttribute : DataAttribute
     ///     Returns filtered YubiKey devices as test data.
     ///     Called by xUnit's Theory discoverer.
     /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         xUnit calls GetData() during BOTH discovery and execution phases.
+    ///         We cannot reliably distinguish between them.
+    ///     </para>
+    ///     <para>
+    ///         Strategy: Always return placeholders with filter descriptions.
+    ///         The placeholder's Device property uses lazy binding - when the test
+    ///         actually accesses Device during execution, it initializes the infrastructure
+    ///         and binds to a real YubiKey.
+    ///     </para>
+    /// </remarks>
     public override IEnumerable<object[]>
-        GetData(MethodInfo testMethod) // TODO why is this called for tests that I haven't specifically run? Inside Rider.
+        GetData(MethodInfo testMethod)
     {
-        // Get all authorized devices from shared infrastructure
-        var allDevices = YubiKeyTestInfrastructure.AllAuthorizedDevices;
-        if (allDevices.Count == 0)
-        {
-            var errorMessage =
-                $"No authorized YubiKey devices available for test '{testMethod.Name}'.\n" +
-                $"\n" +
-                $"This means either:\n" +
-                $"  1. No YubiKeys are connected to this machine\n" +
-                $"  2. Connected YubiKeys are not in the allow list (appsettings.json)\n" +
-                $"\n" +
-                $"To fix: Check YubiKeyTestInfrastructure initialization output for details.";
+        // Always return a placeholder - device binding happens lazily during execution
+        // Create a unique placeholder for each attribute to avoid duplicate test IDs
+        // when multiple [WithYubiKey] attributes are applied to the same test method
+        var filterDescription = BuildFilterDescription();
+        yield return [YubiKeyTestState.CreatePlaceholder(filterDescription)];
+    }
 
-            Console.Error.WriteLine($"[WithYubiKey] {errorMessage}");
+    /// <summary>
+    ///     Builds a description of the filter criteria for this attribute.
+    ///     Used to create unique placeholders when multiple attributes are applied.
+    /// </summary>
+    private string BuildFilterDescription()
+    {
+        var parts = new List<string>();
 
-            throw new InvalidOperationException(errorMessage);
-        }
+        if (!string.IsNullOrEmpty(MinFirmware))
+            parts.Add($"FW>={MinFirmware}");
 
-        // Filter devices using shared infrastructure
-        var filteredDevices = YubiKeyTestInfrastructure.FilterDevices(
-            allDevices,
-            MinFirmware,
-            FormFactor,
-            RequireUsb,
-            RequireNfc,
-            Capability,
-            FipsCapable,
-            FipsApproved,
-            CustomFilter).ToList();
+        if (FormFactor != FormFactor.Unknown)
+            parts.Add($"FF={FormFactor}");
 
-        if (filteredDevices.Count == 0)
-        {
-            var criteria = YubiKeyTestInfrastructure.GetFilterCriteriaDescription(
-                MinFirmware,
-                FormFactor,
-                RequireUsb,
-                RequireNfc,
-                Capability,
-                FipsCapable,
-                FipsApproved,
-                CustomFilter);
+        if (RequireUsb)
+            parts.Add("USB");
 
-            var availableDevices = string.Join(", ", allDevices.Select(d =>
-                $"SN:{d.SerialNumber} (FW:{d.FirmwareVersion}, {d.FormFactor})"));
+        if (RequireNfc)
+            parts.Add("NFC");
 
-            var errorMessage =
-                $"No YubiKey devices match criteria for test '{testMethod.Name}'.\n" +
-                $"\n" +
-                $"Required criteria: {criteria}\n" +
-                $"\n" +
-                $"Available devices ({allDevices.Count}): {availableDevices}\n" +
-                $"\n" +
-                $"To fix: Connect a YubiKey matching the criteria, or adjust the test requirements.";
+        if (ConnectionType != ConnectionType.Unknown)
+            parts.Add($"Conn={ConnectionType}");
 
-            Console.Error.WriteLine($"[WithYubiKey] {errorMessage}");
-            throw new SkipException(errorMessage);
-        }
+        if (Capability != DeviceCapabilities.None)
+            parts.Add($"Cap={Capability}");
 
-        Console.WriteLine(
-            $"[WithYubiKey] Test '{testMethod.Name}' will run on {filteredDevices.Count} device(s)");
+        if (FipsCapable != DeviceCapabilities.None)
+            parts.Add($"FipsCap={FipsCapable}");
 
-        // Yield each matching device as test data
-        foreach (var device in filteredDevices) yield return [device];
+        if (FipsApproved != DeviceCapabilities.None)
+            parts.Add($"FipsAppr={FipsApproved}");
+
+        if (CustomFilter is not null)
+            parts.Add($"Filter={CustomFilter.Name}");
+
+        return parts.Count > 0 ? string.Join(",", parts) : "All";
     }
 }

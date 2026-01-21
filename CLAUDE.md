@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI agents when working with code in this repository.
+
+**IMPORTANT:** If you are working in a subproject directory (e.g., `Yubico.YubiKit.SecurityDomain/`, `Yubico.YubiKit.Piv/`, etc.), you MUST also read that subproject's `CLAUDE.md` file if it exists. Subproject CLAUDE.md files contain specific patterns, test harness details, and context for that module.
 
 ## Project Overview
 
@@ -11,8 +13,51 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 - We actively use new .NET 10 library features, C# 14 language features, and SDK/tooling improvements
 - When implementing features, consult these docs to leverage the latest platform capabilities
 
+## Project Structure
+
+The SDK is organized into the following modules:
+
+**Core Infrastructure:**
+- `Yubico.YubiKit.Core/` - Device management, connection abstractions, APDU protocol handling, platform interop
+- `Yubico.YubiKit.Management/` - Device information queries, capability detection, firmware version
+
+**YubiKey Applications:**
+- `Yubico.YubiKit.Piv/` - PIV (Personal Identity Verification) smart card functionality
+- `Yubico.YubiKit.Fido2/` - FIDO2/WebAuthn authentication
+- `Yubico.YubiKit.Oath/` - TOTP/HOTP one-time password generation
+- `Yubico.YubiKit.YubiOtp/` - Yubico OTP configuration and generation
+- `Yubico.YubiKit.OpenPgp/` - OpenPGP card implementation
+- `Yubico.YubiKit.SecurityDomain/` - Secure Channel Protocol (SCP03), key management
+
+**Hardware Security Modules:**
+- `Yubico.YubiKit.YubiHsm/` - YubiHSM 2 hardware security module integration
+
+**Testing Infrastructure:**
+- `Yubico.YubiKit.Tests.Shared/` - Shared test utilities, multi-transport test harness
+- `Yubico.YubiKit.Tests.TestProject/` - xUnit v3 test project structure
+
+**Module-Specific Documentation:**
+Each module directory may contain:
+- `CLAUDE.md` - AI agent guidance for module-specific patterns and test infrastructure
+- `README.md` - Human-readable module documentation with usage examples
+- `tests/CLAUDE.md` - Test infrastructure and patterns for that module
+
 ## Quick Reference - Critical Rules
 
+**Documentation & Research:**
+- ✅ ALWAYS use Context7 MCP (`context7-query-docs` tool) to look up library/API documentation, code patterns, setup/configuration steps, and framework usage without requiring explicit request
+- ✅ Use Perplexity AI (`.claude/skills/tool-perplexity-search/SKILL.md`) for current events, recent releases, or up-to-date web information
+
+**Skills to Apply When Coding in This Repository:**
+- .claude/skills/tool-codemapper/SKILL.md
+- .claude/skills/domain-build/SKILL.md
+- .claude/skills/domain-test/SKILL.md
+- .claude/skills/domain-yubikit-compare/SKILL.md
+- .claude/skills/workflow-interface-refactor/SKILL.md
+- .claude/skills/workflow-tdd/SKILL.md
+- .claude/skills/workflow-debug/SKILL.md
+- .claude/skills/tool-perplexity-search/SKILL.md
+   
 **Memory Management:**
 - ✅ Sync + ≤512 bytes → `Span<byte>` with `stackalloc`
 - ✅ Sync + >512 bytes → `ArrayPool<byte>.Shared.Rent()`
@@ -40,9 +85,29 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 - ❌ NEVER use `#region` (split large classes instead)
 - ❌ NEVER use exceptions for control flow
 
+**Legacy Code Reference (Java/C# Implementations):**
+- ✅ ALWAYS do forensic byte-level analysis before implementing
+- ✅ ALWAYS read actual source code line-by-line, not just documentation
+- ✅ ALWAYS trace through with concrete examples (input → output bytes)
+- ✅ ALWAYS document the exact wire format/data structure before coding
+- ❌ NEVER implement based on conceptual understanding alone
+- ❌ NEVER skip verifying exact encoding details (TLV structure, byte order, flags)
+
 **Crypto APIs:**
 - ✅ USE: `SHA256.HashData(data, outputSpan)` (Span-based)
 - ❌ AVOID: `SHA256.Create().ComputeHash(data)` (allocates array)
+
+**Testing:**
+- ✅ ALWAYS use `dotnet build.cs test` (handles xUnit v2/v3 runner differences automatically)
+- ❌ NEVER use `dotnet test` directly (fails on xUnit v3 projects with wrong syntax)
+- See `docs/TESTING.md` for full testing guidance
+
+**Codebase Orientation:**
+- ✅ Run `codemapper .` to generate API surface maps (~1.5s for entire repo)
+- ✅ Maps output to `./codebase_ast/` - one file per project (gitignored but readable by agents)
+- ✅ Find symbols: `grep -rn "IYubiKey" ./codebase_ast/`
+- ✅ Load context: `cat ./codebase_ast/Yubico.YubiKit.Core.txt`
+- See `.claude/skills/tool-codemapper/SKILL.md` for full usage
 
 ## Build and Test Commands
 
@@ -159,9 +224,63 @@ dotnet test --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 - Protocol-specific sessions (e.g., `ManagementSession<TConnection>`)
 - Generic over connection type
 
-### Multi-targeting
+### Property Conventions
 
-Projects target `net8` and `net10.0` with `LangVersion=preview` for:
+**Immutability Preference:**
+- ✅ `{ get; init; }` - Immutable properties set only at construction
+- ✅ `{ get; private set; }` - Properties modified only within the class
+- ⚠️ `{ get; set; }` - Use sparingly, only for configuration/mutable DTOs
+
+**Property Initialization:**
+- Validate in constructor or via dedicated `Validate()` method
+- Use `ArgumentNullException.ThrowIfNull()` for required parameters
+- Use `ArgumentOutOfRangeException.ThrowIfNegative()` for numeric constraints
+
+**Computed Properties:**
+```csharp
+// ✅ Expression-bodied for simple computations
+public bool IsValid => _data.Length > 0 && _version >= MinVersion;
+
+// ✅ Traditional getter for complex logic
+public ReadOnlySpan<byte> Data
+{
+    get
+    {
+        ThrowIfDisposed();
+        return _data.AsSpan();
+    }
+}
+```
+
+### Logging Conventions
+
+**Use Static LoggingFactory - NEVER inject ILogger:**
+```csharp
+// ✅ CORRECT: Static logger from factory
+public class FidoSession
+{
+    private static readonly ILogger Logger = LoggingFactory.CreateLogger<FidoSession>();
+}
+
+// ❌ WRONG: Injected logger (breaks consistency)
+public class FidoSession(ILogger<FidoSession> logger) { }
+```
+
+**Log Levels:**
+- `Trace` - Raw APDU/CBOR bytes, detailed protocol steps
+- `Debug` - Protocol-level operations, state transitions
+- `Info` - Session creation, major operations (enroll, authenticate)
+- `Warning` - Recoverable errors, fallback behavior
+- `Error` - Operation failures, exceptions
+
+**Logging Sensitive Data:**
+- ❌ NEVER log PINs, keys, or credentials
+- ✅ Log credential IDs as hex (public identifier)
+- ✅ Log lengths, not contents, of sensitive buffers
+
+### Target Framework
+
+Projects target`net10.0` with `LangVersion=14.0` for:
 - Primary constructors
 - Collection expressions `[..]`
 - Extension types
@@ -719,6 +838,30 @@ _logger.LogDebug("PIN verification for slot {Slot}", slotNumber);
 _logger.LogDebug("Key operation completed, length: {Length}", privateKey.Length);
 ```
 
+### Security Audit Checklist
+
+When implementing or reviewing authentication/cryptographic code, run these verification commands:
+
+```bash
+# 1. Sensitive data cleanup - verify ZeroMemory usage
+grep -rn "ZeroMemory\|Clear()" src/ | wc -l
+# Expected: At least one per sensitive operation (PIN, key, PUK)
+
+# 2. Secret logging audit - ensure no values logged
+grep -rn "Log.*\(pin\|key\|puk\|secret\)" -i src/
+# Expected: No matches (or only variable names, never values)
+
+# 3. ArrayPool cleanup audit - verify finally blocks
+grep -A10 "ArrayPool.*Rent" src/ | grep -c "finally"
+# Expected: Every Rent should have corresponding finally block
+
+# 4. Input validation - ensure parameter checks
+grep -c "ArgumentNullException\|ArgumentException" src/
+# Expected: At least one per public method with parameters
+```
+
+Document any violations and fix before claiming security phase complete.
+
 ### APDU and Protocol Buffers
 
 **✅ Prefer Span for APDU data:**
@@ -1181,14 +1324,32 @@ public async Task IntegrationTest_WithRealDevice()
 - Current working branch: `yubikit`
 - Use `develop` as base for pull requests
 
+### Commit Discipline (CRITICAL for Agents)
+
+**Only commit files YOU created or modified in the current session.**
+
+```bash
+# Check what's staged first
+git status
+
+# Add only YOUR files explicitly - NEVER use git add . or git add -A
+git add path/to/your/file.cs
+
+# Commit
+git commit -m "feat(scope): description"
+```
+
+See `docs/COMMIT_GUIDELINES.md` for detailed rules.
+
 ## Pre-Commit Checklist
 
 Before committing:
-1. ✅ Code builds without warnings: `dotnet build`
-2. ✅ All tests pass: `dotnet test`
-3. ✅ Code formatted: `dotnet format`
-4. ✅ No nullable reference warnings
-5. ✅ Sensitive data properly zeroed
-6. ✅ No unnecessary allocations in hot paths
-7. ✅ Modern C# patterns (is null, switch expressions, etc.)
-8. ✅ EditorConfig rules followed
+1. ✅ Ran `git status` to verify only your files are being committed
+2. ✅ Code builds without warnings: `dotnet build.cs build`
+3. ✅ All tests pass: `dotnet build.cs test`
+4. ✅ Code formatted: `dotnet format`
+5. ✅ No nullable reference warnings
+6. ✅ Sensitive data properly zeroed
+7. ✅ No unnecessary allocations in hot paths
+8. ✅ Modern C# patterns (is null, switch expressions, etc.)
+9. ✅ EditorConfig rules followed

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Interfaces;
+
 namespace Yubico.YubiKit.Core.IntegrationTests.Core;
 
 public class MonitorService_Disabled_Tests()
@@ -20,7 +22,7 @@ public class MonitorService_Disabled_Tests()
     [Fact]
     public async Task WhenDisabledMonitor_FindsDevices()
     {
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
         Assert.NotEmpty(devices);
     }
 
@@ -28,7 +30,7 @@ public class MonitorService_Disabled_Tests()
     public async Task WhenDisabledMonitor_WithDisabledManualScan_DoesNotFindDevices()
     {
         SkipDeviceRepositoryManualScan(true);
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
         Assert.Empty(devices);
     }
 }

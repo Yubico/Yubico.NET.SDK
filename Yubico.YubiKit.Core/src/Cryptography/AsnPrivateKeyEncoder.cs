@@ -14,6 +14,7 @@
 
 using System.Formats.Asn1;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Core.Cryptography;
 
@@ -176,7 +177,7 @@ internal static class AsnPrivateKeyEncoder
                 new Asn1Tag(TagClass.ContextSpecific, 1));
         }
         ecKeyWriter.PopSequence();
-        using var ecPrivateKeyHandle = new ZeroingMemoryHandle(ecKeyWriter.Encode());
+        using var ecPrivateKeyHandle = new DisposableBufferHandle(ecKeyWriter.Encode());
 
         // PKCS#8 PrivateKeyInfo structure
         var writer = new AsnWriter(AsnEncodingRules.DER);
@@ -238,7 +239,7 @@ internal static class AsnPrivateKeyEncoder
         var privateKeyWriter = new AsnWriter(AsnEncodingRules.DER);
         privateKeyWriter.WriteOctetString(privateKey);
         
-        using var privateKeyBytesHandle = new ZeroingMemoryHandle(privateKeyWriter.Encode());
+        using var privateKeyBytesHandle = new DisposableBufferHandle(privateKeyWriter.Encode());
         writer.WriteOctetString(privateKeyBytesHandle.Data.Span);
 
         // End PrivateKeyInfo SEQUENCE

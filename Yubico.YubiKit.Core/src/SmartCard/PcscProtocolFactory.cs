@@ -13,14 +13,14 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+using Yubico.YubiKit.Core.Interfaces;
 
 namespace Yubico.YubiKit.Core.SmartCard;
 
 public interface IProtocolFactory<in TConnection>
     where TConnection : IConnection
 {
-    IProtocol Create(TConnection connection);
+    ISmartCardProtocol Create(TConnection connection);
 }
 
 public class PcscProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
@@ -29,17 +29,17 @@ public class PcscProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
 {
     #region IProtocolFactory<TConnection> Members
 
-    public IProtocol Create(TConnection connection)
+    public ISmartCardProtocol Create(TConnection connection) 
     {
-        if (connection is ISmartCardConnection scConnection)
-            return new PcscProtocol(scConnection, logger: loggerFactory.CreateLogger<PcscProtocol>());
+        if (connection is not ISmartCardConnection scConnection)
+            throw new NotSupportedException(
+                $"The connection type {typeof(TConnection).Name} is not supported by this protocol factory.");
         
-        throw new NotSupportedException(
-            $"The connection type {typeof(TConnection).Name} is not supported by this protocol factory.");
+        return new PcscProtocol(scConnection, logger: loggerFactory.CreateLogger<PcscProtocol>());
     }
 
     #endregion
 
     public static PcscProtocolFactory<TConnection> Create(ILoggerFactory? loggerFactory = null) =>
-        new(loggerFactory ?? NullLoggerFactory.Instance);
+        new(loggerFactory ?? YubiKitLogging.LoggerFactory);
 }

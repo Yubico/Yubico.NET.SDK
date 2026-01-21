@@ -15,6 +15,7 @@
 using System.Formats.Asn1;
 using System.Globalization;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Core.Cryptography;
 
@@ -96,7 +97,7 @@ internal class AsnPrivateKeyDecoder
     public static Curve25519PrivateKey CreateCurve25519Key(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         (var privateKey, var keyType) = GetCurve25519PrivateKeyData(pkcs8EncodedKey);
-        using var privateKeyHandle = new ZeroingMemoryHandle(privateKey);
+        using var privateKeyHandle = new DisposableBufferHandle(privateKey);
         return Curve25519PrivateKey.CreateFromValue(privateKeyHandle.Data, keyType);
     }
 
@@ -119,7 +120,7 @@ internal class AsnPrivateKeyDecoder
                 Oids.Ed25519);
         }
 
-        using var privateKeyDataHandle = new ZeroingMemoryHandle(seqPrivateKeyInfo.ReadOctetString());
+        using var privateKeyDataHandle = new DisposableBufferHandle(seqPrivateKeyInfo.ReadOctetString());
         var seqPrivateKey = new AsnReader(privateKeyDataHandle.Data, AsnEncodingRules.DER);
         var tag = seqPrivateKey.PeekTag();
         if (tag.TagValue != 4 || tag.TagClass != TagClass.Universal)
@@ -173,7 +174,7 @@ internal class AsnPrivateKeyDecoder
                     "ExceptionMessages.UnsupportedAlgorithm));"));
         }
 
-        using var privateKeyInfoHandle = new ZeroingMemoryHandle(seqPrivateKeyInfo.ReadOctetString());
+        using var privateKeyInfoHandle = new DisposableBufferHandle(seqPrivateKeyInfo.ReadOctetString());
         seqPrivateKeyInfo.ThrowIfNotEmpty();
 
         var privateKeyReader = new AsnReader(privateKeyInfoHandle.Data, AsnEncodingRules.BER);
@@ -186,7 +187,7 @@ internal class AsnPrivateKeyDecoder
             throw new CryptographicException("Invalid EC private key format: unexpected version");
         }
 
-        using var privateKeyHandle = new ZeroingMemoryHandle(seqEcPrivateKey.ReadOctetString());
+        using var privateKeyHandle = new DisposableBufferHandle(seqEcPrivateKey.ReadOctetString());
 
         // Check for optional parameters and public key
         ECPoint point = default;
@@ -259,7 +260,7 @@ internal class AsnPrivateKeyDecoder
                     "ExceptionMessages.UnsupportedAlgorithm));"));
         }
 
-        using var privateKeyDataHandle = new ZeroingMemoryHandle(seqPrivateKeyInfo.ReadOctetString());
+        using var privateKeyDataHandle = new DisposableBufferHandle(seqPrivateKeyInfo.ReadOctetString());
         seqPrivateKeyInfo.ThrowIfNotEmpty();
 
         var privateKeyReader = new AsnReader(privateKeyDataHandle.Data, AsnEncodingRules.DER);

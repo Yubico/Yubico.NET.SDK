@@ -18,29 +18,6 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.SmartCard;
 
-public interface IProtocol : IDisposable
-{
-    void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null);
-}
-
-/// <summary>
-///     Protocol interface for SmartCard communication.
-/// </summary>
-public interface ISmartCardProtocol : IProtocol
-{
-    Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-        ApduCommand command,
-        CancellationToken cancellationToken = default);
-
-    Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> applicationId,
-        CancellationToken cancellationToken = default);
-}
-
-public readonly record struct ProtocolConfiguration
-{
-    public bool? ForceShortApdus { get; init; }
-}
-
 internal class PcscProtocol : ISmartCardProtocol
 {
     private const byte INS_SELECT = 0xA4;
@@ -55,20 +32,35 @@ internal class PcscProtocol : ISmartCardProtocol
 
     public PcscProtocol(
         ISmartCardConnection connection,
-        ReadOnlyMemory<byte> insSendRemaining = default, 
+        ReadOnlyMemory<byte> insSendRemaining = default,
         ILogger<PcscProtocol>? logger = null)
     {
         _logger = logger ?? NullLogger<PcscProtocol>.Instance;
         _connection = connection;
         InsSendRemaining = insSendRemaining.Length > 0 ? insSendRemaining.Span[0] : INS_SEND_REMAINING;
+        UseExtendedApdus = _connection.SupportsExtendedApdu();
         _processor = BuildBaseProcessor();
     }
 
-    public bool UseExtendedApdus { get; private set; } = true;
+    internal bool UseExtendedApdus { get; private set; }
 
     public int MaxApduSize { get; private set; } = SmartCardMaxApduSizes.Neo; // Lowest as default
 
     public FirmwareVersion? FirmwareVersion { get; private set; }
+
+    private IApduProcessor BuildBaseProcessor()
+    {
+        var processor = UseExtendedApdus
+            ? new ApduTransmitter(_connection, new ApduFormatterExtended(MaxApduSize))
+            : new ChainedApduTransmitter(_connection, new ApduFormatterShort());
+
+        return new ChainedResponseReceiver(FirmwareVersion, processor, InsSendRemaining);
+    }
+
+    private void ReconfigureProcessor() =>
+        _processor = BuildBaseProcessor();
+
+    internal IApduProcessor GetBaseProcessor() => BuildBaseProcessor();
 
     #region ISmartCardProtocol Members
 
@@ -80,7 +72,7 @@ internal class PcscProtocol : ISmartCardProtocol
     {
         _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
 
-        var response = await _processor.TransmitAsync(command, true, cancellationToken).ConfigureAwait(false);
+        var response = await _processor.TransmitAsync(command, false, cancellationToken).ConfigureAwait(false);
         return !response.IsOK()
             ? throw ApduException.FromResponse(response, command, "APDU command failed")
             : response.Data;
@@ -99,7 +91,7 @@ internal class PcscProtocol : ISmartCardProtocol
             : response.Data;
     }
 
-    public void Configure(FirmwareVersion firmwareVersion, ProtocolConfiguration? configuration)
+    public void Configure(FirmwareVersion firmwareVersion, ProtocolConfiguration? configuration = null)
     {
         FirmwareVersion = firmwareVersion;
         if (!FirmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))
@@ -115,18 +107,4 @@ internal class PcscProtocol : ISmartCardProtocol
     }
 
     #endregion
-
-    private IApduProcessor BuildBaseProcessor()
-    {
-        var processor = UseExtendedApdus
-            ? new ExtendedApduProcessor(_connection, new ExtendedApduFormatter(MaxApduSize))
-            : new CommandChainingProcessor(_connection, new ShortApduFormatter());
-
-        return new ChainedResponseProcessor(FirmwareVersion, processor, InsSendRemaining);
-    }
-
-    private void ReconfigureProcessor() =>
-        _processor = BuildBaseProcessor();
-
-    internal IApduProcessor GetBaseProcessor() => BuildBaseProcessor();
 }

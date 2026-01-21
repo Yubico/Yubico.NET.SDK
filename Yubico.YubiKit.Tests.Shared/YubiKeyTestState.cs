@@ -13,8 +13,10 @@
 // limitations under the License.
 
 using Xunit.Abstractions;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Tests.Shared;
 
@@ -34,6 +36,44 @@ namespace Yubico.YubiKit.Tests.Shared;
 /// </remarks>
 public class YubiKeyTestState : IXunitSerializable
 {
+    private const int PlaceholderSerialNumber = -1;
+    private static int s_placeholderCounter;
+
+    /// <summary>
+    ///     Gets a placeholder instance used during test discovery.
+    /// </summary>
+    /// <remarks>
+    ///     During discovery, we don't want to connect to actual hardware.
+    ///     This placeholder is returned instead and tests are re-enumerated
+    ///     with real devices when actually run.
+    /// </remarks>
+    public static YubiKeyTestState Placeholder { get; } = new(isPlaceholder: true, filterDescription: null);
+
+    /// <summary>
+    ///     Creates a unique placeholder with a specific filter description.
+    ///     Used to avoid duplicate test IDs when multiple [WithYubiKey] attributes
+    ///     are applied to the same test method.
+    /// </summary>
+    /// <param name="filterDescription">A description of the filter criteria.</param>
+    /// <returns>A new placeholder instance with unique identity.</returns>
+    public static YubiKeyTestState CreatePlaceholder(string? filterDescription) =>
+        new(isPlaceholder: true, filterDescription: filterDescription);
+
+    /// <summary>
+    ///     Gets whether this is a placeholder instance (used during discovery).
+    /// </summary>
+    public bool IsPlaceholder { get; private set; }
+
+    /// <summary>
+    ///     Gets the unique ID for this placeholder (0 if not a placeholder or no filter).
+    /// </summary>
+    private int PlaceholderId { get; set; }
+
+    /// <summary>
+    ///     Gets the filter description for this placeholder (null for real devices).
+    /// </summary>
+    private string? FilterDescription { get; set; }
+
     /// <summary>
     ///     Parameterless constructor required by <see cref="IXunitSerializable" />.
     /// </summary>
@@ -48,20 +88,51 @@ public class YubiKeyTestState : IXunitSerializable
     }
 
     /// <summary>
+    ///     Private constructor for creating placeholders.
+    /// </summary>
+    private YubiKeyTestState(bool isPlaceholder, string? filterDescription = null)
+    {
+        IsPlaceholder = isPlaceholder;
+        ConnectionType = ConnectionType.Unknown;
+        FilterDescription = filterDescription;
+
+        // Each placeholder gets a unique ID to avoid duplicate test IDs
+        if (isPlaceholder && filterDescription is not null)
+            PlaceholderId = Interlocked.Increment(ref s_placeholderCounter);
+    }
+
+    /// <summary>
     ///     Initializes a new instance with the specified device and device information.
     /// </summary>
     /// <param name="device">The YubiKey device.</param>
     /// <param name="deviceInfo">The device information.</param>
-    public YubiKeyTestState(IYubiKey device, DeviceInfo deviceInfo)
+    /// <param name="connectionType">The connection type for this device instance.</param>
+    public YubiKeyTestState(IYubiKey device, DeviceInfo deviceInfo, ConnectionType connectionType)
     {
         Device = device ?? throw new ArgumentNullException(nameof(device));
         DeviceInfo = deviceInfo;
+        ConnectionType = connectionType;
     }
 
     /// <summary>
     ///     Gets the YubiKey device instance.
+    ///     For placeholders, accessing this property triggers lazy device binding.
     /// </summary>
-    public IYubiKey Device { get; private set; } = null!;
+    public IYubiKey Device
+    {
+        get
+        {
+            if (_device is null && IsPlaceholder)
+            {
+                BindToRealDevice();
+            }
+
+            return _device!;
+        }
+        private set => _device = value;
+    }
+
+    private IYubiKey? _device;
 
     /// <summary>
     ///     Gets the device information (firmware, form factor, capabilities, etc.).
@@ -87,6 +158,11 @@ public class YubiKeyTestState : IXunitSerializable
     public int? SerialNumber => DeviceInfo.SerialNumber;
 
     /// <summary>
+    ///     Gets the connection type for this device instance.
+    /// </summary>
+    public ConnectionType ConnectionType { get; private set; }
+
+    /// <summary>
     ///     Gets whether the device supports USB transport.
     /// </summary>
     public bool IsUsbTransport => DeviceInfo.UsbSupported != DeviceCapabilities.None;
@@ -103,23 +179,63 @@ public class YubiKeyTestState : IXunitSerializable
     /// </summary>
     /// <param name="info">The serialization information.</param>
     /// <remarks>
-    ///     xUnit calls this method to reconstruct the device for test execution.
-    ///     We store the serial number and look up the device from the global device list.
+    ///     xUnit calls this method during BOTH discovery and execution.
+    ///     We cannot distinguish between the two phases here.
+    ///     For placeholders, we just restore the placeholder state - actual device binding
+    ///     happens lazily when the Device property is accessed during test execution.
     /// </remarks>
     public void Deserialize(IXunitSerializationInfo info)
     {
         var serialNumber = info.GetValue<int>(nameof(SerialNumber));
+        var connectionType = info.GetValue<ConnectionType>(nameof(ConnectionType));
+        var isPlaceholder = info.GetValue<bool>(nameof(IsPlaceholder));
+        var filterDescription = info.GetValue<string?>("FilterDescription");
 
-        // Look up device from static cache by serial number
-        // This is set by YubiKeyTheoryDiscoverer during test discovery
-        var deviceFromCache = YubiKeyDeviceCache.GetDevice(serialNumber);
+        // If this was a placeholder during discovery, restore placeholder state
+        // Actual device binding happens lazily when Device property is accessed
+        if (isPlaceholder)
+        {
+            IsPlaceholder = true;
+            FilterDescription = filterDescription;
+            ConnectionType = ConnectionType.Unknown;
+            // Don't initialize infrastructure here - it crashes during discovery
+            // The Device property getter will handle lazy binding during execution
+            return;
+        }
+
+        // Normal deserialization - look up device from cache
+        var deviceFromCache = YubiKeyDeviceCache.GetDevice(serialNumber, connectionType);
         if (deviceFromCache is null)
             throw new InvalidOperationException(
-                $"Device with serial number {serialNumber} not found in cache. " +
-                "This should not happen - device should be cached by YubiKeyTheoryDiscoverer.");
+                $"Device with serial number {serialNumber} and connection type {connectionType} not found in cache. " +
+                "This should not happen - device should be cached during initialization.");
 
         Device = deviceFromCache.Device;
         DeviceInfo = deviceFromCache.DeviceInfo;
+        ConnectionType = deviceFromCache.ConnectionType;
+    }
+
+    /// <summary>
+    ///     Binds this placeholder to a real YubiKey device.
+    ///     Called lazily when Device property is accessed during test execution.
+    /// </summary>
+    private void BindToRealDevice()
+    {
+        // Initialize infrastructure (triggers device discovery)
+        var allDevices = YubiKeyTestInfrastructure.AllAuthorizedDevices;
+
+        if (allDevices.Count == 0)
+            throw new Xunit.SkipException(
+                "No authorized YubiKey devices available. " +
+                "Add device serial numbers to appsettings.json AllowedSerialNumbers array.");
+
+        // For now, just pick the first available device
+        // TODO: Parse FilterDescription and apply filters to select appropriate device
+        var device = allDevices[0];
+        _device = device.Device;
+        DeviceInfo = device.DeviceInfo;
+        ConnectionType = device.ConnectionType;
+        IsPlaceholder = false;
     }
 
     /// <summary>
@@ -128,9 +244,28 @@ public class YubiKeyTestState : IXunitSerializable
     /// <param name="info">The serialization information.</param>
     /// <remarks>
     ///     xUnit calls this method during test discovery.
-    ///     We only serialize the serial number (not the entire device object).
+    ///     For placeholders, we serialize the placeholder flag and filter description.
+    ///     For real devices, we serialize serial number and connection type.
     /// </remarks>
-    public void Serialize(IXunitSerializationInfo info) => info.AddValue(nameof(SerialNumber), DeviceInfo.SerialNumber);
+    public void Serialize(IXunitSerializationInfo info)
+    {
+        info.AddValue(nameof(IsPlaceholder), IsPlaceholder);
+
+        if (IsPlaceholder)
+        {
+            // Serialize placeholder info for later binding
+            info.AddValue(nameof(SerialNumber), 0);
+            info.AddValue(nameof(ConnectionType), ConnectionType.Unknown);
+            info.AddValue("FilterDescription", FilterDescription);
+        }
+        else
+        {
+            // Serialize real device info
+            info.AddValue(nameof(SerialNumber), DeviceInfo.SerialNumber);
+            info.AddValue(nameof(ConnectionType), ConnectionType);
+            info.AddValue("FilterDescription", (string?)null);
+        }
+    }
 
     #endregion
 
@@ -138,10 +273,18 @@ public class YubiKeyTestState : IXunitSerializable
     ///     Returns a friendly string representation for test output.
     /// </summary>
     /// <returns>
-    ///     A formatted string like: <c>YubiKey(SN:12345678,FW:5.7.2,UsbAKeychain)</c>
+    ///     A formatted string like: <c>YubiKey(SN:12345678,FW:5.7.2,UsbAKeychain,Ccid)</c>
     /// </returns>
-    public override string ToString() =>
-        $"YubiKey(SN:{DeviceInfo.SerialNumber},FW:{DeviceInfo.FirmwareVersion},{DeviceInfo.FormFactor})";
+    public override string ToString()
+    {
+        if (!IsPlaceholder)
+            return
+                $"YubiKey(SN:{DeviceInfo.SerialNumber},FW:{DeviceInfo.FirmwareVersion},{DeviceInfo.FormFactor},{ConnectionType})";
+
+        return FilterDescription is not null
+            ? $"YubiKey(Placeholder #{PlaceholderId}: {FilterDescription})"
+            : "YubiKey(Placeholder - device will be bound at runtime)";
+    }
 
     /// <summary>
     ///     Checks if the device is FIPS-capable for the specified capability.
@@ -171,12 +314,19 @@ public class YubiKeyTestState : IXunitSerializable
 /// </summary>
 /// <remarks>
 ///     xUnit serializes/deserializes test parameters, but we can't serialize IYubiKey objects.
-///     This cache stores devices by serial number so we can reconstruct them during deserialization.
+///     This cache stores devices by composite key (serial number + connection type) so we can 
+///     reconstruct them during deserialization.
 /// </remarks>
 internal static class YubiKeyDeviceCache
 {
-    private static readonly Dictionary<int, YubiKeyTestState> s_devices = new();
+    private static readonly Dictionary<string, YubiKeyTestState> s_devices = new();
     private static readonly object s_lock = new();
+
+    /// <summary>
+    ///     Gets the cache key for a device.
+    /// </summary>
+    private static string GetCacheKey(int serialNumber, ConnectionType connectionType) =>
+        $"{serialNumber}:{connectionType}";
 
     /// <summary>
     ///     Adds a device to the cache.
@@ -185,18 +335,20 @@ internal static class YubiKeyDeviceCache
     {
         lock (s_lock)
         {
-            s_devices[state.SerialNumber.GetValueOrDefault()] = state; // TODO change to ReaderName/ DeviceId
+            var key = GetCacheKey(state.SerialNumber.GetValueOrDefault(), state.ConnectionType);
+            s_devices[key] = state;
         }
     }
 
     /// <summary>
-    ///     Gets a device from the cache by serial number.
+    ///     Gets a device from the cache by serial number and connection type.
     /// </summary>
-    public static YubiKeyTestState? GetDevice(int serialNumber)
+    public static YubiKeyTestState? GetDevice(int serialNumber, ConnectionType connectionType)
     {
         lock (s_lock)
         {
-            return s_devices.GetValueOrDefault(serialNumber);
+            var key = GetCacheKey(serialNumber, connectionType);
+            return s_devices.GetValueOrDefault(key);
         }
     }
 

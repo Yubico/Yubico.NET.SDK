@@ -1,67 +1,66 @@
 <Project>
-  <PropertyGroup>
-    <!-- Common Language Settings -->
-    <LangVersion>14</LangVersion>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <AnalysisLevel>preview</AnalysisLevel>
-    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
-    <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
-    <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
-    <NoWarn>$(NoWarn);CS1591;CA1848</NoWarn>
-    <!-- Suppress CS1591 (missing XML docs) and CA1848 (LoggerMessage micro-optimization) until we adopt fuller solutions -->
+    <PropertyGroup>
+        <!-- Common Language Settings -->
+        <LangVersion>14</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        <AnalysisLevel>preview</AnalysisLevel>
+        <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+        <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+        <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
+        <NoWarn>$(NoWarn);CS1591;CA1848</NoWarn>
+        <!-- Suppress CS1591 (missing XML docs) and CA1848 (LoggerMessage micro-optimization) until we adopt fuller solutions -->
 
-    <!-- SDK Version (from Directory.Packages.props) -->
-    <Version>$(YubiKitVersion)</Version>
+        <!-- SDK Version (from Directory.Packages.props) -->
+        <Version>$(YubiKitVersion)</Version>
 
-    <!-- Multi-targeting -->
-    <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">net8.0;net10.0</TargetFrameworks>
+        <TargetFramework Condition="'$(TargetFrameworks)' == ''">net10.0</TargetFramework>
 
-    <!-- Package Metadata -->
-    <Authors>Yubico</Authors>
-    <Company>Yubico</Company>
-    <Copyright>Copyright © Yubico $([System.DateTime]::Now.Year)</Copyright>
-    <PackageProjectUrl>https://github.com/Yubico/Yubico.NET.SDK</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Yubico/Yubico.NET.SDK</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <!-- Package Metadata -->
+        <Authors>Yubico</Authors>
+        <Company>Yubico</Company>
+        <Copyright>Copyright © Yubico $([System.DateTime]::Now.Year)</Copyright>
+        <PackageProjectUrl>https://github.com/Yubico/Yubico.NET.SDK</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Yubico/Yubico.NET.SDK</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 
-    <!-- Deterministic Builds -->
-    <Deterministic>true</Deterministic>
-    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+        <!-- Deterministic Builds -->
+        <Deterministic>true</Deterministic>
+        <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
 
-    <!-- Source Link -->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <!-- Source Link -->
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-    <!-- Package Output -->
-    <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts</PackageOutputPath>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
+        <!-- Package Output -->
+        <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts</PackageOutputPath>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
 
-  <!-- Source Link Package (for all projects) -->
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All"/>
-  </ItemGroup>
+    <!-- Source Link Package (for all projects) -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All"/>
+    </ItemGroup>
 
-  <!-- Determine if this is a test project -->
-  <PropertyGroup>
-    <IsTestProject Condition="$(MSBuildProjectName.Contains('Test'))">true</IsTestProject>
-    <IsPackable Condition="'$(IsTestProject)' == 'true'">false</IsPackable>
-    <!-- Disable XML documentation for test projects -->
-    <GenerateDocumentationFile Condition="'$(IsTestProject)' == 'true'">false</GenerateDocumentationFile>
-  </PropertyGroup>
+    <!-- Determine if this is a test project -->
+    <PropertyGroup>
+        <IsTestProject Condition="$(MSBuildProjectName.Contains('Test'))">true</IsTestProject>
+        <IsPackable Condition="'$(IsTestProject)' == 'true'">false</IsPackable>
+        <!-- Disable XML documentation for test projects -->
+        <GenerateDocumentationFile Condition="'$(IsTestProject)' == 'true'">false</GenerateDocumentationFile>
+    </PropertyGroup>
 
-  <!-- Analyzer configuration overrides -->
-  <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
-    <AnalysisMode>Recommended</AnalysisMode>
-    <NoWarn>$(NoWarn);CA1707;CA1716;CA1873;CA1001;CA1513;CA1852;CA1859;CA1826;CS8892</NoWarn>
-    <!-- Relax noisy test-only diagnostics: keywords (CA1716), logging perf (CA1873), disposable/test harness patterns (CA1001/CA1513/CA1852/CA1859), LINQ on indexables (CA1826), and duplicated generated entry points (CS8892) -->
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-  </PropertyGroup>
+    <!-- Analyzer configuration overrides -->
+    <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+        <AnalysisMode>Recommended</AnalysisMode>
+        <NoWarn>$(NoWarn);CA1707;CA1716;CA1873;CA1001;CA1513;CA1852;CA1859;CA1826;CS8892</NoWarn>
+        <!-- Relax noisy test-only diagnostics: keywords (CA1716), logging perf (CA1873), disposable/test harness patterns (CA1001/CA1513/CA1852/CA1859), LINQ on indexables (CA1826), and duplicated generated entry points (CS8892) -->
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    </PropertyGroup>
 </Project>

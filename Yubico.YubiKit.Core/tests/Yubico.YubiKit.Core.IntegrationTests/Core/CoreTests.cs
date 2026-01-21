@@ -1,3 +1,5 @@
+using Yubico.YubiKit.Core.Interfaces;
+
 namespace Yubico.YubiKit.Core.IntegrationTests.Core;
 
 public class CoreTests : IntegrationTestBase
@@ -19,7 +21,7 @@ public class CoreTests : IntegrationTestBase
     [Fact]
     public async Task GetPcscDevices()
     {
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
         var device = devices.FirstOrDefault();
         Assert.NotNull(device);
     }

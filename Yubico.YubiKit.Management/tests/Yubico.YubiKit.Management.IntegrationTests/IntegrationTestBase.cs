@@ -27,7 +27,8 @@ public abstract class IntegrationTestBase : IDisposable
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddYubiKeyManager(overrideOptions ?? DefaultOptions);
+        services.AddYubiKeyManagerCore(overrideOptions ?? DefaultOptions);
+        services.AddYubiKeyManager();
 
         ServiceProvider = services.BuildServiceProvider();
         YubiKeyManager = ServiceProvider.GetRequiredService<IYubiKeyManager>();

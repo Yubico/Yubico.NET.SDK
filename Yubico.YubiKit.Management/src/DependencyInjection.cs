@@ -13,8 +13,9 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
@@ -24,38 +25,29 @@ namespace Yubico.YubiKit.Management;
 // Delegates for DI-friendly session creation
 public delegate Task<ManagementSession> ManagementSessionFactoryDelegate(
     IConnection connection,
+    ProtocolConfiguration? configuration,
     ScpKeyParameters? scpKeyParameters = null,
     CancellationToken cancellationToken = default);
 
 public delegate Task<ManagementSession> SmartCardManagementSessionFactoryDelegate(
     ISmartCardConnection connection,
+    ProtocolConfiguration? configuration,
     ScpKeyParameters? scpKeyParameters = null,
     CancellationToken cancellationToken = default);
 
 public static class DependencyInjection
 {
-    #region Nested type: $extension
-
     extension(IServiceCollection services)
     {
         public IServiceCollection AddYubiKeyManager(Action<YubiKeyManagerOptions>? configureOptions = null)
         {
-            services.AddSingleton<ManagementSessionFactoryDelegate>(sp =>
-            {
-                var loggerFactory = sp.GetService<ILoggerFactory>();
-                return (connection, scp, ct) => ManagementSession.CreateAsync(connection, loggerFactory, scp, ct);
-            });
+            services.TryAddSingleton<ManagementSessionFactoryDelegate>(
+                ManagementSession.CreateAsync);
 
-            services.AddSingleton<SmartCardManagementSessionFactoryDelegate>(sp =>
-            {
-                var loggerFactory = sp.GetService<ILoggerFactory>();
-                return (connection, scp, ct) => ManagementSession.CreateAsync(connection, loggerFactory, scp, ct);
-            });
+            services.TryAddSingleton<SmartCardManagementSessionFactoryDelegate>(
+                ManagementSession.CreateAsync);
 
-            services.AddYubiKeyManagerCore(configureOptions);
             return services;
         }
     }
-
-    #endregion
 }

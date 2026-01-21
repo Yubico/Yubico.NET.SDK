@@ -49,6 +49,11 @@ public sealed class Tlv : IDisposable
         Encode(value);
     }
 
+    public Tlv(int tag, Memory<byte> value) : this(tag, value.Span) { }
+
+    public Tlv(int tag, ReadOnlyMemory<byte> value) : this(tag, value.Span) { }
+    // public Tlv(int tag, byte[] value) : this(tag, value.AsSpan()) { }
+
     /// <summary>
     ///     Returns the tag.
     /// </summary>
@@ -63,6 +68,11 @@ public sealed class Tlv : IDisposable
     ///     Returns the length of the value.
     /// </summary>
     public int Length { get; private set; }
+
+    /// <summary>
+    ///     Returns the total length of the TLV object.
+    /// </summary>
+    public int TotalLength => _bytes.AsMemory().Length;
 
     #region IDisposable Members
 
@@ -152,7 +162,7 @@ public sealed class Tlv : IDisposable
     ///     This method provides a view of the TLV's internal data, allowing for efficient
     ///     access and manipulation of the bytes without copying the data.
     /// </remarks>
-    public Memory<byte> AsMemory() => _bytes.AsMemory();
+    public ReadOnlyMemory<byte> AsMemory() => _bytes.AsMemory();
 
     /// <summary>
     ///     Returns a read-only span representing the internal byte array of the TLV object.

@@ -14,33 +14,49 @@
 
 using System.Security.Cryptography;
 
-namespace Yubico.YubiKit.Core.Cryptography
-{
+namespace Yubico.YubiKit.Core.Cryptography;
 
-    /// <summary>
-    /// Helper extensions for parameter copying
-    /// </summary>
-    public static class ECParametersExtensions
+/// <summary>
+///     Helper extensions for parameter copying
+/// </summary>
+public static class ECParametersExtensions
+{
+    #region Nested type: $extension
+
+    extension(ECParameters original)
     {
         /// <summary>
-        /// Performs a deep copy of the EC parameters.
+        ///     Performs a deep copy of the EC parameters.
         /// </summary>
-        /// <param name="original">The original ECParameters to copy.</param>
         /// <returns>A new ECParameters with the same values as the original.</returns>
-        public static ECParameters DeepCopy(this ECParameters original)
+        public ECParameters DeepCopy()
         {
             var copy = new ECParameters
             {
                 Curve = original.Curve,
-                Q = new ECPoint
-                {
-                    X = original.Q.X?.ToArray(),
-                    Y = original.Q.Y?.ToArray()
-                },
+                Q = new ECPoint { X = original.Q.X?.ToArray(), Y = original.Q.Y?.ToArray() },
                 D = original.D?.ToArray()
             };
 
             return copy;
         }
+
+        public byte[] ToUncompressedPoint()
+        {
+            if (original.Q.X is null || original.Q.Y is null)
+                throw new ArgumentException(
+                    "ECParameters must contain public key data (Q.X and Q.Y values)", nameof(original));
+
+            // Format identifier (uncompressed point): 0x04 + X + Y
+            var publicPointBytes = new byte[1 + original.Q.X.Length + original.Q.Y.Length];
+
+            publicPointBytes[0] = 0x4;
+            original.Q.X.AsSpan().CopyTo(publicPointBytes.AsSpan(1));
+            original.Q.Y.AsSpan().CopyTo(publicPointBytes.AsSpan(1 + original.Q.X.Length));
+
+            return publicPointBytes;
+        }
     }
+
+    #endregion
 }

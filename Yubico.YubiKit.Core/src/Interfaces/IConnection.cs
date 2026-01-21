@@ -32,6 +32,6 @@ public enum ConnectionType
     Hid,
     HidFido,
     HidOtp,
-    Ccid,
+    SmartCard,
     All
 }

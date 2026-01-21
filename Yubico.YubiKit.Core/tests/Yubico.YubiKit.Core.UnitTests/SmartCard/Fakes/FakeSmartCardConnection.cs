@@ -27,7 +27,7 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
 
     public bool SupportsExtendedApduValue { get; set; } = true;
     public List<ReadOnlyMemory<byte>> TransmittedCommands { get; } = [];
-    public ConnectionType Type { get; } = ConnectionType.Ccid;
+    public ConnectionType Type { get; } = ConnectionType.SmartCard;
 
     public void EnqueueResponse(ReadOnlyMemory<byte> response) => _responses.Enqueue(response);
 

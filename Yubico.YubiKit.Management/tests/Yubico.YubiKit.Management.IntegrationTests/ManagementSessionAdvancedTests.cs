@@ -399,11 +399,11 @@ public class ManagementSessionAdvancedTests
     ///     Demonstrates ConnectionType filtering for transport-specific operations.
     /// </summary>
     [SkippableTheory]
-    [WithYubiKey(ConnectionType = ConnectionType.Ccid)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetDeviceInfo_CcidOnly_UsesSmartCardConnection(YubiKeyTestState state)
     {
         // This test only runs on CCID (SmartCard) connections
-        Assert.Equal(ConnectionType.Ccid, state.ConnectionType);
+        Assert.Equal(ConnectionType.SmartCard, state.ConnectionType);
 
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
         {
@@ -420,7 +420,7 @@ public class ManagementSessionAdvancedTests
     ///     Verifies device info consistency across different transports (CCID, HidFido, HidOtp).
     /// </summary>
     [SkippableTheory]
-    [WithYubiKey(ConnectionType = ConnectionType.Ccid)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
     public async Task GetDeviceInfo_AllTransports_ReturnsConsistentData(YubiKeyTestState state)

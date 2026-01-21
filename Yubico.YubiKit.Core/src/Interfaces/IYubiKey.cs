@@ -29,7 +29,7 @@ public interface IYubiKey
     =>
         ConnectionType switch
         {
-            ConnectionType.Ccid => await ConnectAsync<ISmartCardConnection>(cancellationToken)
+            ConnectionType.SmartCard => await ConnectAsync<ISmartCardConnection>(cancellationToken)
                 .ConfigureAwait(false),
             ConnectionType.HidFido => await ConnectAsync<IFidoHidConnection>(cancellationToken)
                 .ConfigureAwait(false),

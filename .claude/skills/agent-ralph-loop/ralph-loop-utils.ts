@@ -53,7 +53,8 @@ export interface Config {
  * Detects if content is a progress file by checking for YAML frontmatter with type: progress
  */
 export function isProgressFile(content: string): boolean {
-  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+  // Handle both Unix (\n) and Windows (\r\n) line endings
+  const frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!frontmatterMatch) return false;
   return /^type:\s*progress\s*$/m.test(frontmatterMatch[1]);
 }
@@ -72,8 +73,8 @@ export function parseProgressFile(content: string): ProgressFileState {
     rawContent: content,
   };
 
-  // Parse YAML frontmatter
-  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+  // Parse YAML frontmatter (handle both Unix and Windows line endings)
+  const frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!frontmatterMatch) return result;
 
   const frontmatter = frontmatterMatch[1];
@@ -294,7 +295,8 @@ export function detectPhaseFromCommits(
  * Parses skill info from SKILL.md content
  */
 export function parseSkillFile(content: string): SkillInfo | null {
-  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+  // Handle both Unix (\n) and Windows (\r\n) line endings
+  const frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!frontmatterMatch) return null;
 
   const frontmatter = frontmatterMatch[1];

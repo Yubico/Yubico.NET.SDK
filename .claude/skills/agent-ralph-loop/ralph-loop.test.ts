@@ -60,6 +60,11 @@ feature: Test
 ---`;
     expect(isProgressFile(content)).toBe(true);
   });
+
+  test("handles Windows CRLF line endings", () => {
+    const content = "---\r\ntype: progress\r\nfeature: Test\r\n---\r\n# Content";
+    expect(isProgressFile(content)).toBe(true);
+  });
 });
 
 // --- parseProgressFile ---
@@ -476,6 +481,15 @@ description: Some description
   test("returns null for missing frontmatter", () => {
     const content = `# No frontmatter`;
     expect(parseSkillFile(content)).toBeNull();
+  });
+
+  test("handles Windows CRLF line endings", () => {
+    const content = "---\r\nname: build-project\r\ndescription: REQUIRED for building .NET code\r\n---\r\n# Build";
+    const result = parseSkillFile(content);
+
+    expect(result).not.toBeNull();
+    expect(result!.name).toBe("build-project");
+    expect(result!.mandatory).toBe(true);
   });
 });
 

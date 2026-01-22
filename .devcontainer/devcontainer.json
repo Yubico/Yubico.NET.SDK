@@ -1,6 +1,13 @@
 {
   "image": "mcr.microsoft.com/devcontainers/dotnet:9.0",
 
+  "features": {
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "none",
+      "additionalVersions": "8.0,10.0"
+    }
+  },
+
   "customizations": {
     "vscode": {
       "extensions": [

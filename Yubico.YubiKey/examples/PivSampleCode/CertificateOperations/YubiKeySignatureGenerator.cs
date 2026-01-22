@@ -127,30 +127,28 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         }
 
         // Compute the message digest of the data using the given hashAlgorithm.
-        private byte[] DigestData(byte[] data, HashAlgorithmName hashAlgorithm)
+        // For RSA keys, returns the raw digest (PadRsa handles signature padding).
+        // For ECC keys, pads the digest to key size with leading zeros if needed.
+        public byte[] DigestData(byte[] data, HashAlgorithmName hashAlgorithm)
         {
-            using HashAlgorithm digester = hashAlgorithm.Name switch
+            byte[] digest = MessageDigestOperations.ComputeMessageDigest(data, hashAlgorithm);
+
+            // For RSA, return the raw digest - PadRsa handles the signature padding
+            if (_algorithm.IsRSA())
             {
-                "SHA1" => CryptographyProviders.Sha1Creator(),
-                "SHA256" => CryptographyProviders.Sha256Creator(),
-                "SHA384" => CryptographyProviders.Sha384Creator(),
-                "SHA512" => CryptographyProviders.Sha512Creator(),
-                _ => throw new ArgumentException(
-                         string.Format(
-                             CultureInfo.CurrentCulture,
-                             InvalidAlgorithmMessage)),
-            };
+                return digest;
+            }
 
-            // If the algorithm is P-256, then make sure the digest is exactly 32
-            // bytes. If it's P-384, the digest must be exactly 48 bytes.
-            // We'll prepend 00 bytes if necessary.
-            int bufferSize = _algorithm.GetKeySizeBytes();
+            // For ECC, the digest must match the key size (e.g., 32 bytes for P-256)
+            // Pad with leading zeros if necessary
+            int keySizeBytes = _algorithm.GetKeySizeBytes();
 
-            byte[] digest = new byte[bufferSize];
-            int offset = bufferSize - (digester.HashSize / 8);
+            if (digest.Length == keySizeBytes)
+            {
+                return digest;
+            }
 
-            // If offset < 0, that means the digest is too big.
-            if (offset < 0)
+            if (digest.Length > keySizeBytes)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -158,10 +156,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         InvalidAlgorithmMessage));
             }
 
-            _ = digester.TransformFinalBlock(data, 0, data.Length);
-            Array.Copy(digester.Hash, 0, digest, offset, digest.Length);
+            // Pad with leading zeros
+            byte[] paddedDigest = new byte[keySizeBytes];
+            int offset = keySizeBytes - digest.Length;
+            Array.Copy(digest, 0, paddedDigest, offset, digest.Length);
 
-            return digest;
+            return paddedDigest;
         }
 
         // Create a block of data that is the data to sign padded following the

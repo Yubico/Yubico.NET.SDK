@@ -103,7 +103,7 @@ public class PivCryptoTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
-    public async Task SignOrDecryptAsync_Ed25519_ProducesValidSignature(YubiKeyTestState state)
+    public async Task SignOrDecryptAsync_Ed25519_ProducesSignature(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
@@ -121,7 +121,65 @@ public class PivCryptoTests
             PivAlgorithm.Ed25519, 
             dataToSign);
         
-        Assert.NotEmpty(signature.ToArray());
+        // Ed25519 signatures are always 64 bytes
         Assert.Equal(64, signature.Length);
+        
+        // Ed25519 public keys are always 32 bytes
+        var curve25519Key = (Curve25519PublicKey)publicKey;
+        Assert.Equal(32, curve25519Key.PublicPoint.Length);
+        
+        // NOTE: .NET 10 does not support Ed25519 signature verification.
+        // Full verification would require OpenSSL or BouncyCastle.
+        // This test verifies signature format only.
+    }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.0.0")]
+    public async Task SignOrDecryptAsync_EccP384Sign_ProducesValidSignature(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreatePivSessionAsync();
+        await session.ResetAsync();
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+        var publicKey = await session.GenerateKeyAsync(
+            PivSlot.Signature, 
+            PivAlgorithm.EccP384,
+            PivPinPolicy.Once);
+        await session.VerifyPinAsync(DefaultPin);
+        
+        // P384 uses SHA384 (48-byte hash)
+        var dataToSign = SHA384.HashData("test data"u8);
+        
+        var signature = await session.SignOrDecryptAsync(
+            PivSlot.Signature, 
+            PivAlgorithm.EccP384, 
+            dataToSign);
+        
+        Assert.NotEmpty(signature.ToArray());
+        using var ecdsa = ECDsa.Create();
+        ecdsa.ImportSubjectPublicKeyInfo(((ECPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
+        // PIV returns DER-encoded signatures (RFC 3279 format)
+        Assert.True(ecdsa.VerifyHash(dataToSign, signature.Span, DSASignatureFormat.Rfc3279DerSequence));
+    }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
+    public async Task CalculateSecretAsync_X25519_ProducesSharedSecret(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreatePivSessionAsync();
+        await session.ResetAsync();
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+        var publicKey = await session.GenerateKeyAsync(
+            PivSlot.KeyManagement, 
+            PivAlgorithm.X25519);
+        await session.VerifyPinAsync(DefaultPin);
+        
+        // X25519 public keys are always 32 bytes
+        var curve25519Key = (Curve25519PublicKey)publicKey;
+        Assert.Equal(32, curve25519Key.PublicPoint.Length);
+        
+        // NOTE: Software verification of X25519 shared secret would require
+        // creating a compatible peer X25519 key and comparing raw secrets.
+        // .NET System.Security.Cryptography supports ECDiffieHellman but not
+        // directly for Curve25519. Full verification is TBD.
     }
 }

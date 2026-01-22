@@ -122,4 +122,107 @@ public class PivKeyOperationsTests
         ecdsa.ImportSubjectPublicKeyInfo(((ECPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
         Assert.True(ecdsa.VerifyHash(hash, signature.Span, DSASignatureFormat.Rfc3279DerSequence));
     }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+    public async Task ImportKeyAsync_EccP256_CanSign(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreatePivSessionAsync();
+        await session.ResetAsync();
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+        
+        // Generate software ECDSA key
+        using var softwareKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var pkcs8 = softwareKey.ExportPkcs8PrivateKey();
+        var privateKey = ECPrivateKey.CreateFromPkcs8(pkcs8);
+        
+        // Import to YubiKey
+        var detectedAlgorithm = await session.ImportKeyAsync(
+            PivSlot.Authentication, 
+            privateKey);
+        
+        Assert.Equal(PivAlgorithm.EccP256, detectedAlgorithm);
+        
+        // Sign with YubiKey
+        await session.VerifyPinAsync(DefaultPin);
+        var dataToSign = "test data"u8.ToArray();
+        var hash = SHA256.HashData(dataToSign);
+        var signature = await session.SignOrDecryptAsync(
+            PivSlot.Authentication, 
+            PivAlgorithm.EccP256, 
+            hash);
+        
+        // Verify with software public key
+        Assert.True(softwareKey.VerifyHash(hash, signature.Span, DSASignatureFormat.Rfc3279DerSequence));
+    }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
+    public async Task DeleteKeyAsync_RemovesKey_SlotBecomesEmpty(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreatePivSessionAsync();
+        await session.ResetAsync();
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+        
+        // Generate key
+        await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+        
+        // Verify key exists
+        var metadataBefore = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        Assert.NotNull(metadataBefore);
+        
+        // Delete key
+        await session.DeleteKeyAsync(PivSlot.Authentication);
+        
+        // Verify slot is now empty
+        var metadataAfter = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        Assert.Null(metadataAfter);
+    }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+    public async Task PutObjectAsync_GetObjectAsync_RoundTrip(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreatePivSessionAsync();
+        await session.ResetAsync();
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+        
+        var testData = "Hello, YubiKey!"u8.ToArray();
+        
+        try
+        {
+            // Write data to Printed object
+            await session.PutObjectAsync(PivDataObject.PrintedInformation, testData);
+            
+            // Read it back
+            var readData = await session.GetObjectAsync(PivDataObject.PrintedInformation);
+            
+            Assert.False(readData.IsEmpty);
+            Assert.Equal(testData, readData.ToArray());
+        }
+        finally
+        {
+            // Clean up by deleting the object (write null/empty)
+            try
+            {
+                await session.PutObjectAsync(PivDataObject.PrintedInformation, ReadOnlyMemory<byte>.Empty);
+            }
+            catch
+            {
+                // Ignore cleanup failures
+            }
+        }
+    }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
+    public async Task GetSerialNumberAsync_ReturnsDeviceSerial(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreatePivSessionAsync();
+        
+        var serial = await session.GetSerialNumberAsync();
+        
+        Assert.True(serial > 0);
+        Assert.Equal(state.SerialNumber, serial);
+    }
 }

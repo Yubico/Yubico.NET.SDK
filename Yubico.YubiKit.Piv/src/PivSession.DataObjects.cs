@@ -15,6 +15,7 @@
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Piv;
 
@@ -87,46 +88,19 @@ public sealed partial class PivSession
     {
         if (data.IsEmpty)
             return data;
-            
+
         var span = data.Span;
-        
+
         // Check for TAG 0x53 (Discretionary data)
         if (span[0] != 0x53)
         {
-            // Not wrapped, return as-is (shouldn't happen per spec)
+            // Not wrapped, return as-is
             return data;
         }
-        
-        // Parse length
-        int offset = 1;
-        int length;
-        
-        if (span[offset] <= 0x7F)
-        {
-            // Short form
-            length = span[offset];
-            offset++;
-        }
-        else if (span[offset] == 0x81)
-        {
-            // 2-byte form
-            length = span[offset + 1];
-            offset += 2;
-        }
-        else if (span[offset] == 0x82)
-        {
-            // 3-byte form (big-endian)
-            length = (span[offset + 1] << 8) | span[offset + 2];
-            offset += 3;
-        }
-        else
-        {
-            // Unknown length encoding, return as-is
-            return data;
-        }
-        
-        // Return the inner data
-        return data.Slice(offset, length);
+
+        // Use Tlv to parse the wrapper
+        using var wrapper = Tlv.Create(span);
+        return wrapper.Value;
     }
 
     /// <summary>

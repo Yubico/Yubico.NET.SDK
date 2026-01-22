@@ -19,6 +19,7 @@ using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Piv;
 
@@ -187,36 +188,24 @@ public sealed partial class PivSession
     /// </summary>
     private static ReadOnlySpan<byte> ParseWitnessResponse(ReadOnlySpan<byte> response, int expectedLength)
     {
-        // Minimum: 7C 02 80 00 for empty, but we expect: 7C [len] 80 [len] [data]
-        if (response.Length < 4)
+        using var outer = Tlv.Create(response);
+        if (outer.Tag != 0x7C)
         {
-            throw new ApduException("Invalid witness response - too short");
+            throw new ApduException($"Invalid witness response - expected TAG 0x7C, got 0x{outer.Tag:X2}");
         }
 
-        if (response[0] != 0x7C)
+        using var inner = Tlv.Create(outer.Value.Span);
+        if (inner.Tag != 0x80)
         {
-            throw new ApduException($"Invalid witness response - expected TAG 0x7C, got 0x{response[0]:X2}");
+            throw new ApduException($"Invalid witness response - expected TAG 0x80, got 0x{inner.Tag:X2}");
         }
 
-        int outerLen = response[1];
-        if (response.Length < 2 + outerLen)
+        if (inner.Length != expectedLength)
         {
-            throw new ApduException("Invalid witness response - truncated outer TLV");
+            throw new ApduException($"Invalid witness length - expected {expectedLength}, got {inner.Length}");
         }
 
-        var inner = response.Slice(2, outerLen);
-        if (inner.Length < 2 || inner[0] != 0x80)
-        {
-            throw new ApduException($"Invalid witness response - expected TAG 0x80, got 0x{inner[0]:X2}");
-        }
-
-        int witnessLen = inner[1];
-        if (witnessLen != expectedLength)
-        {
-            throw new ApduException($"Invalid witness length - expected {expectedLength}, got {witnessLen}");
-        }
-
-        return inner.Slice(2, witnessLen);
+        return inner.Value.Span;
     }
 
     /// <summary>
@@ -224,35 +213,24 @@ public sealed partial class PivSession
     /// </summary>
     private static ReadOnlySpan<byte> ParseChallengeResponse(ReadOnlySpan<byte> response, int expectedLength)
     {
-        if (response.Length < 4)
+        using var outer = Tlv.Create(response);
+        if (outer.Tag != 0x7C)
         {
-            throw new ApduException("Invalid challenge response - too short");
+            throw new ApduException($"Invalid challenge response - expected TAG 0x7C, got 0x{outer.Tag:X2}");
         }
 
-        if (response[0] != 0x7C)
+        using var inner = Tlv.Create(outer.Value.Span);
+        if (inner.Tag != 0x82)
         {
-            throw new ApduException($"Invalid challenge response - expected TAG 0x7C, got 0x{response[0]:X2}");
+            throw new ApduException($"Invalid challenge response - expected TAG 0x82, got 0x{inner.Tag:X2}");
         }
 
-        int outerLen = response[1];
-        if (response.Length < 2 + outerLen)
+        if (inner.Length != expectedLength)
         {
-            throw new ApduException("Invalid challenge response - truncated outer TLV");
+            throw new ApduException($"Invalid challenge response length - expected {expectedLength}, got {inner.Length}");
         }
 
-        var inner = response.Slice(2, outerLen);
-        if (inner.Length < 2 || inner[0] != 0x82)
-        {
-            throw new ApduException($"Invalid challenge response - expected TAG 0x82, got 0x{inner[0]:X2}");
-        }
-
-        int responseLen = inner[1];
-        if (responseLen != expectedLength)
-        {
-            throw new ApduException($"Invalid challenge response length - expected {expectedLength}, got {responseLen}");
-        }
-
-        return inner.Slice(2, responseLen);
+        return inner.Value.Span;
     }
 
     /// <summary>

@@ -17,6 +17,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Piv;
 
@@ -52,44 +53,15 @@ public sealed partial class PivSession
 
         // Parse TLV: TAG 0x70 (cert) + TAG 0x71 (info) + TAG 0xFE (LRC)
         // Note: GetObjectAsync already unwraps the outer 0x53 tag
-        var span = certData.Span;
-        int offset = 0;
-        byte[]? certBytes = null;
-        bool isCompressed = false;
+        var tlvDict = TlvHelper.DecodeDictionary(certData.Span);
 
-        while (offset < span.Length - 2) // Need at least tag + length
-        {
-            byte tag = span[offset++];
-            if (offset >= span.Length) break;
-            
-            int length = ParseTlvLength(span, ref offset);
-            if (length < 0) break;
-            
-            if (tag == 0x70) // Certificate
-            {
-                if (offset + length <= span.Length)
-                {
-                    certBytes = span.Slice(offset, length).ToArray();
-                }
-                offset += length;
-            }
-            else if (tag == 0x71) // Certificate info (compression flag)
-            {
-                if (length > 0 && offset < span.Length && span[offset] == 0x01)
-                {
-                    isCompressed = true;
-                }
-                offset += length;
-            }
-            else if (tag == 0xFE) // LRC
-            {
-                break;
-            }
-            else
-            {
-                offset += length;
-            }
-        }
+        byte[]? certBytes = tlvDict.TryGetValue(0x70, out var cert) 
+            ? cert.ToArray() 
+            : null;
+
+        bool isCompressed = tlvDict.TryGetValue(0x71, out var info) 
+            && info.Length > 0 
+            && info.Span[0] == 0x01;
 
         if (certBytes == null || certBytes.Length == 0)
         {
@@ -235,37 +207,5 @@ public sealed partial class PivSession
             PivSlot.Retired20 => PivDataObject.Retired20,
             _ => throw new ArgumentException($"Slot 0x{(byte)slot:X2} does not support certificates", nameof(slot))
         };
-    }
-    
-    /// <summary>
-    /// Parses a TLV length field and advances the offset.
-    /// </summary>
-    private static int ParseTlvLength(ReadOnlySpan<byte> data, ref int offset)
-    {
-        if (offset >= data.Length) return -1;
-        
-        byte firstByte = data[offset++];
-        
-        // Short form: length is 0-127
-        if (firstByte <= 0x7F)
-        {
-            return firstByte;
-        }
-        
-        // Long form: first byte indicates number of length bytes
-        int numLengthBytes = firstByte & 0x7F;
-        
-        if (numLengthBytes == 0 || numLengthBytes > 3 || offset + numLengthBytes > data.Length)
-        {
-            return -1;
-        }
-        
-        int length = 0;
-        for (int i = 0; i < numLengthBytes; i++)
-        {
-            length = (length << 8) | data[offset++];
-        }
-        
-        return length;
     }
 }

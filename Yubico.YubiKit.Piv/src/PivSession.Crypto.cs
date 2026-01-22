@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Piv;
 
@@ -276,68 +277,21 @@ public sealed partial class PivSession
 
     private ReadOnlyMemory<byte> ParseCryptoResponse(ReadOnlyMemory<byte> data)
     {
-        var span = data.Span;
-        
-        // Expect TAG 0x7C (Dynamic Auth Template)
-        if (span.Length < 2 || span[0] != 0x7C)
+        // Parse outer TLV (0x7C - Dynamic Auth Template)
+        using var outer = Tlv.Create(data.Span);
+        if (outer.Tag != 0x7C)
         {
             throw new ApduException("Invalid crypto response format");
         }
 
-        int offset = 1;
-        
-        // Parse length
-        int templateLength;
-        if (span[offset] <= 0x7F)
-        {
-            templateLength = span[offset];
-            offset++;
-        }
-        else if (span[offset] == 0x81)
-        {
-            templateLength = span[offset + 1];
-            offset += 2;
-        }
-        else if (span[offset] == 0x82)
-        {
-            templateLength = (span[offset + 1] << 8) | span[offset + 2];
-            offset += 3;
-        }
-        else
-        {
-            throw new ApduException("Invalid TLV length encoding in crypto response");
-        }
-
-        // Expect TAG 0x82 (Response data)
-        if (span[offset] != 0x82)
+        // Parse inner TLV (0x82 - Response data)
+        using var inner = Tlv.Create(outer.Value.Span);
+        if (inner.Tag != 0x82)
         {
             throw new ApduException("Invalid crypto response - expected TAG 0x82");
         }
-        offset++;
 
-        // Parse response data length
-        int responseLength;
-        if (span[offset] <= 0x7F)
-        {
-            responseLength = span[offset];
-            offset++;
-        }
-        else if (span[offset] == 0x81)
-        {
-            responseLength = span[offset + 1];
-            offset += 2;
-        }
-        else if (span[offset] == 0x82)
-        {
-            responseLength = (span[offset + 1] << 8) | span[offset + 2];
-            offset += 3;
-        }
-        else
-        {
-            throw new ApduException("Invalid TLV length encoding for response data");
-        }
-
-        return data.Slice(offset, responseLength);
+        return inner.Value;
     }
 
     private byte[] EncodePeerPublicKey(IPublicKey publicKey)

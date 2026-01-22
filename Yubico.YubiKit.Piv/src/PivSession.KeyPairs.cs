@@ -410,38 +410,14 @@ public sealed partial class PivSession
 
     private IPublicKey ParsePublicKey(ReadOnlyMemory<byte> data, PivAlgorithm algorithm)
     {
-        var span = data.Span;
-        
-        // Expect TAG 0x7F49 (Public key template)
-        if (span.Length < 2 || span[0] != 0x7F || span[1] != 0x49)
+        // Parse 0x7F49 (Public key template) - Tlv handles 2-byte tags
+        using var template = Tlv.Create(data.Span);
+        if (template.Tag != 0x7F49)
         {
             throw new ApduException("Invalid public key response format");
         }
 
-        // Parse length (can be 1 or 2 bytes)
-        int offset = 2;
-        int length;
-        if (span[offset] <= 0x7F)
-        {
-            length = span[offset];
-            offset++;
-        }
-        else if (span[offset] == 0x81)
-        {
-            length = span[offset + 1];
-            offset += 2;
-        }
-        else if (span[offset] == 0x82)
-        {
-            length = (span[offset + 1] << 8) | span[offset + 2];
-            offset += 3;
-        }
-        else
-        {
-            throw new ApduException("Invalid TLV length encoding");
-        }
-
-        var keyData = span.Slice(offset, length);
+        var keyData = template.Value.Span;
 
         // Parse based on algorithm
         return algorithm switch

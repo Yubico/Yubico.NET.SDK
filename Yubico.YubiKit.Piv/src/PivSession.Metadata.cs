@@ -59,58 +59,24 @@ public sealed partial class PivSession
                 $"Failed to get metadata for slot 0x{(byte)slot:X2}");
         }
 
-        // Parse metadata TLV
-        var span = response.Data.Span;
-        PivAlgorithm algorithm = 0;
-        PivPinPolicy pinPolicy = PivPinPolicy.Default;
-        PivTouchPolicy touchPolicy = PivTouchPolicy.Default;
-        bool isGenerated = false;
-        bool isDefault = false;
-        ReadOnlyMemory<byte>? publicKey = null;
+        // Parse metadata TLV using TlvHelper
+        var tlvDict = TlvHelper.DecodeDictionary(response.Data.Span);
 
-        int offset = 0;
-        while (offset < span.Length)
-        {
-            byte tag = span[offset++];
-            if (offset >= span.Length) break;
-            
-            int length = span[offset++];
-            if (offset + length > span.Length) break;
+        var algorithm = tlvDict.TryGetValue(0x01, out var alg) && alg.Length > 0
+            ? (PivAlgorithm)alg.Span[0]
+            : (PivAlgorithm)0;
 
-            switch (tag)
-            {
-                case 0x01: // Algorithm
-                    if (length > 0)
-                    {
-                        algorithm = (PivAlgorithm)span[offset];
-                    }
-                    break;
-                case 0x02: // Policy
-                    if (length >= 2)
-                    {
-                        pinPolicy = (PivPinPolicy)span[offset];
-                        touchPolicy = (PivTouchPolicy)span[offset + 1];
-                    }
-                    break;
-                case 0x03: // Origin
-                    if (length > 0)
-                    {
-                        isGenerated = span[offset] == 0x01;
-                    }
-                    break;
-                case 0x04: // Public key
-                    publicKey = response.Data.Slice(offset, length);
-                    break;
-                case 0x05: // Default value
-                    if (length > 0)
-                    {
-                        isDefault = span[offset] == 0x01;
-                    }
-                    break;
-            }
+        var (pinPolicy, touchPolicy) = tlvDict.TryGetValue(0x02, out var policy) && policy.Length >= 2
+            ? ((PivPinPolicy)policy.Span[0], (PivTouchPolicy)policy.Span[1])
+            : (PivPinPolicy.Default, PivTouchPolicy.Default);
 
-            offset += length;
-        }
+        var isGenerated = tlvDict.TryGetValue(0x03, out var origin) && origin.Length > 0
+            && origin.Span[0] == 0x01;
+
+        ReadOnlyMemory<byte>? publicKey = tlvDict.TryGetValue(0x04, out var pk) ? pk : null;
+
+        var isDefault = tlvDict.TryGetValue(0x05, out var def) && def.Length > 0
+            && def.Span[0] == 0x01;
 
         return new PivSlotMetadata(
             Algorithm: algorithm,
@@ -256,50 +222,22 @@ public sealed partial class PivSession
             throw ApduException.FromStatusWord(response.SW, "Failed to get management key metadata");
         }
 
-        // Parse metadata TLV
+        // Parse metadata TLV using TlvHelper
         // TAG 0x01 = algorithm (ManagementKeyType)
         // TAG 0x02 = policy (byte 0 = unused, byte 1 = touch policy)
         // TAG 0x05 = isDefault (1 = default, 0 = not default)
-        var span = response.Data.Span;
-        PivManagementKeyType keyType = PivManagementKeyType.TripleDes;
-        PivTouchPolicy touchPolicy = PivTouchPolicy.Default;
-        bool isDefault = false;
+        var tlvDict = TlvHelper.DecodeDictionary(response.Data.Span);
 
-        int offset = 0;
-        while (offset < span.Length)
-        {
-            byte tag = span[offset++];
-            if (offset >= span.Length) break;
-            
-            int length = span[offset++];
-            if (offset + length > span.Length) break;
+        var keyType = tlvDict.TryGetValue(0x01, out var alg) && alg.Length > 0
+            ? (PivManagementKeyType)alg.Span[0]
+            : PivManagementKeyType.TripleDes;
 
-            switch (tag)
-            {
-                case 0x01: // Algorithm
-                    if (length > 0)
-                    {
-                        keyType = (PivManagementKeyType)span[offset];
-                    }
-                    break;
-                case 0x02: // Policy (2 bytes: pin policy, touch policy)
-                    if (length >= 2)
-                    {
-                        // Index 0 = pin policy (unused for mgmt key)
-                        // Index 1 = touch policy
-                        touchPolicy = (PivTouchPolicy)span[offset + 1];
-                    }
-                    break;
-                case 0x05: // Default value
-                    if (length > 0)
-                    {
-                        isDefault = span[offset] != 0;
-                    }
-                    break;
-            }
+        var touchPolicy = tlvDict.TryGetValue(0x02, out var policy) && policy.Length >= 2
+            ? (PivTouchPolicy)policy.Span[1]  // Index 1 = touch policy
+            : PivTouchPolicy.Default;
 
-            offset += length;
-        }
+        var isDefault = tlvDict.TryGetValue(0x05, out var def) && def.Length > 0
+            && def.Span[0] != 0;
 
         Logger.LogDebug("PIV: Management key metadata: type={KeyType}, isDefault={IsDefault}, touchPolicy={TouchPolicy}", 
             keyType, isDefault, touchPolicy);

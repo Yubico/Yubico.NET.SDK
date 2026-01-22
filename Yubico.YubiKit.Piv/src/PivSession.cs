@@ -110,13 +110,13 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
 
             // Get firmware version using GET VERSION command (INS 0xFD)
             var versionCommand = new ApduCommand(0x00, 0xFD, 0x00, 0x00);
-            var versionResponse = await smartCardProtocol.TransmitAndReceiveAsync(versionCommand, cancellationToken)
+            var versionResponse = await smartCardProtocol.TransmitAndReceiveAsync(versionCommand, throwOnError: true, cancellationToken)
                 .ConfigureAwait(false);
 
             // Note: PIV GET VERSION returns the PIV application version (often 0.0.1),
             // not the YubiKey firmware version. Feature detection should use metadata
             // commands rather than version comparisons.
-            var firmwareVersion = ParseVersionResponse(versionResponse.Span);
+            var firmwareVersion = ParseVersionResponse(versionResponse.Data.Span);
             Logger.LogDebug("PIV firmware version: {Version}", firmwareVersion);
 
             // Initialize base session
@@ -170,7 +170,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         Logger.LogDebug("PIV: Getting YubiKey serial number");
         
         var command = new ApduCommand(0x00, 0xF8, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
-        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
         
         if (!response.IsOK())
         {
@@ -213,7 +213,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         
         // Step 3: Send RESET command
         var resetCommand = new ApduCommand(0x00, InsReset, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
-        var response = await _protocol.TransmitAsync(resetCommand, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(resetCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
         
         if (!response.IsOK())
         {
@@ -267,7 +267,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         while (retriesRemaining > 0)
         {
             var pinCommand = new ApduCommand(0x00, InsVerify, 0x00, P2Pin, emptyPin);
-            var response = await _protocol!.TransmitAsync(pinCommand, cancellationToken).ConfigureAwait(false);
+            var response = await _protocol!.TransmitAndReceiveAsync(pinCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
             
             retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
             if (retriesRemaining < 0)
@@ -295,7 +295,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         while (retriesRemaining > 0)
         {
             var pukCommand = new ApduCommand(0x00, InsResetRetry, 0x00, P2Pin, emptyPukPin);
-            var response = await _protocol!.TransmitAsync(pukCommand, cancellationToken).ConfigureAwait(false);
+            var response = await _protocol!.TransmitAndReceiveAsync(pukCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
             
             retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
             if (retriesRemaining < 0)
@@ -335,7 +335,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         Logger.LogDebug("PIV: Getting PIN metadata");
         
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
-        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
         
         // Check for "instruction not supported" which indicates firmware < 5.3
         if (response.SW == 0x6D00)

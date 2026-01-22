@@ -96,7 +96,7 @@ public sealed partial class PivSession
 
         // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
         var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, dataList.ToArray());
-        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -185,7 +185,7 @@ public sealed partial class PivSession
 
         // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
         var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, dataList.ToArray());
-        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {

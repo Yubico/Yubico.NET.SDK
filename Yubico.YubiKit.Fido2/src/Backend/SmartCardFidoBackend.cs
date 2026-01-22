@@ -76,7 +76,8 @@ internal sealed class SmartCardFidoBackend : IFidoBackend
             Le = 0  // Maximum response length
         };
         
-        var responseData = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var responseData = response.Data;
         
         // First byte of response data is the CTAP status
         if (responseData.Length < 1)

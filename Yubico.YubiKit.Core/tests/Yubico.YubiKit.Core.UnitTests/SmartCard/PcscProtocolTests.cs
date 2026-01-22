@@ -170,10 +170,10 @@ public class PcscProtocolTests
         var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act
-        var result = await protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken);
+        var result = await protocol.TransmitAndReceiveAsync(command, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(expectedData, result.ToArray());
+        Assert.Equal(expectedData, result.Data.ToArray());
     }
 
     [Fact]
@@ -188,7 +188,7 @@ public class PcscProtocolTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<ApduException>(() =>
-            protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
+            protocol.TransmitAndReceiveAsync(command, cancellationToken: TestContext.Current.CancellationToken));
         Assert.Contains("6982", ex.Message);
     }
 
@@ -204,7 +204,7 @@ public class PcscProtocolTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<ApduException>(() =>
-            protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
+            protocol.TransmitAndReceiveAsync(command, cancellationToken: TestContext.Current.CancellationToken));
         Assert.Contains("6A82", ex.Message);
     }
 
@@ -220,7 +220,7 @@ public class PcscProtocolTests
 
         // Act & Assert
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-            protocol.TransmitAndReceiveAsync(command, cts.Token));
+            protocol.TransmitAndReceiveAsync(command, cancellationToken: cts.Token));
     }
 
     #endregion
@@ -313,7 +313,7 @@ public class PcscProtocolTests
             var response = new byte[] { 0x90, 0x00 };
             _fakeConnection.EnqueueResponse(response);
             await protocol.TransmitAndReceiveAsync(new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty),
-                TestContext.Current.CancellationToken);
+                cancellationToken: TestContext.Current.CancellationToken);
         });
     }
 

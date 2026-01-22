@@ -66,24 +66,21 @@ internal class PcscProtocol : ISmartCardProtocol
 
     public void Dispose() => _connection.Dispose();
 
-    public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+    public async Task<ApduResponse> TransmitAndReceiveAsync(
         ApduCommand command,
+        bool throwOnError = true,
         CancellationToken cancellationToken = default)
     {
         _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
 
         var response = await _processor.TransmitAsync(command, false, cancellationToken).ConfigureAwait(false);
-        return !response.IsOK()
-            ? throw ApduException.FromResponse(response, command, "APDU command failed")
-            : response.Data;
-    }
-
-    public async Task<ApduResponse> TransmitAsync(
-        ApduCommand command,
-        CancellationToken cancellationToken = default)
-    {
-        _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
-        return await _processor.TransmitAsync(command, false, cancellationToken).ConfigureAwait(false);
+        
+        if (throwOnError && !response.IsOK())
+        {
+            throw ApduException.FromResponse(response, command, "APDU command failed");
+        }
+        
+        return response;
     }
 
     public async Task<ReadOnlyMemory<byte>> SelectAsync(

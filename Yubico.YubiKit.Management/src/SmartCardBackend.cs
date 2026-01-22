@@ -40,8 +40,8 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
             P2 = 0
         };
 
-        var response = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken).ConfigureAwait(false);
-        return response.ToArray();
+        var response = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
+        return response.Data.ToArray();
     }
 
     public async ValueTask WriteConfigAsync(byte[] config, CancellationToken cancellationToken)
@@ -57,7 +57,7 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
             Data = config
         };
 
-        await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken).ConfigureAwait(false);
+        await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     public async ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken)
@@ -73,7 +73,7 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
             Data = data
         };
 
-        await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken).ConfigureAwait(false);
+        await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     public async ValueTask DeviceResetAsync(CancellationToken cancellationToken)
@@ -86,7 +86,7 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
             P2 = 0
         };
 
-        await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken).ConfigureAwait(false);
+        await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     public void Dispose()

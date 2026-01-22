@@ -91,7 +91,7 @@ public sealed partial class PivSession
         dataList[templateStart + 1] = (byte)(dataList.Count - templateStart - 2);
 
         var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, dataList.ToArray());
-        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -164,7 +164,7 @@ public sealed partial class PivSession
 
         // INS 0xF6, P1 = destination slot, P2 = source slot, NO DATA
         var command = new ApduCommand(0x00, 0xF6, (byte)destinationSlot, (byte)sourceSlot);
-        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -197,7 +197,7 @@ public sealed partial class PivSession
 
         // INS 0xF6, P1 = 0xFF (delete), P2 = slot to delete, NO DATA
         var command = new ApduCommand(0x00, 0xF6, 0xFF, (byte)slot);
-        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -226,7 +226,7 @@ public sealed partial class PivSession
         // INS 0xF9 (ATTEST), P1 = slot, P2 = 0, NO DATA, no explicit Le
         // The formatter adds a trailing 00 byte for Case 1 commands (no data, no Le)
         var command = new ApduCommand(0x00, 0xF9, (byte)slot, 0x00, null, 0);
-        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {

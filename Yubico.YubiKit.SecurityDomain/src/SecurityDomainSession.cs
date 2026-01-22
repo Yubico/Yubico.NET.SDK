@@ -934,8 +934,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         CancellationToken cancellationToken)
     {
         EnsureInitializedProtocol();
-        var data = await _protocol!.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        return data;
+        var response = await _protocol!.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+        return response.Data;
     }
 
     private bool TryGetResetParameters(KeyReference keyReference, out byte instruction,

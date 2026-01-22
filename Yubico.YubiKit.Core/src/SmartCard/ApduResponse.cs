@@ -78,6 +78,25 @@ public readonly record struct ApduResponse
     public ReadOnlyMemory<byte> Data { get; }
 
     /// <summary>
+    ///     Gets the raw response data including the status word bytes.
+    /// </summary>
+    /// <remarks>
+    ///     This property constructs a new array containing Data + SW1 + SW2.
+    ///     Use sparingly to avoid allocations; prefer <see cref="Data"/> and <see cref="SW"/> separately.
+    /// </remarks>
+    public ReadOnlyMemory<byte> RawData
+    {
+        get
+        {
+            var raw = new byte[Data.Length + 2];
+            Data.Span.CopyTo(raw);
+            raw[^2] = SW1;
+            raw[^1] = SW2;
+            return raw;
+        }
+    }
+
+    /// <summary>
     ///     Prints SW1, SW2, and the length of the Data field in a formatted string.
     /// </summary>
     public override string ToString() => $"SW1: 0x{SW1:X2} SW2: 0x{SW2:X2} Data: {Data.Span.Length} bytes";

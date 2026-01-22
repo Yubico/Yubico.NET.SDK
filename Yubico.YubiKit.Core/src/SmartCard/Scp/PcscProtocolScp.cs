@@ -49,22 +49,21 @@ public class PcscProtocolScp : ISmartCardProtocol
 
     #region ISmartCardProtocol Implementation
 
-    public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+    public async Task<ApduResponse> TransmitAndReceiveAsync(
         ApduCommand command,
+        bool throwOnError = true,
         CancellationToken cancellationToken = default)
     {
         var response = await _scpProcessor.TransmitAsync(command, true, cancellationToken)
             .ConfigureAwait(false);
 
-        return response.IsOK()
-            ? response.Data
-            : throw ApduException.FromResponse(response, command, "SCP command failed");
-    }
+        if (throwOnError && !response.IsOK())
+        {
+            throw ApduException.FromResponse(response, command, "SCP command failed");
+        }
 
-    public async Task<ApduResponse> TransmitAsync(
-        ApduCommand command,
-        CancellationToken cancellationToken = default) =>
-        await _scpProcessor.TransmitAsync(command, true, cancellationToken).ConfigureAwait(false);
+        return response;
+    }
 
     public async Task<ReadOnlyMemory<byte>> SelectAsync(
         ReadOnlyMemory<byte> applicationId,

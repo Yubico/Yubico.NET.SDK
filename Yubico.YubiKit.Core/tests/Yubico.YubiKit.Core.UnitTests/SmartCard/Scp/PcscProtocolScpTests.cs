@@ -42,10 +42,10 @@ public class PcscProtocolScpTests
         var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act
-        var result = await adapter.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken);
+        var result = await adapter.TransmitAndReceiveAsync(command, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(expectedData, result.ToArray());
+        Assert.Equal(expectedData, result.Data.ToArray());
         Assert.Single(_fakeScpProcessor.TransmittedCommands);
     }
 
@@ -142,7 +142,7 @@ public class PcscProtocolScpTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<ApduException>(() =>
-            adapter.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
+            adapter.TransmitAndReceiveAsync(command, cancellationToken: TestContext.Current.CancellationToken));
         Assert.Contains("6982", ex.Message);
     }
 }

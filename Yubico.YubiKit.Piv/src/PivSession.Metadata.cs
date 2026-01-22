@@ -37,7 +37,7 @@ public sealed partial class PivSession
 
         // INS 0xF7 (GET METADATA), P2 = slot
         var command = new ApduCommand(0x00, 0xF7, 0x00, (byte)slot, ReadOnlyMemory<byte>.Empty);
-        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
         if (response.SW == 0x6D00)
@@ -173,7 +173,7 @@ public sealed partial class PivSession
         // INS 0xFF (SET MANAGEMENT KEY), P1 = 0xFF, P2 = 0xFE (set) or 0xFF (set with touch)
         byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
         var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, dataList.ToArray());
-        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -205,7 +205,7 @@ public sealed partial class PivSession
         const byte SlotCardManagement = 0x9B;
         
         var command = new ApduCommand(0x00, InsGetMetadata, 0x00, SlotCardManagement, ReadOnlyMemory<byte>.Empty);
-        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
         if (response.SW == 0x6D00)

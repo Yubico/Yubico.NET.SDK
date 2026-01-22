@@ -406,7 +406,31 @@ Apply to:
 
 **Why:** 30-40% reduction in exploration time (3-4 minutes saved per session).
 
-### 18. Priority Announcement at Session Start
+### 18. Test Bug vs Implementation Bug Checklist
+
+When tests fail, distinguish between test bugs and real implementation bugs:
+
+```markdown
+## Test Failure Triage
+
+When a test fails, check BEFORE assuming implementation bug:
+
+- [ ] **Right key/cert?** Is the test using the correct key pair (device vs software)?
+- [ ] **Device-specific assertions?** Are expected values based on device behavior that may vary?
+- [ ] **Simpler test passes?** Does a simpler test for the same functionality pass?
+
+**Red flags for TEST bugs:**
+- Test creates software key but verifies device signature
+- Hardcoded validity periods/dates that depend on device RTC
+- Assertions that work on one device model but fail on another
+- Complex workflow test fails but atomic operation tests pass
+
+**Action:** If simpler test passes, the workflow test likely has a bug in setup/assertions, not the implementation.
+```
+
+**Why:** Saved 13+ minutes in PIV debug session. Agent initially assumed implementation bugs but the test created a software key for cert verification while signing with YubiKey—mismatched keys.
+
+### 19. Priority Announcement at Session Start
 
 Announce priority decisions BEFORE starting implementation:
 
@@ -441,6 +465,7 @@ If mid-session you realize time is constrained:
 - **Claiming completion with unchecked tasks** (violates completion integrity)
 - **Marking skipped tasks as complete** (dishonest progress tracking)
 - **Sequential file exploration** when parallel calls would work (wastes time)
+- **Assuming implementation bug** when workflow tests fail but atomic tests pass (check test setup first)
 
 ## Handoff (ALWAYS END WITH THIS)
 

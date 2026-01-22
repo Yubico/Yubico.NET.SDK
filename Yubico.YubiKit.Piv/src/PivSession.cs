@@ -136,8 +136,27 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
                 throw new NotSupportedException("PIV session requires SmartCard protocol");
             }
 
-            // Default management key type is 3DES unless we determine otherwise
-            ManagementKeyType = PivManagementKeyType.TripleDes;
+            // Detect management key type from device metadata (firmware 5.3+)
+            // This is critical for YubiKey 5.7+ which defaults to AES-192 instead of 3DES
+            try
+            {
+                var metadata = await GetManagementKeyMetadataAsync(cancellationToken).ConfigureAwait(false);
+                ManagementKeyType = metadata.KeyType;
+                Logger.LogDebug("Management key type detected from metadata: {KeyType}", ManagementKeyType);
+            }
+            catch (NotSupportedException)
+            {
+                // Firmware < 5.3 doesn't support metadata - default to 3DES
+                ManagementKeyType = PivManagementKeyType.TripleDes;
+                Logger.LogDebug("Management key metadata not supported, defaulting to TripleDes");
+            }
+            catch (ApduException ex) when (ex.SW == 0x6A88 || ex.SW == 0x6D00)
+            {
+                // 0x6A88 = Referenced data not found, 0x6D00 = Instruction not supported
+                // Older firmware or metadata not available - default to 3DES
+                ManagementKeyType = PivManagementKeyType.TripleDes;
+                Logger.LogDebug("Management key metadata query failed (SW={SW:X4}), defaulting to TripleDes", ex.SW);
+            }
 
             Logger.LogInformation("PIV session initialized successfully. Version: {Version}", firmwareVersion);
         }
@@ -172,6 +191,12 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         
         var command = new ApduCommand(0x00, 0xF8, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
         var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        
+        // 0x6D00 means INS not supported (firmware < 5.0.0)
+        if (response.SW == 0x6D00)
+        {
+            throw new NotSupportedException("Serial number retrieval requires firmware 5.0.0 or later");
+        }
         
         if (!response.IsOK())
         {

@@ -19,6 +19,7 @@ using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Piv;
@@ -105,6 +106,14 @@ public sealed partial class PivSession
     /// <summary>
     /// Imports a private key into the specified slot.
     /// </summary>
+    /// <param name="slot">The slot where the key should be imported.</param>
+    /// <param name="privateKey">The private key to import.</param>
+    /// <param name="pinPolicy">The PIN policy for using the imported key.</param>
+    /// <param name="touchPolicy">The touch policy for using the imported key.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>The algorithm of the imported key.</returns>
+    /// <exception cref="InvalidOperationException">If session is not authenticated.</exception>
+    /// <exception cref="NotSupportedException">If the key type is not supported.</exception>
     public async Task<PivAlgorithm> ImportKeyAsync(
         PivSlot slot,
         IPrivateKey privateKey,
@@ -112,7 +121,9 @@ public sealed partial class PivSession
         PivTouchPolicy touchPolicy = PivTouchPolicy.Default,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Importing key into slot 0x{Slot:X2}", (byte)slot);
+        ArgumentNullException.ThrowIfNull(privateKey);
+        
+        Logger.LogDebug("PIV: Importing key into slot 0x{Slot:X2}, key type {KeyType}", (byte)slot, privateKey.KeyType);
 
         if (_protocol is null)
         {
@@ -124,9 +135,157 @@ public sealed partial class PivSession
             throw new InvalidOperationException("Management key authentication required to import keys");
         }
 
-        // TODO: Implement key import with proper TLV encoding
-        // This requires encoding the private key components based on algorithm type
-        throw new NotImplementedException("ImportKeyAsync is not yet implemented");
+        // Determine algorithm from key type
+        var algorithm = privateKey.KeyType switch
+        {
+            KeyType.RSA1024 => PivAlgorithm.Rsa1024,
+            KeyType.RSA2048 => PivAlgorithm.Rsa2048,
+            KeyType.RSA3072 => PivAlgorithm.Rsa3072,
+            KeyType.RSA4096 => PivAlgorithm.Rsa4096,
+            KeyType.ECP256 => PivAlgorithm.EccP256,
+            KeyType.ECP384 => PivAlgorithm.EccP384,
+            KeyType.Ed25519 => PivAlgorithm.Ed25519,
+            KeyType.X25519 => PivAlgorithm.X25519,
+            _ => throw new NotSupportedException($"Key type {privateKey.KeyType} is not supported for PIV import")
+        };
+
+        // Build TLV-encoded key data based on algorithm
+        byte[]? keyData = null;
+        try
+        {
+            keyData = privateKey switch
+            {
+                RSAPrivateKey rsaKey => EncodeRsaPrivateKey(rsaKey),
+                ECPrivateKey ecKey => EncodeEcPrivateKey(ecKey, algorithm),
+                Curve25519PrivateKey curveKey => EncodeCurve25519PrivateKey(curveKey),
+                _ => throw new NotSupportedException($"Private key type {privateKey.GetType().Name} is not supported")
+            };
+
+            // Add PIN policy TLV if not default
+            if (pinPolicy != PivPinPolicy.Default)
+            {
+                using var pinPolicyTlv = new Tlv(0xAA, [(byte)pinPolicy]);
+                keyData = [.. keyData, .. pinPolicyTlv.AsSpan().ToArray()];
+            }
+
+            // Add touch policy TLV if not default
+            if (touchPolicy != PivTouchPolicy.Default)
+            {
+                using var touchPolicyTlv = new Tlv(0xAB, [(byte)touchPolicy]);
+                keyData = [.. keyData, .. touchPolicyTlv.AsSpan().ToArray()];
+            }
+
+            // Send IMPORT KEY command: INS 0xFE, P1 = algorithm, P2 = slot
+            var command = new ApduCommand(0x00, 0xFE, (byte)algorithm, (byte)slot, keyData);
+            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsOK())
+            {
+                throw ApduException.FromStatusWord(response.SW, $"Key import failed for slot 0x{(byte)slot:X2}");
+            }
+
+            Logger.LogDebug("PIV: Key imported successfully into slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
+            return algorithm;
+        }
+        finally
+        {
+            // Zero sensitive key data
+            if (keyData is not null)
+            {
+                CryptographicOperations.ZeroMemory(keyData);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Encodes RSA private key components as TLV for PIV import.
+    /// RSA format: TLV(0x01, P) + TLV(0x02, Q) + TLV(0x03, DP) + TLV(0x04, DQ) + TLV(0x05, InverseQ)
+    /// </summary>
+    private static byte[] EncodeRsaPrivateKey(RSAPrivateKey rsaKey)
+    {
+        var parameters = rsaKey.Parameters;
+        
+        // Validate RSA exponent is 65537 (standard requirement)
+        if (parameters.Exponent is null || 
+            !(parameters.Exponent.Length == 3 && 
+              parameters.Exponent[0] == 0x01 && 
+              parameters.Exponent[1] == 0x00 && 
+              parameters.Exponent[2] == 0x01))
+        {
+            throw new NotSupportedException("RSA exponent must be 65537 (0x010001)");
+        }
+
+        if (parameters.P is null || parameters.Q is null || 
+            parameters.DP is null || parameters.DQ is null || parameters.InverseQ is null)
+        {
+            throw new ArgumentException("RSA private key is missing required CRT parameters (P, Q, DP, DQ, InverseQ)");
+        }
+
+        // All components should be half the modulus length
+        var componentLength = parameters.P.Length;
+
+        // Create TLVs for each component, padding to correct length
+        using var pTlv = new Tlv(0x01, PadToLength(parameters.P, componentLength));
+        using var qTlv = new Tlv(0x02, PadToLength(parameters.Q, componentLength));
+        using var dpTlv = new Tlv(0x03, PadToLength(parameters.DP, componentLength));
+        using var dqTlv = new Tlv(0x04, PadToLength(parameters.DQ, componentLength));
+        using var iqTlv = new Tlv(0x05, PadToLength(parameters.InverseQ, componentLength));
+
+        // Concatenate all TLVs
+        return [.. pTlv.AsSpan().ToArray(), 
+                .. qTlv.AsSpan().ToArray(), 
+                .. dpTlv.AsSpan().ToArray(), 
+                .. dqTlv.AsSpan().ToArray(), 
+                .. iqTlv.AsSpan().ToArray()];
+    }
+
+    /// <summary>
+    /// Encodes EC private key D value as TLV for PIV import.
+    /// ECC format: TLV(0x06, D)
+    /// </summary>
+    private static byte[] EncodeEcPrivateKey(ECPrivateKey ecKey, PivAlgorithm algorithm)
+    {
+        var parameters = ecKey.Parameters;
+        
+        if (parameters.D is null)
+        {
+            throw new ArgumentException("EC private key is missing D value");
+        }
+
+        // D should be padded to the curve size
+        var curveSize = algorithm == PivAlgorithm.EccP256 ? 32 : 48;
+        using var dTlv = new Tlv(0x06, PadToLength(parameters.D, curveSize));
+        
+        return dTlv.AsSpan().ToArray();
+    }
+
+    /// <summary>
+    /// Encodes Curve25519 private key as TLV for PIV import.
+    /// Ed25519 format: TLV(0x07, privateKey)
+    /// X25519 format: TLV(0x08, privateKey)
+    /// </summary>
+    private static byte[] EncodeCurve25519PrivateKey(Curve25519PrivateKey curveKey)
+    {
+        var tag = curveKey.KeyType == KeyType.Ed25519 ? 0x07 : 0x08;
+        using var tlv = new Tlv(tag, curveKey.PrivateKey.Span);
+        
+        return tlv.AsSpan().ToArray();
+    }
+
+    /// <summary>
+    /// Pads byte array to target length with leading zeros if needed.
+    /// </summary>
+    private static byte[] PadToLength(byte[] data, int targetLength)
+    {
+        if (data.Length >= targetLength)
+        {
+            return data;
+        }
+
+        var result = new byte[targetLength];
+        var padding = targetLength - data.Length;
+        Buffer.BlockCopy(data, 0, result, padding, data.Length);
+        return result;
     }
 
     /// <summary>
@@ -348,36 +507,22 @@ public sealed partial class PivSession
     private IPublicKey ParseRsaPublicKey(ReadOnlySpan<byte> data)
     {
         // RSA public key format: TAG 0x81 (modulus) + TAG 0x82 (public exponent)
-        int offset = 0;
-        byte[] modulus = null!;
-        byte[] exponent = null!;
-
-        while (offset < data.Length)
+        var tlvDict = TlvHelper.DecodeDictionary(data);
+        
+        if (!tlvDict.TryGetValue(0x81, out var modulusMemory))
         {
-            byte tag = data[offset++];
-            int length = data[offset++];
-
-            if (tag == 0x81)
-            {
-                modulus = data.Slice(offset, length).ToArray();
-            }
-            else if (tag == 0x82)
-            {
-                exponent = data.Slice(offset, length).ToArray();
-            }
-
-            offset += length;
+            throw new ApduException("Invalid RSA public key format: missing modulus");
         }
-
-        if (modulus == null || exponent == null)
+        
+        if (!tlvDict.TryGetValue(0x82, out var exponentMemory))
         {
-            throw new ApduException("Invalid RSA public key format");
+            throw new ApduException("Invalid RSA public key format: missing exponent");
         }
 
         var parameters = new RSAParameters
         {
-            Modulus = modulus,
-            Exponent = exponent
+            Modulus = modulusMemory.ToArray(),
+            Exponent = exponentMemory.ToArray()
         };
 
         return RSAPublicKey.CreateFromParameters(parameters);

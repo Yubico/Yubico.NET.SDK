@@ -50,25 +50,10 @@ public sealed partial class PivSession
             return null;
         }
 
-        // Parse TLV: TAG 0x53 [ TAG 0x70 (cert) + TAG 0x71 (info) + TAG 0xFE (LRC) ]
+        // Parse TLV: TAG 0x70 (cert) + TAG 0x71 (info) + TAG 0xFE (LRC)
+        // Note: GetObjectAsync already unwraps the outer 0x53 tag
         var span = certData.Span;
-        
-        // Expect TAG 0x53 (Data)
-        if (span.Length < 4 || span[0] != 0x53)
-        {
-            Logger.LogWarning("PIV: Invalid certificate format in slot 0x{Slot:X2}", (byte)slot);
-            return null;
-        }
-
-        // Parse outer 0x53 tag length
-        int offset = 1;
-        int outerLength = ParseTlvLength(span, ref offset);
-        if (outerLength < 0 || offset + outerLength > span.Length)
-        {
-            Logger.LogWarning("PIV: Invalid TLV length in slot 0x{Slot:X2}", (byte)slot);
-            return null;
-        }
-
+        int offset = 0;
         byte[]? certBytes = null;
         bool isCompressed = false;
 

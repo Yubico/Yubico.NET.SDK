@@ -222,7 +222,7 @@ public class PivCryptoTests
         return paddedData;
     }
 
-    [Theory(Skip = "RSA key generation returns invalid public key format - ParseRsaPublicKey needs fix")]
+    [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task SignOrDecryptAsync_Rsa2048Sign_ProducesValidSignature(YubiKeyTestState state)
     {
@@ -255,7 +255,7 @@ public class PivCryptoTests
         Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
     }
 
-    [Theory(Skip = "RSA key generation returns invalid public key format - ParseRsaPublicKey needs fix")]
+    [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task SignOrDecryptAsync_Rsa1024Sign_ProducesValidSignature(YubiKeyTestState state)
     {
@@ -288,7 +288,7 @@ public class PivCryptoTests
         Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
     }
 
-    [Theory(Skip = "RSA key generation returns invalid public key format - ParseRsaPublicKey needs fix")]
+    [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task SignOrDecryptAsync_Rsa3072Sign_ProducesValidSignature(YubiKeyTestState state)
     {
@@ -321,7 +321,7 @@ public class PivCryptoTests
         Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
     }
 
-    [Theory(Skip = "RSA key generation returns invalid public key format - ParseRsaPublicKey needs fix")]
+    [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task SignOrDecryptAsync_Rsa4096Sign_ProducesValidSignature(YubiKeyTestState state)
     {
@@ -354,7 +354,7 @@ public class PivCryptoTests
         Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
     }
 
-    [Theory(Skip = "RSA key generation returns invalid public key format - ParseRsaPublicKey needs fix")]
+    [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task SignOrDecryptAsync_Rsa2048Decrypt_DecryptsCorrectly(YubiKeyTestState state)
     {

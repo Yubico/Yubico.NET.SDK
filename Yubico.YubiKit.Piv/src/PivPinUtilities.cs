@@ -118,6 +118,34 @@ internal static class PivPinUtilities
     }
 
     /// <summary>
+    /// Encodes a PIN pair from raw bytes and returns a newly allocated array.
+    /// </summary>
+    /// <param name="currentPin">The current PIN/PUK value as raw bytes.</param>
+    /// <param name="newPin">The new PIN/PUK value as raw bytes.</param>
+    /// <returns>A 16-byte array containing the encoded PIN pair.</returns>
+    /// <remarks>
+    /// This overload is for when the PIN/PUK is already available as raw bytes.
+    /// The bytes are padded with 0xFF to reach 8 bytes each.
+    /// </remarks>
+    public static byte[] EncodePinPairBytes(ReadOnlySpan<byte> currentPin, ReadOnlySpan<byte> newPin)
+    {
+        if (currentPin.Length > PinLength)
+        {
+            throw new ArgumentException($"PIN/PUK must be no longer than {PinLength} bytes.", nameof(currentPin));
+        }
+        if (newPin.Length > PinLength)
+        {
+            throw new ArgumentException($"PIN/PUK must be no longer than {PinLength} bytes.", nameof(newPin));
+        }
+
+        byte[] result = new byte[PinLength * 2];
+        result.AsSpan().Fill(0xFF);
+        currentPin.CopyTo(result.AsSpan(0, currentPin.Length));
+        newPin.CopyTo(result.AsSpan(PinLength, newPin.Length));
+        return result;
+    }
+
+    /// <summary>
     /// Parses the number of remaining retry attempts from a PIV status word.
     /// </summary>
     /// <param name="statusWord">The status word (SW1-SW2) from the response.</param>

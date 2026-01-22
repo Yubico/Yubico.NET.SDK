@@ -70,9 +70,17 @@ public sealed partial class PivSession
 
         // TAG 0x81 (Challenge/data to sign/decrypt)
         dataList.Add(0x81);
-        if (preparedData.Length > 127)
+        if (preparedData.Length > 255)
         {
-            dataList.Add(0x81); // Length is in next byte
+            // Two-byte length encoding: 0x82 followed by 2 length bytes (big-endian)
+            dataList.Add(0x82);
+            dataList.Add((byte)(preparedData.Length >> 8));
+            dataList.Add((byte)(preparedData.Length & 0xFF));
+        }
+        else if (preparedData.Length > 127)
+        {
+            // One-byte length encoding: 0x81 followed by 1 length byte
+            dataList.Add(0x81);
             dataList.Add((byte)preparedData.Length);
         }
         else
@@ -83,9 +91,16 @@ public sealed partial class PivSession
 
         // Update template length
         int templateLength = dataList.Count - templateStart - 2;
-        if (templateLength > 127)
+        if (templateLength > 255)
         {
-            // Need to shift everything and use extended length encoding
+            // Two-byte length encoding for template
+            dataList.Insert(templateStart + 2, (byte)(templateLength & 0xFF));
+            dataList.Insert(templateStart + 2, (byte)(templateLength >> 8));
+            dataList[templateStart + 1] = 0x82;
+        }
+        else if (templateLength > 127)
+        {
+            // One-byte length encoding for template
             dataList.Insert(templateStart + 2, (byte)templateLength);
             dataList[templateStart + 1] = 0x81;
         }

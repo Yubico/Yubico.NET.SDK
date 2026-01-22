@@ -62,7 +62,7 @@ public class PivPukTests
         }
     }
 
-    [Theory(Skip = "UnblockPinAsync not yet implemented")]
+    [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ChangePukAsync_WithCorrectOldPuk_Succeeds(YubiKeyTestState state)
     {
@@ -91,7 +91,7 @@ public class PivPukTests
         }
     }
 
-    [Theory(Skip = "UnblockPinAsync not yet implemented")]
+    [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task UnblockPinAsync_AfterBlockedPin_RestoresAccess(YubiKeyTestState state)
     {
@@ -129,7 +129,7 @@ public class PivPukTests
         }
     }
 
-    [Theory(Skip = "GetPukMetadataAsync not yet implemented")]
+    [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task GetPukMetadataAsync_ReturnsValidMetadata(YubiKeyTestState state)
     {
@@ -143,12 +143,15 @@ public class PivPukTests
         Assert.Equal(3, metadata.RetriesRemaining);
     }
 
-    [Theory(Skip = "SetPinAttemptsAsync and GetPukMetadataAsync not yet implemented")]
+    [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task SetPinAttemptsAsync_CustomLimit_EnforcesLimit(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
+        
+        // SetPinAttemptsAsync requires BOTH PIN verification AND management key auth
+        await session.VerifyPinAsync(DefaultPin);
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         
         try

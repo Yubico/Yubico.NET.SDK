@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Piv;
@@ -157,20 +159,18 @@ public sealed partial class PivSession
                 nameof(newKey));
         }
 
-        // Build TLV: TAG 0x03 [ algorithm ] + TAG 0x9B [ key ]
-        var dataList = new List<byte>();
-        
-        // TAG 0x03 (Algorithm)
-        dataList.Add(0x03);
-        dataList.Add(0x01);
-        dataList.Add((byte)keyType);
-
-        // TAG 0x9B (Key)
-        dataList.Add(0x9B);
-        dataList.Add((byte)newKey.Length);
+        // Build data: [algorithm] [slot 0x9B] [length] [key data]
+        // Format per Yubico PIV spec: algorithm byte, slot byte, length byte, key bytes
+        var dataList = new List<byte>
+        {
+            (byte)keyType,      // Algorithm byte (0x03=3DES, 0x08=AES128, 0x0A=AES192, 0x0C=AES256)
+            0x9B,               // Slot 9B (management key slot)
+            (byte)newKey.Length // Key length
+        };
         dataList.AddRange(newKey.ToArray());
 
-        // INS 0xFF (SET MANAGEMENT KEY), P1 = 0xFF, P2 = 0xFE (set) or 0xFF (set with touch)
+        // INS 0xFF (SET MANAGEMENT KEY), P1 = 0xFF
+        // P2 = touch policy: 0xFF (no touch), 0xFE (touch required), 0xFD (cached touch)
         byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
         var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, dataList.ToArray());
         var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
@@ -184,11 +184,49 @@ public sealed partial class PivSession
         ManagementKeyType = keyType;
     }
 
-    // Stub implementations for less critical metadata methods
-    public Task<PivPukMetadata> GetPukMetadataAsync(CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Gets metadata about the PIV PUK.
+    /// </summary>
+    public async Task<PivPukMetadata> GetPukMetadataAsync(CancellationToken cancellationToken = default)
     {
-        // TODO: Implement PUK metadata retrieval (INS 0xF7, P2=0x81)
-        throw new NotImplementedException("GetPukMetadataAsync not yet implemented");
+        Logger.LogDebug("PIV: Getting PUK metadata");
+
+        if (_protocol is null)
+        {
+            throw new InvalidOperationException("Session not initialized");
+        }
+
+        // INS 0xF7 (GET METADATA), P2 = 0x81 (PUK slot)
+        var command = new ApduCommand(0x00, 0xF7, 0x00, 0x81, ReadOnlyMemory<byte>.Empty);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+        // Check for "instruction not supported" which indicates firmware < 5.3
+        if (response.SW == 0x6D00)
+        {
+            throw new NotSupportedException("PUK metadata requires firmware 5.3.0 or later");
+        }
+
+        if (!response.IsOK())
+        {
+            throw ApduException.FromStatusWord(response.SW, "Failed to get PUK metadata");
+        }
+
+        // Parse TLV structure using TlvHelper
+        // TAG 0x05 = isDefault, TAG 0x06 = retries [total, remaining]
+        var tlvDict = TlvHelper.DecodeDictionary(response.Data);
+        
+        bool isDefault = tlvDict.TryGetValue(0x05, out var defaultValue) && 
+                         defaultValue.Length > 0 && defaultValue.Span[0] != 0;
+        
+        int totalRetries = 0;
+        int retriesRemaining = 0;
+        if (tlvDict.TryGetValue(0x06, out var retriesValue) && retriesValue.Length >= 2)
+        {
+            totalRetries = retriesValue.Span[0];
+            retriesRemaining = retriesValue.Span[1];
+        }
+
+        return new PivPukMetadata(isDefault, totalRetries, retriesRemaining);
     }
 
     public async Task<PivManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default)
@@ -273,21 +311,121 @@ public sealed partial class PivSession
         );
     }
 
-    public Task ChangePukAsync(ReadOnlyMemory<byte> oldPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Changes the PUK from old PUK to new PUK.
+    /// </summary>
+    public async Task ChangePukAsync(ReadOnlyMemory<byte> oldPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement PUK change (INS 0x24, P2=0x81)
-        throw new NotImplementedException("ChangePukAsync not yet implemented");
+        Logger.LogDebug("PIV: Changing PUK");
+
+        if (_protocol is null)
+        {
+            throw new InvalidOperationException("Session not initialized");
+        }
+
+        // Build data: [8-byte old PUK padded with 0xFF] [8-byte new PUK padded with 0xFF]
+        byte[] pukPair = PivPinUtilities.EncodePinPairBytes(oldPuk.Span, newPuk.Span);
+        try
+        {
+            // INS 0x24 (CHANGE REFERENCE DATA), P2=0x81 (PUK reference)
+            var command = new ApduCommand(0x00, 0x24, 0x00, 0x81, pukPair);
+            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsOK())
+            {
+                int retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
+                if (retriesRemaining >= 0)
+                {
+                    throw new InvalidPinException(retriesRemaining, "Invalid PUK");
+                }
+                throw ApduException.FromStatusWord(response.SW, "Failed to change PUK");
+            }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(pukPair);
+        }
     }
 
-    public Task UnblockPinAsync(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Unblocks the PIN using the PUK and sets a new PIN.
+    /// </summary>
+    public async Task UnblockPinAsync(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement PIN unblock with PUK (INS 0x2C, P2=0x80)
-        throw new NotImplementedException("UnblockPinAsync not yet implemented");
+        Logger.LogDebug("PIV: Unblocking PIN with PUK");
+
+        if (_protocol is null)
+        {
+            throw new InvalidOperationException("Session not initialized");
+        }
+
+        // Build data: [8-byte PUK padded with 0xFF] [8-byte new PIN padded with 0xFF]
+        byte[] pukPinPair = PivPinUtilities.EncodePinPairBytes(puk.Span, newPin.Span);
+        try
+        {
+            // INS 0x2C (RESET RETRY COUNTER), P2=0x80 (PIN reference)
+            var command = new ApduCommand(0x00, 0x2C, 0x00, 0x80, pukPinPair);
+            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsOK())
+            {
+                // 0x6983 = PUK blocked
+                if (response.SW == 0x6983)
+                {
+                    throw new InvalidPinException(0, "PUK is blocked");
+                }
+                
+                int retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
+                if (retriesRemaining >= 0)
+                {
+                    throw new InvalidPinException(retriesRemaining, "Invalid PUK");
+                }
+                throw ApduException.FromStatusWord(response.SW, "Failed to unblock PIN");
+            }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(pukPinPair);
+        }
     }
 
-    public Task SetPinAttemptsAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Sets the PIN and PUK retry limits.
+    /// </summary>
+    /// <remarks>
+    /// Requires management key authentication. This command also resets PIN and PUK to defaults.
+    /// </remarks>
+    public async Task SetPinAttemptsAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement set PIN/PUK retry counts (INS 0xFA)
-        throw new NotImplementedException("SetPinAttemptsAsync not yet implemented");
+        Logger.LogDebug("PIV: Setting PIN attempts to {PinAttempts}, PUK attempts to {PukAttempts}", pinAttempts, pukAttempts);
+
+        if (_protocol is null)
+        {
+            throw new InvalidOperationException("Session not initialized");
+        }
+
+        if (!_isAuthenticated)
+        {
+            throw new InvalidOperationException("Management key authentication required");
+        }
+
+        if (pinAttempts is < 1 or > 255)
+        {
+            throw new ArgumentOutOfRangeException(nameof(pinAttempts), "PIN attempts must be 1-255");
+        }
+
+        if (pukAttempts is < 1 or > 255)
+        {
+            throw new ArgumentOutOfRangeException(nameof(pukAttempts), "PUK attempts must be 1-255");
+        }
+
+        // INS 0xFA (SET PIN RETRIES), P1=PIN retries, P2=PUK retries, no data
+        var command = new ApduCommand(0x00, 0xFA, (byte)pinAttempts, (byte)pukAttempts);
+        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+        if (!response.IsOK())
+        {
+            throw ApduException.FromStatusWord(response.SW, "Failed to set PIN/PUK retry limits");
+        }
     }
 }

@@ -123,7 +123,7 @@ public class PivKeyOperationsTests
         Assert.True(ecdsa.VerifyHash(hash, signature.Span, DSASignatureFormat.Rfc3279DerSequence));
     }
 
-    [Theory(Skip = "ImportKeyAsync not yet implemented")]
+    [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ImportKeyAsync_EccP256_CanSign(YubiKeyTestState state)
     {
@@ -179,7 +179,7 @@ public class PivKeyOperationsTests
         Assert.Null(metadataAfter);
     }
 
-    [Theory(Skip = "GetObjectAsync returns TLV-wrapped data but test expects raw data - PutObject/GetObject API needs consistency review")]
+    [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task PutObjectAsync_GetObjectAsync_RoundTrip(YubiKeyTestState state)
     {
@@ -215,7 +215,7 @@ public class PivKeyOperationsTests
         }
     }
 
-    [Theory(Skip = "GetSerialNumberAsync version check incorrectly rejects firmware 5.8.0 - version comparison bug")]
+    [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task GetSerialNumberAsync_ReturnsDeviceSerial(YubiKeyTestState state)
     {

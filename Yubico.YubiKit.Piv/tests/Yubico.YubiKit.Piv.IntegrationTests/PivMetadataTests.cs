@@ -112,6 +112,13 @@ public class PivMetadataTests
         
         var ex = await Record.ExceptionAsync(() => session.GetBioMetadataAsync());
         
-        Assert.True(ex is NotSupportedException || ex is ApduException);
+        // Only accept specific known error responses for non-Bio devices
+        Assert.True(
+            ex is NotSupportedException || 
+            (ex is ApduException apduEx && 
+                (apduEx.SW == 0x6D00 || // INS not supported
+                 apduEx.SW == 0x6A81 || // Function not supported
+                 apduEx.SW == 0x6985)), // Conditions of use not satisfied
+            $"Expected NotSupportedException or ApduException with SW 0x6D00, 0x6A81, or 0x6985, but got {ex?.GetType().Name}: {ex?.Message}");
     }
 }

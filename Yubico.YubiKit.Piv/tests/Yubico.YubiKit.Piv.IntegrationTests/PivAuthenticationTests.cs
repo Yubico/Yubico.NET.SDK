@@ -60,7 +60,7 @@ public class PivAuthenticationTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task AuthenticateAsync_WithWrongKey_ThrowsBadResponse(YubiKeyTestState state)
+    public async Task AuthenticateAsync_WithWrongKey_ThrowsApduException(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
@@ -69,6 +69,8 @@ public class PivAuthenticationTests
         
         await Assert.ThrowsAsync<ApduException>(
             () => session.AuthenticateAsync(wrongKey));
+        
+        Assert.False(session.IsAuthenticated);
     }
 
     [Theory]
@@ -80,7 +82,9 @@ public class PivAuthenticationTests
         
         await session.VerifyPinAsync(DefaultPin);
         
-        // No exception means success
+        // Verify PIN attempts still at max after successful verify
+        var attempts = await session.GetPinAttemptsAsync();
+        Assert.Equal(3, attempts);
     }
 
     [Theory]

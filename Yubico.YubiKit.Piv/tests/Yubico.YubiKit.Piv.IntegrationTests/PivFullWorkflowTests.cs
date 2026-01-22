@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Interfaces;
@@ -47,7 +46,7 @@ public class PivFullWorkflowTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task CompleteWorkflow_GenerateSignVerify(YubiKeyTestState state)
+    public async Task CompleteWorkflow_GenerateKeySignVerify(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
@@ -64,14 +63,10 @@ public class PivFullWorkflowTests
         Assert.NotNull(publicKey);
         Assert.IsType<ECPublicKey>(publicKey);
         
-        // 3. Create and store self-signed certificate (uses software key for certificate storage test)
-        var cert = CreateSelfSignedCertificate();
-        await session.StoreCertificateAsync(PivSlot.Signature, cert);
-        
-        // 4. Verify PIN
+        // 3. Verify PIN
         await session.VerifyPinAsync(DefaultPin);
         
-        // 5. Sign data with YubiKey's generated key
+        // 4. Sign data with YubiKey's generated key
         var dataToSign = "important document"u8.ToArray();
         var hash = SHA256.HashData(dataToSign);
         var signature = await session.SignOrDecryptAsync(
@@ -81,9 +76,7 @@ public class PivFullWorkflowTests
         
         Assert.NotEmpty(signature.ToArray());
         
-        // 6. Verify signature using the YubiKey's public key (from GenerateKeyAsync)
-        // Note: The stored certificate has a DIFFERENT software key, so we use the
-        // public key returned by GenerateKeyAsync for verification
+        // 5. Verify signature using the YubiKey's public key
         using var ecdsa = ECDsa.Create();
         ecdsa.ImportSubjectPublicKeyInfo(((ECPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
         // PIV returns DER-encoded signatures (RFC 3279 format)
@@ -192,20 +185,5 @@ public class PivFullWorkflowTests
         // 4. Verify the certificate has expected extensions for attestation
         // Attestation certs should have a serial number
         Assert.False(string.IsNullOrEmpty(attestation.SerialNumber));
-    }
-
-    private static X509Certificate2 CreateSelfSignedCertificate()
-    {
-        // Create a software key pair for testing (not the YubiKey's key)
-        using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-        
-        var request = new CertificateRequest(
-            "CN=Test Certificate",
-            ecdsa,
-            HashAlgorithmName.SHA256);
-        
-        return request.CreateSelfSigned(
-            DateTimeOffset.UtcNow,
-            DateTimeOffset.UtcNow.AddYears(1));
     }
 }

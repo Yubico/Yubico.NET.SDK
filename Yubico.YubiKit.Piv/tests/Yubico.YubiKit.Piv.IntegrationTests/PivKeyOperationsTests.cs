@@ -94,12 +94,12 @@ public class PivKeyOperationsTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
-    public async Task MoveKeyAsync_MovesToNewSlot(YubiKeyTestState state)
+    public async Task MoveKeyAsync_MovesToNewSlot_KeyRemainsFunctional(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+        var publicKey = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
         
         await session.MoveKeyAsync(PivSlot.Authentication, PivSlot.Retired1);
         
@@ -108,5 +108,18 @@ public class PivKeyOperationsTests
         
         Assert.Null(sourceMetadata); // Source now empty
         Assert.NotNull(destMetadata); // Dest has key
+        
+        // Verify key is functional by signing with the moved key
+        await session.VerifyPinAsync(DefaultPin);
+        var hash = SHA256.HashData("test data"u8);
+        var signature = await session.SignOrDecryptAsync(
+            PivSlot.Retired1, 
+            PivAlgorithm.EccP256, 
+            hash);
+        
+        // Verify signature with original public key
+        using var ecdsa = ECDsa.Create();
+        ecdsa.ImportSubjectPublicKeyInfo(((ECPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
+        Assert.True(ecdsa.VerifyHash(hash, signature.Span, DSASignatureFormat.Rfc3279DerSequence));
     }
 }

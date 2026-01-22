@@ -77,7 +77,7 @@ public class PivResetTests
     }
 
     [Theory]
-    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task ResetAsync_ClearsAllSlots(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -90,8 +90,8 @@ public class PivResetTests
         // Reset again
         await session.ResetAsync();
         
-        // Verify slot is empty
-        var cert = await session.GetCertificateAsync(PivSlot.Authentication);
-        Assert.Null(cert);
+        // Verify slot is empty via metadata (null means no key)
+        var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        Assert.Null(metadata);
     }
 }

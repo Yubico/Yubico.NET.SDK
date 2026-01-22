@@ -73,7 +73,7 @@ public class PivCryptoTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task CalculateSecretAsync_ECDH_ProducesSharedSecret(YubiKeyTestState state)
+    public async Task CalculateSecretAsync_ECDH_ProducesMatchingSharedSecret(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
@@ -92,6 +92,13 @@ public class PivCryptoTests
             peerPublicKey);
         
         Assert.Equal(32, sharedSecret.Length);
+        
+        // Verify shared secrets match using software ECDH
+        using var deviceEcdh = ECDiffieHellman.Create();
+        deviceEcdh.ImportSubjectPublicKeyInfo(((ECPublicKey)devicePublicKey).ExportSubjectPublicKeyInfo(), out _);
+        var softwareSecret = peerKey.DeriveRawSecretAgreement(deviceEcdh.PublicKey);
+        
+        Assert.Equal(softwareSecret, sharedSecret.ToArray());
     }
 
     [Theory]

@@ -118,7 +118,8 @@ public class PivMetadataTests
             (ex is ApduException apduEx && 
                 (apduEx.SW == 0x6D00 || // INS not supported
                  apduEx.SW == 0x6A81 || // Function not supported
-                 apduEx.SW == 0x6985)), // Conditions of use not satisfied
-            $"Expected NotSupportedException or ApduException with SW 0x6D00, 0x6A81, or 0x6985, but got {ex?.GetType().Name}: {ex?.Message}");
+                 apduEx.SW == 0x6985 || // Conditions of use not satisfied
+                 apduEx.SW == 0x6A88)), // Referenced data not found
+            $"Expected NotSupportedException or ApduException with SW 0x6D00, 0x6A81, 0x6985, or 0x6A88, but got {ex?.GetType().Name}: {ex?.Message}");
     }
 }

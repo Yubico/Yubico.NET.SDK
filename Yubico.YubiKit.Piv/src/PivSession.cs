@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
@@ -263,18 +264,24 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         
         // Empty PIN encodes as 8 bytes of 0xFF
         byte[] emptyPin = PivPinUtilities.EncodePinBytes(ReadOnlySpan<char>.Empty);
-        
-        while (retriesRemaining > 0)
+        try
         {
-            var pinCommand = new ApduCommand(0x00, InsVerify, 0x00, P2Pin, emptyPin);
-            var response = await _protocol!.TransmitAndReceiveAsync(pinCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
-            
-            retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
-            if (retriesRemaining < 0)
+            while (retriesRemaining > 0)
             {
-                // Unexpected response - break to avoid infinite loop
-                break;
+                var pinCommand = new ApduCommand(0x00, InsVerify, 0x00, P2Pin, emptyPin);
+                var response = await _protocol!.TransmitAndReceiveAsync(pinCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            
+                retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
+                if (retriesRemaining < 0)
+                {
+                    // Unexpected response - break to avoid infinite loop
+                    break;
+                }
             }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(emptyPin);
         }
         
         Logger.LogDebug("PIV: PIN blocked");
@@ -290,19 +297,25 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         // PUK blocking uses INS_RESET_RETRY (0x2C) with P2=0x80 (PIN_P2, not PUK_P2!)
         // Data is 16 bytes: 8-byte empty PUK + 8-byte empty PIN (both all 0xFF)
         byte[] emptyPukPin = PivPinUtilities.EncodePinPair(ReadOnlySpan<char>.Empty, ReadOnlySpan<char>.Empty);
-        
-        int retriesRemaining = 1; // Start with 1 to enter loop
-        while (retriesRemaining > 0)
+        try
         {
-            var pukCommand = new ApduCommand(0x00, InsResetRetry, 0x00, P2Pin, emptyPukPin);
-            var response = await _protocol!.TransmitAndReceiveAsync(pukCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
-            
-            retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
-            if (retriesRemaining < 0)
+            int retriesRemaining = 1; // Start with 1 to enter loop
+            while (retriesRemaining > 0)
             {
-                // Unexpected response - break to avoid infinite loop
-                break;
+                var pukCommand = new ApduCommand(0x00, InsResetRetry, 0x00, P2Pin, emptyPukPin);
+                var response = await _protocol!.TransmitAndReceiveAsync(pukCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            
+                retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
+                if (retriesRemaining < 0)
+                {
+                    // Unexpected response - break to avoid infinite loop
+                    break;
+                }
             }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(emptyPukPin);
         }
         
         Logger.LogDebug("PIV: PUK blocked");

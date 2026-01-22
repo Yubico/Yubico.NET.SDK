@@ -104,39 +104,70 @@ public sealed partial class PivSession
             var witnessBytes = ParseWitnessResponse(witnessResponse.Data.Span, challengeLength);
 
             // Step 2: Decrypt witness with our key
-            byte[] decryptedWitness = new byte[challengeLength];
-            DecryptBlock(keyBytes.AsSpan(0, expectedKeyLength), witnessBytes, decryptedWitness, ManagementKeyType);
-
-            // Step 3: Generate our challenge
-            byte[] challenge = new byte[challengeLength];
-            RandomNumberGenerator.Fill(challenge);
-
-            // Step 4: Build and send response with decrypted witness and our challenge
-            // Send: 7C [len] 80 [len] [decrypted witness] 81 [len] [challenge]
-            var responseData = BuildAuthResponse(decryptedWitness, challenge);
-            var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseData);
-            var challengeResponse = await _protocol.TransmitAndReceiveAsync(challengeCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            byte[]? decryptedWitness = null;
+            byte[]? challenge = null;
+            byte[]? responseData = null;
+            byte[]? expectedResponse = null;
             
-            if (!challengeResponse.IsOK())
+            try
             {
-                throw ApduException.FromStatusWord(challengeResponse.SW, "Management key authentication failed - challenge response");
+                decryptedWitness = ArrayPool<byte>.Shared.Rent(challengeLength);
+                DecryptBlock(keyBytes.AsSpan(0, expectedKeyLength), witnessBytes, decryptedWitness.AsSpan(0, challengeLength), ManagementKeyType);
+
+                // Step 3: Generate our challenge
+                challenge = ArrayPool<byte>.Shared.Rent(challengeLength);
+                RandomNumberGenerator.Fill(challenge.AsSpan(0, challengeLength));
+
+                // Step 4: Build and send response with decrypted witness and our challenge
+                // Send: 7C [len] 80 [len] [decrypted witness] 81 [len] [challenge]
+                responseData = BuildAuthResponse(decryptedWitness.AsSpan(0, challengeLength), challenge.AsSpan(0, challengeLength));
+                var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseData);
+                var challengeResponse = await _protocol.TransmitAndReceiveAsync(challengeCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            
+                if (!challengeResponse.IsOK())
+                {
+                    throw ApduException.FromStatusWord(challengeResponse.SW, "Management key authentication failed - challenge response");
+                }
+
+                // Step 5: Verify device's response (encrypted challenge)
+                // Response: 7C [len] 82 [len] [encrypted challenge]
+                var encryptedChallenge = ParseChallengeResponse(challengeResponse.Data.Span, challengeLength);
+
+                // Encrypt our challenge and compare
+                expectedResponse = ArrayPool<byte>.Shared.Rent(challengeLength);
+                EncryptBlock(keyBytes.AsSpan(0, expectedKeyLength), challenge.AsSpan(0, challengeLength), expectedResponse.AsSpan(0, challengeLength), ManagementKeyType);
+
+                if (!CryptographicOperations.FixedTimeEquals(encryptedChallenge, expectedResponse.AsSpan(0, challengeLength)))
+                {
+                    throw new ApduException("Management key authentication failed - device response mismatch");
+                }
+
+                _isAuthenticated = true;
+                Logger.LogDebug("PIV: Management key authentication succeeded");
             }
-
-            // Step 5: Verify device's response (encrypted challenge)
-            // Response: 7C [len] 82 [len] [encrypted challenge]
-            var encryptedChallenge = ParseChallengeResponse(challengeResponse.Data.Span, challengeLength);
-
-            // Encrypt our challenge and compare
-            byte[] expectedResponse = new byte[challengeLength];
-            EncryptBlock(keyBytes.AsSpan(0, expectedKeyLength), challenge, expectedResponse, ManagementKeyType);
-
-            if (!CryptographicOperations.FixedTimeEquals(encryptedChallenge, expectedResponse))
+            finally
             {
-                throw new ApduException("Management key authentication failed - device response mismatch");
+                // Zero all sensitive intermediate buffers
+                if (decryptedWitness is not null)
+                {
+                    CryptographicOperations.ZeroMemory(decryptedWitness.AsSpan(0, challengeLength));
+                    ArrayPool<byte>.Shared.Return(decryptedWitness);
+                }
+                if (challenge is not null)
+                {
+                    CryptographicOperations.ZeroMemory(challenge.AsSpan(0, challengeLength));
+                    ArrayPool<byte>.Shared.Return(challenge);
+                }
+                if (responseData is not null)
+                {
+                    CryptographicOperations.ZeroMemory(responseData);
+                }
+                if (expectedResponse is not null)
+                {
+                    CryptographicOperations.ZeroMemory(expectedResponse.AsSpan(0, challengeLength));
+                    ArrayPool<byte>.Shared.Return(expectedResponse);
+                }
             }
-
-            _isAuthenticated = true;
-            Logger.LogDebug("PIV: Management key authentication succeeded");
         }
         finally
         {
@@ -222,7 +253,7 @@ public sealed partial class PivSession
     /// <summary>
     /// Builds the authentication response: 7C [len] 80 [len] [decrypted witness] 81 [len] [challenge]
     /// </summary>
-    private static byte[] BuildAuthResponse(byte[] decryptedWitness, byte[] challenge)
+    private static byte[] BuildAuthResponse(ReadOnlySpan<byte> decryptedWitness, ReadOnlySpan<byte> challenge)
     {
         int witnessLen = decryptedWitness.Length;
         int challengeLen = challenge.Length;
@@ -238,11 +269,11 @@ public sealed partial class PivSession
         result[offset++] = (byte)innerLen;
         result[offset++] = 0x80;
         result[offset++] = (byte)witnessLen;
-        Array.Copy(decryptedWitness, 0, result, offset, witnessLen);
+        decryptedWitness.CopyTo(result.AsSpan(offset));
         offset += witnessLen;
         result[offset++] = 0x81;
         result[offset++] = (byte)challengeLen;
-        Array.Copy(challenge, 0, result, offset, challengeLen);
+        challenge.CopyTo(result.AsSpan(offset));
         
         return result;
     }
@@ -252,29 +283,55 @@ public sealed partial class PivSession
     /// </summary>
     private static void DecryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, PivManagementKeyType keyType)
     {
-        if (keyType == PivManagementKeyType.TripleDes)
+        byte[]? keyBuffer = null;
+        byte[]? inputBuffer = null;
+        byte[]? decryptedBuffer = null;
+        try
         {
-            using var des = TripleDES.Create();
-            des.Key = key.ToArray();
-            des.Mode = CipherMode.ECB;
-            des.Padding = PaddingMode.None;
-            using var decryptor = des.CreateDecryptor();
-            decryptor.TransformBlock(input.ToArray(), 0, input.Length, output.ToArray(), 0);
-            // Copy back to output (TransformBlock may allocate)
-            var decrypted = new byte[input.Length];
-            decryptor.TransformBlock(input.ToArray(), 0, input.Length, decrypted, 0);
-            decrypted.CopyTo(output);
+            keyBuffer = ArrayPool<byte>.Shared.Rent(key.Length);
+            inputBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
+            decryptedBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
+            
+            key.CopyTo(keyBuffer);
+            input.CopyTo(inputBuffer);
+            
+            if (keyType == PivManagementKeyType.TripleDes)
+            {
+                using var des = TripleDES.Create();
+                des.Key = keyBuffer.AsSpan(0, key.Length).ToArray();
+                des.Mode = CipherMode.ECB;
+                des.Padding = PaddingMode.None;
+                using var decryptor = des.CreateDecryptor();
+                decryptor.TransformBlock(inputBuffer, 0, input.Length, decryptedBuffer, 0);
+            }
+            else
+            {
+                using var aes = Aes.Create();
+                aes.Key = keyBuffer.AsSpan(0, key.Length).ToArray();
+                aes.Mode = CipherMode.ECB;
+                aes.Padding = PaddingMode.None;
+                using var decryptor = aes.CreateDecryptor();
+                decryptor.TransformBlock(inputBuffer, 0, input.Length, decryptedBuffer, 0);
+            }
+            
+            decryptedBuffer.AsSpan(0, input.Length).CopyTo(output);
         }
-        else
+        finally
         {
-            using var aes = Aes.Create();
-            aes.Key = key.ToArray();
-            aes.Mode = CipherMode.ECB;
-            aes.Padding = PaddingMode.None;
-            var decrypted = new byte[input.Length];
-            using var decryptor = aes.CreateDecryptor();
-            decryptor.TransformBlock(input.ToArray(), 0, input.Length, decrypted, 0);
-            decrypted.CopyTo(output);
+            if (keyBuffer is not null)
+            {
+                CryptographicOperations.ZeroMemory(keyBuffer.AsSpan(0, key.Length));
+                ArrayPool<byte>.Shared.Return(keyBuffer);
+            }
+            if (inputBuffer is not null)
+            {
+                ArrayPool<byte>.Shared.Return(inputBuffer);
+            }
+            if (decryptedBuffer is not null)
+            {
+                CryptographicOperations.ZeroMemory(decryptedBuffer.AsSpan(0, input.Length));
+                ArrayPool<byte>.Shared.Return(decryptedBuffer);
+            }
         }
     }
 
@@ -283,27 +340,55 @@ public sealed partial class PivSession
     /// </summary>
     private static void EncryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, PivManagementKeyType keyType)
     {
-        if (keyType == PivManagementKeyType.TripleDes)
+        byte[]? keyBuffer = null;
+        byte[]? inputBuffer = null;
+        byte[]? encryptedBuffer = null;
+        try
         {
-            using var des = TripleDES.Create();
-            des.Key = key.ToArray();
-            des.Mode = CipherMode.ECB;
-            des.Padding = PaddingMode.None;
-            var encrypted = new byte[input.Length];
-            using var encryptor = des.CreateEncryptor();
-            encryptor.TransformBlock(input.ToArray(), 0, input.Length, encrypted, 0);
-            encrypted.CopyTo(output);
+            keyBuffer = ArrayPool<byte>.Shared.Rent(key.Length);
+            inputBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
+            encryptedBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
+            
+            key.CopyTo(keyBuffer);
+            input.CopyTo(inputBuffer);
+            
+            if (keyType == PivManagementKeyType.TripleDes)
+            {
+                using var des = TripleDES.Create();
+                des.Key = keyBuffer.AsSpan(0, key.Length).ToArray();
+                des.Mode = CipherMode.ECB;
+                des.Padding = PaddingMode.None;
+                using var encryptor = des.CreateEncryptor();
+                encryptor.TransformBlock(inputBuffer, 0, input.Length, encryptedBuffer, 0);
+            }
+            else
+            {
+                using var aes = Aes.Create();
+                aes.Key = keyBuffer.AsSpan(0, key.Length).ToArray();
+                aes.Mode = CipherMode.ECB;
+                aes.Padding = PaddingMode.None;
+                using var encryptor = aes.CreateEncryptor();
+                encryptor.TransformBlock(inputBuffer, 0, input.Length, encryptedBuffer, 0);
+            }
+            
+            encryptedBuffer.AsSpan(0, input.Length).CopyTo(output);
         }
-        else
+        finally
         {
-            using var aes = Aes.Create();
-            aes.Key = key.ToArray();
-            aes.Mode = CipherMode.ECB;
-            aes.Padding = PaddingMode.None;
-            var encrypted = new byte[input.Length];
-            using var encryptor = aes.CreateEncryptor();
-            encryptor.TransformBlock(input.ToArray(), 0, input.Length, encrypted, 0);
-            encrypted.CopyTo(output);
+            if (keyBuffer is not null)
+            {
+                CryptographicOperations.ZeroMemory(keyBuffer.AsSpan(0, key.Length));
+                ArrayPool<byte>.Shared.Return(keyBuffer);
+            }
+            if (inputBuffer is not null)
+            {
+                ArrayPool<byte>.Shared.Return(inputBuffer);
+            }
+            if (encryptedBuffer is not null)
+            {
+                CryptographicOperations.ZeroMemory(encryptedBuffer.AsSpan(0, input.Length));
+                ArrayPool<byte>.Shared.Return(encryptedBuffer);
+            }
         }
     }
 

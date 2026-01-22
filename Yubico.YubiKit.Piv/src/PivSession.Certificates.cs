@@ -60,17 +60,26 @@ public sealed partial class PivSession
             return null;
         }
 
-        int offset = 2; // Skip TAG and length
+        // Parse outer 0x53 tag length
+        int offset = 1;
+        int outerLength = ParseTlvLength(span, ref offset);
+        if (outerLength < 0)
+        {
+            Logger.LogWarning("PIV: Invalid TLV length in slot 0x{Slot:X2}", (byte)slot);
+            return null;
+        }
 
         byte[]? certBytes = null;
         bool isCompressed = false;
 
-        while (offset < span.Length - 1) // -1 to avoid LRC tag
+        while (offset < span.Length - 2) // Need at least tag + length
         {
             byte tag = span[offset++];
             if (offset >= span.Length) break;
             
-            int length = span[offset++];
+            int length = ParseTlvLength(span, ref offset);
+            if (length < 0) break;
+            
             if (tag == 0x70) // Certificate
             {
                 if (offset + length <= span.Length)
@@ -81,7 +90,7 @@ public sealed partial class PivSession
             }
             else if (tag == 0x71) // Certificate info (compression flag)
             {
-                if (length > 0 && span[offset] == 0x01)
+                if (length > 0 && offset < span.Length && span[offset] == 0x01)
                 {
                     isCompressed = true;
                 }
@@ -155,21 +164,22 @@ public sealed partial class PivSession
             certBytes = output.ToArray();
         }
 
-        // Build TLV: TAG 0x53 [ TAG 0x70 (cert) + TAG 0x71 (info) + TAG 0xFE (LRC) ]
+        // Build TLV: TAG 0x70 (cert) + TAG 0x71 (info) + TAG 0xFE (LRC)
+        // Note: PutObjectAsync adds the outer 0x53 wrapper
         var dataList = new List<byte>();
-        
-        // TAG 0x53 (Data)
-        dataList.Add(0x53);
-        dataList.Add(0x82); // 2-byte length follows
-        dataList.Add(0x00); // Placeholder
-        dataList.Add(0x00); // Placeholder
-        int dataStart = dataList.Count;
 
         // TAG 0x70 (Certificate)
         dataList.Add(0x70);
-        dataList.Add(0x82); // 2-byte length
-        dataList.Add((byte)(certBytes.Length >> 8));
-        dataList.Add((byte)(certBytes.Length & 0xFF));
+        if (certBytes.Length > 127)
+        {
+            dataList.Add(0x82); // 2-byte length
+            dataList.Add((byte)(certBytes.Length >> 8));
+            dataList.Add((byte)(certBytes.Length & 0xFF));
+        }
+        else
+        {
+            dataList.Add((byte)certBytes.Length);
+        }
         dataList.AddRange(certBytes);
 
         // TAG 0x71 (Certificate info)
@@ -180,11 +190,6 @@ public sealed partial class PivSession
         // TAG 0xFE (LRC - error detection)
         dataList.Add(0xFE);
         dataList.Add(0x00);
-
-        // Update length
-        int totalLength = dataList.Count - 4;
-        dataList[2] = (byte)(totalLength >> 8);
-        dataList[3] = (byte)(totalLength & 0xFF);
 
         // Write to object
         int objectId = GetCertificateObjectId(slot);
@@ -245,5 +250,37 @@ public sealed partial class PivSession
             PivSlot.Retired20 => PivDataObject.Retired20,
             _ => throw new ArgumentException($"Slot 0x{(byte)slot:X2} does not support certificates", nameof(slot))
         };
+    }
+    
+    /// <summary>
+    /// Parses a TLV length field and advances the offset.
+    /// </summary>
+    private static int ParseTlvLength(ReadOnlySpan<byte> data, ref int offset)
+    {
+        if (offset >= data.Length) return -1;
+        
+        byte firstByte = data[offset++];
+        
+        // Short form: length is 0-127
+        if (firstByte <= 0x7F)
+        {
+            return firstByte;
+        }
+        
+        // Long form: first byte indicates number of length bytes
+        int numLengthBytes = firstByte & 0x7F;
+        
+        if (numLengthBytes == 0 || numLengthBytes > 3 || offset + numLengthBytes > data.Length)
+        {
+            return -1;
+        }
+        
+        int length = 0;
+        for (int i = 0; i < numLengthBytes; i++)
+        {
+            length = (length << 8) | data[offset++];
+        }
+        
+        return length;
     }
 }

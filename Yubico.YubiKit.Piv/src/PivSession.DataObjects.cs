@@ -125,10 +125,10 @@ public sealed partial class PivSession
             cmdData.Add((byte)(objectId & 0xFF));
         }
 
+        // TAG 0x53 (Data) - always required, even if empty for delete
+        cmdData.Add(0x53);
         if (data.HasValue && !data.Value.IsEmpty)
         {
-            // TAG 0x53 (Data)
-            cmdData.Add(0x53);
             var dataSpan = data.Value.Span;
             if (dataSpan.Length > 127)
             {
@@ -141,6 +141,11 @@ public sealed partial class PivSession
                 cmdData.Add((byte)dataSpan.Length);
             }
             cmdData.AddRange(dataSpan.ToArray());
+        }
+        else
+        {
+            // Empty data for delete operations
+            cmdData.Add(0x00);
         }
 
         // INS 0xDB (PUT DATA)

@@ -67,7 +67,8 @@ public class PivCryptoTests
         Assert.NotEmpty(signature.ToArray());
         using var ecdsa = ECDsa.Create();
         ecdsa.ImportSubjectPublicKeyInfo(((ECPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
-        Assert.True(ecdsa.VerifyHash(dataToSign, signature.Span));
+        // PIV returns DER-encoded signatures (RFC 3279 format)
+        Assert.True(ecdsa.VerifyHash(dataToSign, signature.Span, DSASignatureFormat.Rfc3279DerSequence));
     }
 
     [Theory]

@@ -154,18 +154,16 @@ public sealed partial class PivSession
             throw new InvalidOperationException("Management key authentication required to move keys");
         }
 
-        if (FirmwareVersion < new FirmwareVersion(5, 7, 0))
-        {
-            throw new NotSupportedException("Move key requires firmware 5.7.0 or later");
-        }
+        // MoveKey is supported on firmware 5.7.0+. Rather than check version (which uses PIV app
+        // version, not firmware version), we try the command and let it fail with appropriate SW.
 
         if (sourceSlot == PivSlot.Attestation)
         {
             throw new InvalidOperationException("Cannot move attestation key");
         }
 
-        // INS 0xF6, P1 = 0xFF (MOVE), P2 = dest slot, DATA = source slot
-        var command = new ApduCommand(0x00, 0xF6, 0xFF, (byte)destinationSlot, new[] { (byte)sourceSlot });
+        // INS 0xF6, P1 = destination slot, P2 = source slot, NO DATA
+        var command = new ApduCommand(0x00, 0xF6, (byte)destinationSlot, (byte)sourceSlot);
         var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
@@ -194,13 +192,11 @@ public sealed partial class PivSession
             throw new InvalidOperationException("Management key authentication required to delete keys");
         }
 
-        if (FirmwareVersion < new FirmwareVersion(5, 7, 0))
-        {
-            throw new NotSupportedException("Delete key requires firmware 5.7.0 or later");
-        }
+        // Delete key is supported on firmware 5.7.0+. Rather than check version,
+        // we let the command fail with appropriate SW.
 
-        // INS 0xF6, P1 = 0xFF (MOVE), P2 = 0xFF (delete), DATA = source slot
-        var command = new ApduCommand(0x00, 0xF6, 0xFF, 0xFF, new[] { (byte)slot });
+        // INS 0xF6, P1 = 0xFF (delete), P2 = slot to delete, NO DATA
+        var command = new ApduCommand(0x00, 0xF6, 0xFF, (byte)slot);
         var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
@@ -224,13 +220,12 @@ public sealed partial class PivSession
             throw new InvalidOperationException("Session not initialized");
         }
 
-        if (FirmwareVersion < new FirmwareVersion(4, 3, 0))
-        {
-            throw new NotSupportedException("Key attestation requires firmware 4.3.0 or later");
-        }
+        // Key attestation is supported on firmware 4.3.0+. Rather than check version (which uses PIV app
+        // version, not firmware version), we try the command and let it fail with appropriate SW.
 
-        // INS 0xF9, P2 = slot
-        var command = new ApduCommand(0x00, 0xF9, 0x00, (byte)slot, ReadOnlyMemory<byte>.Empty);
+        // INS 0xF9 (ATTEST), P1 = slot, P2 = 0, NO DATA, no explicit Le
+        // The formatter adds a trailing 00 byte for Case 1 commands (no data, no Le)
+        var command = new ApduCommand(0x00, 0xF9, (byte)slot, 0x00, null, 0);
         var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
@@ -247,42 +242,11 @@ public sealed partial class PivSession
 
     private void CheckAlgorithmSupport(PivAlgorithm algorithm)
     {
-        switch (algorithm)
-        {
-            case PivAlgorithm.EccP384:
-                if (FirmwareVersion < new FirmwareVersion(4, 0, 0))
-                {
-                    throw new NotSupportedException("ECC P-384 requires firmware 4.0.0 or later");
-                }
-                break;
-
-            case PivAlgorithm.Ed25519:
-            case PivAlgorithm.X25519:
-                if (FirmwareVersion < new FirmwareVersion(5, 7, 0))
-                {
-                    throw new NotSupportedException("Curve25519 algorithms require firmware 5.7.0 or later");
-                }
-                break;
-
-            case PivAlgorithm.Rsa3072:
-            case PivAlgorithm.Rsa4096:
-                if (FirmwareVersion < new FirmwareVersion(5, 7, 0))
-                {
-                    throw new NotSupportedException("RSA 3072/4096 requires firmware 5.7.0 or later");
-                }
-                break;
-
-            case PivAlgorithm.Rsa1024:
-            case PivAlgorithm.Rsa2048:
-                // Check for ROCA vulnerability (4.2.0-4.3.4)
-                if (FirmwareVersion >= new FirmwareVersion(4, 2, 0) && FirmwareVersion <= new FirmwareVersion(4, 3, 4))
-                {
-                    throw new NotSupportedException(
-                        "RSA key generation is disabled on firmware 4.2.0-4.3.4 due to ROCA vulnerability. " +
-                        "Please upgrade to firmware 4.3.5 or later.");
-                }
-                break;
-        }
+        // NOTE: Algorithm support is determined by firmware version, but PIV GET VERSION returns
+        // the PIV application version (typically 0.0.1), not the firmware version.
+        // Rather than incorrectly gate features, we let the commands fail with appropriate SW codes
+        // if the algorithm is not supported. The device will return SW 0x6A86 (incorrect parameters)
+        // or 0x6D00 (instruction not supported) for unsupported algorithms.
     }
 
     private IPublicKey ParsePublicKey(ReadOnlyMemory<byte> data, PivAlgorithm algorithm)

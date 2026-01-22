@@ -63,7 +63,7 @@ public sealed partial class PivSession
         // Parse outer 0x53 tag length
         int offset = 1;
         int outerLength = ParseTlvLength(span, ref offset);
-        if (outerLength < 0)
+        if (outerLength < 0 || offset + outerLength > span.Length)
         {
             Logger.LogWarning("PIV: Invalid TLV length in slot 0x{Slot:X2}", (byte)slot);
             return null;

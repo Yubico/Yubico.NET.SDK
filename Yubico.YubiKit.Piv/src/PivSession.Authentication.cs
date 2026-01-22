@@ -106,7 +106,7 @@ public sealed partial class PivSession
             // Step 2: Decrypt witness with our key
             byte[]? decryptedWitness = null;
             byte[]? challenge = null;
-            byte[]? responseData = null;
+            byte[]? responseBuffer = null;
             byte[]? expectedResponse = null;
             
             try
@@ -120,8 +120,11 @@ public sealed partial class PivSession
 
                 // Step 4: Build and send response with decrypted witness and our challenge
                 // Send: 7C [len] 80 [len] [decrypted witness] 81 [len] [challenge]
-                responseData = BuildAuthResponse(decryptedWitness.AsSpan(0, challengeLength), challenge.AsSpan(0, challengeLength));
-                var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseData);
+                // Max size: 2 (header) + 2 + challengeLength + 2 + challengeLength = 6 + 2*challengeLength
+                int responseSize = 6 + (2 * challengeLength);
+                responseBuffer = ArrayPool<byte>.Shared.Rent(responseSize);
+                int bytesWritten = BuildAuthResponse(decryptedWitness.AsSpan(0, challengeLength), challenge.AsSpan(0, challengeLength), responseBuffer.AsSpan(0, responseSize));
+                var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseBuffer.AsMemory(0, bytesWritten));
                 var challengeResponse = await _protocol.TransmitAndReceiveAsync(challengeCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
             
                 if (!challengeResponse.IsOK())
@@ -158,9 +161,11 @@ public sealed partial class PivSession
                     CryptographicOperations.ZeroMemory(challenge.AsSpan(0, challengeLength));
                     ArrayPool<byte>.Shared.Return(challenge);
                 }
-                if (responseData is not null)
+                if (responseBuffer is not null)
                 {
-                    CryptographicOperations.ZeroMemory(responseData);
+                    int responseSize = 6 + (2 * challengeLength);
+                    CryptographicOperations.ZeroMemory(responseBuffer.AsSpan(0, responseSize));
+                    ArrayPool<byte>.Shared.Return(responseBuffer);
                 }
                 if (expectedResponse is not null)
                 {
@@ -253,29 +258,33 @@ public sealed partial class PivSession
     /// <summary>
     /// Builds the authentication response: 7C [len] 80 [len] [decrypted witness] 81 [len] [challenge]
     /// </summary>
-    private static byte[] BuildAuthResponse(ReadOnlySpan<byte> decryptedWitness, ReadOnlySpan<byte> challenge)
+    /// <param name="decryptedWitness">The decrypted witness data.</param>
+    /// <param name="challenge">The challenge data.</param>
+    /// <param name="destination">Destination buffer, must be at least 6 + witness.Length + challenge.Length bytes.</param>
+    /// <returns>Number of bytes written.</returns>
+    private static int BuildAuthResponse(ReadOnlySpan<byte> decryptedWitness, ReadOnlySpan<byte> challenge, Span<byte> destination)
     {
         int witnessLen = decryptedWitness.Length;
         int challengeLen = challenge.Length;
         
         // Inner: 80 [len] [witness] 81 [len] [challenge]
         int innerLen = 2 + witnessLen + 2 + challengeLen;
+        int totalLen = 2 + innerLen;
         
         // Outer: 7C [len] [inner]
-        byte[] result = new byte[2 + innerLen];
         int offset = 0;
         
-        result[offset++] = 0x7C;
-        result[offset++] = (byte)innerLen;
-        result[offset++] = 0x80;
-        result[offset++] = (byte)witnessLen;
-        decryptedWitness.CopyTo(result.AsSpan(offset));
+        destination[offset++] = 0x7C;
+        destination[offset++] = (byte)innerLen;
+        destination[offset++] = 0x80;
+        destination[offset++] = (byte)witnessLen;
+        decryptedWitness.CopyTo(destination[offset..]);
         offset += witnessLen;
-        result[offset++] = 0x81;
-        result[offset++] = (byte)challengeLen;
-        challenge.CopyTo(result.AsSpan(offset));
+        destination[offset++] = 0x81;
+        destination[offset++] = (byte)challengeLen;
+        challenge.CopyTo(destination[offset..]);
         
-        return result;
+        return totalLen;
     }
 
     /// <summary>

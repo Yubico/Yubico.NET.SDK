@@ -182,4 +182,213 @@ public class PivCryptoTests
         // .NET System.Security.Cryptography supports ECDiffieHellman but not
         // directly for Curve25519. Full verification is TBD.
     }
+
+    // SHA-256 DigestInfo prefix for PKCS#1 v1.5 padding
+    private static readonly byte[] Sha256DigestInfo =
+    [
+        0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20
+    ];
+
+    /// <summary>
+    /// Creates PKCS#1 v1.5 padding for RSA signing.
+    /// Format: 0x00 0x01 [0xFF padding] 0x00 [DigestInfo] [Hash]
+    /// </summary>
+    private static byte[] CreatePkcs1v15SigningPadding(byte[] digestInfo, byte[] hash, int modulusBytes)
+    {
+        var paddedData = new byte[modulusBytes];
+        
+        // 0x00 0x01
+        paddedData[0] = 0x00;
+        paddedData[1] = 0x01;
+        
+        // Calculate padding length: total - 3 (0x00, 0x01, 0x00) - digestInfo - hash
+        var paddingLength = modulusBytes - 3 - digestInfo.Length - hash.Length;
+        
+        // Fill with 0xFF
+        for (var i = 2; i < 2 + paddingLength; i++)
+        {
+            paddedData[i] = 0xFF;
+        }
+        
+        // 0x00 separator
+        paddedData[2 + paddingLength] = 0x00;
+        
+        // Copy DigestInfo
+        Array.Copy(digestInfo, 0, paddedData, 3 + paddingLength, digestInfo.Length);
+        
+        // Copy hash
+        Array.Copy(hash, 0, paddedData, 3 + paddingLength + digestInfo.Length, hash.Length);
+        
+        return paddedData;
+    }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
+    public async Task SignOrDecryptAsync_Rsa2048Sign_ProducesValidSignature(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreatePivSessionAsync();
+        await session.ResetAsync();
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+        
+        var publicKey = await session.GenerateKeyAsync(
+            PivSlot.Signature, 
+            PivAlgorithm.Rsa2048,
+            PivPinPolicy.Once);
+        await session.VerifyPinAsync(DefaultPin);
+        
+        var dataToSign = "test data for RSA"u8.ToArray();
+        var hash = SHA256.HashData(dataToSign);
+        
+        // PIV RSA performs raw RSA - we need PKCS#1 v1.5 padding
+        var paddedData = CreatePkcs1v15SigningPadding(Sha256DigestInfo, hash, 256);
+        
+        var signature = await session.SignOrDecryptAsync(
+            PivSlot.Signature, 
+            PivAlgorithm.Rsa2048, 
+            paddedData);
+        
+        Assert.Equal(256, signature.Length);
+        
+        // Verify signature using RSA
+        using var rsa = RSA.Create();
+        rsa.ImportSubjectPublicKeyInfo(((RSAPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
+        Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+    }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
+    public async Task SignOrDecryptAsync_Rsa1024Sign_ProducesValidSignature(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreatePivSessionAsync();
+        await session.ResetAsync();
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+        
+        var publicKey = await session.GenerateKeyAsync(
+            PivSlot.Signature, 
+            PivAlgorithm.Rsa1024,
+            PivPinPolicy.Once);
+        await session.VerifyPinAsync(DefaultPin);
+        
+        var dataToSign = "test data for RSA 1024"u8.ToArray();
+        var hash = SHA256.HashData(dataToSign);
+        
+        // 1024-bit RSA = 128 byte modulus
+        var paddedData = CreatePkcs1v15SigningPadding(Sha256DigestInfo, hash, 128);
+        
+        var signature = await session.SignOrDecryptAsync(
+            PivSlot.Signature, 
+            PivAlgorithm.Rsa1024, 
+            paddedData);
+        
+        Assert.Equal(128, signature.Length);
+        
+        // Verify signature using RSA
+        using var rsa = RSA.Create();
+        rsa.ImportSubjectPublicKeyInfo(((RSAPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
+        Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+    }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
+    public async Task SignOrDecryptAsync_Rsa3072Sign_ProducesValidSignature(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreatePivSessionAsync();
+        await session.ResetAsync();
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+        
+        var publicKey = await session.GenerateKeyAsync(
+            PivSlot.Signature, 
+            PivAlgorithm.Rsa3072,
+            PivPinPolicy.Once);
+        await session.VerifyPinAsync(DefaultPin);
+        
+        var dataToSign = "test data for RSA 3072"u8.ToArray();
+        var hash = SHA256.HashData(dataToSign);
+        
+        // 3072-bit RSA = 384 byte modulus
+        var paddedData = CreatePkcs1v15SigningPadding(Sha256DigestInfo, hash, 384);
+        
+        var signature = await session.SignOrDecryptAsync(
+            PivSlot.Signature, 
+            PivAlgorithm.Rsa3072, 
+            paddedData);
+        
+        Assert.Equal(384, signature.Length);
+        
+        // Verify signature using RSA
+        using var rsa = RSA.Create();
+        rsa.ImportSubjectPublicKeyInfo(((RSAPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
+        Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+    }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
+    public async Task SignOrDecryptAsync_Rsa4096Sign_ProducesValidSignature(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreatePivSessionAsync();
+        await session.ResetAsync();
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+        
+        var publicKey = await session.GenerateKeyAsync(
+            PivSlot.Signature, 
+            PivAlgorithm.Rsa4096,
+            PivPinPolicy.Once);
+        await session.VerifyPinAsync(DefaultPin);
+        
+        var dataToSign = "test data for RSA 4096"u8.ToArray();
+        var hash = SHA256.HashData(dataToSign);
+        
+        // 4096-bit RSA = 512 byte modulus
+        var paddedData = CreatePkcs1v15SigningPadding(Sha256DigestInfo, hash, 512);
+        
+        var signature = await session.SignOrDecryptAsync(
+            PivSlot.Signature, 
+            PivAlgorithm.Rsa4096, 
+            paddedData);
+        
+        Assert.Equal(512, signature.Length);
+        
+        // Verify signature using RSA
+        using var rsa = RSA.Create();
+        rsa.ImportSubjectPublicKeyInfo(((RSAPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
+        Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+    }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
+    public async Task SignOrDecryptAsync_Rsa2048Decrypt_DecryptsCorrectly(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreatePivSessionAsync();
+        await session.ResetAsync();
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+        
+        var publicKey = await session.GenerateKeyAsync(
+            PivSlot.KeyManagement, 
+            PivAlgorithm.Rsa2048);
+        await session.VerifyPinAsync(DefaultPin);
+        
+        // Encrypt test data with public key
+        var plaintext = "secret message"u8.ToArray();
+        using var rsa = RSA.Create();
+        rsa.ImportSubjectPublicKeyInfo(((RSAPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
+        var encrypted = rsa.Encrypt(plaintext, RSAEncryptionPadding.Pkcs1);
+        
+        // Decrypt with YubiKey (returns raw RSA output with PKCS#1 v1.5 encryption padding)
+        var decrypted = await session.SignOrDecryptAsync(
+            PivSlot.KeyManagement, 
+            PivAlgorithm.Rsa2048, 
+            encrypted);
+        
+        // PKCS#1 v1.5 encryption padding: 0x00 0x02 [random bytes] 0x00 [message]
+        // Find the 0x00 separator after the padding
+        var paddedOutput = decrypted.ToArray();
+        Assert.Equal(0x00, paddedOutput[0]);
+        Assert.Equal(0x02, paddedOutput[1]);
+        
+        var separatorIndex = Array.IndexOf(paddedOutput, (byte)0x00, 2);
+        Assert.True(separatorIndex >= 10, "PKCS#1 padding should have at least 8 bytes of random data");
+        
+        var extractedPlaintext = paddedOutput[(separatorIndex + 1)..];
+        Assert.Equal(plaintext, extractedPlaintext);
+    }
 }

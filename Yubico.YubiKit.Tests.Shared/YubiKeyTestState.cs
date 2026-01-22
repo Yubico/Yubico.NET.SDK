@@ -229,13 +229,52 @@ public class YubiKeyTestState : IXunitSerializable
                 "No authorized YubiKey devices available. " +
                 "Add device serial numbers to appsettings.json AllowedSerialNumbers array.");
 
-        // For now, just pick the first available device
-        // TODO: Parse FilterDescription and apply filters to select appropriate device
-        var device = allDevices[0];
+        // Parse FilterDescription to extract connection type requirement
+        var requiredConnectionType = ParseConnectionTypeFromFilter();
+        
+        // Filter devices by connection type if specified
+        IEnumerable<YubiKeyTestState> candidates = allDevices;
+        if (requiredConnectionType != ConnectionType.Unknown)
+        {
+            candidates = allDevices.Where(d => d.ConnectionType == requiredConnectionType);
+        }
+        
+        var device = candidates.FirstOrDefault();
+        if (device is null)
+        {
+            var availableTypes = string.Join(", ", allDevices.Select(d => d.ConnectionType).Distinct());
+            throw new Xunit.SkipException(
+                $"No authorized YubiKey devices with ConnectionType={requiredConnectionType} available. " +
+                $"Available connection types: {availableTypes}");
+        }
+        
         _device = device.Device;
         DeviceInfo = device.DeviceInfo;
         ConnectionType = device.ConnectionType;
         IsPlaceholder = false;
+    }
+    
+    /// <summary>
+    ///     Parses the FilterDescription to extract the required connection type.
+    /// </summary>
+    private ConnectionType ParseConnectionTypeFromFilter()
+    {
+        if (string.IsNullOrEmpty(FilterDescription))
+            return ConnectionType.Unknown;
+            
+        // FilterDescription format: "FW>=5.7.0,Conn=SmartCard" or "Conn=SmartCard"
+        var parts = FilterDescription.Split(',');
+        foreach (var part in parts)
+        {
+            if (part.StartsWith("Conn=", StringComparison.OrdinalIgnoreCase))
+            {
+                var value = part.Substring(5);
+                if (Enum.TryParse<ConnectionType>(value, ignoreCase: true, out var connType))
+                    return connType;
+            }
+        }
+        
+        return ConnectionType.Unknown;
     }
 
     /// <summary>

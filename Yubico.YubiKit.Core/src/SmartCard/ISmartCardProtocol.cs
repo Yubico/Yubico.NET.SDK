@@ -21,7 +21,19 @@ namespace Yubico.YubiKit.Core.SmartCard;
 /// </summary>
 public interface ISmartCardProtocol : IProtocol
 {
+    /// <summary>
+    /// Transmits an APDU command and returns only the response data.
+    /// Throws <see cref="ApduException"/> for non-success status words.
+    /// </summary>
     Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+        ApduCommand command,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Transmits an APDU command and returns the full response including status word.
+    /// Does not throw on non-success status words.
+    /// </summary>
+    Task<ApduResponse> TransmitAsync(
         ApduCommand command,
         CancellationToken cancellationToken = default);
 

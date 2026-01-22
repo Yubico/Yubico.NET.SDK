@@ -61,6 +61,11 @@ public class PcscProtocolScp : ISmartCardProtocol
             : throw ApduException.FromResponse(response, command, "SCP command failed");
     }
 
+    public async Task<ApduResponse> TransmitAsync(
+        ApduCommand command,
+        CancellationToken cancellationToken = default) =>
+        await _scpProcessor.TransmitAsync(command, true, cancellationToken).ConfigureAwait(false);
+
     public async Task<ReadOnlyMemory<byte>> SelectAsync(
         ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default)

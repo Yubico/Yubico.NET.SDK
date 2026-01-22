@@ -49,94 +49,90 @@ public sealed partial class PivSession
     /// </remarks>
     public async Task AuthenticateAsync(ReadOnlyMemory<byte> managementKey, CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Starting management key authentication");
+        Logger.LogDebug("PIV: Starting management key authentication with {KeyType}", ManagementKeyType);
 
         if (_protocol is null)
         {
             throw new InvalidOperationException("Session not initialized");
         }
 
-        // For now, only support 3DES keys (24 bytes)
-        if (managementKey.Length != 24)
+        // Validate key length based on management key type
+        int expectedKeyLength = ManagementKeyType switch
         {
-            throw new ArgumentException($"Invalid management key length: {managementKey.Length}. Expected 24 bytes for 3DES.", nameof(managementKey));
+            PivManagementKeyType.TripleDes => 24,
+            PivManagementKeyType.Aes128 => 16,
+            PivManagementKeyType.Aes192 => 24,
+            PivManagementKeyType.Aes256 => 32,
+            _ => throw new ArgumentException($"Unsupported management key type: {ManagementKeyType}")
+        };
+
+        if (managementKey.Length != expectedKeyLength)
+        {
+            throw new ArgumentException(
+                $"Invalid management key length: {managementKey.Length}. Expected {expectedKeyLength} bytes for {ManagementKeyType}.",
+                nameof(managementKey));
         }
 
-        var keyBytes = ArrayPool<byte>.Shared.Rent(24);
+        // Challenge length: 8 bytes for 3DES, 16 bytes for AES
+        int challengeLength = ManagementKeyType == PivManagementKeyType.TripleDes ? 8 : 16;
+        
+        // Algorithm code for P1
+        byte algorithmCode = (byte)ManagementKeyType;
+        
+        const byte InsAuthenticate = 0x87;
+        const byte SlotCardManagement = 0x9B;
+        const byte TagDynAuth = 0x7C;
+        const byte TagAuthWitness = 0x80;
+
+        var keyBytes = ArrayPool<byte>.Shared.Rent(expectedKeyLength);
         try
         {
             managementKey.CopyTo(keyBytes);
 
-            // Step 1: Get witness from device (empty challenge)  
-            var witnessCommand = new ApduCommand(0x00, 0x87, 0x03, 0x9B, ReadOnlyMemory<byte>.Empty);
-            var witnessData = await _protocol.TransmitAndReceiveAsync(witnessCommand, cancellationToken).ConfigureAwait(false);
-            var witnessResponse = new ApduResponse(witnessData);
+            // Step 1: Request witness from device
+            // Send: 7C 02 80 00 (empty witness request)
+            byte[] witnessRequest = [TagDynAuth, 0x02, TagAuthWitness, 0x00];
+            var witnessCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, witnessRequest);
+            var witnessResponse = await _protocol.TransmitAsync(witnessCommand, cancellationToken).ConfigureAwait(false);
             
             if (!witnessResponse.IsOK())
             {
                 throw ApduException.FromStatusWord(witnessResponse.SW, "Management key authentication failed - witness request");
             }
 
-            // Parse witness response (TAG 0x80)
-            if (witnessResponse.Data.Length < 10 || witnessResponse.Data.Span[0] != 0x80 || witnessResponse.Data.Span[1] != 0x08)
-            {
-                throw new ApduException("Invalid witness response format");
-            }
+            // Parse witness response: 7C [len] 80 [len] [witness data]
+            var witnessBytes = ParseWitnessResponse(witnessResponse.Data.Span, challengeLength);
 
-            var witness = witnessResponse.Data.Slice(2, 8);
+            // Step 2: Decrypt witness with our key
+            byte[] decryptedWitness = new byte[challengeLength];
+            DecryptBlock(keyBytes.AsSpan(0, expectedKeyLength), witnessBytes, decryptedWitness, ManagementKeyType);
 
-            // Step 2: Generate challenge for device
-            var challenge = new byte[8];
+            // Step 3: Generate our challenge
+            byte[] challenge = new byte[challengeLength];
             RandomNumberGenerator.Fill(challenge);
 
-            // Step 3: Encrypt witness and challenge with 3DES
-            var responseData = new byte[18]; // TAG + LEN + 16 bytes encrypted
-            responseData[0] = 0x80;
-            responseData[1] = 0x10; // 16 bytes
-
-            using (var des = TripleDES.Create())
-            {
-                des.Key = keyBytes.AsSpan(0, 24).ToArray();
-                des.Mode = CipherMode.ECB;
-                des.Padding = PaddingMode.None;
-
-                using var encryptor = des.CreateEncryptor();
-                encryptor.TransformBlock(witness.ToArray(), 0, 8, responseData, 2);
-                encryptor.TransformBlock(challenge, 0, 8, responseData, 10);
-            }
-
-            // Step 4: Send encrypted response and get challenge response
-            var challengeCommand = new ApduCommand(0x00, 0x87, 0x03, 0x9B, responseData.AsMemory());
-            var challengeData = await _protocol.TransmitAndReceiveAsync(challengeCommand, cancellationToken).ConfigureAwait(false);
-            var challengeResponse = new ApduResponse(challengeData);
+            // Step 4: Build and send response with decrypted witness and our challenge
+            // Send: 7C [len] 80 [len] [decrypted witness] 81 [len] [challenge]
+            var responseData = BuildAuthResponse(decryptedWitness, challenge);
+            var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseData);
+            var challengeResponse = await _protocol.TransmitAsync(challengeCommand, cancellationToken).ConfigureAwait(false);
             
             if (!challengeResponse.IsOK())
             {
                 throw ApduException.FromStatusWord(challengeResponse.SW, "Management key authentication failed - challenge response");
             }
 
-            // Step 5: Verify device encrypted our challenge correctly
-            if (challengeResponse.Data.Length < 10 || challengeResponse.Data.Span[0] != 0x80 || challengeResponse.Data.Span[1] != 0x08)
+            // Step 5: Verify device's response (encrypted challenge)
+            // Response: 7C [len] 82 [len] [encrypted challenge]
+            var encryptedChallenge = ParseChallengeResponse(challengeResponse.Data.Span, challengeLength);
+
+            // Encrypt our challenge and compare
+            byte[] expectedResponse = new byte[challengeLength];
+            EncryptBlock(keyBytes.AsSpan(0, expectedKeyLength), challenge, expectedResponse, ManagementKeyType);
+
+            if (!CryptographicOperations.FixedTimeEquals(encryptedChallenge, expectedResponse))
             {
-                throw new ApduException("Invalid challenge response format");
-            }
-
-            var deviceResponse = challengeResponse.Data.Slice(2, 8);
-            var expectedResponse = new byte[8];
-
-            using (var des = TripleDES.Create())
-            {
-                des.Key = keyBytes.AsSpan(0, 24).ToArray();
-                des.Mode = CipherMode.ECB;
-                des.Padding = PaddingMode.None;
-
-                using var encryptor = des.CreateEncryptor();
-                encryptor.TransformBlock(challenge, 0, 8, expectedResponse, 0);
-            }
-
-            if (!deviceResponse.Span.SequenceEqual(expectedResponse))
-            {
-                throw new ApduException("Management key authentication failed - device response incorrect");
+                throw new ApduException("Management key authentication failed - device response mismatch");
             }
 
             _isAuthenticated = true;
@@ -145,8 +141,169 @@ public sealed partial class PivSession
         finally
         {
             // Zero sensitive data
-            CryptographicOperations.ZeroMemory(keyBytes.AsSpan(0, 24));
+            CryptographicOperations.ZeroMemory(keyBytes.AsSpan(0, expectedKeyLength));
             ArrayPool<byte>.Shared.Return(keyBytes);
+        }
+    }
+
+    /// <summary>
+    /// Parses the witness response TLV: 7C [len] 80 [len] [witness data]
+    /// </summary>
+    private static ReadOnlySpan<byte> ParseWitnessResponse(ReadOnlySpan<byte> response, int expectedLength)
+    {
+        // Minimum: 7C 02 80 00 for empty, but we expect: 7C [len] 80 [len] [data]
+        if (response.Length < 4)
+        {
+            throw new ApduException("Invalid witness response - too short");
+        }
+
+        if (response[0] != 0x7C)
+        {
+            throw new ApduException($"Invalid witness response - expected TAG 0x7C, got 0x{response[0]:X2}");
+        }
+
+        int outerLen = response[1];
+        if (response.Length < 2 + outerLen)
+        {
+            throw new ApduException("Invalid witness response - truncated outer TLV");
+        }
+
+        var inner = response.Slice(2, outerLen);
+        if (inner.Length < 2 || inner[0] != 0x80)
+        {
+            throw new ApduException($"Invalid witness response - expected TAG 0x80, got 0x{inner[0]:X2}");
+        }
+
+        int witnessLen = inner[1];
+        if (witnessLen != expectedLength)
+        {
+            throw new ApduException($"Invalid witness length - expected {expectedLength}, got {witnessLen}");
+        }
+
+        return inner.Slice(2, witnessLen);
+    }
+
+    /// <summary>
+    /// Parses the challenge response TLV: 7C [len] 82 [len] [encrypted data]
+    /// </summary>
+    private static ReadOnlySpan<byte> ParseChallengeResponse(ReadOnlySpan<byte> response, int expectedLength)
+    {
+        if (response.Length < 4)
+        {
+            throw new ApduException("Invalid challenge response - too short");
+        }
+
+        if (response[0] != 0x7C)
+        {
+            throw new ApduException($"Invalid challenge response - expected TAG 0x7C, got 0x{response[0]:X2}");
+        }
+
+        int outerLen = response[1];
+        if (response.Length < 2 + outerLen)
+        {
+            throw new ApduException("Invalid challenge response - truncated outer TLV");
+        }
+
+        var inner = response.Slice(2, outerLen);
+        if (inner.Length < 2 || inner[0] != 0x82)
+        {
+            throw new ApduException($"Invalid challenge response - expected TAG 0x82, got 0x{inner[0]:X2}");
+        }
+
+        int responseLen = inner[1];
+        if (responseLen != expectedLength)
+        {
+            throw new ApduException($"Invalid challenge response length - expected {expectedLength}, got {responseLen}");
+        }
+
+        return inner.Slice(2, responseLen);
+    }
+
+    /// <summary>
+    /// Builds the authentication response: 7C [len] 80 [len] [decrypted witness] 81 [len] [challenge]
+    /// </summary>
+    private static byte[] BuildAuthResponse(byte[] decryptedWitness, byte[] challenge)
+    {
+        int witnessLen = decryptedWitness.Length;
+        int challengeLen = challenge.Length;
+        
+        // Inner: 80 [len] [witness] 81 [len] [challenge]
+        int innerLen = 2 + witnessLen + 2 + challengeLen;
+        
+        // Outer: 7C [len] [inner]
+        byte[] result = new byte[2 + innerLen];
+        int offset = 0;
+        
+        result[offset++] = 0x7C;
+        result[offset++] = (byte)innerLen;
+        result[offset++] = 0x80;
+        result[offset++] = (byte)witnessLen;
+        Array.Copy(decryptedWitness, 0, result, offset, witnessLen);
+        offset += witnessLen;
+        result[offset++] = 0x81;
+        result[offset++] = (byte)challengeLen;
+        Array.Copy(challenge, 0, result, offset, challengeLen);
+        
+        return result;
+    }
+
+    /// <summary>
+    /// Decrypts a single block using ECB mode with the specified key type.
+    /// </summary>
+    private static void DecryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, PivManagementKeyType keyType)
+    {
+        if (keyType == PivManagementKeyType.TripleDes)
+        {
+            using var des = TripleDES.Create();
+            des.Key = key.ToArray();
+            des.Mode = CipherMode.ECB;
+            des.Padding = PaddingMode.None;
+            using var decryptor = des.CreateDecryptor();
+            decryptor.TransformBlock(input.ToArray(), 0, input.Length, output.ToArray(), 0);
+            // Copy back to output (TransformBlock may allocate)
+            var decrypted = new byte[input.Length];
+            decryptor.TransformBlock(input.ToArray(), 0, input.Length, decrypted, 0);
+            decrypted.CopyTo(output);
+        }
+        else
+        {
+            using var aes = Aes.Create();
+            aes.Key = key.ToArray();
+            aes.Mode = CipherMode.ECB;
+            aes.Padding = PaddingMode.None;
+            var decrypted = new byte[input.Length];
+            using var decryptor = aes.CreateDecryptor();
+            decryptor.TransformBlock(input.ToArray(), 0, input.Length, decrypted, 0);
+            decrypted.CopyTo(output);
+        }
+    }
+
+    /// <summary>
+    /// Encrypts a single block using ECB mode with the specified key type.
+    /// </summary>
+    private static void EncryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, PivManagementKeyType keyType)
+    {
+        if (keyType == PivManagementKeyType.TripleDes)
+        {
+            using var des = TripleDES.Create();
+            des.Key = key.ToArray();
+            des.Mode = CipherMode.ECB;
+            des.Padding = PaddingMode.None;
+            var encrypted = new byte[input.Length];
+            using var encryptor = des.CreateEncryptor();
+            encryptor.TransformBlock(input.ToArray(), 0, input.Length, encrypted, 0);
+            encrypted.CopyTo(output);
+        }
+        else
+        {
+            using var aes = Aes.Create();
+            aes.Key = key.ToArray();
+            aes.Mode = CipherMode.ECB;
+            aes.Padding = PaddingMode.None;
+            var encrypted = new byte[input.Length];
+            using var encryptor = aes.CreateEncryptor();
+            encryptor.TransformBlock(input.ToArray(), 0, input.Length, encrypted, 0);
+            encrypted.CopyTo(output);
         }
     }
 

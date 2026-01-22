@@ -191,10 +191,86 @@ public sealed partial class PivSession
         throw new NotImplementedException("GetPukMetadataAsync not yet implemented");
     }
 
-    public Task<PivManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default)
+    public async Task<PivManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default)
     {
-        // TODO: Implement management key metadata retrieval (INS 0xF7, P2=0x9B)
-        throw new NotImplementedException("GetManagementKeyMetadataAsync not yet implemented");
+        Logger.LogDebug("PIV: Getting management key metadata");
+
+        if (_protocol is null)
+        {
+            throw new InvalidOperationException("Session not initialized");
+        }
+
+        // INS 0xF7 (GET METADATA), P2 = 0x9B (SLOT_CARD_MANAGEMENT)
+        const byte InsGetMetadata = 0xF7;
+        const byte SlotCardManagement = 0x9B;
+        
+        var command = new ApduCommand(0x00, InsGetMetadata, 0x00, SlotCardManagement, ReadOnlyMemory<byte>.Empty);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+
+        // Check for "instruction not supported" which indicates firmware < 5.3
+        if (response.SW == 0x6D00)
+        {
+            throw new NotSupportedException("Management key metadata requires firmware 5.3.0 or later");
+        }
+
+        if (!response.IsOK())
+        {
+            throw ApduException.FromStatusWord(response.SW, "Failed to get management key metadata");
+        }
+
+        // Parse metadata TLV
+        // TAG 0x01 = algorithm (ManagementKeyType)
+        // TAG 0x02 = policy (byte 0 = unused, byte 1 = touch policy)
+        // TAG 0x05 = isDefault (1 = default, 0 = not default)
+        var span = response.Data.Span;
+        PivManagementKeyType keyType = PivManagementKeyType.TripleDes;
+        PivTouchPolicy touchPolicy = PivTouchPolicy.Default;
+        bool isDefault = false;
+
+        int offset = 0;
+        while (offset < span.Length)
+        {
+            byte tag = span[offset++];
+            if (offset >= span.Length) break;
+            
+            int length = span[offset++];
+            if (offset + length > span.Length) break;
+
+            switch (tag)
+            {
+                case 0x01: // Algorithm
+                    if (length > 0)
+                    {
+                        keyType = (PivManagementKeyType)span[offset];
+                    }
+                    break;
+                case 0x02: // Policy (2 bytes: pin policy, touch policy)
+                    if (length >= 2)
+                    {
+                        // Index 0 = pin policy (unused for mgmt key)
+                        // Index 1 = touch policy
+                        touchPolicy = (PivTouchPolicy)span[offset + 1];
+                    }
+                    break;
+                case 0x05: // Default value
+                    if (length > 0)
+                    {
+                        isDefault = span[offset] != 0;
+                    }
+                    break;
+            }
+
+            offset += length;
+        }
+
+        Logger.LogDebug("PIV: Management key metadata: type={KeyType}, isDefault={IsDefault}, touchPolicy={TouchPolicy}", 
+            keyType, isDefault, touchPolicy);
+
+        return new PivManagementKeyMetadata(
+            KeyType: keyType,
+            IsDefault: isDefault,
+            TouchPolicy: touchPolicy
+        );
     }
 
     public Task ChangePukAsync(ReadOnlyMemory<byte> oldPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default)

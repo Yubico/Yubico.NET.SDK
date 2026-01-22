@@ -30,6 +30,15 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
 {
     private static readonly byte[] PivAid = ApplicationIds.Piv;
     
+    // PIV instruction bytes
+    private const byte InsVerify = 0x20;
+    private const byte InsResetRetry = 0x2C;
+    private const byte InsReset = 0xFB;
+    
+    // PIV P2 parameter bytes
+    private const byte P2Pin = 0x80;
+    private const byte P2Puk = 0x81;
+    
     private readonly IConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
     private ISmartCardProtocol? _protocol;
@@ -103,7 +112,10 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
             var versionCommand = new ApduCommand(0x00, 0xFD, 0x00, 0x00);
             var versionResponse = await smartCardProtocol.TransmitAndReceiveAsync(versionCommand, cancellationToken)
                 .ConfigureAwait(false);
-            
+
+            // Note: PIV GET VERSION returns the PIV application version (often 0.0.1),
+            // not the YubiKey firmware version. Feature detection should use metadata
+            // commands rather than version comparisons.
             var firmwareVersion = ParseVersionResponse(versionResponse.Span);
             Logger.LogDebug("PIV firmware version: {Version}", firmwareVersion);
 
@@ -193,40 +205,16 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         
         // TODO: Check bio not configured (Phase 7)
         
-        // Step 1: Block PIN by trying wrong PIN repeatedly  
-        var wrongPin = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF };
-        for (int i = 0; i < 5; i++) // Try more than 3 times to ensure blocked
-        {
-            try
-            {
-                var pinCommand = new ApduCommand(0x00, 0x20, 0x00, 0x80, wrongPin);
-                await _protocol.TransmitAndReceiveAsync(pinCommand, cancellationToken).ConfigureAwait(false);
-            }
-            catch
-            {
-                // Ignore errors - we expect this to fail
-            }
-        }
+        // Step 1: Block PIN by verifying with empty PIN until blocked
+        // Empty PIN encodes as 8 bytes of 0xFF per PIV spec
+        await BlockPinAsync(cancellationToken).ConfigureAwait(false);
         
-        // Step 2: Block PUK by trying wrong PUK repeatedly
-        var wrongPuk = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-        for (int i = 0; i < 5; i++) // Try more than 3 times to ensure blocked  
-        {
-            try
-            {
-                var pukCommand = new ApduCommand(0x00, 0x2C, 0x00, 0x81, wrongPuk);
-                await _protocol.TransmitAndReceiveAsync(pukCommand, cancellationToken).ConfigureAwait(false);
-            }
-            catch
-            {
-                // Ignore errors - we expect this to fail
-            }
-        }
+        // Step 2: Block PUK using RESET RETRY with empty credentials
+        await BlockPukAsync(cancellationToken).ConfigureAwait(false);
         
         // Step 3: Send RESET command
-        var resetCommand = new ApduCommand(0x00, 0xFB, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
-        var responseData = await _protocol.TransmitAndReceiveAsync(resetCommand, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var resetCommand = new ApduCommand(0x00, InsReset, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+        var response = await _protocol.TransmitAsync(resetCommand, cancellationToken).ConfigureAwait(false);
         
         if (!response.IsOK())
         {
@@ -235,9 +223,90 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         
         // Reset authentication state
         _isAuthenticated = false;
-        ManagementKeyType = PivManagementKeyType.TripleDes; // Reset to default
+        
+        // Update management key type from metadata (firmware 5.3+)
+        try
+        {
+            var metadata = await GetManagementKeyMetadataAsync(cancellationToken).ConfigureAwait(false);
+            ManagementKeyType = metadata.KeyType;
+            Logger.LogDebug("PIV: Reset - management key type is {KeyType}", ManagementKeyType);
+        }
+        catch (NotSupportedException)
+        {
+            // Firmware < 5.3 doesn't support metadata - default to 3DES
+            // Note: PIV version is often 0.0.1, so we can't reliably detect 5.7.0+ for AES default
+            ManagementKeyType = PivManagementKeyType.TripleDes;
+            Logger.LogDebug("PIV: Reset - metadata not supported, defaulting to TripleDes");
+        }
         
         Logger.LogDebug("PIV: Reset completed successfully");
+    }
+
+    /// <summary>
+    /// Blocks the PIN by repeatedly verifying with an empty PIN until blocked.
+    /// </summary>
+    private async Task BlockPinAsync(CancellationToken cancellationToken)
+    {
+        Logger.LogDebug("PIV: Blocking PIN");
+        
+        // Get initial retry count
+        int retriesRemaining;
+        try
+        {
+            var metadata = await GetPinMetadataAsync(cancellationToken).ConfigureAwait(false);
+            retriesRemaining = metadata.RetriesRemaining;
+        }
+        catch (NotSupportedException)
+        {
+            // Firmware < 5.3 - assume max retries
+            retriesRemaining = 15;
+        }
+        
+        // Empty PIN encodes as 8 bytes of 0xFF
+        byte[] emptyPin = PivPinUtilities.EncodePinBytes(ReadOnlySpan<char>.Empty);
+        
+        while (retriesRemaining > 0)
+        {
+            var pinCommand = new ApduCommand(0x00, InsVerify, 0x00, P2Pin, emptyPin);
+            var response = await _protocol!.TransmitAsync(pinCommand, cancellationToken).ConfigureAwait(false);
+            
+            retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
+            if (retriesRemaining < 0)
+            {
+                // Unexpected response - break to avoid infinite loop
+                break;
+            }
+        }
+        
+        Logger.LogDebug("PIV: PIN blocked");
+    }
+
+    /// <summary>
+    /// Blocks the PUK by repeatedly calling RESET RETRY with empty credentials until blocked.
+    /// </summary>
+    private async Task BlockPukAsync(CancellationToken cancellationToken)
+    {
+        Logger.LogDebug("PIV: Blocking PUK");
+        
+        // PUK blocking uses INS_RESET_RETRY (0x2C) with P2=0x80 (PIN_P2, not PUK_P2!)
+        // Data is 16 bytes: 8-byte empty PUK + 8-byte empty PIN (both all 0xFF)
+        byte[] emptyPukPin = PivPinUtilities.EncodePinPair(ReadOnlySpan<char>.Empty, ReadOnlySpan<char>.Empty);
+        
+        int retriesRemaining = 1; // Start with 1 to enter loop
+        while (retriesRemaining > 0)
+        {
+            var pukCommand = new ApduCommand(0x00, InsResetRetry, 0x00, P2Pin, emptyPukPin);
+            var response = await _protocol!.TransmitAsync(pukCommand, cancellationToken).ConfigureAwait(false);
+            
+            retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
+            if (retriesRemaining < 0)
+            {
+                // Unexpected response - break to avoid infinite loop
+                break;
+            }
+        }
+        
+        Logger.LogDebug("PIV: PUK blocked");
     }
 
     // All other IPivSession methods would be implemented as placeholders for now...

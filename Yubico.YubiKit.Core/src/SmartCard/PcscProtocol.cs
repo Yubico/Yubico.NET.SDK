@@ -78,6 +78,14 @@ internal class PcscProtocol : ISmartCardProtocol
             : response.Data;
     }
 
+    public async Task<ApduResponse> TransmitAsync(
+        ApduCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
+        return await _processor.TransmitAsync(command, false, cancellationToken).ConfigureAwait(false);
+    }
+
     public async Task<ReadOnlyMemory<byte>> SelectAsync(
         ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default)

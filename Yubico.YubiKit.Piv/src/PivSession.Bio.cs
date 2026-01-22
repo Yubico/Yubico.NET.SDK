@@ -40,8 +40,7 @@ public sealed partial class PivSession
         Logger.LogDebug("PIV: Getting biometric metadata");
         
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x96, ReadOnlyMemory<byte>.Empty);
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
         
         // SW 0x6A82 means object/feature not found (not configured)
         // SW 0x6D00 means instruction not supported (non-Bio key)
@@ -105,8 +104,7 @@ public sealed partial class PivSession
         }
         
         var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData);
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
         
         // SW 0x6A82 or 0x6D00 means biometrics not supported/configured
         if (response.SW == 0x6A82 || response.SW == 0x6D00)
@@ -178,8 +176,7 @@ public sealed partial class PivSession
             temporaryPin.Span.CopyTo(commandData.AsSpan(2));
             
             var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData.AsMemory(0, 2 + temporaryPin.Length));
-            var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-            var response = new ApduResponse(responseData);
+            var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
             
             // SW 0x63Cx means verification failed (x = retries remaining)
             if ((response.SW & 0xFFF0) == 0x63C0)

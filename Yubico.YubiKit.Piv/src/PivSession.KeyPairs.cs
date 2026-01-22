@@ -91,8 +91,7 @@ public sealed partial class PivSession
         dataList[templateStart + 1] = (byte)(dataList.Count - templateStart - 2);
 
         var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, dataList.ToArray());
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -167,8 +166,7 @@ public sealed partial class PivSession
 
         // INS 0xF6, P1 = 0xFF (MOVE), P2 = dest slot, DATA = source slot
         var command = new ApduCommand(0x00, 0xF6, 0xFF, (byte)destinationSlot, new[] { (byte)sourceSlot });
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -203,8 +201,7 @@ public sealed partial class PivSession
 
         // INS 0xF6, P1 = 0xFF (MOVE), P2 = 0xFF (delete), DATA = source slot
         var command = new ApduCommand(0x00, 0xF6, 0xFF, 0xFF, new[] { (byte)slot });
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -234,8 +231,7 @@ public sealed partial class PivSession
 
         // INS 0xF9, P2 = slot
         var command = new ApduCommand(0x00, 0xF9, 0x00, (byte)slot, ReadOnlyMemory<byte>.Empty);
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {

@@ -349,8 +349,7 @@ public sealed partial class PivSession
             Array.Fill(paddedPin, (byte)0xFF, pin.Length, 8 - pin.Length);
 
             var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, paddedPin.AsMemory(0, 8));
-            var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-            var response = new ApduResponse(responseData);
+            var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
             if (response.IsOK())
             {
@@ -413,8 +412,7 @@ public sealed partial class PivSession
 
         // Fallback: empty PIN verify to get retry count
         var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         // Parse retry count from status word (0x63Cx where x is attempts remaining)
         if ((response.SW & 0xFFF0) == SWConstants.VerifyFail)
@@ -473,8 +471,7 @@ public sealed partial class PivSession
             Array.Fill(pinData, (byte)0xFF, 8 + newPin.Length, 8 - newPin.Length);
 
             var command = new ApduCommand(0x00, 0x24, 0x00, 0x80, pinData.AsMemory(0, 16));
-            var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-            var response = new ApduResponse(responseData);
+            var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
             if (response.IsOK())
             {

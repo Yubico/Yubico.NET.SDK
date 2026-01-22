@@ -170,8 +170,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         Logger.LogDebug("PIV: Getting YubiKey serial number");
         
         var command = new ApduCommand(0x00, 0xF8, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
         
         if (!response.IsOK())
         {
@@ -327,7 +326,6 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
     public async Task<PivPinMetadata> GetPinMetadataAsync(CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        EnsureSupports(PivFeatures.Metadata);
         
         if (_protocol is null)
         {
@@ -337,8 +335,13 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         Logger.LogDebug("PIV: Getting PIN metadata");
         
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        
+        // Check for "instruction not supported" which indicates firmware < 5.3
+        if (response.SW == 0x6D00)
+        {
+            throw new NotSupportedException("PIN metadata requires firmware 5.3.0 or later");
+        }
         
         if (!response.IsOK())
         {
@@ -350,12 +353,41 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
             throw new ApduException("Empty PIN metadata response");
         }
         
-        var data = response.Data.Span;
+        // Parse TLV structure
+        // TAG 0x05 = isDefault, TAG 0x06 = retries [total, remaining]
+        var span = response.Data.Span;
+        bool isDefault = false;
+        int totalRetries = 0;
+        int retriesRemaining = 0;
         
-        // Parse metadata TLV structure (simplified for now)
-        var totalRetries = data[0];
-        var retriesRemaining = data[1];
-        var isDefault = data[2] == 0x01;
+        int offset = 0;
+        while (offset < span.Length)
+        {
+            byte tag = span[offset++];
+            if (offset >= span.Length) break;
+            
+            int length = span[offset++];
+            if (offset + length > span.Length) break;
+            
+            switch (tag)
+            {
+                case 0x05: // IsDefault
+                    if (length > 0)
+                    {
+                        isDefault = span[offset] != 0;
+                    }
+                    break;
+                case 0x06: // Retries [total, remaining]
+                    if (length >= 2)
+                    {
+                        totalRetries = span[offset];
+                        retriesRemaining = span[offset + 1];
+                    }
+                    break;
+            }
+            
+            offset += length;
+        }
         
         return new PivPinMetadata(isDefault, totalRetries, retriesRemaining);
     }

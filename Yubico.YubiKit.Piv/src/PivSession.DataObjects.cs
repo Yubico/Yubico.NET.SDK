@@ -62,8 +62,7 @@ public sealed partial class PivSession
 
         // INS 0xCB (GET DATA)
         var command = new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, idBytes.ToArray());
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         if (response.SW == 0x6A82) // File not found
         {
@@ -146,8 +145,7 @@ public sealed partial class PivSession
 
         // INS 0xDB (PUT DATA)
         var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, cmdData.ToArray());
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {

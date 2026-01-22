@@ -35,17 +35,18 @@ public sealed partial class PivSession
             throw new InvalidOperationException("Session not initialized");
         }
 
-        if (FirmwareVersion < new FirmwareVersion(5, 3, 0))
+        // INS 0xF7 (GET METADATA), P2 = slot
+        var command = new ApduCommand(0x00, 0xF7, 0x00, (byte)slot, ReadOnlyMemory<byte>.Empty);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+
+        // Check for "instruction not supported" which indicates firmware < 5.3
+        if (response.SW == 0x6D00)
         {
             throw new NotSupportedException("Slot metadata requires firmware 5.3.0 or later");
         }
 
-        // INS 0xF7 (GET METADATA), P2 = slot
-        var command = new ApduCommand(0x00, 0xF7, 0x00, (byte)slot, ReadOnlyMemory<byte>.Empty);
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
-
-        if (response.SW == 0x6A82) // Not found - slot is empty
+        // Check for empty slot - 0x6A82 "File not found" or 0x6A88 "Referenced data not found"
+        if (response.SW is 0x6A82 or 0x6A88)
         {
             return null;
         }
@@ -172,8 +173,7 @@ public sealed partial class PivSession
         // INS 0xFF (SET MANAGEMENT KEY), P1 = 0xFF, P2 = 0xFE (set) or 0xFF (set with touch)
         byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
         var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, dataList.ToArray());
-        var responseData = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
-        var response = new ApduResponse(responseData);
+        var response = await _protocol.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {

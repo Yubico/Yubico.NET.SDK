@@ -452,6 +452,119 @@ If mid-session you realize time is constrained:
 
 **Why:** User can object to priority decisions early. Prevents mid-session justifications for skipped work.
 
+### 20. Security Audit Checklist (For Crypto/Sensitive Data Tasks)
+
+For any task involving cryptographic code, PIN/PUK handling, or sensitive data, include a security verification section:
+
+```markdown
+## Security Verification (MUST PASS BEFORE COMPLETION)
+
+Run these commands and verify expected results:
+
+```bash
+# Verify ZeroMemory usage for sensitive buffers
+grep -c "ZeroMemory" path/to/module/src/*.cs
+# Expected: >= N (one per sensitive buffer)
+
+# Verify no plaintext secrets in logs
+grep -rn "Log.*\(pin\|key\|puk\|secret\)" path/to/module/src/ --include="*.cs"
+# Expected: 0 matches (or only variable names, never values)
+
+# Verify ArrayPool cleanup pattern
+grep -A5 "ArrayPool.*Rent" path/to/module/src/*.cs | grep -c "finally"
+# Expected: Every Rent has corresponding finally block
+```
+
+Only after ALL security checks pass, output completion promise.
+```
+
+**Why:** Converts subjective "I secured the code" into objective "grep proves N ZeroMemory calls exist." Saved manual security review in PIV refactor session.
+
+### 21. Interface Change Impact Checklist
+
+When a phase involves changing interface signatures, include explicit impact tracking:
+
+```markdown
+## Interface Change Checklist (Task N.X)
+
+Before modifying `IFooInterface`:
+
+- [ ] **Audit scope first:**
+  - Run `codemapper .` to generate API surface maps (if stale)
+  - `grep -rn "IFooInterface" --include="*.cs"` to find all references
+
+- [ ] **All implementations updated:**
+  - List: `FooImpl.cs`, `BarImpl.cs`, etc.
+
+- [ ] **All call sites updated:**
+  - List: `ConsumerA.cs`, `ConsumerB.cs`, etc.
+
+- [ ] **Test mocks/fakes updated:**
+  - `grep -rn "Mock<.*IFoo\|Substitute.For<IFoo\|Fake.*IFoo" tests/ --include="*.cs"`
+  - List: `FooTests.cs` mock setup, `FakeApduProcessor.cs`, etc.
+
+- [ ] **Other modules checked:**
+  - List modules that depend on this interface
+```
+
+**Why:** Test mocks are frequently forgotten during interface refactors. The PIV security refactor required mid-session test file updates when build failed. Explicit checklist prevents this surprise.
+
+### 22. Multi-Phase Prompt Structure Template
+
+For complex refactors (3+ phases), use this proven structure:
+
+```markdown
+## Phase N: [Goal] (Priority: P0/P1/P2)
+
+**Goal:** One sentence describing the outcome.
+
+**Files:**
+- Modify: `path/to/file.cs`
+- Create: `path/to/new/file.cs`
+
+### Tasks
+
+- [ ] N.1: **Audit scope**
+  - Run `codemapper .` to refresh API maps (if >1 day old)
+  - Run grep to find all affected locations:
+    ```bash
+    grep -rn "TargetPattern" path/to/search --include="*.cs"
+    ```
+  - Document findings before proceeding
+
+- [ ] N.2: **Fix [specific item]**
+  ```csharp
+  // Exact code example to implement
+  public void ExampleMethod() { ... }
+  ```
+
+- [ ] N.3: **Fix [next item]**
+  (Include code example)
+
+- [ ] N.X-2: **Build verification**
+  ```bash
+  dotnet build.cs build
+  ```
+  Must exit 0.
+
+- [ ] N.X-1: **Test verification**
+  ```bash
+  dotnet build.cs test --filter "FullyQualifiedName~Module"
+  ```
+  All tests must pass.
+
+- [ ] N.X: **Commit**
+  ```bash
+  git add path/to/files
+  git commit -m "type(scope): description
+
+  - Bullet point 1
+  - Bullet point 2"
+  ```
+```
+
+**Why:** This structure (audit→fix→verify→commit) enabled single-iteration completion of a 5-phase security refactor. Each phase has explicit scope discovery, code examples, and verification gates.
+
 ## Anti-Patterns to Avoid
 - Vague completion criteria ("when finished")
 - Missing test requirement ("when code compiles")
@@ -466,6 +579,8 @@ If mid-session you realize time is constrained:
 - **Marking skipped tasks as complete** (dishonest progress tracking)
 - **Sequential file exploration** when parallel calls would work (wastes time)
 - **Assuming implementation bug** when workflow tests fail but atomic tests pass (check test setup first)
+- **Skipping codemapper** before interface changes (misses structural dependencies)
+- **No security verification** for crypto code (leaves memory leaks undetected)
 
 ## Handoff (ALWAYS END WITH THIS)
 

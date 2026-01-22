@@ -91,6 +91,35 @@ Name!=SkipMe                   Exclude tests named 'SkipMe'
 4. Use `--filter` for test filtering
 5. When in doubt, run `dotnet build.cs test` without filters first
 
+## xUnit v3 Known Limitations
+
+### `[WithYubiKey]` + `[InlineData]` Incompatibility
+
+The `[WithYubiKey]` attribute (used for integration tests requiring physical YubiKeys) is **incompatible** with `[InlineData]` parameterized tests.
+
+**Problem:** When you combine `[WithYubiKey]` with `[Theory]` and `[InlineData]`, xUnit v3 fails to properly inject the `YubiKeyTestState` parameter alongside inline data parameters.
+
+```csharp
+// ❌ WRONG - Does not work
+[WithYubiKey(MinFirmware = "5.7.0")]
+[Theory]
+[InlineData(PivAlgorithm.Rsa3072)]
+[InlineData(PivAlgorithm.Rsa4096)]
+public async Task SignAsync_LargeRsa_Works(PivAlgorithm algorithm, YubiKeyTestState state)
+{
+    // This will fail - state won't be injected correctly
+}
+
+// ✅ CORRECT - Use separate tests
+[WithYubiKey(MinFirmware = "5.7.0")]
+public async Task SignAsync_Rsa3072_Works(YubiKeyTestState state) { /* ... */ }
+
+[WithYubiKey(MinFirmware = "5.7.0")]
+public async Task SignAsync_Rsa4096_Works(YubiKeyTestState state) { /* ... */ }
+```
+
+**Workaround:** Split parameterized tests into separate test methods, one per parameter combination.
+
 ---
 
 ## Multi-Transport Test Infrastructure

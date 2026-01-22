@@ -787,6 +787,17 @@ function parseArgs(): Config {
           process.exit(1);
         }
         config.model = args[++i];
+        // Validate model name against known valid models
+        const validModels = [
+          "claude-sonnet-4.5", "claude-haiku-4.5", "claude-opus-4.5", "claude-sonnet-4",
+          "gpt-5.2-codex", "gpt-5.1-codex-max", "gpt-5.1-codex", "gpt-5.2", "gpt-5.1",
+          "gpt-5", "gpt-5.1-codex-mini", "gpt-5-mini", "gpt-4.1", "gemini-3-pro-preview"
+        ];
+        if (!validModels.includes(config.model)) {
+          console.error(`Error: Invalid model '${config.model}'`);
+          console.error(`Valid models: ${validModels.join(", ")}`);
+          process.exit(1);
+        }
         break;
       case "--session":
         if (i + 1 >= args.length) {

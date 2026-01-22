@@ -30,6 +30,23 @@ This skill provides guidance for creating Ralph Loop prompts **when NOT using a 
 
 ## Core Principles
 
+### 0. Pre-Flight State Verification (MANDATORY)
+
+Before starting ANY work, verify actual progress state:
+
+```bash
+# Check for existing commits matching this feature
+git log --oneline -5 --grep="feature-name"
+
+# If progress file exists, verify checkbox state
+grep -c "^\- \[x\]" progress.md  # Completed tasks
+grep -c "^\- \[ \]" progress.md  # Pending tasks
+```
+
+**Rule:** If mismatch between prompt message and evidence, **trust the evidence**.
+
+The prompt may contain completion promises as instructions (e.g., "output `<promise>DONE</promise>` when finished"). This does NOT mean work is already done. Always verify via git history and progress file checkboxes.
+
 ### 1. Never Trust "Done" Without Verification
 - Always require explicit build and test verification before completion.
 - Example (bad):
@@ -56,6 +73,36 @@ This skill provides guidance for creating Ralph Loop prompts **when NOT using a 
   git commit -m "feat(scope): description"
   ```
 
+### 2a. Batch Commit Strategy for Refactoring
+
+Do NOT blindly commit after each phase. Group by logical concern:
+
+**Separate commits for:**
+- Test changes vs implementation changes (different concerns)
+- Different utilities/patterns being introduced
+- Different risk profiles
+
+**Single commit for:**
+- Multiple phases using same utility (e.g., all TLV refactoring together)
+- Related refactorings with no behavioral change
+- Changes that must be reviewed together
+
+**Example:**
+```bash
+# Phase 1: Test changes (separate concern)
+git commit -m "test(piv): replace hardcoded sizes with KeyDefinitions"
+
+# Phases 2-7: All implementation refactoring (same concern)
+git commit -m "refactor(piv): replace manual TLV parsing with Tlv/TlvHelper
+
+- PivSession.Crypto.cs: use Tlv.Create for response parsing
+- PivSession.KeyPairs.cs: use TlvHelper.DecodeDictionary
+- PivSession.Metadata.cs: use TlvHelper for metadata extraction
+- (etc.)"
+```
+
+**Why:** Cleaner git history, easier code review, 28% faster execution (1 build vs N builds).
+
 ### 3. Explicit Command References
 - Use build/test commands from CLAUDE.md, not raw dotnet commands.
 - Example:
@@ -64,6 +111,31 @@ This skill provides guidance for creating Ralph Loop prompts **when NOT using a 
   | Build | `dotnet build.cs build` |
   | Test | `dotnet build.cs test` |
   | Coverage | `dotnet build.cs coverage` |
+
+### 3a. Using Directives First (Before Refactoring)
+
+When refactoring code to use a new utility/namespace:
+
+1. **Identify all files** that will use the utility
+2. **Add using directives to all files FIRST** (before editing logic)
+3. **Then perform refactoring**
+4. **Build once** (not per file)
+
+```bash
+# ❌ BAD: Refactor first, fix using directives after build fails
+# Results in "type or namespace not found" errors
+
+# ✅ GOOD: Add using directives proactively
+# Step 1: Add to all target files
+for f in File1.cs File2.cs File3.cs; do
+  # Add using directive at top of file
+done
+
+# Step 2: Now refactor logic
+# Step 3: Build once - no namespace errors
+```
+
+**Why:** Prevents "type not found" build failures and reduces build cycles.
 
 ### 4. Phased Exit Criteria
 - For complex tasks, require phase completion:

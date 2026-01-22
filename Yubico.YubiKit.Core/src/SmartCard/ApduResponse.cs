@@ -31,9 +31,7 @@ public readonly record struct ApduResponse
             throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
                 "ExceptionMessages.ResponseApduNotEnoughBytes, data.Length"));
 
-        SW1 = data.Span[^2];
-        SW2 = data.Span[^1];
-        Data = data.Span[..(data.Length - 2)].ToArray();
+        RawData = data.ToArray();
     }
 
     /// <summary>
@@ -48,10 +46,17 @@ public readonly record struct ApduResponse
     {
         ArgumentNullException.ThrowIfNull(dataWithoutSW);
 
-        SW1 = (byte)(sw >> 8);
-        SW2 = (byte)(sw & 0xFF);
-        Data = dataWithoutSW.ToArray();
+        var raw = new byte[dataWithoutSW.Length + 2];
+        dataWithoutSW.AsSpan().CopyTo(raw);
+        raw[^2] = (byte)(sw >> 8);
+        raw[^1] = (byte)(sw & 0xFF);
+        RawData = raw;
     }
+
+    /// <summary>
+    ///     Gets the raw response data including the status word bytes.
+    /// </summary>
+    public ReadOnlyMemory<byte> RawData { get; }
 
     /// <summary>
     ///     The status word (two byte) code which represents the overall result of a CCID interaction.
@@ -62,12 +67,12 @@ public readonly record struct ApduResponse
     /// <summary>
     ///     A convenience property accessor for the high byte of SW
     /// </summary>
-    public byte SW1 { get; }
+    public byte SW1 => RawData.Span[^2];
 
     /// <summary>
     ///     A convenience property accessor for the low byte of SW
     /// </summary>
-    public byte SW2 { get; }
+    public byte SW2 => RawData.Span[^1];
 
     /// <summary>
     ///     Gets the data part of the response.
@@ -75,26 +80,7 @@ public readonly record struct ApduResponse
     /// <value>
     ///     The raw bytes not including the ending status word.
     /// </value>
-    public ReadOnlyMemory<byte> Data { get; }
-
-    /// <summary>
-    ///     Gets the raw response data including the status word bytes.
-    /// </summary>
-    /// <remarks>
-    ///     This property constructs a new array containing Data + SW1 + SW2.
-    ///     Use sparingly to avoid allocations; prefer <see cref="Data"/> and <see cref="SW"/> separately.
-    /// </remarks>
-    public ReadOnlyMemory<byte> RawData
-    {
-        get
-        {
-            var raw = new byte[Data.Length + 2];
-            Data.Span.CopyTo(raw);
-            raw[^2] = SW1;
-            raw[^1] = SW2;
-            return raw;
-        }
-    }
+    public ReadOnlyMemory<byte> Data => RawData[..^2];
 
     /// <summary>
     ///     Prints SW1, SW2, and the length of the Data field in a formatted string.

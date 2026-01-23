@@ -1,5 +1,5 @@
 using Spectre.Console;
-using Yubico.YubiKit.Piv.Examples.PivTool.Features;
+using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Menus;
 
 // Application banner
 AnsiConsole.Write(
@@ -41,35 +41,35 @@ while (true)
         switch (choice)
         {
             case "📋 Device Info":
-                await DeviceInfoFeature.RunAsync();
+                await DeviceInfoMenu.RunAsync();
                 break;
 
             case "🔐 PIN Management":
-                await PinManagementFeature.RunAsync();
+                await PinManagementMenu.RunAsync();
                 break;
 
             case "🔑 Key Generation":
-                await KeyGenerationFeature.RunAsync();
+                await KeyGenerationMenu.RunAsync();
                 break;
 
             case "📜 Certificate Operations":
-                await CertificatesFeature.RunAsync();
+                await CertificatesMenu.RunAsync();
                 break;
 
             case "✍️  Cryptographic Operations":
-                await CryptoFeature.RunAsync();
+                await CryptoMenu.RunAsync();
                 break;
 
             case "🛡️  Key Attestation":
-                await AttestationFeature.RunAsync();
+                await AttestationMenu.RunAsync();
                 break;
 
             case "📊 Slot Overview":
-                await SlotOverviewFeature.RunAsync();
+                await SlotOverviewMenu.RunAsync();
                 break;
 
             case "⚠️  Reset PIV":
-                await ResetFeature.RunAsync();
+                await ResetMenu.RunAsync();
                 break;
 
             default:

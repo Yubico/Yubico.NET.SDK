@@ -44,6 +44,10 @@ while (true)
                 await DeviceInfoFeature.RunAsync();
                 break;
 
+            case "🔐 PIN Management":
+                await PinManagementFeature.RunAsync();
+                break;
+
             default:
                 AnsiConsole.MarkupLine($"[yellow]Selected: {choice} - Not yet implemented[/]");
                 break;

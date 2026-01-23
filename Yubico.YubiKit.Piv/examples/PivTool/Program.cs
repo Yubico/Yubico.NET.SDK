@@ -52,6 +52,26 @@ while (true)
                 await KeyGenerationFeature.RunAsync();
                 break;
 
+            case "📜 Certificate Operations":
+                await CertificatesFeature.RunAsync();
+                break;
+
+            case "✍️  Cryptographic Operations":
+                await CryptoFeature.RunAsync();
+                break;
+
+            case "🛡️  Key Attestation":
+                await AttestationFeature.RunAsync();
+                break;
+
+            case "📊 Slot Overview":
+                await SlotOverviewFeature.RunAsync();
+                break;
+
+            case "⚠️  Reset PIV":
+                await ResetFeature.RunAsync();
+                break;
+
             default:
                 AnsiConsole.MarkupLine($"[yellow]Selected: {choice} - Not yet implemented[/]");
                 break;

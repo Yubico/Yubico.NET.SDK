@@ -177,4 +177,13 @@ public static class OutputHelpers
     {
         AnsiConsole.MarkupLine($"[yellow]🔓 {Markup.Escape(credentialType)} is set to default value - consider changing it[/]");
     }
+
+    /// <summary>
+    /// Waits for the user to press any key.
+    /// </summary>
+    public static void WaitForKey()
+    {
+        AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+        Console.ReadKey(intercept: true);
+    }
 }

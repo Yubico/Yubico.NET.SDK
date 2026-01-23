@@ -25,6 +25,35 @@ namespace Yubico.YubiKit.Piv;
 
 public sealed partial class PivSession
 {
+    /// <summary>
+    /// Gets the factory default PIV management key (3DES).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>⚠️ SECURITY WARNING:</b> This is the well-known default management key shipped with all YubiKeys.
+    /// You SHOULD change this key after initial device setup to protect against unauthorized management operations.
+    /// </para>
+    /// <para>
+    /// The default key is: 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 (24 bytes, 3DES).
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Authenticate with default key (for initial setup only)
+    /// await session.AuthenticateAsync(PivSession.DefaultManagementKey);
+    /// 
+    /// // Generate a new secure key and change it immediately
+    /// byte[] newKey = RandomNumberGenerator.GetBytes(24);
+    /// await session.ChangeManagementKeyAsync(newKey);
+    /// </code>
+    /// </example>
+    public static ReadOnlySpan<byte> DefaultManagementKey =>
+    [
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+    ];
+
     private bool _isAuthenticated;
 
     /// <summary>

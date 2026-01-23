@@ -4,77 +4,88 @@ This document captures usability issues and improvement opportunities discovered
 
 ## Pain Points
 
-### 1. SignOrDecryptAsync API Ergonomics
+### 1. SignOrDecryptAsync API Ergonomics ✅ FIXED
 **Issue**: The `SignOrDecryptAsync` method requires passing the algorithm explicitly, even though the slot metadata already contains this information.
 
-**Current API**:
-```csharp
-var result = await session.SignOrDecryptAsync(slot, slotMetadata.Algorithm, data, cancellationToken);
-```
+**Resolution**: Added overload `SignOrDecryptAsync(PivSlot slot, ReadOnlyMemory<byte> data, CancellationToken)` that auto-detects the algorithm from slot metadata. Requires firmware 5.3+.
 
-**Suggested Improvement**: Consider an overload that automatically retrieves the algorithm from slot metadata:
 ```csharp
+// New simplified API (firmware 5.3+)
 var result = await session.SignOrDecryptAsync(slot, data, cancellationToken);
 ```
 
-**Impact**: Reduces boilerplate and chance of algorithm mismatch errors.
-
 ---
 
-### 2. Nullable PivSlotMetadata Return Type
+### 2. Nullable PivSlotMetadata Return Type (Deferred)
 **Issue**: `GetSlotMetadataAsync` returns `PivSlotMetadata?` (nullable struct), requiring `.Value` access after null check.
 
-**Example**:
-```csharp
-var metadata = await session.GetSlotMetadataAsync(slot, cancellationToken);
-if (metadata is null) { return; }
-var slotMetadata = metadata.Value; // Extra step
-```
+**Status**: Deferred to future release. The nullable pattern is intentional to distinguish between "slot is empty" (null) and "slot has a key" (non-null). Changing this would be a breaking API change.
 
-**Suggested Improvement**: Return a non-nullable struct with an `IsEmpty` property, or use a record class.
+**Workaround**: Use pattern matching:
+```csharp
+if (await session.GetSlotMetadataAsync(slot) is { } metadata)
+{
+    // metadata is non-null here
+}
+```
 
 ---
 
-### 3. Management Key Default Value Not Exposed
+### 3. Management Key Default Value Not Exposed ✅ FIXED
 **Issue**: The default management key value is not exposed as a constant, requiring developers to hardcode it.
 
-**Current Workaround**:
-```csharp
-byte[] defaultKey = [0x01, 0x02, 0x03, ...]; // Hardcoded
-```
+**Resolution**: Added `PivSession.DefaultManagementKey` property (ReadOnlySpan<byte>).
 
-**Suggested Improvement**: Expose `PivSession.DefaultManagementKey` constant.
+```csharp
+// Authenticate with default key
+await session.AuthenticateAsync(PivSession.DefaultManagementKey);
+```
 
 ---
 
-### 4. Certificate Creation Requires External Public Key
+### 4. Certificate Creation Requires External Public Key ✅ FIXED
 **Issue**: Generating a self-signed certificate for a slot requires the public key, but there's no direct way to get the public key bytes in a usable format for `CertificateRequest`.
 
-**Current Workaround**: Must have an existing certificate in the slot to extract the public key.
+**Resolution**: Added extension methods in `PivSlotMetadataExtensions`:
+- `GetRsaPublicKey()` - Returns `RSA` instance for RSA keys
+- `GetECDsaPublicKey()` - Returns `ECDsa` instance for P-256/P-384 keys
+- `IsRsa()` / `IsEcc()` - Algorithm type helpers
 
-**Suggested Improvement**: Add `GetPublicKeyAsync(slot)` that returns an `AsymmetricAlgorithm` compatible with `CertificateRequest`.
-
----
-
-### 5. No Progress/Touch Callback for Long Operations
-**Issue**: Operations requiring touch provide no callback mechanism to prompt users.
-
-**Impact**: Developers must implement timing-based prompts or hope users remember to touch.
-
-**Suggested Improvement**: Add optional `IProgress<PivOperationProgress>` parameter with touch-required notifications.
-
----
-
-### 6. Inconsistent Async Disposal
-**Issue**: `ManagementSession` uses `IDisposable` while `PivSession` uses `IAsyncDisposable`, leading to mixed `using` and `await using` patterns.
-
-**Example**:
 ```csharp
-using var management = ManagementSession.Create(connection);  // sync
-await using var piv = await PivSession.CreateAsync(connection);  // async
+var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+using var rsa = metadata.Value.GetRsaPublicKey();
+var request = new CertificateRequest("CN=Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 ```
 
-**Suggested Improvement**: Align all session types to use `IAsyncDisposable`.
+**Note**: Ed25519/X25519 curves are not supported by .NET's ECDsa class.
+
+---
+
+### 5. No Progress/Touch Callback for Long Operations ✅ FIXED
+**Issue**: Operations requiring touch provide no callback mechanism to prompt users.
+
+**Resolution**: Added `OnTouchRequired` callback property to `PivSession`:
+
+```csharp
+session.OnTouchRequired = () => Console.WriteLine("Touch your YubiKey now...");
+await session.SignOrDecryptAsync(slot, data, cancellationToken);
+```
+
+The callback fires before operations with `TouchPolicy.Always` or `TouchPolicy.Cached`. On firmware < 5.3, it fires conservatively for all crypto operations.
+
+**Security Note**: The callback receives NO operation context (no slot, algorithm, or data) to prevent information leakage.
+
+---
+
+### 6. Inconsistent Async Disposal ✅ FIXED
+**Issue**: `ManagementSession` uses `IDisposable` while `PivSession` uses `IAsyncDisposable`, leading to mixed `using` and `await using` patterns.
+
+**Resolution**: `ManagementSession` now implements `IAsyncDisposable`:
+
+```csharp
+await using var management = ManagementSession.Create(connection);
+await using var piv = await PivSession.CreateAsync(connection);
+```
 
 ---
 
@@ -85,10 +96,13 @@ await using var piv = await PivSession.CreateAsync(connection);  // async
 - Key generation with policy configuration is well-designed
 - Attestation API is straightforward
 
-## Recommendations
+## Summary
 
-1. Consider adding convenience overloads for common patterns
-2. Expose more constants for default values
-3. Add progress/notification callbacks for touch-required operations
-4. Consider adding a high-level certificate builder API
-5. Unify disposal patterns across session types
+| Pain Point | Status |
+|------------|--------|
+| SignOrDecryptAsync ergonomics | ✅ Fixed |
+| Nullable PivSlotMetadata | ⏳ Deferred (intentional design) |
+| Default management key | ✅ Fixed |
+| Public key extraction | ✅ Fixed |
+| Touch callback | ✅ Fixed |
+| Async disposal consistency | ✅ Fixed |

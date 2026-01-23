@@ -76,6 +76,23 @@ Run `dotnet build.cs -- --help` to see all discovered test projects.
 
 ## Filter Syntax Reference
 
+### xUnit v2 vs v3 Filter Differences
+
+When running filtered tests **outside** the build script (ad-hoc debugging), syntax differs by xUnit version:
+
+| Version | Detection | Filter Syntax |
+|---------|-----------|---------------|
+| xUnit v2 | No `UseMicrosoftTestingPlatformRunner` | `--filter "FullyQualifiedName~TestName"` |
+| xUnit v3 | Has `UseMicrosoftTestingPlatformRunner` | `-m TestName` or `--method TestName` |
+
+**Check version:** Look for `<PackageReference Include="xunit"` in the `.csproj`:
+- `3.x.x` → xUnit v3 syntax
+- `2.x.x` → xUnit v2 syntax
+
+**Recommendation:** Use `dotnet build.cs test --filter "..."` which handles this automatically.
+
+### Standard Filter Expressions
+
 ```
 FullyQualifiedName~MyClass     Tests containing 'MyClass' in full name
 Name=MyTestMethod              Exact test method name

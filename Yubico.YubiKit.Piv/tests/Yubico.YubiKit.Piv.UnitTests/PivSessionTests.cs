@@ -82,4 +82,38 @@ public class PivSessionTests
         
         Assert.Null(exception);
     }
+
+    [Fact]
+    public void DefaultManagementKey_Returns24ByteDefaultValue()
+    {
+        // Default PIV management key is 0x010203040506070801020304050607080102030405060708 (24 bytes)
+        ReadOnlySpan<byte> expected = [
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+        ];
+
+        ReadOnlySpan<byte> actual = PivSession.DefaultManagementKey;
+
+        Assert.Equal(24, actual.Length);
+        Assert.True(expected.SequenceEqual(actual));
+    }
+
+    [Fact]
+    public async Task SignOrDecryptAsync_WithoutAlgorithm_OnOldFirmware_ThrowsNotSupportedException()
+    {
+        // Arrange: Create session with firmware < 5.3
+        var mockConnection = Substitute.For<ISmartCardConnection>();
+        mockConnection.Transport.Returns(Transport.Usb);
+        
+        var session = new PivSession(mockConnection, null);
+        // Session has default firmware version (0.0.0 which is < 5.3)
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(
+            () => session.SignOrDecryptAsync(PivSlot.Authentication, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+
+        Assert.Contains("5.3", exception.Message);
+        Assert.Contains("firmware", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
 }

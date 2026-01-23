@@ -12,20 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Interfaces;
+using Xunit;
 
-namespace Yubico.YubiKit.Management;
+namespace Yubico.YubiKit.Management.UnitTests;
 
-public interface IManagementSession : IApplicationSession, IAsyncDisposable
+public class ManagementSessionTests
 {
-    Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default);
+    [Fact]
+    public void IManagementSession_InheritsIAsyncDisposable()
+    {
+        // Verify that IManagementSession inherits from IAsyncDisposable
+        Assert.True(typeof(IAsyncDisposable).IsAssignableFrom(typeof(IManagementSession)));
+    }
 
-    Task SetDeviceConfigAsync(
-        DeviceConfig config,
-        bool reboot,
-        byte[]? currentLockCode = null,
-        byte[]? newLockCode = null,
-        CancellationToken cancellationToken = default);
-
-    Task ResetDeviceAsync(CancellationToken cancellationToken = default);
+    [Fact]
+    public void ManagementSession_ImplementsIAsyncDisposable()
+    {
+        // Verify that ManagementSession implements IAsyncDisposable
+        Assert.True(typeof(IAsyncDisposable).IsAssignableFrom(typeof(ManagementSession)));
+    }
 }

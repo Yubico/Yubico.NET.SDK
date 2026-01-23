@@ -259,6 +259,33 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Sign data or decrypt data using private key in specified slot, auto-detecting the algorithm.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Requires YubiKey firmware 5.3+.</b> This overload queries slot metadata to determine
+    /// the key algorithm automatically, eliminating the need to track algorithms separately.
+    /// </para>
+    /// <para>
+    /// For YubiKeys with firmware older than 5.3, use the overload that accepts an explicit
+    /// algorithm parameter.
+    /// </para>
+    /// <para>
+    /// May require PIN verification or touch based on key policy.
+    /// </para>
+    /// </remarks>
+    /// <param name="slot">PIV slot containing private key.</param>
+    /// <param name="data">Data to sign or decrypt.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Signature or decrypted data.</returns>
+    /// <exception cref="NotSupportedException">YubiKey firmware is older than 5.3 and does not support metadata retrieval.</exception>
+    /// <exception cref="InvalidOperationException">Slot is empty (no key present).</exception>
+    Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
+        PivSlot slot,
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Calculate ECDH shared secret with peer public key.
     /// </summary>
     /// <remarks>

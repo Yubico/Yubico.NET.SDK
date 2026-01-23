@@ -190,6 +190,32 @@ The loop WILL restart. Trust the process. Quality over speed.
 - Hardware tests are best-effort; document and skip after 2-3 failures.
 - Mark with `[Trait("RequiresHardware", "true")]`. Unit tests MUST pass.
 
+### 6a. Integration Test Deferral
+
+When a unit test requires hardware, specific firmware, or mock infrastructure that doesn't exist:
+
+```markdown
+## When to Defer Tests
+
+If a test requires:
+- Physical YubiKey hardware
+- Specific firmware version for metadata/behavior
+- Mock infrastructure not present in the project
+- Session initialization with hardware-specific state
+
+**Action:**
+1. Document as "Requires integration test" in task Notes section
+2. Mark task as complete (not blocking)
+3. Do NOT block progress on unmockable scenarios
+4. Optionally create a follow-up issue for integration test coverage
+
+**Example:**
+- [ ] Task 1.2.7: Test InvalidOperationException on empty slot
+  **Note:** Requires integration test - GetSlotMetadataAsync calls hardware
+```
+
+**Why:** Prevents agents from spinning on scenarios that genuinely can't be unit tested. Integration tests are a separate concern.
+
 ### 7. One Phase Per Iteration (with Mandatory Commits)
 - Design prompts so the agent completes **one phase**, verifies, and commits per iteration.
 - This keeps iterations short, maximizing fresh context window for each phase.
@@ -582,6 +608,27 @@ Only after ALL security checks pass, output completion promise.
 ```
 
 **Why:** Converts subjective "I secured the code" into objective "grep proves N ZeroMemory calls exist." Saved manual security review in PIV refactor session.
+
+### 20a. Security Audit Documentation Template
+
+For phases with explicit security verification tasks, require structured audit documentation:
+
+```markdown
+## Security Phase: Verification
+
+For each security task, document with evidence:
+
+| Check | Evidence | Result |
+|-------|----------|--------|
+| Callback params (no info leak) | `TouchNotificationCallback` is parameterless delegate | ✅ PASS |
+| No secrets in logs | `grep -rn "Log.*pin" src/` → 0 matches | ✅ PASS |
+| ZeroMemory for sensitive buffers | `PivSession.Authentication.cs:142` calls ZeroMemory | ✅ PASS |
+| XML docs include security warning | `DefaultManagementKey` has `<remarks>` with warning | ✅ PASS |
+
+**Audit completed:** 2026-01-23T15:30:00Z
+```
+
+**Why:** Creates audit trail for security-sensitive changes. Evidence-based verification prevents subjective "I think it's secure" claims. Table format ensures completeness.
 
 ### 21. Interface Change Impact Checklist
 

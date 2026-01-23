@@ -113,6 +113,9 @@ public sealed partial class PivSession
             throw new InvalidOperationException("Session not initialized");
         }
 
+        // Notify user if touch may be required
+        await NotifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
+
         // Prepare data according to algorithm key size
         var preparedData = PrepareDataForCrypto(algorithm, data);
 
@@ -208,6 +211,9 @@ public sealed partial class PivSession
         {
             throw new InvalidOperationException("Session not initialized");
         }
+
+        // Notify user if touch may be required
+        await NotifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
 
         // Determine algorithm from public key
         var algorithm = peerPublicKey switch

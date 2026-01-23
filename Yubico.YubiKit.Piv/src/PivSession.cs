@@ -48,6 +48,32 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
     public PivManagementKeyType ManagementKeyType { get; private set; } = PivManagementKeyType.TripleDes;
 
     /// <summary>
+    /// Gets or sets the callback invoked when a YubiKey operation may require physical touch.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Set this property to receive notifications before operations that may require touch.
+    /// The callback will be invoked for keys with <see cref="PivTouchPolicy.Always"/> or
+    /// <see cref="PivTouchPolicy.Cached"/> touch policies.
+    /// </para>
+    /// <para>
+    /// For <see cref="PivTouchPolicy.Cached"/>, the callback fires conservatively because
+    /// the 15-second cache expiry timing cannot be determined from the API.
+    /// </para>
+    /// <para>
+    /// On firmware older than 5.3 (no metadata support), the callback fires conservatively
+    /// for all cryptographic operations as the touch policy cannot be queried.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// session.OnTouchRequired = () => Console.WriteLine("Touch your YubiKey now...");
+    /// await session.SignOrDecryptAsync(PivSlot.Authentication, data);
+    /// </code>
+    /// </example>
+    public TouchNotificationCallback? OnTouchRequired { get; set; }
+
+    /// <summary>
     /// Initializes a new PivSession with the specified connection.
     /// </summary>
     /// <remarks>
@@ -433,6 +459,66 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
 
 
 
+
+    #endregion
+
+    #region Touch Notification
+
+    /// <summary>
+    /// Notifies the user if touch may be required for the operation on the specified slot.
+    /// </summary>
+    /// <param name="slot">The slot to check for touch policy.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    /// <para>
+    /// This method queries slot metadata (if supported) to determine the touch policy.
+    /// For <see cref="PivTouchPolicy.Always"/> or <see cref="PivTouchPolicy.Cached"/>,
+    /// the callback is invoked.
+    /// </para>
+    /// <para>
+    /// On older firmware (&lt; 5.3), metadata is not available and the callback is invoked
+    /// conservatively for all operations.
+    /// </para>
+    /// </remarks>
+    private async Task NotifyTouchIfRequiredAsync(PivSlot slot, CancellationToken cancellationToken)
+    {
+        // Short-circuit if no callback registered
+        if (OnTouchRequired is null)
+        {
+            return;
+        }
+
+        // Try to query slot metadata for touch policy
+        if (FirmwareVersion >= PivFeatures.Metadata.Version)
+        {
+            try
+            {
+                var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
+                if (metadata is null)
+                {
+                    // Slot is empty - no touch needed
+                    return;
+                }
+
+                var touchPolicy = metadata.Value.TouchPolicy;
+                if (touchPolicy is PivTouchPolicy.Always or PivTouchPolicy.Cached)
+                {
+                    Logger.LogDebug("PIV: Touch may be required (policy: {Policy})", touchPolicy);
+                    OnTouchRequired.Invoke();
+                }
+                
+                return;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogDebug(ex, "PIV: Failed to query slot metadata for touch policy, notifying conservatively");
+            }
+        }
+
+        // Fallback: On old firmware or metadata query failure, notify conservatively
+        Logger.LogDebug("PIV: Notifying touch conservatively (metadata unavailable)");
+        OnTouchRequired.Invoke();
+    }
 
     #endregion
 

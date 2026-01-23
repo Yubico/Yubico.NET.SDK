@@ -1,4 +1,5 @@
 using Spectre.Console;
+using Yubico.YubiKit.Piv.Examples.PivTool.Features;
 
 // Application banner
 AnsiConsole.Write(
@@ -35,8 +36,24 @@ while (true)
         break;
     }
 
-    // Placeholder for feature dispatch - will be implemented in later tasks
-    AnsiConsole.MarkupLine($"[yellow]Selected: {choice} - Not yet implemented[/]");
+    try
+    {
+        switch (choice)
+        {
+            case "📋 Device Info":
+                await DeviceInfoFeature.RunAsync();
+                break;
+
+            default:
+                AnsiConsole.MarkupLine($"[yellow]Selected: {choice} - Not yet implemented[/]");
+                break;
+        }
+    }
+    catch (Exception ex)
+    {
+        AnsiConsole.MarkupLine($"[red]Error: {ex.Message}[/]");
+    }
+
     AnsiConsole.WriteLine();
 }
 

@@ -48,6 +48,10 @@ while (true)
                 await PinManagementFeature.RunAsync();
                 break;
 
+            case "🔑 Key Generation":
+                await KeyGenerationFeature.RunAsync();
+                break;
+
             default:
                 AnsiConsole.MarkupLine($"[yellow]Selected: {choice} - Not yet implemented[/]");
                 break;

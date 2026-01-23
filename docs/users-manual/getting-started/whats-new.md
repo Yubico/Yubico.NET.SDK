@@ -18,6 +18,18 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.15.x Releases
 
+### 1.15.1
+
+Release date: January 28th, 2026
+
+Documentation:
+
+- The documentation on [PIV certificate sizes](xref:UsersManualPivCertSizes) has been restructured to improve clarity and readability. Additionally, firmware behavior details and practical examples have been added/updated. ([#356](https://github.com/Yubico/Yubico.NET.SDK/pull/356))
+
+Dependencies:
+
+- Several dependencies across integration, unit, and utilities test projects, the test app, and the Yubico.Core and Yubico.YubiKey projects have been updated. ([#388](https://github.com/Yubico/Yubico.NET.SDK/pull/388), [#387](https://github.com/Yubico/Yubico.NET.SDK/pull/387), [#386](https://github.com/Yubico/Yubico.NET.SDK/pull/386), [#384](https://github.com/Yubico/Yubico.NET.SDK/pull/384))
+
 ### 1.15.0
 
 Release date: December 4th, 2025

@@ -66,7 +66,7 @@ public static class PinManagementMenu
 
     private static async Task VerifyPinAsync(IPivSession session, CancellationToken ct)
     {
-        var pin = PinPrompt.GetPin("Enter PIN");
+        var pin = PinPrompt.GetPinWithDefault("PIN to verify");
         if (pin is null)
         {
             return;
@@ -96,7 +96,7 @@ public static class PinManagementMenu
 
     private static async Task ChangePinAsync(IPivSession session, CancellationToken ct)
     {
-        var currentPin = PinPrompt.GetPin("Enter current PIN");
+        var currentPin = PinPrompt.GetPinWithDefault("Current PIN");
         if (currentPin is null)
         {
             return;
@@ -134,7 +134,7 @@ public static class PinManagementMenu
 
     private static async Task ChangePukAsync(IPivSession session, CancellationToken ct)
     {
-        var currentPuk = PinPrompt.GetPuk("Enter current PUK");
+        var currentPuk = PinPrompt.GetPukWithDefault("Current PUK");
         if (currentPuk is null)
         {
             return;
@@ -172,7 +172,7 @@ public static class PinManagementMenu
 
     private static async Task UnblockPinAsync(IPivSession session, CancellationToken ct)
     {
-        var puk = PinPrompt.GetPuk("Enter PUK");
+        var puk = PinPrompt.GetPukWithDefault("PUK");
         if (puk is null)
         {
             return;
@@ -210,7 +210,7 @@ public static class PinManagementMenu
 
     private static async Task AuthenticateAsync(IPivSession session, CancellationToken ct)
     {
-        var mgmtKey = PinPrompt.GetManagementKey("Enter management key (hex)");
+        var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
         if (mgmtKey is null)
         {
             return;

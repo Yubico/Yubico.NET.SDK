@@ -31,6 +31,10 @@ public static class PinPrompt
     private const int ManagementKeyLengthAes128 = 16;
     private const int ManagementKeyLengthAes192 = 24;
     private const int ManagementKeyLengthAes256 = 32;
+    private const int PbkdfIterations = 600_000; // OWASP recommended
+
+    private const string DefaultPinValue = "123456";
+    private const string DefaultPukValue = "12345678";
 
     /// <summary>
     /// Prompts for a PIN and returns the bytes. Caller must zero the returned memory.
@@ -43,6 +47,23 @@ public static class PinPrompt
     }
 
     /// <summary>
+    /// Prompts for a PIN with option to use the default. Caller must zero the returned memory.
+    /// </summary>
+    /// <param name="prompt">The prompt text to display.</param>
+    /// <returns>The PIN as UTF-8 bytes, or null if cancelled.</returns>
+    public static byte[]? GetPinWithDefault(string prompt = "PIN")
+    {
+        var choice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title($"[blue]{prompt}:[/]")
+                .AddChoices(["Use default", "Enter custom PIN"]));
+
+        return choice == "Use default"
+            ? Encoding.UTF8.GetBytes(DefaultPinValue)
+            : GetCredential("Enter PIN", MaxPinLength, minLength: 6);
+    }
+
+    /// <summary>
     /// Prompts for a PUK and returns the bytes. Caller must zero the returned memory.
     /// </summary>
     /// <param name="prompt">The prompt text to display.</param>
@@ -50,6 +71,23 @@ public static class PinPrompt
     public static byte[]? GetPuk(string prompt = "Enter PUK")
     {
         return GetCredential(prompt, MaxPukLength, minLength: 6);
+    }
+
+    /// <summary>
+    /// Prompts for a PUK with option to use the default. Caller must zero the returned memory.
+    /// </summary>
+    /// <param name="prompt">The prompt text to display.</param>
+    /// <returns>The PUK as UTF-8 bytes, or null if cancelled.</returns>
+    public static byte[]? GetPukWithDefault(string prompt = "PUK")
+    {
+        var choice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title($"[blue]{prompt}:[/]")
+                .AddChoices(["Use default", "Enter custom PUK"]));
+
+        return choice == "Use default"
+            ? Encoding.UTF8.GetBytes(DefaultPukValue)
+            : GetCredential("Enter PUK", MaxPukLength, minLength: 6);
     }
 
     /// <summary>
@@ -160,6 +198,71 @@ public static class PinPrompt
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// Prompts for a management key with options for default, passphrase, or hex.
+    /// Caller must zero the returned memory.
+    /// </summary>
+    /// <param name="prompt">The prompt text to display.</param>
+    /// <param name="keyLength">Expected key length in bytes (16, 24, or 32). Default is 24.</param>
+    /// <returns>The management key bytes, or null if cancelled.</returns>
+    public static byte[]? GetManagementKeyWithDefault(string prompt = "Management key", int keyLength = ManagementKeyLength3Des)
+    {
+        var choice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title($"[blue]{prompt}:[/]")
+                .AddChoices(["Use default", "Enter passphrase (derives key)", "Enter hex string (advanced)"]));
+
+        return choice switch
+        {
+            "Use default" => PivSession.DefaultManagementKey.ToArray(),
+            "Enter passphrase (derives key)" => GetManagementKeyFromPassphrase(keyLength),
+            "Enter hex string (advanced)" => GetManagementKey("Enter management key (hex)", keyLength),
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// Derives a management key from a passphrase using PBKDF2-SHA256.
+    /// </summary>
+    private static byte[]? GetManagementKeyFromPassphrase(int keyLength)
+    {
+        var passphrase = AnsiConsole.Prompt(
+            new TextPrompt<string>("Enter passphrase:")
+                .Secret()
+                .Validate(s => string.IsNullOrEmpty(s)
+                    ? ValidationResult.Error("Passphrase cannot be empty.")
+                    : ValidationResult.Success()));
+
+        if (string.IsNullOrEmpty(passphrase))
+        {
+            return null;
+        }
+
+        return DeriveKeyFromPassphrase(passphrase, keyLength);
+    }
+
+    /// <summary>
+    /// Derives a key from a passphrase using PBKDF2-SHA256.
+    /// </summary>
+    /// <param name="passphrase">The passphrase to derive from.</param>
+    /// <param name="keyLength">The desired key length in bytes.</param>
+    /// <returns>The derived key bytes.</returns>
+    private static byte[] DeriveKeyFromPassphrase(string passphrase, int keyLength)
+    {
+        // Fixed salt for this example app - in production, use unique salt per key
+        ReadOnlySpan<byte> salt = "YubiKit.PIV.Example.2026"u8;
+
+        var key = new byte[keyLength];
+        Rfc2898DeriveBytes.Pbkdf2(
+            passphrase,
+            salt,
+            key,
+            PbkdfIterations,
+            HashAlgorithmName.SHA256);
+
+        return key;
     }
 
     /// <summary>

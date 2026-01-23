@@ -61,7 +61,7 @@ public static class CryptoMenu
         var slot = SlotSelector.SelectSlot("Select slot with signing key:");
 
         // Verify PIN if needed
-        var pin = PinPrompt.GetPin("Enter PIN");
+        var pin = PinPrompt.GetPinWithDefault("PIN");
         if (pin is null)
         {
             return;
@@ -145,7 +145,7 @@ public static class CryptoMenu
         var slot = SlotSelector.SelectSlot("Select slot with RSA decryption key:");
 
         // Verify PIN
-        var pin = PinPrompt.GetPin("Enter PIN");
+        var pin = PinPrompt.GetPinWithDefault("PIN");
         if (pin is null)
         {
             return;

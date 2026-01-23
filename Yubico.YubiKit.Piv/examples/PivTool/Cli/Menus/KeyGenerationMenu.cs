@@ -76,7 +76,7 @@ public static class KeyGenerationMenu
 
         // Authenticate management key
         await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
-        var mgmtKey = PinPrompt.GetManagementKey("Enter management key (hex)");
+        var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
         
         if (mgmtKey is null)
         {

@@ -111,7 +111,7 @@ public static class CertificatesMenu
     private static async Task ImportCertificateAsync(IPivSession session, CancellationToken ct)
     {
         // Authenticate first
-        var mgmtKey = PinPrompt.GetManagementKey("Enter management key (hex)");
+        var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
         if (mgmtKey is null)
         {
             return;
@@ -156,7 +156,7 @@ public static class CertificatesMenu
     private static async Task GenerateSelfSignedAsync(IPivSession session, CancellationToken ct)
     {
         // Authenticate management key
-        var mgmtKey = PinPrompt.GetManagementKey("Enter management key (hex)");
+        var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
         if (mgmtKey is null)
         {
             return;
@@ -225,7 +225,7 @@ public static class CertificatesMenu
     private static async Task DeleteCertificateAsync(IPivSession session, CancellationToken ct)
     {
         // Authenticate first
-        var mgmtKey = PinPrompt.GetManagementKey("Enter management key (hex)");
+        var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
         if (mgmtKey is null)
         {
             return;

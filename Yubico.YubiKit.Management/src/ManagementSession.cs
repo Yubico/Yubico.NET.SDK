@@ -26,7 +26,7 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;
 
-public sealed class ManagementSession : ApplicationSession, IManagementSession
+public sealed class ManagementSession : ApplicationSession, IManagementSession, IAsyncDisposable
 {
     private const int TagMoreDeviceInfo = 0x10;
 
@@ -46,6 +46,19 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     private IManagementBackend _backend;
 
     private FirmwareVersion? _version;
+
+    /// <summary>
+    /// Disposes the session asynchronously.
+    /// </summary>
+    /// <returns>A ValueTask representing the asynchronous dispose operation.</returns>
+    /// <remarks>
+    /// This allows the session to be used with <c>await using</c> syntax for async-friendly cleanup.
+    /// </remarks>
+    public ValueTask DisposeAsync()
+    {
+        Dispose();
+        return ValueTask.CompletedTask;
+    }
 
     private ManagementSession(
         IConnection connection,

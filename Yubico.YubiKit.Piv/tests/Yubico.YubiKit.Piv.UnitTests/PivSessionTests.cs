@@ -98,4 +98,22 @@ public class PivSessionTests
         Assert.Equal(24, actual.Length);
         Assert.True(expected.SequenceEqual(actual));
     }
+
+    [Fact]
+    public async Task SignOrDecryptAsync_WithoutAlgorithm_OnOldFirmware_ThrowsNotSupportedException()
+    {
+        // Arrange: Create session with firmware < 5.3
+        var mockConnection = Substitute.For<ISmartCardConnection>();
+        mockConnection.Transport.Returns(Transport.Usb);
+        
+        var session = new PivSession(mockConnection, null);
+        // Session has default firmware version (0.0.0 which is < 5.3)
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(
+            () => session.SignOrDecryptAsync(PivSlot.Authentication, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+
+        Assert.Contains("5.3", exception.Message);
+        Assert.Contains("firmware", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
 }

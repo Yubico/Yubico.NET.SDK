@@ -41,11 +41,70 @@ public sealed partial class PivSession
     /// PIN verification may be required before this operation depending on the key's PIN policy.
     /// </para>
     /// </remarks>
-    public async Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
+    public Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
         PivSlot slot,
         PivAlgorithm algorithm,
         ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default) =>
+        SignOrDecryptCoreAsync(slot, algorithm, data, cancellationToken);
+
+    /// <summary>
+    /// Signs or decrypts data using the private key in the specified slot, auto-detecting the algorithm.
+    /// </summary>
+    /// <param name="slot">The slot containing the private key.</param>
+    /// <param name="data">The data to sign or decrypt.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>The signature or decrypted data.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>Requires YubiKey firmware 5.3+.</b> This overload queries slot metadata to determine
+    /// the key algorithm automatically, eliminating the need to track algorithms separately.
+    /// </para>
+    /// <para>
+    /// For YubiKeys with firmware older than 5.3, use the overload that accepts an explicit
+    /// algorithm parameter.
+    /// </para>
+    /// <para>
+    /// PIN verification may be required before this operation depending on the key's PIN policy.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="NotSupportedException">YubiKey firmware is older than 5.3 and does not support metadata retrieval.</exception>
+    /// <exception cref="InvalidOperationException">Slot is empty (no key present).</exception>
+    public async Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
+        PivSlot slot,
+        ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default)
+    {
+        Logger.LogDebug("PIV: SignOrDecryptAsync auto-detecting algorithm for slot 0x{Slot:X2}", (byte)slot);
+
+        // Check firmware version supports metadata
+        if (FirmwareVersion < PivFeatures.Metadata.Version)
+        {
+            throw new NotSupportedException(
+                $"Auto-detecting algorithm requires YubiKey firmware 5.3 or later. " +
+                $"Current firmware: {FirmwareVersion}. Use the overload that accepts an explicit algorithm parameter.");
+        }
+
+        // Query slot metadata to get the algorithm
+        var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
+
+        if (metadata is null)
+        {
+            throw new InvalidOperationException(
+                $"Slot 0x{(byte)slot:X2} is empty. Generate or import a key before signing/decrypting.");
+        }
+
+        var slotMetadata = metadata.Value;
+        Logger.LogDebug("PIV: Auto-detected algorithm {Algorithm} for slot 0x{Slot:X2}", slotMetadata.Algorithm, (byte)slot);
+
+        return await SignOrDecryptCoreAsync(slot, slotMetadata.Algorithm, data, cancellationToken).ConfigureAwait(false);;
+    }
+
+    private async Task<ReadOnlyMemory<byte>> SignOrDecryptCoreAsync(
+        PivSlot slot,
+        PivAlgorithm algorithm,
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken)
     {
         Logger.LogDebug("PIV: Signing/decrypting with slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
 

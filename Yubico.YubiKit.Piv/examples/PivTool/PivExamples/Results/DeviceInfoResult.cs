@@ -53,6 +53,12 @@ public sealed record DeviceInfoResult
         new() { Success = true, DeviceInfo = info, PinRetriesRemaining = pinRetries, PukRetriesRemaining = pukRetries };
 
     /// <summary>
+    /// Creates a successful result with only retry information (no device info).
+    /// </summary>
+    public static DeviceInfoResult RetryInfoOnly(int? pinRetries, int? pukRetries) =>
+        new() { Success = true, PinRetriesRemaining = pinRetries, PukRetriesRemaining = pukRetries };
+
+    /// <summary>
     /// Creates a failed device info result.
     /// </summary>
     public static DeviceInfoResult Failed(string error) =>

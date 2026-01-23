@@ -16,7 +16,8 @@ using Spectre.Console;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
-using Yubico.YubiKit.Piv.Examples.PivTool.Shared;
+using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
+using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Features;
 

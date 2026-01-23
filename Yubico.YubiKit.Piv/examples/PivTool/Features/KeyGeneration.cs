@@ -16,7 +16,8 @@ using System.Security.Cryptography;
 using System.Text;
 using Spectre.Console;
 using Yubico.YubiKit.Core.Cryptography;
-using Yubico.YubiKit.Piv.Examples.PivTool.Shared;
+using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
+using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Features;
 

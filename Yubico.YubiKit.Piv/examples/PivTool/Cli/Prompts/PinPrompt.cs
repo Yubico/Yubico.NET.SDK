@@ -16,8 +16,9 @@ using System.Buffers;
 using System.Security.Cryptography;
 using System.Text;
 using Spectre.Console;
+using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 
-namespace Yubico.YubiKit.Piv.Examples.PivTool.Shared;
+namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
 
 /// <summary>
 /// Provides secure credential prompting with proper memory zeroing.

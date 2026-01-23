@@ -14,7 +14,7 @@
 
 using Spectre.Console;
 
-namespace Yubico.YubiKit.Piv.Examples.PivTool.Shared;
+namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 
 /// <summary>
 /// Provides Spectre.Console formatting utilities for consistent output.

@@ -13,7 +13,8 @@
 // limitations under the License.
 
 using Spectre.Console;
-using Yubico.YubiKit.Piv.Examples.PivTool.Shared;
+using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
+using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Features;
 

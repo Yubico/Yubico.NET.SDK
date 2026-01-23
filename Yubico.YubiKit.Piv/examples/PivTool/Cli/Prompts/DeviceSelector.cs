@@ -18,7 +18,7 @@ using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
-namespace Yubico.YubiKit.Piv.Examples.PivTool.Shared;
+namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
 
 /// <summary>
 /// Handles YubiKey device discovery and selection.

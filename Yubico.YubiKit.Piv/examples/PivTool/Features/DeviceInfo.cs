@@ -14,7 +14,6 @@
 
 using Spectre.Console;
 using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Piv.Examples.PivTool.Shared;
@@ -78,16 +77,12 @@ public static class DeviceInfoFeature
     {
         try
         {
-            await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-
-            // Get management info
-            using var mgmtSession = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
-            var deviceInfo = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
-
+            // Get device info directly using extension method
+            var deviceInfo = await device.GetDeviceInfoAsync(cancellationToken);
             DisplayDeviceDetails(deviceInfo);
 
             // Get PIV-specific info
-            await DisplayPivInfoAsync(connection, cancellationToken);
+            await DisplayPivInfoAsync(device, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -137,9 +132,7 @@ public static class DeviceInfoFeature
     {
         try
         {
-            await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-            using var mgmtSession = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
-            var deviceInfo = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
+            var deviceInfo = await device.GetDeviceInfoAsync(cancellationToken);
 
             var pivSupport = deviceInfo.UsbSupported.HasFlag(DeviceCapabilities.Piv)
                 ? "[green]Yes[/]"
@@ -210,12 +203,12 @@ public static class DeviceInfoFeature
     /// Displays PIV application-specific information.
     /// </summary>
     private static async Task DisplayPivInfoAsync(
-        ISmartCardConnection connection,
+        IYubiKey device,
         CancellationToken cancellationToken)
     {
         try
         {
-            await using var pivSession = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+            await using var pivSession = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
 
             AnsiConsole.WriteLine();
             OutputHelpers.WriteKeyValue("PIV Application", "Connected");

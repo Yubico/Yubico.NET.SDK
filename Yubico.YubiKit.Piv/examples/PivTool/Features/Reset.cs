@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using Spectre.Console;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Piv.Examples.PivTool.Shared;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Features;
@@ -37,8 +35,7 @@ public static class ResetFeature
             return;
         }
 
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
 
         // Display warnings
         DisplayResetWarnings();

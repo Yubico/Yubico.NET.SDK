@@ -14,8 +14,6 @@
 
 using System.Security.Cryptography;
 using Spectre.Console;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Piv.Examples.PivTool.Shared;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Features;
@@ -25,12 +23,7 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.Features;
 /// </summary>
 public static class PinManagementFeature
 {
-    private static readonly byte[] DefaultManagementKey =
-    [
-        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-    ];
+    private static readonly byte[] DefaultManagementKey = PivSession.DefaultManagementKey.ToArray();
 
     /// <summary>
     /// Runs the PIN management feature.
@@ -45,8 +38,8 @@ public static class PinManagementFeature
             return;
         }
 
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        // Use extension method for simplified session creation
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
 
         // Show metadata if available
         await DisplayMetadataAsync(session, cancellationToken);

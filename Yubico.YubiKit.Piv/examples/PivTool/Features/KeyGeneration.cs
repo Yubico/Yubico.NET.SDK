@@ -16,8 +16,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Spectre.Console;
 using Yubico.YubiKit.Core.Cryptography;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Piv.Examples.PivTool.Shared;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Features;
@@ -40,8 +38,8 @@ public static class KeyGenerationFeature
             return;
         }
 
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        // Use extension method for simplified session creation
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
 
         // Select slot
         var slot = SelectSlot();
@@ -341,12 +339,8 @@ public static class KeyGenerationFeature
         {
             if (useDefault)
             {
-                key =
-                [
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-                ];
+                // Use SDK-provided constant (SDK pain point #3 - now fixed)
+                key = PivSession.DefaultManagementKey.ToArray();
             }
             else
             {

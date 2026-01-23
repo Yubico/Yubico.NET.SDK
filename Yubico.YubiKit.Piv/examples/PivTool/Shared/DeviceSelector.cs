@@ -55,14 +55,17 @@ public static class DeviceSelector
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            var devices = await YubiKey.FindAllAsync(cancellationToken);
+            var allDevices = await YubiKey.FindAllAsync(cancellationToken);
+            
+            // Filter to only SmartCard/PCSC devices (required for PIV operations)
+            var devices = allDevices.Where(d => d.ConnectionType == ConnectionType.SmartCard).ToList();
 
             if (devices.Count > 0)
             {
                 return devices;
             }
 
-            AnsiConsole.MarkupLine("[red]No YubiKey detected. Please insert a YubiKey and try again.[/]");
+            AnsiConsole.MarkupLine("[red]No YubiKey with SmartCard interface detected. Please insert a YubiKey and try again.[/]");
 
             if (!AnsiConsole.Confirm("Retry?", defaultValue: true))
             {
@@ -92,7 +95,7 @@ public static class DeviceSelector
                     try
                     {
                         await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-                        using var session = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
+                        await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
                         info = await session.GetDeviceInfoAsync(cancellationToken);
                     }
                     catch

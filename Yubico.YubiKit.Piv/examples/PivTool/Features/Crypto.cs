@@ -16,8 +16,6 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Spectre.Console;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Piv.Examples.PivTool.Shared;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Features;
@@ -83,8 +81,12 @@ public static class CryptoFeature
             return;
         }
 
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        // Create PIV session using extension method (preferred):
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        
+        // Alternative: Create session via connection (useful when you need the connection for other purposes):
+        // await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
+        // await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
 
         var slot = SelectSlot("Select slot with signing key");
 
@@ -148,11 +150,8 @@ public static class CryptoFeature
             }
         }
 
-        // Touch reminder
-        if (slotMetadata.TouchPolicy is PivTouchPolicy.Always or PivTouchPolicy.Cached)
-        {
-            OutputHelpers.WriteInfo("Touch the YubiKey when it blinks...");
-        }
+        // Set up touch callback (SDK pain point #5 - now fixed)
+        session.OnTouchRequired = () => OutputHelpers.WriteInfo("Touch the YubiKey when it blinks...");
 
         try
         {
@@ -171,9 +170,11 @@ public static class CryptoFeature
                 hash = hasher.ComputeHash(dataBytes);
             }
 
+            // Use simplified SignOrDecryptAsync that auto-detects algorithm from slot metadata
+            // (SDK pain point #1 - now fixed, requires firmware 5.3+)
             var signature = await AnsiConsole.Status()
                 .StartAsync("Signing data...", async _ =>
-                    await session.SignOrDecryptAsync(slot, slotMetadata.Algorithm, hash, cancellationToken));
+                    await session.SignOrDecryptAsync(slot, hash, cancellationToken));
 
             stopwatch.Stop();
 
@@ -216,8 +217,7 @@ public static class CryptoFeature
             return;
         }
 
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
 
         var slot = SelectSlot("Select slot with RSA decryption key");
 
@@ -230,8 +230,7 @@ public static class CryptoFeature
         }
 
         var slotMetadata = metadata.Value;
-        var isRsa = slotMetadata.Algorithm is PivAlgorithm.Rsa1024 or PivAlgorithm.Rsa2048
-            or PivAlgorithm.Rsa3072 or PivAlgorithm.Rsa4096;
+        var isRsa = slotMetadata.Algorithm.IsRsa();
 
         if (!isRsa)
         {
@@ -272,19 +271,18 @@ public static class CryptoFeature
             }
         }
 
-        // Touch reminder
-        if (slotMetadata.TouchPolicy is PivTouchPolicy.Always or PivTouchPolicy.Cached)
-        {
-            OutputHelpers.WriteInfo("Touch the YubiKey when it blinks...");
-        }
+        // Set up touch callback (SDK pain point #5 - now fixed)
+        session.OnTouchRequired = () => OutputHelpers.WriteInfo("Touch the YubiKey when it blinks...");
 
         try
         {
             var stopwatch = Stopwatch.StartNew();
 
+            // Use simplified SignOrDecryptAsync that auto-detects algorithm from slot metadata
+            // (SDK pain point #1 - now fixed, requires firmware 5.3+)
             var decrypted = await AnsiConsole.Status()
                 .StartAsync("Decrypting data...", async _ =>
-                    await session.SignOrDecryptAsync(slot, slotMetadata.Algorithm, encryptedData, cancellationToken));
+                    await session.SignOrDecryptAsync(slot, encryptedData, cancellationToken));
 
             stopwatch.Stop();
 
@@ -325,8 +323,7 @@ public static class CryptoFeature
             return;
         }
 
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
 
         var slot = SelectSlot("Select slot with certificate");
 

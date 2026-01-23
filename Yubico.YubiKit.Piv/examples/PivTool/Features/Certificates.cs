@@ -16,8 +16,6 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Spectre.Console;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Piv.Examples.PivTool.Shared;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Features;
@@ -95,8 +93,7 @@ public static class CertificatesFeature
             return;
         }
 
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
 
         var slot = SelectSlot("Select slot to view");
 
@@ -131,8 +128,7 @@ public static class CertificatesFeature
             return;
         }
 
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
 
         var slot = SelectSlot("Select slot for import");
 
@@ -201,8 +197,7 @@ public static class CertificatesFeature
             return;
         }
 
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
 
         var slot = SelectSlot("Select slot to export");
 
@@ -253,8 +248,7 @@ public static class CertificatesFeature
             return;
         }
 
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
 
         var slot = SelectSlot("Select slot to delete certificate from");
 
@@ -294,8 +288,7 @@ public static class CertificatesFeature
             return;
         }
 
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
 
         var slot = SelectSlot("Select slot with key");
 
@@ -342,23 +335,15 @@ public static class CertificatesFeature
                 }
             }
 
-            OutputHelpers.WriteInfo("Self-signed certificate generation requires the public key from the slot.");
-            OutputHelpers.WriteInfo("Attempting to use existing certificate or attestation...");
+            // Get public key directly from slot metadata (SDK pain point #4 - now fixed)
+            // No longer need to rely on existing certificate
+            using var publicKey = slotMetadata.Algorithm.IsRsa()
+                ? (AsymmetricAlgorithm)slotMetadata.GetRsaPublicKey()
+                : slotMetadata.GetECDsaPublicKey();
 
-            // Try to get public key from existing certificate
-            var existingCert = await session.GetCertificateAsync(slot, cancellationToken);
-            if (existingCert is null)
-            {
-                OutputHelpers.WriteError("Cannot generate self-signed certificate without existing certificate.");
-                OutputHelpers.WriteInfo("Import a certificate first, or use attestation to verify key.");
-                return;
-            }
-
-            // Create self-signed cert using existing public key
-            using var publicKey = GetPublicKeyFromCertificate(existingCert);
             if (publicKey is null)
             {
-                OutputHelpers.WriteError("Failed to extract public key from certificate.");
+                OutputHelpers.WriteError("Failed to extract public key from slot metadata.");
                 return;
             }
 
@@ -411,8 +396,7 @@ public static class CertificatesFeature
             return;
         }
 
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
 
         var slot = SelectSlot("Select slot with key");
 
@@ -452,19 +436,14 @@ public static class CertificatesFeature
                 }
             }
 
-            // Try to get public key from existing certificate
-            var existingCert = await session.GetCertificateAsync(slot, cancellationToken);
-            if (existingCert is null)
-            {
-                OutputHelpers.WriteError("Cannot generate CSR without existing certificate.");
-                OutputHelpers.WriteInfo("Import a certificate first to access the public key.");
-                return;
-            }
+            // Get public key directly from slot metadata (SDK pain point #4 - now fixed)
+            using var publicKey = slotMetadata.Algorithm.IsRsa()
+                ? (AsymmetricAlgorithm)slotMetadata.GetRsaPublicKey()
+                : slotMetadata.GetECDsaPublicKey();
 
-            using var publicKey = GetPublicKeyFromCertificate(existingCert);
             if (publicKey is null)
             {
-                OutputHelpers.WriteError("Failed to extract public key from certificate.");
+                OutputHelpers.WriteError("Failed to extract public key from slot metadata.");
                 return;
             }
 
@@ -589,12 +568,8 @@ public static class CertificatesFeature
         {
             if (useDefault)
             {
-                key =
-                [
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-                ];
+                // Use SDK-provided constant (SDK pain point #3 - now fixed)
+                key = PivSession.DefaultManagementKey.ToArray();
             }
             else
             {
@@ -640,35 +615,6 @@ public static class CertificatesFeature
             PivAlgorithm.EccP384 => HashAlgorithmName.SHA384,
             _ => HashAlgorithmName.SHA256
         };
-
-    /// <summary>
-    /// Gets the public key from a certificate.
-    /// </summary>
-    private static AsymmetricAlgorithm? GetPublicKeyFromCertificate(X509Certificate2 cert)
-    {
-        try
-        {
-            // Try RSA
-            var rsa = cert.GetRSAPublicKey();
-            if (rsa is not null)
-            {
-                return rsa;
-            }
-
-            // Try ECDSA
-            var ecdsa = cert.GetECDsaPublicKey();
-            if (ecdsa is not null)
-            {
-                return ecdsa;
-            }
-
-            return null;
-        }
-        catch
-        {
-            return null;
-        }
-    }
 
     /// <summary>
     /// Gets the key size from a certificate.

@@ -16,100 +16,81 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# PIV PIN, touch and bio policies
+# PIV PIN, touch, and biometric policies
 
-Suppose you want to use one of the PIV keys to sign or decrypt. The application running on
-your host device will call one or more commands to perform the operation. Do you need to
-enter the PIN to perform the operation? Do you need to touch the YubiKey?
+The YubiKey's PIV PIN, touch, and biometric policies determine when PIN verification, biometric verification, and touch are required in order to perform an operation with a private key from one of the YubiKey's PIV slots (including the management key).
 
-Suppose you want to to generate a new key pair, you need to authenticate the management
-key to perform that operation. But do you need to touch the YubiKey as well? What about fingerprints?
+These policies apply to operations such as signing, decrypting, performing a key agreement, and generating a new key pair. For a full list of operations affected by PIN and touch policies, see [Operations that require the PIN](xref:UsersManualPinPukMgmtKey#operations-that-require-the-pin) and [Operations that require the management key](xref:UsersManualPinPukMgmtKey#operations-that-require-the-management-key).
 
-This article answers those questions.
+## Policy properties
 
-## Related articles
+PIN and touch policies can be configured when a key is generated or imported into a YubiKey PIV slot. Once the policies have been set during key generation/import, they cannot be changed. If a PIN and/or touch policy is not specified at that time, the slot's default policies will be applied to the key. Default policies vary depending on the slot and are programmed into the YubiKey's firmware. Note that policy configuration is supported on YubiKeys with firmware version 4 and later; earlier YubiKeys are limited to the usage of slots' default policies.
 
-[PIV commands access control](access-control.md)
+A key's policies, whether explicitly configured or not, are properties of the key itself. This means that you can move a key from one slot to another (for example, from slot 9A to one of the retired key slots), and its policies do not change.
 
-[The PIV PIN, PUK, and management key](pin-puk-mgmt-key.md)
+Biometric policies are a type of PIN policy and can only be used with YubiKey Bio Series — Multi-protocol Edition keys (YubiKey Bio Series – FIDO Edition key do not support PIV).
 
-## What are the possible policies?
+The management key (slot 9B) only has a touch policy. The PIN is never needed to perform a management key operation (with the exception of [Set PIN Retries](commands.md#set-pin-retries), but in this case the PIN is needed because this is a command related to the PIN itself). The PIN and PUK (slots 80 and 81) do not have PIN *or* touch policies.
 
-#### PIN policies
+Keys generated/imported into the following slots have both PIN **and** touch policies:
 
-* Never: the PIN is never needed
-* Always: the PIN needed for every use
-* Once: the PIN is needed once per session
+- 9A (Authentication)
+- 9C (Digital Signature)
+- 9D (Key Management)
+- 9E (Card Authentication)
+- F9 (Attestation)
+- 82-95 (Retired Key Slots)
 
-#### Touch policies
+## PIN policy options
 
-* Never: a touch is never needed
-* Always: a touch is needed for every use
-* Cached: a touch is not needed if the YubiKey had been touched in the last 15 seconds,
-otherwise a touch is needed (Only available for YubiKey versions 4.3 and greater)
+The three main PIN policy options are as follows:
 
-#### Biometric policies
-For **YubiKey Bio** versions 5.7 and greater, there are two more possible policies
-* Match Once: A biometric or PIN verification is required for each session
-* Match Always: A biometric or PIN verification is required on every object access
+* ``Never``: the PIN is never needed.
+* ``Always``: the PIN is needed for every key operation.
+* ``Once``: the PIN is needed once per session.
+
+Due to PIV card activation requirements in section 4.3 of the [FIPS 201-3 specification](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.201-3.pdf), YubiKey FIPS Series keys with firmware version 5.7.1 or later cannot set PIN policy to ``Never``.
 
 > [!WARNING]
-> It is important to point out that setting the PIN policy to "never" reduces security
+> It is important to note that setting the PIN policy to ``Never`` reduces security
 > dramatically. This feature was added only because of customer demand for convenience.
-> Yubico recommends setting the PIN policy to "always" or "once".
+> Yubico recommends setting the PIN policy to ``Always`` or ``Once``.
 
-Note that if you do not specify a PIN or touch policy, there is a default. What the
-default is will be described below.
+### Biometric policy options
 
-Note also that with management keys there is only a touch policy. The PIN is never needed
-to perform a management key operation (with the exception of
-[Set PIN Retries](commands.md#set-pin-retries), but in this case the PIN is needed
-becasue that is a command related to the PIN itself).
+Biometric policies are a type of PIN policy that are available for YubiKey Bio Series — Multi-protocol Edition keys with firmware 5.7 or later. There are two biometric policy options:
 
-## Older YubiKeys (prior to YubiKey 4)
+* Match Once: a biometric or PIN verification is required for each session.
+* Match Always: a biometric or PIN verification is required on every object access.
 
-The ability to use PIN and touch policies other than the default was not available prior
-to YubiKey 4. What this means is that when using a PIV key in a YubiKey, there was a
-default policy only and no way to generate or import a key to use a different policy.
+## Touch policy options
 
-## Default policy
+There are three touch policy options:
 
-The default policies are programmed into the YubiKey upon manufacture. All YubiKeys,
-before version 4 and after, are programmed with the same default policies. In the future,
-there could be a YubiKey with a different default policy. But for now, the default PIN and
-touch policies are the following.
+* Never: a touch is never needed.
+* Always: a touch is needed for every key operation.
+* Cached: if more than 15 seconds have elapsed since the last time the YubiKey was touched, a touch is needed (only available for YubiKeys with firmware version 4.3 and later).
 
-* Slot 9C PIN policy: Always (the PIN is required before each private key operation)
-* PIN policy: Once (the PIN is required once per session to use a private key to sign,
-  decrypt, or perform key agreement)
-* Touch policy: Never (touch is never required to use any PIV key, private or management)
+## Default policies
 
-> Note:
->
-> The default PIN policy for slot 9C is different from the default for the other slots.
-> This is from the PIV standard. So remember that if you generate a key in slot 9C and set
-> the PIN policy to default, the actual PIN policy will be Always. It is a good idea to
-> simply always specify the PIN policy you want, Never or Once, rather than Default.
+The default PIN and touch policies are programmed into the YubiKey's firmware upon manufacture. Starting with firmware version 4, YubiKeys (with the exception of YubiKey FIPS Series keys with firmware version 5.7.1 or later) have the following default policies:
 
-> Note:
->
-> Touch is not a part of the PIV standard. That is why the first YubiKeys that supported
-> PIV did not have the option of touch when using a PIV key. This non-standard ability to
-> require touch was added to YubiKey in version 4 to augment security.
+* Slot 9C PIN policy: Always
+* Slot 9E PIN policy: Never
+* General PIN policy: Once
+* Touch policy: Never
 
-## Changing the policy: management key (slot 9B)
+Due to PIV card activation requirements in section 4.3 of the [FIPS 201-3 specification](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.201-3.pdf), **YubiKey FIPS Series keys with firmware version 5.7.1 or later have a default 9E PIN policy of ``Once``**. The other default polices listed above are the same for FIPS keys.
 
-If you want a touch policy different from the default for the management key, use the
-[Set Management Key command](commands.md#set-management-key). This will set the actual
-key value as well as the touch policy. With this command you can enter the current key
-along with a different touch policy to change the policy only, or enter the same touch
-policy with a new key to change the key only, or change both key and policy.
+It's also important to note that slots 9C and 9E have different default PIN policies than all other slots due to the requirements mandated by the PIV standard (see [NIST SP 800-73pt1, section 3](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-73pt1-5.pdf)). Touch is not a part of the PIV standard, which is why the default touch policy is ``Never``. The ability to require touch was added to the YubiKey in firmware version 4 to augment security.
 
-## Setting keys to a non-default policy (all slots other than 80, 81, 9B, F9)
+When generating or importing a key into one of the PIV slots, these default policies will be applied to the key unless otherwise specified.
+
+## Setting keys to a non-default policy (all slots other than 80, 81, 9B, and F9)
 
 If you want a policy different from the default for a private key, you must specify that
 policy when the key is [generated](commands.md#generate-asymmetric) or
-[imported](commands.md#import-asymmetric). Once the key is on the YubiKey there is no
+[imported](commands.md#import-asymmetric). Once the key is on the YubiKey, there is no
 way to change the policy.
 
 Note that you can specify different policies for keys in different slots (if the YubiKey
@@ -121,20 +102,7 @@ that has a PIN policy of "always", while a key imported into slot 86 has a PIN p
 > dramatically. This feature was added only because of customer demand for convenience.
 > Yubico recommends setting the PIN policy to "always" or "once".
 
-## Examples
-
-### Management key
-
-You have a new YubiKey and one of the first things you do is change the management key
-from the default. You call the
-[Set Management Key command](commands.md#set-management-key) and provide the new key
-data and specify the touch policy. Suppose you set the policy to "always".
-
-Now whenever you call the
-[Authenticate management key](commands.md#authenticate-management-key) command, the
-authentication won't be complete until the YubiKey has been touched.
-
-### Private key
+### Example scenarios
 
 Suppose you generate a new key pair for slot 9C using the
 [Generate asymmetric key pair](commands.md#generate-asymmetric) command. You set
@@ -147,3 +115,78 @@ Suppose you generate a new key pair for slot 9D. You set the PIN policy to once,
 touch policy to never. Now when you first decrypt using that key in a session, you will
 need to authenticate the PIN, but won't need to touch. The next time you decrypt in the
 session, you will not need the PIN nor touch.
+
+## Changing the touch policy for the management key (slot 9B)
+
+Unlike other slots, the management key (slot 9B) only has a touch policy, which by default is ``Never``. However, when changing the management key, you can set this policy to one of the other touch policy options (``Always`` or ``Cached``). Once reconfigured with one of these other policies, the user will be required to touch the YubiKey at the specified frequency tp perform management key operations.
+
+To change the management key with the SDK, we have two options: the ``PivSession`` method, ``TryChangeManagementKey()``, or the lower-level ``SetManagementKeyCommand()``.
+
+### TryChangeManagementKey() example
+
+To change the management key and set a new touch policy using the ``PivSession``, simply call``TryChangeManagementKey()`` and provide the current management key, the new management key, and the desired touch policy. In this example, let's set the touch policy to ``Always``:
+
+```csharp
+using (PivSession pivtest = new PivSession(yubiKey))
+{
+    // currentKey and newKey set elsewhere.
+    pivtest.TryChangeManagementKey(currentKey, newKey, PivTouchPolicy.Always);
+}
+```
+
+Note that ``TryChangeManagementKey()`` is an overloaded method. In addition to specifying the new key's touch policy, you can also specify a particular algorithm. If these properties are not specified, the slot's default touch policy and default algorithm will be used for the new management key. Also, if you call the method without providing the current and new management keys directly, the SDK will call upon the KeyCollector to fetch them from the user.
+
+### SetManagementKeyCommand() example
+
+Unlike the ``PivSession``, using the PIV command classes to change the management key requires three steps: first we must initiate the PIV management key authentication process with ``InitializeAuthenticateManagementKeyCommand``, then we can finish management key authentication with ``CompleteAuthenticateManagementKeyCommand()``, and finally we can set the new management key and touch policy via ``SetManagementKeyCommand()``:
+
+```csharp
+
+``` 
+
+If you want to set a new a touch policy for the management key, use the
+[SetManagementKeyCommand](commands.md#set-management-key). This command will set both the actual
+key value as well as the touch policy. With ``SetManagementKeyCommand``, you can:
+
+- enter the current key with a different touch policy to change the policy only
+- enter the same touch policy with a new key to change the key only
+- enter a new key and a new policy to change both key and policy
+
+Suppose you want to change the management key and set its touch policy to "always". To do so, call
+``SetManagementKeyCommand`` and provide the new key
+data and the touch policy:
+
+```csharp
+// newKey set elsewhere
+SetManagementKeyCommand(newKey, PivTouchPolicy.Always);
+```
+
+Now, whenever you call the
+[Authenticate management key](commands.md#authenticate-management-key) command, the
+authentication won't be complete until the YubiKey has been touched.
+
+## Retrieving an existing key's PIN and touch policies
+
+Once a key has been generated or imported into a slot, you can check the PIN and touch policies it was configured with via the YubiKey's PIV metadata. Note that this feature is only available for YubiKeys with firmware version 5.3 and later. On older YubiKeys, there is no way to retrieve a key's policies after configuration.
+
+To check a key's policies, start a ``PivSession``, call ``GetMetadata`` on a specific PIV slot, and extract the ``PinPolicy`` and ``TouchPolicy`` properties:
+
+```csharp
+using (PivSession pivtest = new PivSession(yubiKey))
+{
+    // Get the metadata from the key in slot 9A.
+    PivMetadata metadata = pivtest.GetMetadata(0x9A);
+
+    // Extract the properties from the metadata.
+    PivPinPolicy pinPolicy = metadata.PinPolicy;
+    PivTouchPolicy touchPolicy = metadata.TouchPolicy;
+}
+```
+
+Note that if the slot does not contain a key, the SDK will throw an exception when trying to call ``GetMetadata``.
+
+## Related articles
+
+[PIV access control](access-control.md)
+
+[The PIV PIN, PUK, and management key](pin-puk-mgmt-key.md)

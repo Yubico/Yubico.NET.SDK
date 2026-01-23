@@ -186,4 +186,24 @@ public static class OutputHelpers
         AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
         Console.ReadKey(intercept: true);
     }
+
+    /// <summary>
+    /// Displays a touch notification message.
+    /// </summary>
+    public static void WriteTouchRequired()
+    {
+        AnsiConsole.MarkupLine("[yellow]👆 Touch your YubiKey now...[/]");
+    }
+
+    /// <summary>
+    /// Sets up touch notification callback on a PIV session.
+    /// </summary>
+    /// <param name="session">The PIV session (IPivSession or PivSession).</param>
+    public static void SetupTouchNotification(IPivSession session)
+    {
+        if (session is PivSession pivSession)
+        {
+            pivSession.OnTouchRequired = WriteTouchRequired;
+        }
+    }
 }

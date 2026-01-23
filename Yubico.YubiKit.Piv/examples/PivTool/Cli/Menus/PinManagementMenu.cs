@@ -44,6 +44,7 @@ public static class PinManagementMenu
         }
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        OutputHelpers.SetupTouchNotification(session);
 
         switch (choice)
         {

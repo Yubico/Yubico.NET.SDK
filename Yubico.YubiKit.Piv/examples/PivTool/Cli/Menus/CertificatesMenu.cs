@@ -44,6 +44,7 @@ public static class CertificatesMenu
         }
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        OutputHelpers.SetupTouchNotification(session);
 
         switch (choice)
         {
@@ -169,6 +170,27 @@ public static class CertificatesMenu
             {
                 OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");
                 return;
+            }
+
+            // Verify PIN (required for signing operations)
+            var pin = PinPrompt.GetPinWithDefault("PIN");
+            if (pin is null)
+            {
+                return;
+            }
+
+            try
+            {
+                var pinResult = await PinManagement.VerifyPinAsync(session, pin, ct);
+                if (!pinResult.Success)
+                {
+                    OutputHelpers.WriteError(pinResult.ErrorMessage ?? "PIN verification failed");
+                    return;
+                }
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(pin);
             }
 
             var slot = SlotSelector.SelectSlot("Select slot (must have existing key):");

@@ -25,6 +25,7 @@ public static class SlotOverviewMenu
         }
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        OutputHelpers.SetupTouchNotification(session);
 
         await AnsiConsole.Status()
             .StartAsync("Reading slot information...", async ctx =>

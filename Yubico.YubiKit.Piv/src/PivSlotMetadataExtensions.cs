@@ -14,6 +14,8 @@
 
 using System.Security.Cryptography;
 
+using Yubico.YubiKit.Core.Utils;
+
 namespace Yubico.YubiKit.Piv;
 
 /// <summary>
@@ -21,6 +23,21 @@ namespace Yubico.YubiKit.Piv;
 /// </summary>
 public static class PivSlotMetadataExtensions
 {
+    /// <summary>
+    /// PIV TLV tag for RSA modulus (n).
+    /// </summary>
+    private const int RsaModulusTag = 0x81;
+
+    /// <summary>
+    /// PIV TLV tag for RSA public exponent (e).
+    /// </summary>
+    private const int RsaExponentTag = 0x82;
+
+    /// <summary>
+    /// PIV TLV tag for ECC public point.
+    /// </summary>
+    private const int EccPointTag = 0x86;
+
     /// <summary>
     /// Gets the RSA public key from slot metadata.
     /// </summary>
@@ -48,12 +65,32 @@ public static class PivSlotMetadataExtensions
                 $"Slot contains {metadata.Algorithm} key, not an RSA key. Use GetECDsaPublicKey() for ECC keys.");
         }
 
+        // PIV returns public key in TLV format:
+        // Tag 0x81 = modulus (n)
+        // Tag 0x82 = public exponent (e)
         var publicKeyBytes = metadata.PublicKey.Span;
+        var tlvDict = TlvHelper.DecodeDictionary(publicKeyBytes);
+
+        if (!tlvDict.TryGetValue(RsaModulusTag, out var modulusMemory))
+        {
+            throw new InvalidOperationException("RSA public key data is missing modulus (tag 0x81).");
+        }
+
+        if (!tlvDict.TryGetValue(RsaExponentTag, out var exponentMemory))
+        {
+            throw new InvalidOperationException("RSA public key data is missing exponent (tag 0x82).");
+        }
+
+        var rsaParams = new RSAParameters
+        {
+            Modulus = modulusMemory.ToArray(),
+            Exponent = exponentMemory.ToArray()
+        };
+
         var rsa = RSA.Create();
-        
         try
         {
-            rsa.ImportSubjectPublicKeyInfo(publicKeyBytes, out _);
+            rsa.ImportParameters(rsaParams);
             return rsa;
         }
         catch
@@ -101,12 +138,48 @@ public static class PivSlotMetadataExtensions
                 "Curve25519 keys (Ed25519, X25519) require specialized handling.");
         }
 
+        // PIV returns public key in TLV format:
+        // Tag 0x86 = EC point in uncompressed format (04 || X || Y)
         var publicKeyBytes = metadata.PublicKey.Span;
+        var tlvDict = TlvHelper.DecodeDictionary(publicKeyBytes);
+
+        if (!tlvDict.TryGetValue(EccPointTag, out var pointMemory))
+        {
+            throw new InvalidOperationException("ECC public key data is missing EC point (tag 0x86).");
+        }
+
+        var pointBytes = pointMemory.Span;
+
+        // Uncompressed point format: 04 || X || Y
+        if (pointBytes.Length == 0 || pointBytes[0] != 0x04)
+        {
+            throw new InvalidOperationException("ECC public key is not in uncompressed point format (expected 0x04 prefix).");
+        }
+
+        // Determine curve based on algorithm
+        ECCurve curve = metadata.Algorithm switch
+        {
+            PivAlgorithm.EccP256 => ECCurve.NamedCurves.nistP256,
+            PivAlgorithm.EccP384 => ECCurve.NamedCurves.nistP384,
+            _ => throw new InvalidOperationException($"Unsupported ECC algorithm: {metadata.Algorithm}")
+        };
+
+        // Point format is 04 || X || Y, where X and Y are same length
+        var coordinateLength = (pointBytes.Length - 1) / 2;
+        var ecParams = new ECParameters
+        {
+            Curve = curve,
+            Q = new ECPoint
+            {
+                X = pointBytes.Slice(1, coordinateLength).ToArray(),
+                Y = pointBytes.Slice(1 + coordinateLength, coordinateLength).ToArray()
+            }
+        };
+
         var ecdsa = ECDsa.Create();
-        
         try
         {
-            ecdsa.ImportSubjectPublicKeyInfo(publicKeyBytes, out _);
+            ecdsa.ImportParameters(ecParams);
             return ecdsa;
         }
         catch

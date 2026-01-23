@@ -47,6 +47,7 @@ public static class ResetMenu
         }
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        OutputHelpers.SetupTouchNotification(session);
 
         await AnsiConsole.Status()
             .StartAsync("Resetting PIV application...", async ctx =>

@@ -26,6 +26,7 @@ public static class AttestationMenu
         var slot = SlotSelector.SelectSlot("Select slot to attest:");
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        OutputHelpers.SetupTouchNotification(session);
 
         await AnsiConsole.Status()
             .StartAsync("Getting attestation...", async ctx =>

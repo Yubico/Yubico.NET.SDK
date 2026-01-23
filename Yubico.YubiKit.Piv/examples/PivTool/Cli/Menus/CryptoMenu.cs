@@ -41,6 +41,7 @@ public static class CryptoMenu
         }
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        OutputHelpers.SetupTouchNotification(session);
 
         switch (choice)
         {

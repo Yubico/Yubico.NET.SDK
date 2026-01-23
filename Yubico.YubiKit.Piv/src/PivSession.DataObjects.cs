@@ -99,7 +99,7 @@ public sealed partial class PivSession
         }
 
         // Use Tlv to parse the wrapper
-        using var wrapper = Tlv.Create(span);
+        var wrapper = Tlv.Create(span);
         return wrapper.Value;
     }
 

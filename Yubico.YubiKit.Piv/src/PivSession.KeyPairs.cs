@@ -411,7 +411,7 @@ public sealed partial class PivSession
     private IPublicKey ParsePublicKey(ReadOnlyMemory<byte> data, PivAlgorithm algorithm)
     {
         // Parse 0x7F49 (Public key template) - Tlv handles 2-byte tags
-        using var template = Tlv.Create(data.Span);
+        var template = Tlv.Create(data.Span);
         if (template.Tag != 0x7F49)
         {
             throw new ApduException("Invalid public key response format");

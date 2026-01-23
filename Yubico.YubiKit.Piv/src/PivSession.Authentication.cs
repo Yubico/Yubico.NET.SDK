@@ -188,13 +188,13 @@ public sealed partial class PivSession
     /// </summary>
     private static ReadOnlySpan<byte> ParseWitnessResponse(ReadOnlySpan<byte> response, int expectedLength)
     {
-        using var outer = Tlv.Create(response);
+        var outer = Tlv.Create(response);
         if (outer.Tag != 0x7C)
         {
             throw new ApduException($"Invalid witness response - expected TAG 0x7C, got 0x{outer.Tag:X2}");
         }
 
-        using var inner = Tlv.Create(outer.Value.Span);
+        var inner = Tlv.Create(outer.Value.Span);
         if (inner.Tag != 0x80)
         {
             throw new ApduException($"Invalid witness response - expected TAG 0x80, got 0x{inner.Tag:X2}");
@@ -213,13 +213,13 @@ public sealed partial class PivSession
     /// </summary>
     private static ReadOnlySpan<byte> ParseChallengeResponse(ReadOnlySpan<byte> response, int expectedLength)
     {
-        using var outer = Tlv.Create(response);
+        var outer = Tlv.Create(response);
         if (outer.Tag != 0x7C)
         {
             throw new ApduException($"Invalid challenge response - expected TAG 0x7C, got 0x{outer.Tag:X2}");
         }
 
-        using var inner = Tlv.Create(outer.Value.Span);
+        var inner = Tlv.Create(outer.Value.Span);
         if (inner.Tag != 0x82)
         {
             throw new ApduException($"Invalid challenge response - expected TAG 0x82, got 0x{inner.Tag:X2}");

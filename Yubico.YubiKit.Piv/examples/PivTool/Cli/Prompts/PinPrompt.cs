@@ -224,6 +224,75 @@ public static class PinPrompt
     }
 
     /// <summary>
+    /// Prompts for a NEW management key with options for passphrase, random, or hex.
+    /// Caller must zero the returned memory.
+    /// </summary>
+    /// <param name="keyLength">Key length in bytes (16, 24, or 32). Default is 24.</param>
+    /// <returns>The management key bytes, or null if cancelled.</returns>
+    public static byte[]? GetNewManagementKey(int keyLength = ManagementKeyLength3Des)
+    {
+        var choice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[blue]New management key:[/]")
+                .AddChoices(["Generate from passphrase", "Generate random key", "Enter hex string (advanced)"]));
+
+        return choice switch
+        {
+            "Generate from passphrase" => GetManagementKeyFromPassphraseWithConfirm(keyLength),
+            "Generate random key" => GenerateRandomManagementKey(keyLength),
+            "Enter hex string (advanced)" => GetManagementKey("Enter new management key (hex)", keyLength),
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// Derives a management key from a passphrase with confirmation.
+    /// </summary>
+    private static byte[]? GetManagementKeyFromPassphraseWithConfirm(int keyLength)
+    {
+        var passphrase = AnsiConsole.Prompt(
+            new TextPrompt<string>("Enter passphrase:")
+                .Secret()
+                .Validate(s => string.IsNullOrEmpty(s)
+                    ? ValidationResult.Error("Passphrase cannot be empty.")
+                    : ValidationResult.Success()));
+
+        if (string.IsNullOrEmpty(passphrase))
+        {
+            return null;
+        }
+
+        var confirm = AnsiConsole.Prompt(
+            new TextPrompt<string>("Confirm passphrase:")
+                .Secret());
+
+        if (passphrase != confirm)
+        {
+            OutputHelpers.WriteError("Passphrases do not match.");
+            return null;
+        }
+
+        var key = DeriveKeyFromPassphrase(passphrase, keyLength);
+        OutputHelpers.WriteInfo("Key derived from passphrase. Remember this passphrase for future authentication.");
+        return key;
+    }
+
+    /// <summary>
+    /// Generates a random management key.
+    /// </summary>
+    private static byte[] GenerateRandomManagementKey(int keyLength)
+    {
+        var key = new byte[keyLength];
+        RandomNumberGenerator.Fill(key);
+        
+        // Show the hex so user can save it
+        OutputHelpers.WriteInfo($"Generated key: {Convert.ToHexString(key)}");
+        OutputHelpers.WriteWarning("Save this key securely! You will need it for future management operations.");
+        
+        return key;
+    }
+
+    /// <summary>
     /// Derives a management key from a passphrase using PBKDF2-SHA256.
     /// </summary>
     private static byte[]? GetManagementKeyFromPassphrase(int keyLength)

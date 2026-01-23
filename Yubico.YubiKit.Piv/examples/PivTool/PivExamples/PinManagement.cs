@@ -271,4 +271,45 @@ public static class PinManagement
             return PinOperationResult.Failed($"Authentication failed: {ex.Message}");
         }
     }
+
+    /// <summary>
+    /// Changes the management key.
+    /// </summary>
+    /// <param name="session">A PIV session (must be authenticated with current management key).</param>
+    /// <param name="newKey">New management key bytes.</param>
+    /// <param name="keyType">Management key algorithm type.</param>
+    /// <param name="requireTouch">Whether to require touch for future management key operations.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Result indicating success or failure.</returns>
+    /// <example>
+    /// <code>
+    /// // Authenticate with current key first
+    /// await session.AuthenticateAsync(currentKey);
+    /// 
+    /// // Then change to new key
+    /// var newKey = new byte[24]; // or 16/32 for AES
+    /// RandomNumberGenerator.Fill(newKey);
+    /// var result = await PinManagement.ChangeManagementKeyAsync(
+    ///     session, newKey, PivManagementKeyType.TripleDes, ct);
+    /// </code>
+    /// </example>
+    public static async Task<PinOperationResult> ChangeManagementKeyAsync(
+        IPivSession session,
+        ReadOnlyMemory<byte> newKey,
+        PivManagementKeyType keyType = PivManagementKeyType.TripleDes,
+        bool requireTouch = false,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        try
+        {
+            await session.SetManagementKeyAsync(keyType, newKey, requireTouch, cancellationToken);
+            return PinOperationResult.Succeeded();
+        }
+        catch (Exception ex)
+        {
+            return PinOperationResult.Failed($"Failed to change management key: {ex.Message}");
+        }
+    }
 }

@@ -34,6 +34,7 @@ public static class PinManagementMenu
                     "Change PUK",
                     "Unblock PIN using PUK",
                     "Authenticate Management Key",
+                    "Change Management Key",
                     "Back"
                 ]));
 
@@ -60,6 +61,9 @@ public static class PinManagementMenu
                 break;
             case "Authenticate Management Key":
                 await AuthenticateAsync(session, cancellationToken);
+                break;
+            case "Change Management Key":
+                await ChangeManagementKeyAsync(session, cancellationToken);
                 break;
         }
     }
@@ -231,6 +235,57 @@ public static class PinManagementMenu
         finally
         {
             CryptographicOperations.ZeroMemory(mgmtKey);
+        }
+    }
+
+    private static async Task ChangeManagementKeyAsync(IPivSession session, CancellationToken ct)
+    {
+        // First authenticate with current key
+        OutputHelpers.WriteInfo("First, authenticate with current management key:");
+        var currentKey = PinPrompt.GetManagementKeyWithDefault("Current management key");
+        if (currentKey is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var authResult = await PinManagement.AuthenticateAsync(session, currentKey, ct);
+            if (!authResult.Success)
+            {
+                OutputHelpers.WriteError(authResult.ErrorMessage ?? "Authentication failed");
+                return;
+            }
+
+            OutputHelpers.WriteSuccess("Authenticated with current key");
+
+            // Now get new key
+            var newKey = PinPrompt.GetNewManagementKey();
+            if (newKey is null)
+            {
+                return;
+            }
+
+            try
+            {
+                var changeResult = await PinManagement.ChangeManagementKeyAsync(session, newKey, cancellationToken: ct);
+                if (changeResult.Success)
+                {
+                    OutputHelpers.WriteSuccess("Management key changed successfully");
+                }
+                else
+                {
+                    OutputHelpers.WriteError(changeResult.ErrorMessage ?? "Failed to change management key");
+                }
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(newKey);
+            }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(currentKey);
         }
     }
 }

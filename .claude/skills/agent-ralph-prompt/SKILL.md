@@ -156,16 +156,47 @@ done
   Do NOT output completion until all green
   ```
 
+### 5a. Time Pressure Protocol (CRITICAL)
+
+**Agents must NEVER rush or skip work due to "time constraints" or "context limits".**
+
+If the agent feels it cannot complete remaining tasks:
+1. **Finish the current task completely** (including verification and commit)
+2. **Stop cleanly** - do NOT start the next task
+3. **Do NOT emit completion promise** - let the next iteration continue
+4. **Do NOT mark incomplete tasks as done**
+
+```markdown
+## Time Pressure Protocol
+
+If running low on context or time:
+1. Complete current task fully (verify + commit)
+2. Update progress file with accurate checkbox state
+3. Exit WITHOUT completion promise
+4. Next iteration will continue from where you stopped
+
+FORBIDDEN behaviors:
+- "Skipping X due to time constraints" → then marking it [x]
+- "Simplified implementation for now" → must meet acceptance criteria
+- Emitting <promise>DONE</promise> with unchecked tasks
+- Rushing through multiple tasks without verification
+
+The loop WILL restart. Trust the process. Quality over speed.
+```
+
+**Why:** Ralph Loop sessions are resumable. A clean handoff to the next iteration is always better than rushed, incomplete work.
+
 ### 6. Hardware/Integration Test Handling
 - Hardware tests are best-effort; document and skip after 2-3 failures.
 - Mark with `[Trait("RequiresHardware", "true")]`. Unit tests MUST pass.
 
-### 7. One Phase Per Iteration
+### 7. One Phase Per Iteration (with Mandatory Commits)
 - Design prompts so the agent completes **one phase**, verifies, and commits per iteration.
 - This keeps iterations short, maximizing fresh context window for each phase.
 - Avoids context compaction and "context rot" from overly long sessions.
 - The ralph-loop will restart with full context on the next iteration.
 - **Exception:** If phases are small and related, the agent may complete multiple per iteration.
+- **MANDATORY:** Commit after EVERY completed phase. Never batch all work into one commit at the end.
 - Example phase boundaries:
   ```markdown
   ## Phase 1: Create interfaces
@@ -653,6 +684,9 @@ For complex refactors (3+ phases), use this proven structure:
 - **Assuming implementation bug** when workflow tests fail but atomic tests pass (check test setup first)
 - **Skipping codemapper** before interface changes (misses structural dependencies)
 - **No security verification** for crypto code (leaves memory leaks undetected)
+- **"Due to time constraints"** as justification for skipped work (stop cleanly, let next iteration continue)
+- **Single commit at end** instead of commit-per-phase (loses progress if session fails)
+- **Rushing through tasks** without verification (quality over speed)
 
 ## Handoff (ALWAYS END WITH THIS)
 

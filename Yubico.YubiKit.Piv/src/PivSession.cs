@@ -200,7 +200,6 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         return new FirmwareVersion(response[0], response[1], response[2]);
     }
 
-    #region IPivSession Implementation (Placeholder methods for now)
     
     /// <inheritdoc />
     public async Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default)
@@ -372,15 +371,6 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         Logger.LogDebug("PIV: PUK blocked");
     }
 
-    // All other IPivSession methods would be implemented as placeholders for now...
-    // This is Phase 2 - just the core session structure.
-
-    #endregion
-
-    #region Not Yet Implemented Placeholder Methods
-
-
-
     /// <summary>
     /// Gets metadata about the PIV PIN.
     /// </summary>
@@ -455,12 +445,6 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
         
         return new PivPinMetadata(isDefault, totalRetries, retriesRemaining);
     }
-
-
-
-
-
-    #endregion
 
     #region Touch Notification
 

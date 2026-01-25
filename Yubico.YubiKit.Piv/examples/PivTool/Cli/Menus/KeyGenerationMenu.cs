@@ -38,7 +38,9 @@ public static class KeyGenerationMenu
                     "RSA 3072",
                     "RSA 4096",
                     "ECC P-256",
-                    "ECC P-384"
+                    "ECC P-384",
+                    "Ed25519 (YubiKey 5.7+)",
+                    "X25519 (YubiKey 5.7+)"
                 ]));
 
         var pivAlgorithm = algorithm switch
@@ -48,6 +50,8 @@ public static class KeyGenerationMenu
             "RSA 4096" => PivAlgorithm.Rsa4096,
             "ECC P-256" => PivAlgorithm.EccP256,
             "ECC P-384" => PivAlgorithm.EccP384,
+            "Ed25519 (YubiKey 5.7+)" => PivAlgorithm.Ed25519,
+            "X25519 (YubiKey 5.7+)" => PivAlgorithm.X25519,
             _ => PivAlgorithm.EccP256
         };
 

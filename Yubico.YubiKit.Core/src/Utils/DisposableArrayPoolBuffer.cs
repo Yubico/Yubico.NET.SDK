@@ -17,9 +17,13 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Core.Utils;
 
-public class DisposableArrayPoolBuffer : IDisposable
+/// <summary>
+/// A disposable buffer backed by <see cref="ArrayPool{T}"/> that securely clears memory on disposal.
+/// Implements <see cref="IMemoryOwner{T}"/> for compatibility with async APIs.
+/// </summary>
+public class DisposableArrayPoolBuffer : IMemoryOwner<byte>
 {
-    private readonly Memory<byte> _buffer;
+    private Memory<byte> _buffer;
     private byte[]? _rentedBuffer;
 
     public DisposableArrayPoolBuffer(int size, bool clear = true)
@@ -29,7 +33,12 @@ public class DisposableArrayPoolBuffer : IDisposable
         _buffer = _rentedBuffer.AsMemory(0, size);
     }
 
-    public Span<byte> Span => _buffer.Span;
+    /// <inheritdoc />
+    public Memory<byte> Memory => _rentedBuffer is not null 
+        ? _buffer 
+        : throw new ObjectDisposedException(nameof(DisposableArrayPoolBuffer));
+
+    public Span<byte> Span => Memory.Span;
 
     public int Length => _buffer.Length;
 

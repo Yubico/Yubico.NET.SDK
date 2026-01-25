@@ -211,7 +211,7 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
                         }
 
                         charBuffer[charCount++] = c;
-                        _console.Write(options.MaskChar.ToString());
+                        _console.Write(options.MaskCharacter.ToString());
                         continue;
                 }
             }

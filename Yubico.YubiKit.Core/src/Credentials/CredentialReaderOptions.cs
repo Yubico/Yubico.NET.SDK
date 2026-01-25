@@ -23,7 +23,7 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// Use the factory methods <see cref="ForPin"/>, <see cref="ForPuk"/>, <see cref="ForPassphrase"/>,
 /// or <see cref="ForHexKey"/> to create pre-configured options for common credential types.
 /// </remarks>
-public sealed class CredentialReaderOptions
+public sealed record CredentialReaderOptions
 {
     /// <summary>
     /// Gets or sets the prompt text displayed to the user.
@@ -48,7 +48,7 @@ public sealed class CredentialReaderOptions
     /// <summary>
     /// Gets or sets the character used to mask input (default: '*').
     /// </summary>
-    public char MaskChar { get; init; } = '*';
+    public char MaskCharacter { get; init; } = '*';
 
     /// <summary>
     /// Gets or sets a filter function that determines which characters are allowed.

@@ -17,6 +17,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Spectre.Console;
 using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
@@ -309,49 +310,6 @@ public static class PinPrompt
     /// <summary>
     /// Creates a secure memory owner from a span, zeroing the source after copy.
     /// </summary>
-    private static IMemoryOwner<byte> CreateFromSpan(ReadOnlySpan<byte> source)
-    {
-        // Use ArrayPool to get managed memory that will be returned to the pool
-        var buffer = ArrayPool<byte>.Shared.Rent(source.Length);
-        source.CopyTo(buffer);
-        return new ArrayPoolMemoryOwner(buffer, source.Length);
-    }
-
-    /// <summary>
-    /// Memory owner that returns buffer to ArrayPool and zeros on dispose.
-    /// </summary>
-    private sealed class ArrayPoolMemoryOwner : IMemoryOwner<byte>
-    {
-        private byte[]? _buffer;
-        private readonly int _length;
-
-        public ArrayPoolMemoryOwner(byte[] buffer, int length)
-        {
-            _buffer = buffer;
-            _length = length;
-        }
-
-        public Memory<byte> Memory
-        {
-            get
-            {
-                if (_buffer is null)
-                {
-                    throw new ObjectDisposedException(nameof(ArrayPoolMemoryOwner));
-                }
-
-                return _buffer.AsMemory(0, _length);
-            }
-        }
-
-        public void Dispose()
-        {
-            if (_buffer is not null)
-            {
-                CryptographicOperations.ZeroMemory(_buffer.AsSpan(0, _length));
-                ArrayPool<byte>.Shared.Return(_buffer, clearArray: true);
-                _buffer = null;
-            }
-        }
-    }
+    private static IMemoryOwner<byte> CreateFromSpan(ReadOnlySpan<byte> source) =>
+        DisposableArrayPoolBuffer.CreateFromSpan(source);
 }

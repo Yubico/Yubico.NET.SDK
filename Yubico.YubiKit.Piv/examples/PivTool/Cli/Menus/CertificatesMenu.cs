@@ -1,7 +1,6 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
-using System.Security.Cryptography;
 using Spectre.Console;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
@@ -112,110 +111,89 @@ public static class CertificatesMenu
     private static async Task ImportCertificateAsync(IPivSession session, CancellationToken ct)
     {
         // Authenticate first
-        var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
+        using var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
         if (mgmtKey is null)
         {
             return;
         }
 
-        try
+        var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory.Span.ToArray(), ct);
+        if (!authResult.Success)
         {
-            var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey, ct);
-            if (!authResult.Success)
-            {
-                OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");
-                return;
-            }
-
-            var slot = SlotSelector.SelectSlot("Select slot:");
-
-            var filename = AnsiConsole.Ask<string>("Enter certificate file path:");
-            if (!File.Exists(filename))
-            {
-                OutputHelpers.WriteError("File not found");
-                return;
-            }
-
-            var certData = await File.ReadAllBytesAsync(filename, ct);
-            var result = await Certificates.ImportCertificateAsync(session, slot, certData, false, ct);
-
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("Certificate imported successfully");
-            }
-            else
-            {
-                OutputHelpers.WriteError(result.ErrorMessage ?? "Import failed");
-            }
+            OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");
+            return;
         }
-        finally
+
+        var slot = SlotSelector.SelectSlot("Select slot:");
+
+        var filename = AnsiConsole.Ask<string>("Enter certificate file path:");
+        if (!File.Exists(filename))
         {
-            CryptographicOperations.ZeroMemory(mgmtKey);
+            OutputHelpers.WriteError("File not found");
+            return;
+        }
+
+        var certData = await File.ReadAllBytesAsync(filename, ct);
+        var result = await Certificates.ImportCertificateAsync(session, slot, certData, false, ct);
+
+        if (result.Success)
+        {
+            OutputHelpers.WriteSuccess("Certificate imported successfully");
+        }
+        else
+        {
+            OutputHelpers.WriteError(result.ErrorMessage ?? "Import failed");
         }
     }
 
     private static async Task GenerateSelfSignedAsync(IPivSession session, CancellationToken ct)
     {
         // Authenticate management key
-        var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
+        using var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
         if (mgmtKey is null)
         {
             return;
         }
 
-        try
+        var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory.Span.ToArray(), ct);
+        if (!authResult.Success)
         {
-            var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey, ct);
-            if (!authResult.Success)
-            {
-                OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");
-                return;
-            }
+            OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");
+            return;
+        }
 
-            // Verify PIN (required for signing operations)
-            var pin = PinPrompt.GetPinWithDefault("PIN");
-            if (pin is null)
-            {
-                return;
-            }
+        // Verify PIN (required for signing operations)
+        using var pin = PinPrompt.GetPinWithDefault("PIN");
+        if (pin is null)
+        {
+            return;
+        }
 
-            try
-            {
-                var pinResult = await PinManagement.VerifyPinAsync(session, pin, ct);
-                if (!pinResult.Success)
-                {
-                    OutputHelpers.WriteError(pinResult.ErrorMessage ?? "PIN verification failed");
-                    return;
-                }
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(pin);
-            }
+        var pinResult = await PinManagement.VerifyPinAsync(session, pin.Memory.Span.ToArray(), ct);
+        if (!pinResult.Success)
+        {
+            OutputHelpers.WriteError(pinResult.ErrorMessage ?? "PIN verification failed");
+            return;
+        }
 
-            var slot = SlotSelector.SelectSlot("Select slot (must have existing key):");
-            var subject = AnsiConsole.Ask("Enter subject (e.g., CN=Test User):", "CN=Test User");
-            var validDays = AnsiConsole.Ask("Enter validity in days:", 365);
+        var slot = SlotSelector.SelectSlot("Select slot (must have existing key):");
+        var subject = AnsiConsole.Ask("Enter subject (e.g., CN=Test User):", "CN=Test User");
+        var validDays = AnsiConsole.Ask("Enter validity in days:", 365);
 
-            var result = await Certificates.GenerateSelfSignedAsync(session, slot, subject, validDays, ct);
+        var result = await Certificates.GenerateSelfSignedAsync(session, slot, subject, validDays, ct);
 
-            if (result.Success)
+        if (result.Success)
+        {
+            OutputHelpers.WriteSuccess("Self-signed certificate generated and stored");
+            if (result.Certificate is not null)
             {
-                OutputHelpers.WriteSuccess("Self-signed certificate generated and stored");
-                if (result.Certificate is not null)
-                {
-                    OutputHelpers.WriteKeyValue("Subject", result.Certificate.Subject);
-                    OutputHelpers.WriteKeyValue("Valid Until", result.Certificate.NotAfter.ToString("yyyy-MM-dd"));
-                }
-            }
-            else
-            {
-                OutputHelpers.WriteError(result.ErrorMessage ?? "Generation failed");
+                OutputHelpers.WriteKeyValue("Subject", result.Certificate.Subject);
+                OutputHelpers.WriteKeyValue("Valid Until", result.Certificate.NotAfter.ToString("yyyy-MM-dd"));
             }
         }
-        finally
+        else
         {
-            CryptographicOperations.ZeroMemory(mgmtKey);
+            OutputHelpers.WriteError(result.ErrorMessage ?? "Generation failed");
         }
     }
 
@@ -247,42 +225,35 @@ public static class CertificatesMenu
     private static async Task DeleteCertificateAsync(IPivSession session, CancellationToken ct)
     {
         // Authenticate first
-        var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
+        using var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
         if (mgmtKey is null)
         {
             return;
         }
 
-        try
+        var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory.Span.ToArray(), ct);
+        if (!authResult.Success)
         {
-            var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey, ct);
-            if (!authResult.Success)
-            {
-                OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");
-                return;
-            }
-
-            var slot = SlotSelector.SelectSlot("Select slot:");
-
-            if (!AnsiConsole.Confirm($"Delete certificate from slot {slot}?", defaultValue: false))
-            {
-                return;
-            }
-
-            var result = await Certificates.DeleteCertificateAsync(session, slot, ct);
-
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("Certificate deleted");
-            }
-            else
-            {
-                OutputHelpers.WriteError(result.ErrorMessage ?? "Delete failed");
-            }
+            OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");
+            return;
         }
-        finally
+
+        var slot = SlotSelector.SelectSlot("Select slot:");
+
+        if (!AnsiConsole.Confirm($"Delete certificate from slot {slot}?", defaultValue: false))
         {
-            CryptographicOperations.ZeroMemory(mgmtKey);
+            return;
+        }
+
+        var result = await Certificates.DeleteCertificateAsync(session, slot, ct);
+
+        if (result.Success)
+        {
+            OutputHelpers.WriteSuccess("Certificate deleted");
+        }
+        else
+        {
+            OutputHelpers.WriteError(result.ErrorMessage ?? "Delete failed");
         }
     }
 }

@@ -1,7 +1,6 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
-using System.Security.Cryptography;
 using Spectre.Console;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
@@ -77,44 +76,37 @@ public static class KeyGenerationMenu
         // Authenticate management key
         await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
         OutputHelpers.SetupTouchNotification(session);
-        var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
+        using var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
         
         if (mgmtKey is null)
         {
             return;
         }
 
-        try
+        var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory.Span.ToArray(), cancellationToken);
+        if (!authResult.Success)
         {
-            var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey, cancellationToken);
-            if (!authResult.Success)
+            OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");
+            return;
+        }
+
+        // Generate key
+        await AnsiConsole.Status()
+            .StartAsync("Generating key...", async ctx =>
             {
-                OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");
-                return;
-            }
+                var result = await KeyGeneration.GenerateKeyAsync(
+                    session, slot, pivAlgorithm, pinPolicy, touchPolicy, cancellationToken);
 
-            // Generate key
-            await AnsiConsole.Status()
-                .StartAsync("Generating key...", async ctx =>
+                if (result.Success)
                 {
-                    var result = await KeyGeneration.GenerateKeyAsync(
-                        session, slot, pivAlgorithm, pinPolicy, touchPolicy, cancellationToken);
-
-                    if (result.Success)
-                    {
-                        OutputHelpers.WriteSuccess($"Key generated in slot {result.Slot}");
-                        OutputHelpers.WriteKeyValue("Algorithm", result.Algorithm.ToString());
-                        OutputHelpers.WriteKeyValue("Public Key Size", $"{result.PublicKey.Length} bytes");
-                    }
-                    else
-                    {
-                        OutputHelpers.WriteError(result.ErrorMessage ?? "Key generation failed");
-                    }
-                });
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(mgmtKey);
-        }
+                    OutputHelpers.WriteSuccess($"Key generated in slot {result.Slot}");
+                    OutputHelpers.WriteKeyValue("Algorithm", result.Algorithm.ToString());
+                    OutputHelpers.WriteKeyValue("Public Key Size", $"{result.PublicKey.Length} bytes");
+                }
+                else
+                {
+                    OutputHelpers.WriteError(result.ErrorMessage ?? "Key generation failed");
+                }
+            });
     }
 }

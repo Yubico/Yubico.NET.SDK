@@ -16,6 +16,7 @@ using System.Buffers;
 using System.Security.Cryptography;
 using System.Text;
 using Spectre.Console;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
@@ -36,178 +37,146 @@ public static class PinPrompt
     private const string DefaultPinValue = "123456";
     private const string DefaultPukValue = "12345678";
 
+    private static readonly ConsoleCredentialReader CredentialReader = new();
+
     /// <summary>
-    /// Prompts for a PIN and returns the bytes. Caller must zero the returned memory.
+    /// Prompts for a PIN and returns the bytes. Caller must dispose the returned memory owner.
     /// </summary>
     /// <param name="prompt">The prompt text to display.</param>
-    /// <returns>The PIN as UTF-8 bytes, or null if cancelled.</returns>
-    public static byte[]? GetPin(string prompt = "Enter PIN")
+    /// <returns>The PIN as UTF-8 bytes in a memory owner, or null if cancelled.</returns>
+    public static IMemoryOwner<byte>? GetPin(string prompt = "Enter PIN: ")
     {
-        return GetCredential(prompt, MaxPinLength, minLength: 6);
+        var options = new CredentialReaderOptions
+        {
+            Prompt = prompt,
+            MinLength = 6,
+            MaxLength = 8,
+            CharacterFilter = char.IsAsciiDigit
+        };
+        return CredentialReader.ReadCredential(options);
     }
 
     /// <summary>
-    /// Prompts for a PIN with option to use the default. Caller must zero the returned memory.
+    /// Prompts for a PIN with option to use the default. Caller must dispose the returned memory owner.
     /// </summary>
     /// <param name="prompt">The prompt text to display.</param>
-    /// <returns>The PIN as UTF-8 bytes, or null if cancelled.</returns>
-    public static byte[]? GetPinWithDefault(string prompt = "PIN")
+    /// <returns>The PIN as UTF-8 bytes in a memory owner, or null if cancelled.</returns>
+    public static IMemoryOwner<byte>? GetPinWithDefault(string prompt = "PIN")
     {
         var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title($"[blue]{prompt}:[/]")
                 .AddChoices(["Use default", "Enter custom PIN"]));
 
-        return choice == "Use default"
-            ? Encoding.UTF8.GetBytes(DefaultPinValue)
-            : GetCredential("Enter PIN", MaxPinLength, minLength: 6);
+        if (choice == "Use default")
+        {
+            return CreateFromDefault(DefaultPinValue);
+        }
+
+        var options = CredentialReaderOptions.ForPin();
+        return CredentialReader.ReadCredential(options);
     }
 
     /// <summary>
-    /// Prompts for a PUK and returns the bytes. Caller must zero the returned memory.
+    /// Prompts for a PUK and returns the bytes. Caller must dispose the returned memory owner.
     /// </summary>
     /// <param name="prompt">The prompt text to display.</param>
-    /// <returns>The PUK as UTF-8 bytes, or null if cancelled.</returns>
-    public static byte[]? GetPuk(string prompt = "Enter PUK")
+    /// <returns>The PUK as UTF-8 bytes in a memory owner, or null if cancelled.</returns>
+    public static IMemoryOwner<byte>? GetPuk(string prompt = "Enter PUK: ")
     {
-        return GetCredential(prompt, MaxPukLength, minLength: 6);
+        var options = new CredentialReaderOptions
+        {
+            Prompt = prompt,
+            MinLength = 6,
+            MaxLength = 8,
+            CharacterFilter = char.IsAsciiDigit
+        };
+        return CredentialReader.ReadCredential(options);
     }
 
     /// <summary>
-    /// Prompts for a PUK with option to use the default. Caller must zero the returned memory.
+    /// Prompts for a PUK with option to use the default. Caller must dispose the returned memory owner.
     /// </summary>
     /// <param name="prompt">The prompt text to display.</param>
-    /// <returns>The PUK as UTF-8 bytes, or null if cancelled.</returns>
-    public static byte[]? GetPukWithDefault(string prompt = "PUK")
+    /// <returns>The PUK as UTF-8 bytes in a memory owner, or null if cancelled.</returns>
+    public static IMemoryOwner<byte>? GetPukWithDefault(string prompt = "PUK")
     {
         var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title($"[blue]{prompt}:[/]")
                 .AddChoices(["Use default", "Enter custom PUK"]));
 
-        return choice == "Use default"
-            ? Encoding.UTF8.GetBytes(DefaultPukValue)
-            : GetCredential("Enter PUK", MaxPukLength, minLength: 6);
+        if (choice == "Use default")
+        {
+            return CreateFromDefault(DefaultPukValue);
+        }
+
+        var options = CredentialReaderOptions.ForPuk();
+        return CredentialReader.ReadCredential(options);
     }
 
     /// <summary>
-    /// Prompts for a new PIN with confirmation. Caller must zero the returned memory.
+    /// Prompts for a new PIN with confirmation. Caller must dispose the returned memory owner.
     /// </summary>
-    /// <returns>The new PIN as UTF-8 bytes, or null if cancelled or mismatch.</returns>
-    public static byte[]? GetNewPin()
+    /// <returns>The new PIN as UTF-8 bytes in a memory owner, or null if cancelled or mismatch.</returns>
+    public static IMemoryOwner<byte>? GetNewPin()
     {
-        var pin = GetCredential("Enter new PIN", MaxPinLength, minLength: 6);
-        if (pin is null)
+        var options = new CredentialReaderOptions
         {
-            return null;
-        }
-
-        var confirm = GetCredential("Confirm new PIN", MaxPinLength, minLength: 6);
-        if (confirm is null)
-        {
-            CryptographicOperations.ZeroMemory(pin);
-            return null;
-        }
-
-        if (!pin.AsSpan().SequenceEqual(confirm))
-        {
-            CryptographicOperations.ZeroMemory(pin);
-            CryptographicOperations.ZeroMemory(confirm);
-            OutputHelpers.WriteError("PINs do not match.");
-            return null;
-        }
-
-        CryptographicOperations.ZeroMemory(confirm);
-        return pin;
+            Prompt = "Enter new PIN: ",
+            ConfirmPrompt = "Confirm new PIN: ",
+            MinLength = 6,
+            MaxLength = 8,
+            CharacterFilter = char.IsAsciiDigit
+        };
+        return CredentialReader.ReadCredentialWithConfirmation(options);
     }
 
     /// <summary>
-    /// Prompts for a new PUK with confirmation. Caller must zero the returned memory.
+    /// Prompts for a new PUK with confirmation. Caller must dispose the returned memory owner.
     /// </summary>
-    /// <returns>The new PUK as UTF-8 bytes, or null if cancelled or mismatch.</returns>
-    public static byte[]? GetNewPuk()
+    /// <returns>The new PUK as UTF-8 bytes in a memory owner, or null if cancelled or mismatch.</returns>
+    public static IMemoryOwner<byte>? GetNewPuk()
     {
-        var puk = GetCredential("Enter new PUK", MaxPukLength, minLength: 6);
-        if (puk is null)
+        var options = new CredentialReaderOptions
         {
-            return null;
-        }
-
-        var confirm = GetCredential("Confirm new PUK", MaxPukLength, minLength: 6);
-        if (confirm is null)
-        {
-            CryptographicOperations.ZeroMemory(puk);
-            return null;
-        }
-
-        if (!puk.AsSpan().SequenceEqual(confirm))
-        {
-            CryptographicOperations.ZeroMemory(puk);
-            CryptographicOperations.ZeroMemory(confirm);
-            OutputHelpers.WriteError("PUKs do not match.");
-            return null;
-        }
-
-        CryptographicOperations.ZeroMemory(confirm);
-        return puk;
+            Prompt = "Enter new PUK: ",
+            ConfirmPrompt = "Confirm new PUK: ",
+            MinLength = 6,
+            MaxLength = 8,
+            CharacterFilter = char.IsAsciiDigit
+        };
+        return CredentialReader.ReadCredentialWithConfirmation(options);
     }
 
     /// <summary>
-    /// Prompts for a management key in hex format. Caller must zero the returned memory.
+    /// Prompts for a management key in hex format. Caller must dispose the returned memory owner.
     /// </summary>
     /// <param name="prompt">The prompt text to display.</param>
     /// <param name="expectedLength">Expected key length in bytes (16, 24, or 32).</param>
-    /// <returns>The management key bytes, or null if cancelled or invalid.</returns>
-    public static byte[]? GetManagementKey(string prompt = "Enter management key (hex)", int expectedLength = ManagementKeyLength3Des)
+    /// <returns>The management key bytes in a memory owner, or null if cancelled or invalid.</returns>
+    public static IMemoryOwner<byte>? GetManagementKey(string prompt = "Enter management key (hex): ", int expectedLength = ManagementKeyLength3Des)
     {
-        var hexInput = AnsiConsole.Prompt(
-            new TextPrompt<string>($"{prompt}:")
-                .Secret()
-                .Validate(hex =>
-                {
-                    if (string.IsNullOrWhiteSpace(hex))
-                    {
-                        return ValidationResult.Error("Management key cannot be empty.");
-                    }
-
-                    // Remove any spaces or dashes
-                    var cleanHex = hex.Replace(" ", "").Replace("-", "");
-
-                    if (cleanHex.Length != expectedLength * 2)
-                    {
-                        return ValidationResult.Error($"Management key must be {expectedLength} bytes ({expectedLength * 2} hex characters).");
-                    }
-
-                    try
-                    {
-                        _ = Convert.FromHexString(cleanHex);
-                        return ValidationResult.Success();
-                    }
-                    catch
-                    {
-                        return ValidationResult.Error("Invalid hex format.");
-                    }
-                }));
-
-        try
+        var options = new CredentialReaderOptions
         {
-            var cleanHex = hexInput.Replace(" ", "").Replace("-", "");
-            return Convert.FromHexString(cleanHex);
-        }
-        catch
-        {
-            return null;
-        }
+            Prompt = prompt,
+            MinLength = expectedLength * 2,
+            MaxLength = expectedLength * 3, // Allow for separators
+            IsHexMode = true,
+            ExpectedByteLength = expectedLength,
+            CharacterFilter = static c => char.IsAsciiHexDigit(c) || c is ' ' or ':' or '-'
+        };
+        return CredentialReader.ReadCredential(options);
     }
 
     /// <summary>
     /// Prompts for a management key with options for default, passphrase, or hex.
-    /// Caller must zero the returned memory.
+    /// Caller must dispose the returned memory owner.
     /// </summary>
     /// <param name="prompt">The prompt text to display.</param>
     /// <param name="keyLength">Expected key length in bytes (16, 24, or 32). Default is 24.</param>
-    /// <returns>The management key bytes, or null if cancelled.</returns>
-    public static byte[]? GetManagementKeyWithDefault(string prompt = "Management key", int keyLength = ManagementKeyLength3Des)
+    /// <returns>The management key bytes in a memory owner, or null if cancelled.</returns>
+    public static IMemoryOwner<byte>? GetManagementKeyWithDefault(string prompt = "Management key", int keyLength = ManagementKeyLength3Des)
     {
         var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
@@ -216,20 +185,20 @@ public static class PinPrompt
 
         return choice switch
         {
-            "Use default" => PivSession.DefaultManagementKey.ToArray(),
+            "Use default" => CreateFromSpan(PivSession.DefaultManagementKey),
             "Enter passphrase (derives key)" => GetManagementKeyFromPassphrase(keyLength),
-            "Enter hex string (advanced)" => GetManagementKey("Enter management key (hex)", keyLength),
+            "Enter hex string (advanced)" => GetManagementKey("Enter management key (hex): ", keyLength),
             _ => null
         };
     }
 
     /// <summary>
     /// Prompts for a NEW management key with options for passphrase, random, or hex.
-    /// Caller must zero the returned memory.
+    /// Caller must dispose the returned memory owner.
     /// </summary>
     /// <param name="keyLength">Key length in bytes (16, 24, or 32). Default is 24.</param>
-    /// <returns>The management key bytes, or null if cancelled.</returns>
-    public static byte[]? GetNewManagementKey(int keyLength = ManagementKeyLength3Des)
+    /// <returns>The management key bytes in a memory owner, or null if cancelled.</returns>
+    public static IMemoryOwner<byte>? GetNewManagementKey(int keyLength = ManagementKeyLength3Des)
     {
         var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
@@ -240,7 +209,7 @@ public static class PinPrompt
         {
             "Generate from passphrase" => GetManagementKeyFromPassphraseWithConfirm(keyLength),
             "Generate random key" => GenerateRandomManagementKey(keyLength),
-            "Enter hex string (advanced)" => GetManagementKey("Enter new management key (hex)", keyLength),
+            "Enter hex string (advanced)" => GetManagementKey("Enter new management key (hex): ", keyLength),
             _ => null
         };
     }
@@ -248,176 +217,141 @@ public static class PinPrompt
     /// <summary>
     /// Derives a management key from a passphrase with confirmation.
     /// </summary>
-    private static byte[]? GetManagementKeyFromPassphraseWithConfirm(int keyLength)
+    private static IMemoryOwner<byte>? GetManagementKeyFromPassphraseWithConfirm(int keyLength)
     {
-        var passphrase = AnsiConsole.Prompt(
-            new TextPrompt<string>("Enter passphrase:")
-                .Secret()
-                .Validate(s => string.IsNullOrEmpty(s)
-                    ? ValidationResult.Error("Passphrase cannot be empty.")
-                    : ValidationResult.Success()));
-
-        if (string.IsNullOrEmpty(passphrase))
+        var options = new CredentialReaderOptions
         {
+            Prompt = "Enter passphrase: ",
+            ConfirmPrompt = "Confirm passphrase: ",
+            MinLength = 1,
+            MaxLength = 128
+        };
+
+        using var passphrase = CredentialReader.ReadCredentialWithConfirmation(options);
+        if (passphrase is null)
+        {
+            OutputHelpers.WriteError("Passphrases do not match or were cancelled.");
             return null;
         }
 
-        var confirm = AnsiConsole.Prompt(
-            new TextPrompt<string>("Confirm passphrase:")
-                .Secret());
-
-        if (passphrase != confirm)
-        {
-            OutputHelpers.WriteError("Passphrases do not match.");
-            return null;
-        }
-
-        var key = DeriveKeyFromPassphrase(passphrase, keyLength);
+        var result = DeriveKeyFromPassphraseBytes(passphrase.Memory.Span, keyLength);
         OutputHelpers.WriteInfo("Key derived from passphrase. Remember this passphrase for future authentication.");
-        return key;
+        return result;
     }
 
     /// <summary>
     /// Generates a random management key.
     /// </summary>
-    private static byte[] GenerateRandomManagementKey(int keyLength)
+    private static IMemoryOwner<byte> GenerateRandomManagementKey(int keyLength)
     {
         var key = new byte[keyLength];
         RandomNumberGenerator.Fill(key);
-        
+
         // Show the hex so user can save it
         OutputHelpers.WriteInfo($"Generated key: {Convert.ToHexString(key)}");
         OutputHelpers.WriteWarning("Save this key securely! You will need it for future management operations.");
-        
-        return key;
+
+        return CreateFromSpan(key);
     }
 
     /// <summary>
     /// Derives a management key from a passphrase using PBKDF2-SHA256.
     /// </summary>
-    private static byte[]? GetManagementKeyFromPassphrase(int keyLength)
+    private static IMemoryOwner<byte>? GetManagementKeyFromPassphrase(int keyLength)
     {
-        var passphrase = AnsiConsole.Prompt(
-            new TextPrompt<string>("Enter passphrase:")
-                .Secret()
-                .Validate(s => string.IsNullOrEmpty(s)
-                    ? ValidationResult.Error("Passphrase cannot be empty.")
-                    : ValidationResult.Success()));
+        var options = new CredentialReaderOptions
+        {
+            Prompt = "Enter passphrase: ",
+            MinLength = 1,
+            MaxLength = 128
+        };
 
-        if (string.IsNullOrEmpty(passphrase))
+        using var passphrase = CredentialReader.ReadCredential(options);
+        if (passphrase is null)
         {
             return null;
         }
 
-        return DeriveKeyFromPassphrase(passphrase, keyLength);
+        return DeriveKeyFromPassphraseBytes(passphrase.Memory.Span, keyLength);
     }
 
     /// <summary>
-    /// Derives a key from a passphrase using PBKDF2-SHA256.
+    /// Derives a key from passphrase bytes using PBKDF2-SHA256.
     /// </summary>
-    /// <param name="passphrase">The passphrase to derive from.</param>
+    /// <param name="passphraseBytes">The passphrase as UTF-8 bytes.</param>
     /// <param name="keyLength">The desired key length in bytes.</param>
-    /// <returns>The derived key bytes.</returns>
-    private static byte[] DeriveKeyFromPassphrase(string passphrase, int keyLength)
+    /// <returns>The derived key bytes in a memory owner.</returns>
+    private static IMemoryOwner<byte> DeriveKeyFromPassphraseBytes(ReadOnlySpan<byte> passphraseBytes, int keyLength)
     {
         // Fixed salt for this example app - in production, use unique salt per key
         ReadOnlySpan<byte> salt = "YubiKit.PIV.Example.2026"u8;
 
         var key = new byte[keyLength];
         Rfc2898DeriveBytes.Pbkdf2(
-            passphrase,
+            passphraseBytes,
             salt,
             key,
             PbkdfIterations,
             HashAlgorithmName.SHA256);
 
-        return key;
+        return CreateFromSpan(key);
     }
 
     /// <summary>
-    /// Prompts for a credential and returns the UTF-8 bytes. Caller must zero the returned memory.
+    /// Creates a secure memory owner from a default string value.
     /// </summary>
-    private static byte[]? GetCredential(string prompt, int maxLength, int minLength = 1)
+    private static IMemoryOwner<byte> CreateFromDefault(string value)
     {
-        var input = AnsiConsole.Prompt(
-            new TextPrompt<string>($"{prompt}:")
-                .Secret()
-                .Validate(s =>
+        var bytes = Encoding.UTF8.GetBytes(value);
+        return CreateFromSpan(bytes);
+    }
+
+    /// <summary>
+    /// Creates a secure memory owner from a span, zeroing the source after copy.
+    /// </summary>
+    private static IMemoryOwner<byte> CreateFromSpan(ReadOnlySpan<byte> source)
+    {
+        // Use ArrayPool to get managed memory that will be returned to the pool
+        var buffer = ArrayPool<byte>.Shared.Rent(source.Length);
+        source.CopyTo(buffer);
+        return new ArrayPoolMemoryOwner(buffer, source.Length);
+    }
+
+    /// <summary>
+    /// Memory owner that returns buffer to ArrayPool and zeros on dispose.
+    /// </summary>
+    private sealed class ArrayPoolMemoryOwner : IMemoryOwner<byte>
+    {
+        private byte[]? _buffer;
+        private readonly int _length;
+
+        public ArrayPoolMemoryOwner(byte[] buffer, int length)
+        {
+            _buffer = buffer;
+            _length = length;
+        }
+
+        public Memory<byte> Memory
+        {
+            get
+            {
+                if (_buffer is null)
                 {
-                    if (string.IsNullOrEmpty(s))
-                    {
-                        return ValidationResult.Error("Cannot be empty.");
-                    }
+                    throw new ObjectDisposedException(nameof(ArrayPoolMemoryOwner));
+                }
 
-                    if (s.Length < minLength)
-                    {
-                        return ValidationResult.Error($"Must be at least {minLength} characters.");
-                    }
-
-                    if (s.Length > maxLength)
-                    {
-                        return ValidationResult.Error($"Cannot exceed {maxLength} characters.");
-                    }
-
-                    return ValidationResult.Success();
-                }));
-
-        if (string.IsNullOrEmpty(input))
-        {
-            return null;
+                return _buffer.AsMemory(0, _length);
+            }
         }
 
-        // Convert to UTF-8 bytes using pooled buffer
-        var maxByteCount = Encoding.UTF8.GetMaxByteCount(input.Length);
-        var buffer = ArrayPool<byte>.Shared.Rent(maxByteCount);
-
-        try
+        public void Dispose()
         {
-            var byteCount = Encoding.UTF8.GetBytes(input, buffer);
-            var result = new byte[byteCount];
-            buffer.AsSpan(0, byteCount).CopyTo(result);
-            return result;
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(buffer.AsSpan(0, maxByteCount));
-            ArrayPool<byte>.Shared.Return(buffer);
-        }
-    }
-
-    /// <summary>
-    /// Executes an action with PIN bytes and ensures they are zeroed afterward.
-    /// </summary>
-    /// <typeparam name="T">The return type of the action.</typeparam>
-    /// <param name="pin">The PIN bytes to use.</param>
-    /// <param name="action">The action to execute with the PIN.</param>
-    /// <returns>The result of the action.</returns>
-    public static async Task<T> UseAndZeroAsync<T>(byte[] pin, Func<byte[], Task<T>> action)
-    {
-        try
-        {
-            return await action(pin);
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(pin);
-        }
-    }
-
-    /// <summary>
-    /// Executes an action with PIN bytes and ensures they are zeroed afterward.
-    /// </summary>
-    /// <param name="pin">The PIN bytes to use.</param>
-    /// <param name="action">The action to execute with the PIN.</param>
-    public static async Task UseAndZeroAsync(byte[] pin, Func<byte[], Task> action)
-    {
-        try
-        {
-            await action(pin);
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(pin);
+            if (_buffer is not null)
+            {
+                CryptographicOperations.ZeroMemory(_buffer.AsSpan(0, _length));
+                ArrayPool<byte>.Shared.Return(_buffer, clearArray: true);
+                _buffer = null;
+            }
         }
     }
 }

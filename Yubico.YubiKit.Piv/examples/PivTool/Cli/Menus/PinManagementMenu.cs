@@ -1,7 +1,6 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
-using System.Security.Cryptography;
 using Spectre.Console;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
@@ -71,171 +70,130 @@ public static class PinManagementMenu
 
     private static async Task VerifyPinAsync(IPivSession session, CancellationToken ct)
     {
-        var pin = PinPrompt.GetPinWithDefault("PIN to verify");
+        using var pin = PinPrompt.GetPinWithDefault("PIN to verify");
         if (pin is null)
         {
             return;
         }
 
-        try
+        var result = await PinManagement.VerifyPinAsync(session, pin.Memory.Span.ToArray(), ct);
+        if (result.Success)
         {
-            var result = await PinManagement.VerifyPinAsync(session, pin, ct);
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("PIN verified successfully");
-            }
-            else
-            {
-                OutputHelpers.WriteError(result.ErrorMessage ?? "PIN verification failed");
-                if (result.RetriesRemaining.HasValue)
-                {
-                    OutputHelpers.WriteInfo($"Retries remaining: {result.RetriesRemaining}");
-                }
-            }
+            OutputHelpers.WriteSuccess("PIN verified successfully");
         }
-        finally
+        else
         {
-            CryptographicOperations.ZeroMemory(pin);
+            OutputHelpers.WriteError(result.ErrorMessage ?? "PIN verification failed");
+            if (result.RetriesRemaining.HasValue)
+            {
+                OutputHelpers.WriteInfo($"Retries remaining: {result.RetriesRemaining}");
+            }
         }
     }
 
     private static async Task ChangePinAsync(IPivSession session, CancellationToken ct)
     {
-        var currentPin = PinPrompt.GetPinWithDefault("Current PIN");
+        using var currentPin = PinPrompt.GetPinWithDefault("Current PIN");
         if (currentPin is null)
         {
             return;
         }
 
-        var newPin = PinPrompt.GetNewPin();
+        using var newPin = PinPrompt.GetNewPin();
         if (newPin is null)
         {
-            CryptographicOperations.ZeroMemory(currentPin);
             return;
         }
 
-        try
+        var result = await PinManagement.ChangePinAsync(session, currentPin.Memory.Span.ToArray(), newPin.Memory.Span.ToArray(), ct);
+        if (result.Success)
         {
-            var result = await PinManagement.ChangePinAsync(session, currentPin, newPin, ct);
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("PIN changed successfully");
-            }
-            else
-            {
-                OutputHelpers.WriteError(result.ErrorMessage ?? "Failed to change PIN");
-                if (result.RetriesRemaining.HasValue)
-                {
-                    OutputHelpers.WriteInfo($"Retries remaining: {result.RetriesRemaining}");
-                }
-            }
+            OutputHelpers.WriteSuccess("PIN changed successfully");
         }
-        finally
+        else
         {
-            CryptographicOperations.ZeroMemory(currentPin);
-            CryptographicOperations.ZeroMemory(newPin);
+            OutputHelpers.WriteError(result.ErrorMessage ?? "Failed to change PIN");
+            if (result.RetriesRemaining.HasValue)
+            {
+                OutputHelpers.WriteInfo($"Retries remaining: {result.RetriesRemaining}");
+            }
         }
     }
 
     private static async Task ChangePukAsync(IPivSession session, CancellationToken ct)
     {
-        var currentPuk = PinPrompt.GetPukWithDefault("Current PUK");
+        using var currentPuk = PinPrompt.GetPukWithDefault("Current PUK");
         if (currentPuk is null)
         {
             return;
         }
 
-        var newPuk = PinPrompt.GetNewPuk();
+        using var newPuk = PinPrompt.GetNewPuk();
         if (newPuk is null)
         {
-            CryptographicOperations.ZeroMemory(currentPuk);
             return;
         }
 
-        try
+        var result = await PinManagement.ChangePukAsync(session, currentPuk.Memory.Span.ToArray(), newPuk.Memory.Span.ToArray(), ct);
+        if (result.Success)
         {
-            var result = await PinManagement.ChangePukAsync(session, currentPuk, newPuk, ct);
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("PUK changed successfully");
-            }
-            else
-            {
-                OutputHelpers.WriteError(result.ErrorMessage ?? "Failed to change PUK");
-                if (result.RetriesRemaining.HasValue)
-                {
-                    OutputHelpers.WriteInfo($"Retries remaining: {result.RetriesRemaining}");
-                }
-            }
+            OutputHelpers.WriteSuccess("PUK changed successfully");
         }
-        finally
+        else
         {
-            CryptographicOperations.ZeroMemory(currentPuk);
-            CryptographicOperations.ZeroMemory(newPuk);
+            OutputHelpers.WriteError(result.ErrorMessage ?? "Failed to change PUK");
+            if (result.RetriesRemaining.HasValue)
+            {
+                OutputHelpers.WriteInfo($"Retries remaining: {result.RetriesRemaining}");
+            }
         }
     }
 
     private static async Task UnblockPinAsync(IPivSession session, CancellationToken ct)
     {
-        var puk = PinPrompt.GetPukWithDefault("PUK");
+        using var puk = PinPrompt.GetPukWithDefault("PUK");
         if (puk is null)
         {
             return;
         }
 
-        var newPin = PinPrompt.GetNewPin();
+        using var newPin = PinPrompt.GetNewPin();
         if (newPin is null)
         {
-            CryptographicOperations.ZeroMemory(puk);
             return;
         }
 
-        try
+        var result = await PinManagement.UnblockPinAsync(session, puk.Memory.Span.ToArray(), newPin.Memory.Span.ToArray(), ct);
+        if (result.Success)
         {
-            var result = await PinManagement.UnblockPinAsync(session, puk, newPin, ct);
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("PIN unblocked successfully");
-            }
-            else
-            {
-                OutputHelpers.WriteError(result.ErrorMessage ?? "Failed to unblock PIN");
-                if (result.RetriesRemaining.HasValue)
-                {
-                    OutputHelpers.WriteInfo($"PUK retries remaining: {result.RetriesRemaining}");
-                }
-            }
+            OutputHelpers.WriteSuccess("PIN unblocked successfully");
         }
-        finally
+        else
         {
-            CryptographicOperations.ZeroMemory(puk);
-            CryptographicOperations.ZeroMemory(newPin);
+            OutputHelpers.WriteError(result.ErrorMessage ?? "Failed to unblock PIN");
+            if (result.RetriesRemaining.HasValue)
+            {
+                OutputHelpers.WriteInfo($"PUK retries remaining: {result.RetriesRemaining}");
+            }
         }
     }
 
     private static async Task AuthenticateAsync(IPivSession session, CancellationToken ct)
     {
-        var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
+        using var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
         if (mgmtKey is null)
         {
             return;
         }
 
-        try
+        var result = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory.Span.ToArray(), ct);
+        if (result.Success)
         {
-            var result = await PinManagement.AuthenticateAsync(session, mgmtKey, ct);
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("Management key authenticated successfully");
-            }
-            else
-            {
-                OutputHelpers.WriteError(result.ErrorMessage ?? "Authentication failed");
-            }
+            OutputHelpers.WriteSuccess("Management key authenticated successfully");
         }
-        finally
+        else
         {
-            CryptographicOperations.ZeroMemory(mgmtKey);
+            OutputHelpers.WriteError(result.ErrorMessage ?? "Authentication failed");
         }
     }
 
@@ -243,50 +201,36 @@ public static class PinManagementMenu
     {
         // First authenticate with current key
         OutputHelpers.WriteInfo("First, authenticate with current management key:");
-        var currentKey = PinPrompt.GetManagementKeyWithDefault("Current management key");
+        using var currentKey = PinPrompt.GetManagementKeyWithDefault("Current management key");
         if (currentKey is null)
         {
             return;
         }
 
-        try
+        var authResult = await PinManagement.AuthenticateAsync(session, currentKey.Memory.Span.ToArray(), ct);
+        if (!authResult.Success)
         {
-            var authResult = await PinManagement.AuthenticateAsync(session, currentKey, ct);
-            if (!authResult.Success)
-            {
-                OutputHelpers.WriteError(authResult.ErrorMessage ?? "Authentication failed");
-                return;
-            }
-
-            OutputHelpers.WriteSuccess("Authenticated with current key");
-
-            // Now get new key
-            var newKey = PinPrompt.GetNewManagementKey();
-            if (newKey is null)
-            {
-                return;
-            }
-
-            try
-            {
-                var changeResult = await PinManagement.ChangeManagementKeyAsync(session, newKey, cancellationToken: ct);
-                if (changeResult.Success)
-                {
-                    OutputHelpers.WriteSuccess("Management key changed successfully");
-                }
-                else
-                {
-                    OutputHelpers.WriteError(changeResult.ErrorMessage ?? "Failed to change management key");
-                }
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(newKey);
-            }
+            OutputHelpers.WriteError(authResult.ErrorMessage ?? "Authentication failed");
+            return;
         }
-        finally
+
+        OutputHelpers.WriteSuccess("Authenticated with current key");
+
+        // Now get new key
+        using var newKey = PinPrompt.GetNewManagementKey();
+        if (newKey is null)
         {
-            CryptographicOperations.ZeroMemory(currentKey);
+            return;
+        }
+
+        var changeResult = await PinManagement.ChangeManagementKeyAsync(session, newKey.Memory.Span.ToArray(), cancellationToken: ct);
+        if (changeResult.Success)
+        {
+            OutputHelpers.WriteSuccess("Management key changed successfully");
+        }
+        else
+        {
+            OutputHelpers.WriteError(changeResult.ErrorMessage ?? "Failed to change management key");
         }
     }
 }

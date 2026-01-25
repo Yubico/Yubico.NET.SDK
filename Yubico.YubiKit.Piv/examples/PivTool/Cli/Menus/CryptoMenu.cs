@@ -62,24 +62,17 @@ public static class CryptoMenu
         var slot = SlotSelector.SelectSlot("Select slot with signing key:");
 
         // Verify PIN if needed
-        var pin = PinPrompt.GetPinWithDefault("PIN");
+        using var pin = PinPrompt.GetPinWithDefault("PIN");
         if (pin is null)
         {
             return;
         }
 
-        try
+        var pinResult = await PinManagement.VerifyPinAsync(session, pin.Memory.Span.ToArray(), ct);
+        if (!pinResult.Success)
         {
-            var pinResult = await PinManagement.VerifyPinAsync(session, pin, ct);
-            if (!pinResult.Success)
-            {
-                OutputHelpers.WriteError(pinResult.ErrorMessage ?? "PIN verification failed");
-                return;
-            }
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(pin);
+            OutputHelpers.WriteError(pinResult.ErrorMessage ?? "PIN verification failed");
+            return;
         }
 
         // Get hash algorithm
@@ -146,24 +139,17 @@ public static class CryptoMenu
         var slot = SlotSelector.SelectSlot("Select slot with RSA decryption key:");
 
         // Verify PIN
-        var pin = PinPrompt.GetPinWithDefault("PIN");
+        using var pin = PinPrompt.GetPinWithDefault("PIN");
         if (pin is null)
         {
             return;
         }
 
-        try
+        var pinResult = await PinManagement.VerifyPinAsync(session, pin.Memory.Span.ToArray(), ct);
+        if (!pinResult.Success)
         {
-            var pinResult = await PinManagement.VerifyPinAsync(session, pin, ct);
-            if (!pinResult.Success)
-            {
-                OutputHelpers.WriteError(pinResult.ErrorMessage ?? "PIN verification failed");
-                return;
-            }
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(pin);
+            OutputHelpers.WriteError(pinResult.ErrorMessage ?? "PIN verification failed");
+            return;
         }
 
         // Get encrypted data

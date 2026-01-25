@@ -13,7 +13,9 @@
 // limitations under the License.
 
 using System.Buffers;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Core.Credentials;
 
@@ -227,7 +229,7 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
         }
 
         int byteCount = options.Encoding.GetByteCount(input);
-        var result = new SecureMemoryOwner(byteCount);
+        var result = new DisposableArrayPoolBuffer(byteCount);
 
         try
         {
@@ -278,7 +280,7 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
                 return null;
             }
 
-            var result = new SecureMemoryOwner(byteLength);
+            var result = new DisposableArrayPoolBuffer(byteLength);
 
             try
             {
@@ -312,11 +314,6 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
         _ => throw new ArgumentException($"Invalid hex character: {c}")
     };
 
-    private static void ClearCharBuffer(char[] buffer, int length)
-    {
-        for (int i = 0; i < length; i++)
-        {
-            buffer[i] = '\0';
-        }
-    }
+    private static void ClearCharBuffer(char[] buffer, int length) =>
+        CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(buffer.AsSpan(0, length)));
 }

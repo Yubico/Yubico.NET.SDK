@@ -105,7 +105,7 @@ status: in-progress
   }
   ```
 
-- [ ] 1.3: **Fix ClearCharBuffer to use CryptographicOperations.ZeroMemory**
+- [x] 1.3: **Fix ClearCharBuffer to use CryptographicOperations.ZeroMemory**
   Replace the manual loop:
   ```csharp
   // OLD:
@@ -125,7 +125,7 @@ status: in-progress
   ```
   Add `using System.Runtime.InteropServices;` if not present.
 
-- [ ] 1.4: **Update ConsoleCredentialReader to use DisposableArrayPoolBuffer**
+- [x] 1.4: **Update ConsoleCredentialReader to use DisposableArrayPoolBuffer**
   Replace `SecureMemoryOwner` with `DisposableArrayPoolBuffer`:
   ```csharp
   // OLD:
@@ -136,19 +136,19 @@ status: in-progress
   ```
   Update the using directive from `Yubico.YubiKit.Core.Credentials` internal to `Yubico.YubiKit.Core.Utils`.
 
-- [ ] 1.5: **Delete SecureMemoryOwner and its tests**
+- [x] 1.5: **Delete SecureMemoryOwner and its tests**
   ```bash
   rm Yubico.YubiKit.Core/src/Credentials/SecureMemoryOwner.cs
   rm Yubico.YubiKit.Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/SecureMemoryOwnerTests.cs
   ```
 
-- [ ] 1.6: **Build verification**
+- [x] 1.6: **Build verification**
   ```bash
   dotnet build.cs build
   ```
   Must exit 0.
 
-- [ ] 1.7: **Security verification**
+- [x] 1.7: **Security verification**
   ```bash
   # Verify no manual zeroing loops remain
   grep -n "for.*buffer\[i\].*=" Yubico.YubiKit.Core/src/Credentials/*.cs

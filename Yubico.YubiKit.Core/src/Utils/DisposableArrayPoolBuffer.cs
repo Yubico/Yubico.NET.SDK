@@ -21,37 +21,65 @@ namespace Yubico.YubiKit.Core.Utils;
 /// A disposable buffer backed by <see cref="ArrayPool{T}"/> that securely clears memory on disposal.
 /// Implements <see cref="IMemoryOwner{T}"/> for compatibility with async APIs.
 /// </summary>
-public class DisposableArrayPoolBuffer : IMemoryOwner<byte>
+public sealed class DisposableArrayPoolBuffer : IMemoryOwner<byte>
 {
-    private Memory<byte> _buffer;
     private byte[]? _rentedBuffer;
+    private readonly int _length;
 
-    public DisposableArrayPoolBuffer(int size, bool clear = true)
+    /// <summary>
+    /// Creates a new buffer of the specified size from the shared array pool.
+    /// </summary>
+    /// <param name="size">The size of the buffer to allocate.</param>
+    /// <param name="clearOnCreate">If true, zeros the buffer after allocation. Defaults to true.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when size is zero or negative.</exception>
+    public DisposableArrayPoolBuffer(int size, bool clearOnCreate = true)
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(size);
         _rentedBuffer = ArrayPool<byte>.Shared.Rent(size);
-        if (clear) CryptographicOperations.ZeroMemory(_rentedBuffer);
-        _buffer = _rentedBuffer.AsMemory(0, size);
+        _length = size;
+        if (clearOnCreate)
+        {
+            CryptographicOperations.ZeroMemory(_rentedBuffer);
+        }
     }
 
     /// <inheritdoc />
     public Memory<byte> Memory => _rentedBuffer is not null 
-        ? _buffer 
+        ? _rentedBuffer.AsMemory(0, _length) 
         : throw new ObjectDisposedException(nameof(DisposableArrayPoolBuffer));
 
+    /// <summary>
+    /// Gets a span over the buffer's memory.
+    /// </summary>
     public Span<byte> Span => Memory.Span;
 
-    public int Length => _buffer.Length;
+    /// <summary>
+    /// Gets the logical length of the buffer.
+    /// </summary>
+    public int Length => _length;
 
-    #region IDisposable Members
-
-    public void Dispose()
+    /// <summary>
+    /// Creates a buffer from a source span, copying the data.
+    /// </summary>
+    /// <param name="source">The source data to copy into the new buffer.</param>
+    /// <returns>A new buffer containing a copy of the source data.</returns>
+    public static DisposableArrayPoolBuffer CreateFromSpan(ReadOnlySpan<byte> source)
     {
-        if (_rentedBuffer == null) return;
-
-        CryptographicOperations.ZeroMemory(_rentedBuffer);
-        ArrayPool<byte>.Shared.Return(_rentedBuffer);
-        _rentedBuffer = null;
+        var buffer = new DisposableArrayPoolBuffer(source.Length, clearOnCreate: false);
+        source.CopyTo(buffer.Span);
+        return buffer;
     }
 
-    #endregion
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (_rentedBuffer is null)
+        {
+            return;
+        }
+
+        CryptographicOperations.ZeroMemory(_rentedBuffer);
+        ArrayPool<byte>.Shared.Return(_rentedBuffer, clearArray: true);
+        _rentedBuffer = null;
+    }
 }

@@ -531,6 +531,13 @@ Apply to:
 - Checking multiple API classes simultaneously
 - Reading related documentation files
 - Examining similar implementations across modules
+- **Viewing API source before migrating call sites** (understand new patterns first)
+- **Viewing multiple menu/consumer files** when updating call sites
+
+**Example - API migration exploration:**
+When migrating PinPrompt call sites, view SIMULTANEOUSLY:
+- PinPrompt.cs (new API)
+- CryptoMenu.cs, PinManagementMenu.cs, CertificatesMenu.cs (consumers)
 ```
 
 **Why:** 30-40% reduction in exploration time (3-4 minutes saved per session).
@@ -630,7 +637,73 @@ For each security task, document with evidence:
 
 **Why:** Creates audit trail for security-sensitive changes. Evidence-based verification prevents subjective "I think it's secure" claims. Table format ensures completeness.
 
-### 21. Interface Change Impact Checklist
+### 21. API Migration Call-Site Pattern
+
+When migrating code to use new APIs after signature changes:
+
+```markdown
+## API Migration Checklist
+
+For each API signature change:
+
+1. **Find all call sites:**
+   ```bash
+   grep -rn "OldMethod\|OldReturnType" src/ examples/ --include="*.cs"
+   ```
+
+2. **Batch updates (3-5 files per batch):**
+   - Update return type consumers with consistent pattern
+   - Example: `byte[]?` → `IMemoryOwner<byte>?` requires `using var` pattern
+
+3. **Build after each batch:**
+   ```bash
+   dotnet build.cs build
+   ```
+
+4. **Verify no remaining references:**
+   ```bash
+   grep -rn "OldMethod" src/ --include="*.cs"  # Should be 0
+   ```
+
+**Example migration pattern:**
+```csharp
+// Old: byte[]? pin = await PinPrompt.GetPinAsync();
+// New: using var pin = await PinPrompt.GetPinAsync();
+//      if (pin is not null) session.VerifyPin(pin.Memory.Span);
+```
+```
+
+**Why:** Systematic call-site migration prevents missed updates. Batch builds catch type errors incrementally.
+
+### 22. Type Inspection Before Copy Expressions
+
+Before using `with` expressions or copy patterns, verify the type definition:
+
+```markdown
+## Type Inspection Rule
+
+Before using `with` expression syntax:
+```bash
+grep -A2 "^public.*class\|^public.*record" path/to/Type.cs | head -3
+```
+
+- **Record:** Can use `options with { Prompt = "..." }`
+- **Class:** Must use object initializer or dedicated method:
+  ```csharp
+  // ❌ WRONG for class
+  var newOptions = options with { Prompt = "New" };
+  
+  // ✅ CORRECT for class
+  var newOptions = new CredentialReaderOptions { 
+      Prompt = "New", 
+      MinLength = options.MinLength 
+  };
+  ```
+```
+
+**Why:** `with` expressions on classes cause build errors. 30-second check prevents 2-minute fix cycle.
+
+### 23. Interface Change Impact Checklist
 
 When a phase involves changing interface signatures, include explicit impact tracking:
 

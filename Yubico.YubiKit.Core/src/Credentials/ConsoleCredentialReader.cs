@@ -68,23 +68,23 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
     }
 
     /// <inheritdoc />
-    public IMemoryOwner<byte>? ReadCredential(CredentialReaderOptions options)
+    public IMemoryOwner<byte>? ReadCredential(CredentialReaderOptions options, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
 
         return _console.IsInteractive
-            ? ReadInteractive(options)
+            ? ReadInteractive(options, cancellationToken)
             : ReadNonInteractive(options);
     }
 
     /// <inheritdoc />
-    public IMemoryOwner<byte>? ReadCredentialWithConfirmation(CredentialReaderOptions options)
+    public IMemoryOwner<byte>? ReadCredentialWithConfirmation(CredentialReaderOptions options, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
 
         // Read first entry
         _console.Write(options.Prompt);
-        var first = ReadCredentialCore(options);
+        var first = ReadCredentialCore(options, cancellationToken);
         if (first is null)
         {
             return null;
@@ -92,7 +92,7 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
 
         // Read confirmation
         _console.Write(options.ConfirmPrompt);
-        var second = ReadCredentialCore(options);
+        var second = ReadCredentialCore(options, cancellationToken);
         if (second is null)
         {
             first.Dispose();
@@ -116,10 +116,10 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
         return first;
     }
 
-    private IMemoryOwner<byte>? ReadInteractive(CredentialReaderOptions options)
+    private IMemoryOwner<byte>? ReadInteractive(CredentialReaderOptions options, CancellationToken cancellationToken)
     {
         _console.Write(options.Prompt);
-        return ReadCredentialCore(options);
+        return ReadCredentialCore(options, cancellationToken);
     }
 
     private IMemoryOwner<byte>? ReadNonInteractive(CredentialReaderOptions options)
@@ -144,7 +144,7 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
         }
     }
 
-    private IMemoryOwner<byte>? ReadCredentialCore(CredentialReaderOptions options)
+    private IMemoryOwner<byte>? ReadCredentialCore(CredentialReaderOptions options, CancellationToken cancellationToken)
     {
         // Use a temporary buffer for character input
         var charBuffer = ArrayPool<char>.Shared.Rent(options.MaxLength);
@@ -154,6 +154,13 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
         {
             while (true)
             {
+                // Wait for key availability with cancellation support
+                while (!_console.KeyAvailable)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    Thread.Sleep(10);
+                }
+
                 var keyInfo = _console.ReadKey(intercept: true);
 
                 switch (keyInfo.Key)

@@ -25,6 +25,11 @@ internal interface IConsoleInputSource
     bool IsInteractive { get; }
 
     /// <summary>
+    /// Gets a value indicating whether a key press is available to be read.
+    /// </summary>
+    bool KeyAvailable { get; }
+
+    /// <summary>
     /// Reads the next key from the console without displaying it.
     /// </summary>
     ConsoleKeyInfo ReadKey(bool intercept);
@@ -65,6 +70,8 @@ internal sealed class RealConsoleInput : IConsoleInputSource
         }
     }
 
+    public bool KeyAvailable => Console.KeyAvailable;
+
     public ConsoleKeyInfo ReadKey(bool intercept) => Console.ReadKey(intercept);
 
     public string? ReadLine() => Console.ReadLine();
@@ -84,6 +91,8 @@ internal sealed class MockConsoleInput : IConsoleInputSource
     private readonly List<string> _output = [];
 
     public bool IsInteractive { get; set; } = true;
+
+    public bool KeyAvailable => _keys.Count > 0;
 
     public IReadOnlyList<string> Output => _output;
 

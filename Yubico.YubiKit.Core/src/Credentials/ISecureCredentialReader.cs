@@ -44,6 +44,7 @@ public interface ISecureCredentialReader
     /// Reads a credential from the user with the specified options.
     /// </summary>
     /// <param name="options">Configuration for the credential input behavior.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>
     /// An <see cref="IMemoryOwner{T}"/> containing the credential bytes, or <c>null</c>
     /// if the user cancelled the input (e.g., pressed Escape).
@@ -52,12 +53,14 @@ public interface ISecureCredentialReader
     /// The returned memory owner automatically zeros its contents when disposed.
     /// Callers must dispose the result to ensure sensitive data is cleared.
     /// </remarks>
-    IMemoryOwner<byte>? ReadCredential(CredentialReaderOptions options);
+    /// <exception cref="OperationCanceledException">Thrown when cancellation is requested.</exception>
+    IMemoryOwner<byte>? ReadCredential(CredentialReaderOptions options, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Reads a credential with confirmation (user must enter it twice).
     /// </summary>
     /// <param name="options">Configuration for the credential input behavior.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>
     /// An <see cref="IMemoryOwner{T}"/> containing the credential bytes if both entries
     /// matched, or <c>null</c> if the user cancelled or entries did not match.
@@ -71,5 +74,6 @@ public interface ISecureCredentialReader
     /// and both buffers are zeroed if they don't match.
     /// </para>
     /// </remarks>
-    IMemoryOwner<byte>? ReadCredentialWithConfirmation(CredentialReaderOptions options);
+    /// <exception cref="OperationCanceledException">Thrown when cancellation is requested.</exception>
+    IMemoryOwner<byte>? ReadCredentialWithConfirmation(CredentialReaderOptions options, CancellationToken cancellationToken = default);
 }

@@ -17,11 +17,13 @@ public static class KeyGenerationMenu
     {
         OutputHelpers.WriteHeader("Key Generation");
 
-        var device = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-        if (device is null)
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        if (selection is null)
         {
             return;
         }
+
+        OutputHelpers.WriteActiveDevice(selection.DisplayName);
 
         // Select slot
         var slot = SlotSelector.SelectSlot("Select slot for key generation:");
@@ -74,7 +76,7 @@ public static class KeyGenerationMenu
         };
 
         // Authenticate management key
-        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        await using var session = await selection.Device.CreatePivSessionAsync(cancellationToken: cancellationToken);
         OutputHelpers.SetupTouchNotification(session);
         using var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
         

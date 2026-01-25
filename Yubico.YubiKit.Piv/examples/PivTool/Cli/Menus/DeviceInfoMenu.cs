@@ -19,21 +19,23 @@ public static class DeviceInfoMenu
     {
         OutputHelpers.WriteHeader("Device Information");
 
-        var device = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-        if (device is null)
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        if (selection is null)
         {
             return;
         }
+
+        OutputHelpers.WriteActiveDevice(selection.DisplayName);
 
         await AnsiConsole.Status()
             .StartAsync("Getting device information...", async ctx =>
             {
                 // Get device info using the Management extension
-                var deviceInfo = await device.GetDeviceInfoAsync(cancellationToken);
+                var deviceInfo = await selection.Device.GetDeviceInfoAsync(cancellationToken);
                 DisplayDeviceDetails(deviceInfo);
 
                 // Get PIV-specific retry info
-                await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+                await using var session = await selection.Device.CreatePivSessionAsync(cancellationToken: cancellationToken);
                 OutputHelpers.SetupTouchNotification(session);
                 var retryResult = await DeviceInfoQuery.GetPivRetryInfoAsync(session, cancellationToken);
                 

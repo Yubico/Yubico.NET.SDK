@@ -206,4 +206,14 @@ public static class OutputHelpers
             pivSession.OnTouchRequired = WriteTouchRequired;
         }
     }
+
+    /// <summary>
+    /// Displays the currently active device with serial number.
+    /// </summary>
+    /// <param name="deviceDisplayName">The device display name (e.g., "YubiKey 5C - S/N: 12345678").</param>
+    public static void WriteActiveDevice(string deviceDisplayName)
+    {
+        AnsiConsole.MarkupLine($"[blue]🔑 Using:[/] [cyan]{Markup.Escape(deviceDisplayName)}[/]");
+        AnsiConsole.WriteLine();
+    }
 }

@@ -17,15 +17,17 @@ public static class AttestationMenu
     {
         OutputHelpers.WriteHeader("Key Attestation");
 
-        var device = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-        if (device is null)
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        if (selection is null)
         {
             return;
         }
 
+        OutputHelpers.WriteActiveDevice(selection.DisplayName);
+
         var slot = SlotSelector.SelectSlot("Select slot to attest:");
 
-        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        await using var session = await selection.Device.CreatePivSessionAsync(cancellationToken: cancellationToken);
         OutputHelpers.SetupTouchNotification(session);
 
         await AnsiConsole.Status()

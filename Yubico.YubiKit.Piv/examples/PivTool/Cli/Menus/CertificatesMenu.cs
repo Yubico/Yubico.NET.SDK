@@ -17,11 +17,13 @@ public static class CertificatesMenu
     {
         OutputHelpers.WriteHeader("Certificate Operations");
 
-        var device = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-        if (device is null)
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        if (selection is null)
         {
             return;
         }
+
+        OutputHelpers.WriteActiveDevice(selection.DisplayName);
 
         var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
@@ -42,7 +44,7 @@ public static class CertificatesMenu
             return;
         }
 
-        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        await using var session = await selection.Device.CreatePivSessionAsync(cancellationToken: cancellationToken);
         OutputHelpers.SetupTouchNotification(session);
 
         switch (choice)

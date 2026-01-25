@@ -21,6 +21,31 @@ using Yubico.YubiKit.Management;
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
 
 /// <summary>
+/// Represents a selected YubiKey device with its identifying information.
+/// </summary>
+/// <param name="Device">The selected YubiKey device.</param>
+/// <param name="SerialNumber">The device serial number, if available.</param>
+/// <param name="FormFactor">The device form factor.</param>
+/// <param name="FirmwareVersion">The firmware version string.</param>
+public record DeviceSelection(
+    IYubiKey Device,
+    int? SerialNumber,
+    FormFactor FormFactor,
+    string FirmwareVersion)
+{
+    /// <summary>
+    /// Gets a display string for this device (e.g., "YubiKey 5C - S/N: 12345678").
+    /// </summary>
+    public string DisplayName =>
+        SerialNumber.HasValue
+            ? $"YubiKey {FormatFormFactor(FormFactor)} - S/N: {SerialNumber}"
+            : $"YubiKey {FormatFormFactor(FormFactor)}";
+
+    private static string FormatFormFactor(FormFactor formFactor) =>
+        DeviceSelector.FormatFormFactor(formFactor);
+}
+
+/// <summary>
 /// Handles YubiKey device discovery and selection.
 /// </summary>
 public static class DeviceSelector
@@ -29,8 +54,8 @@ public static class DeviceSelector
     /// Finds all connected YubiKeys and allows user to select one.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The selected YubiKey, or null if none available or user cancelled.</returns>
-    public static async Task<IYubiKey?> SelectDeviceAsync(CancellationToken cancellationToken = default)
+    /// <returns>The selected YubiKey with device info, or null if none available or user cancelled.</returns>
+    public static async Task<DeviceSelection?> SelectDeviceAsync(CancellationToken cancellationToken = default)
     {
         var devices = await FindDevicesWithRetryAsync(cancellationToken);
         if (devices.Count == 0)
@@ -40,7 +65,13 @@ public static class DeviceSelector
 
         if (devices.Count == 1)
         {
-            return devices[0];
+            // Get device info for single device
+            var info = await GetDeviceInfoAsync(devices[0], cancellationToken);
+            return new DeviceSelection(
+                devices[0],
+                info?.SerialNumber,
+                info?.FormFactor ?? FormFactor.Unknown,
+                info?.FirmwareVersion.ToString() ?? "Unknown");
         }
 
         // Multiple devices - let user choose
@@ -77,9 +108,28 @@ public static class DeviceSelector
     }
 
     /// <summary>
+    /// Gets device info for a single device.
+    /// </summary>
+    private static async Task<DeviceInfo?> GetDeviceInfoAsync(
+        IYubiKey device,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
+            await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
+            return await session.GetDeviceInfoAsync(cancellationToken);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Prompts user to select from multiple devices.
     /// </summary>
-    private static async Task<IYubiKey?> PromptForDeviceSelectionAsync(
+    private static async Task<DeviceSelection?> PromptForDeviceSelectionAsync(
         IReadOnlyList<IYubiKey> devices,
         CancellationToken cancellationToken)
     {
@@ -91,18 +141,7 @@ public static class DeviceSelector
             {
                 foreach (var device in devices)
                 {
-                    DeviceInfo? info = null;
-                    try
-                    {
-                        await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-                        await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
-                        info = await session.GetDeviceInfoAsync(cancellationToken);
-                    }
-                    catch
-                    {
-                        // Device info unavailable - continue with null
-                    }
-
+                    var info = await GetDeviceInfoAsync(device, cancellationToken);
                     deviceInfos.Add((device, info));
                 }
             });
@@ -122,7 +161,12 @@ public static class DeviceSelector
         }
 
         var index = choices.IndexOf(selection);
-        return deviceInfos[index].Device;
+        var selected = deviceInfos[index];
+        return new DeviceSelection(
+            selected.Device,
+            selected.Info?.SerialNumber,
+            selected.Info?.FormFactor ?? FormFactor.Unknown,
+            selected.Info?.FirmwareVersion.ToString() ?? "Unknown");
     }
 
     /// <summary>

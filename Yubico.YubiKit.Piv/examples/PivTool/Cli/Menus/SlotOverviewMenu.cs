@@ -18,13 +18,15 @@ public static class SlotOverviewMenu
     {
         OutputHelpers.WriteHeader("Slot Overview");
 
-        var device = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-        if (device is null)
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        if (selection is null)
         {
             return;
         }
 
-        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        OutputHelpers.WriteActiveDevice(selection.DisplayName);
+
+        await using var session = await selection.Device.CreatePivSessionAsync(cancellationToken: cancellationToken);
         OutputHelpers.SetupTouchNotification(session);
 
         await AnsiConsole.Status()

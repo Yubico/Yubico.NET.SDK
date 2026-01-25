@@ -201,4 +201,22 @@ public class ConsoleCredentialReaderTests
         Assert.NotNull(result);
         Assert.Equal("123456"u8.ToArray(), result.Memory.ToArray());
     }
+
+    [Fact]
+    public void ReadCredential_WithCancelledToken_ThrowsOperationCanceledException()
+    {
+        // Arrange
+        var mock = new MockConsoleInput();
+        // Don't enqueue any keys - the reader should check cancellation before blocking
+        
+        var reader = new ConsoleCredentialReader(mock);
+        var cts = new CancellationTokenSource();
+        cts.Cancel();
+        
+        var options = CredentialReaderOptions.ForPin();
+
+        // Act & Assert
+        Assert.Throws<OperationCanceledException>(() => 
+            reader.ReadCredential(options, cts.Token));
+    }
 }

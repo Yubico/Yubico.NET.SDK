@@ -167,13 +167,13 @@ status: in-progress
   # Expected: No such file
   ```
 
-- [ ] 1.8: **Test verification**
+- [x] 1.8: **Test verification**
   ```bash
   dotnet build.cs test --filter "FullyQualifiedName~Credential"
   ```
   All credential tests must pass.
 
-- [ ] 1.9: **Commit**
+- [x] 1.9: **Commit**
   ```bash
   git add Yubico.YubiKit.Core/src/Credentials/ConsoleCredentialReader.cs \
           Yubico.YubiKit.Core/src/Utils/DisposableArrayPoolBuffer.cs
@@ -204,7 +204,7 @@ status: in-progress
 
 ### Tasks
 
-- [ ] 2.1: **Update ISecureCredentialReader interface**
+- [x] 2.1: **Update ISecureCredentialReader interface**
   Add CancellationToken parameter with default value to both methods:
   ```csharp
   IMemoryOwner<byte>? ReadCredential(
@@ -216,7 +216,7 @@ status: in-progress
       CancellationToken cancellationToken = default);
   ```
 
-- [ ] 2.2: **Update IConsoleInputSource to support cancellation**
+- [x] 2.2: **Update IConsoleInputSource to support cancellation**
   Add KeyAvailable property for non-blocking checks:
   ```csharp
   /// <summary>
@@ -225,19 +225,19 @@ status: in-progress
   bool KeyAvailable { get; }
   ```
 
-- [ ] 2.3: **Update RealConsoleInput implementation**
+- [x] 2.3: **Update RealConsoleInput implementation**
   Add KeyAvailable property:
   ```csharp
   public bool KeyAvailable => Console.KeyAvailable;
   ```
 
-- [ ] 2.4: **Update MockConsoleInput for tests**
+- [x] 2.4: **Update MockConsoleInput for tests**
   Add KeyAvailable property that returns true when keys are enqueued:
   ```csharp
   public bool KeyAvailable => _keys.Count > 0;
   ```
 
-- [ ] 2.5: **Update ConsoleCredentialReader implementation**
+- [x] 2.5: **Update ConsoleCredentialReader implementation**
   Update method signatures and add cancellation checks in the read loop:
   ```csharp
   public IMemoryOwner<byte>? ReadCredential(
@@ -252,19 +252,19 @@ status: in-progress
   }
   ```
 
-- [ ] 2.6: **Build verification**
+- [x] 2.6: **Build verification**
   ```bash
   dotnet build.cs build
   ```
   Must exit 0.
 
-- [ ] 2.7: **Test verification**
+- [x] 2.7: **Test verification**
   ```bash
   dotnet build.cs test --filter "FullyQualifiedName~Credential"
   ```
   All credential tests must pass.
 
-- [ ] 2.8: **Commit**
+- [x] 2.8: **Commit**
   ```bash
   git add Yubico.YubiKit.Core/src/Credentials/
   git commit -m "feat(core): add CancellationToken support to credential reader
@@ -288,13 +288,13 @@ status: in-progress
 
 ### Tasks
 
-- [ ] 3.1: **Audit call sites for MaskChar**
+- [x] 3.1: **Audit call sites for MaskChar**
   ```bash
   grep -rn "MaskChar" Yubico.YubiKit.Core/ Yubico.YubiKit.Piv/examples/ --include="*.cs"
   ```
   Document all locations before proceeding.
 
-- [ ] 3.2: **Convert CredentialReaderOptions to record**
+- [x] 3.2: **Convert CredentialReaderOptions to record**
   Change class declaration:
   ```csharp
   // OLD:
@@ -306,7 +306,7 @@ status: in-progress
   
   This provides structural equality and better `with` expression support.
 
-- [ ] 3.3: **Rename MaskChar to MaskCharacter**
+- [x] 3.3: **Rename MaskChar to MaskCharacter**
   Update property name:
   ```csharp
   // OLD:
@@ -316,7 +316,7 @@ status: in-progress
   public char MaskCharacter { get; init; } = '*';
   ```
 
-- [ ] 3.4: **Update ConsoleCredentialReader reference**
+- [x] 3.4: **Update ConsoleCredentialReader reference**
   ```csharp
   // OLD:
   _console.Write(options.MaskChar.ToString());
@@ -325,19 +325,19 @@ status: in-progress
   _console.Write(options.MaskCharacter.ToString());
   ```
 
-- [ ] 3.5: **Build verification**
+- [x] 3.5: **Build verification**
   ```bash
   dotnet build.cs build
   ```
   Must exit 0.
 
-- [ ] 3.6: **Test verification**
+- [x] 3.6: **Test verification**
   ```bash
   dotnet build.cs test --filter "FullyQualifiedName~Credential"
   ```
   All tests must pass.
 
-- [ ] 3.7: **Commit**
+- [x] 3.7: **Commit**
   ```bash
   git add Yubico.YubiKit.Core/src/Credentials/CredentialReaderOptions.cs \
           Yubico.YubiKit.Core/src/Credentials/ConsoleCredentialReader.cs
@@ -360,7 +360,7 @@ status: in-progress
 
 ### Tasks
 
-- [ ] 4.1: **Update PinPrompt.cs to use DisposableArrayPoolBuffer**
+- [x] 4.1: **Update PinPrompt.cs to use DisposableArrayPoolBuffer**
   Replace private `ArrayPoolMemoryOwner` class with `DisposableArrayPoolBuffer`:
   ```csharp
   // Add using directive
@@ -380,28 +380,28 @@ status: in-progress
       DisposableArrayPoolBuffer.CreateFromSpan(source);
   ```
 
-- [ ] 4.2: **Delete the private ArrayPoolMemoryOwner class**
+- [x] 4.2: **Delete the private ArrayPoolMemoryOwner class**
   Remove lines 323-356 (the entire private class definition).
 
-- [ ] 4.3: **Build verification**
+- [x] 4.3: **Build verification**
   ```bash
   dotnet build.cs build
   ```
   Must exit 0.
 
-- [ ] 4.4: **Test verification**
+- [x] 4.4: **Test verification**
   ```bash
   dotnet build.cs test
   ```
   All tests must pass.
 
-- [ ] 4.5: **Verify no duplicate memory owners**
+- [x] 4.5: **Verify no duplicate memory owners**
   ```bash
   grep -c "class.*MemoryOwner" Yubico.YubiKit.Piv/examples/PivTool/Cli/Prompts/PinPrompt.cs
   # Expected: 0
   ```
 
-- [ ] 4.6: **Commit**
+- [x] 4.6: **Commit**
   ```bash
   git add Yubico.YubiKit.Piv/examples/PivTool/Cli/Prompts/PinPrompt.cs
   git commit -m "refactor(piv-example): use DisposableArrayPoolBuffer instead of duplicate class
@@ -424,7 +424,7 @@ status: in-progress
 
 ### Tasks
 
-- [ ] 5.1: **Add CancellationToken test**
+- [x] 5.1: **Add CancellationToken test**
   Add test for cancellation behavior:
   ```csharp
   [Fact]
@@ -447,7 +447,7 @@ status: in-progress
   }
   ```
 
-- [ ] 5.2: **Add DisposableArrayPoolBuffer.CreateFromSpan test**
+- [x] 5.2: **Add DisposableArrayPoolBuffer.CreateFromSpan test**
   ```csharp
   [Fact]
   public void CreateFromSpan_CopiesDataCorrectly()
@@ -464,13 +464,13 @@ status: in-progress
   }
   ```
 
-- [ ] 5.3: **Build and test verification**
+- [x] 5.3: **Build and test verification**
   ```bash
   dotnet build.cs test --filter "FullyQualifiedName~Credential|FullyQualifiedName~DisposableArrayPoolBuffer"
   ```
   All tests must pass.
 
-- [ ] 5.4: **Commit**
+- [x] 5.4: **Commit**
   ```bash
   git add Yubico.YubiKit.Core/tests/
   git commit -m "test(core): add CancellationToken and CreateFromSpan tests"
@@ -484,25 +484,25 @@ status: in-progress
 
 ### Tasks
 
-- [ ] 6.1: **Full solution build**
+- [x] 6.1: **Full solution build**
   ```bash
   dotnet build.cs build
   ```
   Must exit 0.
 
-- [ ] 6.2: **Full credential test suite**
+- [x] 6.2: **Full credential test suite**
   ```bash
   dotnet build.cs test --filter "FullyQualifiedName~Credential"
   ```
   All tests must pass.
 
-- [ ] 6.3: **Core module tests**
+- [x] 6.3: **Core module tests**
   ```bash
   dotnet build.cs test --filter "FullyQualifiedName~Core"
   ```
   No regressions in Core tests.
 
-- [ ] 6.4: **Security audit checklist**
+- [x] 6.4: **Security audit checklist**
   | Check | Command | Expected |
   |-------|---------|----------|
   | No manual zeroing loops | `grep -n "for.*buffer\[i\].*=" Yubico.YubiKit.Core/src/Credentials/*.cs` | 0 matches |

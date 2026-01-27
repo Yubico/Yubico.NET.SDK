@@ -33,9 +33,4 @@
     <ProjectReference Include="..\..\..\Yubico.YubiKit.Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- xUnit runner configuration - disable parallel execution for hardware tests -->
-    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
 </Project>

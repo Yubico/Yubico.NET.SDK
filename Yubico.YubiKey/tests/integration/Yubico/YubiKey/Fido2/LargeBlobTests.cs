@@ -142,5 +142,99 @@ namespace Yubico.YubiKey.Fido2
                 Assert.True(isValid);
             }
         }
+
+        /// <summary>
+        /// Tests whether YubiKeys auto-generate a largeBlobKey for resident credentials
+        /// even when the extension is NOT requested at MakeCredential time.
+        /// 
+        /// Per CTAP 2.1 spec: "Authenticators MAY optionally generate a largeBlobKey for
+        /// a credential if the Large Blob Key extension is absent."
+        /// 
+        /// This test verifies that on YubiKeys:
+        /// 1. MakeCredential without extension returns null LargeBlobKey (per spec)
+        /// 2. GetAssertion WITH extension can retrieve the auto-generated key
+        /// 3. The retrieved key can be used to store and retrieve blob data
+        /// 
+        /// This addresses the JIRA request about relaxing large blob requirements,
+        /// mimicking the workflow used by libfido2/fido2-token for SSH certificates.
+        /// </summary>
+        [SkippableFact(typeof(DeviceNotFoundException))]
+        public void GetLargeBlobKey_ViaGetAssertion_ForCredentialCreatedWithoutExtension_Succeeds()
+        {
+            // Use a distinct relying party to avoid conflicts with other tests
+            var rp = new RelyingParty("test.largeblob.noextension");
+
+            using (var fido2Session = new Fido2Session(_testDevice))
+            {
+                // bool isValid = Fido2ResetForTest.DoReset(_testDevice.SerialNumber);
+                // Assert.True(isValid);
+                fido2Session.KeyCollector = Fido2ResetForTest.ResetForTestKeyCollectorDelegate;
+
+                var user = new UserEntity(new byte[] { 0xAA, 0xBB, 0xCC, 0xDD })
+                {
+                    Name = "TestUserNoExtension",
+                    DisplayName = "Test User No Extension"
+                };
+
+                // STEP 1: Create credential WITHOUT largeBlobKey extension
+                var mcParams = new MakeCredentialParameters(rp, user)
+                {
+                    ClientDataHash = _clientDataHash
+                };
+                mcParams.AddOption(AuthenticatorOptions.rk, true);
+                // NOTE: Intentionally NOT adding largeBlobKey extension
+
+                fido2Session.AddPermissions(PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion, rp.Id);
+                MakeCredentialData mcData = fido2Session.MakeCredential(mcParams);
+                Assert.True(mcData.VerifyAttestation(_clientDataHash));
+
+                // Per CTAP spec: authenticator MUST NOT return unsolicited largeBlobKey
+                Assert.Null(mcData.LargeBlobKey);
+
+                // STEP 2: Retrieve largeBlobKey via GetAssertion WITH the extension
+                var gaParams = new GetAssertionParameters(rp, _clientDataHash);
+                gaParams.AddExtension(Extensions.LargeBlobKey, new byte[] { 0xF5 });
+
+                IReadOnlyList<GetAssertionData> assertions = fido2Session.GetAssertions(gaParams);
+                Assert.Single(assertions);
+
+                // KEY TEST: YubiKeys should return the auto-generated largeBlobKey
+                ReadOnlyMemory<byte>? retrievedKey = assertions[0].LargeBlobKey;
+                Assert.NotNull(retrievedKey);
+
+                // STEP 3: Verify blob storage works with the retrieved key
+                byte[] testBlobData = {
+                    0x53, 0x53, 0x48, 0x20, 0x43, 0x45, 0x52, 0x54, // "SSH CERT" in ASCII
+                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+                };
+
+                SerializedLargeBlobArray blobArray = fido2Session.GetSerializedLargeBlobArray();
+                int initialCount = blobArray.Entries.Count;
+
+                blobArray.AddEntry(testBlobData, retrievedKey.Value);
+                fido2Session.SetSerializedLargeBlobArray(blobArray);
+
+                // STEP 4: Verify round-trip - retrieve and decrypt
+                blobArray = fido2Session.GetSerializedLargeBlobArray();
+                Assert.Equal(initialCount + 1, blobArray.Entries.Count);
+
+                // Find and decrypt our entry
+                bool foundAndDecrypted = false;
+                foreach (var entry in blobArray.Entries)
+                {
+                    if (entry.TryDecrypt(retrievedKey.Value, out Memory<byte> plaintext))
+                    {
+                        if (plaintext.Span.SequenceEqual(testBlobData.AsSpan()))
+                        {
+                            foundAndDecrypted = true;
+                            break;
+                        }
+                    }
+                }
+
+                Assert.True(foundAndDecrypted, 
+                    "Failed to find and decrypt blob data using largeBlobKey retrieved via GetAssertion");
+            }
+        }
     }
 }

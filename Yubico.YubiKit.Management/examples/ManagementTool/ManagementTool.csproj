@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Yubico.YubiKit.Management.Examples.ManagementTool</RootNamespace>
+    <AssemblyName>ManagementTool</AssemblyName>
+    <IsPackable>false</IsPackable>
+    
+    <!-- Suppress analyzer warnings that are noisy for example/CLI apps -->
+    <NoWarn>$(NoWarn);CA1852</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Yubico.YubiKit.Management.csproj" />
+    <ProjectReference Include="..\..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

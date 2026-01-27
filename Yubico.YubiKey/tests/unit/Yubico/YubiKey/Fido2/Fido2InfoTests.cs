@@ -130,15 +130,11 @@ namespace Yubico.YubiKey.Fido2
             {
                 for (; index < correctKeys.Length; index++)
                 {
-                    if (fido2Info.Options.TryGetValue(correctKeys[index], out bool currentValue))
+                    if (!fido2Info.Options.TryGetValue(correctKeys[index], out bool currentValue) ||
+                        currentValue != correctValues[index])
                     {
-                        if (currentValue == correctValues[index])
-                        {
-                            continue;
-                        }
+                        break;
                     }
-
-                    break;
                 }
             }
 
@@ -312,15 +308,12 @@ namespace Yubico.YubiKey.Fido2
                 {
                     string currentType = fido2Info.Algorithms[index].Item1;
                     CoseAlgorithmIdentifier currentAlg = fido2Info.Algorithms[index].Item2;
-                    if (currentType.Equals(correctTypes[index], StringComparison.Ordinal))
-                    {
-                        if (currentAlg == correctAlgs[index])
-                        {
-                            continue;
-                        }
-                    }
 
-                    break;
+                    if (!currentType.Equals(correctTypes[index], StringComparison.Ordinal) ||
+                        currentAlg != correctAlgs[index])
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -507,15 +500,11 @@ namespace Yubico.YubiKey.Fido2
             {
                 for (; index < correctKeys.Length; index++)
                 {
-                    if (fido2Info.Certifications.TryGetValue(correctKeys[index], out int currentValue))
+                    if (!fido2Info.Certifications.TryGetValue(correctKeys[index], out int currentValue) ||
+                        currentValue != correctValues[index])
                     {
-                        if (currentValue == correctValues[index])
-                        {
-                            continue;
-                        }
+                        break;
                     }
-
-                    break;
                 }
             }
 

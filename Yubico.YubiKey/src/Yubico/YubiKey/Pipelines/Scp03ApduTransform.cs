@@ -146,15 +146,12 @@ namespace Yubico.YubiKey.Pipelines
         // disposed.
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!_disposed && disposing)
             {
-                if (disposing)
-                {
-                    Scp03Keys.Dispose();
-                    _session.Dispose();
-
-                    _disposed = true;
-                }
+                Scp03Keys.Dispose();
+                _session.Dispose();
+            
+                _disposed = true;
             }
         }
     }

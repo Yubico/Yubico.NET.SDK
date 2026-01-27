@@ -254,14 +254,10 @@ namespace Yubico.YubiKey.Scp03
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!_disposed && disposing)
             {
-                if (disposing)
-                {
-                    _sessionKeys?.Dispose();
-
-                    _disposed = true;
-                }
+                _sessionKeys?.Dispose();
+                _disposed = true;
             }
         }
     }

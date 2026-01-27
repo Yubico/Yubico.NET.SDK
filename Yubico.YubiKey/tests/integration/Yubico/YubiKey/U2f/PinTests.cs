@@ -29,12 +29,9 @@ namespace Yubico.YubiKey.U2f
 
         public PinTests()
         {
-            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows && !SdkPlatformInfo.IsElevated)
             {
-                if (!SdkPlatformInfo.IsElevated)
-                {
-                    throw new ArgumentException("Windows not elevated.");
-                }
+                throw new ArgumentException("Windows not elevated.");
             }
 
             var devices = HidDevice.GetHidDevices();

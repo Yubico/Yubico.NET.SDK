@@ -111,12 +111,9 @@ namespace Yubico.YubiKey
             _notifyTask = new Task(() => RunKeyCollectorTask(keyCollector));
             _ = _notifyTask.ContinueWith((t) => HandleTaskException(t), TaskScheduler.Current);
 
-            if (connection is ICancelConnection cancelConnection)
+            if (connection is ICancelConnection cancelConnection && cancelConnection.LoadQueryCancel(IsCanceled))
             {
-                if (cancelConnection.LoadQueryCancel(IsCanceled))
-                {
-                    _connection = cancelConnection;
-                }
+                _connection = cancelConnection;
             }
 
             if (_connection is null)

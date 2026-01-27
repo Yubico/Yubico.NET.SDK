@@ -185,12 +185,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             char[] targetStart = (Part1 + title + Part2And4).ToCharArray();
             char[] targetEnd = (Part3 + title + Part2And4).ToCharArray();
             bool returnValue = false;
-            if (pemKeyString.Length > targetStart.Length + targetEnd.Length)
+            if (pemKeyString.Length > targetStart.Length + targetEnd.Length &&
+                CompareToTarget(pemKeyString, 0, targetStart))
             {
-                if (CompareToTarget(pemKeyString, 0, targetStart))
-                {
-                    returnValue = CompareToTarget(pemKeyString, pemKeyString.Length - targetEnd.Length, targetEnd);
-                }
+                returnValue = CompareToTarget(pemKeyString, pemKeyString.Length - targetEnd.Length, targetEnd);
             }
 
             return returnValue;

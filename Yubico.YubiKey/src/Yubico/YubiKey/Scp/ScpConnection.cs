@@ -73,15 +73,12 @@ namespace Yubico.YubiKey.Scp
 
         protected override void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!_disposed && disposing)
             {
-                if (disposing)
-                {
-                    _scpApduTransform.Dispose();
-                    _disposed = true;
-                }
+                _scpApduTransform.Dispose();
+                _disposed = true;
             }
-
+            
             base.Dispose(disposing);
         }
     }

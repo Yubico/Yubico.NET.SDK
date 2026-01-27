@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 using Yubico.YubiKey.Fido2.Cose;
 
@@ -202,20 +203,13 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[CredIdTransports];
-            if (!(mgmtData.CredentialId is null) && expected is string[] unboxedValue)
+            if (mgmtData.CredentialId is not null &&
+                expected is string[] unboxedValue &&
+                mgmtData.CredentialId.Transports is not null &&
+                mgmtData.CredentialId.Transports.Count == unboxedValue.Length &&
+                mgmtData.CredentialId.Transports.SequenceEqual(unboxedValue))
             {
-                if (!(mgmtData.CredentialId.Transports is null) && mgmtData.CredentialId.Transports.Count == unboxedValue.Length)
-                {
-                    int index = 0;
-                    for (; index < unboxedValue.Length; index++)
-                    {
-                        if (mgmtData.CredentialId.Transports[index] != unboxedValue[index])
-                        {
-                            break;
-                        }
-                    }
-                    isCorrect = index >= unboxedValue.Length;
-                }
+                isCorrect = true;
             }
 
             Assert.True(isCorrect);
@@ -255,12 +249,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[PubKeyCurve];
-            if (!(mgmtData.CredentialPublicKey is null) && expected is CoseEcCurve unboxedValue)
+            if (mgmtData.CredentialPublicKey is CoseEcPublicKey pubKey && expected is CoseEcCurve unboxedValue)
             {
-                if (mgmtData.CredentialPublicKey is CoseEcPublicKey pubKey)
-                {
-                    isCorrect = unboxedValue == pubKey.Curve;
-                }
+                isCorrect = unboxedValue == pubKey.Curve;
             }
 
             Assert.True(isCorrect);
@@ -272,12 +263,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[PubKeyX];
-            if (!(mgmtData.CredentialPublicKey is null) && expected is byte[] unboxedValue)
+            if (mgmtData.CredentialPublicKey is CoseEcPublicKey pubKey && expected is byte[] unboxedValue)
             {
-                if (mgmtData.CredentialPublicKey is CoseEcPublicKey pubKey)
-                {
-                    isCorrect = MemoryExtensions.SequenceEqual(pubKey.XCoordinate.Span, unboxedValue);
-                }
+                isCorrect = MemoryExtensions.SequenceEqual(pubKey.XCoordinate.Span, unboxedValue);
             }
 
             Assert.True(isCorrect);
@@ -289,12 +277,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[PubKeyY];
-            if (!(mgmtData.CredentialPublicKey is null) && expected is byte[] unboxedValue)
+            if (mgmtData.CredentialPublicKey is CoseEcPublicKey pubKey && expected is byte[] unboxedValue)
             {
-                if (mgmtData.CredentialPublicKey is CoseEcPublicKey pubKey)
-                {
-                    isCorrect = MemoryExtensions.SequenceEqual(pubKey.YCoordinate.Span, unboxedValue);
-                }
+                isCorrect = MemoryExtensions.SequenceEqual(pubKey.YCoordinate.Span, unboxedValue);
             }
 
             Assert.True(isCorrect);

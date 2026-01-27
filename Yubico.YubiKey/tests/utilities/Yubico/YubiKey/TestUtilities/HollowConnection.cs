@@ -69,44 +69,38 @@ namespace Yubico.YubiKey.TestUtilities
                 return yubiKeyCommand.CreateResponseForApdu(responseApdu);
             }
 
-            if (yubiKeyCommand is InitializeAuthenticateManagementKeyCommand)
+            if (yubiKeyCommand is InitializeAuthenticateManagementKeyCommand && AlwaysAuthenticatePiv)
             {
-                if (AlwaysAuthenticatePiv)
-                {
-                    byte[] responseData = new byte[] {
-                        0x7C, 0x0A, 0x80, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x90, 0x00
-                    };
-                    var responseApdu = new ResponseApdu(responseData);
-                    return yubiKeyCommand.CreateResponseForApdu(responseApdu);
-                }
+                byte[] responseData = new byte[] {
+                    0x7C, 0x0A, 0x80, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x90, 0x00
+                };
+                var responseApdu = new ResponseApdu(responseData);
+                return yubiKeyCommand.CreateResponseForApdu(responseApdu);
             }
 
-            if (yubiKeyCommand is CompleteAuthenticateManagementKeyCommand)
+            if (yubiKeyCommand is CompleteAuthenticateManagementKeyCommand && AlwaysAuthenticatePiv)
             {
-                if (AlwaysAuthenticatePiv)
-                {
-                    CommandApdu apdu = yubiKeyCommand.CreateCommandApdu();
-                    byte[] data = apdu.Data.ToArray();
-                    byte[] responseData = new byte[] {
-                        0x7C, 0x0A, 0x82, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x90, 0x00
-                    };
-                    byte[] keyBytes = new byte[] {
-                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-                    };
-                    Array.Copy(data, 14, responseData, 4, 8);
-
-                    using TripleDES tripleDes = CryptographyProviders.TripleDesCreator();
-
-                    tripleDes.Mode = CipherMode.ECB;
-                    tripleDes.Padding = PaddingMode.None;
-                    using ICryptoTransform encryptor = tripleDes.CreateEncryptor(keyBytes, null);
-                    _ = encryptor.TransformBlock(data, 14, 8, responseData, 4);
-
-                    var responseApdu = new ResponseApdu(responseData);
-                    return yubiKeyCommand.CreateResponseForApdu(responseApdu);
-                }
+                CommandApdu apdu = yubiKeyCommand.CreateCommandApdu();
+                byte[] data = apdu.Data.ToArray();
+                byte[] responseData = new byte[] {
+                    0x7C, 0x0A, 0x82, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x90, 0x00
+                };
+                byte[] keyBytes = new byte[] {
+                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+                };
+                Array.Copy(data, 14, responseData, 4, 8);
+            
+                using TripleDES tripleDes = CryptographyProviders.TripleDesCreator();
+            
+                tripleDes.Mode = CipherMode.ECB;
+                tripleDes.Padding = PaddingMode.None;
+                using ICryptoTransform encryptor = tripleDes.CreateEncryptor(keyBytes, null);
+                _ = encryptor.TransformBlock(data, 14, 8, responseData, 4);
+            
+                var responseApdu = new ResponseApdu(responseData);
+                return yubiKeyCommand.CreateResponseForApdu(responseApdu);
             }
 
             if (yubiKeyCommand is ReadStatusCommand)

@@ -228,16 +228,13 @@ namespace Yubico.YubiKey.Scp03
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!_disposed && disposing)
             {
-                if (disposing)
-                {
-                    CryptographicOperations.ZeroMemory(_macKey.AsSpan());
-                    CryptographicOperations.ZeroMemory(_encKey.AsSpan());
-                    CryptographicOperations.ZeroMemory(_dekKey.AsSpan());
-
-                    _disposed = true;
-                }
+                CryptographicOperations.ZeroMemory(_macKey.AsSpan());
+                CryptographicOperations.ZeroMemory(_encKey.AsSpan());
+                CryptographicOperations.ZeroMemory(_dekKey.AsSpan());
+            
+                _disposed = true;
             }
         }
     }

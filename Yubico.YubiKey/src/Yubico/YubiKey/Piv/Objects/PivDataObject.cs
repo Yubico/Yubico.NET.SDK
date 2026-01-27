@@ -152,14 +152,13 @@ namespace Yubico.YubiKey.Piv.Objects
         /// </returns>
         protected virtual bool IsValidAlternateTag(int dataTag)
         {
-            if (dataTag != GetDefinedDataTag())
+            if (dataTag != GetDefinedDataTag() &&
+                (dataTag < MinVendorDataTag || 
+                 dataTag > MaxVendorDataTag ||
+                 (dataTag >= MinPivDataTag && dataTag <= MaxPivDataTag) ||
+                 (dataTag >= MinYubicoDataTag && dataTag <= MaxYubicoDataTag)))
             {
-                if (dataTag < MinVendorDataTag || dataTag > MaxVendorDataTag
-                   || (dataTag >= MinPivDataTag && dataTag <= MaxPivDataTag)
-                   || (dataTag >= MinYubicoDataTag && dataTag <= MaxYubicoDataTag))
-                {
-                    return false;
-                }
+                return false;
             }
 
             return true;

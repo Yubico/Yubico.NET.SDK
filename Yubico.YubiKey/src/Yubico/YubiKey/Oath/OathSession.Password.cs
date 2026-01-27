@@ -314,12 +314,9 @@ namespace Yubico.YubiKey.Oath
         /// </returns>
         public bool TrySetPassword(ReadOnlyMemory<byte> currentPassword, ReadOnlyMemory<byte> newPassword)
         {
-            if (IsPasswordProtected || !currentPassword.IsEmpty)
+            if ((IsPasswordProtected || !currentPassword.IsEmpty) && !TryVerifyPassword(currentPassword))
             {
-                if (!TryVerifyPassword(currentPassword))
-                {
-                    return false;
-                }
+                return false;
             }
 
             var setPasswordResponse = Connection.SendCommand(new SetPasswordCommand(newPassword, _oathData));

@@ -102,13 +102,11 @@ namespace Yubico.YubiKey.Piv
             {
                 foreach (X500NameElement? nameElement in enumValues)
                 {
-                    if (!(nameElement is null))
+                    if (nameElement is not null && 
+                        _elements.TryGetValue((X500NameElement)nameElement, out byte[]? encodedValue))
                     {
-                        if (_elements.TryGetValue((X500NameElement)nameElement, out byte[]? encodedValue))
-                        {
-                            tlvWriter.WriteEncoded(encodedValue);
-                            count++;
-                        }
+                        tlvWriter.WriteEncoded(encodedValue);
+                        count++;
                     }
 
                 }

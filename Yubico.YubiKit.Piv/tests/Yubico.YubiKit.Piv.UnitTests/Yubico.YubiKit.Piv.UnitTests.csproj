@@ -12,19 +12,20 @@
   <ItemGroup>
     <!-- Package versions come from Directory.Packages.props -->
     <!-- When using Microsoft Testing Platform, DON'T use Microsoft.NET.Test.Sdk or xunit.runner.visualstudio -->
+    <PackageReference Include="NSubstitute" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest"/>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Xunit"/>
+    <Using Include="Xunit" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Yubico.YubiKit.Piv.csproj"/>
+    <ProjectReference Include="..\..\src\Yubico.YubiKit.Piv.csproj" />
   </ItemGroup>
 
 </Project>

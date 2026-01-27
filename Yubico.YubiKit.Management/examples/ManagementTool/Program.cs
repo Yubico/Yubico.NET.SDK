@@ -1,4 +1,6 @@
 using Spectre.Console;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 
 // Application banner
 AnsiConsole.Write(
@@ -39,38 +41,31 @@ while (true)
         switch (choice)
         {
             case "📋 Device Info":
-                // await DeviceInfoMenu.RunAsync();
-                AnsiConsole.MarkupLine("[yellow]Not yet implemented[/]");
+                await DeviceInfoMenu.RunAsync();
                 break;
 
             case "🔌 USB Capabilities":
-                // await CapabilitiesMenu.RunAsync(Transport.Usb);
-                AnsiConsole.MarkupLine("[yellow]Not yet implemented[/]");
+                await CapabilitiesMenu.RunAsync(Transport.Usb);
                 break;
 
             case "📶 NFC Capabilities":
-                // await CapabilitiesMenu.RunAsync(Transport.Nfc);
-                AnsiConsole.MarkupLine("[yellow]Not yet implemented[/]");
+                await CapabilitiesMenu.RunAsync(Transport.Nfc);
                 break;
 
             case "⏱️  Timeouts":
-                // await TimeoutsMenu.RunAsync();
-                AnsiConsole.MarkupLine("[yellow]Not yet implemented[/]");
+                await TimeoutsMenu.RunAsync();
                 break;
 
             case "🚩 Device Flags":
-                // await DeviceFlagsMenu.RunAsync();
-                AnsiConsole.MarkupLine("[yellow]Not yet implemented[/]");
+                await DeviceFlagsMenu.RunAsync();
                 break;
 
             case "🔒 Lock Code":
-                // await LockCodeMenu.RunAsync();
-                AnsiConsole.MarkupLine("[yellow]Not yet implemented[/]");
+                await LockCodeMenu.RunAsync();
                 break;
 
             case "⚠️  Factory Reset":
-                // await ResetMenu.RunAsync();
-                AnsiConsole.MarkupLine("[yellow]Not yet implemented[/]");
+                await ResetMenu.RunAsync();
                 break;
 
             default:

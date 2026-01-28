@@ -22,6 +22,9 @@ Here you can find all of the updates and release notes for published versions of
 
 Release date: January 28th, 2026
 
+Bug Fixes:
+- Fixed regression in Piv sample app ([#398](https://github.com/Yubico/Yubico.NET.SDK/pull/398)
+
 Documentation:
 
 - The documentation on [PIV certificate sizes](xref:UsersManualPivCertSizes) has been restructured to improve clarity and readability. Additionally, firmware behavior details and practical examples have been added/updated. ([#356](https://github.com/Yubico/Yubico.NET.SDK/pull/356))

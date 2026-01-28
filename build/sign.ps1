@@ -357,7 +357,7 @@ function Invoke-NuGetPackageSigning {
         Write-Host "✓ NuGet found at: $NuGetPath"
 
         if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
-            throw "GitHub CLI installed or not found in PATH"
+            throw "GitHub CLI not installed or not found in PATH"
         }
         Write-Host "✓ GitHub CLI found"
 
@@ -431,7 +431,7 @@ function Invoke-NuGetPackageSigning {
                 
             if ($LASTEXITCODE -ne 0) {
                 $output | ForEach-Object { Write-Host $_ }
-                throw "Signing failed for file: $FilePath"
+                throw "Signing failed for file: $($package.FullName)"
             }
         }
 
@@ -561,7 +561,7 @@ function Invoke-NuGetPackagePush {
         
         if ($isDirectory) {
             Write-Host "`n📂 Searching for package files in: $PackagePath" -ForegroundColor Yellow
-            $packages = Get-ChildItem -Path $PackagePath -Include "*.nupkg", "*.snupkg" -File
+            $packages = Get-ChildItem -Path "$PackagePath\*" -Include "*.nupkg", "*.snupkg" -File
             
             if ($packages.Count -eq 0) {
                 throw "No .nupkg or .snupkg files found in directory: $PackagePath"
@@ -586,7 +586,6 @@ function Invoke-NuGetPackagePush {
         
         # Push each package
         $successCount = 0
-        $skipCount = 0
         $failCount = 0
         
         foreach ($package in $packages) {
@@ -613,10 +612,6 @@ function Invoke-NuGetPackagePush {
                 Write-Host "  ✅ Successfully pushed" -ForegroundColor Green
                 $successCount++
             }
-            elseif ($SkipDuplicate -and $output -match "already exists|conflict") {
-                Write-Host "  ⏭️ Skipped (already exists)" -ForegroundColor Yellow
-                $skipCount++
-            }
             else {
                 Write-Host "  ❌ Failed to push" -ForegroundColor Red
                 $output | ForEach-Object { Write-Host "    $_" -ForegroundColor Red }
@@ -628,9 +623,6 @@ function Invoke-NuGetPackagePush {
         Write-Host "`n📊 Push Summary:" -ForegroundColor Yellow
         Write-Host "  Total Packages:   $($packages.Count)"
         Write-Host "  Successfully Pushed: $successCount" -ForegroundColor Green
-        if ($skipCount -gt 0) {
-            Write-Host "  Skipped (Existing):  $skipCount" -ForegroundColor Yellow
-        }
         if ($failCount -gt 0) {
             Write-Host "  Failed:              $failCount" -ForegroundColor Red
             throw "$failCount package(s) failed to push"

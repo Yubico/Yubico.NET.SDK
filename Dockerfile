@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM nginx:alpine
+FROM nginx:alpine@sha256:2622096d277282954bcf28459f8a3bc527c34ec8f4847fb46ec11f7ed49efd8b
 
 ARG UID=1000
 ARG GID=1000

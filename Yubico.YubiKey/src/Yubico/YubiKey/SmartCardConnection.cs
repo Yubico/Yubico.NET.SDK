@@ -123,9 +123,11 @@ namespace Yubico.YubiKey
                 SelectApplication();
             }
 
+            var commandApdu = yubiKeyCommand.CreateCommandApdu();
+            var commandType = yubiKeyCommand.GetType();
             var responseApdu = _apduPipeline.Invoke(
-                yubiKeyCommand.CreateCommandApdu(),
-                yubiKeyCommand.GetType(),
+                commandApdu,
+                commandType,
                 typeof(TResponse));
 
             return yubiKeyCommand.CreateResponseForApdu(responseApdu);

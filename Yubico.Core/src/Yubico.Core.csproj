@@ -113,14 +113,14 @@ limitations under the License. -->
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.100">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.102">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.2" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <!-- Before updating PolySharp, we should do some due dilligence on the update -->
     <PackageReference Include="PolySharp" Version="1.15.0" AllowUpdates="false">
@@ -136,6 +136,7 @@ limitations under the License. -->
   <ItemGroup Label="Expose internal test hooks to Unit Test projects">
 
     <!-- Expose internal test hooks -->
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.2" />
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>Yubico.Core.UnitTests,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
     </AssemblyAttribute>

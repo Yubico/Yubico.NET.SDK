@@ -24,7 +24,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "wednesday"
       time: "09:00"
       timezone: "Europe/Stockholm"
@@ -32,3 +32,11 @@ updates:
       github-actions:
         patterns:
           - "*"
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "Europe/Stockholm"

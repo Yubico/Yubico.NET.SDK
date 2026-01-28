@@ -80,8 +80,8 @@ public abstract class AuthenticatorOperationParameters<TOperationParameters> : I
     /// </exception>
     public void AddExtension<TValue>(string extensionKey, TValue value)
     {
-        Guard.IsNotNullOrWhiteSpace(extensionKey, nameof(extensionKey));
-        Guard.IsNotNull(value, nameof(value));
+        Guard.IsNotNullOrWhiteSpace(extensionKey);
+        Guard.IsNotNull(value);
 
         _extensions[extensionKey] = value switch
         {
@@ -95,7 +95,9 @@ public abstract class AuthenticatorOperationParameters<TOperationParameters> : I
             ICborEncode cborEncode => cborEncode.CborEncode(),
             _ => throw new ArgumentException(ExceptionMessages.Ctap2CborUnexpectedValue, nameof(value))
         };
-        
+
+        return;
+
         static byte[] EncodeValue(Action<CborWriter> writeAction)
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
@@ -103,34 +105,7 @@ public abstract class AuthenticatorOperationParameters<TOperationParameters> : I
             return cbor.Encode();
         }
     }
-
-    /// <summary>
-    /// Add an entry to the extensions list.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// Each extension is a key/value pair. For each extension the key is a
-    /// string (such as "credProtect" or "hmac-secret"). However, each value
-    /// is different. There will be a definition of the value that
-    /// goes with each key. It will be possible to encode that definition
-    /// using the rules of CBOR. The caller supplies the key and the encoded value.
-    /// </para>
-    /// </remarks>
-    /// <param name="extensionKey">
-    /// The key of key/value to add.
-    /// </param>
-    /// <param name="encodedBytes">
-    /// The CBOR-encoded value of key/value to add.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// The <c>extensionKey</c> or <c>encodedValue</c> arg is null.
-    /// </exception>
-    public void AddExtension(string extensionKey, byte[] encodedBytes)
-    { 
-        Guard.IsNotNull(encodedBytes, nameof(encodedBytes));
-        _extensions[extensionKey] = encodedBytes;
-    }
-
+    
     /// <summary>
     /// Add an entry to the list of options.
     /// </summary>

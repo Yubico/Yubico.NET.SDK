@@ -40,28 +40,33 @@ on:
       - '.github/workflows/*.yml'
 
 permissions:
-  # required for all workflows
-  security-events: write
-
-  # only required for workflows in private repositories
-  actions: read
   contents: read
-  packages: read
 
 jobs:
   analyze:
     name: Analyze
     runs-on: windows-2022
+    # Requires write permission to upload CodeQL security scan results
+    permissions:
+      security-events: write  # Required for CodeQL to upload scan results
+      actions: read           # Required for workflows in private repositories
+      contents: read
+      packages: read
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        with:
+          egress-policy: audit
+
       - name: Checkout repository
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           persist-credentials: false
 
       # Setup .NET with authenticated NuGet source
       - name: Setup .NET
-        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602  # v5.0.1
+        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309  # v5.1.0
         with:
           source-url: https://nuget.pkg.github.com/Yubico/index.json
         env:
@@ -69,7 +74,7 @@ jobs:
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@fe4161a26a8629af62121b670040955b330f9af2  # v4.31.6
+        uses: github/codeql-action/init@b20883b0cd1f46c72ae0ba6d1090936928f9fa30  # v4.32.0
         with:
           # Override automatic language detection to only analyze C#
           # C/C++ code in Yubico.NativeShims is built separately (requires CMake/vcpkg)
@@ -82,4 +87,4 @@ jobs:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@fe4161a26a8629af62121b670040955b330f9af2  # v4.31.6
+        uses: github/codeql-action/analyze@b20883b0cd1f46c72ae0ba6d1090936928f9fa30  # v4.32.0

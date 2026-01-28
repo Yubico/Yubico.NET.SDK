@@ -236,7 +236,6 @@ namespace Yubico.YubiKey.Fido2
                 int remaining = encodedArray.Length;
                 int maxFragmentLength = AuthenticatorInfo.MaximumMessageSize ?? AuthenticatorInfo.DefaultMaximumMessageSize;
                 maxFragmentLength -= MessageOverhead;
-                int currentLength;
                 bool forceToken = false;
 
                 using HashAlgorithm digester = CryptographyProviders.Sha256Creator();
@@ -247,7 +246,7 @@ namespace Yubico.YubiKey.Fido2
                         forceToken, PinUvAuthTokenPermissions.LargeBlobWrite, null);
                     currentToken.CopyTo(token.AsMemory());
 
-                    currentLength = remaining >= maxFragmentLength ? maxFragmentLength : remaining;
+                    int currentLength = remaining >= maxFragmentLength ? maxFragmentLength : remaining;
 
                     byte[] dataToAuth = BuildDataToAuth(encodedArray, offset, currentLength, digester);
                     byte[] pinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(token, 0, currentToken.Length, dataToAuth);

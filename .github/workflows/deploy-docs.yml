@@ -26,8 +26,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        with:
+          egress-policy: audit
+
       - name: Check out current repo
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           path: self
           persist-credentials: false
@@ -41,7 +46,7 @@ jobs:
 
       - name: Generate GitHub App token
         id: generate_token
-        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94  # v2.2.0
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf  # v2.2.1
         with:
           app-id: 800408 # Yubico Docs
           owner: Yubico
@@ -49,13 +54,13 @@ jobs:
           private-key: ${{ secrets.GH_APP_YUBICO_DOCS_PRIVATE_KEY }}
 
       - name: Check out docs-gitops repo (${{ inputs.gitops-branch }} branch)
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           repository: Yubico/docs-gitops
           ref: ${{ inputs.gitops-branch }}
           token: ${{ steps.generate_token.outputs.token }}
           path: gitops
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Update GitOps resources
         run: sed -i "s#/yesdk/yesdk-docserver:.*\$#/yesdk/yesdk-docserver:$IMAGE_TAG#" ./k8s/yesdk/kustomization.yaml
@@ -82,8 +87,13 @@ jobs:
     needs: deploy
 
     steps:
+    - name: Harden the runner (Audit all outbound calls)
+      uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+      with:
+        egress-policy: audit
+
     - name: Checkout
-      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       with:
         persist-credentials: false
 
@@ -95,7 +105,7 @@ jobs:
 
     - name: Generate GitHub App token
       id: generate_token
-      uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94  # v2.2.0
+      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf  # v2.2.1
       with:
         app-id: 260767 # Yubico Commit Status Reader
         owner: Yubico

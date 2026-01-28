@@ -27,16 +27,24 @@ on:
     #   - '**.csproj'
     #   - '**.sln'
     #   - '.github/workflows/check-code-formatting.yml'
+permissions:
+  contents: read
+
 jobs:
   verify-code-style:
     name: "Verify code style"
     runs-on: windows-latest
   
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602  # v5.0.1
+      - uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309  # v5.1.0
         with:
           global-json-file: "./global.json"
           source-url: https://nuget.pkg.github.com/Yubico/index.json

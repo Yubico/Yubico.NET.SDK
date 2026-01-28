@@ -10,6 +10,9 @@ on:
   pull_request_review:
     types: [submitted]
 
+permissions:
+  contents: read
+
 jobs:
   claude:
     if: |
@@ -18,22 +21,28 @@ jobs:
       (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
+    # Requires write permissions for Claude Code to interact with repository
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      id-token: write
-      actions: read # Required for Claude to read CI results on PRs
+      contents: write       # Required for Claude to commit/push changes
+      pull-requests: write  # Required to comment on and manage PRs
+      issues: write         # Required to comment on and manage issues
+      id-token: write       # Required for OIDC token generation
+      actions: read         # Required for Claude to read CI results on PRs
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        with:
+          egress-policy: audit
+
       - name: Checkout repository
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           fetch-depth: 1
           persist-credentials: false
 
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@426380f01bad0a17200865605a85cb28926dccbf  # v1.0.9
+        uses: anthropics/claude-code-action@2817c54db8f44f3a0485d57292566bf07d428a25  # v1.0.37
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 

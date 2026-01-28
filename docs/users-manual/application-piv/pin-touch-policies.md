@@ -18,7 +18,7 @@ limitations under the License. -->
 
 # PIV PIN, touch, and biometric policies
 
-The YubiKey's PIV PIN, touch, and biometric policies determine when PIN verification, biometric verification, and touch are required in order to perform an operation with a private key from one of the YubiKey's PIV slots (including the management key).
+The YubiKey's PIN, touch, and biometric policies determine when PIN verification, biometric verification, and touch are required in order to perform an operation with a private key from one of the YubiKey's PIV slots (including the management key).
 
 These policies apply to operations such as signing, decrypting, performing a key agreement, and generating a new key pair. For a full list of operations affected by PIN and touch policies, see [Operations that require the PIN](xref:UsersManualPinPukMgmtKey#operations-that-require-the-pin) and [Operations that require the management key](xref:UsersManualPinPukMgmtKey#operations-that-require-the-management-key).
 
@@ -118,7 +118,7 @@ session, you will not need the PIN nor touch.
 
 ## Changing the touch policy for the management key (slot 9B)
 
-Unlike other slots, the management key (slot 9B) only has a touch policy, which by default is ``Never``. However, when changing the management key, you can set this policy to one of the other touch policy options (``Always`` or ``Cached``). Once reconfigured with one of these other policies, the user will be required to touch the YubiKey at the specified frequency tp perform management key operations.
+Unlike other slots, the management key (slot 9B) only has a touch policy, which by default is ``Never``. However, when changing the management key, you can set this policy to one of the other touch policy options (``Always`` or ``Cached``). Once reconfigured with one of these other policies, the user will be required to touch the YubiKey at the specified frequency to perform management key operations.
 
 To change the management key with the SDK, we have two options: the ``PivSession`` method, ``TryChangeManagementKey()``, or the lower-level ``SetManagementKeyCommand()``.
 
@@ -134,42 +134,35 @@ using (PivSession pivtest = new PivSession(yubiKey))
 }
 ```
 
-Note that ``TryChangeManagementKey()`` is an overloaded method. In addition to specifying the new key's touch policy, you can also specify a particular algorithm. If these properties are not specified, the slot's default touch policy and default algorithm will be used for the new management key. Also, if you call the method without providing the current and new management keys directly, the SDK will call upon the KeyCollector to fetch them from the user.
+Note that ``TryChangeManagementKey()`` is an overloaded method. In addition to specifying the new key's touch policy, you can also specify a particular algorithm. If these properties are not specified, the slot's default touch policy and default algorithm will be used for the new management key. Also, if you call the method without providing the current and new management keys directly, the SDK will call upon your KeyCollector to fetch them from the user.
 
 ### SetManagementKeyCommand() example
 
 Unlike the ``PivSession``, using the PIV command classes to change the management key requires three steps: first we must initiate the PIV management key authentication process with ``InitializeAuthenticateManagementKeyCommand``, then we can finish management key authentication with ``CompleteAuthenticateManagementKeyCommand()``, and finally we can set the new management key and touch policy via ``SetManagementKeyCommand()``:
 
 ```csharp
+IYubiKeyConnection connection = yubiKey.Connect(YubiKeyApplication.Piv);
 
-``` 
+// When initializing management key authentication with the command classes, we must specify the current management key's algorithm. (If you aren't sure about the algorithm, retrieve it from the key's metadata first.)
+InitializeAuthenticateManagementKeyCommand initAuthManKeyCommand = new InitializeAuthenticateManagementKeyCommand(PivAlgorithm.Aes192);
+InitializeAuthenticateManagementKeyResponse initAuthManKeyResponse = connection.SendCommand(initAuthManKeyCommand);
 
-If you want to set a new a touch policy for the management key, use the
-[SetManagementKeyCommand](commands.md#set-management-key). This command will set both the actual
-key value as well as the touch policy. With ``SetManagementKeyCommand``, you can:
+// Complete the management key authentication by passing in the initialization response and the current management key (currentKey set elsewhere).
+CompleteAuthenticateManagementKeyCommand authManKeyCommand = new CompleteAuthenticateManagementKeyCommand(initAuthManKeyResponse, currentKey);
+CompleteAuthenticateManagementKeyResponse authManKeyResponse = connection.SendCommand(authManKeyCommand);
 
-- enter the current key with a different touch policy to change the policy only
-- enter the same touch policy with a new key to change the key only
-- enter a new key and a new policy to change both key and policy
-
-Suppose you want to change the management key and set its touch policy to "always". To do so, call
-``SetManagementKeyCommand`` and provide the new key
-data and the touch policy:
-
-```csharp
-// newKey set elsewhere
-SetManagementKeyCommand(newKey, PivTouchPolicy.Always);
+// When setting the new management key and its touch policy, we must also specify the new key's algorithm.
+SetManagementKeyCommand setManKeyCommand = new SetManagementKeyCommand(newKey, PivTouchPolicy.Always, PivAlgorithm.Aes192);
+SetManagementKeyResponse setManKeyResponse = connection.SendCommand(setManKeyCommand);
 ```
 
-Now, whenever you call the
-[Authenticate management key](commands.md#authenticate-management-key) command, the
-authentication won't be complete until the YubiKey has been touched.
+In this example, we set the management key's touch policy to ``Always``. This means that future calls to ``CompleteAuthenticateManagementKeyCommand`` will not complete until the YubiKey has been touched.
 
 ## Retrieving an existing key's PIN and touch policies
 
-Once a key has been generated or imported into a slot, you can check the PIN and touch policies it was configured with via the YubiKey's PIV metadata. Note that this feature is only available for YubiKeys with firmware version 5.3 and later. On older YubiKeys, there is no way to retrieve a key's policies after configuration.
+Once a key has been generated or imported into a slot, you can check the PIN and touch policies it was configured with via the key's PIV metadata. Note that this feature is only available for YubiKeys with firmware version 5.3 and later. On older YubiKeys, there is no way to retrieve a key's policies after configuration.
 
-To check a key's policies, start a ``PivSession``, call ``GetMetadata`` on a specific PIV slot, and extract the ``PinPolicy`` and ``TouchPolicy`` properties:
+To check a key's policies, create an instance of a ``PivSession`` with the desired YubiKey, call ``GetMetadata`` on a specific PIV slot, and extract the ``PinPolicy`` and ``TouchPolicy`` properties:
 
 ```csharp
 using (PivSession pivtest = new PivSession(yubiKey))
@@ -183,7 +176,7 @@ using (PivSession pivtest = new PivSession(yubiKey))
 }
 ```
 
-Note that if the slot does not contain a key, the SDK will throw an exception when trying to call ``GetMetadata``.
+Note that if the slot does not contain a key, the SDK will throw an exception when trying to call ``GetMetadata``. Slots 80 and 81 (PIN and PUK) do not have PIN or touch policies and will always return ``None`` for those properties in the metadata. The management key (9B), on the other hand, has a touch policy but no PIN policy. In order to maintain consistency with the data format, the YubiKey will return the undefined value "0" for 9B's PIN policy. This is not a valid PIN policy, and the SDK translates it to ``Default`` in the metadata.
 
 ## Related articles
 

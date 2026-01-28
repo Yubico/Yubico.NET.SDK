@@ -265,6 +265,7 @@ Set $DebugPreference = "Continue" for verbose output
 
 .PARAMETER Thumbprint
 The thumbprint of the signing certificate stored on the smart card.
+Can also be provided via YUBICO_SIGNING_THUMBPRINT environment variable.
 
 .PARAMETER WorkingDirectory
 The directory containing the zip files and where the signing process will take place.
@@ -313,7 +314,7 @@ Requires:
 function Invoke-NuGetPackageSigning {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [string]$Thumbprint,
         
         [Parameter(Mandatory = $true)]
@@ -343,6 +344,15 @@ function Invoke-NuGetPackageSigning {
 
     try {
         Write-Host "`nInitializing NuGet package signing process..." -ForegroundColor Cyan
+        
+        # Resolve Thumbprint from environment variable if not provided
+        if ([string]::IsNullOrWhiteSpace($Thumbprint)) {
+            $Thumbprint = $env:YUBICO_SIGNING_THUMBPRINT
+        }
+        
+        if ([string]::IsNullOrWhiteSpace($Thumbprint)) {
+            throw "Thumbprint is required. Provide via -Thumbprint parameter or YUBICO_SIGNING_THUMBPRINT environment variable."
+        }
         
         # Validate tools existence
         Write-Host "`nVerifying required tools..."
@@ -460,11 +470,11 @@ function Invoke-NuGetPackageSigning {
         
         if ($examplePackage) {
             Write-Host "`nTo push a single file:" -ForegroundColor White
-            Write-Host "  Invoke-NuGetPackagePush -PackagePath `"$($examplePackage.FullName)`" -ApiKey `"YOUR-API-KEY`"" -ForegroundColor Gray
+            Write-Host "  Invoke-NuGetPackagePush -PackagePath `"$($examplePackage.FullName)`"" -ForegroundColor Gray
         }
         
         Write-Host "`nTo push all files (nupkg, snupkg) from a directory:" -ForegroundColor White
-        Write-Host "  Invoke-NuGetPackagePush -PackagePath `"$($directories.Packages)`" -ApiKey `"YOUR-API-KEY`" -SkipDuplicate" -ForegroundColor Gray
+        Write-Host "  Invoke-NuGetPackagePush -PackagePath `"$($directories.Packages)`" -SkipDuplicate" -ForegroundColor Gray
         Write-Host ""
 
         return
@@ -490,6 +500,7 @@ Path to a single package (.nupkg or .snupkg) file or a directory containing pack
 
 .PARAMETER ApiKey
 The API key for authenticating with the NuGet server.
+Can also be provided via NUGET_API_KEY environment variable.
 
 .PARAMETER Source
 Optional. The NuGet server URL. Defaults to "https://api.nuget.org/v3/index.json" (nuget.org).
@@ -526,7 +537,7 @@ function Invoke-NuGetPackagePush {
         [Parameter(Mandatory = $true)]
         [string]$PackagePath,
         
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [string]$ApiKey,
         
         [Parameter(Mandatory = $false)]
@@ -544,6 +555,15 @@ function Invoke-NuGetPackagePush {
     
     try {
         Write-Host "`n🚀 Initializing NuGet package push process..." -ForegroundColor Cyan
+        
+        # Resolve ApiKey from environment variable if not provided
+        if ([string]::IsNullOrWhiteSpace($ApiKey)) {
+            $ApiKey = $env:NUGET_API_KEY
+        }
+        
+        if ([string]::IsNullOrWhiteSpace($ApiKey)) {
+            throw "ApiKey is required. Provide via -ApiKey parameter or NUGET_API_KEY environment variable."
+        }
         
         # Verify NuGet CLI exists
         if (-not (Get-Command $NuGetPath -ErrorAction SilentlyContinue)) {

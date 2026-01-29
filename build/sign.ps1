@@ -265,6 +265,7 @@ Set $DebugPreference = "Continue" for verbose output
 
 .PARAMETER Thumbprint
 The thumbprint of the signing certificate stored on the smart card.
+Can also be provided via YUBICO_SIGNING_THUMBPRINT environment variable.
 
 .PARAMETER WorkingDirectory
 The directory containing the zip files and where the signing process will take place.
@@ -313,7 +314,7 @@ Requires:
 function Invoke-NuGetPackageSigning {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [string]$Thumbprint,
         
         [Parameter(Mandatory = $true)]
@@ -344,6 +345,15 @@ function Invoke-NuGetPackageSigning {
     try {
         Write-Host "`nInitializing NuGet package signing process..." -ForegroundColor Cyan
         
+        # Resolve Thumbprint from environment variable if not provided
+        if ([string]::IsNullOrWhiteSpace($Thumbprint)) {
+            $Thumbprint = $env:YUBICO_SIGNING_THUMBPRINT
+        }
+        
+        if ([string]::IsNullOrWhiteSpace($Thumbprint)) {
+            throw "Thumbprint is required. Provide via -Thumbprint parameter or YUBICO_SIGNING_THUMBPRINT environment variable."
+        }
+        
         # Validate tools existence
         Write-Host "`nVerifying required tools..."
         if (-not (Get-Command $SignToolPath -ErrorAction SilentlyContinue)) {
@@ -357,7 +367,7 @@ function Invoke-NuGetPackageSigning {
         Write-Host "✓ NuGet found at: $NuGetPath"
 
         if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
-            throw "GitHub CLI installed or not found in PATH"
+            throw "GitHub CLI not installed or not found in PATH"
         }
         Write-Host "✓ GitHub CLI found"
 
@@ -431,7 +441,7 @@ function Invoke-NuGetPackageSigning {
                 
             if ($LASTEXITCODE -ne 0) {
                 $output | ForEach-Object { Write-Host $_ }
-                throw "Signing failed for file: $FilePath"
+                throw "Signing failed for file: $($package.FullName)"
             }
         }
 
@@ -451,13 +461,198 @@ function Invoke-NuGetPackageSigning {
 
         Write-Host "`n✨ Package signing process completed successfully! ✨" -ForegroundColor Green
         Write-Host "➡️ Locate your signed packages here: $($directories.Packages)" -ForegroundColor Yellow
+        
+        # Get first package as an example
+        $examplePackage = Get-ChildItem -Path $directories.Packages -Filter "*.nupkg" | Select-Object -First 1
+        
+        # Offer to push packages
+        Write-Host "`n🚀 Would you like to push the signed packages to NuGet?" -ForegroundColor Cyan
+        
+        if ($examplePackage) {
+            Write-Host "`nTo push a single file:" -ForegroundColor White
+            Write-Host "  Invoke-NuGetPackagePush -PackagePath `"$($examplePackage.FullName)`"" -ForegroundColor Gray
+        }
+        
+        Write-Host "`nTo push all files (nupkg, snupkg) from a directory:" -ForegroundColor White
+        Write-Host "  Invoke-NuGetPackagePush -PackagePath `"$($directories.Packages)`" -SkipDuplicate" -ForegroundColor Gray
+        Write-Host ""
 
-        return 
+        return
     }
     catch {
         Write-Host "`n❌ Error occurred:" -ForegroundColor Red
         Write-Error $_.Exception.Message
         Clean-Directory -BaseDirectory $WorkingDirectory
+        throw
+    }
+}
+
+<#
+.SYNOPSIS
+Pushes NuGet packages to the global NuGet feed using the NuGet CLI.
+
+.DESCRIPTION
+Pushes one or more NuGet packages (.nupkg) and symbol packages (.snupkg) to nuget.org or another NuGet feed.
+Supports pushing individual packages or all packages from a directory.
+
+.PARAMETER PackagePath
+Path to a single package (.nupkg or .snupkg) file or a directory containing package files.
+
+.PARAMETER ApiKey
+The API key for authenticating with the NuGet server.
+Can also be provided via NUGET_API_KEY environment variable.
+
+.PARAMETER Source
+Optional. The NuGet server URL. Defaults to "https://api.nuget.org/v3/index.json" (nuget.org).
+
+.PARAMETER Timeout
+Optional. Timeout for pushing to the server in seconds. Defaults to 300 seconds (5 minutes).
+
+.PARAMETER SkipDuplicate
+Optional switch. If specified, skips packages that already exist on the server instead of failing.
+
+.PARAMETER NuGetPath
+Optional. Path to nuget.exe. Defaults to "nuget.exe" (expects it in PATH).
+
+.EXAMPLE
+# Push a single package to nuget.org
+Invoke-NuGetPackagePush -PackagePath "C:\packages\MyPackage.1.0.0.nupkg" -ApiKey "oy2abc123..."
+
+.EXAMPLE
+# Push all packages from a directory to nuget.org
+Invoke-NuGetPackagePush -PackagePath "C:\packages\signed\packages" -ApiKey "oy2abc123..." -SkipDuplicate
+
+.EXAMPLE
+# Push to a custom NuGet feed
+Invoke-NuGetPackagePush -PackagePath "C:\packages\MyPackage.1.0.0.nupkg" -ApiKey "abc123" -Source "https://my-nuget-server/v3/index.json"
+
+.NOTES
+Requires:
+- nuget.exe in PATH or specified via -NuGetPath parameter
+- Valid API key for the target NuGet server
+#>
+function Invoke-NuGetPackagePush {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$PackagePath,
+        
+        [Parameter(Mandatory = $false)]
+        [string]$ApiKey,
+        
+        [Parameter(Mandatory = $false)]
+        [string]$Source = "https://api.nuget.org/v3/index.json",
+        
+        [Parameter(Mandatory = $false)]
+        [int]$Timeout = 300,
+        
+        [Parameter(Mandatory = $false)]
+        [switch]$SkipDuplicate,
+        
+        [Parameter(Mandatory = $false)]
+        [string]$NuGetPath = "nuget.exe"
+    )
+    
+    try {
+        Write-Host "`n🚀 Initializing NuGet package push process..." -ForegroundColor Cyan
+        
+        # Resolve ApiKey from environment variable if not provided
+        if ([string]::IsNullOrWhiteSpace($ApiKey)) {
+            $ApiKey = $env:NUGET_API_KEY
+        }
+        
+        if ([string]::IsNullOrWhiteSpace($ApiKey)) {
+            throw "ApiKey is required. Provide via -ApiKey parameter or NUGET_API_KEY environment variable."
+        }
+        
+        # Verify NuGet CLI exists
+        if (-not (Get-Command $NuGetPath -ErrorAction SilentlyContinue)) {
+            throw "NuGet CLI not found at path: $NuGetPath"
+        }
+        Write-Host "✓ NuGet CLI found at: $NuGetPath"
+        
+        # Validate PackagePath exists
+        if (-not (Test-Path $PackagePath)) {
+            throw "Package path not found: $PackagePath"
+        }
+        
+        # Determine if PackagePath is a file or directory
+        $isDirectory = (Get-Item $PackagePath).PSIsContainer
+        
+        if ($isDirectory) {
+            Write-Host "`n📂 Searching for package files in: $PackagePath" -ForegroundColor Yellow
+            $packages = Get-ChildItem -Path "$PackagePath\*" -Include "*.nupkg", "*.snupkg" -File
+            
+            if ($packages.Count -eq 0) {
+                throw "No .nupkg or .snupkg files found in directory: $PackagePath"
+            }
+            
+            $nupkgCount = ($packages | Where-Object { $_.Extension -eq ".nupkg" }).Count
+            $snupkgCount = ($packages | Where-Object { $_.Extension -eq ".snupkg" }).Count
+            Write-Host "✓ Found $($packages.Count) package(s) to push ($nupkgCount .nupkg, $snupkgCount .snupkg)"
+        }
+        else {
+            # Single file
+            if (-not ($PackagePath.EndsWith(".nupkg") -or $PackagePath.EndsWith(".snupkg"))) {
+                throw "Package file must have .nupkg or .snupkg extension: $PackagePath"
+            }
+            $packages = @(Get-Item $PackagePath)
+        }
+        
+        Write-Host "`n📋 Push Configuration:" -ForegroundColor Cyan
+        Write-Host "  Target Source: $Source"
+        Write-Host "  Timeout:       $Timeout seconds"
+        Write-Host "  Skip Existing: $($SkipDuplicate.IsPresent)"
+        
+        # Push each package
+        $successCount = 0
+        $failCount = 0
+        
+        foreach ($package in $packages) {
+            Write-Host "`n📦 Pushing: $($package.Name)" -ForegroundColor White
+            
+            # Build the nuget push command arguments
+            $pushArgs = @(
+                "push",
+                $package.FullName,
+                $ApiKey,
+                "-Source", $Source,
+                "-Timeout", $Timeout,
+                "-NonInteractive"
+            )
+            
+            if ($SkipDuplicate) {
+                $pushArgs += "-SkipDuplicate"
+            }
+            
+            # Execute the push
+            $output = & $NuGetPath $pushArgs 2>&1
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "  ✅ Successfully pushed" -ForegroundColor Green
+                $successCount++
+            }
+            else {
+                Write-Host "  ❌ Failed to push" -ForegroundColor Red
+                $output | ForEach-Object { Write-Host "    $_" -ForegroundColor Red }
+                $failCount++
+            }
+        }
+        
+        # Print summary
+        Write-Host "`n📊 Push Summary:" -ForegroundColor Yellow
+        Write-Host "  Total Packages:   $($packages.Count)"
+        Write-Host "  Successfully Pushed: $successCount" -ForegroundColor Green
+        if ($failCount -gt 0) {
+            Write-Host "  Failed:              $failCount" -ForegroundColor Red
+            throw "$failCount package(s) failed to push"
+        }
+        
+        Write-Host "`n✨ Package push process completed successfully! ✨" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "`n❌ Error occurred:" -ForegroundColor Red
+        Write-Error $_.Exception.Message
         throw
     }
 }

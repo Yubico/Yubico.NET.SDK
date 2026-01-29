@@ -44,7 +44,7 @@ public static class IYubiKeyExtensions
         /// </returns>
         public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
         {
-            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
+            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
             return await mgmtSession.GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -77,7 +77,7 @@ public static class IYubiKeyExtensions
             byte[]? newLockCode = null,
             CancellationToken cancellationToken = default)
         {
-            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
+            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
             await mgmtSession.SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken)
                 .ConfigureAwait(false);

@@ -83,7 +83,7 @@ public static class TestStateExtensions
 
         return state.WithConnectionAsync(async connection =>
         {
-            using var session = await factory(
+            await using var session = await factory(
                 connection,
                 configuration,
                 scpKeyParams,

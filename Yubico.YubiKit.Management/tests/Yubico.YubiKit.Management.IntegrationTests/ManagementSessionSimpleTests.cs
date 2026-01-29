@@ -17,8 +17,8 @@ public class
         var device = devices.FirstOrDefault();
         Assert.NotNull(device);
 
-        using var connection = await device.ConnectAsync<ISmartCardConnection>();
-        using var mgmtSession = await ManagementSession.CreateAsync(connection);
+        await using var connection = await device.ConnectAsync<ISmartCardConnection>();
+        await using var mgmtSession = await ManagementSession.CreateAsync(connection);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
@@ -37,7 +37,7 @@ public class
             return;
 
         await using var connection = await fidoDevice.ConnectAsync<IFidoHidConnection>();
-        using var mgmtSession = await ManagementSession.CreateAsync(connection);
+        await using var mgmtSession = await ManagementSession.CreateAsync(connection);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
@@ -81,7 +81,7 @@ public class
             return;
 
         await using var connection = await fidoDevice.ConnectAsync<IFidoHidConnection>();
-        using var mgmtSession = await ManagementSession.CreateAsync(connection);
+        await using var mgmtSession = await ManagementSession.CreateAsync(connection);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
@@ -94,8 +94,8 @@ public class
         var device = devices.First();
         var sessionFactory = ServiceProvider.GetRequiredService<ManagementSessionFactoryDelegate>();
 
-        using var connection = await device.ConnectAsync<ISmartCardConnection>();
-        using var mgmtSession = await sessionFactory(connection, configuration: null);
+        await using var connection = await device.ConnectAsync<ISmartCardConnection>();
+        await using var mgmtSession = await sessionFactory(connection, configuration: null);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
@@ -107,8 +107,8 @@ public class
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
         var device = devices.First();
 
-        using var connection = await device.ConnectAsync<ISmartCardConnection>();
-        using var mgmtSession = await ManagementSession.CreateAsync(connection);
+        await using var connection = await device.ConnectAsync<ISmartCardConnection>();
+        await using var mgmtSession = await ManagementSession.CreateAsync(connection);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
@@ -120,7 +120,7 @@ public class
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
         var device = devices[0];
 
-        using var mgmtSession = await device.CreateManagementSessionAsync();
+        await using var mgmtSession = await device.CreateManagementSessionAsync();
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
@@ -141,7 +141,7 @@ public class
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
         var device = devices[0];
 
-        using var mgmtSession = await device.CreateManagementSessionAsync();
+        await using var mgmtSession = await device.CreateManagementSessionAsync();
 
         var originalInfo = await mgmtSession.GetDeviceInfoAsync();
         var originalAutoEject = originalInfo.AutoEjectTimeout;
@@ -210,7 +210,7 @@ public class
         await using var connection = await device.ConnectAsync<ISmartCardConnection>();
 
         // Create ManagementSession with SCP03 enabled
-        using var mgmtSession = await ManagementSession.CreateAsync(
+        await using var mgmtSession = await ManagementSession.CreateAsync(
             connection,
             scpKeyParams: scpKeyParams);
 
@@ -238,12 +238,12 @@ public class
         var keyRef = new KeyReference(0x01, 0xFF);
         var scpKeyParams = new Scp03KeyParameters(keyRef, staticKeys);
 
-        using var connection = await device.ConnectAsync<ISmartCardConnection>();
+        await using var connection = await device.ConnectAsync<ISmartCardConnection>();
 
         // Attempt to create ManagementSession with wrong SCP keys should throw
         await Assert.ThrowsAnyAsync<Exception>(async () =>
         {
-            using var mgmtSession = await ManagementSession.CreateAsync(
+            await using var mgmtSession = await ManagementSession.CreateAsync(
                 connection,
                 scpKeyParams: scpKeyParams);
         });

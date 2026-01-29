@@ -16,7 +16,7 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.Interfaces;
 
-public interface IApplicationSession : IDisposable
+public interface IApplicationSession : IDisposable, IAsyncDisposable
 {
     FirmwareVersion FirmwareVersion { get; }
     bool IsInitialized { get; }

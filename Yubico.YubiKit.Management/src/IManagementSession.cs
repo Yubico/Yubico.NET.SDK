@@ -16,7 +16,7 @@ using Yubico.YubiKit.Core.Interfaces;
 
 namespace Yubico.YubiKit.Management;
 
-public interface IManagementSession : IApplicationSession, IAsyncDisposable
+public interface IManagementSession : IApplicationSession
 {
     Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default);
 

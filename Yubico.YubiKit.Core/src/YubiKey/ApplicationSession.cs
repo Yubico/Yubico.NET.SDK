@@ -91,6 +91,13 @@ public abstract class ApplicationSession : IApplicationSession
             Protocol = null;
         }
     }
+
+    public virtual ValueTask DisposeAsync()
+    {
+        Dispose();
+        GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
+    }
 }
 
 

@@ -62,7 +62,7 @@ public static class YubiKeyTestStateExtensions
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(action);
 
-            using var session = await state.Device
+            await using var session = await state.Device
                 .CreateManagementSessionAsync(scpKeyParams, configuration, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
             await action(session, state.DeviceInfo).ConfigureAwait(false);

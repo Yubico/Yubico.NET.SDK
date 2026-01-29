@@ -77,7 +77,7 @@ public class ManagementSessionAdvancedTests
         await state.WithManagementAsync(async (mgmt, deviceInfo) =>
         {
             var info = await mgmt.GetDeviceInfoAsync();
-            Assert.True(info.FirmwareVersion.Major >= 5);
+            Assert.True(info.FirmwareVersion.IsAtLeast(5, 0, 0));
         }, scpKeyParams: Scp03KeyParameters.Default);
     }
 
@@ -100,7 +100,7 @@ public class ManagementSessionAdvancedTests
             Assert.Equal(FormFactor.UsbABiometricKeychain, deviceInfo.FormFactor);
 
             // Bio keys typically have modern firmware
-            Assert.True(deviceInfo.FirmwareVersion.Major >= 5);
+            Assert.True(deviceInfo.FirmwareVersion.IsAtLeast(5, 0, 0));
         });
     }
 
@@ -210,7 +210,7 @@ public class ManagementSessionAdvancedTests
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
 
             // Verify all requirements
-            Assert.True(deviceInfo.FirmwareVersion.Major >= 5);
+            Assert.True(deviceInfo.FirmwareVersion.IsAtLeast(5, 0, 0));
             Assert.True(deviceInfo.UsbSupported != DeviceCapabilities.None);
             Assert.True((deviceInfo.UsbEnabled & DeviceCapabilities.Piv) != 0);
         });
@@ -228,7 +228,7 @@ public class ManagementSessionAdvancedTests
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
 
             // Test adapts based on device characteristics
-            if (state.FirmwareVersion.Major >= 5)
+            if (state.FirmwareVersion.IsAtLeast(5, 0, 0))
                 // Modern firmware: expect extended capabilities
                 Assert.True(deviceInfo.UsbEnabled != DeviceCapabilities.None);
             else
@@ -237,7 +237,7 @@ public class ManagementSessionAdvancedTests
 
             if (state.FormFactor == FormFactor.UsbABiometricKeychain)
                 // Bio keys: verify biometric support expectations
-                Assert.True(state.FirmwareVersion.Major >= 5);
+                Assert.True(state.FirmwareVersion.IsAtLeast(5, 0, 0));
 
             // Test that works on all devices
             Assert.True(deviceInfo.SerialNumber > 0);

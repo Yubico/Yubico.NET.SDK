@@ -85,7 +85,7 @@ public class ManagementSessionTests
 
             // Verify firmware version is accessible
             Assert.NotNull(deviceInfo.FirmwareVersion);
-            Assert.True(deviceInfo.FirmwareVersion.Major >= 4);
+            Assert.True(deviceInfo.FirmwareVersion.IsAtLeast(4, 0, 0));
         });
 
     /// <summary>
@@ -136,7 +136,7 @@ public class ManagementSessionTests
         await state.WithManagementAsync(async (mgmt, deviceInfo) =>
         {
             // Device meets all requirements (guaranteed by attribute filter)
-            Assert.True(deviceInfo.FirmwareVersion.Major >= 5);
+            Assert.True(deviceInfo.FirmwareVersion.IsAtLeast(5, 0, 0));
             Assert.True(state.IsUsbTransport);
             var info = await mgmt.GetDeviceInfoAsync();
             Assert.True(info.SerialNumber > 0);
@@ -158,7 +158,7 @@ public class ManagementSessionTests
             var info = await mgmt.GetDeviceInfoAsync();
 
             // At least one of the conditions must be true
-            var hasModernFirmware = deviceInfo.FirmwareVersion.Major >= 5;
+            var hasModernFirmware = deviceInfo.FirmwareVersion.IsAtLeast(5, 0, 0);
             var isUsbAKeychain = deviceInfo.FormFactor == FormFactor.UsbAKeychain;
             Assert.True(hasModernFirmware || isUsbAKeychain);
         });

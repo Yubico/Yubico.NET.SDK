@@ -38,7 +38,17 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     public byte Minor { get; }
     public byte Patch { get; }
 
-    public static FirmwareVersion Default => new(0);
+    /// <summary>
+    ///     Gets a value indicating whether this firmware version represents an alpha or beta YubiKey.
+    ///     Alpha/beta keys report firmware version 0.0.0 but should be treated as the latest version
+    ///     for feature compatibility checks.
+    /// </summary>
+    public bool IsAlphaOrBeta => Major == 0 && Minor == 0 && Patch == 0;
+
+    /// <summary>
+    ///     A default firmware version (0.0.0), representing unknown or uninitialized version.
+    /// </summary>
+    public static readonly FirmwareVersion Default = new(0);
 
     #region IComparable Members
 
@@ -58,7 +68,7 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
         if (obj is null) return 1;
 
         return obj is not FirmwareVersion version
-            ? throw new ArgumentException("ExceptionMessages.ArgumentMustBeFirmwareVersion, nameof(obj)")
+            ? throw new ArgumentException("Argument must be a FirmwareVersion", nameof(obj))
             : CompareTo(version);
     }
 
@@ -70,6 +80,10 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     ///     Compares the relative sort order of the current instance with another object of
     ///     the same type.
     /// </summary>
+    /// <remarks>
+    ///     Alpha/beta keys (version 0.0.0) are treated as the latest version and will compare
+    ///     greater than any other version.
+    /// </remarks>
     /// <returns>
     ///     An integer that indicates whether the current instance precedes (negative value),
     ///     follows (positive value), or occurs in the same position (0) in the sort order
@@ -78,7 +92,17 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     public int CompareTo(FirmwareVersion? other)
     {
         if (ReferenceEquals(this, other)) return 0;
-        return other is null ? 1 : CompareVersion(other.Major, other.Minor, other.Patch);
+        if (other is null) return 1;
+
+        // Alpha/beta keys (0.0.0) are treated as the latest version
+        bool thisIsAlphaOrBeta = IsAlphaOrBeta;
+        bool otherIsAlphaOrBeta = other.IsAlphaOrBeta;
+
+        if (thisIsAlphaOrBeta && otherIsAlphaOrBeta) return 0;
+        if (thisIsAlphaOrBeta) return 1;  // This is alpha/beta, so it's "greater"
+        if (otherIsAlphaOrBeta) return -1; // Other is alpha/beta, so this is "less"
+
+        return CompareVersion(other.Major, other.Minor, other.Patch);
     }
 
     #endregion
@@ -108,15 +132,18 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
         return new FirmwareVersion(major, minor, patch);
     }
 
-    public bool IsAtLeast(FirmwareVersion firmwareVersion) =>
-        CompareVersion(firmwareVersion.Major, firmwareVersion.Minor, firmwareVersion.Patch) >= 0;
+    public bool IsAtLeast(FirmwareVersion firmwareVersion)
+    {
+        return CompareTo(firmwareVersion) >= 0;
+    }
 
-    public bool IsLessThan(FirmwareVersion firmwareVersion) =>
-        CompareVersion(firmwareVersion.Major, firmwareVersion.Minor, firmwareVersion.Patch) < 0;
+    public bool IsLessThan(FirmwareVersion firmwareVersion) => CompareTo(firmwareVersion) < 0;
 
-    public bool IsAtLeast(int major, int minor, int patch) => CompareVersion(major, minor, patch) >= 0;
+    public bool IsAtLeast(int major, int minor, int patch) =>
+        IsAlphaOrBeta || CompareVersion(major, minor, patch) >= 0;
 
-    public bool IsLessThan(int major, int minor, int patch) => CompareVersion(major, minor, patch) < 0;
+    public bool IsLessThan(int major, int minor, int patch) =>
+        !IsAlphaOrBeta && CompareVersion(major, minor, patch) < 0;
 
     private int CompareVersion(int major, int minor, int patch) =>
         ((Major << 16) | (Minor << 8) | Patch).CompareTo((major << 16) | (minor << 8) | patch);
@@ -136,32 +163,36 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
         ? throw new ArgumentException("Invalid length of data")
         : new FirmwareVersion(bytes[0], bytes[1], bytes[2]);
 
-    public static bool operator >(FirmwareVersion? left, FirmwareVersion right)
+    public static bool operator >(FirmwareVersion? left, FirmwareVersion? right)
     {
-        if (left is null) return false;
+        if (left is null) return false; // null > anything is false
+        if (right is null) return true; // non-null > null is true
 
         return left.CompareTo(right) > 0;
     }
 
     public static bool operator <(FirmwareVersion? left, FirmwareVersion? right)
     {
-        if (right is null) return left is not null;
+        if (left is null) return right is not null; // null < non-null is true, null < null is false
+        if (right is null) return false; // non-null < null is false
 
-        return left is not null && left.CompareTo(right) < 0;
+        return left.CompareTo(right) < 0;
     }
 
     public static bool operator >=(FirmwareVersion? left, FirmwareVersion? right)
     {
-        if (left is null) return right is null;
+        if (left is null) return right is null; // null >= null is true, null >= non-null is false
+        if (right is null) return true; // non-null >= null is true
 
         return left.CompareTo(right) >= 0;
     }
 
     public static bool operator <=(FirmwareVersion? left, FirmwareVersion? right)
     {
-        if (right is null) return left is not null;
+        if (left is null) return true; // null <= anything is true
+        if (right is null) return false; // non-null <= null is false
 
-        return left is not null && left.CompareTo(right) <= 0;
+        return left.CompareTo(right) <= 0;
     }
 
     public static bool operator ==(FirmwareVersion? left, FirmwareVersion? right)
@@ -173,7 +204,7 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
         return left.CompareTo(right) == 0;
     }
 
-    public static bool operator !=(FirmwareVersion left, FirmwareVersion right) =>
+    public static bool operator !=(FirmwareVersion? left, FirmwareVersion? right) =>
         !(left == right);
 
     public override bool Equals([NotNullWhen(true)] object? obj) => obj is FirmwareVersion version && Equals(version);
@@ -184,7 +215,6 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
 
     #region Frequently Used Versions
 
-    internal static readonly FirmwareVersion All = new(1);
     internal static readonly FirmwareVersion V4_0_0 = new(4);
     internal static readonly FirmwareVersion V4_3_0 = new(4, 3);
     internal static readonly FirmwareVersion V5_0_0 = new(5);

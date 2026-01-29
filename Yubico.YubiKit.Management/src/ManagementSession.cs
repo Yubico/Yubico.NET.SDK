@@ -196,10 +196,11 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession, 
                 "Could not get version from DeviceInfo, fallback to versionHeader in Management.Select");
         }
 
-        return defaultVersion;
+        return defaultVersion 
+            ?? throw new InvalidOperationException("Could not determine firmware version from device");
     }
 
-    private async Task<FirmwareVersion> GetVersionFromManagementHeader(CancellationToken cancellationToken)
+    private async Task<FirmwareVersion?> GetVersionFromManagementHeader(CancellationToken cancellationToken)
     {
         var versionBytes = await SelectAsync(cancellationToken).ConfigureAwait(false);
 
@@ -209,7 +210,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession, 
 
         return versionParts.Length == 3
             ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
-            : new FirmwareVersion();
+            : null;
     }
 
     private Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken)

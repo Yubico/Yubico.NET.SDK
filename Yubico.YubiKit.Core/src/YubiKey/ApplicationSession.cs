@@ -21,6 +21,8 @@ namespace Yubico.YubiKit.Core.YubiKey;
 
 public abstract class ApplicationSession : IApplicationSession
 {
+    private bool _disposed;
+
     protected ILogger Logger { get; }
     protected IProtocol? Protocol { get; set; }
 
@@ -77,25 +79,42 @@ public abstract class ApplicationSession : IApplicationSession
             throw new NotSupportedException($"{feature.Name} requires firmware {feature.Version}+");
     }
 
+    protected void ThrowIfDisposed()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+    }
+
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    public async ValueTask DisposeAsync()
+    {
+        await DisposeAsyncCore().ConfigureAwait(false);
+        Dispose(disposing: false);
+        GC.SuppressFinalize(this);
+    }
+
     protected virtual void Dispose(bool disposing)
     {
+        if (_disposed)
+            return;
+
         if (disposing)
         {
             Protocol?.Dispose();
             Protocol = null;
         }
+
+        _disposed = true;
     }
 
-    public virtual ValueTask DisposeAsync()
+    protected virtual ValueTask DisposeAsyncCore()
     {
-        Dispose();
-        GC.SuppressFinalize(this);
+        Protocol?.Dispose();
+        Protocol = null;
         return ValueTask.CompletedTask;
     }
 }

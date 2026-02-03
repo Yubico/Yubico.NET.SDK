@@ -36,7 +36,6 @@ namespace Yubico.YubiKit.Tests.Shared;
 /// </remarks>
 public class YubiKeyTestState : IXunitSerializable
 {
-    private const int PlaceholderSerialNumber = -1;
     private static int s_placeholderCounter;
 
     /// <summary>

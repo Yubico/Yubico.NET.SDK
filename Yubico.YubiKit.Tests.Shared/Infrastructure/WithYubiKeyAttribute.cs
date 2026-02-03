@@ -171,42 +171,4 @@ public class WithYubiKeyAttribute : DataAttribute
         };
         yield return [YubiKeyTestState.CreateFilteredPlaceholder(criteria)];
     }
-
-    /// <summary>
-    ///     Builds a description of the filter criteria for this attribute.
-    ///     Used to create unique placeholders when multiple attributes are applied.
-    /// </summary>
-    private string BuildFilterDescription()
-    {
-        var parts = new List<string>();
-
-        if (!string.IsNullOrEmpty(MinFirmware))
-            parts.Add($"FW>={MinFirmware}");
-
-        if (FormFactor != FormFactor.Unknown)
-            parts.Add($"FF={FormFactor}");
-
-        if (RequireUsb)
-            parts.Add("USB");
-
-        if (RequireNfc)
-            parts.Add("NFC");
-
-        if (ConnectionType != ConnectionType.Unknown)
-            parts.Add($"Conn={ConnectionType}");
-
-        if (Capability != DeviceCapabilities.None)
-            parts.Add($"Cap={Capability}");
-
-        if (FipsCapable != DeviceCapabilities.None)
-            parts.Add($"FipsCap={FipsCapable}");
-
-        if (FipsApproved != DeviceCapabilities.None)
-            parts.Add($"FipsAppr={FipsApproved}");
-
-        if (CustomFilter is not null)
-            parts.Add($"Filter={CustomFilter.Name}");
-
-        return parts.Count > 0 ? string.Join(",", parts) : "All";
-    }
 }

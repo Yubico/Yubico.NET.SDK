@@ -14,7 +14,6 @@
 
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using Yubico.YubiKit.Core.Hid.Constants;
 using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.PlatformInterop;
 using Yubico.YubiKit.Core.PlatformInterop.Linux.Libc;

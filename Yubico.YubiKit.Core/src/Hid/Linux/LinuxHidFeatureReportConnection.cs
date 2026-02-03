@@ -15,9 +15,9 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Hid.Interfaces;
-using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.PlatformInterop;
 using Yubico.YubiKit.Core.PlatformInterop.Linux.Libc;
+using Yubico.YubiKit.Core.YubiKey;
 using LibcNativeMethods = Yubico.YubiKit.Core.PlatformInterop.Linux.Libc.NativeMethods;
 
 namespace Yubico.YubiKit.Core.Hid.Linux;
@@ -136,7 +136,7 @@ internal sealed class LinuxHidFeatureReportConnection : IHidConnection
             ? ValueTask.CompletedTask
             : new ValueTask(Task.Run(Dispose));
 
-    public ConnectionType Type { get; } = ConnectionType.Hid;
+    public ConnectionType Type => ConnectionType.Hid;
 
     private void Dispose(bool disposing)
     {

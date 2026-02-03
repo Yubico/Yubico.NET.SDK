@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
@@ -260,7 +259,7 @@ internal static class YubiKeyTestInfrastructure
         try
         {
             // Discover all devices
-            var allDevices = YubiKey.FindAllAsync().GetAwaiter().GetResult();
+            var allDevices = TestDeviceDiscovery.FindAllAsync().GetAwaiter().GetResult();
             Console.WriteLine($"[YubiKey Infrastructure] Found {allDevices.Count} device(s)");
 
             if (allDevices.Count == 0)

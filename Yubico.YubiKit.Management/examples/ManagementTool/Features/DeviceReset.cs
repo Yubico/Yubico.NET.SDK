@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.YubiKey;
-using Yubico.YubiKit.Management.Examples.ManagementTool.ManagementExamples.Results;
+using Yubico.YubiKit.Management.Examples.ManagementTool.Features.Results;
 
-namespace Yubico.YubiKit.Management.Examples.ManagementTool.ManagementExamples;
+namespace Yubico.YubiKit.Management.Examples.ManagementTool.Features;
 
 /// <summary>
 /// Demonstrates factory resetting a YubiKey.

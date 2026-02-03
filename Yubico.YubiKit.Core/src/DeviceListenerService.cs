@@ -23,10 +23,10 @@ public class DeviceListenerService(
     ILogger<DeviceListenerService> logger,
     IDeviceChannel deviceChannel,
     IDeviceRepository deviceRepository,
-    IOptions<YubiKeyManagerOptions> ioptions)
+    IOptions<YubiKeyManagerOptions> options)
     : BackgroundService
 {
-    private readonly YubiKeyManagerOptions _options = ioptions.Value;
+    private readonly YubiKeyManagerOptions _options = options.Value;
 
     public override Task StartAsync(CancellationToken cancellationToken)
     {
@@ -35,6 +35,13 @@ public class DeviceListenerService(
 
         logger.LogInformation("YubiKey device auto-discovery is disabled. Device listener will not start.");
         return Task.CompletedTask;
+    }
+
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("YubiKey device listener stopping...");
+        await base.StopAsync(cancellationToken).ConfigureAwait(false);
+        logger.LogInformation("YubiKey device listener stopped");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

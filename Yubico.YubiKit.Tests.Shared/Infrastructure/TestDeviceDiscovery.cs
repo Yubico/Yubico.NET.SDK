@@ -13,11 +13,17 @@
 // limitations under the License.
 
 using System.Runtime.CompilerServices;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.YubiKey;
 
-namespace Yubico.YubiKit.Core.YubiKey;
+namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 
-public static class YubiKey // TODO Keep Plan was to do all via manager?
+/// <summary>
+/// Simple static helpers for device discovery in test scenarios.
+/// For production use, prefer <see cref="IYubiKeyManager"/> via dependency injection.
+/// </summary>
+public static class TestDeviceDiscovery
 {
     public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default) =>
         FindYubiKeys.Create().FindAllAsync(cancellationToken: cancellationToken);
@@ -39,16 +45,21 @@ public static class YubiKey // TODO Keep Plan was to do all via manager?
                 var id = GetDeviceId(device);
                 currentDeviceIds.Add(id);
 
-                if (!previousDeviceIds.Contains(id)) yield return new DeviceEvent(DeviceAction.Added, device);
+                if (!previousDeviceIds.Contains(id))
+                {
+                    yield return new DeviceEvent(DeviceAction.Added, device);
+                }
             }
 
             foreach (var removedId in previousDeviceIds.Except(currentDeviceIds))
+            {
                 yield return new DeviceEvent(DeviceAction.Removed, null) { DeviceId = removedId };
+            }
 
             previousDeviceIds = currentDeviceIds;
             await Task.Delay(interval, cancellationToken).ConfigureAwait(false);
         }
     }
 
-    private static string GetDeviceId(IYubiKey device) => device.GetHashCode().ToString(); // TODO improve
+    private static string GetDeviceId(IYubiKey device) => device.GetHashCode().ToString();
 }

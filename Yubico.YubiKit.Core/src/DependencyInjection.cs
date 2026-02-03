@@ -14,6 +14,8 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
@@ -37,6 +39,15 @@ public static class DependencyInjection
         ///         <see cref="ISmartCardConnectionFactory" />, <see cref="IDeviceRepository" />,
         ///         and background device monitoring services.
         ///     </para>
+        ///     <para>
+        ///         <b>Logging:</b> Automatically configures YubiKit logging from the DI container's
+        ///         <see cref="ILoggerFactory"/> when services are first resolved.
+        ///     </para>
+        ///     <para>
+        ///         <b>Background services:</b> Call <c>host.StartAsync()</c> before using
+        ///         <see cref="IYubiKeyManager.DeviceChanges"/>. The <see cref="IYubiKeyManager.FindAllAsync"/>
+        ///         method works without starting the host (performs synchronous scan if needed).
+        ///     </para>
         /// </remarks>
         /// <param name="configureOptions">Optional configuration for YubiKey manager options.</param>
         /// <returns>The service collection for chaining.</returns>
@@ -48,8 +59,6 @@ public static class DependencyInjection
             }
 
             // Use TryAdd* for idempotency - safe to call multiple times
-            services.TryAddSingleton<YubiKitLoggingInitializer>();
-            services.TryAddTransient<IYubiKeyManager, YubiKeyManager>();
             services.TryAddTransient<IYubiKeyFactory, YubiKeyFactory>();
             services.TryAddTransient<IFindYubiKeys, FindYubiKeys>();
             services.TryAddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>();
@@ -60,6 +69,23 @@ public static class DependencyInjection
             services.TryAddSingleton<IDeviceRepository, DeviceRepositoryCached>();
 
             services.AddBackgroundServices();
+            
+            // Register IYubiKeyManager
+            services.TryAddTransient<IYubiKeyManager>(sp =>
+            {
+                // Auto-configure logging from DI only if not already configured
+                // This allows explicit YubiKitLogging.Configure() to take precedence
+                if (YubiKitLogging.LoggerFactory == NullLoggerFactory.Instance)
+                {
+                    var loggerFactory = sp.GetService<ILoggerFactory>();
+                    if (loggerFactory is not null)
+                    {
+                        YubiKitLogging.Configure(loggerFactory);
+                    }
+                }
+                
+                return new YubiKeyManager(sp.GetRequiredService<IDeviceRepository>());
+            });
 
             return services;
         }

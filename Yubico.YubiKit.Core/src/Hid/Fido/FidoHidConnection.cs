@@ -14,7 +14,7 @@
 
 using Yubico.YubiKit.Core.Hid.Constants;
 using Yubico.YubiKit.Core.Hid.Interfaces;
-using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.Hid.Fido;
 

@@ -20,7 +20,7 @@ public class FindPcscDevices(ILogger<FindPcscDevices> logger) : IFindPcscDevices
 
     private IReadOnlyList<IPcscDevice> FindAll()
     {
-        logger.LogInformation("Getting list of PC/SC devices");
+        logger.LogDebug("Getting list of PC/SC devices");
 
         var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
         if (result != ErrorCode.SCARD_S_SUCCESS)

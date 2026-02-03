@@ -23,7 +23,7 @@ public static class TestStateExtensions
 {
     /// <summary>
     ///     Executes an action with a <see cref="ManagementSession" /> created via
-    ///     the DI-registered <see cref="ManagementSessionFactoryDelegate" />.
+    ///     the DI-registered <see cref="ManagementSessionFactory" />.
     /// </summary>
     /// <remarks>
     ///     This method builds a <see cref="ServiceProvider" /> internally with
@@ -66,7 +66,7 @@ public static class TestStateExtensions
     /// <param name="state">The YubiKey test state.</param>
     /// <param name="action">The async action to execute with the session.</param>
     /// <param name="serviceProvider">
-    ///     The service provider containing the registered <see cref="ManagementSessionFactoryDelegate" />.
+    ///     The service provider containing the registered <see cref="ManagementSessionFactory" />.
     /// </param>
     /// <param name="configuration">Optional protocol configuration.</param>
     /// <param name="scpKeyParams">Optional SCP key parameters for authentication.</param>
@@ -79,7 +79,7 @@ public static class TestStateExtensions
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
-        var factory = serviceProvider.GetRequiredService<ManagementSessionFactoryDelegate>();
+        var factory = serviceProvider.GetRequiredService<ManagementSessionFactory>();
 
         return state.WithConnectionAsync(async connection =>
         {

@@ -13,8 +13,8 @@ ManagementTool is an interactive CLI application that demonstrates how to use th
 - **NFC Capabilities** - Configure which applications are enabled over NFC
 - **Timeouts** - Set auto-eject and challenge-response timeouts
 - **Device Flags** - Configure device flags (eject, remote wakeup)
-- **Lock Code** - Set, change, or remove the configuration lock code
-- **Factory Reset** - Reset device to factory defaults (firmware 5.6.0+)
+- **Lock Code** - Set, change, or remove the configuration lock code (DANGEROUS, CAN LEAD TO BEING LOCKED OUT OF DEVICE)
+- **Factory Reset** - Reset device to factory defaults (firmware 5.6.0+, Bio MPE keys)
 
 ## Project Structure
 
@@ -36,7 +36,7 @@ ManagementTool/
 │   └── Prompts/                  # User input prompts
 │       ├── DeviceSelector.cs
 │       └── LockCodePrompt.cs
-└── ManagementExamples/           # Pure SDK example classes (no UI dependencies)
+└── Features/           # Pure SDK example classes (no UI dependencies)
     ├── DeviceInfoQuery.cs
     ├── DeviceConfiguration.cs
     ├── DeviceReset.cs

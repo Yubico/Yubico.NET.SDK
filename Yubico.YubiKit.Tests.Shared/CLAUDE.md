@@ -60,7 +60,7 @@ public static class YubiKeyTestInfrastructure
     private static async Task<IReadOnlyList<YubiKeyTestState>> InitializeDevicesAsync()
     {
         // 1. Discover all YubiKeys
-        var devices = await YubiKey.FindAllAsync();
+        var devices = await TestDeviceDiscovery.FindAllAsync();
         
         // 2. Load allow list
         var allowList = await AllowList.LoadAsync();

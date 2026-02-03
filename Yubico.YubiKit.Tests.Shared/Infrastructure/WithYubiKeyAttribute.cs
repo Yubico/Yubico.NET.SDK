@@ -13,9 +13,8 @@
 // limitations under the License.
 
 using System.Reflection;
-using Xunit;
 using Xunit.Sdk;
-using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Tests.Shared.Infrastructure;

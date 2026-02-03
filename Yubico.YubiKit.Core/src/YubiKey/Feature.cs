@@ -14,11 +14,22 @@
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
-public class Feature(string name, int versionMajor, int versionMinor, int versionRevision)
+public readonly record struct Feature
 {
-    public string Name { get; } = name;
-    public int VersionMajor { get; init; } = versionMajor;
-    public int VersionMinor { get; init; } = versionMinor;
-    public int VersionRevision { get; init; } = versionRevision;
-    public FirmwareVersion Version { get; } = new(versionMajor, versionMinor, versionRevision);
+    public Feature(string name, int versionMajor, int versionMinor, int versionRevision)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        ArgumentOutOfRangeException.ThrowIfNegative(versionMajor);
+
+        Name = name;
+        VersionMajor = versionMajor;
+        VersionMinor = versionMinor;
+        VersionRevision = versionRevision;
+    }
+    
+    public string Name { get; init; }
+    public int VersionMajor { get; init; }
+    public int VersionMinor { get; init; }
+    public int VersionRevision { get; init; }
+    public FirmwareVersion Version => new(VersionMajor, VersionMinor, VersionRevision);
 }

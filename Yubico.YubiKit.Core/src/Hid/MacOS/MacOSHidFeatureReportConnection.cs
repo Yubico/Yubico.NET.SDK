@@ -14,9 +14,9 @@
 
 using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Hid.Interfaces;
-using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.PlatformInterop;
 using Yubico.YubiKit.Core.PlatformInterop.MacOS.IOKitFramework;
+using Yubico.YubiKit.Core.YubiKey;
 using IOKitNativeMethods = Yubico.YubiKit.Core.PlatformInterop.MacOS.IOKitFramework.NativeMethods;
 
 namespace Yubico.YubiKit.Core.Hid.MacOS;

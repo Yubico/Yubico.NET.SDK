@@ -30,13 +30,18 @@ namespace Yubico.YubiKit.Tests.Shared;
 ///         for use with xUnit Theory tests via <see cref="Yubico.YubiKit.Tests.Shared.Infrastructure" />.
 ///     </para>
 ///     <para>
+///         <strong>Discovery vs Execution Phases:</strong>
+///         During test <em>discovery</em> (e.g., when the test explorer lists tests), placeholder instances
+///         are returned to avoid connecting to hardware. During test <em>execution</em>, placeholders are
+///         bound to real devices via <see cref="BindToRealDevice"/> based on stored filter criteria.
+///     </para>
+///     <para>
 ///         The <see cref="ToString" /> method provides a friendly display name for test output:
 ///         <c>YubiKey(SN:12345678,FW:5.7.2,UsbAKeychain)</c>
 ///     </para>
 /// </remarks>
 public class YubiKeyTestState : IXunitSerializable
 {
-    private const int PlaceholderSerialNumber = -1;
     private static int s_placeholderCounter;
 
     /// <summary>
@@ -60,6 +65,21 @@ public class YubiKeyTestState : IXunitSerializable
         new(isPlaceholder: true, filterDescription: filterDescription);
 
     /// <summary>
+    ///     Creates a placeholder with full filter parameters for device binding.
+    ///     The filter criteria are serialized and used during test execution
+    ///     to find a matching device via <see cref="Infrastructure.YubiKeyTestInfrastructure.FilterDevices"/>.
+    /// </summary>
+    /// <param name="criteria">The filter criteria to apply when binding to a device.</param>
+    /// <returns>A new placeholder instance with filter criteria.</returns>
+    public static YubiKeyTestState CreateFilteredPlaceholder(FilterCriteria criteria)
+    {
+        return new YubiKeyTestState(isPlaceholder: true, filterDescription: criteria.GetShortDescription())
+        {
+            _filterCriteria = criteria.PrepareForSerialization()
+        };
+    }
+
+    /// <summary>
     ///     Gets whether this is a placeholder instance (used during discovery).
     /// </summary>
     public bool IsPlaceholder { get; private set; }
@@ -73,6 +93,12 @@ public class YubiKeyTestState : IXunitSerializable
     ///     Gets the filter description for this placeholder (null for real devices).
     /// </summary>
     private string? FilterDescription { get; set; }
+
+    /// <summary>
+    ///     Filter criteria for device binding (placeholders only).
+    ///     Serialized with the placeholder and used during <see cref="BindToRealDevice"/>.
+    /// </summary>
+    private FilterCriteria _filterCriteria = new();
 
     /// <summary>
     ///     Parameterless constructor required by <see cref="IXunitSerializable" />.
@@ -127,7 +153,14 @@ public class YubiKeyTestState : IXunitSerializable
                 BindToRealDevice();
             }
 
-            return _device!;
+            if (_device is null)
+            {
+                throw new InvalidOperationException(
+                    "Device binding failed. This may indicate no YubiKey matching the filter criteria is connected. " +
+                    $"Filter: {FilterDescription ?? "none"}");
+            }
+
+            return _device;
         }
         private set => _device = value;
     }
@@ -136,8 +169,23 @@ public class YubiKeyTestState : IXunitSerializable
 
     /// <summary>
     ///     Gets the device information (firmware, form factor, capabilities, etc.).
+    ///     For placeholders, accessing this property triggers lazy device binding.
     /// </summary>
-    public DeviceInfo DeviceInfo { get; private set; }
+    public DeviceInfo DeviceInfo
+    {
+        get
+        {
+            if (_device is null && IsPlaceholder)
+            {
+                BindToRealDevice();
+            }
+
+            return _deviceInfo;
+        }
+        private set => _deviceInfo = value;
+    }
+
+    private DeviceInfo _deviceInfo;
 
     /// <summary>
     ///     Gets the firmware version.
@@ -198,6 +246,21 @@ public class YubiKeyTestState : IXunitSerializable
             IsPlaceholder = true;
             FilterDescription = filterDescription;
             ConnectionType = ConnectionType.Unknown;
+
+            // Restore filter criteria from serialized values
+            _filterCriteria = new FilterCriteria
+            {
+                MinFirmware = info.GetValue<string?>("FilterMinFirmware"),
+                FormFactor = (FormFactor)info.GetValue<int>("FilterFormFactor"),
+                RequireUsb = info.GetValue<bool>("FilterRequireUsb"),
+                RequireNfc = info.GetValue<bool>("FilterRequireNfc"),
+                ConnectionType = (ConnectionType)info.GetValue<int>("FilterConnectionType"),
+                Capability = (DeviceCapabilities)info.GetValue<int>("FilterCapability"),
+                FipsCapable = (DeviceCapabilities)info.GetValue<int>("FilterFipsCapable"),
+                FipsApproved = (DeviceCapabilities)info.GetValue<int>("FilterFipsApproved"),
+                CustomFilterTypeName = info.GetValue<string?>("FilterCustomFilterTypeName")
+            }.ResolveCustomFilterType();
+
             // Don't initialize infrastructure here - it crashes during discovery
             // The Device property getter will handle lazy binding during execution
             return;
@@ -229,52 +292,22 @@ public class YubiKeyTestState : IXunitSerializable
                 "No authorized YubiKey devices available. " +
                 "Add device serial numbers to appsettings.json AllowedSerialNumbers array.");
 
-        // Parse FilterDescription to extract connection type requirement
-        var requiredConnectionType = ParseConnectionTypeFromFilter();
-        
-        // Filter devices by connection type if specified
-        IEnumerable<YubiKeyTestState> candidates = allDevices;
-        if (requiredConnectionType != ConnectionType.Unknown)
-        {
-            candidates = allDevices.Where(d => d.ConnectionType == requiredConnectionType);
-        }
-        
+        // Apply all filter criteria using the centralized FilterDevices method
+        var candidates = YubiKeyTestInfrastructure.FilterDevices(allDevices, _filterCriteria).ToList();
+
         var device = candidates.FirstOrDefault();
         if (device is null)
         {
-            var availableTypes = string.Join(", ", allDevices.Select(d => d.ConnectionType).Distinct());
+            var available = string.Join(", ", allDevices.Select(d => d.ToString()));
             throw new Xunit.SkipException(
-                $"No authorized YubiKey devices with ConnectionType={requiredConnectionType} available. " +
-                $"Available connection types: {availableTypes}");
+                $"No YubiKey matches filter criteria: {_filterCriteria.GetDescription()}. " +
+                $"Available devices: [{available}]");
         }
-        
+
         _device = device.Device;
         DeviceInfo = device.DeviceInfo;
         ConnectionType = device.ConnectionType;
         IsPlaceholder = false;
-    }
-    
-    /// <summary>
-    ///     Parses the FilterDescription to extract the required connection type.
-    /// </summary>
-    private ConnectionType ParseConnectionTypeFromFilter()
-    {
-        if (string.IsNullOrEmpty(FilterDescription))
-            return ConnectionType.Unknown;
-            
-        // FilterDescription format: "FW>=5.7.0,Conn=SmartCard" or "Conn=SmartCard"
-        var parts = FilterDescription.Split(',');
-        foreach (var part in parts)
-        {
-            if (part.StartsWith("Conn=", StringComparison.OrdinalIgnoreCase))
-            {
-                var value = part.Substring(5);
-                if (Enum.TryParse<ConnectionType>(value, ignoreCase: true, out var connType))
-                    return connType;
-            }
-        }
-        
-        return ConnectionType.Unknown;
     }
 
     /// <summary>
@@ -296,6 +329,17 @@ public class YubiKeyTestState : IXunitSerializable
             info.AddValue(nameof(SerialNumber), 0);
             info.AddValue(nameof(ConnectionType), ConnectionType.Unknown);
             info.AddValue("FilterDescription", FilterDescription);
+
+            // Serialize all filter parameters from FilterCriteria
+            info.AddValue("FilterMinFirmware", _filterCriteria.MinFirmware);
+            info.AddValue("FilterFormFactor", (int)_filterCriteria.FormFactor);
+            info.AddValue("FilterRequireUsb", _filterCriteria.RequireUsb);
+            info.AddValue("FilterRequireNfc", _filterCriteria.RequireNfc);
+            info.AddValue("FilterConnectionType", (int)_filterCriteria.ConnectionType);
+            info.AddValue("FilterCapability", (int)_filterCriteria.Capability);
+            info.AddValue("FilterFipsCapable", (int)_filterCriteria.FipsCapable);
+            info.AddValue("FilterFipsApproved", (int)_filterCriteria.FipsApproved);
+            info.AddValue("FilterCustomFilterTypeName", _filterCriteria.CustomFilterTypeName);
         }
         else
         {

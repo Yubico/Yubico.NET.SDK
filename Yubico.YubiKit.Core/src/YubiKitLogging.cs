@@ -39,6 +39,14 @@ public static class YubiKitLogging
     internal static ILogger CreateLogger(string categoryName) => LoggerFactory.CreateLogger(categoryName);
 
     /// <summary>
+    /// Configures YubiKit logging with the provided logger factory.
+    /// Call this method once at application startup before using SDK services.
+    /// </summary>
+    /// <param name="loggerFactory">The logger factory to use, or null for no logging.</param>
+    public static void Configure(ILoggerFactory? loggerFactory) =>
+        LoggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
+
+    /// <summary>
     /// Temporarily replaces the LoggerFactory. Dispose to restore. Useful for testing.
     /// </summary>
     public static IDisposable UseTemporary(ILoggerFactory factory)
@@ -58,10 +66,4 @@ public static class YubiKitLogging
             _restore = null;
         }
     }
-}
-
-public sealed class YubiKitLoggingInitializer
-{
-    public YubiKitLoggingInitializer(ILoggerFactory? loggerFactory = null) =>
-        YubiKitLogging.LoggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
 }

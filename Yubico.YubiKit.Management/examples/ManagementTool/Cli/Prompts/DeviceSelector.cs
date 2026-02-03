@@ -14,7 +14,6 @@
 
 using Spectre.Console;
 using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
@@ -68,11 +67,16 @@ public static class DeviceSelector
     /// <summary>
     /// Finds all connected YubiKeys and allows user to select one.
     /// </summary>
+    /// <param name="manager">YubiKeyManager for device enumeration.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The selected YubiKey with device info, or null if none available or user cancelled.</returns>
-    public static async Task<DeviceSelection?> SelectDeviceAsync(CancellationToken cancellationToken = default)
+    public static async Task<DeviceSelection?> SelectDeviceAsync(
+        IYubiKeyManager manager,
+        CancellationToken cancellationToken = default)
     {
-        var devices = await FindDevicesWithRetryAsync(cancellationToken);
+        ArgumentNullException.ThrowIfNull(manager);
+        
+        var devices = await FindDevicesWithRetryAsync(manager, cancellationToken);
         if (devices.Count == 0)
         {
             return null;
@@ -98,12 +102,17 @@ public static class DeviceSelector
     /// Finds all connected YubiKeys, with retry prompt if none found.
     /// Supports SmartCard, FIDO HID, and OTP HID connection types.
     /// </summary>
+    /// <param name="manager">YubiKeyManager for device enumeration.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     public static async Task<IReadOnlyList<IYubiKey>> FindDevicesWithRetryAsync(
+        IYubiKeyManager manager,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(manager);
+        
         while (!cancellationToken.IsCancellationRequested)
         {
-            var allDevices = await YubiKey.FindAllAsync(cancellationToken);
+            var allDevices = await manager.FindAllAsync(ConnectionType.All, cancellationToken);
 
             // Filter to supported connection types for Management
             var devices = allDevices
@@ -136,20 +145,13 @@ public static class DeviceSelector
     {
         try
         {
-            // For Management, prefer SmartCard connection if available
-            if (device.ConnectionType == ConnectionType.SmartCard)
-            {
-                await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-                await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
-                return await session.GetDeviceInfoAsync(cancellationToken);
-            }
-
-            // For HID connections, we need to use the appropriate interface
-            // For now, just return null for HID - device info query works best over SmartCard
-            return null;
+            // Use the IYubiKey extension method which handles all transport types
+            return await device.GetDeviceInfoAsync(cancellationToken);
         }
-        catch
+        catch (Exception ex)
         {
+            // TODO: Remove debug output once SmartCard issue is resolved
+            AnsiConsole.MarkupLine($"[grey]Debug: {device.ConnectionType} device info failed: {Markup.Escape(ex.GetType().Name)}: {Markup.Escape(ex.Message)}[/]");
             return null;
         }
     }
@@ -167,14 +169,25 @@ public static class DeviceSelector
         await AnsiConsole.Status()
             .StartAsync("Querying device information...", async ctx =>
             {
-                foreach (var device in devices)
+                var tasks = devices
+                    .Select(device => GetDeviceInfoAsync(device, cancellationToken))
+                    .ToArray();
+
+                var infos = await Task.WhenAll(tasks);
+
+                for (int i = 0; i < devices.Count; i++)
                 {
-                    var info = await GetDeviceInfoAsync(device, cancellationToken);
-                    deviceInfos.Add((device, info));
+                    deviceInfos.Add((devices[i], infos[i]));
                 }
             });
 
-        var choices = deviceInfos.Select(d => FormatDeviceChoice(d.Device, d.Info)).ToList();
+        // Create indexed choices and sort by name, keeping original index
+        var indexedChoices = deviceInfos
+            .Select((d, index) => (Choice: FormatDeviceChoice(d.Device, d.Info), OriginalIndex: index))
+            .OrderBy(x => x.Choice)
+            .ToList();
+
+        var choices = indexedChoices.Select(x => x.Choice).ToList();
         choices.Add("Cancel");
 
         var selection = AnsiConsole.Prompt(
@@ -188,8 +201,10 @@ public static class DeviceSelector
             return null;
         }
 
-        var index = choices.IndexOf(selection);
-        var selected = deviceInfos[index];
+        // Find the original index from the sorted list
+        var selectedSortedIndex = choices.IndexOf(selection);
+        var originalIndex = indexedChoices[selectedSortedIndex].OriginalIndex;
+        var selected = deviceInfos[originalIndex];
         return new DeviceSelection(
             selected.Device,
             selected.Info?.SerialNumber,
@@ -242,7 +257,6 @@ public static class DeviceSelector
             ConnectionType.SmartCard => "SmartCard",
             ConnectionType.HidFido => "FIDO HID",
             ConnectionType.HidOtp => "OTP HID",
-            ConnectionType.Hid => "HID",
             _ => "Unknown"
         };
 }

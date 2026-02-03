@@ -8,44 +8,28 @@ namespace Yubico.YubiKit.Management.UnitTests;
 public class DependencyInjectionTests
 {
     [Fact]
-    public void AddYubiKeyManager_RegistersManagementSessionFactoryDelegate()
+    public void AddYubiKeyManager_RegistersManagementSessionFactory()
     {
         var services = new ServiceCollection();
 
         services.AddYubiKeyManager();
         var provider = services.BuildServiceProvider();
 
-        var factory = provider.GetService<ManagementSessionFactoryDelegate>();
+        var factory = provider.GetService<ManagementSessionFactory>();
         Assert.NotNull(factory);
     }
 
     [Fact]
-    public void AddYubiKeyManager_RegistersSmartCardManagementSessionFactoryDelegate()
+    public void AddYubiKeyManager_RegistersFactory_AsSingleton()
     {
         var services = new ServiceCollection();
 
         services.AddYubiKeyManager();
         var provider = services.BuildServiceProvider();
 
-        var factory = provider.GetService<SmartCardManagementSessionFactoryDelegate>();
-        Assert.NotNull(factory);
-    }
-
-    [Fact]
-    public void AddYubiKeyManager_RegistersFactories_AsSingletons()
-    {
-        var services = new ServiceCollection();
-
-        services.AddYubiKeyManager();
-        var provider = services.BuildServiceProvider();
-
-        var factory1 = provider.GetRequiredService<ManagementSessionFactoryDelegate>();
-        var factory2 = provider.GetRequiredService<ManagementSessionFactoryDelegate>();
+        var factory1 = provider.GetRequiredService<ManagementSessionFactory>();
+        var factory2 = provider.GetRequiredService<ManagementSessionFactory>();
         Assert.Same(factory1, factory2);
-
-        var scFactory1 = provider.GetRequiredService<SmartCardManagementSessionFactoryDelegate>();
-        var scFactory2 = provider.GetRequiredService<SmartCardManagementSessionFactoryDelegate>();
-        Assert.Same(scFactory1, scFactory2);
     }
 
     [Fact]
@@ -68,14 +52,13 @@ public class DependencyInjectionTests
 
         var provider = services.BuildServiceProvider();
 
-        Assert.NotNull(provider.GetService<ManagementSessionFactoryDelegate>());
-        Assert.NotNull(provider.GetService<SmartCardManagementSessionFactoryDelegate>());
+        Assert.NotNull(provider.GetService<ManagementSessionFactory>());
     }
 
     [Fact]
-    public void AddYubiKeyManager_ManagementSessionFactoryDelegate_HasExpectedSignature()
+    public void AddYubiKeyManager_ManagementSessionFactory_HasExpectedSignature()
     {
-        var method = typeof(ManagementSessionFactoryDelegate).GetMethod("Invoke");
+        var method = typeof(ManagementSessionFactory).GetMethod("Invoke");
         Assert.NotNull(method);
 
         Assert.Equal(typeof(Task<ManagementSession>), method.ReturnType);
@@ -83,25 +66,6 @@ public class DependencyInjectionTests
         var parameters = method.GetParameters();
         Assert.Equal(4, parameters.Length);
         Assert.Equal(typeof(IConnection), parameters[0].ParameterType);
-        Assert.Equal(typeof(ProtocolConfiguration?), parameters[1].ParameterType);
-        Assert.Equal(typeof(ScpKeyParameters), parameters[2].ParameterType);
-        Assert.Equal(typeof(CancellationToken), parameters[3].ParameterType);
-        Assert.False(parameters[1].IsOptional);
-        Assert.True(parameters[2].IsOptional);
-        Assert.True(parameters[3].IsOptional);
-    }
-
-    [Fact]
-    public void AddYubiKeyManager_SmartCardManagementSessionFactoryDelegate_HasExpectedSignature()
-    {
-        var method = typeof(SmartCardManagementSessionFactoryDelegate).GetMethod("Invoke");
-        Assert.NotNull(method);
-
-        Assert.Equal(typeof(Task<ManagementSession>), method.ReturnType);
-
-        var parameters = method.GetParameters();
-        Assert.Equal(4, parameters.Length);
-        Assert.Equal(typeof(ISmartCardConnection), parameters[0].ParameterType);
         Assert.Equal(typeof(ProtocolConfiguration?), parameters[1].ParameterType);
         Assert.Equal(typeof(ScpKeyParameters), parameters[2].ParameterType);
         Assert.Equal(typeof(CancellationToken), parameters[3].ParameterType);

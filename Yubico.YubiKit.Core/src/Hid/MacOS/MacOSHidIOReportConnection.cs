@@ -17,9 +17,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using Yubico.YubiKit.Core.Hid.Interfaces;
-using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.PlatformInterop;
 using Yubico.YubiKit.Core.PlatformInterop.MacOS.IOKitFramework;
+using Yubico.YubiKit.Core.YubiKey;
 using CFNativeMethods = Yubico.YubiKit.Core.PlatformInterop.MacOS.CoreFoundation.NativeMethods;
 using IOKitNativeMethods = Yubico.YubiKit.Core.PlatformInterop.MacOS.IOKitFramework.NativeMethods;
 

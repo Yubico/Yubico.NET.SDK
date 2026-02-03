@@ -457,7 +457,7 @@ Configuration files must be copied to output:
     - xUnit discovers all `[YubiKeyTheory]` test methods
     - `YubiKeyTheoryDiscoverer.Discover()` is called for each test method
     - `YubiKeyTestInfrastructure.AllAuthorizedDevices` is accessed (lazy initialization)
-        - Discovers all YubiKey devices via `YubiKey.FindAllAsync()`
+        - Discovers all YubiKey devices via `TestDeviceDiscovery.FindAllAsync()`
         - **Verifies allow list** for each device (hard fail if not authorized)
         - Retrieves `DeviceInfo` for each authorized device
         - Caches devices in `YubiKeyDeviceCache`

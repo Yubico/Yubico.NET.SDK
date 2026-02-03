@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
@@ -69,67 +68,52 @@ internal static class YubiKeyTestInfrastructure
     ///     Filters devices based on test attribute criteria.
     /// </summary>
     /// <param name="devices">Devices to filter.</param>
-    /// <param name="minFirmware">Minimum firmware version string (e.g., "5.7.2").</param>
-    /// <param name="formFactor">Required form factor.</param>
-    /// <param name="requireUsb">Whether USB transport is required.</param>
-    /// <param name="requireNfc">Whether NFC transport is required.</param>
-    /// <param name="connectionType">Required connection type.</param>
-    /// <param name="capability">Required capability.</param>
-    /// <param name="fipsCapable">Required FIPS-capable capability.</param>
-    /// <param name="fipsApproved">Required FIPS-approved capability.</param>
-    /// <param name="customFilterType">Optional custom filter type implementing IYubiKeyFilter.</param>
+    /// <param name="criteria">Filter criteria to apply.</param>
     /// <returns>Filtered list of devices matching all criteria.</returns>
     public static IEnumerable<YubiKeyTestState> FilterDevices(
         IEnumerable<YubiKeyTestState> devices,
-        string? minFirmware,
-        FormFactor formFactor,
-        bool requireUsb,
-        bool requireNfc,
-        ConnectionType connectionType,
-        DeviceCapabilities capability,
-        DeviceCapabilities fipsCapable,
-        DeviceCapabilities fipsApproved,
-        Type? customFilterType = null)
+        FilterCriteria criteria)
     {
         var filtered = devices;
 
         // Filter by minimum firmware
-        if (!string.IsNullOrEmpty(minFirmware))
+        if (!string.IsNullOrEmpty(criteria.MinFirmware))
         {
-            var minFw = FirmwareVersion.FromString(minFirmware);
+            var minFw = FirmwareVersion.FromString(criteria.MinFirmware);
             if (minFw is not null)
                 filtered = filtered.Where(d => d.FirmwareVersion >= minFw);
         }
 
         // Filter by form factor
-        if (formFactor != FormFactor.Unknown)
-            filtered = filtered.Where(d => d.FormFactor == formFactor);
+        if (criteria.FormFactor != FormFactor.Unknown)
+            filtered = filtered.Where(d => d.FormFactor == criteria.FormFactor);
 
         // Filter by USB transport
-        if (requireUsb)
+        if (criteria.RequireUsb)
             filtered = filtered.Where(d => d.IsUsbTransport);
 
         // Filter by NFC transport
-        if (requireNfc)
+        if (criteria.RequireNfc)
             filtered = filtered.Where(d => d.IsNfcTransport);
 
         // Filter by connection type
-        if (connectionType != ConnectionType.Unknown)
-            filtered = filtered.Where(d => d.ConnectionType == connectionType);
+        if (criteria.ConnectionType != ConnectionType.Unknown)
+            filtered = filtered.Where(d => d.ConnectionType == criteria.ConnectionType);
 
         // Filter by capability
-        if (capability != DeviceCapabilities.None)
-            filtered = filtered.Where(d => d.HasCapability(capability));
+        if (criteria.Capability != DeviceCapabilities.None)
+            filtered = filtered.Where(d => d.HasCapability(criteria.Capability));
 
         // Filter by FIPS-capable
-        if (fipsCapable != DeviceCapabilities.None)
-            filtered = filtered.Where(d => d.IsFipsCapable(fipsCapable));
+        if (criteria.FipsCapable != DeviceCapabilities.None)
+            filtered = filtered.Where(d => d.IsFipsCapable(criteria.FipsCapable));
 
         // Filter by FIPS-approved
-        if (fipsApproved != DeviceCapabilities.None)
-            filtered = filtered.Where(d => d.IsFipsApproved(fipsApproved));
+        if (criteria.FipsApproved != DeviceCapabilities.None)
+            filtered = filtered.Where(d => d.IsFipsApproved(criteria.FipsApproved));
 
         // Apply custom filter if provided
+        var customFilterType = criteria.CustomFilterType;
         if (customFilterType is not null)
         {
             var filter = InstantiateCustomFilter(customFilterType);
@@ -141,63 +125,11 @@ internal static class YubiKeyTestInfrastructure
     }
 
     /// <summary>
-    ///     Gets a human-readable description of filter criteria for diagnostic output.
-    /// </summary>
-    public static string GetFilterCriteriaDescription(
-        string? minFirmware,
-        FormFactor formFactor,
-        bool requireUsb,
-        bool requireNfc,
-        ConnectionType connectionType,
-        DeviceCapabilities capability,
-        DeviceCapabilities fipsCapable,
-        DeviceCapabilities fipsApproved,
-        Type? customFilterType = null)
-    {
-        var criteria = new List<string>();
-
-        if (minFirmware is not null)
-            criteria.Add($"MinFirmware >= {minFirmware}");
-
-        if (formFactor != FormFactor.Unknown)
-            criteria.Add($"FormFactor = {formFactor}");
-
-        if (requireUsb)
-            criteria.Add("Transport = USB");
-
-        if (requireNfc)
-            criteria.Add("Transport = NFC");
-
-        if (connectionType != ConnectionType.Unknown)
-            criteria.Add($"ConnectionType = {connectionType}");
-
-        if (capability != DeviceCapabilities.None)
-            criteria.Add($"Capability = {capability}");
-
-        if (fipsCapable != DeviceCapabilities.None)
-            criteria.Add($"FipsCapable = {fipsCapable}");
-
-        if (fipsApproved != DeviceCapabilities.None)
-            criteria.Add($"FipsApproved = {fipsApproved}");
-
-        if (customFilterType is not null)
-        {
-            var filter = InstantiateCustomFilter(customFilterType);
-            if (filter is not null)
-                criteria.Add($"CustomFilter = {filter.GetDescription()}");
-            else
-                criteria.Add($"CustomFilter = {customFilterType.Name} (failed to instantiate)");
-        }
-
-        return criteria.Count > 0 ? string.Join(", ", criteria) : "None (all devices)";
-    }
-
-    /// <summary>
     ///     Instantiates a custom filter from the specified type.
     /// </summary>
     /// <param name="filterType">The type implementing IYubiKeyFilter.</param>
     /// <returns>An instance of the filter, or null if instantiation fails.</returns>
-    private static IYubiKeyFilter? InstantiateCustomFilter(Type filterType)
+    internal static IYubiKeyFilter? InstantiateCustomFilter(Type filterType)
     {
         try
         {
@@ -221,8 +153,7 @@ internal static class YubiKeyTestInfrastructure
             }
 
             // Instantiate the filter
-            var filter = Activator.CreateInstance(filterType) as IYubiKeyFilter;
-            if (filter is null)
+            if (Activator.CreateInstance(filterType) is not IYubiKeyFilter filter)
             {
                 Console.Error.WriteLine(
                     $"[YubiKey Infrastructure] ERROR: Failed to instantiate custom filter '{filterType.FullName}'");
@@ -260,7 +191,7 @@ internal static class YubiKeyTestInfrastructure
         try
         {
             // Discover all devices
-            var allDevices = YubiKey.FindAllAsync().GetAwaiter().GetResult();
+            var allDevices = TestDeviceDiscovery.FindAllAsync().GetAwaiter().GetResult();
             Console.WriteLine($"[YubiKey Infrastructure] Found {allDevices.Count} device(s)");
 
             if (allDevices.Count == 0)
@@ -305,7 +236,7 @@ internal static class YubiKeyTestInfrastructure
                         Console.WriteLine("[YubiKey Infrastructure] Device with unknown serial FILTERED");
                     }
                 }
-                catch (Exception ex) when (ex is SCardException scardException)
+                catch (SCardException scardException)
                 {
                     filteredCount++;
                     Console.WriteLine(

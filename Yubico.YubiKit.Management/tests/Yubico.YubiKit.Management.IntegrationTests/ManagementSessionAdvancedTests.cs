@@ -13,9 +13,8 @@
 // limitations under the License.
 
 using System.Diagnostics;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 

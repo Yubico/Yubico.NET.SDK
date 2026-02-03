@@ -12,17 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Management.Examples.ManagementTool.ManagementExamples.Results;
+namespace Yubico.YubiKit.Management.Examples.ManagementTool.Features.Results;
 
 /// <summary>
-/// Result of a device reset operation.
+/// Result of a device configuration operation.
 /// </summary>
-public sealed record ResetResult
+public sealed record ConfigResult
 {
     /// <summary>
-    /// Gets whether the reset operation succeeded.
+    /// Gets whether the configuration operation succeeded.
     /// </summary>
     public bool Success { get; init; }
+
+    /// <summary>
+    /// Gets whether the device needs to be rebooted for changes to take effect.
+    /// </summary>
+    public bool RebootRequired { get; init; }
 
     /// <summary>
     /// Gets the error message when the operation failed.
@@ -30,14 +35,15 @@ public sealed record ResetResult
     public string? ErrorMessage { get; init; }
 
     /// <summary>
-    /// Creates a successful reset result.
+    /// Creates a successful configuration result.
     /// </summary>
-    public static ResetResult Succeeded() =>
-        new() { Success = true };
+    /// <param name="rebootRequired">Whether the device requires a reboot.</param>
+    public static ConfigResult Succeeded(bool rebootRequired = false) =>
+        new() { Success = true, RebootRequired = rebootRequired };
 
     /// <summary>
-    /// Creates a failed reset result.
+    /// Creates a failed configuration result.
     /// </summary>
-    public static ResetResult Failed(string error) =>
+    public static ConfigResult Failed(string error) =>
         new() { Success = false, ErrorMessage = error };
 }

@@ -14,23 +14,22 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;
 
-// Delegates for DI-friendly session creation
-public delegate Task<ManagementSession> ManagementSessionFactoryDelegate(
+/// <summary>
+///     Factory delegate for creating <see cref="ManagementSession" /> instances.
+/// </summary>
+/// <param name="connection">The connection to use (SmartCard, FIDO HID, or OTP HID).</param>
+/// <param name="configuration">Optional protocol configuration.</param>
+/// <param name="scpKeyParameters">Optional SCP key parameters for secure channel (SmartCard only).</param>
+/// <param name="cancellationToken">Cancellation token.</param>
+/// <returns>A configured ManagementSession.</returns>
+public delegate Task<ManagementSession> ManagementSessionFactory(
     IConnection connection,
-    ProtocolConfiguration? configuration,
-    ScpKeyParameters? scpKeyParameters = null,
-    CancellationToken cancellationToken = default);
-
-public delegate Task<ManagementSession> SmartCardManagementSessionFactoryDelegate(
-    ISmartCardConnection connection,
     ProtocolConfiguration? configuration,
     ScpKeyParameters? scpKeyParameters = null,
     CancellationToken cancellationToken = default);
@@ -39,12 +38,23 @@ public static class DependencyInjection
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddYubiKeyManager(Action<YubiKeyManagerOptions>? configureOptions = null)
+        /// <summary>
+        ///     Registers Management services including the <see cref="ManagementSessionFactory" />.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         This method registers the <see cref="ManagementSessionFactory" /> delegate
+        ///         for creating Management sessions via dependency injection.
+        ///     </para>
+        ///     <para>
+        ///         <b>Prerequisite:</b> Call <c>AddYubiKeyManagerCore()</c> before this method
+        ///         to register core YubiKey services.
+        ///     </para>
+        /// </remarks>
+        /// <returns>The service collection for chaining.</returns>
+        public IServiceCollection AddYubiKeyManager()
         {
-            services.TryAddSingleton<ManagementSessionFactoryDelegate>(
-                ManagementSession.CreateAsync);
-
-            services.TryAddSingleton<SmartCardManagementSessionFactoryDelegate>(
+            services.TryAddSingleton<ManagementSessionFactory>(
                 ManagementSession.CreateAsync);
 
             return services;

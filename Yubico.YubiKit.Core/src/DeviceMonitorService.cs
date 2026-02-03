@@ -34,13 +34,35 @@ public sealed class DeviceMonitorService(
     private readonly YubiKeyManagerOptions _options = options.Value;
     private bool _disposed;
 
+    /// <summary>
+    /// Indicates whether the monitor service has been started.
+    /// Used by DeviceRepositoryCached to validate DeviceChanges access.
+    /// </summary>
+    internal static bool IsStarted { get; private set; }
+
     public override Task StartAsync(CancellationToken cancellationToken)
     {
-        if (_options.EnableAutoDiscovery)
-            return base.StartAsync(cancellationToken);
+        if (!_options.EnableAutoDiscovery)
+        {
+            logger.LogInformation("YubiKey device auto-discovery is disabled. Device monitor will not start.");
+            return Task.CompletedTask;
+        }
+        
+        IsStarted = true;
+        return base.StartAsync(cancellationToken);
+    }
 
-        logger.LogInformation("YubiKey device auto-discovery is disabled. Device monitor will not start.");
-        return Task.CompletedTask;
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("YubiKey device monitor stopping...");
+
+        // Complete the channel BEFORE stopping ExecuteAsync
+        // This allows DeviceListenerService to exit its await foreach loop
+        deviceChannel.Complete();
+
+        await base.StopAsync(cancellationToken).ConfigureAwait(false);
+        IsStarted = false;
+        logger.LogInformation("YubiKey device monitor stopped");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -51,8 +73,8 @@ public sealed class DeviceMonitorService(
             logger.LogInformation("Performing initial device scan...");
 
             await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
+            
             using var timer = new PeriodicTimer(_options.ScanInterval);
-
             while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
                 await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
         }
@@ -64,8 +86,6 @@ public sealed class DeviceMonitorService(
         {
             logger.LogError(ex, "Device monitoring failed");
         }
-
-        logger.LogInformation("YubiKey device monitor stopped");
     }
 
     private async Task PerformDeviceScan(CancellationToken cancellationToken)
@@ -98,7 +118,7 @@ public sealed class DeviceMonitorService(
     {
         var devices = await findPcscService.FindAllAsync(cancellationToken).ConfigureAwait(false);
         var yubiKeys = devices.Select(yubiKeyFactory.Create).ToList();
-        logger.LogInformation("PCSC scan completed, found {DeviceCount} devices", devices.Count);
+        logger.LogDebug("PCSC scan completed, found {DeviceCount} devices", devices.Count);
         return yubiKeys;
     }
 
@@ -106,7 +126,7 @@ public sealed class DeviceMonitorService(
     {
         var devices = await findHidService.FindAllAsync(cancellationToken).ConfigureAwait(false);
         var yubiKeys = devices.Select(yubiKeyFactory.Create).ToList();
-        logger.LogInformation("HID scan completed, found {DeviceCount} devices", devices.Count);
+        logger.LogDebug("HID scan completed, found {DeviceCount} devices", devices.Count);
         return yubiKeys;
     }
 
@@ -114,7 +134,6 @@ public sealed class DeviceMonitorService(
     {
         if (_disposed) return;
 
-        deviceChannel.Complete();
         base.Dispose();
 
         _disposed = true;

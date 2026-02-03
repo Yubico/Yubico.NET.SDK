@@ -31,11 +31,4 @@ public interface IAllowListProvider
     /// </summary>
     /// <returns>Error message with instructions for configuring the allow list.</returns>
     string OnInvalidInputErrorMessage();
-
-    /// <summary>
-    ///     Gets the error message to display when a device's serial number is not in the allow list.
-    /// </summary>
-    /// <param name="serialNumber">The serial number of the device that was rejected.</param>
-    /// <returns>Error message explaining why the device was rejected.</returns>
-    string OnNotAllowedErrorMessage(int serialNumber);
 }

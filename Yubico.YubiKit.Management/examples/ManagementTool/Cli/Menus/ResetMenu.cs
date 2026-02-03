@@ -2,10 +2,10 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
-using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Output;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
-using Yubico.YubiKit.Management.Examples.ManagementTool.ManagementExamples;
+using Yubico.YubiKit.Management.Examples.ManagementTool.Features;
 
 namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 
@@ -14,11 +14,13 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 /// </summary>
 public static class ResetMenu
 {
-    public static async Task RunAsync(CancellationToken cancellationToken = default)
+    public static async Task RunAsync(IYubiKeyManager manager, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(manager);
+        
         OutputHelpers.WriteHeader("Factory Reset");
 
-        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        var selection = await DeviceSelector.SelectDeviceAsync(manager, cancellationToken);
         if (selection is null)
         {
             return;
@@ -26,8 +28,7 @@ public static class ResetMenu
 
         OutputHelpers.WriteActiveDevice(selection.DisplayName);
 
-        await using var connection = await selection.Device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-        await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
+        await using var session = await selection.Device.CreateManagementSessionAsync(cancellationToken: cancellationToken);
 
         var infoResult = await DeviceInfoQuery.GetDeviceInfoAsync(session, cancellationToken);
         if (!infoResult.Success || !infoResult.DeviceInfo.HasValue)

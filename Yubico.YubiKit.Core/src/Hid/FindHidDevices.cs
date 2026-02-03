@@ -35,7 +35,7 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
 
     private IReadOnlyList<IHidDevice> FindAll()
     {
-        logger.LogInformation("Getting list of HID devices");
+        logger.LogDebug("Getting list of HID devices");
 
         var allDevices = GetPlatformDevices();
 
@@ -43,7 +43,7 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
             .Where(d => d.DescriptorInfo.VendorId == YubicoVendorId)
             .ToList();
 
-        logger.LogInformation("Found {Count} Yubico HID devices", yubicoDevices.Count);
+        logger.LogDebug("Found {Count} Yubico HID devices", yubicoDevices.Count);
 
         return yubicoDevices;
     }

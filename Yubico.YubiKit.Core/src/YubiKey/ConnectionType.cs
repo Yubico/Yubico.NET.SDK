@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Interfaces;
+namespace Yubico.YubiKit.Core.YubiKey;
 
+[Flags]
 public enum ConnectionType
 {
     Unknown,
@@ -21,5 +22,5 @@ public enum ConnectionType
     HidFido,
     HidOtp,
     SmartCard,
-    All
+    All = Hid | HidFido | HidOtp | SmartCard
 }

@@ -1,9 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Hid.Fido;
-using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management.IntegrationTests;
 
@@ -92,7 +92,7 @@ public class
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
         var device = devices.First();
-        var sessionFactory = ServiceProvider.GetRequiredService<ManagementSessionFactoryDelegate>();
+        var sessionFactory = ServiceProvider.GetRequiredService<ManagementSessionFactory>();
 
         await using var connection = await device.ConnectAsync<ISmartCardConnection>();
         await using var mgmtSession = await sessionFactory(connection, configuration: null);

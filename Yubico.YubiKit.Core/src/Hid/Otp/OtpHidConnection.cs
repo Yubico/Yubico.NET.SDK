@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Hid.Interfaces;
-using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.Hid.Otp;
 

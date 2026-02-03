@@ -31,9 +31,9 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 ///         lead to data loss or device misconfiguration.
 ///     </para>
 /// </remarks>
-public class AllowList
+public sealed class AllowList
 {
-    private readonly IReadOnlyList<int> _allowedSerials;
+    private readonly HashSet<int> _allowedSerials;
 
     /// <summary>
     ///     Initializes a new instance of <see cref="AllowList" /> with the specified provider.
@@ -48,7 +48,8 @@ public class AllowList
     {
         ArgumentNullException.ThrowIfNull(provider);
 
-        _allowedSerials = provider.GetList();
+        var serialList = provider.GetList();
+        _allowedSerials = [..serialList];
 
         if (_allowedSerials.Count == 0)
         {

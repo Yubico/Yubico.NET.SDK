@@ -8,10 +8,7 @@ var builder = WebApplication.CreateSlimBuilder(args);
 AddJsonOptions(builder);
 
 // Register YubiKey services with DI
-builder.Services.AddYubiKeyManager(options =>
-{
-    options.EnableAutoDiscovery = true;
-});
+builder.Services.AddYubiKeyManager();
 
 // Register controllers for the DiTestController
 builder.Services.AddControllers();

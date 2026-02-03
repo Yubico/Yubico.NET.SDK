@@ -10,11 +10,8 @@ public interface IYubiKeyManager
         CancellationToken cancellationToken = default);
 }
 
-public class YubiKeyManager(IDeviceRepository? deviceRepository = null, YubiKitLoggingInitializer? _ = null) : IYubiKeyManager
+public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManager
 {
-    private readonly YubiKitLoggingInitializer? _loggingInitializer = _; // TODO what?
-
-
     public Task<IReadOnlyList<IYubiKey>> FindAllAsync(
         ConnectionType type = ConnectionType.All,
         CancellationToken cancellationToken = default)

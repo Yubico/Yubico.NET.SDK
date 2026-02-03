@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Core;
@@ -21,7 +23,12 @@ public class YubiKeyManagerTests
     [Fact]
     public async Task FindAllAsync_HasAtLeastOneDevice()
     {
-        var manager = new YubiKeyManager();
+        // Use DI to get a properly configured manager
+        using var host = Host.CreateDefaultBuilder()
+            .ConfigureServices(services => services.AddYubiKeyManagerCore())
+            .Build();
+            
+        var manager = host.Services.GetRequiredService<IYubiKeyManager>();
         var devices = await manager.FindAllAsync();
         Assert.NotEmpty(devices);
     }

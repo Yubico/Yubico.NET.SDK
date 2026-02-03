@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.Helpers;
 

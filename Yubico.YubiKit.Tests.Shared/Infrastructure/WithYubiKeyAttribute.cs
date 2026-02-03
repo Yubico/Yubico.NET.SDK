@@ -13,9 +13,8 @@
 // limitations under the License.
 
 using System.Reflection;
-using Xunit;
 using Xunit.Sdk;
-using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -146,57 +145,30 @@ public class WithYubiKeyAttribute : DataAttribute
     ///         We cannot reliably distinguish between them.
     ///     </para>
     ///     <para>
-    ///         Strategy: Always return placeholders with filter descriptions.
+    ///         Strategy: Always return placeholders with filter parameters.
     ///         The placeholder's Device property uses lazy binding - when the test
-    ///         actually accesses Device during execution, it initializes the infrastructure
-    ///         and binds to a real YubiKey.
+    ///         actually accesses Device during execution, it initializes the infrastructure,
+    ///         applies all filter criteria via <see cref="YubiKeyTestInfrastructure.FilterDevices"/>,
+    ///         and binds to a matching YubiKey.
     ///     </para>
     /// </remarks>
     public override IEnumerable<object[]>
         GetData(MethodInfo testMethod)
     {
-        // Always return a placeholder - device binding happens lazily during execution
-        // Create a unique placeholder for each attribute to avoid duplicate test IDs
-        // when multiple [WithYubiKey] attributes are applied to the same test method
-        var filterDescription = BuildFilterDescription();
-        yield return [YubiKeyTestState.CreatePlaceholder(filterDescription)];
-    }
-
-    /// <summary>
-    ///     Builds a description of the filter criteria for this attribute.
-    ///     Used to create unique placeholders when multiple attributes are applied.
-    /// </summary>
-    private string BuildFilterDescription()
-    {
-        var parts = new List<string>();
-
-        if (!string.IsNullOrEmpty(MinFirmware))
-            parts.Add($"FW>={MinFirmware}");
-
-        if (FormFactor != FormFactor.Unknown)
-            parts.Add($"FF={FormFactor}");
-
-        if (RequireUsb)
-            parts.Add("USB");
-
-        if (RequireNfc)
-            parts.Add("NFC");
-
-        if (ConnectionType != ConnectionType.Unknown)
-            parts.Add($"Conn={ConnectionType}");
-
-        if (Capability != DeviceCapabilities.None)
-            parts.Add($"Cap={Capability}");
-
-        if (FipsCapable != DeviceCapabilities.None)
-            parts.Add($"FipsCap={FipsCapable}");
-
-        if (FipsApproved != DeviceCapabilities.None)
-            parts.Add($"FipsAppr={FipsApproved}");
-
-        if (CustomFilter is not null)
-            parts.Add($"Filter={CustomFilter.Name}");
-
-        return parts.Count > 0 ? string.Join(",", parts) : "All";
+        // Always return a placeholder with full filter parameters
+        // Device binding and filtering happens lazily during test execution
+        var criteria = new FilterCriteria
+        {
+            MinFirmware = MinFirmware,
+            FormFactor = FormFactor,
+            RequireUsb = RequireUsb,
+            RequireNfc = RequireNfc,
+            ConnectionType = ConnectionType,
+            Capability = Capability,
+            FipsCapable = FipsCapable,
+            FipsApproved = FipsApproved,
+            CustomFilterType = CustomFilter
+        };
+        yield return [YubiKeyTestState.CreateFilteredPlaceholder(criteria)];
     }
 }

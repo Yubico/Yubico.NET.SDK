@@ -30,6 +30,12 @@ namespace Yubico.YubiKit.Tests.Shared;
 ///         for use with xUnit Theory tests via <see cref="Yubico.YubiKit.Tests.Shared.Infrastructure" />.
 ///     </para>
 ///     <para>
+///         <strong>Discovery vs Execution Phases:</strong>
+///         During test <em>discovery</em> (e.g., when the test explorer lists tests), placeholder instances
+///         are returned to avoid connecting to hardware. During test <em>execution</em>, placeholders are
+///         bound to real devices via <see cref="BindToRealDevice"/> based on stored filter criteria.
+///     </para>
+///     <para>
 ///         The <see cref="ToString" /> method provides a friendly display name for test output:
 ///         <c>YubiKey(SN:12345678,FW:5.7.2,UsbAKeychain)</c>
 ///     </para>

@@ -68,20 +68,6 @@ internal static class YubiKeyTestInfrastructure
     ///     Filters devices based on test attribute criteria.
     /// </summary>
     /// <param name="devices">Devices to filter.</param>
-    /// <param name="minFirmware">Minimum firmware version string (e.g., "5.7.2").</param>
-    /// <param name="formFactor">Required form factor.</param>
-    /// <param name="requireUsb">Whether USB transport is required.</param>
-    /// <param name="requireNfc">Whether NFC transport is required.</param>
-    /// <param name="connectionType">Required connection type.</param>
-    /// <param name="capability">Required capability.</param>
-    /// <param name="fipsCapable">Required FIPS-capable capability.</param>
-    /// <param name="fipsApproved">Required FIPS-approved capability.</param>
-    /// <param name="customFilterType">Optional custom filter type implementing IYubiKeyFilter.</param>
-    /// <returns>Filtered list of devices matching all criteria.</returns>
-    /// <summary>
-    ///     Filters devices based on test attribute criteria.
-    /// </summary>
-    /// <param name="devices">Devices to filter.</param>
     /// <param name="criteria">Filter criteria to apply.</param>
     /// <returns>Filtered list of devices matching all criteria.</returns>
     public static IEnumerable<YubiKeyTestState> FilterDevices(

@@ -1,6 +1,6 @@
 # CLAUDE.md - Tests.Shared Module
 
-This file provides AI agent guidance for working with the YubiKit Integration Test Infrastructure.  
+This file provides AI agent guidance for working with the YubiKit Integration Test Infrastructure.
 **Read [README.md](README.md) first** for comprehensive user documentation.
 
 ## Module Context
@@ -12,7 +12,7 @@ Tests.Shared provides the foundation for all YubiKit integration tests. It imple
 - **Extension methods** - Fluent API for session management across applications
 
 **Key Implementation Files:**
-- `Infrastructure/WithYubiKeyAttribute.cs` - xUnit attribute with device filtering
+- `Infrastructure/WithYubiKeyAttribute.cs` - xUnit DataAttribute for device-parameterized tests
 - `Infrastructure/YubiKeyTestInfrastructure.cs` - Device discovery and caching
 - `Infrastructure/AllowList.cs` - Security layer preventing unauthorized testing
 - `YubiKeyTestState.cs` - Device wrapper implementing `IXunitSerializable`
@@ -20,113 +20,85 @@ Tests.Shared provides the foundation for all YubiKit integration tests. It imple
 
 ## Critical Design Patterns
 
-### 1. xUnit Discovery Integration
+### 1. xUnit DataAttribute Integration
 
-The `[WithYubiKey]` attribute implements `ITraitAttribute` and `ITestCaseOrderer` to integrate with xUnit's discovery phase:
+The `[WithYubiKey]` attribute extends `DataAttribute` to provide test data for `[Theory]` tests:
 
 ```csharp
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-public sealed class WithYubiKeyAttribute : Attribute, ITraitAttribute, ITestCaseOrderer
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+public class WithYubiKeyAttribute : DataAttribute
 {
     // Filter properties
     public string? MinFirmware { get; init; }
-    public FormFactor? FormFactor { get; init; }
+    public FormFactor FormFactor { get; init; }
     // ... more filters
     
-    // xUnit integration
-    public IEnumerable<IXunitTestCase> OrderTestCases<TTestCase>(
-        IEnumerable<TTestCase> testCases) where TTestCase : IXunitTestCase
+    // DataAttribute implementation
+    public override IEnumerable<object[]> GetData(MethodInfo testMethod)
     {
-        // Device filtering happens HERE during test discovery
-        // Creates one test case per matching device
+        // During discovery: returns a single placeholder
+        // During execution: placeholder binds to real device via FilterCriteria
+        var criteria = new FilterCriteria { /* from properties */ };
+        yield return [YubiKeyTestState.CreateFilteredPlaceholder(criteria)];
     }
 }
 ```
 
-**Why this pattern:**
-- Filtering happens at discovery time, not runtime
-- Each matching device generates a separate test case
-- xUnit naturally parallelizes across test cases
-- Test names include device serial number for clarity
+**Why DataAttribute:**
+- Works with standard xUnit `[Theory]` tests
+- Placeholders avoid device access during test discovery
+- Filter criteria serialized with placeholder, resolved at execution time
+- Multiple `[WithYubiKey]` attributes create multiple test cases
 
-### 2. Static Device Cache
+### 2. Discovery vs Execution Phases
+
+**Discovery phase** (when test explorer enumerates tests):
+- `WithYubiKeyAttribute.GetData()` returns a placeholder `YubiKeyTestState`
+- Placeholder contains serialized `FilterCriteria`
+- NO device access occurs
+
+**Execution phase** (when tests actually run):
+- Test receives placeholder `YubiKeyTestState`
+- Accessing `Device` property triggers `BindToRealDevice()`
+- `YubiKeyTestInfrastructure.FilterDevices()` finds matching device
+- Placeholder is replaced with real device state
+
+### 3. Lazy Static Device Cache
 
 ```csharp
 public static class YubiKeyTestInfrastructure
 {
-    public static IReadOnlyList<YubiKeyTestState> AllAuthorizedDevices { get; } =
-        InitializeDevicesAsync().GetAwaiter().GetResult();
-        
+    private static readonly Lazy<IReadOnlyList<YubiKeyTestState>> LazyAuthorizedDevices =
+        new(() => InitializeDevicesAsync().GetAwaiter().GetResult());
+
+    public static IReadOnlyList<YubiKeyTestState> AllAuthorizedDevices => LazyAuthorizedDevices.Value;
+
     private static async Task<IReadOnlyList<YubiKeyTestState>> InitializeDevicesAsync()
     {
         // 1. Discover all YubiKeys
         var devices = await TestDeviceDiscovery.FindAllAsync();
-        
-        // 2. Load allow list
-        var allowList = await AllowList.LoadAsync();
-        
-        // 3. Verify each device (hard fail if not authorized)
-        var authorized = new List<YubiKeyTestState>();
+
+        // 2. Load allow list via provider
+        var provider = new AppSettingsAllowListProvider();
+        var allowList = new AllowList(provider);
+
+        // 3. Filter to authorized devices only
         foreach (var device in devices)
         {
-            allowList.VerifyOrExit(device.SerialNumber);
-            var state = await YubiKeyTestState.FromDeviceAsync(device);
-            authorized.Add(state);
+            if (allowList.IsDeviceAllowed(device.SerialNumber))
+                authorizedDevices.Add(/* ... */);
         }
-        
-        return authorized;
+
+        return authorizedDevices;
     }
 }
 ```
 
-**Why static initialization:**
+**Why Lazy<> pattern:**
 - Device discovery is expensive (~500ms per device)
-- Allow list verification must happen before ANY test runs
+- Initialization happens only when first test accesses devices
 - CLR guarantees thread-safe initialization
-- Fail-fast if unauthorized devices detected
-
-**Tradeoff:**
-- ✅ Fast test execution (discover once, use many times)
-- ✅ Consistent state across all tests
-- ❌ Devices plugged in after discovery won't be found
-- ❌ Must restart test runner to discover new devices
-
-### 3. Extension Method Pattern
-
-```csharp
-public static class YubiKeyTestStateExtensions
-{
-    public static async Task WithManagementAsync(
-        this YubiKeyTestState state,
-        Func<ManagementSession, DeviceInfo, Task> action,
-        ScpKeyParameters? scpKeyParams = null,
-        CancellationToken cancellationToken = default)
-    {
-        // 1. Create connection
-        await using var connection = await state.Device.OpenConnectionAsync<ISmartCardConnection>(cancellationToken);
-        
-        // 2. Create session with optional SCP
-        await using var session = await ManagementSession.CreateAsync(
-            connection,
-            scpKeyParams: scpKeyParams,
-            cancellationToken: cancellationToken);
-        
-        // 3. Get cached device info
-        var deviceInfo = state.DeviceInfo;
-        
-        // 4. Invoke test action
-        await action(session, deviceInfo);
-        
-        // 5. Automatic disposal via using statements
-    }
-}
-```
-
-**Why extension methods:**
-- Composition over inheritance (no test base classes)
-- Application-agnostic `YubiKeyTestState`
-- Easy to add new applications (`WithPivAsync`, `WithOathAsync`, etc.)
-- Clear resource management (using statements)
+- `GetAwaiter().GetResult()` bridges async initialization to static context
 
 ### 4. Allow List Security Layer
 
@@ -134,50 +106,68 @@ public static class YubiKeyTestStateExtensions
 public sealed class AllowList
 {
     private readonly HashSet<int> _allowedSerials;
-    
-    public void VerifyOrExit(int? serialNumber)
+
+    public AllowList(IAllowListProvider provider, ILogger<AllowList>? logger = null)
     {
-        if (serialNumber is null)
+        _allowedSerials = [..provider.GetList()];
+
+        if (_allowedSerials.Count == 0)
         {
-            PrintError("Cannot read device serial number");
-            Environment.Exit(-1);
-        }
-        
-        if (!_allowedSerials.Contains(serialNumber.Value))
-        {
-            PrintError($"Device {serialNumber} not in allow list");
-            Environment.Exit(-1);
+            Console.Error.WriteLine(provider.OnInvalidInputErrorMessage());
+            Environment.Exit(-1); // Hard fail - cannot continue without allow list
         }
     }
+
+    public bool IsDeviceAllowed(int? serialNumber) =>
+        serialNumber is not null && _allowedSerials.Contains(serialNumber.Value);
 }
 ```
 
+**Why IAllowListProvider abstraction:**
+- Allows testing AllowList without actual config files
+- Production uses `AppSettingsAllowListProvider` (reads from appsettings.json)
+- Tests can inject mock providers
+
 **Why Environment.Exit:**
-- Cannot throw exceptions during static initialization
 - Must prevent ANY test from running on unauthorized devices
 - Clear, loud failure that cannot be caught
 - Forces developer to explicitly authorize devices
 
-**Tradeoff:**
-- ✅ Maximum security - impossible to bypass
-- ✅ Fail-fast - no tests run on wrong devices
-- ❌ Abrupt termination - no cleanup
-- ❌ Harder to test the infrastructure itself
+### 5. FilterCriteria and Serialization
+
+`FilterCriteria` stores all filtering parameters and handles xUnit serialization:
+
+```csharp
+public record FilterCriteria
+{
+    // Standard properties that serialize directly
+    public string? MinFirmware { get; init; }
+    public FormFactor FormFactor { get; init; }
+    // ...
+
+    // Type cannot be serialized, so we store the assembly-qualified name
+    public Type? CustomFilterType { get; init; }
+    public string? CustomFilterTypeName { get; init; }
+
+    // Before serialization: convert Type to string
+    public FilterCriteria PrepareForSerialization() =>
+        this with { CustomFilterTypeName = CustomFilterType?.AssemblyQualifiedName };
+
+    // After deserialization: resolve string back to Type
+    public FilterCriteria ResolveCustomFilterType() =>
+        this with { CustomFilterType = Type.GetType(CustomFilterTypeName!) };
+}
+```
 
 ## Testing the Test Infrastructure
 
-**Problem:** How to test code that calls `Environment.Exit(-1)`?
+**Problem:** How to test code that may call `Environment.Exit(-1)`?
 
-**Solution:** Abstraction for testability:
+**Solution:** Provider abstraction for testability:
 
 ```csharp
 // Production
-public interface IAllowListProvider
-{
-    Task<HashSet<int>> GetAllowedSerialsAsync();
-}
-
-public class AppSettingsAllowListProvider : IAllowListProvider
+public sealed class AppSettingsAllowListProvider : IAllowListProvider
 {
     // Reads from appsettings.json
 }
@@ -185,23 +175,12 @@ public class AppSettingsAllowListProvider : IAllowListProvider
 // Tests
 public class FakeAllowListProvider : IAllowListProvider
 {
-    private readonly HashSet<int> _serials;
-    
-    public FakeAllowListProvider(params int[] serials)
-    {
-        _serials = new HashSet<int>(serials);
-    }
-    
-    public Task<HashSet<int>> GetAllowedSerialsAsync() =>
-        Task.FromResult(_serials);
+    private readonly List<int> _serials;
+
+    public IReadOnlyList<int> GetList() => _serials;
+    public string OnInvalidInputErrorMessage() => "Test error";
 }
 ```
-
-**When testing infrastructure:**
-- Mock `IAllowListProvider` to avoid `Environment.Exit`
-- Use `FakeYubiKey` implementations for device simulation
-- Test filter logic separately from device discovery
-- Never commit real serial numbers in test code
 
 ## Common Implementation Patterns
 
@@ -216,121 +195,35 @@ public static async Task WithOathAsync(
     this YubiKeyTestState state,
     Func<OathSession, DeviceInfo, Task> action,
     ScpKeyParameters? scpKeyParams = null,
-    bool resetBeforeUse = false,
     CancellationToken cancellationToken = default)
 {
     await using var connection = await state.Device.OpenConnectionAsync<ISmartCardConnection>(cancellationToken);
-    
-    if (resetBeforeUse)
-    {
-        // Reset OATH app to factory defaults
-        await using var resetSession = await OathSession.CreateAsync(connection);
-        await resetSession.ResetAsync(cancellationToken);
-        
-        // Reconnect after reset
-        connection = await state.Device.OpenConnectionAsync<ISmartCardConnection>(cancellationToken);
-    }
-    
+
     await using var session = await OathSession.CreateAsync(
         connection,
         scpKeyParams: scpKeyParams,
         cancellationToken: cancellationToken);
-    
+
     await action(session, state.DeviceInfo);
 }
 ```
 
-2. **Follow established patterns:**
-- `ScpKeyParameters?` parameter for optional SCP
-- `resetBeforeUse` for applications that support reset
-- `CancellationToken` for async cancellation
-- Automatic disposal via `await using`
-- Pass both session AND cached device info to action
-
-3. **Document in README.md:**
-- Add example under "Extension Methods" section
-- Include common usage patterns
-- Document reset behavior if applicable
-
 ### Adding New Filter Criteria
 
-To add a new filter property (e.g., `ExcludeFirmware`):
-
-1. **Add property to `WithYubiKeyAttribute`:**
-
-```csharp
-public sealed class WithYubiKeyAttribute : Attribute, ITraitAttribute, ITestCaseOrderer
-{
-    public string? ExcludeFirmware { get; init; }
-}
-```
-
-2. **Implement filter logic in `OrderTestCases`:**
-
-```csharp
-public IEnumerable<IXunitTestCase> OrderTestCases<TTestCase>(
-    IEnumerable<TTestCase> testCases)
-{
-    var devices = YubiKeyTestInfrastructure.AllAuthorizedDevices;
-    
-    var filtered = devices.Where(state =>
-    {
-        // Existing filters...
-        
-        if (!string.IsNullOrEmpty(ExcludeFirmware))
-        {
-            var excluded = FirmwareVersion.Parse(ExcludeFirmware);
-            if (state.FirmwareVersion == excluded)
-                return false; // Exclude this device
-        }
-        
-        return true;
-    });
-    
-    // Create test cases...
-}
-```
-
-3. **Add helper method to `YubiKeyTestState` if needed:**
-
-```csharp
-public class YubiKeyTestState
-{
-    public bool HasFirmware(FirmwareVersion version) =>
-        FirmwareVersion == version;
-}
-```
-
-4. **Document in README.md** under "Available Filter Properties"
+1. Add property to `WithYubiKeyAttribute`
+2. Add corresponding property to `FilterCriteria`
+3. Update `YubiKeyTestInfrastructure.FilterDevices()` to apply the filter
+4. Update `FilterCriteria.GetShortDescription()` for test names
+5. Document in README.md
 
 ## Performance Considerations
-
-### Device Discovery Cost
 
 Device discovery has fixed costs:
 - USB enumeration: ~100ms
 - SmartCard enumeration: ~200ms
 - Per-device `GetDeviceInfo`: ~100ms per device
 
-**For 3 devices:**
-- Total discovery: ~600ms
-- Per-test overhead: ~0ms (cached)
-
-**Optimization:**
-- Static cache eliminates per-test cost
-- Worth the upfront cost for test suites with >5 tests
-- Break-even point: ~3 tests per device
-
-### Parallel Test Execution
-
-xUnit runs test cases in parallel by default:
-- Each `[WithYubiKey]` test generates N test cases (N = matching devices)
-- Test cases run in parallel across devices
-- Safe because each test case uses a different physical device
-
-**Constraint:**
-- Tests on the SAME device run sequentially (xUnit collection constraint)
-- Use `[Collection("YubiKey")]` if tests share device state
+Static cache eliminates per-test cost, making this worthwhile for test suites with >5 tests.
 
 ## Debugging Tips
 
@@ -338,112 +231,27 @@ xUnit runs test cases in parallel by default:
 
 **Check:**
 1. Device serial in allow list? (`appsettings.json`)
-2. Device matches filter criteria? (firmware, form factor, etc.)
-3. Device discovery succeeded? (check test output)
+2. Device matches filter criteria?
+3. Device discovery succeeded?
 
 ### Environment.Exit During Discovery
 
-**Symptoms:**
-- Test runner terminates immediately
-- No tests execute
-- Error message printed to console
-
 **Causes:**
-- Device serial not in allow list
-- Cannot read device serial
-- Allow list is empty
+- Allow list is empty or missing
+- Cannot read appsettings.json
 
 **Fix:**
 - Add serial to `appsettings.json`
-- Check device is properly connected
 - Verify appsettings.json copied to output directory
-
-### Multiple Devices, Only One Running
-
-**Check:**
-- All devices in allow list?
-- Filter criteria excluding some devices?
-- xUnit test output shows all generated test cases?
-
-## Future Enhancements
-
-### Planned Features
-
-1. **Per-test device isolation:**
-   - Reset application to factory defaults before each test
-   - Verify no state leakage between tests
-   - Optional via `[WithYubiKey(ResetBefore = true)]`
-
-2. **Conditional skip reasons:**
-   - More informative skip messages ("Skipped: Requires firmware >= 5.7.0")
-   - Include device info in skip message
-   - Link to documentation for required features
-
-3. **Device-specific test data:**
-   - Store per-device test data (PINs, keys, certificates)
-   - Avoid hardcoding test credentials
-   - Support device-specific configuration in appsettings.json
-
-4. **Test retry logic:**
-   - Automatic retry on transient failures
-   - Configurable retry count
-   - Log retry attempts for debugging
-
-## Related Modules
-
-- **Core.Devices** - `IYubiKey`, device discovery
-- **Management** - `ManagementSession`, `DeviceInfo`
-- **All test projects** - Use this infrastructure
-
-## Contributing
-
-When modifying test infrastructure:
-
-1. **Maintain backward compatibility:**
-   - Existing tests must continue working
-   - Add new features, don't break old ones
-   - Deprecate before removing
-
-2. **Update README.md:**
-   - Document new extension methods
-   - Add examples for new filter criteria
-   - Update "Future Enhancements" section
-
-3. **Test the infrastructure:**
-   - Unit tests for filter logic
-   - Integration tests for session helpers
-   - Mock allow list in tests
-
-4. **Consider performance:**
-   - Minimize per-test overhead
-   - Cache expensive operations
-   - Profile test suite execution time
 
 ## Known Limitations
 
-1. **Static device cache:**
-   - Devices must be connected before test runner starts
-   - Cannot detect devices plugged in during test run
-   - Workaround: Restart test runner
-
-2. **Environment.Exit:**
-   - Cannot recover from allow list violations
-   - Kills entire test process
-   - Difficult to test infrastructure itself
-
-3. **xUnit v2 constraint:**
-   - Tests.Shared still uses xUnit v2 for compatibility
-   - Cannot use xUnit v3 features
-   - Will migrate when all test projects upgrade
-
-4. **Single transport per test:**
-   - Extension methods assume one connection type
-   - Cannot test multi-transport scenarios easily
-   - Workaround: Manual connection management
+1. **Static device cache:** Devices must be connected before test runner starts
+2. **Environment.Exit:** Cannot recover from allow list violations
+3. **Single device per test case:** Each `[WithYubiKey]` attribute produces one test case per matching device
 
 ## Security Considerations
 
 - **Never commit real serial numbers** - Use environment variables or .gitignored appsettings.json
-- **Never log sensitive device info** - Serial numbers are public, but device IDs might be internal
-- **Verify allow list before destructive operations** - Even within tests
 - **Use separate test devices** - Never test on production or user devices
+- **Verify allow list is configured** - Tests fail fast if misconfigured

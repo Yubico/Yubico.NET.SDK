@@ -43,14 +43,15 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// </para>
     /// </remarks>
     public class GetEccP256SessionKeysResponse : BaseYubiHsmAuthResponseWithRetries,
-        IYubiKeyResponseWithData<SessionKeys>
+        IYubiKeyResponseWithData<Ecp256SessionKeys>
     {
         private const int encStart = 0;
         private const int macStart = 16;
         private const int rmacStart = 32;
-
         private const int keyLength = 16;
-        private const int expectedDataLength = 48;
+        private const int hostCryptogramStart = 48;
+        private const int hostCryptogramLength = 8;
+        private const int expectedDataLength = 56;
 
         /// <summary>
         /// Constructs a GetEccP256SessionKeysResponse based on a ResponseApdu
@@ -77,7 +78,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// <returns>
         /// Session keys are used to establish an encrypted and authenticated
         /// session with a YubiHSM 2 device. The secure session is based on the
-        /// Global Platform Secure Channel Protocol '03' (SCP03).
+        /// Global Platform Secure Channel Protocol '11' (SCP11).
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// The <see cref="IYubiKeyResponse.Status"/> is not equal to
@@ -86,7 +87,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// <exception cref="MalformedYubiKeyResponseException">
         /// Invalid response data length.
         /// </exception>
-        public SessionKeys GetData()
+        public Ecp256SessionKeys GetData()
         {
             if (Status != ResponseStatus.Success)
             {
@@ -98,11 +99,12 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                 throw new MalformedYubiKeyResponseException();
             }
 
-            var keys = new SessionKeys(
+            var keys = new Ecp256SessionKeys(
                 ResponseApdu.Data.Slice(encStart, keyLength),
                 ResponseApdu.Data.Slice(macStart, keyLength),
-                ResponseApdu.Data.Slice(rmacStart, keyLength));
-
+                ResponseApdu.Data.Slice(rmacStart, keyLength),
+                ResponseApdu.Data.Slice(hostCryptogramStart, hostCryptogramLength));
+        
             return keys;
         }
     }

@@ -154,5 +154,17 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             return response.GetData().ToArray();
         }
+
+        public byte [] GetPubkey(string credentialLabel)
+        {
+            var command = new GetPubkeyCommand(credentialLabel);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+
+            return response.GetData().ToArray();
+        }
     }
 }

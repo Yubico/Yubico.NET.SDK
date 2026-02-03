@@ -157,18 +157,19 @@ public class WithYubiKeyAttribute : DataAttribute
     {
         // Always return a placeholder with full filter parameters
         // Device binding and filtering happens lazily during test execution
-        var filterDescription = BuildFilterDescription();
-        yield return [YubiKeyTestState.CreateFilteredPlaceholder(
-            filterDescription,
-            MinFirmware,
-            FormFactor,
-            RequireUsb,
-            RequireNfc,
-            ConnectionType,
-            Capability,
-            FipsCapable,
-            FipsApproved,
-            CustomFilter)];
+        var criteria = new FilterCriteria
+        {
+            MinFirmware = MinFirmware,
+            FormFactor = FormFactor,
+            RequireUsb = RequireUsb,
+            RequireNfc = RequireNfc,
+            ConnectionType = ConnectionType,
+            Capability = Capability,
+            FipsCapable = FipsCapable,
+            FipsApproved = FipsApproved,
+            CustomFilterType = CustomFilter
+        };
+        yield return [YubiKeyTestState.CreateFilteredPlaceholder(criteria)];
     }
 
     /// <summary>

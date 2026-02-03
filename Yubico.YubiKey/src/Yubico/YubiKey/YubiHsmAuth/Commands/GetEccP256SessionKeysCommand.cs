@@ -46,8 +46,8 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// information on response statuses.
     /// </para>
     /// <para>
-    /// The secure session protocol is based on Secure Channel Protocol 3
-    /// (SCP03). The session keys returned by the application are the
+    /// The secure session protocol is based on Secure Channel Protocol 11
+    /// (SCP11). The session keys returned by the application are the
     /// Session Secure Channel Encryption Key (S-ENC),
     /// Secure Channel Message Authentication Code Key for Command (S-MAC),
     /// and Secure Channel Message Authentication Code Key for Response

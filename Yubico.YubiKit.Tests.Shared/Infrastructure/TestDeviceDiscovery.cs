@@ -61,5 +61,5 @@ public static class TestDeviceDiscovery
         }
     }
 
-    private static string GetDeviceId(IYubiKey device) => device.GetHashCode().ToString();
+    private static string GetDeviceId(IYubiKey device) => device.DeviceId;
 }

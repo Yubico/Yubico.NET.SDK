@@ -167,8 +167,7 @@ internal static class YubiKeyTestInfrastructure
             }
 
             // Instantiate the filter
-            var filter = Activator.CreateInstance(filterType) as IYubiKeyFilter;
-            if (filter is null)
+            if (Activator.CreateInstance(filterType) is not IYubiKeyFilter filter)
             {
                 Console.Error.WriteLine(
                     $"[YubiKey Infrastructure] ERROR: Failed to instantiate custom filter '{filterType.FullName}'");
@@ -251,7 +250,7 @@ internal static class YubiKeyTestInfrastructure
                         Console.WriteLine("[YubiKey Infrastructure] Device with unknown serial FILTERED");
                     }
                 }
-                catch (Exception ex) when (ex is SCardException scardException)
+                catch (SCardException scardException)
                 {
                     filteredCount++;
                     Console.WriteLine(

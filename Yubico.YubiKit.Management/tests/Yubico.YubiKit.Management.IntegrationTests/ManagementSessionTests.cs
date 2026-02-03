@@ -12,27 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Management.IntegrationTests;
-
-/// <summary>
-///     Example custom filter that only matches YubiKeys with firmware version 5.0 or higher.
-///     This demonstrates the IYubiKeyFilter interface for custom filtering logic.
-/// </summary>
-public class ModernFirmwareFilter : IYubiKeyFilter
-{
-    #region IYubiKeyFilter Members
-
-    public bool Matches(YubiKeyTestState device) =>
-        device.FirmwareVersion >= new FirmwareVersion(5);
-
-    public string GetDescription() => "Firmware >= 5.0.0";
-
-    #endregion
-}
 
 /// <summary>
 ///     Integration tests for Management application.

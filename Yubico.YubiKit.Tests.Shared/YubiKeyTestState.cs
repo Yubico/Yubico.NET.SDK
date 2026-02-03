@@ -147,7 +147,14 @@ public class YubiKeyTestState : IXunitSerializable
                 BindToRealDevice();
             }
 
-            return _device!;
+            if (_device is null)
+            {
+                throw new InvalidOperationException(
+                    "Device binding failed. This may indicate no YubiKey matching the filter criteria is connected. " +
+                    $"Filter: {FilterDescription ?? "none"}");
+            }
+
+            return _device;
         }
         private set => _device = value;
     }

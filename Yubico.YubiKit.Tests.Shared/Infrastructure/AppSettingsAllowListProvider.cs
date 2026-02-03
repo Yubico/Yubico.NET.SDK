@@ -32,7 +32,7 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 ///     </code>
 ///     </para>
 /// </remarks>
-public class AppSettingsAllowListProvider : IAllowListProvider
+public sealed class AppSettingsAllowListProvider : IAllowListProvider
 {
     private const string ConfigSection = "YubiKeyTests";
     private const string AllowedSerialsKey = "AllowedSerialNumbers";

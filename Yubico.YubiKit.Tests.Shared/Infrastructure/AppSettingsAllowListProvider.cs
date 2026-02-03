@@ -116,44 +116,6 @@ public class AppSettingsAllowListProvider : IAllowListProvider
     }
 
     /// <summary>
-    ///     Gets error message when a device is not in the allow list.
-    /// </summary>
-    public string OnNotAllowedErrorMessage(int serialNumber)
-    {
-        return $$"""
-                ╔═══════════════════════════════════════════════════════════════════════════════╗
-                ║                  CRITICAL: DEVICE NOT AUTHORIZED FOR TESTING                  ║
-                ╚═══════════════════════════════════════════════════════════════════════════════╝
-
-                Device with serial number {{serialNumber}} is NOT in the allow list.
-
-                This safety mechanism prevents integration tests from running on unauthorized
-                YubiKeys (especially production keys).
-
-                To authorize this device for testing:
-
-                1. VERIFY this is a TEST device (not a production key!)
-
-                2. Add the serial number to appsettings.json:
-
-                   {
-                     "YubiKeyTests": {
-                       "AllowedSerialNumbers": [
-                         {{serialNumber}}
-                       ]
-                     }
-                   }
-
-                3. Re-run the tests
-
-                WARNING: Only add test devices! Integration tests perform destructive operations
-                         (reset, credential changes, etc.) that WILL ERASE ALL DATA on the device.
-
-                ═══════════════════════════════════════════════════════════════════════════════
-                """;
-    }
-
-    /// <summary>
     ///     Builds default configuration from appsettings.json in current directory.
     /// </summary>
     private static IConfiguration BuildDefaultConfiguration()

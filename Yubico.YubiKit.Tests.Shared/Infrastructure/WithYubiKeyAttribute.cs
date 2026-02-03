@@ -145,20 +145,30 @@ public class WithYubiKeyAttribute : DataAttribute
     ///         We cannot reliably distinguish between them.
     ///     </para>
     ///     <para>
-    ///         Strategy: Always return placeholders with filter descriptions.
+    ///         Strategy: Always return placeholders with filter parameters.
     ///         The placeholder's Device property uses lazy binding - when the test
-    ///         actually accesses Device during execution, it initializes the infrastructure
-    ///         and binds to a real YubiKey.
+    ///         actually accesses Device during execution, it initializes the infrastructure,
+    ///         applies all filter criteria via <see cref="YubiKeyTestInfrastructure.FilterDevices"/>,
+    ///         and binds to a matching YubiKey.
     ///     </para>
     /// </remarks>
     public override IEnumerable<object[]>
         GetData(MethodInfo testMethod)
     {
-        // Always return a placeholder - device binding happens lazily during execution
-        // Create a unique placeholder for each attribute to avoid duplicate test IDs
-        // when multiple [WithYubiKey] attributes are applied to the same test method
+        // Always return a placeholder with full filter parameters
+        // Device binding and filtering happens lazily during test execution
         var filterDescription = BuildFilterDescription();
-        yield return [YubiKeyTestState.CreatePlaceholder(filterDescription)];
+        yield return [YubiKeyTestState.CreateFilteredPlaceholder(
+            filterDescription,
+            MinFirmware,
+            FormFactor,
+            RequireUsb,
+            RequireNfc,
+            ConnectionType,
+            Capability,
+            FipsCapable,
+            FipsApproved,
+            CustomFilter)];
     }
 
     /// <summary>

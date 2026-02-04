@@ -129,55 +129,6 @@ namespace Yubico.YubiKey.YubiHsmAuth
             return applicationVersionResponse.GetData();
         }
 
-        /// <summary>
-        /// Generate a 65-byte host challenge for ECC P-256 credential authentication.
-        /// </summary>
-        /// <returns>
-        /// A 65-byte host challenge in uncompressed ECC P-256 public key format (0x04 || X || Y).
-        /// </returns>
-        /// <param name="credential">
-        /// An <see cref="EccP256CredentialWithSecrets"/> object containing the credential details.
-        /// </param>
-        /// <exception cref="InvalidOperationException">
-        /// The command to generate the host challenge failed.
-        /// </exception>
-        public byte[] CreateHostChallengeEccP256(EccP256CredentialWithSecrets credential)
-        {
-            var command = new CreateHostChallengeEccP256Command(credential);
-            var response = Connection.SendCommand(command);
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-
-            return response.GetData().ToArray();
-        }
-
-        /// <summary>
-        /// Retrieve the 65-byte public key from an asymmetric credential stored on the YubiKey.
-        /// </summary>
-        /// <returns>
-        /// A 65-byte public key in uncompressed ECC P-256 format (0x04 || X || Y).
-        /// </returns>
-        /// <param name="credentialLabel">
-        /// The label of the credential. The string must meet the same requirements as
-        /// <see cref="Credential.Label"/>.
-        /// </param>
-        /// <exception cref="InvalidOperationException">
-        /// The command to retrieve the public key failed.
-        /// </exception>
-        public byte[] GetPublicKey(string credentialLabel)
-        {
-            var command = new GetPublicKeyCommand(credentialLabel);
-            var response = Connection.SendCommand(command);
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-
-            return response.GetData().ToArray();
-        }
-        
         // Returns the KeyCollector. Throws exception if it's null.
         private Func<KeyEntryData, bool> GetKeyCollector()
         {

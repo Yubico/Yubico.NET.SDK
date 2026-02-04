@@ -198,7 +198,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
 
             if (_cardPublicKey.Length > 0)
             {
-                tlvWriter.WriteValue(DataTagConstants.PubKey, _cardPublicKey.Span);
+                tlvWriter.WriteValue(DataTagConstants.PublicKey, _cardPublicKey.Span);
             }
 
             if (_cardCrypto.Length > 0)

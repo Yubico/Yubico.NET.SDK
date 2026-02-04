@@ -31,12 +31,12 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// </para>
     /// <para>
     /// The partner response class is
-    /// <see cref="GetPubkeyResponse"/>.
+    /// <see cref="GetPublicKeyResponse"/>.
     /// </para>
     /// </remarks>
-    public sealed class GetPubkeyCommand : IYubiKeyCommand<GetPubkeyResponse>
+    public sealed class GetPublicKeyCommand : IYubiKeyCommand<GetPublicKeyResponse>
     {
-        private const byte GetPubkeyInstruction = 0x0A;
+        private const byte GetPublicKeyInstruction = 0x0A;
 
         private readonly Credential _credential = new Credential();
 
@@ -65,7 +65,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// string must meet the same requirements as
         /// <see cref="Credential.Label"/>.
         /// </param>
-        public GetPubkeyCommand(string credentialLabel)
+        public GetPublicKeyCommand(string credentialLabel)
         {
             CredentialLabel = credentialLabel;
         }
@@ -73,13 +73,13 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// <inheritdoc/>
         public CommandApdu CreateCommandApdu() => new CommandApdu()
         {
-            Ins = GetPubkeyInstruction,
+            Ins = GetPublicKeyInstruction,
             Data = BuildDataField(),
         };
 
         /// <inheritdoc/>
-        public GetPubkeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetPubkeyResponse(responseApdu);
+        public GetPublicKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new GetPublicKeyResponse(responseApdu);
 
         /// <summary>
         /// Build the <see cref="CommandApdu.Data"/> field from the given data.

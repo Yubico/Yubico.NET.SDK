@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// <inheritdoc/>
         public CreateHostChallengeEccP256Response CreateResponseForApdu(ResponseApdu responseApdu) =>
             new CreateHostChallengeEccP256Response(responseApdu);
-        public byte[] BuildDataField()
+        private byte[] BuildDataField()
         {
             var tlvWriter = new TlvWriter();
 

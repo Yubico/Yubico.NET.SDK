@@ -43,15 +43,13 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// </para>
     /// </remarks>
     public class GetEccP256SessionKeysResponse : BaseYubiHsmAuthResponseWithRetries,
-        IYubiKeyResponseWithData<Ecp256SessionKeys>
+        IYubiKeyResponseWithData<SessionKeys>
     {
         private const int encStart = 0;
         private const int macStart = 16;
         private const int rmacStart = 32;
         private const int keyLength = 16;
-        private const int hostCryptogramStart = 48;
-        private const int hostCryptogramLength = 8;
-        private const int expectedDataLength = 56;
+        private const int expectedDataLength = 48;
 
         /// <summary>
         /// Constructs a GetEccP256SessionKeysResponse based on a ResponseApdu
@@ -87,7 +85,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// <exception cref="MalformedYubiKeyResponseException">
         /// Invalid response data length.
         /// </exception>
-        public Ecp256SessionKeys GetData()
+        public SessionKeys GetData()
         {
             if (Status != ResponseStatus.Success)
             {
@@ -99,11 +97,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                 throw new MalformedYubiKeyResponseException();
             }
 
-            var keys = new Ecp256SessionKeys(
+            var keys = new SessionKeys(
                 ResponseApdu.Data.Slice(encStart, keyLength),
                 ResponseApdu.Data.Slice(macStart, keyLength),
-                ResponseApdu.Data.Slice(rmacStart, keyLength),
-                ResponseApdu.Data.Slice(hostCryptogramStart, hostCryptogramLength));
+                ResponseApdu.Data.Slice(rmacStart, keyLength));
         
             return keys;
         }

@@ -24,24 +24,24 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// <remarks>
     /// <para>
     /// This response class handles the public key data returned by the
-    /// GetPubkey command. The response contains a 65-byte public key
+    /// GetPublicKey command. The response contains a 65-byte public key
     /// (PK-OCE) for asymmetric credentials such as ECC P-256.
     /// </para>
     /// <para>
-    /// The associated command class is <see cref="GetPubkeyCommand"/>.
+    /// The associated command class is <see cref="GetPublicKeyCommand"/>.
     /// </para>
     /// </remarks>
-    public sealed class GetPubkeyResponse : YubiKeyResponse,
+    public sealed class GetPublicKeyResponse : YubiKeyResponse,
         IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
     {
         /// <summary>
-        /// Constructs a GetPubkeyResponse based on a ResponseApdu
+        /// Constructs a GetPublicKeyResponse based on a ResponseApdu
         /// received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
         /// The ResponseApdu returned by the YubiKey.
         /// </param>
-        public GetPubkeyResponse(ResponseApdu responseApdu) :
+        public GetPublicKeyResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
         }

@@ -325,30 +325,6 @@ namespace Yubico.YubiKey.YubiHsmAuth
         }
 
         /// <summary>
-        /// Generate a 65-byte host challenge for ECC P-256 credential authentication.
-        /// </summary>
-        /// <returns>
-        /// A 65-byte host challenge in uncompressed ECC P-256 public key format (0x04 || X || Y).
-        /// </returns>
-        /// <param name="credential">
-        /// An <see cref="EccP256CredentialWithSecrets"/> object containing the credential details.
-        /// </param>
-        /// <exception cref="InvalidOperationException">
-        /// The command to generate the host challenge failed.
-        /// </exception>
-        public byte[] CreateHostChallengeEccP256(EccP256CredentialWithSecrets credential)
-        {
-            var command = new CreateHostChallengeEccP256Command(credential);
-            var response = Connection.SendCommand(command);
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-
-            return response.GetData().ToArray();
-        }
-
-        /// <summary>
         /// Retrieve the 65-byte public key from an asymmetric credential stored on the YubiKey.
         /// </summary>
         /// <returns>

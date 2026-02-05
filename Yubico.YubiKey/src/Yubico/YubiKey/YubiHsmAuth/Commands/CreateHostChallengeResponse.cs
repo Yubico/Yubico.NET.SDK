@@ -18,7 +18,7 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// The response class for the <see cref="CreateHostChallengeEccP256Command"/>.
+    /// The response class for the <see cref="CreateHostChallengeCommand"/>.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -26,17 +26,17 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// For asymmetric (ECC) credentials, this is a 65-byte uncompressed ECC SECP256R1 public key.
     /// </para>
     /// </remarks>
-    public sealed class CreateHostChallengeEccP256Response : YubiKeyResponse,
+    public sealed class CreateHostChallengeResponse : YubiKeyResponse,
         IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
     {
         /// <summary>
-        /// Constructs a <see cref="CreateHostChallengeEccP256Response"/> based on a ResponseApdu
+        /// Constructs a <see cref="CreateHostChallengeResponse"/> based on a ResponseApdu
         /// received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
         /// The ResponseApdu returned by the YubiKey.
         /// </param>
-        public CreateHostChallengeEccP256Response(ResponseApdu responseApdu) :
+        public CreateHostChallengeResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
         }

@@ -21,19 +21,26 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// The command class for getting a challenge (EPK-OCE) for ECC P-256 credential.
+    /// The command class for getting a challenge for credential authentication.
     /// </summary>
     /// <remarks>
     /// <para>
     /// This command sends the GET_CHALLENGE instruction (0x04) to the YubiKey device
-    /// to retrieve the public part of a newly generated ephemeral ECC SECP256R1 key.
-    /// For asymmetric (ECC) credentials, this returns a 65-byte uncompressed public key.
+    /// to retrieve a challenge based on the credential type.
     /// </para>
     /// <para>
-    /// The associated response class is <see cref="CreateHostChallengeEccP256Response"/>.
+    /// For symmetric credentials this generates an 8-byte 'Host Challenge', a random value
+    /// used for authentication with AES-based symmetric key protocols.
+    /// </para>
+    /// <para>
+    /// For asymmetric credentials this returns 'EPK-OCE', the public part of a newly generated
+    /// ephemeral ECC SECP256R1 key (65 bytes uncompressed).
+    /// </para>
+    /// <para>
+    /// The associated response class is <see cref="CreateHostChallengeResponse"/>.
     /// </para>
     /// </remarks>
-    public sealed class CreateHostChallengeEccP256Command : IYubiKeyCommand<CreateHostChallengeEccP256Response>
+    public sealed class CreateHostChallengeCommand : IYubiKeyCommand<CreateHostChallengeResponse>
     {
         private const byte GetChallengeInstruction = 0x04;
         private readonly Credential _credential = new Credential();
@@ -53,29 +60,49 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             get => _credential.Label;
             set => _credential.Label = value;
         }
+        /// <inheritdoc cref="CryptographicKeyType"/>
+        public CryptographicKeyType KeyType
+        {
+            get => _credential.KeyType;
+            set => _credential.KeyType = value;
+        }
 
         /// <summary>
-        /// Constructs an instance of the <see cref="CreateHostChallengeEccP256Command"/> class.
+        /// Constructs an instance of the <see cref="CreateHostChallengeCommand"/> class.
         /// </summary>
         /// <remarks>
         /// The <see cref="CredentialLabel"/> will need to be set before calling
         /// <see cref="CreateCommandApdu"/>.
         /// </remarks>
-        public CreateHostChallengeEccP256Command()
+        public CreateHostChallengeCommand()
         {
         }
 
         /// <summary>
-        /// Constructs an instance of the <see cref="CreateHostChallengeEccP256Command"/> class
+        /// Constructs an instance of the <see cref="CreateHostChallengeCommand"/> class
         /// with the credential.
         /// </summary>
-        /// <param name="credential">
-        /// The ECC P-256 credential for which to get the challenge.
+        /// <param name="credentialLabel">
+        /// The <see cref="Credential"/> for which to get the challenge.
         /// </param>
-        public CreateHostChallengeEccP256Command(EccP256CredentialWithSecrets credential)
+        /// <param name="keytype">
+        /// The type of cryptographic key.
+        /// </param>
+        /// <param name="credentialPassword">
+        /// The password for the credential.
+        /// </param>
+        public CreateHostChallengeCommand(CryptographicKeyType keytype, string credentialLabel, ReadOnlyMemory<byte>? credentialPassword = null)
         {
-            CredentialLabel = credential.Label;
-            _credentialPassword = credential.CredentialPassword;
+            CredentialLabel = credentialLabel;
+            KeyType = keytype;
+            if (credentialPassword == null)
+            {
+                _credentialPassword = ReadOnlyMemory<byte>.Empty;
+            }
+            else
+            {
+                _credentialPassword = credentialPassword.Value;
+            }
         }
 
         /// <inheritdoc/>
@@ -86,15 +113,19 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         };
 
         /// <inheritdoc/>
-        public CreateHostChallengeEccP256Response CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new CreateHostChallengeEccP256Response(responseApdu);
+        public CreateHostChallengeResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new CreateHostChallengeResponse(responseApdu);
         private byte[] BuildDataField()
         {
             var tlvWriter = new TlvWriter();
-
             tlvWriter.WriteString(DataTagConstants.Label, CredentialLabel, Encoding.UTF8);
-            tlvWriter.WriteValue(DataTagConstants.Password, _credentialPassword.Span);
 
+            if (_credential.KeyType is CryptographicKeyType.SecP256R1 && _credentialPassword.Length > 0)
+            {
+                tlvWriter.WriteValue(DataTagConstants.Password, _credentialPassword.Span);
+
+            }
+            
             byte[] tlvBytes = tlvWriter.Encode();
             tlvWriter.Clear();
 

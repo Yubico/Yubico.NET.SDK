@@ -22,8 +22,15 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This response contains the challenge (EPK-OCE) returned by the YubiKey device.
-    /// For asymmetric (ECC) credentials, this is a 65-byte uncompressed ECC SECP256R1 public key.
+    /// This response contains the challenge returned by the YubiKey device based on the credential type.
+    /// </para>
+    /// <para>
+    /// For symmetric credentials this returns an 8-byte 'Host Challenge', a random value
+    /// used for authentication with AES-based symmetric key protocols.
+    /// </para>
+    /// <para>
+    /// For asymmetric credentials this returns 'EPK-OCE', the public part of a newly generated
+    /// ephemeral ECC SECP256R1 key (65 bytes uncompressed).
     /// </para>
     /// </remarks>
     public sealed class CreateHostChallengeResponse : YubiKeyResponse,
@@ -45,7 +52,8 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// Gets the challenge data returned by the device.
         /// </summary>
         /// <remarks>
-        /// For asymmetric (ECC) credentials, this returns a 65-byte uncompressed public key.
+        /// For symmetric credentials this returns an 8-byte host challenge (random value).
+        /// For asymmetric credentials this returns a 65-byte uncompressed public key in ECC P-256 format (0x04 || X || Y).
         /// </remarks>
         /// <returns>
         /// The challenge data as a <see cref="ReadOnlyMemory{Byte}"/>.

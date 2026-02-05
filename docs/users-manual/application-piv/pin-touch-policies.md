@@ -24,7 +24,7 @@ These policies apply to operations such as signing, decrypting, performing a key
 
 ## Policy properties
 
-PIN and touch policies can be configured when a key is generated or imported into a YubiKey PIV slot. Once the policies have been set during key generation/import, they cannot be changed. If a PIN and/or touch policy is not specified at that time, the slot's default policies will be applied to the key. Default policies vary depending on the slot and are programmed into the YubiKey's firmware. Note that policy configuration is supported on YubiKeys with firmware version 4 and later; earlier YubiKeys are limited to the usage of slots' default policies.
+PIN and touch policies can be configured when a private key is generated or imported into a YubiKey's PIV slot. Once the policies have been set during key generation/import, they cannot be changed. If a PIN and/or touch policy is not specified at that time, the slot's default policies will be applied to the key. Default policies vary depending on the slot and are programmed into the YubiKey's firmware. Note that policy configuration is supported on YubiKeys with firmware version 4 and later; earlier YubiKeys are limited to the slots' default policies.
 
 A key's policies, whether explicitly configured or not, are properties of the key itself. This means that you can move a key from one slot to another (for example, from slot 9A to one of the retired key slots), and its policies do not change.
 
@@ -60,29 +60,29 @@ Due to PIV card activation requirements in section 4.3 of the [FIPS 201-3 specif
 
 Biometric policies are a type of PIN policy that are available for YubiKey Bio Series — Multi-protocol Edition keys with firmware 5.7 or later. There are two biometric policy options:
 
-* Match Once: a biometric or PIN verification is required for each session.
-* Match Always: a biometric or PIN verification is required on every object access.
+* ``Match Once``: a biometric or PIN verification is required for each session.
+* ``Match Always``: a biometric or PIN verification is required on every object access.
 
 ## Touch policy options
 
 There are three touch policy options:
 
-* Never: a touch is never needed.
-* Always: a touch is needed for every key operation.
-* Cached: if more than 15 seconds have elapsed since the last time the YubiKey was touched, a touch is needed (only available for YubiKeys with firmware version 4.3 and later).
+* ``Never``: a touch is never needed.
+* ``Always``: a touch is needed for every key operation.
+* ``Cached``: if more than 15 seconds have elapsed since the last time the YubiKey was touched, a touch is needed (only available for YubiKeys with firmware version 4.3 and later).
 
 ## Default policies
 
 The default PIN and touch policies are programmed into the YubiKey's firmware upon manufacture. Starting with firmware version 4, YubiKeys (with the exception of YubiKey FIPS Series keys with firmware version 5.7.1 or later) have the following default policies:
 
-* Slot 9C PIN policy: Always
-* Slot 9E PIN policy: Never
-* General PIN policy: Once
-* Touch policy: Never
+* Slot 9C PIN policy: ``Always``
+* Slot 9E PIN policy: ``Never``
+* General PIN policy: ``Once``
+* Touch policy: ``Never``
 
 Due to PIV card activation requirements in section 4.3 of the [FIPS 201-3 specification](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.201-3.pdf), **YubiKey FIPS Series keys with firmware version 5.7.1 or later have a default 9E PIN policy of ``Once``**. The other default polices listed above are the same for FIPS keys.
 
-It's also important to note that slots 9C and 9E have different default PIN policies than all other slots due to the requirements mandated by the PIV standard (see [NIST SP 800-73pt1, section 3](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-73pt1-5.pdf)). Touch is not a part of the PIV standard, which is why the default touch policy is ``Never``. The ability to require touch was added to the YubiKey in firmware version 4 to augment security.
+It's also important to note that slots 9C and 9E have different default PIN policies than all other slots due to the requirements mandated by the PIV standard (see [NIST SP 800-73pt1](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-73pt1-5.pdf), section 3). Touch is not a part of the PIV standard, which is why the default touch policy is ``Never``. The ability to require touch was added to the YubiKey in firmware version 4 to augment security.
 
 When generating or importing a key into one of the PIV slots, these default policies will be applied to the key unless otherwise specified.
 
@@ -118,13 +118,13 @@ session, you will not need the PIN nor touch.
 
 ## Changing the touch policy for the management key (slot 9B)
 
-Unlike other slots, the management key (slot 9B) only has a touch policy, which by default is ``Never``. However, when changing the management key, you can set this policy to one of the other touch policy options (``Always`` or ``Cached``). Once reconfigured with one of these other policies, the user will be required to touch the YubiKey at the specified frequency to perform management key operations.
+The management key (slot 9B) has a touch policy only, and its default value is ``Never``. However, when changing the management key, you can set this policy to one of the other touch policy options (``Always`` or ``Cached``). Once reconfigured with one of these other policies, the user will be required to touch the YubiKey at the specified frequency to perform management key operations.
 
-To change the management key with the SDK, we have two options: the ``PivSession`` method, ``TryChangeManagementKey()``, or the lower-level ``SetManagementKeyCommand()``.
+To change the management key with the SDK, there are two options: the ``PivSession`` method, ``TryChangeManagementKey()``, or the lower-level ``SetManagementKeyCommand()``.
 
 ### TryChangeManagementKey() example
 
-To change the management key and set a new touch policy using the ``PivSession``, simply call``TryChangeManagementKey()`` and provide the current management key, the new management key, and the desired touch policy. In this example, let's set the touch policy to ``Always``:
+To change the management key and set a new touch policy using the ``PivSession``, simply call [TryChangeManagementKey()](xref:Yubico.YubiKey.Piv.PivSession.TryChangeManagementKey%28System.ReadOnlyMemory%7BSystem.Byte%7D%2CSystem.ReadOnlyMemory%7BSystem.Byte%7D%2CYubico.YubiKey.Piv.PivTouchPolicy%29) and provide the current management key, the new management key, and the desired touch policy. In this example, let's set the touch policy to ``Always``:
 
 ```csharp
 using (PivSession pivtest = new PivSession(yubiKey))
@@ -138,16 +138,18 @@ Note that ``TryChangeManagementKey()`` is an overloaded method. In addition to s
 
 ### SetManagementKeyCommand() example
 
-Unlike the ``PivSession``, using the PIV command classes to change the management key requires three steps: first we must initiate the PIV management key authentication process with ``InitializeAuthenticateManagementKeyCommand``, then we can finish management key authentication with ``CompleteAuthenticateManagementKeyCommand()``, and finally we can set the new management key and touch policy via ``SetManagementKeyCommand()``:
+Unlike the ``PivSession``, using the PIV command classes to change the management key requires three steps: first we must initiate the PIV management key authentication process with [InitializeAuthenticateManagementKeyCommand](xref:Yubico.YubiKey.Piv.Commands.InitializeAuthenticateManagementKeyCommand.%23ctor%28Yubico.YubiKey.Piv.PivAlgorithm%29), then we can finish management key authentication with [CompleteAuthenticateManagementKeyCommand()](xref:Yubico.YubiKey.Piv.Commands.CompleteAuthenticateManagementKeyCommand.%23ctor%28Yubico.YubiKey.Piv.Commands.InitializeAuthenticateManagementKeyResponse%2CSystem.ReadOnlySpan%7BSystem.Byte%7D%29), and finally we can set the new management key and touch policy via [SetManagementKeyCommand()](xref:Yubico.YubiKey.Piv.Commands.SetManagementKeyCommand.%23ctor%28System.ReadOnlyMemory%7BSystem.Byte%7D%2CYubico.YubiKey.Piv.PivTouchPolicy%2CYubico.YubiKey.Piv.PivAlgorithm%29):
 
 ```csharp
 IYubiKeyConnection connection = yubiKey.Connect(YubiKeyApplication.Piv);
 
-// When initializing management key authentication with the command classes, we must specify the current management key's algorithm. (If you aren't sure about the algorithm, retrieve it from the key's metadata first.)
+// When initializing management key authentication with the command classes, we must specify the current
+// management key's algorithm. (If you aren't sure about the algorithm, retrieve it from the key's metadata first.)
 InitializeAuthenticateManagementKeyCommand initAuthManKeyCommand = new InitializeAuthenticateManagementKeyCommand(PivAlgorithm.Aes192);
 InitializeAuthenticateManagementKeyResponse initAuthManKeyResponse = connection.SendCommand(initAuthManKeyCommand);
 
-// Complete the management key authentication by passing in the initialization response and the current management key (currentKey set elsewhere).
+// Complete the management key authentication by passing in the initialization response and the current management
+// key (currentKey set elsewhere).
 CompleteAuthenticateManagementKeyCommand authManKeyCommand = new CompleteAuthenticateManagementKeyCommand(initAuthManKeyResponse, currentKey);
 CompleteAuthenticateManagementKeyResponse authManKeyResponse = connection.SendCommand(authManKeyCommand);
 
@@ -156,13 +158,13 @@ SetManagementKeyCommand setManKeyCommand = new SetManagementKeyCommand(newKey, P
 SetManagementKeyResponse setManKeyResponse = connection.SendCommand(setManKeyCommand);
 ```
 
-In this example, we set the management key's touch policy to ``Always``. This means that future calls to ``CompleteAuthenticateManagementKeyCommand`` will not complete until the YubiKey has been touched.
+In this example, we set the management key's touch policy to ``Always``. This means that all future calls to ``CompleteAuthenticateManagementKeyCommand`` will not complete until the YubiKey has been touched.
 
 ## Retrieving an existing key's PIN and touch policies
 
 Once a key has been generated or imported into a slot, you can check the PIN and touch policies it was configured with via the key's PIV metadata. Note that this feature is only available for YubiKeys with firmware version 5.3 and later. On older YubiKeys, there is no way to retrieve a key's policies after configuration.
 
-To check a key's policies, create an instance of a ``PivSession`` with the desired YubiKey, call ``GetMetadata`` on a specific PIV slot, and extract the ``PinPolicy`` and ``TouchPolicy`` properties:
+To check a key's policies, create an instance of a ``PivSession`` with the desired YubiKey, call [GetMetadata](xref:Yubico.YubiKey.Piv.PivSession.GetMetadata%28System.Byte%29) on a specific PIV slot, and extract the ``PinPolicy`` and ``TouchPolicy`` properties:
 
 ```csharp
 using (PivSession pivtest = new PivSession(yubiKey))
@@ -176,7 +178,9 @@ using (PivSession pivtest = new PivSession(yubiKey))
 }
 ```
 
-Note that if the slot does not contain a key, the SDK will throw an exception when trying to call ``GetMetadata``. Slots 80 and 81 (PIN and PUK) do not have PIN or touch policies and will always return ``None`` for those properties in the metadata. The management key (9B), on the other hand, has a touch policy but no PIN policy. In order to maintain consistency with the data format, the YubiKey will return the undefined value "0" for 9B's PIN policy. This is not a valid PIN policy, and the SDK translates it to ``Default`` in the metadata.
+Note that if the slot does not contain a key, the SDK will throw an exception when trying to call ``GetMetadata``. Slots 80 and 81 (PIN and PUK) do not have PIN or touch policies and will always return ``None`` for those properties in the metadata.
+
+The management key (9B)has a touch policy but no PIN policy. In order to maintain consistency with the data format, the YubiKey will return the undefined value "0" for 9B's PIN policy. This is not a valid PIN policy, and the SDK translates it to ``Default`` in the metadata.
 
 ## Related articles
 

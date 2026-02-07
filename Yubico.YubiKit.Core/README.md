@@ -183,6 +183,46 @@ The Core module provides platform-specific implementations for:
 
 Platform detection is automatic via `SdkPlatformInfo.OperatingSystem`.
 
+### Composite Device Model
+
+YubiKeys expose multiple transports (SmartCard, HID FIDO, HID OTP) that appear as separate devices at the OS level. The SDK provides two abstraction levels:
+
+| Interface | Description | Use Case |
+|-----------|-------------|----------|
+| `IYubiKeyReference` | Transport-level reference | When you need a specific transport (SmartCard vs HID) |
+| `IYubiKey` | Composite physical device | When you want to work with "the YubiKey" regardless of transport |
+
+**Device Identity (`IDeviceIdentity`):**
+Properties identifying a YubiKey: serial number, firmware version, form factor, enabled/supported capabilities.
+
+**Correlation Flow:**
+```csharp
+// Get transport references from repository
+var references = await deviceRepository.FindAllAsync(ConnectionType.All, ct);
+
+// Correlate into composite devices (requires identity reader from Management)
+var compositeFactory = serviceProvider.GetService<ICompositeYubiKeyFactory>();
+var identityReader = serviceProvider.GetService<IdentityReaderDelegate>();
+var yubiKeys = await compositeFactory.CreateCompositesAsync(references, identityReader, ct);
+
+// Work with composite device
+foreach (var yubiKey in yubiKeys)
+{
+    Console.WriteLine($"YubiKey {yubiKey.DeviceId}: {yubiKey.AvailableConnections.Count} transports");
+    
+    // Connect using preferred transport
+    if (yubiKey.SupportsConnection<ISmartCardConnection>())
+    {
+        var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(ct);
+        // Use connection...
+    }
+}
+```
+
+**DeviceId Formats:**
+- Serial-based: `"12345678"` (when serial is available)
+- Fingerprint-based: `"fp:a1b2c3d4"` (fallback for FIDO-only Security Keys)
+
 ## Key Classes
 
 | Class | Purpose |

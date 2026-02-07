@@ -14,6 +14,8 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
@@ -79,6 +81,8 @@ public static class DependencyInjection
         }
     }
 
+    private static readonly ILogger Logger = NullLoggerFactory.Instance.CreateLogger(nameof(DependencyInjection));
+
     private static async Task<IDeviceIdentity?> ReadDeviceIdentityAsync(
         IYubiKeyReference reference,
         CancellationToken cancellationToken)
@@ -97,9 +101,9 @@ public static class DependencyInjection
                 return await session.GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Identity reading failed - return null to allow uncorrelated fallback
+            Logger.LogDebug(ex, "Failed to read device identity from {DeviceId}, falling back to uncorrelated", reference.DeviceId);
             return null;
         }
     }

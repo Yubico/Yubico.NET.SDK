@@ -65,6 +65,7 @@ public static class DependencyInjection
             services.TryAddTransient<IFindPcscDevices, FindPcscDevices>();
             services.TryAddTransient<IFindHidDevices, FindHidDevices>();
             services.TryAddTransient<IProtocolFactory<ISmartCardConnection>, PcscProtocolFactory<ISmartCardConnection>>();
+            services.TryAddSingleton<ICompositeYubiKeyFactory, CompositeYubiKeyFactory>();
             services.TryAddSingleton<IDeviceChannel, DeviceChannel>();
             services.TryAddSingleton<IDeviceRepository, DeviceRepositoryCached>();
 

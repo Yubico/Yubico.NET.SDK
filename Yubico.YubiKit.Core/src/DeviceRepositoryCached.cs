@@ -154,7 +154,7 @@ public class DeviceRepositoryCached(
             if (_deviceCache.TryRemove(deviceId, out var removedDevice))
             {
                 _deviceChanges.OnNext(
-                    new DeviceEvent(DeviceAction.Removed, null) { DeviceId = deviceId });
+                    new DeviceEvent(DeviceAction.Removed, (IYubiKeyReference?)null) { DeviceId = deviceId });
                 logger.LogDebug("Removed device: {DeviceId}", deviceId);
             }
 

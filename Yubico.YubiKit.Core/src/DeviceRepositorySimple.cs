@@ -50,8 +50,8 @@ public class DeviceRepositorySimple : IDeviceRepository
 
             foreach (var removedId in previousDeviceIds.Except(currentDeviceIds))
             {
-                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, null) { DeviceId = removedId });
-                yield return new DeviceEvent(DeviceAction.Removed, null) { DeviceId = removedId };
+                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, (IYubiKeyReference?)null) { DeviceId = removedId });
+                yield return new DeviceEvent(DeviceAction.Removed, (IYubiKeyReference?)null) { DeviceId = removedId };
             }
 
             previousDeviceIds = currentDeviceIds;

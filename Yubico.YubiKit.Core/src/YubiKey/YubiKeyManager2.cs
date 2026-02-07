@@ -47,7 +47,7 @@ public static class YubiKeyManager2
 
             foreach (var removedId in previousDeviceIds.Except(currentDeviceIds))
             {
-                yield return new DeviceEvent(DeviceAction.Removed, null) { DeviceId = removedId };
+                yield return new DeviceEvent(DeviceAction.Removed, (IYubiKeyReference?)null) { DeviceId = removedId };
             }
 
             previousDeviceIds = currentDeviceIds;

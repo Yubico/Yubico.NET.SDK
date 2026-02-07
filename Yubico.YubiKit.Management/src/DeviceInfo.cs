@@ -15,12 +15,13 @@
 using System.Buffers.Binary;
 using System.Text;
 using Yubico.YubiKit.Core.Extensions;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;
 
-public readonly record struct DeviceInfo
+public readonly record struct DeviceInfo : IDeviceIdentity
 {
     private const int TAG_USB_SUPPORTED = 0x01;
     private const int TAG_SERIAL_NUMBER = 0x02;

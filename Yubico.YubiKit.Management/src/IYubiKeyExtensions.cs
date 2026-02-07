@@ -111,4 +111,97 @@ public static class IYubiKeyExtensions
                 .ConfigureAwait(false);
         }
     }
+
+    extension(IYubiKey yubiKey)
+    {
+        /// <summary>
+        ///     Retrieves device information from a composite YubiKey asynchronously.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     An optional token to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="DeviceInfo" /> structure containing detailed information about the YubiKey device.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     Thrown when the YubiKey has no available connections.
+        /// </exception>
+        public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
+        {
+            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+            return await mgmtSession.GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        ///     Sets the device configuration on a composite YubiKey asynchronously.
+        /// </summary>
+        /// <param name="config">
+        ///     The desired device configuration to be applied to the YubiKey.
+        /// </param>
+        /// <param name="reboot">
+        ///     A value indicating whether the YubiKey should reboot after applying the configuration.
+        /// </param>
+        /// <param name="currentLockCode">
+        ///     The current lock code for the device, if required.
+        /// </param>
+        /// <param name="newLockCode">
+        ///     An optional new lock code to set for the device.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     An optional token to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     A task representing the asynchronous operation.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     Thrown when the YubiKey has no available connections.
+        /// </exception>
+        public async ValueTask SetDeviceConfigAsync(
+            DeviceConfig config,
+            bool reboot,
+            byte[]? currentLockCode = null,
+            byte[]? newLockCode = null,
+            CancellationToken cancellationToken = default)
+        {
+            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+            await mgmtSession.SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        ///     Creates a management session for interacting with a composite YubiKey asynchronously.
+        ///     The session provides capabilities to perform management operations on the device.
+        /// </summary>
+        /// <param name="scpKeyParams">
+        ///     Optional SCP (Secure Channel Protocol) key parameters necessary to establish
+        ///     a secure session with the YubiKey device.
+        /// </param>
+        /// <param name="configuration">Optional protocol configuration.</param>
+        /// <param name="cancellationToken">
+        ///     An optional token to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="ManagementSession" /> instance configured for the YubiKey device.
+        ///     The session must be disposed by the caller when no longer needed.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     Thrown when the YubiKey has no available connections.
+        /// </exception>
+        public async Task<ManagementSession> CreateManagementSessionAsync(
+            ScpKeyParameters? scpKeyParams = null,
+            ProtocolConfiguration? configuration = null,
+            CancellationToken cancellationToken = default)
+        {
+            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
+                .ConfigureAwait(false);
+            return await ManagementSession.CreateAsync(
+                    connection,
+                    configuration,
+                    scpKeyParams,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+    }
 }

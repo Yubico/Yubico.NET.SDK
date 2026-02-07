@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers.Binary;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.Interfaces;
@@ -103,4 +105,55 @@ public interface IDeviceIdentity
     /// This is a computed property that returns <c>UsbSupported | NfcSupported</c>.
     /// </remarks>
     DeviceCapabilities SupportedCapabilities => UsbSupported | NfcSupported;
+
+    /// <summary>
+    /// Computes a configuration fingerprint for device correlation.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The fingerprint is computed from configuration properties that are stable
+    /// across transports but unique to a physical device's configuration:
+    /// </para>
+    /// <list type="bullet">
+    /// <item>USB enabled capabilities</item>
+    /// <item>NFC enabled capabilities</item>
+    /// <item>Auto-eject timeout</item>
+    /// <item>Challenge-response timeout</item>
+    /// <item>Device flags</item>
+    /// <item>NFC restricted flag</item>
+    /// </list>
+    /// <para>
+    /// This is used as a fallback correlation key when serial number is unavailable.
+    /// </para>
+    /// </remarks>
+    /// <returns>An 8-character lowercase hex string representing the fingerprint.</returns>
+    string ComputeConfigFingerprint()
+    {
+        // Allocate buffer for fingerprint data on stack
+        // Layout: UsbEnabled (2) + NfcEnabled (2) + AutoEjectTimeout (2) + DeviceFlags (1) + IsNfcRestricted (1) + ChallengeResponseTimeout (variable)
+        int challengeTimeoutLength = ChallengeResponseTimeout.Length;
+        int bufferSize = 8 + challengeTimeoutLength;
+        
+        Span<byte> buffer = stackalloc byte[bufferSize];
+        
+        // Write fixed-size fields
+        BinaryPrimitives.WriteUInt16BigEndian(buffer[..2], (ushort)UsbEnabled);
+        BinaryPrimitives.WriteUInt16BigEndian(buffer[2..4], (ushort)NfcEnabled);
+        BinaryPrimitives.WriteUInt16BigEndian(buffer[4..6], AutoEjectTimeout);
+        buffer[6] = (byte)DeviceFlags;
+        buffer[7] = IsNfcRestricted ? (byte)1 : (byte)0;
+        
+        // Copy challenge-response timeout
+        if (challengeTimeoutLength > 0)
+        {
+            ChallengeResponseTimeout.Span.CopyTo(buffer[8..]);
+        }
+        
+        // Compute SHA256 hash
+        Span<byte> hash = stackalloc byte[32];
+        SHA256.HashData(buffer, hash);
+        
+        // Return first 4 bytes as hex (8 characters)
+        return Convert.ToHexString(hash[..4]).ToLowerInvariant();
+    }
 }

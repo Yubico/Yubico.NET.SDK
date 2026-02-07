@@ -87,6 +87,68 @@ public class IDeviceIdentityTests
         Assert.True(identity.IsNfcRestricted);
     }
 
+    [Fact]
+    public void ComputeConfigFingerprint_ReturnsDeterministicHash()
+    {
+        // Arrange - two identities with same config
+        var identity1 = CreateTestIdentity(
+            usbEnabled: DeviceCapabilities.Piv,
+            nfcEnabled: DeviceCapabilities.Oath,
+            autoEjectTimeout: 30,
+            challengeResponseTimeout: [0x0F],
+            deviceFlags: DeviceFlags.TouchEject,
+            isNfcRestricted: true);
+
+        var identity2 = CreateTestIdentity(
+            usbEnabled: DeviceCapabilities.Piv,
+            nfcEnabled: DeviceCapabilities.Oath,
+            autoEjectTimeout: 30,
+            challengeResponseTimeout: [0x0F],
+            deviceFlags: DeviceFlags.TouchEject,
+            isNfcRestricted: true);
+
+        // Act
+        var fingerprint1 = identity1.ComputeConfigFingerprint();
+        var fingerprint2 = identity2.ComputeConfigFingerprint();
+
+        // Assert - same config produces same fingerprint
+        Assert.Equal(fingerprint1, fingerprint2);
+        Assert.NotEmpty(fingerprint1);
+    }
+
+    [Fact]
+    public void ComputeConfigFingerprint_DifferentConfig_ReturnsDifferentHash()
+    {
+        // Arrange - two identities with different config
+        var identity1 = CreateTestIdentity(
+            usbEnabled: DeviceCapabilities.Piv,
+            nfcEnabled: DeviceCapabilities.Oath);
+
+        var identity2 = CreateTestIdentity(
+            usbEnabled: DeviceCapabilities.Fido2,  // Different
+            nfcEnabled: DeviceCapabilities.Oath);
+
+        // Act
+        var fingerprint1 = identity1.ComputeConfigFingerprint();
+        var fingerprint2 = identity2.ComputeConfigFingerprint();
+
+        // Assert - different config produces different fingerprint
+        Assert.NotEqual(fingerprint1, fingerprint2);
+    }
+
+    [Fact]
+    public void ComputeConfigFingerprint_ReturnsHexString()
+    {
+        // Arrange
+        var identity = CreateTestIdentity();
+
+        // Act
+        var fingerprint = identity.ComputeConfigFingerprint();
+
+        // Assert - should be hex string (SHA256 truncated to 8 chars)
+        Assert.Matches("^[0-9a-f]{8}$", fingerprint);
+    }
+
     /// <summary>
     /// Creates a test implementation of IDeviceIdentity for testing the interface contract.
     /// </summary>

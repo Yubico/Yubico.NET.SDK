@@ -46,10 +46,11 @@ public interface IDeviceRepository : IDisposable
     /// Updates the cache with newly discovered transport references.
     /// </summary>
     /// <param name="discoveredDevices">Transport references discovered by device scanning.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <remarks>
     /// This method is called by background services. It correlates transport references into composites.
     /// </remarks>
-    void UpdateCache(IEnumerable<IYubiKeyReference> discoveredDevices);
+    Task UpdateCacheAsync(IEnumerable<IYubiKeyReference> discoveredDevices, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -99,14 +100,11 @@ public class DeviceRepositoryCached(
             return; // Fast path - data already available
 
         await _initializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-        if (_hasData)
-        {
-            _initializationLock.Release();
-            return; // Double-check after acquiring lock
-        }
-
         try
         {
+            if (_hasData)
+                return; // Double-check after acquiring lock
+
             Logger.LogInformation("Cache empty, performing synchronous device scan...");
             var references = await findYubiKeys.FindAllAsync(ConnectionType.All, cancellationToken)
                 .ConfigureAwait(false);
@@ -177,12 +175,8 @@ public class DeviceRepositoryCached(
     }
 
     /// <inheritdoc />
-    public void UpdateCache(IEnumerable<IYubiKeyReference> discoveredDevices)
-    {
-        // Fire-and-forget async correlation, but we need to handle this synchronously for the interface
-        // This is called from background services that can handle async
-        _ = UpdateCacheInternalAsync(discoveredDevices.ToList(), CancellationToken.None);
-    }
+    public Task UpdateCacheAsync(IEnumerable<IYubiKeyReference> discoveredDevices, CancellationToken cancellationToken = default) =>
+        UpdateCacheInternalAsync(discoveredDevices.ToList(), cancellationToken);
 
     private async Task UpdateCacheInternalAsync(IEnumerable<IYubiKeyReference> discoveredDevices, CancellationToken cancellationToken)
     {

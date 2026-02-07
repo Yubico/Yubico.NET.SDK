@@ -208,10 +208,28 @@ This complexity is appropriate for enterprise applications with existing DI infr
 
 ### 5.1 Must Use
 
-- **`DeviceRepositoryCached`** - Existing cache and event infrastructure
+- **`DeviceRepositoryCached`** - Existing cache and event infrastructure (caches composite `IYubiKey`, not `IYubiKeyReference`)
+- **`ICompositeYubiKeyFactory`** - Correlates transport-specific references into composite YubiKeys
 - **Same device discovery logic** - Reuse existing `SmartCardDeviceListener`, `HidDeviceListener` patterns
-- **`IYubiKey` interface** - Return types must match existing API
+- **`IYubiKey` interface** - Return type is composite representing physical device (aggregates all transports)
+- **`IYubiKeyReference`** - Transport-specific device references (internal to correlation)
 - **CancellationToken** - For async operations and graceful shutdown
+
+### 5.4 Composite Device Model (from composite-device-refactor.md)
+
+**Important:** This spec assumes the composite device refactor (PR #2) is complete. Key concepts:
+
+| Type | Purpose |
+|------|---------|
+| `IYubiKey` | Composite representing the physical YubiKey (aggregates all transports) |
+| `IYubiKeyReference` | Transport-specific device reference (PCSC reader, HID endpoint) |
+| `IDeviceIdentity` | Device identity information (serial, version, capabilities) |
+
+**`FindAllAsync()` returns composites:** Each `IYubiKey` represents one physical YubiKey with all available transports, not individual transport endpoints.
+
+**Identity reader dependency:** Static API needs access to identity reader (from Management) for device correlation. This is provided via:
+- DI: `Func<IYubiKeyReference, CancellationToken, Task<IDeviceIdentity?>>` registered by `AddYubiKeyManagement()`
+- Static: Default reader that opens ManagementSession to read DeviceInfo
 
 ### 5.2 Must Not
 
@@ -233,11 +251,19 @@ This complexity is appropriate for enterprise applications with existing DI infr
 
 ### 6.1 Architectural Changes
 
+**Prerequisite:** This spec depends on the composite device refactor (see `docs/plans/composite-device-refactor.md`). The refactor must be complete before implementing this feature.
+
 **Merge Services:** Combine `DeviceMonitorService` and `DeviceListenerService` into single internal monitoring loop within `YubiKeyManager`. The producer/consumer pattern via `IDeviceChannel` is unnecessary for this domain.
 
 **Remove Abstractions:** Delete `IDeviceChannel` interface - direct calls to `UpdateCache()` on the repository.
 
 **Static Factory for Repository:** Add `DeviceRepositoryCached.Create()` static method for internal use by static API.
+
+**Composite Device Integration:**
+- `FindAllAsync()` returns `IReadOnlyList<IYubiKey>` where each `IYubiKey` is a composite (physical device with all transports)
+- `DeviceEvent` contains composite `IYubiKey`, not `IYubiKeyReference`
+- Static API needs default identity reader for correlation (creates ManagementSession internally)
+- Cache uses `IYubiKey.DeviceId` (serial number or fingerprint) as key, not transport-level IDs
 
 ### 6.2 Memory Safety
 
@@ -326,6 +352,7 @@ This complexity is appropriate for enterprise applications with existing DI infr
 ## 10. Related Documents
 
 - **[Design Research](../../research/yubikey-manager-static-api-design.md)** - Architecture analysis and trade-off decisions
+- **[Composite Device Refactor](../../plans/composite-device-refactor.md)** - Prerequisite refactor: IYubiKey becomes composite, IYubiKeyReference for transport endpoints
 - **[DX Audit Report](../../research/yubikey-manager-static-api-dx-audit.md)** - API design recommendations (referenced in research)
 - **[Technical Feasibility Report](../../research/yubikey-manager-static-api-feasibility.md)** - Implementation validation (referenced in research)
 - **[CLAUDE.md](../../CLAUDE.md)** - SDK patterns and conventions
@@ -333,6 +360,8 @@ This complexity is appropriate for enterprise applications with existing DI infr
 ---
 
 ## 11. Implementation Notes for Plan Agent
+
+**PREREQUISITE:** The composite device refactor (`docs/plans/composite-device-refactor.md`) must be complete before starting this feature. Specifically, Step 2 (Create Composite IYubiKey) must be merged.
 
 When creating the implementation plan, consider:
 

@@ -101,7 +101,7 @@ public class OtpHidProtocolTests
         var protocol = CreateProtocolWithMock(mock);
 
         // Trigger initialization by calling Configure
-        protocol.Configure(new YubiKey.FirmwareVersion(5, 4, 3));
+        protocol.Configure(new Yubico.YubiKit.Core.YubiKey.FirmwareVersion(5, 4, 3));
 
         Assert.NotNull(protocol.FirmwareVersion);
         Assert.Equal(5, protocol.FirmwareVersion.Major);

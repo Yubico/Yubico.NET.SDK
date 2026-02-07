@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Hid;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 
@@ -48,6 +49,11 @@ public static class DependencyInjection
         ///         <see cref="IYubiKeyManager.DeviceChanges"/>. The <see cref="IYubiKeyManager.FindAllAsync"/>
         ///         method works without starting the host (performs synchronous scan if needed).
         ///     </para>
+        ///     <para>
+        ///         <b>Identity reading:</b> By default, a null identity reader is registered. Call
+        ///         <c>AddYubiKeyManagement()</c> to register the Management module which provides
+        ///         the actual identity reader implementation.
+        ///     </para>
         /// </remarks>
         /// <param name="configureOptions">Optional configuration for YubiKey manager options.</param>
         /// <returns>The service collection for chaining.</returns>
@@ -67,6 +73,12 @@ public static class DependencyInjection
             services.TryAddTransient<IProtocolFactory<ISmartCardConnection>, PcscProtocolFactory<ISmartCardConnection>>();
             services.TryAddSingleton<ICompositeYubiKeyFactory, CompositeYubiKeyFactory>();
             services.TryAddSingleton<IDeviceChannel, DeviceChannel>();
+
+            // Register default identity reader delegate (returns null for all references)
+            // The Management module will override this with actual device info reading
+            services.TryAddSingleton<Func<IYubiKeyReference, CancellationToken, Task<IDeviceIdentity?>>>(
+                (_, _) => Task.FromResult<IDeviceIdentity?>(null));
+
             services.TryAddSingleton<IDeviceRepository, DeviceRepositoryCached>();
 
             services.AddBackgroundServices();

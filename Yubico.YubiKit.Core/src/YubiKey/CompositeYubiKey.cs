@@ -77,6 +77,10 @@ internal sealed class CompositeYubiKey : IYubiKey
     }
 
     /// <inheritdoc />
+    public bool SupportsConnection(ConnectionType connectionType) =>
+        _references.ContainsKey(connectionType);
+
+    /// <inheritdoc />
     public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection
     {

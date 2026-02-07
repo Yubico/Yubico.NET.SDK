@@ -21,19 +21,59 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core;
 
+/// <summary>
+/// Repository for discovering and caching YubiKey devices.
+/// </summary>
 public interface IDeviceRepository : IDisposable
 {
+    /// <summary>
+    /// Observable stream of device events (added, removed, updated).
+    /// </summary>
+    /// <remarks>
+    /// Requires background services to be running. Call <c>host.StartAsync()</c> before accessing.
+    /// </remarks>
     IObservable<DeviceEvent> DeviceChanges { get; }
-    Task<IReadOnlyList<IYubiKeyReference>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Finds all connected YubiKey devices, returning composite devices that aggregate all transports.
+    /// </summary>
+    /// <param name="type">Connection type filter. Use <see cref="ConnectionType.All"/> for all devices.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>List of composite YubiKey devices.</returns>
+    Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates the cache with newly discovered transport references.
+    /// </summary>
+    /// <param name="discoveredDevices">Transport references discovered by device scanning.</param>
+    /// <remarks>
+    /// This method is called by background services. It correlates transport references into composites.
+    /// </remarks>
     void UpdateCache(IEnumerable<IYubiKeyReference> discoveredDevices);
 }
 
+/// <summary>
+/// Cached device repository that correlates transport references into composite YubiKey devices.
+/// </summary>
+/// <remarks>
+/// <para>
+/// This repository caches <see cref="IYubiKey"/> composites rather than raw transport references.
+/// When <see cref="FindAllAsync"/> is called, transport references are correlated using the
+/// <see cref="ICompositeYubiKeyFactory"/> to group multiple transports for the same physical device.
+/// </para>
+/// <para>
+/// The identity reader delegate is provided by the Management module at DI registration time,
+/// enabling identity reading without creating a circular dependency.
+/// </para>
+/// </remarks>
 public class DeviceRepositoryCached(
     ILogger<DeviceRepositoryCached> logger,
-    IFindYubiKeys findYubiKeys)
+    IFindYubiKeys findYubiKeys,
+    ICompositeYubiKeyFactory compositeFactory,
+    Func<IYubiKeyReference, CancellationToken, Task<IDeviceIdentity?>> identityReader)
     : IDeviceRepository
 {
-    private readonly ConcurrentDictionary<string, IYubiKeyReference> _deviceCache = new();
+    private readonly ConcurrentDictionary<string, IYubiKey> _deviceCache = new();
     private readonly Subject<DeviceEvent> _deviceChanges = new();
     private readonly SemaphoreSlim _initializationLock = new(1, 1);
 
@@ -59,16 +99,19 @@ public class DeviceRepositoryCached(
 
         await _initializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
         if (_hasData)
+        {
+            _initializationLock.Release();
             return; // Double-check after acquiring lock
+        }
 
         try
         {
             logger.LogInformation("Cache empty, performing synchronous device scan...");
-            var yubiKeys = await findYubiKeys.FindAllAsync(ConnectionType.All, cancellationToken)
+            var references = await findYubiKeys.FindAllAsync(ConnectionType.All, cancellationToken)
                 .ConfigureAwait(false);
-            UpdateCache(yubiKeys);
+            await UpdateCacheInternalAsync(references, cancellationToken).ConfigureAwait(false);
 
-            logger.LogInformation("Synchronous scan completed, found {DeviceCount} devices", yubiKeys.Count);
+            logger.LogInformation("Synchronous scan completed, found {DeviceCount} devices", _deviceCache.Count);
         }
         catch (Exception ex)
         {
@@ -82,19 +125,40 @@ public class DeviceRepositoryCached(
         }
     }
 
-    private static bool DevicesAreEqual(IYubiKeyReference device1, IYubiKeyReference device2) =>
+    /// <summary>
+    /// Creates an identity reader that handles null returns from the delegate.
+    /// </summary>
+    private Func<IYubiKeyReference, CancellationToken, Task<IDeviceIdentity>> CreateSafeIdentityReader()
+    {
+        return async (reference, ct) =>
+        {
+            var identity = await identityReader(reference, ct).ConfigureAwait(false);
+            // If identity is null, return a minimal identity for uncorrelatable devices
+            return identity ?? new MinimalDeviceIdentity(reference.DeviceId);
+        };
+    }
+
+    private static bool DevicesAreEqual(IYubiKey device1, IYubiKey device2) =>
         device1.DeviceId == device2.DeviceId;
 
     #region IDeviceRepository Members
 
-    // Public API methods with guaranteed data availability
-    public async Task<IReadOnlyList<IYubiKeyReference>> FindAllAsync(ConnectionType type = ConnectionType.All,
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type = ConnectionType.All,
         CancellationToken cancellationToken = default)
     {
         await EnsureDataAvailable(cancellationToken).ConfigureAwait(false);
-        return [.. _deviceCache.Values.Where(d => d.ConnectionType == type || type == ConnectionType.All)];
+
+        if (type == ConnectionType.All)
+        {
+            return [.. _deviceCache.Values];
+        }
+
+        // Filter to composites that support the requested connection type
+        return [.. _deviceCache.Values.Where(d => d.SupportsConnection(type))];
     }
 
+    /// <inheritdoc />
     public IObservable<DeviceEvent> DeviceChanges
     {
         get
@@ -106,21 +170,56 @@ public class DeviceRepositoryCached(
                     "Call host.StartAsync() before accessing DeviceChanges. " +
                     "Alternatively, use FindAllAsync() which works without background services.");
             }
-            
+
             return _deviceChanges.AsObservable();
         }
     }
 
+    /// <inheritdoc />
     public void UpdateCache(IEnumerable<IYubiKeyReference> discoveredDevices)
     {
-        var currentIds = _deviceCache.Keys.ToHashSet();
-        var newDeviceMap = new Dictionary<string, IYubiKeyReference>();
+        // Fire-and-forget async correlation, but we need to handle this synchronously for the interface
+        // This is called from background services that can handle async
+        _ = UpdateCacheInternalAsync(discoveredDevices.ToList(), CancellationToken.None);
+    }
 
-        foreach (var device in discoveredDevices)
+    private async Task UpdateCacheInternalAsync(IEnumerable<IYubiKeyReference> discoveredDevices, CancellationToken cancellationToken)
+    {
+        var referenceList = discoveredDevices.ToList();
+        if (referenceList.Count == 0)
         {
-            var deviceId = device.DeviceId;
-            newDeviceMap[deviceId] = device;
+            // Handle removal of all devices
+            var emptyRemovedIds = _deviceCache.Keys.ToList();
+            foreach (var deviceId in emptyRemovedIds)
+            {
+                if (_deviceCache.TryRemove(deviceId, out _))
+                {
+                    _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, (IYubiKey?)null) { DeviceId = deviceId });
+                    logger.LogDebug("Removed device: {DeviceId}", deviceId);
+                }
+            }
+            _hasData = true;
+            return;
         }
+
+        // Correlate transport references into composite devices
+        IReadOnlyList<IYubiKey> composites;
+        try
+        {
+            composites = await compositeFactory.CreateCompositesAsync(
+                referenceList,
+                CreateSafeIdentityReader(),
+                cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to correlate devices into composites");
+            _hasData = true;
+            return;
+        }
+
+        var currentIds = _deviceCache.Keys.ToHashSet();
+        var newDeviceMap = composites.ToDictionary(c => c.DeviceId);
 
         var newIds = newDeviceMap.Keys.ToHashSet();
         var addedIds = newIds.Except(currentIds).ToList();
@@ -151,10 +250,10 @@ public class DeviceRepositoryCached(
 
         // Handle removed devices
         foreach (var deviceId in removedIds)
-            if (_deviceCache.TryRemove(deviceId, out var removedDevice))
+            if (_deviceCache.TryRemove(deviceId, out _))
             {
                 _deviceChanges.OnNext(
-                    new DeviceEvent(DeviceAction.Removed, (IYubiKeyReference?)null) { DeviceId = deviceId });
+                    new DeviceEvent(DeviceAction.Removed, (IYubiKey?)null) { DeviceId = deviceId });
                 logger.LogDebug("Removed device: {DeviceId}", deviceId);
             }
 
@@ -165,6 +264,7 @@ public class DeviceRepositoryCached(
             newDeviceMap.Count, addedIds.Count, potentiallyUpdatedIds.Count, removedIds.Count);
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed)
@@ -187,4 +287,31 @@ public class DeviceRepositoryCached(
     }
 
     #endregion
+
+    /// <summary>
+    /// Minimal device identity for uncorrelatable references when identity reading returns null.
+    /// </summary>
+    private sealed class MinimalDeviceIdentity(string deviceId) : IDeviceIdentity
+    {
+        public int? SerialNumber => null;
+        public FirmwareVersion FirmwareVersion => FirmwareVersion.Default;
+        public FormFactor FormFactor => FormFactor.Unknown;
+        public DeviceCapabilities UsbSupported => DeviceCapabilities.None;
+        public DeviceCapabilities NfcSupported => DeviceCapabilities.None;
+        public DeviceCapabilities UsbEnabled => DeviceCapabilities.None;
+        public DeviceCapabilities NfcEnabled => DeviceCapabilities.None;
+        public ushort AutoEjectTimeout => 0;
+        public ReadOnlyMemory<byte> ChallengeResponseTimeout => ReadOnlyMemory<byte>.Empty;
+        public DeviceFlags DeviceFlags => DeviceFlags.None;
+        public bool IsNfcRestricted => false;
+
+        public string ComputeConfigFingerprint()
+        {
+            // Use a hash of the device ID to ensure uniqueness
+            Span<byte> hash = stackalloc byte[32];
+            var bytes = System.Text.Encoding.UTF8.GetBytes(deviceId);
+            System.Security.Cryptography.SHA256.HashData(bytes, hash);
+            return Convert.ToHexString(hash[..4]).ToLowerInvariant();
+        }
+    }
 }

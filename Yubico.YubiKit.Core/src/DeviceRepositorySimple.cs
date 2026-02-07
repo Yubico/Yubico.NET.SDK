@@ -20,6 +20,20 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core;
 
+/// <summary>
+/// Simple device repository that performs direct device scanning without caching.
+/// </summary>
+/// <remarks>
+/// <para>
+/// This implementation does not support composite device correlation. Use 
+/// <see cref="DeviceRepositoryCached"/> via dependency injection for full functionality.
+/// </para>
+/// <para>
+/// This class is provided for backwards compatibility and simple use cases where
+/// device caching and correlation are not required.
+/// </para>
+/// </remarks>
+[Obsolete("Use DeviceRepositoryCached via AddYubiKeyManagerCore() dependency injection for composite device support.")]
 public class DeviceRepositorySimple : IDeviceRepository
 {
     private readonly Subject<DeviceEvent> _deviceChanges = new();
@@ -33,19 +47,19 @@ public class DeviceRepositorySimple : IDeviceRepository
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            var devices = await FindAllAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var references = await FindYubiKeys.Create().FindAllAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var currentDeviceIds = new HashSet<string>();
 
-            foreach (var device in devices)
+            foreach (var reference in references)
             {
-                var id = device.DeviceId;
+                var id = reference.DeviceId;
                 currentDeviceIds.Add(id);
 
                 if (previousDeviceIds.Contains(id))
                     continue;
 
-                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, device));
-                yield return new DeviceEvent(DeviceAction.Added, device);
+                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, reference));
+                yield return new DeviceEvent(DeviceAction.Added, reference);
             }
 
             foreach (var removedId in previousDeviceIds.Except(currentDeviceIds))
@@ -61,16 +75,25 @@ public class DeviceRepositorySimple : IDeviceRepository
 
     #region IDeviceRepository Members
 
-    public Task<IReadOnlyList<IYubiKeyReference>> FindAllAsync(ConnectionType type = ConnectionType.All,
+    /// <inheritdoc />
+    /// <exception cref="NotSupportedException">
+    /// DeviceRepositorySimple does not support composite devices. 
+    /// Use DeviceRepositoryCached via dependency injection.
+    /// </exception>
+    public Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type = ConnectionType.All,
         CancellationToken cancellationToken = default) =>
-        FindYubiKeys
-            .Create()
-            .FindAllAsync(type, cancellationToken);
+        throw new NotSupportedException(
+            "DeviceRepositorySimple does not support composite devices. " +
+            "Use AddYubiKeyManagerCore() dependency injection with DeviceRepositoryCached for composite device support.");
 
-    public void UpdateCache(IEnumerable<IYubiKeyReference> discoveredDevices) => throw new NotImplementedException();
+    /// <inheritdoc />
+    public void UpdateCache(IEnumerable<IYubiKeyReference> discoveredDevices) => 
+        throw new NotSupportedException("DeviceRepositorySimple does not support caching.");
 
+    /// <inheritdoc />
     public IObservable<DeviceEvent> DeviceChanges => _deviceChanges.AsObservable();
 
+    /// <inheritdoc />
     public void Dispose() => _deviceChanges.Dispose();
 
     #endregion

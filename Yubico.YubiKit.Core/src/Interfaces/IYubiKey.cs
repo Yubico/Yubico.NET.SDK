@@ -71,6 +71,13 @@ public interface IYubiKey
     bool SupportsConnection<TConnection>() where TConnection : class, IConnection;
 
     /// <summary>
+    /// Determines whether the specified connection type is supported by this device.
+    /// </summary>
+    /// <param name="connectionType">The connection type to check.</param>
+    /// <returns><c>true</c> if the connection type is available; otherwise, <c>false</c>.</returns>
+    bool SupportsConnection(ConnectionType connectionType);
+
+    /// <summary>
     /// Opens a connection of the specified type to the device.
     /// </summary>
     /// <typeparam name="TConnection">The type of connection to open.</typeparam>

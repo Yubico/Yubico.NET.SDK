@@ -144,6 +144,9 @@ public class IYubiKeyTests
                    AvailableConnections.Contains(ConnectionType.SmartCard);
         }
 
+        public bool SupportsConnection(ConnectionType connectionType) =>
+            AvailableConnections.Contains(connectionType);
+
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection
         {

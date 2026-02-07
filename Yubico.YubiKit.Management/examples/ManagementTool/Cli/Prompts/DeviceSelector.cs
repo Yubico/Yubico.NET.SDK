@@ -25,27 +25,27 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
 /// <param name="SerialNumber">The device serial number, if available.</param>
 /// <param name="FormFactor">The device form factor.</param>
 /// <param name="FirmwareVersion">The firmware version string.</param>
-/// <param name="ConnectionType">The connection type used to connect to this device.</param>
+/// <param name="AvailableConnections">The connection types available for this device.</param>
 public record DeviceSelection(
-    IYubiKeyReference Device,
+    IYubiKey Device,
     int? SerialNumber,
     FormFactor FormFactor,
     string FirmwareVersion,
-    ConnectionType ConnectionType)
+    IReadOnlyList<ConnectionType> AvailableConnections)
 {
     /// <summary>
-    /// Gets a display string for this device (e.g., "YubiKey 5C - S/N: 12345678 (SmartCard)").
+    /// Gets a display string for this device (e.g., "YubiKey 5C - S/N: 12345678 (SmartCard, FIDO HID)").
     /// </summary>
     public string DisplayName =>
         SerialNumber.HasValue
-            ? $"YubiKey {FormatFormFactor(FormFactor)} - S/N: {SerialNumber} ({FormatConnectionType(ConnectionType)})"
-            : $"YubiKey {FormatFormFactor(FormFactor)} ({FormatConnectionType(ConnectionType)})";
+            ? $"YubiKey {FormatFormFactor(FormFactor)} - S/N: {SerialNumber} ({FormatConnectionTypes(AvailableConnections)})"
+            : $"YubiKey {FormatFormFactor(FormFactor)} ({FormatConnectionTypes(AvailableConnections)})";
 
     private static string FormatFormFactor(FormFactor formFactor) =>
         DeviceSelector.FormatFormFactor(formFactor);
 
-    private static string FormatConnectionType(ConnectionType connectionType) =>
-        DeviceSelector.FormatConnectionType(connectionType);
+    private static string FormatConnectionTypes(IReadOnlyList<ConnectionType> connectionTypes) =>
+        string.Join(", ", connectionTypes.Select(DeviceSelector.FormatConnectionType));
 }
 
 /// <summary>
@@ -85,13 +85,12 @@ public static class DeviceSelector
         if (devices.Count == 1)
         {
             var device = devices[0];
-            var info = await GetDeviceInfoAsync(device, cancellationToken);
             return new DeviceSelection(
                 device,
-                info?.SerialNumber,
-                info?.FormFactor ?? FormFactor.Unknown,
-                info?.FirmwareVersion.ToString() ?? "Unknown",
-                device.ConnectionType);
+                device.Identity.SerialNumber,
+                device.Identity.FormFactor,
+                device.Identity.FirmwareVersion.ToString(),
+                device.AvailableConnections);
         }
 
         // Multiple devices - let user choose
@@ -104,7 +103,7 @@ public static class DeviceSelector
     /// </summary>
     /// <param name="manager">YubiKeyManager for device enumeration.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    public static async Task<IReadOnlyList<IYubiKeyReference>> FindDevicesWithRetryAsync(
+    public static async Task<IReadOnlyList<IYubiKey>> FindDevicesWithRetryAsync(
         IYubiKeyManager manager,
         CancellationToken cancellationToken = default)
     {
@@ -116,7 +115,7 @@ public static class DeviceSelector
 
             // Filter to supported connection types for Management
             var devices = allDevices
-                .Where(d => SupportedConnectionTypes.Contains(d.ConnectionType))
+                .Where(d => d.AvailableConnections.Any(c => SupportedConnectionTypes.Contains(c)))
                 .ToList();
 
             if (devices.Count > 0)
@@ -137,53 +136,15 @@ public static class DeviceSelector
     }
 
     /// <summary>
-    /// Gets device info for a single device.
-    /// </summary>
-    private static async Task<DeviceInfo?> GetDeviceInfoAsync(
-        IYubiKeyReference device,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            // Use the IYubiKeyReference extension method which handles all transport types
-            return await device.GetDeviceInfoAsync(cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            // TODO: Remove debug output once SmartCard issue is resolved
-            AnsiConsole.MarkupLine($"[grey]Debug: {device.ConnectionType} device info failed: {Markup.Escape(ex.GetType().Name)}: {Markup.Escape(ex.Message)}[/]");
-            return null;
-        }
-    }
-
-    /// <summary>
     /// Prompts user to select from multiple devices.
     /// </summary>
     private static async Task<DeviceSelection?> PromptForDeviceSelectionAsync(
-        IReadOnlyList<IYubiKeyReference> devices,
+        IReadOnlyList<IYubiKey> devices,
         CancellationToken cancellationToken)
     {
-        var deviceInfos = new List<(IYubiKeyReference Device, DeviceInfo? Info)>();
-
-        // Get device info for each device to display details
-        await AnsiConsole.Status()
-            .StartAsync("Querying device information...", async ctx =>
-            {
-                var tasks = devices
-                    .Select(device => GetDeviceInfoAsync(device, cancellationToken))
-                    .ToArray();
-
-                var infos = await Task.WhenAll(tasks);
-
-                for (int i = 0; i < devices.Count; i++)
-                {
-                    deviceInfos.Add((devices[i], infos[i]));
-                }
-            });
-
         // Create indexed choices and sort by name, keeping original index
-        var indexedChoices = deviceInfos
-            .Select((d, index) => (Choice: FormatDeviceChoice(d.Device, d.Info), OriginalIndex: index))
+        var indexedChoices = devices
+            .Select((d, index) => (Choice: FormatDeviceChoice(d), OriginalIndex: index))
             .OrderBy(x => x.Choice)
             .ToList();
 
@@ -204,32 +165,29 @@ public static class DeviceSelector
         // Find the original index from the sorted list
         var selectedSortedIndex = choices.IndexOf(selection);
         var originalIndex = indexedChoices[selectedSortedIndex].OriginalIndex;
-        var selected = deviceInfos[originalIndex];
+        var selected = devices[originalIndex];
+        
         return new DeviceSelection(
-            selected.Device,
-            selected.Info?.SerialNumber,
-            selected.Info?.FormFactor ?? FormFactor.Unknown,
-            selected.Info?.FirmwareVersion.ToString() ?? "Unknown",
-            selected.Device.ConnectionType);
+            selected,
+            selected.Identity.SerialNumber,
+            selected.Identity.FormFactor,
+            selected.Identity.FirmwareVersion.ToString(),
+            selected.AvailableConnections);
     }
 
     /// <summary>
     /// Formats a device choice string for display.
     /// </summary>
-    private static string FormatDeviceChoice(IYubiKeyReference device, DeviceInfo? info)
+    private static string FormatDeviceChoice(IYubiKey device)
     {
-        var transport = FormatConnectionType(device.ConnectionType);
+        var transports = string.Join(", ", device.AvailableConnections.Select(FormatConnectionType));
+        var identity = device.Identity;
 
-        if (info is null)
-        {
-            return $"YubiKey ({transport})";
-        }
+        var serial = identity.SerialNumber?.ToString() ?? "N/A";
+        var firmware = identity.FirmwareVersion.ToString();
+        var formFactor = FormatFormFactor(identity.FormFactor);
 
-        var serial = info.Value.SerialNumber?.ToString() ?? "N/A";
-        var firmware = info.Value.FirmwareVersion.ToString();
-        var formFactor = FormatFormFactor(info.Value.FormFactor);
-
-        return $"YubiKey {formFactor} - Serial: {serial}, Firmware: {firmware} ({transport})";
+        return $"YubiKey {formFactor} - Serial: {serial}, Firmware: {firmware} ({transports})";
     }
 
     /// <summary>

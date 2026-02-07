@@ -49,7 +49,7 @@ public class
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
         var fidoDevice = devices[0];
 
-        Assert.Equal(ConnectionType.HidFido, fidoDevice.ConnectionType);
+        Assert.True(fidoDevice.SupportsConnection(ConnectionType.HidFido));
         
         var deviceInfo = await fidoDevice.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
@@ -61,7 +61,7 @@ public class
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidOtp);
         var otpDevice = devices[0];
     
-        Assert.Equal(ConnectionType.HidOtp, otpDevice.ConnectionType);
+        Assert.True(otpDevice.SupportsConnection(ConnectionType.HidOtp));
         
         var deviceInfo = await otpDevice.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);

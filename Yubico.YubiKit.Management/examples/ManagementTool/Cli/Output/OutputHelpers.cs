@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Spectre.Console;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Output;
 

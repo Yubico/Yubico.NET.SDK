@@ -14,7 +14,7 @@
 
 using Yubico.YubiKit.Core.SmartCard;
 
-namespace Yubico.YubiKit.Core;
+namespace Yubico.YubiKit.Core.YubiKey;
 
 public static class ProductAtrs
 {

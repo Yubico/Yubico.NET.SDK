@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management.UnitTests;
 

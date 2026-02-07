@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Management;
+namespace Yubico.YubiKit.Core.YubiKey;
 
 public enum FormFactor
 {

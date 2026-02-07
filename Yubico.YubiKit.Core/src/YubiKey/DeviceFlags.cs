@@ -45,7 +45,7 @@ public enum DeviceFlags
     ///     </para>
     ///     <para>
     ///         To automatically eject the smart card following a touch, see
-    ///         <see cref="DeviceInfo.AutoEjectTimeout" />.
+    ///         the AutoEjectTimeout property on the device info.
     ///     </para>
     /// </remarks>
     TouchEject = 0x80

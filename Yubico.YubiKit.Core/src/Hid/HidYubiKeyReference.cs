@@ -28,10 +28,10 @@ namespace Yubico.YubiKit.Core.Hid;
 /// HID connections are inherently synchronous (OS-level ioctl calls), so connection
 /// creation completes synchronously. The async API is maintained for interface consistency.
 /// </remarks>
-internal class HidYubiKey(
+internal class HidYubiKeyReference(
     IHidDevice hidDevice,
-    ILogger<HidYubiKey> logger)
-    : IYubiKey
+    ILogger<HidYubiKeyReference> logger)
+    : IYubiKeyReference
 {
     public string DeviceId { get; } =
         $"hid:{hidDevice.DescriptorInfo.VendorId:X4}:{hidDevice.DescriptorInfo.ProductId:X4}:{hidDevice.DescriptorInfo.Usage:X4}";

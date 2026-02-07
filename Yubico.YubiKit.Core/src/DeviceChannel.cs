@@ -19,19 +19,19 @@ namespace Yubico.YubiKit.Core;
 
 public interface IDeviceChannel
 {
-    Task PublishAsync(IEnumerable<IYubiKey> devices, CancellationToken cancellationToken = default);
-    IAsyncEnumerable<IEnumerable<IYubiKey>> ConsumeAsync(CancellationToken cancellationToken = default);
+    Task PublishAsync(IEnumerable<IYubiKeyReference> devices, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<IEnumerable<IYubiKeyReference>> ConsumeAsync(CancellationToken cancellationToken = default);
     void Complete();
 }
 
 public class DeviceChannel : IDeviceChannel, IDisposable
 {
-    private readonly Channel<IEnumerable<IYubiKey>> _channel = Channel.CreateUnbounded<IEnumerable<IYubiKey>>();
+    private readonly Channel<IEnumerable<IYubiKeyReference>> _channel = Channel.CreateUnbounded<IEnumerable<IYubiKeyReference>>();
     private bool _disposed;
 
     #region IDeviceChannel Members
 
-    public async Task PublishAsync(IEnumerable<IYubiKey> devices, CancellationToken cancellationToken = default)
+    public async Task PublishAsync(IEnumerable<IYubiKeyReference> devices, CancellationToken cancellationToken = default)
     {
         if (_disposed) return;
 
@@ -45,7 +45,7 @@ public class DeviceChannel : IDeviceChannel, IDisposable
         }
     }
 
-    public IAsyncEnumerable<IEnumerable<IYubiKey>> ConsumeAsync(CancellationToken cancellationToken = default) =>
+    public IAsyncEnumerable<IEnumerable<IYubiKeyReference>> ConsumeAsync(CancellationToken cancellationToken = default) =>
         _channel.Reader.ReadAllAsync(cancellationToken);
 
     public void Complete()

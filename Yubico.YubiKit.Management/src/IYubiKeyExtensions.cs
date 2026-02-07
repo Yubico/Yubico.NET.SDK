@@ -29,7 +29,7 @@ namespace Yubico.YubiKit.Management;
 /// </remarks>
 public static class IYubiKeyExtensions
 {
-    extension(IYubiKey yubiKey)
+    extension(IYubiKeyReference yubiKeyReference)
     {
         /// <summary>
         ///     Retrieves device information from a YubiKey asynchronously.
@@ -42,7 +42,7 @@ public static class IYubiKeyExtensions
         /// </returns>
         public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
         {
-            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
+            await using var mgmtSession = await yubiKeyReference.CreateManagementSessionAsync(cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
             return await mgmtSession.GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -75,7 +75,7 @@ public static class IYubiKeyExtensions
             byte[]? newLockCode = null,
             CancellationToken cancellationToken = default)
         {
-            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
+            await using var mgmtSession = await yubiKeyReference.CreateManagementSessionAsync(cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
             await mgmtSession.SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken)
                 .ConfigureAwait(false);
@@ -102,7 +102,7 @@ public static class IYubiKeyExtensions
             ProtocolConfiguration? configuration = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync(cancellationToken);
+            var connection = await yubiKeyReference.ConnectAsync(cancellationToken);
             return await ManagementSession.CreateAsync(
                     connection,
                     configuration,

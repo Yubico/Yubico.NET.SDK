@@ -15,6 +15,7 @@
 namespace Yubico.YubiKit.Core.IntegrationTests.Core;
 
 using Tests.Shared.Infrastructure;
+using Yubico.YubiKit.Core.YubiKey;
 
 public class YubiKeyTests
 {

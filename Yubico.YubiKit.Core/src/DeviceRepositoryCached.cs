@@ -24,8 +24,8 @@ namespace Yubico.YubiKit.Core;
 public interface IDeviceRepository : IDisposable
 {
     IObservable<DeviceEvent> DeviceChanges { get; }
-    Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
-    void UpdateCache(IEnumerable<IYubiKey> discoveredDevices);
+    Task<IReadOnlyList<IYubiKeyReference>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
+    void UpdateCache(IEnumerable<IYubiKeyReference> discoveredDevices);
 }
 
 public class DeviceRepositoryCached(
@@ -33,7 +33,7 @@ public class DeviceRepositoryCached(
     IFindYubiKeys findYubiKeys)
     : IDeviceRepository
 {
-    private readonly ConcurrentDictionary<string, IYubiKey> _deviceCache = new();
+    private readonly ConcurrentDictionary<string, IYubiKeyReference> _deviceCache = new();
     private readonly Subject<DeviceEvent> _deviceChanges = new();
     private readonly SemaphoreSlim _initializationLock = new(1, 1);
 
@@ -82,13 +82,13 @@ public class DeviceRepositoryCached(
         }
     }
 
-    private static bool DevicesAreEqual(IYubiKey device1, IYubiKey device2) =>
+    private static bool DevicesAreEqual(IYubiKeyReference device1, IYubiKeyReference device2) =>
         device1.DeviceId == device2.DeviceId;
 
     #region IDeviceRepository Members
 
     // Public API methods with guaranteed data availability
-    public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type = ConnectionType.All,
+    public async Task<IReadOnlyList<IYubiKeyReference>> FindAllAsync(ConnectionType type = ConnectionType.All,
         CancellationToken cancellationToken = default)
     {
         await EnsureDataAvailable(cancellationToken).ConfigureAwait(false);
@@ -111,10 +111,10 @@ public class DeviceRepositoryCached(
         }
     }
 
-    public void UpdateCache(IEnumerable<IYubiKey> discoveredDevices)
+    public void UpdateCache(IEnumerable<IYubiKeyReference> discoveredDevices)
     {
         var currentIds = _deviceCache.Keys.ToHashSet();
-        var newDeviceMap = new Dictionary<string, IYubiKey>();
+        var newDeviceMap = new Dictionary<string, IYubiKeyReference>();
 
         foreach (var device in discoveredDevices)
         {

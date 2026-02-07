@@ -96,7 +96,7 @@ public sealed class DeviceMonitorService(
             var hidScanTask = ScanHidDevices(cancellationToken);
             await Task.WhenAll(pcscScanTask, hidScanTask).ConfigureAwait(false);
 
-            var yubiKeys = new List<IYubiKey>();
+            var yubiKeys = new List<IYubiKeyReference>();
             yubiKeys.AddRange(pcscScanTask.Result);
             yubiKeys.AddRange(hidScanTask.Result);
 
@@ -114,7 +114,7 @@ public sealed class DeviceMonitorService(
         }
     }
 
-    private async Task<List<IYubiKey>> ScanPcscDevices(CancellationToken cancellationToken)
+    private async Task<List<IYubiKeyReference>> ScanPcscDevices(CancellationToken cancellationToken)
     {
         var devices = await findPcscService.FindAllAsync(cancellationToken).ConfigureAwait(false);
         var yubiKeys = devices.Select(yubiKeyFactory.Create).ToList();
@@ -122,7 +122,7 @@ public sealed class DeviceMonitorService(
         return yubiKeys;
     }
 
-    private async Task<List<IYubiKey>> ScanHidDevices(CancellationToken cancellationToken)
+    private async Task<List<IYubiKeyReference>> ScanHidDevices(CancellationToken cancellationToken)
     {
         var devices = await findHidService.FindAllAsync(cancellationToken).ConfigureAwait(false);
         var yubiKeys = devices.Select(yubiKeyFactory.Create).ToList();

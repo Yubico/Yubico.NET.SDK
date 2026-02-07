@@ -19,11 +19,11 @@ using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
-internal class PcscYubiKey(
+internal class PcscYubiKeyReference(
     IPcscDevice pcscDevice,
     ISmartCardConnectionFactory connectionFactory,
-    ILogger<PcscYubiKey> logger)
-    : IYubiKey
+    ILogger<PcscYubiKeyReference> logger)
+    : IYubiKeyReference
 {
     private readonly string _readerName = pcscDevice.ReaderName;
 
@@ -35,10 +35,10 @@ internal class PcscYubiKey(
         return connection;
     }
 
-    public static PcscYubiKey Create(IPcscDevice pcscDevice, ILogger<PcscYubiKey>? logger) => new(pcscDevice,
-        SmartCardConnectionFactory.CreateDefault(), logger ?? NullLogger<PcscYubiKey>.Instance);
+    public static PcscYubiKeyReference Create(IPcscDevice pcscDevice, ILogger<PcscYubiKeyReference>? logger) => new(pcscDevice,
+        SmartCardConnectionFactory.CreateDefault(), logger ?? NullLogger<PcscYubiKeyReference>.Instance);
 
-    #region IYubiKey Members
+    #region IYubiKeyReference Members
 
     public string DeviceId { get; } = $"pcsc:{pcscDevice.ReaderName}";
     public ConnectionType ConnectionType => ConnectionType.SmartCard;

@@ -23,9 +23,9 @@ public enum DeviceAction
     Updated
 }
 
-public class DeviceEvent(DeviceAction action, IYubiKey? device)
+public class DeviceEvent(DeviceAction action, IYubiKeyReference? device)
 {
-    public IYubiKey? Device { get; } = device;
+    public IYubiKeyReference? Device { get; } = device;
     public DeviceAction Action { get; } = action;
     public string? DeviceId { get; set; }
     public DateTime Timestamp { get; } = DateTime.UtcNow;

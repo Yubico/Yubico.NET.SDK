@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Tests.Shared;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         This class wraps an <see cref="IYubiKey" /> and its <see cref="Management.DeviceInfo" />
+///         This class wraps an <see cref="IYubiKeyReference" /> and its <see cref="Management.DeviceInfo" />
 ///         for use with xUnit Theory tests via <see cref="Yubico.YubiKit.Tests.Shared.Infrastructure" />.
 ///     </para>
 ///     <para>
@@ -133,7 +133,7 @@ public class YubiKeyTestState : IXunitSerializable
     /// <param name="device">The YubiKey device.</param>
     /// <param name="deviceInfo">The device information.</param>
     /// <param name="connectionType">The connection type for this device instance.</param>
-    public YubiKeyTestState(IYubiKey device, DeviceInfo deviceInfo, ConnectionType connectionType)
+    public YubiKeyTestState(IYubiKeyReference device, DeviceInfo deviceInfo, ConnectionType connectionType)
     {
         Device = device ?? throw new ArgumentNullException(nameof(device));
         DeviceInfo = deviceInfo;
@@ -144,7 +144,7 @@ public class YubiKeyTestState : IXunitSerializable
     ///     Gets the YubiKey device instance.
     ///     For placeholders, accessing this property triggers lazy device binding.
     /// </summary>
-    public IYubiKey Device
+    public IYubiKeyReference Device
     {
         get
         {
@@ -165,7 +165,7 @@ public class YubiKeyTestState : IXunitSerializable
         private set => _device = value;
     }
 
-    private IYubiKey? _device;
+    private IYubiKeyReference? _device;
 
     /// <summary>
     ///     Gets the device information (firmware, form factor, capabilities, etc.).
@@ -396,7 +396,7 @@ public class YubiKeyTestState : IXunitSerializable
 ///     Static cache for YubiKey devices shared across test data attributes.
 /// </summary>
 /// <remarks>
-///     xUnit serializes/deserializes test parameters, but we can't serialize IYubiKey objects.
+///     xUnit serializes/deserializes test parameters, but we can't serialize IYubiKeyReference objects.
 ///     This cache stores devices by composite key (serial number + connection type) so we can 
 ///     reconstruct them during deserialization.
 /// </remarks>

@@ -27,7 +27,7 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
 /// <param name="FirmwareVersion">The firmware version string.</param>
 /// <param name="ConnectionType">The connection type used to connect to this device.</param>
 public record DeviceSelection(
-    IYubiKey Device,
+    IYubiKeyReference Device,
     int? SerialNumber,
     FormFactor FormFactor,
     string FirmwareVersion,
@@ -104,7 +104,7 @@ public static class DeviceSelector
     /// </summary>
     /// <param name="manager">YubiKeyManager for device enumeration.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    public static async Task<IReadOnlyList<IYubiKey>> FindDevicesWithRetryAsync(
+    public static async Task<IReadOnlyList<IYubiKeyReference>> FindDevicesWithRetryAsync(
         IYubiKeyManager manager,
         CancellationToken cancellationToken = default)
     {
@@ -140,12 +140,12 @@ public static class DeviceSelector
     /// Gets device info for a single device.
     /// </summary>
     private static async Task<DeviceInfo?> GetDeviceInfoAsync(
-        IYubiKey device,
+        IYubiKeyReference device,
         CancellationToken cancellationToken)
     {
         try
         {
-            // Use the IYubiKey extension method which handles all transport types
+            // Use the IYubiKeyReference extension method which handles all transport types
             return await device.GetDeviceInfoAsync(cancellationToken);
         }
         catch (Exception ex)
@@ -160,10 +160,10 @@ public static class DeviceSelector
     /// Prompts user to select from multiple devices.
     /// </summary>
     private static async Task<DeviceSelection?> PromptForDeviceSelectionAsync(
-        IReadOnlyList<IYubiKey> devices,
+        IReadOnlyList<IYubiKeyReference> devices,
         CancellationToken cancellationToken)
     {
-        var deviceInfos = new List<(IYubiKey Device, DeviceInfo? Info)>();
+        var deviceInfos = new List<(IYubiKeyReference Device, DeviceInfo? Info)>();
 
         // Get device info for each device to display details
         await AnsiConsole.Status()
@@ -216,7 +216,7 @@ public static class DeviceSelector
     /// <summary>
     /// Formats a device choice string for display.
     /// </summary>
-    private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
+    private static string FormatDeviceChoice(IYubiKeyReference device, DeviceInfo? info)
     {
         var transport = FormatConnectionType(device.ConnectionType);
 

@@ -19,7 +19,7 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.Interfaces;
 
-public interface IYubiKey
+public interface IYubiKeyReference
 {
     string DeviceId { get; }
     ConnectionType ConnectionType { get; }

@@ -20,11 +20,11 @@ using Yubico.YubiKit.Core.YubiKey;
 namespace Yubico.YubiKit.SecurityDomain;
 
 /// <summary>
-///     Extension methods for creating Security Domain sessions from an <see cref="IYubiKey" />.
+///     Extension methods for creating Security Domain sessions from an <see cref="IYubiKeyReference" />.
 /// </summary>
 public static class IYubiKeyExtensions
 {
-    extension(IYubiKey yubiKey)
+    extension(IYubiKeyReference yubiKeyReference)
     {
         /// <summary>
         ///     Creates a new Security Domain session for the specified YubiKey.
@@ -44,7 +44,7 @@ public static class IYubiKeyExtensions
             FirmwareVersion? firmwareVersion = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
+            var connection = await yubiKeyReference.ConnectAsync<ISmartCardConnection>(cancellationToken)
                 .ConfigureAwait(false);
             return await SecurityDomainSession.CreateAsync(
                     connection,
@@ -92,7 +92,7 @@ public static class IYubiKeyExtensions
             ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {
-            using var session = await yubiKey.CreateSecurityDomainSessionAsync(
+            using var session = await yubiKeyReference.CreateSecurityDomainSessionAsync(
                     scpKeyParams,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);

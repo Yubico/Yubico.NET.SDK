@@ -12,19 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.YubiKey;
 
-namespace Yubico.YubiKit.Core;
+namespace Yubico.YubiKit.Core.YubiKey;
 
-public class DeviceRepositorySimple : IDeviceRepository
+public static class YubiKeyManager2
 {
-    private readonly Subject<DeviceEvent> _deviceChanges = new();
+    public static Task<IReadOnlyList<IYubiKeyReference>> FindAllAsync(CancellationToken cancellationToken = default) =>
+        FindYubiKeys.Create().FindAllAsync(cancellationToken: cancellationToken);
 
-    private async IAsyncEnumerable<DeviceEvent> MonitorAsync(
+    public static async IAsyncEnumerable<DeviceEvent> MonitorAsync(
         TimeSpan? pollInterval = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -33,24 +31,22 @@ public class DeviceRepositorySimple : IDeviceRepository
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            var devices = await FindAllAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var devices = await FindAllAsync(cancellationToken).ConfigureAwait(false);
             var currentDeviceIds = new HashSet<string>();
 
             foreach (var device in devices)
             {
-                var id = device.DeviceId;
+                var id = GetDeviceId(device);
                 currentDeviceIds.Add(id);
 
-                if (previousDeviceIds.Contains(id))
-                    continue;
-
-                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, device));
-                yield return new DeviceEvent(DeviceAction.Added, device);
+                if (!previousDeviceIds.Contains(id))
+                {
+                    yield return new DeviceEvent(DeviceAction.Added, device);
+                }
             }
 
             foreach (var removedId in previousDeviceIds.Except(currentDeviceIds))
             {
-                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, null) { DeviceId = removedId });
                 yield return new DeviceEvent(DeviceAction.Removed, null) { DeviceId = removedId };
             }
 
@@ -59,19 +55,5 @@ public class DeviceRepositorySimple : IDeviceRepository
         }
     }
 
-    #region IDeviceRepository Members
-
-    public Task<IReadOnlyList<IYubiKeyReference>> FindAllAsync(ConnectionType type = ConnectionType.All,
-        CancellationToken cancellationToken = default) =>
-        FindYubiKeys
-            .Create()
-            .FindAllAsync(type, cancellationToken);
-
-    public void UpdateCache(IEnumerable<IYubiKeyReference> discoveredDevices) => throw new NotImplementedException();
-
-    public IObservable<DeviceEvent> DeviceChanges => _deviceChanges.AsObservable();
-
-    public void Dispose() => _deviceChanges.Dispose();
-
-    #endregion
+    private static string GetDeviceId(IYubiKeyReference device) => device.DeviceId;
 }

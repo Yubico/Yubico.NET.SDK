@@ -6,13 +6,14 @@ public interface IYubiKeyManager
 {
     IObservable<DeviceEvent> DeviceChanges { get; }
 
-    Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type = ConnectionType.All,
+    Task<IReadOnlyList<IYubiKeyReference>> FindAllAsync(ConnectionType type = ConnectionType.All,
         CancellationToken cancellationToken = default);
 }
 
-public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManager
+public class YubiKeyManager (IDeviceRepository? deviceRepository): IYubiKeyManager
 {
-    public Task<IReadOnlyList<IYubiKey>> FindAllAsync(
+    
+    public Task<IReadOnlyList<IYubiKeyReference>> FindAllAsync(
         ConnectionType type = ConnectionType.All,
         CancellationToken cancellationToken = default)
     {
@@ -36,4 +37,5 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManag
             return deviceRepository.DeviceChanges;
         }
     }
+
 }

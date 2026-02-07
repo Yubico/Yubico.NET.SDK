@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.Core.YubiKey;
 
 public interface IFindYubiKeys
 {
-    Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<IYubiKeyReference>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
 }
 
 public class FindYubiKeys(
@@ -30,11 +30,11 @@ public class FindYubiKeys(
 {
     #region IFindYubiKeys Members
 
-    public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(
+    public async Task<IReadOnlyList<IYubiKeyReference>> FindAllAsync(
         ConnectionType type = ConnectionType.All,
         CancellationToken cancellationToken = default)
     {
-        var yubiKeys = new List<IYubiKey>();
+        var yubiKeys = new List<IYubiKeyReference>();
 
         if (type.HasFlag(ConnectionType.SmartCard))
         {
@@ -53,13 +53,13 @@ public class FindYubiKeys(
 
     #endregion
 
-    private async Task<IReadOnlyList<IYubiKey>> FindAllHid(CancellationToken cancellationToken = default)
+    private async Task<IReadOnlyList<IYubiKeyReference>> FindAllHid(CancellationToken cancellationToken = default)
     {
         var hidDevices = await findHidService.FindAllAsync(cancellationToken);
         return hidDevices.Select(yubiKeyFactory.Create).ToList();
     }
 
-    private async Task<IReadOnlyList<IYubiKey>> FindAllCcid(CancellationToken cancellationToken = default)
+    private async Task<IReadOnlyList<IYubiKeyReference>> FindAllCcid(CancellationToken cancellationToken = default)
     {
         var pcscDevices = await findPcscService.FindAllAsync(cancellationToken);
         return pcscDevices.Select(yubiKeyFactory.Create).ToList();

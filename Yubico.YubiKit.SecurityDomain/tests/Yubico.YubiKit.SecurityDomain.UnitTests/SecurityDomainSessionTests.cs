@@ -33,11 +33,11 @@ public class SecurityDomainSessionTests
     }
 
     /// <summary>
-    ///     Creates a mock IYubiKey that provides a mock SmartCard connection.
+    ///     Creates a mock IYubiKeyReference that provides a mock SmartCard connection.
     /// </summary>
-    private static IYubiKey CreateMockYubiKey(out ISmartCardConnection connection)
+    private static IYubiKeyReference CreateMockYubiKey(out ISmartCardConnection connection)
     {
-        var yubiKey = Substitute.For<IYubiKey>();
+        var yubiKey = Substitute.For<IYubiKeyReference>();
         connection = CreateMockConnection();
 
         yubiKey.ConnectAsync<ISmartCardConnection>(Arg.Any<CancellationToken>())

@@ -23,7 +23,7 @@ namespace Yubico.YubiKit.Core.YubiKey;
 
 public interface IYubiKeyFactory
 {
-    IYubiKey Create(IDevice device);
+    IYubiKeyReference Create(IDevice device);
 }
 
 public class YubiKeyFactory(
@@ -31,7 +31,7 @@ public class YubiKeyFactory(
     ISmartCardConnectionFactory connectionFactory
 ) : IYubiKeyFactory
 {
-    public IYubiKey Create(IDevice device) =>
+    public IYubiKeyReference Create(IDevice device) =>
         device switch
         {
             IPcscDevice pcscDevice => CreatePcscYubiKey(pcscDevice),
@@ -40,17 +40,17 @@ public class YubiKeyFactory(
                 $"Device type {device.GetType().Name} is not supported by this factory.")
         };
 
-    private PcscYubiKey CreatePcscYubiKey(IPcscDevice cardDevice) =>
+    private PcscYubiKeyReference CreatePcscYubiKey(IPcscDevice cardDevice) =>
         new(
             cardDevice,
             connectionFactory,
-            loggerFactory.CreateLogger<PcscYubiKey>()
+            loggerFactory.CreateLogger<PcscYubiKeyReference>()
         );
 
-    private HidYubiKey CreateHidYubiKey(IHidDevice hidDevice) =>
+    private HidYubiKeyReference CreateHidYubiKey(IHidDevice hidDevice) =>
         new(
             hidDevice,
-            loggerFactory.CreateLogger<HidYubiKey>()
+            loggerFactory.CreateLogger<HidYubiKeyReference>()
         );
 
     public static YubiKeyFactory Create(ILoggerFactory? loggerFactory = null) =>

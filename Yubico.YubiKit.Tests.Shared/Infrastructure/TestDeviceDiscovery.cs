@@ -25,7 +25,7 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 /// </summary>
 public static class TestDeviceDiscovery
 {
-    public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default) =>
+    public static Task<IReadOnlyList<IYubiKeyReference>> FindAllAsync(CancellationToken cancellationToken = default) =>
         FindYubiKeys.Create().FindAllAsync(cancellationToken: cancellationToken);
 
     public static async IAsyncEnumerable<DeviceEvent> MonitorAsync(
@@ -61,5 +61,5 @@ public static class TestDeviceDiscovery
         }
     }
 
-    private static string GetDeviceId(IYubiKey device) => device.DeviceId;
+    private static string GetDeviceId(IYubiKeyReference device) => device.DeviceId;
 }

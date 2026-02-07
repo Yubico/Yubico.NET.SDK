@@ -20,7 +20,7 @@ limitations under the License. -->
 
 The YubiKey's PIN, touch, and biometric policies determine when PIN verification, biometric verification, and touch are required in order to perform an operation with a private key from one of the YubiKey's PIV slots (including the management key).
 
-These policies apply to operations such as signing, decrypting, performing a key agreement, and generating a new key pair. For a full list of operations affected by PIN and touch policies, see [Operations that require the PIN](xref:UsersManualPinPukMgmtKey#operations-that-require-the-pin) and [Operations that require the management key](xref:UsersManualPinPukMgmtKey#operations-that-require-the-management-key).
+These policies apply to operations such as signing, decrypting, performing a key agreement, and authenticating the management key (required when generating a key pair, importing a private key or certificate, etc).
 
 ## Policy properties
 
@@ -61,7 +61,7 @@ Due to PIV card activation requirements in section 4.3 of the [FIPS 201-3 specif
 Biometric policies are a type of PIN policy that are available for YubiKey Bio Series — Multi-protocol Edition keys with firmware 5.7 or later. There are two biometric policy options:
 
 * ``Match Once``: a biometric or PIN verification is required for each session.
-* ``Match Always``: a biometric or PIN verification is required on every object access.
+* ``Match Always``: a biometric or PIN verification is required for every key operation.
 
 ## Touch policy options
 
@@ -86,35 +86,55 @@ It's also important to note that slots 9C and 9E have different default PIN poli
 
 When generating or importing a key into one of the PIV slots, these default policies will be applied to the key unless otherwise specified.
 
-## Setting keys to a non-default policy (all slots other than 80, 81, 9B, and F9)
+## Setting a key's PIN and touch policies (all slots other than 80, 81, and 9B)
 
-If you want a policy different from the default for a private key, you must specify that
-policy when the key is [generated](commands.md#generate-asymmetric) or
-[imported](commands.md#import-asymmetric). Once the key is on the YubiKey, there is no
-way to change the policy.
+You can set a private key's PIN and touch policies to something other than the slot's default options only when generating or importing the key onto the YubiKey (firmware version 4 and later). Note that you can specify different policies for keys in different slots. For example, you can generate a new key in slot 9A
+that has a PIN policy of ``Always``, while a key imported into slot 86 has a PIN policy of ``Once``.
 
-Note that you can specify different policies for keys in different slots (if the YubiKey
-has the option of setting policies). For example, you can generate a new key in slot 9A
-that has a PIN policy of "always", while a key imported into slot 86 has a PIN policy of
-"once".
+When specifying the PIN policy with the SDK, you must select one of the [PivPinPolicy](xref:Yubico.YubiKey.Piv.PivPinPolicy) enum fields:
 
-> It is important to point out that setting the PIN policy to "never" reduces security
-> dramatically. This feature was added only because of customer demand for convenience.
-> Yubico recommends setting the PIN policy to "always" or "once".
+- ``Always``
+- ``Default``
+- ``MatchAlways``
+- ``MatchOnce``
+- ``Never``
+- ``None``
+- ``Once``
 
-### Example scenarios
+However, note that if you choose ``MatchOnce`` or ``MatchAlways`` and your YubiKey is not a YubiKey Bio Series — Multi-protocol Edition key, the SDK will throw an exception. And as a reminder, setting the PIN policy to ``Never`` reduces security dramatically and is not recommended by Yubico.
 
-Suppose you generate a new key pair for slot 9C using the
-[Generate asymmetric key pair](commands.md#generate-asymmetric) command. You set
-the PIN policy to never and the touch policy to always. Now when you call the
-[Authenticate: sign](commands.md#authenticate-sign) command, you won't need to
-combine it with [PIN verification](commands.md#verify) to make it work, but the
-YubiKey won't complete the signing process until the YubiKey has been touched.
+When specifying the touch policy with the SDK, you must select one of the [PivTouchPolicy](xref:Yubico.YubiKey.Piv.PivTouchPolicy) enum fields:
 
-Suppose you generate a new key pair for slot 9D. You set the PIN policy to once, and the
-touch policy to never. Now when you first decrypt using that key in a session, you will
-need to authenticate the PIN, but won't need to touch. The next time you decrypt in the
-session, you will not need the PIN nor touch.
+- ``Always``
+- ``Cached``
+- ``Default``
+- ``Never``
+- ``None``
+
+It should also be noted that selecting ``None`` for either the PIN policy or touch policy during generation/import does not remove the policy field from the private key. The YubiKey's firmware interprets ``None`` as an invalid policy and will use the slot's default policy instead.
+
+### GenerateKeyPair() and ImportPrivateKey() example
+
+In this example, we will generate a key in slot 9C and import a key into slot 9D using the [GenerateKeyPair](xref:Yubico.YubiKey.Piv.PivSession.GenerateKeyPair%28System.Byte%2CYubico.YubiKey.Cryptography.KeyType%2CYubico.YubiKey.Piv.PivPinPolicy%2CYubico.YubiKey.Piv.PivTouchPolicy%29) and [ImportPrivateKey](xref:Yubico.YubiKey.Piv.PivSession.ImportPrivateKey%28System.Byte%2CYubico.YubiKey.Cryptography.IPrivateKey%2CYubico.YubiKey.Piv.PivPinPolicy%2CYubico.YubiKey.Piv.PivTouchPolicy%29) PIV session methods, respectively. When calling each method, we will specify the intended slot via the [PivSlot](xref:Yubico.YubiKey.Piv.PivSlot) class. For the 9C key, we will set its PIN policy to ``Once`` and its touch policy to ``Always``. For the 9D key, we will set its PIN policy to ``Always`` and its touch policy to ``Cached``.
+
+With ``GenerateKeyPair``, we must specify the key's algorithm via the [KeyType](xref:Yubico.YubiKey.Cryptography.KeyType) class. ``ImportPrivateKey``, on the other hand, must be provided the private key to be imported, which must be an implementation of the [PrivateKey](xref:Yubico.YubiKey.Cryptography.PrivateKey) class.
+
+Generating and importing keys, however, requires management key authentication before those operations can complete. When you call ``GenerateKeyPair`` or ``ImportPrivateKey``, the SDK will call on your [KeyCollector](xref:Yubico.YubiKey.Piv.PivSession.KeyCollector) to collect the management key from the user and perform authentication automatically. However, we can also perform management key authentication manually (by providing the management key directly instead of using the KeyCollector) via [TryAuthenticateManagementKey](xref:Yubico.YubiKey.Piv.PivSession.TryAuthenticateManagementKey%28System.ReadOnlyMemory%7BSystem.Byte%7D%2CSystem.Boolean%29), which we will call in this example.
+
+```csharp
+using (PivSession pivtest = new PivSession(yubiKey))
+{
+    // Perform management key authentication first (managementKey set elsewhere).
+    pivtest.TryAuthenticateManagementKey(managementKey, true);
+
+    pivtest.GenerateKeyPair(PivSlot.Signing, KeyType.RSA2048, PivPinPolicy.Once, PivTouchPolicy.Always);
+
+    // privateKey set elsewhere.
+    pivtest.ImportPrivateKey(PivSlot.KeyManagement, privateKey, PivPinPolicy.Always, PivTouchPolicy.Cached);
+}
+```
+
+After performing this configuration, every time a signing operation is performed with the key in slot 9C, the YubiKey must be touched, but the PIN will only need to be authenticated once per session. And when performing a decryption operation with the key in slot 9D, the PIN must be authenticated every time, but the YubiKey will only need to be touched if more than 15 seconds have elapsed since the previous touch.
 
 ## Changing the touch policy for the management key (slot 9B)
 
@@ -180,7 +200,7 @@ using (PivSession pivtest = new PivSession(yubiKey))
 
 Note that if the slot does not contain a key, the SDK will throw an exception when trying to call ``GetMetadata``. Slots 80 and 81 (PIN and PUK) do not have PIN or touch policies and will always return ``None`` for those properties in the metadata.
 
-The management key (9B)has a touch policy but no PIN policy. In order to maintain consistency with the data format, the YubiKey will return the undefined value "0" for 9B's PIN policy. This is not a valid PIN policy, and the SDK translates it to ``Default`` in the metadata.
+The management key (9B) has a touch policy but no PIN policy. In order to maintain consistency with the data format, the YubiKey will return the undefined value "0" for 9B's PIN policy. This is not a valid PIN policy, and the SDK translates it to ``Default`` in the metadata.
 
 ## Related articles
 

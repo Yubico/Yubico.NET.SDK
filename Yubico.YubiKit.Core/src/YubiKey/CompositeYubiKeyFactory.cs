@@ -105,33 +105,4 @@ internal sealed class CompositeYubiKeyFactory : ICompositeYubiKeyFactory
 
         return composites;
     }
-
-    /// <summary>
-    /// Minimal device identity for uncorrelatable references.
-    /// </summary>
-    private sealed class MinimalDeviceIdentity(string deviceId) : IDeviceIdentity
-    {
-        public int? SerialNumber => null;
-        public FirmwareVersion FirmwareVersion => FirmwareVersion.Default;
-        public FormFactor FormFactor => FormFactor.Unknown;
-        public DeviceCapabilities UsbSupported => DeviceCapabilities.None;
-        public DeviceCapabilities NfcSupported => DeviceCapabilities.None;
-        public DeviceCapabilities UsbEnabled => DeviceCapabilities.None;
-        public DeviceCapabilities NfcEnabled => DeviceCapabilities.None;
-        public ushort AutoEjectTimeout => 0;
-        public ReadOnlyMemory<byte> ChallengeResponseTimeout => ReadOnlyMemory<byte>.Empty;
-        public DeviceFlags DeviceFlags => DeviceFlags.None;
-        public bool IsNfcRestricted => false;
-
-        // Override fingerprint to use the device ID so each uncorrelatable reference
-        // gets its own unique composite
-        public string ComputeConfigFingerprint()
-        {
-            // Use a hash of the device ID to ensure uniqueness
-            Span<byte> hash = stackalloc byte[32];
-            var bytes = System.Text.Encoding.UTF8.GetBytes(deviceId);
-            System.Security.Cryptography.SHA256.HashData(bytes, hash);
-            return Convert.ToHexString(hash[..4]).ToLowerInvariant();
-        }
-    }
 }

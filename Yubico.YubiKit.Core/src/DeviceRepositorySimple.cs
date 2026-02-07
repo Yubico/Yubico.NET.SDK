@@ -87,7 +87,7 @@ public class DeviceRepositorySimple : IDeviceRepository
             "Use AddYubiKeyManagerCore() dependency injection with DeviceRepositoryCached for composite device support.");
 
     /// <inheritdoc />
-    public void UpdateCache(IEnumerable<IYubiKeyReference> discoveredDevices) => 
+    public Task UpdateCacheAsync(IEnumerable<IYubiKeyReference> discoveredDevices, CancellationToken cancellationToken = default) => 
         throw new NotSupportedException("DeviceRepositorySimple does not support caching.");
 
     /// <inheritdoc />

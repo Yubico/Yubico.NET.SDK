@@ -46,10 +46,11 @@ public interface IDeviceRepository : IDisposable
     /// Updates the cache with newly discovered transport references.
     /// </summary>
     /// <param name="discoveredDevices">Transport references discovered by device scanning.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <remarks>
     /// This method is called by background services. It correlates transport references into composites.
     /// </remarks>
-    void UpdateCache(IEnumerable<IYubiKeyReference> discoveredDevices);
+    Task UpdateCacheAsync(IEnumerable<IYubiKeyReference> discoveredDevices, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -173,12 +174,8 @@ public class DeviceRepositoryCached(
     }
 
     /// <inheritdoc />
-    public void UpdateCache(IEnumerable<IYubiKeyReference> discoveredDevices)
-    {
-        // Fire-and-forget async correlation, but we need to handle this synchronously for the interface
-        // This is called from background services that can handle async
-        _ = UpdateCacheInternalAsync(discoveredDevices.ToList(), CancellationToken.None);
-    }
+    public Task UpdateCacheAsync(IEnumerable<IYubiKeyReference> discoveredDevices, CancellationToken cancellationToken = default) =>
+        UpdateCacheInternalAsync(discoveredDevices.ToList(), cancellationToken);
 
     private async Task UpdateCacheInternalAsync(IEnumerable<IYubiKeyReference> discoveredDevices, CancellationToken cancellationToken)
     {
@@ -284,31 +281,4 @@ public class DeviceRepositoryCached(
     }
 
     #endregion
-
-    /// <summary>
-    /// Minimal device identity for uncorrelatable references when identity reading returns null.
-    /// </summary>
-    private sealed class MinimalDeviceIdentity(string deviceId) : IDeviceIdentity
-    {
-        public int? SerialNumber => null;
-        public FirmwareVersion FirmwareVersion => FirmwareVersion.Default;
-        public FormFactor FormFactor => FormFactor.Unknown;
-        public DeviceCapabilities UsbSupported => DeviceCapabilities.None;
-        public DeviceCapabilities NfcSupported => DeviceCapabilities.None;
-        public DeviceCapabilities UsbEnabled => DeviceCapabilities.None;
-        public DeviceCapabilities NfcEnabled => DeviceCapabilities.None;
-        public ushort AutoEjectTimeout => 0;
-        public ReadOnlyMemory<byte> ChallengeResponseTimeout => ReadOnlyMemory<byte>.Empty;
-        public DeviceFlags DeviceFlags => DeviceFlags.None;
-        public bool IsNfcRestricted => false;
-
-        public string ComputeConfigFingerprint()
-        {
-            // Use a hash of the device ID to ensure uniqueness
-            Span<byte> hash = stackalloc byte[32];
-            var bytes = System.Text.Encoding.UTF8.GetBytes(deviceId);
-            System.Security.Cryptography.SHA256.HashData(bytes, hash);
-            return Convert.ToHexString(hash[..4]).ToLowerInvariant();
-        }
-    }
 }

@@ -66,5 +66,5 @@ public class FindYubiKeys(
     }
 
     public static FindYubiKeys Create() =>
-        new(FindPcscDevices.Create(), FindHidDevices.Create(), YubiKeyFactory.Create());
+        new(new FindPcscDevices(), new FindHidDevices(), YubiKeyFactory.Create());
 }

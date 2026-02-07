@@ -27,10 +27,10 @@ public sealed class DeviceMonitorService(
     IFindPcscDevices findPcscService,
     IFindHidDevices findHidService,
     IDeviceChannel deviceChannel,
-    ILogger<DeviceMonitorService> logger,
     IOptions<YubiKeyManagerOptions> options)
     : BackgroundService
 {
+    private static readonly ILogger<DeviceMonitorService> Logger = YubiKitLogging.CreateLogger<DeviceMonitorService>();
     private readonly YubiKeyManagerOptions _options = options.Value;
     private bool _disposed;
 
@@ -44,7 +44,7 @@ public sealed class DeviceMonitorService(
     {
         if (!_options.EnableAutoDiscovery)
         {
-            logger.LogInformation("YubiKey device auto-discovery is disabled. Device monitor will not start.");
+            Logger.LogInformation("YubiKey device auto-discovery is disabled. Device monitor will not start.");
             return Task.CompletedTask;
         }
         
@@ -54,7 +54,7 @@ public sealed class DeviceMonitorService(
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("YubiKey device monitor stopping...");
+        Logger.LogInformation("YubiKey device monitor stopping...");
 
         // Complete the channel BEFORE stopping ExecuteAsync
         // This allows DeviceListenerService to exit its await foreach loop
@@ -62,15 +62,15 @@ public sealed class DeviceMonitorService(
 
         await base.StopAsync(cancellationToken).ConfigureAwait(false);
         IsStarted = false;
-        logger.LogInformation("YubiKey device monitor stopped");
+        Logger.LogInformation("YubiKey device monitor stopped");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
-            logger.LogInformation("YubiKey device monitor started");
-            logger.LogInformation("Performing initial device scan...");
+            Logger.LogInformation("YubiKey device monitor started");
+            Logger.LogInformation("Performing initial device scan...");
 
             await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
             
@@ -80,11 +80,11 @@ public sealed class DeviceMonitorService(
         }
         catch (OperationCanceledException)
         {
-            logger.LogDebug("Device monitoring was cancelled");
+            Logger.LogDebug("Device monitoring was cancelled");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Device monitoring failed");
+            Logger.LogError(ex, "Device monitoring failed");
         }
     }
 
@@ -101,15 +101,15 @@ public sealed class DeviceMonitorService(
             yubiKeys.AddRange(hidScanTask.Result);
 
             await deviceChannel.PublishAsync(yubiKeys, cancellationToken).ConfigureAwait(false);
-            logger.LogDebug("Device scan completed, found {TotalCount} total devices", yubiKeys.Count);
+            Logger.LogDebug("Device scan completed, found {TotalCount} total devices", yubiKeys.Count);
         }
         catch (OperationCanceledException)
         {
-            logger.LogDebug("Device scan was cancelled");
+            Logger.LogDebug("Device scan was cancelled");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Device scanning failed");
+            Logger.LogError(ex, "Device scanning failed");
             // Continue despite errors - don't crash the background service
         }
     }
@@ -118,7 +118,7 @@ public sealed class DeviceMonitorService(
     {
         var devices = await findPcscService.FindAllAsync(cancellationToken).ConfigureAwait(false);
         var yubiKeys = devices.Select(yubiKeyFactory.Create).ToList();
-        logger.LogDebug("PCSC scan completed, found {DeviceCount} devices", devices.Count);
+        Logger.LogDebug("PCSC scan completed, found {DeviceCount} devices", devices.Count);
         return yubiKeys;
     }
 
@@ -126,7 +126,7 @@ public sealed class DeviceMonitorService(
     {
         var devices = await findHidService.FindAllAsync(cancellationToken).ConfigureAwait(false);
         var yubiKeys = devices.Select(yubiKeyFactory.Create).ToList();
-        logger.LogDebug("HID scan completed, found {DeviceCount} devices", devices.Count);
+        Logger.LogDebug("HID scan completed, found {DeviceCount} devices", devices.Count);
         return yubiKeys;
     }
 

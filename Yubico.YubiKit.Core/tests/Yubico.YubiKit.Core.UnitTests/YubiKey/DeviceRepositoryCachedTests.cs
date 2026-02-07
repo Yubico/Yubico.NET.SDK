@@ -127,7 +127,6 @@ public class DeviceRepositoryCachedTests
         Func<IYubiKeyReference, CancellationToken, Task<IDeviceIdentity?>>? identityReader = null)
     {
         return new DeviceRepositoryCached(
-            NullLogger<DeviceRepositoryCached>.Instance,
             findYubiKeys,
             compositeFactory,
             identityReader ?? ((_, _) => Task.FromResult<IDeviceIdentity?>(null)));

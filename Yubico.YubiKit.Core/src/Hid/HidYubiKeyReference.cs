@@ -28,11 +28,10 @@ namespace Yubico.YubiKit.Core.Hid;
 /// HID connections are inherently synchronous (OS-level ioctl calls), so connection
 /// creation completes synchronously. The async API is maintained for interface consistency.
 /// </remarks>
-internal class HidYubiKeyReference(
-    IHidDevice hidDevice,
-    ILogger<HidYubiKeyReference> logger)
-    : IYubiKeyReference
+internal class HidYubiKeyReference(IHidDevice hidDevice) : IYubiKeyReference
 {
+    private static readonly ILogger<HidYubiKeyReference> Logger = YubiKitLogging.CreateLogger<HidYubiKeyReference>();
+
     public string DeviceId { get; } =
         $"hid:{hidDevice.DescriptorInfo.VendorId:X4}:{hidDevice.DescriptorInfo.ProductId:X4}:{hidDevice.DescriptorInfo.Usage:X4}";
 
@@ -73,7 +72,7 @@ internal class HidYubiKeyReference(
                 $"found {hidDevice.InterfaceType} (UsagePage=0x{hidDevice.DescriptorInfo.UsagePage:X4}, Usage=0x{hidDevice.DescriptorInfo.Usage:X4})");
         }
 
-        logger.LogInformation(
+        Logger.LogInformation(
             "Connecting to FIDO HID interface VID={VendorId:X4} PID={ProductId:X4}",
             hidDevice.DescriptorInfo.VendorId,
             hidDevice.DescriptorInfo.ProductId);
@@ -91,7 +90,7 @@ internal class HidYubiKeyReference(
                 $"found {hidDevice.InterfaceType} (UsagePage=0x{hidDevice.DescriptorInfo.UsagePage:X4}, Usage=0x{hidDevice.DescriptorInfo.Usage:X4})");
         }
 
-        logger.LogInformation(
+        Logger.LogInformation(
             "Connecting to OTP/Keyboard HID interface VID={VendorId:X4} PID={ProductId:X4}",
             hidDevice.DescriptorInfo.VendorId,
             hidDevice.DescriptorInfo.ProductId);

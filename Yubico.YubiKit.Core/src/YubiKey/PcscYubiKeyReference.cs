@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 
@@ -21,22 +20,22 @@ namespace Yubico.YubiKit.Core.YubiKey;
 
 internal class PcscYubiKeyReference(
     IPcscDevice pcscDevice,
-    ISmartCardConnectionFactory connectionFactory,
-    ILogger<PcscYubiKeyReference> logger)
+    ISmartCardConnectionFactory connectionFactory)
     : IYubiKeyReference
 {
+    private static readonly ILogger<PcscYubiKeyReference> Logger = YubiKitLogging.CreateLogger<PcscYubiKeyReference>();
     private readonly string _readerName = pcscDevice.ReaderName;
 
     private async Task<ISmartCardConnection> CreateConnection(CancellationToken cancellationToken = default)
     {
         var connection = await connectionFactory.CreateAsync(pcscDevice, cancellationToken).ConfigureAwait(false);
-        logger.LogInformation("Connected to YubiKey in reader {ReaderName}", _readerName);
+        Logger.LogInformation("Connected to YubiKey in reader {ReaderName}", _readerName);
 
         return connection;
     }
 
-    public static PcscYubiKeyReference Create(IPcscDevice pcscDevice, ILogger<PcscYubiKeyReference>? logger) => new(pcscDevice,
-        SmartCardConnectionFactory.CreateDefault(), logger ?? NullLogger<PcscYubiKeyReference>.Instance);
+    public static PcscYubiKeyReference Create(IPcscDevice pcscDevice) => new(pcscDevice,
+        SmartCardConnectionFactory.CreateDefault());
 
     #region IYubiKeyReference Members
 

@@ -14,7 +14,6 @@
 
 using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.Hid.Linux;
 using Yubico.YubiKit.Core.Hid.MacOS;
@@ -26,16 +25,17 @@ public interface IFindHidDevices
     Task<IReadOnlyList<IHidDevice>> FindAllAsync(CancellationToken cancellationToken = default);
 }
 
-public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
+public class FindHidDevices : IFindHidDevices
 {
+    private static readonly ILogger<FindHidDevices> Logger = YubiKitLogging.CreateLogger<FindHidDevices>();
     private const short YubicoVendorId = 0x1050;
 
     public async Task<IReadOnlyList<IHidDevice>> FindAllAsync(CancellationToken cancellationToken = default) =>
         await Task.Run(FindAll, cancellationToken).ConfigureAwait(false);
 
-    private IReadOnlyList<IHidDevice> FindAll()
+    private static IReadOnlyList<IHidDevice> FindAll()
     {
-        logger.LogDebug("Getting list of HID devices");
+        Logger.LogDebug("Getting list of HID devices");
 
         var allDevices = GetPlatformDevices();
 
@@ -43,7 +43,7 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
             .Where(d => d.DescriptorInfo.VendorId == YubicoVendorId)
             .ToList();
 
-        logger.LogDebug("Found {Count} Yubico HID devices", yubicoDevices.Count);
+        Logger.LogDebug("Found {Count} Yubico HID devices", yubicoDevices.Count);
 
         return yubicoDevices;
     }
@@ -71,7 +71,4 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
     [SupportedOSPlatform("linux")]
     private static IReadOnlyList<IHidDevice> FindAllLinux() =>
         LinuxHidDevice.GetList();
-
-    public static FindHidDevices Create(ILogger<FindHidDevices>? logger = null) =>
-        new(logger ?? NullLogger<FindHidDevices>.Instance);
 }

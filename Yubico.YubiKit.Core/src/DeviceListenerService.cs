@@ -20,12 +20,12 @@ using Yubico.YubiKit.Core.YubiKey;
 namespace Yubico.YubiKit.Core;
 
 public class DeviceListenerService(
-    ILogger<DeviceListenerService> logger,
     IDeviceChannel deviceChannel,
     IDeviceRepository deviceRepository,
     IOptions<YubiKeyManagerOptions> options)
     : BackgroundService
 {
+    private static readonly ILogger<DeviceListenerService> Logger = YubiKitLogging.CreateLogger<DeviceListenerService>();
     private readonly YubiKeyManagerOptions _options = options.Value;
 
     public override Task StartAsync(CancellationToken cancellationToken)
@@ -33,32 +33,32 @@ public class DeviceListenerService(
         if (_options.EnableAutoDiscovery)
             return base.StartAsync(cancellationToken);
 
-        logger.LogInformation("YubiKey device auto-discovery is disabled. Device listener will not start.");
+        Logger.LogInformation("YubiKey device auto-discovery is disabled. Device listener will not start.");
         return Task.CompletedTask;
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("YubiKey device listener stopping...");
+        Logger.LogInformation("YubiKey device listener stopping...");
         await base.StopAsync(cancellationToken).ConfigureAwait(false);
-        logger.LogInformation("YubiKey device listener stopped");
+        Logger.LogInformation("YubiKey device listener stopped");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("YubiKey device listener started");
+        Logger.LogInformation("YubiKey device listener started");
         try
         {
             await foreach (var devices in deviceChannel.ConsumeAsync(stoppingToken).ConfigureAwait(false))
-                await deviceRepository.UpdateCacheAsync(devices, stoppingToken).ConfigureAwait(false);
+                deviceRepository.UpdateCache(devices);
         }
         catch (OperationCanceledException)
         {
-            logger.LogDebug("Device repository background service was cancelled");
+            Logger.LogDebug("Device repository background service was cancelled");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error consuming device updates");
+            Logger.LogError(ex, "Error consuming device updates");
         }
     }
 }

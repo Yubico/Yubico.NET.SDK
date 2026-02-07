@@ -43,7 +43,8 @@ public class HidEnumerationTests
         var loggerFactory = LoggerFactory.Create(builder =>
             builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
         
-        var finder = new FindHidDevices(loggerFactory.CreateLogger<FindHidDevices>());
+        YubiKitLogging.Configure(loggerFactory);
+        var finder = new FindHidDevices();
 
         var devices = await finder.FindAllAsync();
 

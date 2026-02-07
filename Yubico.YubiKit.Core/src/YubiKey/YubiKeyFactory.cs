@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.Interfaces;
@@ -26,10 +24,7 @@ public interface IYubiKeyFactory
     IYubiKeyReference Create(IDevice device);
 }
 
-public class YubiKeyFactory(
-    ILoggerFactory loggerFactory,
-    ISmartCardConnectionFactory connectionFactory
-) : IYubiKeyFactory
+public class YubiKeyFactory(ISmartCardConnectionFactory connectionFactory) : IYubiKeyFactory
 {
     public IYubiKeyReference Create(IDevice device) =>
         device switch
@@ -41,18 +36,11 @@ public class YubiKeyFactory(
         };
 
     private PcscYubiKeyReference CreatePcscYubiKey(IPcscDevice cardDevice) =>
-        new(
-            cardDevice,
-            connectionFactory,
-            loggerFactory.CreateLogger<PcscYubiKeyReference>()
-        );
+        new(cardDevice, connectionFactory);
 
-    private HidYubiKeyReference CreateHidYubiKey(IHidDevice hidDevice) =>
-        new(
-            hidDevice,
-            loggerFactory.CreateLogger<HidYubiKeyReference>()
-        );
+    private static HidYubiKeyReference CreateHidYubiKey(IHidDevice hidDevice) =>
+        new(hidDevice);
 
-    public static YubiKeyFactory Create(ILoggerFactory? loggerFactory = null) =>
-        new(loggerFactory ?? NullLoggerFactory.Instance, SmartCardConnectionFactory.CreateDefault());
+    public static YubiKeyFactory Create() =>
+        new(SmartCardConnectionFactory.CreateDefault());
 }

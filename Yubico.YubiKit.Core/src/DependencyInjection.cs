@@ -76,7 +76,7 @@ public static class DependencyInjection
 
             // Register default identity reader delegate (returns null for all references)
             // The Management module will override this with actual device info reading
-            services.TryAddSingleton<Func<IYubiKeyReference, CancellationToken, Task<IDeviceIdentity?>>>(
+            services.TryAddSingleton<IdentityReaderDelegate>(
                 (_, _) => Task.FromResult<IDeviceIdentity?>(null));
 
             services.TryAddSingleton<IDeviceRepository, DeviceRepositoryCached>();

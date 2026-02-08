@@ -70,7 +70,7 @@ public interface IDeviceRepository : IDisposable
 public class DeviceRepositoryCached(
     IFindYubiKeys findYubiKeys,
     ICompositeYubiKeyFactory compositeFactory,
-    Func<IYubiKeyReference, CancellationToken, Task<IDeviceIdentity?>> identityReader)
+    IdentityReaderDelegate identityReader)
     : IDeviceRepository
 {
     private static readonly ILogger<DeviceRepositoryCached> Logger = YubiKitLogging.CreateLogger<DeviceRepositoryCached>();

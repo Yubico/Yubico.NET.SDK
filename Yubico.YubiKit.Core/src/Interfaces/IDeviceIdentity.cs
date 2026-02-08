@@ -19,6 +19,27 @@ using Yubico.YubiKit.Core.YubiKey;
 namespace Yubico.YubiKit.Core.Interfaces;
 
 /// <summary>
+/// Delegate for reading device identity from a YubiKey reference.
+/// </summary>
+/// <remarks>
+/// <para>
+/// This delegate is used by <see cref="Yubico.YubiKit.Core.YubiKey.ICompositeYubiKeyFactory"/>
+/// to read identity information from transport references for device correlation.
+/// </para>
+/// <para>
+/// The Management module provides the actual implementation that reads <c>DeviceInfo</c>
+/// via <c>ManagementSession</c>. Core registers a default no-op implementation that
+/// returns <c>null</c> for all references.
+/// </para>
+/// </remarks>
+/// <param name="reference">The transport reference to read from.</param>
+/// <param name="cancellationToken">Cancellation token.</param>
+/// <returns>The device identity, or <c>null</c> if it cannot be read.</returns>
+public delegate Task<IDeviceIdentity?> IdentityReaderDelegate(
+    IYubiKeyReference reference,
+    CancellationToken cancellationToken);
+
+/// <summary>
 /// Represents the identity and capability information of a YubiKey device.
 /// </summary>
 /// <remarks>

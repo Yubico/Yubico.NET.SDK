@@ -82,8 +82,7 @@ public class DeviceRepositoryCachedTests
         var findYubiKeys = new MockFindYubiKeys([reference]);
         var compositeFactory = new MockCompositeYubiKeyFactory([composite]);
 
-        Func<IYubiKeyReference, CancellationToken, Task<IDeviceIdentity?>> identityReader =
-            (_, _) => Task.FromResult<IDeviceIdentity?>(identity);
+        IdentityReaderDelegate identityReader = (_, _) => Task.FromResult<IDeviceIdentity?>(identity);
 
         var repo = CreateRepository(findYubiKeys, compositeFactory, identityReader);
 
@@ -124,7 +123,7 @@ public class DeviceRepositoryCachedTests
     private static DeviceRepositoryCached CreateRepository(
         IFindYubiKeys findYubiKeys,
         ICompositeYubiKeyFactory compositeFactory,
-        Func<IYubiKeyReference, CancellationToken, Task<IDeviceIdentity?>>? identityReader = null)
+        IdentityReaderDelegate? identityReader = null)
     {
         return new DeviceRepositoryCached(
             findYubiKeys,

@@ -21,11 +21,16 @@ using var host = Host.CreateDefaultBuilder()
     .ConfigureLogging(logging =>
     {
         logging.ClearProviders();
+        logging.AddConsole();
+        logging.SetMinimumLevel(LogLevel.Error);
     })
     .ConfigureServices(services => services
         .AddYubiKeyManagerCore()
         .AddYubiKeyManager())
     .Build();
+
+// Configure YubiKit to use the host's logger factory
+YubiKitLogging.Configure(host.Services.GetRequiredService<ILoggerFactory>());
 
 // Start background services (required for DeviceChanges observable)
 await host.StartAsync();

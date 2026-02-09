@@ -33,6 +33,11 @@ public sealed class DeviceMonitorService(
 {
     private readonly YubiKeyManagerOptions _options = options.Value;
     private bool _disposed;
+    
+    // Event-driven listeners
+    private DesktopSmartCardDeviceListener? _smartCardListener;
+    private HidDeviceListener? _hidListener;
+    private readonly SemaphoreSlim _eventSemaphore = new(0);
 
     /// <summary>
     /// Indicates whether the monitor service has been started.
@@ -56,11 +61,16 @@ public sealed class DeviceMonitorService(
     {
         logger.LogInformation("YubiKey device monitor stopping...");
 
+        // Signal the event semaphore to wake up ExecuteAsync
+        try { _eventSemaphore.Release(); } catch (SemaphoreFullException) { }
+
         // Complete the channel BEFORE stopping ExecuteAsync
         // This allows DeviceListenerService to exit its await foreach loop
         deviceChannel.Complete();
 
         await base.StopAsync(cancellationToken).ConfigureAwait(false);
+        
+        TeardownListeners();
         IsStarted = false;
         logger.LogInformation("YubiKey device monitor stopped");
     }
@@ -70,13 +80,29 @@ public sealed class DeviceMonitorService(
         try
         {
             logger.LogInformation("YubiKey device monitor started");
+            
+            SetupListeners();
+            
             logger.LogInformation("Performing initial device scan...");
-
             await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
             
-            using var timer = new PeriodicTimer(_options.ScanInterval);
-            while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
+            // Event-driven loop: wait for signals, coalesce, then scan
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                // Wait for an event signal from a listener
+                await _eventSemaphore.WaitAsync(stoppingToken).ConfigureAwait(false);
+                
+                // Coalescing delay: wait to allow multiple rapid events to accumulate
+                await Task.Delay(_options.EventCoalescingDelay, stoppingToken).ConfigureAwait(false);
+                
+                // Drain any additional events that accumulated during the delay
+                while (_eventSemaphore.CurrentCount > 0)
+                {
+                    await _eventSemaphore.WaitAsync(TimeSpan.Zero, stoppingToken).ConfigureAwait(false);
+                }
+                
                 await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
+            }
         }
         catch (OperationCanceledException)
         {
@@ -85,6 +111,83 @@ public sealed class DeviceMonitorService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Device monitoring failed");
+        }
+    }
+    
+    private void SetupListeners()
+    {
+        // SmartCard listener
+        try
+        {
+            _smartCardListener = new DesktopSmartCardDeviceListener();
+            _smartCardListener.Arrived += (_, _) => SignalEvent();
+            _smartCardListener.Removed += (_, _) => SignalEvent();
+            logger.LogDebug("SmartCard device listener started");
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to start SmartCard device listener, falling back to polling");
+            _smartCardListener = null;
+        }
+        
+        // HID listener (platform-specific via factory)
+        try
+        {
+            _hidListener = HidDeviceListener.Create();
+            _hidListener.Arrived += (_, _) => SignalEvent();
+            _hidListener.Removed += (_, _) => SignalEvent();
+            logger.LogDebug("HID device listener started ({Platform})", _hidListener.GetType().Name);
+        }
+        catch (PlatformNotSupportedException)
+        {
+            logger.LogDebug("HID device listener not supported on this platform");
+            _hidListener = null;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to start HID device listener");
+            _hidListener = null;
+        }
+    }
+    
+    private void TeardownListeners()
+    {
+        try
+        {
+            _smartCardListener?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Error disposing SmartCard listener");
+        }
+        finally
+        {
+            _smartCardListener = null;
+        }
+        
+        try
+        {
+            _hidListener?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Error disposing HID listener");
+        }
+        finally
+        {
+            _hidListener = null;
+        }
+    }
+    
+    private void SignalEvent()
+    {
+        try
+        {
+            _eventSemaphore.Release();
+        }
+        catch (SemaphoreFullException)
+        {
+            // Semaphore is already at max; event is already pending
         }
     }
 
@@ -134,6 +237,8 @@ public sealed class DeviceMonitorService(
     {
         if (_disposed) return;
 
+        TeardownListeners();
+        _eventSemaphore.Dispose();
         base.Dispose();
 
         _disposed = true;

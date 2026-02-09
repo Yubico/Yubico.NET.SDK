@@ -46,14 +46,6 @@ internal static class YubiKeyTestInfrastructure
     private static readonly Lazy<IReadOnlyList<YubiKeyTestState>> LazyAuthorizedDevices =
         new(InitializeDevicesAsync, LazyThreadSafetyMode.ExecutionAndPublication);
 
-    /// <summary>
-    ///     Gets whether the device infrastructure has been initialized.
-    /// </summary>
-    /// <remarks>
-    ///     Returns true only if AllAuthorizedDevices has been accessed and initialization completed.
-    ///     Use this to check if we're in discovery mode (not yet initialized) vs execution mode.
-    /// </remarks>
-    public static bool IsInitialized => LazyAuthorizedDevices.IsValueCreated;
 
     /// <summary>
     ///     Gets all authorized YubiKey devices discovered during test run initialization.

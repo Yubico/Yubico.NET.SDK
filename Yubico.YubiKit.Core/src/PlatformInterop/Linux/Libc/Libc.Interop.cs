@@ -33,6 +33,50 @@ internal static class NativeMethods
 
     #endregion
 
+    #region Poll
+
+    /// <summary>
+    /// Structure for poll() file descriptor monitoring.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PollFd
+    {
+        public int fd;
+        public short events;
+        public short revents;
+    }
+
+    /// <summary>There is data to read.</summary>
+    public const short POLLIN = 0x0001;
+
+    /// <summary>There is urgent data to read (e.g., out-of-band data on TCP socket).</summary>
+    public const short POLLPRI = 0x0002;
+
+    /// <summary>Writing is now possible.</summary>
+    public const short POLLOUT = 0x0004;
+
+    /// <summary>Error condition (only returned in revents; ignored in events).</summary>
+    public const short POLLERR = 0x0008;
+
+    /// <summary>Hang up (only returned in revents; ignored in events).</summary>
+    public const short POLLHUP = 0x0010;
+
+    /// <summary>Invalid request: fd not open (only returned in revents; ignored in events).</summary>
+    public const short POLLNVAL = 0x0020;
+
+    /// <summary>
+    /// Wait for events on the specified file descriptors.
+    /// </summary>
+    /// <param name="fds">Array of PollFd structures describing the file descriptors to monitor.</param>
+    /// <param name="nfds">Number of items in the fds array.</param>
+    /// <param name="timeout">Timeout in milliseconds. -1 means infinite, 0 means return immediately.</param>
+    /// <returns>Number of file descriptors with events, 0 on timeout, -1 on error (check errno).</returns>
+    [DllImport(Libraries.LinuxKernelLib, EntryPoint = "poll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    public static extern int poll([In, Out] PollFd[] fds, int nfds, int timeout);
+
+    #endregion
+
     public const long HIDIOCGRAWINFO = 0x0000000080084803;
     public const long HIDIOCGRDESCSIZE = 0x0000000080044801;
 

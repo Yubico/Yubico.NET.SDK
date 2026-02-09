@@ -154,14 +154,8 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
                 return;
             }
 
-            // Create a device from the path
-            // Note: WindowsHidDevice.FromDevicePath needs to be implemented
-            // For now, we'll create a basic device object
-            var device = CreateDeviceFromPath(devicePath);
-            if (device is not null)
-            {
-                OnArrived(device);
-            }
+            Logger.LogDebug("HID device arrived: {DevicePath}", devicePath);
+            OnDeviceEvent();
         }
         catch (Exception ex)
         {
@@ -171,16 +165,7 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
 
     private void HandleDeviceRemoval()
     {
-        // For removal events, we don't have full device info, so use NullDevice
-        OnRemoved(NullDevice.Instance);
-    }
-
-    private static Hid.Interfaces.IHidDevice? CreateDeviceFromPath(string devicePath)
-    {
-        // TODO: Implement WindowsHidDevice.FromDevicePath in a future phase
-        // For now, return null (device creation will be implemented when WindowsHidDevice is available)
-        Logger.LogDebug("Device arrived: {DevicePath}", devicePath);
-        return null;
+        OnDeviceEvent();
     }
 
     protected override void Dispose(bool disposing)

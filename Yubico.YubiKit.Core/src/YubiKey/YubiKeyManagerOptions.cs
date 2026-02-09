@@ -17,7 +17,6 @@ namespace Yubico.YubiKit.Core.YubiKey;
 public class YubiKeyManagerOptions
 {
     public bool EnableAutoDiscovery { get; set; } = true;
-    public TimeSpan ScanInterval { get; set; } = TimeSpan.FromMilliseconds(500);
     public Transport EnabledTransport { get; set; } = Transport.All;
     
     /// <summary>

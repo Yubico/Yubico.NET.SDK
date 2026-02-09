@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.PlatformInterop;
 
 namespace Yubico.YubiKit.Core.Hid;
@@ -26,27 +25,12 @@ public abstract class HidDeviceListener : IDisposable
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<HidDeviceListener>();
     
-    private event EventHandler<HidDeviceEventArgs>? _arrived;
-    private event EventHandler<HidDeviceEventArgs>? _removed;
     private bool _disposed;
 
     /// <summary>
-    /// Raised when a HID device is connected to the system.
+    /// Callback invoked when any HID device event (arrival or removal) occurs.
     /// </summary>
-    public event EventHandler<HidDeviceEventArgs>? Arrived
-    {
-        add => _arrived += value;
-        remove => _arrived -= value;
-    }
-
-    /// <summary>
-    /// Raised when a HID device is disconnected from the system.
-    /// </summary>
-    public event EventHandler<HidDeviceEventArgs>? Removed
-    {
-        add => _removed += value;
-        remove => _removed -= value;
-    }
+    public Action? DeviceEvent { get; set; }
 
     /// <summary>
     /// Gets the current status of the listener.
@@ -71,55 +55,18 @@ public abstract class HidDeviceListener : IDisposable
         };
 
     /// <summary>
-    /// Raises the <see cref="Arrived"/> event safely.
+    /// Signals that a device event has occurred.
     /// </summary>
-    /// <param name="device">The device that arrived.</param>
-    protected void OnArrived(IHidDevice device)
+    protected void OnDeviceEvent()
     {
-        var args = new HidDeviceEventArgs(device);
-        InvokeEventSafely(_arrived, args, "Arrived");
-    }
-
-    /// <summary>
-    /// Raises the <see cref="Removed"/> event safely.
-    /// </summary>
-    /// <param name="device">The device that was removed.</param>
-    protected void OnRemoved(IHidDevice device)
-    {
-        var args = new HidDeviceEventArgs(device);
-        InvokeEventSafely(_removed, args, "Removed");
-    }
-
-    /// <summary>
-    /// Invokes an event handler safely, catching exceptions from individual handlers.
-    /// </summary>
-    private void InvokeEventSafely(EventHandler<HidDeviceEventArgs>? handler, HidDeviceEventArgs args, string eventName)
-    {
-        if (handler is null)
+        try
         {
-            return;
+            DeviceEvent?.Invoke();
         }
-
-        foreach (var invoker in handler.GetInvocationList())
+        catch (Exception ex)
         {
-            try
-            {
-                ((EventHandler<HidDeviceEventArgs>)invoker).Invoke(this, args);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogWarning(ex, "Exception in {EventName} event handler", eventName);
-            }
+            Logger.LogWarning(ex, "Exception in DeviceEvent callback");
         }
-    }
-
-    /// <summary>
-    /// Clears all event handlers to prevent leaks during disposal.
-    /// </summary>
-    protected void ClearEventHandlers()
-    {
-        _arrived = null;
-        _removed = null;
     }
 
     /// <summary>
@@ -135,7 +82,7 @@ public abstract class HidDeviceListener : IDisposable
 
         if (disposing)
         {
-            ClearEventHandlers();
+            DeviceEvent = null;
             Status = DeviceListenerStatus.Stopped;
         }
 

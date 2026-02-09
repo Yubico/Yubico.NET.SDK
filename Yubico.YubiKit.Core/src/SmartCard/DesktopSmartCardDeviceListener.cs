@@ -39,22 +39,8 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
     private volatile bool _shouldStop;
     private bool _disposed;
 
-    private event EventHandler<SmartCardDeviceEventArgs>? _arrived;
-    private event EventHandler<SmartCardDeviceEventArgs>? _removed;
-
     /// <inheritdoc />
-    public event EventHandler<SmartCardDeviceEventArgs>? Arrived
-    {
-        add => _arrived += value;
-        remove => _arrived -= value;
-    }
-
-    /// <inheritdoc />
-    public event EventHandler<SmartCardDeviceEventArgs>? Removed
-    {
-        add => _removed += value;
-        remove => _removed -= value;
-    }
+    public Action? DeviceEvent { get; set; }
 
     /// <inheritdoc />
     public DeviceListenerStatus Status { get; private set; } = DeviceListenerStatus.Stopped;
@@ -162,13 +148,13 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
                 // Detect removed readers
                 foreach (var reader in knownReaders.Except(currentReaderSet))
                 {
-                    OnRemoved(reader);
+                    OnDeviceEvent();
                 }
 
                 // Detect new readers
                 foreach (var reader in currentReaderSet.Except(knownReaders))
                 {
-                    OnArrived(reader);
+                    OnDeviceEvent();
                 }
 
                 knownReaders = currentReaderSet;
@@ -248,42 +234,21 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
         }
     }
 
-    private void OnArrived(string readerName)
+    private void OnDeviceEvent()
     {
-        var args = new SmartCardDeviceEventArgs(readerName);
-        InvokeEventSafely(_arrived, args, "Arrived");
-    }
-
-    private void OnRemoved(string readerName)
-    {
-        var args = new SmartCardDeviceEventArgs(readerName);
-        InvokeEventSafely(_removed, args, "Removed");
-    }
-
-    private void InvokeEventSafely(EventHandler<SmartCardDeviceEventArgs>? handler, SmartCardDeviceEventArgs args, string eventName)
-    {
-        if (handler is null)
+        try
         {
-            return;
+            DeviceEvent?.Invoke();
         }
-
-        foreach (var invoker in handler.GetInvocationList())
+        catch (Exception ex)
         {
-            try
-            {
-                ((EventHandler<SmartCardDeviceEventArgs>)invoker).Invoke(this, args);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogWarning(ex, "Exception in {EventName} event handler", eventName);
-            }
+            Logger.LogWarning(ex, "Exception in DeviceEvent callback");
         }
     }
 
     private void ClearEventHandlers()
     {
-        _arrived = null;
-        _removed = null;
+        DeviceEvent = null;
     }
 
     /// <inheritdoc />

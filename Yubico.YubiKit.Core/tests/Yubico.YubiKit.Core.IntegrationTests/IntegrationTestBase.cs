@@ -34,24 +34,20 @@ public abstract class IntegrationTestBase : IDisposable
 
         DeviceRepository = ServiceProvider.GetRequiredService<IDeviceRepository>();
         DeviceMonitorService = ServiceProvider.GetRequiredService<DeviceMonitorService>();
-        DeviceListenerService = ServiceProvider.GetRequiredService<DeviceListenerService>();
 
         DeviceMonitorService.StartAsync(CancellationToken.None).Wait();
-        DeviceListenerService.StartAsync(CancellationToken.None).Wait();
     }
 
     private static Action<YubiKeyManagerOptions> DefaultOptions =>
         options =>
         {
             options.EnableAutoDiscovery = true;
-            options.ScanInterval = TimeSpan.FromMilliseconds(100);
             options.EnabledTransport = Transport.All;
         };
 
     protected ServiceProvider ServiceProvider { get; }
     protected IYubiKeyManager YubiKeyManager { get; }
     private IDeviceRepository DeviceRepository { get; }
-    private DeviceListenerService DeviceListenerService { get; }
     private DeviceMonitorService DeviceMonitorService { get; }
 
     #region IDisposable Members

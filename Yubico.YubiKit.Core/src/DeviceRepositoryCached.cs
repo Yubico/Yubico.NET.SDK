@@ -95,21 +95,7 @@ public class DeviceRepositoryCached(
         return [.. _deviceCache.Values.Where(d => d.ConnectionType == type || type == ConnectionType.All)];
     }
 
-    public IObservable<DeviceEvent> DeviceChanges
-    {
-        get
-        {
-            if (!DeviceMonitorService.IsStarted)
-            {
-                throw new InvalidOperationException(
-                    "DeviceChanges requires background services to be running. " +
-                    "Call host.StartAsync() before accessing DeviceChanges. " +
-                    "Alternatively, use FindAllAsync() which works without background services.");
-            }
-            
-            return _deviceChanges.AsObservable();
-        }
-    }
+    public IObservable<DeviceEvent> DeviceChanges => _deviceChanges.AsObservable();
 
     public void UpdateCache(IEnumerable<IYubiKey> discoveredDevices)
     {

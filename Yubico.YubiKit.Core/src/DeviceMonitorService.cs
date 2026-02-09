@@ -26,7 +26,7 @@ public sealed class DeviceMonitorService(
     IYubiKeyFactory yubiKeyFactory,
     IFindPcscDevices findPcscService,
     IFindHidDevices findHidService,
-    IDeviceChannel deviceChannel,
+    IDeviceRepository deviceRepository,
     ILogger<DeviceMonitorService> logger,
     IOptions<YubiKeyManagerOptions> options)
     : BackgroundService
@@ -63,10 +63,6 @@ public sealed class DeviceMonitorService(
 
         // Signal the event semaphore to wake up ExecuteAsync
         try { _eventSemaphore.Release(); } catch (SemaphoreFullException) { }
-
-        // Complete the channel BEFORE stopping ExecuteAsync
-        // This allows DeviceListenerService to exit its await foreach loop
-        deviceChannel.Complete();
 
         await base.StopAsync(cancellationToken).ConfigureAwait(false);
         
@@ -120,8 +116,7 @@ public sealed class DeviceMonitorService(
         try
         {
             _smartCardListener = new DesktopSmartCardDeviceListener();
-            _smartCardListener.Arrived += (_, _) => SignalEvent();
-            _smartCardListener.Removed += (_, _) => SignalEvent();
+            _smartCardListener.DeviceEvent = SignalEvent;
             logger.LogDebug("SmartCard device listener started");
         }
         catch (Exception ex)
@@ -134,8 +129,7 @@ public sealed class DeviceMonitorService(
         try
         {
             _hidListener = HidDeviceListener.Create();
-            _hidListener.Arrived += (_, _) => SignalEvent();
-            _hidListener.Removed += (_, _) => SignalEvent();
+            _hidListener.DeviceEvent = SignalEvent;
             logger.LogDebug("HID device listener started ({Platform})", _hidListener.GetType().Name);
         }
         catch (PlatformNotSupportedException)
@@ -207,7 +201,7 @@ public sealed class DeviceMonitorService(
             yubiKeys.AddRange(pcscScanTask.Result);
             yubiKeys.AddRange(hidScanTask.Result);
 
-            await deviceChannel.PublishAsync(yubiKeys, cancellationToken).ConfigureAwait(false);
+            deviceRepository.UpdateCache(yubiKeys);
             logger.LogDebug("Device scan completed, found {TotalCount} total devices", yubiKeys.Count);
         }
         catch (OperationCanceledException)

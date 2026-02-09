@@ -128,20 +128,17 @@ public class HidDeviceListenerIntegrationTests
             return;
         }
 
-        var arrivedCount = 0;
-        var removedCount = 0;
+        var eventCount = 0;
 
         try
         {
-            listener.Arrived += (_, _) => Interlocked.Increment(ref arrivedCount);
-            listener.Removed += (_, _) => Interlocked.Increment(ref removedCount);
+            listener.DeviceEvent = () => Interlocked.Increment(ref eventCount);
 
             // Act - wait briefly
             Thread.Sleep(500);
 
             // Assert - no spurious events
-            Assert.Equal(0, arrivedCount);
-            Assert.Equal(0, removedCount);
+            Assert.Equal(0, eventCount);
             _output.WriteLine("No spurious events fired during quiet period");
         }
         finally

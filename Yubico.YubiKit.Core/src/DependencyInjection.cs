@@ -65,7 +65,6 @@ public static class DependencyInjection
             services.TryAddTransient<IFindPcscDevices, FindPcscDevices>();
             services.TryAddTransient<IFindHidDevices, FindHidDevices>();
             services.TryAddTransient<IProtocolFactory<ISmartCardConnection>, PcscProtocolFactory<ISmartCardConnection>>();
-            services.TryAddSingleton<IDeviceChannel, DeviceChannel>();
             services.TryAddSingleton<IDeviceRepository, DeviceRepositoryCached>();
 
             services.AddBackgroundServices();
@@ -93,13 +92,11 @@ public static class DependencyInjection
         private IServiceCollection AddBackgroundServices()
         {
             // Background services use TryAdd pattern via marker check
-            if (services.Any(s => s.ServiceType == typeof(DeviceListenerService)))
+            if (services.Any(s => s.ServiceType == typeof(DeviceMonitorService)))
             {
                 return services;
             }
 
-            services.AddSingleton<DeviceListenerService>();
-            services.AddHostedService<DeviceListenerService>(sp => sp.GetRequiredService<DeviceListenerService>());
             services.AddSingleton<DeviceMonitorService>();
             services.AddHostedService<DeviceMonitorService>(sp => sp.GetRequiredService<DeviceMonitorService>());
 

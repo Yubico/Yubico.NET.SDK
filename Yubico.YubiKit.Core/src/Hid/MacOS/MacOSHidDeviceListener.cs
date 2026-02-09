@@ -167,30 +167,7 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
                 return;
             }
 
-            // Get the IORegistry entry ID
-            var service = IOKitNativeMethods.IOHIDDeviceGetService(deviceRef);
-            if (service == 0)
-            {
-                return;
-            }
-
-            // Create device descriptor from the deviceRef
-            var usagePage = IOKitHelpers.GetNullableIntPropertyValue(deviceRef, "PrimaryUsagePage") ?? 0;
-            var usage = IOKitHelpers.GetNullableIntPropertyValue(deviceRef, "PrimaryUsage") ?? 0;
-            var vendorId = IOKitHelpers.GetNullableIntPropertyValue(deviceRef, "VendorID") ?? 0;
-            var productId = IOKitHelpers.GetNullableIntPropertyValue(deviceRef, "ProductID") ?? 0;
-
-            var descriptorInfo = new HidDescriptorInfo
-            {
-                UsagePage = (ushort)usagePage,
-                Usage = (ushort)usage,
-                DevicePath = service.ToString(),
-                VendorId = (short)vendorId,
-                ProductId = (short)productId
-            };
-
-            var device = new MacOSHidDevice(service, descriptorInfo);
-            OnArrived(device);
+            OnDeviceEvent();
         }
         catch (Exception ex)
         {
@@ -202,9 +179,7 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
     {
         try
         {
-            // For removal events, device info may not be fully available
-            // Use NullDevice as a placeholder
-            OnRemoved(NullDevice.Instance);
+            OnDeviceEvent();
         }
         catch (Exception ex)
         {

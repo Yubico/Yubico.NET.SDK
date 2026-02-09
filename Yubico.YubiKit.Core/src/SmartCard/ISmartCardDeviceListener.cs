@@ -20,14 +20,9 @@ namespace Yubico.YubiKit.Core.SmartCard;
 public interface ISmartCardDeviceListener : IDisposable
 {
     /// <summary>
-    /// Raised when a SmartCard device is connected to the system.
+    /// Callback invoked when any SmartCard device event (arrival or removal) occurs.
     /// </summary>
-    event EventHandler<SmartCardDeviceEventArgs>? Arrived;
-
-    /// <summary>
-    /// Raised when a SmartCard device is disconnected from the system.
-    /// </summary>
-    event EventHandler<SmartCardDeviceEventArgs>? Removed;
+    Action? DeviceEvent { get; set; }
 
     /// <summary>
     /// Gets the current status of the listener.

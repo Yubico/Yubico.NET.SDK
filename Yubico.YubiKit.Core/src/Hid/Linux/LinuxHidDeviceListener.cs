@@ -203,44 +203,17 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
         switch (action)
         {
             case "add":
-                HandleDeviceAdd(device);
+                HandleDeviceAdd();
                 break;
             case "remove":
-                OnRemoved(NullDevice.Instance);
+                OnDeviceEvent();
                 break;
         }
     }
 
-    private void HandleDeviceAdd(LinuxUdevDeviceSafeHandle device)
+    private void HandleDeviceAdd()
     {
-        try
-        {
-            // Get the device node path (e.g., /dev/hidraw0)
-            var devNodePtr = UdevNativeMethods.udev_device_get_devnode(device);
-            if (devNodePtr == IntPtr.Zero)
-            {
-                return;
-            }
-
-            var devNode = Marshal.PtrToStringAnsi(devNodePtr);
-            if (string.IsNullOrEmpty(devNode))
-            {
-                return;
-            }
-
-            // Create a HID device from the devnode
-            // Note: Full device creation would require opening the device and reading descriptor
-            Logger.LogDebug("Device added: {DevNode}", devNode);
-            
-            // For now, use NullDevice - full device creation requires descriptor parsing
-            // which is done in LinuxHidDevice.GetList()
-            // TODO: Create proper LinuxHidDevice from udev device
-            OnArrived(NullDevice.Instance);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Failed to process device add event");
-        }
+        OnDeviceEvent();
     }
 
     protected override void Dispose(bool disposing)

@@ -14,7 +14,6 @@
 
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.PlatformInterop.Linux.Libc;
 using Yubico.YubiKit.Core.PlatformInterop.Linux.Udev;
 using LibcNativeMethods = Yubico.YubiKit.Core.PlatformInterop.Linux.Libc.NativeMethods;
@@ -30,7 +29,7 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
     private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
     private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
 
-    private static readonly ILogger Logger = NullLoggerFactory.Instance.CreateLogger<LinuxHidDeviceListener>();
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<LinuxHidDeviceListener>();
 
     private LinuxUdevSafeHandle? _udevHandle;
     private LinuxUdevMonitorSafeHandle? _monitorHandle;

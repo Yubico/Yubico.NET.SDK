@@ -14,7 +14,6 @@
 
 using System.Text;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.PlatformInterop.MacOS.CoreFoundation;
 using IOKitNativeMethods = Yubico.YubiKit.Core.PlatformInterop.MacOS.IOKitFramework.NativeMethods;
 using CFNativeMethods = Yubico.YubiKit.Core.PlatformInterop.MacOS.CoreFoundation.NativeMethods;
@@ -29,7 +28,7 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
     private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
     private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
     
-    private static readonly ILogger Logger = NullLoggerFactory.Instance.CreateLogger<MacOSHidDeviceListener>();
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<MacOSHidDeviceListener>();
 
     private IntPtr _hidManager;
     private IntPtr _runLoop;

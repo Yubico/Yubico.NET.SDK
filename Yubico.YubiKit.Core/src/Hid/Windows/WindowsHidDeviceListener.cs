@@ -14,7 +14,6 @@
 
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.PlatformInterop.Windows.Cfgmgr32;
 
 namespace Yubico.YubiKit.Core.Hid.Windows;
@@ -24,7 +23,7 @@ namespace Yubico.YubiKit.Core.Hid.Windows;
 /// </summary>
 internal sealed class WindowsHidDeviceListener : HidDeviceListener
 {
-    private static readonly ILogger Logger = NullLoggerFactory.Instance.CreateLogger<WindowsHidDeviceListener>();
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<WindowsHidDeviceListener>();
     
     /// <summary>
     /// GUID for the HID device interface class.

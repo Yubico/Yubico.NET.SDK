@@ -14,7 +14,6 @@
 
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 
 namespace Yubico.YubiKit.Core.SmartCard;
@@ -32,7 +31,7 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
     private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(1000);
     private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
 
-    private static readonly ILogger Logger = NullLoggerFactory.Instance.CreateLogger<DesktopSmartCardDeviceListener>();
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<DesktopSmartCardDeviceListener>();
 
     private readonly object _syncLock = new();
     private SCardContext? _context;

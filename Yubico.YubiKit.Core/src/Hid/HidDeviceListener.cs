@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.PlatformInterop;
 
@@ -25,7 +24,7 @@ namespace Yubico.YubiKit.Core.Hid;
 /// </summary>
 public abstract class HidDeviceListener : IDisposable
 {
-    private static readonly ILogger Logger = NullLoggerFactory.Instance.CreateLogger<HidDeviceListener>();
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<HidDeviceListener>();
     
     private event EventHandler<HidDeviceEventArgs>? _arrived;
     private event EventHandler<HidDeviceEventArgs>? _removed;

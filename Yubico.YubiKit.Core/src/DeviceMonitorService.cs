@@ -189,6 +189,10 @@ public sealed class DeviceMonitorService(
         {
             // Semaphore is already at max; event is already pending
         }
+        catch (ObjectDisposedException)
+        {
+            // Semaphore was disposed; service is shutting down
+        }
     }
 
     private async Task PerformDeviceScan(CancellationToken cancellationToken)

@@ -290,6 +290,8 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
     /// <inheritdoc />
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
+
         if (_disposed)
         {
             return;

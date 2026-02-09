@@ -206,6 +206,11 @@ public class DeviceRepositoryCached(
                 CreateSafeIdentityReader(),
                 cancellationToken).ConfigureAwait(false);
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            Logger.LogError("Device scan was cancelled");
+            return;
+        }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to correlate devices into composites");

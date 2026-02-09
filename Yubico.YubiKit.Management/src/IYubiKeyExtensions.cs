@@ -168,7 +168,7 @@ public static class IYubiKeyExtensions
             ProtocolConfiguration? configuration = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await reference.ConnectAsync<ISmartCardConnection>(cancellationToken)
+            var connection = await reference.ConnectAsync(cancellationToken)
                 .ConfigureAwait(false);
             return await ManagementSession.CreateAsync(
                     connection,

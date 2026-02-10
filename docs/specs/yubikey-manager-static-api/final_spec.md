@@ -66,7 +66,7 @@ This complexity is appropriate for enterprise applications with existing DI infr
 - [ ] `YubiKeyManager.FindAllAsync()` returns all connected YubiKeys without prior setup
 - [ ] `YubiKeyManager.FindAllAsync(ConnectionType)` filters by connection type
 - [ ] Method works without calling any initialization or DI setup
-- [ ] Returns `IReadOnlyList<IYubiKey>` consistent with existing instance API
+- [ ] Returns `IReadOnlyList<IYubiKeyReference>` consistent with existing instance API
 - [ ] Thread-safe for concurrent calls from multiple threads
 - [ ] No background monitoring is started by `FindAllAsync()` calls
 
@@ -91,7 +91,7 @@ This complexity is appropriate for enterprise applications with existing DI infr
 
 **Acceptance Criteria:**
 - [ ] `YubiKeyManager.DeviceChanges` exposes `IObservable<DeviceEvent>`
-- [ ] `DeviceEvent` contains `EventType` (Arrived/Removed) and `Device` (IYubiKey)
+- [ ] `DeviceEvent` contains `EventType` (Arrived/Removed) and `Device` (IYubiKeyReference)
 - [ ] Events are only emitted when monitoring is active
 - [ ] Subscribing to `DeviceChanges` before `StartMonitoring()` does not start monitoring automatically
 - [ ] Events fire on background thread (not UI thread)
@@ -134,7 +134,7 @@ This complexity is appropriate for enterprise applications with existing DI infr
 
 | Step | User Action | System Response |
 |------|-------------|-----------------|
-| 1 | Call `YubiKeyManager.FindAllAsync()` | Performs on-demand device scan, returns list of `IYubiKey` instances |
+| 1 | Call `YubiKeyManager.FindAllAsync()` | Performs on-demand device scan, returns list of `IYubiKeyReference` instances |
 | 2 | Call `YubiKeyManager.StartMonitoring()` | Starts background task that scans devices at default interval (5 seconds) |
 | 3 | Subscribe to `YubiKeyManager.DeviceChanges` | Receives `IObservable<DeviceEvent>` that emits Arrived/Removed events |
 | 4 | Connect a YubiKey while monitoring | Emits `DeviceEvent` with `EventType.Arrived` and device instance |
@@ -208,28 +208,10 @@ This complexity is appropriate for enterprise applications with existing DI infr
 
 ### 5.1 Must Use
 
-- **`DeviceRepositoryCached`** - Existing cache and event infrastructure (caches composite `IYubiKey`, not `IYubiKeyReference`)
-- **`ICompositeYubiKeyFactory`** - Correlates transport-specific references into composite YubiKeys
+- **`DeviceRepositoryCached`** - Existing cache and event infrastructure
 - **Same device discovery logic** - Reuse existing `SmartCardDeviceListener`, `HidDeviceListener` patterns
-- **`IYubiKey` interface** - Return type is composite representing physical device (aggregates all transports)
-- **`IYubiKeyReference`** - Transport-specific device references (internal to correlation)
+- **`IYubiKeyReference`** - Transport-specific device references returned by discovery
 - **CancellationToken** - For async operations and graceful shutdown
-
-### 5.4 Composite Device Model (from composite-device-refactor.md)
-
-**Important:** This spec assumes the composite device refactor (PR #2) is complete. Key concepts:
-
-| Type | Purpose |
-|------|---------|
-| `IYubiKey` | Composite representing the physical YubiKey (aggregates all transports) |
-| `IYubiKeyReference` | Transport-specific device reference (PCSC reader, HID endpoint) |
-| `IDeviceIdentity` | Device identity information (serial, version, capabilities) |
-
-**`FindAllAsync()` returns composites:** Each `IYubiKey` represents one physical YubiKey with all available transports, not individual transport endpoints.
-
-**Identity reader dependency:** Static API needs access to identity reader (from Management) for device correlation. This is provided via:
-- DI: `Func<IYubiKeyReference, CancellationToken, Task<IDeviceIdentity?>>` registered by `AddYubiKeyManagement()`
-- Static: Default reader that opens ManagementSession to read DeviceInfo
 
 ### 5.2 Must Not
 
@@ -251,19 +233,21 @@ This complexity is appropriate for enterprise applications with existing DI infr
 
 ### 6.1 Architectural Changes
 
-**Prerequisite:** This spec depends on the composite device refactor (see `docs/plans/composite-device-refactor.md`). The refactor must be complete before implementing this feature.
+**Prerequisite:** The `yubikit-listeners` branch refactor is complete. This already accomplished:
+- ✅ Merged `DeviceMonitorService` and `DeviceListenerService` into single service
+- ✅ Deleted `IDeviceChannel` interface - `DeviceMonitorService` calls `UpdateCache()` directly
+- ✅ Event-driven device discovery via `HidDeviceListener` and `DesktopSmartCardDeviceListener`
 
-**Merge Services:** Combine `DeviceMonitorService` and `DeviceListenerService` into single internal monitoring loop within `YubiKeyManager`. The producer/consumer pattern via `IDeviceChannel` is unnecessary for this domain.
+**Remaining Work:**
 
-**Remove Abstractions:** Delete `IDeviceChannel` interface - direct calls to `UpdateCache()` on the repository.
+**Static Factory for Repository:** Add `DeviceRepositoryCached.Create()` static method for internal use by static API. This factory must instantiate:
+- `IFindYubiKeys` (via `FindYubiKeys` which needs `IFindPcscDevices`, `IFindHidDevices`, `IYubiKeyFactory`)
+- `ILogger<DeviceRepositoryCached>` (use `NullLogger<T>` for static API, or allow injection)
 
-**Static Factory for Repository:** Add `DeviceRepositoryCached.Create()` static method for internal use by static API.
-
-**Composite Device Integration:**
-- `FindAllAsync()` returns `IReadOnlyList<IYubiKey>` where each `IYubiKey` is a composite (physical device with all transports)
-- `DeviceEvent` contains composite `IYubiKey`, not `IYubiKeyReference`
-- Static API needs default identity reader for correlation (creates ManagementSession internally)
-- Cache uses `IYubiKey.DeviceId` (serial number or fingerprint) as key, not transport-level IDs
+**Static Monitoring Loop:** The static API needs its own monitoring capability independent of DI-hosted `DeviceMonitorService`. Reuse:
+- `HidDeviceListener.Create()` - factory method for platform-specific HID listener
+- `new DesktopSmartCardDeviceListener()` - cross-platform PC/SC listener
+- Event coalescing pattern (200ms delay via `SemaphoreSlim`)
 
 ### 6.2 Memory Safety
 
@@ -342,8 +326,8 @@ This complexity is appropriate for enterprise applications with existing DI infr
 | INVEST compliance | All 5 user stories pass INVEST checklist | PRD audit |
 | No breaking changes | All existing tests pass | CI pipeline |
 | Thread safety verified | Concurrent usage tests pass | Unit tests |
-| Monitoring consolidation | `DeviceMonitorService` + `DeviceListenerService` merged | Code review |
-| `IDeviceChannel` removed | Interface deleted from codebase | Code review |
+| Monitoring consolidation | ✅ COMPLETE via `yubikit-listeners` branch | Already merged |
+| `IDeviceChannel` removed | ✅ COMPLETE via `yubikit-listeners` branch | Already merged |
 | Documentation complete | API reference and usage examples added | Docs review |
 | Performance targets met | Device scan ≤ 500ms, monitoring ≤ 1% CPU | Performance tests |
 
@@ -352,7 +336,8 @@ This complexity is appropriate for enterprise applications with existing DI infr
 ## 10. Related Documents
 
 - **[Design Research](../../research/yubikey-manager-static-api-design.md)** - Architecture analysis and trade-off decisions
-- **[Composite Device Refactor](../../plans/composite-device-refactor.md)** - Prerequisite refactor: IYubiKey becomes composite, IYubiKeyReference for transport endpoints
+- **[Event-Driven Device Discovery](../../../architecture/event-driven-device-discovery.md)** - Architecture docs for the new listener-based discovery (from `yubikit-listeners`)
+- **[Merge Device Services Plan](../../../plans/2026-02-09-merge-device-services.md)** - Plan that consolidated DeviceListenerService into DeviceMonitorService
 - **[DX Audit Report](../../research/yubikey-manager-static-api-dx-audit.md)** - API design recommendations (referenced in research)
 - **[Technical Feasibility Report](../../research/yubikey-manager-static-api-feasibility.md)** - Implementation validation (referenced in research)
 - **[CLAUDE.md](../../CLAUDE.md)** - SDK patterns and conventions
@@ -361,31 +346,52 @@ This complexity is appropriate for enterprise applications with existing DI infr
 
 ## 11. Implementation Notes for Plan Agent
 
-**PREREQUISITE:** The composite device refactor (`docs/plans/composite-device-refactor.md`) must be complete before starting this feature. Specifically, Step 2 (Create Composite IYubiKey) must be merged.
+**PREREQUISITE:** The `yubikit-listeners` branch refactor is complete. This brought:
+- Event-driven device discovery (OS notifications instead of 500ms polling)
+- Merged `DeviceListenerService` + `DeviceChannel` into `DeviceMonitorService`
+- Deleted: `DeviceChannel.cs`, `DeviceListenerService.cs`, `IDeviceChannel`, `DeviceRepositorySimple`
+- Simplified listener events to `Action? DeviceEvent` callbacks (signal-only, no device construction)
+- `DeviceRepositoryCached.DeviceChanges` is now always accessible (no `IsStarted` gate)
+
+**Current Architecture (post-rebase):**
+```
+HidDeviceListener ─────┐
+                       ├──► SignalEvent() ──► DeviceMonitorService ──► DeviceRepositoryCached
+SmartCardListener ─────┘         │                    │                        │
+                                 │                    ▼                        ▼
+                           (coalescing)        PerformDeviceScan()      IObservable<DeviceEvent>
+                            200ms delay              │
+                                                     ▼
+                                              UpdateCache()
+```
 
 When creating the implementation plan, consider:
 
-1. **Phase 1: Repository Factory**
-   - Add `DeviceRepositoryCached.Create()` static method
-   - Ensure repository can be used without DI
+1. **Phase 1: Repository Factory** *(NEW WORK)*
+   - Add `DeviceRepositoryCached.Create()` static method for non-DI usage
+   - Factory must create all dependencies: `IFindYubiKeys`, `ILogger<T>`
+   - Consider using `NullLoggerFactory` for static API or allow optional logger injection
 
-2. **Phase 2: Monitoring Consolidation**
-   - Merge `DeviceMonitorService` and `DeviceListenerService` into single loop
-   - Remove `IDeviceChannel` and async channel dependency
-   - Preserve all device scanning logic
+2. **Phase 2: Monitoring Consolidation** *(ALREADY COMPLETE via yubikit-listeners)*
+   - ✅ `DeviceListenerService` + `DeviceChannel` merged into `DeviceMonitorService`
+   - ✅ `IDeviceChannel` deleted
+   - ✅ Event-driven architecture with `HidDeviceListener` and `DesktopSmartCardDeviceListener`
+   - ✅ `DeviceChanges` no longer gated by `IsStarted` check
 
-3. **Phase 3: Static API Surface**
+3. **Phase 3: Static API Surface** *(NEW WORK)*
    - Add static methods to `YubiKeyManager` (or create new `YubiKeyManager` static class)
-   - Implement thread-safe lazy initialization of internal repository
+   - Implement thread-safe lazy initialization using `Lazy<T>` with `ExecutionAndPublication` mode
    - Add `IsMonitoring` property and `DeviceChanges` observable
+   - For static monitoring: instantiate `HidDeviceListener.Create()` and `DesktopSmartCardDeviceListener` directly
+   - Reuse the event coalescing pattern from `DeviceMonitorService`
 
-4. **Phase 4: Testing**
+4. **Phase 4: Testing** *(NEW WORK)*
    - Unit tests for each static method
    - Concurrency tests (multiple threads calling `FindAllAsync()`)
    - Monitoring lifecycle tests (start/stop/shutdown)
-   - Static + DI coexistence tests
+   - Static + DI coexistence tests (shared cache verification)
 
-5. **Phase 5: Documentation**
+5. **Phase 5: Documentation** *(NEW WORK)*
    - XML doc comments for all public static members
    - Usage examples for common scenarios (discovery, monitoring, shutdown)
    - Migration guide for users of existing instance API
@@ -434,4 +440,4 @@ All validators passed. This specification is approved for implementation.
 
 ---
 
-**Estimated Implementation Time:** 13 days (2.6 weeks for 1 developer)
+**Estimated Implementation Time:** 8 days (1.6 weeks for 1 developer) - reduced from 13 days since Phase 2 (Monitoring Consolidation) is already complete via `yubikit-listeners` rebase.

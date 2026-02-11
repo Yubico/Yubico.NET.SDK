@@ -140,6 +140,32 @@ public class YubiKeyTestState : IXunitSerializable
         ConnectionType = connectionType;
     }
 
+    #region Device Properties (all trigger lazy binding)
+
+    /// <summary>
+    ///     Ensures the placeholder is bound to a real device.
+    ///     Call this before accessing any device-related field.
+    /// </summary>
+    /// <remarks>
+    ///     This is the SINGLE point where binding is triggered. All public properties
+    ///     that expose device data must call this method to ensure consistency.
+    ///     This prevents bugs where a new property forgets to trigger binding.
+    /// </remarks>
+    private void EnsureBound()
+    {
+        if (_device is not null || !IsPlaceholder)
+            return;
+
+        BindToRealDevice();
+
+        if (_device is null)
+        {
+            throw new InvalidOperationException(
+                "Device binding failed. This may indicate no YubiKey matching the filter criteria is connected. " +
+                $"Filter: {FilterDescription ?? "none"}");
+        }
+    }
+
     /// <summary>
     ///     Gets the YubiKey device instance.
     ///     For placeholders, accessing this property triggers lazy device binding.
@@ -148,19 +174,8 @@ public class YubiKeyTestState : IXunitSerializable
     {
         get
         {
-            if (_device is null && IsPlaceholder)
-            {
-                BindToRealDevice();
-            }
-
-            if (_device is null)
-            {
-                throw new InvalidOperationException(
-                    "Device binding failed. This may indicate no YubiKey matching the filter criteria is connected. " +
-                    $"Filter: {FilterDescription ?? "none"}");
-            }
-
-            return _device;
+            EnsureBound();
+            return _device!;
         }
         private set => _device = value;
     }
@@ -175,11 +190,7 @@ public class YubiKeyTestState : IXunitSerializable
     {
         get
         {
-            if (_device is null && IsPlaceholder)
-            {
-                BindToRealDevice();
-            }
-
+            EnsureBound();
             return _deviceInfo;
         }
         private set => _deviceInfo = value;
@@ -188,27 +199,38 @@ public class YubiKeyTestState : IXunitSerializable
     private DeviceInfo _deviceInfo;
 
     /// <summary>
+    ///     Gets the connection type for this device instance.
+    ///     For placeholders, accessing this property triggers lazy device binding.
+    /// </summary>
+    public ConnectionType ConnectionType
+    {
+        get
+        {
+            EnsureBound();
+            return _connectionType;
+        }
+        private set => _connectionType = value;
+    }
+
+    private ConnectionType _connectionType;
+
+    /// <summary>
     ///     Gets the firmware version.
-    ///     Convenience property for <c>Info.FirmwareVersion</c>.
+    ///     Convenience property for <c>DeviceInfo.FirmwareVersion</c>.
     /// </summary>
     public FirmwareVersion FirmwareVersion => DeviceInfo.FirmwareVersion;
 
     /// <summary>
     ///     Gets the form factor.
-    ///     Convenience property for <c>Info.FormFactor</c>.
+    ///     Convenience property for <c>DeviceInfo.FormFactor</c>.
     /// </summary>
     public FormFactor FormFactor => DeviceInfo.FormFactor;
 
     /// <summary>
     ///     Gets the device serial number.
-    ///     Convenience property for <c>Info.SerialNumber</c>.
+    ///     Convenience property for <c>DeviceInfo.SerialNumber</c>.
     /// </summary>
     public int? SerialNumber => DeviceInfo.SerialNumber;
-
-    /// <summary>
-    ///     Gets the connection type for this device instance.
-    /// </summary>
-    public ConnectionType ConnectionType { get; private set; }
 
     /// <summary>
     ///     Gets whether the device supports USB transport.
@@ -219,6 +241,8 @@ public class YubiKeyTestState : IXunitSerializable
     ///     Gets whether the device supports NFC transport.
     /// </summary>
     public bool IsNfcTransport => DeviceInfo.NfcSupported != DeviceCapabilities.None;
+
+    #endregion
 
     #region IXunitSerializable Members
 

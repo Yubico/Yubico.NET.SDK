@@ -24,6 +24,10 @@ namespace Yubico.YubiKit.Core.SmartCard;
 /// <remarks>
 /// Uses a dedicated background thread with 1000ms timeout for responsive cancellation.
 /// On Windows, also watches for PnP notifications via the special <c>\\?\PnP?\Notification</c> reader.
+/// <para>
+/// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="DeviceEvent"/>
+/// callback. The listener establishes baseline during <see cref="Start"/> to avoid duplicate events.
+/// </para>
 /// </remarks>
 public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
 {
@@ -33,9 +37,10 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
 
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<DesktopSmartCardDeviceListener>();
 
-    private readonly object _syncLock = new();
+    private readonly Lock _syncLock = new();
     private SCardContext? _context;
     private Thread? _listenerThread;
+    private HashSet<string>? _knownReaders;
     private volatile bool _shouldStop;
     private bool _disposed;
 
@@ -46,41 +51,97 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
     public DeviceListenerStatus Status { get; private set; } = DeviceListenerStatus.Stopped;
 
     /// <summary>
-    /// Creates a new instance and starts listening for SmartCard device events.
+    /// Creates a new instance. The listener does not start automatically - call <see cref="Start"/>
+    /// after setting up the <see cref="DeviceEvent"/> callback.
     /// </summary>
     public DesktopSmartCardDeviceListener()
     {
-        StartListening();
+        // Lazy start - do nothing in constructor
     }
 
-    private void StartListening()
+    /// <inheritdoc />
+    public void Start()
     {
-        try
+        lock (_syncLock)
         {
-            var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
-            if (result != ErrorCode.SCARD_S_SUCCESS)
+            if (Status == DeviceListenerStatus.Started)
             {
-                Logger.LogWarning("Failed to establish SCard context: 0x{Result:X8}", result);
-                Status = DeviceListenerStatus.Error;
                 return;
             }
 
-            _context = context;
-
-            _listenerThread = new Thread(ListenerThreadProc)
+            try
             {
-                Name = "SmartCardDeviceListener",
-                IsBackground = true
-            };
-            _listenerThread.Start();
+                var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
+                if (result != ErrorCode.SCARD_S_SUCCESS)
+                {
+                    Logger.LogWarning("Failed to establish SCard context: 0x{Result:X8}", result);
+                    Status = DeviceListenerStatus.Error;
+                    return;
+                }
 
-            Status = DeviceListenerStatus.Started;
+                _context = context;
+                _shouldStop = false;
+
+                // Establish baseline of currently connected readers BEFORE starting thread
+                EstablishBaseline();
+
+                _listenerThread = new Thread(ListenerThreadProc)
+                {
+                    Name = "SmartCardDeviceListener",
+                    IsBackground = true
+                };
+                _listenerThread.Start();
+
+                Status = DeviceListenerStatus.Started;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to start SmartCard listener");
+                Status = DeviceListenerStatus.Error;
+            }
         }
-        catch (Exception ex)
+    }
+
+    /// <inheritdoc />
+    public void Stop()
+    {
+        lock (_syncLock)
         {
-            Logger.LogError(ex, "Failed to start SmartCard listener");
-            Status = DeviceListenerStatus.Error;
+            if (Status == DeviceListenerStatus.Stopped)
+            {
+                return;
+            }
+
+            StopListening();
+            _knownReaders = null;
+            Status = DeviceListenerStatus.Stopped;
         }
+    }
+
+    private void EstablishBaseline()
+    {
+        if (_context is null || _context.IsInvalid)
+        {
+            _knownReaders = [];
+            return;
+        }
+
+        var result = NativeMethods.SCardListReaders(_context, null, out var currentReaders);
+
+        if (result == ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
+        {
+            _knownReaders = [];
+            return;
+        }
+
+        if (result != ErrorCode.SCARD_S_SUCCESS)
+        {
+            Logger.LogWarning("SCardListReaders failed during baseline: 0x{Result:X8}", result);
+            _knownReaders = [];
+            return;
+        }
+
+        _knownReaders = [.. currentReaders];
     }
 
     private void StopListening()
@@ -107,8 +168,6 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
 
     private void ListenerThreadProc()
     {
-        HashSet<string>? knownReaders = null;
-
         try
         {
             while (!_shouldStop)
@@ -125,7 +184,7 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
                 {
                     // No readers available - wait with PnP notification on Windows
                     currentReaders = [];
-                    knownReaders ??= [];
+                    _knownReaders ??= [];
                     WaitForPnpChange();
                     continue;
                 }
@@ -146,27 +205,22 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
 
                 var currentReaderSet = new HashSet<string>(currentReaders);
 
-                // First iteration: establish baseline without firing events
-                if (knownReaders is null)
-                {
-                    knownReaders = currentReaderSet;
-                    WaitForStatusChange(currentReaders);
-                    continue;
-                }
+                // Baseline was established in Start(), so we always have _knownReaders
+                _knownReaders ??= currentReaderSet;
 
                 // Detect removed readers
-                foreach (var reader in knownReaders.Except(currentReaderSet))
+                foreach (var reader in _knownReaders.Except(currentReaderSet))
                 {
                     OnDeviceEvent();
                 }
 
                 // Detect new readers
-                foreach (var reader in currentReaderSet.Except(knownReaders))
+                foreach (var reader in currentReaderSet.Except(_knownReaders))
                 {
                     OnDeviceEvent();
                 }
 
-                knownReaders = currentReaderSet;
+                _knownReaders = currentReaderSet;
 
                 // Wait for status change with timeout
                 WaitForStatusChange(currentReaders);

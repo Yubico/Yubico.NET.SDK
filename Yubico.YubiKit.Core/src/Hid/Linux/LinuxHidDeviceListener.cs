@@ -24,6 +24,10 @@ namespace Yubico.YubiKit.Core.Hid.Linux;
 /// <summary>
 /// Linux implementation of HID device listener using udev_monitor with poll().
 /// </summary>
+/// <remarks>
+/// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="DeviceEvent"/>
+/// callback.
+/// </remarks>
 internal sealed class LinuxHidDeviceListener : HidDeviceListener
 {
     private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
@@ -31,75 +35,125 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
 
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<LinuxHidDeviceListener>();
 
+    private readonly Lock _syncLock = new();
     private LinuxUdevSafeHandle? _udevHandle;
     private LinuxUdevMonitorSafeHandle? _monitorHandle;
     private Thread? _listenerThread;
     private volatile bool _shouldStop;
     private bool _disposed;
 
+    /// <summary>
+    /// Creates a new instance. The listener does not start automatically - call <see cref="Start"/>
+    /// after setting up the <see cref="DeviceEvent"/> callback.
+    /// </summary>
     public LinuxHidDeviceListener()
     {
-        StartListening();
+        // Lazy start - do nothing in constructor
     }
 
-    private void StartListening()
+    /// <inheritdoc />
+    public override void Start()
     {
-        try
+        lock (_syncLock)
         {
-            // Create udev context
-            _udevHandle = UdevNativeMethods.udev_new();
-            if (_udevHandle.IsInvalid)
+            if (Status == DeviceListenerStatus.Started)
             {
-                Logger.LogWarning("Failed to create udev context");
-                Status = DeviceListenerStatus.Error;
                 return;
             }
 
-            // Create monitor for netlink events
-            _monitorHandle = UdevNativeMethods.udev_monitor_new_from_netlink(_udevHandle, UdevNativeMethods.UdevMonitorName);
-            if (_monitorHandle.IsInvalid)
+            try
             {
-                Logger.LogWarning("Failed to create udev monitor");
-                Status = DeviceListenerStatus.Error;
-                return;
+                // Create udev context
+                _udevHandle = UdevNativeMethods.udev_new();
+                if (_udevHandle.IsInvalid)
+                {
+                    Logger.LogWarning("Failed to create udev context");
+                    Status = DeviceListenerStatus.Error;
+                    return;
+                }
+
+                // Create monitor for netlink events
+                _monitorHandle = UdevNativeMethods.udev_monitor_new_from_netlink(_udevHandle, UdevNativeMethods.UdevMonitorName);
+                if (_monitorHandle.IsInvalid)
+                {
+                    Logger.LogWarning("Failed to create udev monitor");
+                    Status = DeviceListenerStatus.Error;
+                    return;
+                }
+
+                // Filter for hidraw subsystem
+                var filterResult = UdevNativeMethods.udev_monitor_filter_add_match_subsystem_devtype(
+                    _monitorHandle,
+                    UdevNativeMethods.UdevSubsystemName,
+                    null);
+                
+                if (filterResult < 0)
+                {
+                    Logger.LogWarning("Failed to add udev filter: {Result}", filterResult);
+                    Status = DeviceListenerStatus.Error;
+                    return;
+                }
+
+                // Enable receiving
+                var enableResult = UdevNativeMethods.udev_monitor_enable_receiving(_monitorHandle);
+                if (enableResult < 0)
+                {
+                    Logger.LogWarning("Failed to enable udev receiving: {Result}", enableResult);
+                    Status = DeviceListenerStatus.Error;
+                    return;
+                }
+
+                _shouldStop = false;
+
+                // Start the listener thread
+                _listenerThread = new Thread(ListenerThreadProc)
+                {
+                    Name = "LinuxHidDeviceListener",
+                    IsBackground = true
+                };
+                _listenerThread.Start();
+
+                Status = DeviceListenerStatus.Started;
             }
-
-            // Filter for hidraw subsystem
-            var filterResult = UdevNativeMethods.udev_monitor_filter_add_match_subsystem_devtype(
-                _monitorHandle,
-                UdevNativeMethods.UdevSubsystemName,
-                null);
-            
-            if (filterResult < 0)
+            catch (Exception ex)
             {
-                Logger.LogWarning("Failed to add udev filter: {Result}", filterResult);
+                Logger.LogError(ex, "Failed to start Linux HID listener");
                 Status = DeviceListenerStatus.Error;
-                return;
             }
-
-            // Enable receiving
-            var enableResult = UdevNativeMethods.udev_monitor_enable_receiving(_monitorHandle);
-            if (enableResult < 0)
-            {
-                Logger.LogWarning("Failed to enable udev receiving: {Result}", enableResult);
-                Status = DeviceListenerStatus.Error;
-                return;
-            }
-
-            // Start the listener thread
-            _listenerThread = new Thread(ListenerThreadProc)
-            {
-                Name = "LinuxHidDeviceListener",
-                IsBackground = true
-            };
-            _listenerThread.Start();
-
-            Status = DeviceListenerStatus.Started;
         }
-        catch (Exception ex)
+    }
+
+    /// <inheritdoc />
+    public override void Stop()
+    {
+        lock (_syncLock)
         {
-            Logger.LogError(ex, "Failed to start Linux HID listener");
-            Status = DeviceListenerStatus.Error;
+            if (Status == DeviceListenerStatus.Stopped)
+            {
+                return;
+            }
+
+            _shouldStop = true;
+
+            // Wait for the listener thread to exit
+            if (_listenerThread is not null && _listenerThread.IsAlive)
+            {
+                if (!_listenerThread.Join(MaxDisposalWaitTime))
+                {
+                    Logger.LogWarning("Linux HID listener thread did not exit within timeout");
+                }
+            }
+
+            _listenerThread = null;
+
+            // Cleanup udev resources
+            _monitorHandle?.Dispose();
+            _monitorHandle = null;
+
+            _udevHandle?.Dispose();
+            _udevHandle = null;
+
+            Status = DeviceListenerStatus.Stopped;
         }
     }
 
@@ -225,25 +279,18 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
         }
 
         _disposed = true;
-        _shouldStop = true;
 
-        // Wait for the listener thread to exit
-        if (_listenerThread is not null && _listenerThread.IsAlive)
+        if (disposing)
         {
-            if (!_listenerThread.Join(MaxDisposalWaitTime))
-            {
-                Logger.LogWarning("Linux HID listener thread did not exit within timeout");
-            }
+            Stop();
         }
-
-        _listenerThread = null;
-
-        // Cleanup udev resources
-        _monitorHandle?.Dispose();
-        _monitorHandle = null;
-
-        _udevHandle?.Dispose();
-        _udevHandle = null;
+        else
+        {
+            // Finalizer path - minimal cleanup
+            _shouldStop = true;
+            _monitorHandle?.Dispose();
+            _udevHandle?.Dispose();
+        }
 
         base.Dispose(disposing);
     }

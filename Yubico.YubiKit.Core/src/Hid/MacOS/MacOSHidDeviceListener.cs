@@ -23,6 +23,10 @@ namespace Yubico.YubiKit.Core.Hid.MacOS;
 /// <summary>
 /// macOS implementation of HID device listener using IOHIDManager callbacks.
 /// </summary>
+/// <remarks>
+/// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="DeviceEvent"/>
+/// callback.
+/// </remarks>
 internal sealed class MacOSHidDeviceListener : HidDeviceListener
 {
     private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
@@ -30,6 +34,7 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
     
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<MacOSHidDeviceListener>();
 
+    private readonly Lock _syncLock = new();
     private IntPtr _hidManager;
     private IntPtr _runLoop;
     private IntPtr _runLoopMode;
@@ -41,56 +46,121 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
     private IOKitNativeMethods.IOHIDDeviceCallback? _arrivedCallbackDelegate;
     private IOKitNativeMethods.IOHIDDeviceCallback? _removedCallbackDelegate;
 
+    /// <summary>
+    /// Creates a new instance. The listener does not start automatically - call <see cref="Start"/>
+    /// after setting up the <see cref="DeviceEvent"/> callback.
+    /// </summary>
     public MacOSHidDeviceListener()
     {
-        StartListening();
+        // Lazy start - do nothing in constructor
     }
 
-    private void StartListening()
+    /// <inheritdoc />
+    public override void Start()
     {
-        try
+        lock (_syncLock)
         {
-            // Create the HID Manager
-            _hidManager = IOKitNativeMethods.IOHIDManagerCreate(IntPtr.Zero, 0);
-            if (_hidManager == IntPtr.Zero)
+            if (Status == DeviceListenerStatus.Started)
             {
-                Logger.LogWarning("Failed to create IOHIDManager");
-                Status = DeviceListenerStatus.Error;
                 return;
             }
 
-            // Set device matching to all HID devices
-            IOKitNativeMethods.IOHIDManagerSetDeviceMatching(_hidManager, IntPtr.Zero);
-
-            // Keep callback delegates alive
-            _arrivedCallbackDelegate = DeviceArrivedCallback;
-            _removedCallbackDelegate = DeviceRemovedCallback;
-
-            // Register callbacks
-            IOKitNativeMethods.IOHIDManagerRegisterDeviceMatchingCallback(
-                _hidManager,
-                _arrivedCallbackDelegate,
-                IntPtr.Zero);
-
-            IOKitNativeMethods.IOHIDManagerRegisterDeviceRemovalCallback(
-                _hidManager,
-                _removedCallbackDelegate,
-                IntPtr.Zero);
-
-            // Start the listener thread
-            _listenerThread = new Thread(ListenerThreadProc)
+            try
             {
-                Name = "MacOSHidDeviceListener",
-                IsBackground = true
-            };
-            _listenerThread.Start();
+                // Create the HID Manager
+                _hidManager = IOKitNativeMethods.IOHIDManagerCreate(IntPtr.Zero, 0);
+                if (_hidManager == IntPtr.Zero)
+                {
+                    Logger.LogWarning("Failed to create IOHIDManager");
+                    Status = DeviceListenerStatus.Error;
+                    return;
+                }
 
-            Status = DeviceListenerStatus.Started;
+                // Set device matching to all HID devices
+                IOKitNativeMethods.IOHIDManagerSetDeviceMatching(_hidManager, IntPtr.Zero);
+
+                // Keep callback delegates alive
+                _arrivedCallbackDelegate = DeviceArrivedCallback;
+                _removedCallbackDelegate = DeviceRemovedCallback;
+
+                // Register callbacks
+                IOKitNativeMethods.IOHIDManagerRegisterDeviceMatchingCallback(
+                    _hidManager,
+                    _arrivedCallbackDelegate,
+                    IntPtr.Zero);
+
+                IOKitNativeMethods.IOHIDManagerRegisterDeviceRemovalCallback(
+                    _hidManager,
+                    _removedCallbackDelegate,
+                    IntPtr.Zero);
+
+                _shouldStop = false;
+
+                // Start the listener thread
+                _listenerThread = new Thread(ListenerThreadProc)
+                {
+                    Name = "MacOSHidDeviceListener",
+                    IsBackground = true
+                };
+                _listenerThread.Start();
+
+                Status = DeviceListenerStatus.Started;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to start macOS HID listener");
+                Status = DeviceListenerStatus.Error;
+            }
         }
-        catch (Exception ex)
+    }
+
+    /// <inheritdoc />
+    public override void Stop()
+    {
+        lock (_syncLock)
         {
-            Logger.LogError(ex, "Failed to start macOS HID listener");
-            Status = DeviceListenerStatus.Error;
+            if (Status == DeviceListenerStatus.Stopped)
+            {
+                return;
+            }
+
+            _shouldStop = true;
+
+            // Stop the run loop
+            if (_runLoop != IntPtr.Zero)
+            {
+                CFNativeMethods.CFRunLoopStop(_runLoop);
+            }
+
+            // Wait for the listener thread to exit
+            if (_listenerThread is not null && _listenerThread.IsAlive)
+            {
+                if (!_listenerThread.Join(MaxDisposalWaitTime))
+                {
+                    Logger.LogWarning("macOS HID listener thread did not exit within timeout");
+                }
+            }
+
+            _listenerThread = null;
+
+            // Release the run loop mode string
+            if (_runLoopMode != IntPtr.Zero)
+            {
+                CFNativeMethods.CFRelease(_runLoopMode);
+                _runLoopMode = IntPtr.Zero;
+            }
+
+            // Release the HID manager
+            if (_hidManager != IntPtr.Zero)
+            {
+                CFNativeMethods.CFRelease(_hidManager);
+                _hidManager = IntPtr.Zero;
+            }
+
+            _arrivedCallbackDelegate = null;
+            _removedCallbackDelegate = null;
+
+            Status = DeviceListenerStatus.Stopped;
         }
     }
 
@@ -196,41 +266,28 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
         }
 
         _disposed = true;
-        _shouldStop = true;
 
-        // Stop the run loop
-        if (_runLoop != IntPtr.Zero)
+        if (disposing)
         {
-            CFNativeMethods.CFRunLoopStop(_runLoop);
+            Stop();
         }
-
-        // Wait for the listener thread to exit
-        if (_listenerThread is not null && _listenerThread.IsAlive)
+        else
         {
-            if (!_listenerThread.Join(MaxDisposalWaitTime))
+            // Finalizer path - minimal cleanup
+            _shouldStop = true;
+            if (_runLoop != IntPtr.Zero)
             {
-                Logger.LogWarning("macOS HID listener thread did not exit within timeout");
+                CFNativeMethods.CFRunLoopStop(_runLoop);
+            }
+            if (_runLoopMode != IntPtr.Zero)
+            {
+                CFNativeMethods.CFRelease(_runLoopMode);
+            }
+            if (_hidManager != IntPtr.Zero)
+            {
+                CFNativeMethods.CFRelease(_hidManager);
             }
         }
-
-        _listenerThread = null;
-
-        // Release the run loop mode string
-        if (_runLoopMode != IntPtr.Zero)
-        {
-            CFNativeMethods.CFRelease(_runLoopMode);
-            _runLoopMode = IntPtr.Zero;
-        }
-
-        // Release the HID manager (no need to release _runLoop as it's not retained)
-        if (_hidManager != IntPtr.Zero)
-        {
-            CFNativeMethods.CFRelease(_hidManager);
-            _hidManager = IntPtr.Zero;
-        }
-
-        _arrivedCallbackDelegate = null;
-        _removedCallbackDelegate = null;
 
         base.Dispose(disposing);
     }

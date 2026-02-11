@@ -21,6 +21,10 @@ namespace Yubico.YubiKit.Core.Hid.Windows;
 /// <summary>
 /// Windows implementation of HID device listener using CM_Register_Notification.
 /// </summary>
+/// <remarks>
+/// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="DeviceEvent"/>
+/// callback.
+/// </remarks>
 internal sealed class WindowsHidDeviceListener : HidDeviceListener
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<WindowsHidDeviceListener>();
@@ -35,65 +39,108 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
     /// </summary>
     private const int SymbolicLinkOffset = 24;
 
+    private readonly Lock _syncLock = new();
     private GCHandle _marshalableThisPtr;
     private NativeMethods.CM_NOTIFY_CALLBACK? _callbackDelegate;
     private IntPtr _notificationHandle;
     private bool _disposed;
 
+    /// <summary>
+    /// Creates a new instance. The listener does not start automatically - call <see cref="Start"/>
+    /// after setting up the <see cref="DeviceEvent"/> callback.
+    /// </summary>
     public WindowsHidDeviceListener()
     {
-        StartListening();
+        // Lazy start - do nothing in constructor
     }
 
-    private void StartListening()
+    /// <inheritdoc />
+    public override void Start()
     {
-        try
+        lock (_syncLock)
         {
-            // Keep callback delegate alive for the duration of the listener
-            _callbackDelegate = NotificationCallback;
-
-            // Pin 'this' so we can pass it to the callback
-            _marshalableThisPtr = GCHandle.Alloc(this);
-
-            // Build the notification filter for HID device interfaces
-            var filterSize = Marshal.SizeOf<NativeMethods.CM_NOTIFY_FILTER>();
-            var filter = new NativeMethods.CM_NOTIFY_FILTER
+            if (Status == DeviceListenerStatus.Started)
             {
-                cbSize = filterSize,
-                Flags = 0,
-                FilterType = NativeMethods.CM_NOTIFY_FILTER_TYPE.DEVINTERFACE,
-                ClassGuid = GuidDevinterfaceHid
-            };
+                return;
+            }
 
-            var filterPtr = Marshal.AllocHGlobal(filterSize);
             try
             {
-                Marshal.StructureToPtr(filter, filterPtr, false);
+                // Keep callback delegate alive for the duration of the listener
+                _callbackDelegate = NotificationCallback;
 
-                var result = NativeMethods.CM_Register_Notification(
-                    filterPtr,
-                    GCHandle.ToIntPtr(_marshalableThisPtr),
-                    _callbackDelegate,
-                    out _notificationHandle);
+                // Pin 'this' so we can pass it to the callback
+                _marshalableThisPtr = GCHandle.Alloc(this);
 
-                if (result != NativeMethods.CmErrorCode.CR_SUCCESS)
+                // Build the notification filter for HID device interfaces
+                var filterSize = Marshal.SizeOf<NativeMethods.CM_NOTIFY_FILTER>();
+                var filter = new NativeMethods.CM_NOTIFY_FILTER
                 {
-                    Logger.LogWarning("Failed to register HID notification: {Result}", result);
-                    Status = DeviceListenerStatus.Error;
-                    return;
-                }
+                    cbSize = filterSize,
+                    Flags = 0,
+                    FilterType = NativeMethods.CM_NOTIFY_FILTER_TYPE.DEVINTERFACE,
+                    ClassGuid = GuidDevinterfaceHid
+                };
 
-                Status = DeviceListenerStatus.Started;
+                var filterPtr = Marshal.AllocHGlobal(filterSize);
+                try
+                {
+                    Marshal.StructureToPtr(filter, filterPtr, false);
+
+                    var result = NativeMethods.CM_Register_Notification(
+                        filterPtr,
+                        GCHandle.ToIntPtr(_marshalableThisPtr),
+                        _callbackDelegate,
+                        out _notificationHandle);
+
+                    if (result != NativeMethods.CmErrorCode.CR_SUCCESS)
+                    {
+                        Logger.LogWarning("Failed to register HID notification: {Result}", result);
+                        Status = DeviceListenerStatus.Error;
+                        return;
+                    }
+
+                    Status = DeviceListenerStatus.Started;
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(filterPtr);
+                }
             }
-            finally
+            catch (Exception ex)
             {
-                Marshal.FreeHGlobal(filterPtr);
+                Logger.LogError(ex, "Failed to start Windows HID listener");
+                Status = DeviceListenerStatus.Error;
             }
         }
-        catch (Exception ex)
+    }
+
+    /// <inheritdoc />
+    public override void Stop()
+    {
+        lock (_syncLock)
         {
-            Logger.LogError(ex, "Failed to start Windows HID listener");
-            Status = DeviceListenerStatus.Error;
+            if (Status == DeviceListenerStatus.Stopped)
+            {
+                return;
+            }
+
+            // Unregister the notification
+            if (_notificationHandle != IntPtr.Zero)
+            {
+                _ = NativeMethods.CM_Unregister_Notification(_notificationHandle);
+                _notificationHandle = IntPtr.Zero;
+            }
+
+            // Free the GCHandle
+            if (_marshalableThisPtr.IsAllocated)
+            {
+                _marshalableThisPtr.Free();
+            }
+
+            _callbackDelegate = null;
+
+            Status = DeviceListenerStatus.Stopped;
         }
     }
 
@@ -178,20 +225,24 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
 
         _disposed = true;
 
-        // Unregister the notification
-        if (_notificationHandle != IntPtr.Zero)
+        if (disposing)
         {
-            _ = NativeMethods.CM_Unregister_Notification(_notificationHandle);
-            _notificationHandle = IntPtr.Zero;
+            Stop();
         }
-
-        // Free the GCHandle
-        if (_marshalableThisPtr.IsAllocated)
+        else
         {
-            _marshalableThisPtr.Free();
-        }
+            // Finalizer path - minimal cleanup
+            if (_notificationHandle != IntPtr.Zero)
+            {
+                _ = NativeMethods.CM_Unregister_Notification(_notificationHandle);
+                _notificationHandle = IntPtr.Zero;
+            }
 
-        _callbackDelegate = null;
+            if (_marshalableThisPtr.IsAllocated)
+            {
+                _marshalableThisPtr.Free();
+            }
+        }
 
         base.Dispose(disposing);
     }

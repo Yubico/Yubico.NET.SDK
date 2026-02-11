@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.SmartCard;
@@ -24,23 +27,24 @@ namespace Yubico.YubiKit.Core.YubiKey;
 /// <remarks>
 /// This service owns the device listeners (HID and SmartCard) and coordinates
 /// with <see cref="IYubiKeyDeviceRepository"/> to update the device cache.
-/// The monitoring loop uses event-driven acceleration with coalescing to
-/// minimize redundant scans.
+/// Uses Rx-based event coalescing via Throttle to minimize redundant scans.
 /// </remarks>
 internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyDeviceMonitorService>();
+    private static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(200);
 
     private readonly IYubiKeyDeviceRepository _repository;
     private readonly IFindYubiKeys _findYubiKeys;
-    private readonly object _monitorLock = new();
+    private readonly Lock _monitorLock = new();
 
     // Device listeners for event-driven discovery
     private HidDeviceListener? _hidListener;
     private ISmartCardDeviceListener? _smartCardListener;
 
-    // Event semaphore for coalescing rapid device events
-    private SemaphoreSlim? _eventSemaphore;
+    // Rx-based event coalescing
+    private Subject<Unit>? _rescanTrigger;
+    private IDisposable? _throttleSubscription;
 
     // Monitoring lifecycle fields
     private CancellationTokenSource? _monitoringCts;
@@ -100,18 +104,14 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 return; // Already monitoring, idempotent
             }
 
-            // Perform initial scan synchronously before starting background loop
-            // This ensures HasData is true before returning, preventing race conditions
-            // where FindAllAsync() might trigger a parallel scan
-            var devices = _findYubiKeys.FindAllAsync(ConnectionType.All, CancellationToken.None)
-                .ConfigureAwait(false)
-                .GetAwaiter()
-                .GetResult();
-            _repository.UpdateCache(devices);
-
+            // Setup Rx subject for event coalescing
+            _rescanTrigger = new Subject<Unit>();
+            
+            // Setup listeners BEFORE starting them
             SetupListeners();
+            
             _monitoringCts = new CancellationTokenSource();
-            _monitoringTask = Task.Run(() => MonitoringLoopAsync(interval, _monitoringCts.Token));
+            _monitoringTask = Task.Run(() => MonitoringLoopAsync(_monitoringCts.Token));
 
             Logger.LogInformation("Device monitoring started with interval {Interval}", interval);
         }
@@ -164,61 +164,45 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     }
 
     /// <summary>
-    /// Internal monitoring loop that scans for devices at the specified interval,
-    /// with event-driven acceleration.
+    /// Internal monitoring loop that processes throttled device events.
     /// </summary>
-    private async Task MonitoringLoopAsync(TimeSpan interval, CancellationToken cancellationToken)
+    private async Task MonitoringLoopAsync(CancellationToken cancellationToken)
     {
-        // Skip initial scan - StartMonitoring already performed it before starting this loop
-        var skipNextScan = true;
-
-        while (!cancellationToken.IsCancellationRequested)
+        if (_rescanTrigger is null)
         {
-            try
-            {
-                // Trigger a device rescan (unless skipping)
-                if (!skipNextScan)
+            return;
+        }
+
+        try
+        {
+            // Subscribe to throttled events - this coalesces rapid device events
+            await _rescanTrigger
+                .Throttle(ThrottleInterval)
+                .ForEachAsync(async _ =>
                 {
-                    await RescanAsync(cancellationToken).ConfigureAwait(false);
-                }
-                skipNextScan = false;
-
-                // Wait for EITHER interval OR device event
-                var eventTask = _eventSemaphore?.WaitAsync(cancellationToken) ?? Task.CompletedTask;
-
-                // var intervalTask = Task.Delay(interval, cancellationToken);
-                // var completed = await Task.WhenAny(eventTask, intervalTask).ConfigureAwait(false);
-                var completed = await Task.WhenAny(eventTask).ConfigureAwait(false);
-                cancellationToken.ThrowIfCancellationRequested();
-                if (completed == eventTask)
-                {
-                    // Device event received - add coalescing delay
-                    await Task.Delay(TimeSpan.FromMilliseconds(200), cancellationToken)
-                        .ConfigureAwait(false);
-
-                    // Drain any additional signals (coalescing)
-                    while (_eventSemaphore is not null && _eventSemaphore.CurrentCount > 0)
+                    if (cancellationToken.IsCancellationRequested)
                     {
-                        await _eventSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                        return;
                     }
-                }
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                // Expected during shutdown, exit gracefully
-                break;
-            }
-            catch (ObjectDisposedException)
-            {
-                // CTS or semaphore was disposed during monitoring, exit gracefully
-                Logger.LogDebug("Monitoring loop exiting: resource was disposed");
-                break;
-            }
-            catch (Exception ex)
-            {
-                // Log and continue - monitoring should be resilient
-                Logger.LogWarning(ex, "Background device scan failed, continuing monitoring");
-            }
+
+                    try
+                    {
+                        await RescanAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Expected during shutdown
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogWarning(ex, "Background device scan failed, continuing monitoring");
+                    }
+                }, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Expected during shutdown
         }
     }
 
@@ -229,13 +213,16 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     {
         _hidListener = HidDeviceListener.Create();
         _smartCardListener = new DesktopSmartCardDeviceListener();
-        _eventSemaphore = new SemaphoreSlim(0, 1);
 
-        // Wire event callbacks to signal semaphore
+        // Wire event callbacks to signal Rx subject
         _hidListener.DeviceEvent = SignalEvent;
         _smartCardListener.DeviceEvent = SignalEvent;
 
-        Logger.LogDebug("Device listeners set up");
+        // Start listeners AFTER wiring callbacks (explicit lifecycle)
+        _hidListener.Start();
+        _smartCardListener.Start();
+
+        Logger.LogDebug("Device listeners set up and started");
     }
 
     /// <summary>
@@ -243,7 +230,11 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     /// </summary>
     private void TeardownListeners()
     {
-        // Clear callbacks FIRST (prevent events during disposal)
+        // Stop listeners first
+        _hidListener?.Stop();
+        _smartCardListener?.Stop();
+
+        // Clear callbacks (prevent events during disposal)
         if (_hidListener is not null)
         {
             _hidListener.DeviceEvent = null;
@@ -253,47 +244,35 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             _smartCardListener.DeviceEvent = null;
         }
 
-        // NOW dispose listeners
+        // Dispose listeners
         _hidListener?.Dispose();
         _hidListener = null;
 
         _smartCardListener?.Dispose();
         _smartCardListener = null;
 
-        _eventSemaphore?.Dispose();
-        _eventSemaphore = null;
+        // Dispose Rx resources
+        _throttleSubscription?.Dispose();
+        _throttleSubscription = null;
+
+        _rescanTrigger?.Dispose();
+        _rescanTrigger = null;
 
         Logger.LogDebug("Device listeners torn down");
     }
 
     /// <summary>
-    /// Signals the event semaphore when a device event occurs.
+    /// Signals the Rx subject when a device event occurs.
     /// </summary>
     private void SignalEvent()
     {
-        // Capture reference under lock to avoid race with disposal
-        SemaphoreSlim? semaphore;
-        lock (_monitorLock)
-        {
-            semaphore = _eventSemaphore;
-        }
-
-        if (semaphore is null)
-        {
-            return;
-        }
-
         try
         {
-            // Only release if current count is 0 (avoid building up releases)
-            if (semaphore.CurrentCount == 0)
-            {
-                semaphore.Release();
-            }
+            _rescanTrigger?.OnNext(Unit.Default);
         }
         catch (ObjectDisposedException)
         {
-            // Semaphore was disposed, ignore
+            // Subject was disposed, ignore
         }
     }
 
@@ -329,7 +308,11 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             }
         }
 
-        // 3. Clear callbacks (prevent events during disposal)
+        // 3. Stop listeners
+        _hidListener?.Stop();
+        _smartCardListener?.Stop();
+
+        // 4. Clear callbacks (prevent events during disposal)
         if (_hidListener is not null)
         {
             _hidListener.DeviceEvent = null;
@@ -339,12 +322,15 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             _smartCardListener.DeviceEvent = null;
         }
 
-        // 4. Dispose listeners
+        // 5. Dispose listeners
         _hidListener?.Dispose();
         _smartCardListener?.Dispose();
 
-        // 5. Dispose primitives
-        _eventSemaphore?.Dispose();
+        // 6. Dispose Rx resources
+        _throttleSubscription?.Dispose();
+        _rescanTrigger?.Dispose();
+
+        // 7. Dispose primitives
         _monitoringCts?.Dispose();
 
         Logger.LogDebug("YubiKeyDeviceMonitorService disposed");

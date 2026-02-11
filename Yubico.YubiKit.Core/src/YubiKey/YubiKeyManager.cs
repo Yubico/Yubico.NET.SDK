@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
@@ -42,28 +40,34 @@ namespace Yubico.YubiKit.Core.YubiKey;
 public static class YubiKeyManager
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger(nameof(YubiKeyManager));
-    
-    // Static API - Lazy singleton for DI-free usage
-    private static readonly Lazy<DeviceRepository> _repository = new(
-        DeviceRepository.Create,
-        LazyThreadSafetyMode.ExecutionAndPublication);
 
-    // Monitoring lifecycle fields
-    private static CancellationTokenSource? _monitoringCts;
-    private static Task? _monitoringTask;
-    private static readonly object _monitorLock = new();
-    
-    // Device listeners for event-driven discovery
-    private static HidDeviceListener? _hidListener;
-    private static ISmartCardDeviceListener? _smartCardListener;
-    
-    // Event semaphore for coalescing rapid device events (200ms window)
-    private static SemaphoreSlim? _eventSemaphore;
-    
+    // Single context that encapsulates all lifecycle state
+    private static YubiKeyManagerContext? _context;
+    private static readonly object _contextLock = new();
+
     /// <summary>
-    /// Default monitoring interval (5 seconds).
+    /// Ensures the context exists, creating it lazily if needed.
     /// </summary>
-    private static readonly TimeSpan DefaultMonitoringInterval = TimeSpan.FromSeconds(5);
+    private static YubiKeyManagerContext EnsureContext()
+    {
+        var ctx = Volatile.Read(ref _context);
+        if (ctx is not null)
+        {
+            return ctx;
+        }
+
+        lock (_contextLock)
+        {
+            ctx = _context;
+            if (ctx is not null)
+            {
+                return ctx;
+            }
+
+            _context = new YubiKeyManagerContext();
+            return _context;
+        }
+    }
 
     /// <summary>
     /// Starts monitoring for YubiKey device changes using the default interval (5 seconds).
@@ -76,8 +80,8 @@ public static class YubiKeyManager
     /// <seealso cref="StopMonitoring"/>
     /// <seealso cref="IsMonitoring"/>
     /// <seealso cref="DeviceChanges"/>
-    public static void StartMonitoring() => StartMonitoring(DefaultMonitoringInterval);
-    
+    public static void StartMonitoring() => StartMonitoring(YubiKeyManagerContext.DefaultMonitoringInterval);
+
     /// <summary>
     /// Starts monitoring for YubiKey device changes using the specified interval.
     /// </summary>
@@ -91,108 +95,8 @@ public static class YubiKeyManager
     /// <seealso cref="StartMonitoring()"/>
     /// <seealso cref="StopMonitoring"/>
     /// <seealso cref="IsMonitoring"/>
-    public static void StartMonitoring(TimeSpan interval)
-    {
-        if (interval <= TimeSpan.Zero)
-            throw new ArgumentOutOfRangeException(nameof(interval), interval, "Monitoring interval must be positive.");
-        
-        lock (_monitorLock)
-        {
-            if (_monitoringTask is not null)
-                return; // Already monitoring, idempotent
-            
-            SetupListeners();
-            _monitoringCts = new CancellationTokenSource();
-            _monitoringTask = Task.Run(() => MonitoringLoopAsync(interval, _monitoringCts.Token));
-        }
-    }
-    
-    /// <summary>
-    /// Internal monitoring loop that scans for devices at the specified interval.
-    /// </summary>
-    private static async Task MonitoringLoopAsync(TimeSpan interval, CancellationToken cancellationToken)
-    {
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            try
-            {
-                // Trigger a device scan by calling FindAllAsync which updates the cache
-                _ = await _repository.Value.FindAllAsync(ConnectionType.All, cancellationToken).ConfigureAwait(false);
-                await Task.Delay(interval, cancellationToken).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                // Expected during shutdown, exit gracefully
-                break;
-            }
-            catch (ObjectDisposedException)
-            {
-                // CTS was disposed during monitoring, exit gracefully (task 3.21)
-                Logger.LogDebug("Monitoring loop exiting: CancellationTokenSource was disposed");
-                break;
-            }
-            catch (Exception ex)
-            {
-                // Log and continue - monitoring should be resilient (task 3.15)
-                Logger.LogWarning(ex, "Background device scan failed, continuing monitoring");
-            }
-        }
-    }
-    
-    /// <summary>
-    /// Sets up device listeners for event-driven discovery.
-    /// </summary>
-    private static void SetupListeners()
-    {
-        // Create listeners
-        _hidListener = HidDeviceListener.Create();
-        _smartCardListener = new DesktopSmartCardDeviceListener();
-        _eventSemaphore = new SemaphoreSlim(0, 1);
-        
-        // Wire event callbacks to signal semaphore
-        _hidListener.DeviceEvent = SignalEvent;
-        _smartCardListener.DeviceEvent = SignalEvent;
-    }
-    
-    /// <summary>
-    /// Tears down device listeners.
-    /// </summary>
-    private static void TeardownListeners()
-    {
-        _hidListener?.Dispose();
-        _hidListener = null;
-        
-        _smartCardListener?.Dispose();
-        _smartCardListener = null;
-        
-        _eventSemaphore?.Dispose();
-        _eventSemaphore = null;
-    }
-    
-    /// <summary>
-    /// Signals the event semaphore when a device event occurs.
-    /// This causes the monitoring loop to perform an immediate scan.
-    /// </summary>
-    private static void SignalEvent()
-    {
-        // Release semaphore if available (won't block if already signaled)
-        if (_eventSemaphore is not null)
-        {
-            try
-            {
-                // Only release if current count is 0 (avoid building up releases)
-                if (_eventSemaphore.CurrentCount == 0)
-                {
-                    _eventSemaphore.Release();
-                }
-            }
-            catch (ObjectDisposedException)
-            {
-                // Semaphore was disposed, ignore
-            }
-        }
-    }
-    
+    public static void StartMonitoring(TimeSpan interval) => EnsureContext().StartMonitoring(interval);
+
     /// <summary>
     /// Stops monitoring for YubiKey device changes.
     /// </summary>
@@ -207,45 +111,10 @@ public static class YubiKeyManager
     /// <seealso cref="ShutdownAsync"/>
     public static void StopMonitoring()
     {
-        Task? taskToAwait;
-        CancellationTokenSource? ctsToDispose;
-        
-        lock (_monitorLock)
-        {
-            if (_monitoringTask is null)
-                return; // Not monitoring, idempotent
-            
-            taskToAwait = _monitoringTask;
-            ctsToDispose = _monitoringCts;
-            
-            // Signal cancellation
-            _monitoringCts?.Cancel();
-            
-            // Clear fields under lock
-            _monitoringTask = null;
-            _monitoringCts = null;
-            
-            // Teardown listeners under lock
-            TeardownListeners();
-        }
-        
-        // Wait for monitoring loop to complete (outside lock to avoid deadlock)
-        if (taskToAwait is not null)
-        {
-            try
-            {
-                taskToAwait.Wait(TimeSpan.FromSeconds(10));
-            }
-            catch (AggregateException)
-            {
-                // Ignore exceptions from the monitoring task - it's being stopped
-            }
-        }
-        
-        // Dispose the CancellationTokenSource
-        ctsToDispose?.Dispose();
+        var ctx = Volatile.Read(ref _context);
+        ctx?.StopMonitoring();
     }
-    
+
     /// <summary>
     /// Gets a value indicating whether device monitoring is currently active.
     /// </summary>
@@ -256,13 +125,11 @@ public static class YubiKeyManager
     {
         get
         {
-            lock (_monitorLock)
-            {
-                return _monitoringTask is not null && !_monitoringTask.IsCompleted;
-            }
+            var ctx = Volatile.Read(ref _context);
+            return ctx?.IsMonitoring ?? false;
         }
     }
-    
+
     /// <summary>
     /// Gets an observable sequence of device events (arrivals and removals).
     /// </summary>
@@ -279,8 +146,8 @@ public static class YubiKeyManager
     /// </remarks>
     /// <seealso cref="StartMonitoring()"/>
     /// <seealso cref="DeviceEvent"/>
-    public static IObservable<DeviceEvent> DeviceChanges => _repository.Value.DeviceChanges;
-    
+    public static IObservable<DeviceEvent> DeviceChanges => EnsureContext().DeviceChanges;
+
     /// <summary>
     /// Shuts down all YubiKeyManager resources asynchronously.
     /// </summary>
@@ -305,16 +172,22 @@ public static class YubiKeyManager
     public static async Task ShutdownAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        
-        // Stop monitoring if active
-        StopMonitoring();
-        
-        // Wait for any in-flight operations
-        await Task.Yield();
-        
+
+        YubiKeyManagerContext? ctx;
+        lock (_contextLock)
+        {
+            ctx = _context;
+            _context = null;
+        }
+
+        if (ctx is not null)
+        {
+            await ctx.DisposeAsync().ConfigureAwait(false);
+        }
+
         Logger.LogInformation("YubiKeyManager shutdown complete");
     }
-    
+
     /// <summary>
     /// Shuts down all YubiKeyManager resources synchronously.
     /// </summary>
@@ -367,5 +240,5 @@ public static class YubiKeyManager
     public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(
         ConnectionType type,
         CancellationToken cancellationToken = default)
-        => _repository.Value.FindAllAsync(type, cancellationToken);
+        => EnsureContext().FindAllAsync(type, cancellationToken);
 }

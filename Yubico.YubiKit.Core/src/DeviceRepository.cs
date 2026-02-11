@@ -40,7 +40,7 @@ public class DeviceRepository(
     private readonly bool
         TEST_MONITORSERVICE_SKIP_MANUALSCAN = false; // For unit testing only, we should be able to set this to internal
 
-    private bool _disposed;
+    private int _disposed;
 
     // Thread-safety for initialization
     private volatile bool _hasData;
@@ -82,15 +82,13 @@ public class DeviceRepository(
         }
     }
 
-    private static bool DevicesAreEqual(IYubiKey device1, IYubiKey device2) =>
-        device1.DeviceId == device2.DeviceId;
-
     #region IDeviceRepository Members
 
     // Public API methods with guaranteed data availability
     public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type = ConnectionType.All,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
         await EnsureDataAvailable(cancellationToken).ConfigureAwait(false);
         return [.. _deviceCache.Values.Where(d => d.ConnectionType == type || type == ConnectionType.All)];
     }
@@ -99,6 +97,8 @@ public class DeviceRepository(
 
     public void UpdateCache(IEnumerable<IYubiKey> discoveredDevices)
     {
+        ThrowIfDisposed();
+        
         var currentIds = _deviceCache.Keys.ToHashSet();
         var newDeviceMap = new Dictionary<string, IYubiKey>();
 
@@ -110,7 +110,6 @@ public class DeviceRepository(
 
         var newIds = newDeviceMap.Keys.ToHashSet();
         var addedIds = newIds.Except(currentIds).ToList();
-        var potentiallyUpdatedIds = newIds.Intersect(currentIds).ToList();
         var removedIds = currentIds.Except(newIds).ToList();
 
         // Handle added devices
@@ -122,39 +121,52 @@ public class DeviceRepository(
             logger.LogDebug("Added device: {DeviceId}", deviceId);
         }
 
-        // Handle updated devices
-        foreach (var deviceId in potentiallyUpdatedIds)
-        {
-            var newDevice = newDeviceMap[deviceId];
-            if (!_deviceCache.TryGetValue(deviceId, out var existingDevice) ||
-                DevicesAreEqual(existingDevice, newDevice))
-                continue;
-
-            _deviceCache[deviceId] = newDevice;
-            _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Updated, newDevice));
-            logger.LogDebug("Updated device: {DeviceId}", deviceId);
-        }
-
-        // Handle removed devices
+        // Handle removed devices - include the removed device object
         foreach (var deviceId in removedIds)
+        {
             if (_deviceCache.TryRemove(deviceId, out var removedDevice))
             {
-                _deviceChanges.OnNext(
-                    new DeviceEvent(DeviceAction.Removed, null) { DeviceId = deviceId });
+                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, removedDevice));
                 logger.LogDebug("Removed device: {DeviceId}", deviceId);
             }
+        }
+
+        // Update existing devices in cache (refresh connection info)
+        foreach (var deviceId in newIds.Intersect(currentIds))
+        {
+            _deviceCache[deviceId] = newDeviceMap[deviceId];
+        }
 
         _hasData = true; // Mark as initialized
 
         logger.LogDebug(
-            "Device cache updated: {DeviceCount} devices, {AddedCount} added, {UpdatedCount} updated, {RemovedCount} removed",
-            newDeviceMap.Count, addedIds.Count, potentiallyUpdatedIds.Count, removedIds.Count);
+            "Device cache updated: {DeviceCount} devices, {AddedCount} added, {RemovedCount} removed",
+            newDeviceMap.Count, addedIds.Count, removedIds.Count);
+    }
+
+    /// <summary>
+    /// Clears the device cache. Used during shutdown.
+    /// </summary>
+    public void ClearCache()
+    {
+        _deviceCache.Clear();
+        _hasData = false;
+    }
+
+    private void ThrowIfDisposed()
+    {
+        if (_disposed == 1)
+        {
+            throw new ObjectDisposedException(nameof(DeviceRepository));
+        }
     }
 
     public void Dispose()
     {
-        if (_disposed)
+        if (Interlocked.Exchange(ref _disposed, 1) == 1)
+        {
             return;
+        }
 
         try
         {
@@ -168,8 +180,6 @@ public class DeviceRepository(
         }
 
         GC.SuppressFinalize(this);
-
-        _disposed = true;
     }
 
     #endregion

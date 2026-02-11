@@ -134,6 +134,13 @@ const EXECUTION_PROTOCOL = `
 
 You are executing a task from a progress file. Follow this protocol for EVERY task:
 
+## First Action (EVERY ITERATION - MANDATORY)
+**Invoke the \`codemapper\` skill** to generate/refresh API surface maps before any code changes.
+- Command: \`codemapper .\` (runs in ~1.5s for entire repo)
+- Output: \`./codebase_ast/\` contains one file per project with public API surface
+- Use: \`grep -rn "SymbolName" ./codebase_ast/\` to find types, methods, dependencies
+- Why: Prevents guessing at API shapes, catches interface changes, finds related code
+
 ## TDD Loop
 1. **RED:** Write a failing test that asserts the task's expected behavior
    - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`

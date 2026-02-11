@@ -198,4 +198,156 @@ public class YubiKeyManagerStaticTests
         Assert.NotNull(field);
         Assert.Equal(typeof(object), field.FieldType);
     }
+    
+    [Fact]
+    public void YubiKeyManager_StartMonitoring_MethodExists()
+    {
+        // Task 3.2: YubiKeyManager should have static StartMonitoring() method
+        var method = typeof(YubiKeyManager).GetMethod(
+            "StartMonitoring",
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
+            Type.EmptyTypes);
+        
+        Assert.NotNull(method);
+        Assert.True(method.IsStatic);
+        Assert.Equal(typeof(void), method.ReturnType);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_StartMonitoring_WithInterval_MethodExists()
+    {
+        // Task 3.3: YubiKeyManager should have static StartMonitoring(TimeSpan) method
+        var method = typeof(YubiKeyManager).GetMethod(
+            "StartMonitoring",
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
+            [typeof(TimeSpan)]);
+        
+        Assert.NotNull(method);
+        Assert.True(method.IsStatic);
+        Assert.Equal(typeof(void), method.ReturnType);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_StartMonitoring_HasDefaultInterval()
+    {
+        // Task 3.2: Default interval should be 5 seconds
+        var type = typeof(YubiKeyManager);
+        var field = type.GetField("DefaultMonitoringInterval", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        
+        Assert.NotNull(field);
+        var value = field.GetValue(null);
+        Assert.Equal(TimeSpan.FromSeconds(5), value);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_StopMonitoring_MethodExists()
+    {
+        // Task 3.4: YubiKeyManager should have static StopMonitoring() method
+        var method = typeof(YubiKeyManager).GetMethod(
+            "StopMonitoring",
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
+            Type.EmptyTypes);
+        
+        Assert.NotNull(method);
+        Assert.True(method.IsStatic);
+        Assert.Equal(typeof(void), method.ReturnType);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_IsMonitoring_PropertyExists()
+    {
+        // Task 3.5: YubiKeyManager should have static IsMonitoring property
+        var property = typeof(YubiKeyManager).GetProperty(
+            "IsMonitoring",
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+        
+        Assert.NotNull(property);
+        Assert.Equal(typeof(bool), property.PropertyType);
+        Assert.True(property.CanRead);
+        Assert.False(property.CanWrite);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_StartMonitoring_ZeroInterval_ThrowsArgumentOutOfRangeException()
+    {
+        // Task 3.16: Handle interval = 0ms -> Throw ArgumentOutOfRangeException
+        YubiKeyManager.StopMonitoring(); // Ensure clean state
+        
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => 
+            YubiKeyManager.StartMonitoring(TimeSpan.Zero));
+        
+        Assert.Equal("interval", exception.ParamName);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_StartMonitoring_NegativeInterval_ThrowsArgumentOutOfRangeException()
+    {
+        // Task 3.16: Handle negative interval -> Throw ArgumentOutOfRangeException
+        YubiKeyManager.StopMonitoring(); // Ensure clean state
+        
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => 
+            YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(-1)));
+        
+        Assert.Equal("interval", exception.ParamName);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_StartMonitoring_SetsIsMonitoring()
+    {
+        // Task 3.5, 3.13: Starting monitoring sets IsMonitoring to true
+        YubiKeyManager.StopMonitoring(); // Ensure clean state
+        
+        Assert.False(YubiKeyManager.IsMonitoring);
+        
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
+        
+        Assert.True(YubiKeyManager.IsMonitoring);
+        
+        YubiKeyManager.StopMonitoring(); // Cleanup
+    }
+    
+    [Fact]
+    public void YubiKeyManager_StopMonitoring_SetsIsMonitoringFalse()
+    {
+        // Task 3.4, 3.5: Stopping monitoring sets IsMonitoring to false
+        YubiKeyManager.StopMonitoring(); // Ensure clean state
+        
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
+        Assert.True(YubiKeyManager.IsMonitoring);
+        
+        YubiKeyManager.StopMonitoring();
+        
+        Assert.False(YubiKeyManager.IsMonitoring);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_StartMonitoring_WhenAlreadyMonitoring_IsIdempotent()
+    {
+        // Task 3.13, 3.17: StartMonitoring when already monitoring -> No-op (idempotent)
+        YubiKeyManager.StopMonitoring(); // Ensure clean state
+        
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
+        Assert.True(YubiKeyManager.IsMonitoring);
+        
+        // Call again - should not throw or change behavior
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(2));
+        Assert.True(YubiKeyManager.IsMonitoring);
+        
+        YubiKeyManager.StopMonitoring(); // Cleanup
+    }
+    
+    [Fact]
+    public void YubiKeyManager_StopMonitoring_WhenNotMonitoring_IsIdempotent()
+    {
+        // Task 3.14: StopMonitoring when not monitoring -> No-op (idempotent)
+        YubiKeyManager.StopMonitoring(); // Ensure clean state
+        
+        Assert.False(YubiKeyManager.IsMonitoring);
+        
+        // Call again - should not throw
+        YubiKeyManager.StopMonitoring();
+        
+        Assert.False(YubiKeyManager.IsMonitoring);
+    }
 }

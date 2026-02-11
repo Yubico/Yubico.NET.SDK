@@ -1,4 +1,5 @@
 using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Core;
 
@@ -13,6 +14,8 @@ public class CoreTests : IAsyncLifetime
     public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
     
     [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task DeviceEvents_ArePublished()
     {
         var events = new List<DeviceEvent>();
@@ -27,6 +30,7 @@ public class CoreTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
     public async Task GetPcscDevices()
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);

@@ -93,6 +93,18 @@ The `--filter` option supports various patterns:
 | `Name!=SkipMe` | Exclude tests named 'SkipMe' |
 | `Category=Unit` | Tests with `[Trait("Category", "Unit")]` |
 
+### xUnit v3 Direct Runner (Advanced)
+
+When running xUnit v3 test projects directly (not through `build.cs`), filter syntax differs:
+
+| xUnit v2 (`dotnet test`) | xUnit v3 Direct | Notes |
+|--------------------------|-----------------|-------|
+| `--filter "FullyQualifiedName~Class"` | `--filter-class ClassName` | Class filter |
+| `--filter "Name=Method"` | `--filter-method MethodName` | Method filter |
+| No matches → 0 tests run | No matches → **test failure** | v3 fails on empty results |
+
+**Avoid this complexity** - use `dotnet build.cs test` which handles xUnit v2/v3 differences automatically.
+
 ## Project Discovery
 
 The build script automatically discovers:

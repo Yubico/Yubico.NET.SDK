@@ -552,7 +552,7 @@ Output <promise>ANALYSIS_COMPLETE</promise> when done.`;
 
     console.log(`\n${CONSTANTS.COLOR.BLUE}🧠 Learning mode: Generating session analysis...${CONSTANTS.COLOR.RESET}\n`);
 
-    const copilotArgs = ["-p", analysisPrompt, "--allow-all-tools"];
+    const copilotArgs = ["-p", analysisPrompt, "--allow-all-tools", "--no-ask-user"];
     if (this.config.model) copilotArgs.push("--model", this.config.model);
 
     try {
@@ -614,19 +614,15 @@ ${CONSTANTS.COLOR.CYAN}🔄 ═════════════════�
       const logFile = join(this.sessionDir, `iteration-${this.iteration}.log`);
 
       // Build iteration prompt - different for progress file vs ad-hoc mode
+      // The ralph-loop agent already has execution protocol, skills, and autonomy directives baked in
       let iterationPrompt: string;
       
       if (this.progressState?.isProgressFile) {
-        // Progress file mode: inject full protocol + task context + file content
-        iterationPrompt = `${this.skillsPrompt}
-
-[PROGRESS FILE MODE]
-You are executing tasks from a progress file.
+        // Progress file mode: provide context + file content (agent has protocol)
+        iterationPrompt = `[PROGRESS FILE EXECUTION]
 
 **Progress File:** \`${this.config.promptFile}\`
 ${this.progressState.prd ? `**Source PRD:** \`${this.progressState.prd}\`` : ""}
-
-${EXECUTION_PROTOCOL}
 
 ${formatProgressContext(this.progressState)}
 
@@ -641,18 +637,12 @@ Iteration: ${this.iteration}
 ${this.config.completionPromise ? `Output <promise>${this.config.completionPromise}</promise> ONLY when ALL tasks in the progress file are marked [x] AND verification passes.` : ""}
 ${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}` : ""}
 
-[AUTONOMY DIRECTIVES]
-1. You are in NON-INTERACTIVE mode. The user is not present.
-2. NEVER ask questions, NEVER ask for clarification, and NEVER say "Let me know if you want me to...".
-3. If a decision is ambiguous, pick the most standard/reasonable option and EXECUTE it immediately.
-4. Use "git" to explore the codebase if you are lost.
-5. Check your previous work in files and git history. Continue from where you left off.
-6. REVIEW THE SKILLS LIST ABOVE before any build/test/commit operation.
-7. After completing a task, UPDATE THE PROGRESS FILE to mark it [x].
+After completing a task, UPDATE THE PROGRESS FILE to mark it [x].
 ---`;
       } else {
-        // Ad-hoc mode: original behavior
-        iterationPrompt = `${this.skillsPrompt}
+        // Ad-hoc mode: provide prompt + context (agent has protocol)
+        iterationPrompt = `[AD-HOC TASK]
+
 ${this.prompt}
 
 ---
@@ -660,18 +650,10 @@ ${this.prompt}
 Iteration: ${this.iteration}
 ${this.config.completionPromise ? `Output <promise>${this.config.completionPromise}</promise> ONLY when the objective is fully verified complete.` : ""}
 ${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}` : ""}
-
-[AUTONOMY DIRECTIVES]
-1. You are in NON-INTERACTIVE mode. The user is not present.
-2. NEVER ask questions, NEVER ask for clarification, and NEVER say "Let me know if you want me to...".
-3. If a decision is ambiguous, pick the most standard/reasonable option and EXECUTE it immediately.
-4. Use "git" to explore the codebase if you are lost.
-5. Check your previous work in files and git history. Continue from where you left off.
-6. REVIEW THE SKILLS LIST ABOVE before any build/test/commit operation.
 ---`;
       }
 
-      const copilotArgs = ["-p", iterationPrompt, "--allow-all-tools"];
+      const copilotArgs = ["--agent", "ralph-loop", "-p", iterationPrompt, "--allow-all-tools", "--no-ask-user"];
       if (this.config.model) copilotArgs.push("--model", this.config.model);
 
       // Execute Copilot

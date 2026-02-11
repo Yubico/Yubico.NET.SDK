@@ -160,4 +160,42 @@ public class YubiKeyManagerStaticTests
         Assert.Contains("PC/SC", ex.Message);
         Assert.NotNull(ex.InnerException);
     }
+    
+    // Phase 3: Monitoring Lifecycle Tests
+    
+    [Fact]
+    public void YubiKeyManager_HasMonitoringCtsField()
+    {
+        // Task 3.1: YubiKeyManager should have static _monitoringCts field
+        var type = typeof(YubiKeyManager);
+        var field = type.GetField("_monitoringCts", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        
+        Assert.NotNull(field);
+        Assert.Equal(typeof(CancellationTokenSource), field.FieldType);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_HasMonitoringTaskField()
+    {
+        // Task 3.1: YubiKeyManager should have static _monitoringTask field
+        var type = typeof(YubiKeyManager);
+        var field = type.GetField("_monitoringTask", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        
+        Assert.NotNull(field);
+        Assert.Equal(typeof(Task), field.FieldType);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_HasMonitorLockField()
+    {
+        // Task 3.1: YubiKeyManager should have static _monitorLock field
+        var type = typeof(YubiKeyManager);
+        var field = type.GetField("_monitorLock", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        
+        Assert.NotNull(field);
+        Assert.Equal(typeof(object), field.FieldType);
+    }
 }

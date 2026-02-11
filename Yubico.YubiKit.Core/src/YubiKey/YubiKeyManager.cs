@@ -17,6 +17,13 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManag
         DeviceRepository.Create,
         LazyThreadSafetyMode.ExecutionAndPublication);
 
+    // Monitoring lifecycle fields
+#pragma warning disable CS0169 // Field is never used - used in upcoming monitoring implementation (tasks 3.2-3.6)
+    private static CancellationTokenSource? _monitoringCts;
+    private static Task? _monitoringTask;
+#pragma warning restore CS0169
+    private static readonly object _monitorLock = new();
+
     /// <summary>
     /// Finds all connected YubiKey devices using the static API (no DI required).
     /// </summary>

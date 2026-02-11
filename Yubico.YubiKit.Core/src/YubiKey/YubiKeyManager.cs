@@ -50,7 +50,7 @@ public static class YubiKeyManager
 
     // Single manager that encapsulates all lifecycle state
     private static YubiKeyDeviceManager? _manager;
-    private static readonly object _managerLock = new();
+    private static readonly Lock _managerLock = new();
 
     /// <summary>
     /// Ensures the manager exists, creating it lazily if needed.

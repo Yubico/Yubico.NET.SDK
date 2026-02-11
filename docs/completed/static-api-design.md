@@ -2,7 +2,8 @@
 
 **Completed:** 2026-02-11  
 **Branch:** `yubikit-static-api-design`  
-**Commits:** 600+ (including Ralph Loop autonomous execution)
+**Commits:** 600+ (including Ralph Loop autonomous execution)  
+**Last Updated:** 2026-02-11 (device monitoring architecture refactor)
 
 ## Reference Documents
 
@@ -32,9 +33,12 @@ Implemented a **static-only API** for `YubiKeyManager` that provides simple, zer
 ```csharp
 public static class YubiKeyManager
 {
-    // Device Discovery
-    public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken ct = default);
-    public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken ct = default);
+    // Device Discovery (with caching and optional rescan)
+    public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken ct);
+    public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(
+        ConnectionType type = ConnectionType.All,
+        bool forceRescan = false,
+        CancellationToken ct = default);
     
     // Monitoring Lifecycle
     public static void StartMonitoring();
@@ -50,6 +54,15 @@ public static class YubiKeyManager
     public static void Shutdown();
 }
 ```
+
+### FindAllAsync Behavior
+
+| Scenario | forceRescan | Monitoring | Behavior |
+|----------|-------------|------------|----------|
+| First call | `false` | Off | Scan hardware, cache results |
+| Subsequent | `false` | Off | Return cached (may be stale) |
+| Any call | `true` | - | Always scan hardware |
+| While monitoring | `false` | On | Return cache (kept fresh) |
 
 ---
 
@@ -71,53 +84,96 @@ DeviceMonitorService (IHostedService)
 DeviceRepository + DeviceListenerService + DeviceChannel
 ```
 
-### After (Simple)
+### After (Simple) - Updated Architecture
 
 ```
 Application
     ↓
 YubiKeyManager (static class)
     ↓
-YubiKeyManagerContext (internal, IAsyncDisposable)
-    ↓
-DeviceRepository (singleton cache + events)
+YubiKeyDeviceManager (internal, composition root)
+    ├── YubiKeyDeviceRepository (pure cache + diff + events)
+    └── YubiKeyDeviceMonitorService (owns listeners + discovery)
+            ├── HidDeviceListener
+            ├── DesktopSmartCardDeviceListener  
+            └── IFindYubiKeys
 ```
 
-### Context Pattern
+### Separation of Concerns
 
-The key architectural insight: **encapsulate all lifecycle state in a resettable context**.
+| Component | Responsibility |
+|-----------|----------------|
+| `YubiKeyManager` | Public static API, lazy initialization |
+| `YubiKeyDeviceManager` | Composition root, owns lifecycle |
+| `YubiKeyDeviceRepository` | Pure cache, diff logic, Rx events (NO discovery) |
+| `YubiKeyDeviceMonitorService` | Owns listeners, calls IFindYubiKeys, updates repository |
+
+### Event Flow
+
+```
+Hardware Event (USB insert/remove)
+    ↓
+[HidDeviceListener / SmartCardDeviceListener]
+    ↓ (DeviceEvent callback)
+SignalEvent() - captures semaphore under lock
+    ↓
+SemaphoreSlim.Release()
+    ↓
+MonitoringLoopAsync (coalescing: 200ms delay, drain semaphore)
+    ↓
+RescanAsync() → IFindYubiKeys.FindAllAsync()
+    ↓
+_repository.UpdateCache(devices)
+    ↓ (diff: detect added/removed)
+Subject<DeviceEvent>.OnNext()
+    ↓
+DeviceChanges observable (public API)
+```
+
+### Context Pattern → Manager Pattern
+
+The key architectural insight: **encapsulate all lifecycle state in a resettable manager with clear separation of concerns**.
 
 ```csharp
 public static class YubiKeyManager
 {
-    private static YubiKeyManagerContext? _context;
-    private static readonly object _contextLock = new();
+    private static YubiKeyDeviceManager? _manager;
+    private static readonly object _managerLock = new();
     
-    private static YubiKeyManagerContext EnsureContext()
+    private static YubiKeyDeviceManager EnsureManager()
     {
-        var ctx = Volatile.Read(ref _context);
-        if (ctx is not null) return ctx;
+        var mgr = Volatile.Read(ref _manager);
+        if (mgr is not null) return mgr;
         
-        lock (_contextLock)
+        lock (_managerLock)
         {
-            ctx = _context;
-            if (ctx is not null) return ctx;
-            _context = new YubiKeyManagerContext();
-            return _context;
+            mgr = _manager;
+            if (mgr is not null) return mgr;
+            _manager = YubiKeyDeviceManager.Create();
+            return _manager;
         }
     }
     
     public static async Task ShutdownAsync(CancellationToken ct = default)
     {
-        YubiKeyManagerContext? ctx;
-        lock (_contextLock)
+        YubiKeyDeviceManager? mgr;
+        lock (_managerLock)
         {
-            ctx = _context;
-            _context = null;  // Allow re-initialization
+            mgr = _manager;
+            _manager = null;  // Allow re-initialization
         }
-        if (ctx is not null)
-            await ctx.DisposeAsync();
+        if (mgr is not null)
+            await mgr.DisposeAsync();
     }
+}
+
+// Internal composition root
+internal sealed class YubiKeyDeviceManager : IAsyncDisposable
+{
+    private readonly YubiKeyDeviceRepository _repository;
+    private readonly YubiKeyDeviceMonitorService _monitorService;
+    
+    // Owns both, coordinates lifecycle, exposes unified API
 }
 ```
 
@@ -126,6 +182,8 @@ public static class YubiKeyManager
 - Test isolation via `ShutdownAsync()`
 - Thread-safe lazy initialization
 - No `Lazy<T>` limitations (can reset)
+- **Clean separation**: Repository = pure cache, MonitorService = discovery engine
+- **Dual-mode support**: One-off scans (lightweight) AND reactive monitoring (power users)
 
 ---
 
@@ -135,33 +193,43 @@ public static class YubiKeyManager
 
 | File | Description |
 |------|-------------|
-| `Yubico.YubiKit.Core/src/YubiKey/YubiKeyManagerContext.cs` | Internal lifecycle context with proper disposal |
+| `Yubico.YubiKit.Core/src/YubiKey/YubiKeyDeviceManager.cs` | Internal composition root, owns repository + monitor service |
+| `Yubico.YubiKit.Core/src/YubiKey/YubiKeyDeviceRepository.cs` | Pure cache with diff logic and Rx events |
+| `Yubico.YubiKit.Core/src/YubiKey/IYubiKeyDeviceRepository.cs` | Internal interface for repository |
+| `Yubico.YubiKit.Core/src/YubiKey/YubiKeyDeviceMonitorService.cs` | Owns listeners and discovery service |
+| `Yubico.YubiKit.Core/src/YubiKey/IYubiKeyDeviceMonitorService.cs` | Internal interface for monitor service |
 | `Yubico.YubiKit.Tests.Shared/Infrastructure/TestCategories.cs` | Constants for test trait filtering |
+| `Yubico.YubiKit.Core/tests/.../YubiKeyDeviceManagerTests.cs` | Unit tests for manager |
+| `Yubico.YubiKit.Core/tests/.../YubiKeyDeviceRepositoryTests.cs` | Unit tests for repository |
+| `Yubico.YubiKit.Core/tests/.../YubiKeyDeviceMonitorServiceTests.cs` | Unit tests for monitor service |
 
 ### Modified
 
 | File | Changes |
 |------|---------|
-| `YubiKeyManager.cs` | Converted to static class, delegates to context |
-| `DeviceRepository.cs` | Fixed disposal, removed broken Updated logic |
-| `DeviceEvent.cs` | Removed `DeviceAction.Updated`, made `Device` non-nullable for Removed |
+| `YubiKeyManager.cs` | Converted to static class, simplified to 2 FindAllAsync overloads with defaults |
 | `YubiKeyTestInfrastructure.cs` | Uses `YubiKeyManager` directly |
 | `CoreTests.cs`, `YubiKeyTests.cs` | Added test category traits |
-| `YubiKeyManagerStaticTests.cs` | Updated for context-based architecture |
+| `YubiKeyManagerStaticTests.cs` | Updated for manager-based architecture |
+| `DeviceSelector.cs` (ManagementTool) | Updated for new API with named parameters |
 | `docs/TESTING.md` | Added test traits documentation |
 | `.claude/skills/domain-test/SKILL.md` | Added trait filter patterns |
 | `build.cs` | Added trait filter documentation |
+| `experiments/DeviceMonitor/Program.cs` | Fixed async patterns, adapted to new API |
 
 ### Deleted
 
 | File | Reason |
 |------|--------|
+| `DeviceRepository.cs` | Replaced by `YubiKeyDeviceRepository.cs` |
+| `YubiKeyManagerContext.cs` | Replaced by `YubiKeyDeviceManager.cs` + `YubiKeyDeviceMonitorService.cs` |
+| `DeviceRepositoryTests.cs` | Replaced by `YubiKeyDeviceRepositoryTests.cs` |
 | `YubiKeyManagerOptions.cs` | Unused |
 | `DependencyInjection.cs` | DI support removed |
 | `IYubiKeyManager.cs` | Interface removed (static API) |
 | `DeviceMonitorService.cs` | Replaced by static monitoring |
-| `DeviceListenerService.cs` | Consolidated into context |
-| `DeviceChannel.cs` | Consolidated into context |
+| `DeviceListenerService.cs` | Consolidated into monitor service |
+| `DeviceChannel.cs` | Consolidated into monitor service |
 | `TestDeviceDiscovery.cs` | Redundant wrapper |
 
 ---
@@ -189,12 +257,29 @@ await Task.WhenAny(delayTask, eventTask);
 
 **Problem:** Listeners disposed while callbacks might still execute.
 
-**Solution:** Correct ordering in `DisposeAsync()`:
-1. Cancel CTS
-2. Wait for monitoring task (with timeout)
-3. Dispose listeners
-4. Dispose repository
-5. Dispose primitives
+**Solution:** Clear callbacks BEFORE disposing listeners, capture semaphore under lock:
+```csharp
+// In DisposeAsync:
+// 1. Cancel CTS
+// 2. Wait for monitoring task (with timeout)
+// 3. Clear callbacks (prevent events during disposal)
+if (_hidListener is not null) _hidListener.DeviceEvent = null;
+if (_smartCardListener is not null) _smartCardListener.DeviceEvent = null;
+// 4. Dispose listeners
+// 5. Dispose primitives
+
+// In SignalEvent - capture under lock:
+private void SignalEvent()
+{
+    SemaphoreSlim? semaphore;
+    lock (_monitorLock)
+    {
+        semaphore = _eventSemaphore;
+    }
+    if (semaphore is null) return;
+    // ... use captured reference
+}
+```
 
 ### 4. DeviceEvent.Removed Had Null Device (MEDIUM)
 
@@ -207,6 +292,15 @@ await Task.WhenAny(delayTask, eventTask);
 **Problem:** Only compared `DeviceId` (always equal for same device), so Updated events never fired.
 
 **Solution:** Removed `DeviceAction.Updated` entirely (not in PRD, logic unfixable).
+
+### 6. Repository Had Discovery Dependency (MEDIUM)
+
+**Problem:** `DeviceRepository` mixed caching with discovery (`IFindYubiKeys` dependency), causing unclear separation of concerns and a bug where `FindAllAsync()` never rescanned after first call.
+
+**Solution:** Split into:
+- `YubiKeyDeviceRepository` - Pure cache, no discovery dependency
+- `YubiKeyDeviceMonitorService` - Owns listeners and `IFindYubiKeys`, calls `repository.UpdateCache()`
+- Added `forceRescan` parameter for explicit control
 
 ---
 
@@ -255,11 +349,18 @@ dotnet build.cs test --filter "Category!=RequiresHardware&Category!=RequiresUser
 ### Simple Device Discovery
 
 ```csharp
+// Returns cached results (fast)
 var devices = await YubiKeyManager.FindAllAsync();
 foreach (var device in devices)
 {
     Console.WriteLine($"Found: {device.SerialNumber}");
 }
+
+// Force fresh scan
+var freshDevices = await YubiKeyManager.FindAllAsync(forceRescan: true);
+
+// Filter by connection type
+var smartCardOnly = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
 ```
 
 ### Device Monitoring
@@ -323,15 +424,21 @@ public class MyTests : IAsyncLifetime
 
 ## Lessons Learned
 
-1. **Static classes need lifecycle management** - The context pattern solves this elegantly.
+1. **Static classes need lifecycle management** - The manager pattern solves this elegantly.
 
 2. **Double-checked locking with `Volatile.Read`** - Essential for thread-safe lazy initialization without `Lazy<T>`.
 
-3. **Disposal order matters** - Cancel → Wait → Dispose, not Cancel → Dispose → Wait.
+3. **Disposal order matters** - Cancel → Wait → Clear callbacks → Dispose, not Cancel → Dispose → Wait.
 
 4. **Test trait constants** - Avoid magic strings, enable consistent filtering.
 
 5. **Remove unused features** - `DeviceAction.Updated` was broken and not in PRD—deleting it was the right call.
+
+6. **Separation of concerns** - Repository should be pure cache; discovery belongs in a separate service.
+
+7. **Clear callbacks before disposal** - Prevents race conditions where callbacks fire on disposed resources.
+
+8. **Capture references under lock** - In `SignalEvent()`, capture semaphore reference under lock to avoid TOCTOU race.
 
 ---
 
@@ -342,3 +449,5 @@ public class MyTests : IAsyncLifetime
 2. **Additional transports** - Current implementation handles SmartCard and HID; NFC could be added.
 
 3. **Configuration options** - If needed, could add `YubiKeyManagerOptions` parameter to `StartMonitoring()`.
+
+4. **Smarter listeners** - Current listeners only signal "something changed"; future versions could report which device for targeted updates instead of full rescans.

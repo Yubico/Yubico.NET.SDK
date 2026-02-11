@@ -16,6 +16,9 @@ namespace Yubico.YubiKit.Core.YubiKey;
 /// background threads. UI applications must marshal to the UI thread for updates.</para>
 /// <para><strong>Testing Pattern:</strong> Call <see cref="ShutdownAsync"/> in test cleanup (e.g., xUnit
 /// <c>DisposeAsync</c> or <c>IAsyncLifetime.DisposeAsync</c>) to reset static state between tests.</para>
+/// <para><strong>Caching Behavior:</strong> By default, <see cref="FindAllAsync(CancellationToken)"/>
+/// returns cached results after the first call. Use <c>forceRescan: true</c> to always perform a fresh
+/// device scan, or call <see cref="ShutdownAsync"/> to clear the cache.</para>
 /// </remarks>
 /// <example>
 /// <para><strong>Simple Device Discovery:</strong></para>
@@ -25,6 +28,10 @@ namespace Yubico.YubiKit.Core.YubiKey;
 /// {
 ///     Console.WriteLine($"Found: {device.SerialNumber}");
 /// }
+/// </code>
+/// <para><strong>Force Fresh Scan:</strong></para>
+/// <code>
+/// var devices = await YubiKeyManager.FindAllAsync(forceRescan: true);
 /// </code>
 /// <para><strong>Device Monitoring:</strong></para>
 /// <code>
@@ -41,31 +48,31 @@ public static class YubiKeyManager
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger(nameof(YubiKeyManager));
 
-    // Single context that encapsulates all lifecycle state
-    private static YubiKeyManagerContext? _context;
-    private static readonly object _contextLock = new();
+    // Single manager that encapsulates all lifecycle state
+    private static YubiKeyDeviceManager? _manager;
+    private static readonly object _managerLock = new();
 
     /// <summary>
-    /// Ensures the context exists, creating it lazily if needed.
+    /// Ensures the manager exists, creating it lazily if needed.
     /// </summary>
-    private static YubiKeyManagerContext EnsureContext()
+    private static YubiKeyDeviceManager EnsureManager()
     {
-        var ctx = Volatile.Read(ref _context);
-        if (ctx is not null)
+        var mgr = Volatile.Read(ref _manager);
+        if (mgr is not null)
         {
-            return ctx;
+            return mgr;
         }
 
-        lock (_contextLock)
+        lock (_managerLock)
         {
-            ctx = _context;
-            if (ctx is not null)
+            mgr = _manager;
+            if (mgr is not null)
             {
-                return ctx;
+                return mgr;
             }
 
-            _context = new YubiKeyManagerContext();
-            return _context;
+            _manager = YubiKeyDeviceManager.Create();
+            return _manager;
         }
     }
 
@@ -80,7 +87,7 @@ public static class YubiKeyManager
     /// <seealso cref="StopMonitoring"/>
     /// <seealso cref="IsMonitoring"/>
     /// <seealso cref="DeviceChanges"/>
-    public static void StartMonitoring() => StartMonitoring(YubiKeyManagerContext.DefaultMonitoringInterval);
+    public static void StartMonitoring() => StartMonitoring(YubiKeyDeviceManager.DefaultMonitoringInterval);
 
     /// <summary>
     /// Starts monitoring for YubiKey device changes using the specified interval.
@@ -95,7 +102,7 @@ public static class YubiKeyManager
     /// <seealso cref="StartMonitoring()"/>
     /// <seealso cref="StopMonitoring"/>
     /// <seealso cref="IsMonitoring"/>
-    public static void StartMonitoring(TimeSpan interval) => EnsureContext().StartMonitoring(interval);
+    public static void StartMonitoring(TimeSpan interval) => EnsureManager().StartMonitoring(interval);
 
     /// <summary>
     /// Stops monitoring for YubiKey device changes.
@@ -111,8 +118,8 @@ public static class YubiKeyManager
     /// <seealso cref="ShutdownAsync"/>
     public static void StopMonitoring()
     {
-        var ctx = Volatile.Read(ref _context);
-        ctx?.StopMonitoring();
+        var mgr = Volatile.Read(ref _manager);
+        mgr?.StopMonitoring();
     }
 
     /// <summary>
@@ -125,8 +132,8 @@ public static class YubiKeyManager
     {
         get
         {
-            var ctx = Volatile.Read(ref _context);
-            return ctx?.IsMonitoring ?? false;
+            var mgr = Volatile.Read(ref _manager);
+            return mgr?.IsMonitoring ?? false;
         }
     }
 
@@ -146,7 +153,7 @@ public static class YubiKeyManager
     /// </remarks>
     /// <seealso cref="StartMonitoring()"/>
     /// <seealso cref="DeviceEvent"/>
-    public static IObservable<DeviceEvent> DeviceChanges => EnsureContext().DeviceChanges;
+    public static IObservable<DeviceEvent> DeviceChanges => EnsureManager().DeviceChanges;
 
     /// <summary>
     /// Shuts down all YubiKeyManager resources asynchronously.
@@ -173,16 +180,16 @@ public static class YubiKeyManager
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        YubiKeyManagerContext? ctx;
-        lock (_contextLock)
+        YubiKeyDeviceManager? mgr;
+        lock (_managerLock)
         {
-            ctx = _context;
-            _context = null;
+            mgr = _manager;
+            _manager = null;
         }
 
-        if (ctx is not null)
+        if (mgr is not null)
         {
-            await ctx.DisposeAsync().ConfigureAwait(false);
+            await mgr.DisposeAsync().ConfigureAwait(false);
         }
 
         Logger.LogInformation("YubiKeyManager shutdown complete");
@@ -206,39 +213,65 @@ public static class YubiKeyManager
     /// <exception cref="OperationCanceledException">Thrown when the cancellation token is triggered.</exception>
     /// <exception cref="PlatformInteropException">Thrown when the platform API fails.</exception>
     /// <remarks>
+    /// <para>This method returns cached results after the first call. Use the overload with
+    /// <c>forceRescan: true</c> to always perform a fresh device scan.</para>
     /// <para>This method scans both SmartCard (PCSC) and HID transports.</para>
     /// <para><strong>Race Condition Note:</strong> Results may be stale if devices connect or
     /// disconnect during the scan. For real-time tracking, use <see cref="DeviceChanges"/>
     /// with <see cref="StartMonitoring()"/>.</para>
     /// </remarks>
-    /// <seealso cref="FindAllAsync(ConnectionType, CancellationToken)"/>
+    /// <seealso cref="FindAllAsync(ConnectionType, bool, CancellationToken)"/>
     /// <seealso cref="DeviceChanges"/>
-    public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default)
-        => FindAllAsync(ConnectionType.All, cancellationToken);
+    public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken)
+        => FindAllAsync(ConnectionType.All, forceRescan: false, cancellationToken);
 
     /// <summary>
-    /// Finds all connected YubiKey devices of the specified connection type using the static API.
+    /// Finds all connected YubiKey devices, with options for connection type and rescan behavior.
     /// </summary>
-    /// <param name="type">The connection type to filter by (SmartCard, HID, or All).</param>
+    /// <param name="type">The connection type to filter by (SmartCard, HID, or All). Default is <see cref="ConnectionType.All"/>.</param>
+    /// <param name="forceRescan">
+    /// If <c>true</c>, always performs a fresh device scan.
+    /// If <c>false</c> (default), returns cached results unless cache is empty.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token to cancel the scan.</param>
     /// <returns>A read-only list of discovered YubiKey devices matching the filter, or an empty list if none found.</returns>
     /// <exception cref="OperationCanceledException">Thrown when the cancellation token is triggered.</exception>
     /// <exception cref="PlatformInteropException">Thrown when the platform API fails.</exception>
     /// <remarks>
+    /// <para><strong>Caching:</strong> When <paramref name="forceRescan"/> is <c>false</c>:
+    /// <list type="bullet">
+    ///   <item>First call: Performs a fresh scan and caches results</item>
+    ///   <item>Subsequent calls: Returns cached results</item>
+    ///   <item>While monitoring: Returns cached results (monitoring keeps cache fresh)</item>
+    /// </list>
+    /// </para>
     /// <para><strong>Race Condition Note:</strong> Results may be stale if devices connect or
     /// disconnect during the scan. For real-time tracking, use <see cref="DeviceChanges"/>
     /// with <see cref="StartMonitoring()"/>.</para>
     /// </remarks>
     /// <example>
     /// <code>
-    /// // Find only SmartCard-connected devices
+    /// // Simple usage - returns cached results
+    /// var devices = await YubiKeyManager.FindAllAsync();
+    ///
+    /// // Force a fresh scan
+    /// var freshDevices = await YubiKeyManager.FindAllAsync(forceRescan: true);
+    ///
+    /// // Filter by connection type
     /// var smartCardDevices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
+    ///
+    /// // Both options
+    /// var freshSmartCard = await YubiKeyManager.FindAllAsync(
+    ///     ConnectionType.SmartCard,
+    ///     forceRescan: true);
     /// </code>
     /// </example>
     /// <seealso cref="FindAllAsync(CancellationToken)"/>
     /// <seealso cref="ConnectionType"/>
+    /// <seealso cref="DeviceChanges"/>
     public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(
-        ConnectionType type,
+        ConnectionType type = ConnectionType.All,
+        bool forceRescan = false,
         CancellationToken cancellationToken = default)
-        => EnsureContext().FindAllAsync(type, cancellationToken);
+        => EnsureManager().FindAllAsync(type, forceRescan, cancellationToken);
 }

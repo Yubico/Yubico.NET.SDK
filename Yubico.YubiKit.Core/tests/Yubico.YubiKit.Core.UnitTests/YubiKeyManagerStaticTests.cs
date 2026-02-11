@@ -40,7 +40,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     public async Task YubiKeyManager_FindAllAsync_WithConnectionType_IsStaticMethod()
     {
         // FindAllAsync with ConnectionType should be callable as static method
-        var result = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, CancellationToken.None);
+        var result = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, cancellationToken: CancellationToken.None);
 
         Assert.NotNull(result);
         Assert.IsAssignableFrom<IReadOnlyList<Yubico.YubiKit.Core.Interfaces.IYubiKey>>(result);

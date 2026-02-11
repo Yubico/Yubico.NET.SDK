@@ -104,7 +104,7 @@ public static class DeviceSelector
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            var allDevices = await YubiKeyManager.FindAllAsync(ConnectionType.All, cancellationToken);
+            var allDevices = await YubiKeyManager.FindAllAsync(ConnectionType.All, cancellationToken: cancellationToken);
 
             // Filter to supported connection types for Management
             var devices = allDevices

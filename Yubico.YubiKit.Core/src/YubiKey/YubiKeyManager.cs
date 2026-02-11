@@ -218,6 +218,16 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManag
             }
         }
     }
+    
+    /// <summary>
+    /// Gets an observable sequence of device events (arrivals and removals).
+    /// </summary>
+    /// <remarks>
+    /// Events are only emitted while monitoring is active (via <see cref="StartMonitoring()"/>).
+    /// Subscribing before starting monitoring will not auto-start monitoring; the subscriber
+    /// will simply receive events once monitoring is started.
+    /// </remarks>
+    public static IObservable<DeviceEvent> DeviceChanges => _repository.Value.DeviceChanges;
 
     /// <summary>
     /// Finds all connected YubiKey devices using the static API (no DI required).
@@ -251,13 +261,13 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManag
         return deviceRepository.FindAllAsync(type, cancellationToken);
     }
 
-    public IObservable<DeviceEvent> DeviceChanges
+    IObservable<DeviceEvent> IYubiKeyManager.DeviceChanges
     {
         get
         {
             if (deviceRepository is null)
                 throw new InvalidOperationException(
-                    $"{nameof(DeviceChanges)} is not available when the {nameof(YubiKeyManager)} " +
+                    $"DeviceChanges is not available when the {nameof(YubiKeyManager)} " +
                     "is created without a device repository.");
 
             return deviceRepository.DeviceChanges;

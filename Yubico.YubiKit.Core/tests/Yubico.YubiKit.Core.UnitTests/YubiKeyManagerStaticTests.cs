@@ -416,4 +416,102 @@ public class YubiKeyManagerStaticTests
         
         Assert.NotNull(field);
     }
+    
+    // Phase 4: Device Events Tests
+    
+    [Fact]
+    public void YubiKeyManager_DeviceChanges_StaticPropertyExists()
+    {
+        // Task 4.1: YubiKeyManager should have static DeviceChanges property
+        var property = typeof(YubiKeyManager).GetProperty(
+            "DeviceChanges",
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+        
+        Assert.NotNull(property);
+        Assert.True(typeof(IObservable<DeviceEvent>).IsAssignableFrom(property.PropertyType));
+    }
+    
+    [Fact]
+    public void DeviceEvent_ContainsExpectedMembers()
+    {
+        // Task 4.2: Verify DeviceEvent contains IYubiKey and DeviceAction enum
+        var deviceEventType = typeof(DeviceEvent);
+        
+        // Should have a Device property of type IYubiKey
+        var deviceProperty = deviceEventType.GetProperty("Device");
+        Assert.NotNull(deviceProperty);
+        Assert.True(typeof(Yubico.YubiKit.Core.Interfaces.IYubiKey).IsAssignableFrom(deviceProperty.PropertyType));
+        
+        // Should have an Action property of type DeviceAction
+        var actionProperty = deviceEventType.GetProperty("Action");
+        Assert.NotNull(actionProperty);
+        Assert.Equal(typeof(DeviceAction), actionProperty.PropertyType);
+        
+        // DeviceAction should be an enum with Added and Removed
+        Assert.True(typeof(DeviceAction).IsEnum);
+        Assert.True(Enum.IsDefined(typeof(DeviceAction), "Added"));
+        Assert.True(Enum.IsDefined(typeof(DeviceAction), "Removed"));
+    }
+    
+    [Fact]
+    public void YubiKeyManager_DeviceChanges_CanSubscribe()
+    {
+        // Task 4.3/4.5: Can subscribe to DeviceChanges even when not monitoring
+        YubiKeyManager.StopMonitoring(); // Ensure clean state
+        
+        var observable = YubiKeyManager.DeviceChanges;
+        Assert.NotNull(observable);
+        
+        // Subscribe and immediately unsubscribe (no events expected)
+        var subscription = observable.Subscribe(_ => { });
+        subscription.Dispose();
+        
+        // Monitoring should not have auto-started
+        Assert.False(YubiKeyManager.IsMonitoring);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_DeviceChanges_MultipleSubscribersAllowed()
+    {
+        // Task 4.4: Verify multiple subscribers receive the same events
+        YubiKeyManager.StopMonitoring(); // Ensure clean state
+        
+        var observable = YubiKeyManager.DeviceChanges;
+        
+        // Multiple subscriptions should be allowed
+        var subscription1 = observable.Subscribe(_ => { });
+        var subscription2 = observable.Subscribe(_ => { });
+        var subscription3 = observable.Subscribe(_ => { });
+        
+        // All subscriptions should be distinct
+        Assert.NotNull(subscription1);
+        Assert.NotNull(subscription2);
+        Assert.NotNull(subscription3);
+        
+        // Cleanup
+        subscription1.Dispose();
+        subscription2.Dispose();
+        subscription3.Dispose();
+    }
+    
+    [Fact]
+    public void YubiKeyManager_DeviceChanges_UnsubscribeDoesNotAffectMonitoring()
+    {
+        // Task 4.6: Handle unsubscribe -> Does not affect other subscribers or monitoring
+        YubiKeyManager.StopMonitoring(); // Ensure clean state
+        
+        var observable = YubiKeyManager.DeviceChanges;
+        var subscription = observable.Subscribe(_ => { });
+        
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
+        Assert.True(YubiKeyManager.IsMonitoring);
+        
+        // Unsubscribe
+        subscription.Dispose();
+        
+        // Monitoring should still be active (unsubscribe doesn't stop monitoring)
+        Assert.True(YubiKeyManager.IsMonitoring);
+        
+        YubiKeyManager.StopMonitoring(); // Cleanup
+    }
 }

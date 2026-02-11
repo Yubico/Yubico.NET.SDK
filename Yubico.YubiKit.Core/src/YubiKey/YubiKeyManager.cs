@@ -12,9 +12,34 @@ public interface IYubiKeyManager
 
 public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManager
 {
-    public Task<IReadOnlyList<IYubiKey>> FindAllAsync(
-        ConnectionType type = ConnectionType.All,
-        CancellationToken cancellationToken = default)
+    // Static API - Lazy singleton for DI-free usage
+    private static readonly Lazy<DeviceRepository> _repository = new(
+        DeviceRepository.Create,
+        LazyThreadSafetyMode.ExecutionAndPublication);
+
+    /// <summary>
+    /// Finds all connected YubiKey devices using the static API (no DI required).
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A read-only list of discovered YubiKey devices.</returns>
+    public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default)
+        => FindAllAsync(ConnectionType.All, cancellationToken);
+
+    /// <summary>
+    /// Finds all connected YubiKey devices of the specified connection type using the static API.
+    /// </summary>
+    /// <param name="type">The connection type to filter by.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A read-only list of discovered YubiKey devices.</returns>
+    public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(
+        ConnectionType type,
+        CancellationToken cancellationToken)
+        => _repository.Value.FindAllAsync(type, cancellationToken);
+
+    // Instance API - for DI-based usage
+    Task<IReadOnlyList<IYubiKey>> IYubiKeyManager.FindAllAsync(
+        ConnectionType type,
+        CancellationToken cancellationToken)
     {
         if (deviceRepository is null)
             return FindYubiKeys

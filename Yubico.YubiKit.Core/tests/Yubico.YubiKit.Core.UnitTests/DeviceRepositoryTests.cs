@@ -55,4 +55,28 @@ public class DeviceRepositoryTests
         Assert.IsAssignableFrom<IDisposable>(repository);
         repository.Dispose();
     }
+    
+    [Fact]
+    public void DeviceRepository_Create_WorksWithoutDIConfiguration()
+    {
+        // Task 1.3: Factory works without any DI setup
+        // This test verifies the factory doesn't require services.AddYubiKeyManagerCore()
+        using var repository = DeviceRepository.Create();
+        
+        // Repository exposes DeviceChanges observable
+        Assert.NotNull(repository.DeviceChanges);
+    }
+    
+    [Fact]
+    public void DeviceRepository_Create_DeviceChangesIsSubscribable()
+    {
+        // Task 1.3: Verify the created repository has functional DeviceChanges
+        using var repository = DeviceRepository.Create();
+        
+        var eventReceived = false;
+        using var subscription = repository.DeviceChanges.Subscribe(e => eventReceived = true);
+        
+        // We can subscribe without error (we don't expect events in unit tests)
+        Assert.NotNull(subscription);
+    }
 }

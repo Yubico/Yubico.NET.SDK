@@ -191,7 +191,7 @@ internal static class YubiKeyTestInfrastructure
         try
         {
             // Discover all devices
-            var allDevices = TestDeviceDiscovery.FindAllAsync().GetAwaiter().GetResult();
+            var allDevices = YubiKeyManager.FindAllAsync().GetAwaiter().GetResult();
             Console.WriteLine($"[YubiKey Infrastructure] Found {allDevices.Count} device(s)");
 
             if (allDevices.Count == 0)

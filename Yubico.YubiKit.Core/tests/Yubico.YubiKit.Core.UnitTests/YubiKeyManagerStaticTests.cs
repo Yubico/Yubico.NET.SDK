@@ -514,4 +514,85 @@ public class YubiKeyManagerStaticTests
         
         YubiKeyManager.StopMonitoring(); // Cleanup
     }
+    
+    // Phase 5: Shutdown Tests
+    
+    [Fact]
+    public void YubiKeyManager_ShutdownAsync_MethodExists()
+    {
+        // Task 5.1: YubiKeyManager should have static ShutdownAsync method
+        var method = typeof(YubiKeyManager).GetMethod(
+            "ShutdownAsync",
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
+            [typeof(CancellationToken)]);
+        
+        Assert.NotNull(method);
+        Assert.True(method.IsStatic);
+        Assert.Equal(typeof(Task), method.ReturnType);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_Shutdown_MethodExists()
+    {
+        // Task 5.2: YubiKeyManager should have static Shutdown sync wrapper
+        var method = typeof(YubiKeyManager).GetMethod(
+            "Shutdown",
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
+            Type.EmptyTypes);
+        
+        Assert.NotNull(method);
+        Assert.True(method.IsStatic);
+        Assert.Equal(typeof(void), method.ReturnType);
+    }
+    
+    [Fact]
+    public async Task YubiKeyManager_ShutdownAsync_StopsMonitoring()
+    {
+        // Task 5.3: Verify ShutdownAsync stops monitoring if active
+        YubiKeyManager.StopMonitoring(); // Ensure clean state
+        
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
+        Assert.True(YubiKeyManager.IsMonitoring);
+        
+        await YubiKeyManager.ShutdownAsync();
+        
+        Assert.False(YubiKeyManager.IsMonitoring);
+    }
+    
+    [Fact]
+    public async Task YubiKeyManager_ShutdownAsync_IsIdempotent()
+    {
+        // Task 5.8: Handle multiple Shutdown() calls -> Idempotent
+        YubiKeyManager.StopMonitoring(); // Ensure clean state
+        
+        // Multiple shutdown calls should not throw
+        await YubiKeyManager.ShutdownAsync();
+        await YubiKeyManager.ShutdownAsync();
+        
+        Assert.False(YubiKeyManager.IsMonitoring);
+    }
+    
+    [Fact]
+    public async Task YubiKeyManager_AfterShutdown_FindAllAsync_Works()
+    {
+        // Task 5.10: Verify after shutdown, FindAllAsync performs fresh scan
+        await YubiKeyManager.ShutdownAsync();
+        
+        // FindAllAsync should work after shutdown
+        var result = await YubiKeyManager.FindAllAsync();
+        Assert.NotNull(result);
+    }
+    
+    [Fact]
+    public async Task YubiKeyManager_AfterShutdown_StartMonitoring_Works()
+    {
+        // Task 5.11: Verify after shutdown, StartMonitoring works correctly
+        await YubiKeyManager.ShutdownAsync();
+        
+        // StartMonitoring should work after shutdown
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
+        Assert.True(YubiKeyManager.IsMonitoring);
+        
+        YubiKeyManager.StopMonitoring(); // Cleanup
+    }
 }

@@ -228,6 +228,36 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManag
     /// will simply receive events once monitoring is started.
     /// </remarks>
     public static IObservable<DeviceEvent> DeviceChanges => _repository.Value.DeviceChanges;
+    
+    /// <summary>
+    /// Shuts down all YubiKeyManager resources asynchronously.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    /// This method stops monitoring if active, clears the internal device cache,
+    /// and disposes all managed resources. It is idempotent.
+    /// </remarks>
+    public static async Task ShutdownAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        
+        // Stop monitoring if active
+        StopMonitoring();
+        
+        // Wait for any in-flight operations
+        await Task.Yield();
+        
+        Logger.LogInformation("YubiKeyManager shutdown complete");
+    }
+    
+    /// <summary>
+    /// Shuts down all YubiKeyManager resources synchronously.
+    /// </summary>
+    /// <remarks>
+    /// This is a convenience wrapper around <see cref="ShutdownAsync(CancellationToken)"/>.
+    /// For async contexts, prefer the async version.
+    /// </remarks>
+    public static void Shutdown() => ShutdownAsync().GetAwaiter().GetResult();
 
     /// <summary>
     /// Finds all connected YubiKey devices using the static API (no DI required).

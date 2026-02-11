@@ -107,7 +107,7 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
 
     private void ListenerThreadProc()
     {
-        HashSet<string> knownReaders = [];
+        HashSet<string>? knownReaders = null;
 
         try
         {
@@ -125,6 +125,7 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
                 {
                     // No readers available - wait with PnP notification on Windows
                     currentReaders = [];
+                    knownReaders ??= [];
                     WaitForPnpChange();
                     continue;
                 }
@@ -144,6 +145,14 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
                 }
 
                 var currentReaderSet = new HashSet<string>(currentReaders);
+
+                // First iteration: establish baseline without firing events
+                if (knownReaders is null)
+                {
+                    knownReaders = currentReaderSet;
+                    WaitForStatusChange(currentReaders);
+                    continue;
+                }
 
                 // Detect removed readers
                 foreach (var reader in knownReaders.Except(currentReaderSet))

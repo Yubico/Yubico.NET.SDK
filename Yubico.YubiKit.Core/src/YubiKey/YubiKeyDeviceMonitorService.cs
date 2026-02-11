@@ -100,6 +100,15 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 return; // Already monitoring, idempotent
             }
 
+            // Perform initial scan synchronously before starting background loop
+            // This ensures HasData is true before returning, preventing race conditions
+            // where FindAllAsync() might trigger a parallel scan
+            var devices = _findYubiKeys.FindAllAsync(ConnectionType.All, CancellationToken.None)
+                .ConfigureAwait(false)
+                .GetAwaiter()
+                .GetResult();
+            _repository.UpdateCache(devices);
+
             SetupListeners();
             _monitoringCts = new CancellationTokenSource();
             _monitoringTask = Task.Run(() => MonitoringLoopAsync(interval, _monitoringCts.Token));
@@ -160,20 +169,27 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     /// </summary>
     private async Task MonitoringLoopAsync(TimeSpan interval, CancellationToken cancellationToken)
     {
+        // Skip initial scan - StartMonitoring already performed it before starting this loop
+        var skipNextScan = true;
+
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
-                // Trigger a device rescan
-                await RescanAsync(cancellationToken).ConfigureAwait(false);
+                // Trigger a device rescan (unless skipping)
+                if (!skipNextScan)
+                {
+                    await RescanAsync(cancellationToken).ConfigureAwait(false);
+                }
+                skipNextScan = false;
 
                 // Wait for EITHER interval OR device event
-                var eventTask = _eventSemaphore?.WaitAsync(cancellationToken)
-                    ?? Task.Delay(Timeout.Infinite, cancellationToken);
+                var eventTask = _eventSemaphore?.WaitAsync(cancellationToken) ?? Task.CompletedTask;
 
-                var completed = await Task.WhenAny(eventTask, Task.Delay(interval, cancellationToken))
-                    .ConfigureAwait(false);
-
+                // var intervalTask = Task.Delay(interval, cancellationToken);
+                // var completed = await Task.WhenAny(eventTask, intervalTask).ConfigureAwait(false);
+                var completed = await Task.WhenAny(eventTask).ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
                 if (completed == eventTask)
                 {
                     // Device event received - add coalescing delay

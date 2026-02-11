@@ -25,6 +25,7 @@
   <!-- Explicit InternalsVisibleTo for legacy project names -->
   <ItemGroup>
     <InternalsVisibleTo Include="Yubico.YubiKit" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Core.UnitTests" />
   </ItemGroup>
 
 </Project>

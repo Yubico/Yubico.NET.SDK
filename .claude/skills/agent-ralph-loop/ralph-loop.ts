@@ -163,6 +163,14 @@ You are executing a task from a progress file. Follow this protocol for EVERY ta
 - Test: \`dotnet build.cs test\`
 - Test filtered: \`dotnet build.cs test --filter "..."\`
 
+**CRITICAL - xUnit v2/v3 MIXED CODEBASE:**
+This repo uses BOTH xUnit v2 and v3 test projects with different CLI requirements:
+- xUnit v3 uses Microsoft.Testing.Platform (requires \`dotnet run\`, not \`dotnet test\`)
+- Filter syntax differs between versions (v2: \`--filter\`, v3: \`-m\`/\`--method\`)
+- The build script handles this automatically - NEVER bypass it
+- If you use \`dotnet test\` directly, you WILL get confusing errors like "No test matches the given testcase filter"
+- See \`docs/TESTING.md\` for full details if tests fail unexpectedly
+
 ## Rules
 - Complete ONE task fully before moving to next
 - Mark \`[x]\` ONLY after build + test pass

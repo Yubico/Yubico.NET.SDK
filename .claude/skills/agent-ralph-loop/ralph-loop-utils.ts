@@ -255,6 +255,7 @@ SKILL RULES:
 - BEFORE any build/test/commit action, check if a skill covers it
 - Use \`skill invoke <name>\` or follow skill instructions
 - Mandatory skills MUST be used - direct commands (dotnet build, dotnet test, git add .) are FORBIDDEN
+- This repo has mixed xUnit v2/v3 - ONLY use \`dotnet build.cs test\`, never \`dotnet test\`
 `;
 }
 

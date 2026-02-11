@@ -28,8 +28,8 @@ public interface IDeviceRepository : IDisposable
     void UpdateCache(IEnumerable<IYubiKey> discoveredDevices);
 }
 
-public class DeviceRepositoryCached(
-    ILogger<DeviceRepositoryCached> logger,
+public class DeviceRepository(
+    ILogger<DeviceRepository> logger,
     IFindYubiKeys findYubiKeys)
     : IDeviceRepository
 {

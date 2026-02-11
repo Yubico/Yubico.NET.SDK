@@ -65,7 +65,7 @@ public static class DependencyInjection
             services.TryAddTransient<IFindPcscDevices, FindPcscDevices>();
             services.TryAddTransient<IFindHidDevices, FindHidDevices>();
             services.TryAddTransient<IProtocolFactory<ISmartCardConnection>, PcscProtocolFactory<ISmartCardConnection>>();
-            services.TryAddSingleton<IDeviceRepository, DeviceRepositoryCached>();
+            services.TryAddSingleton<IDeviceRepository, DeviceRepository>();
 
             services.AddBackgroundServices();
             

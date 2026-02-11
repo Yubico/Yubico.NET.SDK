@@ -129,4 +129,35 @@ public class YubiKeyManagerStaticTests
         var lazyValue = field.GetValue(null);
         Assert.NotNull(lazyValue);
     }
+    
+    [Fact]
+    public void PlatformInteropException_Exists_AndIsProperException()
+    {
+        // Task 2.7: PlatformInteropException should be available for platform API errors
+        var exceptionType = typeof(PlatformInteropException);
+        
+        // Verify it inherits from Exception
+        Assert.True(typeof(Exception).IsAssignableFrom(exceptionType));
+        
+        // Verify it has a message constructor
+        var ex1 = new PlatformInteropException("Test error");
+        Assert.Equal("Test error", ex1.Message);
+        
+        // Verify it has a message + inner exception constructor
+        var innerEx = new InvalidOperationException("Inner error");
+        var ex2 = new PlatformInteropException("Outer error", innerEx);
+        Assert.Equal("Outer error", ex2.Message);
+        Assert.Same(innerEx, ex2.InnerException);
+    }
+    
+    [Fact]
+    public void PlatformInteropException_CanContain_ContextInformation()
+    {
+        // Task 2.7: Exception should carry context about what operation failed
+        var ex = new PlatformInteropException("PC/SC service unavailable: 0x8010001D", 
+            new InvalidOperationException("SCardEstablishContext failed"));
+        
+        Assert.Contains("PC/SC", ex.Message);
+        Assert.NotNull(ex.InnerException);
+    }
 }

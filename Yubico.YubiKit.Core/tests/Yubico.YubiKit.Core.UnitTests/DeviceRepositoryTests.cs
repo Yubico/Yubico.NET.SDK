@@ -123,4 +123,64 @@ public class DeviceRepositoryTests
         Assert.NotNull(lockField);
         Assert.Equal(typeof(SemaphoreSlim), lockField.FieldType);
     }
+    
+    [Fact]
+    public void DeviceRepository_ConcurrentInitialization_100PlusThreads_NoDeadlock()
+    {
+        // Task 1.5: Verify concurrent operations from 100+ threads doesn't deadlock
+        const int threadCount = 100;
+        using var repository = DeviceRepository.Create();
+        var completedCount = 0;
+        var exceptions = new System.Collections.Concurrent.ConcurrentBag<Exception>();
+        
+        // Use Parallel.For which handles thread pooling efficiently
+        Parallel.For(0, threadCount, new ParallelOptions { MaxDegreeOfParallelism = threadCount }, i =>
+        {
+            try
+            {
+                // All threads try to update cache concurrently
+                repository.UpdateCache([]);
+                Interlocked.Increment(ref completedCount);
+            }
+            catch (Exception ex)
+            {
+                exceptions.Add(ex);
+            }
+        });
+        
+        Assert.Empty(exceptions);
+        Assert.Equal(threadCount, completedCount);
+    }
+    
+    [Fact]
+    public void DeviceRepository_ConcurrentSubscription_MultipleThreads_Safe()
+    {
+        // Task 1.5: Verify concurrent subscriptions to DeviceChanges are safe
+        const int threadCount = 100;
+        using var repository = DeviceRepository.Create();
+        var subscriptions = new System.Collections.Concurrent.ConcurrentBag<IDisposable>();
+        var exceptions = new System.Collections.Concurrent.ConcurrentBag<Exception>();
+        
+        Parallel.For(0, threadCount, i =>
+        {
+            try
+            {
+                var subscription = repository.DeviceChanges.Subscribe(_ => { });
+                subscriptions.Add(subscription);
+            }
+            catch (Exception ex)
+            {
+                exceptions.Add(ex);
+            }
+        });
+        
+        Assert.Empty(exceptions);
+        Assert.Equal(threadCount, subscriptions.Count);
+        
+        // Cleanup subscriptions
+        foreach (var sub in subscriptions)
+        {
+            sub.Dispose();
+        }
+    }
 }

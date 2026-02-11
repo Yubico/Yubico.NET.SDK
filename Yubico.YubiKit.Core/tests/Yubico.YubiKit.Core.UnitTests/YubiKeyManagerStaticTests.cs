@@ -350,4 +350,59 @@ public class YubiKeyManagerStaticTests
         
         Assert.False(YubiKeyManager.IsMonitoring);
     }
+    
+    [Fact]
+    public void YubiKeyManager_HasHidListenerField()
+    {
+        // Task 3.7: YubiKeyManager should have static _hidListener field
+        var type = typeof(YubiKeyManager);
+        var field = type.GetField("_hidListener", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        
+        Assert.NotNull(field);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_HasSmartCardListenerField()
+    {
+        // Task 3.7: YubiKeyManager should have static _smartCardListener field
+        var type = typeof(YubiKeyManager);
+        var field = type.GetField("_smartCardListener", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        
+        Assert.NotNull(field);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_HasEventSemaphoreField()
+    {
+        // Task 3.11: YubiKeyManager should have static _eventSemaphore field
+        var type = typeof(YubiKeyManager);
+        var field = type.GetField("_eventSemaphore", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        
+        Assert.NotNull(field);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_HasSetupListenersMethod()
+    {
+        // Task 3.8: YubiKeyManager should have internal SetupListeners method
+        var method = typeof(YubiKeyManager).GetMethod(
+            "SetupListeners",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        
+        Assert.NotNull(method);
+    }
+    
+    [Fact]
+    public void YubiKeyManager_HasTeardownListenersMethod()
+    {
+        // Task 3.10: YubiKeyManager should have internal TeardownListeners method
+        var method = typeof(YubiKeyManager).GetMethod(
+            "TeardownListeners",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        
+        Assert.NotNull(method);
+    }
 }

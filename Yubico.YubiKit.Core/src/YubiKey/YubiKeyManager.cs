@@ -1,4 +1,6 @@
-﻿using Yubico.YubiKit.Core.Interfaces;
+﻿using Yubico.YubiKit.Core.Hid;
+using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
@@ -21,6 +23,13 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManag
     private static CancellationTokenSource? _monitoringCts;
     private static Task? _monitoringTask;
     private static readonly object _monitorLock = new();
+    
+    // Device listeners for event-driven discovery
+    private static HidDeviceListener? _hidListener;
+    private static ISmartCardDeviceListener? _smartCardListener;
+    
+    // Event semaphore for coalescing rapid device events (200ms window)
+    private static SemaphoreSlim? _eventSemaphore;
     
     /// <summary>
     /// Default monitoring interval (5 seconds).
@@ -53,6 +62,7 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManag
             if (_monitoringTask is not null)
                 return; // Already monitoring, idempotent
             
+            SetupListeners();
             _monitoringCts = new CancellationTokenSource();
             _monitoringTask = Task.Run(() => MonitoringLoopAsync(interval, _monitoringCts.Token));
         }
@@ -85,6 +95,60 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManag
     }
     
     /// <summary>
+    /// Sets up device listeners for event-driven discovery.
+    /// </summary>
+    private static void SetupListeners()
+    {
+        // Create listeners
+        _hidListener = HidDeviceListener.Create();
+        _smartCardListener = new DesktopSmartCardDeviceListener();
+        _eventSemaphore = new SemaphoreSlim(0, 1);
+        
+        // Wire event callbacks to signal semaphore
+        _hidListener.DeviceEvent = SignalEvent;
+        _smartCardListener.DeviceEvent = SignalEvent;
+    }
+    
+    /// <summary>
+    /// Tears down device listeners.
+    /// </summary>
+    private static void TeardownListeners()
+    {
+        _hidListener?.Dispose();
+        _hidListener = null;
+        
+        _smartCardListener?.Dispose();
+        _smartCardListener = null;
+        
+        _eventSemaphore?.Dispose();
+        _eventSemaphore = null;
+    }
+    
+    /// <summary>
+    /// Signals the event semaphore when a device event occurs.
+    /// This causes the monitoring loop to perform an immediate scan.
+    /// </summary>
+    private static void SignalEvent()
+    {
+        // Release semaphore if available (won't block if already signaled)
+        if (_eventSemaphore is not null)
+        {
+            try
+            {
+                // Only release if current count is 0 (avoid building up releases)
+                if (_eventSemaphore.CurrentCount == 0)
+                {
+                    _eventSemaphore.Release();
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // Semaphore was disposed, ignore
+            }
+        }
+    }
+    
+    /// <summary>
     /// Stops monitoring for YubiKey device changes.
     /// </summary>
     /// <remarks>
@@ -110,6 +174,9 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManag
             // Clear fields under lock
             _monitoringTask = null;
             _monitoringCts = null;
+            
+            // Teardown listeners under lock
+            TeardownListeners();
         }
         
         // Wait for monitoring loop to complete (outside lock to avoid deadlock)

@@ -84,7 +84,7 @@ DeviceMonitorService (IHostedService)
 DeviceRepository + DeviceListenerService + DeviceChannel
 ```
 
-### After (Simple) - Updated Architecture
+### After (Simple) - Updated Architecture (Post-Refactor)
 
 ```
 Application
@@ -93,11 +93,17 @@ YubiKeyManager (static class)
     ↓
 YubiKeyDeviceManager (internal, composition root)
     ├── YubiKeyDeviceRepository (pure cache + diff + events)
-    └── YubiKeyDeviceMonitorService (owns listeners + discovery)
-            ├── HidDeviceListener
-            ├── DesktopSmartCardDeviceListener  
+    └── YubiKeyDeviceMonitorService (Rx-based event coalescing)
+            ├── HidDeviceListener (explicit Start/Stop, lazy)
+            ├── DesktopSmartCardDeviceListener (explicit Start/Stop, lazy)
             └── IFindYubiKeys
 ```
+
+**Listener Lifecycle:**
+- Listeners created but NOT started in constructor
+- `Start()` establishes baseline (existing devices) without firing events
+- Only changes after `Start()` trigger `DeviceEvent` callback
+- `Stop()` halts monitoring (can be restarted)
 
 ### Separation of Concerns
 
@@ -108,18 +114,17 @@ YubiKeyDeviceManager (internal, composition root)
 | `YubiKeyDeviceRepository` | Pure cache, diff logic, Rx events (NO discovery) |
 | `YubiKeyDeviceMonitorService` | Owns listeners, calls IFindYubiKeys, updates repository |
 
-### Event Flow
+### Event Flow (Post-Refactor)
 
 ```
 Hardware Event (USB insert/remove)
     ↓
 [HidDeviceListener / SmartCardDeviceListener]
-    ↓ (DeviceEvent callback)
-SignalEvent() - captures semaphore under lock
+    │ (explicit Start() establishes baseline - no events for existing devices)
+    ↓ (DeviceEvent callback - only fires for changes AFTER Start())
+_rescanTrigger.OnNext(Unit.Default)
     ↓
-SemaphoreSlim.Release()
-    ↓
-MonitoringLoopAsync (coalescing: 200ms delay, drain semaphore)
+Rx Throttle (200ms) - coalesces rapid events
     ↓
 RescanAsync() → IFindYubiKeys.FindAllAsync()
     ↓
@@ -129,6 +134,13 @@ Subject<DeviceEvent>.OnNext()
     ↓
 DeviceChanges observable (public API)
 ```
+
+**Key Design Points:**
+- Listeners have explicit `Start()`/`Stop()` - no auto-start in constructors
+- `Start()` establishes baseline of existing devices **without** firing events
+- Only subsequent device changes trigger events
+- Rx `Throttle()` replaces semaphore-based coalescing for cleaner event debouncing
+- `StartMonitoring()` enables event detection; `FindAllAsync()` triggers initial scan
 
 ### Context Pattern → Manager Pattern
 
@@ -302,6 +314,28 @@ private void SignalEvent()
 - `YubiKeyDeviceMonitorService` - Owns listeners and `IFindYubiKeys`, calls `repository.UpdateCache()`
 - Added `forceRescan` parameter for explicit control
 
+### 7. Duplicate Device Events on Startup (HIGH) - Fixed in Refactor
+
+**Problem:** When a YubiKey was already plugged in at startup, duplicate ADDED events fired for each interface (6 events instead of 3).
+
+**Root Causes:**
+1. SmartCard listener started in constructor, fired events for existing readers on first poll
+2. Race between `StartMonitoring()` initial scan and `FindAllAsync()` triggered parallel scans
+3. Semaphore-based coalescing had timing edge cases
+
+**Solution (Architectural Refactor):**
+1. Listeners have explicit `Start()`/`Stop()` - no auto-start in constructors
+2. `Start()` establishes baseline of existing devices **without** firing events
+3. Rx `Throttle()` replaces semaphore-based coalescing for clean event debouncing
+4. Removed sync-over-async blocking and sentinel value hacks
+5. Clear separation: `StartMonitoring()` = listen for changes; `FindAllAsync()` = scan now
+
+**Key Files Changed:**
+- `ISmartCardDeviceListener.cs` - Added `Start()`/`Stop()` to interface
+- `HidDeviceListener.cs` - Added abstract `Start()` method  
+- All listener implementations - Lazy start pattern with baseline establishment
+- `YubiKeyDeviceMonitorService.cs` - Rx-based throttling via `Subject<Unit>`
+
 ---
 
 ## Test Infrastructure Improvements
@@ -363,20 +397,28 @@ var freshDevices = await YubiKeyManager.FindAllAsync(forceRescan: true);
 var smartCardOnly = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
 ```
 
-### Device Monitoring
+### Device Monitoring (Recommended Pattern)
 
 ```csharp
+// 1. Subscribe to changes first
 using var subscription = YubiKeyManager.DeviceChanges.Subscribe(e =>
 {
     Console.WriteLine($"{e.Action}: {e.Device.SerialNumber}");
 });
 
+// 2. Start monitoring for future events
 YubiKeyManager.StartMonitoring();
 
-// ... application runs ...
+// 3. Get current devices (triggers scan, populates cache, fires events)
+var devices = await YubiKeyManager.FindAllAsync();
 
+// ... application runs, receives events for insert/remove ...
+
+// 4. Cleanup
 await YubiKeyManager.ShutdownAsync();
 ```
+
+**Note:** `StartMonitoring()` only enables event detection for future changes. Call `FindAllAsync()` to trigger the initial device scan.
 
 ### Test Cleanup Pattern
 
@@ -439,6 +481,21 @@ public class MyTests : IAsyncLifetime
 7. **Clear callbacks before disposal** - Prevents race conditions where callbacks fire on disposed resources.
 
 8. **Capture references under lock** - In `SignalEvent()`, capture semaphore reference under lock to avoid TOCTOU race.
+
+9. **Explicit Start/Stop > auto-start** - Listeners that auto-start in constructors cause initialization ordering issues and duplicate events. Explicit `Start()` with baseline establishment is cleaner.
+
+10. **Rx for event coalescing** - `Throttle()` operator is more declarative and testable than manual semaphore drain loops.
+
+11. **Lazy initialization for monitoring** - `StartMonitoring()` should just enable event detection; `FindAllAsync()` should trigger the scan. This gives callers explicit control.
+
+---
+
+## Related Documents
+
+| Document | Path | Description |
+|----------|------|-------------|
+| Code Review | [`docs/ralph-loop/reviews/2026-02-11-device-monitoring-refactor.md`](../ralph-loop/reviews/2026-02-11-device-monitoring-refactor.md) | Review of the refactor |
+| Progress File | [`docs/ralph-loop/device-monitoring-refactor-progress.md`](../ralph-loop/device-monitoring-refactor-progress.md) | Ralph Loop task tracking |
 
 ---
 

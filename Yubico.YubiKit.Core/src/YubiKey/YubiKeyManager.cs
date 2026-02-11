@@ -5,9 +5,9 @@ using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
-public class YubiKeyManager(IDeviceRepository? deviceRepository)
+public static class YubiKeyManager
 {
-    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyManager>();
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger(nameof(YubiKeyManager));
     
     // Static API - Lazy singleton for DI-free usage
     private static readonly Lazy<DeviceRepository> _repository = new(

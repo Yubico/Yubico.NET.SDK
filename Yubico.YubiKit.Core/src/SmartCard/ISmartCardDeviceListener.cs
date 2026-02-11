@@ -17,6 +17,11 @@ namespace Yubico.YubiKit.Core.SmartCard;
 /// <summary>
 /// Interface for monitoring SmartCard device arrival and removal events.
 /// </summary>
+/// <remarks>
+/// Listeners do not auto-start. Call <see cref="Start"/> after setting up <see cref="DeviceEvent"/>
+/// callback. The listener establishes baseline state during <see cref="Start"/> to avoid
+/// duplicate events for devices already present.
+/// </remarks>
 public interface ISmartCardDeviceListener : IDisposable
 {
     /// <summary>
@@ -28,4 +33,23 @@ public interface ISmartCardDeviceListener : IDisposable
     /// Gets the current status of the listener.
     /// </summary>
     DeviceListenerStatus Status { get; }
+
+    /// <summary>
+    /// Starts the listener. Establishes baseline of currently connected devices,
+    /// then begins monitoring for changes. Only fires events for subsequent changes.
+    /// </summary>
+    /// <remarks>
+    /// This method should be called after setting <see cref="DeviceEvent"/> callback.
+    /// Calling Start() on an already started listener has no effect.
+    /// </remarks>
+    void Start();
+
+    /// <summary>
+    /// Stops the listener and releases monitoring resources.
+    /// </summary>
+    /// <remarks>
+    /// After calling Stop(), the listener can be restarted by calling <see cref="Start"/> again.
+    /// Calling Stop() on an already stopped listener has no effect.
+    /// </remarks>
+    void Stop();
 }

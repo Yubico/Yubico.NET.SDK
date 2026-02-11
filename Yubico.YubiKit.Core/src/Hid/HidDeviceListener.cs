@@ -21,6 +21,11 @@ namespace Yubico.YubiKit.Core.Hid;
 /// Abstract base class for platform-specific HID device listeners.
 /// Monitors for HID device arrival and removal events using OS-level notifications.
 /// </summary>
+/// <remarks>
+/// Listeners do not auto-start. Call <see cref="Start"/> after setting up <see cref="DeviceEvent"/>
+/// callback. The listener establishes baseline state during <see cref="Start"/> to avoid
+/// duplicate events for devices already present.
+/// </remarks>
 public abstract class HidDeviceListener : IDisposable
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<HidDeviceListener>();
@@ -36,6 +41,25 @@ public abstract class HidDeviceListener : IDisposable
     /// Gets the current status of the listener.
     /// </summary>
     public DeviceListenerStatus Status { get; protected set; } = DeviceListenerStatus.Stopped;
+
+    /// <summary>
+    /// Starts the listener. Establishes baseline of currently connected devices,
+    /// then begins monitoring for changes. Only fires events for subsequent changes.
+    /// </summary>
+    /// <remarks>
+    /// This method should be called after setting <see cref="DeviceEvent"/> callback.
+    /// Calling Start() on an already started listener has no effect.
+    /// </remarks>
+    public abstract void Start();
+
+    /// <summary>
+    /// Stops the listener and releases monitoring resources.
+    /// </summary>
+    /// <remarks>
+    /// After calling Stop(), the listener can be restarted by calling <see cref="Start"/> again.
+    /// Calling Stop() on an already stopped listener has no effect.
+    /// </remarks>
+    public abstract void Stop();
 
     /// <summary>
     /// Creates a platform-specific HID device listener.

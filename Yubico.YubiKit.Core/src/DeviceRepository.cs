@@ -58,11 +58,11 @@ public class DeviceRepository(
             return; // Fast path - data already available
 
         await _initializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-        if (_hasData)
-            return; // Double-check after acquiring lock
-
         try
         {
+            if (_hasData)
+                return; // Double-check after acquiring lock
+
             logger.LogInformation("Cache empty, performing synchronous device scan...");
             var yubiKeys = await findYubiKeys.FindAllAsync(ConnectionType.All, cancellationToken)
                 .ConfigureAwait(false);

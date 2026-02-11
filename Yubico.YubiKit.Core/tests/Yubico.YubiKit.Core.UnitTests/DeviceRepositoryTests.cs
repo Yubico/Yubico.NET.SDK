@@ -35,4 +35,24 @@ public class DeviceRepositoryTests
         Assert.Equal("DeviceRepository", type.Name);
         Assert.NotEqual("DeviceRepositoryCached", type.Name);
     }
+    
+    [Fact]
+    public void DeviceRepository_Create_ReturnsValidInstance()
+    {
+        // Task 1.2: Static factory method creates valid repository
+        var repository = DeviceRepository.Create();
+        
+        Assert.NotNull(repository);
+        Assert.IsAssignableFrom<IDeviceRepository>(repository);
+    }
+    
+    [Fact]
+    public void DeviceRepository_Create_InstanceIsDisposable()
+    {
+        // Verify the created instance implements IDisposable
+        var repository = DeviceRepository.Create();
+        
+        Assert.IsAssignableFrom<IDisposable>(repository);
+        repository.Dispose();
+    }
 }

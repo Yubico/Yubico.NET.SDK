@@ -173,4 +173,13 @@ public class DeviceRepository(
     }
 
     #endregion
+
+    /// <summary>
+    /// Creates a new <see cref="DeviceRepository"/> instance without requiring dependency injection.
+    /// </summary>
+    /// <returns>A new instance of <see cref="DeviceRepository"/>.</returns>
+    public static DeviceRepository Create() =>
+        new(
+            YubiKitLogging.CreateLogger<DeviceRepository>(),
+            FindYubiKeys.Create());
 }

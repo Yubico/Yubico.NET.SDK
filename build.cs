@@ -48,6 +48,24 @@
  *   dotnet build.cs publish --package-version 1.0.0-preview.1
  *   dotnet build.cs -- --help
  *
+ * TEST TRAIT FILTERS:
+ *   Tests are categorized with traits. Use --filter to include/exclude:
+ *
+ *   Categories:
+ *     RequiresHardware      - Tests needing physical YubiKey connected
+ *     RequiresUserPresence  - Tests needing user to insert/remove/touch device
+ *     Slow                  - Tests taking >5 seconds
+ *     Integration           - Tests exercising multiple components
+ *
+ *   Filter Examples:
+ *     --filter "Category!=RequiresUserPresence"     Skip user presence tests (for CI/agents)
+ *     --filter "Category!=RequiresHardware"         Skip hardware tests (unit tests only)
+ *     --filter "Category!=Slow"                     Skip slow tests
+ *     --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
+ *                                                   Run only fast unit tests
+ *
+ *   AI AGENTS: Always exclude RequiresUserPresence tests (cannot insert/remove devices).
+ *
  * XUNIT V2 VS V3 TEST RUNNER DETECTION:
  *   This script automatically detects which test runner each project uses:
  *

@@ -247,3 +247,97 @@ var fidoDevice = devices.FirstOrDefault(d =>
 var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
 var fidoDevice = devices.FirstOrDefault();
 ```
+
+---
+
+## Test Traits and Categories
+
+Tests are categorized using xUnit traits to enable filtering. Use the `TestCategories` constants from `Yubico.YubiKit.Tests.Shared.Infrastructure`.
+
+### Available Categories
+
+| Category | Constant | Description |
+|----------|----------|-------------|
+| `RequiresHardware` | `TestCategories.RequiresHardware` | Test needs a physical YubiKey connected |
+| `RequiresUserPresence` | `TestCategories.RequiresUserPresence` | Test needs user interaction (insert/remove/touch) |
+| `Slow` | `TestCategories.Slow` | Test takes >5 seconds (delays, performance tests) |
+| `Integration` | `TestCategories.Integration` | Test exercises multiple components |
+| `RequiresFirmware` | `TestCategories.RequiresFirmware` | Test needs specific firmware features |
+
+### How to Apply Traits
+
+```csharp
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
+
+public class MyTests
+{
+    // Test requires hardware (device must be connected, but runs automatically)
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+    public async Task FindAllAsync_ReturnsDevice() { }
+
+    // Test requires user to insert/remove device (cannot run in CI/agents)
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.Slow)]
+    public async Task DeviceChanges_DetectsRemoval() { }
+
+    // Slow test with long delays
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.Slow)]
+    public async Task Performance_ManyOperations() { }
+}
+```
+
+### Filtering Tests by Category
+
+```bash
+# Skip tests requiring user interaction (for CI/agents)
+dotnet build.cs test --filter "Category!=RequiresUserPresence"
+
+# Skip slow tests
+dotnet build.cs test --filter "Category!=Slow"
+
+# Skip hardware tests (run only unit tests)
+dotnet build.cs test --filter "Category!=RequiresHardware"
+
+# Run only fast unit tests (no hardware, no user presence, not slow)
+dotnet build.cs test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
+```
+
+### When to Apply Each Trait
+
+**`RequiresHardware`:**
+- Tests that call `YubiKeyManager.FindAllAsync()` expecting results
+- Tests that open connections to devices
+- Tests that send APDU commands
+
+**`RequiresUserPresence`:**
+- Tests waiting for device insertion/removal events
+- Tests requiring touch for user presence verification
+- Tests that prompt for PIN entry via physical interaction
+- **AI agents cannot run these tests** - they require human interaction
+
+**`Slow`:**
+- Tests with `Task.Delay()` > 5 seconds
+- Performance benchmark tests
+- Tests waiting for timeout conditions
+
+### AI Agent Guidelines
+
+**When writing new tests, agents MUST apply appropriate traits:**
+
+1. If the test calls `YubiKeyManager.FindAllAsync()` or opens device connections:
+   → Add `[Trait(TestCategories.Category, TestCategories.RequiresHardware)]`
+
+2. If the test waits for device insertion/removal or requires touch:
+   → Add `[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]`
+   → Add `[Trait(TestCategories.Category, TestCategories.Slow)]`
+
+3. If the test has intentional delays > 5 seconds:
+   → Add `[Trait(TestCategories.Category, TestCategories.Slow)]`
+
+**Agents should skip `RequiresUserPresence` tests** when running test suites:
+```bash
+dotnet build.cs test --filter "Category!=RequiresUserPresence"
+```

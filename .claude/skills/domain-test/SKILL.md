@@ -92,6 +92,45 @@ The `--filter` option supports various patterns:
 | `ClassName~Integration` | Classes containing 'Integration' |
 | `Name!=SkipMe` | Exclude tests named 'SkipMe' |
 | `Category=Unit` | Tests with `[Trait("Category", "Unit")]` |
+| `Category!=RequiresUserPresence` | Exclude tests needing user interaction |
+| `Category!=RequiresHardware` | Exclude tests needing physical YubiKey |
+| `Category!=Slow` | Exclude slow tests (>5 seconds) |
+
+### Test Category Traits
+
+Tests are categorized using `TestCategories` constants from `Yubico.YubiKit.Tests.Shared.Infrastructure`:
+
+| Category | Constant | Description |
+|----------|----------|-------------|
+| `RequiresHardware` | `TestCategories.RequiresHardware` | Needs physical YubiKey connected |
+| `RequiresUserPresence` | `TestCategories.RequiresUserPresence` | Needs user to insert/remove/touch device |
+| `Slow` | `TestCategories.Slow` | Takes >5 seconds (delays, performance) |
+| `Integration` | `TestCategories.Integration` | Exercises multiple components |
+
+**AI Agents:** Always exclude `RequiresUserPresence` tests (you cannot insert/remove devices):
+
+```bash
+# Run tests without user presence requirement
+dotnet build.cs test --filter "Category!=RequiresUserPresence"
+
+# Run only fast unit tests (no hardware, no user presence, not slow)
+dotnet build.cs test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
+```
+
+**When writing new tests**, apply traits using constants:
+
+```csharp
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
+
+[Fact]
+[Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+public async Task MyHardwareTest() { }
+
+[Fact]
+[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+[Trait(TestCategories.Category, TestCategories.Slow)]
+public async Task MyDeviceInsertionTest() { }
+```
 
 ### xUnit v3 Direct Runner (Advanced)
 

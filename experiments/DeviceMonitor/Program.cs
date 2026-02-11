@@ -30,32 +30,18 @@ Console.CancelKeyPress += (sender, e) =>
     cts.Cancel();
 };
 
+// Event counter for tracking
+var eventCounter = 0;
+
 // Subscribe to device changes BEFORE starting monitoring
 Console.WriteLine("[Setup] Subscribing to YubiKeyManager.DeviceChanges...");
 using var subscription = YubiKeyManager.DeviceChanges.Subscribe(
     onNext: e =>
     {
-        var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
-        var actionColor = e.Action == DeviceAction.Added ? ConsoleColor.Green : ConsoleColor.Red;
-        var actionSymbol = e.Action == DeviceAction.Added ? "+" : "-";
-
-        Console.ForegroundColor = actionColor;
-        Console.WriteLine($"[{timestamp}] [{actionSymbol}] {e.Action}: {e.Device.DeviceId}");
-        Console.ResetColor();
-
-        // Only fetch device details on Added - device is gone on Removed
-        if (e.Action == DeviceAction.Added)
-        {
-            // Fire-and-forget but log errors (avoid sync-over-async deadlocks)
-            _ = PrintDeviceDetailsAsync(e.Device, "  ");
-        }
-        else
-        {
-            // For removals, just show the connection type we had cached
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.WriteLine($"  ConnectionType: {e.Device.ConnectionType}");
-            Console.ResetColor();
-        }
+        // Increment counter here (before async call)
+        var currentEventNum = ++eventCounter;
+        // Handle event synchronously to ensure proper output ordering
+        HandleDeviceEventAsync(e, currentEventNum).GetAwaiter().GetResult();
     },
     onError: ex =>
     {
@@ -68,25 +54,94 @@ using var subscription = YubiKeyManager.DeviceChanges.Subscribe(
         Console.WriteLine("[INFO] DeviceChanges stream completed");
     });
 
+// Async handler for device events - ensures proper output ordering
+static async Task HandleDeviceEventAsync(DeviceEvent e, int eventNum)
+{
+    var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
+    var isAdded = e.Action == DeviceAction.Added;
+    var actionColor = isAdded ? ConsoleColor.Green : ConsoleColor.Red;
+    var actionSymbol = isAdded ? "▲ ADDED" : "▼ REMOVED";
+    var borderChar = isAdded ? '═' : '─';
+
+    Console.WriteLine();
+    Console.ForegroundColor = actionColor;
+    Console.WriteLine($"╔{new string(borderChar, 62)}╗");
+    Console.WriteLine($"║  [{timestamp}] EVENT #{eventNum}: {actionSymbol,-42} ║");
+    Console.WriteLine($"╠{new string(borderChar, 62)}╣");
+    Console.ResetColor();
+
+    // Print device info
+    Console.ForegroundColor = ConsoleColor.White;
+    Console.WriteLine($"║  DeviceId:       {e.Device.DeviceId,-43} ║");
+    Console.WriteLine($"║  ConnectionType: {e.Device.ConnectionType,-43} ║");
+    Console.ResetColor();
+
+    // Fetch device details for Added events (await to ensure proper ordering)
+    if (isAdded)
+    {
+        await PrintDeviceDetailsAsync(e.Device, "║  ", actionColor);
+    }
+
+    Console.ForegroundColor = actionColor;
+    Console.WriteLine($"╚{new string(borderChar, 62)}╝");
+    Console.ResetColor();
+}
+
 // Start monitoring BEFORE initial scan to avoid race condition
 Console.WriteLine("[Setup] Starting device monitoring...");
 YubiKeyManager.StartMonitoring();
 Console.WriteLine($"[Setup] Monitoring started: {YubiKeyManager.IsMonitoring}");
 
 // Perform initial scan
-Console.WriteLine("[Setup] Performing initial device scan...");
+Console.WriteLine();
+Console.WriteLine("┌──────────────────────────────────────────────────────────────┐");
+Console.WriteLine("│                    INITIAL DEVICE SCAN                       │");
+Console.WriteLine("└──────────────────────────────────────────────────────────────┘");
 var initialDevices = await YubiKeyManager.FindAllAsync(cts.Token);
-Console.WriteLine($"[Setup] Found {initialDevices.Count} device(s) initially:");
-foreach (var device in initialDevices)
-{
-    Console.WriteLine($"  - {device.DeviceId} ({device.ConnectionType})");
-    await PrintDeviceDetailsAsync(device, "    ");
-}
+
+// Sort by ConnectionType for easier reading
+var sortedInitialDevices = initialDevices
+    .OrderBy(d => d.ConnectionType)
+    .ThenBy(d => d.DeviceId)
+    .ToList();
+
+Console.WriteLine($"  Found {sortedInitialDevices.Count} device(s):");
 Console.WriteLine();
 
+var deviceNum = 0;
+foreach (var device in sortedInitialDevices)
+{
+    deviceNum++;
+    Console.ForegroundColor = ConsoleColor.Cyan;
+    Console.WriteLine($"  ┌─── Device #{deviceNum} ───────────────────────────────────────────┐");
+    Console.ResetColor();
+    
+    Console.ForegroundColor = ConsoleColor.White;
+    Console.WriteLine($"  │  DeviceId:       {device.DeviceId}");
+    Console.WriteLine($"  │  ConnectionType: {device.ConnectionType}");
+    Console.ResetColor();
+    
+    await PrintDeviceDetailsAsync(device, "  │  ", ConsoleColor.Cyan);
+    
+    Console.ForegroundColor = ConsoleColor.Cyan;
+    Console.WriteLine($"  └────────────────────────────────────────────────────────────┘");
+    Console.ResetColor();
+    Console.WriteLine();
+}
+
+if (initialDevices.Count == 0)
+{
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine("  (No devices found - insert a YubiKey)");
+    Console.ResetColor();
+}
+
+Console.WriteLine();
+Console.ForegroundColor = ConsoleColor.White;
 Console.WriteLine("═══════════════════════════════════════════════════════════════");
-Console.WriteLine("  Waiting for device events... (Insert/remove your YubiKey)");
+Console.WriteLine("  MONITORING ACTIVE - Insert/remove your YubiKey to see events");
 Console.WriteLine("═══════════════════════════════════════════════════════════════");
+Console.ResetColor();
 Console.WriteLine();
 
 // Main loop - periodically show current state
@@ -94,16 +149,35 @@ try
 {
     while (!cts.Token.IsCancellationRequested)
     {
-        await Task.Delay(TimeSpan.FromSeconds(10), cts.Token);
+        await Task.Delay(TimeSpan.FromSeconds(15), cts.Token);
 
         // Periodic status update
         var devices = await YubiKeyManager.FindAllAsync(cts.Token);
+        
+        // Sort by ConnectionType for easier reading
+        var sortedDevices = devices
+            .OrderBy(d => d.ConnectionType)
+            .ThenBy(d => d.DeviceId)
+            .ToList();
+        
         Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] [STATUS] {devices.Count} device(s) in repository:");
-        foreach (var device in devices)
+        Console.WriteLine();
+        Console.WriteLine($"┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄");
+        Console.WriteLine($"  [{DateTime.Now:HH:mm:ss}] STATUS: {sortedDevices.Count} device(s) in cache");
+        
+        // Group by connection type for clearer display
+        var grouped = sortedDevices.GroupBy(d => d.ConnectionType);
+        foreach (var group in grouped)
         {
-            Console.WriteLine($"  - {device.DeviceId} ({device.ConnectionType})");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"  [{group.Key}]");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            foreach (var device in group)
+            {
+                Console.WriteLine($"    • {device.DeviceId}");
+            }
         }
+        Console.WriteLine($"┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄");
         Console.ResetColor();
     }
 }
@@ -120,22 +194,27 @@ await YubiKeyManager.ShutdownAsync();
 Console.WriteLine("[Shutdown] Done.");
 
 // Async helper method to print device details without blocking
-static async Task PrintDeviceDetailsAsync(IYubiKey device, string indent)
+static async Task PrintDeviceDetailsAsync(IYubiKey device, string indent, ConsoleColor borderColor)
 {
     try
     {
-        Console.ForegroundColor = ConsoleColor.DarkCyan;
-        Console.WriteLine($"{indent}ConnectionType: {device.ConnectionType}");
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.WriteLine($"{indent}--- Querying DeviceInfo... ---");
 
         // Use proper async with timeout via CancellationToken
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
         var info = await device.GetDeviceInfoAsync(timeoutCts.Token);
         
-        Console.WriteLine($"{indent}SerialNumber: {info.SerialNumber}");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"{indent}SerialNumber:    {info.SerialNumber}");
+        Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine($"{indent}FirmwareVersion: {info.FirmwareVersion}");
-        Console.WriteLine($"{indent}FormFactor: {info.FormFactor}");
-        Console.WriteLine($"{indent}UsbEnabled: {info.UsbEnabled}");
-        Console.WriteLine($"{indent}NfcEnabled: {info.NfcEnabled}");
+        Console.WriteLine($"{indent}FormFactor:      {info.FormFactor}");
+        Console.ForegroundColor = ConsoleColor.DarkCyan;
+        Console.WriteLine($"{indent}UsbSupported:    {info.UsbSupported}");
+        Console.WriteLine($"{indent}UsbEnabled:      {info.UsbEnabled}");
+        Console.WriteLine($"{indent}NfcSupported:    {info.NfcSupported}");
+        Console.WriteLine($"{indent}NfcEnabled:      {info.NfcEnabled}");
         Console.ResetColor();
     }
     catch (OperationCanceledException)
@@ -151,4 +230,3 @@ static async Task PrintDeviceDetailsAsync(IYubiKey device, string indent)
         Console.ResetColor();
     }
 }
-

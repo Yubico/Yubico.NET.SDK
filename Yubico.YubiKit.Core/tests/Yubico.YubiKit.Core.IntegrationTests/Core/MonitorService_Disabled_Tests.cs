@@ -16,21 +16,31 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Core;
 
-public class MonitorService_Disabled_Tests()
-    : IntegrationTestBase(options => options.EnableAutoDiscovery = false)
+/// <summary>
+/// Tests that verify behavior without monitoring.
+/// The static API still finds devices on-demand even without monitoring.
+/// </summary>
+public class MonitorService_Disabled_Tests : IAsyncLifetime
 {
-    [Fact]
-    public async Task WhenDisabledMonitor_FindsDevices()
+    public Task InitializeAsync()
     {
+        // Don't start monitoring
+        return Task.CompletedTask;
+    }
+    
+    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    
+    [Fact]
+    public async Task WhenMonitoringDisabled_StillFindsDevicesOnDemand()
+    {
+        // Static API performs on-demand scan even without monitoring
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
         Assert.NotEmpty(devices);
     }
 
     [Fact]
-    public async Task WhenDisabledMonitor_WithDisabledManualScan_DoesNotFindDevices()
+    public void WhenMonitoringDisabled_IsMonitoringReturnsFalse()
     {
-        SkipDeviceRepositoryManualScan(true);
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
-        Assert.Empty(devices);
+        Assert.False(YubiKeyManager.IsMonitoring);
     }
 }

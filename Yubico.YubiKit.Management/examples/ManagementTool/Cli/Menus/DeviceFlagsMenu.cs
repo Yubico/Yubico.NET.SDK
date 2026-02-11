@@ -14,13 +14,11 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 /// </summary>
 public static class DeviceFlagsMenu
 {
-    public static async Task RunAsync(IYubiKeyManager manager, CancellationToken cancellationToken = default)
+    public static async Task RunAsync(CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(manager);
-        
         OutputHelpers.WriteHeader("Device Flags Configuration");
 
-        var selection = await DeviceSelector.SelectDeviceAsync(manager, cancellationToken);
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
         if (selection is null)
         {
             return;

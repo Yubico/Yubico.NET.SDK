@@ -89,7 +89,6 @@ public static class TestStateExtensions
             CancellationToken cancellationToken = default)
         {
             var services = new ServiceCollection();
-            services.AddYubiKeyManagerCore();
             services.AddYubiKeySecurityDomain();
             await using var provider = services.BuildServiceProvider();
 

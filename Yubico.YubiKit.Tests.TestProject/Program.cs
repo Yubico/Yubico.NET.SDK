@@ -15,14 +15,13 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Minimal API endpoint - demonstrates the simplest integration pattern
+// Minimal API endpoint - demonstrates the simplest integration pattern (no DI needed)
 app.MapGet("/di-demo/minimal", async (
-    [FromServices] IYubiKeyManager yubiKeyManager,
     CancellationToken cancellationToken
 ) =>
 {
-    // Find all available YubiKeys
-    var yubiKeys = await yubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+    // Find all available YubiKeys using static API
+    var yubiKeys = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
     if (yubiKeys.Count == 0)
         return Results.Problem("No YubiKey detected. Please connect a YubiKey and try again.", statusCode: 503);
 

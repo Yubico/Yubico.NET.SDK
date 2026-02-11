@@ -67,16 +67,12 @@ public static class DeviceSelector
     /// <summary>
     /// Finds all connected YubiKeys and allows user to select one.
     /// </summary>
-    /// <param name="manager">YubiKeyManager for device enumeration.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The selected YubiKey with device info, or null if none available or user cancelled.</returns>
     public static async Task<DeviceSelection?> SelectDeviceAsync(
-        IYubiKeyManager manager,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(manager);
-        
-        var devices = await FindDevicesWithRetryAsync(manager, cancellationToken);
+        var devices = await FindDevicesWithRetryAsync(cancellationToken);
         if (devices.Count == 0)
         {
             return null;
@@ -102,17 +98,13 @@ public static class DeviceSelector
     /// Finds all connected YubiKeys, with retry prompt if none found.
     /// Supports SmartCard, FIDO HID, and OTP HID connection types.
     /// </summary>
-    /// <param name="manager">YubiKeyManager for device enumeration.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     public static async Task<IReadOnlyList<IYubiKey>> FindDevicesWithRetryAsync(
-        IYubiKeyManager manager,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(manager);
-        
         while (!cancellationToken.IsCancellationRequested)
         {
-            var allDevices = await manager.FindAllAsync(ConnectionType.All, cancellationToken);
+            var allDevices = await YubiKeyManager.FindAllAsync(ConnectionType.All, cancellationToken);
 
             // Filter to supported connection types for Management
             var devices = allDevices

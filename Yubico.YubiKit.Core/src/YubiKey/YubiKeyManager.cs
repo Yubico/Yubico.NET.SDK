@@ -267,6 +267,6 @@ public static class YubiKeyManager
     /// <returns>A read-only list of discovered YubiKey devices.</returns>
     public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(
         ConnectionType type,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
         => _repository.Value.FindAllAsync(type, cancellationToken);
 }

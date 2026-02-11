@@ -88,20 +88,6 @@ public class
     }
 
     [Fact]
-    public async Task CreateManagementSession_with_FactoryInstance()
-    {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
-        var device = devices.First();
-        var sessionFactory = ServiceProvider.GetRequiredService<ManagementSessionFactory>();
-
-        await using var connection = await device.ConnectAsync<ISmartCardConnection>();
-        await using var mgmtSession = await sessionFactory(connection, configuration: null);
-
-        var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
-        Assert.NotEqual(0, deviceInfo.SerialNumber);
-    }
-
-    [Fact]
     public async Task CreateManagementSession_with_FactoryMethod()
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);

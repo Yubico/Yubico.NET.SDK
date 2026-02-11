@@ -12,68 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management.IntegrationTests;
 
-public abstract class IntegrationTestBase : IDisposable
+/// <summary>
+/// Base class for Management integration tests using the static YubiKeyManager API.
+/// </summary>
+public abstract class IntegrationTestBase : IAsyncDisposable
 {
     private bool _disposed;
 
-    protected IntegrationTestBase(Action<YubiKeyManagerOptions>? overrideOptions = null)
+    protected IntegrationTestBase()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddYubiKeyManagerCore(overrideOptions ?? DefaultOptions);
-        services.AddYubiKeyManager();
-
-        ServiceProvider = services.BuildServiceProvider();
-        YubiKeyManager = ServiceProvider.GetRequiredService<IYubiKeyManager>();
-        ServiceLocator.SetLocatorProvider(ServiceProvider);
-
-        DeviceRepository = ServiceProvider.GetRequiredService<IDeviceRepository>();
-        DeviceMonitorService = ServiceProvider.GetRequiredService<DeviceMonitorService>();
-
-        DeviceMonitorService.StartAsync(CancellationToken.None).Wait();
+        // Start monitoring to enable device events
+        YubiKeyManager.StartMonitoring();
     }
 
-    private static Action<YubiKeyManagerOptions> DefaultOptions =>
-        options =>
-        {
-            options.EnableAutoDiscovery = true;
-            options.EnabledTransport = Transport.All;
-        };
-
-    protected ServiceProvider ServiceProvider { get; }
-    protected IYubiKeyManager YubiKeyManager { get; }
-    private IDeviceRepository DeviceRepository { get; }
-    private DeviceMonitorService DeviceMonitorService { get; }
-
-    #region IDisposable Members
-
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         if (_disposed)
             return;
 
-        DeviceMonitorService?.Dispose();
-        DeviceRepository?.Dispose();
-        ServiceProvider?.Dispose();
+        await YubiKeyManager.ShutdownAsync();
         GC.SuppressFinalize(this);
 
         _disposed = true;
-    }
-
-    #endregion
-
-    protected void SkipDeviceRepositoryManualScan(bool value)
-    {
-        var type = typeof(DeviceRepository);
-        var field = type.GetField("TEST_MONITORSERVICE_SKIP_MANUALSCAN",
-            BindingFlags.NonPublic | BindingFlags.Instance);
-        field?.SetValue(DeviceRepository, value);
     }
 }

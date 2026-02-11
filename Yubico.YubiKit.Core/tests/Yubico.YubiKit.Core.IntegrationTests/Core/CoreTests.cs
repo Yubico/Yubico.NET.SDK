@@ -2,8 +2,16 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Core;
 
-public class CoreTests : IntegrationTestBase
+public class CoreTests : IAsyncLifetime
 {
+    public Task InitializeAsync()
+    {
+        YubiKeyManager.StartMonitoring();
+        return Task.CompletedTask;
+    }
+    
+    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    
     [Fact]
     public async Task DeviceEvents_ArePublished()
     {

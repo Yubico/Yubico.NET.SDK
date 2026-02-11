@@ -5,13 +5,12 @@ using Yubico.YubiKit.Management;
 namespace TestProject.Controllers;
 
 /// <summary>
-///     Example controller demonstrating YubiKey integration with ASP.NET Core DI.
+///     Example controller demonstrating YubiKey integration with ASP.NET Core.
 ///     Shows proper resource management, error handling, and cancellation support.
 /// </summary>
 [ApiController]
 [Route("di/controller")]
-public class DiTestController(
-    IYubiKeyManager yubiKeyManager)
+public class DiTestController
     : ControllerBase
 {
     /// <summary>
@@ -22,7 +21,7 @@ public class DiTestController(
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
-        var yubiKeys = await yubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+        var yubiKeys = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
         if (yubiKeys.Count == 0)
             return Problem("No YubiKey detected. Please connect a YubiKey and try again.", statusCode: 503);
 

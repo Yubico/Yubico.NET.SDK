@@ -1,4 +1,5 @@
-﻿using Yubico.YubiKit.Core.Hid;
+﻿using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 
@@ -14,6 +15,8 @@ public interface IYubiKeyManager
 
 public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManager
 {
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyManager>();
+    
     // Static API - Lazy singleton for DI-free usage
     private static readonly Lazy<DeviceRepository> _repository = new(
         DeviceRepository.Create,
@@ -86,10 +89,16 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository) : IYubiKeyManag
                 // Expected during shutdown, exit gracefully
                 break;
             }
-            catch (Exception)
+            catch (ObjectDisposedException)
             {
-                // Log and continue - monitoring should be resilient
-                // TODO: Add logging via YubiKitLogging.CreateLogger<YubiKeyManager>()
+                // CTS was disposed during monitoring, exit gracefully (task 3.21)
+                Logger.LogDebug("Monitoring loop exiting: CancellationTokenSource was disposed");
+                break;
+            }
+            catch (Exception ex)
+            {
+                // Log and continue - monitoring should be resilient (task 3.15)
+                Logger.LogWarning(ex, "Background device scan failed, continuing monitoring");
             }
         }
     }

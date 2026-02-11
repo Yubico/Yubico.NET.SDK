@@ -405,4 +405,15 @@ public class YubiKeyManagerStaticTests
         
         Assert.NotNull(method);
     }
+    
+    [Fact]
+    public void YubiKeyManager_HasLoggerField()
+    {
+        // Task 3.15: YubiKeyManager should have static Logger for background scan exceptions
+        var type = typeof(YubiKeyManager);
+        var field = type.GetField("Logger", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        
+        Assert.NotNull(field);
+    }
 }

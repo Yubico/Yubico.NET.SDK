@@ -119,18 +119,18 @@ In this example, we will generate a key in slot 9C and import a key into slot 9D
 
 With ``GenerateKeyPair``, we must specify the key's algorithm via the [KeyType](xref:Yubico.YubiKey.Cryptography.KeyType) class. ``ImportPrivateKey``, on the other hand, must be provided the private key to be imported, which must be an implementation of the [PrivateKey](xref:Yubico.YubiKey.Cryptography.PrivateKey) class.
 
-Generating and importing keys, however, requires management key authentication before those operations can complete. When you call ``GenerateKeyPair`` or ``ImportPrivateKey``, the SDK will call on your [KeyCollector](xref:Yubico.YubiKey.Piv.PivSession.KeyCollector) to collect the management key from the user and perform authentication automatically. However, we can also perform management key authentication manually (by providing the management key directly instead of using the KeyCollector) via [TryAuthenticateManagementKey](xref:Yubico.YubiKey.Piv.PivSession.TryAuthenticateManagementKey%28System.ReadOnlyMemory%7BSystem.Byte%7D%2CSystem.Boolean%29), which we will call in this example.
+Generating and importing keys, however, requires management key authentication before those operations can complete. When you call ``GenerateKeyPair`` or ``ImportPrivateKey``, the SDK will call on your [KeyCollector](xref:Yubico.YubiKey.Piv.PivSession.KeyCollector) to collect the management key from the user and perform authentication automatically. However, we can also perform management key authentication manually (by providing the management key directly instead of using the KeyCollector) via [TryAuthenticateManagementKey](xref:Yubico.YubiKey.Piv.PivSession.TryAuthenticateManagementKey%28System.ReadOnlyMemory%7BSystem.Byte%7D%2CSystem.Boolean%29), which we will call in this example:
 
 ```csharp
-using (PivSession pivtest = new PivSession(yubiKey))
+using (PivSession pivSession = new PivSession(yubiKey))
 {
     // Perform management key authentication first (managementKey set elsewhere).
-    pivtest.TryAuthenticateManagementKey(managementKey, true);
+    pivSession.TryAuthenticateManagementKey(managementKey, true);
 
-    pivtest.GenerateKeyPair(PivSlot.Signing, KeyType.RSA2048, PivPinPolicy.Once, PivTouchPolicy.Always);
+    pivSession.GenerateKeyPair(PivSlot.Signing, KeyType.RSA2048, PivPinPolicy.Once, PivTouchPolicy.Always);
 
     // privateKey set elsewhere.
-    pivtest.ImportPrivateKey(PivSlot.KeyManagement, privateKey, PivPinPolicy.Always, PivTouchPolicy.Cached);
+    pivSession.ImportPrivateKey(PivSlot.KeyManagement, privateKey, PivPinPolicy.Always, PivTouchPolicy.Cached);
 }
 ```
 
@@ -147,10 +147,10 @@ To change the management key with the SDK, there are two options: the ``PivSessi
 To change the management key and set a new touch policy using the ``PivSession``, simply call [TryChangeManagementKey()](xref:Yubico.YubiKey.Piv.PivSession.TryChangeManagementKey%28System.ReadOnlyMemory%7BSystem.Byte%7D%2CSystem.ReadOnlyMemory%7BSystem.Byte%7D%2CYubico.YubiKey.Piv.PivTouchPolicy%29) and provide the current management key, the new management key, and the desired touch policy. In this example, let's set the touch policy to ``Always``:
 
 ```csharp
-using (PivSession pivtest = new PivSession(yubiKey))
+using (PivSession pivSession = new PivSession(yubiKey))
 {
     // currentKey and newKey set elsewhere.
-    pivtest.TryChangeManagementKey(currentKey, newKey, PivTouchPolicy.Always);
+    pivSession.TryChangeManagementKey(currentKey, newKey, PivTouchPolicy.Always);
 }
 ```
 
@@ -187,10 +187,10 @@ Once a key has been generated or imported into a slot, you can check the PIN and
 To check a key's policies, create an instance of a ``PivSession`` with the desired YubiKey, call [GetMetadata](xref:Yubico.YubiKey.Piv.PivSession.GetMetadata%28System.Byte%29) on a specific PIV slot, and extract the ``PinPolicy`` and ``TouchPolicy`` properties:
 
 ```csharp
-using (PivSession pivtest = new PivSession(yubiKey))
+using (PivSession pivSession = new PivSession(yubiKey))
 {
     // Get the metadata from the key in slot 9A.
-    PivMetadata metadata = pivtest.GetMetadata(0x9A);
+    PivMetadata metadata = pivSession.GetMetadata(0x9A);
 
     // Extract the properties from the metadata.
     PivPinPolicy pinPolicy = metadata.PinPolicy;

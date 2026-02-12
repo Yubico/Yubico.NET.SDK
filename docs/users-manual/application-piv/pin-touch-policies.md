@@ -125,7 +125,7 @@ Generating and importing keys, however, requires management key authentication b
 using (PivSession pivSession = new PivSession(yubiKey))
 {
     // Perform management key authentication first (managementKey set elsewhere).
-    pivSession.TryAuthenticateManagementKey(managementKey, true);
+    pivSession.TryAuthenticateManagementKey(managementKey);
 
     pivSession.GenerateKeyPair(PivSlot.Signing, KeyType.RSA2048, PivPinPolicy.Once, PivTouchPolicy.Always);
 

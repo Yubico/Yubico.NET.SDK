@@ -42,7 +42,7 @@ limitations under the License. -->
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.Cryptography" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Bcl.Cryptography" Version="10.0.2" />
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -16,9 +16,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# PIV PIN, touch, and biometric policies
+# PIN, touch, and biometric policies
 
-The YubiKey's PIN, touch, and biometric policies determine when PIN verification, biometric verification, and touch are required in order to perform an operation with a private key from one of the YubiKey's PIV slots (including the management key).
+The YubiKey's PIN, touch, and biometric policies determine when PIN verification, biometric verification, and touch are required in order to perform an operation with a private key from one of the YubiKey's PIV slots, including the management key.
 
 These policies apply to operations such as signing, decrypting, performing a key agreement, and authenticating the management key (required when generating a key pair, importing a private key or certificate, etc).
 
@@ -28,11 +28,11 @@ PIN and touch policies can be configured when a private key is generated or impo
 
 A key's policies, whether explicitly configured or not, are properties of the key itself. This means that you can move a key from one slot to another (for example, from slot 9A to one of the retired key slots), and its policies do not change.
 
-Biometric policies are a type of PIN policy and can only be used with YubiKey Bio Series — Multi-protocol Edition keys (YubiKey Bio Series – FIDO Edition key do not support PIV).
+Biometric policies are a type of PIN policy and can only be used with YubiKey Bio Series — Multi-protocol Edition keys. (YubiKey Bio Series – FIDO Edition keys do not support PIV.)
 
-The management key (slot 9B) only has a touch policy. The PIN is never needed to perform a management key operation (with the exception of [Set PIN Retries](commands.md#set-pin-retries), but in this case the PIN is needed because this is a command related to the PIN itself). The PIN and PUK (slots 80 and 81) do not have PIN *or* touch policies.
+The management key (slot 9B) only has a touch policy. The PIN is never needed to perform a management key operation (with the exception of [SetPinRetriesCommand](commands.md#set-pin-retries) because it is related to the PIN itself). The PIN and PUK (slots 80 and 81) do not have PIN *or* touch policies.
 
-Keys generated/imported into the following slots have both PIN **and** touch policies:
+Keys generated or imported into the following slots have both PIN and touch policies:
 
 - 9A (Authentication)
 - 9C (Digital Signature)
@@ -69,20 +69,22 @@ There are three touch policy options:
 
 * ``Never``: a touch is never needed.
 * ``Always``: a touch is needed for every key operation.
-* ``Cached``: if more than 15 seconds have elapsed since the last time the YubiKey was touched, a touch is needed (only available for YubiKeys with firmware version 4.3 and later).
+* ``Cached``: if more than 15 seconds have elapsed since the last time the YubiKey was touched, a touch is needed. 
+
+``Cached`` is only available for YubiKeys with firmware version 4.3 and later.
 
 ## Default policies
 
-The default PIN and touch policies are programmed into the YubiKey's firmware upon manufacture. Starting with firmware version 4, YubiKeys (with the exception of YubiKey FIPS Series keys with firmware version 5.7.1 or later) have the following default policies:
+The default PIN and touch policies are programmed into the YubiKey's firmware upon manufacture. Starting with firmware version 4, YubiKeys (with the exception of YubiKey FIPS Series keys with firmware version 5.7.1 and later) have the following default policies:
 
 * Slot 9C PIN policy: ``Always``
 * Slot 9E PIN policy: ``Never``
 * General PIN policy: ``Once``
 * Touch policy: ``Never``
 
-Due to PIV card activation requirements in section 4.3 of the [FIPS 201-3 specification](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.201-3.pdf), **YubiKey FIPS Series keys with firmware version 5.7.1 or later have a default 9E PIN policy of ``Once``**. The other default polices listed above are the same for FIPS keys.
+Due to PIV card activation requirements in section 4.3 of the [FIPS 201-3 specification](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.201-3.pdf), **YubiKey FIPS Series keys with firmware version 5.7.1 and later have a default 9E PIN policy of ``Once``**. The other default polices listed above are the same for these keys.
 
-It's also important to note that slots 9C and 9E have different default PIN policies than all other slots due to the requirements mandated by the PIV standard (see [NIST SP 800-73pt1](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-73pt1-5.pdf), section 3). Touch is not a part of the PIV standard, which is why the default touch policy is ``Never``. The ability to require touch was added to the YubiKey in firmware version 4 to augment security.
+Slots 9C and 9E have different default PIN policies than all other slots due to the requirements mandated by the PIV standard (see [NIST SP 800-73pt1](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-73pt1-5.pdf), section 3). Touch is not a part of the PIV standard, which is why the default touch policy is ``Never``. The ability to require touch was added to the YubiKey in firmware version 4 to augment security.
 
 When generating or importing a key into one of the PIV slots, these default policies will be applied to the key unless otherwise specified.
 
@@ -111,13 +113,13 @@ When specifying the touch policy with the SDK, you must select one of the [PivTo
 - ``Never``
 - ``None``
 
-It should also be noted that selecting ``None`` for either the PIN policy or touch policy during generation/import does not remove the policy field from the private key. The YubiKey's firmware interprets ``None`` as an invalid policy and will use the slot's default policy instead.
+Selecting ``None`` for either the PIN policy or touch policy during generation/import does not remove the policy field from the private key. The YubiKey's firmware interprets ``None`` as an invalid policy and will use the slot's default policy instead.
 
 ### GenerateKeyPair() and ImportPrivateKey() example
 
 In this example, we will generate a key in slot 9C and import a key into slot 9D using the [GenerateKeyPair](xref:Yubico.YubiKey.Piv.PivSession.GenerateKeyPair%28System.Byte%2CYubico.YubiKey.Cryptography.KeyType%2CYubico.YubiKey.Piv.PivPinPolicy%2CYubico.YubiKey.Piv.PivTouchPolicy%29) and [ImportPrivateKey](xref:Yubico.YubiKey.Piv.PivSession.ImportPrivateKey%28System.Byte%2CYubico.YubiKey.Cryptography.IPrivateKey%2CYubico.YubiKey.Piv.PivPinPolicy%2CYubico.YubiKey.Piv.PivTouchPolicy%29) PIV session methods, respectively. When calling each method, we will specify the intended slot via the [PivSlot](xref:Yubico.YubiKey.Piv.PivSlot) class. For the 9C key, we will set its PIN policy to ``Once`` and its touch policy to ``Always``. For the 9D key, we will set its PIN policy to ``Always`` and its touch policy to ``Cached``.
 
-With ``GenerateKeyPair``, we must specify the key's algorithm via the [KeyType](xref:Yubico.YubiKey.Cryptography.KeyType) class. ``ImportPrivateKey``, on the other hand, must be provided the private key to be imported, which must be an implementation of the [PrivateKey](xref:Yubico.YubiKey.Cryptography.PrivateKey) class.
+With ``GenerateKeyPair``, we must also specify the key's algorithm via the [KeyType](xref:Yubico.YubiKey.Cryptography.KeyType) class. For ``ImportPrivateKey``, we must provide the private key to be imported, which must be an implementation of the [PrivateKey](xref:Yubico.YubiKey.Cryptography.PrivateKey) class.
 
 Generating and importing keys, however, requires management key authentication before those operations can complete. When you call ``GenerateKeyPair`` or ``ImportPrivateKey``, the SDK will call on your [KeyCollector](xref:Yubico.YubiKey.Piv.PivSession.KeyCollector) to collect the management key from the user and perform authentication automatically. However, we can also perform management key authentication manually (by providing the management key directly instead of using the KeyCollector) via [TryAuthenticateManagementKey](xref:Yubico.YubiKey.Piv.PivSession.TryAuthenticateManagementKey%28System.ReadOnlyMemory%7BSystem.Byte%7D%2CSystem.Boolean%29), which we will call in this example:
 
@@ -127,10 +129,18 @@ using (PivSession pivSession = new PivSession(yubiKey))
     // Perform management key authentication first (managementKey set elsewhere).
     pivSession.TryAuthenticateManagementKey(managementKey);
 
-    pivSession.GenerateKeyPair(PivSlot.Signing, KeyType.RSA2048, PivPinPolicy.Once, PivTouchPolicy.Always);
+    pivSession.GenerateKeyPair(
+        PivSlot.Signing, 
+        KeyType.RSA2048, 
+        PivPinPolicy.Once, 
+        PivTouchPolicy.Always);
 
     // privateKey set elsewhere.
-    pivSession.ImportPrivateKey(PivSlot.KeyManagement, privateKey, PivPinPolicy.Always, PivTouchPolicy.Cached);
+    pivSession.ImportPrivateKey(
+        PivSlot.KeyManagement, 
+        privateKey, 
+        PivPinPolicy.Always, 
+        PivTouchPolicy.Cached);
 }
 ```
 
@@ -158,24 +168,37 @@ Note that ``TryChangeManagementKey()`` is an overloaded method. In addition to s
 
 ### SetManagementKeyCommand() example
 
-Unlike the ``PivSession``, using the PIV command classes to change the management key requires three steps: first we must initiate the PIV management key authentication process with [InitializeAuthenticateManagementKeyCommand](xref:Yubico.YubiKey.Piv.Commands.InitializeAuthenticateManagementKeyCommand.%23ctor%28Yubico.YubiKey.Piv.PivAlgorithm%29), then we can finish management key authentication with [CompleteAuthenticateManagementKeyCommand()](xref:Yubico.YubiKey.Piv.Commands.CompleteAuthenticateManagementKeyCommand.%23ctor%28Yubico.YubiKey.Piv.Commands.InitializeAuthenticateManagementKeyResponse%2CSystem.ReadOnlySpan%7BSystem.Byte%7D%29), and finally we can set the new management key and touch policy via [SetManagementKeyCommand()](xref:Yubico.YubiKey.Piv.Commands.SetManagementKeyCommand.%23ctor%28System.ReadOnlyMemory%7BSystem.Byte%7D%2CYubico.YubiKey.Piv.PivTouchPolicy%2CYubico.YubiKey.Piv.PivAlgorithm%29):
+Unlike the ``PivSession``, using the PIV command classes to change the management key requires three steps:
+
+1. First we must initiate the PIV management key authentication process with [InitializeAuthenticateManagementKeyCommand](xref:Yubico.YubiKey.Piv.Commands.InitializeAuthenticateManagementKeyCommand.%23ctor%28Yubico.YubiKey.Piv.PivAlgorithm%29). 
+1. Then we can finish management key authentication with [CompleteAuthenticateManagementKeyCommand()](xref:Yubico.YubiKey.Piv.Commands.CompleteAuthenticateManagementKeyCommand.%23ctor%28Yubico.YubiKey.Piv.Commands.InitializeAuthenticateManagementKeyResponse%2CSystem.ReadOnlySpan%7BSystem.Byte%7D%29).
+1. And finally we can set the new management key and touch policy via [SetManagementKeyCommand()](xref:Yubico.YubiKey.Piv.Commands.SetManagementKeyCommand.%23ctor%28System.ReadOnlyMemory%7BSystem.Byte%7D%2CYubico.YubiKey.Piv.PivTouchPolicy%2CYubico.YubiKey.Piv.PivAlgorithm%29).
 
 ```csharp
 IYubiKeyConnection connection = yubiKey.Connect(YubiKeyApplication.Piv);
 
-// When initializing management key authentication with the command classes, we must specify the current
-// management key's algorithm. (If you aren't sure about the algorithm, retrieve it from the key's metadata first.)
-InitializeAuthenticateManagementKeyCommand initAuthManKeyCommand = new InitializeAuthenticateManagementKeyCommand(PivAlgorithm.Aes192);
-InitializeAuthenticateManagementKeyResponse initAuthManKeyResponse = connection.SendCommand(initAuthManKeyCommand);
+// Specify the current management key's algorithm. (If you aren't sure about the
+// algorithm, retrieve it from the key's metadata first.)
+InitializeAuthenticateManagementKeyCommand initAuthManKeyCommand = 
+    new InitializeAuthenticateManagementKeyCommand(PivAlgorithm.Aes192);
 
-// Complete the management key authentication by passing in the initialization response and the current management
-// key (currentKey set elsewhere).
-CompleteAuthenticateManagementKeyCommand authManKeyCommand = new CompleteAuthenticateManagementKeyCommand(initAuthManKeyResponse, currentKey);
-CompleteAuthenticateManagementKeyResponse authManKeyResponse = connection.SendCommand(authManKeyCommand);
+InitializeAuthenticateManagementKeyResponse initAuthManKeyResponse = 
+    connection.SendCommand(initAuthManKeyCommand);
 
-// When setting the new management key and its touch policy, we must also specify the new key's algorithm.
-SetManagementKeyCommand setManKeyCommand = new SetManagementKeyCommand(newKey, PivTouchPolicy.Always, PivAlgorithm.Aes192);
-SetManagementKeyResponse setManKeyResponse = connection.SendCommand(setManKeyCommand);
+// Pass in the initialization response and the current management key 
+// (currentKey set elsewhere).
+CompleteAuthenticateManagementKeyCommand authManKeyCommand = 
+    new CompleteAuthenticateManagementKeyCommand(initAuthManKeyResponse, currentKey);
+
+CompleteAuthenticateManagementKeyResponse authManKeyResponse = 
+    connection.SendCommand(authManKeyCommand);
+
+// Also specify the new key's algorithm.
+SetManagementKeyCommand setManKeyCommand = 
+    new SetManagementKeyCommand(newKey, PivTouchPolicy.Always, PivAlgorithm.Aes192);
+
+SetManagementKeyResponse setManKeyResponse = 
+    connection.SendCommand(setManKeyCommand);
 ```
 
 In this example, we set the management key's touch policy to ``Always``. This means that all future calls to ``CompleteAuthenticateManagementKeyCommand`` will not complete until the YubiKey has been touched.

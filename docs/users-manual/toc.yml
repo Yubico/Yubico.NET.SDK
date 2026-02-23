@@ -176,7 +176,7 @@
           href: application-piv/access-control.md
         - name: PIN-only mode
           href: application-piv/pin-only.md
-        - name: PIN and touch policy
+        - name: PIN, touch, and biometric policies
           href: application-piv/pin-touch-policies.md
         - name: Keeping track of slot contents
           href: application-piv/keeping-track.md

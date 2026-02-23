@@ -128,6 +128,65 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             return applicationVersionResponse.GetData();
         }
+        
+        /// <summary>
+        /// Generate a challenge for credential authentication.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method sends the GET_CHALLENGE instruction to the YubiKey device
+        /// to retrieve a challenge based on the credential type.
+        /// </para>
+        /// <para>
+        /// For symmetric credentials this generates an 8-byte 'Host Challenge', a random value
+        /// used for authentication with AES-based symmetric key protocols.
+        /// </para>
+        /// <para>
+        /// For asymmetric credentials this returns 'EPK-OCE', the public part of a newly generated
+        /// ephemeral ECC SECP256R1 key (65 bytes uncompressed).
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// For symmetric credentials: an 8-byte host challenge (random value).
+        /// For asymmetric credentials: a 65-byte public key in uncompressed ECC P-256 format (0x04 || X || Y).
+        /// </returns>
+        /// <param name="keytype">
+        /// The type of cryptographic key (symmetric or asymmetric).
+        /// </param>
+        /// <param name="credentialLabel">
+        /// The label of the credential. The string must meet the same requirements as
+        /// <see cref="Credential.Label"/>.
+        /// </param>
+        /// <param name="credentialPassword">
+        /// The credential password. Only necessary for asymmetrical credentials if the YubiKey firmware is 5.7.1 or higher; 
+        /// omit or pass <c>null</c> otherwise.
+        /// </param>
+        /// <exception cref="InvalidOperationException">
+        /// The command to generate the host challenge failed.
+        /// </exception>
+        public byte[] CreateHostChallenge(CryptographicKeyType keytype, string credentialLabel, ReadOnlyMemory<byte>? credentialPassword = null)
+        {
+            CreateHostChallengeCommand command;
+            FirmwareVersion version = YubiKey.FirmwareVersion;
+
+            if (version.Major > 5 || (version.Major == 5 && version.Minor > 7) || 
+                (version.Major == 5 && version.Minor == 7 && version.Patch >= 1))
+            {
+                command = new CreateHostChallengeCommand(keytype, credentialLabel, credentialPassword);
+            }
+            else
+            {
+                command = new CreateHostChallengeCommand(keytype, credentialLabel);
+            }
+            
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+
+            return response.GetData().ToArray();
+        }
 
         // Returns the KeyCollector. Throws exception if it's null.
         private Func<KeyEntryData, bool> GetKeyCollector()

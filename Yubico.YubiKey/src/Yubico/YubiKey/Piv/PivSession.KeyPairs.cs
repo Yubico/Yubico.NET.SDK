@@ -605,14 +605,16 @@ namespace Yubico.YubiKey.Piv
 
             try
             {
-                return new X509Certificate2(Decompress(certBytesCopy));
+                byte[] decompressedData = DecompressWithFormatDetection(certBytesCopy);
+                return new X509Certificate2(decompressedData);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.FailedDecompressingCertificate));
+                        ExceptionMessages.FailedDecompressingCertificate),
+                    ex);
             }
         }
 
@@ -661,14 +663,169 @@ namespace Yubico.YubiKey.Piv
             return compressedStream.ToArray();
         }
 
-        static private byte[] Decompress(byte[] data)
+        static private byte[] Decompress(byte[] data, int offset = 0)
         {
-            using var dataStream = new MemoryStream(data);
-            using var decompressor = new GZipStream(dataStream, CompressionMode.Decompress);
-            using var decompressedStream = new MemoryStream();
-            decompressor.CopyTo(decompressedStream);
-            
-            return decompressedStream.ToArray();
+            using (var dataStream = new MemoryStream(data, offset, data.Length - offset))
+            {
+                using (var decompressor = new GZipStream(dataStream, CompressionMode.Decompress))
+                {
+                    using (var decompressedStream = new MemoryStream())
+                    {
+                        decompressor.CopyTo(decompressedStream);
+                        return decompressedStream.ToArray();
+                    }
+                }
+            }
         }
+
+        /// <summary>
+        /// Decompresses a certificate by detecting the compression format.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Supports the following compressed formats in order of detection:
+        /// </para>
+        /// <list type="number">
+        /// <item><description>GZip (magic bytes 0x1F, 0x8B) — as specified by the PIV standard for
+        /// compressed certificates.</description></item>
+        /// <item><description>Zlib (RFC 1950) — CMF byte with compression method 8 (deflate) and valid
+        /// header checksum. Common first bytes: 0x78 0x01/0x5E/0x9C/0xDA.</description></item>
+        /// <item><description>Net iD 4-byte header (0x01, 0x00 magic + 2-byte LE uncompressed length)
+        /// followed by GZip, zlib, or raw deflate data, as used by some third-party PIV
+        /// middleware.</description></item>
+        /// <item><description>Raw deflate as a last-resort fallback.</description></item>
+        /// </list>
+        /// </remarks>
+        static private byte[] DecompressWithFormatDetection(byte[] data)
+        {
+            if (data.Length < 2)
+            {
+                throw new InvalidOperationException("Certificate data too short to determine compression format.");
+            }
+
+            // Check for GZip magic bytes (0x1F, 0x8B)
+            if (data[0] == 0x1F && data[1] == 0x8B)
+            {
+                return Decompress(data);
+            }
+
+            // Check for standard zlib (RFC 1950) header:
+            // CMF lower nibble must be 8 (deflate), and (CMF*256 + FLG) % 31 == 0
+            if (IsZlibHeader(data[0], data[1]))
+            {
+                return DecompressZlib(data);
+            }
+
+            // Check for Net iD prefix (0x01, 0x00) followed by compressed payload
+            if (data[0] == 0x01 && data[1] == 0x00 && data.Length > 2)
+            {
+                return DecompressNetId(data);
+            }
+
+            // Last resort: try raw deflate (no header/trailer)
+            return DecompressRawDeflate(data);
+        }
+
+        /// <summary>
+        /// Determines whether two bytes form a valid zlib (RFC 1950) header.
+        /// </summary>
+        /// <param name="cmf">The CMF (Compression Method and Flags) byte.</param>
+        /// <param name="flg">The FLG (Flags) byte.</param>
+        /// <returns><see langword="true"/> if the bytes form a valid zlib header
+        /// using the deflate compression method.</returns>
+        static private bool IsZlibHeader(byte cmf, byte flg)
+        {
+            // Compression method must be 8 (deflate)
+            if ((cmf & 0x0F) != 8)
+            {
+                return false;
+            }
+
+            // Header checksum: (CMF * 256 + FLG) must be divisible by 31
+            return ((cmf * 256) + flg) % 31 == 0;
+        }
+
+        /// <summary>
+        /// Decompresses zlib (RFC 1950) data starting at the specified offset.
+        /// </summary>
+        static private byte[] DecompressZlib(byte[] data, int offset = 0)
+        {
+            using (var dataStream = new MemoryStream(data, offset, data.Length - offset))
+            {
+                using (var decompressor = new ZLibStream(dataStream, CompressionMode.Decompress))
+                {
+                    using (var decompressedStream = new MemoryStream())
+                    {
+                        decompressor.CopyTo(decompressedStream);
+                        return decompressedStream.ToArray();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Decompresses raw deflate data (no zlib or gzip wrapper) starting at the specified offset.
+        /// </summary>
+        static private byte[] DecompressRawDeflate(byte[] data, int offset = 0)
+        {
+            using (var dataStream = new MemoryStream(data, offset, data.Length - offset))
+            {
+                using (var decompressor = new DeflateStream(dataStream, CompressionMode.Decompress))
+                {
+                    using (var decompressedStream = new MemoryStream())
+                    {
+                        decompressor.CopyTo(decompressedStream);
+                        return decompressedStream.ToArray();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Decompresses Net iD formatted data.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The Net iD format uses a 4-byte header:
+        /// </para>
+        /// <list type="bullet">
+        /// <item><description>Bytes 0–1: Magic prefix (0x01, 0x00).</description></item>
+        /// <item><description>Bytes 2–3: Uncompressed data length in little-endian byte order.</description></item>
+        /// </list>
+        /// <para>
+        /// After the 4-byte header, the payload may be GZip, standard zlib
+        /// (RFC 1950), or raw deflate data. This method detects the sub-format
+        /// and decompresses accordingly.
+        /// </para>
+        /// </remarks>
+        static private byte[] DecompressNetId(byte[] data)
+        {
+            // Net iD header: 2-byte magic (0x01, 0x00) + 2-byte little-endian uncompressed length
+            const int netIdHeaderLength = 4;
+
+            if (data.Length <= netIdHeaderLength)
+            {
+                throw new InvalidOperationException(
+                    "Net iD compressed data is too short to contain a valid payload.");
+            }
+
+            // Check if the payload after the Net iD header is GZip
+            if (data.Length > netIdHeaderLength + 1 &&
+                data[netIdHeaderLength] == 0x1F && data[netIdHeaderLength + 1] == 0x8B)
+            {
+                return Decompress(data, offset: netIdHeaderLength);
+            }
+
+            // Check if the payload after the Net iD header is standard zlib
+            if (data.Length > netIdHeaderLength + 1 &&
+                IsZlibHeader(data[netIdHeaderLength], data[netIdHeaderLength + 1]))
+            {
+                return DecompressZlib(data, offset: netIdHeaderLength);
+            }
+
+            // Otherwise treat as raw deflate
+            return DecompressRawDeflate(data, offset: netIdHeaderLength);
+        }
+
     }
 }

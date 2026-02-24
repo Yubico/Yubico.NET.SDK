@@ -50,17 +50,17 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Fact]
-        public void Decompress_NetIdFormat_StripsHeaderAndDecompresses()
+        public void Decompress_ZlibFormat_StripsHeaderAndDecompresses()
         {
-            // Net iD format: 4-byte header (01 00 = magic, 1D 00 = LE uncompressed length 29)
+            // Zlib format: 4-byte header (01 00 = magic, 1D 00 = LE uncompressed length 29)
             // followed by standard zlib (RFC 1950) data.
             string hex = "01001d00789c8b2c4dcaf4ce2c5148cb2f5270cc4b29cacf4c5128492d2e5148492c4904009f2e0aa4";
 
             byte[] data = Convert.FromHexString(hex);
 
-            // Strip 4-byte Net iD header, then decompress the zlib payload
-            const int netIdHeaderLength = 4;
-            using var compressedStream = new MemoryStream(data, netIdHeaderLength, data.Length - netIdHeaderLength);
+            // Strip 4-byte Zlib header, then decompress the zlib payload
+            const int zlibHeaderLength = 4;
+            using var compressedStream = new MemoryStream(data, zlibHeaderLength, data.Length - zlibHeaderLength);
             using var zlibStream = new ZLibStream(compressedStream, CompressionMode.Decompress);
             using var resultStream = new MemoryStream();
 
@@ -491,14 +491,14 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        /// Simulates the Net iD zlib format: 4-byte Net iD header (0x01, 0x00 magic +
+        /// Simulates the Zlib format: 4-byte Zlib header (0x01, 0x00 magic +
         /// 2-byte LE uncompressed length) followed by standard zlib-compressed data.
-        /// Verifies the decompression approach used in PivSession.KeyPairs.DecompressNetId.
+        /// Verifies the decompression approach used in PivSession.KeyPairs.DecompressZlib.
         /// </summary>
         [Fact]
-        public void Decompress_NetIdFormat_WithHeaderStripping_Works()
+        public void Decompress_ZlibFormat_WithHeaderStripping_Works()
         {
-            byte[] original = Encoding.UTF8.GetBytes("Certificate data for Net iD test");
+            byte[] original = Encoding.UTF8.GetBytes("Certificate data for Zlib test");
 
             // Compress with zlib
             byte[] zlibCompressed;
@@ -512,19 +512,19 @@ namespace Yubico.YubiKey.Cryptography
                 zlibCompressed = compressedStream.ToArray();
             }
 
-            // Prepend the 4-byte Net iD header: magic (0x01, 0x00) + LE uncompressed length
+            // Prepend the 4-byte Zlib header: magic (0x01, 0x00) + LE uncompressed length
             int uncompressedLength = original.Length;
-            byte[] netIdData = new byte[4 + zlibCompressed.Length];
-            netIdData[0] = 0x01;
-            netIdData[1] = 0x00;
-            netIdData[2] = (byte)(uncompressedLength & 0xFF);
-            netIdData[3] = (byte)((uncompressedLength >> 8) & 0xFF);
-            Buffer.BlockCopy(zlibCompressed, 0, netIdData, 4, zlibCompressed.Length);
+            byte[] zlibData = new byte[4 + zlibCompressed.Length];
+            zlibData[0] = 0x01;
+            zlibData[1] = 0x00;
+            zlibData[2] = (byte)(uncompressedLength & 0xFF);
+            zlibData[3] = (byte)((uncompressedLength >> 8) & 0xFF);
+            Buffer.BlockCopy(zlibCompressed, 0, zlibData, 4, zlibCompressed.Length);
 
-            // Decompress like PivSession.KeyPairs.DecompressNetId does:
+            // Decompress like PivSession.KeyPairs.DecompressZlib does:
             // strip 4-byte header, then pass to ZLibStream
-            const int netIdHeaderLength = 4;
-            using (var dataStream = new MemoryStream(netIdData, netIdHeaderLength, netIdData.Length - netIdHeaderLength))
+            const int zlibHeaderLength = 4;
+            using (var dataStream = new MemoryStream(zlibData, zlibHeaderLength, zlibData.Length - zlibHeaderLength))
             {
                 using (var decompressor = new ZLibStream(dataStream, CompressionMode.Decompress))
                 {

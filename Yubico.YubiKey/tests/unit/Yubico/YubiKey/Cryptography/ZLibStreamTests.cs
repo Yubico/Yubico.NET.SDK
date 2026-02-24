@@ -50,17 +50,17 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Fact]
-        public void Decompress_ZlibFormat_StripsHeaderAndDecompresses()
+        public void Decompress_GidsFormat_StripsHeaderAndDecompresses()
         {
-            // Zlib format: 4-byte header (01 00 = magic, 1D 00 = LE uncompressed length 29)
+            // GIDS format: 4-byte header (01 00 = magic, 1D 00 = LE uncompressed length 29)
             // followed by standard zlib (RFC 1950) data.
             string hex = "01001d00789c8b2c4dcaf4ce2c5148cb2f5270cc4b29cacf4c5128492d2e5148492c4904009f2e0aa4";
 
             byte[] data = Convert.FromHexString(hex);
 
-            // Strip 4-byte Zlib header, then decompress the zlib payload
-            const int zlibHeaderLength = 4;
-            using var compressedStream = new MemoryStream(data, zlibHeaderLength, data.Length - zlibHeaderLength);
+            // Strip 4-byte GIDS header, then decompress the zlib payload
+            const int gidsHeaderLength = 4;
+            using var compressedStream = new MemoryStream(data, gidsHeaderLength, data.Length - gidsHeaderLength);
             using var zlibStream = new ZLibStream(compressedStream, CompressionMode.Decompress);
             using var resultStream = new MemoryStream();
 
@@ -491,14 +491,14 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        /// Simulates the Zlib format: 4-byte Zlib header (0x01, 0x00 magic +
+        /// Simulates the GIDS format: 4-byte GIDS header (0x01, 0x00 magic +
         /// 2-byte LE uncompressed length) followed by standard zlib-compressed data.
-        /// Verifies the decompression approach used in PivSession.KeyPairs.DecompressZlib.
+        /// Verifies the decompression approach used in PivSession.KeyPairs.DecompressGids.
         /// </summary>
         [Fact]
-        public void Decompress_ZlibFormat_WithHeaderStripping_Works()
+        public void Decompress_GidsFormat_WithHeaderStripping_Works()
         {
-            byte[] original = Encoding.UTF8.GetBytes("Certificate data for Zlib test");
+            byte[] original = Encoding.UTF8.GetBytes("Certificate data for GIDS test");
 
             // Compress with zlib
             byte[] zlibCompressed;
@@ -512,19 +512,19 @@ namespace Yubico.YubiKey.Cryptography
                 zlibCompressed = compressedStream.ToArray();
             }
 
-            // Prepend the 4-byte Zlib header: magic (0x01, 0x00) + LE uncompressed length
+            // Prepend the 4-byte GIDS header: magic (0x01, 0x00) + LE uncompressed length
             int uncompressedLength = original.Length;
-            byte[] zlibData = new byte[4 + zlibCompressed.Length];
-            zlibData[0] = 0x01;
-            zlibData[1] = 0x00;
-            zlibData[2] = (byte)(uncompressedLength & 0xFF);
-            zlibData[3] = (byte)((uncompressedLength >> 8) & 0xFF);
-            Buffer.BlockCopy(zlibCompressed, 0, zlibData, 4, zlibCompressed.Length);
+            byte[] gidsData = new byte[4 + zlibCompressed.Length];
+            gidsData[0] = 0x01;
+            gidsData[1] = 0x00;
+            gidsData[2] = (byte)(uncompressedLength & 0xFF);
+            gidsData[3] = (byte)((uncompressedLength >> 8) & 0xFF);
+            Buffer.BlockCopy(zlibCompressed, 0, gidsData, 4, zlibCompressed.Length);
 
-            // Decompress like PivSession.KeyPairs.DecompressZlib does:
+            // Decompress like PivSession.KeyPairs.DecompressGids does:
             // strip 4-byte header, then pass to ZLibStream
-            const int zlibHeaderLength = 4;
-            using (var dataStream = new MemoryStream(zlibData, zlibHeaderLength, zlibData.Length - zlibHeaderLength))
+            const int gidsHeaderLength = 4;
+            using (var dataStream = new MemoryStream(gidsData, gidsHeaderLength, gidsData.Length - gidsHeaderLength))
             {
                 using (var decompressor = new ZLibStream(dataStream, CompressionMode.Decompress))
                 {

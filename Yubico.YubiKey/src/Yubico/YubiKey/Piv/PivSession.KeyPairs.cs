@@ -688,8 +688,9 @@ namespace Yubico.YubiKey.Piv
         /// <list type="number">
         /// <item><description>GZip (magic bytes 0x1F, 0x8B) — as specified by the PIV standard for
         /// compressed certificates.</description></item>
-        /// <item><description>Zlib 4-byte header (0x01, 0x00 magic + 2-byte LE uncompressed length)
-        /// followed by compressed data, as used by some third-party PIV middleware.</description></item>
+        /// <item><description>GIDS (magic bytes 0x01, 0x00 + 2-byte LE uncompressed length)
+        /// followed by zlib (RFC 1950) compressed data, as used by the GIDS smartcard
+        /// standard.</description></item>
         /// </list>
         /// <para>
         /// If none of the above formats are detected, throws an exception.
@@ -708,13 +709,49 @@ namespace Yubico.YubiKey.Piv
                 return Decompress(data);
             }
 
-            // Check for Zlib magic bytes (0x01, 0x00) followed by compressed payload
-            if (data[0] == 0x01 && data[1] == 0x00 && data.Length > 2)
+            // Check for GIDS header (0x01, 0x00) followed by 2-byte LE length and zlib payload
+            if (data[0] == 0x01 && data[1] == 0x00 && data.Length > 4)
             {
-                return DecompressZlib(data, offset: 4); // Skip header
+                return DecompressGids(data);
             }
 
             throw new InvalidOperationException("Couldn't detect compression format.");
+        }
+
+        /// <summary>
+        /// Decompresses GIDS-formatted data.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The GIDS format uses a 4-byte header:
+        /// </para>
+        /// <list type="bullet">
+        /// <item><description>Bytes 0–1: Magic prefix (0x01, 0x00).</description></item>
+        /// <item><description>Bytes 2–3: Expected uncompressed data length in little-endian byte order.</description></item>
+        /// </list>
+        /// <para>
+        /// After the 4-byte header, the payload is zlib (RFC 1950) compressed data.
+        /// The decompressed length is validated against the expected length from the header.
+        /// </para>
+        /// </remarks>
+        static private byte[] DecompressGids(byte[] data)
+        {
+            const int gidsHeaderLength = 4;
+
+            int expectedLength = data[2] | (data[3] << 8);
+            byte[] decompressed = DecompressZlib(data, offset: gidsHeaderLength);
+
+            if (decompressed.Length != expectedLength)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        "Decompressed data length {0} does not match expected length {1} from GIDS header.",
+                        decompressed.Length,
+                        expectedLength));
+            }
+
+            return decompressed;
         }
 
         /// <summary>

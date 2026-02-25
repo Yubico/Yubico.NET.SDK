@@ -103,19 +103,19 @@ namespace Yubico.YubiKey.Cryptography
             {
                 if (!stream.CanWrite)
                 {
-                    throw new ArgumentException("The stream does not support writing.", nameof(stream));
+                    throw new ArgumentException(ExceptionMessages.StreamDoesNotSupportWriting, nameof(stream));
                 }
             }
             else if (mode == CompressionMode.Decompress)
             {
                 if (!stream.CanRead)
                 {
-                    throw new ArgumentException("The stream does not support reading.", nameof(stream));
+                    throw new ArgumentException(ExceptionMessages.StreamDoesNotSupportReading, nameof(stream));
                 }
             }
             else
             {
-                throw new ArgumentException("Invalid CompressionMode value.", nameof(mode));
+                throw new ArgumentException(ExceptionMessages.InvalidCompressionModeValue, nameof(mode));
             }
         }
 
@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Cryptography
 
             if (!stream.CanWrite)
             {
-                throw new ArgumentException("The stream does not support writing.", nameof(stream));
+                throw new ArgumentException(ExceptionMessages.StreamDoesNotSupportWriting, nameof(stream));
             }
 
             _mode = CompressionMode.Compress;
@@ -191,7 +191,7 @@ namespace Yubico.YubiKey.Cryptography
 
             if (_mode != CompressionMode.Decompress)
             {
-                throw new InvalidOperationException("Reading is not supported on compression streams.");
+                throw new InvalidOperationException(ExceptionMessages.ReadingNotSupportedOnCompressionStreams);
             }
 
             EnsureDecompressionInitialized();
@@ -206,7 +206,7 @@ namespace Yubico.YubiKey.Cryptography
 
             if (_mode != CompressionMode.Decompress)
             {
-                throw new InvalidOperationException("Reading is not supported on compression streams.");
+                throw new InvalidOperationException(ExceptionMessages.ReadingNotSupportedOnCompressionStreams);
             }
 
             EnsureDecompressionInitialized();
@@ -221,7 +221,7 @@ namespace Yubico.YubiKey.Cryptography
 
             if (_mode != CompressionMode.Decompress)
             {
-                throw new InvalidOperationException("Reading is not supported on compression streams.");
+                throw new InvalidOperationException(ExceptionMessages.ReadingNotSupportedOnCompressionStreams);
             }
 
             EnsureDecompressionInitialized();
@@ -236,7 +236,7 @@ namespace Yubico.YubiKey.Cryptography
 
             if (_mode != CompressionMode.Compress)
             {
-                throw new InvalidOperationException("Writing is not supported on decompression streams.");
+                throw new InvalidOperationException(ExceptionMessages.WritingNotSupportedOnDecompressionStreams);
             }
 
             EnsureCompressionInitialized();
@@ -254,7 +254,7 @@ namespace Yubico.YubiKey.Cryptography
 
             if (_mode != CompressionMode.Compress)
             {
-                throw new InvalidOperationException("Writing is not supported on decompression streams.");
+                throw new InvalidOperationException(ExceptionMessages.WritingNotSupportedOnDecompressionStreams);
             }
 
             EnsureCompressionInitialized();
@@ -273,7 +273,7 @@ namespace Yubico.YubiKey.Cryptography
 
             if (_mode != CompressionMode.Decompress)
             {
-                throw new InvalidOperationException("Reading is not supported on compression streams.");
+                throw new InvalidOperationException(ExceptionMessages.ReadingNotSupportedOnCompressionStreams);
             }
 
             EnsureDecompressionInitialized();
@@ -288,7 +288,7 @@ namespace Yubico.YubiKey.Cryptography
 
             if (_mode != CompressionMode.Compress)
             {
-                throw new InvalidOperationException("Writing is not supported on decompression streams.");
+                throw new InvalidOperationException(ExceptionMessages.WritingNotSupportedOnDecompressionStreams);
             }
 
             EnsureCompressionInitialized();
@@ -340,7 +340,7 @@ namespace Yubico.YubiKey.Cryptography
 
             if (_mode != CompressionMode.Decompress)
             {
-                throw new InvalidOperationException("CopyTo is not supported on compression streams.");
+                throw new InvalidOperationException(ExceptionMessages.CopyToNotSupportedOnCompressionStreams);
             }
 
             EnsureDecompressionInitialized();
@@ -356,7 +356,7 @@ namespace Yubico.YubiKey.Cryptography
 
             if (_mode != CompressionMode.Decompress)
             {
-                throw new InvalidOperationException("CopyToAsync is not supported on compression streams.");
+                throw new InvalidOperationException(ExceptionMessages.CopyToAsyncNotSupportedOnCompressionStreams);
             }
 
             EnsureDecompressionInitialized();
@@ -411,13 +411,13 @@ namespace Yubico.YubiKey.Cryptography
 
             if (cmf == -1 || flg == -1)
             {
-                throw new InvalidDataException("Unexpected end of stream while reading zlib header.");
+                throw new InvalidDataException(ExceptionMessages.UnexpectedEndOfZlibHeader);
             }
 
             // Validate the header checksum: (CMF * 256 + FLG) must be divisible by 31
             if (((cmf * 256) + flg) % 31 != 0)
             {
-                throw new InvalidDataException("Invalid zlib header checksum.");
+                throw new InvalidDataException(ExceptionMessages.InvalidZlibHeaderChecksum);
             }
 
             // Extract compression method (lower 4 bits of CMF)
@@ -425,15 +425,17 @@ namespace Yubico.YubiKey.Cryptography
             if (compressionMethod != 8)
             {
                 throw new InvalidDataException(
-                    $"Unsupported zlib compression method: {compressionMethod}. Only deflate (8) is supported.");
+                    string.Format(
+                        System.Globalization.CultureInfo.CurrentCulture,
+                        ExceptionMessages.UnsupportedZlibCompressionMethod,
+                        compressionMethod));
             }
 
             // Check FDICT flag (bit 5 of FLG) - preset dictionary not supported
             bool hasPresetDictionary = (flg & 0x20) != 0;
             if (hasPresetDictionary)
             {
-                throw new InvalidDataException(
-                    "Zlib streams with a preset dictionary are not supported.");
+                throw new InvalidDataException(ExceptionMessages.ZlibPresetDictionaryNotSupported);
             }
         }
 

@@ -700,7 +700,7 @@ namespace Yubico.YubiKey.Piv
         {
             if (data.Length < 2)
             {
-                throw new InvalidOperationException("Certificate data too short to determine compression format.");
+                throw new InvalidOperationException(ExceptionMessages.CertificateDataTooShortToDetectFormat);
             }
 
             // Check for GZip magic bytes (0x1F, 0x8B)
@@ -715,7 +715,7 @@ namespace Yubico.YubiKey.Piv
                 return DecompressGids(data);
             }
 
-            throw new InvalidOperationException("Couldn't detect compression format.");
+            throw new InvalidOperationException(ExceptionMessages.CouldNotDetectCompressionFormat);
         }
 
         /// <summary>
@@ -746,7 +746,7 @@ namespace Yubico.YubiKey.Piv
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        "Decompressed data length {0} does not match expected length {1} from GIDS header.",
+                        ExceptionMessages.DecompressedLengthMismatch,
                         decompressed.Length,
                         expectedLength));
             }

@@ -172,7 +172,7 @@ namespace Yubico.Core.Devices.Hid
                 {
                     case CM_NOTIFY_ACTION.DEVICEINTERFACEARRIVAL:
                         {
-                            string instancePath = System.Text.Encoding.Unicode.GetString(buffer);
+                            string instancePath = System.Text.Encoding.Unicode.GetString(buffer, 0, stringSize).TrimEnd('\0');
                             var cmDevice = CmDevice.FromDevicePath(instancePath);
                             if (cmDevice == null)
                             {

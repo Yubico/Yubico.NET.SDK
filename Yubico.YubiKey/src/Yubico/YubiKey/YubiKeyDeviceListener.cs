@@ -231,6 +231,21 @@ namespace Yubico.YubiKey
                         continue;
                     }
 
+                    // A device with no serial number AND a default firmware version (0.0.0) indicates
+                    // incomplete device info — typically caused by a timeout reading from the HID
+                    // interface after a FIDO reset. These "ghost" entries should not be cached.
+                    bool isIncompleteInfo = deviceWithInfo.Info.SerialNumber is null
+                        && deviceWithInfo.Info.FirmwareVersion == FirmwareVersion.Default;
+                        
+                    if (isIncompleteInfo)
+                    {
+                        _log.LogWarning(
+                            "Ignoring device with incomplete info (SerialNumber=null, FirmwareVersion=0.0.0). "
+                            + "This is typically caused by a HID interface timeout after a FIDO reset.");
+
+                        continue;
+                    }
+
                     if (deviceWithInfo.Info.SerialNumber is null)
                     {
                         CreateAndMarkNewYubiKey(deviceWithInfo, addedYubiKeys);

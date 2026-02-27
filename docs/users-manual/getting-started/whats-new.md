@@ -47,7 +47,8 @@ _________
 Release date: January 28th, 2026
 
 Bug Fixes:
-- Fixed regression in Piv sample app ([#398](https://github.com/Yubico/Yubico.NET.SDK/pull/398)
+
+- A regression in the [PIV sample app's digital signature functionality](https://github.com/Yubico/Yubico.NET.SDK/blob/HEAD/Yubico.YubiKey/examples/PivSampleCode/CertificateOperations/YubiKeySignatureGenerator.cs) caused by a misalignment of RSA key size and format has been fixed. New unit tests covering digest computation logic have also been added. ([#398](https://github.com/Yubico/Yubico.NET.SDK/pull/398))
 
 Documentation:
 

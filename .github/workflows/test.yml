@@ -81,7 +81,7 @@ jobs:
     if: inputs.build-coverage-report == true
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
 
@@ -129,7 +129,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
 
@@ -157,26 +157,26 @@ jobs:
     if: github.event_name == 'pull_request' 
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
 
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7.0.0
 
       - name: "Add PR Comment: Test Results (Windows)"
-        uses: EnricoMi/publish-unit-test-result-action@27d65e188ec43221b20d26de30f4892fad91df2f  # v2.22.0
+        uses: EnricoMi/publish-unit-test-result-action@c950f6fb443cb5af20a377fd0dfaa78838901040  # v2.23.0
         with:
           trx_files: "${{ github.workspace }}/TestResults-Windows/**/*.trx"
           check_name: "Test Results: Windows"
 
       - name: "Add PR Comment: Test Results (Ubuntu)"
-        uses: EnricoMi/publish-unit-test-result-action@27d65e188ec43221b20d26de30f4892fad91df2f  # v2.22.0
+        uses: EnricoMi/publish-unit-test-result-action@c950f6fb443cb5af20a377fd0dfaa78838901040  # v2.23.0
         with:
           trx_files: "${{ github.workspace }}/TestResults-Ubuntu/**/*.trx"
           check_name: "Test Results: Ubuntu"
 
       - name: "Add PR Comment: Test Results (MacOS)"
-        uses: EnricoMi/publish-unit-test-result-action@27d65e188ec43221b20d26de30f4892fad91df2f  # v2.22.0
+        uses: EnricoMi/publish-unit-test-result-action@c950f6fb443cb5af20a377fd0dfaa78838901040  # v2.23.0
         with:
           trx_files: "${{ github.workspace }}/TestResults-macOS/**/*.trx"
           check_name: "Test Results: MacOS"

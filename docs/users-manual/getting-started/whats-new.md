@@ -18,6 +18,30 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.15.x Releases
 
+### 1.15.2
+
+Release date: February 27th, 2026
+
+Features:
+
+- Added support for YubiHSM Logon with ECC P-256. This includes new `SessionKeysCommand` and `CredentialWithSecret` classes, `HostChallenge` command, and `GetPubKeyCommand` for ECC-based authentication workflows. ([#407](https://github.com/Yubico/Yubico.NET.SDK/pull/407))
+
+Bug Fixes:
+
+- Fixed an issue where ghost device entries remained in the `YubiKeyDeviceListener` cache after a FIDO reset operation. ([#418](https://github.com/Yubico/Yubico.NET.SDK/pull/418))
+
+- Fixed an issue where trailing NUL bytes in HID device paths could corrupt log output. The device path string is now properly trimmed to remove null characters. ([#416](https://github.com/Yubico/Yubico.NET.SDK/pull/416))
+
+Documentation:
+
+- The documentation on [PIV PIN and touch policies](xref:UsersManualPivAccessControl) has been updated with improved clarity, FIPS-specific details, and updated sample code. ([#411](https://github.com/Yubico/Yubico.NET.SDK/pull/411))
+
+Dependencies:
+
+- Several dependencies across the Yubico.Core and GitHub Actions workflows have been updated to newer versions. ([#419](https://github.com/Yubico/Yubico.NET.SDK/pull/419), [#420](https://github.com/Yubico/Yubico.NET.SDK/pull/420))
+
+_________
+
 ### 1.15.1
 
 Release date: January 28th, 2026

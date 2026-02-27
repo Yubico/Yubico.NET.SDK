@@ -29,7 +29,6 @@ Features:
 Bug Fixes:
 
 - Fixed an issue where ghost device entries remained in the `YubiKeyDeviceListener` cache after a FIDO reset operation. ([#418](https://github.com/Yubico/Yubico.NET.SDK/pull/418))
-
 - Fixed an issue where trailing NUL bytes in HID device paths could corrupt log output. The device path string is now properly trimmed to remove null characters. ([#416](https://github.com/Yubico/Yubico.NET.SDK/pull/416))
 
 Documentation:

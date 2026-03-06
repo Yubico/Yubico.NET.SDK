@@ -916,6 +916,9 @@
   <data name="KeyAgreementReceiptMissmatch" xml:space="preserve">
     <value>Key agreement receipts do not match</value>
   </data>
+  <data name="GenerateKeyPairFailed" xml:space="preserve">
+    <value>Error generating key pair: {0}</value>
+  </data>
   <data name="CertificateDataTooShortToDetectFormat" xml:space="preserve">
     <value>Certificate data too short to determine compression format.</value>
   </data>

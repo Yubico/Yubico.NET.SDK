@@ -490,6 +490,38 @@ namespace Yubico.YubiKey.Cryptography
             Assert.Equal(original, decompressed);
         }
 
+        [Fact]
+        public void Compress_WritesCorrectAdler32Trailer()
+        {
+            // "Wikipedia" has the well-known Adler-32 value 0x11E60398.
+            // Verify that the last 4 bytes of the compressed output match the
+            // Adler-32 of the original data in big-endian order.
+            byte[] original = Encoding.ASCII.GetBytes("Wikipedia");
+
+            byte[] compressed;
+            using (var output = new MemoryStream())
+            {
+                using (var zlibStream = new ZLibStream(output, CompressionLevel.Optimal, leaveOpen: true))
+                {
+                    zlibStream.Write(original, 0, original.Length);
+                }
+
+                compressed = output.ToArray();
+            }
+
+            Assert.True(compressed.Length >= 6, "Compressed output too short to contain header + trailer.");
+
+            // Parse the 4-byte big-endian Adler-32 trailer
+            uint trailer = ((uint)compressed[compressed.Length - 4] << 24)
+                         | ((uint)compressed[compressed.Length - 3] << 16)
+                         | ((uint)compressed[compressed.Length - 2] << 8)
+                         | compressed[compressed.Length - 1];
+
+            uint expected = ZLibStream.ComputeAdler32(original);
+            Assert.Equal(0x11E60398u, expected); // sanity-check known test vector
+            Assert.Equal(expected, trailer);
+        }
+
         /// <summary>
         /// Simulates the GIDS format: 4-byte GIDS header (0x01, 0x00 magic +
         /// 2-byte LE uncompressed length) followed by standard zlib-compressed data.

@@ -2445,6 +2445,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error generating key pair: {0}.
+        /// </summary>
+        internal static string GenerateKeyPairFailed {
+            get {
+                return ResourceManager.GetString("GenerateKeyPairFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Certificate data too short to determine compression format..
         /// </summary>
         internal static string CertificateDataTooShortToDetectFormat {

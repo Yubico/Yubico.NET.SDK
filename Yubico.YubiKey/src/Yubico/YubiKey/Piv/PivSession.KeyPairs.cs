@@ -176,7 +176,11 @@ namespace Yubico.YubiKey.Piv
             
             if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException("Error generating key pair: " + response);
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.GenerateKeyPairFailed,
+                        response));
             }
 
             return PivKeyDecoder.CreatePublicKey(response.Data, keyType);
@@ -710,7 +714,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Check for GIDS header (0x01, 0x00) followed by 2-byte LE length and zlib payload
-            if (data[0] == 0x01 && data[1] == 0x00 && data.Length > 4)
+            if (data[0] == 0x01 && data[1] == 0x00 && data.Length >= 6)
             {
                 return DecompressGids(data);
             }

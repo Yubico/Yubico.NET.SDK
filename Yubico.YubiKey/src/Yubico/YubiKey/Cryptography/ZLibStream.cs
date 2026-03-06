@@ -36,6 +36,17 @@ namespace Yubico.YubiKey.Cryptography
     /// <see cref="DeflateStream"/>.
     /// </para>
     /// <para>
+    /// During <b>compression</b>, an Adler-32 checksum of all written bytes is
+    /// computed and appended as a 4-byte big-endian trailer when the stream is
+    /// disposed, producing a fully RFC 1950-compliant zlib stream.
+    /// </para>
+    /// <para>
+    /// During <b>decompression</b>, the 2-byte zlib header is validated (checksum,
+    /// compression method, and FDICT flag), but the 4-byte Adler-32 trailer is
+    /// <b>not</b> verified. Corruption that is not caught by the underlying DEFLATE
+    /// decoder will go undetected.
+    /// </para>
+    /// <para>
     /// This implementation targets .NET Standard 2.0 / 2.1 / .NET Framework 4.7.2
     /// where <c>System.IO.Compression.ZLibStream</c> is not available.
     /// </para>

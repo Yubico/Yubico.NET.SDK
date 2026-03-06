@@ -512,10 +512,10 @@ namespace Yubico.YubiKey.Cryptography
             Assert.True(compressed.Length >= 6, "Compressed output too short to contain header + trailer.");
 
             // Parse the 4-byte big-endian Adler-32 trailer
-            uint trailer = ((uint)compressed[compressed.Length - 4] << 24)
-                         | ((uint)compressed[compressed.Length - 3] << 16)
-                         | ((uint)compressed[compressed.Length - 2] << 8)
-                         | compressed[compressed.Length - 1];
+            uint trailer = ((uint)compressed[^4] << 24)
+                         | ((uint)compressed[^3] << 16)
+                         | ((uint)compressed[^2] << 8)
+                         | compressed[^1];
 
             uint expected = ZLibStream.ComputeAdler32(original);
             Assert.Equal(0x11E60398u, expected); // sanity-check known test vector

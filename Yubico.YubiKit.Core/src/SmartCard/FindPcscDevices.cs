@@ -24,7 +24,7 @@ public class FindPcscDevices(ILogger<FindPcscDevices> logger) : IFindPcscDevices
 
         var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
         if (result != ErrorCode.SCARD_S_SUCCESS)
-            throw new InvalidOperationException("Can't establish context with PC/SC service.");
+            throw new PlatformInteropException($"PC/SC service unavailable: SCardEstablishContext failed with error 0x{(uint)result:X8}");
 
         result = NativeMethods.SCardListReaders(context, null, out var readerNames);
         if (result != ErrorCode.SCARD_S_SUCCESS || readerNames.Length == 0) return [];
@@ -37,7 +37,7 @@ public class FindPcscDevices(ILogger<FindPcscDevices> logger) : IFindPcscDevices
             readerStates.Length);
 
         if (result != ErrorCode.SCARD_S_SUCCESS)
-            throw new InvalidOperationException($"SCardGetStatusChange failed: 0x{result:X8}");
+            throw new PlatformInteropException($"PC/SC device enumeration failed: SCardGetStatusChange returned error 0x{(uint)result:X8}");
 
         try
         {

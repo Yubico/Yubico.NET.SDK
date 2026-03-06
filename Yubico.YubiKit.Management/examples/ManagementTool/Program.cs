@@ -1,10 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.YubiKey;
-using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 
 // Application banner
@@ -16,26 +13,18 @@ AnsiConsole.Write(
 AnsiConsole.MarkupLine("[grey]YubiKey Management Tool - SDK Example Application[/]");
 AnsiConsole.WriteLine();
 
-// Build host with YubiKey services via DI
-using var host = Host.CreateDefaultBuilder()
-    .ConfigureLogging(logging =>
-    {
-        logging.ClearProviders();
-    })
-    .ConfigureServices(services => services
-        .AddYubiKeyManagerCore()
-        .AddYubiKeyManager())
-    .Build();
+// Start monitoring for device events
+YubiKeyManager.StartMonitoring();
 
-// Start background services (required for DeviceChanges observable)
-await host.StartAsync();
-
-// ConsoleLifetime (from CreateDefaultBuilder) handles Ctrl+C and triggers this token
-var ct = host.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping;
-var manager = host.Services.GetRequiredService<IYubiKeyManager>();
+using var cts = new CancellationTokenSource();
+Console.CancelKeyPress += (_, e) =>
+{
+    e.Cancel = true;
+    cts.Cancel();
+};
 
 // Main menu loop
-while (!ct.IsCancellationRequested)
+while (!cts.Token.IsCancellationRequested)
 {
     string choice;
     try
@@ -54,7 +43,7 @@ while (!ct.IsCancellationRequested)
                 "⚠️  Factory Reset",
                 "❌ Exit"
             ])
-            .ShowAsync(AnsiConsole.Console, ct);
+            .ShowAsync(AnsiConsole.Console, cts.Token);
     }
     catch (OperationCanceledException)
     {
@@ -72,31 +61,31 @@ while (!ct.IsCancellationRequested)
         switch (choice)
         {
             case "📋 Device Info":
-                await DeviceInfoMenu.RunAsync(manager);
+                await DeviceInfoMenu.RunAsync();
                 break;
 
             case "🔌 USB Capabilities":
-                await CapabilitiesMenu.RunAsync(Transport.Usb, manager);
+                await CapabilitiesMenu.RunAsync(Transport.Usb);
                 break;
 
             case "📶 NFC Capabilities":
-                await CapabilitiesMenu.RunAsync(Transport.Nfc, manager);
+                await CapabilitiesMenu.RunAsync(Transport.Nfc);
                 break;
 
             case "⏱️  Timeouts":
-                await TimeoutsMenu.RunAsync(manager);
+                await TimeoutsMenu.RunAsync();
                 break;
 
             case "🚩 Device Flags":
-                await DeviceFlagsMenu.RunAsync(manager);
+                await DeviceFlagsMenu.RunAsync();
                 break;
 
             case "🔒 Lock Code":
-                await LockCodeMenu.RunAsync(manager);
+                await LockCodeMenu.RunAsync();
                 break;
 
             case "⚠️  Factory Reset":
-                await ResetMenu.RunAsync(manager);
+                await ResetMenu.RunAsync();
                 break;
 
             default:
@@ -112,6 +101,6 @@ while (!ct.IsCancellationRequested)
     AnsiConsole.WriteLine();
 }
 
-await host.StopAsync();
+await YubiKeyManager.ShutdownAsync();
 
 return 0;

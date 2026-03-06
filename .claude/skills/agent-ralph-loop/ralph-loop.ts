@@ -134,6 +134,13 @@ const EXECUTION_PROTOCOL = `
 
 You are executing a task from a progress file. Follow this protocol for EVERY task:
 
+## First Action (EVERY ITERATION - MANDATORY)
+**Invoke the \`codemapper\` skill** to generate/refresh API surface maps before any code changes.
+- Command: \`codemapper .\` (runs in ~1.5s for entire repo)
+- Output: \`./codebase_ast/\` contains one file per project with public API surface
+- Use: \`grep -rn "SymbolName" ./codebase_ast/\` to find types, methods, dependencies
+- Why: Prevents guessing at API shapes, catches interface changes, finds related code
+
 ## TDD Loop
 1. **RED:** Write a failing test that asserts the task's expected behavior
    - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
@@ -162,6 +169,14 @@ You are executing a task from a progress file. Follow this protocol for EVERY ta
 - Build: \`dotnet build.cs build\`
 - Test: \`dotnet build.cs test\`
 - Test filtered: \`dotnet build.cs test --filter "..."\`
+
+**CRITICAL - xUnit v2/v3 MIXED CODEBASE:**
+This repo uses BOTH xUnit v2 and v3 test projects with different CLI requirements:
+- xUnit v3 uses Microsoft.Testing.Platform (requires \`dotnet run\`, not \`dotnet test\`)
+- Filter syntax differs between versions (v2: \`--filter\`, v3: \`-m\`/\`--method\`)
+- The build script handles this automatically - NEVER bypass it
+- If you use \`dotnet test\` directly, you WILL get confusing errors like "No test matches the given testcase filter"
+- See \`docs/TESTING.md\` for full details if tests fail unexpectedly
 
 ## Rules
 - Complete ONE task fully before moving to next
@@ -537,7 +552,7 @@ Output <promise>ANALYSIS_COMPLETE</promise> when done.`;
 
     console.log(`\n${CONSTANTS.COLOR.BLUE}🧠 Learning mode: Generating session analysis...${CONSTANTS.COLOR.RESET}\n`);
 
-    const copilotArgs = ["-p", analysisPrompt, "--allow-all-tools"];
+    const copilotArgs = ["-p", analysisPrompt, "--allow-all-tools", "--no-ask-user"];
     if (this.config.model) copilotArgs.push("--model", this.config.model);
 
     try {
@@ -599,19 +614,15 @@ ${CONSTANTS.COLOR.CYAN}🔄 ═════════════════�
       const logFile = join(this.sessionDir, `iteration-${this.iteration}.log`);
 
       // Build iteration prompt - different for progress file vs ad-hoc mode
+      // The ralph-loop agent already has execution protocol, skills, and autonomy directives baked in
       let iterationPrompt: string;
       
       if (this.progressState?.isProgressFile) {
-        // Progress file mode: inject full protocol + task context + file content
-        iterationPrompt = `${this.skillsPrompt}
-
-[PROGRESS FILE MODE]
-You are executing tasks from a progress file.
+        // Progress file mode: provide context + file content (agent has protocol)
+        iterationPrompt = `[PROGRESS FILE EXECUTION]
 
 **Progress File:** \`${this.config.promptFile}\`
 ${this.progressState.prd ? `**Source PRD:** \`${this.progressState.prd}\`` : ""}
-
-${EXECUTION_PROTOCOL}
 
 ${formatProgressContext(this.progressState)}
 
@@ -626,18 +637,12 @@ Iteration: ${this.iteration}
 ${this.config.completionPromise ? `Output <promise>${this.config.completionPromise}</promise> ONLY when ALL tasks in the progress file are marked [x] AND verification passes.` : ""}
 ${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}` : ""}
 
-[AUTONOMY DIRECTIVES]
-1. You are in NON-INTERACTIVE mode. The user is not present.
-2. NEVER ask questions, NEVER ask for clarification, and NEVER say "Let me know if you want me to...".
-3. If a decision is ambiguous, pick the most standard/reasonable option and EXECUTE it immediately.
-4. Use "git" to explore the codebase if you are lost.
-5. Check your previous work in files and git history. Continue from where you left off.
-6. REVIEW THE SKILLS LIST ABOVE before any build/test/commit operation.
-7. After completing a task, UPDATE THE PROGRESS FILE to mark it [x].
+After completing a task, UPDATE THE PROGRESS FILE to mark it [x].
 ---`;
       } else {
-        // Ad-hoc mode: original behavior
-        iterationPrompt = `${this.skillsPrompt}
+        // Ad-hoc mode: provide prompt + context (agent has protocol)
+        iterationPrompt = `[AD-HOC TASK]
+
 ${this.prompt}
 
 ---
@@ -645,18 +650,10 @@ ${this.prompt}
 Iteration: ${this.iteration}
 ${this.config.completionPromise ? `Output <promise>${this.config.completionPromise}</promise> ONLY when the objective is fully verified complete.` : ""}
 ${this.config.maxIterations > 0 ? `Max iterations: ${this.config.maxIterations}` : ""}
-
-[AUTONOMY DIRECTIVES]
-1. You are in NON-INTERACTIVE mode. The user is not present.
-2. NEVER ask questions, NEVER ask for clarification, and NEVER say "Let me know if you want me to...".
-3. If a decision is ambiguous, pick the most standard/reasonable option and EXECUTE it immediately.
-4. Use "git" to explore the codebase if you are lost.
-5. Check your previous work in files and git history. Continue from where you left off.
-6. REVIEW THE SKILLS LIST ABOVE before any build/test/commit operation.
 ---`;
       }
 
-      const copilotArgs = ["-p", iterationPrompt, "--allow-all-tools"];
+      const copilotArgs = ["--agent", "ralph-loop", "-p", iterationPrompt, "--allow-all-tools", "--no-ask-user"];
       if (this.config.model) copilotArgs.push("--model", this.config.model);
 
       // Execute Copilot

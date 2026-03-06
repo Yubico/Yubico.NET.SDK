@@ -63,12 +63,14 @@ This complexity is appropriate for enterprise applications with existing DI infr
 **So that** I can enumerate devices in 2-3 lines of code.
 
 **Acceptance Criteria:**
-- [ ] `YubiKeyManager.FindAllAsync()` returns all connected YubiKeys without prior setup
-- [ ] `YubiKeyManager.FindAllAsync(ConnectionType)` filters by connection type
+- [ ] `YubiKeyManager.FindAllAsync(CancellationToken)` returns all connected YubiKeys without prior setup
+- [ ] `YubiKeyManager.FindAllAsync(ConnectionType, CancellationToken)` filters by connection type
 - [ ] Method works without calling any initialization or DI setup
-- [ ] Returns `IReadOnlyList<IYubiKeyReference>` consistent with existing instance API
+- [ ] Returns `IReadOnlyList<IYubiKey>` consistent with existing instance API
 - [ ] Thread-safe for concurrent calls from multiple threads
 - [ ] No background monitoring is started by `FindAllAsync()` calls
+- [ ] Each `IYubiKey` represents a transport-specific device endpoint
+- [ ] Cancellation token cancels in-flight device scan
 
 ### Story 2: Device Monitoring Lifecycle
 **As a** developer building an interactive application,  
@@ -91,7 +93,7 @@ This complexity is appropriate for enterprise applications with existing DI infr
 
 **Acceptance Criteria:**
 - [ ] `YubiKeyManager.DeviceChanges` exposes `IObservable<DeviceEvent>`
-- [ ] `DeviceEvent` contains `EventType` (Arrived/Removed) and `Device` (IYubiKeyReference)
+- [ ] `DeviceEvent` contains `Action` (Added/Removed via `DeviceAction` enum) and `Device` (`IYubiKey`)
 - [ ] Events are only emitted when monitoring is active
 - [ ] Subscribing to `DeviceChanges` before `StartMonitoring()` does not start monitoring automatically
 - [ ] Events fire on background thread (not UI thread)
@@ -113,18 +115,17 @@ This complexity is appropriate for enterprise applications with existing DI infr
 - [ ] Both shutdown methods are idempotent (safe to call multiple times)
 - [ ] `ShutdownAsync()` respects cancellation token for timeout scenarios
 
-### Story 5: DI Compatibility
-**As a** developer with existing DI infrastructure,  
-**I want to** continue using instance-based `IYubiKeyManager` via DI,  
-**So that** my existing code is not affected by the static API addition.
+### Story 5: Clean Static API (Replaces DI)
+**As a** developer with any application architecture,  
+**I want to** use a simple static API without DI setup,  
+**So that** I have one clear way to interact with YubiKeys.
 
 **Acceptance Criteria:**
-- [ ] Existing `AddYubiKeyManagerCore()` continues to work
-- [ ] `IYubiKeyManager` instance API remains unchanged
-- [ ] Static and instance APIs can coexist in the same application
-- [ ] Static and instance APIs share the same underlying cache (consistent device state)
-- [ ] Instance-based API sees devices discovered by static API and vice versa
-- [ ] All existing unit tests for instance-based API pass without changes
+- [ ] `YubiKeyManager` is a static class with no instance members
+- [ ] No `IYubiKeyManager` interface exists
+- [ ] No `AddYubiKeyManagerCore()` DI extension exists
+- [ ] All functionality available via static methods
+- [ ] `IDeviceRepository` remains internal for advanced isolation scenarios
 
 ---
 
@@ -134,11 +135,11 @@ This complexity is appropriate for enterprise applications with existing DI infr
 
 | Step | User Action | System Response |
 |------|-------------|-----------------|
-| 1 | Call `YubiKeyManager.FindAllAsync()` | Performs on-demand device scan, returns list of `IYubiKeyReference` instances |
+| 1 | Call `YubiKeyManager.FindAllAsync()` | Performs on-demand device scan, returns list of `IYubiKey` instances |
 | 2 | Call `YubiKeyManager.StartMonitoring()` | Starts background task that scans devices at default interval (5 seconds) |
-| 3 | Subscribe to `YubiKeyManager.DeviceChanges` | Receives `IObservable<DeviceEvent>` that emits Arrived/Removed events |
-| 4 | Connect a YubiKey while monitoring | Emits `DeviceEvent` with `EventType.Arrived` and device instance |
-| 5 | Disconnect a YubiKey while monitoring | Emits `DeviceEvent` with `EventType.Removed` and device instance |
+| 3 | Subscribe to `YubiKeyManager.DeviceChanges` | Receives `IObservable<DeviceEvent>` that emits Added/Removed events |
+| 4 | Connect a YubiKey while monitoring | Emits `DeviceEvent` with `DeviceAction.Added` and device instance |
+| 5 | Disconnect a YubiKey while monitoring | Emits `DeviceEvent` with `DeviceAction.Removed` and device instance |
 | 6 | Call `YubiKeyManager.StopMonitoring()` | Stops background task, no more events emitted |
 | 7 | Call `YubiKeyManager.ShutdownAsync()` | Stops monitoring, clears cache, releases resources |
 
@@ -167,7 +168,7 @@ This complexity is appropriate for enterprise applications with existing DI infr
 | Device disconnects during `FindAllAsync()` scan | Device may or may not appear in results (race condition, documented behavior) |
 | Monitoring interval = 0ms | Throws `ArgumentOutOfRangeException` (minimum interval enforced) |
 | Application exits without calling `ShutdownAsync()` | Background task stopped by OS process cleanup (not ideal, but safe) |
-| Static API and DI API used in same application | Both use shared cache, consistent state |
+| Static API and advanced users need isolation | Use `IDeviceRepository` directly (internal API) |
 
 ---
 
@@ -187,14 +188,23 @@ This complexity is appropriate for enterprise applications with existing DI infr
 - Lazy initialization of repository must use `Lazy<T>` with `ExecutionAndPublication` mode
 - Background monitoring task must safely handle concurrent `StopMonitoring()` calls
 
-### 4.3 Compatibility
+### 4.3 Breaking Changes
+
+This release includes intentional breaking changes to simplify the API:
+- **Removed:** `IYubiKeyManager` interface
+- **Removed:** `AddYubiKeyManagerCore()` DI extension method
+- **Removed:** `DependencyInjection.cs`
+- **Changed:** `YubiKeyManager` from instance class to static class
+
+**Migration:** Replace `IYubiKeyManager` injection with direct `YubiKeyManager` static calls.
+
+### 4.4 Compatibility
 
 - **Platforms:** Windows, macOS, Linux (existing platform support unchanged)
 - **.NET Version:** Same as existing SDK (currently .NET 10.0+)
-- **Breaking Changes:** NONE - this is additive functionality
-- **Existing Code:** All current instance-based code continues to work unchanged
+- **Existing Code:** Migration required from `IYubiKeyManager` to static API
 
-### 4.4 Testability
+### 4.5 Testability
 
 - Static API must be testable via:
   - `ShutdownAsync()` to reset state between tests
@@ -210,15 +220,13 @@ This complexity is appropriate for enterprise applications with existing DI infr
 
 - **`DeviceRepositoryCached`** - Existing cache and event infrastructure
 - **Same device discovery logic** - Reuse existing `SmartCardDeviceListener`, `HidDeviceListener` patterns
-- **`IYubiKeyReference`** - Transport-specific device references returned by discovery
+- **`IYubiKey`** - Transport-specific device references returned by discovery
 - **CancellationToken** - For async operations and graceful shutdown
 
 ### 5.2 Must Not
 
-- **Break existing DI API** - `IYubiKeyManager` interface and implementation unchanged
-- **Change device discovery behavior** - Same device enumeration logic as instance API
 - **Introduce new external dependencies** - Use existing SDK dependencies only
-- **Make static API required** - Must remain optional for DI users
+- **Require DI setup** - Static API works without any initialization
 
 ### 5.3 Dependencies
 
@@ -269,19 +277,16 @@ This complexity is appropriate for enterprise applications with existing DI infr
 
 ## 7. Open Questions (RESOLVED)
 
-### Q1: Should static and DI APIs share the same cache?
+### Q1: Should we keep DI support alongside static API?
 
-**Decision:** Shared cache (singleton `DeviceRepositoryCached`).
+**Decision:** No. Remove DI support entirely.
 
 **Rationale:**
-- **Simple mental model:** "YubiKeyManager shows all YubiKeys connected to this computer" - one cache, one truth
-- **Reality alignment:** Physical USB devices ARE global state - the API should reflect this
-- **No duplicate scans:** Both APIs see the same devices without redundant USB enumeration
-- **Consistent state:** No confusing scenarios where static API sees devices but DI API doesn't
-- **Better memory:** 5MB always, not 10MB when both APIs used
-- **Cleaner test isolation:** Single `ShutdownAsync()` resets everything
-
-**For advanced isolation:** DI constructor accepts explicit `IDeviceRepository` parameter for users who truly need independent instances (rare).
+- Physical USB devices ARE global state - one API surface is simpler
+- DI adds no value when static API provides identical functionality
+- No naming conflicts between static and instance methods
+- Cleaner codebase with fewer abstractions
+- `IDeviceRepository` remains internal for advanced isolation scenarios
 
 ### Q2: Error handling when FindAllAsync() called during active monitoring
 
@@ -322,9 +327,10 @@ This complexity is appropriate for enterprise applications with existing DI infr
 
 | Criterion | Target | Verification |
 |-----------|--------|--------------|
-| Static API implementation complete | All 4 static methods + 2 shutdown methods + 1 property implemented | Code review |
+| Static API implementation complete | All static methods + shutdown methods + properties implemented | Code review |
 | INVEST compliance | All 5 user stories pass INVEST checklist | PRD audit |
-| No breaking changes | All existing tests pass | CI pipeline |
+| DI removed | `IYubiKeyManager` and `AddYubiKeyManagerCore()` deleted | Code review |
+| Tests migrated | All tests updated to use static API | CI pipeline |
 | Thread safety verified | Concurrent usage tests pass | Unit tests |
 | Monitoring consolidation | ✅ COMPLETE via `yubikit-listeners` branch | Already merged |
 | `IDeviceChannel` removed | ✅ COMPLETE via `yubikit-listeners` branch | Already merged |
@@ -368,7 +374,8 @@ SmartCardListener ─────┘         │                    │         
 When creating the implementation plan, consider:
 
 1. **Phase 1: Repository Factory** *(NEW WORK)*
-   - Add `DeviceRepositoryCached.Create()` static method for non-DI usage
+   - Rename `DeviceRepositoryCached` to `DeviceRepository`
+   - Add `DeviceRepository.Create()` static method for non-DI usage
    - Factory must create all dependencies: `IFindYubiKeys`, `ILogger<T>`
    - Consider using `NullLoggerFactory` for static API or allow optional logger injection
 
@@ -379,22 +386,26 @@ When creating the implementation plan, consider:
    - ✅ `DeviceChanges` no longer gated by `IsStarted` check
 
 3. **Phase 3: Static API Surface** *(NEW WORK)*
-   - Add static methods to `YubiKeyManager` (or create new `YubiKeyManager` static class)
+   - Convert `YubiKeyManager` to static class (delete instance members)
    - Implement thread-safe lazy initialization using `Lazy<T>` with `ExecutionAndPublication` mode
    - Add `IsMonitoring` property and `DeviceChanges` observable
    - For static monitoring: instantiate `HidDeviceListener.Create()` and `DesktopSmartCardDeviceListener` directly
    - Reuse the event coalescing pattern from `DeviceMonitorService`
 
-4. **Phase 4: Testing** *(NEW WORK)*
+4. **Phase 4: Remove DI Support** *(NEW WORK)*
+   - Delete `IYubiKeyManager` interface
+   - Delete `AddYubiKeyManagerCore()` extension method
+   - Delete `DependencyInjection.cs`
+   - Update all tests to use static API
+
+5. **Phase 5: Testing** *(NEW WORK)*
    - Unit tests for each static method
    - Concurrency tests (multiple threads calling `FindAllAsync()`)
    - Monitoring lifecycle tests (start/stop/shutdown)
-   - Static + DI coexistence tests (shared cache verification)
 
-5. **Phase 5: Documentation** *(NEW WORK)*
+6. **Phase 6: Documentation** *(NEW WORK)*
    - XML doc comments for all public static members
    - Usage examples for common scenarios (discovery, monitoring, shutdown)
-   - Migration guide for users of existing instance API
 
 ---
 

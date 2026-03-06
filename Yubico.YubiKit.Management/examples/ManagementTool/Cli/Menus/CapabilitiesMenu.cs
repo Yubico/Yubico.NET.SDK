@@ -15,14 +15,12 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 /// </summary>
 public static class CapabilitiesMenu
 {
-    public static async Task RunAsync(Transport transport, IYubiKeyManager manager, CancellationToken cancellationToken = default)
+    public static async Task RunAsync(Transport transport, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(manager);
-        
         var transportName = transport == Transport.Usb ? "USB" : "NFC";
         OutputHelpers.WriteHeader($"{transportName} Capabilities Configuration");
 
-        var selection = await DeviceSelector.SelectDeviceAsync(manager, cancellationToken);
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
         if (selection is null)
         {
             return;

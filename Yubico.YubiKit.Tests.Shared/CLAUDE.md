@@ -75,8 +75,8 @@ public static class YubiKeyTestInfrastructure
 
     private static async Task<IReadOnlyList<YubiKeyTestState>> InitializeDevicesAsync()
     {
-        // 1. Discover all YubiKeys
-        var devices = await TestDeviceDiscovery.FindAllAsync();
+        // 1. Discover all YubiKeys via YubiKeyManager
+        var devices = await YubiKeyManager.FindAllAsync();
 
         // 2. Load allow list via provider
         var provider = new AppSettingsAllowListProvider();

@@ -19,14 +19,12 @@ namespace Yubico.YubiKit.Core;
 public enum DeviceAction
 {
     Added,
-    Removed,
-    Updated
+    Removed
 }
 
-public class DeviceEvent(DeviceAction action, IYubiKey? device)
+public class DeviceEvent(DeviceAction action, IYubiKey device)
 {
-    public IYubiKey? Device { get; } = device;
+    public IYubiKey Device { get; } = device;
     public DeviceAction Action { get; } = action;
-    public string? DeviceId { get; set; }
     public DateTime Timestamp { get; } = DateTime.UtcNow;
 }

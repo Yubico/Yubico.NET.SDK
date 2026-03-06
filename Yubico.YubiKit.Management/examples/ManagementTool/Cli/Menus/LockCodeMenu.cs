@@ -15,13 +15,11 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 /// </summary>
 public static class LockCodeMenu
 {
-    public static async Task RunAsync(IYubiKeyManager manager, CancellationToken cancellationToken = default)
+    public static async Task RunAsync(CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(manager);
-        
         OutputHelpers.WriteHeader("Lock Code Management");
 
-        var selection = await DeviceSelector.SelectDeviceAsync(manager, cancellationToken);
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
         if (selection is null)
         {
             return;

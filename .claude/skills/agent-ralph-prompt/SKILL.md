@@ -732,6 +732,39 @@ Before modifying `IFooInterface`:
 
 **Why:** Test mocks are frequently forgotten during interface refactors. The PIV security refactor required mid-session test file updates when build failed. Explicit checklist prevents this surprise.
 
+### 24. Explicit Verification Commands Per Phase
+
+Each phase MUST end with explicit verification commands—not just "verify build passes" but the actual commands with expected outcomes:
+
+```markdown
+## Phase N: [Name]
+
+### Tasks
+- [ ] N.1: Implement feature
+- [ ] N.2: Add tests
+
+### Verification
+Run these commands and verify expected results:
+```bash
+# Build must succeed
+dotnet build.cs build   # Must exit 0
+
+# Run unit tests (hardware tests may fail - document expected failures)
+dotnet build.cs test -- --filter "Category!=Integration"  # Unit tests must pass
+
+# Verify expected file changes
+grep -rn "NewClass" src/  # Should find 3 files
+```
+
+**Expected test failures (acceptable):**
+- `*IntegrationTests*` - Requires YubiKey hardware
+- `*TouchTests*` - Requires human presence for touch verification
+
+Only proceed to next phase after unit tests pass and expected files exist.
+```
+
+**Why:** Self-validating phases prevent incomplete work. Documenting expected failures distinguishes hardware-dependent tests from real regressions.
+
 ### 22. Multi-Phase Prompt Structure Template
 
 For complex refactors (3+ phases), use this proven structure:

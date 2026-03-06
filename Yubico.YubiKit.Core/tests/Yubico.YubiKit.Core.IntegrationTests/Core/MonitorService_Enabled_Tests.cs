@@ -16,14 +16,29 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Core;
 
-public class MonitorService_Enabled_Tests()
-    : IntegrationTestBase(options => options.EnableAutoDiscovery = true)
+/// <summary>
+/// Tests that verify behavior when monitoring is enabled.
+/// </summary>
+public class MonitorService_Enabled_Tests : IAsyncLifetime
 {
-    [Fact]
-    public async Task WhenEnabledMonitor_WithDisabledManualScan_FindsDevices()
+    public Task InitializeAsync()
     {
-        SkipDeviceRepositoryManualScan(true);
+        YubiKeyManager.StartMonitoring();
+        return Task.CompletedTask;
+    }
+    
+    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    
+    [Fact]
+    public async Task WhenMonitoringEnabled_FindsDevices()
+    {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
         Assert.NotEmpty(devices);
+    }
+    
+    [Fact]
+    public void WhenMonitoringEnabled_IsMonitoringReturnsTrue()
+    {
+        Assert.True(YubiKeyManager.IsMonitoring);
     }
 }

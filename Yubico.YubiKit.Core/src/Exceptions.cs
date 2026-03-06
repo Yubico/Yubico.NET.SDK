@@ -24,6 +24,41 @@ public class BadResponseException(string message) : Exception(message)
     //The data contained in a YubiKey response was invalid
 }
 
+/// <summary>
+/// Exception thrown when a platform interop (P/Invoke) operation fails.
+/// </summary>
+/// <remarks>
+/// This exception wraps platform-specific errors from native API calls (PC/SC, HID, etc.)
+/// and provides context about what operation failed.
+/// </remarks>
+public class PlatformInteropException : Exception
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PlatformInteropException"/> class.
+    /// </summary>
+    public PlatformInteropException()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PlatformInteropException"/> class with a specified error message.
+    /// </summary>
+    /// <param name="message">The error message that explains the reason for the exception.</param>
+    public PlatformInteropException(string message) : base(message)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PlatformInteropException"/> class with a specified error message
+    /// and a reference to the inner exception that is the cause of this exception.
+    /// </summary>
+    /// <param name="message">The error message that explains the reason for the exception.</param>
+    /// <param name="innerException">The exception that is the cause of the current exception.</param>
+    public PlatformInteropException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
+}
+
 /* We also use:
 InvalidOperationException (IllegalStateException)
 TimeoutException The operation timed out waiting for something

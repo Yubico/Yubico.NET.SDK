@@ -1,0 +1,348 @@
+// Copyright 2025 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
+
+namespace Yubico.YubiKit.Core.SmartCard;
+
+/// <summary>
+/// Monitors for SmartCard reader arrival and removal using PC/SC SCardGetStatusChange.
+/// </summary>
+/// <remarks>
+/// Uses a dedicated background thread with 1000ms timeout for responsive cancellation.
+/// On Windows, also watches for PnP notifications via the special <c>\\?\PnP?\Notification</c> reader.
+/// <para>
+/// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="DeviceEvent"/>
+/// callback. The listener establishes baseline during <see cref="Start"/> to avoid duplicate events.
+/// </para>
+/// </remarks>
+public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
+{
+    private const string PnpNotificationReaderName = @"\\?PnP?\Notification";
+    private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(1000);
+    private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
+
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<DesktopSmartCardDeviceListener>();
+
+    private readonly Lock _syncLock = new();
+    private SCardContext? _context;
+    private Thread? _listenerThread;
+    private HashSet<string>? _knownReaders;
+    private volatile bool _shouldStop;
+    private bool _disposed;
+
+    /// <inheritdoc />
+    public Action? DeviceEvent { get; set; }
+
+    /// <inheritdoc />
+    public DeviceListenerStatus Status { get; private set; } = DeviceListenerStatus.Stopped;
+
+    /// <summary>
+    /// Creates a new instance. The listener does not start automatically - call <see cref="Start"/>
+    /// after setting up the <see cref="DeviceEvent"/> callback.
+    /// </summary>
+    public DesktopSmartCardDeviceListener()
+    {
+        // Lazy start - do nothing in constructor
+    }
+
+    /// <inheritdoc />
+    public void Start()
+    {
+        lock (_syncLock)
+        {
+            if (Status == DeviceListenerStatus.Started)
+            {
+                return;
+            }
+
+            try
+            {
+                var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
+                if (result != ErrorCode.SCARD_S_SUCCESS)
+                {
+                    Logger.LogWarning("Failed to establish SCard context: 0x{Result:X8}", result);
+                    Status = DeviceListenerStatus.Error;
+                    return;
+                }
+
+                _context = context;
+                _shouldStop = false;
+
+                // Establish baseline of currently connected readers BEFORE starting thread
+                EstablishBaseline();
+
+                _listenerThread = new Thread(ListenerThreadProc)
+                {
+                    Name = "SmartCardDeviceListener",
+                    IsBackground = true
+                };
+                _listenerThread.Start();
+
+                Status = DeviceListenerStatus.Started;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to start SmartCard listener");
+                Status = DeviceListenerStatus.Error;
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public void Stop()
+    {
+        lock (_syncLock)
+        {
+            if (Status == DeviceListenerStatus.Stopped)
+            {
+                return;
+            }
+
+            StopListening();
+            _knownReaders = null;
+            Status = DeviceListenerStatus.Stopped;
+        }
+    }
+
+    private void EstablishBaseline()
+    {
+        if (_context is null || _context.IsInvalid)
+        {
+            _knownReaders = [];
+            return;
+        }
+
+        var result = NativeMethods.SCardListReaders(_context, null, out var currentReaders);
+
+        if (result == ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
+        {
+            _knownReaders = [];
+            return;
+        }
+
+        if (result != ErrorCode.SCARD_S_SUCCESS)
+        {
+            Logger.LogWarning("SCardListReaders failed during baseline: 0x{Result:X8}", result);
+            _knownReaders = [];
+            return;
+        }
+
+        _knownReaders = [.. currentReaders];
+    }
+
+    private void StopListening()
+    {
+        _shouldStop = true;
+
+        // Signal the SCard context to cancel any blocking calls
+        if (_context is { IsInvalid: false })
+        {
+            _ = NativeMethods.SCardCancel(_context);
+        }
+
+        // Wait for the listener thread to exit
+        if (_listenerThread is not null && _listenerThread.IsAlive)
+        {
+            if (!_listenerThread.Join(MaxDisposalWaitTime))
+            {
+                Logger.LogWarning("SmartCard listener thread did not exit within timeout");
+            }
+        }
+
+        _listenerThread = null;
+    }
+
+    private void ListenerThreadProc()
+    {
+        try
+        {
+            while (!_shouldStop)
+            {
+                if (_context is null || _context.IsInvalid)
+                {
+                    break;
+                }
+
+                // Get current list of readers
+                var result = NativeMethods.SCardListReaders(_context, null, out var currentReaders);
+
+                if (result == ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
+                {
+                    // No readers available - wait with PnP notification on Windows
+                    currentReaders = [];
+                    _knownReaders ??= [];
+                    WaitForPnpChange();
+                    continue;
+                }
+
+                if (result != ErrorCode.SCARD_S_SUCCESS)
+                {
+                    if (result == ErrorCode.SCARD_E_CANCELLED ||
+                        result == ErrorCode.SCARD_E_SERVICE_STOPPED ||
+                        result == ErrorCode.SCARD_E_NO_SERVICE)
+                    {
+                        break;
+                    }
+
+                    Logger.LogWarning("SCardListReaders failed: 0x{Result:X8}", result);
+                    Thread.Sleep(CheckForChangesWaitTime);
+                    continue;
+                }
+
+                var currentReaderSet = new HashSet<string>(currentReaders);
+
+                // Baseline was established in Start(), so we always have _knownReaders
+                _knownReaders ??= currentReaderSet;
+
+                // Detect removed readers
+                foreach (var reader in _knownReaders.Except(currentReaderSet))
+                {
+                    OnDeviceEvent();
+                }
+
+                // Detect new readers
+                foreach (var reader in currentReaderSet.Except(_knownReaders))
+                {
+                    OnDeviceEvent();
+                }
+
+                _knownReaders = currentReaderSet;
+
+                // Wait for status change with timeout
+                WaitForStatusChange(currentReaders);
+            }
+        }
+        catch (Exception ex)
+        {
+            if (!_shouldStop)
+            {
+                Logger.LogError(ex, "SmartCard listener thread encountered an error");
+                Status = DeviceListenerStatus.Error;
+            }
+        }
+    }
+
+    private void WaitForPnpChange()
+    {
+        if (_context is null || _context.IsInvalid || _shouldStop)
+        {
+            return;
+        }
+
+        // Use PnP notification reader on Windows to wait for reader arrival
+        var pnpState = SCARD_READER_STATE.Create(PnpNotificationReaderName);
+        var states = new[] { pnpState };
+
+        _ = NativeMethods.SCardGetStatusChange(
+            _context,
+            (int)CheckForChangesWaitTime.TotalMilliseconds,
+            states,
+            states.Length);
+
+        // Free the allocated string
+        if (pnpState.ReaderName != IntPtr.Zero)
+        {
+            Marshal.FreeHGlobal(pnpState.ReaderName);
+        }
+    }
+
+    private void WaitForStatusChange(string[] readers)
+    {
+        if (_context is null || _context.IsInvalid || _shouldStop || readers.Length == 0)
+        {
+            Thread.Sleep(CheckForChangesWaitTime);
+            return;
+        }
+
+        // Create reader states for monitoring
+        var readerStates = SCARD_READER_STATE.CreateMany(readers);
+
+        // Also add PnP notification reader to detect new reader arrivals
+        var allStates = new SCARD_READER_STATE[readerStates.Length + 1];
+        Array.Copy(readerStates, allStates, readerStates.Length);
+        allStates[^1] = SCARD_READER_STATE.Create(PnpNotificationReaderName);
+
+        try
+        {
+            _ = NativeMethods.SCardGetStatusChange(
+                _context,
+                (int)CheckForChangesWaitTime.TotalMilliseconds,
+                allStates,
+                allStates.Length);
+        }
+        finally
+        {
+            // Free all allocated strings
+            foreach (var state in allStates)
+            {
+                if (state.ReaderName != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(state.ReaderName);
+                }
+            }
+        }
+    }
+
+    private void OnDeviceEvent()
+    {
+        try
+        {
+            DeviceEvent?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Exception in DeviceEvent callback");
+        }
+    }
+
+    private void ClearEventHandlers()
+    {
+        DeviceEvent = null;
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        StopListening();
+
+        lock (_syncLock)
+        {
+            _context?.Dispose();
+            _context = null;
+        }
+
+        ClearEventHandlers();
+        Status = DeviceListenerStatus.Stopped;
+    }
+
+    /// <summary>
+    /// Destructor to ensure resources are cleaned up.
+    /// </summary>
+    ~DesktopSmartCardDeviceListener()
+    {
+        _shouldStop = true;
+        _context?.Dispose();
+    }
+}

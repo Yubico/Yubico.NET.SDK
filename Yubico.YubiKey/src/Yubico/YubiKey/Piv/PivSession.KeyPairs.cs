@@ -176,7 +176,11 @@ namespace Yubico.YubiKey.Piv
             
             if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException("Error generating key pair: " + response);
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.GenerateKeyPairFailed,
+                        response));
             }
 
             return PivKeyDecoder.CreatePublicKey(response.Data, keyType);
@@ -605,14 +609,16 @@ namespace Yubico.YubiKey.Piv
 
             try
             {
-                return new X509Certificate2(Decompress(certBytesCopy));
+                byte[] decompressedData = DecompressWithFormatDetection(certBytesCopy);
+                return new X509Certificate2(decompressedData);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.FailedDecompressingCertificate));
+                        ExceptionMessages.FailedDecompressingCertificate),
+                    ex);
             }
         }
 
@@ -661,14 +667,113 @@ namespace Yubico.YubiKey.Piv
             return compressedStream.ToArray();
         }
 
-        static private byte[] Decompress(byte[] data)
+        static private byte[] Decompress(byte[] data, int offset = 0)
         {
-            using var dataStream = new MemoryStream(data);
-            using var decompressor = new GZipStream(dataStream, CompressionMode.Decompress);
-            using var decompressedStream = new MemoryStream();
-            decompressor.CopyTo(decompressedStream);
-            
-            return decompressedStream.ToArray();
+            using (var dataStream = new MemoryStream(data, offset, data.Length - offset))
+            {
+                using (var decompressor = new GZipStream(dataStream, CompressionMode.Decompress))
+                {
+                    using (var decompressedStream = new MemoryStream())
+                    {
+                        decompressor.CopyTo(decompressedStream);
+                        return decompressedStream.ToArray();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Decompresses a certificate by detecting the compression format.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Attempts to decompress using the following formats in order of detection:
+        /// </para>
+        /// <list type="number">
+        /// <item><description>GZip (magic bytes 0x1F, 0x8B) — as specified by the PIV standard for
+        /// compressed certificates.</description></item>
+        /// <item><description>GIDS (magic bytes 0x01, 0x00 + 2-byte LE uncompressed length)
+        /// followed by zlib (RFC 1950) compressed data, as used by the GIDS smartcard
+        /// standard.</description></item>
+        /// </list>
+        /// <para>
+        /// If none of the above formats are detected, throws an exception.
+        /// </para>
+        /// </remarks>
+        static private byte[] DecompressWithFormatDetection(byte[] data)
+        {
+            if (data.Length < 2)
+            {
+                throw new InvalidOperationException(ExceptionMessages.CertificateDataTooShortToDetectFormat);
+            }
+
+            // Check for GZip magic bytes (0x1F, 0x8B)
+            if (data[0] == 0x1F && data[1] == 0x8B)
+            {
+                return Decompress(data);
+            }
+
+            // Check for GIDS header (0x01, 0x00) followed by 2-byte LE length and zlib payload
+            if (data[0] == 0x01 && data[1] == 0x00 && data.Length >= 6)
+            {
+                return DecompressGids(data);
+            }
+
+            throw new InvalidOperationException(ExceptionMessages.CouldNotDetectCompressionFormat);
+        }
+
+        /// <summary>
+        /// Decompresses GIDS-formatted data.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The GIDS format uses a 4-byte header:
+        /// </para>
+        /// <list type="bullet">
+        /// <item><description>Bytes 0–1: Magic prefix (0x01, 0x00).</description></item>
+        /// <item><description>Bytes 2–3: Expected uncompressed data length in little-endian byte order.</description></item>
+        /// </list>
+        /// <para>
+        /// After the 4-byte header, the payload is zlib (RFC 1950) compressed data.
+        /// The decompressed length is validated against the expected length from the header.
+        /// </para>
+        /// </remarks>
+        static private byte[] DecompressGids(byte[] data)
+        {
+            const int gidsHeaderLength = 4;
+
+            int expectedLength = data[2] | (data[3] << 8);
+            byte[] decompressed = DecompressZlib(data, offset: gidsHeaderLength);
+
+            if (decompressed.Length != expectedLength)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.DecompressedLengthMismatch,
+                        decompressed.Length,
+                        expectedLength));
+            }
+
+            return decompressed;
+        }
+
+        /// <summary>
+        /// Decompresses zlib (RFC 1950) data starting at the specified offset.
+        /// </summary>
+        static private byte[] DecompressZlib(byte[] data, int offset = 0)
+        {
+            using (var dataStream = new MemoryStream(data, offset, data.Length - offset))
+            {
+                using (var decompressor = new ZLibStream(dataStream, CompressionMode.Decompress))
+                {
+                    using (var decompressedStream = new MemoryStream())
+                    {
+                        decompressor.CopyTo(decompressedStream);
+                        return decompressedStream.ToArray();
+                    }
+                }
+            }
         }
     }
 }

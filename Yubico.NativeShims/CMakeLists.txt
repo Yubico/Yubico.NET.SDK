@@ -60,6 +60,8 @@ elseif(WIN32)
     set(BACKEND "winscard")
     add_link_options("/guard:cf" "/def:${CMAKE_CURRENT_SOURCE_DIR}/exports.msvc")
     add_compile_options("/GS" "/Gs")
+    # Static CRT to avoid VC++ Redistributable dependency (see #391)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
 

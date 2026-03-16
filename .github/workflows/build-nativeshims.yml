@@ -61,24 +61,22 @@ jobs:
             & ./build-windows.ps1
           }
       - name: Verify no VC++ Redistributable dependency
+        shell: cmd
         run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           cd Yubico.NativeShims
-          foreach ($arch in @("win-x64", "win-x86", "win-arm64")) {
-            $dll = "$arch/Yubico.NativeShims.dll"
-            if (!(Test-Path $dll)) {
-              Write-Error "DLL not found: $dll"
-              exit 1
-            }
-            Write-Host "Checking $dll for CRT dependencies..."
-            $imports = & dumpbin /imports $dll | Out-String
-            if ($imports -match "VCRUNTIME|api-ms-win-crt") {
-              Write-Error "FAIL: $dll has VC++ Redistributable dependency"
-              $imports | Select-String "VCRUNTIME|api-ms-win-crt"
-              exit 1
-            }
-            Write-Host "PASS: $dll has no CRT dependencies"
-          }
-          Write-Host "All Windows builds verified: no VC++ Redistributable required"
+          set FAILED=0
+          for %%a in (win-x64 win-x86 win-arm64) do (
+            echo Checking %%a\Yubico.NativeShims.dll for CRT dependencies...
+            dumpbin /imports %%a\Yubico.NativeShims.dll | findstr /i "VCRUNTIME api-ms-win-crt" && (
+              echo FAIL: %%a\Yubico.NativeShims.dll has VC++ Redistributable dependency
+              set FAILED=1
+            ) || (
+              echo PASS: %%a\Yubico.NativeShims.dll has no CRT dependencies
+            )
+          )
+          if %FAILED%==1 exit /b 1
+          echo All Windows builds verified: no VC++ Redistributable required
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
         with:
           name: win-x64

@@ -232,7 +232,7 @@ namespace Yubico.YubiKey.Fido2
         /// <para>
         /// To establish an SCP-protected FIDO2 session:
         /// <code language="csharp">
-        ///     using (var fido2 = new Fido2Session(yubiKeyToUse, Scp03KeyParameters.DefaultKey))
+        ///     using (var fido2 = new Fido2Session(yubiKeyToUse, keyParameters: Scp03KeyParameters.DefaultKey))
         ///     {
         ///         /* All FIDO2 commands are encrypted via SCP. */
         ///     }

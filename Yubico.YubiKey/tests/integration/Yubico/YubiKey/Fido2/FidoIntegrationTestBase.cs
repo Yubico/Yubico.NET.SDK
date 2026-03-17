@@ -111,7 +111,7 @@ public class FidoSessionIntegrationTestBase : IDisposable
         {
             session = persistentPinUvAuthToken is null
                 ? new Fido2Session(testDevice)
-                : new Fido2Session(testDevice, persistentPinUvAuthToken: persistentPinUvAuthToken);
+                : new Fido2Session(testDevice, persistentPinUvAuthToken);
 
             session.KeyCollector = KeyCollector.HandleRequest;
 

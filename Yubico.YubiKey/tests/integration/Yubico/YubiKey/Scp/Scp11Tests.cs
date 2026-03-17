@@ -138,18 +138,18 @@ namespace Yubico.YubiKey.Scp
         public void Scp11b_App_Fido2Session_GetAuthenticatorInfo_Succeeds(
             StandardTestDevice desiredDeviceType)
         {
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, Transport.NfcSmartCard);
 
-            // FIDO2 over SCP requires SmartCard protocol (NFC). Over USB, FIDO2 uses HID
+            // FIDO2 over SCP requires NFC (SmartCard protocol). Over USB, FIDO2 uses HID
             // and the FIDO2 AID is not selectable over CCID on most YubiKey devices.
             Skip.IfNot(
-                testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Fido2),
-                "FIDO2 is not available over SmartCard on this device");
+                testDevice.AvailableNfcCapabilities.HasFlag(YubiKeyCapabilities.Fido2),
+                "FIDO2 is not available over NFC on this device");
 
             var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
             var keyParams = Get_Scp11b_SecureConnection_Parameters(testDevice, keyReference);
 
-            using var session = new Fido2Session(testDevice, keyParams);
+            using var session = new Fido2Session(testDevice, keyParameters: keyParams);
 
             var info = session.AuthenticatorInfo;
             Assert.NotNull(info);

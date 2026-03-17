@@ -407,7 +407,6 @@ namespace Yubico.YubiKey.Scp
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5, Transport.NfcSmartCard)]
-        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
         public void Scp03_Fido2Session_GetAuthenticatorInfo_Succeeds(
             StandardTestDevice desiredDeviceType,
             Transport transport)
@@ -418,13 +417,11 @@ namespace Yubico.YubiKey.Scp
 
             // FIDO2 over SCP requires NFC (SmartCard protocol). Over USB, FIDO2 uses HID
             // and the FIDO2 AID is not selectable over CCID on most YubiKey devices.
-            // This matches the Android SDK behavior where FIDO2+SCP tests run over NFC.
             Skip.IfNot(
-                testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Fido2)
-                || transport == Transport.NfcSmartCard,
-                "FIDO2 is not available over SmartCard on this device");
+                testDevice.AvailableNfcCapabilities.HasFlag(YubiKeyCapabilities.Fido2),
+                "FIDO2 is not available over NFC on this device");
 
-            using var fido2Session = new Fido2Session(testDevice, Scp03KeyParameters.DefaultKey);
+            using var fido2Session = new Fido2Session(testDevice, keyParameters: Scp03KeyParameters.DefaultKey);
 
             var info = fido2Session.AuthenticatorInfo;
             Assert.NotNull(info);

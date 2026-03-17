@@ -46,6 +46,9 @@ jobs:
     
   build-artifacts:
     name: Build artifacts
+    permissions:
+      contents: read
+      packages: read
     runs-on: windows-latest
     needs: run-tests
     

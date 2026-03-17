@@ -219,6 +219,7 @@ namespace Yubico.YubiKey.Fido2
         /// YubiKey.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// Because this class implements <c>IDisposable</c>, use the <c>using</c> keyword. For example,
         /// <code language="csharp">
         ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
@@ -227,6 +228,22 @@ namespace Yubico.YubiKey.Fido2
         ///         /* Perform FIDO2 operations. */
         ///     }
         /// </code>
+        /// </para>
+        /// <para>
+        /// To establish an SCP-protected FIDO2 session:
+        /// <code language="csharp">
+        ///     using (var fido2 = new Fido2Session(yubiKeyToUse, Scp03KeyParameters.DefaultKey))
+        ///     {
+        ///         /* All FIDO2 commands are encrypted via SCP. */
+        ///     }
+        /// </code>
+        /// </para>
+        /// <para>
+        /// <b>Important:</b> FIDO2 over SCP requires an NFC connection. Over USB, FIDO2 communicates
+        /// via the HID interface, which does not support SCP (a SmartCard-layer protocol). Over NFC,
+        /// all communication uses the SmartCard protocol, so both FIDO2 and SCP are available on the
+        /// same interface.
+        /// </para>
         /// </remarks>
         /// <param name="yubiKey">
         /// The object that represents the actual YubiKey on which the FIDO2 operations should be performed.
@@ -234,7 +251,8 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="keyParameters">
         /// Optional parameters for establishing a Secure Channel Protocol (SCP) connection.
         /// When provided, all communication with the YubiKey will be encrypted and authenticated
-        /// using the specified SCP protocol (e.g., SCP03 or SCP11).
+        /// using the specified SCP protocol (e.g., SCP03 or SCP11). Requires an NFC connection —
+        /// FIDO2 over SCP is not supported over USB.
         /// </param>
         /// <param name="persistentPinUvAuthToken">If supplied, will be used for credential management read-only operations
         /// </param>

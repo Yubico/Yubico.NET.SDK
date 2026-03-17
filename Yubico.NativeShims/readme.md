@@ -20,6 +20,8 @@ Yubico.NativeShims is a cross-platform C library designed to bridge the gap in n
 - Install Visual Studio with C++ workload and ARM64 build tools.
 - Use "x64 Native tools command prompt" to navigate and run `./build-windows.ps1`.
 
+> **Note:** The Windows build statically links the MSVC C runtime (`/MT`) so that the resulting DLL does not require the Visual C++ Redistributable to be installed on end-user systems.
+
 ### macOS Build
 
 - Requires XCode

@@ -239,10 +239,10 @@ namespace Yubico.YubiKey.Fido2
         /// </code>
         /// </para>
         /// <para>
-        /// <b>Important:</b> FIDO2 over SCP requires an NFC connection. Over USB, FIDO2 communicates
-        /// via the HID interface, which does not support SCP (a SmartCard-layer protocol). Over NFC,
-        /// all communication uses the SmartCard protocol, so both FIDO2 and SCP are available on the
-        /// same interface.
+        /// <b>Transport notes for FIDO2 over SCP:</b> On YubiKey firmware 5.8 and later, FIDO2 is
+        /// available over both HID and USB CCID (SmartCard), so SCP works over USB as well as NFC.
+        /// On earlier firmware, FIDO2 communicates via HID only over USB, which does not support SCP
+        /// (a SmartCard-layer protocol). Over NFC, all firmware versions expose FIDO2 via SmartCard.
         /// </para>
         /// </remarks>
         /// <param name="yubiKey">
@@ -253,8 +253,8 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="keyParameters">
         /// Optional parameters for establishing a Secure Channel Protocol (SCP) connection.
         /// When provided, all communication with the YubiKey will be encrypted and authenticated
-        /// using the specified SCP protocol (e.g., SCP03 or SCP11). Requires an NFC connection —
-        /// FIDO2 over SCP is not supported over USB.
+        /// using the specified SCP protocol (e.g., SCP03 or SCP11). On firmware prior to 5.8, this
+        /// requires an NFC connection. On firmware 5.8+, SCP is also supported over USB.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <paramref name="yubiKey"/> argument is <c>null</c>.

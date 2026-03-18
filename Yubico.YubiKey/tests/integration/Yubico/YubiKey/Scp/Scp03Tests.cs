@@ -32,6 +32,28 @@ namespace Yubico.YubiKey.Scp
     public class Scp03Tests
     {
         private readonly ReadOnlyMemory<byte> _defaultPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+        private readonly ReadOnlyMemory<byte> _fido2Pin = "11234567"u8.ToArray();
+
+        private bool Fido2KeyCollector(KeyEntryData data)
+        {
+            if (data.Request == KeyEntryRequest.Release)
+            {
+                return true;
+            }
+
+            if (data.Request == KeyEntryRequest.TouchRequest)
+            {
+                return true;
+            }
+
+            if (data.Request is KeyEntryRequest.VerifyFido2Pin or KeyEntryRequest.SetFido2Pin)
+            {
+                data.SubmitValue(_fido2Pin.Span);
+                return true;
+            }
+
+            return false;
+        }
 
         public Scp03Tests()
         {
@@ -407,6 +429,7 @@ namespace Yubico.YubiKey.Scp
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5, Transport.NfcSmartCard)]
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
         public void Scp03_Fido2Session_GetAuthenticatorInfo_Succeeds(
             StandardTestDevice desiredDeviceType,
             Transport transport)
@@ -415,17 +438,120 @@ namespace Yubico.YubiKey.Scp
             Assert.True(testDevice.FirmwareVersion >= FirmwareVersion.V5_3_0);
             Assert.True(testDevice.HasFeature(YubiKeyFeature.Scp03));
 
-            // FIDO2 over SCP requires NFC (SmartCard protocol). Over USB, FIDO2 uses HID
-            // and the FIDO2 AID is not selectable over CCID on most YubiKey devices.
-            Skip.IfNot(
-                testDevice.AvailableNfcCapabilities.HasFlag(YubiKeyCapabilities.Fido2),
-                "FIDO2 is not available over NFC on this device");
+            // FIDO2 over CCID requires firmware 5.8+. Over NFC, all applets are
+            // selectable via SmartCard. Over USB, FIDO2 is available on CCID
+            // starting with firmware 5.8; older keys only expose FIDO2 over HID.
+            if (transport == Transport.UsbSmartCard)
+            {
+                Skip.IfNot(
+                    testDevice.FirmwareVersion >= FirmwareVersion.V5_8_0,
+                    "FIDO2 over USB CCID requires firmware 5.8+");
+            }
+            else
+            {
+                Skip.IfNot(
+                    testDevice.AvailableNfcCapabilities.HasFlag(YubiKeyCapabilities.Fido2),
+                    "FIDO2 is not available over NFC on this device");
+            }
 
             using var fido2Session = new Fido2Session(testDevice, keyParameters: Scp03KeyParameters.DefaultKey);
 
             var info = fido2Session.AuthenticatorInfo;
             Assert.NotNull(info);
             Assert.NotEmpty(info.Versions);
+        }
+
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        public void Scp03_Fido2Session_MakeCredential_Over_UsbCcid_Succeeds(
+            StandardTestDevice desiredDeviceType,
+            Transport transport)
+        {
+            var testDevice = GetDevice(desiredDeviceType, transport);
+            Assert.True(testDevice.HasFeature(YubiKeyFeature.Scp03));
+
+            Skip.IfNot(
+                testDevice.FirmwareVersion >= FirmwareVersion.V5_8_0,
+                "FIDO2 over USB CCID requires firmware 5.8+");
+
+            using var fido2Session = new Fido2Session(testDevice, keyParameters: Scp03KeyParameters.DefaultKey);
+            Assert.Equal("ScpConnection", fido2Session.Connection.GetType().Name);
+
+            fido2Session.KeyCollector = Fido2KeyCollector;
+
+            // Ensure PIN is set and verify it
+            var pinOption = fido2Session.AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.clientPin);
+            if (pinOption == OptionValue.False)
+            {
+                fido2Session.TrySetPin(_fido2Pin);
+            }
+            else if (fido2Session.AuthenticatorInfo.ForcePinChange == true)
+            {
+                Skip.If(true, "Key requires PIN change — cannot test MakeCredential in this state");
+            }
+
+            bool verified;
+            try
+            {
+                verified = fido2Session.TryVerifyPin(
+                    _fido2Pin,
+                    permissions: null,
+                    relyingPartyId: null,
+                    retriesRemaining: out _,
+                    rebootRequired: out _);
+            }
+            catch (Fido2.Fido2Exception)
+            {
+                verified = false;
+            }
+
+            Skip.IfNot(verified, "PIN verification failed — key may have a different PIN set. Reset FIDO2 app to use default test PIN.");
+
+            // MakeCredential — requires touch
+            var rp = new RelyingParty("scp03-ccid-test.yubico.com");
+            var userId = new UserEntity(new byte[] { 0x01, 0x02, 0x03 })
+            {
+                Name = "scp03-ccid-test",
+                DisplayName = "SCP03 CCID Test"
+            };
+
+            var mcParams = new MakeCredentialParameters(rp, userId)
+            {
+                ClientDataHash = new byte[]
+                {
+                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
+                }
+            };
+
+            var mcData = fido2Session.MakeCredential(mcParams);
+            Assert.True(mcData.VerifyAttestation(mcParams.ClientDataHash));
+        }
+
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        public void Scp03_Fido2Session_Pre58_UsbCcid_Skips_Gracefully(
+            StandardTestDevice desiredDeviceType,
+            Transport transport)
+        {
+            var testDevice = GetDevice(desiredDeviceType, transport);
+
+            if (testDevice.FirmwareVersion >= FirmwareVersion.V5_8_0)
+            {
+                // On 5.8+, FIDO2 over CCID should work — verify it does
+                using var session = new Fido2Session(testDevice, keyParameters: Scp03KeyParameters.DefaultKey);
+                Assert.NotNull(session.AuthenticatorInfo);
+            }
+            else
+            {
+                // On pre-5.8, FIDO2 AID SELECT over CCID should fail with ApduException (0x6A82)
+                Assert.ThrowsAny<Exception>(() =>
+                {
+                    using var session = new Fido2Session(testDevice, keyParameters: Scp03KeyParameters.DefaultKey);
+                });
+            }
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]

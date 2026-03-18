@@ -133,18 +133,31 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
+        [InlineData(StandardTestDevice.Fw5, Transport.NfcSmartCard)]
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
         public void Scp11b_App_Fido2Session_GetAuthenticatorInfo_Succeeds(
-            StandardTestDevice desiredDeviceType)
+            StandardTestDevice desiredDeviceType,
+            Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType, Transport.NfcSmartCard);
+            var testDevice = GetDevice(desiredDeviceType, transport);
 
-            // FIDO2 over SCP requires NFC (SmartCard protocol). Over USB, FIDO2 uses HID
-            // and the FIDO2 AID is not selectable over CCID on most YubiKey devices.
-            Skip.IfNot(
-                testDevice.AvailableNfcCapabilities.HasFlag(YubiKeyCapabilities.Fido2),
-                "FIDO2 is not available over NFC on this device");
+            // FIDO2 over CCID requires firmware 5.8+. Over NFC, all applets are
+            // selectable via SmartCard. Over USB, FIDO2 is available on CCID
+            // starting with firmware 5.8; older keys only expose FIDO2 over HID.
+            if (transport == Transport.UsbSmartCard)
+            {
+                Skip.IfNot(
+                    testDevice.FirmwareVersion >= FirmwareVersion.V5_8_0,
+                    "FIDO2 over USB CCID requires firmware 5.8+");
+            }
+            else
+            {
+                Skip.IfNot(
+                    testDevice.AvailableNfcCapabilities.HasFlag(YubiKeyCapabilities.Fido2),
+                    "FIDO2 is not available over NFC on this device");
+            }
 
             var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
             var keyParams = Get_Scp11b_SecureConnection_Parameters(testDevice, keyReference);

@@ -94,7 +94,8 @@ namespace Yubico.YubiKey
                     || HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath)
                     || HasApplication(yubiKeyDevice, YubiKeyCapabilities.OpenPgp)
                     || HasApplication(yubiKeyDevice, YubiKeyCapabilities.Otp)
-                    || HasApplication(yubiKeyDevice, YubiKeyCapabilities.YubiHsmAuth)),
+                    || HasApplication(yubiKeyDevice, YubiKeyCapabilities.YubiHsmAuth)
+                    || HasApplication(yubiKeyDevice, YubiKeyCapabilities.Fido2)),
 
                 YubiKeyFeature.Scp03Oath =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_6_3

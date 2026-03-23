@@ -18,6 +18,7 @@ using CommunityToolkit.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2.Commands;
+using Yubico.YubiKey.Scp;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -218,6 +219,7 @@ namespace Yubico.YubiKey.Fido2
         /// YubiKey.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// Because this class implements <c>IDisposable</c>, use the <c>using</c> keyword. For example,
         /// <code language="csharp">
         ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
@@ -226,17 +228,42 @@ namespace Yubico.YubiKey.Fido2
         ///         /* Perform FIDO2 operations. */
         ///     }
         /// </code>
+        /// </para>
+        /// <para>
+        /// To establish an SCP-protected FIDO2 session:
+        /// <code language="csharp">
+        ///     using (var fido2 = new Fido2Session(yubiKeyToUse, keyParameters: Scp03KeyParameters.DefaultKey))
+        ///     {
+        ///         /* All FIDO2 commands are encrypted via SCP. */
+        ///     }
+        /// </code>
+        /// </para>
+        /// <para>
+        /// <b>Transport notes for FIDO2 over SCP:</b> On YubiKey firmware 5.8 and later, FIDO2 is
+        /// available over both HID and USB CCID (SmartCard), so SCP works over USB as well as NFC.
+        /// On earlier firmware, FIDO2 communicates via HID only over USB, which does not support SCP
+        /// (a SmartCard-layer protocol). Over NFC, all firmware versions expose FIDO2 via SmartCard.
+        /// </para>
         /// </remarks>
         /// <param name="yubiKey">
         /// The object that represents the actual YubiKey on which the FIDO2 operations should be performed.
         /// </param>
-        /// <param name="persistentPinUvAuthToken">If supplied, will be used for credential management read-only operations
+        /// <param name="persistentPinUvAuthToken">If supplied, will be used for credential management read-only operations.
+        /// </param>
+        /// <param name="keyParameters">
+        /// Optional parameters for establishing a Secure Channel Protocol (SCP) connection.
+        /// When provided, all communication with the YubiKey will be encrypted and authenticated
+        /// using the specified SCP protocol (e.g., SCP03 or SCP11). On firmware prior to 5.8, this
+        /// requires an NFC connection. On firmware 5.8+, SCP is also supported over USB.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <paramref name="yubiKey"/> argument is <c>null</c>.
         /// </exception>
-        public Fido2Session(IYubiKeyDevice yubiKey, ReadOnlyMemory<byte>? persistentPinUvAuthToken = null)
-            : base(Log.GetLogger<Fido2Session>(), yubiKey, YubiKeyApplication.Fido2, keyParameters: null)
+        public Fido2Session(
+            IYubiKeyDevice yubiKey,
+            ReadOnlyMemory<byte>? persistentPinUvAuthToken = null,
+            ScpKeyParameters? keyParameters = null)
+            : base(Log.GetLogger<Fido2Session>(), yubiKey, YubiKeyApplication.Fido2, keyParameters)
         {
             Guard.IsNotNull(yubiKey, nameof(yubiKey));
 

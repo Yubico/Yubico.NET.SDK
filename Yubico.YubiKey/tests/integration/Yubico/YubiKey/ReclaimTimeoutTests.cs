@@ -16,28 +16,15 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Extensions.Logging;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
 using Xunit;
 using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.TestUtilities;
 using Log = Yubico.Core.Logging.Log;
-using Logger = Serilog.Core.Logger;
 
 namespace Yubico.YubiKey
 {
-    class ThreadIdEnricher : ILogEventEnricher
-    {
-        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-        {
-            logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
-                "ThreadId", Environment.CurrentManagedThreadId));
-        }
-    }
-
     public class ReclaimTimeoutTests
     {
         [Trait(TraitTypes.Category, TestCategories.Elevated)]
@@ -47,16 +34,10 @@ namespace Yubico.YubiKey
             // Force the old behavior even for newer YubiKeys.
             AppContext.SetSwitch(YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior, true);
 
-            using Logger? log = new LoggerConfiguration()
-                .Enrich.With(new ThreadIdEnricher())
-                .WriteTo.Console(
-                    outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
-                .CreateLogger();
-
             Log.ConfigureLoggerFactory(builder =>
                 builder
                     .ClearProviders()
-                    .AddSerilog(log)
+                    .AddSimpleConsole(opts => opts.TimestampFormat = "HH:mm:ss.fffffff ")
                     .AddFilter(level => level >= LogLevel.Information));
 
             // TEST ASSUMPTION: This test requires FIDO. On Windows, that means this test case must run elevated (admin).

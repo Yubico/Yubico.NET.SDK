@@ -14,23 +14,10 @@
 
 using System;
 using Microsoft.Extensions.Logging;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
 using Log = Yubico.Core.Logging.Log;
-using Logger = Serilog.Core.Logger;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
-    class ThreadIdEnricher : ILogEventEnricher
-    {
-        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-        {
-            logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
-                "ThreadId", Environment.CurrentManagedThreadId));
-        }
-    }
-
     internal class EventManagerPlugin : PluginBase
     {
         public override string Name => "EventManager";
@@ -40,16 +27,11 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
-            using Logger? log = new LoggerConfiguration()
-                .Enrich.With(new ThreadIdEnricher())
-                .WriteTo.Console(
-                    outputTemplate: "[{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
-                .CreateLogger();
-
             Log.ConfigureLoggerFactory(builder =>
                 builder
-                    .AddSerilog(log)
+                    .AddSimpleConsole()
                     .AddFilter(level => level >= LogLevel.Information));
+
             YubiKeyDeviceListener.Instance.Arrived += (s, e) =>
             {
                 Console.WriteLine("YubiKey arrived:");

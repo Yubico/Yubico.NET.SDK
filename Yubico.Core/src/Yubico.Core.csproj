@@ -121,7 +121,7 @@ limitations under the License. -->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.5" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.201" PrivateAssets="All" />
     <!-- Before updating PolySharp, we should do some due dilligence on the update -->
     <PackageReference Include="PolySharp" Version="1.15.0" AllowUpdates="false">
       <PrivateAssets>all</PrivateAssets>

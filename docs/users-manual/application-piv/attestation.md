@@ -280,7 +280,7 @@ before deployment.
 There is a method in the `PivSession` class to replace the attestation key and cert.
 
 ```csharp
-public void ReplaceAttestationKeyAndCertificate(PivPrivateKey privateKey, X509Certificate2 certificate)
+public void ReplaceAttestationKeyAndCertificate(IPrivateKey privateKey, X509Certificate2 certificate)
 ```
 
 If you use this method to replace the key and cert, it will check the certificate to make
@@ -301,28 +301,31 @@ class is not one you should use with sensitive data, so we present this techniqu
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-private static bool IsMatchingKeyAndCert(PivPrivateKey privateKey, X509Certificate2 certificate)
+private static bool IsMatchingKeyAndCert(IPrivateKey privateKey, X509Certificate2 certificate)
 {
-    if (privateKey.Algorithm == PivAlgorithm.Rsa2048)
+    if (privateKey is RSAPrivateKey rsaPrivateKey)
     {
-        return IsMatchingKeyAndCertRsa((PivRsaPrivateKey)privateKey, (RSA)certificate.PublicKey.Key);
+        return IsMatchingKeyAndCertRsa(rsaPrivateKey, (RSA)certificate.PublicKey.Key);
     }
 
-    return IsMatchingKeyAndCertEcc((PivEccPrivateKey)privateKey, (byte[])certificate.PublicKey.EncodedKeyValue);
+    if (privateKey is ECPrivateKey ecPrivateKey)
+    {
+        return IsMatchingKeyAndCertEcc(ecPrivateKey, (byte[])certificate.PublicKey.EncodedKeyValue);
+    }
+
+    throw new ArgumentException("Unsupported key type");
 }
 
-private static bool IsMatchingKeyAndCertRsa(PivRsaPrivateKey privateKey, RSA publicKey)
+private static bool IsMatchingKeyAndCertRsa(RSAPrivateKey privateKey, RSA publicKey)
 {
-    bool returnValue = isValidCert;
-
     // In order to build a System.Security.Cryptography.RSA object
     // that contains the private key, we must provide all possible
     // components: modulus, public exponent, private exponent, CRT
     // info.
     // We have everything needed from the publicKey (an RSA object)
-    // and privateKey (a PivRsaPrivateKey object) except for the
+    // and privateKey (an RSAPrivateKey object) except for the
     // private exponent. If you have the CRT info, you don't need the
-    // private exponent, so the PivRsaPrivateKey class doesn't keep
+    // private exponent, so the RSAPrivateKey class doesn't keep
     // it (and the YubiKey itself does not keep it).
     // But in order to build the RSA private key-containing object we
     // need to obtain the private exponent. Except we don't really.
@@ -333,6 +336,7 @@ private static bool IsMatchingKeyAndCertRsa(PivRsaPrivateKey privateKey, RSA pub
     // using an arbitrary private exponent.
 
     RSAParameters publicParams = publicKey.ExportParameters(false);
+    RSAParameters keyParams = privateKey.Parameters;
     byte[] fakeExponent = new byte[publicParams.Modulus.Length];
     byte[] modCopy = new byte[publicParams.Modulus.Length];
     byte[] expCopy = new byte[publicParams.Exponent.Length];
@@ -358,11 +362,11 @@ private static bool IsMatchingKeyAndCertRsa(PivRsaPrivateKey privateKey, RSA pub
     try
     {
         rsaParams.D = fakeExponent;
-        rsaParams.DP = privateKey.ExponentP.ToArray();
-        rsaParams.DQ = privateKey.ExponentQ.ToArray();
-        rsaParams.InverseQ = privateKey.Coefficient.ToArray();
-        rsaParams.P = privateKey.PrimeP.ToArray();
-        rsaParams.Q = privateKey.PrimeQ.ToArray();
+        rsaParams.DP = keyParams.DP;
+        rsaParams.DQ = keyParams.DQ;
+        rsaParams.InverseQ = keyParams.InverseQ;
+        rsaParams.P = keyParams.P;
+        rsaParams.Q = keyParams.Q;
         rsaParams.Modulus = modCopy;
         rsaParams.Exponent = expCopy;
 
@@ -385,11 +389,11 @@ private static bool IsMatchingKeyAndCertRsa(PivRsaPrivateKey privateKey, RSA pub
     }
 }
 
-private static bool IsMatchingKeyAndCertEcc(PivEccPrivateKey privateKey, byte[] publicKey)
+private static bool IsMatchingKeyAndCertEcc(ECPrivateKey privateKey, byte[] publicKey)
 {
     bool returnValue = false;
 
-    ECCurve eccCurve = privateKey.Algorithm == PivAlgorithm.EccP256 ?
+    ECCurve eccCurve = privateKey.KeyType == KeyType.ECP256 ?
         ECCurve.CreateFromValue("1.2.840.10045.3.1.7") :
         ECCurve.CreateFromValue("1.3.132.0.34");
 
@@ -407,7 +411,7 @@ private static bool IsMatchingKeyAndCertEcc(PivEccPrivateKey privateKey, byte[] 
         Array.Copy(publicKey, 1 + coordLength, yCoord, 0, coordLength);
         eccParams.Q.X = xCoord;
         eccParams.Q.Y = yCoord;
-        eccParams.D = privateKey.PrivateValue.ToArray();
+        eccParams.D = privateKey.Parameters.D;
 
         // To determine if the public key in the cert is the partner
         // to the private key, sign random data using that private

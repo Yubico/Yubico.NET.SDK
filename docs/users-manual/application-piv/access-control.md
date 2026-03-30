@@ -38,9 +38,9 @@ For example, suppose you have some code to generate a key pair.
     using (var pivSession = new PivSession(yubiKeyToUse))
     {
         pivSession.KeyCollector = SomeKeyCollector;
-        PivPublicKey publicKey = pivSession.GenerateKeyPair(
+        IPublicKey publicKey = pivSession.GenerateKeyPair(
             PivSlot.Authentication,
-            PivAlgorithm.EccP256,
+            KeyType.ECP256,
             PivPinPolicy.Once,
             PivTouchPolicy.Once);
     }

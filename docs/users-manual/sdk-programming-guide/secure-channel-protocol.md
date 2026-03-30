@@ -99,15 +99,15 @@ var certificates = sdSession.GetCertificates(keyReference);
 // Verify the Yubikey's certificate chain against a trusted root using your implementation
 CertificateChainVerifier.Verify(certificateList)
 
-// Use the verified leaf certificate to construct ECPublicKeyParameters
-var publicKey = certificates.Last().GetECDsaPublicKey();
-var scp11Params = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(publicKey));
+// Use the verified leaf certificate to construct an ECPublicKey
+var ecDsa = certificates.Last().GetECDsaPublicKey()!;
+var scp11Params = new Scp11KeyParameters(keyReference, ECPublicKey.CreateFromParameters(ecDsa.ExportParameters(false)));
 
 // Use SCP11b parameters to open connection
 using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
 {
     // All PivSession-commands are now automatically protected by SCP11
-    session.GenerateKeyPair(PivSlot.Retired12, PivAlgorithm.EccP256, PivPinPolicy.Always); // Protected by SCP11
+    session.GenerateKeyPair(PivSlot.Retired12, KeyType.ECP256, PivPinPolicy.Always); // Protected by SCP11
 }
 ```
 
@@ -137,7 +137,7 @@ using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
 
 // Using SCP03
 StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
-using Scp03KeyParamaters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
+using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
 using (var oathSession = new OathSession(yubiKeyDevice, scp03params))
 {
     // All oathSession-commands are now automatically protected by SCP03
@@ -156,7 +156,7 @@ using (var oathSession = new OathSession(yubiKeyDevice, scp11Params))
 
 // Using SCP03
 StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
-using Scp03KeyParamaters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
+using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
 using (var otpSession = new OtpSession(yubiKeyDevice, scp03params))
 {
     // All otpSession-commands are now automatically protected by SCP03
@@ -174,7 +174,7 @@ using (var otpSession = new OtpSession(yubiKeyDevice, scp11Params))
 ```csharp
 // Using SCP03
 StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
-using Scp03KeyParamaters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
+using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
 using (var yubiHsmSession = new YubiHsmAuthSession(yubiKeyDevice, scp03params))
 {
     // All YubiHsmSession-commands are now automatically protected by SCP03
@@ -422,7 +422,7 @@ Unlike SCP03's static keys, SCP11 uses `Scp11KeyParameters` which can contain:
 var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, 0x1);
 var scp11Params = new Scp11KeyParameters(
     keyReference,
-    new ECPublicKeyParameters(publicKey));
+    ECPublicKey.CreateFromParameters(publicKey));
 
 // SCP11a/c with full certificate chain
 var scp11Params = new Scp11KeyParameters(
@@ -445,7 +445,7 @@ var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, 0x3);
 var publicKey = session.GenerateEcKey(keyReference);
 
 // Import existing key pair
-var privateKey = new ECPrivateKeyParameters(ecdsa);
+var privateKey = ECPrivateKey.CreateFromParameters(ecdsa.ExportParameters(true));
 session.PutKey(keyReference, privateKey);
 
 // Store certificates
@@ -480,7 +480,7 @@ var leaf = certificateList.Last();
 var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!.ExportParameters(false);
 var keyParams = new Scp11KeyParameters(
     keyReference, 
-    new ECPublicKeyParameters(ecDsaPublicKey));
+    ECPublicKey.CreateFromParameters(ecDsaPublicKey));
 
 // Use with any application
 using var pivSession = new PivSession(yubiKeyDevice, keyParams);
@@ -502,7 +502,7 @@ var newPublicKey = session.GenerateEcKey(keyRef);
 
 // Setup off-card entity (OCE)
 var oceRef = KeyReference.Create(OceKid, kvn);
-var ocePublicKey = new ECPublicKeyParameters(oceCerts.Ca.PublicKey.GetECDsaPublicKey());
+var ocePublicKey = ECPublicKey.CreateFromParameters(oceCerts.Ca.PublicKey.GetECDsaPublicKey()!.ExportParameters(false));
 session.PutKey(oceRef, ocePublicKey);
 
 // Store CA identifier
@@ -512,9 +512,9 @@ session.StoreCaIssuer(oceRef, ski);
 // Create SCP11a parameters
 var scp11Params = new Scp11KeyParameters(
     keyRef,
-    new ECPublicKeyParameters(newPublicKey.Parameters),
+    ECPublicKey.CreateFromParameters(newPublicKey.Parameters),
     oceRef,
-    new ECPrivateKeyParameters(privateKey),
+    ECPrivateKey.CreateFromParameters(privateKey.ExportParameters(true)),
     certChain);
 
 // Use the secure connection

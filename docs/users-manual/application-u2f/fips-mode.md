@@ -42,15 +42,14 @@ version 5 FIPS series YubiKeys. Even though it is a FIPS-certified device, its F
 application is not FIPS-compliant. Note that a version 5 FIPS series YubiKey supports
 FIDO2 and that can be FIPS-compliant.
 
-You can determine programmatically whether a given YubiKey is a 4 FIPS Series key with the
-[GetDeviceInfoCommand](u2f-commands.md#get-device-info).
+You can determine programmatically whether a given YubiKey is a 4 FIPS Series key using
+the device info available through the `IYubiKeyDevice` interface (see
+[Get device info](u2f-commands.md#get-device-info) for protocol details).
 
 ```c#
-    var getDeviceInfoCmd = new GetDeviceInfoCommand();
-    GetDeviceInfoResponse getDeviceInfoRsp = connection.SendCommand(getDeviceInfoCmd);
-    YubiKeyDeviceInfo deviceInfo = getDeviceInfoRsp.GetData();
+    IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindAll().First();
 
-    if (deviceInfo.IsFipsSeries && (deviceInfo.FirmwareVersion.Major == 4))
+    if (yubiKeyDevice.IsFipsSeries && (yubiKeyDevice.FirmwareVersion.Major == 4))
     {
         // This is a version 4 FIPS YubiKey.
     }
@@ -69,12 +68,10 @@ programmatically determine if a YubiKey is in FIPS mode or not with
 [VerifyFipsModeCommand](u2f-commands.md#verify-fips-mode).
 
 ```c#
-    var getDeviceInfoCmd = new GetDeviceInfoCommand();
-    GetDeviceInfoResponse getDeviceInfoRsp = connection.SendCommand(getDeviceInfoCmd);
-    YubiKeyDeviceInfo deviceInfo = getDeviceInfoRsp.GetData();
+    IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindAll().First();
 
-    // Is this YubiKey 4 FIPS series? 
-    if (deviceInfo.IsFipsSeries && (deviceInfo.FirmwareVersion.Major == 4))
+    // Is this YubiKey 4 FIPS series?
+    if (yubiKeyDevice.IsFipsSeries && (yubiKeyDevice.FirmwareVersion.Major == 4))
     {
         // If it is YubiKey 4 FIPS series, we can get the FIPS mode.
         var vfyFipsModeCmd = new VerifyFipsModeCommand();

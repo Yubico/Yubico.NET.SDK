@@ -36,10 +36,6 @@ Documentation:
 
 - NFC requirements and SCP usage examples have been added to the `Fido2Session` documentation. ([#428](https://github.com/Yubico/Yubico.NET.SDK/pull/428))
 
-- Fixed positioning issues in the documentation site. ([#428](https://github.com/Yubico/Yubico.NET.SDK/pull/428))
-
-- Internal documentation files not intended for the public repository have been removed. ([#428](https://github.com/Yubico/Yubico.NET.SDK/pull/428))
-
 - Comments and logical grouping have been added to the NativeShims CMakeLists and readme. ([#427](https://github.com/Yubico/Yubico.NET.SDK/pull/427))
 
 Miscellaneous:

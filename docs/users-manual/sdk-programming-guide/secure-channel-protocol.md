@@ -97,7 +97,7 @@ var keyReference = KeyReference.Create(keyId, keyVersionNumber);
 var certificates = sdSession.GetCertificates(keyReference); 
 
 // Verify the Yubikey's certificate chain against a trusted root using your implementation
-CertificateChainVerifier.Verify(certificateList)
+CertificateChainVerifier.Verify(certificates);
 
 // Use the verified leaf certificate to construct an ECPublicKey
 var ecDsa = certificates.Last().GetECDsaPublicKey()!;
@@ -119,7 +119,7 @@ using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
 // Using SCP03
 StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
 using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
-using (var pivSession = new PivSession(yubiKeyDevice, scp03params))
+using (var pivSession = new PivSession(yubiKeyDevice, scp03Params))
 {
     // All PivSession-commands are now automatically protected by SCP03
 }
@@ -138,7 +138,7 @@ using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
 // Using SCP03
 StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
 using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
-using (var oathSession = new OathSession(yubiKeyDevice, scp03params))
+using (var oathSession = new OathSession(yubiKeyDevice, scp03Params))
 {
     // All oathSession-commands are now automatically protected by SCP03
 }
@@ -157,7 +157,7 @@ using (var oathSession = new OathSession(yubiKeyDevice, scp11Params))
 // Using SCP03
 StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
 using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
-using (var otpSession = new OtpSession(yubiKeyDevice, scp03params))
+using (var otpSession = new OtpSession(yubiKeyDevice, scp03Params))
 {
     // All otpSession-commands are now automatically protected by SCP03
 }
@@ -175,7 +175,7 @@ using (var otpSession = new OtpSession(yubiKeyDevice, scp11Params))
 // Using SCP03
 StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
 using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
-using (var yubiHsmSession = new YubiHsmAuthSession(yubiKeyDevice, scp03params))
+using (var yubiHsmSession = new YubiHsmAuthSession(yubiKeyDevice, scp03Params))
 {
     // All YubiHsmSession-commands are now automatically protected by SCP03
 }
@@ -443,7 +443,7 @@ using var session = new SecurityDomainSession(yubiKeyDevice, Scp03KeyParameters.
 
 // Generate new EC key pair
 var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, 0x3);
-var publicKey = session.GenerateEcKey(keyReference);
+var publicKey = session.GenerateEcKey(keyReference, 0);
 
 // Import existing key pair
 var privateKey = ECPrivateKey.CreateFromParameters(ecdsa.ExportParameters(true));
@@ -512,9 +512,10 @@ var ski = GetSubjectKeyIdentifier(oceCerts.Ca);
 session.StoreCaIssuer(oceRef, ski);
 
 // Create SCP11a parameters
+// privateKey is the OCE private key as ECDsa
 var scp11Params = new Scp11KeyParameters(
     keyRef,
-    ECPublicKey.CreateFromParameters(newPublicKey.Parameters),
+    newPublicKey,
     oceRef,
     ECPrivateKey.CreateFromParameters(privateKey.ExportParameters(true)),
     certChain);

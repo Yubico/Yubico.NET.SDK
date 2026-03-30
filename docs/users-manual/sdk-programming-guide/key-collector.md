@@ -469,6 +469,11 @@ using Yubico.YubiKey;
         private int _currentLength;
         public Memory<byte> CurrentValue;
 
+        public MyKeyCollector()
+        {
+            CurrentValue = new Memory<byte>(_currentValue);
+        }
+
         public bool SampleKeyCollectorDelegate(KeyEntryData keyEntryData)
         {
             if (keyEntryData is null)

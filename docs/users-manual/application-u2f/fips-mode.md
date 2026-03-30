@@ -47,7 +47,8 @@ the device info available through the `IYubiKeyDevice` interface (see
 [Get device info](u2f-commands.md#get-device-info) for protocol details).
 
 ```c#
-    IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindAll().First();
+    IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindAll().FirstOrDefault()
+        ?? throw new InvalidOperationException("No YubiKey device found.");
 
     if (yubiKeyDevice.IsFipsSeries && (yubiKeyDevice.FirmwareVersion.Major == 4))
     {
@@ -68,7 +69,8 @@ programmatically determine if a YubiKey is in FIPS mode or not with
 [VerifyFipsModeCommand](u2f-commands.md#verify-fips-mode).
 
 ```c#
-    IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindAll().First();
+    IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindAll().FirstOrDefault()
+        ?? throw new InvalidOperationException("No YubiKey device found.");
 
     // Is this YubiKey 4 FIPS series?
     if (yubiKeyDevice.IsFipsSeries && (yubiKeyDevice.FirmwareVersion.Major == 4))

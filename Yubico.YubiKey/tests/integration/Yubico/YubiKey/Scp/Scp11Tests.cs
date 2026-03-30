@@ -25,6 +25,7 @@ using Xunit;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Oath;
 using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Piv;
@@ -129,6 +130,43 @@ namespace Yubico.YubiKey.Scp
             configObj = configObj.GeneratePassword(generatedPassword);
 
             configObj.Execute();
+        }
+
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, Transport.NfcSmartCard)]
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        public void Scp11b_App_Fido2Session_GetAuthenticatorInfo_Succeeds(
+            StandardTestDevice desiredDeviceType,
+            Transport transport)
+        {
+            var testDevice = GetDevice(desiredDeviceType, transport);
+
+            // FIDO2 over CCID requires firmware 5.8+. Over NFC, all applets are
+            // selectable via SmartCard. Over USB, FIDO2 is available on CCID
+            // starting with firmware 5.8; older keys only expose FIDO2 over HID.
+            if (transport == Transport.UsbSmartCard)
+            {
+                Skip.IfNot(
+                    testDevice.FirmwareVersion >= FirmwareVersion.V5_8_0,
+                    "FIDO2 over USB CCID requires firmware 5.8+");
+            }
+            else
+            {
+                Skip.IfNot(
+                    testDevice.AvailableNfcCapabilities.HasFlag(YubiKeyCapabilities.Fido2),
+                    "FIDO2 is not available over NFC on this device");
+            }
+
+            var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
+            var keyParams = Get_Scp11b_SecureConnection_Parameters(testDevice, keyReference);
+
+            using var session = new Fido2Session(testDevice, keyParameters: keyParams);
+
+            var info = session.AuthenticatorInfo;
+            Assert.NotNull(info);
+            Assert.NotEmpty(info.Versions);
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]

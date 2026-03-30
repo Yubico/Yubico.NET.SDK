@@ -916,4 +916,49 @@
   <data name="KeyAgreementReceiptMissmatch" xml:space="preserve">
     <value>Key agreement receipts do not match</value>
   </data>
+  <data name="GenerateKeyPairFailed" xml:space="preserve">
+    <value>Error generating key pair: {0}</value>
+  </data>
+  <data name="CertificateDataTooShortToDetectFormat" xml:space="preserve">
+    <value>Certificate data too short to determine compression format.</value>
+  </data>
+  <data name="CouldNotDetectCompressionFormat" xml:space="preserve">
+    <value>Could not detect compression format.</value>
+  </data>
+  <data name="DecompressedLengthMismatch" xml:space="preserve">
+    <value>Decompressed data length {0} does not match expected length {1} from GIDS header.</value>
+  </data>
+  <data name="StreamDoesNotSupportWriting" xml:space="preserve">
+    <value>The stream does not support writing.</value>
+  </data>
+  <data name="StreamDoesNotSupportReading" xml:space="preserve">
+    <value>The stream does not support reading.</value>
+  </data>
+  <data name="InvalidCompressionModeValue" xml:space="preserve">
+    <value>Invalid CompressionMode value.</value>
+  </data>
+  <data name="ReadingNotSupportedOnCompressionStreams" xml:space="preserve">
+    <value>Reading is not supported on compression streams.</value>
+  </data>
+  <data name="WritingNotSupportedOnDecompressionStreams" xml:space="preserve">
+    <value>Writing is not supported on decompression streams.</value>
+  </data>
+  <data name="CopyToNotSupportedOnCompressionStreams" xml:space="preserve">
+    <value>CopyTo is not supported on compression streams.</value>
+  </data>
+  <data name="CopyToAsyncNotSupportedOnCompressionStreams" xml:space="preserve">
+    <value>CopyToAsync is not supported on compression streams.</value>
+  </data>
+  <data name="UnexpectedEndOfZlibHeader" xml:space="preserve">
+    <value>Unexpected end of stream while reading zlib header.</value>
+  </data>
+  <data name="InvalidZlibHeaderChecksum" xml:space="preserve">
+    <value>Invalid zlib header checksum.</value>
+  </data>
+  <data name="UnsupportedZlibCompressionMethod" xml:space="preserve">
+    <value>Unsupported zlib compression method: {0}. Only deflate (8) is supported.</value>
+  </data>
+  <data name="ZlibPresetDictionaryNotSupported" xml:space="preserve">
+    <value>Zlib streams with a preset dictionary are not supported.</value>
+  </data>
 </root>

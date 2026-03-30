@@ -1,5 +1,5 @@
 param(
-    [string]$Version
+    [string]$Version = "1.0.0"
 )
 
 # Update to latest vcpkg baseline

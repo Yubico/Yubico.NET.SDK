@@ -2453,5 +2453,140 @@ namespace Yubico.YubiKey {
                 return ResourceManager.GetString("YubiKeyOperationFailed", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error generating key pair: {0}.
+        /// </summary>
+        internal static string GenerateKeyPairFailed {
+            get {
+                return ResourceManager.GetString("GenerateKeyPairFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Certificate data too short to determine compression format..
+        /// </summary>
+        internal static string CertificateDataTooShortToDetectFormat {
+            get {
+                return ResourceManager.GetString("CertificateDataTooShortToDetectFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not detect compression format..
+        /// </summary>
+        internal static string CouldNotDetectCompressionFormat {
+            get {
+                return ResourceManager.GetString("CouldNotDetectCompressionFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decompressed data length {0} does not match expected length {1} from GIDS header..
+        /// </summary>
+        internal static string DecompressedLengthMismatch {
+            get {
+                return ResourceManager.GetString("DecompressedLengthMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The stream does not support writing..
+        /// </summary>
+        internal static string StreamDoesNotSupportWriting {
+            get {
+                return ResourceManager.GetString("StreamDoesNotSupportWriting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The stream does not support reading..
+        /// </summary>
+        internal static string StreamDoesNotSupportReading {
+            get {
+                return ResourceManager.GetString("StreamDoesNotSupportReading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid CompressionMode value..
+        /// </summary>
+        internal static string InvalidCompressionModeValue {
+            get {
+                return ResourceManager.GetString("InvalidCompressionModeValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reading is not supported on compression streams..
+        /// </summary>
+        internal static string ReadingNotSupportedOnCompressionStreams {
+            get {
+                return ResourceManager.GetString("ReadingNotSupportedOnCompressionStreams", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Writing is not supported on decompression streams..
+        /// </summary>
+        internal static string WritingNotSupportedOnDecompressionStreams {
+            get {
+                return ResourceManager.GetString("WritingNotSupportedOnDecompressionStreams", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CopyTo is not supported on compression streams..
+        /// </summary>
+        internal static string CopyToNotSupportedOnCompressionStreams {
+            get {
+                return ResourceManager.GetString("CopyToNotSupportedOnCompressionStreams", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CopyToAsync is not supported on compression streams..
+        /// </summary>
+        internal static string CopyToAsyncNotSupportedOnCompressionStreams {
+            get {
+                return ResourceManager.GetString("CopyToAsyncNotSupportedOnCompressionStreams", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unexpected end of stream while reading zlib header..
+        /// </summary>
+        internal static string UnexpectedEndOfZlibHeader {
+            get {
+                return ResourceManager.GetString("UnexpectedEndOfZlibHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid zlib header checksum..
+        /// </summary>
+        internal static string InvalidZlibHeaderChecksum {
+            get {
+                return ResourceManager.GetString("InvalidZlibHeaderChecksum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported zlib compression method: {0}. Only deflate (8) is supported..
+        /// </summary>
+        internal static string UnsupportedZlibCompressionMethod {
+            get {
+                return ResourceManager.GetString("UnsupportedZlibCompressionMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Zlib streams with a preset dictionary are not supported..
+        /// </summary>
+        internal static string ZlibPresetDictionaryNotSupported {
+            get {
+                return ResourceManager.GetString("ZlibPresetDictionaryNotSupported", resourceCulture);
+            }
+        }
     }
 }

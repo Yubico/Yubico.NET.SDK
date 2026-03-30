@@ -54,6 +54,7 @@ namespace Yubico.YubiKey.TestApp
                 ["feature"] = (output) => new YubiKeyFeaturePlugin(output),
                 ["david"] = (output) => new DavidPlugin(output),
                 ["oath"] = (output) => new OathPlugin(output),
+                ["fido2ccid"] = (output) => new Fido2CcidProbePlugin(output),
             };
 
         #region IDisposable Implementation

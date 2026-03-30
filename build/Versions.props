@@ -30,10 +30,17 @@ for external milestones.
 
   <PropertyGroup Label="Versions for all projects">
 
-    <!-- 
-    Common version for both projects. Can be overridden by the below properties if needed 
+    <!--
+    Default development version. This value is used for local and automated CI builds
+    (push, cron, PR). For release builds, the version is set via the workflow_dispatch
+    input in build.yml, which overwrites this value at build time.
+
+    You do NOT need to update this file before a release.
+
+    Note: These versions do NOT affect Yubico.NativeShims, which is versioned independently
+    via its own build pipeline (build-nativeshims.yml) and CMake configuration.
     -->
-    <CommonVersion>1.15.2</CommonVersion>
+    <CommonVersion>0.0.0-dev</CommonVersion>
 
     <!--
     Yubico.Core project

@@ -16,6 +16,42 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.16.x Releases
+
+### 1.16.0
+
+Release date: March 31st, 2026
+
+Features:
+
+- The FIDO2 application now supports SCP03 and SCP11 secure channels over USB CCID on YubiKeys with firmware version 5.8 and above. This enables encrypted communication with the FIDO2 application, matching the SCP support already available for PIV, OATH, OTP, and YubiHSM Auth. ([#428](https://github.com/Yubico/Yubico.NET.SDK/pull/428))
+
+- ZLib compression and decompression support has been added via a new `ZlibStream` class. The `PivSession.KeyPairs` property now correctly handles compressed certificate formats. ([#417](https://github.com/Yubico/Yubico.NET.SDK/pull/417))
+
+Bug Fixes:
+
+- The MSVC C runtime is now statically linked in Yubico.NativeShims, removing the dependency on the Visual C++ Redistributable. **Additionally, `cmake_minimum_required` has been bumped to 3.15** for proper CMP0091 policy support, and an explicit `exit /b 0` has been added to prevent `findstr` exit codes from leaking into the build process. ([#427](https://github.com/Yubico/Yubico.NET.SDK/pull/427))
+
+Documentation:
+
+- NFC requirements and SCP usage examples have been added to the `Fido2Session` documentation. ([#428](https://github.com/Yubico/Yubico.NET.SDK/pull/428))
+
+- Fixed positioning issues in the documentation site. ([#428](https://github.com/Yubico/Yubico.NET.SDK/pull/428))
+
+- Internal documentation files not intended for the public repository have been removed. ([#428](https://github.com/Yubico/Yubico.NET.SDK/pull/428))
+
+- Comments and logical grouping have been added to the NativeShims CMakeLists and readme. ([#427](https://github.com/Yubico/Yubico.NET.SDK/pull/427))
+
+Miscellaneous:
+
+- The Serilog dependency has been removed from integration tests and the sandbox app, simplifying the test project dependencies.
+
+Dependencies:
+
+- Several dependencies across the Yubico.Core, Yubico.YubiKey, and GitHub Actions workflows have been updated to newer versions. ([#424](https://github.com/Yubico/Yubico.NET.SDK/pull/424), [#429](https://github.com/Yubico/Yubico.NET.SDK/pull/429), [#430](https://github.com/Yubico/Yubico.NET.SDK/pull/430), [#432](https://github.com/Yubico/Yubico.NET.SDK/pull/432), [#433](https://github.com/Yubico/Yubico.NET.SDK/pull/433), [#435](https://github.com/Yubico/Yubico.NET.SDK/pull/435), [#436](https://github.com/Yubico/Yubico.NET.SDK/pull/436), [#437](https://github.com/Yubico/Yubico.NET.SDK/pull/437), [#438](https://github.com/Yubico/Yubico.NET.SDK/pull/438))
+
+_________
+
 ## 1.15.x Releases
 
 ### 1.15.2

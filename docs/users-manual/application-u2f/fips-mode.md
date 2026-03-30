@@ -74,9 +74,10 @@ programmatically determine if a YubiKey is in FIPS mode or not with
     if (yubiKeyDevice.IsFipsSeries && (yubiKeyDevice.FirmwareVersion.Major == 4))
     {
         // If it is YubiKey 4 FIPS series, we can get the FIPS mode.
+        using IYubiKeyConnection connection = yubiKeyDevice.Connect(YubiKeyApplication.FidoU2f);
         var vfyFipsModeCmd = new VerifyFipsModeCommand();
         VerifyFipsModeResponse vfyFipsModeRsp = connection.SendCommand(vfyFipsModeCmd);
-        if (vfyFipsMode.GetData())
+        if (vfyFipsModeRsp.GetData())
         {
             // If the return from GetData is true, then this is
             // YubiKey 4 FIPS series in FIPS mode.
@@ -85,7 +86,7 @@ programmatically determine if a YubiKey is in FIPS mode or not with
         }
         // Note that if the YubiKey is not version 4 FIPS series, the
         // VerifyFipsModeCommand is undefined. A call to VerifyFipsModeResponse.GetData
-        // will result in an exception. 
+        // will result in an exception.
     }
 ```
 

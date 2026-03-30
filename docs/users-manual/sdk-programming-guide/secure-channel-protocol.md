@@ -502,7 +502,8 @@ var newPublicKey = session.GenerateEcKey(keyRef);
 
 // Setup off-card entity (OCE)
 var oceRef = KeyReference.Create(OceKid, kvn);
-var ocePublicKey = ECPublicKey.CreateFromParameters(oceCerts.Ca.PublicKey.GetECDsaPublicKey()!.ExportParameters(false));
+var oceEcDsa = oceCerts.Ca.PublicKey.GetECDsaPublicKey()!;
+var ocePublicKey = ECPublicKey.CreateFromParameters(oceEcDsa.ExportParameters(false));
 session.PutKey(oceRef, ocePublicKey);
 
 // Store CA identifier

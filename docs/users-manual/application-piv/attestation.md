@@ -391,8 +391,6 @@ private static bool IsMatchingKeyAndCertRsa(RSAPrivateKey privateKey, RSA public
 
 private static bool IsMatchingKeyAndCertEcc(ECPrivateKey privateKey, byte[] publicKey)
 {
-    bool returnValue = false;
-
     ECCurve eccCurve = privateKey.KeyType == KeyType.ECP256 ?
         ECCurve.CreateFromValue("1.2.840.10045.3.1.7") :
         ECCurve.CreateFromValue("1.3.132.0.34");

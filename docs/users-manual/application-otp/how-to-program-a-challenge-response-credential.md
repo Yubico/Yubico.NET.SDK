@@ -124,13 +124,21 @@ credential. This configuration uses the Yubico OTP algorithm and a randomly gene
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
 {
-  //Don't forget to share the secret key with the validation server before clearing it from memory.
   Memory<byte> secretKey = new byte[ConfigureYubicoOtp.KeySize];
 
-  otp.ConfigureChallengeResponse(Slot.LongPress)
-    .UseYubiOtp()
-    .GenerateKey(secretKey)
-    .Execute();
+  try
+  {
+    otp.ConfigureChallengeResponse(Slot.LongPress)
+      .UseYubiOtp()
+      .GenerateKey(secretKey)
+      .Execute();
+
+    // Share the secret key with the validation server before clearing.
+  }
+  finally
+  {
+    CryptographicOperations.ZeroMemory(secretKey.Span);
+  }
 }
 ```
 

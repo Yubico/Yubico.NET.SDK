@@ -99,6 +99,11 @@ using (OtpSession otp = new OtpSession(yubiKey))
 }
 ```
 
+> [!NOTE]
+> In production code, clear sensitive buffers such as access codes and HMAC keys after use with
+> `CryptographicOperations.ZeroMemory()`. See [Sensitive Data](../sdk-programming-guide/sensitive-data.md)
+> for details.
+
 ### Example: modify a slot access code
 
 To modify a slot's access code, you must provide the current access code

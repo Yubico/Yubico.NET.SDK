@@ -70,9 +70,18 @@ using (OtpSession otp = new OtpSession(yubiKey))
 {
     Memory<byte> hmacKey = new byte[ConfigureHotp.HmacKeySize];
 
-    otp.ConfigureHotp(Slot.LongPress)
-       .GenerateKey(hmacKey)
-       .Execute();
+    try
+    {
+        otp.ConfigureHotp(Slot.LongPress)
+           .GenerateKey(hmacKey)
+           .Execute();
+
+        // Share with validation server before clearing.
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(hmacKey.Span);
+    }
 }
 ```
 
@@ -102,11 +111,20 @@ using (OtpSession otp = new OtpSession(yubiKey))
 {
     Memory<byte> hmacKey = new byte[ConfigureHotp.HmacKeySize];
 
-    otp.ConfigureHotp(Slot.LongPress)
-       .UseInitialMovingFactor(16)
-       .GenerateKey(hmacKey)
-       .Use8Digits()
-       .Execute();
+    try
+    {
+        otp.ConfigureHotp(Slot.LongPress)
+           .UseInitialMovingFactor(16)
+           .GenerateKey(hmacKey)
+           .Use8Digits()
+           .Execute();
+
+        // Share with validation server before clearing.
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(hmacKey.Span);
+    }
 }
 ```
 

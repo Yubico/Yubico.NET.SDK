@@ -182,7 +182,7 @@ using (var yubiHsmSession = new YubiHsmAuthSession(yubiKeyDevice, scp03params))
 
 // Using SCP11b
 var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, kvn);
-using (var yubiHsmSession = new YubiHsmSession(yubiKeyDevice, scp11Params))
+using (var yubiHsmSession = new YubiHsmAuthSession(yubiKeyDevice, scp11Params))
 {
     // All yubiHsmSession-commands are now automatically protected by SCP11
 }

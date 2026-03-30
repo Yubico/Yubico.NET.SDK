@@ -246,12 +246,12 @@ For example, here is a possibility.
         try
         {
             int pinLength = CollectPin(pinData);
-            while (!pivSession.TryVerifyPin(pinData.Slice(0, pinLength, out int? retriesRemaining))
+            while (!pivSession.TryVerifyPin(pinData.Slice(0, pinLength), out int? retriesRemaining))
             {
-                pinLength = CollectPin(someMessage, retriesRemaining, pinData))
+                pinLength = CollectPin(someMessage, retriesRemaining, pinData);
                 if (pinLength == 0)
                 {
-                    throw OperationCanceledException(message);
+                    throw new OperationCanceledException(message);
                 }
             }
         }
@@ -465,9 +465,9 @@ using Yubico.YubiKey;
 
     public class MyKeyCollector
     {
-        private byte[] _currentValue = new byte[MaxValueLength]
+        private byte[] _currentValue = new byte[MaxValueLength];
         private int _currentLength;
-        public Memory<byte> CurrentValue = new Memory<byte>(_currentValue);
+        public Memory<byte> CurrentValue;
 
         public bool SampleKeyCollectorDelegate(KeyEntryData keyEntryData)
         {
@@ -479,7 +479,7 @@ using Yubico.YubiKey;
             switch (keyEntryData.Request)
             {
                 case KeyEntryRequest.Release:
-                    CryptographicOperations.ZeroMemory(CurrentValue.Span)
+                    CryptographicOperations.ZeroMemory(CurrentValue.Span);
                     break;
 
                 case KeyEntryRequest.VerifyPivPin:

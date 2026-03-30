@@ -420,9 +420,10 @@ Unlike SCP03's static keys, SCP11 uses `Scp11KeyParameters` which can contain:
 ```csharp
 // SCP11b basic parameters
 var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, 0x1);
+ECParameters ecParams = ecdsa.ExportParameters(includePrivateParameters: false);
 var scp11Params = new Scp11KeyParameters(
     keyReference,
-    ECPublicKey.CreateFromParameters(publicKey));
+    ECPublicKey.CreateFromParameters(ecParams));
 
 // SCP11a/c with full certificate chain
 var scp11Params = new Scp11KeyParameters(

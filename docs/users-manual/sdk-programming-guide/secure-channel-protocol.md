@@ -78,7 +78,7 @@ The SDK provides a consistent way to use secure channels across different YubiKe
 
 ### Common pattern
 
-Each application session (PIV, OATH, OTP, YubiHSM Auth) accepts an optional `ScpKeyParameters` parameter. This can be either `Scp03KeyParameters` or `Scp11KeyParameters` depending on which protocol you want to use.
+Each application session (PIV, OATH, OTP, YubiHSM Auth, FIDO2) accepts an optional `ScpKeyParameters` parameter. This can be either `Scp03KeyParameters` or `Scp11KeyParameters` depending on which protocol you want to use.
 
 ```csharp
 // Using SCP03
@@ -185,6 +185,28 @@ var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, kvn);
 using (var yubiHsmSession = new YubiHsmSession(yubiKeyDevice, scp11Params))
 {
     // All yubiHsmSession-commands are now automatically protected by SCP11
+}
+
+```
+
+#### FIDO2 with secure channel
+
+SCP is supported for FIDO2 over both NFC and USB connections for YubiKeys with firmware 5.8 and later. For earlier firmware versions, SCP is supported for FIDO2 over NFC connections only.
+
+```csharp
+// Using SCP03
+StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
+using Scp03KeyParamaters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
+using (var fido2Session = new Fido2Session(yubiKeyDevice, scp03params))
+{
+    // All Fido2Session commands are now automatically protected by SCP03
+}
+
+// Using SCP11b
+var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, kvn);
+using (var fido2Session = new Fido2Session(yubiKeyDevice, scp11Params))
+{
+    // All Fido2Session commands are now automatically protected by SCP11
 }
 
 ```

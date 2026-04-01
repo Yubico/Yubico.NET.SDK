@@ -1,21 +1,10 @@
 // Copyright 2026 Yubico AB
-//
-// Licensed under the Apache License, Version 2.0 (the "License").
-// You may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Licensed under the Apache License, Version 2.0.
 
-using Spectre.Console;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 
 namespace Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts;
 
@@ -37,8 +26,8 @@ public record DeviceSelection(
     /// </summary>
     public string DisplayName =>
         SerialNumber.HasValue
-            ? $"YubiKey {FormatFormFactor(FormFactor)} - S/N: {SerialNumber} (SmartCard)"
-            : $"YubiKey {FormatFormFactor(FormFactor)} (SmartCard)";
+            ? $"YubiKey {FormatFormFactor(FormFactor)} (Serial: {SerialNumber})"
+            : $"YubiKey {FormatFormFactor(FormFactor)}";
 
     private static string FormatFormFactor(FormFactor formFactor) =>
         DeviceSelector.FormatFormFactor(formFactor);
@@ -46,67 +35,47 @@ public record DeviceSelection(
 
 /// <summary>
 /// Handles YubiKey device discovery and selection for OATH operations.
-/// OATH only supports SmartCard (CCID) transport.
+/// Auto-selects when only one device is connected. Fails with clear error
+/// when multiple devices are found (no interactive prompt in CLI mode).
 /// </summary>
 public static class DeviceSelector
 {
     /// <summary>
-    /// Finds all connected YubiKeys via SmartCard and allows user to select one.
+    /// Finds a single connected YubiKey via SmartCard.
+    /// Auto-selects when exactly one device is found.
+    /// Fails with an error when zero or multiple devices are connected.
     /// </summary>
     public static async Task<DeviceSelection?> SelectDeviceAsync(
         CancellationToken cancellationToken = default)
     {
-        var devices = await FindDevicesWithRetryAsync(cancellationToken);
+        var allDevices = await YubiKeyManager.FindAllAsync(
+            ConnectionType.All, cancellationToken: cancellationToken);
+
+        var devices = allDevices
+            .Where(d => d.ConnectionType == ConnectionType.SmartCard)
+            .ToList();
+
         if (devices.Count == 0)
         {
+            OutputHelpers.WriteError("No YubiKey detected via SmartCard. Insert a YubiKey and try again.");
             return null;
         }
 
-        if (devices.Count == 1)
+        if (devices.Count > 1)
         {
-            var device = devices[0];
-            var info = await GetDeviceInfoAsync(device, cancellationToken);
-            return new DeviceSelection(
-                device,
-                info?.SerialNumber,
-                info?.FormFactor ?? FormFactor.Unknown,
-                info?.FirmwareVersion.ToString() ?? "Unknown");
+            OutputHelpers.WriteError(
+                $"Multiple YubiKeys detected ({devices.Count}). " +
+                "Remove extra devices so only one is connected.");
+            return null;
         }
 
-        return await PromptForDeviceSelectionAsync(devices, cancellationToken);
-    }
-
-    /// <summary>
-    /// Finds all connected YubiKeys via SmartCard, with retry prompt if none found.
-    /// </summary>
-    private static async Task<IReadOnlyList<IYubiKey>> FindDevicesWithRetryAsync(
-        CancellationToken cancellationToken = default)
-    {
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            var allDevices = await YubiKeyManager.FindAllAsync(
-                ConnectionType.All, cancellationToken: cancellationToken);
-
-            // OATH only supports SmartCard transport
-            var devices = allDevices
-                .Where(d => d.ConnectionType == ConnectionType.SmartCard)
-                .ToList();
-
-            if (devices.Count > 0)
-            {
-                return devices;
-            }
-
-            AnsiConsole.MarkupLine("[red]No YubiKey detected via SmartCard. Please insert a YubiKey and try again.[/]");
-            AnsiConsole.MarkupLine("[grey]OATH requires SmartCard (CCID) transport.[/]");
-
-            if (!AnsiConsole.Confirm("Retry?", defaultValue: true))
-            {
-                return [];
-            }
-        }
-
-        return [];
+        var device = devices[0];
+        var info = await GetDeviceInfoAsync(device, cancellationToken);
+        return new DeviceSelection(
+            device,
+            info?.SerialNumber,
+            info?.FormFactor ?? FormFactor.Unknown,
+            info?.FirmwareVersion.ToString() ?? "Unknown");
     }
 
     /// <summary>
@@ -120,82 +89,10 @@ public static class DeviceSelector
         {
             return await device.GetDeviceInfoAsync(cancellationToken);
         }
-        catch (Exception ex)
-        {
-            AnsiConsole.MarkupLine(
-                $"[grey]Debug: Device info query failed: {Markup.Escape(ex.GetType().Name)}: {Markup.Escape(ex.Message)}[/]");
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// Prompts user to select from multiple devices.
-    /// </summary>
-    private static async Task<DeviceSelection?> PromptForDeviceSelectionAsync(
-        IReadOnlyList<IYubiKey> devices,
-        CancellationToken cancellationToken)
-    {
-        var deviceInfos = new List<(IYubiKey Device, DeviceInfo? Info)>();
-
-        await AnsiConsole.Status()
-            .StartAsync("Querying device information...", async ctx =>
-            {
-                var tasks = devices
-                    .Select(device => GetDeviceInfoAsync(device, cancellationToken))
-                    .ToArray();
-
-                var infos = await Task.WhenAll(tasks);
-
-                for (int i = 0; i < devices.Count; i++)
-                {
-                    deviceInfos.Add((devices[i], infos[i]));
-                }
-            });
-
-        var indexedChoices = deviceInfos
-            .Select((d, index) => (Choice: FormatDeviceChoice(d.Device, d.Info), OriginalIndex: index))
-            .OrderBy(x => x.Choice)
-            .ToList();
-
-        var choices = indexedChoices.Select(x => x.Choice).ToList();
-        choices.Add("Cancel");
-
-        var selection = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("Multiple YubiKeys detected. Select one:")
-                .PageSize(10)
-                .AddChoices(choices));
-
-        if (selection == "Cancel")
+        catch
         {
             return null;
         }
-
-        var selectedSortedIndex = choices.IndexOf(selection);
-        var originalIndex = indexedChoices[selectedSortedIndex].OriginalIndex;
-        var selected = deviceInfos[originalIndex];
-        return new DeviceSelection(
-            selected.Device,
-            selected.Info?.SerialNumber,
-            selected.Info?.FormFactor ?? FormFactor.Unknown,
-            selected.Info?.FirmwareVersion.ToString() ?? "Unknown");
-    }
-
-    /// <summary>
-    /// Formats a device choice string for display.
-    /// </summary>
-    private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
-    {
-        if (info is null)
-        {
-            return "YubiKey (SmartCard)";
-        }
-
-        var serial = info.Value.SerialNumber?.ToString() ?? "N/A";
-        var firmware = info.Value.FirmwareVersion.ToString();
-        var formFactor = FormatFormFactor(info.Value.FormFactor);
-
-        return $"YubiKey {formFactor} - Serial: {serial}, Firmware: {firmware} (SmartCard)";
     }
 
     /// <summary>

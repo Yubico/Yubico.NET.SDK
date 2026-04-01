@@ -721,7 +721,7 @@ internal static class CliRunner
                 return 1;
             }
 
-            var result = await Decryption.DecryptDataAsync(session, slot.Value, encryptedData, ct);
+            var result = await Decryption.DecryptDataAsync(session, slot.Value, encryptedData, cancellationToken: ct);
 
             if (outputPath is not null && result.Success)
             {

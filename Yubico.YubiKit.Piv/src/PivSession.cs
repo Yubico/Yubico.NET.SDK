@@ -27,7 +27,7 @@ namespace Yubico.YubiKit.Piv;
 /// <summary>
 /// PIV (Personal Identity Verification) session for YubiKey operations.
 /// </summary>
-public sealed partial class PivSession : ApplicationSession, IPivSession, IAsyncDisposable
+public sealed partial class PivSession : ApplicationSession, IPivSession
 {
     private static readonly byte[] PivAid = ApplicationIds.Piv;
     
@@ -528,10 +528,4 @@ public sealed partial class PivSession : ApplicationSession, IPivSession, IAsync
             throw new InvalidOperationException("Session is not initialized. Use PivSession.CreateAsync() to create a session.");
     }
 
-    /// <inheritdoc />
-    public async ValueTask DisposeAsync()
-    {
-        Dispose();
-        await Task.CompletedTask.ConfigureAwait(false);
-    }
 }

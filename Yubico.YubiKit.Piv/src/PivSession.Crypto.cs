@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Buffers;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
@@ -97,7 +98,7 @@ public sealed partial class PivSession
         var slotMetadata = metadata.Value;
         Logger.LogDebug("PIV: Auto-detected algorithm {Algorithm} for slot 0x{Slot:X2}", slotMetadata.Algorithm, (byte)slot);
 
-        return await SignOrDecryptCoreAsync(slot, slotMetadata.Algorithm, data, cancellationToken).ConfigureAwait(false);;
+        return await SignOrDecryptCoreAsync(slot, slotMetadata.Algorithm, data, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<ReadOnlyMemory<byte>> SignOrDecryptCoreAsync(
@@ -191,6 +192,115 @@ public sealed partial class PivSession
 
         // Parse response: TAG 0x7C [ TAG 0x82 (response data) ]
         return ParseCryptoResponse(response.Data);
+    }
+
+    /// <inheritdoc/>
+    public async Task<ReadOnlyMemory<byte>> DecryptAsync(
+        PivSlot slot,
+        ReadOnlyMemory<byte> cipherText,
+        RSAEncryptionPadding padding,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(padding);
+        Logger.LogDebug("PIV: DecryptAsync slot 0x{Slot:X2}", (byte)slot);
+
+        var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
+        if (metadata is null || !metadata.Value.Algorithm.IsRsa())
+        {
+            throw new ArgumentException(
+                $"Slot 0x{(byte)slot:X2} does not contain an RSA key.", nameof(slot));
+        }
+
+        var algorithm = metadata.Value.Algorithm;
+        int keyBits = algorithm switch
+        {
+            PivAlgorithm.Rsa1024 => 1024,
+            PivAlgorithm.Rsa2048 => 2048,
+            PivAlgorithm.Rsa3072 => 3072,
+            PivAlgorithm.Rsa4096 => 4096,
+            _ => throw new ArgumentException("Slot does not contain an RSA key.", nameof(slot))
+        };
+
+        if (cipherText.Length != keyBits / 8)
+        {
+            throw new ArgumentException(
+                $"Cipher text length {cipherText.Length} does not match RSA-{keyBits} key size ({keyBits / 8} bytes).",
+                nameof(cipherText));
+        }
+
+        // Perform the raw RSA private key operation on the YubiKey
+        var rawDecrypted = await SignOrDecryptCoreAsync(slot, algorithm, cipherText, cancellationToken).ConfigureAwait(false);
+
+        // Strip padding using a dummy RSA key — same technique as Python yubikey-manager's _unpad_message.
+        // We generate a temporary RSA key of the same size, use textbook RSA (encrypt with public key)
+        // to re-wrap the raw bytes, then decrypt with the dummy private key and real padding params.
+        // This lets .NET's crypto library handle PKCS#1 v1.5 and OAEP unpadding correctly.
+        using var dummy = RSA.Create(keyBits);
+        var publicParams = dummy.ExportParameters(false);
+        var n = publicParams.Modulus ?? throw new CryptographicException("RSA key export returned null modulus.");
+        var e = publicParams.Exponent ?? throw new CryptographicException("RSA key export returned null exponent.");
+
+        // rawBytes and reEncrypted are sensitive — zeroed in finally regardless of outcome.
+        // The try starts before ModPow so rawBytes is zeroed even if ModPow throws.
+        var rawBytes = rawDecrypted.Span.ToArray();
+        byte[]? reEncrypted = null;
+        try
+        {
+            reEncrypted = ModPow(rawBytes, e, n, keyBits / 8);
+            return dummy.Decrypt(reEncrypted, padding);
+        }
+        catch (CryptographicException ex)
+        {
+            throw new CryptographicException(
+                "Padding removal failed. The cipher text may be corrupt or encrypted with a different padding scheme.", ex);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(rawBytes);
+            if (reEncrypted is not null)
+            {
+                CryptographicOperations.ZeroMemory(reEncrypted);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Raw modular exponentiation for re-wrapping RSA output: result = base^exp mod modulus.
+    /// </summary>
+    private static byte[] ModPow(byte[] baseBytes, byte[] expBytes, byte[] modBytes, int outputLength)
+    {
+        var b = new System.Numerics.BigInteger(baseBytes, isUnsigned: true, isBigEndian: true);
+        var exp = new System.Numerics.BigInteger(expBytes, isUnsigned: true, isBigEndian: true);
+        var mod = new System.Numerics.BigInteger(modBytes, isUnsigned: true, isBigEndian: true);
+
+        // The re-wrap technique requires b < mod. If the raw YubiKey output (interpreted as an integer)
+        // is >= the dummy modulus, ModPow silently reduces it and the result won't unpad correctly.
+        // This is astronomically unlikely with a fresh random modulus of equal bit length, but we
+        // guard explicitly so any failure produces a clear error rather than a corrupt padding message.
+        if (b >= mod)
+        {
+            throw new CryptographicException(
+                "RSA re-wrap invariant violated: raw decryption output >= dummy modulus. Retry the operation.");
+        }
+
+        var result = System.Numerics.BigInteger.ModPow(b, exp, mod);
+        var raw = result.ToByteArray(isUnsigned: true, isBigEndian: true);
+
+        if (raw.Length > outputLength)
+        {
+            throw new CryptographicException(
+                $"ModPow result ({raw.Length} bytes) exceeds expected output length ({outputLength} bytes).");
+        }
+
+        if (raw.Length == outputLength)
+        {
+            return raw;
+        }
+
+        // Pad with leading zeros if result is shorter than key size (leading zeros lost in BigInteger)
+        var padded = new byte[outputLength];
+        raw.CopyTo(padded.AsSpan(outputLength - raw.Length));
+        return padded;
     }
 
     /// <summary>

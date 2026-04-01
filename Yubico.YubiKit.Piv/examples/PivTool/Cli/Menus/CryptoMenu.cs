@@ -166,7 +166,7 @@ public static class CryptoMenu
 
         OutputHelpers.WriteInfo("Touch YubiKey if prompted...");
 
-        var result = await Decryption.DecryptDataAsync(session, slot, encryptedData, ct);
+        var result = await Decryption.DecryptDataAsync(session, slot, encryptedData, cancellationToken: ct);
 
         if (result.Success)
         {

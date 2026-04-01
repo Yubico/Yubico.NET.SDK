@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Interfaces;
@@ -283,6 +284,37 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
         PivSlot slot,
         ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Decrypts RSA cipher text and removes padding, returning clean plaintext.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is the high-level decrypt API, modelled after the Python yubikey-manager SDK.
+    /// It performs the raw RSA private key operation via the YubiKey, then strips the
+    /// specified padding scheme to return the original plaintext.
+    /// </para>
+    /// <para>
+    /// Supported padding schemes:
+    /// - <see cref="RSAEncryptionPadding.Pkcs1"/> — PKCS#1 v1.5 (most common)
+    /// - <see cref="RSAEncryptionPadding.OaepSHA1"/> / OaepSHA256 etc. — OAEP
+    /// </para>
+    /// <para>
+    /// Slot must contain an RSA key. May require PIN verification before calling.
+    /// </para>
+    /// </remarks>
+    /// <param name="slot">PIV slot containing RSA private key.</param>
+    /// <param name="cipherText">RSA-encrypted cipher text (length must match key size).</param>
+    /// <param name="padding">Padding scheme used when encrypting.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Decrypted plaintext with padding removed.</returns>
+    /// <exception cref="ArgumentException">Cipher text length does not match RSA key size, or slot has no RSA key.</exception>
+    /// <exception cref="CryptographicException">Padding is malformed or decryption failed.</exception>
+    Task<ReadOnlyMemory<byte>> DecryptAsync(
+        PivSlot slot,
+        ReadOnlyMemory<byte> cipherText,
+        RSAEncryptionPadding padding,
         CancellationToken cancellationToken = default);
 
     /// <summary>

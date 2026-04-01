@@ -19,7 +19,7 @@ using Yubico.YubiKit.Core.SmartCard.Scp;
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
-public abstract class ApplicationSession : IApplicationSession
+public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 {
     protected ILogger Logger { get; }
     protected IProtocol? Protocol { get; set; }
@@ -81,6 +81,12 @@ public abstract class ApplicationSession : IApplicationSession
     {
         Dispose(true);
         GC.SuppressFinalize(this);
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        Dispose();
+        return ValueTask.CompletedTask;
     }
 
     protected virtual void Dispose(bool disposing)

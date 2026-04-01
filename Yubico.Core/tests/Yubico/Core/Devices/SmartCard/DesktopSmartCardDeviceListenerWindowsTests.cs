@@ -199,9 +199,8 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
                 "The new SCARDCONTEXT handle is invalid. " +
                 "UpdateCurrentContext must have called SCardEstablishContext and stored the result.");
 
-            Assert.NotEqual(
-                originalHandle,
-                newContext.DangerousGetHandle(),
+            Assert.True(
+                originalHandle != newContext.DangerousGetHandle(),
                 "The SCARDCONTEXT handle is unchanged after invalidation. " +
                 "Expected a fresh handle from a new SCardEstablishContext call.");
 

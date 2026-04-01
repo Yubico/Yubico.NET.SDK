@@ -38,7 +38,7 @@ public static class DeviceInfoMenu
                 await using var session = await selection.Device.CreatePivSessionAsync(cancellationToken: cancellationToken);
                 OutputHelpers.SetupTouchNotification(session);
                 var retryResult = await DeviceInfoQuery.GetPivRetryInfoAsync(session, cancellationToken);
-                
+
                 if (retryResult.Success)
                 {
                     AnsiConsole.WriteLine();

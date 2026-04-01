@@ -1,8 +1,8 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
-using System.Security.Cryptography;
 using Spectre.Console;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
 using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
@@ -119,7 +119,7 @@ public static class CryptoMenu
         {
             OutputHelpers.WriteSuccess($"Signing completed in {result.ElapsedMilliseconds}ms");
             OutputHelpers.WriteKeyValue("Signature size", $"{result.Signature.Length} bytes");
-            
+
             var sigHex = Convert.ToHexString(result.Signature.Span);
             AnsiConsole.WriteLine($"Signature (hex): {sigHex[..Math.Min(64, sigHex.Length)]}...");
 

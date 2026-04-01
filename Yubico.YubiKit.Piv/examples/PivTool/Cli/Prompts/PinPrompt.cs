@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Spectre.Console;
 using System.Buffers;
 using System.Security.Cryptography;
 using System.Text;
-using Spectre.Console;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;

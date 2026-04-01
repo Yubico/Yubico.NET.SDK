@@ -87,7 +87,7 @@ public static class DeviceSelector
         while (!cancellationToken.IsCancellationRequested)
         {
             var allDevices = await YubiKey.FindAllAsync(cancellationToken);
-            
+
             // Filter to only SmartCard/PCSC devices (required for PIV operations)
             var devices = allDevices.Where(d => d.ConnectionType == ConnectionType.SmartCard).ToList();
 

@@ -84,10 +84,20 @@ public static class Decryption
             // Decrypt using explicit algorithm overload.
             // The auto-detect overload checks PIV app version (0.0.1), not device firmware.
             var algorithm = metadata.Value.Algorithm;
-            var decrypted = await session.SignOrDecryptAsync(slot, algorithm, encryptedData, cancellationToken);
+            var rawDecrypted = await session.SignOrDecryptAsync(slot, algorithm, encryptedData, cancellationToken);
 
             stopwatch.Stop();
-            return DecryptionResult.Succeeded(decrypted, stopwatch.ElapsedMilliseconds);
+
+            // The YubiKey returns the raw RSA decryption block including PKCS#1 v1.5 padding:
+            // [0x00][0x02][non-zero padding bytes][0x00][plaintext]
+            // Strip the padding to return the actual plaintext.
+            var plaintext = StripPkcs1v15Padding(rawDecrypted.Span);
+            if (plaintext.IsEmpty)
+            {
+                return DecryptionResult.Failed("Decryption succeeded but PKCS#1 v1.5 padding is malformed.");
+            }
+
+            return DecryptionResult.Succeeded(plaintext, stopwatch.ElapsedMilliseconds);
         }
         catch (OperationCanceledException)
         {
@@ -97,5 +107,37 @@ public static class Decryption
         {
             return DecryptionResult.Failed($"Decryption failed: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Strips PKCS#1 v1.5 type-2 padding from a raw RSA decryption block.
+    /// Format: [0x00][0x02][8+ non-zero padding bytes][0x00][plaintext]
+    /// </summary>
+    /// <returns>The plaintext slice, or empty if padding is malformed.</returns>
+    private static ReadOnlyMemory<byte> StripPkcs1v15Padding(ReadOnlySpan<byte> block)
+    {
+        // Must start with 0x00 0x02
+        if (block.Length < 11 || block[0] != 0x00 || block[1] != 0x02)
+        {
+            return ReadOnlyMemory<byte>.Empty;
+        }
+
+        // Find the 0x00 separator (must be at position 10 or later — minimum 8 padding bytes)
+        int separatorIndex = -1;
+        for (int i = 2; i < block.Length; i++)
+        {
+            if (block[i] == 0x00)
+            {
+                separatorIndex = i;
+                break;
+            }
+        }
+
+        if (separatorIndex < 10 || separatorIndex == block.Length - 1)
+        {
+            return ReadOnlyMemory<byte>.Empty;
+        }
+
+        return block[(separatorIndex + 1)..].ToArray();
     }
 }

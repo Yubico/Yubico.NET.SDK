@@ -83,7 +83,7 @@ public static class KeyGenerationMenu
         await using var session = await selection.Device.CreatePivSessionAsync(cancellationToken: cancellationToken);
         OutputHelpers.SetupTouchNotification(session);
         using var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
-        
+
         if (mgmtKey is null)
         {
             return;

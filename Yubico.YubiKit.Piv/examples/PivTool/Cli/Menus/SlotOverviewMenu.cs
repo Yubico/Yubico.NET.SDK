@@ -61,7 +61,7 @@ public static class SlotOverviewMenu
             var certStatus = slot.HasCertificate ? "[green]Yes[/]" : "[grey]No[/]";
             var algorithm = slot.Metadata?.Algorithm.ToString() ?? "-";
             var subject = slot.Certificate?.Subject ?? "-";
-            
+
             // Truncate long subjects
             if (subject.Length > 30)
             {

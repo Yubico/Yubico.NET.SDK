@@ -102,22 +102,10 @@ public static class Certificates
 
         try
         {
-            X509Certificate2? cert = null;
             var text = Encoding.UTF8.GetString(certificateData.Span);
-
-            if (text.Contains("-----BEGIN CERTIFICATE-----"))
-            {
-                cert = X509Certificate2.CreateFromPem(text);
-            }
-            else
-            {
-                cert = X509CertificateLoader.LoadCertificate(certificateData.Span);
-            }
-
-            if (cert is null)
-            {
-                return CertificateResult.Failed("Certificate format not recognized. Expected PEM or DER.");
-            }
+            using var cert = text.Contains("-----BEGIN CERTIFICATE-----")
+                ? X509Certificate2.CreateFromPem(text)
+                : X509CertificateLoader.LoadCertificate(certificateData.Span);
 
             await session.StoreCertificateAsync(slot, cert, compress, cancellationToken);
             return CertificateResult.Stored();
@@ -370,22 +358,33 @@ public static class Certificates
                 ? HashAlgorithmName.SHA384
                 : HashAlgorithmName.SHA256;
 
-            string? csr = null;
+            // CSR must be signed by the private key on the YubiKey.
+            // Use the custom X509SignatureGenerator that delegates signing to the device.
+            CertificateRequest request;
+            X509SignatureGenerator signatureGenerator;
 
             if (publicKey is RSA rsa)
             {
-                var request = new CertificateRequest(subjectName, rsa, hashAlgorithm, RSASignaturePadding.Pkcs1);
-                csr = request.CreateSigningRequestPem();
+                request = new CertificateRequest(subjectName, rsa, hashAlgorithm, RSASignaturePadding.Pkcs1);
+                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, slotMetadata.Algorithm, rsa);
             }
             else if (publicKey is ECDsa ecdsa)
             {
-                var request = new CertificateRequest(subjectName, ecdsa, hashAlgorithm);
-                csr = request.CreateSigningRequestPem();
+                request = new CertificateRequest(subjectName, ecdsa, hashAlgorithm);
+                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, slotMetadata.Algorithm, ecdsa);
+            }
+            else
+            {
+                return CertificateResult.Failed($"Unsupported key type: {publicKey.GetType().Name}");
             }
 
-            return csr is not null
-                ? CertificateResult.CsrGenerated(csr)
-                : CertificateResult.Failed("Failed to generate CSR.");
+            // CreateSigningRequest(X509SignatureGenerator) returns DER-encoded PKCS#10 bytes.
+            var derBytes = request.CreateSigningRequest(signatureGenerator);
+            var pem = "-----BEGIN CERTIFICATE REQUEST-----\n"
+                + Convert.ToBase64String(derBytes, Base64FormattingOptions.InsertLineBreaks)
+                + "\n-----END CERTIFICATE REQUEST-----";
+
+            return CertificateResult.CsrGenerated(pem);
         }
         catch (Exception ex)
         {
@@ -539,75 +538,11 @@ internal sealed class YubiKeyEcdsaSignatureGenerator(
         };
 
         // Sign using YubiKey (blocking call - this is sync API required by X509SignatureGenerator)
-        // YubiKey returns signature in IEEE P1363 format (r || s)
+        // YubiKey returns ECDSA signatures in DER format (RFC 3279 SEQUENCE { INTEGER r, INTEGER s }).
+        // X.509 CSR signature fields also expect DER, so no conversion is needed.
         var signatureMemory = session.SignOrDecryptAsync(slot, algorithm, hash).GetAwaiter().GetResult();
-        var signature = signatureMemory.Span;
-
-        // Convert IEEE P1363 (r || s) to DER format for X.509
-        return ConvertIeeeP1363ToDer(signature);
+        return signatureMemory.ToArray();
     }
 
     protected override PublicKey BuildPublicKey() => new(publicKey);
-
-    private static byte[] ConvertIeeeP1363ToDer(ReadOnlySpan<byte> ieeeSignature)
-    {
-        // IEEE P1363 format: r || s (each coordinate is half the signature)
-        int coordinateSize = ieeeSignature.Length / 2;
-        var r = ieeeSignature[..coordinateSize];
-        var s = ieeeSignature[coordinateSize..];
-
-        // Convert to DER integers (may need leading 0x00 if high bit set)
-        byte[] rDer = ToDerInteger(r);
-        byte[] sDer = ToDerInteger(s);
-
-        // Build SEQUENCE { INTEGER r, INTEGER s }
-        int sequenceContentLength = rDer.Length + sDer.Length;
-        int sequenceHeaderLength = sequenceContentLength < 128 ? 2 : 3;
-        byte[] result = new byte[sequenceHeaderLength + sequenceContentLength];
-
-        int offset = 0;
-        result[offset++] = 0x30; // SEQUENCE tag
-        if (sequenceContentLength < 128)
-        {
-            result[offset++] = (byte)sequenceContentLength;
-        }
-        else
-        {
-            result[offset++] = 0x81;
-            result[offset++] = (byte)sequenceContentLength;
-        }
-
-        rDer.CopyTo(result, offset);
-        offset += rDer.Length;
-        sDer.CopyTo(result, offset);
-
-        return result;
-    }
-
-    private static byte[] ToDerInteger(ReadOnlySpan<byte> value)
-    {
-        // Skip leading zeros
-        int start = 0;
-        while (start < value.Length - 1 && value[start] == 0)
-        {
-            start++;
-        }
-
-        // Need leading 0x00 if high bit is set (to indicate positive number)
-        bool needsLeadingZero = (value[start] & 0x80) != 0;
-        int length = value.Length - start + (needsLeadingZero ? 1 : 0);
-
-        byte[] result = new byte[2 + length];
-        result[0] = 0x02; // INTEGER tag
-        result[1] = (byte)length;
-
-        int offset = 2;
-        if (needsLeadingZero)
-        {
-            result[offset++] = 0x00;
-        }
-
-        value[start..].CopyTo(result.AsSpan(offset));
-        return result;
-    }
 }

@@ -77,9 +77,9 @@ public static class Verification
             }
 
             var stopwatch = Stopwatch.StartNew();
-            var isValid = false;
+            bool isValid;
 
-            var rsaKey = cert.GetRSAPublicKey();
+            using var rsaKey = cert.GetRSAPublicKey();
             if (rsaKey is not null)
             {
                 isValid = rsaKey.VerifyData(
@@ -90,13 +90,21 @@ public static class Verification
             }
             else
             {
-                var ecdsaKey = cert.GetECDsaPublicKey();
+                using var ecdsaKey = cert.GetECDsaPublicKey();
                 if (ecdsaKey is not null)
                 {
+                    // YubiKey returns ECDSA signatures in DER format (RFC 3279 SEQUENCE).
+                    // .NET's default VerifyData expects IEEE P1363 (raw r||s), so specify DER explicitly.
                     isValid = ecdsaKey.VerifyData(
                         originalData.Span,
                         signature.Span,
-                        hashAlgorithm);
+                        hashAlgorithm,
+                        DSASignatureFormat.Rfc3279DerSequence);
+                }
+                else
+                {
+                    return VerificationResult.Failed(
+                        "Certificate does not contain a supported public key type (RSA or ECDSA).");
                 }
             }
 

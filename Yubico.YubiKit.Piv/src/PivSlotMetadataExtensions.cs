@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Piv;
 
@@ -48,19 +49,31 @@ public static class PivSlotMetadataExtensions
                 $"Slot contains {metadata.Algorithm} key, not an RSA key. Use GetECDsaPublicKey() for ECC keys.");
         }
 
-        var publicKeyBytes = metadata.PublicKey.Span;
-        var rsa = RSA.Create();
-        
-        try
+        // PivSlotMetadata.PublicKey stores the raw PIV TLV-encoded RSA public key:
+        //   { tag 0x81: modulus bytes, tag 0x82: exponent bytes }
+        // We parse it the same way PivSession.ParseRsaPublicKey does.
+        var rawSpan = metadata.PublicKey.Span;
+        var tlvDict = TlvHelper.DecodeDictionary(rawSpan);
+
+        if (!tlvDict.TryGetValue(0x81, out var modulusMemory))
         {
-            rsa.ImportSubjectPublicKeyInfo(publicKeyBytes, out _);
-            return rsa;
+            throw new InvalidOperationException(
+                "Public key metadata is missing RSA modulus (tag 0x81).");
         }
-        catch
+
+        if (!tlvDict.TryGetValue(0x82, out var exponentMemory))
         {
-            rsa.Dispose();
-            throw;
+            throw new InvalidOperationException(
+                "Public key metadata is missing RSA public exponent (tag 0x82).");
         }
+
+        var parameters = new RSAParameters
+        {
+            Modulus = modulusMemory.ToArray(),
+            Exponent = exponentMemory.ToArray()
+        };
+
+        return RSA.Create(parameters);
     }
 
     /// <summary>
@@ -101,19 +114,41 @@ public static class PivSlotMetadataExtensions
                 "Curve25519 keys (Ed25519, X25519) require specialized handling.");
         }
 
-        var publicKeyBytes = metadata.PublicKey.Span;
-        var ecdsa = ECDsa.Create();
-        
-        try
+        // PivSlotMetadata.PublicKey stores the raw PIV TLV-encoded EC point:
+        //   [0x86][length][0x04][X bytes][Y bytes]
+        // We need to strip the TLV header and build ECParameters from the raw point.
+        var rawBytes = metadata.PublicKey.Span;
+        ReadOnlySpan<byte> ecPoint = rawBytes;
+
+        // Strip the outer TLV tag/length if present (tag 0x86 = PIV EC point)
+        if (rawBytes.Length > 2 && rawBytes[0] == 0x86)
         {
-            ecdsa.ImportSubjectPublicKeyInfo(publicKeyBytes, out _);
-            return ecdsa;
+            int headerLength = rawBytes[1] < 0x80 ? 2 : 2 + (rawBytes[1] & 0x7F);
+            ecPoint = rawBytes[headerLength..];
         }
-        catch
+
+        // ecPoint should now be [0x04][X][Y] (uncompressed format)
+        if (ecPoint.Length < 3 || ecPoint[0] != 0x04)
         {
-            ecdsa.Dispose();
-            throw;
+            throw new InvalidOperationException(
+                "Public key is not in expected uncompressed EC point format (0x04 prefix).");
         }
+
+        int coordinateSize = (ecPoint.Length - 1) / 2;
+        var x = ecPoint[1..(1 + coordinateSize)].ToArray();
+        var y = ecPoint[(1 + coordinateSize)..].ToArray();
+
+        var curve = metadata.Algorithm == PivAlgorithm.EccP384
+            ? ECCurve.NamedCurves.nistP384
+            : ECCurve.NamedCurves.nistP256;
+
+        var ecParams = new ECParameters
+        {
+            Curve = curve,
+            Q = new ECPoint { X = x, Y = y }
+        };
+
+        return ECDsa.Create(ecParams);
     }
 }
 

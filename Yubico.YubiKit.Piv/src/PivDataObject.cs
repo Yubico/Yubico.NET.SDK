@@ -115,6 +115,6 @@ public static class PivDataObject
     /// <summary>Retired certificate 20 (slot 95).</summary>
     public const int Retired20 = 0x5FC120;
     
-    /// <summary>Attestation certificate (slot F9).</summary>
-    public const int Attestation = 0x5FC121;
+    /// <summary>Attestation certificate (slot F9). Yubico-specific, not standard PIV.</summary>
+    public const int Attestation = 0x5FFF01;
 }

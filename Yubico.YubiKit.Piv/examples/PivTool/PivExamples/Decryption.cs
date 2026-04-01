@@ -81,8 +81,10 @@ public static class Decryption
 
             var stopwatch = Stopwatch.StartNew();
 
-            // Decrypt using simplified API
-            var decrypted = await session.SignOrDecryptAsync(slot, encryptedData, cancellationToken);
+            // Decrypt using explicit algorithm overload.
+            // The auto-detect overload checks PIV app version (0.0.1), not device firmware.
+            var algorithm = metadata.Value.Algorithm;
+            var decrypted = await session.SignOrDecryptAsync(slot, algorithm, encryptedData, cancellationToken);
 
             stopwatch.Stop();
             return DecryptionResult.Succeeded(decrypted, stopwatch.ElapsedMilliseconds);

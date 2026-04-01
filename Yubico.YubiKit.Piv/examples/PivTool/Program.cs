@@ -1,13 +1,22 @@
 using Spectre.Console;
+using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Commands;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Menus;
 
-// Application banner
+// Non-interactive mode: any argument triggers CLI mode
+// Interactive mode: no args, or stdin is not a TTY
+if (args.Length > 0)
+{
+    return await CliRunner.RunAsync(args);
+}
+
+// Application banner (interactive only)
 AnsiConsole.Write(
     new FigletText("PIV Tool")
         .LeftJustified()
         .Color(Color.Green));
 
 AnsiConsole.MarkupLine("[grey]YubiKey PIV Management Tool - SDK Example Application[/]");
+AnsiConsole.MarkupLine("[grey]Tip: run with --help for non-interactive CLI usage.[/]");
 AnsiConsole.WriteLine();
 
 // Main menu loop

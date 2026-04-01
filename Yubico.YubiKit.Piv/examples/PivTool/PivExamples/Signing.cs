@@ -90,11 +90,13 @@ public static class Signing
                 "SHA256" => SHA256.HashData(dataToSign.Span),
                 "SHA384" => SHA384.HashData(dataToSign.Span),
                 "SHA512" => SHA512.HashData(dataToSign.Span),
-                _ => SHA256.HashData(dataToSign.Span)
+                _ => throw new ArgumentException($"Unsupported hash algorithm: {hashAlgorithm.Name}", nameof(hashAlgorithm))
             };
 
-            // Sign using simplified API (auto-detects algorithm from slot metadata)
-            var signature = await session.SignOrDecryptAsync(slot, hash, cancellationToken);
+            // Sign using explicit algorithm from the already-fetched metadata.
+            // The auto-detect overload checks PIV app version (0.0.1), not device firmware.
+            var algorithm = metadata.Value.Algorithm;
+            var signature = await session.SignOrDecryptAsync(slot, algorithm, hash, cancellationToken);
 
             stopwatch.Stop();
             return SigningResult.Succeeded(signature, stopwatch.ElapsedMilliseconds);

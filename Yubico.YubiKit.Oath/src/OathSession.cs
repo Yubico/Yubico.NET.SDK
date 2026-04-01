@@ -203,35 +203,74 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         byte typeByte = (byte)((byte)credentialData.OathType | (byte)credentialData.HashAlgorithm);
 
-        // TAG_NAME + TAG_KEY
-        using var nameTlv = new Tlv(OathConstants.TagName, credId);
         // TAG_KEY value: [type_byte][digits_byte][secret...]
         byte[] keyValue = [(byte)typeByte, (byte)credentialData.Digits, .. secret];
-        using var keyTlv = new Tlv(OathConstants.TagKey, keyValue);
 
-        var dataBuilder = new List<byte>();
-        dataBuilder.AddRange(nameTlv.AsSpan().ToArray());
-        dataBuilder.AddRange(keyTlv.AsSpan().ToArray());
-
-        if (requireTouch)
+        try
         {
-            using var propTlv = new Tlv(OathConstants.TagProperty, [OathConstants.PropRequireTouch]);
-            dataBuilder.AddRange(propTlv.AsSpan().ToArray());
-        }
+            // TAG_NAME + TAG_KEY
+            using var nameTlv = new Tlv(OathConstants.TagName, credId);
+            using var keyTlv = new Tlv(OathConstants.TagKey, keyValue);
 
-        if (credentialData.OathType == OathType.Hotp && credentialData.Counter > 0)
+            // Calculate total size for all TLVs
+            int totalSize = nameTlv.TotalLength + keyTlv.TotalLength;
+
+            Tlv? propTlv = null;
+            Tlv? imfTlv = null;
+
+            if (requireTouch)
+            {
+                propTlv = new Tlv(OathConstants.TagProperty, [OathConstants.PropRequireTouch]);
+                totalSize += propTlv.TotalLength;
+            }
+
+            if (credentialData.OathType == OathType.Hotp && credentialData.Counter > 0)
+            {
+                Span<byte> imfBytes = stackalloc byte[4];
+                BinaryPrimitives.WriteInt32BigEndian(imfBytes, credentialData.Counter);
+                imfTlv = new Tlv(OathConstants.TagImf, imfBytes);
+                totalSize += imfTlv.TotalLength;
+            }
+
+            try
+            {
+                var data = new byte[totalSize];
+                int offset = 0;
+
+                nameTlv.AsSpan().CopyTo(data.AsSpan(offset));
+                offset += nameTlv.TotalLength;
+
+                keyTlv.AsSpan().CopyTo(data.AsSpan(offset));
+                offset += keyTlv.TotalLength;
+
+                if (propTlv is not null)
+                {
+                    propTlv.AsSpan().CopyTo(data.AsSpan(offset));
+                    offset += propTlv.TotalLength;
+                }
+
+                if (imfTlv is not null)
+                {
+                    imfTlv.AsSpan().CopyTo(data.AsSpan(offset));
+                }
+
+                var command = new ApduCommand(0x00, OathConstants.InsPut, 0x00, 0x00, data);
+                await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            finally
+            {
+                propTlv?.Dispose();
+                imfTlv?.Dispose();
+            }
+
+            _logger.LogDebug("Credential stored: {CredentialIdLength} bytes", credId.Length);
+        }
+        finally
         {
-            Span<byte> imfBytes = stackalloc byte[4];
-            BinaryPrimitives.WriteInt32BigEndian(imfBytes, credentialData.Counter);
-            using var imfTlv = new Tlv(OathConstants.TagImf, imfBytes);
-            dataBuilder.AddRange(imfTlv.AsSpan().ToArray());
+            CryptographicOperations.ZeroMemory(keyValue);
+            CryptographicOperations.ZeroMemory(secret);
         }
-
-        var command = new ApduCommand(0x00, OathConstants.InsPut, 0x00, 0x00, dataBuilder.ToArray());
-        await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        _logger.LogDebug("Credential stored: {CredentialIdLength} bytes", credId.Length);
     }
 
     /// <inheritdoc />
@@ -496,10 +535,10 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
             // Verify device's response
             byte[] expectedResponse = HMACSHA1.HashData(key, clientChallenge);
+            byte[]? deviceResponse = null;
             try
             {
                 using var deviceTlvs = TlvHelper.DecodeList(response.Data.Span);
-                byte[]? deviceResponse = null;
 
                 foreach (var tlv in deviceTlvs)
                 {
@@ -522,6 +561,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
             finally
             {
                 CryptographicOperations.ZeroMemory(expectedResponse);
+                if (deviceResponse is not null)
+                    CryptographicOperations.ZeroMemory(deviceResponse);
             }
         }
         finally
@@ -540,6 +581,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         byte[] clientChallenge = new byte[OathConstants.ChallengeLength];
         byte[]? clientResponse = null;
+        byte[]? keyValue = null;
 
         try
         {
@@ -547,7 +589,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             clientResponse = HMACSHA1.HashData(key, clientChallenge);
 
             byte typeByte = (byte)((byte)OathType.Totp | (byte)OathHashAlgorithm.Sha1);
-            byte[] keyValue = [typeByte, .. key];
+            keyValue = [typeByte, .. key];
 
             using var keyTlv = new Tlv(OathConstants.TagKey, keyValue);
             using var challengeTlv = new Tlv(OathConstants.TagChallenge, clientChallenge);
@@ -567,6 +609,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
             CryptographicOperations.ZeroMemory(clientChallenge);
             if (clientResponse is not null)
                 CryptographicOperations.ZeroMemory(clientResponse);
+            if (keyValue is not null)
+                CryptographicOperations.ZeroMemory(keyValue);
         }
     }
 
@@ -593,9 +637,9 @@ public sealed class OathSession : ApplicationSession, IOathSession
         if (response.SW1 != 0x61)
             return response.Data;
 
-        // Collect all chained data
-        var allData = new List<byte>();
-        allData.AddRange(response.Data.ToArray());
+        // Collect all chained data using MemoryStream to avoid repeated ToArray() calls
+        using var stream = new MemoryStream();
+        stream.Write(response.Data.Span);
 
         var currentResponse = response;
         while (currentResponse.SW1 == 0x61)
@@ -604,9 +648,9 @@ public sealed class OathSession : ApplicationSession, IOathSession
             currentResponse = await _protocol
                 .TransmitAndReceiveAsync(sendRemaining, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
-            allData.AddRange(currentResponse.Data.ToArray());
+            stream.Write(currentResponse.Data.Span);
         }
 
-        return allData.ToArray();
+        return stream.ToArray();
     }
 }

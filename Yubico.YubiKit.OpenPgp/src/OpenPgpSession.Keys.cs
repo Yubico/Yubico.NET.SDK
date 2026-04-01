@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.OpenPgp;

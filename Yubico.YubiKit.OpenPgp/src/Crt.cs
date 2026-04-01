@@ -24,22 +24,28 @@ public static class Crt
     /// <summary>
     ///     CRT for the Signature key slot.
     /// </summary>
-    public static ReadOnlyMemory<byte> Sig { get; } = new Tlv(0xB6, ReadOnlySpan<byte>.Empty).AsMemory().ToArray();
+    public static ReadOnlyMemory<byte> Sig { get; } = BuildCrt(0xB6);
 
     /// <summary>
     ///     CRT for the Decryption key slot.
     /// </summary>
-    public static ReadOnlyMemory<byte> Dec { get; } = new Tlv(0xB8, ReadOnlySpan<byte>.Empty).AsMemory().ToArray();
+    public static ReadOnlyMemory<byte> Dec { get; } = BuildCrt(0xB8);
 
     /// <summary>
     ///     CRT for the Authentication key slot.
     /// </summary>
-    public static ReadOnlyMemory<byte> Aut { get; } = new Tlv(0xA4, ReadOnlySpan<byte>.Empty).AsMemory().ToArray();
+    public static ReadOnlyMemory<byte> Aut { get; } = BuildCrt(0xA4);
 
     /// <summary>
     ///     CRT for the Attestation key slot.
     /// </summary>
     public static ReadOnlyMemory<byte> Att { get; } = BuildAttCrt();
+
+    private static byte[] BuildCrt(int tag)
+    {
+        using var tlv = new Tlv(tag, ReadOnlySpan<byte>.Empty);
+        return tlv.AsMemory().ToArray();
+    }
 
     private static byte[] BuildAttCrt()
     {

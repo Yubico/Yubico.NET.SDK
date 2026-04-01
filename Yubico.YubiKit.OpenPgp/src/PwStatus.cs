@@ -103,15 +103,10 @@ public sealed class PwStatus
             throw new ArgumentException("PW status must be at least 7 bytes.", nameof(encoded));
         }
 
-        PinPolicy policy;
-        try
-        {
-            policy = (PinPolicy)encoded[0];
-        }
-        catch
-        {
-            policy = PinPolicy.Once;
-        }
+        var policyByte = encoded[0];
+        var policy = Enum.IsDefined((PinPolicy)policyByte)
+            ? (PinPolicy)policyByte
+            : PinPolicy.Once;
 
         return new PwStatus
         {

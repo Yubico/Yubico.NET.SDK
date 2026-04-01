@@ -188,7 +188,7 @@ public sealed class DiscretionaryDataObjects
         var result = new KeyInformation();
         for (var i = 0; i + 1 < encoded.Length; i += 2)
         {
-            if (Enum.IsDefined(typeof(KeyRef), encoded[i]))
+            if (Enum.IsDefined((KeyRef)encoded[i]))
             {
                 result[(KeyRef)encoded[i]] = (KeyStatus)encoded[i + 1];
             }

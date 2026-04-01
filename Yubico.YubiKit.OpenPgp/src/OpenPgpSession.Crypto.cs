@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.Utils;
 

@@ -12,13 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Oath.UnitTests;
+namespace Yubico.YubiKit.Oath;
 
-public class PlaceholderTests
+/// <summary>
+///     The hash algorithm used for OATH credential calculation.
+/// </summary>
+public enum OathHashAlgorithm : byte
 {
-    [Fact]
-    public void Placeholder_ShouldPass()
-    {
-        Assert.True(true);
-    }
+    /// <summary>
+    ///     SHA-1 (160-bit digest, 64-byte block size).
+    /// </summary>
+    Sha1 = 0x01,
+
+    /// <summary>
+    ///     SHA-256 (256-bit digest, 64-byte block size).
+    /// </summary>
+    Sha256 = 0x02,
+
+    /// <summary>
+    ///     SHA-512 (512-bit digest, 128-byte block size).
+    /// </summary>
+    Sha512 = 0x03
 }

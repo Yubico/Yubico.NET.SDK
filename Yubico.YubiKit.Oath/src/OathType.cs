@@ -12,13 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Oath.UnitTests;
+namespace Yubico.YubiKit.Oath;
 
-public class PlaceholderTests
+/// <summary>
+///     The type of OATH credential.
+/// </summary>
+public enum OathType : byte
 {
-    [Fact]
-    public void Placeholder_ShouldPass()
-    {
-        Assert.True(true);
-    }
+    /// <summary>
+    ///     HMAC-based One-Time Password (RFC 4226).
+    /// </summary>
+    Hotp = 0x10,
+
+    /// <summary>
+    ///     Time-based One-Time Password (RFC 6238).
+    /// </summary>
+    Totp = 0x20
 }

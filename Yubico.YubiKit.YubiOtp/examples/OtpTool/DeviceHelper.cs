@@ -56,13 +56,16 @@ public static class DeviceHelper
             .Where(d => SupportedConnectionTypes.Contains(d.ConnectionType))
             .ToList();
 
-        return devices.Count switch
+        if (devices.Count is 0)
         {
-            0 => throw new InvalidOperationException(
-                "No YubiKey detected. Insert a YubiKey with SmartCard (CCID) or OTP HID support."),
-            1 => devices[0],
-            _ => throw new InvalidOperationException(
-                $"Multiple YubiKeys detected ({devices.Count}). Remove extra devices so only one is connected.")
-        };
+            throw new InvalidOperationException(
+                "No YubiKey detected. Insert a YubiKey with SmartCard (CCID) or OTP HID support.");
+        }
+
+        // A single YubiKey may appear on multiple transports (SmartCard + HidOtp).
+        // Prefer SmartCard for richer protocol support.
+        return devices
+            .OrderBy(d => d.ConnectionType == ConnectionType.SmartCard ? 0 : 1)
+            .First();
     }
 }

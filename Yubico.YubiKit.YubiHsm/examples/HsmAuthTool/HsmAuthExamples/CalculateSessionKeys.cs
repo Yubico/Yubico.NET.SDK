@@ -47,6 +47,9 @@ public static class CalculateSessionKeys
 
         AnsiConsole.WriteLine();
         OutputHelpers.WriteSuccess("Session keys calculated successfully.");
+
+        // SECURITY NOTE: Session keys displayed for developer diagnostics only.
+        // Never display session key material in production applications.
         OutputHelpers.WriteHex("S-ENC", keys.SEnc);
         OutputHelpers.WriteHex("S-MAC", keys.SMac);
         OutputHelpers.WriteHex("S-RMAC", keys.SRmac);

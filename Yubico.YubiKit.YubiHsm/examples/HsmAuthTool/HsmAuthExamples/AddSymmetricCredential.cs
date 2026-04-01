@@ -31,6 +31,9 @@ public static class AddSymmetricCredential
         {
             keyEnc = RandomNumberGenerator.GetBytes(16);
             keyMac = RandomNumberGenerator.GetBytes(16);
+
+            // SECURITY NOTE: Keys displayed for developer diagnostics only.
+            // Never display key material in production applications.
             OutputHelpers.WriteHex("K-ENC (generated)", keyEnc);
             OutputHelpers.WriteHex("K-MAC (generated)", keyMac);
         }

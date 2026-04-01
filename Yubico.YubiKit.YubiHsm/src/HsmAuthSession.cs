@@ -14,7 +14,6 @@
 
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.Utils;
@@ -87,7 +86,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     internal const int Pbkdf2DerivedKeyLength = 32;
 
     private readonly ISmartCardConnection _connection;
-    private readonly ILogger _logger;
     private readonly ScpKeyParameters? _scpKeyParams;
     private ISmartCardProtocol? _protocol;
 
@@ -96,7 +94,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ScpKeyParameters? scpKeyParams = null)
     {
         _connection = connection;
-        _logger = Logger;
         _scpKeyParams = scpKeyParams;
     }
 

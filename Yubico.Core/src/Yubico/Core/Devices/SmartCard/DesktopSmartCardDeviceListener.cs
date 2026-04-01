@@ -1,4 +1,4 @@
-﻿// Copyright 2025 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using Yubico.PlatformInterop;
 
-using static Yubico.PlatformInterop.NativeMethods;
-
 namespace Yubico.Core.Devices.SmartCard
 {
     /// <summary>
@@ -31,6 +29,7 @@ namespace Yubico.Core.Devices.SmartCard
     {
         private static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
         private readonly ILogger _log = Logging.Log.GetLogger<DesktopSmartCardDeviceListener>();
+        private readonly ISCardInterop _scard;
 
         // The resource manager context.
         private SCardContext _context;
@@ -46,19 +45,32 @@ namespace Yubico.Core.Devices.SmartCard
         private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
         private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
 
+        // How long to back off after a recoverable SCard error before retrying.
+        // Prevents a tight polling loop when SCardGetStatusChange returns immediately (e.g.
+        // SCARD_E_INVALID_HANDLE in an RDS environment). See GitHub issue #434.
+        private static readonly TimeSpan RecoveryBackoffDelay = TimeSpan.FromMilliseconds(1000);
+
         /// <summary>
-        /// Constructs a <see cref="SmartCardDeviceListener"/>.
+        /// Constructs a <see cref="SmartCardDeviceListener"/> using the system SCard implementation.
         /// </summary>
-        public DesktopSmartCardDeviceListener()
+        public DesktopSmartCardDeviceListener() : this(new SCardInterop())
         {
+        }
+
+        /// <summary>
+        /// Internal constructor that accepts a test double for the SCard API surface.
+        /// </summary>
+        internal DesktopSmartCardDeviceListener(ISCardInterop scard)
+        {
+            _scard = scard;
             _log.LogInformation("Creating DesktopSmartCardDeviceListener.");
             Status = DeviceListenerStatus.Stopped;
 
-            uint result = SCardEstablishContext(SCARD_SCOPE.USER, out SCardContext context);
-            _log.SCardApiCall(nameof(SCardEstablishContext), result);
+            uint result = _scard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
+            _log.SCardApiCall(nameof(NativeMethods.SCardEstablishContext), result);
 
             // If we failed to establish context to the smart card subsystem, something substantially wrong
-            // has occured. We should not continue, and the device listener should remain dormant.
+            // has occurred. We should not continue, and the device listener should remain dormant.
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {
                 context.Dispose(); // Needed to satisfy analyzer (even though it should be null already)
@@ -116,7 +128,7 @@ namespace Yubico.Core.Devices.SmartCard
                     if (!result)
                     {
                         break;
-                    }    
+                    }
                 }
                 catch (Exception e)
                 {
@@ -148,7 +160,7 @@ namespace Yubico.Core.Devices.SmartCard
                     if (disposing)
                     {
                         // Cancel any blocking SCardGetStatusChange calls
-                        _ = SCardCancel(_context);
+                        _ = _scard.Cancel(_context);
 
                         // Stop the listener thread BEFORE disposing the context
                         // This ensures the thread can exit gracefully while context is still valid
@@ -208,7 +220,7 @@ namespace Yubico.Core.Devices.SmartCard
             bool sendEvents = CheckForChangesWaitTime != TimeSpan.Zero;
             var newStates = (SCARD_READER_STATE[])_readerStates.Clone();
 
-            uint getStatusChangeResult = SCardGetStatusChange(_context, (int)CheckForChangesWaitTime.TotalMilliseconds, newStates, newStates.Length);
+            uint getStatusChangeResult = _scard.GetStatusChange(_context, (int)CheckForChangesWaitTime.TotalMilliseconds, newStates, newStates.Length);
             if (!HandleSCardGetStatusChangeResult(getStatusChangeResult, newStates))
             {
                 return false;
@@ -246,7 +258,7 @@ namespace Yubico.Core.Devices.SmartCard
                 if (addedReaderStates.Length != 0)
                 {
                     _log.LogInformation("Additional smart card readers were found. Calling GetStatusChange for more information.");
-                    getStatusChangeResult = SCardGetStatusChange(_context, 0, updatedStates, updatedStates.Length);
+                    getStatusChangeResult = _scard.GetStatusChange(_context, 0, updatedStates, updatedStates.Length);
 
                     if (!HandleSCardGetStatusChangeResult(getStatusChangeResult, updatedStates))
                     {
@@ -259,7 +271,7 @@ namespace Yubico.Core.Devices.SmartCard
 
             if (RelevantChangesDetected(newStates))
             {
-                getStatusChangeResult = SCardGetStatusChange(_context, 0, newStates, newStates.Length);
+                getStatusChangeResult = _scard.GetStatusChange(_context, 0, newStates, newStates.Length);
                 if (!HandleSCardGetStatusChangeResult(getStatusChangeResult, newStates))
                 {
                     return false;
@@ -292,9 +304,9 @@ namespace Yubico.Core.Devices.SmartCard
             try
             {
                 SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(readerNames);
-                _ = SCardGetStatusChange(_context, 0, testState, testState.Length);
+                _ = _scard.GetStatusChange(_context, 0, testState, testState.Length);
                 bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);
-                return usePnpWorkaround;    
+                return usePnpWorkaround;
             }
             catch (Exception e)
             {
@@ -313,10 +325,10 @@ namespace Yubico.Core.Devices.SmartCard
         {
             if (usePnpWorkaround)
             {
-                uint result = SCardListReaders(_context, null, out string[] readerNames);
+                uint result = _scard.ListReaders(_context, null, out string[] readerNames);
                 if (result != ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
                 {
-                    _log.SCardApiCall(nameof(SCardListReaders), result);
+                    _log.SCardApiCall(nameof(NativeMethods.SCardListReaders), result);
                 }
 
                 return readerNames.Length != newStates.Length - 1;
@@ -396,14 +408,36 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         /// <summary>
-        /// Updates the current context.
+        /// Re-establishes the SCARDCONTEXT and refreshes the reader state list.
         /// </summary>
+        /// <remarks>
+        /// Guards against failed establishment: if <c>SCardEstablishContext</c> returns
+        /// non-success (e.g. Smart Card Service still restarting), the existing <c>_context</c>
+        /// is preserved rather than replaced with a failed handle.
+        /// </remarks>
         private void UpdateCurrentContext()
         {
-            uint result = SCardEstablishContext(SCARD_SCOPE.USER, out SCardContext context);
-            _log.SCardApiCall(nameof(SCardEstablishContext), result);
+            uint result = _scard.EstablishContext(SCARD_SCOPE.USER, out SCardContext newContext);
+            _log.SCardApiCall(nameof(NativeMethods.SCardEstablishContext), result);
 
-            _context = context;
+            if (result != ErrorCode.SCARD_S_SUCCESS)
+            {
+                // Establishment failed (e.g. Smart Card Service is still transitioning).
+                // Discard the invalid new handle and keep the existing _context so the caller
+                // can identify and retry on the next iteration.
+                newContext.Dispose();
+                _log.LogWarning("Failed to re-establish smart card context during recovery (error: {Error:X}).", result);
+                return;
+            }
+
+            // Explicitly release the old context before replacing it to avoid leaking the
+            // native handle while waiting for the SafeHandle finalizer.
+            if (!_context.IsInvalid && !_context.IsClosed)
+            {
+                _context.Dispose();
+            }
+
+            _context = newContext;
             _readerStates = GetReaderStateList();
         }
 
@@ -413,10 +447,10 @@ namespace Yubico.Core.Devices.SmartCard
         /// <returns><see cref="SCARD_READER_STATE"/></returns>
         private SCARD_READER_STATE[] GetReaderStateList()
         {
-            uint result = SCardListReaders(_context, null, out string[] readerNames);
+            uint result = _scard.ListReaders(_context, null, out string[] readerNames);
             if (result != ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
             {
-                _log.SCardApiCall(nameof(SCardListReaders), result);
+                _log.SCardApiCall(nameof(NativeMethods.SCardListReaders), result);
             }
 
             // We use this workaround as .NET 4.7 doesn't really support all of .NET Standard 2.0
@@ -476,26 +510,56 @@ namespace Yubico.Core.Devices.SmartCard
                 return true;
             }
 
-            // Log actual errors and reader states for debugging
-            _log.SCardApiCall(nameof(SCardGetStatusChange), result);
+            // Log actual errors and reader states for debugging.
+            // Sleep briefly to prevent a tight loop if this error persists (e.g. unknown
+            // persistent error codes not yet classified as recoverable).
+            _log.SCardApiCall(nameof(NativeMethods.SCardGetStatusChange), result);
             _log.LogInformation("Reader states:\n{States}", states);
+            Thread.Sleep(RecoveryBackoffDelay);
 
             return true;
         }
 
         /// <summary>
-        /// Checks if context need to be updated.
+        /// Attempts to recover from a non-critical SCard error by re-establishing the context.
+        /// Returns true if the error is recognised as recoverable and recovery was attempted.
         /// </summary>
-        /// <param name="errorCode"></param>
-        /// <returns>true if context updated</returns>
+        /// <remarks>
+        /// <para>
+        /// The following errors are handled:
+        /// <list type="bullet">
+        ///   <item><c>SCARD_E_INVALID_HANDLE</c> — the SCARDCONTEXT handle was invalidated, most
+        ///     commonly when a Windows Remote Desktop / terminal-server session is disconnected and
+        ///     reconnected (GitHub issue #434). WinSCard internally raises a C++ exception for each
+        ///     call with a stale handle, pegging a CPU core if the loop spins freely.</item>
+        ///   <item><c>SCARD_E_SYSTEM_CANCELLED</c> — the system cancelled the operation (e.g. RDS
+        ///     session logoff or shutdown).</item>
+        ///   <item><c>ERROR_BROKEN_PIPE</c> — smart card operation attempted in a remote session
+        ///     where the OS does not support smart card redirection (documented in SCardError.cs).</item>
+        ///   <item><c>SCARD_E_SERVICE_STOPPED</c> — the Smart Card Service stopped.</item>
+        ///   <item><c>SCARD_E_NO_READERS_AVAILABLE</c> — no readers present.</item>
+        ///   <item><c>SCARD_E_NO_SERVICE</c> — the Smart Card Service is not running.</item>
+        /// </list>
+        /// After re-establishing the context a <see cref="RecoveryBackoffDelay"/> sleep is applied
+        /// to prevent a tight polling loop if re-establishment also fails repeatedly (e.g. the
+        /// Smart Card Service is still transitioning).
+        /// </para>
+        /// </remarks>
         private bool UpdateContextIfNonCritical(uint errorCode)
         {
             switch (errorCode)
             {
+                case ErrorCode.SCARD_E_INVALID_HANDLE:      // RDS session disconnect invalidates handle
+                case ErrorCode.SCARD_E_SYSTEM_CANCELLED:    // RDS session logoff / system shutdown
+                case ErrorCode.ERROR_BROKEN_PIPE:           // RDS: OS does not support smart card redirection
                 case ErrorCode.SCARD_E_SERVICE_STOPPED:
                 case ErrorCode.SCARD_E_NO_READERS_AVAILABLE:
                 case ErrorCode.SCARD_E_NO_SERVICE:
                     UpdateCurrentContext();
+                    // Back off before the next poll to avoid a tight loop when SCardGetStatusChange
+                    // returns immediately (as it does with an invalid handle) and/or when the Smart
+                    // Card Service is unavailable and EstablishContext also fails immediately.
+                    Thread.Sleep(RecoveryBackoffDelay);
                     return true;
                 default:
                     return false;

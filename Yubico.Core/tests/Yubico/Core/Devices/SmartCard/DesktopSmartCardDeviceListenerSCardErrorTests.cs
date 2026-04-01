@@ -1,0 +1,291 @@
+// Copyright 2025 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Reproduces GitHub issue #434:
+// High idle CPU cost of enumerating devices in terminal server environments.
+//
+// Root cause: When an RDS session is disconnected, the Windows Smart Card Service invalidates
+// existing SCARDCONTEXT handles. DesktopSmartCardDeviceListener continued to call
+// SCardGetStatusChange with the stale handle, which internally raises and unwinds a C++
+// exception thousands of times per second, pegging a CPU core.
+//
+// Reproduction mechanism: FakeSCardInterop returns SCARD_E_INVALID_HANDLE from GetStatusChange
+// to simulate what WinSCard returns after an RDS handle invalidation. The fake does not require
+// Windows or a real smart card reader, and runs on all CI platforms.
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using Xunit;
+using Yubico.PlatformInterop;
+
+namespace Yubico.Core.Devices.SmartCard.UnitTests
+{
+    [Collection("SCardErrorTests")]
+    public class DesktopSmartCardDeviceListenerSCardErrorTests
+    {
+        // -----------------------------------------------------------------------------------------
+        // Issue #434 — SCARD_E_INVALID_HANDLE causes tight loop and high CPU
+        //
+        // This test FAILS before the fix and PASSES after.
+        // Before fix: SCARD_E_INVALID_HANDLE is not handled by UpdateContextIfNonCritical, so
+        //             the listener logs the error and immediately retries, spinning at full speed.
+        // After fix:  SCARD_E_INVALID_HANDLE triggers UpdateCurrentContext (re-establishes the
+        //             SCARDCONTEXT) followed by Thread.Sleep(1000) to back off.
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenGetStatusChangeReturnsInvalidHandle_ContextIsReestablished()
+        {
+            // Arrange: first GetStatusChange call (UsePnpWorkaround probe) returns timeout,
+            // second call returns SCARD_E_INVALID_HANDLE (simulates RDS handle invalidation),
+            // all subsequent calls return timeout (normal polling after recovery).
+            var fake = new FakeSCardInterop(
+                probeResult: ErrorCode.SCARD_E_TIMEOUT,
+                scheduledResults: new[] { ErrorCode.SCARD_E_INVALID_HANDLE });
+
+            using var listener = new DesktopSmartCardDeviceListener(fake);
+
+            // Act: give the listener enough time for the polling thread to hit INVALID_HANDLE,
+            // call UpdateCurrentContext, sleep 1000ms (the recovery backoff), and continue.
+            Thread.Sleep(2500);
+
+            // Assert: EstablishContext must have been called at least twice —
+            // once at construction and at least once more when recovering from INVALID_HANDLE.
+            Assert.True(
+                fake.EstablishContextCallCount >= 2,
+                $"EstablishContext was called {fake.EstablishContextCallCount} time(s). " +
+                "Expected >= 2: once at construction and once after SCARD_E_INVALID_HANDLE. " +
+                "This indicates SCARD_E_INVALID_HANDLE is not triggering context re-establishment.");
+        }
+
+        // -----------------------------------------------------------------------------------------
+        // Issue #434 — Proof that SCARD_E_INVALID_HANDLE causes a tight polling loop (high CPU)
+        //
+        // This test quantifies the spin rate. When SCARD_E_INVALID_HANDLE is returned on every
+        // GetStatusChange call (simulating persistent handle invalidation as in RDS), the loop
+        // must NOT spin freely. The Thread.Sleep(1000) backoff introduced by the fix limits the
+        // rate to ~1 iteration per second.
+        //
+        // This test FAILS before the fix (spin → hundreds of calls) and PASSES after.
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenGetStatusChangeAlwaysReturnsInvalidHandle_LoopDoesNotSpin()
+        {
+            // Arrange: all GetStatusChange calls (after probe) return SCARD_E_INVALID_HANDLE.
+            // This simulates the worst case: handle remains invalid after each recovery attempt.
+            var fake = new FakeSCardInterop(
+                probeResult: ErrorCode.SCARD_E_TIMEOUT,
+                defaultResult: ErrorCode.SCARD_E_INVALID_HANDLE);
+
+            using var listener = new DesktopSmartCardDeviceListener(fake);
+
+            // Act: observe for 600ms.
+            // Without fix: INVALID_HANDLE is ignored, loop spins at max speed —
+            //   expect hundreds of GetStatusChange calls in 600ms.
+            // With fix: INVALID_HANDLE triggers recovery + Thread.Sleep(1000) —
+            //   only 1–2 main poll calls fit in 600ms (probe + first main poll, then sleeping).
+            Thread.Sleep(600);
+
+            int callCount = fake.GetStatusChangeCallCount;
+
+            // Assert: fewer than 15 calls in 600ms proves no tight loop.
+            // With fix: expect ~2 (probe + first INVALID_HANDLE poll, then 1000ms sleep begins).
+            // Without fix: expect hundreds (unthrottled spin).
+            Assert.True(
+                callCount < 15,
+                $"GetStatusChange was called {callCount} times in ~600ms. " +
+                "Expected < 15: SCARD_E_INVALID_HANDLE must not cause an unthrottled polling loop. " +
+                "This is the high-CPU symptom reported in GitHub issue #434.");
+        }
+
+        // -----------------------------------------------------------------------------------------
+        // Issue #434 — SCARD_E_SYSTEM_CANCELLED (RDS session disconnect/logoff) also recovers
+        //
+        // SCARD_E_SYSTEM_CANCELLED is documented as "The action was canceled by the system,
+        // presumably to log off or shut down." It surfaces during RDS session transitions and
+        // must also trigger context re-establishment, not a tight loop.
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenGetStatusChangeReturnsSystemCancelled_ContextIsReestablished()
+        {
+            var fake = new FakeSCardInterop(
+                probeResult: ErrorCode.SCARD_E_TIMEOUT,
+                scheduledResults: new[] { ErrorCode.SCARD_E_SYSTEM_CANCELLED });
+
+            using var listener = new DesktopSmartCardDeviceListener(fake);
+            Thread.Sleep(2500);
+
+            Assert.True(
+                fake.EstablishContextCallCount >= 2,
+                $"EstablishContext was called {fake.EstablishContextCallCount} time(s). " +
+                "Expected >= 2: SCARD_E_SYSTEM_CANCELLED (RDS logoff/disconnect) must trigger context re-establishment.");
+        }
+
+        // -----------------------------------------------------------------------------------------
+        // Issue #434 — ERROR_BROKEN_PIPE (RDS smart card redirection not supported) also recovers
+        //
+        // ERROR_BROKEN_PIPE (0x109) is explicitly documented in SCardError.cs as the error
+        // returned when a smart card operation is attempted in a remote session where the OS
+        // does not support smart card redirection. Must not cause a tight loop.
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenGetStatusChangeReturnsBrokenPipe_ContextIsReestablished()
+        {
+            var fake = new FakeSCardInterop(
+                probeResult: ErrorCode.SCARD_E_TIMEOUT,
+                scheduledResults: new[] { ErrorCode.ERROR_BROKEN_PIPE });
+
+            using var listener = new DesktopSmartCardDeviceListener(fake);
+            Thread.Sleep(2500);
+
+            Assert.True(
+                fake.EstablishContextCallCount >= 2,
+                $"EstablishContext was called {fake.EstablishContextCallCount} time(s). " +
+                "Expected >= 2: ERROR_BROKEN_PIPE (RDS smart card redirection error) must trigger context re-establishment.");
+        }
+
+        // -----------------------------------------------------------------------------------------
+        // ISC-D — When context re-establishment itself fails, listener continues without crashing
+        //
+        // If SCardEstablishContext fails during recovery (Smart Card Service still unavailable),
+        // the listener must not crash, must not replace _context with a failed handle, and
+        // must continue attempting recovery (bounded by the 1000ms sleep between retries).
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenContextReestablishmentFails_ListenerContinuesWithoutCrashing()
+        {
+            // Arrange: first EstablishContext (construction) succeeds,
+            // subsequent EstablishContext calls (recovery) fail.
+            // GetStatusChange returns INVALID_HANDLE to trigger recovery.
+            var fake = new FakeSCardInterop(
+                probeResult: ErrorCode.SCARD_E_TIMEOUT,
+                defaultResult: ErrorCode.SCARD_E_INVALID_HANDLE,
+                establishContextFailAfterFirstCall: true);
+
+            var exception = Record.Exception(() =>
+            {
+                using var listener = new DesktopSmartCardDeviceListener(fake);
+                Thread.Sleep(2500);
+                // Listener should still be alive (Status is not Error due to exception)
+                Assert.NotEqual(DeviceListenerStatus.Error, listener.Status);
+            });
+
+            Assert.Null(exception);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────────────────
+        // Test double
+        // ─────────────────────────────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// A deterministic fake of <see cref="ISCardInterop"/> that lets tests control which
+        /// error codes <c>GetStatusChange</c> returns and count calls to each method.
+        /// Thread-safe: counters use <c>volatile</c> reads/writes from the listener thread.
+        /// </summary>
+        private sealed class FakeSCardInterop : ISCardInterop
+        {
+            private readonly uint _probeResult;
+            private readonly uint _defaultResult;
+            private readonly Queue<uint> _scheduledResults;
+            private readonly bool _establishContextFailAfterFirstCall;
+
+            private int _establishContextCallCount;
+            private int _getStatusChangeCallCount;
+
+            /// <summary>Total calls to EstablishContext. Safe to read from test thread after Thread.Sleep.</summary>
+            public int EstablishContextCallCount => Volatile.Read(ref _establishContextCallCount);
+
+            /// <summary>Total calls to GetStatusChange (includes the UsePnpWorkaround probe).</summary>
+            public int GetStatusChangeCallCount => Volatile.Read(ref _getStatusChangeCallCount);
+
+            /// <param name="probeResult">
+            ///   Return value for the very first GetStatusChange call (UsePnpWorkaround probe).
+            ///   Defaults to SCARD_E_TIMEOUT so the probe indicates no PnP workaround needed.
+            /// </param>
+            /// <param name="defaultResult">
+            ///   Return value for all GetStatusChange calls once <paramref name="scheduledResults"/>
+            ///   is exhausted. Defaults to SCARD_E_TIMEOUT (normal polling).
+            /// </param>
+            /// <param name="scheduledResults">
+            ///   Ordered sequence of return values for GetStatusChange calls after the probe.
+            ///   Values are consumed in order; after the queue is empty, <paramref name="defaultResult"/> is used.
+            /// </param>
+            /// <param name="establishContextFailAfterFirstCall">
+            ///   When true, the second and subsequent calls to EstablishContext return
+            ///   SCARD_E_NO_SERVICE to simulate the Smart Card Service being unavailable during recovery.
+            /// </param>
+            public FakeSCardInterop(
+                uint probeResult = ErrorCode.SCARD_E_TIMEOUT,
+                uint defaultResult = ErrorCode.SCARD_E_TIMEOUT,
+                uint[]? scheduledResults = null,
+                bool establishContextFailAfterFirstCall = false)
+            {
+                _probeResult = probeResult;
+                _defaultResult = defaultResult;
+                _scheduledResults = scheduledResults is null
+                    ? new Queue<uint>()
+                    : new Queue<uint>(scheduledResults);
+                _establishContextFailAfterFirstCall = establishContextFailAfterFirstCall;
+            }
+
+            public uint EstablishContext(SCARD_SCOPE scope, out SCardContext context)
+            {
+                int callNum = Interlocked.Increment(ref _establishContextCallCount);
+                context = new SCardContext(IntPtr.Zero);
+
+                if (_establishContextFailAfterFirstCall && callNum > 1)
+                {
+                    return ErrorCode.SCARD_E_NO_SERVICE;
+                }
+
+                return ErrorCode.SCARD_S_SUCCESS;
+            }
+
+            public uint GetStatusChange(SCardContext context, int timeout, SCARD_READER_STATE[] states, int count)
+            {
+                int callNum = Interlocked.Increment(ref _getStatusChangeCallCount);
+
+                // Call #1 is always the UsePnpWorkaround probe (timeout=0).
+                if (callNum == 1)
+                {
+                    return _probeResult;
+                }
+
+                lock (_scheduledResults)
+                {
+                    if (_scheduledResults.Count > 0)
+                    {
+                        return _scheduledResults.Dequeue();
+                    }
+                }
+
+                return _defaultResult;
+            }
+
+            public uint ListReaders(SCardContext context, string[]? groups, out string[] readerNames)
+            {
+                // Return empty reader list — no readers is valid and avoids allocating real state.
+                readerNames = Array.Empty<string>();
+                return ErrorCode.SCARD_E_NO_READERS_AVAILABLE;
+            }
+
+            public uint Cancel(SCardContext context) => ErrorCode.SCARD_S_SUCCESS;
+        }
+    }
+}

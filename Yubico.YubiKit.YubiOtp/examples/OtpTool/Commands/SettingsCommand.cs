@@ -18,14 +18,15 @@ using Spectre.Console;
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 
 /// <summary>
-/// Deletes an OTP slot configuration (ykman otp delete SLOT).
+/// Updates slot settings/flags without reprogramming key material (ykman otp settings SLOT).
+/// Requires the slot to have been programmed with AllowUpdate enabled.
 /// </summary>
-public static class DeleteCommand
+public static class SettingsCommand
 {
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)
     {
         var slot = options.Slot
-                   ?? throw new ArgumentException("SLOT argument is required. Usage: OtpTool delete <1|2>");
+                   ?? throw new ArgumentException("SLOT argument is required. Usage: OtpTool settings <1|2>");
 
         byte[] accessCode = OutputHelper.ParseHex(options.AccessCode, "access-code") ?? [];
 
@@ -33,7 +34,9 @@ public static class DeleteCommand
         {
             if (!options.Force && !options.Json)
             {
-                if (!AnsiConsole.Confirm($"Delete slot {FormatSlot(slot)} configuration?", defaultValue: false))
+                if (!AnsiConsole.Confirm(
+                        $"Update settings on slot {FormatSlot(slot)}?",
+                        defaultValue: false))
                 {
                     OutputHelper.WriteError("Aborted.");
                     return 1;
@@ -42,15 +45,38 @@ public static class DeleteCommand
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
-            await session.DeleteSlotAsync(slot, accessCode, ct);
+            using var config = new UpdateConfiguration();
+
+            if (options.Pacing == 10)
+            {
+                config.PacingChar10();
+            }
+            else if (options.Pacing == 20)
+            {
+                config.PacingChar20();
+            }
+
+            if (options.NoEnter)
+            {
+                config.AppendCr(false);
+            }
+
+            await session.UpdateConfigurationAsync(slot, config, currentAccessCode: accessCode, cancellationToken: ct);
 
             if (options.Json)
             {
-                OutputHelper.WriteJson(new { status = "ok", action = "delete", slot = FormatSlot(slot) });
+                OutputHelper.WriteJson(new
+                {
+                    status = "ok",
+                    slot = FormatSlot(slot),
+                    type = "settings",
+                    pacing = options.Pacing,
+                    noEnter = options.NoEnter
+                });
             }
             else
             {
-                OutputHelper.WriteSuccess($"Slot {FormatSlot(slot)} configuration deleted.");
+                OutputHelper.WriteSuccess($"Slot {FormatSlot(slot)} settings updated.");
             }
 
             return 0;

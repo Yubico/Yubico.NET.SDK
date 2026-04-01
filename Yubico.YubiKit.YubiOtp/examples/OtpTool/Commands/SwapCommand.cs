@@ -17,7 +17,7 @@ using Spectre.Console;
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 
 /// <summary>
-/// Swaps the configurations of slot 1 and slot 2.
+/// Swaps the configurations of slot 1 and slot 2 (ykman otp swap).
 /// </summary>
 public static class SwapCommand
 {
@@ -27,64 +27,24 @@ public static class SwapCommand
         {
             if (!AnsiConsole.Confirm("Swap slot 1 and slot 2 configurations?", defaultValue: false))
             {
-                AnsiConsole.MarkupLine("[grey]Cancelled.[/]");
-                return 0;
+                OutputHelper.WriteError("Aborted.");
+                return 1;
             }
         }
 
-        await using var session = await DeviceHelper.CreateSessionAsync(options.Json, ct);
-        if (session is null)
+        await using var session = await DeviceHelper.CreateSessionAsync(ct);
+
+        await session.SwapSlotsAsync(ct);
+
+        if (options.Json)
         {
-            if (options.Json) OutputHelper.WriteJsonError("No YubiKey found.");
-            else OutputHelper.WriteError("No YubiKey found.");
-            return 1;
+            OutputHelper.WriteJson(new { status = "ok", action = "swap" });
         }
-
-        try
+        else
         {
-            await session.SwapSlotsAsync(ct);
-
-            if (options.Json)
-            {
-                OutputHelper.WriteJson(new { status = "ok", action = "swap" });
-            }
-            else
-            {
-                OutputHelper.WriteSuccess("Slot 1 and slot 2 configurations swapped.");
-            }
-
-            return 0;
-        }
-        catch (Exception ex)
-        {
-            if (options.Json) OutputHelper.WriteJsonError(ex.Message);
-            else OutputHelper.WriteError(ex.Message);
-            return 1;
-        }
-    }
-
-    public static async Task RunInteractiveAsync(CancellationToken ct)
-    {
-        if (!AnsiConsole.Confirm("Swap slot 1 and slot 2 configurations?", defaultValue: false))
-        {
-            AnsiConsole.MarkupLine("[grey]Cancelled.[/]");
-            return;
-        }
-
-        await using var session = await DeviceHelper.CreateSessionAsync(jsonMode: false, ct);
-        if (session is null)
-        {
-            return;
-        }
-
-        try
-        {
-            await session.SwapSlotsAsync(ct);
             OutputHelper.WriteSuccess("Slot 1 and slot 2 configurations swapped.");
         }
-        catch (Exception ex)
-        {
-            OutputHelper.WriteError(ex.Message);
-        }
+
+        return 0;
     }
 }

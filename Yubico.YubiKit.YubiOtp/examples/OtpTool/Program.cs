@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Spectre.Console;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.YubiOtp.Examples.OtpTool;
 using Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
@@ -28,23 +27,21 @@ try
 {
     var options = CliOptions.Parse(args);
 
-    // CLI mode: execute command and exit
-    if (options is not null)
-    {
-        YubiKeyManager.StartMonitoring();
-        int exitCode = await RunCommandAsync(options, cts.Token);
-        await YubiKeyManager.ShutdownAsync();
-        return exitCode;
-    }
+    YubiKeyManager.StartMonitoring();
 
-    // Interactive mode: show menu loop
-    return await RunInteractiveAsync(cts.Token);
+    int exitCode = await RunCommandAsync(options, cts.Token);
+
+    await YubiKeyManager.ShutdownAsync();
+    return exitCode;
 }
 catch (ArgumentException ex)
 {
-    AnsiConsole.MarkupLine($"[red]{Markup.Escape(ex.Message)}[/]");
-    AnsiConsole.WriteLine();
-    CliOptions.PrintHelp();
+    OutputHelper.WriteError(ex.Message);
+    return 1;
+}
+catch (InvalidOperationException ex)
+{
+    OutputHelper.WriteError(ex.Message);
     return 1;
 }
 catch (OperationCanceledException)
@@ -52,95 +49,19 @@ catch (OperationCanceledException)
     return 0;
 }
 
-static async Task<int> RunCommandAsync(CliOptions options, CancellationToken ct) =>
+static Task<int> RunCommandAsync(CliOptions options, CancellationToken ct) =>
     options.Command switch
     {
-        "status" => await StatusCommand.RunAsync(options, ct),
-        "program" => await ProgramCommand.RunAsync(options, ct),
-        "calculate" => await CalculateCommand.RunAsync(options, ct),
-        "swap" => await SwapCommand.RunAsync(options, ct),
-        "delete" => await DeleteCommand.RunAsync(options, ct),
-        "help" => ShowHelp(),
-        _ => throw new ArgumentException($"Unknown command: {options.Command}. Run 'OtpTool --help' for usage.")
+        "info" => InfoCommand.RunAsync(options, ct),
+        "swap" => SwapCommand.RunAsync(options, ct),
+        "delete" => DeleteCommand.RunAsync(options, ct),
+        "chalresp" => ChalRespCommand.RunAsync(options, ct),
+        "hotp" => HotpCommand.RunAsync(options, ct),
+        "static" => StaticCommand.RunAsync(options, ct),
+        "yubiotp" => YubiOtpCommand.RunAsync(options, ct),
+        "calculate" => CalculateCommand.RunAsync(options, ct),
+        "ndef" => NdefCommand.RunAsync(options, ct),
+        "settings" => SettingsCommand.RunAsync(options, ct),
+        _ => throw new ArgumentException(
+            $"Unknown command: {options.Command}. Run 'OtpTool --help' for usage.")
     };
-
-static int ShowHelp()
-{
-    CliOptions.PrintHelp();
-    return 0;
-}
-
-static async Task<int> RunInteractiveAsync(CancellationToken ct)
-{
-    AnsiConsole.Write(
-        new FigletText("OTP Tool")
-            .LeftJustified()
-            .Color(Color.Blue));
-
-    AnsiConsole.MarkupLine("[grey]YubiKey OTP Slot Configuration Tool - SDK Example Application[/]");
-    AnsiConsole.WriteLine();
-
-    YubiKeyManager.StartMonitoring();
-
-    while (!ct.IsCancellationRequested)
-    {
-        string choice;
-        try
-        {
-            choice = await new SelectionPrompt<string>()
-                .Title("What would you like to do?")
-                .PageSize(12)
-                .AddChoices(
-                [
-                    "View Slot Status",
-                    "Program Slot",
-                    "HMAC-SHA1 Challenge-Response",
-                    "Swap Slots",
-                    "Delete Slot",
-                    "Exit"
-                ])
-                .ShowAsync(AnsiConsole.Console, ct);
-        }
-        catch (OperationCanceledException)
-        {
-            break;
-        }
-
-        if (choice == "Exit")
-        {
-            AnsiConsole.MarkupLine("[grey]Goodbye![/]");
-            break;
-        }
-
-        try
-        {
-            switch (choice)
-            {
-                case "View Slot Status":
-                    await StatusCommand.RunInteractiveAsync(ct);
-                    break;
-                case "Program Slot":
-                    await ProgramCommand.RunInteractiveAsync(ct);
-                    break;
-                case "HMAC-SHA1 Challenge-Response":
-                    await CalculateCommand.RunInteractiveAsync(ct);
-                    break;
-                case "Swap Slots":
-                    await SwapCommand.RunInteractiveAsync(ct);
-                    break;
-                case "Delete Slot":
-                    await DeleteCommand.RunInteractiveAsync(ct);
-                    break;
-            }
-        }
-        catch (Exception ex)
-        {
-            AnsiConsole.MarkupLine($"[red]Error: {Markup.Escape(ex.Message)}[/]");
-        }
-
-        AnsiConsole.WriteLine();
-    }
-
-    await YubiKeyManager.ShutdownAsync();
-    return 0;
-}

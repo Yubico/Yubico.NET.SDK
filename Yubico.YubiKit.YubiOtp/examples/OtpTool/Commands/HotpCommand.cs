@@ -18,14 +18,30 @@ using Spectre.Console;
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 
 /// <summary>
-/// Deletes an OTP slot configuration (ykman otp delete SLOT).
+/// Programs HOTP (event-based OTP) on a slot (ykman otp hotp SLOT).
 /// </summary>
-public static class DeleteCommand
+public static class HotpCommand
 {
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)
     {
         var slot = options.Slot
-                   ?? throw new ArgumentException("SLOT argument is required. Usage: OtpTool delete <1|2>");
+                   ?? throw new ArgumentException("SLOT argument is required. Usage: OtpTool hotp <1|2>");
+
+        byte[] hmacKey;
+
+        if (options.Generate)
+        {
+            hmacKey = RandomNumberGenerator.GetBytes(20);
+
+            if (!options.Json)
+            {
+                OutputHelper.WriteHex("Generated HMAC key", hmacKey);
+            }
+        }
+        else
+        {
+            hmacKey = OutputHelper.RequireHex(options.Key, "key");
+        }
 
         byte[] accessCode = OutputHelper.ParseHex(options.AccessCode, "access-code") ?? [];
 
@@ -33,7 +49,9 @@ public static class DeleteCommand
         {
             if (!options.Force && !options.Json)
             {
-                if (!AnsiConsole.Confirm($"Delete slot {FormatSlot(slot)} configuration?", defaultValue: false))
+                if (!AnsiConsole.Confirm(
+                        $"Program slot {FormatSlot(slot)} with HOTP?",
+                        defaultValue: false))
                 {
                     OutputHelper.WriteError("Aborted.");
                     return 1;
@@ -42,21 +60,36 @@ public static class DeleteCommand
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
-            await session.DeleteSlotAsync(slot, accessCode, ct);
+            using var config = new HotpSlotConfiguration(hmacKey, options.Imf ?? 0);
+
+            if (options.Digits == 8)
+            {
+                config.Use8Digits();
+            }
+
+            await session.PutConfigurationAsync(slot, config, currentAccessCode: accessCode, cancellationToken: ct);
 
             if (options.Json)
             {
-                OutputHelper.WriteJson(new { status = "ok", action = "delete", slot = FormatSlot(slot) });
+                OutputHelper.WriteJson(new
+                {
+                    status = "ok",
+                    slot = FormatSlot(slot),
+                    type = "hotp",
+                    digits = options.Digits ?? 6,
+                    imf = options.Imf ?? 0
+                });
             }
             else
             {
-                OutputHelper.WriteSuccess($"Slot {FormatSlot(slot)} configuration deleted.");
+                OutputHelper.WriteSuccess($"Slot {FormatSlot(slot)} programmed for HOTP.");
             }
 
             return 0;
         }
         finally
         {
+            CryptographicOperations.ZeroMemory(hmacKey);
             CryptographicOperations.ZeroMemory(accessCode);
         }
     }

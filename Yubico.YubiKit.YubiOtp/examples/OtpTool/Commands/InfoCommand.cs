@@ -17,26 +17,13 @@ using Spectre.Console;
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 
 /// <summary>
-/// Displays the OTP slot configuration state.
+/// Displays the OTP slot configuration state (ykman otp info).
 /// </summary>
-public static class StatusCommand
+public static class InfoCommand
 {
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)
     {
-        await using var session = await DeviceHelper.CreateSessionAsync(options.Json, ct);
-        if (session is null)
-        {
-            if (options.Json)
-            {
-                OutputHelper.WriteJsonError("No YubiKey found.");
-            }
-            else
-            {
-                OutputHelper.WriteError("No YubiKey found.");
-            }
-
-            return 1;
-        }
+        await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
         var state = session.GetConfigState();
 
@@ -50,21 +37,9 @@ public static class StatusCommand
         return 0;
     }
 
-    public static async Task RunInteractiveAsync(CancellationToken ct)
-    {
-        await using var session = await DeviceHelper.CreateSessionAsync(jsonMode: false, ct);
-        if (session is null)
-        {
-            return;
-        }
-
-        var state = session.GetConfigState();
-        DisplayStatus(state);
-    }
-
     private static void DisplayStatus(ConfigState state)
     {
-        OutputHelper.WriteHeader("OTP Slot Configuration");
+        OutputHelper.WriteHeader("OTP Slot Status");
 
         OutputHelper.WriteKeyValue("Firmware", state.FirmwareVersion.ToString());
         AnsiConsole.WriteLine();

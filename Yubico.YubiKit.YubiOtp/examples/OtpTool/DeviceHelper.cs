@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Spectre.Console;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool;
 
 /// <summary>
-/// Handles YubiKey device discovery and selection for OTP operations.
-/// Supports SmartCard and OTP HID transports.
+/// Handles YubiKey device discovery for OTP operations.
+/// Auto-selects when exactly one device is connected (non-interactive).
 /// </summary>
 public static class DeviceHelper
 {
@@ -32,106 +31,38 @@ public static class DeviceHelper
 
     /// <summary>
     /// Finds a YubiKey and creates a YubiOTP session.
-    /// In automation mode (JSON), fails immediately if no device found.
-    /// In interactive mode, prompts for retry.
+    /// Auto-selects when exactly one YubiKey is connected.
+    /// Fails with an error when zero or multiple devices are found.
     /// </summary>
-    public static async Task<YubiOtpSession?> CreateSessionAsync(
-        bool jsonMode,
-        CancellationToken cancellationToken)
+    public static async Task<YubiOtpSession> CreateSessionAsync(CancellationToken cancellationToken)
     {
-        var device = await SelectDeviceAsync(jsonMode, cancellationToken);
-        if (device is null)
-        {
-            return null;
-        }
-
+        var device = await SelectDeviceAsync(cancellationToken);
         return await device.CreateYubiOtpSessionAsync(cancellationToken: cancellationToken);
     }
 
     /// <summary>
-    /// Finds and selects a YubiKey device.
+    /// Finds and selects a YubiKey device (non-interactive).
     /// </summary>
-    public static async Task<IYubiKey?> SelectDeviceAsync(
-        bool jsonMode,
-        CancellationToken cancellationToken)
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when no devices are found or multiple devices are connected.
+    /// </exception>
+    public static async Task<IYubiKey> SelectDeviceAsync(CancellationToken cancellationToken)
     {
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            var allDevices = await YubiKeyManager.FindAllAsync(
-                ConnectionType.All,
-                cancellationToken: cancellationToken);
+        var allDevices = await YubiKeyManager.FindAllAsync(
+            ConnectionType.All,
+            cancellationToken: cancellationToken);
 
-            var devices = allDevices
-                .Where(d => SupportedConnectionTypes.Contains(d.ConnectionType))
-                .ToList();
-
-            if (devices.Count == 1)
-            {
-                return devices[0];
-            }
-
-            if (devices.Count > 1)
-            {
-                if (jsonMode)
-                {
-                    // In JSON mode, use the first device
-                    return devices[0];
-                }
-
-                return await PromptDeviceSelectionAsync(devices, cancellationToken);
-            }
-
-            if (jsonMode)
-            {
-                return null;
-            }
-
-            AnsiConsole.MarkupLine("[red]No YubiKey detected. Please insert a YubiKey and try again.[/]");
-            AnsiConsole.MarkupLine("[grey]Supported transports: SmartCard (CCID), OTP HID[/]");
-
-            if (!AnsiConsole.Confirm("Retry?", defaultValue: true))
-            {
-                return null;
-            }
-        }
-
-        return null;
-    }
-
-    private static async Task<IYubiKey?> PromptDeviceSelectionAsync(
-        IReadOnlyList<IYubiKey> devices,
-        CancellationToken cancellationToken)
-    {
-        var choices = devices
-            .Select((d, i) => $"{i + 1}. YubiKey ({FormatConnectionType(d.ConnectionType)})")
+        var devices = allDevices
+            .Where(d => SupportedConnectionTypes.Contains(d.ConnectionType))
             .ToList();
 
-        choices.Add("Cancel");
-
-        var selection = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("Multiple YubiKeys detected. Select one:")
-                .PageSize(10)
-                .AddChoices(choices));
-
-        if (selection == "Cancel")
+        return devices.Count switch
         {
-            return null;
-        }
-
-        int index = choices.IndexOf(selection);
-        return devices[index];
-    }
-
-    /// <summary>
-    /// Formats a connection type for display.
-    /// </summary>
-    public static string FormatConnectionType(ConnectionType connectionType) =>
-        connectionType switch
-        {
-            ConnectionType.SmartCard => "SmartCard",
-            ConnectionType.HidOtp => "OTP HID",
-            ConnectionType.HidFido => "FIDO HID",
-            _ => "Unknown"
+            0 => throw new InvalidOperationException(
+                "No YubiKey detected. Insert a YubiKey with SmartCard (CCID) or OTP HID support."),
+            1 => devices[0],
+            _ => throw new InvalidOperationException(
+                $"Multiple YubiKeys detected ({devices.Count}). Remove extra devices so only one is connected.")
         };
+    }
 }

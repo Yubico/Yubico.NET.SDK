@@ -18,14 +18,16 @@ using Spectre.Console;
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 
 /// <summary>
-/// Deletes an OTP slot configuration (ykman otp delete SLOT).
+/// Configures NDEF for NFC on a slot (ykman otp ndef SLOT).
 /// </summary>
-public static class DeleteCommand
+public static class NdefCommand
 {
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)
     {
         var slot = options.Slot
-                   ?? throw new ArgumentException("SLOT argument is required. Usage: OtpTool delete <1|2>");
+                   ?? throw new ArgumentException("SLOT argument is required. Usage: OtpTool ndef <1|2>");
+
+        NdefType ndefType = ParseNdefType(options.NdefTypeValue);
 
         byte[] accessCode = OutputHelper.ParseHex(options.AccessCode, "access-code") ?? [];
 
@@ -33,7 +35,9 @@ public static class DeleteCommand
         {
             if (!options.Force && !options.Json)
             {
-                if (!AnsiConsole.Confirm($"Delete slot {FormatSlot(slot)} configuration?", defaultValue: false))
+                if (!AnsiConsole.Confirm(
+                        $"Configure NDEF on slot {FormatSlot(slot)}?",
+                        defaultValue: false))
                 {
                     OutputHelper.WriteError("Aborted.");
                     return 1;
@@ -42,15 +46,27 @@ public static class DeleteCommand
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
-            await session.DeleteSlotAsync(slot, accessCode, ct);
+            await session.SetNdefConfigurationAsync(
+                slot,
+                options.Prefix,
+                accessCode,
+                ndefType,
+                ct);
 
             if (options.Json)
             {
-                OutputHelper.WriteJson(new { status = "ok", action = "delete", slot = FormatSlot(slot) });
+                OutputHelper.WriteJson(new
+                {
+                    status = "ok",
+                    slot = FormatSlot(slot),
+                    type = "ndef",
+                    ndefType = ndefType.ToString().ToLowerInvariant(),
+                    prefix = options.Prefix
+                });
             }
             else
             {
-                OutputHelper.WriteSuccess($"Slot {FormatSlot(slot)} configuration deleted.");
+                OutputHelper.WriteSuccess($"Slot {FormatSlot(slot)} NDEF configured.");
             }
 
             return 0;
@@ -60,6 +76,14 @@ public static class DeleteCommand
             CryptographicOperations.ZeroMemory(accessCode);
         }
     }
+
+    private static NdefType ParseNdefType(string? value) =>
+        value?.ToUpperInvariant() switch
+        {
+            null or "URI" => NdefType.Uri,
+            "TEXT" => NdefType.Text,
+            _ => throw new ArgumentException($"Invalid --ndef-type: {value}. Must be URI or TEXT.")
+        };
 
     private static string FormatSlot(Slot slot) =>
         slot == Slot.One ? "1" : "2";

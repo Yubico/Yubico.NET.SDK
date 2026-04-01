@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Hid.Otp;
 
@@ -25,13 +24,15 @@ namespace Yubico.YubiKit.YubiOtp;
 /// </summary>
 internal sealed class OtpHidBackend : IYubiOtpBackend
 {
-    private readonly IOtpHidProtocol _protocol;
-    private readonly ILogger _logger;
+    private static readonly ILogger Logger =
+        YubiKitLogging.LoggerFactory.CreateLogger<OtpHidBackend>();
 
-    public OtpHidBackend(IOtpHidProtocol protocol, ILogger? logger = null)
+    private readonly IOtpHidProtocol _protocol;
+
+    public OtpHidBackend(IOtpHidProtocol protocol)
     {
-        _protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
-        _logger = logger ?? NullLogger.Instance;
+        ArgumentNullException.ThrowIfNull(protocol);
+        _protocol = protocol;
     }
 
     public async ValueTask<ReadOnlyMemory<byte>> WriteUpdateAsync(
@@ -39,7 +40,7 @@ internal sealed class OtpHidBackend : IYubiOtpBackend
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken)
     {
-        _logger.LogDebug("OtpHidBackend WriteUpdate: slot={Slot}", slot);
+        Logger.LogDebug("OtpHidBackend WriteUpdate: slot={Slot}", slot);
 
         var response = await _protocol.SendAndReceiveAsync((byte)slot, data, cancellationToken)
             .ConfigureAwait(false);
@@ -53,7 +54,7 @@ internal sealed class OtpHidBackend : IYubiOtpBackend
         int expectedLength,
         CancellationToken cancellationToken)
     {
-        _logger.LogDebug("OtpHidBackend SendAndReceive: slot={Slot}, expectedLength={Length}", slot, expectedLength);
+        Logger.LogDebug("OtpHidBackend SendAndReceive: slot={Slot}, expectedLength={Length}", slot, expectedLength);
 
         var response = await _protocol.SendAndReceiveAsync((byte)slot, data, cancellationToken)
             .ConfigureAwait(false);
@@ -72,5 +73,10 @@ internal sealed class OtpHidBackend : IYubiOtpBackend
         }
 
         return response[..expectedLength];
+    }
+
+    public void Dispose()
+    {
+        // Backend doesn't own the protocol - YubiOtpSession handles disposal
     }
 }

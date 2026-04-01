@@ -18,7 +18,7 @@ namespace Yubico.YubiKit.YubiOtp;
 /// Internal abstraction for YubiOTP transport-specific operations.
 /// Implementations encode operations for SmartCard (APDU) or OTP HID (feature reports).
 /// </summary>
-internal interface IYubiOtpBackend
+internal interface IYubiOtpBackend : IDisposable
 {
     /// <summary>
     /// Writes a configuration to a slot and returns the updated status bytes.

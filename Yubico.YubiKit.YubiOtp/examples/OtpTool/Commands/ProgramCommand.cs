@@ -212,10 +212,17 @@ public static class ProgramCommand
 
         var scanCodes = Encoding.UTF8.GetBytes(password);
 
-        using var config = new StaticPasswordSlotConfiguration(scanCodes);
-        if (options.AppendCr) config.AppendCr();
+        try
+        {
+            using var config = new StaticPasswordSlotConfiguration(scanCodes);
+            if (options.AppendCr) config.AppendCr();
 
-        await session.PutConfigurationAsync(slot, config, newAccessCode, accessCode, ct);
+            await session.PutConfigurationAsync(slot, config, newAccessCode, accessCode, ct);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(scanCodes);
+        }
     }
 
     private static async Task ProgramHotpAsync(
@@ -323,10 +330,17 @@ public static class ProgramCommand
         var scanCodes = Encoding.UTF8.GetBytes(password);
         bool appendCr = AnsiConsole.Confirm("Append carriage return?", defaultValue: true);
 
-        using var config = new StaticPasswordSlotConfiguration(scanCodes);
-        if (appendCr) config.AppendCr();
+        try
+        {
+            using var config = new StaticPasswordSlotConfiguration(scanCodes);
+            if (appendCr) config.AppendCr();
 
-        await session.PutConfigurationAsync(slot, config, newAccessCode, accessCode, ct);
+            await session.PutConfigurationAsync(slot, config, newAccessCode, accessCode, ct);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(scanCodes);
+        }
     }
 
     private static async Task ProgramHotpInteractiveAsync(

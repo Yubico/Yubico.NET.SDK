@@ -167,8 +167,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             _backend = new SmartCardBackend(
                 wrappedScProtocol,
                 FirmwareVersion,
-                GetProgSeq(),
-                _logger);
+                GetProgSeq());
         }
 
         _logger.LogDebug("YubiOTP session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
@@ -505,7 +504,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     {
         // Text record: [language_length=0x02]["en"][text_content]
         const byte languageLength = 0x02;
-        byte[] langCode = "en"u8.ToArray();
+        ReadOnlySpan<byte> langCode = "en"u8;
         var textBytes = Encoding.UTF8.GetBytes(text);
 
         int dataLength = Math.Min(1 + langCode.Length + textBytes.Length, YubiOtpConstants.NdefDataSize);
@@ -513,11 +512,11 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
         // Language header
         payload[2] = languageLength;
-        Array.Copy(langCode, 0, payload, 3, langCode.Length);
+        langCode.CopyTo(payload.AsSpan(3));
 
         // Text content
         int textCopyLength = Math.Min(textBytes.Length, YubiOtpConstants.NdefDataSize - 1 - langCode.Length);
-        Array.Copy(textBytes, 0, payload, 3 + langCode.Length, textCopyLength);
+        textBytes.AsSpan(0, textCopyLength).CopyTo(payload.AsSpan(3 + langCode.Length));
     }
 
     private async Task WriteConfigAsync(

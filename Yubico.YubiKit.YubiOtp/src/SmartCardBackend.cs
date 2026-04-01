@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
@@ -26,22 +25,23 @@ namespace Yubico.YubiKit.YubiOtp;
 /// </summary>
 internal sealed class SmartCardBackend : IYubiOtpBackend
 {
+    private static readonly ILogger Logger =
+        YubiKitLogging.LoggerFactory.CreateLogger<SmartCardBackend>();
+
     private readonly ISmartCardProtocol _protocol;
     private readonly FirmwareVersion _firmwareVersion;
-    private readonly ILogger _logger;
 
     private byte _lastProgSeq;
 
     public SmartCardBackend(
         ISmartCardProtocol protocol,
         FirmwareVersion firmwareVersion,
-        byte initialProgSeq,
-        ILogger? logger = null)
+        byte initialProgSeq)
     {
-        _protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
+        ArgumentNullException.ThrowIfNull(protocol);
+        _protocol = protocol;
         _firmwareVersion = firmwareVersion;
         _lastProgSeq = initialProgSeq;
-        _logger = logger ?? NullLogger.Instance;
     }
 
     public async ValueTask<ReadOnlyMemory<byte>> WriteUpdateAsync(
@@ -58,7 +58,7 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
             Data = data
         };
 
-        _logger.LogDebug("SmartCardBackend WriteUpdate: slot={Slot}", slot);
+        Logger.LogDebug("SmartCardBackend WriteUpdate: slot={Slot}", slot);
 
         var response = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
@@ -91,7 +91,7 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
             Data = data
         };
 
-        _logger.LogDebug("SmartCardBackend SendAndReceive: slot={Slot}, expectedLength={Length}", slot, expectedLength);
+        Logger.LogDebug("SmartCardBackend SendAndReceive: slot={Slot}, expectedLength={Length}", slot, expectedLength);
 
         var response = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
@@ -154,5 +154,10 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
         }
 
         _lastProgSeq = newProgSeq;
+    }
+
+    public void Dispose()
+    {
+        // Backend doesn't own the protocol - YubiOtpSession handles disposal
     }
 }

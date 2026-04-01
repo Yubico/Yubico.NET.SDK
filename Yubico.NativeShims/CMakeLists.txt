@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.15)
 # Project version
 #
 if(NOT DEFINED PROJECT_VERSION)
-    set(PROJECT_VERSION "1.14.0")
+    set(PROJECT_VERSION "1.0.0")
 endif()
 set(VCPKG_MANIFEST_VERSION ${PROJECT_VERSION})
 

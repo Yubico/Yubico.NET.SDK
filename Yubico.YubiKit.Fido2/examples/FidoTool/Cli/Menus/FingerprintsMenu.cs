@@ -22,16 +22,17 @@ using Yubico.YubiKit.Fido2.Examples.FidoTool.FidoExamples;
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Menus;
 
 /// <summary>
-/// Interactive menu for biometric enrollment operations.
+/// Interactive menu for fingerprint enrollment operations.
+/// Mirrors ykman's "fido fingerprints" command group.
 /// </summary>
-public static class BioMenu
+public static class FingerprintsMenu
 {
     /// <summary>
-    /// Runs the bio enrollment sub-menu.
+    /// Runs the fingerprints sub-menu.
     /// </summary>
     public static async Task RunAsync(CancellationToken cancellationToken)
     {
-        OutputHelpers.WriteHeader("Bio Enrollment");
+        OutputHelpers.WriteHeader("Fingerprints (Bio Enrollment)");
 
         var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
         if (selection is null)
@@ -55,37 +56,37 @@ public static class BioMenu
                 .Title("Select operation:")
                 .AddChoices(
                 [
+                    "List enrolled fingerprints",
+                    "Add fingerprint",
+                    "Delete fingerprint",
+                    "Rename fingerprint",
                     "Sensor info",
-                    "Enroll fingerprint",
-                    "List enrollments",
-                    "Rename enrollment",
-                    "Remove enrollment",
                     "Back"
                 ]));
 
         switch (choice)
         {
-            case "Sensor info":
-                await RunSensorInfoAsync(selection.Device, cancellationToken);
-                break;
-            case "Enroll fingerprint":
-                await RunEnrollAsync(selection.Device, cancellationToken);
-                break;
-            case "List enrollments":
+            case "List enrolled fingerprints":
                 await RunListAsync(selection.Device, cancellationToken);
                 break;
-            case "Rename enrollment":
+            case "Add fingerprint":
+                await RunAddAsync(selection.Device, cancellationToken);
+                break;
+            case "Delete fingerprint":
+                await RunDeleteAsync(selection.Device, cancellationToken);
+                break;
+            case "Rename fingerprint":
                 await RunRenameAsync(selection.Device, cancellationToken);
                 break;
-            case "Remove enrollment":
-                await RunRemoveAsync(selection.Device, cancellationToken);
+            case "Sensor info":
+                await RunSensorInfoAsync(selection.Device, cancellationToken);
                 break;
         }
     }
 
     private static async Task RunSensorInfoAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = await PromptForPinAsync(cancellationToken);
+        var pin = OutputHelpers.PromptForPin();
 
         var result = await AnsiConsole.Status()
             .StartAsync("Querying sensor info...", async _ =>
@@ -110,9 +111,9 @@ public static class BioMenu
         }
     }
 
-    private static async Task RunEnrollAsync(IYubiKey device, CancellationToken cancellationToken)
+    private static async Task RunAddAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = await PromptForPinAsync(cancellationToken);
+        var pin = OutputHelpers.PromptForPin();
 
         var friendlyName = AnsiConsole.Ask("Friendly name (optional):", string.Empty);
         if (string.IsNullOrWhiteSpace(friendlyName))
@@ -121,7 +122,7 @@ public static class BioMenu
         }
 
         AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLine("[yellow]Place your finger on the sensor...[/]");
+        AnsiConsole.MarkupLine("[yellow]Touch your YubiKey now...[/]");
         AnsiConsole.WriteLine();
 
         var result = await BioEnrollmentExample.EnrollFingerprintAsync(
@@ -158,7 +159,7 @@ public static class BioMenu
 
     private static async Task RunListAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = await PromptForPinAsync(cancellationToken);
+        var pin = OutputHelpers.PromptForPin();
 
         var result = await AnsiConsole.Status()
             .StartAsync("Enumerating enrollments...", async _ =>
@@ -185,11 +186,11 @@ public static class BioMenu
         }
     }
 
-    private static async Task RunRenameAsync(IYubiKey device, CancellationToken cancellationToken)
+    private static async Task RunDeleteAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = await PromptForPinAsync(cancellationToken);
+        var pin = OutputHelpers.PromptForPin();
 
-        var templateIdHex = AnsiConsole.Ask<string>("Template ID (hex):");
+        var templateIdHex = AnsiConsole.Ask<string>("Fingerprint ID (hex):");
         byte[] templateId;
         try
         {
@@ -197,44 +198,11 @@ public static class BioMenu
         }
         catch (FormatException)
         {
-            OutputHelpers.WriteError("Invalid hex string for template ID.");
+            OutputHelpers.WriteError("Invalid hex string for fingerprint ID.");
             return;
         }
 
-        var newName = AnsiConsole.Ask<string>("New friendly name:");
-
-        var result = await AnsiConsole.Status()
-            .StartAsync("Renaming enrollment...", async _ =>
-                await BioEnrollmentExample.RenameEnrollmentAsync(
-                    device, pin, templateId, newName, cancellationToken));
-
-        if (result.Success)
-        {
-            OutputHelpers.WriteSuccess("Enrollment renamed successfully.");
-        }
-        else
-        {
-            OutputHelpers.WriteError(result.ErrorMessage!);
-        }
-    }
-
-    private static async Task RunRemoveAsync(IYubiKey device, CancellationToken cancellationToken)
-    {
-        var pin = await PromptForPinAsync(cancellationToken);
-
-        var templateIdHex = AnsiConsole.Ask<string>("Template ID (hex):");
-        byte[] templateId;
-        try
-        {
-            templateId = Convert.FromHexString(templateIdHex);
-        }
-        catch (FormatException)
-        {
-            OutputHelpers.WriteError("Invalid hex string for template ID.");
-            return;
-        }
-
-        if (!OutputHelpers.ConfirmDangerous("permanently remove this fingerprint enrollment"))
+        if (!OutputHelpers.ConfirmDangerous("permanently delete this fingerprint enrollment"))
         {
             OutputHelpers.WriteInfo("Operation cancelled.");
             return;
@@ -247,7 +215,40 @@ public static class BioMenu
 
         if (result.Success)
         {
-            OutputHelpers.WriteSuccess("Enrollment removed successfully.");
+            OutputHelpers.WriteSuccess("Fingerprint enrollment removed successfully.");
+        }
+        else
+        {
+            OutputHelpers.WriteError(result.ErrorMessage!);
+        }
+    }
+
+    private static async Task RunRenameAsync(IYubiKey device, CancellationToken cancellationToken)
+    {
+        var pin = OutputHelpers.PromptForPin();
+
+        var templateIdHex = AnsiConsole.Ask<string>("Fingerprint ID (hex):");
+        byte[] templateId;
+        try
+        {
+            templateId = Convert.FromHexString(templateIdHex);
+        }
+        catch (FormatException)
+        {
+            OutputHelpers.WriteError("Invalid hex string for fingerprint ID.");
+            return;
+        }
+
+        var newName = AnsiConsole.Ask<string>("New friendly name:");
+
+        var result = await AnsiConsole.Status()
+            .StartAsync("Renaming enrollment...", async _ =>
+                await BioEnrollmentExample.RenameEnrollmentAsync(
+                    device, pin, templateId, newName, cancellationToken));
+
+        if (result.Success)
+        {
+            OutputHelpers.WriteSuccess("Fingerprint enrollment renamed successfully.");
         }
         else
         {
@@ -268,9 +269,4 @@ public static class BioMenu
             OutputHelpers.WriteKeyValue("    Samples", template.SampleCount.ToString());
         }
     }
-
-    private static async Task<string> PromptForPinAsync(CancellationToken cancellationToken) =>
-        await new TextPrompt<string>("PIN:")
-            .Secret()
-            .ShowAsync(AnsiConsole.Console, cancellationToken);
 }

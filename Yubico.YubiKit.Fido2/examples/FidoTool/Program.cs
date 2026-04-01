@@ -56,7 +56,7 @@ await YubiKeyManager.ShutdownAsync();
 return exitCode;
 
 // ---------------------------------------------------------------------------
-// CLI verb routing
+// CLI verb routing — mirrors ykman fido command tree
 // ---------------------------------------------------------------------------
 static async Task<int> RunVerbAsync(string[] args, CancellationToken cancellationToken)
 {
@@ -65,11 +65,11 @@ static async Task<int> RunVerbAsync(string[] args, CancellationToken cancellatio
         return args[0].ToLowerInvariant() switch
         {
             "info" => await RunInfoVerbAsync(cancellationToken),
-            "pin" => await RunPinVerbAsync(args, cancellationToken),
-            "credential" => await RunCredentialVerbAsync(args, cancellationToken),
-            "bio" => await RunBioVerbAsync(args, cancellationToken),
-            "config" => await RunConfigVerbAsync(args, cancellationToken),
             "reset" => await RunResetVerbAsync(args, cancellationToken),
+            "access" => await RunAccessVerbAsync(args, cancellationToken),
+            "config" => await RunConfigVerbAsync(args, cancellationToken),
+            "credentials" => await RunCredentialsVerbAsync(args, cancellationToken),
+            "fingerprints" => await RunFingerprintsVerbAsync(args, cancellationToken),
             "help" or "--help" or "-h" => ShowHelp(),
             _ => ShowUnknownCommand(args[0])
         };
@@ -100,15 +100,15 @@ static async Task<int> RunInteractiveAsync(CancellationToken cancellationToken)
                 .PageSize(15)
                 .AddChoices(
                 [
-                    "📋 Authenticator Info",
-                    "🔑 PIN Management",
-                    "🔐 Create Credential",
-                    "✅ Get Assertion",
-                    "📂 Credential Management",
-                    "🖐️  Bio Enrollment",
-                    "⚙️  Authenticator Config",
-                    "⚠️  Factory Reset",
-                    "❌ Exit"
+                    "Authenticator Info",
+                    "Access (PIN Management)",
+                    "Config (Authenticator Settings)",
+                    "Credentials (Discoverable Credentials)",
+                    "Fingerprints (Bio Enrollment)",
+                    "Create Credential (MakeCredential)",
+                    "Get Assertion",
+                    "Factory Reset",
+                    "Exit"
                 ])
                 .ShowAsync(AnsiConsole.Console, cancellationToken);
         }
@@ -117,7 +117,7 @@ static async Task<int> RunInteractiveAsync(CancellationToken cancellationToken)
             break;
         }
 
-        if (choice == "❌ Exit")
+        if (choice == "Exit")
         {
             AnsiConsole.MarkupLine("[grey]Goodbye![/]");
             break;
@@ -127,35 +127,35 @@ static async Task<int> RunInteractiveAsync(CancellationToken cancellationToken)
         {
             switch (choice)
             {
-                case "📋 Authenticator Info":
+                case "Authenticator Info":
                     await InfoMenu.RunAsync(cancellationToken);
                     break;
 
-                case "🔑 PIN Management":
-                    await PinMenu.RunAsync(cancellationToken);
+                case "Access (PIN Management)":
+                    await AccessMenu.RunAsync(cancellationToken);
                     break;
 
-                case "🔐 Create Credential":
-                    await CredentialMenu.RunMakeCredentialAsync(cancellationToken);
-                    break;
-
-                case "✅ Get Assertion":
-                    await CredentialMenu.RunGetAssertionAsync(cancellationToken);
-                    break;
-
-                case "📂 Credential Management":
-                    await CredentialMgmtMenu.RunAsync(cancellationToken);
-                    break;
-
-                case "🖐️  Bio Enrollment":
-                    await BioMenu.RunAsync(cancellationToken);
-                    break;
-
-                case "⚙️  Authenticator Config":
+                case "Config (Authenticator Settings)":
                     await ConfigMenu.RunAsync(cancellationToken);
                     break;
 
-                case "⚠️  Factory Reset":
+                case "Credentials (Discoverable Credentials)":
+                    await CredentialsMenu.RunAsync(cancellationToken);
+                    break;
+
+                case "Fingerprints (Bio Enrollment)":
+                    await FingerprintsMenu.RunAsync(cancellationToken);
+                    break;
+
+                case "Create Credential (MakeCredential)":
+                    await CredentialMenu.RunMakeCredentialAsync(cancellationToken);
+                    break;
+
+                case "Get Assertion":
+                    await CredentialMenu.RunGetAssertionAsync(cancellationToken);
+                    break;
+
+                case "Factory Reset":
                     await ResetMenu.RunAsync(cancellationToken);
                     break;
 
@@ -176,7 +176,7 @@ static async Task<int> RunInteractiveAsync(CancellationToken cancellationToken)
 }
 
 // ---------------------------------------------------------------------------
-// Verb stubs - to be implemented by feature files
+// fido info
 // ---------------------------------------------------------------------------
 static async Task<int> RunInfoVerbAsync(CancellationToken cancellationToken)
 {
@@ -201,593 +201,12 @@ static async Task<int> RunInfoVerbAsync(CancellationToken cancellationToken)
     return 0;
 }
 
-static async Task<int> RunPinVerbAsync(string[] args, CancellationToken cancellationToken)
-{
-    var subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
-
-    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-    if (selection is null)
-    {
-        OutputHelpers.WriteError("No YubiKey found.");
-        return 1;
-    }
-
-    OutputHelpers.WriteActiveDevice(selection.DisplayName);
-
-    switch (subVerb)
-    {
-        case "set":
-        {
-            var pin = ParseFlag(args, "--pin");
-            if (pin is null)
-            {
-                OutputHelpers.WriteError("Missing --pin flag. Usage: FidoTool pin set --pin <value>");
-                return 1;
-            }
-
-            var result = await PinManagement.SetPinAsync(selection.Device, pin, cancellationToken);
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("PIN set successfully.");
-                return 0;
-            }
-
-            OutputHelpers.WriteError(result.ErrorMessage!);
-            return 1;
-        }
-
-        case "change":
-        {
-            var oldPin = ParseFlag(args, "--old");
-            var newPin = ParseFlag(args, "--new");
-
-            if (oldPin is null || newPin is null)
-            {
-                OutputHelpers.WriteError(
-                    "Missing flags. Usage: FidoTool pin change --old <value> --new <value>");
-                return 1;
-            }
-
-            var result = await PinManagement.ChangePinAsync(
-                selection.Device, oldPin, newPin, cancellationToken);
-
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("PIN changed successfully.");
-                return 0;
-            }
-
-            OutputHelpers.WriteError(result.ErrorMessage!);
-            return 1;
-        }
-
-        case "retries":
-        {
-            var pinResult = await PinManagement.GetPinRetriesAsync(
-                selection.Device, cancellationToken);
-
-            if (!pinResult.Success)
-            {
-                OutputHelpers.WriteError(pinResult.ErrorMessage!);
-                return 1;
-            }
-
-            OutputHelpers.WriteKeyValue("PIN retries remaining", pinResult.Retries.ToString());
-            if (pinResult.PowerCycleRequired)
-            {
-                OutputHelpers.WriteWarning(
-                    "Power cycle required. Remove and re-insert the YubiKey before next PIN attempt.");
-            }
-
-            var uvResult = await PinManagement.GetUvRetriesAsync(
-                selection.Device, cancellationToken);
-
-            if (uvResult.Success)
-            {
-                OutputHelpers.WriteKeyValue("UV retries remaining", uvResult.Retries.ToString());
-                if (uvResult.PowerCycleRequired)
-                {
-                    OutputHelpers.WriteWarning(
-                        "Power cycle required. Remove and re-insert the YubiKey before next UV attempt.");
-                }
-            }
-
-            return 0;
-        }
-
-        default:
-            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool pin <subcommand> [options]");
-            AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[bold]Subcommands:[/]");
-            AnsiConsole.MarkupLine("  [green]set[/]       Set initial PIN      --pin <value>");
-            AnsiConsole.MarkupLine("  [green]change[/]    Change existing PIN   --old <value> --new <value>");
-            AnsiConsole.MarkupLine("  [green]retries[/]   Show PIN/UV retries");
-            return 0;
-    }
-}
-
-static string? ParseFlag(string[] args, string flag)
-{
-    for (int i = 0; i < args.Length - 1; i++)
-    {
-        if (string.Equals(args[i], flag, StringComparison.OrdinalIgnoreCase))
-        {
-            return args[i + 1];
-        }
-    }
-
-    return null;
-}
-
-static async Task<int> RunCredentialVerbAsync(string[] args, CancellationToken cancellationToken)
-{
-    var subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
-
-    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-    if (selection is null)
-    {
-        OutputHelpers.WriteError("No YubiKey found.");
-        return 1;
-    }
-
-    OutputHelpers.WriteActiveDevice(selection.DisplayName);
-
-    switch (subVerb)
-    {
-        case "make":
-        {
-            var rp = ParseFlag(args, "--rp");
-            var user = ParseFlag(args, "--user");
-
-            if (rp is null || user is null)
-            {
-                OutputHelpers.WriteError(
-                    "Missing flags. Usage: FidoTool credential make --rp <id> --user <name> [--display <name>] [--pin <value>]");
-                return 1;
-            }
-
-            var display = ParseFlag(args, "--display");
-            var pin = ParseFlag(args, "--pin");
-
-            OutputHelpers.WriteWarning(
-                "Using random clientDataHash for testing. In production, this must be the SHA-256 of the WebAuthn clientData JSON.");
-            OutputHelpers.WriteTouchPrompt();
-
-            var result = await MakeCredential.CreateAsync(
-                selection.Device, rp, user, display, pin, cancellationToken);
-
-            if (!result.Success)
-            {
-                OutputHelpers.WriteError(result.ErrorMessage!);
-                return 1;
-            }
-
-            CredentialMenu.DisplayCredentialResult(result);
-            return 0;
-        }
-
-        case "assert":
-        {
-            var rp = ParseFlag(args, "--rp");
-
-            if (rp is null)
-            {
-                OutputHelpers.WriteError(
-                    "Missing --rp flag. Usage: FidoTool credential assert --rp <id> [--pin <value>]");
-                return 1;
-            }
-
-            var pin = ParseFlag(args, "--pin");
-
-            OutputHelpers.WriteWarning(
-                "Using random clientDataHash for testing. In production, this must be the SHA-256 of the WebAuthn clientData JSON.");
-            OutputHelpers.WriteTouchPrompt();
-
-            var result = await GetAssertion.AssertAsync(
-                selection.Device, rp, pin, cancellationToken);
-
-            if (!result.Success)
-            {
-                OutputHelpers.WriteError(result.ErrorMessage!);
-                return 1;
-            }
-
-            CredentialMenu.DisplayAssertionResult(result);
-            return 0;
-        }
-
-        case "list":
-        {
-            var pin = ParseFlag(args, "--pin");
-            if (pin is null)
-            {
-                OutputHelpers.WriteError(
-                    "Missing --pin flag. Usage: FidoTool credential list --pin <value>");
-                return 1;
-            }
-
-            var rpResult = await CredentialManagementExample.EnumerateRelyingPartiesAsync(
-                selection.Device, pin, cancellationToken);
-
-            if (!rpResult.Success)
-            {
-                OutputHelpers.WriteError(rpResult.ErrorMessage!);
-                return 1;
-            }
-
-            if (rpResult.RelyingParties.Count == 0)
-            {
-                OutputHelpers.WriteInfo("No credentials stored on this authenticator.");
-                return 0;
-            }
-
-            OutputHelpers.WriteSuccess($"Found {rpResult.RelyingParties.Count} relying party(ies).");
-            AnsiConsole.WriteLine();
-
-            foreach (var rp in rpResult.RelyingParties)
-            {
-                AnsiConsole.MarkupLine($"  [green bold]{Markup.Escape(rp.RelyingParty.Id)}[/]");
-                OutputHelpers.WriteHex("    RP ID Hash", rp.RpIdHash);
-
-                var credResult = await CredentialManagementExample.EnumerateCredentialsAsync(
-                    selection.Device, pin, rp.RpIdHash, cancellationToken);
-
-                if (credResult.Success)
-                {
-                    foreach (var cred in credResult.Credentials)
-                    {
-                        CredentialMgmtMenu.DisplayStoredCredential(cred);
-                    }
-                }
-
-                AnsiConsole.WriteLine();
-            }
-
-            return 0;
-        }
-
-        case "delete":
-        {
-            var pin = ParseFlag(args, "--pin");
-            var idHex = ParseFlag(args, "--id");
-
-            if (pin is null || idHex is null)
-            {
-                OutputHelpers.WriteError(
-                    "Missing flags. Usage: FidoTool credential delete --id <hex> --pin <value>");
-                return 1;
-            }
-
-            byte[] credentialId;
-            try
-            {
-                credentialId = Convert.FromHexString(idHex);
-            }
-            catch (FormatException)
-            {
-                OutputHelpers.WriteError("Invalid hex string for credential ID.");
-                return 1;
-            }
-
-            var deleteResult = await CredentialManagementExample.DeleteCredentialAsync(
-                selection.Device, pin, credentialId, cancellationToken);
-
-            if (deleteResult.Success)
-            {
-                OutputHelpers.WriteSuccess("Credential deleted successfully.");
-                return 0;
-            }
-
-            OutputHelpers.WriteError(deleteResult.ErrorMessage!);
-            return 1;
-        }
-
-        default:
-            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool credential <subcommand> [options]");
-            AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[bold]Subcommands:[/]");
-            AnsiConsole.MarkupLine(
-                "  [green]make[/]      Create credential   --rp <id> --user <name> [--display <name>] [--pin <value>]");
-            AnsiConsole.MarkupLine(
-                "  [green]assert[/]    Get assertion        --rp <id> [--pin <value>]");
-            AnsiConsole.MarkupLine(
-                "  [green]list[/]      List credentials     --pin <value>");
-            AnsiConsole.MarkupLine(
-                "  [green]delete[/]    Delete credential    --id <hex> --pin <value>");
-            return 0;
-    }
-}
-
-static async Task<int> RunBioVerbAsync(string[] args, CancellationToken cancellationToken)
-{
-    var subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
-
-    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-    if (selection is null)
-    {
-        OutputHelpers.WriteError("No YubiKey found.");
-        return 1;
-    }
-
-    OutputHelpers.WriteActiveDevice(selection.DisplayName);
-
-    switch (subVerb)
-    {
-        case "enroll":
-        {
-            var pin = ParseFlag(args, "--pin");
-            if (pin is null)
-            {
-                OutputHelpers.WriteError(
-                    "Missing --pin flag. Usage: FidoTool bio enroll --pin <value> [--name <friendly>]");
-                return 1;
-            }
-
-            var friendlyName = ParseFlag(args, "--name");
-
-            AnsiConsole.MarkupLine("[yellow]Place your finger on the sensor...[/]");
-
-            var result = await BioEnrollmentExample.EnrollFingerprintAsync(
-                selection.Device,
-                pin,
-                friendlyName,
-                onSampleCaptured: (sample, remaining, status) =>
-                {
-                    var statusText = BioEnrollmentExample.FormatSampleStatus(status);
-                    AnsiConsole.MarkupLine($"  Sample {sample}: {Markup.Escape(statusText)} ({remaining} remaining)");
-
-                    if (remaining > 0)
-                    {
-                        AnsiConsole.MarkupLine("[yellow]  Touch the sensor again...[/]");
-                    }
-                },
-                cancellationToken);
-
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("Fingerprint enrolled successfully.");
-                OutputHelpers.WriteHex("Template ID", result.TemplateId);
-                return 0;
-            }
-
-            OutputHelpers.WriteError(result.ErrorMessage!);
-            return 1;
-        }
-
-        case "list":
-        {
-            var pin = ParseFlag(args, "--pin");
-            if (pin is null)
-            {
-                OutputHelpers.WriteError(
-                    "Missing --pin flag. Usage: FidoTool bio list --pin <value>");
-                return 1;
-            }
-
-            var result = await BioEnrollmentExample.EnumerateEnrollmentsAsync(
-                selection.Device, pin, cancellationToken);
-
-            if (!result.Success)
-            {
-                OutputHelpers.WriteError(result.ErrorMessage!);
-                return 1;
-            }
-
-            if (result.Templates.Count == 0)
-            {
-                OutputHelpers.WriteInfo("No fingerprints enrolled.");
-                return 0;
-            }
-
-            OutputHelpers.WriteSuccess($"Found {result.Templates.Count} enrollment(s).");
-            AnsiConsole.WriteLine();
-
-            foreach (var template in result.Templates)
-            {
-                BioMenu.DisplayTemplate(template);
-            }
-
-            return 0;
-        }
-
-        case "rename":
-        {
-            var pin = ParseFlag(args, "--pin");
-            var idHex = ParseFlag(args, "--id");
-            var name = ParseFlag(args, "--name");
-
-            if (pin is null || idHex is null || name is null)
-            {
-                OutputHelpers.WriteError(
-                    "Missing flags. Usage: FidoTool bio rename --id <hex> --name <friendly> --pin <value>");
-                return 1;
-            }
-
-            byte[] templateId;
-            try
-            {
-                templateId = Convert.FromHexString(idHex);
-            }
-            catch (FormatException)
-            {
-                OutputHelpers.WriteError("Invalid hex string for template ID.");
-                return 1;
-            }
-
-            var result = await BioEnrollmentExample.RenameEnrollmentAsync(
-                selection.Device, pin, templateId, name, cancellationToken);
-
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("Enrollment renamed successfully.");
-                return 0;
-            }
-
-            OutputHelpers.WriteError(result.ErrorMessage!);
-            return 1;
-        }
-
-        case "remove":
-        {
-            var pin = ParseFlag(args, "--pin");
-            var idHex = ParseFlag(args, "--id");
-
-            if (pin is null || idHex is null)
-            {
-                OutputHelpers.WriteError(
-                    "Missing flags. Usage: FidoTool bio remove --id <hex> --pin <value>");
-                return 1;
-            }
-
-            byte[] templateId;
-            try
-            {
-                templateId = Convert.FromHexString(idHex);
-            }
-            catch (FormatException)
-            {
-                OutputHelpers.WriteError("Invalid hex string for template ID.");
-                return 1;
-            }
-
-            var result = await BioEnrollmentExample.RemoveEnrollmentAsync(
-                selection.Device, pin, templateId, cancellationToken);
-
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("Enrollment removed successfully.");
-                return 0;
-            }
-
-            OutputHelpers.WriteError(result.ErrorMessage!);
-            return 1;
-        }
-
-        default:
-            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool bio <subcommand> [options]");
-            AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[bold]Subcommands:[/]");
-            AnsiConsole.MarkupLine(
-                "  [green]enroll[/]    Enroll fingerprint   --pin <value> [--name <friendly>]");
-            AnsiConsole.MarkupLine(
-                "  [green]list[/]      List enrollments     --pin <value>");
-            AnsiConsole.MarkupLine(
-                "  [green]rename[/]    Rename enrollment    --id <hex> --name <friendly> --pin <value>");
-            AnsiConsole.MarkupLine(
-                "  [green]remove[/]    Remove enrollment    --id <hex> --pin <value>");
-            return 0;
-    }
-}
-
-static async Task<int> RunConfigVerbAsync(string[] args, CancellationToken cancellationToken)
-{
-    var subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
-
-    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-    if (selection is null)
-    {
-        OutputHelpers.WriteError("No YubiKey found.");
-        return 1;
-    }
-
-    OutputHelpers.WriteActiveDevice(selection.DisplayName);
-
-    switch (subVerb)
-    {
-        case "enterprise":
-        {
-            var pin = ParseFlag(args, "--pin");
-            if (pin is null)
-            {
-                OutputHelpers.WriteError(
-                    "Missing --pin flag. Usage: FidoTool config enterprise --pin <value>");
-                return 1;
-            }
-
-            var result = await ConfigManagement.EnableEnterpriseAttestationAsync(
-                selection.Device, pin, cancellationToken);
-
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("Enterprise attestation enabled.");
-                return 0;
-            }
-
-            OutputHelpers.WriteError(result.ErrorMessage!);
-            return 1;
-        }
-
-        case "always-uv":
-        {
-            var pin = ParseFlag(args, "--pin");
-            if (pin is null)
-            {
-                OutputHelpers.WriteError(
-                    "Missing --pin flag. Usage: FidoTool config always-uv --pin <value>");
-                return 1;
-            }
-
-            var result = await ConfigManagement.ToggleAlwaysUvAsync(
-                selection.Device, pin, cancellationToken);
-
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess("Always-UV setting toggled.");
-                return 0;
-            }
-
-            OutputHelpers.WriteError(result.ErrorMessage!);
-            return 1;
-        }
-
-        case "min-pin":
-        {
-            var pin = ParseFlag(args, "--pin");
-            var lengthStr = ParseFlag(args, "--length");
-
-            if (pin is null || lengthStr is null)
-            {
-                OutputHelpers.WriteError(
-                    "Missing flags. Usage: FidoTool config min-pin --length <n> --pin <value>");
-                return 1;
-            }
-
-            if (!int.TryParse(lengthStr, out var length))
-            {
-                OutputHelpers.WriteError("Invalid value for --length. Must be an integer.");
-                return 1;
-            }
-
-            var result = await ConfigManagement.SetMinPinLengthAsync(
-                selection.Device, pin, length, cancellationToken: cancellationToken);
-
-            if (result.Success)
-            {
-                OutputHelpers.WriteSuccess($"Minimum PIN length set to {length}.");
-                return 0;
-            }
-
-            OutputHelpers.WriteError(result.ErrorMessage!);
-            return 1;
-        }
-
-        default:
-            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool config <subcommand> [options]");
-            AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[bold]Subcommands:[/]");
-            AnsiConsole.MarkupLine(
-                "  [green]enterprise[/]   Enable enterprise attestation   --pin <value>");
-            AnsiConsole.MarkupLine(
-                "  [green]always-uv[/]    Toggle always-UV                --pin <value>");
-            AnsiConsole.MarkupLine(
-                "  [green]min-pin[/]      Set minimum PIN length          --length <n> --pin <value>");
-            return 0;
-    }
-}
-
+// ---------------------------------------------------------------------------
+// fido reset [-f]
+// ---------------------------------------------------------------------------
 static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancellationToken)
 {
-    var force = args.Any(a => string.Equals(a, "--force", StringComparison.OrdinalIgnoreCase));
+    var force = HasFlag(args, "-f") || HasFlag(args, "--force");
 
     if (!force)
     {
@@ -831,20 +250,496 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
     return 1;
 }
 
+// ---------------------------------------------------------------------------
+// fido access change-pin [--pin PIN] [--new-pin PIN]
+// fido access verify-pin [--pin PIN]
+// ---------------------------------------------------------------------------
+static async Task<int> RunAccessVerbAsync(string[] args, CancellationToken cancellationToken)
+{
+    var subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
+
+    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+    if (selection is null)
+    {
+        OutputHelpers.WriteError("No YubiKey found.");
+        return 1;
+    }
+
+    OutputHelpers.WriteActiveDevice(selection.DisplayName);
+
+    switch (subVerb)
+    {
+        case "change-pin":
+        {
+            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("Current PIN");
+            var newPin = ParseOption(args, "--new-pin") ?? OutputHelpers.PromptForPin("New PIN");
+
+            var result = await PinManagement.ChangePinAsync(
+                selection.Device, pin, newPin, cancellationToken);
+
+            if (result.Success)
+            {
+                OutputHelpers.WriteSuccess("PIN changed successfully.");
+                return 0;
+            }
+
+            OutputHelpers.WriteError(result.ErrorMessage!);
+            return 1;
+        }
+
+        case "verify-pin":
+        {
+            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+
+            // Verify PIN by attempting to get retries after PIN auth
+            // The simplest way to verify is to get a PIN token
+            var result = await PinManagement.VerifyPinAsync(
+                selection.Device, pin, cancellationToken);
+
+            if (result.Success)
+            {
+                OutputHelpers.WriteSuccess("PIN is correct.");
+                return 0;
+            }
+
+            OutputHelpers.WriteError(result.ErrorMessage!);
+            return 1;
+        }
+
+        default:
+            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool access <subcommand> [options]");
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[bold]Subcommands:[/]");
+            AnsiConsole.MarkupLine(
+                "  [green]change-pin[/]    Change the PIN    [--pin PIN] [--new-pin PIN]");
+            AnsiConsole.MarkupLine(
+                "  [green]verify-pin[/]    Verify the PIN    [--pin PIN]");
+            return 0;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// fido config toggle-always-uv [--pin PIN]
+// fido config enable-ep-attestation [--pin PIN]
+// ---------------------------------------------------------------------------
+static async Task<int> RunConfigVerbAsync(string[] args, CancellationToken cancellationToken)
+{
+    var subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
+
+    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+    if (selection is null)
+    {
+        OutputHelpers.WriteError("No YubiKey found.");
+        return 1;
+    }
+
+    OutputHelpers.WriteActiveDevice(selection.DisplayName);
+
+    switch (subVerb)
+    {
+        case "toggle-always-uv":
+        {
+            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+
+            var result = await ConfigManagement.ToggleAlwaysUvAsync(
+                selection.Device, pin, cancellationToken);
+
+            if (result.Success)
+            {
+                OutputHelpers.WriteSuccess("Always-UV setting toggled.");
+                return 0;
+            }
+
+            OutputHelpers.WriteError(result.ErrorMessage!);
+            return 1;
+        }
+
+        case "enable-ep-attestation":
+        {
+            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+
+            var result = await ConfigManagement.EnableEnterpriseAttestationAsync(
+                selection.Device, pin, cancellationToken);
+
+            if (result.Success)
+            {
+                OutputHelpers.WriteSuccess("Enterprise attestation enabled.");
+                return 0;
+            }
+
+            OutputHelpers.WriteError(result.ErrorMessage!);
+            return 1;
+        }
+
+        default:
+            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool config <subcommand> [options]");
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[bold]Subcommands:[/]");
+            AnsiConsole.MarkupLine(
+                "  [green]toggle-always-uv[/]        Toggle always-UV    [--pin PIN]");
+            AnsiConsole.MarkupLine(
+                "  [green]enable-ep-attestation[/]    Enable enterprise attestation    [--pin PIN]");
+            return 0;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// fido credentials list [--pin PIN]
+// fido credentials delete CREDENTIAL_ID [--pin PIN] [-f]
+// ---------------------------------------------------------------------------
+static async Task<int> RunCredentialsVerbAsync(string[] args, CancellationToken cancellationToken)
+{
+    var subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
+
+    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+    if (selection is null)
+    {
+        OutputHelpers.WriteError("No YubiKey found.");
+        return 1;
+    }
+
+    OutputHelpers.WriteActiveDevice(selection.DisplayName);
+
+    switch (subVerb)
+    {
+        case "list":
+        {
+            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+
+            var rpResult = await CredentialManagementExample.EnumerateRelyingPartiesAsync(
+                selection.Device, pin, cancellationToken);
+
+            if (!rpResult.Success)
+            {
+                OutputHelpers.WriteError(rpResult.ErrorMessage!);
+                return 1;
+            }
+
+            if (rpResult.RelyingParties.Count == 0)
+            {
+                OutputHelpers.WriteInfo("No credentials stored on this authenticator.");
+                return 0;
+            }
+
+            OutputHelpers.WriteSuccess($"Found {rpResult.RelyingParties.Count} relying party(ies).");
+            AnsiConsole.WriteLine();
+
+            foreach (var rp in rpResult.RelyingParties)
+            {
+                AnsiConsole.MarkupLine($"  [green bold]{Markup.Escape(rp.RelyingParty.Id)}[/]");
+                OutputHelpers.WriteHex("    RP ID Hash", rp.RpIdHash);
+
+                var credResult = await CredentialManagementExample.EnumerateCredentialsAsync(
+                    selection.Device, pin, rp.RpIdHash, cancellationToken);
+
+                if (credResult.Success)
+                {
+                    foreach (var cred in credResult.Credentials)
+                    {
+                        CredentialsMenu.DisplayStoredCredential(cred);
+                    }
+                }
+
+                AnsiConsole.WriteLine();
+            }
+
+            return 0;
+        }
+
+        case "delete":
+        {
+            // Positional argument: CREDENTIAL_ID (hex), expected at args[2]
+            if (args.Length < 3 || args[2].StartsWith("--") || args[2].StartsWith("-"))
+            {
+                OutputHelpers.WriteError(
+                    "Missing credential ID. Usage: FidoTool credentials delete CREDENTIAL_ID [--pin PIN] [-f]");
+                return 1;
+            }
+
+            var idHex = args[2];
+            byte[] credentialId;
+            try
+            {
+                credentialId = Convert.FromHexString(idHex);
+            }
+            catch (FormatException)
+            {
+                OutputHelpers.WriteError("Invalid hex string for credential ID.");
+                return 1;
+            }
+
+            var force = HasFlag(args, "-f") || HasFlag(args, "--force");
+            if (!force)
+            {
+                if (!OutputHelpers.ConfirmDangerous("permanently delete this credential"))
+                {
+                    OutputHelpers.WriteInfo("Operation cancelled.");
+                    return 0;
+                }
+            }
+
+            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+
+            var deleteResult = await CredentialManagementExample.DeleteCredentialAsync(
+                selection.Device, pin, credentialId, cancellationToken);
+
+            if (deleteResult.Success)
+            {
+                OutputHelpers.WriteSuccess("Credential deleted successfully.");
+                return 0;
+            }
+
+            OutputHelpers.WriteError(deleteResult.ErrorMessage!);
+            return 1;
+        }
+
+        default:
+            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool credentials <subcommand> [options]");
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[bold]Subcommands:[/]");
+            AnsiConsole.MarkupLine(
+                "  [green]list[/]      List discoverable credentials    [--pin PIN]");
+            AnsiConsole.MarkupLine(
+                "  [green]delete[/]    Delete a credential              CREDENTIAL_ID [--pin PIN] [-f]");
+            return 0;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// fido fingerprints list [--pin PIN]
+// fido fingerprints add NAME [--pin PIN]
+// fido fingerprints delete FINGERPRINT_ID [--pin PIN] [-f]
+// fido fingerprints rename FINGERPRINT_ID NAME [--pin PIN]
+// ---------------------------------------------------------------------------
+static async Task<int> RunFingerprintsVerbAsync(string[] args, CancellationToken cancellationToken)
+{
+    var subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
+
+    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+    if (selection is null)
+    {
+        OutputHelpers.WriteError("No YubiKey found.");
+        return 1;
+    }
+
+    OutputHelpers.WriteActiveDevice(selection.DisplayName);
+
+    switch (subVerb)
+    {
+        case "list":
+        {
+            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+
+            var result = await BioEnrollmentExample.EnumerateEnrollmentsAsync(
+                selection.Device, pin, cancellationToken);
+
+            if (!result.Success)
+            {
+                OutputHelpers.WriteError(result.ErrorMessage!);
+                return 1;
+            }
+
+            if (result.Templates.Count == 0)
+            {
+                OutputHelpers.WriteInfo("No fingerprints enrolled.");
+                return 0;
+            }
+
+            OutputHelpers.WriteSuccess($"Found {result.Templates.Count} enrollment(s).");
+            AnsiConsole.WriteLine();
+
+            foreach (var template in result.Templates)
+            {
+                FingerprintsMenu.DisplayTemplate(template);
+            }
+
+            return 0;
+        }
+
+        case "add":
+        {
+            // Positional argument: NAME, expected at args[2]
+            string? friendlyName = null;
+            if (args.Length > 2 && !args[2].StartsWith("--") && !args[2].StartsWith("-"))
+            {
+                friendlyName = args[2];
+            }
+
+            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+
+            AnsiConsole.MarkupLine("[yellow]Touch your YubiKey now...[/]");
+
+            var result = await BioEnrollmentExample.EnrollFingerprintAsync(
+                selection.Device,
+                pin,
+                friendlyName,
+                onSampleCaptured: (sample, remaining, status) =>
+                {
+                    var statusText = BioEnrollmentExample.FormatSampleStatus(status);
+                    AnsiConsole.MarkupLine($"  Sample {sample}: {Markup.Escape(statusText)} ({remaining} remaining)");
+
+                    if (remaining > 0)
+                    {
+                        AnsiConsole.MarkupLine("[yellow]  Touch the sensor again...[/]");
+                    }
+                },
+                cancellationToken);
+
+            if (result.Success)
+            {
+                OutputHelpers.WriteSuccess("Fingerprint enrolled successfully.");
+                OutputHelpers.WriteHex("Template ID", result.TemplateId);
+                return 0;
+            }
+
+            OutputHelpers.WriteError(result.ErrorMessage!);
+            return 1;
+        }
+
+        case "delete":
+        {
+            // Positional argument: FINGERPRINT_ID (hex), expected at args[2]
+            if (args.Length < 3 || args[2].StartsWith("--") || args[2].StartsWith("-"))
+            {
+                OutputHelpers.WriteError(
+                    "Missing fingerprint ID. Usage: FidoTool fingerprints delete FINGERPRINT_ID [--pin PIN] [-f]");
+                return 1;
+            }
+
+            var idHex = args[2];
+            byte[] templateId;
+            try
+            {
+                templateId = Convert.FromHexString(idHex);
+            }
+            catch (FormatException)
+            {
+                OutputHelpers.WriteError("Invalid hex string for fingerprint ID.");
+                return 1;
+            }
+
+            var force = HasFlag(args, "-f") || HasFlag(args, "--force");
+            if (!force)
+            {
+                if (!OutputHelpers.ConfirmDangerous("permanently delete this fingerprint enrollment"))
+                {
+                    OutputHelpers.WriteInfo("Operation cancelled.");
+                    return 0;
+                }
+            }
+
+            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+
+            var result = await BioEnrollmentExample.RemoveEnrollmentAsync(
+                selection.Device, pin, templateId, cancellationToken);
+
+            if (result.Success)
+            {
+                OutputHelpers.WriteSuccess("Fingerprint enrollment removed successfully.");
+                return 0;
+            }
+
+            OutputHelpers.WriteError(result.ErrorMessage!);
+            return 1;
+        }
+
+        case "rename":
+        {
+            // Positional arguments: FINGERPRINT_ID NAME, expected at args[2] and args[3]
+            if (args.Length < 4
+                || args[2].StartsWith("--") || args[2].StartsWith("-")
+                || args[3].StartsWith("--") || args[3].StartsWith("-"))
+            {
+                OutputHelpers.WriteError(
+                    "Missing arguments. Usage: FidoTool fingerprints rename FINGERPRINT_ID NAME [--pin PIN]");
+                return 1;
+            }
+
+            var idHex = args[2];
+            var newName = args[3];
+
+            byte[] templateId;
+            try
+            {
+                templateId = Convert.FromHexString(idHex);
+            }
+            catch (FormatException)
+            {
+                OutputHelpers.WriteError("Invalid hex string for fingerprint ID.");
+                return 1;
+            }
+
+            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+
+            var result = await BioEnrollmentExample.RenameEnrollmentAsync(
+                selection.Device, pin, templateId, newName, cancellationToken);
+
+            if (result.Success)
+            {
+                OutputHelpers.WriteSuccess("Fingerprint enrollment renamed successfully.");
+                return 0;
+            }
+
+            OutputHelpers.WriteError(result.ErrorMessage!);
+            return 1;
+        }
+
+        default:
+            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool fingerprints <subcommand> [options]");
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[bold]Subcommands:[/]");
+            AnsiConsole.MarkupLine(
+                "  [green]list[/]      List enrolled fingerprints           [--pin PIN]");
+            AnsiConsole.MarkupLine(
+                "  [green]add[/]       Enroll new fingerprint               NAME [--pin PIN]");
+            AnsiConsole.MarkupLine(
+                "  [green]delete[/]    Delete a fingerprint enrollment      FINGERPRINT_ID [--pin PIN] [-f]");
+            AnsiConsole.MarkupLine(
+                "  [green]rename[/]    Rename a fingerprint enrollment      FINGERPRINT_ID NAME [--pin PIN]");
+            return 0;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Argument parsing helpers
+// ---------------------------------------------------------------------------
+static string? ParseOption(string[] args, string flag)
+{
+    for (int i = 0; i < args.Length - 1; i++)
+    {
+        if (string.Equals(args[i], flag, StringComparison.OrdinalIgnoreCase))
+        {
+            return args[i + 1];
+        }
+    }
+
+    return null;
+}
+
+static bool HasFlag(string[] args, string flag) =>
+    args.Any(a => string.Equals(a, flag, StringComparison.OrdinalIgnoreCase));
+
+// ---------------------------------------------------------------------------
+// Help
+// ---------------------------------------------------------------------------
 static int ShowHelp()
 {
-    AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool [command] [subcommand] [options]");
+    AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool <command> [subcommand] [options]");
     AnsiConsole.WriteLine();
     AnsiConsole.MarkupLine("[bold]Commands:[/]");
-    AnsiConsole.MarkupLine("  [green]info[/]          Display authenticator capabilities");
-    AnsiConsole.MarkupLine("  [green]pin[/]           PIN management (set, change, retries)");
-    AnsiConsole.MarkupLine("  [green]credential[/]    Credential operations (make, assert, list, delete)");
-    AnsiConsole.MarkupLine("  [green]bio[/]           Biometric enrollment (enroll, list, rename, remove)");
-    AnsiConsole.MarkupLine("  [green]config[/]        Authenticator config (enterprise, always-uv, min-pin)");
-    AnsiConsole.MarkupLine("  [green]reset[/]         Factory reset (destructive)");
-    AnsiConsole.MarkupLine("  [green]help[/]          Show this help message");
+    AnsiConsole.MarkupLine("  [green]info[/]            Display general status of the FIDO2 application");
+    AnsiConsole.MarkupLine("  [green]reset[/]           Reset all FIDO applications [-f]");
+    AnsiConsole.MarkupLine("  [green]access[/]          Manage PIN (change-pin, verify-pin)");
+    AnsiConsole.MarkupLine("  [green]config[/]          Configure authenticator settings (toggle-always-uv, enable-ep-attestation)");
+    AnsiConsole.MarkupLine("  [green]credentials[/]     Manage discoverable credentials (list, delete)");
+    AnsiConsole.MarkupLine("  [green]fingerprints[/]    Manage fingerprint enrollments (list, add, delete, rename)");
+    AnsiConsole.MarkupLine("  [green]help[/]            Show this help message");
     AnsiConsole.WriteLine();
     AnsiConsole.MarkupLine("[grey]Run without arguments for interactive mode.[/]");
+    AnsiConsole.WriteLine();
+    AnsiConsole.MarkupLine("[bold]Options:[/]");
+    AnsiConsole.MarkupLine("  [green]--pin PIN[/]       Provide PIN (prompted if omitted in interactive mode)");
+    AnsiConsole.MarkupLine("  [green]-f, --force[/]     Skip confirmation prompts");
     return 0;
 }
 

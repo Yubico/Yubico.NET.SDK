@@ -22,6 +22,7 @@ namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Menus;
 
 /// <summary>
 /// Interactive menu for authenticator configuration operations.
+/// Mirrors ykman's "fido config" command group.
 /// </summary>
 public static class ConfigMenu
 {
@@ -30,7 +31,7 @@ public static class ConfigMenu
     /// </summary>
     public static async Task RunAsync(CancellationToken cancellationToken)
     {
-        OutputHelpers.WriteHeader("Authenticator Config");
+        OutputHelpers.WriteHeader("Config (Authenticator Settings)");
 
         var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
         if (selection is null)
@@ -54,23 +55,45 @@ public static class ConfigMenu
                 .Title("Select operation:")
                 .AddChoices(
                 [
-                    "Enable enterprise attestation",
                     "Toggle always-UV",
+                    "Enable enterprise attestation",
                     "Set minimum PIN length",
                     "Back"
                 ]));
 
         switch (choice)
         {
-            case "Enable enterprise attestation":
-                await RunEnableEnterpriseAttestationAsync(selection.Device, cancellationToken);
-                break;
             case "Toggle always-UV":
                 await RunToggleAlwaysUvAsync(selection.Device, cancellationToken);
+                break;
+            case "Enable enterprise attestation":
+                await RunEnableEnterpriseAttestationAsync(selection.Device, cancellationToken);
                 break;
             case "Set minimum PIN length":
                 await RunSetMinPinLengthAsync(selection.Device, cancellationToken);
                 break;
+        }
+    }
+
+    private static async Task RunToggleAlwaysUvAsync(
+        IYubiKey device, CancellationToken cancellationToken)
+    {
+        OutputHelpers.WriteInfo(
+            "This toggles the always-UV setting. When enabled, user verification is required for every operation.");
+
+        var pin = OutputHelpers.PromptForPin();
+
+        var result = await AnsiConsole.Status()
+            .StartAsync("Toggling always-UV...", async _ =>
+                await ConfigManagement.ToggleAlwaysUvAsync(device, pin, cancellationToken));
+
+        if (result.Success)
+        {
+            OutputHelpers.WriteSuccess("Always-UV setting toggled.");
+        }
+        else
+        {
+            OutputHelpers.WriteError(result.ErrorMessage!);
         }
     }
 
@@ -86,7 +109,7 @@ public static class ConfigMenu
             return;
         }
 
-        var pin = await PromptForPinAsync(cancellationToken);
+        var pin = OutputHelpers.PromptForPin();
 
         var result = await AnsiConsole.Status()
             .StartAsync("Enabling enterprise attestation...", async _ =>
@@ -103,28 +126,6 @@ public static class ConfigMenu
         }
     }
 
-    private static async Task RunToggleAlwaysUvAsync(
-        IYubiKey device, CancellationToken cancellationToken)
-    {
-        OutputHelpers.WriteInfo(
-            "This toggles the always-UV setting. When enabled, user verification is required for every operation.");
-
-        var pin = await PromptForPinAsync(cancellationToken);
-
-        var result = await AnsiConsole.Status()
-            .StartAsync("Toggling always-UV...", async _ =>
-                await ConfigManagement.ToggleAlwaysUvAsync(device, pin, cancellationToken));
-
-        if (result.Success)
-        {
-            OutputHelpers.WriteSuccess("Always-UV setting toggled.");
-        }
-        else
-        {
-            OutputHelpers.WriteError(result.ErrorMessage!);
-        }
-    }
-
     private static async Task RunSetMinPinLengthAsync(
         IYubiKey device, CancellationToken cancellationToken)
     {
@@ -133,7 +134,7 @@ public static class ConfigMenu
         var forceChange = AnsiConsole.Confirm(
             "Force PIN change before next use?", defaultValue: false);
 
-        var pin = await PromptForPinAsync(cancellationToken);
+        var pin = OutputHelpers.PromptForPin();
 
         var result = await AnsiConsole.Status()
             .StartAsync("Setting minimum PIN length...", async _ =>
@@ -154,9 +155,4 @@ public static class ConfigMenu
             OutputHelpers.WriteError(result.ErrorMessage!);
         }
     }
-
-    private static async Task<string> PromptForPinAsync(CancellationToken cancellationToken) =>
-        await new TextPrompt<string>("PIN:")
-            .Secret()
-            .ShowAsync(AnsiConsole.Console, cancellationToken);
 }

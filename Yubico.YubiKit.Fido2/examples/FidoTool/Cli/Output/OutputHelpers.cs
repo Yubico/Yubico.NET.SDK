@@ -172,4 +172,13 @@ public static class OutputHelpers
         var color = value ? "green" : "grey";
         WriteKeyValueMarkup(label, $"[{color}]{Markup.Escape(text)}[/]");
     }
+
+    /// <summary>
+    /// Prompts the user for a PIN interactively with masked input.
+    /// Used when --pin is not provided on the command line.
+    /// </summary>
+    public static string PromptForPin(string label = "PIN") =>
+        AnsiConsole.Prompt(
+            new TextPrompt<string>($"{label}:")
+                .Secret());
 }

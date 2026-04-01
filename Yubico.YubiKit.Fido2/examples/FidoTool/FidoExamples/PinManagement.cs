@@ -160,6 +160,63 @@ public static class PinManagement
     }
 
     /// <summary>
+    /// Verifies the PIN by attempting to obtain a PIN token.
+    /// </summary>
+    /// <param name="yubiKey">The YubiKey device.</param>
+    /// <param name="pin">The PIN to verify.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The operation result.</returns>
+    public static async Task<PinResult> VerifyPinAsync(
+        IYubiKey yubiKey,
+        string pin,
+        CancellationToken cancellationToken = default)
+    {
+        byte[]? pinBytes = null;
+        byte[]? pinToken = null;
+        try
+        {
+            pinBytes = Encoding.UTF8.GetBytes(pin);
+
+            await using var session = await yubiKey.CreateFidoSessionAsync(
+                cancellationToken: cancellationToken);
+
+            using var protocol = new PinUvAuthProtocolV2();
+            using var clientPin = new ClientPin(session, protocol);
+
+            pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+                pin,
+                PinUvAuthTokenPermissions.GetAssertion,
+                cancellationToken: cancellationToken);
+
+            return PinResult.Succeeded();
+        }
+        catch (CtapException ex)
+        {
+            return PinResult.Failed(MapCtapPinError(ex));
+        }
+        catch (ArgumentException ex)
+        {
+            return PinResult.Failed(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return PinResult.Failed($"Failed to verify PIN: {ex.Message}");
+        }
+        finally
+        {
+            if (pinBytes is not null)
+            {
+                CryptographicOperations.ZeroMemory(pinBytes);
+            }
+
+            if (pinToken is not null)
+            {
+                CryptographicOperations.ZeroMemory(pinToken);
+            }
+        }
+    }
+
+    /// <summary>
     /// Gets the number of PIN retries remaining.
     /// </summary>
     /// <param name="yubiKey">The YubiKey device.</param>

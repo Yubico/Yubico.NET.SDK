@@ -21,16 +21,17 @@ using Yubico.YubiKit.Fido2.Examples.FidoTool.FidoExamples;
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Menus;
 
 /// <summary>
-/// Interactive menu for PIN management operations.
+/// Interactive menu for PIN/access management operations.
+/// Mirrors ykman's "fido access" command group.
 /// </summary>
-public static class PinMenu
+public static class AccessMenu
 {
     /// <summary>
-    /// Runs the PIN management sub-menu.
+    /// Runs the access management sub-menu.
     /// </summary>
     public static async Task RunAsync(CancellationToken cancellationToken)
     {
-        OutputHelpers.WriteHeader("PIN Management");
+        OutputHelpers.WriteHeader("Access (PIN Management)");
 
         var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
         if (selection is null)
@@ -42,11 +43,12 @@ public static class PinMenu
 
         var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .Title("Select PIN operation:")
+                .Title("Select access operation:")
                 .AddChoices(
                 [
-                    "Set PIN (first time)",
                     "Change PIN",
+                    "Verify PIN",
+                    "Set PIN (first time)",
                     "View PIN retries",
                     "View UV retries",
                     "Back"
@@ -54,11 +56,14 @@ public static class PinMenu
 
         switch (choice)
         {
-            case "Set PIN (first time)":
-                await RunSetPinAsync(selection.Device, cancellationToken);
-                break;
             case "Change PIN":
                 await RunChangePinAsync(selection.Device, cancellationToken);
+                break;
+            case "Verify PIN":
+                await RunVerifyPinAsync(selection.Device, cancellationToken);
+                break;
+            case "Set PIN (first time)":
+                await RunSetPinAsync(selection.Device, cancellationToken);
                 break;
             case "View PIN retries":
                 await RunPinRetriesAsync(selection.Device, cancellationToken);
@@ -69,45 +74,10 @@ public static class PinMenu
         }
     }
 
-    private static async Task RunSetPinAsync(IYubiKey device, CancellationToken cancellationToken)
-    {
-        var newPin = AnsiConsole.Prompt(
-            new TextPrompt<string>("Enter new PIN (4-63 characters):")
-                .Secret());
-
-        var confirmPin = AnsiConsole.Prompt(
-            new TextPrompt<string>("Confirm new PIN:")
-                .Secret());
-
-        if (!string.Equals(newPin, confirmPin, StringComparison.Ordinal))
-        {
-            OutputHelpers.WriteError("PINs do not match.");
-            return;
-        }
-
-        var result = await AnsiConsole.Status()
-            .StartAsync("Setting PIN...", async _ =>
-                await PinManagement.SetPinAsync(device, newPin, cancellationToken));
-
-        if (result.Success)
-        {
-            OutputHelpers.WriteSuccess("PIN set successfully.");
-        }
-        else
-        {
-            OutputHelpers.WriteError(result.ErrorMessage!);
-        }
-    }
-
     private static async Task RunChangePinAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var currentPin = AnsiConsole.Prompt(
-            new TextPrompt<string>("Enter current PIN:")
-                .Secret());
-
-        var newPin = AnsiConsole.Prompt(
-            new TextPrompt<string>("Enter new PIN (4-63 characters):")
-                .Secret());
+        var currentPin = OutputHelpers.PromptForPin("Current PIN");
+        var newPin = OutputHelpers.PromptForPin("New PIN");
 
         var confirmPin = AnsiConsole.Prompt(
             new TextPrompt<string>("Confirm new PIN:")
@@ -126,6 +96,52 @@ public static class PinMenu
         if (result.Success)
         {
             OutputHelpers.WriteSuccess("PIN changed successfully.");
+        }
+        else
+        {
+            OutputHelpers.WriteError(result.ErrorMessage!);
+        }
+    }
+
+    private static async Task RunVerifyPinAsync(IYubiKey device, CancellationToken cancellationToken)
+    {
+        var pin = OutputHelpers.PromptForPin("PIN");
+
+        var result = await AnsiConsole.Status()
+            .StartAsync("Verifying PIN...", async _ =>
+                await PinManagement.VerifyPinAsync(device, pin, cancellationToken));
+
+        if (result.Success)
+        {
+            OutputHelpers.WriteSuccess("PIN is correct.");
+        }
+        else
+        {
+            OutputHelpers.WriteError(result.ErrorMessage!);
+        }
+    }
+
+    private static async Task RunSetPinAsync(IYubiKey device, CancellationToken cancellationToken)
+    {
+        var newPin = OutputHelpers.PromptForPin("New PIN (4-63 characters)");
+
+        var confirmPin = AnsiConsole.Prompt(
+            new TextPrompt<string>("Confirm new PIN:")
+                .Secret());
+
+        if (!string.Equals(newPin, confirmPin, StringComparison.Ordinal))
+        {
+            OutputHelpers.WriteError("PINs do not match.");
+            return;
+        }
+
+        var result = await AnsiConsole.Status()
+            .StartAsync("Setting PIN...", async _ =>
+                await PinManagement.SetPinAsync(device, newPin, cancellationToken));
+
+        if (result.Success)
+        {
+            OutputHelpers.WriteSuccess("PIN set successfully.");
         }
         else
         {

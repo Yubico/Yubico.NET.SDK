@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
 using Spectre.Console;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Fido2.CredentialManagement;
@@ -23,16 +22,17 @@ using Yubico.YubiKit.Fido2.Examples.FidoTool.FidoExamples;
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Menus;
 
 /// <summary>
-/// Interactive menu for credential management: list RPs, list credentials, delete, update user.
+/// Interactive menu for credential management: list and delete discoverable credentials.
+/// Mirrors ykman's "fido credentials" command group.
 /// </summary>
-public static class CredentialMgmtMenu
+public static class CredentialsMenu
 {
     /// <summary>
     /// Runs the credential management sub-menu.
     /// </summary>
     public static async Task RunAsync(CancellationToken cancellationToken)
     {
-        OutputHelpers.WriteHeader("Credential Management");
+        OutputHelpers.WriteHeader("Credentials (Discoverable Credentials)");
 
         var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
         if (selection is null)
@@ -56,23 +56,23 @@ public static class CredentialMgmtMenu
                 .Title("Select operation:")
                 .AddChoices(
                 [
-                    "View credential metadata",
                     "List all credentials",
                     "Delete a credential",
+                    "View credential metadata",
                     "Update user info",
                     "Back"
                 ]));
 
         switch (choice)
         {
-            case "View credential metadata":
-                await RunMetadataAsync(selection.Device, cancellationToken);
-                break;
             case "List all credentials":
                 await RunListAllAsync(selection.Device, cancellationToken);
                 break;
             case "Delete a credential":
                 await RunDeleteAsync(selection.Device, cancellationToken);
+                break;
+            case "View credential metadata":
+                await RunMetadataAsync(selection.Device, cancellationToken);
                 break;
             case "Update user info":
                 await RunUpdateUserAsync(selection.Device, cancellationToken);
@@ -82,7 +82,7 @@ public static class CredentialMgmtMenu
 
     private static async Task RunMetadataAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = await PromptForPinAsync(cancellationToken);
+        var pin = OutputHelpers.PromptForPin();
 
         var result = await AnsiConsole.Status()
             .StartAsync("Querying credential metadata...", async _ =>
@@ -104,7 +104,7 @@ public static class CredentialMgmtMenu
 
     private static async Task RunListAllAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = await PromptForPinAsync(cancellationToken);
+        var pin = OutputHelpers.PromptForPin();
 
         var rpResult = await AnsiConsole.Status()
             .StartAsync("Enumerating relying parties...", async _ =>
@@ -158,7 +158,7 @@ public static class CredentialMgmtMenu
 
     private static async Task RunDeleteAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = await PromptForPinAsync(cancellationToken);
+        var pin = OutputHelpers.PromptForPin();
 
         var credIdHex = AnsiConsole.Ask<string>("Credential ID (hex):");
         byte[] credentialId;
@@ -195,7 +195,7 @@ public static class CredentialMgmtMenu
 
     private static async Task RunUpdateUserAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = await PromptForPinAsync(cancellationToken);
+        var pin = OutputHelpers.PromptForPin();
 
         var credIdHex = AnsiConsole.Ask<string>("Credential ID (hex):");
         byte[] credentialId;
@@ -261,9 +261,4 @@ public static class CredentialMgmtMenu
             OutputHelpers.WriteKeyValue("      Cred Protect", protectLevel);
         }
     }
-
-    private static async Task<string> PromptForPinAsync(CancellationToken cancellationToken) =>
-        await new TextPrompt<string>("PIN:")
-            .Secret()
-            .ShowAsync(AnsiConsole.Console, cancellationToken);
 }

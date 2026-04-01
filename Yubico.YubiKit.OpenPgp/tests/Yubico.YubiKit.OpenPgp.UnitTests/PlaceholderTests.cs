@@ -1,10 +1,1 @@
-namespace Yubico.YubiKit.OpenPgp.UnitTests;
-
-public class PlaceholderTests
-{
-    [Fact]
-    public void Placeholder_ShouldPass()
-    {
-        Assert.True(true);
-    }
-}
+// This file intentionally left empty — real tests are in dedicated test classes.

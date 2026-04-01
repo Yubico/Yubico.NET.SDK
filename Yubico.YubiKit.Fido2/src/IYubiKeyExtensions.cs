@@ -17,6 +17,7 @@ using Yubico.YubiKit.Core.Hid.Fido;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Fido2;
 

@@ -76,20 +76,21 @@ internal sealed class SmartCardFidoBackend : IFidoBackend
             Le = 0  // Maximum response length
         };
         
-        var responseData = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken).ConfigureAwait(false);
-        
+        var apduResponse = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var responseData = apduResponse.Data;
+
         // First byte of response data is the CTAP status
         if (responseData.Length < 1)
         {
             throw new Ctap.CtapException(CtapStatus.Other, "Empty response from authenticator");
         }
-        
+
         var status = (CtapStatus)responseData.Span[0];
         Ctap.CtapException.ThrowIfError(status);
-        
-        _logger.LogDebug("CTAP CBOR response: status={Status}, data={Length} bytes", 
+
+        _logger.LogDebug("CTAP CBOR response: status={Status}, data={Length} bytes",
             status, responseData.Length - 1);
-        
+
         // Return the response data (without status byte)
         return responseData[1..];
     }

@@ -60,7 +60,6 @@ public static class DependencyInjection
         /// <summary>
         /// Adds FIDO2/CTAP2 session support to the service collection.
         /// </summary>
-        /// <param name="configureOptions">Optional action to configure YubiKeyManager options.</param>
         /// <returns>The service collection for chaining.</returns>
         /// <remarks>
         /// <para>
@@ -88,7 +87,7 @@ public static class DependencyInjection
         /// var factory = provider.GetRequiredService&lt;FidoSessionFactoryDelegate&gt;();
         /// </code>
         /// </example>
-        public IServiceCollection AddYubiKeyFido2(Action<YubiKeyManagerOptions>? configureOptions = null)
+        public IServiceCollection AddYubiKeyFido2()
         {
             services.TryAddSingleton<FidoSessionFactoryDelegate>(
                 FidoSession.CreateAsync);
@@ -96,7 +95,6 @@ public static class DependencyInjection
             services.TryAddSingleton<SmartCardFidoSessionFactoryDelegate>(
                 FidoSession.CreateAsync);
 
-            services.AddYubiKeyManagerCore(configureOptions);
             return services;
         }
     }

@@ -91,6 +91,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.TestPr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagementTool", "Yubico.YubiKit.Management\examples\ManagementTool\ManagementTool.csproj", "{2AD12F83-CB52-4995-8499-B9FE03C80DF7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FidoTool", "Yubico.YubiKit.Fido2\examples\FidoTool\FidoTool.csproj", "{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -461,6 +463,18 @@ Global
 		{2AD12F83-CB52-4995-8499-B9FE03C80DF7}.Release|x64.Build.0 = Release|Any CPU
 		{2AD12F83-CB52-4995-8499-B9FE03C80DF7}.Release|x86.ActiveCfg = Release|Any CPU
 		{2AD12F83-CB52-4995-8499-B9FE03C80DF7}.Release|x86.Build.0 = Release|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Debug|x64.Build.0 = Debug|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Debug|x86.Build.0 = Debug|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Release|x64.ActiveCfg = Release|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Release|x64.Build.0 = Release|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Release|x86.ActiveCfg = Release|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -494,6 +508,7 @@ Global
 		{1F9F7F46-43B4-4DB1-BAD8-AD508EB7B326} = {A5BDC44E-1E16-6059-A821-C8C236504AAA}
 		{64153330-5664-4099-A821-B33BD5B51ED5} = {A5BDC44E-1E16-6059-A821-C8C236504AAA}
 		{2AD12F83-CB52-4995-8499-B9FE03C80DF7} = {29556DAF-D256-48EA-BE95-94E86BFE0D22}
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741} = {51E56800-A682-637B-22A4-3BC77FC77BA1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A15F6F16-41BD-43F1-BF4A-17B4695A4D45}

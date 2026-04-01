@@ -626,7 +626,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     }
     
     /// <inheritdoc />
-    public async ValueTask DisposeAsync()
+    public new async ValueTask DisposeAsync()
     {
         if (_disposed)
             return;

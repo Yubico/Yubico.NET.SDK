@@ -64,4 +64,18 @@ public static class CredentialMenu
             cancellationToken: cancellationToken);
         await DeleteCredential.RunAsync(session, cancellationToken);
     }
+
+    public static async Task GenerateAsync(CancellationToken cancellationToken = default)
+    {
+        OutputHelpers.WriteHeader("Generate Asymmetric Credential");
+
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        if (selection is null) return;
+
+        OutputHelpers.WriteActiveDevice(selection.DisplayName);
+
+        await using var session = await selection.Device.CreateHsmAuthSessionAsync(
+            cancellationToken: cancellationToken);
+        await GenerateAsymmetricCredential.RunAsync(session, cancellationToken);
+    }
 }

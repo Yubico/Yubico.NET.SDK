@@ -62,6 +62,11 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         internal DesktopSmartCardDeviceListener(ISCardInterop scard)
         {
+            if (scard is null)
+            {
+                throw new ArgumentNullException(nameof(scard));
+            }
+
             _scard = scard;
             _log.LogInformation("Creating DesktopSmartCardDeviceListener.");
             Status = DeviceListenerStatus.Stopped;

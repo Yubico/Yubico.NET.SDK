@@ -86,7 +86,9 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             // SCardReleaseContext with the raw IntPtr tells WinSCard the handle is gone.
             // Subsequent SCardGetStatusChange calls using this handle will fail immediately
             // with SCARD_E_INVALID_HANDLE and trigger WinSCard's internal C++ exception path.
-            NativeMethods.SCardReleaseContext(context.DangerousGetHandle());
+            uint result = NativeMethods.SCardReleaseContext(context.DangerousGetHandle());
+            Skip.If(result != ErrorCode.SCARD_S_SUCCESS,
+                $"SCardReleaseContext failed with 0x{result:X8}; context may already be invalid or disposed. Skipping test.");
         }
 
         /// <summary>
@@ -225,25 +227,32 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
 
             var listener = SmartCardDeviceListener.Create();
 
-            Skip.IfNot(ListenerIsActive(listener),
-                "Smart Card service (SCardSvr) is not running on this machine.");
+            try
+            {
+                Skip.IfNot(ListenerIsActive(listener),
+                    "Smart Card service (SCardSvr) is not running on this machine.");
 
-            Thread.Sleep(300);
-            InvalidateListenerContext(listener);
+                Thread.Sleep(300);
+                InvalidateListenerContext(listener);
 
-            // Let recovery fire once (1000ms sleep inside the listener thread).
-            Thread.Sleep(1500);
+                // Let recovery fire once (1000ms sleep inside the listener thread).
+                Thread.Sleep(1500);
 
-            // Now dispose — must complete well within 8 seconds.
-            var stopwatch = Stopwatch.StartNew();
-            var exception = Record.Exception(() => listener.Dispose());
-            stopwatch.Stop();
+                // Now dispose — must complete well within 8 seconds.
+                var stopwatch = Stopwatch.StartNew();
+                var exception = Record.Exception(() => listener.Dispose());
+                stopwatch.Stop();
 
-            Assert.Null(exception);
-            Assert.True(
-                stopwatch.ElapsedMilliseconds < 5000,
-                $"Dispose took {stopwatch.ElapsedMilliseconds}ms after handle invalidation. " +
-                "Expected < 5000ms. The listener thread may be blocked in the recovery sleep.");
+                Assert.Null(exception);
+                Assert.True(
+                    stopwatch.ElapsedMilliseconds < 5000,
+                    $"Dispose took {stopwatch.ElapsedMilliseconds}ms after handle invalidation. " +
+                    "Expected < 5000ms. The listener thread may be blocked in the recovery sleep.");
+            }
+            finally
+            {
+                listener.Dispose();
+            }
         }
     }
 }

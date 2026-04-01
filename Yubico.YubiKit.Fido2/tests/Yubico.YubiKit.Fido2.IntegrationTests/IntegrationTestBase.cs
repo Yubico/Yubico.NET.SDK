@@ -12,76 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
-using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.YubiKey;
-
 namespace Yubico.YubiKit.Fido2.IntegrationTests;
 
 /// <summary>
 /// Base class for FIDO2 integration tests.
-/// Provides YubiKey device discovery and service container setup.
+/// Tests use [WithYubiKey] attribute and YubiKeyTestState for device discovery.
 /// </summary>
-public abstract class IntegrationTestBase : IDisposable
+/// <remarks>
+/// This base class exists for shared test utilities. Device discovery is handled
+/// by the standard WithYubiKey test infrastructure from Yubico.YubiKit.Tests.Shared.
+/// </remarks>
+public abstract class IntegrationTestBase
 {
-    private bool _disposed;
-
-    protected IntegrationTestBase(Action<YubiKeyManagerOptions>? overrideOptions = null)
-    {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddYubiKeyManagerCore();
-        services.AddYubiKeyFido2(overrideOptions ?? DefaultOptions);
-
-        ServiceProvider = services.BuildServiceProvider();
-        YubiKeyManager = ServiceProvider.GetRequiredService<IYubiKeyManager>();
-        ServiceLocator.SetLocatorProvider(ServiceProvider);
-
-        DeviceRepository = ServiceProvider.GetRequiredService<IDeviceRepository>();
-        DeviceMonitorService = ServiceProvider.GetRequiredService<DeviceMonitorService>();
-        DeviceListenerService = ServiceProvider.GetRequiredService<DeviceListenerService>();
-
-        DeviceMonitorService.StartAsync(CancellationToken.None).Wait();
-        DeviceListenerService.StartAsync(CancellationToken.None).Wait();
-    }
-
-    private static Action<YubiKeyManagerOptions> DefaultOptions =>
-        options =>
-        {
-            options.EnableAutoDiscovery = true;
-            options.ScanInterval = TimeSpan.FromMilliseconds(100);
-            options.EnabledTransport = Transport.All;
-        };
-
-    protected ServiceProvider ServiceProvider { get; }
-    protected IYubiKeyManager YubiKeyManager { get; }
-    private IDeviceRepository DeviceRepository { get; }
-    private DeviceListenerService DeviceListenerService { get; }
-    private DeviceMonitorService DeviceMonitorService { get; }
-
-    #region IDisposable Members
-
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-
-        DeviceMonitorService?.Dispose();
-        DeviceRepository?.Dispose();
-        ServiceProvider?.Dispose();
-        GC.SuppressFinalize(this);
-
-        _disposed = true;
-    }
-
-    #endregion
-
-    protected void SkipDeviceRepositoryManualScan(bool value)
-    {
-        var type = typeof(DeviceRepositoryCached);
-        var field = type.GetField("TEST_MONITORSERVICE_SKIP_MANUALSCAN",
-            BindingFlags.NonPublic | BindingFlags.Instance);
-        field?.SetValue(DeviceRepository, value);
-    }
 }

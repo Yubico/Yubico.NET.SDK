@@ -18,7 +18,6 @@ internal class ApduFormatterShort : IApduFormatter
 {
     private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;
 
-    #region IApduFormatter Members
 
     public ReadOnlyMemory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data,
         int le)
@@ -59,5 +58,4 @@ internal class ApduFormatterShort : IApduFormatter
     public ReadOnlyMemory<byte> Format(ApduCommand apdu) =>
         Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le);
 
-    #endregion
 }

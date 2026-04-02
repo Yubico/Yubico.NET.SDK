@@ -15,6 +15,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
+using System.Security.Cryptography;
 namespace Yubico.YubiKit.Oath;
 
 /// <summary>
@@ -171,7 +172,7 @@ public sealed class Credential : IEquatable<Credential>, IComparable<Credential>
             return false;
         }
 
-        return DeviceId == other.DeviceId && Id.AsSpan().SequenceEqual(other.Id);
+        return DeviceId == other.DeviceId && CryptographicOperations.FixedTimeEquals(Id.AsSpan(), other.Id);
     }
 
     /// <inheritdoc />

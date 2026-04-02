@@ -22,7 +22,6 @@ namespace Yubico.YubiKit.Core.UnitTests;
 /// </summary>
 public class YubiKeyDeviceManagerTests
 {
-    #region FindAllAsync Behavior Matrix Tests (Task 3.7)
 
     [Fact]
     public async Task FindAllAsync_FirstCall_PerformsScan()
@@ -143,9 +142,7 @@ public class YubiKeyDeviceManagerTests
         await manager.DisposeAsync();
     }
 
-    #endregion
 
-    #region DeviceChanges Tests (Task 3.3)
 
     [Fact]
     public async Task DeviceChanges_EmitsEventsFromRepository()
@@ -167,9 +164,7 @@ public class YubiKeyDeviceManagerTests
         await manager.DisposeAsync();
     }
 
-    #endregion
 
-    #region Monitoring Tests (Task 3.4)
 
     [Fact]
     public void IsMonitoring_InitiallyFalse()
@@ -231,9 +226,7 @@ public class YubiKeyDeviceManagerTests
         manager.DisposeAsync().GetAwaiter().GetResult();
     }
 
-    #endregion
 
-    #region Disposal Tests (Task 3.5)
 
     [Fact]
     public async Task DisposeAsync_StopsMonitoring()
@@ -295,9 +288,7 @@ public class YubiKeyDeviceManagerTests
         Assert.Throws<ObjectDisposedException>(() => manager.StopMonitoring());
     }
 
-    #endregion
 
-    #region Factory Tests (Task 3.6)
 
     [Fact]
     public void Create_ReturnsValidInstance()
@@ -312,9 +303,7 @@ public class YubiKeyDeviceManagerTests
         manager.DisposeAsync().GetAwaiter().GetResult();
     }
 
-    #endregion
 
-    #region Concurrent Access Tests
 
     [Fact]
     public async Task FindAllAsync_ConcurrentCalls_AllComplete()
@@ -339,9 +328,7 @@ public class YubiKeyDeviceManagerTests
         await manager.DisposeAsync();
     }
 
-    #endregion
 
-    #region Test Helpers
 
     private static (YubiKeyDeviceManager Manager, FakeFindYubiKeys FindYubiKeys, YubiKeyDeviceRepository Repository)
         CreateManager()
@@ -390,5 +377,4 @@ public class YubiKeyDeviceManagerTests
             => throw new NotSupportedException("FakeYubiKey does not support connections.");
     }
 
-    #endregion
 }

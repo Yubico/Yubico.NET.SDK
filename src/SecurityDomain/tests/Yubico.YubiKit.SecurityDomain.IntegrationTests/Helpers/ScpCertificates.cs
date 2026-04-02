@@ -49,7 +49,7 @@ public class ScpCertificates
 
         // Find the root certificate (self-signed)
         var root = certList.FirstOrDefault(IsSelfSigned);
-        if (root == null) throw new InvalidOperationException("No root certificate found in the collection");
+        if (root is null) throw new InvalidOperationException("No root certificate found in the collection");
 
         var ordered = new List<X509Certificate2> { root };
         certList.Remove(root);
@@ -58,7 +58,7 @@ public class ScpCertificates
         while (certList.Count > 0)
         {
             var next = certList.FirstOrDefault(c => IsIssuedBy(c, ordered[^1]));
-            if (next == null) break; // No more certificates in the chain
+            if (next is null) break; // No more certificates in the chain
 
             ordered.Add(next);
             certList.Remove(next);

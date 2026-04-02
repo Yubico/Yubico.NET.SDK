@@ -32,7 +32,6 @@ public sealed partial class HidCodeTranslator
     // afterwards.
     private const byte _shift = 0x80;
 
-    #region Constructors (static and instance)
 
     // For now, this is private. I can't think of a reason anyone should be
     // instantiating these outside of this class.
@@ -46,9 +45,7 @@ public sealed partial class HidCodeTranslator
         Layout = keyboardLayout;
     }
 
-    #endregion
 
-    #region Private fields
 
     private static readonly Dictionary<KeyboardLayout, HidCodeTranslator> _lookup = new()
     {
@@ -65,9 +62,7 @@ public sealed partial class HidCodeTranslator
     private readonly Dictionary<char, byte> _byChar;
     private readonly Dictionary<byte, char> _byCode;
 
-    #endregion
 
-    #region Index operators for chars and HID codes
 
     /// <summary>
     ///     Gets the HID code that corresponds to the given HID code.
@@ -120,9 +115,7 @@ public sealed partial class HidCodeTranslator
     }
 #pragma warning restore CA1043
 
-    #endregion
 
-    #region Instance Properties
 
     /// <summary>
     ///     Gets a <see cref="KeyboardLayout" /> specific instance of this class.
@@ -157,9 +150,7 @@ public sealed partial class HidCodeTranslator
     public byte[] SupportedHidCodes => _byCode.Keys.ToArray();
 #pragma warning restore CA1819
 
-    #endregion
 
-    #region Instance Methods
 
     /// <summary>
     ///     Given a collection of HID codes, returns the string that it would produce.
@@ -221,5 +212,4 @@ public sealed partial class HidCodeTranslator
         return GetHidCodes(value.ToCharArray());
     }
 
-    #endregion
 }

@@ -107,7 +107,7 @@ public class CredentialTests
     {
         var cred = new Credential("d", "user"u8.ToArray(), null, "user", OathType.Totp, 30, null);
 
-        Assert.False(cred == null);
+        Assert.False(cred is null);
         Assert.False(null == cred);
     }
 }

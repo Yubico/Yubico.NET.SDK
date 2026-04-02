@@ -450,10 +450,10 @@ public class FingerprintBioEnrollmentTests
     private static byte[] CreateTemplateInfoResponse(byte[] templateId, string? friendlyName)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(friendlyName != null ? 2 : 1);
+        writer.WriteStartMap(friendlyName is not null ? 2 : 1);
         writer.WriteInt32(4); // templateId
         writer.WriteByteString(templateId);
-        if (friendlyName != null)
+        if (friendlyName is not null)
         {
             writer.WriteInt32(7); // templateFriendlyName
             writer.WriteTextString(friendlyName);

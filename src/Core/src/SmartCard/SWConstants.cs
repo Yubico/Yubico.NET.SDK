@@ -19,14 +19,11 @@ namespace Yubico.YubiKit.Core.SmartCard;
 /// </summary>
 public static class SWConstants
 {
-    #region Success (0x9000)
 
     /// <summary>Normal processing - command completed successfully.</summary>
     public const short Success = unchecked((short)0x9000);
 
-    #endregion
 
-    #region Warnings - NVM Unchanged (0x62XX)
 
     /// <summary>Warning: No information given, NVM unchanged.</summary>
     public const short WarningNvmUnchanged = 0x6200;
@@ -49,9 +46,7 @@ public static class SWConstants
     /// <summary>Warning: No input data available from sensor.</summary>
     public const short NoSensorData = 0x6286;
 
-    #endregion
 
-    #region Warnings - NVM Changed (0x63XX)
 
     /// <summary>Warning: No information given, NVM changed.</summary>
     public const short WarningNvmChanged = 0x6300;
@@ -62,9 +57,7 @@ public static class SWConstants
     /// <summary>Verification failed (counter bits indicate remaining attempts).</summary>
     public const short VerifyFail = 0x63C0;
 
-    #endregion
 
-    #region Execution Errors - NVM Unchanged (0x64XX)
 
     /// <summary>Execution error: No information given, NVM unchanged.</summary>
     public const short ExecutionError = 0x6400;
@@ -72,9 +65,7 @@ public static class SWConstants
     /// <summary>Execution error: Immediate response required by the card.</summary>
     public const short ResponseRequired = 0x6401;
 
-    #endregion
 
-    #region Execution Errors - NVM Changed (0x65XX)
 
     /// <summary>Execution error: No information given, NVM changed.</summary>
     public const short ErrorNvmChanged = 0x6500;
@@ -82,16 +73,12 @@ public static class SWConstants
     /// <summary>Execution error: Memory failure.</summary>
     public const short MemoryFailure = 0x6581;
 
-    #endregion
 
-    #region Checking Errors - Wrong Length (0x67XX)
 
     /// <summary>Wrong length field (Lc or Le).</summary>
     public const short WrongLength = 0x6700;
 
-    #endregion
 
-    #region Checking Errors - Functions Not Supported (0x68XX)
 
     /// <summary>Functions in CLA not supported: No information given.</summary>
     public const short FunctionError = 0x6800;
@@ -108,9 +95,7 @@ public static class SWConstants
     /// <summary>Functions in CLA not supported: Command chaining not supported.</summary>
     public const short CommandChainingNotSupported = 0x6884;
 
-    #endregion
 
-    #region Checking Errors - Command Not Allowed (0x69XX)
 
     /// <summary>Command not allowed: No information given.</summary>
     public const short CommandNotAllowed = 0x6900;
@@ -139,9 +124,7 @@ public static class SWConstants
     /// <summary>Command not allowed: Incorrect secure messaging data objects.</summary>
     public const short SecureMessageMalformed = 0x6988;
 
-    #endregion
 
-    #region Checking Errors - Wrong Parameters (0x6AXX)
 
     /// <summary>Wrong parameters: No information given.</summary>
     public const short InvalidParameter = 0x6A00;
@@ -179,28 +162,21 @@ public static class SWConstants
     /// <summary>Wrong parameters: DF name already exists.</summary>
     public const short DFNameAlreadyExists = 0x6A8A;
 
-    #endregion
 
-    #region Checking Errors - Instruction Not Supported (0x6DXX)
 
     /// <summary>Instruction code not supported or invalid.</summary>
     public const short InsNotSupported = 0x6D00;
 
-    #endregion
 
-    #region Checking Errors - Class Not Supported (0x6EXX)
 
     /// <summary>Class not supported.</summary>
     public const short ClaNotSupported = 0x6E00;
 
-    #endregion
 
-    #region Undiagnosed Error (0x6FXX)
 
     /// <summary>No precise diagnosis possible.</summary>
     public const short NoPreciseDiagnosis = 0x6F00;
 
-    #endregion
 
     /// <summary>
     ///     Gets a human-readable description for a status word.

@@ -22,7 +22,6 @@ namespace Yubico.YubiKit.Fido2.UnitTests.Cbor;
 /// </summary>
 public class CtapResponseParserTests
 {
-    #region ReadIntKeyMap Tests
     
     [Fact]
     public void ReadIntKeyMap_ParsesMapCorrectly()
@@ -100,9 +99,7 @@ public class CtapResponseParserTests
             CtapResponseParser.ReadIntKeyMap(reader, null!));
     }
     
-    #endregion
     
-    #region ReadTextKeyMap Tests
     
     [Fact]
     public void ReadTextKeyMap_ParsesMapCorrectly()
@@ -143,9 +140,7 @@ public class CtapResponseParserTests
         Assert.Equal(123, value);
     }
     
-    #endregion
     
-    #region ToNullableMemory Tests
     
     [Fact]
     public void ToNullableMemory_WithData_ReturnsMemory()
@@ -157,9 +152,7 @@ public class CtapResponseParserTests
         Assert.Equal(data, result.Value.ToArray());
     }
     
-    #endregion
     
-    #region ReadArrayAsList Tests
     
     [Fact]
     public void ReadArrayAsList_ParsesArrayCorrectly()
@@ -194,9 +187,7 @@ public class CtapResponseParserTests
         Assert.Empty(result);
     }
     
-    #endregion
     
-    #region ReadOptional Tests
     
     [Fact]
     public void ReadOptionalInt32_WithValue_ReturnsValue()
@@ -271,5 +262,4 @@ public class CtapResponseParserTests
         Assert.Null(result);
     }
     
-    #endregion
 }

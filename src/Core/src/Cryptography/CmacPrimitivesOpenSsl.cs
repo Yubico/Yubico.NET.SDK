@@ -180,7 +180,6 @@ internal sealed class CmacPrimitivesOpenSsl : IDisposable
         _cmacCtx.BlockCipherAlgorithm = algorithm;
     }
 
-    #region IDisposable Members
 
     public void Dispose()
     {
@@ -190,7 +189,6 @@ internal sealed class CmacPrimitivesOpenSsl : IDisposable
         _disposed = true;
     }
 
-    #endregion
 
     /// <inheritdoc />
     public void CmacInit(ReadOnlySpan<byte> keyData)

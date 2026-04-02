@@ -30,7 +30,6 @@ internal abstract class UnmanagedDynamicLibrary : IDisposable
         _handle = handle;
     }
 
-    #region IDisposable Members
 
     public void Dispose()
     {
@@ -39,7 +38,6 @@ internal abstract class UnmanagedDynamicLibrary : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    #endregion
 
     public static UnmanagedDynamicLibrary Open(string fileName) =>
         SdkPlatformInfo.OperatingSystem switch

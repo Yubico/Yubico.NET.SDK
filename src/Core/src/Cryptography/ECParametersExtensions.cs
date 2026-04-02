@@ -21,7 +21,6 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// </summary>
 public static class ECParametersExtensions
 {
-    #region Nested type: $extension
 
     extension(ECParameters original)
     {
@@ -58,5 +57,4 @@ public static class ECParametersExtensions
         }
     }
 
-    #endregion
 }

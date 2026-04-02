@@ -170,7 +170,6 @@ internal static class YubiKeyTestInfrastructure
         }
     }
 
-    #region Static Device Initialization
 
     /// <summary>
     ///     Initializes all authorized YubiKey devices (runs once per test run).
@@ -294,5 +293,4 @@ internal static class YubiKeyTestInfrastructure
         }
     }
 
-    #endregion
 }

@@ -39,7 +39,7 @@ internal static class AsnUtilities
     // Ensures the integer value is treated as positive by adding a leading zero if needed
     public static byte[] EnsurePositive(byte[]? value)
     {
-        if (value == null || value.Length == 0)
+        if (value is null || value.Length == 0)
         {
             return [];
         }

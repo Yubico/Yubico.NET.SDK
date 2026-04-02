@@ -19,7 +19,6 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// </summary>
 public static class ScpExtensions
 {
-    #region Nested type: $extension
 
     extension(ISmartCardProtocol protocol)
     {
@@ -70,5 +69,4 @@ public static class ScpExtensions
         }
     }
 
-    #endregion
 }

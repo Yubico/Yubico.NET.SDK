@@ -12,7 +12,6 @@ public class SmartCardConnectionFactory(ILoggerFactory loggerFactory) : ISmartCa
 {
     private readonly ILoggerFactory _loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
 
-    #region ISmartCardConnectionFactory Members
 
     public async Task<ISmartCardConnection> CreateAsync(IPcscDevice smartCardDevice,
         CancellationToken cancellationToken = default)
@@ -25,7 +24,6 @@ public class SmartCardConnectionFactory(ILoggerFactory loggerFactory) : ISmartCa
         return connection;
     }
 
-    #endregion
 
     public static SmartCardConnectionFactory CreateDefault(ILoggerFactory? loggerFactory = null) =>
         new(loggerFactory ?? NullLoggerFactory.Instance);

@@ -268,7 +268,7 @@ public sealed class ExtensionBuilder
             writer.WriteInt32((int)_credProtect.Value);
         }
         
-        if (_hmacSecret != null)
+        if (_hmacSecret is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.HmacSecret);
             _hmacSecret.Encode(writer);
@@ -280,13 +280,13 @@ public sealed class ExtensionBuilder
             writer.WriteBoolean(true);
         }
         
-        if (_largeBlob != null)
+        if (_largeBlob is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.LargeBlob);
             _largeBlob.Encode(writer);
         }
         
-        if (_largeBlobAssertion != null)
+        if (_largeBlobAssertion is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.LargeBlob);
             _largeBlobAssertion.Encode(writer);
@@ -301,7 +301,7 @@ public sealed class ExtensionBuilder
         if (_prf)
         {
             writer.WriteTextString(ExtensionIdentifiers.Prf);
-            if (_prfInput != null)
+            if (_prfInput is not null)
             {
                 EncodePrfInput(writer, _prfInput);
             }
@@ -346,9 +346,9 @@ public sealed class ExtensionBuilder
     {
         return _credProtect.HasValue ||
                _credBlob.HasValue ||
-               _largeBlob != null ||
-               _largeBlobAssertion != null ||
-               _hmacSecret != null ||
+               _largeBlob is not null ||
+               _largeBlobAssertion is not null ||
+               _hmacSecret is not null ||
                _hmacSecretMc ||
                _minPinLength ||
                _prf;
@@ -359,8 +359,8 @@ public sealed class ExtensionBuilder
         var count = 0;
         if (_credProtect.HasValue) count++;
         if (_credBlob.HasValue) count++;
-        if (_largeBlob != null || _largeBlobAssertion != null) count++;
-        if (_hmacSecret != null) count++;
+        if (_largeBlob is not null || _largeBlobAssertion is not null) count++;
+        if (_hmacSecret is not null) count++;
         if (_hmacSecretMc) count++;
         if (_minPinLength) count++;
         if (_prf) count++;

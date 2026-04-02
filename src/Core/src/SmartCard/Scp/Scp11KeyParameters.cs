@@ -51,7 +51,7 @@ public sealed record Scp11KeyParameters : ScpKeyParameters
         // Validate SCP11a/c requirements
         if (keyReference.Kid is ScpKid.SCP11a or ScpKid.SCP11c)
         {
-            if (skOceEcka == null)
+            if (skOceEcka is null)
                 throw new ArgumentNullException(nameof(skOceEcka), $"SCP11a and SCP11c require {nameof(skOceEcka)}");
 
             if (Certificates.Count == 0)

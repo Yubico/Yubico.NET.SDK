@@ -18,7 +18,6 @@ namespace Yubico.YubiKit.Core.SmartCard;
 
 internal class ApduFormatterExtended(int maxApduSize) : IApduFormatter
 {
-    #region IApduFormatter Members
 
     public ReadOnlyMemory<byte> Format(ApduCommand apdu) =>
         Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le);
@@ -97,5 +96,4 @@ internal class ApduFormatterExtended(int maxApduSize) : IApduFormatter
         return buffer.ToArray();
     }
 
-    #endregion
 }

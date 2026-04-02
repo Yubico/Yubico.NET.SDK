@@ -62,7 +62,6 @@ internal class PcscProtocol : ISmartCardProtocol
 
     internal IApduProcessor GetBaseProcessor() => BuildBaseProcessor();
 
-    #region ISmartCardProtocol Members
 
     public void Dispose() => _connection.Dispose();
 
@@ -120,5 +119,4 @@ internal class PcscProtocol : ISmartCardProtocol
         ReconfigureProcessor();
     }
 
-    #endregion
 }

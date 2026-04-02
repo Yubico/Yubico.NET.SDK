@@ -19,7 +19,6 @@ namespace Yubico.YubiKit.Core.PlatformInterop;
 
 internal static class NativeMethods
 {
-    #region DlOpenFlags enum
 
     [Flags]
     public enum DlOpenFlags
@@ -34,7 +33,6 @@ internal static class NativeMethods
         NoDelete = 0x1000
     }
 
-    #endregion
 
     private const string Kernel32Dll = "kernel32.dll";
     private const string MacDlLib = "libdl.dylib";

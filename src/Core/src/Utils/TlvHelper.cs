@@ -142,7 +142,7 @@ public static class TlvHelper
 
     public static Memory<byte> EncodeDictionary(IReadOnlyDictionary<int, byte[]?> tlvData)
     {
-        if (tlvData.Count == 0) return Array.Empty<byte>();
+        if (tlvData.Count == 0) return Memory<byte>.Empty;
 
         var estimatedSize = tlvData.Sum(kvp => 2 + (kvp.Value?.Length ?? 0));
         var rented = ArrayPool<byte>.Shared.Rent(estimatedSize);

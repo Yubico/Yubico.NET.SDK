@@ -155,11 +155,10 @@ internal class ScpProcessor(
         }
         finally
         {
-            if (rentedMacData != null) ArrayPool<byte>.Shared.Return(rentedMacData);
+            if (rentedMacData is not null) ArrayPool<byte>.Shared.Return(rentedMacData);
         }
     }
 
-    #region IApduProcessor Members
 
     /// <summary>
     ///     Gets the APDU formatter.
@@ -173,5 +172,4 @@ internal class ScpProcessor(
         CancellationToken cancellationToken = default)
         => TransmitAsync(command, useScp, true, cancellationToken);
 
-    #endregion
 }

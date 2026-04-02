@@ -14,7 +14,6 @@ namespace Yubico.YubiKit.YubiHsm.IntegrationTests.TestExtensions;
 /// </summary>
 public static class HsmAuthTestStateExtensions
 {
-    #region Nested type: $extension
 
     extension(YubiKeyTestState state)
     {
@@ -62,5 +61,4 @@ public static class HsmAuthTestStateExtensions
             }, cancellationToken);
     }
 
-    #endregion
 }

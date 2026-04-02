@@ -18,14 +18,11 @@ namespace Yubico.YubiKit.Core.PlatformInterop.Windows.Cfgmgr32;
 
 internal static partial class NativeMethods
 {
-    #region Nested type: CM_NOTIFY_CALLBACK
 
     internal delegate int CM_NOTIFY_CALLBACK(IntPtr hNotify, IntPtr Context, CM_NOTIFY_ACTION Action,
         IntPtr EventData, int EventDataSize);
 
-    #endregion
 
-    #region Enumerations and flags
 
     /// <summary>
     ///     Configuration Manager CONFIGRET return status codes
@@ -167,9 +164,7 @@ internal static partial class NativeMethods
         ALL_DEVICES = 0x0000_0001 // All registered device interfaces, live or not
     }
 
-    #endregion
 
-    #region Structures
 
     // These are the values that define the CM_NOTIFY_FILTER in the Windows
     // cfgmgr32 library.
@@ -203,9 +198,7 @@ internal static partial class NativeMethods
         internal Guid ClassGuid;
     }
 
-    #endregion
 
-    #region P/Invoke DLL Imports
 
     internal static CmErrorCode CM_Get_Child(
         out int childInstance,
@@ -367,5 +360,4 @@ internal static partial class NativeMethods
         int mustBeZero
     );
 
-    #endregion
 }

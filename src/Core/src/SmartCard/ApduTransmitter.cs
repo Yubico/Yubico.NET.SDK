@@ -16,7 +16,6 @@ namespace Yubico.YubiKit.Core.SmartCard;
 
 internal class ApduTransmitter(ISmartCardConnection connection, IApduFormatter formatter) : IApduProcessor
 {
-    #region IApduProcessor Members
 
     public IApduFormatter Formatter => formatter;
 
@@ -35,5 +34,4 @@ internal class ApduTransmitter(ISmartCardConnection connection, IApduFormatter f
         return new ApduResponse(responseBytes);
     }
 
-    #endregion
 }

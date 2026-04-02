@@ -114,7 +114,6 @@ public sealed record DeviceConfig
 
     public static Builder CreateBuilder() => new();
 
-    #region Nested type: Builder
 
     public sealed class Builder
     {
@@ -186,5 +185,4 @@ public sealed record DeviceConfig
         }
     }
 
-    #endregion
 }

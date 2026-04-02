@@ -27,7 +27,6 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
 /// </summary>
 public static class TestStateExtensions
 {
-    #region Nested type: $extension
 
     extension(YubiKeyTestState state)
     {
@@ -156,5 +155,4 @@ public static class TestStateExtensions
         }
     }
 
-    #endregion
 }

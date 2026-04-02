@@ -11,12 +11,10 @@ public interface IFindPcscDevices
 
 public class FindPcscDevices(ILogger<FindPcscDevices> logger) : IFindPcscDevices
 {
-    #region IFindPcscDevices Members
 
     public async Task<IReadOnlyList<IPcscDevice>> FindAllAsync(CancellationToken cancellationToken = default) =>
         await Task.Run(FindAll, cancellationToken).ConfigureAwait(false);
 
-    #endregion
 
     private IReadOnlyList<IPcscDevice> FindAll()
     {

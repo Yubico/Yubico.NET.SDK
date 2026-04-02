@@ -25,7 +25,6 @@ namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Scp;
 /// </summary>
 public class X963KdfTests
 {
-    #region SHA-256 Test Vectors - Empty SharedInfo (128-bit output)
 
     /// <summary>
     ///     SHA-256 test vectors with empty SharedInfo and 128-bit (16 byte) output.
@@ -65,7 +64,7 @@ public class X963KdfTests
     {
         // Arrange
         var z = Convert.FromHexString(zHex);
-        var sharedInfo = sharedInfoHex.Length > 0 ? Convert.FromHexString(sharedInfoHex) : [];
+        var sharedInfo = sharedInfoHex.Length > 0 ? Convert.FromHexString(sharedInfoHex) : Array.Empty<byte>();
         var expectedKeyData = Convert.FromHexString(expectedKeyDataHex);
 
         // Act
@@ -75,9 +74,7 @@ public class X963KdfTests
         Assert.Equal(expectedKeyData, derivedKey);
     }
 
-    #endregion
 
-    #region SHA-256 Test Vectors - 128-bit SharedInfo (1024-bit output)
 
     /// <summary>
     ///     SHA-256 test vectors with 128-bit SharedInfo and 1024-bit (128 byte) output.
@@ -157,9 +154,7 @@ public class X963KdfTests
         Assert.Equal(expectedKeyData, derivedKey);
     }
 
-    #endregion
 
-    #region Edge Cases and Error Handling
 
     [Fact]
     public void X963Kdf_ZeroLengthOutput_ThrowsArgumentException()
@@ -191,8 +186,8 @@ public class X963KdfTests
     public void X963Kdf_EmptyZ_ProducesValidOutput()
     {
         // Arrange - Even with empty Z, KDF should work (though not cryptographically useful)
-        Span<byte> z = [];
-        Span<byte> sharedInfo = [];
+        Span<byte> z = Array.Empty<byte>();
+        Span<byte> sharedInfo = Array.Empty<byte>();
 
         // Act
         var result = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 16);
@@ -211,7 +206,7 @@ public class X963KdfTests
         // Arrange - Request 100 bytes (requires 4 iterations of SHA-256)
         Span<byte> z = stackalloc byte[32];
         z.Fill(0x42);
-        Span<byte> sharedInfo = [];
+        Span<byte> sharedInfo = Array.Empty<byte>();
 
         // Act
         var result = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 100);
@@ -231,7 +226,7 @@ public class X963KdfTests
         // Arrange
         Span<byte> z = stackalloc byte[16];
         z.Fill(0xAA);
-        Span<byte> sharedInfo = [];
+        Span<byte> sharedInfo = Array.Empty<byte>();
 
         // Act
         var result = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 1);
@@ -247,7 +242,7 @@ public class X963KdfTests
         // Arrange - Request exactly 32 bytes (one SHA-256 hash)
         Span<byte> z = stackalloc byte[24];
         z.Fill(0x55);
-        Span<byte> sharedInfo = [];
+        Span<byte> sharedInfo = Array.Empty<byte>();
 
         // Act
         var result = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 32);
@@ -265,7 +260,7 @@ public class X963KdfTests
         z1.Fill(0x01);
         Span<byte> z2 = stackalloc byte[24];
         z2.Fill(0x02);
-        Span<byte> sharedInfo = [];
+        Span<byte> sharedInfo = Array.Empty<byte>();
 
         // Act
         var result1 = X963Kdf.DeriveKeyMaterial(z1, sharedInfo, 16);
@@ -313,5 +308,4 @@ public class X963KdfTests
         Assert.Equal(result2, result3);
     }
 
-    #endregion
 }

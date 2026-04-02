@@ -63,12 +63,12 @@ internal static class AsnPrivateKeyEncoder
     public static byte[] EncodeToPkcs8(RSAParameters parameters)
     {
         // Ensure parameters include private key parts
-        if (parameters.D == null ||
-            parameters.P == null ||
-            parameters.Q == null ||
-            parameters.DP == null ||
-            parameters.DQ == null ||
-            parameters.InverseQ == null)
+        if (parameters.D is null ||
+            parameters.P is null ||
+            parameters.Q is null ||
+            parameters.DP is null ||
+            parameters.DQ is null ||
+            parameters.InverseQ is null)
         {
             throw new ArgumentException("All RSA Private key parameters must be provided.");
         }
@@ -119,12 +119,12 @@ internal static class AsnPrivateKeyEncoder
     /// <exception cref="ArgumentException">Thrown when the private key parameter D is null.</exception>
     public static byte[] EncodeToPkcs8(ECParameters parameters)
     {
-        if (parameters.D == null)
+        if (parameters.D is null)
         {
             throw new ArgumentException("Private key parameter D must be provided.");
         }
         
-        if(parameters.Curve.Oid.Value == null)
+        if(parameters.Curve.Oid.Value is null)
             throw new ArgumentException("Curve OID is null.");
         
         ReadOnlyMemory<byte> privateKey = parameters.D;
@@ -206,7 +206,7 @@ internal static class AsnPrivateKeyEncoder
             throw new ArgumentException("Curve25519 key must be 32 bytes.");
         }
 
-        if (algorithmOid == null)
+        if (algorithmOid is null)
         {
             throw new ArgumentException("Curve OID is null.");
         }

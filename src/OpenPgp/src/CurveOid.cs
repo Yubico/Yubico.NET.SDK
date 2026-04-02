@@ -95,7 +95,7 @@ public static class CurveOidExtensions
     {
         foreach (var (curve, bytes) in OidBytes)
         {
-            if (oidBytes.SequenceEqual(bytes))
+            if (CryptographicOperations.FixedTimeEquals(oidBytes, bytes))
             {
                 curveOid = curve;
                 return true;

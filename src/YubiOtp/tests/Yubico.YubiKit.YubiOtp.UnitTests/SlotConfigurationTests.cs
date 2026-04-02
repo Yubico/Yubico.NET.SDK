@@ -38,7 +38,6 @@ public class SlotConfigurationTests
         Assert.True(ChecksumUtils.CheckCrc(config, YubiOtpConstants.ConfigSize));
     }
 
-    #region YubiOtpSlotConfiguration
 
     [Fact]
     public void YubiOtp_GetConfig_ProducesValid52ByteStruct()
@@ -150,9 +149,7 @@ public class SlotConfigurationTests
         AssertValidCrc(result);
     }
 
-    #endregion
 
-    #region HmacSha1SlotConfiguration
 
     [Fact]
     public void HmacSha1_GetConfig_ProducesValid52ByteStruct()
@@ -287,9 +284,7 @@ public class SlotConfigurationTests
         Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 1, 9)));
     }
 
-    #endregion
 
-    #region HotpSlotConfiguration
 
     [Fact]
     public void Hotp_GetConfig_ProducesValid52ByteStruct()
@@ -426,9 +421,7 @@ public class SlotConfigurationTests
         Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 0, 9)));
     }
 
-    #endregion
 
-    #region StaticPasswordSlotConfiguration
 
     [Fact]
     public void StaticPassword_GetConfig_ProducesValid52ByteStruct()
@@ -521,9 +514,7 @@ public class SlotConfigurationTests
             new StaticPasswordSlotConfiguration(scanCodes));
     }
 
-    #endregion
 
-    #region StaticTicketSlotConfiguration
 
     [Fact]
     public void StaticTicket_GetConfig_ProducesValid52ByteStruct()
@@ -571,9 +562,7 @@ public class SlotConfigurationTests
         Assert.Equal(3, result[FixedSizeOffset]);
     }
 
-    #endregion
 
-    #region UpdateConfiguration
 
     [Fact]
     public void Update_GetConfig_ProducesValid52ByteStruct()
@@ -664,9 +653,7 @@ public class SlotConfigurationTests
         Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 2, 9)));
     }
 
-    #endregion
 
-    #region Base SlotConfiguration
 
     [Fact]
     public void Base_AllowUpdate_SetsExtFlag()
@@ -781,9 +768,7 @@ public class SlotConfigurationTests
         Assert.True(config.IsSupportedBy(new FirmwareVersion(2, 0, 0)));
     }
 
-    #endregion
 
-    #region CRC Verification
 
     [Fact]
     public void Crc_AllZeroConfig_ValidCrc()
@@ -816,5 +801,4 @@ public class SlotConfigurationTests
         Assert.NotEqual(crc1, crc2);
     }
 
-    #endregion
 }

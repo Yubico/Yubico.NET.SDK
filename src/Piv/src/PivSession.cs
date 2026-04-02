@@ -200,7 +200,6 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
         return new FirmwareVersion(response[0], response[1], response[2]);
     }
 
-    #region IPivSession Implementation (Placeholder methods for now)
     
     /// <inheritdoc />
     public async Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default)
@@ -375,9 +374,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
     // All other IPivSession methods would be implemented as placeholders for now...
     // This is Phase 2 - just the core session structure.
 
-    #endregion
 
-    #region Not Yet Implemented Placeholder Methods
 
 
 
@@ -460,9 +457,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
 
 
 
-    #endregion
 
-    #region Touch Notification
 
     /// <summary>
     /// Notifies the user if touch may be required for the operation on the specified slot.
@@ -520,7 +515,6 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
         OnTouchRequired.Invoke();
     }
 
-    #endregion
 
     private void EnsureInitialized()
     {

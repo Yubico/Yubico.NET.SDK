@@ -35,7 +35,6 @@ internal class HidDDevice : IHidDDevice
         FeatureReportByteLength = capabilities.FeatureReportByteLength;
     }
 
-    #region IHidDDevice Members
 
     public string DevicePath { get; }
     public short Usage { get; }
@@ -115,7 +114,6 @@ internal class HidDDevice : IHidDDevice
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
     }
 
-    #endregion
 
     private static NativeMethods.HIDP_CAPS GetCapabilities(SafeFileHandle safeHandle)
     {
@@ -154,7 +152,6 @@ internal class HidDDevice : IHidDDevice
         return handle;
     }
 
-    #region IDisposable Support
 
     private bool disposedValue; // To detect redundant calls
 
@@ -171,5 +168,4 @@ internal class HidDDevice : IHidDDevice
     // This code added to correctly implement the disposable pattern.
     public void Dispose() => Dispose(true);
 
-    #endregion
 }

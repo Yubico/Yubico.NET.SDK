@@ -38,7 +38,6 @@ internal class PcscYubiKey(
     public static PcscYubiKey Create(IPcscDevice pcscDevice, ILogger<PcscYubiKey>? logger) => new(pcscDevice,
         SmartCardConnectionFactory.CreateDefault(), logger ?? NullLogger<PcscYubiKey>.Instance);
 
-    #region IYubiKey Members
 
     public string DeviceId { get; } = $"pcsc:{pcscDevice.ReaderName}";
     public ConnectionType ConnectionType => ConnectionType.SmartCard;
@@ -55,5 +54,4 @@ internal class PcscYubiKey(
                throw new InvalidOperationException("Connection is not of the expected type.");
     }
 
-    #endregion
 }

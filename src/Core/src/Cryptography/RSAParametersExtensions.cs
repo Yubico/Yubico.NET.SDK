@@ -52,9 +52,9 @@ public static class RSAParametersExtensions
     internal static RSAParameters NormalizeParameters(this RSAParameters parameters)
     {
         var normalized = parameters.DeepCopy();
-        if (normalized.D == null || normalized.P == null || normalized.Q == null || 
-            normalized.DP == null || normalized.DQ == null || normalized.InverseQ == null ||
-            normalized.Modulus == null)
+        if (normalized.D is null || normalized.P is null || normalized.Q is null || 
+            normalized.DP is null || normalized.DQ is null || normalized.InverseQ is null ||
+            normalized.Modulus is null)
         {
             return normalized; // Can't normalize if missing required components
         }

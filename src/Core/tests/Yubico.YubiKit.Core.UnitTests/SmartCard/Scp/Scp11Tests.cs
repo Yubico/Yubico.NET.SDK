@@ -229,7 +229,6 @@ public class Scp11Tests
         // 7. Delete keys to clean up
         await Task.CompletedTask;
 
-    #region Helper Methods
 
     /// <summary>
     ///     Parses test certificates from PEM data.
@@ -254,5 +253,4 @@ public class Scp11Tests
         return certs;
     }
 
-    #endregion
 }

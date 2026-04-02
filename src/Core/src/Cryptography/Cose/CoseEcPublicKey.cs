@@ -47,8 +47,8 @@
 //         private const int TagX = -2;
 //         private const int TagY = -3;
 //
-//         private byte[] _xCoordinate = Array.Empty<byte>();
-//         private byte[] _yCoordinate = Array.Empty<byte>();
+//         private byte[] _xCoordinate = [];
+//         private byte[] _yCoordinate = [];
 // #pragma warning disable IDE0032
 //         private CoseEcCurve _curve;
 // #pragma warning restore IDE0032
@@ -238,7 +238,7 @@
 //             }
 //
 //             var definition = KeyDefinitions.GetByOid(ecParameters.Curve.Oid.Value);
-//             if (definition.CoseKeyDefinition == null)
+//             if (definition.CoseKeyDefinition is null)
 //             {
 //                 throw new NotSupportedException(
 //                     string.Format(

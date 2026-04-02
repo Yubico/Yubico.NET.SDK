@@ -23,7 +23,6 @@ namespace Yubico.YubiKit.Fido2.UnitTests.Extensions;
 /// </summary>
 public class ExtensionBuilderTests
 {
-    #region Basic Building Tests
     
     [Fact]
     public void Build_WithNoExtensions_ReturnsNull()
@@ -172,9 +171,7 @@ public class ExtensionBuilderTests
         Assert.True(reader.ReadBoolean());
     }
     
-    #endregion
     
-    #region Multiple Extensions Tests
     
     [Fact]
     public void Build_WithMultipleExtensions_EncodesAllCorrectly()
@@ -242,9 +239,7 @@ public class ExtensionBuilderTests
         Assert.Equal(4, innerCount);
     }
     
-    #endregion
     
-    #region Fluent API Tests
     
     [Fact]
     public void Builder_SupportsChainingAllMethods()
@@ -266,9 +261,7 @@ public class ExtensionBuilderTests
         Assert.Equal(5, count); // All 5 extensions
     }
     
-    #endregion
     
-    #region Edge Case Tests
     
     [Fact]
     public void WithCredBlob_EmptyBlob_EncodesEmptyByteString()
@@ -367,7 +360,6 @@ public class ExtensionBuilderTests
         Assert.Contains("Salt2 must be exactly 32 bytes", exception.Message);
     }
     
-    #endregion
 }
 
 /// <summary>
@@ -446,7 +438,6 @@ internal class MockPinProtocol : Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol
 /// </summary>
 public class ExtensionOutputTests
 {
-    #region Decode Tests
     
     [Fact]
     public void Decode_EmptyData_ReturnsEmptyOutput()
@@ -582,9 +573,7 @@ public class ExtensionOutputTests
         Assert.Equal(48, hmacOutput.Output.Length);
     }
     
-    #endregion
     
-    #region TryGet Failure Tests
     
     [Fact]
     public void TryGetCredProtect_MissingExtension_ReturnsFalse()
@@ -625,9 +614,7 @@ public class ExtensionOutputTests
         Assert.False(result);
     }
     
-    #endregion
     
-    #region Multiple Extensions Tests
     
     [Fact]
     public void Decode_WithMultipleExtensions_ParsesAll()
@@ -665,5 +652,4 @@ public class ExtensionOutputTests
         Assert.Equal(4, minLength);
     }
     
-    #endregion
 }

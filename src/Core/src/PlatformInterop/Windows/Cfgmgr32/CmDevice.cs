@@ -92,7 +92,7 @@ public class CmDevice
         };
 
         value = (T?)CmPropertyAccessHelper.TryGetProperty(NativeMethods.CM_Get_DevNode_Property, Instance, propKey);
-        return value != null;
+        return value is not null;
     }
 
     public T GetProperty<T>(CmDeviceProperty property)

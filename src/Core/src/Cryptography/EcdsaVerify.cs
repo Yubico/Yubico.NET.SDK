@@ -180,8 +180,8 @@
 //
 //             string oid = GetOidByAlgorithm(coseKey.Algorithm);
 //
-//             byte[] xCoordinate = Array.Empty<byte>();
-//             byte[] yCoordinate = Array.Empty<byte>();
+//             byte[] xCoordinate = [];
+//             byte[] yCoordinate = [];
 //             if (coseKey is CoseEcPublicKey ecKey)
 //             {
 //                 xCoordinate = ecKey.XCoordinate.ToArray();

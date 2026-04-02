@@ -22,7 +22,6 @@ namespace Yubico.YubiKit.Core.UnitTests;
 /// </summary>
 public class YubiKeyDeviceMonitorServiceTests
 {
-    #region RescanAsync Tests
 
     [Fact]
     public async Task RescanAsync_UpdatesRepository()
@@ -102,9 +101,7 @@ public class YubiKeyDeviceMonitorServiceTests
         repository.Dispose();
     }
 
-    #endregion
 
-    #region StartMonitoring / StopMonitoring Tests
 
     [Fact]
     public void IsMonitoring_InitiallyFalse()
@@ -225,9 +222,7 @@ public class YubiKeyDeviceMonitorServiceTests
         repository.Dispose();
     }
 
-    #endregion
 
-    #region Disposal Tests
 
     [Fact]
     public async Task DisposeAsync_StopsMonitoring()
@@ -293,9 +288,7 @@ public class YubiKeyDeviceMonitorServiceTests
         repository.Dispose();
     }
 
-    #endregion
 
-    #region Constructor Tests
 
     [Fact]
     public void Constructor_NullRepository_Throws()
@@ -319,9 +312,7 @@ public class YubiKeyDeviceMonitorServiceTests
         repository.Dispose();
     }
 
-    #endregion
 
-    #region Test Helpers
 
     /// <summary>
     /// Fake IFindYubiKeys for testing.
@@ -356,5 +347,4 @@ public class YubiKeyDeviceMonitorServiceTests
             => throw new NotSupportedException("FakeYubiKey does not support connections.");
     }
 
-    #endregion
 }

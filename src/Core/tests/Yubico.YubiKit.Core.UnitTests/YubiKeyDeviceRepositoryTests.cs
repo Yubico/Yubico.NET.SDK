@@ -23,7 +23,6 @@ namespace Yubico.YubiKit.Core.UnitTests;
 /// </summary>
 public class YubiKeyDeviceRepositoryTests
 {
-    #region UpdateCache Diff Logic Tests (Task 1.3)
 
     [Fact]
     public void UpdateCache_EmptyToDevices_EmitsAddedEvents()
@@ -143,9 +142,7 @@ public class YubiKeyDeviceRepositoryTests
         Assert.Single(events.Where(e => e.Action == DeviceAction.Added && e.Device.DeviceId == "device-C"));
     }
 
-    #endregion
 
-    #region GetAll Filtering Tests (Task 1.4)
 
     [Fact]
     public void GetAll_WithConnectionTypeAll_ReturnsAllDevices()
@@ -243,9 +240,7 @@ public class YubiKeyDeviceRepositoryTests
         Assert.Equal(2, result.Count);
     }
 
-    #endregion
 
-    #region Disposal Tests (Task 1.5)
 
     [Fact]
     public void Dispose_CompletesSubject()
@@ -309,9 +304,7 @@ public class YubiKeyDeviceRepositoryTests
         Assert.Throws<ObjectDisposedException>(() => repository.Clear());
     }
 
-    #endregion
 
-    #region HasData Tests
 
     [Fact]
     public void HasData_InitiallyFalse()
@@ -350,9 +343,7 @@ public class YubiKeyDeviceRepositoryTests
         Assert.False(repository.HasData);
     }
 
-    #endregion
 
-    #region Clear Tests
 
     [Fact]
     public void Clear_RemovesAllDevices()
@@ -388,9 +379,7 @@ public class YubiKeyDeviceRepositoryTests
         Assert.Empty(events);
     }
 
-    #endregion
 
-    #region Thread Safety Tests
 
     [Fact]
     public void UpdateCache_ConcurrentCalls_NoCorruption()
@@ -445,7 +434,6 @@ public class YubiKeyDeviceRepositoryTests
         Assert.Empty(exceptions);
     }
 
-    #endregion
 
     /// <summary>
     /// Minimal fake IYubiKey implementation for testing.

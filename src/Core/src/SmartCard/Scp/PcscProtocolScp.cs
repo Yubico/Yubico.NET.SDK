@@ -47,7 +47,6 @@ public class PcscProtocolScp : ISmartCardProtocol
     /// </summary>
     public DataEncryptor GetDataEncryptor() => _dataEncryptor;
 
-    #region ISmartCardProtocol Implementation
 
     public async Task<ApduResponse> TransmitAndReceiveAsync(
         ApduCommand command,
@@ -89,5 +88,4 @@ public class PcscProtocolScp : ISmartCardProtocol
 
     public void Dispose() => _baseProtocol.Dispose();
 
-    #endregion
 }

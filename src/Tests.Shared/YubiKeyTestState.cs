@@ -140,7 +140,6 @@ public class YubiKeyTestState : IXunitSerializable
         ConnectionType = connectionType;
     }
 
-    #region Device Properties (all trigger lazy binding)
 
     /// <summary>
     ///     Ensures the placeholder is bound to a real device.
@@ -242,9 +241,7 @@ public class YubiKeyTestState : IXunitSerializable
     /// </summary>
     public bool IsNfcTransport => DeviceInfo.NfcSupported != DeviceCapabilities.None;
 
-    #endregion
 
-    #region IXunitSerializable Members
 
     /// <summary>
     ///     Deserializes test device data from xUnit.
@@ -374,7 +371,6 @@ public class YubiKeyTestState : IXunitSerializable
         }
     }
 
-    #endregion
 
     /// <summary>
     ///     Returns a friendly string representation for test output.

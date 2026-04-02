@@ -101,8 +101,8 @@ internal static class AsnPublicKeyEncoder
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
     public static byte[] EncodeToSubjectPublicKeyInfo(RSAParameters parameters)
     {
-        if (parameters.Exponent == null ||
-            parameters.Modulus == null)
+        if (parameters.Exponent is null ||
+            parameters.Modulus is null)
         {
             throw new InvalidOperationException("Cannot export public key, missing required parameters");
         }
@@ -117,7 +117,7 @@ internal static class AsnPublicKeyEncoder
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
     public static byte[] EncodeToSubjectPublicKeyInfo(ECParameters parameters)
     {
-        if (parameters.Q.X == null || parameters.Q.Y == null)
+        if (parameters.Q.X is null || parameters.Q.Y is null)
         {
             throw new ArgumentException("EC point coordinates cannot be null.", nameof(parameters));
         }

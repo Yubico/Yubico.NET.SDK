@@ -27,7 +27,6 @@ internal class ChainedResponseReceiver(
 
     public FirmwareVersion? FirmwareVersion { get; } = firmwareVersion;
 
-    #region IApduProcessor Members
 
     public IApduFormatter Formatter => apduTransmitter.Formatter;
 
@@ -58,5 +57,4 @@ internal class ChainedResponseReceiver(
         return completeResponse;
     }
 
-    #endregion
 }

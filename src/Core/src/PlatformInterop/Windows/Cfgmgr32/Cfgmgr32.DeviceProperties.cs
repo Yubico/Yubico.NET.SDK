@@ -115,7 +115,6 @@ internal static partial class NativeMethods
     internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_BackgroundAccess =
         new(0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 8); // DEVPROP_TYPE.BOOLEAN
 
-    #region DEVPROPKEY and DEVPROP_TYPE definitions
 
     [StructLayout(LayoutKind.Sequential)]
     internal struct DEVPROPKEY
@@ -172,5 +171,4 @@ internal static partial class NativeMethods
         STRING_INDIRECT = 0x0000_0019 // String resource (@[path\]<dllname>,-<strId>)
     }
 
-    #endregion
 }

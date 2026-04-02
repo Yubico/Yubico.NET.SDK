@@ -216,7 +216,7 @@ public sealed class LargeBlobArray
         Span<byte> computedHash = stackalloc byte[32];
         SHA256.HashData(arrayData, computedHash);
         
-        if (!computedHash[..HashSize].SequenceEqual(expectedHash))
+        if (!CryptographicOperations.FixedTimeEquals(computedHash[..HashSize], expectedHash))
         {
             throw new ArgumentException("Large blob array hash verification failed.", nameof(data));
         }

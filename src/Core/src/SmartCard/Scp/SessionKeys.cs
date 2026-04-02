@@ -71,7 +71,6 @@ internal sealed class SessionKeys : IDisposable
     /// </summary>
     public ReadOnlySpan<byte> Dek => _dek;
 
-    #region IDisposable Members
 
     /// <summary>
     ///     Releases the resources used by this instance and securely zeroes all key material.
@@ -80,25 +79,25 @@ internal sealed class SessionKeys : IDisposable
     {
         if (_disposed) return;
 
-        if (_senc != null)
+        if (_senc is not null)
         {
             CryptographicOperations.ZeroMemory(_senc);
             _senc = null;
         }
 
-        if (_smac != null)
+        if (_smac is not null)
         {
             CryptographicOperations.ZeroMemory(_smac);
             _smac = null;
         }
 
-        if (_srmac != null)
+        if (_srmac is not null)
         {
             CryptographicOperations.ZeroMemory(_srmac);
             _srmac = null;
         }
 
-        if (_dek != null)
+        if (_dek is not null)
         {
             CryptographicOperations.ZeroMemory(_dek);
             _dek = null;
@@ -107,5 +106,4 @@ internal sealed class SessionKeys : IDisposable
         _disposed = true;
     }
 
-    #endregion
 }

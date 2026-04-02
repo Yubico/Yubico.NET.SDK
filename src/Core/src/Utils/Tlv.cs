@@ -74,7 +74,6 @@ public sealed class Tlv : IDisposable
     /// </summary>
     public int TotalLength => _bytes.AsMemory().Length;
 
-    #region IDisposable Members
 
     /// <summary>
     ///     Dispose the object and clears its buffers
@@ -89,7 +88,6 @@ public sealed class Tlv : IDisposable
         _disposed = true;
     }
 
-    #endregion
 
     private void Encode(ReadOnlySpan<byte> value)
     {

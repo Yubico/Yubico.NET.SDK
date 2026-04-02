@@ -47,7 +47,6 @@ public sealed class DisposableTlvList : IDisposable, IReadOnlyList<Tlv>
         _tlvs = new List<Tlv>(tlvs);
     }
 
-    #region IDisposable Members
 
     /// <summary>
     ///     Disposes all TLV objects in the collection, securely zeroing their data.
@@ -61,9 +60,7 @@ public sealed class DisposableTlvList : IDisposable, IReadOnlyList<Tlv>
         _disposed = true;
     }
 
-    #endregion
 
-    #region IReadOnlyList<Tlv> Members
 
     /// <summary>
     ///     Gets the TLV object at the specified index.
@@ -85,7 +82,6 @@ public sealed class DisposableTlvList : IDisposable, IReadOnlyList<Tlv>
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    #endregion
 
     /// <summary>
     ///     Returns a span view of the collection for efficient iteration.

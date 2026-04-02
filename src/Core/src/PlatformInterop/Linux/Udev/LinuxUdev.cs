@@ -37,7 +37,6 @@ internal class LinuxUdev : IDisposable
         _udevObject = (LinuxUdevSafeHandle)ThrowIfFailedNull(NativeMethods.udev_new());
     }
 
-    #region IDisposable Members
 
     public void Dispose()
     {
@@ -45,7 +44,6 @@ internal class LinuxUdev : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    #endregion
 
     // Throw the PlatformApiException(LinuxUdevError) if the value is NULL.
     // Otherwise, just return value.

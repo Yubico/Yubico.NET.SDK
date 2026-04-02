@@ -40,7 +40,6 @@
 //
 //     public DisposableTlvDictionary() { _tlvs = new Dictionary<int, Tlv>(); }
 //
-//     #region IDictionary<int,Tlv> Members
 //
 //     public void Add(int key, Tlv value) => _tlvs.Add(key, value);
 //     public bool ContainsKey(int key) => _tlvs.ContainsKey(key);
@@ -84,9 +83,7 @@
 //
 //     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 //
-//     #endregion
 //
-//     #region IDisposable Members
 //
 //     /// <summary>
 //     ///     Disposes all TLV objects in the collection, securely zeroing their data.
@@ -100,7 +97,6 @@
 //         _disposed = true;
 //     }
 //
-//     #endregion
 //
 //     // /// <summary>
 //     // ///     Creates a new collection from an enumerable of TLV objects.

@@ -24,7 +24,6 @@ internal sealed class FakeApduProcessor : IApduProcessor
     private readonly Queue<ApduResponse> _responses = new();
     public List<ApduCommand> TransmittedCommands { get; } = [];
 
-    #region IApduProcessor Members
 
     public IApduFormatter Formatter { get; set; } = new FakeApduFormatter();
 
@@ -43,7 +42,6 @@ internal sealed class FakeApduProcessor : IApduProcessor
         return await Task.FromResult(_responses.Dequeue());
     }
 
-    #endregion
 
     public void EnqueueResponse(ApduResponse response) => _responses.Enqueue(response);
 
@@ -62,7 +60,6 @@ internal sealed class FakeApduProcessor : IApduProcessor
 /// </summary>
 internal class FakeApduFormatter : IApduFormatter
 {
-    #region IApduFormatter Members
 
     public ReadOnlyMemory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int le)
     {
@@ -83,5 +80,4 @@ internal class FakeApduFormatter : IApduFormatter
     public ReadOnlyMemory<byte> Format(ApduCommand apdu) =>
         Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le);
 
-    #endregion
 }

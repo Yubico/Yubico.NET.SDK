@@ -218,7 +218,6 @@ public class AuthenticatorInfoTests
         info.Versions.Should().HaveCount(1);
     }
     
-    #region CTAP 2.3 Encrypted Metadata Fields Tests
     
     [Fact]
     public void Decode_WithEncIdentifier_ParsesByteString()
@@ -419,6 +418,5 @@ public class AuthenticatorInfoTests
         info.AuthenticatorConfigCommands.Should().Contain(0x03);
     }
     
-    #endregion
 }
 

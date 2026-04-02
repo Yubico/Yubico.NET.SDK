@@ -74,7 +74,7 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
         finally
         {
             CryptographicOperations.ZeroMemory(padded);
-            if (iv != null)
+            if (iv is not null)
                 CryptographicOperations.ZeroMemory(iv);
         }
     }
@@ -123,9 +123,9 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
         }
         finally
         {
-            if (iv != null)
+            if (iv is not null)
                 CryptographicOperations.ZeroMemory(iv);
-            if (decrypted != null)
+            if (decrypted is not null)
                 CryptographicOperations.ZeroMemory(decrypted);
         }
     }
@@ -191,7 +191,7 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
         }
         finally
         {
-            if (rentedMsg != null)
+            if (rentedMsg is not null)
             {
                 CryptographicOperations.ZeroMemory(rentedMsg);
                 ArrayPool<byte>.Shared.Return(rentedMsg);

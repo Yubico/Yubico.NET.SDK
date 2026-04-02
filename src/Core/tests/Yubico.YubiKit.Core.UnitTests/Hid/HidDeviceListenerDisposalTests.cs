@@ -23,7 +23,6 @@ namespace Yubico.YubiKit.Core.UnitTests.Hid;
 [Trait("Category", "Disposal")]
 public class HidDeviceListenerDisposalTests
 {
-    #region Start/Stop Lifecycle Tests
 
     /// <summary>
     /// Verifies that a newly created listener is in Stopped state.
@@ -249,9 +248,7 @@ public class HidDeviceListenerDisposalTests
         }
     }
 
-    #endregion
 
-    #region Factory Tests
 
     /// <summary>
     /// Verifies that the factory returns the correct platform-specific implementation.
@@ -287,9 +284,7 @@ public class HidDeviceListenerDisposalTests
         }
     }
 
-    #endregion
 
-    #region Disposal Tests
 
     /// <summary>
     /// Verifies that Dispose completes within a reasonable timeout when listener is running.
@@ -412,5 +407,4 @@ public class HidDeviceListenerDisposalTests
         Assert.Equal(DeviceListenerStatus.Stopped, listener.Status);
     }
 
-    #endregion
 }

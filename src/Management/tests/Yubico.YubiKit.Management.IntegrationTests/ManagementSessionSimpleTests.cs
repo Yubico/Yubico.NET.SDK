@@ -28,7 +28,6 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 /// </summary>
 public class ManagementSessionSimpleTests
 {
-    #region SmartCard Connection Tests
 
     /// <summary>
     ///     Verify ManagementSession can be created via SmartCard connection using CreateAsync factory.
@@ -72,9 +71,7 @@ public class ManagementSessionSimpleTests
         Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
     }
 
-    #endregion
 
-    #region HID Connection Tests
 
     /// <summary>
     ///     Verify ManagementSession can be created via HID FIDO connection.
@@ -120,9 +117,7 @@ public class ManagementSessionSimpleTests
         Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
     }
 
-    #endregion
 
-    #region Device Configuration Tests
 
     /// <summary>
     ///     Verify SetDeviceConfigAsync works via ManagementSession.
@@ -188,9 +183,7 @@ public class ManagementSessionSimpleTests
         await device.SetDeviceConfigAsync(restoreConfig, false);
     }
 
-    #endregion
 
-    #region SCP03 Tests
 
     /// <summary>
     ///     Verify ManagementSession can be created with SCP03 using default keys.
@@ -243,9 +236,7 @@ public class ManagementSessionSimpleTests
         });
     }
 
-    #endregion
 
-    #region Tests Without Attributes (using AuthorizedDevices directly)
 
     /// <summary>
     ///     Demonstrates using AuthorizedDevices directly without [WithYubiKey] attribute.
@@ -309,7 +300,6 @@ public class ManagementSessionSimpleTests
         }
     }
 
-    #endregion
 }
 
 

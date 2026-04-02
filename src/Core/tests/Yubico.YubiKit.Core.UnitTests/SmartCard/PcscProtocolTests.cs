@@ -28,7 +28,6 @@ public class PcscProtocolTests
     private readonly FakeSmartCardConnection _fakeConnection = new();
     private readonly NullLogger<PcscProtocol> _logger = NullLogger<PcscProtocol>.Instance;
 
-    #region Configuration Tests
 
     [Fact]
     public void Configure_FirmwareBelow400_IgnoresConfiguration()
@@ -151,9 +150,7 @@ public class PcscProtocolTests
         Assert.Equal((byte)0xC0, protocol.InsSendRemaining);
     }
 
-    #endregion
 
-    #region TransmitAndReceiveAsync Tests
 
     [Fact]
     public async Task TransmitAndReceiveAsync_SuccessResponse_ReturnsData()
@@ -223,9 +220,7 @@ public class PcscProtocolTests
             protocol.TransmitAndReceiveAsync(command, cancellationToken: cts.Token));
     }
 
-    #endregion
 
-    #region SelectAsync Tests
 
     [Fact]
     public async Task SelectAsync_ConstructsCorrectApdu()
@@ -317,5 +312,4 @@ public class PcscProtocolTests
         });
     }
 
-    #endregion
 }

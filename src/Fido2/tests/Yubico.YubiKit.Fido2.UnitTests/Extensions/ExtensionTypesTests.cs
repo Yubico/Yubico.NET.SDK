@@ -23,7 +23,6 @@ namespace Yubico.YubiKit.Fido2.UnitTests.Extensions;
 /// </summary>
 public class ExtensionTypesTests
 {
-    #region CredProtectPolicy Tests
     
     [Theory]
     [InlineData(CredProtectPolicy.UserVerificationOptional, 1)]
@@ -34,9 +33,7 @@ public class ExtensionTypesTests
         Assert.Equal(expected, (int)policy);
     }
     
-    #endregion
     
-    #region ExtensionIdentifiers Tests
     
     [Fact]
     public void ExtensionIdentifiers_HaveCorrectValues()
@@ -51,9 +48,7 @@ public class ExtensionTypesTests
         Assert.Equal("prf", ExtensionIdentifiers.Prf);
     }
     
-    #endregion
     
-    #region HmacSecretInput Tests
     
     [Fact]
     public void HmacSecretInput_EncodesCorrectly()
@@ -106,9 +101,7 @@ public class ExtensionTypesTests
         Assert.Equal(48, output.Output.Length);
     }
     
-    #endregion
     
-    #region LargeBlobInput Tests
     
     [Fact]
     public void LargeBlobInput_EncodesPreferredCorrectly()
@@ -210,9 +203,7 @@ public class ExtensionTypesTests
         Assert.True(output.Written);
     }
     
-    #endregion
     
-    #region CredBlobInput Tests
     
     [Fact]
     public void CredBlobInput_EncodesCorrectly()
@@ -262,9 +253,7 @@ public class ExtensionTypesTests
         Assert.Equal(blob, output.Blob.ToArray());
     }
     
-    #endregion
     
-    #region MinPinLengthInput Tests
     
     [Fact]
     public void MinPinLengthInput_EncodesCorrectly()
@@ -296,9 +285,7 @@ public class ExtensionTypesTests
         Assert.Equal(8, output.MinPinLength);
     }
     
-    #endregion
     
-    #region PrfInput Tests
     
     [Fact]
     public void PrfInput_ComputesSaltCorrectly()
@@ -378,5 +365,4 @@ public class ExtensionTypesTests
             () => PrfOutput.FromHmacSecretOutput(decrypted));
     }
     
-    #endregion
 }

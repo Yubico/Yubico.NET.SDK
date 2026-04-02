@@ -23,7 +23,6 @@ namespace Yubico.YubiKit.Core.UnitTests.SmartCard;
 [Trait("Category", "Disposal")]
 public class DesktopSmartCardDeviceListenerDisposalTests
 {
-    #region Start/Stop Lifecycle Tests
 
     /// <summary>
     /// Verifies that a newly created listener is in Stopped state.
@@ -231,9 +230,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         }
     }
 
-    #endregion
 
-    #region Disposal Tests
 
     /// <summary>
     /// Verifies that Dispose completes within a reasonable timeout when listener is running.
@@ -353,5 +350,4 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         Assert.Null(exception);
     }
 
-    #endregion
 }

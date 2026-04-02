@@ -88,7 +88,6 @@ internal class CmPropertyAccessHelper
         }
     }
 
-    #region Nested type: GetObjectProperty
 
     internal delegate NativeMethods.CmErrorCode GetObjectProperty<T>(
         T ObjectId,
@@ -98,5 +97,4 @@ internal class CmPropertyAccessHelper
         ref IntPtr propertyBufferSize
     );
 
-    #endregion
 }

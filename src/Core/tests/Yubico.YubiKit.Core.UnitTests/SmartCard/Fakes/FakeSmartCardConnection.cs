@@ -31,7 +31,6 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
 
     public void EnqueueResponse(ReadOnlyMemory<byte> response) => _responses.Enqueue(response);
 
-    #region ISmartCardConnection Members
 
     public Transport Transport { get; set; } = Transport.Usb;
 
@@ -64,5 +63,4 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
         // TODO release managed resources here
     }
 
-    #endregion
 }

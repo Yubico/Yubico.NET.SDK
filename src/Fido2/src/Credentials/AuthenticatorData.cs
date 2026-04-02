@@ -191,7 +191,7 @@ public sealed class AuthenticatorData
         Span<byte> expectedHash = stackalloc byte[32];
         SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(rpId), expectedHash);
         
-        return expectedHash.SequenceEqual(RpIdHash.Span);
+        return CryptographicOperations.FixedTimeEquals(expectedHash, RpIdHash.Span);
     }
 }
 

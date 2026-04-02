@@ -30,7 +30,6 @@ public class EncryptedMetadataDecryptorTests
         return ppuat;
     }
     
-    #region DeriveKey Tests
     
     [Fact]
     public void DeriveKey_Returns16ByteKey()
@@ -99,9 +98,7 @@ public class EncryptedMetadataDecryptorTests
             () => EncryptedMetadataDecryptor.DeriveKey(ReadOnlySpan<byte>.Empty, "test"u8));
     }
     
-    #endregion
     
-    #region DecryptIdentifier Tests
     
     [Fact]
     public void DecryptIdentifier_EmptyPpuat_ReturnsNull()
@@ -196,9 +193,7 @@ public class EncryptedMetadataDecryptorTests
         Assert.NotEqual(plaintext, decrypted);
     }
     
-    #endregion
     
-    #region DecryptCredStoreState Tests
     
     [Fact]
     public void DecryptCredStoreState_EmptyPpuat_ReturnsNull()
@@ -309,9 +304,7 @@ public class EncryptedMetadataDecryptorTests
         Assert.Equal(plaintext, decryptedState);
     }
     
-    #endregion
     
-    #region RoundTrip Tests
     
     [Fact]
     public void RoundTrip_MultipleBlockSize()
@@ -378,9 +371,7 @@ public class EncryptedMetadataDecryptorTests
         Assert.Equal(plaintext, decrypted);
     }
     
-    #endregion
     
-    #region CBC Mode Tests (Java compatibility)
     
     [Fact]
     public void DecryptIdentifier_CbcMode_ExtractsIvAndDecrypts()
@@ -462,5 +453,4 @@ public class EncryptedMetadataDecryptorTests
         Assert.Null(result);
     }
     
-    #endregion
 }

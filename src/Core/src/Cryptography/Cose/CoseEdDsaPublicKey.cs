@@ -35,7 +35,7 @@
 //         private const int TagCurve = -1;
 //         private const int TagPublicKey = -2;
 //         private const int Ed25519PublicKeyLength = 32;
-//         private byte[] _publicKey = Array.Empty<byte>();
+//         private byte[] _publicKey = [];
 //         private CoseEcCurve _curve;
 //
 //         /// <summary>

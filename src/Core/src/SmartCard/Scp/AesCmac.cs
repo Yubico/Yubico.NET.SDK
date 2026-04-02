@@ -38,7 +38,6 @@ internal sealed class AesCmac : IDisposable
         }
     }
 
-    #region IDisposable Members
 
     public void Dispose()
     {
@@ -53,7 +52,6 @@ internal sealed class AesCmac : IDisposable
         _disposed = true;
     }
 
-    #endregion
 
     public void AppendData(ReadOnlySpan<byte> data)
     {

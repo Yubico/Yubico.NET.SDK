@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 namespace Yubico.YubiKit.Core.SmartCard;
 
 public class AnswerToReset
@@ -39,7 +40,7 @@ public class AnswerToReset
         {
             (AnswerToReset _, null) => false,
             (null, AnswerToReset _) => false,
-            (AnswerToReset left, AnswerToReset right) => left._bytes.AsSpan().SequenceEqual(right._bytes.AsSpan()),
+            (AnswerToReset left, AnswerToReset right) => left._bytes.Length == right._bytes.Length && CryptographicOperations.FixedTimeEquals(left._bytes.AsSpan(), right._bytes.AsSpan()),
             _ => false
         };
 

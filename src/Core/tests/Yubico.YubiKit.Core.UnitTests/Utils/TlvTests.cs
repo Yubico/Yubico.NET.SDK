@@ -146,7 +146,7 @@ public class TlvTests
 
     [Fact]
     public void Create_Throws_On_Empty_Input() =>
-        Assert.Throws<ArgumentException>(() => Tlv.Create(Array.Empty<byte>()));
+        Assert.Throws<ArgumentException>(() => Tlv.Create([]));
 
     [Fact]
     public void Create_Throws_On_Truncated_Length() =>

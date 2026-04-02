@@ -263,19 +263,19 @@ public class SecurityDomainSession_Scp11Tests
             X509CertificateLoader.LoadPkcs12Collection(ocePkcs12.Span, ocePassword.Span,
                 X509KeyStorageFlags.Exportable);
         var leafCert = collection.FirstOrDefault(cert => cert.HasPrivateKey);
-        if (leafCert == null) throw new InvalidOperationException("No private key entry found in PKCS12");
+        if (leafCert is null) throw new InvalidOperationException("No private key entry found in PKCS12");
 
         ECParameters ecParams;
         using (var ecdsa = leafCert.GetECDsaPrivateKey())
         {
-            if (ecdsa != null)
+            if (ecdsa is not null)
             {
                 ecParams = ecdsa.ExportParameters(true);
             }
             else
             {
                 using var ecdh = leafCert.GetECDiffieHellmanPrivateKey();
-                if (ecdh == null)
+                if (ecdh is null)
                     throw new InvalidOperationException(
                         "Private key is not an EC key (or is not ECDSA/ECDH compatible)");
                 ecParams = ecdh.ExportParameters(true);
@@ -284,7 +284,7 @@ public class SecurityDomainSession_Scp11Tests
 
         var certs = ScpCertificates.From(collection);
         var certChain = new List<X509Certificate2>(certs.Bundle);
-        if (certs.Leaf != null) certChain.Add(certs.Leaf);
+        if (certs.Leaf is not null) certChain.Add(certs.Leaf);
 
         var privateKey = ECPrivateKey.CreateFromParameters(ecParams);
         return (certChain, privateKey);
@@ -329,7 +329,7 @@ public class SecurityDomainSession_Scp11Tests
             throw new InvalidOperationException("Invalid Subject Key Identifier extension");
 
         var rawData = skiExtension.RawData;
-        if (rawData == null || rawData.Length == 0)
+        if (rawData is null || rawData.Length == 0)
             throw new InvalidOperationException("Missing Subject Key Identifier");
 
         var tlv = Tlv.Create(skiExtension.RawData);

@@ -58,8 +58,8 @@ public sealed class RSAPublicKey : PublicKey
     /// <inheritdoc />
     public override byte[] ExportSubjectPublicKeyInfo()
     {
-        if (Parameters.Exponent == null ||
-            Parameters.Modulus == null)
+        if (Parameters.Exponent is null ||
+            Parameters.Modulus is null)
         {
             throw new InvalidOperationException("Cannot export public key, missing required parameters");
         }
@@ -82,12 +82,12 @@ public sealed class RSAPublicKey : PublicKey
     /// </exception>
     public static RSAPublicKey CreateFromParameters(RSAParameters parameters)
     {
-        if (parameters.D != null ||
-            parameters.P != null ||
-            parameters.Q != null ||
-            parameters.DP != null ||
-            parameters.DQ != null ||
-            parameters.InverseQ != null
+        if (parameters.D is not null ||
+            parameters.P is not null ||
+            parameters.Q is not null ||
+            parameters.DP is not null ||
+            parameters.DQ is not null ||
+            parameters.InverseQ is not null
            )
         {
             throw new ArgumentException("Parameters must not contain private key data");

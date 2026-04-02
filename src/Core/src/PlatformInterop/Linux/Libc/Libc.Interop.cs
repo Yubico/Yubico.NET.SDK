@@ -20,7 +20,6 @@ namespace Yubico.YubiKit.Core.PlatformInterop.Linux.Libc;
 // Currently we only need open, close, and ioctl.
 internal static class NativeMethods
 {
-    #region OpenFlags enum
 
     [Flags]
     public enum OpenFlags
@@ -31,9 +30,7 @@ internal static class NativeMethods
         O_NONBLOCK = 0x800
     }
 
-    #endregion
 
-    #region Poll
 
     /// <summary>
     /// Structure for poll() file descriptor monitoring.
@@ -75,7 +72,6 @@ internal static class NativeMethods
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern int poll([In, Out] PollFd[] fds, int nfds, int timeout);
 
-    #endregion
 
     public const long HIDIOCGRAWINFO = 0x0000000080084803;
     public const long HIDIOCGRDESCSIZE = 0x0000000080044801;

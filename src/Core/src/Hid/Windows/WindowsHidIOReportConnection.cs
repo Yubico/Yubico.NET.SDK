@@ -55,7 +55,6 @@
 //             _device.LogDeviceAccessTime();
 //         }
 //
-//         #region IDisposable Support
 //         private bool disposedValue; // To detect redundant calls
 //
 //         protected virtual void Dispose(bool disposing)
@@ -84,6 +83,5 @@
 //             Dispose(true);
 //             GC.SuppressFinalize(this);
 //         }
-//         #endregion
 //     }
 // }

@@ -157,7 +157,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         }
 
         var receivedNonce = response.Span[..CtapConstants.NonceSize];
-        if (!nonce.SequenceEqual(receivedNonce))
+        if (!CryptographicOperations.FixedTimeEquals(nonce, receivedNonce))
         {
             _logger.LogError("CTAPHID_INIT nonce mismatch. Sent: {SentNonce}, Received: {ReceivedNonce}",
                 Convert.ToHexString(nonce),

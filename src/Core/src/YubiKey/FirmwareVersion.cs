@@ -50,7 +50,6 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     /// </summary>
     public static readonly FirmwareVersion Default = new(0);
 
-    #region IComparable Members
 
     /// <summary>
     ///     Compares the relative sort order of the specified object to the current object.
@@ -72,9 +71,7 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
             : CompareTo(version);
     }
 
-    #endregion
 
-    #region IComparable<FirmwareVersion> Members
 
     /// <summary>
     ///     Compares the relative sort order of the current instance with another object of
@@ -105,13 +102,10 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
         return CompareVersion(other.Major, other.Minor, other.Patch);
     }
 
-    #endregion
 
-    #region IEquatable<FirmwareVersion> Members
 
     public bool Equals(FirmwareVersion? other) => CompareTo(other) == 0;
 
-    #endregion
 
     /// <summary>
     ///     Parses a firmware version string in format "major.minor.patch".
@@ -213,7 +207,6 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
 
     public override string ToString() => $"{Major}.{Minor}.{Patch}";
 
-    #region Frequently Used Versions
 
     internal static readonly FirmwareVersion V4_0_0 = new(4);
     internal static readonly FirmwareVersion V4_3_0 = new(4, 3);
@@ -224,5 +217,4 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     public static readonly FirmwareVersion V5_7_2 = new(5, 7, 2);
     public static readonly FirmwareVersion V5_8_0 = new(5, 8);
 
-    #endregion
 }

@@ -276,7 +276,7 @@
 //         //                                        out byte[] digest)
 //         // {
 //         //     digestAlgorithm = 0;
-//         //     digest = Array.Empty<byte>();
+//         //     digest = [];
 //         //
 //         //     if (formattedSignature.Length != 128 && formattedSignature.Length != 256)
 //         //     {
@@ -678,7 +678,7 @@
 //                                             out byte[] mPrimeAndH,
 //                                             out bool isVerified)
 //         {
-//             mPrimeAndH = Array.Empty<byte>();
+//             mPrimeAndH = [];
 //             isVerified = false;
 //
 //             if (formattedSignature.Length != 128 && formattedSignature.Length != 256)
@@ -947,7 +947,7 @@
 //         public static bool TryParsePkcs1Decrypt(ReadOnlySpan<byte> formattedData, out byte[] outputData)
 //         {
 //             // Return this buffer if there is any error.
-//             outputData = Array.Empty<byte>();
+//             outputData = [];
 //
 //             if (formattedData.Length != 128 && formattedData.Length != 256)
 //             {
@@ -1233,7 +1233,7 @@
 //                                              int digestAlgorithm,
 //                                              out byte[] outputData)
 //         {
-//             outputData = Array.Empty<byte>();
+//             outputData = [];
 //
 //             if (formattedData.Length == 128)
 //             {
@@ -1472,7 +1472,7 @@
 //
 //             if (isValid)
 //             {
-//                 var supportedOid = Array.Empty<byte>();
+//                 var supportedOid = [];
 //
 //                 switch (oid.Length)
 //                 {

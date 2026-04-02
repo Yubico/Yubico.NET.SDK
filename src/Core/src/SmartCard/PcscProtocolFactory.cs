@@ -27,7 +27,6 @@ public class PcscProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
     : IProtocolFactory<TConnection>
     where TConnection : IConnection
 {
-    #region IProtocolFactory<TConnection> Members
 
     public ISmartCardProtocol Create(TConnection connection) 
     {
@@ -38,7 +37,6 @@ public class PcscProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
         return new PcscProtocol(scConnection, logger: loggerFactory.CreateLogger<PcscProtocol>());
     }
 
-    #endregion
 
     public static PcscProtocolFactory<TConnection> Create(ILoggerFactory? loggerFactory = null) =>
         new(loggerFactory ?? YubiKitLogging.LoggerFactory);

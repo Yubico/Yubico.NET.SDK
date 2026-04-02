@@ -24,7 +24,6 @@ public class FirmwareVersionTests
         Assert.True(new FirmwareVersion(6, 9).IsAtLeast(6, 0, 0));
     }
 
-    #region Alpha/Beta Key Tests (0.0.0 is treated as latest)
 
     [Fact]
     public void IsAlphaOrBeta_ReturnsTrue_ForZeroVersion()
@@ -136,9 +135,7 @@ public class FirmwareVersionTests
         Assert.Equal("0.0.0", alphaKey.ToString());
     }
 
-    #endregion
 
-    #region Null Handling in Operators
 
     [Fact]
     public void GreaterThan_NullLeft_ReturnsFalse()
@@ -284,9 +281,7 @@ public class FirmwareVersionTests
         Assert.False(left != right);
     }
 
-    #endregion
 
-    #region CompareTo Edge Cases
 
     [Fact]
     public void CompareTo_Null_ReturnsPositive()
@@ -353,9 +348,7 @@ public class FirmwareVersionTests
         Assert.True(higher.CompareTo(lower) > 0);
     }
 
-    #endregion
 
-    #region Equals and GetHashCode
 
     [Fact]
     public void Equals_Null_ReturnsFalse()
@@ -404,9 +397,7 @@ public class FirmwareVersionTests
         Assert.NotEqual(v1.GetHashCode(), v2.GetHashCode());
     }
 
-    #endregion
 
-    #region FromString
 
     [Fact]
     public void FromString_ValidVersion_ReturnsCorrectVersion()
@@ -447,9 +438,7 @@ public class FirmwareVersionTests
         Assert.True(version.IsAlphaOrBeta);
     }
 
-    #endregion
 
-    #region FromBytes
 
     [Fact]
     public void FromBytes_ValidBytes_ReturnsCorrectVersion()
@@ -467,12 +456,10 @@ public class FirmwareVersionTests
     {
         Assert.Throws<ArgumentException>(() => FirmwareVersion.FromBytes(new byte[] { 5, 7 }));
         Assert.Throws<ArgumentException>(() => FirmwareVersion.FromBytes(new byte[] { 5, 7, 2, 1 }));
-        Assert.Throws<ArgumentException>(() => FirmwareVersion.FromBytes(Array.Empty<byte>()));
+        Assert.Throws<ArgumentException>(() => FirmwareVersion.FromBytes([]));
     }
 
-    #endregion
 
-    #region Constructor Edge Cases
 
     [Fact]
     public void Constructor_DefaultValues()
@@ -515,9 +502,7 @@ public class FirmwareVersionTests
         Assert.True(version.IsAlphaOrBeta);
     }
 
-    #endregion
 
-    #region ToString
 
     [Fact]
     public void ToString_ReturnsCorrectFormat()
@@ -533,9 +518,7 @@ public class FirmwareVersionTests
         Assert.Equal("255.255.255", version.ToString());
     }
 
-    #endregion
 
-    #region Static Fields
 
     [Fact]
     public void Default_IsAlphaOrBeta()
@@ -566,9 +549,7 @@ public class FirmwareVersionTests
         Assert.Equal(0, FirmwareVersion.V5_8_0.Patch);
     }
 
-    #endregion
 
-    #region Operator Consistency
 
     [Fact]
     public void Operators_AreConsistentWithCompareTo()
@@ -603,5 +584,4 @@ public class FirmwareVersionTests
         Assert.True(v2 >= v1);
     }
 
-    #endregion
 }

@@ -19,7 +19,6 @@ namespace Yubico.YubiKit.Core.PlatformInterop.Windows.HidD;
 
 internal static partial class NativeMethods
 {
-    #region Structures
 
     [StructLayout(LayoutKind.Sequential)]
     internal struct HIDD_ATTRIBUTES
@@ -54,9 +53,7 @@ internal static partial class NativeMethods
         public short NumberFeatureDataIndices;
     }
 
-    #endregion
 
-    #region P/Invoke DLL Imports
 
     [LibraryImport(Libraries.Hid, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
@@ -125,5 +122,4 @@ internal static partial class NativeMethods
         ref HIDP_CAPS Capabilities
     );
 
-    #endregion
 }

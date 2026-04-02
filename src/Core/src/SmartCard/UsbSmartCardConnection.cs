@@ -151,7 +151,6 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
         }
     }
 
-    #region Nested type: TransactionScope
 
     private sealed class TransactionScope(UsbSmartCardConnection owner, SCARD_DISPOSITION endDisposition)
         : IDisposable
@@ -159,7 +158,6 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
         private bool _began;
         private bool _ended;
 
-        #region IDisposable Members
 
         public void Dispose()
         {
@@ -183,7 +181,6 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
                 }
         }
 
-        #endregion
 
         public void MarkBeganOrThrow(uint ec)
         {
@@ -193,9 +190,7 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
         }
     }
 
-    #endregion
 
-    #region ISmartCardConnection Members
 
     public void Dispose()
     {
@@ -299,5 +294,4 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
     public IDisposable BeginTransaction(CancellationToken cancellationToken = default)
         => BeginTransactionInternal(SCARD_DISPOSITION.LEAVE_CARD, cancellationToken);
 
-    #endregion
 }

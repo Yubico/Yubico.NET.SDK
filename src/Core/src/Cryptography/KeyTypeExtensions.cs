@@ -21,7 +21,7 @@ public static class KeyTypeExtensions
     public static string? GetCurveOid(this KeyType keyType) => Oids.GetOidsByKeyType(keyType).Curveoid;    
     public static int GetKeySizeBits(this KeyType keyType) => keyType.GetKeyDefinition().LengthInBits;
     public static int GetKeySizeBytes(this KeyType keyType) => keyType.GetKeyDefinition().LengthInBytes;
-    public static bool IsCoseKey(this KeyType keyType) => keyType.GetKeyDefinition().CoseKeyDefinition != null;
+    public static bool IsCoseKey(this KeyType keyType) => keyType.GetKeyDefinition().CoseKeyDefinition is not null;
     public static bool IsECDsa(this KeyType keyType) => keyType is KeyType.ECP256 or KeyType.ECP384 or KeyType.ECP521;
     public static bool IsCurve25519(this KeyType keyType) => keyType is KeyType.X25519 or KeyType.Ed25519;
     public static bool IsAsymmetric(this KeyType keyType) => 

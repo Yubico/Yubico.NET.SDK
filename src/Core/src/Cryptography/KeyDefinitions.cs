@@ -122,7 +122,7 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// </exception>
         public static KeyDefinition GetByCoseCurve(CoseEcCurve curve) =>
             AllDefinitions.Values.SingleOrDefault(
-                d => d.CoseKeyDefinition != null && d.CoseKeyDefinition.CurveIdentifier == curve)
+                d => d.CoseKeyDefinition is not null && d.CoseKeyDefinition.CurveIdentifier == curve)
             ?? throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,

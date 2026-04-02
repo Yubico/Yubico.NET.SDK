@@ -28,7 +28,6 @@ public class FindYubiKeys(
     IFindHidDevices findHidService,
     IYubiKeyFactory yubiKeyFactory) : IFindYubiKeys
 {
-    #region IFindYubiKeys Members
 
     public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(
         ConnectionType type = ConnectionType.All,
@@ -51,7 +50,6 @@ public class FindYubiKeys(
         return yubiKeys;
     }
 
-    #endregion
 
     private async Task<IReadOnlyList<IYubiKey>> FindAllHid(CancellationToken cancellationToken = default)
     {

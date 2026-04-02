@@ -18,7 +18,6 @@ namespace Yubico.YubiKit.Core.PlatformInterop.MacOS.IOKitFramework;
 
 internal static partial class NativeMethods
 {
-    #region Delegates
 
     public delegate void IOHIDCallback(IntPtr context, int result, IntPtr sender);
 
@@ -44,7 +43,6 @@ internal static partial class NativeMethods
         byte[] report,
         long reportLength);
 
-    #endregion
 
     /*!
         @function   IOHIDManagerCreate

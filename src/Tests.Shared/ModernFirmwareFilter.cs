@@ -22,12 +22,10 @@ namespace Yubico.YubiKit.Tests.Shared;
 /// </summary>
 public class ModernFirmwareFilter : IYubiKeyFilter
 {
-    #region IYubiKeyFilter Members
 
     public bool Matches(YubiKeyTestState device) =>
         device.FirmwareVersion >= new FirmwareVersion(5);
 
     public string GetDescription() => "Firmware >= 5.0.0";
 
-    #endregion
 }

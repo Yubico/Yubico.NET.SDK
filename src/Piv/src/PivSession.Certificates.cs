@@ -63,7 +63,7 @@ public sealed partial class PivSession
             && info.Length > 0 
             && info.Span[0] == 0x01;
 
-        if (certBytes == null || certBytes.Length == 0)
+        if (certBytes is null || certBytes.Length == 0)
         {
             return null;
         }

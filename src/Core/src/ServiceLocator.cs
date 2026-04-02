@@ -25,7 +25,7 @@ public static class ServiceLocator
 
     public static void SetLocatorProvider(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
-    public static T GetService<T>() where T : notnull => _serviceProvider == null
+    public static T GetService<T>() where T : notnull => _serviceProvider is null
         ? throw new InvalidOperationException("Service provider not set.")
         : _serviceProvider.GetRequiredService<T>();
 }

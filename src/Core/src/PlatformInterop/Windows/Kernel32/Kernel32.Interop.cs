@@ -20,7 +20,6 @@ namespace Yubico.YubiKit.Core.PlatformInterop.Windows.Kernel32;
 
 internal static partial class NativeMethods
 {
-    #region Enumerations and flags
 
     [Flags]
     [SuppressMessage("Design", "CA1069:Enums values should not be duplicated",
@@ -151,9 +150,7 @@ internal static partial class NativeMethods
         // Security QOS
     }
 
-    #endregion
 
-    #region P/Invoke DLL Imports
 
     [LibraryImport(Libraries.Kernel32, EntryPoint = "CreateFileW", SetLastError = true,
         StringMarshalling = StringMarshalling.Utf8)]
@@ -191,5 +188,4 @@ internal static partial class NativeMethods
         IntPtr mustBeZero
     );
 
-    #endregion
 }

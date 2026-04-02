@@ -435,10 +435,12 @@ public sealed class OathSession : ApplicationSession, IOathSession
             if (nameTlv.Tag != OathConstants.TagName)
                 continue;
 
-            var nameValue = nameTlv.Value.Span;
-            byte typeByte = nameValue[0];
-            var oathType = (OathType)(typeByte & OathConstants.MaskType);
-            var credentialId = nameValue[1..].ToArray();
+            // In CALCULATE_ALL, TAG_NAME (0x71) contains the raw credential ID directly.
+            // The oath type is derived from the response TLV tag (TAG_HOTP/TAG_TOUCH = HOTP,
+            // TAG_TRUNCATED = TOTP). This differs from LIST where TAG_NAME_LIST (0x72) prepends
+            // a type byte before the credential ID.
+            var credentialId = nameTlv.Value.ToArray();
+            var oathType = responseTlv.Tag == OathConstants.TagHotp ? OathType.Hotp : OathType.Totp;
             var (issuer, name, period) = Credential.ParseCredentialId(credentialId, oathType);
 
             bool touchRequired = responseTlv.Tag == OathConstants.TagTouch;

@@ -145,3 +145,61 @@ yubikit (2.0 base)
 | `Yubico.YubiKit.Core/src/YubiKey/ApplicationSession.cs` | Major==0 sentinel for feature gating |
 | `Yubico.YubiKit.Core/src/SmartCard/PcscProtocol.cs` | Major==0 sentinel for APDU configuration |
 | `docs/TESTING.md` | Test runner requirements (always use `dotnet build.cs test`) |
+
+---
+
+## FIDO2 Validation — Requires User Presence
+
+The following FIDO2 tests require the user to physically touch the YubiKey. They cannot
+be run autonomously. When you are sitting at the keyboard with the YubiKey attached:
+
+### CLI E2E Tests (run these manually)
+
+```bash
+cd /Users/Dennis.Dyall/Code/y/Yubico.NET.SDK
+
+# 1. Check device info (no touch needed — already validated)
+dotnet run --project Yubico.YubiKit.Fido2/examples/FidoTool/FidoTool.csproj -- info
+
+# 2. Set PIN (no touch)
+dotnet run --project Yubico.YubiKit.Fido2/examples/FidoTool/FidoTool.csproj -- \
+  access change-pin --pin 12345678
+
+# 3. Make a credential — TOUCH REQUIRED when YubiKey blinks
+dotnet run --project Yubico.YubiKit.Fido2/examples/FidoTool/FidoTool.csproj -- \
+  credential make --rp example.com --user test@example.com --pin 12345678
+# Expected: "Touch your YubiKey..." then credential ID printed
+
+# Cross-check with ykman:
+ykman fido credentials list --pin 12345678
+
+# 4. List credentials
+dotnet run --project Yubico.YubiKit.Fido2/examples/FidoTool/FidoTool.csproj -- \
+  credentials list --pin 12345678
+
+# 5. Reset — TOUCH REQUIRED (device will blink)
+dotnet run --project Yubico.YubiKit.Fido2/examples/FidoTool/FidoTool.csproj -- \
+  reset --force
+```
+
+### Integration Tests (with user present to touch)
+
+```bash
+# Run FIDO2 integration tests — you MUST be ready to touch the key when it blinks
+dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/ \
+  -c Release --filter "Category!=Slow"
+
+# First re-add the integration test project to the solution if needed:
+# dotnet sln Yubico.YubiKit.sln add \
+#   Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/...csproj
+```
+
+### What to Verify
+
+- [ ] `FidoTool info` shows authenticator capabilities and PIN status
+- [ ] `FidoTool credential make` produces a credential ID, YubiKey blinks for touch
+- [ ] `FidoTool credentials list` shows the created credential
+- [ ] `ykman fido credentials list` shows same credential
+- [ ] `FidoTool reset` clears all FIDO data after touch
+- [ ] FIDO2 integration tests: `FidoGetInfoTests` passes (no touch needed)
+- [ ] FIDO2 integration tests: `FidoSessionSimpleTests` passes (may need touch)

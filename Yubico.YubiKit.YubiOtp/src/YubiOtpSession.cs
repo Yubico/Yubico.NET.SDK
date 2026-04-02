@@ -158,14 +158,13 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
         _protocol = Protocol ?? throw new InvalidOperationException();
 
-        if (IsAuthenticated)
+        if (_protocol is ISmartCardProtocol scProtocolFinal)
         {
-            // Recreate SmartCard backend with SCP-wrapped protocol
-            var wrappedScProtocol = _protocol as ISmartCardProtocol
-                                    ?? throw new InvalidOperationException(
-                                        "SCP authentication succeeded but protocol is not ISmartCardProtocol.");
+            // Always recreate SmartCard backend after initialization so _lastProgSeq
+            // reflects the current device state (read from OTP SELECT response).
+            // When SCP is used, _protocol has been replaced with the SCP-wrapped protocol.
             _backend = new SmartCardBackend(
-                wrappedScProtocol,
+                scProtocolFinal,
                 FirmwareVersion,
                 GetProgSeq());
         }

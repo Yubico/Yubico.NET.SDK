@@ -41,6 +41,12 @@ internal sealed class OtpBackend(IOtpHidProtocol otpProtocol) : IManagementBacke
         // Verify CRC: checkCrc(response, response[0] + 1 + 2)
         // response[0] is the length of TLV data, +1 for the length byte, +2 for CRC
         var totalLength = response.Span[0] + 1 + 2;
+        if (totalLength > response.Length)
+        {
+            throw new BadResponseException(
+                $"OTP response length field ({response.Span[0]}) exceeds buffer size ({response.Length}).");
+        }
+
         if (!ChecksumUtils.CheckCrc(response.Span, totalLength))
         {
             throw new BadResponseException("Invalid CRC in OTP response");

@@ -56,8 +56,10 @@ public abstract class SlotConfiguration : IDisposable
 
     /// <summary>
     /// Checks whether this configuration is supported by the given firmware version.
+    /// Major version 0 is treated as a sentinel for alpha firmware (see ApplicationSession.IsSupported).
     /// </summary>
-    public bool IsSupportedBy(FirmwareVersion version) => version.IsAtLeast(MinimumFirmwareVersion);
+    public bool IsSupportedBy(FirmwareVersion version) =>
+        version.Major == 0 || version.IsAtLeast(MinimumFirmwareVersion);
 
     /// <summary>
     /// Enables or disables the AllowUpdate flag, permitting future update operations on this slot.

@@ -30,7 +30,7 @@ public class OpenPgpSessionTests
     // ── Reset & Clean State ──────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task Reset_RestoresDefaultState(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -45,7 +45,7 @@ public class OpenPgpSessionTests
     // ── Application Related Data ─────────────────────────────────────
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetApplicationRelatedData_ReturnsValidData(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -63,7 +63,7 @@ public class OpenPgpSessionTests
     // ── PIN Operations ───────────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task VerifyPin_DefaultPin_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -73,7 +73,7 @@ public class OpenPgpSessionTests
             });
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task VerifyAdmin_DefaultPin_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -83,7 +83,7 @@ public class OpenPgpSessionTests
             });
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task VerifyPin_WrongPin_ThrowsWithRemainingAttempts(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -95,7 +95,7 @@ public class OpenPgpSessionTests
             });
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ChangePin_AndRestore_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -117,7 +117,7 @@ public class OpenPgpSessionTests
             });
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ChangeAdmin_AndRestore_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -132,7 +132,7 @@ public class OpenPgpSessionTests
             });
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetPinStatus_DefaultState_ReturnsExpected(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -147,7 +147,7 @@ public class OpenPgpSessionTests
     // ── Algorithm Attributes ─────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetAlgorithmAttributes_DefaultState_ReturnsRsa2048(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -169,7 +169,7 @@ public class OpenPgpSessionTests
     // ── Key Generation: EC ───────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.2.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task GenerateEcKey_P256_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -184,7 +184,7 @@ public class OpenPgpSessionTests
             });
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.2.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task GenerateEcKey_P256_PublicKeyReadable(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -200,7 +200,7 @@ public class OpenPgpSessionTests
     // ── Key Generation: RSA ──────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GenerateRsaKey_2048_Succeeds(YubiKeyTestState state)
     {
         // Skip firmware 4.2.0–4.3.5 (RSA generation unreliable)
@@ -229,7 +229,7 @@ public class OpenPgpSessionTests
     // ── Sign & Verify: EC ────────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.2.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task Sign_EcP256_ProducesValidSignature(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -254,7 +254,7 @@ public class OpenPgpSessionTests
     // ── Sign & Verify: RSA ───────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task Sign_Rsa2048_ProducesSignature(YubiKeyTestState state)
     {
         if (state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
@@ -285,7 +285,7 @@ public class OpenPgpSessionTests
     // ── Authenticate ─────────────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.2.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task Authenticate_EcP256_ProducesSignature(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -305,7 +305,7 @@ public class OpenPgpSessionTests
     // ── Certificate CRUD ─────────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.2.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task Certificate_PutGetDelete_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -342,7 +342,7 @@ public class OpenPgpSessionTests
     // ── Key Attestation ──────────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.2.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task AttestKey_ReturnsValidCertificate(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -359,7 +359,7 @@ public class OpenPgpSessionTests
     // ── UIF (Touch Policy) ───────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey(MinFirmware = "4.2.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.2.0")]
     public async Task GetUif_DefaultState_ReturnsOff(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -370,7 +370,7 @@ public class OpenPgpSessionTests
             });
 
     [Theory]
-    [WithYubiKey(MinFirmware = "4.2.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.2.0")]
     public async Task SetUif_On_ThenReadBack(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -386,7 +386,7 @@ public class OpenPgpSessionTests
     // ── Key Information ──────────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.2.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task GetKeyInformation_AfterGenerate_ShowsGenerated(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -403,7 +403,7 @@ public class OpenPgpSessionTests
     // ── Fingerprints & Generation Times ──────────────────────────────
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetFingerprints_DefaultState_AllZero(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -419,7 +419,7 @@ public class OpenPgpSessionTests
             });
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetGenerationTimes_DefaultState_AllZero(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -437,7 +437,7 @@ public class OpenPgpSessionTests
     // ── Signature Counter ────────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetSignatureCounter_DefaultState_ReturnsZero(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -450,7 +450,7 @@ public class OpenPgpSessionTests
     // ── Algorithm Information ────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.2.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task GetAlgorithmInformation_ReturnsSupportedAlgorithms(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -469,7 +469,7 @@ public class OpenPgpSessionTests
     // ── Delete Key ───────────────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.2.0")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task DeleteKey_AfterGenerate_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -493,7 +493,7 @@ public class OpenPgpSessionTests
     // ── KDF Configuration ────────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetKdf_DefaultState_ReturnsKdfNone(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -506,7 +506,7 @@ public class OpenPgpSessionTests
     // ── Get Challenge ────────────────────────────────────────────────
 
     [Theory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetChallenge_ReturnsRandomBytes(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,

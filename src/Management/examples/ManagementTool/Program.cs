@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Logging;
 using Spectre.Console;
+using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
@@ -16,91 +16,18 @@ AnsiConsole.WriteLine();
 // Start monitoring for device events
 YubiKeyManager.StartMonitoring();
 
-using var cts = new CancellationTokenSource();
-Console.CancelKeyPress += (_, e) =>
-{
-    e.Cancel = true;
-    cts.Cancel();
-};
+using var cts = CommandHelper.CreateConsoleCts();
 
-// Main menu loop
-while (!cts.Token.IsCancellationRequested)
-{
-    string choice;
-    try
-    {
-        choice = await new SelectionPrompt<string>()
-            .Title("What would you like to do?")
-            .PageSize(15)
-            .AddChoices(
-            [
-                "📋 Device Info",
-                "🔌 USB Capabilities",
-                "📶 NFC Capabilities",
-                "⏳ Timeouts",
-                "🚩 Device Flags",
-                "🔒 Lock Code",
-                "⚠️  Factory Reset",
-                "❌ Exit"
-            ])
-            .ShowAsync(AnsiConsole.Console, cts.Token);
-    }
-    catch (OperationCanceledException)
-    {
-        break;
-    }
-
-    if (choice == "❌ Exit")
-    {
-        AnsiConsole.MarkupLine("[grey]Goodbye![/]");
-        break;
-    }
-
-    try
-    {
-        switch (choice)
-        {
-            case "📋 Device Info":
-                await DeviceInfoMenu.RunAsync();
-                break;
-
-            case "🔌 USB Capabilities":
-                await CapabilitiesMenu.RunAsync(Transport.Usb);
-                break;
-
-            case "📶 NFC Capabilities":
-                await CapabilitiesMenu.RunAsync(Transport.Nfc);
-                break;
-
-            case "⏱️  Timeouts":
-                await TimeoutsMenu.RunAsync();
-                break;
-
-            case "🚩 Device Flags":
-                await DeviceFlagsMenu.RunAsync();
-                break;
-
-            case "🔒 Lock Code":
-                await LockCodeMenu.RunAsync();
-                break;
-
-            case "⚠️  Factory Reset":
-                await ResetMenu.RunAsync();
-                break;
-
-            default:
-                AnsiConsole.MarkupLine($"[yellow]Selected: {choice} - Not yet implemented[/]");
-                break;
-        }
-    }
-    catch (Exception ex)
-    {
-        AnsiConsole.MarkupLine($"[red]Error: {ex.Message}[/]");
-    }
-
-    AnsiConsole.WriteLine();
-}
+var exitCode = await InteractiveMenuBuilder.Create("What would you like to do?")
+    .AddItem("Device Info", ct => DeviceInfoMenu.RunAsync())
+    .AddItem("USB Capabilities", ct => CapabilitiesMenu.RunAsync(Transport.Usb))
+    .AddItem("NFC Capabilities", ct => CapabilitiesMenu.RunAsync(Transport.Nfc))
+    .AddItem("Timeouts", ct => TimeoutsMenu.RunAsync())
+    .AddItem("Device Flags", ct => DeviceFlagsMenu.RunAsync())
+    .AddItem("Lock Code", ct => LockCodeMenu.RunAsync())
+    .AddItem("Factory Reset", ct => ResetMenu.RunAsync())
+    .RunAsync(cts.Token);
 
 await YubiKeyManager.ShutdownAsync();
 
-return 0;
+return exitCode;

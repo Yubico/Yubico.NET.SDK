@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
+using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Commands;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Menus;
@@ -25,104 +26,24 @@ AnsiConsole.WriteLine();
 
 YubiKeyManager.StartMonitoring();
 
-using var cts = new CancellationTokenSource();
-Console.CancelKeyPress += (_, e) =>
-{
-    e.Cancel = true;
-    cts.Cancel();
-};
+using var cts = CommandHelper.CreateConsoleCts();
 
-while (!cts.Token.IsCancellationRequested)
-{
-    string choice;
-    try
-    {
-        choice = await new SelectionPrompt<string>()
-            .Title("What would you like to do?")
-            .PageSize(15)
-            .AddChoices(
-            [
-                "Info",
-                "List Credentials",
-                "Add Symmetric Credential",
-                "Add Derived Credential",
-                "Delete Credential",
-                "Generate Asymmetric Credential",
-                "Calculate Session Keys",
-                "Change Management Key",
-                "Get Management Key Retries",
-                "Factory Reset",
-                "Exit"
-            ])
-            .ShowAsync(AnsiConsole.Console, cts.Token);
-    }
-    catch (OperationCanceledException)
-    {
-        break;
-    }
-
-    if (choice == "Exit")
-    {
-        AnsiConsole.MarkupLine("[grey]Goodbye![/]");
-        break;
-    }
-
-    try
-    {
-        switch (choice)
-        {
-            case "Info":
-                await InfoCommand.RunAsync([], cts.Token);
-                break;
-
-            case "List Credentials":
-                await CredentialsCommand.RunAsync(["credentials", "list"], cts.Token);
-                break;
-
-            case "Add Symmetric Credential":
-                await CredentialMenu.AddSymmetricAsync(cts.Token);
-                break;
-
-            case "Add Derived Credential":
-                await CredentialMenu.AddDerivedAsync(cts.Token);
-                break;
-
-            case "Delete Credential":
-                await CredentialMenu.DeleteAsync(cts.Token);
-                break;
-
-            case "Generate Asymmetric Credential":
-                await CredentialMenu.GenerateAsync(cts.Token);
-                break;
-
-            case "Calculate Session Keys":
-                await SessionKeyMenu.RunAsync(cts.Token);
-                break;
-
-            case "Change Management Key":
-                await ManagementKeyMenu.RunAsync(cts.Token);
-                break;
-
-            case "Get Management Key Retries":
-                await ManagementKeyMenu.GetRetriesAsync(cts.Token);
-                break;
-
-            case "Factory Reset":
-                await ResetMenu.RunAsync(cts.Token);
-                break;
-        }
-    }
-    catch (Exception ex)
-    {
-        AnsiConsole.MarkupLine($"[red]Error: {Markup.Escape(ex.Message)}[/]");
-    }
-
-    AnsiConsole.WriteLine();
-}
+var exitCode = await InteractiveMenuBuilder.Create("What would you like to do?")
+    .AddItem("Info", ct => InfoCommand.RunAsync([], ct))
+    .AddItem("List Credentials", ct => CredentialsCommand.RunAsync(["credentials", "list"], ct))
+    .AddItem("Add Symmetric Credential", ct => CredentialMenu.AddSymmetricAsync(ct))
+    .AddItem("Add Derived Credential", ct => CredentialMenu.AddDerivedAsync(ct))
+    .AddItem("Delete Credential", ct => CredentialMenu.DeleteAsync(ct))
+    .AddItem("Generate Asymmetric Credential", ct => CredentialMenu.GenerateAsync(ct))
+    .AddItem("Calculate Session Keys", ct => SessionKeyMenu.RunAsync(ct))
+    .AddItem("Change Management Key", ct => ManagementKeyMenu.RunAsync(ct))
+    .AddItem("Get Management Key Retries", ct => ManagementKeyMenu.GetRetriesAsync(ct))
+    .AddItem("Factory Reset", ct => ResetMenu.RunAsync(ct))
+    .RunAsync(cts.Token);
 
 await YubiKeyManager.ShutdownAsync();
 
-return 0;
+return exitCode;
 
 // ── CLI command dispatch ─────────────────────────────────────────────────────
 

@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\src\Yubico.YubiKit.Piv.csproj" />
     <ProjectReference Include="..\..\..\Core\src\Yubico.YubiKit.Core.csproj" />
     <ProjectReference Include="..\..\..\Management\src\Yubico.YubiKit.Management.csproj" />
+    <ProjectReference Include="..\..\..\Cli.Shared\src\Yubico.YubiKit.Cli.Shared.csproj" />
   </ItemGroup>
 
 </Project>

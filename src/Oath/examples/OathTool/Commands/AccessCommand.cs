@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts;
@@ -34,7 +35,7 @@ public static class AccessCommand
         // Unlock if currently locked
         if (session.IsLocked)
         {
-            if (!await SessionHelper.UnlockSessionAsync(session, password))
+            if (!await OathSessionHelper.UnlockSessionAsync(session, password))
             {
                 return 1;
             }
@@ -60,13 +61,9 @@ public static class AccessCommand
         {
             if (!Console.IsInputRedirected)
             {
-                Console.Error.Write("Enter new OATH password: ");
-                newPassword = ReadPasswordMasked();
-                Console.Error.WriteLine();
+                newPassword = SessionHelper.ReadPasswordMasked("Enter new OATH password");
 
-                Console.Error.Write("Confirm new OATH password: ");
-                var confirm = ReadPasswordMasked();
-                Console.Error.WriteLine();
+                var confirm = SessionHelper.ReadPasswordMasked("Confirm new OATH password");
 
                 if (!string.Equals(newPassword, confirm, StringComparison.Ordinal))
                 {
@@ -106,32 +103,5 @@ public static class AccessCommand
                 CryptographicOperations.ZeroMemory(key);
             }
         }
-    }
-
-    /// <summary>
-    /// Reads a password from the console with masking (no echo).
-    /// </summary>
-    private static string ReadPasswordMasked()
-    {
-        var chars = new List<char>();
-        while (true)
-        {
-            var keyInfo = Console.ReadKey(intercept: true);
-            if (keyInfo.Key is ConsoleKey.Enter)
-            {
-                break;
-            }
-
-            if (keyInfo.Key is ConsoleKey.Backspace && chars.Count > 0)
-            {
-                chars.RemoveAt(chars.Count - 1);
-            }
-            else if (!char.IsControl(keyInfo.KeyChar))
-            {
-                chars.Add(keyInfo.KeyChar);
-            }
-        }
-
-        return new string(chars.ToArray());
     }
 }

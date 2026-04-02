@@ -12,16 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.YubiOtp.Examples.OtpTool;
 using Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 
-using var cts = new CancellationTokenSource();
-Console.CancelKeyPress += (_, e) =>
-{
-    e.Cancel = true;
-    cts.Cancel();
-};
+using var cts = CommandHelper.CreateConsoleCts();
 
 try
 {

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Cli.Shared.Device;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts;
@@ -11,7 +12,7 @@ namespace Yubico.YubiKit.Oath.Examples.OathTool.Cli;
 /// <summary>
 /// Shared helpers for device selection, session creation, and password unlock.
 /// </summary>
-public static class SessionHelper
+public static class OathSessionHelper
 {
     /// <summary>
     /// Selects a device and creates an OATH session. If the session is locked,
@@ -51,19 +52,7 @@ public static class SessionHelper
         IOathSession session,
         string? password = null)
     {
-        if (password is null)
-        {
-            if (!Console.IsInputRedirected)
-            {
-                Console.Error.Write("Enter OATH password: ");
-                password = ReadPasswordMasked();
-                Console.Error.WriteLine();
-            }
-            else
-            {
-                password = Console.ReadLine();
-            }
-        }
+        password ??= SessionHelper.ReadPasswordMasked("Enter OATH password");
 
         if (string.IsNullOrEmpty(password))
         {
@@ -90,32 +79,5 @@ public static class SessionHelper
                 CryptographicOperations.ZeroMemory(key);
             }
         }
-    }
-
-    /// <summary>
-    /// Reads a password from the console with masking (no echo).
-    /// </summary>
-    private static string ReadPasswordMasked()
-    {
-        var password = new List<char>();
-        while (true)
-        {
-            var keyInfo = Console.ReadKey(intercept: true);
-            if (keyInfo.Key is ConsoleKey.Enter)
-            {
-                break;
-            }
-
-            if (keyInfo.Key is ConsoleKey.Backspace && password.Count > 0)
-            {
-                password.RemoveAt(password.Count - 1);
-            }
-            else if (!char.IsControl(keyInfo.KeyChar))
-            {
-                password.Add(keyInfo.KeyChar);
-            }
-        }
-
-        return new string(password.ToArray());
     }
 }

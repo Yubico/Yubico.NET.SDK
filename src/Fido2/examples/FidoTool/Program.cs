@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Spectre.Console;
+using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Menus;
 using Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Output;
@@ -31,12 +32,7 @@ AnsiConsole.WriteLine();
 // Start monitoring for device events
 YubiKeyManager.StartMonitoring();
 
-using var cts = new CancellationTokenSource();
-Console.CancelKeyPress += (_, e) =>
-{
-    e.Cancel = true;
-    cts.Cancel();
-};
+using var cts = CommandHelper.CreateConsoleCts();
 
 int exitCode;
 
@@ -48,7 +44,16 @@ if (args.Length > 0)
 else
 {
     // Interactive menu mode
-    exitCode = await RunInteractiveAsync(cts.Token);
+    exitCode = await InteractiveMenuBuilder.Create("What would you like to do?")
+        .AddItem("Authenticator Info", ct => InfoMenu.RunAsync(ct))
+        .AddItem("Access (PIN Management)", ct => AccessMenu.RunAsync(ct))
+        .AddItem("Config (Authenticator Settings)", ct => ConfigMenu.RunAsync(ct))
+        .AddItem("Credentials (Discoverable Credentials)", ct => CredentialsMenu.RunAsync(ct))
+        .AddItem("Fingerprints (Bio Enrollment)", ct => FingerprintsMenu.RunAsync(ct))
+        .AddItem("Create Credential (MakeCredential)", ct => CredentialMenu.RunMakeCredentialAsync(ct))
+        .AddItem("Get Assertion", ct => CredentialMenu.RunGetAssertionAsync(ct))
+        .AddItem("Factory Reset", ct => ResetMenu.RunAsync(ct))
+        .RunAsync(cts.Token);
 }
 
 await YubiKeyManager.ShutdownAsync();
@@ -83,96 +88,6 @@ static async Task<int> RunVerbAsync(string[] args, CancellationToken cancellatio
         OutputHelpers.WriteError(ex.Message);
         return 1;
     }
-}
-
-// ---------------------------------------------------------------------------
-// Interactive menu loop
-// ---------------------------------------------------------------------------
-static async Task<int> RunInteractiveAsync(CancellationToken cancellationToken)
-{
-    while (!cancellationToken.IsCancellationRequested)
-    {
-        string choice;
-        try
-        {
-            choice = await new SelectionPrompt<string>()
-                .Title("What would you like to do?")
-                .PageSize(15)
-                .AddChoices(
-                [
-                    "Authenticator Info",
-                    "Access (PIN Management)",
-                    "Config (Authenticator Settings)",
-                    "Credentials (Discoverable Credentials)",
-                    "Fingerprints (Bio Enrollment)",
-                    "Create Credential (MakeCredential)",
-                    "Get Assertion",
-                    "Factory Reset",
-                    "Exit"
-                ])
-                .ShowAsync(AnsiConsole.Console, cancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
-            break;
-        }
-
-        if (choice == "Exit")
-        {
-            AnsiConsole.MarkupLine("[grey]Goodbye![/]");
-            break;
-        }
-
-        try
-        {
-            switch (choice)
-            {
-                case "Authenticator Info":
-                    await InfoMenu.RunAsync(cancellationToken);
-                    break;
-
-                case "Access (PIN Management)":
-                    await AccessMenu.RunAsync(cancellationToken);
-                    break;
-
-                case "Config (Authenticator Settings)":
-                    await ConfigMenu.RunAsync(cancellationToken);
-                    break;
-
-                case "Credentials (Discoverable Credentials)":
-                    await CredentialsMenu.RunAsync(cancellationToken);
-                    break;
-
-                case "Fingerprints (Bio Enrollment)":
-                    await FingerprintsMenu.RunAsync(cancellationToken);
-                    break;
-
-                case "Create Credential (MakeCredential)":
-                    await CredentialMenu.RunMakeCredentialAsync(cancellationToken);
-                    break;
-
-                case "Get Assertion":
-                    await CredentialMenu.RunGetAssertionAsync(cancellationToken);
-                    break;
-
-                case "Factory Reset":
-                    await ResetMenu.RunAsync(cancellationToken);
-                    break;
-
-                default:
-                    AnsiConsole.MarkupLine($"[yellow]Selected: {choice} - Not yet implemented[/]");
-                    break;
-            }
-        }
-        catch (Exception ex)
-        {
-            OutputHelpers.WriteError(ex.Message);
-        }
-
-        AnsiConsole.WriteLine();
-    }
-
-    return 0;
 }
 
 // ---------------------------------------------------------------------------

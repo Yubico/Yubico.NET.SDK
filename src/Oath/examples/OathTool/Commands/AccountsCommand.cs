@@ -18,7 +18,7 @@ public static class AccountsCommand
         string? password = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await SessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
         if (result is null)
         {
             return 1;
@@ -96,7 +96,7 @@ public static class AccountsCommand
             }
         }
 
-        var result = await SessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
         if (result is null)
         {
             return 1;
@@ -128,7 +128,7 @@ public static class AccountsCommand
         string? password = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await SessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
         if (result is null)
         {
             return 1;
@@ -155,7 +155,7 @@ public static class AccountsCommand
         string? password = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await SessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
         if (result is null)
         {
             return 1;
@@ -207,7 +207,7 @@ public static class AccountsCommand
         string? password = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await SessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
         if (result is null)
         {
             return 1;
@@ -300,7 +300,7 @@ public static class AccountsCommand
             }
         }
 
-        var result = await SessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
         if (result is null)
         {
             return 1;

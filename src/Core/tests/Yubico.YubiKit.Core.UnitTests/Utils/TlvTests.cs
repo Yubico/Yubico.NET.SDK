@@ -154,6 +154,28 @@ public class TlvTests
         Assert.Throws<ArgumentException>(() => Tlv.Create([0x5A]));
 
     [Fact]
+    public void Create_IndefiniteLength0x80_ThrowsArgumentException() =>
+        // Tag 0x5A with length byte 0x80 (BER-TLV indefinite length — not supported)
+        Assert.Throws<ArgumentException>(() => Tlv.Create((ReadOnlySpan<byte>)[0x5A, 0x80, 0x01, 0x02]));
+
+    [Fact]
+    public void Create_LongFormLength0x81_128Bytes_ParsesCorrectly()
+    {
+        // Tag 0x5A, long-form length 0x81 0x80 = 128 bytes
+        var value = Enumerable.Range(0, 128).Select(i => (byte)i).ToArray();
+        var encoded = new byte[3 + value.Length];
+        encoded[0] = 0x5A;
+        encoded[1] = 0x81;
+        encoded[2] = 0x80;
+        Array.Copy(value, 0, encoded, 3, value.Length);
+
+        using var tlv = Tlv.Create(encoded);
+        Assert.Equal(0x5A, tlv.Tag);
+        Assert.Equal(128, tlv.Length);
+        Assert.True(tlv.Value.Span.SequenceEqual(value));
+    }
+
+    [Fact]
     public void ToString_Contains_Tag_Length_And_Value()
     {
         using var tlv = new Tlv(0x5A, [0xAA, 0xBB]);

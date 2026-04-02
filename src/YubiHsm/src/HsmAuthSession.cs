@@ -780,8 +780,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
             var data = TlvHelper.EncodeList(
             [
-                new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
+                new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagCredentialPassword, newPwBytes)
             ]);
 

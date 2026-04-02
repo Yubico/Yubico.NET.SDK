@@ -104,9 +104,27 @@ public sealed partial class OpenPgpSession
         var rawData = await GetDataCoreAsync(DataObject.AlgorithmInformation, cancellationToken)
             .ConfigureAwait(false);
 
-        // Unwrap the outer 0xFA TLV to get the inner list
-        using var outerTlv = Tlv.Create(rawData.Span);
-        var innerSpan = outerTlv.Value.Span;
+        // Unwrap the outer 0xFA TLV to get the inner list.
+        // Some firmware versions return malformed TLV — pad and retry (matches ykman pattern:
+        // yubikit/openpgp.py Tlv.unpack(DO.ALGORITHM_INFORMATION, buf + b"\0\0")[:-2])
+        Tlv outerTlv;
+        bool padded = false;
+        try
+        {
+            outerTlv = Tlv.Create(rawData.Span);
+        }
+        catch (ArgumentException)
+        {
+            Span<byte> paddedData = new byte[rawData.Length + 2];
+            rawData.Span.CopyTo(paddedData);
+            outerTlv = Tlv.Create(paddedData);
+            padded = true;
+        }
+
+        using var _ = outerTlv;
+        var innerSpan = padded
+            ? outerTlv.Value.Span[..^2]
+            : outerTlv.Value.Span;
 
         // Build reverse lookup: DataObject → KeyRef
         var doToKeyRef = new Dictionary<DataObject, KeyRef>();

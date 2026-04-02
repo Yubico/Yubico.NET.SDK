@@ -217,6 +217,12 @@ public sealed class Tlv : IDisposable
         int length = buffer[0];
         buffer = buffer[1..];
 
+        // BER-TLV: 0x80 = indefinite length (not supported in determinate-length encoding)
+        if (length == 0x80)
+        {
+            throw new ArgumentException("Indefinite length encoding (0x80) is not supported");
+        }
+
         // If the length is more than one byte, process remaining bytes.
         if (length > 0x80)
         {

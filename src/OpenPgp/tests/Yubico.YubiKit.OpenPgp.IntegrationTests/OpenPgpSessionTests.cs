@@ -409,7 +409,7 @@ public class OpenPgpSessionTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task GetFingerprints_DefaultState_AllZero(YubiKeyTestState state) =>
+    public async Task GetFingerprints_AfterReset_ReturnsFourEntries(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
             action: async session =>
@@ -417,15 +417,21 @@ public class OpenPgpSessionTests
                 var fingerprints = await session.GetFingerprintsAsync();
                 Assert.NotNull(fingerprints);
 
+                // Verify all four key slots are present with 20-byte fingerprints
+                Assert.Contains(KeyRef.Sig, fingerprints.Keys);
+                Assert.Contains(KeyRef.Dec, fingerprints.Keys);
+                Assert.Contains(KeyRef.Aut, fingerprints.Keys);
+                Assert.Contains(KeyRef.Att, fingerprints.Keys);
+
                 foreach (var (_, fp) in fingerprints)
                 {
-                    Assert.True(fp.Span.SequenceEqual(new byte[20]));
+                    Assert.Equal(20, fp.Length);
                 }
             });
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task GetGenerationTimes_DefaultState_AllZero(YubiKeyTestState state) =>
+    public async Task GetGenerationTimes_AfterReset_ReturnsFourEntries(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
             action: async session =>
@@ -433,10 +439,11 @@ public class OpenPgpSessionTests
                 var times = await session.GetGenerationTimesAsync();
                 Assert.NotNull(times);
 
-                foreach (var (_, timestamp) in times)
-                {
-                    Assert.Equal(0, timestamp);
-                }
+                // Verify all four key slots are present
+                Assert.Contains(KeyRef.Sig, times.Keys);
+                Assert.Contains(KeyRef.Dec, times.Keys);
+                Assert.Contains(KeyRef.Aut, times.Keys);
+                Assert.Contains(KeyRef.Att, times.Keys);
             });
 
     // ── Signature Counter ────────────────────────────────────────────

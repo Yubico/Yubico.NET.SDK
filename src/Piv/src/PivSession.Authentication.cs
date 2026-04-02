@@ -498,7 +498,7 @@ public sealed partial class PivSession
         }
 
         // Try metadata approach first if supported
-        if (FirmwareVersion >= PivFeatures.Metadata.Version)
+        if (IsSupported(PivFeatures.Metadata))
         {
             try
             {

@@ -484,7 +484,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
         }
 
         // Try to query slot metadata for touch policy
-        if (FirmwareVersion >= PivFeatures.Metadata.Version)
+        if (IsSupported(PivFeatures.Metadata))
         {
             try
             {

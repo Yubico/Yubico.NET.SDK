@@ -79,7 +79,7 @@ public sealed partial class PivSession
         Logger.LogDebug("PIV: SignOrDecryptAsync auto-detecting algorithm for slot 0x{Slot:X2}", (byte)slot);
 
         // Check firmware version supports metadata
-        if (FirmwareVersion < PivFeatures.Metadata.Version)
+        if (!IsSupported(PivFeatures.Metadata))
         {
             throw new NotSupportedException(
                 $"Auto-detecting algorithm requires YubiKey firmware 5.3 or later. " +

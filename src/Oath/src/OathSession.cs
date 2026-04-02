@@ -91,7 +91,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         if (_scpKeyParams is not null)
         {
-            if (FirmwareVersion < FeatureScp03.Version)
+            if (!IsSupported(FeatureScp03))
             {
                 throw new NotSupportedException(
                     $"SCP03 for OATH requires firmware {FeatureScp03.Version}+, " +

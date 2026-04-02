@@ -142,7 +142,7 @@ public sealed partial class OpenPgpSession
         }
 
         // Fix Curve25519 entries for firmware < 5.6.1
-        if (FirmwareVersion < AlgorithmInfoFixVersion)
+        if (FirmwareVersion.Major != 0 && FirmwareVersion < AlgorithmInfoFixVersion)
         {
             result = FixCurve25519AlgorithmInfo(result);
         }

@@ -36,9 +36,62 @@ public static class ResetAuthenticator
     }
 
     /// <summary>
+    /// Pre-reset information queried from the authenticator to guide user prompts.
+    /// </summary>
+    public sealed record ResetPreflightInfo
+    {
+        /// <summary>
+        /// Whether the authenticator requires a long (10-second) touch for reset.
+        /// When false, a short tap is sufficient.
+        /// </summary>
+        public bool LongTouchForReset { get; init; }
+
+        /// <summary>
+        /// Transports the authenticator allows for reset (e.g. "usb", "nfc").
+        /// Empty means all transports are allowed.
+        /// </summary>
+        public IReadOnlyList<string> TransportsForReset { get; init; } = [];
+
+        /// <summary>
+        /// Returns the appropriate touch prompt message for the user.
+        /// </summary>
+        public string TouchMessage => LongTouchForReset
+            ? "Press and hold the YubiKey button for 10 seconds to confirm."
+            : "Touch the YubiKey to confirm.";
+    }
+
+    /// <summary>
+    /// Queries the authenticator for reset-related information before performing
+    /// the actual reset. Use this to display the correct touch message and validate
+    /// transport restrictions.
+    /// </summary>
+    public static async Task<ResetPreflightInfo?> GetPreflightInfoAsync(
+        IYubiKey yubiKey,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await using var session = await yubiKey.CreateFidoSessionAsync(
+                cancellationToken: cancellationToken);
+
+            var info = await session.GetInfoAsync(cancellationToken);
+
+            return new ResetPreflightInfo
+            {
+                LongTouchForReset = info.LongTouchForReset ?? false,
+                TransportsForReset = info.TransportsForReset
+            };
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Performs a factory reset of the FIDO2 application.
-    /// The YubiKey must be re-inserted within 5 seconds before calling this method,
-    /// and the user must touch the key when prompted.
+    /// The YubiKey must have been recently re-inserted before calling this method,
+    /// and the user must touch (or hold for 10 seconds on newer firmware) when prompted.
     /// </summary>
     public static async Task<ResetResult> ResetAsync(
         IYubiKey yubiKey,
@@ -67,11 +120,13 @@ public static class ResetAuthenticator
         ex.Status switch
         {
             CtapStatus.UserActionTimeout =>
-                "Reset timed out. The YubiKey must be touched within 5 seconds of insertion.",
+                "Reset timed out. You need to touch your YubiKey to confirm the reset.",
             CtapStatus.NotAllowed =>
-                "Reset not allowed. Remove the YubiKey, re-insert it, and try again within 5 seconds.",
+                "Reset not allowed. Reset must be triggered within 5 seconds after the YubiKey is inserted.",
             CtapStatus.OperationDenied =>
                 "Reset was denied. Remove the YubiKey, re-insert it, and try again within 5 seconds.",
+            CtapStatus.PinAuthBlocked =>
+                "Reset not allowed. Remove the YubiKey, re-insert it, and try again within 5 seconds.",
             _ => $"CTAP error: {ex.Message} (0x{(byte)ex.Status:X2})"
         };
 }

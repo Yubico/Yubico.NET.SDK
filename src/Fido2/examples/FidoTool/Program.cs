@@ -132,14 +132,30 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
         }
     }
 
-    AnsiConsole.MarkupLine("[yellow]To perform the reset:[/]");
-    AnsiConsole.MarkupLine("[yellow]  1. Remove your YubiKey[/]");
-    AnsiConsole.MarkupLine("[yellow]  2. Re-insert your YubiKey[/]");
-    AnsiConsole.MarkupLine("[yellow]  3. Touch your YubiKey within 5 seconds[/]");
-    AnsiConsole.WriteLine();
-
     if (!force)
     {
+        // Query preflight info from the currently connected device
+        var preSelection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        if (preSelection is null)
+        {
+            OutputHelpers.WriteError("No YubiKey found.");
+            return 1;
+        }
+
+        var preflight = await ResetAuthenticator.GetPreflightInfoAsync(
+            preSelection.Device, cancellationToken);
+
+        var touchInstruction = preflight?.LongTouchForReset == true
+            ? "Press and hold for 10 seconds after re-inserting"
+            : "Touch your YubiKey after re-inserting";
+
+        AnsiConsole.MarkupLine("[yellow]To perform the reset:[/]");
+        AnsiConsole.MarkupLine("[yellow]  1. Remove your YubiKey[/]");
+        AnsiConsole.MarkupLine("[yellow]  2. Re-insert your YubiKey[/]");
+        AnsiConsole.MarkupLine($"[yellow]  3. {touchInstruction}[/]");
+        AnsiConsole.WriteLine();
+
+        AnsiConsole.MarkupLine("[yellow]Remove your YubiKey now...[/]");
         AnsiConsole.MarkupLine("[grey]Press Enter after re-inserting your YubiKey.[/]");
         Console.ReadLine();
     }
@@ -151,7 +167,12 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
         return 1;
     }
 
-    OutputHelpers.PromptForTouch();
+    // Query the (reinserted) device for accurate touch message
+    var reinsertedPreflight = await ResetAuthenticator.GetPreflightInfoAsync(
+        selection.Device, cancellationToken);
+
+    var touchMsg = reinsertedPreflight?.TouchMessage ?? "Touch your YubiKey to confirm.";
+    AnsiConsole.MarkupLine($"[yellow]{Markup.Escape(touchMsg)}[/]");
 
     var result = await ResetAuthenticator.ResetAsync(selection.Device, cancellationToken);
 

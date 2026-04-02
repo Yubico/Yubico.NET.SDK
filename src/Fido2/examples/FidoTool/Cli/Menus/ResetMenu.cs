@@ -39,6 +39,24 @@ public static class ResetMenu
 
         OutputHelpers.WriteActiveDevice(selection.DisplayName);
 
+        // Query authenticator for reset-specific capabilities
+        var preflight = await ResetAuthenticator.GetPreflightInfoAsync(
+            selection.Device, cancellationToken);
+
+        // Check transport restrictions
+        if (preflight is { TransportsForReset.Count: > 0 })
+        {
+            var currentTransport = selection.ConnectionType.ToString().ToLowerInvariant();
+            var allowed = preflight.TransportsForReset;
+            if (!allowed.Any(t => currentTransport.Contains(t, StringComparison.OrdinalIgnoreCase)))
+            {
+                OutputHelpers.WriteError(
+                    $"Cannot perform FIDO reset over the current transport. " +
+                    $"Allowed transports: {string.Join(", ", allowed)}");
+                return;
+            }
+        }
+
         // Double confirmation
         if (!OutputHelpers.ConfirmDestructive("factory reset the FIDO2 application"))
         {
@@ -46,11 +64,15 @@ public static class ResetMenu
             return;
         }
 
+        var touchInstruction = preflight?.LongTouchForReset == true
+            ? "Press and hold for 10 seconds after re-inserting"
+            : "Touch your YubiKey after re-inserting";
+
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[yellow]To perform the reset:[/]");
         AnsiConsole.MarkupLine("[yellow]  1. Remove your YubiKey[/]");
         AnsiConsole.MarkupLine("[yellow]  2. Re-insert your YubiKey[/]");
-        AnsiConsole.MarkupLine("[yellow]  3. Touch your YubiKey within 5 seconds[/]");
+        AnsiConsole.MarkupLine($"[yellow]  3. {touchInstruction}[/]");
         AnsiConsole.WriteLine();
 
         if (!AnsiConsole.Confirm("Ready to proceed?", defaultValue: false))
@@ -59,7 +81,7 @@ public static class ResetMenu
             return;
         }
 
-        AnsiConsole.MarkupLine("[yellow]Waiting for device re-insertion...[/]");
+        AnsiConsole.MarkupLine("[yellow]Remove your YubiKey now...[/]");
         AnsiConsole.MarkupLine("[grey]Press Enter after re-inserting your YubiKey.[/]");
         Console.ReadLine();
 
@@ -71,7 +93,12 @@ public static class ResetMenu
             return;
         }
 
-        OutputHelpers.PromptForTouch();
+        // Query preflight from the reinserted device for the accurate touch message
+        var reinsertedPreflight = await ResetAuthenticator.GetPreflightInfoAsync(
+            newSelection.Device, cancellationToken);
+
+        var touchMsg = reinsertedPreflight?.TouchMessage ?? "Touch your YubiKey to confirm.";
+        AnsiConsole.MarkupLine($"[yellow]{Markup.Escape(touchMsg)}[/]");
 
         var result = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)

@@ -19,7 +19,7 @@ using Yubico.YubiKit.Core.SmartCard.Scp;
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
-public abstract class ApplicationSession : IApplicationSession
+public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 {
     private bool _disposed;
 

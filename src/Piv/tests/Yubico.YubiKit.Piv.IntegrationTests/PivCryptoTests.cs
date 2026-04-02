@@ -286,6 +286,7 @@ public class PivCryptoTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
+    [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task SignOrDecryptAsync_Rsa3072Sign_ProducesValidSignature(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -318,6 +319,7 @@ public class PivCryptoTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
+    [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task SignOrDecryptAsync_Rsa4096Sign_ProducesValidSignature(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();

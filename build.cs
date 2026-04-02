@@ -38,6 +38,7 @@
  *   --filter <expression>          Test filter expression (e.g., "FullyQualifiedName~MyTest")
  *   --project <name>               Build/test specific project only (partial match)
  *   --integration                  Include integration tests (requires --project, unit tests only by default)
+ *   --smoke                        Smoke test mode: skip Slow and RequiresUserPresence tests
  *
  * EXAMPLES:
  *   dotnet build.cs build
@@ -45,6 +46,7 @@
  *   dotnet build.cs test
  *   dotnet build.cs test --filter "FullyQualifiedName~MyTestClass"
  *   dotnet build.cs test --project Piv --filter "Method~Sign"
+ *   dotnet build.cs -- test --integration --project Piv --smoke   (quick integration smoke test)
  *   dotnet build.cs coverage
  *   dotnet build.cs publish --package-version 1.0.0-preview.1
  *   dotnet build.cs -- --help
@@ -101,36 +103,21 @@ var includeDocs = HasFlag("--include-docs");
 var dryRun = HasFlag("--dry-run");
 var shouldClean = HasFlag("--clean");
 var testFilter = GetArgument("--filter");
-var testProject = GetArgument("--project");
+var projectFilter = GetArgument("--project");
 var includeIntegration = HasFlag("--integration");
+var smokeTest = HasFlag("--smoke");
+
+// --smoke injects trait filters to skip slow and user-presence tests
+if (smokeTest)
+{
+    var smokeFilter = "Category!=Slow&Category!=RequiresUserPresence";
+    testFilter = string.IsNullOrEmpty(testFilter) ? smokeFilter : $"{testFilter}&{smokeFilter}";
+}
 
 // Dynamically discover projects using glob patterns
-
-// Projects to pack - all Yubico.YubiKit.*/src/*.csproj
-var packableProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDirectories)
-    .Where(p => p.Contains($"{Path.DirectorySeparatorChar}src{Path.DirectorySeparatorChar}") &&
-                p.Contains("Yubico.YubiKit."))
-    .Select(p => Path.GetRelativePath(repoRoot, p))
-    .OrderBy(p => p)
-    .ToArray();
-
-// Unit test projects - all Yubico.YubiKit.*.UnitTests/*.csproj
-var unitTestProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDirectories)
-    .Where(p => p.Contains($"{Path.DirectorySeparatorChar}tests{Path.DirectorySeparatorChar}") &&
-                p.Contains(".UnitTests") &&
-                p.Contains("Yubico.YubiKit."))
-    .Select(p => Path.GetRelativePath(repoRoot, p))
-    .OrderBy(p => p)
-    .ToArray();
-
-// Integration test projects - all Yubico.YubiKit.*.IntegrationTests/*.csproj
-var integrationTestProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDirectories)
-    .Where(p => p.Contains($"{Path.DirectorySeparatorChar}tests{Path.DirectorySeparatorChar}") &&
-                p.Contains(".IntegrationTests") &&
-                p.Contains("Yubico.YubiKit."))
-    .Select(p => Path.GetRelativePath(repoRoot, p))
-    .OrderBy(p => p)
-    .ToArray();
+var packableProjects = DiscoverProjects("src", "Yubico.YubiKit.");
+var unitTestProjects = DiscoverProjects("tests", ".UnitTests", "Yubico.YubiKit.");
+var integrationTestProjects = DiscoverProjects("tests", ".IntegrationTests", "Yubico.YubiKit.");
 
 var testProjects = includeIntegration
     ? [..unitTestProjects, ..integrationTestProjects]
@@ -172,16 +159,16 @@ Target("build", () =>
 {
     PrintHeader("Building");
 
-    if (!string.IsNullOrEmpty(testProject))
+    if (!string.IsNullOrEmpty(projectFilter))
     {
         var matchingProjects = packableProjects
             .Where(p => Path.GetFileNameWithoutExtension(p)
-                .Contains(testProject, StringComparison.OrdinalIgnoreCase))
+                .Contains(projectFilter, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         if (matchingProjects.Count == 0)
         {
-            PrintNoProjectsFound(testProject, packableProjects);
+            PrintNoProjectsFound(projectFilter, packableProjects);
             return;
         }
 
@@ -191,7 +178,7 @@ Target("build", () =>
             Run("dotnet", $"build {project} -c {configuration}");
         }
 
-        PrintInfo($"Built {matchingProjects.Count} project(s) matching '{testProject}'");
+        PrintInfo($"Built {matchingProjects.Count} project(s) matching '{projectFilter}'");
     }
     else
     {
@@ -203,7 +190,7 @@ Target("build", () =>
 Target("test", () =>
 {
     // --integration requires --project to prevent accidentally running all integration tests
-    if (includeIntegration && string.IsNullOrEmpty(testProject))
+    if (includeIntegration && string.IsNullOrEmpty(projectFilter))
     {
         PrintColored("Error: --integration requires --project to specify which module to test.", ConsoleColor.Red);
         Console.WriteLine("Example: dotnet build.cs test --integration --project Piv");
@@ -214,7 +201,7 @@ Target("test", () =>
 
     PrintHeader(includeIntegration ? "Running unit + integration tests" : "Running unit tests");
 
-    var projectsToTest = FilterToProject(testProjectInfos, testProject);
+    var projectsToTest = FilterToProject(testProjectInfos, projectFilter);
     if (projectsToTest is null)
         return;
 
@@ -230,15 +217,18 @@ Target("coverage", () =>
 {
     PrintHeader("Running tests with coverage");
 
-    // NOTE: Coverage uses dotnet test directly and only runs xUnit v2 unit test projects.
-    // Projects using Microsoft.Testing.Platform (UseMicrosoftTestingPlatformRunner=true)
-    // require different tooling for coverage collection and are excluded here.
+    // Coverage uses dotnet test with coverlet. Both xUnit v2 and v3 (MTP) projects support
+    // this via the VSTest compatibility layer, so all unit test projects are included.
     var coverageResultsDir = Path.Combine(artifactsDir, "coverage");
     Directory.CreateDirectory(coverageResultsDir);
 
+    var projectsToCover = FilterProjectsByName(unitTestProjects, projectFilter);
+    if (projectsToCover is null)
+        return;
+
     var results = new List<(string Project, bool Passed, string? Error)>();
 
-    foreach (var project in unitTestProjects)
+    foreach (var project in projectsToCover)
     {
         var projectName = Path.GetFileNameWithoutExtension(project);
         Console.WriteLine($"\n{'='} Running coverage for: {projectName} {'='}");
@@ -364,7 +354,7 @@ if (args.Contains("--help") || args.Contains("-h"))
 // Run Bullseye — strip all custom args so Bullseye only sees target names and its own flags
 var bullseyeArgs = FilterBullseyeArgs(args,
     optionsWithValues: ["--project", "--filter", "--package-version", "--nuget-feed-name", "--nuget-feed-path"],
-    flags: ["--integration", "--include-docs", "--dry-run", "--clean"]);
+    flags: ["--integration", "--include-docs", "--dry-run", "--clean", "--smoke"]);
 await RunTargetsAndExitAsync(bullseyeArgs);
 
 // ─── Helper functions ──────────────────────────────────────────────────────────
@@ -451,9 +441,11 @@ List<(string Project, bool Passed, string? Error)> RunTestProjects(
                 command = $"run --project {projectPath} -c {configuration}";
                 if (!string.IsNullOrEmpty(testFilter))
                 {
-                    var mtpFilter = TranslateToMtpFilter(testFilter);
-                    // --minimum-expected-tests 0 prevents failure when no tests match the filter
-                    command += $" -- --minimum-expected-tests 0 {mtpFilter}";
+                    var (mtpFilter, hasPositiveFilters) = TranslateToMtpFilter(testFilter);
+                    // --minimum-expected-tests is incompatible with exclusion-only simple filters
+                    // (--filter-not-trait, etc.) in the MTP runner — only add for positive filters.
+                    var minTests = hasPositiveFilters ? " --minimum-expected-tests 0" : "";
+                    command += $" --{minTests} {mtpFilter}";
                 }
             }
             else
@@ -551,6 +543,7 @@ OPTIONS:
   --filter <expression>          Test filter expression (e.g., ""FullyQualifiedName~MyTest"")
   --project <name>               Build/test specific project only (partial match)
   --integration                  Include integration tests (requires --project)
+  --smoke                        Smoke test mode: skip Slow and RequiresUserPresence tests
   -h, --help                     Show this help message
 
 EXAMPLES:
@@ -559,6 +552,7 @@ EXAMPLES:
   dotnet build.cs test
   dotnet build.cs test --filter ""FullyQualifiedName~MyTestClass""
   dotnet build.cs test --project Piv --filter ""Method~Sign""
+  dotnet build.cs -- test --integration --project Piv --smoke
   dotnet build.cs coverage
   dotnet build.cs publish --package-version 1.0.0-preview.1
   dotnet build.cs -- --help
@@ -591,10 +585,13 @@ static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPa
 
 // Translates a VSTest-style --filter expression to xUnit v3 MTP native filter arguments.
 // Supports: FullyQualifiedName~X, Method~X, Category!=X, Category=X, and '&' compounds.
-static string TranslateToMtpFilter(string vstestFilter)
+// Returns (filter args string, whether any positive/inclusion filters are present).
+// MTP runner does not allow --minimum-expected-tests alongside exclusion-only simple filters.
+static (string Args, bool HasPositiveFilters) TranslateToMtpFilter(string vstestFilter)
 {
     var parts = vstestFilter.Split('&');
     var mtpArgs = new List<string>();
+    var hasPositiveFilters = false;
 
     foreach (var part in parts)
     {
@@ -609,6 +606,7 @@ static string TranslateToMtpFilter(string vstestFilter)
         // FullyQualifiedName~Value or Name~Value or Method~Value → --filter-method "*Value*"
         else if (trimmed.Contains('~'))
         {
+            hasPositiveFilters = true;
             var segments = trimmed.Split('~', 2);
             var property = segments[0].Trim();
             var value = segments[1].Trim();
@@ -622,6 +620,7 @@ static string TranslateToMtpFilter(string vstestFilter)
         // Category=Value → --filter-trait "Category=Value"
         else if (trimmed.Contains('='))
         {
+            hasPositiveFilters = true;
             var segments = trimmed.Split('=', 2);
             var property = segments[0].Trim();
             var value = segments[1].Trim();
@@ -633,12 +632,43 @@ static string TranslateToMtpFilter(string vstestFilter)
         }
         else
         {
+            hasPositiveFilters = true;
             // Unrecognized pattern — pass as-is to --filter-method with wildcards
             mtpArgs.Add($"--filter-method \"*{trimmed}*\"");
         }
     }
 
-    return string.Join(" ", mtpArgs);
+    return (string.Join(" ", mtpArgs), hasPositiveFilters);
+}
+
+string[] DiscoverProjects(string subdirectory, string nameFilter, string? additionalFilter = null) =>
+    Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDirectories)
+        .Where(p => p.Contains($"{Path.DirectorySeparatorChar}{subdirectory}{Path.DirectorySeparatorChar}") &&
+                    p.Contains(nameFilter) &&
+                    (additionalFilter is null || p.Contains(additionalFilter)) &&
+                    !p.Contains($"{Path.DirectorySeparatorChar}.claude{Path.DirectorySeparatorChar}"))
+        .Select(p => Path.GetRelativePath(repoRoot, p))
+        .OrderBy(p => p)
+        .ToArray();
+
+// Returns null when no projects matched and an error was already printed (caller should return early).
+List<string>? FilterProjectsByName(string[] projects, string? filter)
+{
+    if (string.IsNullOrEmpty(filter))
+        return [..projects];
+
+    var matched = projects
+        .Where(p => Path.GetFileNameWithoutExtension(p)
+            .Contains(filter, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    if (matched.Count > 0)
+        return matched;
+
+    PrintColored($"⚠ No projects match '{filter}'", ConsoleColor.Yellow);
+    Console.WriteLine("Available projects:");
+    PrintProjectList(projects);
+    return null;
 }
 
 string[] FilterBullseyeArgs(string[] args, string[] optionsWithValues, string[] flags)

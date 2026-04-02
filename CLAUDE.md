@@ -1146,6 +1146,21 @@ bool isValid = expected.SequenceEqual(actual);
 
 ## Testing
 
+### Integration Test Strategy
+
+**Run only what's affected.** Don't run the full integration suite unless you're finishing a module or touching shared infrastructure.
+
+| Phase | What to run | Command |
+|-------|------------|---------|
+| **During development** | Smoke test on affected module only | `dotnet build.cs -- test --integration --project Piv --smoke` |
+| **Targeted check** | Specific test you touched | `dotnet build.cs -- test --integration --project Oath --filter "FullyQualifiedName~Calculate"` |
+| **Finishing a module** | Full integration for that module | `dotnet build.cs -- test --integration --project Piv` |
+| **Before PR** | Full integration for all affected modules | Run per-module, not all modules |
+
+**`--smoke` skips:** `Slow` tests (RSA 3072/4096 keygen, 30+ sec each) and `RequiresUserPresence` tests (need physical touch).
+
+**Mark slow tests:** Any integration test that generates RSA 3072+ keys or has delays >5s must have `[Trait(TestCategories.Category, TestCategories.Slow)]`.
+
 ### Test Philosophy: Value Over Coverage
 
 **CRITICAL: Only write tests that provide real value. Don't create tests just to increase coverage metrics.**

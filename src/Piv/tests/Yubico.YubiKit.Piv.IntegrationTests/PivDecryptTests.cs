@@ -143,6 +143,7 @@ public class PivDecryptTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
+    [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task DecryptAsync_Rsa4096Pkcs1_ReturnsExactPlaintext(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();

@@ -39,6 +39,42 @@ dotnet build.cs test --filter "Method~Sign"
 dotnet build.cs test --project Piv --filter "Method~Sign"
 ```
 
+## Integration Test Strategy
+
+Integration tests require a physical YubiKey and can be slow (especially RSA keygen). Follow this tiered approach:
+
+### During Development
+
+Run integration tests **only for the module you changed**:
+
+```bash
+# Quick smoke test — skips slow keygen and user-presence tests
+dotnet build.cs -- test --integration --project Piv --smoke
+
+# Targeted test for a specific method you touched
+dotnet build.cs -- test --integration --project Oath --filter "FullyQualifiedName~CalculateAll"
+```
+
+### When Finishing a Module
+
+Run the **full integration suite** for the affected module (no `--smoke`):
+
+```bash
+dotnet build.cs -- test --integration --project Piv
+```
+
+### Before PR / Final Validation
+
+Run full integration for all affected modules. You do **not** need to run all modules unless changes touch Core or shared infrastructure.
+
+### What `--smoke` Skips
+
+The `--smoke` flag excludes tests with these traits:
+- **`Slow`** — RSA 3072/4096 key generation (30+ seconds each), long delays
+- **`RequiresUserPresence`** — Tests needing physical touch or device insert/remove
+
+This typically cuts PIV integration time from ~4 minutes to under 1 minute.
+
 ## Common Mistakes
 
 ```bash

@@ -146,7 +146,7 @@ var credential = new Credential {
     Digits = 6,
     Secret = "HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ",
     RequireTouch = false
-}
+};
 
 // create HOTP credential
 var credential = new Credential {

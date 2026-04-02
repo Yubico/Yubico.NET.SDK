@@ -86,7 +86,7 @@ internal class PcscProtocol : ISmartCardProtocol
         ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogTrace("Selecting application ID: {ApplicationId}", Convert.ToHexString(applicationId.ToArray()));
+        _logger.LogTrace("Selecting application ID: {ApplicationId}", Convert.ToHexString(applicationId.Span));
 
         var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };
         var response = await _processor.TransmitAsync(selectCommand, false, cancellationToken).ConfigureAwait(false);

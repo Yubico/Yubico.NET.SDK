@@ -161,7 +161,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         {
             _logger.LogError("CTAPHID_INIT nonce mismatch. Sent: {SentNonce}, Received: {ReceivedNonce}",
                 Convert.ToHexString(nonce),
-                Convert.ToHexString(receivedNonce.ToArray()));
+                Convert.ToHexString(receivedNonce));
             throw new InvalidOperationException("CTAPHID_INIT nonce mismatch");
         }
 

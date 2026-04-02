@@ -123,8 +123,8 @@ public class DisposableTlvListTests
     public void Dispose_CascadesToItems_ZeroesAndResetsState()
     {
         // Arrange
-        var tlv1 = new Tlv(0x5A, new byte[] { 0xAA, 0xBB });
-        var tlv2 = new Tlv(0x9F33, new byte[] { 0xCC });
+        var tlv1 = new Tlv(0x5A, [0xAA, 0xBB]);
+        var tlv2 = new Tlv(0x9F33, [0xCC]);
 
         // Sanity: pre-dispose values are non-zero
         Assert.False(tlv1.AsSpan().ToArray().All(b => b == 0));
@@ -150,8 +150,8 @@ public class DisposableTlvListTests
     public void Dispose_IsIdempotent_OnCollection()
     {
         // Arrange
-        var tlv1 = new Tlv(0x01, new byte[] { 0x11 });
-        var tlv2 = new Tlv(0x02, new byte[] { 0x22 });
+        var tlv1 = new Tlv(0x01, [0x11]);
+        var tlv2 = new Tlv(0x02, [0x22]);
 
         using var collection = new DisposableTlvList(tlv1, tlv2);
 
@@ -170,8 +170,8 @@ public class DisposableTlvListTests
     public void Enumerate_AfterDispose_ItemsAreZeroed_NoThrow()
     {
         // Arrange
-        var tlv1 = new Tlv(0x10, new byte[] { 0x01, 0x02 });
-        var tlv2 = new Tlv(0x11, new byte[] { 0x03 });
+        var tlv1 = new Tlv(0x10, [0x01, 0x02]);
+        var tlv2 = new Tlv(0x11, [0x03]);
         var collection = new DisposableTlvList(tlv1, tlv2);
 
         // Act

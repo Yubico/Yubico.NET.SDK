@@ -248,5 +248,5 @@ public sealed class Tlv : IDisposable
     ///     </para>
     /// </remarks>
     public override string ToString() =>
-        $"Tlv(0x{Tag:X}, {Length}, {BitConverter.ToString(Value.ToArray()).Replace("-", "", StringComparison.Ordinal)})";
+        $"Tlv(0x{Tag:X}, {Length}, {Convert.ToHexString(Value.Span)})";
 }

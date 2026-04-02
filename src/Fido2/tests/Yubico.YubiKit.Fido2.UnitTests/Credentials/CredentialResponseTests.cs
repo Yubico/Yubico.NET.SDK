@@ -130,7 +130,7 @@ public class CredentialResponseTests
             writer.WriteTextString("type");
             writer.WriteTextString("public-key");
             writer.WriteTextString("id");
-            writer.WriteByteString(new byte[] { 0x01, 0x02, 0x03, 0x04 });
+            writer.WriteByteString([0x01, 0x02, 0x03, 0x04]);
             writer.WriteEndMap();
         }
         
@@ -141,7 +141,7 @@ public class CredentialResponseTests
         
         // 0x03: signature
         writer.WriteInt32(3);
-        writer.WriteByteString(new byte[] { 0x30, 0x44 }); // Minimal signature
+        writer.WriteByteString([0x30, 0x44]); // Minimal signature
         
         // 0x04: user (optional)
         if (includeUser)
@@ -149,7 +149,7 @@ public class CredentialResponseTests
             writer.WriteInt32(4);
             writer.WriteStartMap(3);
             writer.WriteTextString("id");
-            writer.WriteByteString(new byte[] { 0xAA, 0xBB });
+            writer.WriteByteString([0xAA, 0xBB]);
             writer.WriteTextString("name");
             writer.WriteTextString("testuser");
             writer.WriteTextString("displayName");

@@ -249,7 +249,7 @@ public class LargeBlobDataTests
         // Arrange
         var array = LargeBlobArray.CreateEmpty();
         var key = CreateRandomKey();
-        var entry = LargeBlobEntry.Encrypt(key, new byte[] { 0x01 });
+        var entry = LargeBlobEntry.Encrypt(key, [0x01]);
         
         // Act
         var newArray = array.WithEntry(entry);
@@ -264,7 +264,7 @@ public class LargeBlobDataTests
     {
         // Arrange
         var key = CreateRandomKey();
-        var entry = LargeBlobEntry.Encrypt(key, new byte[] { 0x01 });
+        var entry = LargeBlobEntry.Encrypt(key, [0x01]);
         var array = new LargeBlobArray { Entries = [entry] };
         
         // Act
@@ -309,7 +309,7 @@ public class LargeBlobDataTests
         // Arrange
         var key1 = CreateRandomKey();
         var key2 = CreateRandomKey();
-        var entry = LargeBlobEntry.Encrypt(key1, new byte[] { 0x01 });
+        var entry = LargeBlobEntry.Encrypt(key1, [0x01]);
         var array = new LargeBlobArray { Entries = [entry] };
         
         // Act

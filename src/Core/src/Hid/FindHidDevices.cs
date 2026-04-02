@@ -48,7 +48,7 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
         return yubicoDevices;
     }
 
-    private static IReadOnlyList<IHidDevice> GetPlatformDevices()
+    private IReadOnlyList<IHidDevice> GetPlatformDevices()
     {
         if (OperatingSystem.IsMacOS())
         {
@@ -69,8 +69,18 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
         MacOSHidDevice.GetList();
 
     [SupportedOSPlatform("linux")]
-    private static IReadOnlyList<IHidDevice> FindAllLinux() =>
-        LinuxHidDevice.GetList();
+    private IReadOnlyList<IHidDevice> FindAllLinux()
+    {
+        try
+        {
+            return LinuxHidDevice.GetList();
+        }
+        catch (DllNotFoundException ex)
+        {
+            logger.LogWarning("udev native library not available, returning no HID devices: {Message}", ex.Message);
+            return [];
+        }
+    }
 
     public static FindHidDevices Create(ILogger<FindHidDevices>? logger = null) =>
         new(logger ?? NullLogger<FindHidDevices>.Instance);

@@ -33,7 +33,7 @@ jobs:
       - name: Install PC/SC dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends pcscd libpcsclite-dev
+          sudo apt-get install -y --no-install-recommends pcscd libpcsclite-dev libudev-dev
           # Run pcscd directly (bypasses systemd/socket-activation issues on CI runners)
           # and open socket permissions so the test runner user can connect
           sudo mkdir -p /run/pcscd

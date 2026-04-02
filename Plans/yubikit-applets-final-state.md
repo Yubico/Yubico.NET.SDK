@@ -149,7 +149,7 @@ Touch the YubiKey when it blinks (~2–3 seconds after test starts).
 | **#30** | FidoTool reset (`reset --force`) | Actionable today | Interactive: user must remove YubiKey, reinsert, hold touch for 10s within the window. See commands below. |
 | **#28** | OpenPGP VerifyPin P2 mode | Blocked | Needs production firmware (non-alpha). Current alpha has different P2=0x82 behavior |
 | **#1** | Management as authoritative firmware version | Future design | Workaround (Major==0 sentinel) shipped. Real fix: query Management on session init when applet reports 0.0.1 |
-| **#12** | CLI shared infrastructure extraction | Future refactor | All 5 CLIs normalized to same pattern but code not extracted to shared project |
+| **#12** | CLI shared infrastructure extraction | Future refactor | DevTeam review complete → `Plans/cli-shared-infrastructure.md`. ~2600 LOC duplication across 5 CLIs, 4-phase extraction plan, 9-13 hours estimated. |
 
 ---
 

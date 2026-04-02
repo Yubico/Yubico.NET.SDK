@@ -3,6 +3,9 @@
 
 namespace Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 
+// OathTool intentionally uses plain-text output (no Spectre.Console) for pipe-safe operation.
+// It does NOT delegate to Yubico.YubiKit.Cli.Shared.Output.OutputHelpers by design.
+
 /// <summary>
 /// Provides plain-text formatting utilities for consistent CLI output.
 /// No Spectre.Console dependency - works in pipes and non-interactive terminals.

@@ -13,172 +13,72 @@
 // limitations under the License.
 
 using Spectre.Console;
+using SharedOutput = Yubico.YubiKit.Cli.Shared.Output.OutputHelpers;
+using SharedConfirm = Yubico.YubiKit.Cli.Shared.Output.ConfirmationPrompts;
+using SharedPin = Yubico.YubiKit.Cli.Shared.Output.PinPrompt;
 
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Output;
 
 /// <summary>
 /// Provides Spectre.Console formatting utilities for consistent FIDO2 tool output.
+/// Delegates common methods to the shared CLI library.
 /// </summary>
 public static class OutputHelpers
 {
-    /// <summary>
-    /// Displays a section header with a rule.
-    /// </summary>
-    public static void WriteHeader(string title)
-    {
-        AnsiConsole.WriteLine();
-        AnsiConsole.Write(new Rule($"[green]{Markup.Escape(title)}[/]").LeftJustified());
-        AnsiConsole.WriteLine();
-    }
+    // ── Delegated to shared library ──────────────────────────────────────────
 
-    /// <summary>
-    /// Displays a success message.
-    /// </summary>
-    public static void WriteSuccess(string message)
-    {
-        AnsiConsole.MarkupLine($"[green]✓[/] {Markup.Escape(message)}");
-    }
+    /// <inheritdoc cref="SharedOutput.WriteHeader"/>
+    public static void WriteHeader(string title) => SharedOutput.WriteHeader(title);
 
-    /// <summary>
-    /// Displays an error message.
-    /// </summary>
-    public static void WriteError(string message)
-    {
-        AnsiConsole.MarkupLine($"[red]✗[/] {Markup.Escape(message)}");
-    }
+    /// <inheritdoc cref="SharedOutput.WriteSuccess"/>
+    public static void WriteSuccess(string message) => SharedOutput.WriteSuccess(message);
 
-    /// <summary>
-    /// Displays a warning message.
-    /// </summary>
-    public static void WriteWarning(string message)
-    {
-        AnsiConsole.MarkupLine($"[yellow]⚠[/] {Markup.Escape(message)}");
-    }
+    /// <inheritdoc cref="SharedOutput.WriteError"/>
+    public static void WriteError(string message) => SharedOutput.WriteError(message);
 
-    /// <summary>
-    /// Displays an info message.
-    /// </summary>
-    public static void WriteInfo(string message)
-    {
-        AnsiConsole.MarkupLine($"[blue]ℹ[/] {Markup.Escape(message)}");
-    }
+    /// <inheritdoc cref="SharedOutput.WriteWarning"/>
+    public static void WriteWarning(string message) => SharedOutput.WriteWarning(message);
 
-    /// <summary>
-    /// Displays a key-value pair.
-    /// </summary>
-    public static void WriteKeyValue(string key, string? value)
-    {
-        AnsiConsole.MarkupLine($"  [grey]{Markup.Escape(key)}:[/] {Markup.Escape(value ?? "N/A")}");
-    }
+    /// <inheritdoc cref="SharedOutput.WriteInfo"/>
+    public static void WriteInfo(string message) => SharedOutput.WriteInfo(message);
 
-    /// <summary>
-    /// Displays a key-value pair with markup in the value.
-    /// </summary>
-    public static void WriteKeyValueMarkup(string key, string valueMarkup)
-    {
-        AnsiConsole.MarkupLine($"  [grey]{Markup.Escape(key)}:[/] {valueMarkup}");
-    }
+    /// <inheritdoc cref="SharedOutput.WriteKeyValue"/>
+    public static void WriteKeyValue(string key, string? value) => SharedOutput.WriteKeyValue(key, value);
 
-    /// <summary>
-    /// Displays a touch prompt for operations requiring user presence.
-    /// </summary>
-    public static void WriteTouchPrompt()
-    {
-        AnsiConsole.MarkupLine("[yellow]Touch your YubiKey now...[/]");
-    }
+    /// <inheritdoc cref="SharedOutput.WriteKeyValueMarkup"/>
+    public static void WriteKeyValueMarkup(string key, string valueMarkup) =>
+        SharedOutput.WriteKeyValueMarkup(key, valueMarkup);
+
+    /// <inheritdoc cref="SharedOutput.PromptForTouch"/>
+    public static void PromptForTouch() => SharedOutput.PromptForTouch();
 
     /// <summary>
     /// Displays bytes as a hex string.
     /// </summary>
-    public static void WriteHex(string label, ReadOnlyMemory<byte> data)
-    {
-        AnsiConsole.MarkupLine($"  [grey]{Markup.Escape(label)}:[/] {Convert.ToHexString(data.Span)}");
-    }
+    public static void WriteHex(string label, ReadOnlyMemory<byte> data) =>
+        SharedOutput.WriteHex(label, data);
 
-    /// <summary>
-    /// Creates a panel with a title.
-    /// </summary>
-    public static Panel CreatePanel(string title, string content) =>
-        new Panel(content)
-            .Header($"[green]{Markup.Escape(title)}[/]")
-            .Border(BoxBorder.Rounded)
-            .Padding(1, 0);
+    /// <inheritdoc cref="SharedOutput.CreatePanel"/>
+    public static Panel CreatePanel(string title, string content) => SharedOutput.CreatePanel(title, content);
 
-    /// <summary>
-    /// Creates a table with standard styling.
-    /// </summary>
-    public static Table CreateTable(params string[] columns)
-    {
-        var table = new Table()
-            .Border(TableBorder.Rounded)
-            .BorderColor(Color.Grey);
+    /// <inheritdoc cref="SharedOutput.CreateTable"/>
+    public static Table CreateTable(params string[] columns) => SharedOutput.CreateTable(columns);
 
-        foreach (var column in columns)
-        {
-            table.AddColumn(new TableColumn($"[green]{Markup.Escape(column)}[/]"));
-        }
+    /// <inheritdoc cref="SharedOutput.WriteActiveDevice"/>
+    public static void WriteActiveDevice(string deviceDisplayName) =>
+        SharedOutput.WriteActiveDevice(deviceDisplayName);
 
-        return table;
-    }
+    /// <inheritdoc cref="SharedOutput.WriteBoolValue"/>
+    public static void WriteBoolValue(string label, bool value, string? trueText = null, string? falseText = null) =>
+        SharedOutput.WriteBoolValue(label, value, trueText, falseText);
 
-    /// <summary>
-    /// Displays a confirmation prompt with clear warning styling.
-    /// </summary>
-    public static bool ConfirmDangerous(string action)
-    {
-        AnsiConsole.MarkupLine($"[red bold]WARNING:[/] This will {Markup.Escape(action)}.");
-        AnsiConsole.MarkupLine("[red]This action cannot be undone.[/]");
-        AnsiConsole.WriteLine();
+    /// <inheritdoc cref="SharedConfirm.ConfirmDangerous"/>
+    public static bool ConfirmDangerous(string action) => SharedConfirm.ConfirmDangerous(action);
 
-        return AnsiConsole.Confirm("[red]Are you sure you want to proceed?[/]", defaultValue: false);
-    }
+    /// <inheritdoc cref="SharedConfirm.ConfirmDestructive"/>
+    public static bool ConfirmDestructive(string action, string confirmationWord = "RESET") =>
+        SharedConfirm.ConfirmDestructive(action, confirmationWord);
 
-    /// <summary>
-    /// Displays a double-confirmation for extremely dangerous operations (e.g., FIDO2 reset).
-    /// </summary>
-    public static bool ConfirmDestructive(string action, string confirmationWord = "RESET")
-    {
-        AnsiConsole.MarkupLine("[red bold]⚠️  DANGER ⚠️[/]");
-        AnsiConsole.MarkupLine($"[red]This will {Markup.Escape(action)}.[/]");
-        AnsiConsole.MarkupLine("[red]ALL CREDENTIALS AND SETTINGS WILL BE PERMANENTLY LOST.[/]");
-        AnsiConsole.WriteLine();
-
-        if (!AnsiConsole.Confirm("[red]Are you absolutely sure?[/]", defaultValue: false))
-        {
-            return false;
-        }
-
-        AnsiConsole.WriteLine();
-        var input = AnsiConsole.Ask<string>($"Type '[yellow]{confirmationWord}[/]' to confirm:");
-
-        return string.Equals(input, confirmationWord, StringComparison.Ordinal);
-    }
-
-    /// <summary>
-    /// Displays the currently active device with serial number.
-    /// </summary>
-    public static void WriteActiveDevice(string deviceDisplayName)
-    {
-        AnsiConsole.MarkupLine($"[blue]🔑 Using:[/] [cyan]{Markup.Escape(deviceDisplayName)}[/]");
-        AnsiConsole.WriteLine();
-    }
-
-    /// <summary>
-    /// Displays a boolean value with color coding.
-    /// </summary>
-    public static void WriteBoolValue(string label, bool value, string? trueText = null, string? falseText = null)
-    {
-        var text = value ? (trueText ?? "Yes") : (falseText ?? "No");
-        var color = value ? "green" : "grey";
-        WriteKeyValueMarkup(label, $"[{color}]{Markup.Escape(text)}[/]");
-    }
-
-    /// <summary>
-    /// Prompts the user for a PIN interactively with masked input.
-    /// Used when --pin is not provided on the command line.
-    /// </summary>
-    public static string PromptForPin(string label = "PIN") =>
-        AnsiConsole.Prompt(
-            new TextPrompt<string>($"{label}:")
-                .Secret());
+    /// <inheritdoc cref="SharedPin.PromptForPin"/>
+    public static string PromptForPin(string label = "PIN") => SharedPin.PromptForPin(label);
 }

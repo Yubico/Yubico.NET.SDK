@@ -2,36 +2,12 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
+using Yubico.YubiKit.Cli.Shared.Device;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Prompts;
-
-/// <summary>
-/// Represents a selected YubiKey device with its identifying information.
-/// </summary>
-public record DeviceSelection(
-    IYubiKey Device,
-    int? SerialNumber,
-    FormFactor FormFactor,
-    string FirmwareVersion,
-    ConnectionType ConnectionType)
-{
-    /// <summary>
-    /// Gets a display string for this device.
-    /// </summary>
-    public string DisplayName =>
-        SerialNumber.HasValue
-            ? $"YubiKey {FormatFormFactor(FormFactor)} - S/N: {SerialNumber} ({FormatConnectionType(ConnectionType)})"
-            : $"YubiKey {FormatFormFactor(FormFactor)} ({FormatConnectionType(ConnectionType)})";
-
-    private static string FormatFormFactor(FormFactor formFactor) =>
-        DeviceSelector.FormatFormFactor(formFactor);
-
-    private static string FormatConnectionType(ConnectionType connectionType) =>
-        DeviceSelector.FormatConnectionType(connectionType);
-}
 
 /// <summary>
 /// Handles YubiKey device discovery and selection for OpenPGP operations.
@@ -63,7 +39,7 @@ public static class DeviceSelector
                 device.ConnectionType);
         }
 
-        // Multiple devices — in non-interactive mode, auto-select first device
+        // Multiple devices -- in non-interactive mode, auto-select first device
         if (!AnsiConsole.Profile.Capabilities.Interactive)
         {
             var first = devices[0];
@@ -117,7 +93,13 @@ public static class DeviceSelector
         return [];
     }
 
-    private static async Task<Management.DeviceInfo?> GetDeviceInfoAsync(
+    /// <summary>Formats form factor for display.</summary>
+    public static string FormatFormFactor(FormFactor formFactor) => FormFactorFormatter.Format(formFactor);
+
+    /// <summary>Formats connection type for display.</summary>
+    public static string FormatConnectionType(ConnectionType connectionType) => ConnectionTypeFormatter.Format(connectionType);
+
+    private static async Task<DeviceInfo?> GetDeviceInfoAsync(
         IYubiKey device,
         CancellationToken cancellationToken)
     {
@@ -135,7 +117,7 @@ public static class DeviceSelector
         IReadOnlyList<IYubiKey> devices,
         CancellationToken cancellationToken)
     {
-        var deviceInfos = new List<(IYubiKey Device, Management.DeviceInfo? Info)>();
+        var deviceInfos = new List<(IYubiKey Device, DeviceInfo? Info)>();
 
         await AnsiConsole.Status()
             .StartAsync("Querying device information...", async _ =>
@@ -182,47 +164,15 @@ public static class DeviceSelector
             selected.Device.ConnectionType);
     }
 
-    private static string FormatDeviceChoice(IYubiKey device, Management.DeviceInfo? info)
+    private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
     {
-        var transport = FormatConnectionType(device.ConnectionType);
+        var transport = ConnectionTypeFormatter.Format(device.ConnectionType);
 
         if (info is null)
         {
             return $"YubiKey ({transport})";
         }
 
-        var serial = info.Value.SerialNumber?.ToString() ?? "N/A";
-        var firmware = info.Value.FirmwareVersion.ToString();
-        var formFactor = FormatFormFactor(info.Value.FormFactor);
-
-        return $"YubiKey {formFactor} - Serial: {serial}, Firmware: {firmware} ({transport})";
+        return $"YubiKey {FormFactorFormatter.Format(info.Value.FormFactor)} - Serial: {info.Value.SerialNumber?.ToString() ?? "N/A"}, Firmware: {info.Value.FirmwareVersion} ({transport})";
     }
-
-    /// <summary>
-    /// Formats form factor for display.
-    /// </summary>
-    public static string FormatFormFactor(FormFactor formFactor) =>
-        formFactor switch
-        {
-            FormFactor.UsbAKeychain => "5A",
-            FormFactor.UsbANano => "5 Nano",
-            FormFactor.UsbCKeychain => "5C",
-            FormFactor.UsbCNano => "5C Nano",
-            FormFactor.UsbCLightning => "5Ci",
-            FormFactor.UsbABiometricKeychain => "Bio",
-            FormFactor.UsbCBiometricKeychain => "Bio (USB-C)",
-            _ => "Unknown"
-        };
-
-    /// <summary>
-    /// Formats connection type for display.
-    /// </summary>
-    public static string FormatConnectionType(ConnectionType connectionType) =>
-        connectionType switch
-        {
-            ConnectionType.SmartCard => "SmartCard",
-            ConnectionType.HidFido => "FIDO HID",
-            ConnectionType.HidOtp => "OTP HID",
-            _ => "Unknown"
-        };
 }

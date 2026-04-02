@@ -71,7 +71,7 @@ public static class ResetMenu
             return;
         }
 
-        OutputHelpers.WriteTouchPrompt();
+        OutputHelpers.PromptForTouch();
 
         var result = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)

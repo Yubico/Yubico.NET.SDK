@@ -236,7 +236,7 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
         return 1;
     }
 
-    OutputHelpers.WriteTouchPrompt();
+    OutputHelpers.PromptForTouch();
 
     var result = await ResetAuthenticator.ResetAsync(selection.Device, cancellationToken);
 

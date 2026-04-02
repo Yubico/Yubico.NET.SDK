@@ -53,7 +53,7 @@ public static class CredentialMenu
             "Using random clientDataHash for testing. In production, this must be the SHA-256 of the WebAuthn clientData JSON.");
         AnsiConsole.WriteLine();
 
-        OutputHelpers.WriteTouchPrompt();
+        OutputHelpers.PromptForTouch();
 
         var result = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
@@ -102,7 +102,7 @@ public static class CredentialMenu
             "Using random clientDataHash for testing. In production, this must be the SHA-256 of the WebAuthn clientData JSON.");
         AnsiConsole.WriteLine();
 
-        OutputHelpers.WriteTouchPrompt();
+        OutputHelpers.PromptForTouch();
 
         var result = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)

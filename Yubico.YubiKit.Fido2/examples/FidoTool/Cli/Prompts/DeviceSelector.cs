@@ -13,41 +13,12 @@
 // limitations under the License.
 
 using Spectre.Console;
+using Yubico.YubiKit.Cli.Shared.Device;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Prompts;
-
-/// <summary>
-/// Represents a selected YubiKey device with its identifying information.
-/// </summary>
-/// <param name="Device">The selected YubiKey device.</param>
-/// <param name="SerialNumber">The device serial number, if available.</param>
-/// <param name="FormFactor">The device form factor.</param>
-/// <param name="FirmwareVersion">The firmware version string.</param>
-/// <param name="ConnectionType">The connection type used to connect to this device.</param>
-public record DeviceSelection(
-    IYubiKey Device,
-    int? SerialNumber,
-    FormFactor FormFactor,
-    string FirmwareVersion,
-    ConnectionType ConnectionType)
-{
-    /// <summary>
-    /// Gets a display string for this device (e.g., "YubiKey 5C - S/N: 12345678 (FIDO HID)").
-    /// </summary>
-    public string DisplayName =>
-        SerialNumber.HasValue
-            ? $"YubiKey {FormatFormFactor(FormFactor)} - S/N: {SerialNumber} ({FormatConnectionType(ConnectionType)})"
-            : $"YubiKey {FormatFormFactor(FormFactor)} ({FormatConnectionType(ConnectionType)})";
-
-    private static string FormatFormFactor(FormFactor formFactor) =>
-        DeviceSelector.FormatFormFactor(formFactor);
-
-    private static string FormatConnectionType(ConnectionType connectionType) =>
-        DeviceSelector.FormatConnectionType(connectionType);
-}
 
 /// <summary>
 /// Handles YubiKey device discovery and selection for FIDO2 operations.
@@ -59,9 +30,6 @@ public record DeviceSelection(
 /// </remarks>
 public static class DeviceSelector
 {
-    /// <summary>
-    /// Connection types supported for FIDO2 operations.
-    /// </summary>
     private static readonly ConnectionType[] SupportedConnectionTypes =
     [
         ConnectionType.HidFido,
@@ -71,8 +39,6 @@ public static class DeviceSelector
     /// <summary>
     /// Finds all connected YubiKeys and allows user to select one.
     /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The selected YubiKey with device info, or null if none available or user cancelled.</returns>
     public static async Task<DeviceSelection?> SelectDeviceAsync(
         CancellationToken cancellationToken = default)
     {
@@ -113,9 +79,7 @@ public static class DeviceSelector
 
     /// <summary>
     /// Finds all connected YubiKeys, with retry prompt if none found.
-    /// Supports FIDO HID and SmartCard connection types.
     /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
     public static async Task<IReadOnlyList<IYubiKey>> FindDevicesWithRetryAsync(
         CancellationToken cancellationToken = default)
     {
@@ -124,7 +88,6 @@ public static class DeviceSelector
             var allDevices = await YubiKeyManager.FindAllAsync(
                 ConnectionType.All, cancellationToken: cancellationToken);
 
-            // Filter to supported connection types for FIDO2
             var devices = allDevices
                 .Where(d => SupportedConnectionTypes.Contains(d.ConnectionType))
                 .ToList();
@@ -135,7 +98,7 @@ public static class DeviceSelector
             }
 
             AnsiConsole.MarkupLine("[red]No YubiKey detected. Please insert a YubiKey and try again.[/]");
-            AnsiConsole.MarkupLine("[grey]Supported transports: FIDO HID (USB), SmartCard (NFC)[/]");
+            AnsiConsole.MarkupLine("[grey]FIDO2 supports: FIDO HID (USB), SmartCard (NFC)[/]");
 
             if (!AnsiConsole.Confirm("Retry?", defaultValue: true))
             {
@@ -146,9 +109,12 @@ public static class DeviceSelector
         return [];
     }
 
-    /// <summary>
-    /// Gets device info for a single device.
-    /// </summary>
+    /// <summary>Formats form factor for display.</summary>
+    public static string FormatFormFactor(FormFactor formFactor) => FormFactorFormatter.Format(formFactor);
+
+    /// <summary>Formats connection type for display.</summary>
+    public static string FormatConnectionType(ConnectionType connectionType) => ConnectionTypeFormatter.Format(connectionType);
+
     private static async Task<DeviceInfo?> GetDeviceInfoAsync(
         IYubiKey device,
         CancellationToken cancellationToken)
@@ -166,16 +132,12 @@ public static class DeviceSelector
         }
     }
 
-    /// <summary>
-    /// Prompts user to select from multiple devices.
-    /// </summary>
     private static async Task<DeviceSelection?> PromptForDeviceSelectionAsync(
         IReadOnlyList<IYubiKey> devices,
         CancellationToken cancellationToken)
     {
         var deviceInfos = new List<(IYubiKey Device, DeviceInfo? Info)>();
 
-        // Get device info for each device to display details
         await AnsiConsole.Status()
             .StartAsync("Querying device information...", async _ =>
             {
@@ -191,7 +153,6 @@ public static class DeviceSelector
                 }
             });
 
-        // Create indexed choices and sort by name, keeping original index
         var indexedChoices = deviceInfos
             .Select((d, index) => (Choice: FormatDeviceChoice(d.Device, d.Info), OriginalIndex: index))
             .OrderBy(x => x.Choice)
@@ -211,7 +172,6 @@ public static class DeviceSelector
             return null;
         }
 
-        // Find the original index from the sorted list
         var selectedSortedIndex = choices.IndexOf(selection);
         var originalIndex = indexedChoices[selectedSortedIndex].OriginalIndex;
         var selected = deviceInfos[originalIndex];
@@ -223,49 +183,15 @@ public static class DeviceSelector
             selected.Device.ConnectionType);
     }
 
-    /// <summary>
-    /// Formats a device choice string for display.
-    /// </summary>
     private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
     {
-        var transport = FormatConnectionType(device.ConnectionType);
+        var transport = ConnectionTypeFormatter.Format(device.ConnectionType);
 
         if (info is null)
         {
             return $"YubiKey ({transport})";
         }
 
-        var serial = info.Value.SerialNumber?.ToString() ?? "N/A";
-        var firmware = info.Value.FirmwareVersion.ToString();
-        var formFactor = FormatFormFactor(info.Value.FormFactor);
-
-        return $"YubiKey {formFactor} - Serial: {serial}, Firmware: {firmware} ({transport})";
+        return $"YubiKey {FormFactorFormatter.Format(info.Value.FormFactor)} - Serial: {info.Value.SerialNumber?.ToString() ?? "N/A"}, Firmware: {info.Value.FirmwareVersion} ({transport})";
     }
-
-    /// <summary>
-    /// Formats form factor for display.
-    /// </summary>
-    public static string FormatFormFactor(FormFactor formFactor) =>
-        formFactor switch
-        {
-            FormFactor.UsbAKeychain => "5A",
-            FormFactor.UsbANano => "5 Nano",
-            FormFactor.UsbCKeychain => "5C",
-            FormFactor.UsbCNano => "5C Nano",
-            FormFactor.UsbCLightning => "5Ci",
-            FormFactor.UsbABiometricKeychain => "Bio",
-            FormFactor.UsbCBiometricKeychain => "Bio (USB-C)",
-            _ => "Unknown"
-        };
-
-    /// <summary>
-    /// Formats connection type for display.
-    /// </summary>
-    public static string FormatConnectionType(ConnectionType connectionType) =>
-        connectionType switch
-        {
-            ConnectionType.SmartCard => "SmartCard/NFC",
-            ConnectionType.HidFido => "FIDO HID",
-            _ => "Unknown"
-        };
 }

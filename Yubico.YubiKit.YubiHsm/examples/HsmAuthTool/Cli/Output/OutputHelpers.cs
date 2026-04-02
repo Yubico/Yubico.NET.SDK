@@ -2,74 +2,48 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
+using SharedOutput = Yubico.YubiKit.Cli.Shared.Output.OutputHelpers;
+using SharedConfirm = Yubico.YubiKit.Cli.Shared.Output.ConfirmationPrompts;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
 
 /// <summary>
 /// Provides Spectre.Console formatting utilities for consistent output.
+/// Delegates common methods to the shared CLI library.
 /// </summary>
 public static class OutputHelpers
 {
-    public static void WriteHeader(string title)
-    {
-        AnsiConsole.WriteLine();
-        AnsiConsole.Write(new Rule($"[green]{Markup.Escape(title)}[/]").LeftJustified());
-        AnsiConsole.WriteLine();
-    }
+    // -- Delegated to shared library --
 
-    public static void WriteSuccess(string message) =>
-        AnsiConsole.MarkupLine($"[green]\u2713[/] {Markup.Escape(message)}");
+    /// <inheritdoc cref="SharedOutput.WriteHeader"/>
+    public static void WriteHeader(string title) => SharedOutput.WriteHeader(title);
 
-    public static void WriteError(string message) =>
-        AnsiConsole.MarkupLine($"[red]\u2717[/] {Markup.Escape(message)}");
+    /// <inheritdoc cref="SharedOutput.WriteSuccess"/>
+    public static void WriteSuccess(string message) => SharedOutput.WriteSuccess(message);
 
-    public static void WriteWarning(string message) =>
-        AnsiConsole.MarkupLine($"[yellow]\u26a0[/] {Markup.Escape(message)}");
+    /// <inheritdoc cref="SharedOutput.WriteError"/>
+    public static void WriteError(string message) => SharedOutput.WriteError(message);
 
-    public static void WriteInfo(string message) =>
-        AnsiConsole.MarkupLine($"[blue]\u2139[/] {Markup.Escape(message)}");
+    /// <inheritdoc cref="SharedOutput.WriteWarning"/>
+    public static void WriteWarning(string message) => SharedOutput.WriteWarning(message);
 
-    public static void WriteKeyValue(string key, string? value) =>
-        AnsiConsole.MarkupLine($"  [grey]{Markup.Escape(key)}:[/] {Markup.Escape(value ?? "N/A")}");
+    /// <inheritdoc cref="SharedOutput.WriteInfo"/>
+    public static void WriteInfo(string message) => SharedOutput.WriteInfo(message);
 
-    public static void WriteHex(string label, ReadOnlySpan<byte> data) =>
-        AnsiConsole.MarkupLine($"  [grey]{Markup.Escape(label)}:[/] {Convert.ToHexString(data)}");
+    /// <inheritdoc cref="SharedOutput.WriteKeyValue"/>
+    public static void WriteKeyValue(string key, string? value) => SharedOutput.WriteKeyValue(key, value);
 
-    public static Table CreateTable(params string[] columns)
-    {
-        var table = new Table()
-            .Border(TableBorder.Rounded)
-            .BorderColor(Color.Grey);
+    /// <inheritdoc cref="SharedOutput.WriteHex(string, ReadOnlySpan{byte})"/>
+    public static void WriteHex(string label, ReadOnlySpan<byte> data) => SharedOutput.WriteHex(label, data);
 
-        foreach (var column in columns)
-        {
-            table.AddColumn(new TableColumn($"[green]{Markup.Escape(column)}[/]"));
-        }
+    /// <inheritdoc cref="SharedOutput.CreateTable"/>
+    public static Table CreateTable(params string[] columns) => SharedOutput.CreateTable(columns);
 
-        return table;
-    }
+    /// <inheritdoc cref="SharedConfirm.ConfirmDestructive"/>
+    public static bool ConfirmDestructive(string action, string confirmationWord = "RESET") =>
+        SharedConfirm.ConfirmDestructive(action, confirmationWord);
 
-    public static bool ConfirmDestructive(string action, string confirmationWord = "RESET")
-    {
-        AnsiConsole.MarkupLine("[red bold]\u26a0\ufe0f  DANGER \u26a0\ufe0f[/]");
-        AnsiConsole.MarkupLine($"[red]This will {Markup.Escape(action)}.[/]");
-        AnsiConsole.MarkupLine("[red]ALL DATA WILL BE PERMANENTLY LOST.[/]");
-        AnsiConsole.WriteLine();
-
-        if (!AnsiConsole.Confirm("[red]Are you absolutely sure?[/]", defaultValue: false))
-        {
-            return false;
-        }
-
-        AnsiConsole.WriteLine();
-        var input = AnsiConsole.Ask<string>($"Type '[yellow]{confirmationWord}[/]' to confirm:");
-
-        return string.Equals(input, confirmationWord, StringComparison.Ordinal);
-    }
-
-    public static void WriteActiveDevice(string deviceDisplayName)
-    {
-        AnsiConsole.MarkupLine($"[blue]\ud83d\udd11 Using:[/] [cyan]{Markup.Escape(deviceDisplayName)}[/]");
-        AnsiConsole.WriteLine();
-    }
+    /// <inheritdoc cref="SharedOutput.WriteActiveDevice"/>
+    public static void WriteActiveDevice(string deviceDisplayName) =>
+        SharedOutput.WriteActiveDevice(deviceDisplayName);
 }

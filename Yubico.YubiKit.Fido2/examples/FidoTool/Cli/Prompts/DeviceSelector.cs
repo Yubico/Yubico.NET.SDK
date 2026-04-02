@@ -94,7 +94,20 @@ public static class DeviceSelector
                 device.ConnectionType);
         }
 
-        // Multiple devices - let user choose
+        // Multiple devices - prefer HID FIDO in non-interactive mode (FIDO2 native transport)
+        if (!AnsiConsole.Profile.Capabilities.Interactive)
+        {
+            var hidFido = devices.FirstOrDefault(d => d.ConnectionType == ConnectionType.HidFido)
+                ?? devices[0];
+            var info = await GetDeviceInfoAsync(hidFido, cancellationToken);
+            return new DeviceSelection(
+                hidFido,
+                info?.SerialNumber,
+                info?.FormFactor ?? FormFactor.Unknown,
+                info?.FirmwareVersion.ToString() ?? "Unknown",
+                hidFido.ConnectionType);
+        }
+
         return await PromptForDeviceSelectionAsync(devices, cancellationToken);
     }
 

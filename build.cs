@@ -131,12 +131,8 @@ var integrationTestProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOpt
     .OrderBy(p => p)
     .ToArray();
 
-var allTestProjects = unitTestProjects
-    .Concat(integrationTestProjects)
-    .ToArray();
-
 var testProjects = includeIntegration
-    ? allTestProjects
+    ? [..unitTestProjects, ..integrationTestProjects]
     : unitTestProjects;
 
 var testProjectInfos = testProjects
@@ -174,37 +170,30 @@ Target("restore", DependsOn("clean"), () =>
 Target("build", DependsOn("restore"), () =>
 {
     PrintHeader("Building");
-    
+
     if (!string.IsNullOrEmpty(testProject))
     {
-        // Build specific project(s) matching the filter
         var matchingProjects = packableProjects
             .Where(p => Path.GetFileNameWithoutExtension(p)
                 .Contains(testProject, StringComparison.OrdinalIgnoreCase))
             .ToList();
-        
+
         if (matchingProjects.Count == 0)
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"⚠ No projects match '{testProject}'");
-            Console.ResetColor();
-            Console.WriteLine("Available projects:");
-            foreach (var proj in packableProjects)
-                Console.WriteLine($"  - {Path.GetFileNameWithoutExtension(proj)}");
+            PrintNoProjectsFound(testProject, packableProjects);
             return;
         }
-        
+
         foreach (var project in matchingProjects)
         {
-            var projectName = Path.GetFileNameWithoutExtension(project);
-            Console.WriteLine($"Building: {projectName}");
+            Console.WriteLine($"Building: {Path.GetFileNameWithoutExtension(project)}");
             Run("dotnet", $"build {project} -c {configuration} --no-restore");
         }
+
         PrintInfo($"Built {matchingProjects.Count} project(s) matching '{testProject}'");
     }
     else
     {
-        // Build entire solution
         Run("dotnet", $"build {solutionFile} -c {configuration} --no-restore");
         PrintInfo($"Built {solutionFile} in {configuration} configuration");
     }
@@ -215,131 +204,38 @@ Target("test", DependsOn("build"), () =>
     // --integration requires --project to prevent accidentally running all integration tests
     if (includeIntegration && string.IsNullOrEmpty(testProject))
     {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("Error: --integration requires --project to specify which module to test.");
+        PrintColored("Error: --integration requires --project to specify which module to test.", ConsoleColor.Red);
         Console.WriteLine("Example: dotnet build.cs test --integration --project Piv");
-        Console.ResetColor();
         Console.WriteLine("\nAvailable integration test projects:");
-        foreach (var p in integrationTestProjects)
-            Console.WriteLine($"  - {Path.GetFileNameWithoutExtension(p)}");
+        PrintProjectList(integrationTestProjects);
         throw new InvalidOperationException("--integration requires --project");
     }
 
     PrintHeader(includeIntegration ? "Running unit + integration tests" : "Running unit tests");
 
-    var testResults = new List<(string Project, bool Passed, string? Error)>();
+    var projectsToTest = FilterToProject(testProjectInfos, testProject);
+    if (projectsToTest is null)
+        return;
 
-    // Filter to specific project if --project specified
-    var projectsToTest = testProjectInfos.AsEnumerable();
-    if (!string.IsNullOrEmpty(testProject))
-    {
-        projectsToTest = projectsToTest.Where(p =>
-            Path.GetFileNameWithoutExtension(p.ProjectPath)
-                .Contains(testProject, StringComparison.OrdinalIgnoreCase));
+    var results = RunTestProjects(projectsToTest);
+    PrintTestSummary(results, "TEST");
 
-        if (!projectsToTest.Any())
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"⚠ No test projects match '{testProject}'");
-            Console.ResetColor();
-            Console.WriteLine("Available test projects:");
-            foreach (var p in testProjectInfos)
-                Console.WriteLine($"  - {Path.GetFileNameWithoutExtension(p.ProjectPath)}");
-            return;
-        }
-    }
-
-    foreach (var projectInfo in projectsToTest)
-    {
-        var project = projectInfo.ProjectPath;
-        var projectName = Path.GetFileNameWithoutExtension(project);
-        Console.WriteLine($"\n{'='} Testing: {projectName} {'='}");
-
-        try
-        {
-            string command;
-            if (projectInfo.UsesTestingPlatformRunner)
-            {
-                // Microsoft.Testing.Platform uses -- to pass filter
-                command = $"run --project {project} -c {configuration} --no-build";
-                if (!string.IsNullOrEmpty(testFilter))
-                    command += $" -- --filter \"{testFilter}\"";
-            }
-            else
-            {
-                // xUnit/MSTest use --filter directly
-                command = $"test {project} -c {configuration} --no-build --logger \"console;verbosity=normal\"";
-                if (!string.IsNullOrEmpty(testFilter))
-                    command += $" --filter \"{testFilter}\"";
-            }
-
-            Run("dotnet", command);
-            testResults.Add((projectName, true, null));
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"✓ {projectName} - All tests passed");
-            Console.ResetColor();
-        }
-        catch (Exception ex)
-        {
-            testResults.Add((projectName, false, ex.Message));
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"✗ {projectName} - Tests failed");;
-            Console.ResetColor();
-        }
-    }
-
-    // Print summary
-    Console.WriteLine("\n" + new string('=', 60));
-    Console.WriteLine("TEST SUMMARY");
-    Console.WriteLine(new string('=', 60));
-
-    var passed = testResults.Count(r => r.Passed);
-    var failed = testResults.Count(r => !r.Passed);
-
-    foreach (var (project, success, error) in testResults)
-    {
-        if (success)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"  ✓ {project}");
-        }
-        else
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"  ✗ {project}");
-            if (!string.IsNullOrEmpty(error) && error.Contains("Test Run Aborted"))
-            {
-                Console.WriteLine($"    (Test run aborted - check for initialization errors)");
-            }
-        }
-        Console.ResetColor();
-    }
-
-    Console.WriteLine(new string('=', 60));
-    Console.ForegroundColor = passed > 0 ? ConsoleColor.Green : ConsoleColor.Gray;
-    Console.Write($"Passed: {passed}");
-    Console.ResetColor();
-    Console.Write(" | ");
-    Console.ForegroundColor = failed > 0 ? ConsoleColor.Red : ConsoleColor.Gray;
-    Console.Write($"Failed: {failed}");
-    Console.ResetColor();
-    Console.Write($" | Total: {testResults.Count}\n");
-    Console.WriteLine(new string('=', 60));
-
-    if (failed > 0)
-    {
-        throw new InvalidOperationException($"{failed} test project(s) failed");
-    }
+    var failCount = results.Count(r => !r.Passed);
+    if (failCount > 0)
+        throw new InvalidOperationException($"{failCount} test project(s) failed");
 });
 
 Target("coverage", DependsOn("build"), () =>
 {
     PrintHeader("Running tests with coverage");
 
+    // NOTE: Coverage uses dotnet test directly and only runs xUnit v2 unit test projects.
+    // Projects using Microsoft.Testing.Platform (UseMicrosoftTestingPlatformRunner=true)
+    // require different tooling for coverage collection and are excluded here.
     var coverageResultsDir = Path.Combine(artifactsDir, "coverage");
     Directory.CreateDirectory(coverageResultsDir);
 
-    var testResults = new List<(string Project, bool Passed)>();
+    var results = new List<(string Project, bool Passed, string? Error)>();
 
     foreach (var project in unitTestProjects)
     {
@@ -349,65 +245,31 @@ Target("coverage", DependsOn("build"), () =>
         try
         {
             Run("dotnet", $"test {project} -c {configuration} --no-build --settings coverlet.runsettings.xml --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}");
-            testResults.Add((projectName, true));
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"✓ {projectName} - Coverage collected");
-            Console.ResetColor();
+            results.Add((projectName, true, null));
+            PrintColored($"✓ {projectName} - Coverage collected", ConsoleColor.Green);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            testResults.Add((projectName, false));
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"✗ {projectName} - Coverage collection failed");
-            Console.ResetColor();
+            results.Add((projectName, false, ex.Message));
+            PrintColored($"✗ {projectName} - Coverage collection failed", ConsoleColor.Red);
         }
     }
 
-    // Print summary
-    Console.WriteLine("\n" + new string('=', 60));
-    Console.WriteLine("COVERAGE SUMMARY");
-    Console.WriteLine(new string('=', 60));
+    PrintTestSummary(results, "COVERAGE");
 
-    var passed = testResults.Count(r => r.Passed);
-    var failed = testResults.Count(r => !r.Passed);
-
-    foreach (var (project, success) in testResults)
-    {
-        Console.ForegroundColor = success ? ConsoleColor.Green : ConsoleColor.Red;
-        Console.WriteLine($"  {(success ? "✓" : "✗")} {project}");
-        Console.ResetColor();
-    }
-
-    Console.WriteLine(new string('=', 60));
-    Console.ForegroundColor = passed > 0 ? ConsoleColor.Green : ConsoleColor.Gray;
-    Console.Write($"Collected: {passed}");
-    Console.ResetColor();
-    Console.Write(" | ");
-    Console.ForegroundColor = failed > 0 ? ConsoleColor.Red : ConsoleColor.Gray;
-    Console.Write($"Failed: {failed}");
-    Console.ResetColor();
-    Console.Write($" | Total: {testResults.Count}\n");
-    Console.WriteLine(new string('=', 60));
-
-    // Find coverage files
     var coverageFiles = Directory.GetFiles(coverageResultsDir, "coverage.cobertura.xml", SearchOption.AllDirectories);
     if (coverageFiles.Length > 0)
     {
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine($"\nCoverage reports generated:");
+        PrintColored("\nCoverage reports generated:", ConsoleColor.Cyan);
         foreach (var file in coverageFiles)
-        {
             Console.WriteLine($"  {file}");
-        }
-        Console.ResetColor();
     }
 
     PrintInfo($"Coverage results saved to {coverageResultsDir}");
 
-    if (failed > 0)
-    {
-        throw new InvalidOperationException($"{failed} test project(s) failed during coverage collection");
-    }
+    var failCount = results.Count(r => !r.Passed);
+    if (failCount > 0)
+        throw new InvalidOperationException($"{failCount} test project(s) failed during coverage collection");
 });
 
 Target("pack", DependsOn("build"), () =>
@@ -416,10 +278,7 @@ Target("pack", DependsOn("build"), () =>
 
     Directory.CreateDirectory(packagesDir);
 
-    var versionArg = string.IsNullOrEmpty(packageVersion)
-        ? ""
-        : $"/p:Version={packageVersion}";
-
+    var versionArg = string.IsNullOrEmpty(packageVersion) ? "" : $"/p:Version={packageVersion}";
     var docsArg = includeDocs ? "" : "/p:GenerateDocumentationFile=false";
 
     foreach (var project in packableProjects)
@@ -489,9 +348,7 @@ Target("publish", DependsOn("pack", "setup-feed"), () =>
     }
 
     if (dryRun)
-    {
         Console.WriteLine($"\n(Dry run - no packages were actually published)");
-    }
 });
 
 Target("default", DependsOn("test", "publish"));
@@ -503,37 +360,153 @@ if (args.Contains("--help") || args.Contains("-h"))
     return;
 }
 
-// Run Bullseye
+// Run Bullseye — strip all custom args so Bullseye only sees target names and its own flags
 var bullseyeArgs = FilterBullseyeArgs(args,
-    optionsWithValues: ["--project", "--filter"],
+    optionsWithValues: ["--project", "--filter", "--package-version", "--nuget-feed-name", "--nuget-feed-path"],
     flags: ["--integration", "--include-docs", "--dry-run", "--clean"]);
 await RunTargetsAndExitAsync(bullseyeArgs);
 
-// Helper functions
+// ─── Helper functions ──────────────────────────────────────────────────────────
+
 string GetRepoRoot()
 {
     var current = Directory.GetCurrentDirectory();
     while (current is not null && !Directory.Exists(Path.Combine(current, ".git")))
-    {
         current = Directory.GetParent(current)?.FullName;
-    }
     return current ?? Directory.GetCurrentDirectory();
 }
 
+// Use the captured top-level `args`, not Environment.GetCommandLineArgs() which includes the host path.
 string? GetArgument(string name)
 {
-    var args = Environment.GetCommandLineArgs();
     var index = Array.IndexOf(args, name);
     return index >= 0 && index < args.Length - 1 ? args[index + 1] : null;
 }
 
-bool HasFlag(string name)
-{
-    return Environment.GetCommandLineArgs().Contains(name);
-}
+bool HasFlag(string name) => args.Contains(name);
 
 void PrintInfo(string message) => Console.WriteLine($"✓ {message}");
 void PrintHeader(string message) => Console.WriteLine($"\n=== {message} ===\n");
+
+void PrintColored(string message, ConsoleColor color)
+{
+    Console.ForegroundColor = color;
+    Console.WriteLine(message);
+    Console.ResetColor();
+}
+
+void PrintProjectList(string[] projects)
+{
+    foreach (var p in projects)
+        Console.WriteLine($"  - {Path.GetFileNameWithoutExtension(p)}");
+}
+
+void PrintNoProjectsFound(string filter, string[] available)
+{
+    PrintColored($"⚠ No projects match '{filter}'", ConsoleColor.Yellow);
+    Console.WriteLine("Available projects:");
+    PrintProjectList(available);
+}
+
+// Returns null when no projects matched and an error was already printed (caller should return early).
+List<(string ProjectPath, bool UsesTestingPlatformRunner)>? FilterToProject(
+    (string ProjectPath, bool UsesTestingPlatformRunner)[] projectInfos,
+    string? filter)
+{
+    if (string.IsNullOrEmpty(filter))
+        return [..projectInfos];
+
+    var matched = projectInfos
+        .Where(p => Path.GetFileNameWithoutExtension(p.ProjectPath)
+            .Contains(filter, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    if (matched.Count > 0)
+        return matched;
+
+    PrintColored($"⚠ No test projects match '{filter}'", ConsoleColor.Yellow);
+    Console.WriteLine("Available test projects:");
+    PrintProjectList(projectInfos.Select(p => p.ProjectPath).ToArray());
+    return null;
+}
+
+List<(string Project, bool Passed, string? Error)> RunTestProjects(
+    IEnumerable<(string ProjectPath, bool UsesTestingPlatformRunner)> projects)
+{
+    var results = new List<(string Project, bool Passed, string? Error)>();
+
+    foreach (var (projectPath, usesTestingPlatformRunner) in projects)
+    {
+        var projectName = Path.GetFileNameWithoutExtension(projectPath);
+        Console.WriteLine($"\n{'='} Testing: {projectName} {'='}");
+
+        try
+        {
+            string command;
+            if (usesTestingPlatformRunner)
+            {
+                // Microsoft.Testing.Platform uses -- to pass filter
+                command = $"run --project {projectPath} -c {configuration} --no-build";
+                if (!string.IsNullOrEmpty(testFilter))
+                    command += $" -- --filter \"{testFilter}\"";
+            }
+            else
+            {
+                // xUnit v2 uses --filter directly
+                command = $"test {projectPath} -c {configuration} --no-build --logger \"console;verbosity=normal\"";
+                if (!string.IsNullOrEmpty(testFilter))
+                    command += $" --filter \"{testFilter}\"";
+            }
+
+            Run("dotnet", command);
+            results.Add((projectName, true, null));
+            PrintColored($"✓ {projectName} - All tests passed", ConsoleColor.Green);
+        }
+        catch (Exception ex)
+        {
+            results.Add((projectName, false, ex.Message));
+            PrintColored($"✗ {projectName} - Tests failed", ConsoleColor.Red);
+        }
+    }
+
+    return results;
+}
+
+void PrintTestSummary(List<(string Project, bool Passed, string? Error)> results, string label)
+{
+    var separator = new string('=', 60);
+    Console.WriteLine($"\n{separator}");
+    Console.WriteLine($"{label} SUMMARY");
+    Console.WriteLine(separator);
+
+    foreach (var (project, passed, error) in results)
+    {
+        if (passed)
+        {
+            PrintColored($"  ✓ {project}", ConsoleColor.Green);
+        }
+        else
+        {
+            PrintColored($"  ✗ {project}", ConsoleColor.Red);
+            if (!string.IsNullOrEmpty(error) && error.Contains("Test Run Aborted"))
+                Console.WriteLine("    (Test run aborted - check for initialization errors)");
+        }
+    }
+
+    var passedCount = results.Count(r => r.Passed);
+    var failedCount = results.Count(r => !r.Passed);
+
+    Console.WriteLine(separator);
+    Console.ForegroundColor = passedCount > 0 ? ConsoleColor.Green : ConsoleColor.Gray;
+    Console.Write($"Passed: {passedCount}");
+    Console.ResetColor();
+    Console.Write(" | ");
+    Console.ForegroundColor = failedCount > 0 ? ConsoleColor.Red : ConsoleColor.Gray;
+    Console.Write($"Failed: {failedCount}");
+    Console.ResetColor();
+    Console.WriteLine($" | Total: {results.Count}");
+    Console.WriteLine(separator);
+}
 
 void PrintHelp()
 {
@@ -571,6 +544,7 @@ OPTIONS:
   --clean                        Run dotnet clean before build
   --filter <expression>          Test filter expression (e.g., ""FullyQualifiedName~MyTest"")
   --project <name>               Build/test specific project only (partial match)
+  --integration                  Include integration tests (requires --project)
   -h, --help                     Show this help message
 
 EXAMPLES:
@@ -591,21 +565,11 @@ FILTER SYNTAX (for --filter):
   Category=Unit                  Tests with [Trait(""Category"", ""Unit"")]
 ");
 
-    Console.ForegroundColor = ConsoleColor.Cyan;
-    Console.WriteLine($"Discovered {packableProjects.Length} packable projects:");
-    Console.ResetColor();
-    foreach (var proj in packableProjects)
-    {
-        Console.WriteLine($"  • {Path.GetFileNameWithoutExtension(proj)}");
-    }
+    PrintColored($"Discovered {packableProjects.Length} packable projects:", ConsoleColor.Cyan);
+    PrintProjectList(packableProjects);
 
-    Console.ForegroundColor = ConsoleColor.Cyan;
-    Console.WriteLine($"\nDiscovered {testProjects.Length} test projects:");
-    Console.ResetColor();
-    foreach (var proj in testProjects)
-    {
-        Console.WriteLine($"  • {Path.GetFileNameWithoutExtension(proj)}");
-    }
+    PrintColored($"\nDiscovered {testProjects.Length} test projects:", ConsoleColor.Cyan);
+    PrintProjectList(testProjects);
 
     Console.WriteLine("\nSee BUILD.md for full documentation.");
 }
@@ -613,15 +577,10 @@ FILTER SYNTAX (for --filter):
 static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPath)
 {
     var fullPath = Path.Combine(repoRoot, projectPath);
-    if (!File.Exists(fullPath))
-    {
-        return false;
-    }
-
-    var contents = File.ReadAllText(fullPath);
-    return contents.Contains(
-        "<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>",
-            StringComparison.OrdinalIgnoreCase);
+    return File.Exists(fullPath) &&
+           File.ReadAllText(fullPath).Contains(
+               "<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>",
+               StringComparison.OrdinalIgnoreCase);
 }
 
 string[] FilterBullseyeArgs(string[] args, string[] optionsWithValues, string[] flags)
@@ -635,22 +594,17 @@ string[] FilterBullseyeArgs(string[] args, string[] optionsWithValues, string[] 
         var arg = args[i];
 
         if (flagOptions.Contains(arg))
-        {
             continue;
-        }
 
         if (valueOptions.Contains(arg))
         {
             if (i + 1 < args.Length)
-            {
                 i++;
-            }
-
             continue;
         }
 
         filtered.Add(arg);
     }
 
-    return filtered.ToArray();
+    return [..filtered];
 }

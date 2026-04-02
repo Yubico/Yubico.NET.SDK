@@ -55,6 +55,7 @@ dotnet build.cs -- build --project Piv --clean
 - `--clean` - Run `dotnet clean` before build
 - `--filter <expression>` - Test filter expression (e.g., `"FullyQualifiedName~MyTest"`)
 - `--project <name>` - Build/test specific project only (partial match, e.g., `Piv`)
+- `--integration` - Include integration tests (requires `--project`)
 - `-h, --help` - Show help message (use `dotnet build.cs -- --help`)
 
 ### Examples
@@ -78,8 +79,11 @@ dotnet build.cs test
 # Run tests for specific project with filter
 dotnet build.cs test --project Piv --filter "Method~Sign"
 
-# Run tests with code coverage
+# Run tests with code coverage (xUnit v2 unit test projects only)
 dotnet build.cs coverage
+
+# Run integration tests for a specific module
+dotnet build.cs test --integration --project Piv
 
 # Create and publish packages with custom version
 dotnet build.cs publish --package-version 1.0.0-preview.2
@@ -124,6 +128,10 @@ The build script automatically discovers projects using glob patterns:
 - **Test projects**: All `Yubico.YubiKit.*.UnitTests/*.csproj` files under `tests/` directories
 
 This means you don't need to manually update the build script when adding new projects that follow the standard structure. Run `dotnet build.cs -- --help` to see the current list of discovered projects.
+
+## Code Coverage
+
+The `coverage` target collects coverage via `dotnet test` with the `coverlet` collector. It runs **xUnit v2 unit test projects only** — projects using `Microsoft.Testing.Platform` (`UseMicrosoftTestingPlatformRunner=true`) are excluded because they require different tooling for coverage collection.
 
 ## xUnit v2 vs v3 Test Runner Detection
 

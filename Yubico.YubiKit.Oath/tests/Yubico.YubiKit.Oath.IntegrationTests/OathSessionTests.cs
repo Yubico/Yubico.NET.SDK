@@ -22,7 +22,10 @@ namespace Yubico.YubiKit.Oath.IntegrationTests;
 
 public class OathSessionTests
 {
-    private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(60));
+    // Per-test CancellationToken — do not use a static CTS (shared state across tests
+    // causes cancellation after cumulative timeout, breaking later tests in the suite).
+    private static CancellationToken NewToken(int timeoutSeconds = 30) =>
+        new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds)).Token;
 
     private static CredentialData CreateTotpCredential(
         string name = "user@example.com",
@@ -58,15 +61,15 @@ public class OathSessionTests
         await state.WithOathSessionAsync(async session =>
         {
             // After reset, list should be empty
-            var credentials = await session.ListCredentialsAsync(CancellationTokenSource.Token);
+            var credentials = await session.ListCredentialsAsync(NewToken());
             Assert.Empty(credentials);
 
             // Put a TOTP credential
             var credData = CreateTotpCredential();
-            await session.PutCredentialAsync(credData, cancellationToken: CancellationTokenSource.Token);
+            await session.PutCredentialAsync(credData, cancellationToken: NewToken());
 
             // List should now contain the credential
-            credentials = await session.ListCredentialsAsync(CancellationTokenSource.Token);
+            credentials = await session.ListCredentialsAsync(NewToken());
             Assert.Single(credentials);
 
             var credential = credentials[0];
@@ -77,19 +80,19 @@ public class OathSessionTests
 
             // Calculate a code using a fixed timestamp
             long timestamp = 1704067200; // 2024-01-01 00:00:00 UTC
-            var code = await session.CalculateCodeAsync(credential, timestamp, CancellationTokenSource.Token);
+            var code = await session.CalculateCodeAsync(credential, timestamp, NewToken());
             Assert.NotNull(code);
             Assert.Equal(6, code.Value.Length);
             Assert.True(code.ValidFrom <= timestamp);
             Assert.True(code.ValidTo > timestamp);
 
             // Delete the credential
-            await session.DeleteCredentialAsync(credential, CancellationTokenSource.Token);
+            await session.DeleteCredentialAsync(credential, NewToken());
 
             // List should be empty again
-            credentials = await session.ListCredentialsAsync(CancellationTokenSource.Token);
+            credentials = await session.ListCredentialsAsync(NewToken());
             Assert.Empty(credentials);
-        }, cancellationToken: CancellationTokenSource.Token);
+        }, cancellationToken: NewToken());
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
@@ -105,11 +108,11 @@ public class OathSessionTests
 
             try
             {
-                await session.SetKeyAsync(key, CancellationTokenSource.Token);
+                await session.SetKeyAsync(key, NewToken());
 
                 // Create a new session to verify the key is required
                 await using var lockedSession = await state.Device
-                    .CreateOathSessionAsync(cancellationToken: CancellationTokenSource.Token);
+                    .CreateOathSessionAsync(cancellationToken: NewToken());
 
                 Assert.True(lockedSession.IsLocked);
 
@@ -117,7 +120,7 @@ public class OathSessionTests
                 byte[] validateKey = lockedSession.DeriveKey(password);
                 try
                 {
-                    await lockedSession.ValidateAsync(validateKey, CancellationTokenSource.Token);
+                    await lockedSession.ValidateAsync(validateKey, NewToken());
                     Assert.False(lockedSession.IsLocked);
                 }
                 finally
@@ -126,11 +129,11 @@ public class OathSessionTests
                 }
 
                 // Unset the key (using original unlocked session)
-                await session.UnsetKeyAsync(CancellationTokenSource.Token);
+                await session.UnsetKeyAsync(NewToken());
 
                 // Verify device is no longer locked
                 await using var unlockedSession = await state.Device
-                    .CreateOathSessionAsync(cancellationToken: CancellationTokenSource.Token);
+                    .CreateOathSessionAsync(cancellationToken: NewToken());
 
                 Assert.False(unlockedSession.IsLocked);
             }
@@ -138,7 +141,7 @@ public class OathSessionTests
             {
                 System.Security.Cryptography.CryptographicOperations.ZeroMemory(key);
             }
-        }, cancellationToken: CancellationTokenSource.Token);
+        }, cancellationToken: NewToken());
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.1")]
@@ -147,15 +150,15 @@ public class OathSessionTests
         {
             // Put a credential
             var credData = CreateTotpCredential("original@example.com", "OriginalIssuer");
-            await session.PutCredentialAsync(credData, cancellationToken: CancellationTokenSource.Token);
+            await session.PutCredentialAsync(credData, cancellationToken: NewToken());
 
-            var credentials = await session.ListCredentialsAsync(CancellationTokenSource.Token);
+            var credentials = await session.ListCredentialsAsync(NewToken());
             Assert.Single(credentials);
             var original = credentials[0];
 
             // Rename
             var renamed = await session.RenameCredentialAsync(
-                original, "NewIssuer", "renamed@example.com", CancellationTokenSource.Token);
+                original, "NewIssuer", "renamed@example.com", NewToken());
 
             Assert.Equal("NewIssuer", renamed.Issuer);
             Assert.Equal("renamed@example.com", renamed.Name);
@@ -163,11 +166,11 @@ public class OathSessionTests
             Assert.Equal(original.Period, renamed.Period);
 
             // Verify via list
-            credentials = await session.ListCredentialsAsync(CancellationTokenSource.Token);
+            credentials = await session.ListCredentialsAsync(NewToken());
             Assert.Single(credentials);
             Assert.Equal("NewIssuer", credentials[0].Issuer);
             Assert.Equal("renamed@example.com", credentials[0].Name);
-        }, cancellationToken: CancellationTokenSource.Token);
+        }, cancellationToken: NewToken());
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
@@ -178,12 +181,12 @@ public class OathSessionTests
             var cred1 = CreateTotpCredential("alice@example.com", "ServiceA");
             var cred2 = CreateTotpCredential("bob@example.com", "ServiceB");
 
-            await session.PutCredentialAsync(cred1, cancellationToken: CancellationTokenSource.Token);
-            await session.PutCredentialAsync(cred2, cancellationToken: CancellationTokenSource.Token);
+            await session.PutCredentialAsync(cred1, cancellationToken: NewToken());
+            await session.PutCredentialAsync(cred2, cancellationToken: NewToken());
 
             // Calculate all
             long timestamp = 1704067200;
-            var results = await session.CalculateAllAsync(timestamp, CancellationTokenSource.Token);
+            var results = await session.CalculateAllAsync(timestamp, NewToken());
 
             Assert.Equal(2, results.Count);
 
@@ -194,7 +197,7 @@ public class OathSessionTests
                 Assert.Equal(6, code.Value.Length);
                 Assert.Equal(OathType.Totp, credential.OathType);
             }
-        }, cancellationToken: CancellationTokenSource.Token);
+        }, cancellationToken: NewToken());
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
@@ -205,12 +208,12 @@ public class OathSessionTests
             var totpCred = CreateTotpCredential("totp@example.com", "TotpService");
             var hotpCred = CreateHotpCredential();
 
-            await session.PutCredentialAsync(totpCred, cancellationToken: CancellationTokenSource.Token);
-            await session.PutCredentialAsync(hotpCred, cancellationToken: CancellationTokenSource.Token);
+            await session.PutCredentialAsync(totpCred, cancellationToken: NewToken());
+            await session.PutCredentialAsync(hotpCred, cancellationToken: NewToken());
 
             // Calculate all — HOTP should return null code
             long timestamp = 1704067200;
-            var results = await session.CalculateAllAsync(timestamp, CancellationTokenSource.Token);
+            var results = await session.CalculateAllAsync(timestamp, NewToken());
 
             Assert.Equal(2, results.Count);
 
@@ -219,7 +222,7 @@ public class OathSessionTests
 
             var totpEntry = results.First(kv => kv.Key.OathType == OathType.Totp);
             Assert.NotNull(totpEntry.Value);
-        }, cancellationToken: CancellationTokenSource.Token);
+        }, cancellationToken: NewToken());
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
@@ -227,9 +230,9 @@ public class OathSessionTests
         await state.WithOathSessionAsync(async session =>
         {
             var credData = CreateHotpCredential();
-            await session.PutCredentialAsync(credData, cancellationToken: CancellationTokenSource.Token);
+            await session.PutCredentialAsync(credData, cancellationToken: NewToken());
 
-            var credentials = await session.ListCredentialsAsync(CancellationTokenSource.Token);
+            var credentials = await session.ListCredentialsAsync(NewToken());
             Assert.Single(credentials);
 
             var credential = credentials[0];
@@ -237,16 +240,16 @@ public class OathSessionTests
             Assert.Equal("HotpIssuer", credential.Issuer);
 
             // Calculate HOTP code (counter-based)
-            var code1 = await session.CalculateCodeAsync(credential, cancellationToken: CancellationTokenSource.Token);
+            var code1 = await session.CalculateCodeAsync(credential, cancellationToken: NewToken());
             Assert.NotNull(code1);
             Assert.Equal(6, code1.Value.Length);
 
             // Calculate again — HOTP counter increments, so code should differ
-            var code2 = await session.CalculateCodeAsync(credential, cancellationToken: CancellationTokenSource.Token);
+            var code2 = await session.CalculateCodeAsync(credential, cancellationToken: NewToken());
             Assert.NotNull(code2);
             Assert.Equal(6, code2.Value.Length);
             Assert.NotEqual(code1.Value, code2.Value);
-        }, cancellationToken: CancellationTokenSource.Token);
+        }, cancellationToken: NewToken());
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
@@ -255,24 +258,24 @@ public class OathSessionTests
         {
             // Put a credential
             var credData = CreateTotpCredential();
-            await session.PutCredentialAsync(credData, cancellationToken: CancellationTokenSource.Token);
+            await session.PutCredentialAsync(credData, cancellationToken: NewToken());
 
-            var credentials = await session.ListCredentialsAsync(CancellationTokenSource.Token);
+            var credentials = await session.ListCredentialsAsync(NewToken());
             Assert.Single(credentials);
 
             string oldDeviceId = session.DeviceId;
 
             // Reset
-            await session.ResetAsync(CancellationTokenSource.Token);
+            await session.ResetAsync(NewToken());
 
             // Credentials should be gone
-            credentials = await session.ListCredentialsAsync(CancellationTokenSource.Token);
+            credentials = await session.ListCredentialsAsync(NewToken());
             Assert.Empty(credentials);
 
             // DeviceId changes after reset (new salt)
             Assert.NotEqual(oldDeviceId, session.DeviceId);
             Assert.False(session.IsLocked);
-        }, cancellationToken: CancellationTokenSource.Token);
+        }, cancellationToken: NewToken());
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
@@ -283,15 +286,15 @@ public class OathSessionTests
             // Put a touch-required credential
             var credData = CreateTotpCredential("touch@example.com", "TouchService");
             await session.PutCredentialAsync(credData, requireTouch: true,
-                cancellationToken: CancellationTokenSource.Token);
+                cancellationToken: NewToken());
 
             // CalculateAll should return null code for touch-required credentials
             long timestamp = 1704067200;
-            var results = await session.CalculateAllAsync(timestamp, CancellationTokenSource.Token);
+            var results = await session.CalculateAllAsync(timestamp, NewToken());
 
             Assert.Single(results);
             var entry = results.First();
             Assert.Null(entry.Value);
             Assert.True(entry.Key.TouchRequired);
-        }, cancellationToken: CancellationTokenSource.Token);
+        }, cancellationToken: NewToken());
 }

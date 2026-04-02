@@ -79,7 +79,7 @@ using (OtpSession otp = new OtpSession(yKey))
       .GenerateKey(aesKey)
       .Execute();
 
-    // Do whatever is needed with privateId and aesKey.
+    // Do whatever is needed with privateId and aesKey before clearing them from memory.
   }
   finally
   {

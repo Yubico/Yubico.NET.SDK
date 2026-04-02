@@ -116,3 +116,4 @@ Yubico.YubiKit.Cli.Shared/
 ## Decision Log
 
 - 2026-04-02: DevTeam review completed. All patterns documented. Deferred to future sprint.
+- 2026-04-02: Phases 1-3 implemented and committed (`32733e32`). Phase 4 (InteractiveMenuBuilder, SessionHelper) deferred — optional per plan. PlainTextOutputHelpers not created; OathTool retains custom plain-text output by design. Reviewer fixes applied: non-interactive guard, Logger.LogDebug, PromptForTouch rename.

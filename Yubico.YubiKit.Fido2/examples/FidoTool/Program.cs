@@ -269,6 +269,15 @@ static async Task<int> RunAccessVerbAsync(string[] args, CancellationToken cance
 
     switch (subVerb)
     {
+        case "set-pin":
+        {
+            var newPin = ParseOption(args, "--new-pin") ?? OutputHelpers.PromptForPin("New PIN");
+            var result = await PinManagement.SetPinAsync(selection.Device, newPin, cancellationToken);
+            if (result.Success) { OutputHelpers.WriteSuccess("PIN set successfully."); return 0; }
+            OutputHelpers.WriteError(result.ErrorMessage!);
+            return 1;
+        }
+
         case "change-pin":
         {
             var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("Current PIN");

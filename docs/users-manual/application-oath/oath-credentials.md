@@ -157,5 +157,5 @@ var credential = new Credential {
     Counter = 0,
     Secret = "HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ",
     RequireTouch = false
-}
+};
 ```

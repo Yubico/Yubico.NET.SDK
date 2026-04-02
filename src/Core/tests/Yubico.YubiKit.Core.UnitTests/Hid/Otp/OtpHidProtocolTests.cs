@@ -91,7 +91,7 @@ public class OtpHidProtocolTests
 
         var result = await protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken);
 
-        Assert.Equal(0, result.Length); // No data in response
+        Assert.Equal(6, result.Length); // Status-only response returns 6 status bytes
     }
 
     [Fact]

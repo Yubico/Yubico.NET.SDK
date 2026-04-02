@@ -203,7 +203,7 @@ public sealed class LargeBlobArray
     /// <exception cref="ArgumentException">Thrown when the data is invalid or the hash doesn't match.</exception>
     public static LargeBlobArray Deserialize(ReadOnlyMemory<byte> data)
     {
-        if (data.Length < HashSize + 2) // Minimum: 2-byte empty CBOR array + 16-byte hash
+        if (data.Length < HashSize + 1) // Minimum: 1-byte empty CBOR array (0x80) + 16-byte hash
         {
             throw new ArgumentException("Data too short for valid large blob array.", nameof(data));
         }

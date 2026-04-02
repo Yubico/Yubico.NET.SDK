@@ -102,9 +102,11 @@ public class YubiKeyDeviceManagerTests
         var (manager, findYubiKeys, repository) = CreateManager();
         findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
 
-        // Start monitoring (triggers initial scan)
+        // Populate cache with an initial scan before monitoring starts
+        await manager.FindAllAsync();
+
+        // Start monitoring (event-driven, does not trigger its own scan)
         manager.StartMonitoring(TimeSpan.FromSeconds(10));
-        await Task.Delay(100); // Allow monitoring loop to run once
 
         var scanCountAfterStart = findYubiKeys.ScanCount;
 

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Reflection;
 using NSubstitute;
 using Xunit;
 using Yubico.YubiKit.Core;
@@ -105,9 +106,15 @@ public class PivSessionTests
         // Arrange: Create session with firmware < 5.3
         var mockConnection = Substitute.For<ISmartCardConnection>();
         mockConnection.Transport.Returns(Transport.Usb);
-        
+
         var session = new PivSession(mockConnection, null);
-        // Session has default firmware version (0.0.0 which is < 5.3)
+
+        // Default FirmwareVersion is 0.0.0 which is treated as alpha/beta (latest).
+        // Set an explicit old firmware version via the protected setter to simulate old hardware.
+        typeof(PivSession).BaseType!
+            .GetProperty(nameof(session.FirmwareVersion))!
+            .GetSetMethod(nonPublic: true)!
+            .Invoke(session, [new FirmwareVersion(4, 0, 0)]);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<NotSupportedException>(

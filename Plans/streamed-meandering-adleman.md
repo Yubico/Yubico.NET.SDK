@@ -282,3 +282,25 @@ The 7 remaining failures are:
 - Key generation tests (4) — ordering/state dependencies
 - `GetAlgorithmInformation` — algorithm information query format
 These require further investigation on production firmware hardware.
+
+### 5. OpenPGP AttestKey (GET_ATTESTATION) on 5.8.0-alpha Firmware
+
+**Symptom:** `AttestKeyAsync(KeyRef.Sig)` returns SW=0x6982 (Security Status Not Satisfied)
+after correct User PIN verification.
+
+**Evidence:**
+- `ykman openpgp keys attest sig /tmp/out.pem --pin 123456` succeeds on the same device
+- Our implementation sends identical APDU: CLA=0x80, INS=0xFB, P1=keyRef, P2=0x00
+- PIN is verified via VERIFY (0x00, 0x20, 0x00, 0x82) before attestation
+
+**Hypothesis:** The 5.8.0-alpha firmware's GET_ATTESTATION implementation may require:
+(a) A specific authentication state set up via a different command sequence, or
+(b) The attestation key (ATT slot) to have an active certificate already, or
+(c) Some session-level state that ykman's Python session establishes but we don't.
+
+**Impact:** Only `AttestKey_ReturnsValidCertificate` integration test fails. All other
+27 OpenPGP integration tests pass. The CLI `OpenPgpTool keys attest` command is also
+affected.
+
+**Resolution on production firmware:** Expected to work correctly — attestation is a
+well-established 5.2.0+ feature. Test and validate when production hardware is available.

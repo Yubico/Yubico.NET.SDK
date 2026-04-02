@@ -31,10 +31,9 @@ public sealed partial class OpenPgpSession
 
         // P2: 0x81 (Pw.User) = signature verification only (per spec)
         //     0x82 (Pw.Reset) = extended mode (decrypt/authenticate/attest, NOT sign)
-        // NOTE: On alpha/beta 5.8.0 firmware P2=0x82 unexpectedly also enables sign.
-        // On production firmware the distinction matters per OpenPGP card spec.
-        var p2 = extended ? (byte)Pw.User : (byte)Pw.Reset;
-        var pw = extended ? Pw.User : Pw.Reset;
+        // Matches ykman canonical: pw + mode where mode = 1 if extended else 0
+        var p2 = extended ? (byte)Pw.Reset : (byte)Pw.User;
+        var pw = extended ? Pw.Reset : Pw.User;
 
         _logger.LogDebug("Verifying User PIN (P2=0x{P2:X2})", p2);
         await VerifyPwAsync(pw, p2, pin, cancellationToken).ConfigureAwait(false);

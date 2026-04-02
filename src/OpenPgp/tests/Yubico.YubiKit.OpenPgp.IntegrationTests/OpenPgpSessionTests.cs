@@ -240,8 +240,8 @@ public class OpenPgpSessionTests
 
                 var message = "Hello OpenPGP"u8.ToArray();
 
-                // Verify PIN for signing (extended=true for signature slot)
-                await session.VerifyPinAsync(DefaultUserPin, extended: true);
+                // Verify PIN for signing — default extended=false sends P2=0x81 (signature mode)
+                await session.VerifyPinAsync(DefaultUserPin);
 
                 var signature = await session.SignAsync(message, HashAlgorithmName.SHA256);
                 Assert.True(signature.Length > 0);
@@ -272,7 +272,8 @@ public class OpenPgpSessionTests
 
                 var message = "Hello RSA OpenPGP"u8.ToArray();
 
-                await session.VerifyPinAsync(DefaultUserPin, extended: true);
+                // Verify PIN for signing — default extended=false sends P2=0x81 (signature mode)
+                await session.VerifyPinAsync(DefaultUserPin);
 
                 var signature = await session.SignAsync(message, HashAlgorithmName.SHA256);
                 Assert.True(signature.Length > 0);
@@ -296,7 +297,8 @@ public class OpenPgpSessionTests
 
                 var data = "Auth challenge"u8.ToArray();
 
-                await session.VerifyPinAsync(DefaultUserPin);
+                // Authenticate needs extended=true → P2=0x82 (non-signature operations)
+                await session.VerifyPinAsync(DefaultUserPin, extended: true);
 
                 var result = await session.AuthenticateAsync(data, HashAlgorithmName.SHA256);
                 Assert.True(result.Length > 0);
@@ -351,11 +353,8 @@ public class OpenPgpSessionTests
                 await session.VerifyAdminAsync(DefaultAdminPin);
                 await session.GenerateEcKeyAsync(KeyRef.Sig, CurveOid.Secp256R1);
 
-                // NOTE: AttestKeyAsync (GET_ATTESTATION, CLA=0x80) fails with SW=0x6982
-                // on 5.8.0-alpha firmware even after VerifyPin — likely an alpha firmware gap.
-                // The VerifyPin below uses P2=0x82 (which this alpha accepts for all operations).
-                // On production firmware this should work per the OpenPGP card spec.
-                await session.VerifyPinAsync(DefaultUserPin);
+                // Attest needs extended=true → P2=0x82 (non-signature operations)
+                await session.VerifyPinAsync(DefaultUserPin, extended: true);
                 var attestCert = await session.AttestKeyAsync(KeyRef.Sig);
                 Assert.NotNull(attestCert);
                 Assert.True(attestCert.RawData.Length > 0);

@@ -248,3 +248,37 @@ After all 5 agate runs + dev-team review + CLI testing:
 8. All branches pushed to origin
 9. Cross-branch consistency verified by dev-team review
 10. Autonomous CLI E2E tests pass on all applets
+
+## Future Work (Post 2.0 Initial Delivery)
+
+### 1. Management Session as Authoritative Firmware Version Source
+Alpha/beta YubiKey firmware reports placeholder version `0.0.1` from each applet's
+SELECT response. The true firmware version is only available via the Management session.
+**Current workaround:** `Major == 0` sentinel in `ApplicationSession.IsSupported()` and
+`PcscProtocol.Configure()` treats the device as modern (5.x). This works for internal
+alpha/beta hardware but is not a production-quality solution.
+**Proper fix:** At `ApplicationSession.InitializeCoreAsync()`, if the applet-reported
+version has `Major == 0`, open a short-lived ManagementSession to read the true firmware
+version. Cache it for the session lifetime. This requires careful design to avoid PCSC
+transaction conflicts with the caller's open session.
+
+### 2. FIDO2 over SmartCard on 5.8+ Devices
+YubiKey 5.8 adds FIDO2 over SmartCard (CCID) transport, not just HID FIDO.
+FidoTool currently unconditionally prefers HID FIDO in non-interactive mode.
+**Fix:** Detect firmware >= 5.8.0 via Management session and allow SmartCard FIDO.
+Blocked by #1 (need true firmware version to make this decision).
+
+### 3. CLI Shared Infrastructure Extraction
+All 5 CLI tools now follow the canonical DeviceSelector pattern but still contain
+copy-paste code. A shared project `Yubico.YubiKit.Examples.Shared` could contain:
+- `DeviceSelector.cs` (canonical implementation)
+- `OutputHelpers.cs` (error → stderr, data → stdout)
+- `SessionHelper.cs` patterns
+
+### 4. OpenPGP Integration Test Edge Cases (7/28 failing)
+The 7 remaining failures are:
+- `GetAlgorithmAttributes_DefaultState_ReturnsRsa2048` — SW=0x6B00 on alpha firmware
+- `VerifyPin_WrongPin_ThrowsWithRemainingAttempts` — error message format mismatch
+- Key generation tests (4) — ordering/state dependencies
+- `GetAlgorithmInformation` — algorithm information query format
+These require further investigation on production firmware hardware.

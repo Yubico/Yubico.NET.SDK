@@ -63,6 +63,19 @@ public static class DeviceSelector
                 device.ConnectionType);
         }
 
+        // Multiple devices — in non-interactive mode, auto-select first device
+        if (!AnsiConsole.Profile.Capabilities.Interactive)
+        {
+            var first = devices[0];
+            var info = await GetDeviceInfoAsync(first, cancellationToken);
+            return new DeviceSelection(
+                first,
+                info?.SerialNumber,
+                info?.FormFactor ?? FormFactor.Unknown,
+                info?.FirmwareVersion.ToString() ?? "Unknown",
+                first.ConnectionType);
+        }
+
         return await PromptForDeviceSelectionAsync(devices, cancellationToken);
     }
 
@@ -83,6 +96,13 @@ public static class DeviceSelector
             if (devices.Count > 0)
             {
                 return devices;
+            }
+
+            // Non-interactive: fail immediately, never prompt
+            if (!AnsiConsole.Profile.Capabilities.Interactive)
+            {
+                Console.Error.WriteLine("Error: No YubiKey detected. OpenPGP requires SmartCard (CCID) transport.");
+                return [];
             }
 
             AnsiConsole.MarkupLine("[red]No YubiKey detected. Please insert a YubiKey and try again.[/]");

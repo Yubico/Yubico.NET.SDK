@@ -29,11 +29,11 @@ public static class OutputHelpers
     }
 
     /// <summary>
-    /// Displays an error message.
+    /// Displays an error message to stderr.
     /// </summary>
     public static void WriteError(string message)
     {
-        AnsiConsole.MarkupLine($"[red]x[/] {Markup.Escape(message)}");
+        Console.Error.WriteLine($"Error: {message}");
     }
 
     /// <summary>

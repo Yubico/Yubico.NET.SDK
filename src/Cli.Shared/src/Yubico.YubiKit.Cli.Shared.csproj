@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>Yubico.YubiKit.Cli.Shared</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.Cli.Shared</AssemblyName>
     <IsPackable>false</IsPackable>
 
     <!-- Suppress analyzer warnings that are noisy for example/CLI apps -->
@@ -13,8 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj" />
-    <ProjectReference Include="..\..\Yubico.YubiKit.Management\src\Yubico.YubiKit.Management.csproj" />
+    <ProjectReference Include="..\..\Core\src\Yubico.YubiKit.Core.csproj" />
+    <ProjectReference Include="..\..\Management\src\Yubico.YubiKit.Management.csproj" />
   </ItemGroup>
 
 </Project>

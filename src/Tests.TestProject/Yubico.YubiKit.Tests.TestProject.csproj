@@ -5,6 +5,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <PublishAot>true</PublishAot>
     <RootNamespace>TestProject</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.Tests.TestProject</AssemblyName>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -21,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Yubico.YubiKit.Management\src\Yubico.YubiKit.Management.csproj"/>
+    <ProjectReference Include="..\Management\src\Yubico.YubiKit.Management.csproj"/>
   </ItemGroup>
 
 </Project>

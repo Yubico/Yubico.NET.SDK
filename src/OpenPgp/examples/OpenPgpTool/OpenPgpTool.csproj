@@ -18,9 +18,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKit.OpenPgp.csproj" />
-    <ProjectReference Include="..\..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj" />
-    <ProjectReference Include="..\..\..\Yubico.YubiKit.Management\src\Yubico.YubiKit.Management.csproj" />
-    <ProjectReference Include="..\..\..\Yubico.YubiKit.Cli.Shared\src\Yubico.YubiKit.Cli.Shared.csproj" />
+    <ProjectReference Include="..\..\..\Core\src\Yubico.YubiKit.Core.csproj" />
+    <ProjectReference Include="..\..\..\Management\src\Yubico.YubiKit.Management.csproj" />
+    <ProjectReference Include="..\..\..\Cli.Shared\src\Yubico.YubiKit.Cli.Shared.csproj" />
   </ItemGroup>
 
 </Project>

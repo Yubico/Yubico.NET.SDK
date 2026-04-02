@@ -2,7 +2,7 @@
 
 This file provides guidance to AI agents when working with code in this repository.
 
-**IMPORTANT:** If you are working in a subproject directory (e.g., `Yubico.YubiKit.SecurityDomain/`, `Yubico.YubiKit.Piv/`, etc.), you MUST also read that subproject's `CLAUDE.md` file if it exists. Subproject CLAUDE.md files contain specific patterns, test harness details, and context for that module.
+**IMPORTANT:** If you are working in a subproject directory (e.g., `src/SecurityDomain/`, `src/Piv/`, etc.), you MUST also read that subproject's `CLAUDE.md` file if it exists. Subproject CLAUDE.md files contain specific patterns, test harness details, and context for that module.
 
 ## Project Overview
 
@@ -17,24 +17,29 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 
 The SDK is organized into the following modules:
 
+All project folders live under `src/` with the `Yubico.YubiKit.` prefix stripped from directory names. Assembly names, namespaces, and DLL output names remain unchanged (e.g., `Yubico.YubiKit.Core`).
+
 **Core Infrastructure:**
-- `Yubico.YubiKit.Core/` - Device management, connection abstractions, APDU protocol handling, platform interop
-- `Yubico.YubiKit.Management/` - Device information queries, capability detection, firmware version
+- `src/Core/` - Device management, connection abstractions, APDU protocol handling, platform interop
+- `src/Management/` - Device information queries, capability detection, firmware version
 
 **YubiKey Applications:**
-- `Yubico.YubiKit.Piv/` - PIV (Personal Identity Verification) smart card functionality
-- `Yubico.YubiKit.Fido2/` - FIDO2/WebAuthn authentication
-- `Yubico.YubiKit.Oath/` - TOTP/HOTP one-time password generation
-- `Yubico.YubiKit.YubiOtp/` - Yubico OTP configuration and generation
-- `Yubico.YubiKit.OpenPgp/` - OpenPGP card implementation
-- `Yubico.YubiKit.SecurityDomain/` - Secure Channel Protocol (SCP03), key management
+- `src/Piv/` - PIV (Personal Identity Verification) smart card functionality
+- `src/Fido2/` - FIDO2/WebAuthn authentication
+- `src/Oath/` - TOTP/HOTP one-time password generation
+- `src/YubiOtp/` - Yubico OTP configuration and generation
+- `src/OpenPgp/` - OpenPGP card implementation
+- `src/SecurityDomain/` - Secure Channel Protocol (SCP03), key management
 
 **Hardware Security Modules:**
-- `Yubico.YubiKit.YubiHsm/` - YubiHSM 2 hardware security module integration
+- `src/YubiHsm/` - YubiHSM 2 hardware security module integration
+
+**Shared Infrastructure:**
+- `src/Cli.Shared/` - Shared CLI infrastructure for example tools
 
 **Testing Infrastructure:**
-- `Yubico.YubiKit.Tests.Shared/` - Shared test utilities, multi-transport test harness
-- `Yubico.YubiKit.Tests.TestProject/` - xUnit v3 test project structure
+- `src/Tests.Shared/` - Shared test utilities, multi-transport test harness
+- `src/Tests.TestProject/` - xUnit v3 test project structure
 
 **Module-Specific Documentation:**
 Each module directory may contain:
@@ -177,7 +182,7 @@ dotnet build Yubico.YubiKit.sln
 dotnet test Yubico.YubiKit.sln
 
 # Run specific test project
-dotnet test Yubico.YubiKit.Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj
+dotnet test src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj
 
 # Run with coverage directly
 dotnet test --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"

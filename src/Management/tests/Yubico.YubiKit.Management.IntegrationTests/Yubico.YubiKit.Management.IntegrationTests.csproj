@@ -28,9 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Yubico.YubiKit.Management\src\Yubico.YubiKit.Management.csproj"/>
-    <ProjectReference Include="..\..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj"/>
-    <ProjectReference Include="..\..\..\Yubico.YubiKit.Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj"/>
+    <ProjectReference Include="..\..\..\Management\src\Yubico.YubiKit.Management.csproj"/>
+    <ProjectReference Include="..\..\..\Core\src\Yubico.YubiKit.Core.csproj"/>
+    <ProjectReference Include="..\..\..\Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj"/>
   </ItemGroup>
 
   <ItemGroup>

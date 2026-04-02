@@ -28,7 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKit.Fido2.csproj"/>
-    <ProjectReference Include="..\..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj"/>
+    <ProjectReference Include="..\..\..\Core\src\Yubico.YubiKit.Core.csproj"/>
   </ItemGroup>
 
 </Project>

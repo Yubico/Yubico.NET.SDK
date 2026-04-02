@@ -20,7 +20,7 @@
  * TARGETS:
  *   clean      - Remove artifacts directory
  *   restore    - Restore NuGet dependencies
- *   build      - Build the solution (or specific project with --project)
+ *   build      - Build the solution (restores only if needed)
  *   test       - Run unit tests with summary output
  *   coverage   - Run tests with code coverage
  *   pack       - Create NuGet packages
@@ -72,7 +72,8 @@
  *
  *   - xUnit v3 (Microsoft.Testing.Platform): Projects with
  *     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
- *     These use: dotnet run --project <proj> -- --filter "..."
+ *     These use: dotnet run --project <proj> -- --filter-method/--filter-trait "..."
+ *     VSTest --filter expressions are auto-translated to xUnit v3 native options
  *
  *   - xUnit v2 (traditional): Projects without that setting
  *     These use: dotnet test <proj> --filter "..."
@@ -167,7 +168,7 @@ Target("restore", () =>
     PrintInfo("Dependencies restored");
 });
 
-Target("build", DependsOn("restore"), () =>
+Target("build", () =>
 {
     PrintHeader("Building");
 
@@ -187,19 +188,19 @@ Target("build", DependsOn("restore"), () =>
         foreach (var project in matchingProjects)
         {
             Console.WriteLine($"Building: {Path.GetFileNameWithoutExtension(project)}");
-            Run("dotnet", $"build {project} -c {configuration} --no-restore");
+            Run("dotnet", $"build {project} -c {configuration}");
         }
 
         PrintInfo($"Built {matchingProjects.Count} project(s) matching '{testProject}'");
     }
     else
     {
-        Run("dotnet", $"build {solutionFile} -c {configuration} --no-restore");
+        Run("dotnet", $"build {solutionFile} -c {configuration}");
         PrintInfo($"Built {solutionFile} in {configuration} configuration");
     }
 });
 
-Target("test", DependsOn("build"), () =>
+Target("test", () =>
 {
     // --integration requires --project to prevent accidentally running all integration tests
     if (includeIntegration && string.IsNullOrEmpty(testProject))
@@ -225,7 +226,7 @@ Target("test", DependsOn("build"), () =>
         throw new InvalidOperationException($"{failCount} test project(s) failed");
 });
 
-Target("coverage", DependsOn("build"), () =>
+Target("coverage", () =>
 {
     PrintHeader("Running tests with coverage");
 
@@ -244,7 +245,7 @@ Target("coverage", DependsOn("build"), () =>
 
         try
         {
-            Run("dotnet", $"test {project} -c {configuration} --no-build --settings coverlet.runsettings.xml --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}");
+            Run("dotnet", $"test {project} -c {configuration} --settings coverlet.runsettings.xml --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}");
             results.Add((projectName, true, null));
             PrintColored($"✓ {projectName} - Coverage collected", ConsoleColor.Green);
         }
@@ -445,15 +446,20 @@ List<(string Project, bool Passed, string? Error)> RunTestProjects(
             string command;
             if (usesTestingPlatformRunner)
             {
-                // Microsoft.Testing.Platform uses -- to pass filter
-                command = $"run --project {projectPath} -c {configuration} --no-build";
+                // xUnit v3 MTP runner uses native filter options (--filter-method, --filter-trait, etc.)
+                // not VSTest's --filter syntax
+                command = $"run --project {projectPath} -c {configuration}";
                 if (!string.IsNullOrEmpty(testFilter))
-                    command += $" -- --filter \"{testFilter}\"";
+                {
+                    var mtpFilter = TranslateToMtpFilter(testFilter);
+                    // --minimum-expected-tests 0 prevents failure when no tests match the filter
+                    command += $" -- --minimum-expected-tests 0 {mtpFilter}";
+                }
             }
             else
             {
                 // xUnit v2 uses --filter directly
-                command = $"test {projectPath} -c {configuration} --no-build --logger \"console;verbosity=normal\"";
+                command = $"test {projectPath} -c {configuration} --logger \"console;verbosity=normal\"";
                 if (!string.IsNullOrEmpty(testFilter))
                     command += $" --filter \"{testFilter}\"";
             }
@@ -527,7 +533,7 @@ NOTE: The -- separator passes arguments to the script instead of dotnet:
 TARGETS:
   clean      - Remove artifacts directory
   restore    - Restore NuGet dependencies
-  build      - Build the solution (or specific project with --project)
+  build      - Build the solution (restores only if needed)
   test       - Run unit tests with summary output
   coverage   - Run tests with code coverage
   pack       - Create NuGet packages
@@ -581,6 +587,58 @@ static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPa
            File.ReadAllText(fullPath).Contains(
                "<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>",
                StringComparison.OrdinalIgnoreCase);
+}
+
+// Translates a VSTest-style --filter expression to xUnit v3 MTP native filter arguments.
+// Supports: FullyQualifiedName~X, Method~X, Category!=X, Category=X, and '&' compounds.
+static string TranslateToMtpFilter(string vstestFilter)
+{
+    var parts = vstestFilter.Split('&');
+    var mtpArgs = new List<string>();
+
+    foreach (var part in parts)
+    {
+        var trimmed = part.Trim();
+
+        // Category!=Value → --filter-not-trait "Category=Value"
+        if (trimmed.Contains("!="))
+        {
+            var segments = trimmed.Split("!=", 2);
+            mtpArgs.Add($"--filter-not-trait \"{segments[0].Trim()}={segments[1].Trim()}\"");
+        }
+        // FullyQualifiedName~Value or Name~Value or Method~Value → --filter-method "*Value*"
+        else if (trimmed.Contains('~'))
+        {
+            var segments = trimmed.Split('~', 2);
+            var property = segments[0].Trim();
+            var value = segments[1].Trim();
+
+            mtpArgs.Add(property switch
+            {
+                "ClassName" or "Namespace" => $"--filter-class \"*{value}*\"",
+                _ => $"--filter-method \"*{value}*\""
+            });
+        }
+        // Category=Value → --filter-trait "Category=Value"
+        else if (trimmed.Contains('='))
+        {
+            var segments = trimmed.Split('=', 2);
+            var property = segments[0].Trim();
+            var value = segments[1].Trim();
+
+            if (property is "FullyQualifiedName" or "Name" or "Method")
+                mtpArgs.Add($"--filter-method \"{value}\"");
+            else
+                mtpArgs.Add($"--filter-trait \"{property}={value}\"");
+        }
+        else
+        {
+            // Unrecognized pattern — pass as-is to --filter-method with wildcards
+            mtpArgs.Add($"--filter-method \"*{trimmed}*\"");
+        }
+    }
+
+    return string.Join(" ", mtpArgs);
 }
 
 string[] FilterBullseyeArgs(string[] args, string[] optionsWithValues, string[] flags)

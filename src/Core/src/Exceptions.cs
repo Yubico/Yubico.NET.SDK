@@ -14,11 +14,6 @@
 
 namespace Yubico.YubiKit.Core;
 
-public class CtapException : Exception
-{
-    //An error response from a YubiKey
-}
-
 public class BadResponseException(string message) : Exception(message)
 {
     //The data contained in a YubiKey response was invalid

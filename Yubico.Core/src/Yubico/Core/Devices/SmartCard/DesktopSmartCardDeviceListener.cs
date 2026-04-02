@@ -231,6 +231,15 @@ namespace Yubico.Core.Devices.SmartCard
                 return false;
             }
 
+            // If a non-critical error triggered context recovery (UpdateCurrentContext refreshed
+            // _readerStates), short-circuit so the next loop iteration starts with fresh state.
+            // Without this, the stale newStates clone would overwrite _readerStates at the end.
+            if (getStatusChangeResult != ErrorCode.SCARD_S_SUCCESS
+                && getStatusChangeResult != ErrorCode.SCARD_E_TIMEOUT)
+            {
+                return true;
+            }
+
             while (ReaderListChangeDetected(ref newStates, usePnpWorkaround))
             {
                 SCARD_READER_STATE[] eventStateList = GetReaderStateList();
@@ -269,6 +278,12 @@ namespace Yubico.Core.Devices.SmartCard
                     {
                         return false;
                     }
+
+                    if (getStatusChangeResult != ErrorCode.SCARD_S_SUCCESS
+                        && getStatusChangeResult != ErrorCode.SCARD_E_TIMEOUT)
+                    {
+                        return true;
+                    }
                 }
 
                 newStates = updatedStates;
@@ -280,6 +295,12 @@ namespace Yubico.Core.Devices.SmartCard
                 if (!HandleSCardGetStatusChangeResult(getStatusChangeResult, newStates))
                 {
                     return false;
+                }
+
+                if (getStatusChangeResult != ErrorCode.SCARD_S_SUCCESS
+                    && getStatusChangeResult != ErrorCode.SCARD_E_TIMEOUT)
+                {
+                    return true;
                 }
             }
 
@@ -519,7 +540,7 @@ namespace Yubico.Core.Devices.SmartCard
             // Sleep briefly to prevent a tight loop if this error persists (e.g. unknown
             // persistent error codes not yet classified as recoverable).
             _log.SCardApiCall(nameof(NativeMethods.SCardGetStatusChange), result);
-            _log.LogInformation("Reader states:\n{States}", states);
+            _log.LogInformation("Reader states:\n{States}", string.Join(Environment.NewLine, states.Select(s => s.ToString())));
             Thread.Sleep(RecoveryBackoffDelay);
 
             return true;

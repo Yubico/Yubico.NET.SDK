@@ -47,28 +47,9 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
 
         [Fact]
         public void WhenGetStatusChangeReturnsInvalidHandle_ContextIsReestablished()
-        {
-            // Arrange: first GetStatusChange call (UsePnpWorkaround probe) returns timeout,
-            // second call returns SCARD_E_INVALID_HANDLE (simulates RDS handle invalidation),
-            // all subsequent calls return timeout (normal polling after recovery).
-            var fake = new FakeSCardInterop(
-                probeResult: ErrorCode.SCARD_E_TIMEOUT,
-                scheduledResults: new[] { ErrorCode.SCARD_E_INVALID_HANDLE });
-
-            using var listener = new DesktopSmartCardDeviceListener(fake);
-
-            // Act: give the listener enough time for the polling thread to hit INVALID_HANDLE,
-            // call UpdateCurrentContext, sleep 1000ms (the recovery backoff), and continue.
-            Thread.Sleep(2500);
-
-            // Assert: EstablishContext must have been called at least twice —
-            // once at construction and at least once more when recovering from INVALID_HANDLE.
-            Assert.True(
-                fake.EstablishContextCallCount >= 2,
-                $"EstablishContext was called {fake.EstablishContextCallCount} time(s). " +
-                "Expected >= 2: once at construction and once after SCARD_E_INVALID_HANDLE. " +
-                "This indicates SCARD_E_INVALID_HANDLE is not triggering context re-establishment.");
-        }
+            => AssertErrorTriggersContextReestablishment(
+                ErrorCode.SCARD_E_INVALID_HANDLE,
+                "SCARD_E_INVALID_HANDLE");
 
         // -----------------------------------------------------------------------------------------
         // Issue #434 — Proof that SCARD_E_INVALID_HANDLE causes a tight polling loop (high CPU)
@@ -78,7 +59,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         // must NOT spin freely. The Thread.Sleep(1000) backoff introduced by the fix limits the
         // rate to ~1 iteration per second.
         //
-        // This test FAILS before the fix (spin → hundreds of calls) and PASSES after.
+        // This test FAILS before the fix (spin -> hundreds of calls) and PASSES after.
         // -----------------------------------------------------------------------------------------
 
         [Fact]
@@ -113,42 +94,33 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
 
         // -----------------------------------------------------------------------------------------
         // Issue #434 — SCARD_E_SYSTEM_CANCELLED (RDS session disconnect/logoff) also recovers
-        //
-        // SCARD_E_SYSTEM_CANCELLED is documented as "The action was canceled by the system,
-        // presumably to log off or shut down." It surfaces during RDS session transitions and
-        // must also trigger context re-establishment, not a tight loop.
         // -----------------------------------------------------------------------------------------
 
         [Fact]
         public void WhenGetStatusChangeReturnsSystemCancelled_ContextIsReestablished()
-        {
-            var fake = new FakeSCardInterop(
-                probeResult: ErrorCode.SCARD_E_TIMEOUT,
-                scheduledResults: new[] { ErrorCode.SCARD_E_SYSTEM_CANCELLED });
-
-            using var listener = new DesktopSmartCardDeviceListener(fake);
-            Thread.Sleep(2500);
-
-            Assert.True(
-                fake.EstablishContextCallCount >= 2,
-                $"EstablishContext was called {fake.EstablishContextCallCount} time(s). " +
-                "Expected >= 2: SCARD_E_SYSTEM_CANCELLED (RDS logoff/disconnect) must trigger context re-establishment.");
-        }
+            => AssertErrorTriggersContextReestablishment(
+                ErrorCode.SCARD_E_SYSTEM_CANCELLED,
+                "SCARD_E_SYSTEM_CANCELLED (RDS logoff/disconnect)");
 
         // -----------------------------------------------------------------------------------------
         // Issue #434 — ERROR_BROKEN_PIPE (RDS smart card redirection not supported) also recovers
-        //
-        // ERROR_BROKEN_PIPE (0x109) is explicitly documented in SCardError.cs as the error
-        // returned when a smart card operation is attempted in a remote session where the OS
-        // does not support smart card redirection. Must not cause a tight loop.
         // -----------------------------------------------------------------------------------------
 
         [Fact]
         public void WhenGetStatusChangeReturnsBrokenPipe_ContextIsReestablished()
+            => AssertErrorTriggersContextReestablishment(
+                ErrorCode.ERROR_BROKEN_PIPE,
+                "ERROR_BROKEN_PIPE (RDS smart card redirection error)");
+
+        /// <summary>
+        /// Verifies that a given non-critical SCard error triggers context re-establishment.
+        /// The error is scheduled as the first GetStatusChange result after the PnP probe.
+        /// </summary>
+        private static void AssertErrorTriggersContextReestablishment(uint errorCode, string errorName)
         {
             var fake = new FakeSCardInterop(
                 probeResult: ErrorCode.SCARD_E_TIMEOUT,
-                scheduledResults: new[] { ErrorCode.ERROR_BROKEN_PIPE });
+                scheduledResults: new[] { errorCode });
 
             using var listener = new DesktopSmartCardDeviceListener(fake);
             Thread.Sleep(2500);
@@ -156,7 +128,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             Assert.True(
                 fake.EstablishContextCallCount >= 2,
                 $"EstablishContext was called {fake.EstablishContextCallCount} time(s). " +
-                "Expected >= 2: ERROR_BROKEN_PIPE (RDS smart card redirection error) must trigger context re-establishment.");
+                $"Expected >= 2: {errorName} must trigger context re-establishment.");
         }
 
         // -----------------------------------------------------------------------------------------
@@ -247,13 +219,15 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             public uint EstablishContext(SCARD_SCOPE scope, out SCardContext context)
             {
                 int callNum = Interlocked.Increment(ref _establishContextCallCount);
-                context = new SCardContext(IntPtr.Zero);
 
                 if (_establishContextFailAfterFirstCall && callNum > 1)
                 {
+                    context = new SCardContext(IntPtr.Zero);
                     return ErrorCode.SCARD_E_NO_SERVICE;
                 }
 
+                // Return a distinct non-zero handle on success, matching real WinSCard behavior.
+                context = new SCardContext(new IntPtr(callNum));
                 return ErrorCode.SCARD_S_SUCCESS;
             }
 

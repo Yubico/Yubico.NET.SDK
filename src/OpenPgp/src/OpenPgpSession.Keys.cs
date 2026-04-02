@@ -150,11 +150,15 @@ public sealed partial class OpenPgpSession
 
         _logger.LogDebug("Attesting key in {Slot}", keyRef);
 
+        // GET_ATTESTATION generates the attestation cert and writes it to the
+        // certificate slot for the key. We then read it back with GetCertificateAsync.
+        // This matches ykman canonical: send_apdu → get_certificate(key_ref).
         var command = new ApduCommand(0x80, (int)Ins.GetAttestation, (int)keyRef, 0x00);
-        var response = await TransmitWithResponseAsync(command, cancellationToken)
-            .ConfigureAwait(false);
+        await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
-        return X509CertificateLoader.LoadCertificate(response.Data.Span);
+        var cert = await GetCertificateAsync(keyRef, cancellationToken).ConfigureAwait(false);
+        return cert ?? throw new InvalidOperationException(
+            $"Attestation certificate was not found in slot {keyRef} after GET_ATTESTATION.");
     }
 
     /// <inheritdoc />

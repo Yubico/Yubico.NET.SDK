@@ -107,34 +107,24 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken)
     {
-        // Map key slot to certificate index (0-based: SIG=0, DEC=1, AUT=2)
-        var index = keyRef switch
+        if (keyRef is not (KeyRef.Sig or KeyRef.Dec or KeyRef.Aut))
         {
-            KeyRef.Sig => (byte)0x00,
-            KeyRef.Dec => (byte)0x01,
-            KeyRef.Aut => (byte)0x02,
-            _ => throw new ArgumentOutOfRangeException(nameof(keyRef),
-                "Only Sig, Dec, and Aut slots support per-slot certificates."),
-        };
-
-        // Build SELECT_DATA payload: TLV(0x60, TLV(0x5C, TLV(tag 0x7F21)))
-        // The occurrence is encoded as the index in P2
-        byte[] selectDataPayload;
-
-        if (IsSupported(FeatureSelectDataFix))
-        {
-            // Firmware >= 5.4.4: standard SELECT_DATA
-            using var innerTlv = new Tlv(0x5C, [(byte)0x7F, (byte)0x21]);
-            using var outerTlv = new Tlv(0x60, innerTlv.AsSpan());
-            selectDataPayload = outerTlv.AsMemory().ToArray();
+            throw new ArgumentOutOfRangeException(nameof(keyRef),
+                "Only Sig, Dec, and Aut slots support per-slot certificates.");
         }
-        else
-        {
-            // Firmware 5.2.0-5.4.3: non-standard SELECT_DATA with extra 0x06 byte
-            using var innerTlv = new Tlv(0x5C, [(byte)0x06, (byte)0x7F, (byte)0x21]);
-            using var outerTlv = new Tlv(0x60, innerTlv.AsSpan());
-            selectDataPayload = outerTlv.AsMemory().ToArray();
-        }
+
+        // Index = 3 - keyRef (ykman canonical: SIG=2, DEC=1, AUT=0)
+        var index = (byte)(3 - (byte)keyRef);
+
+        // Build SELECT_DATA payload: TLV(0x60, TLV(0x5C, [0x7F, 0x21]))
+        using var innerTlv = new Tlv(0x5C, [(byte)0x7F, (byte)0x21]);
+        using var outerTlv = new Tlv(0x60, innerTlv.AsSpan());
+        var tlvBytes = outerTlv.AsMemory().ToArray();
+
+        // Firmware 5.2.0–5.4.3: prepend non-standard length byte before TLV
+        byte[] selectDataPayload = IsSupported(FeatureSelectDataFix)
+            ? tlvBytes
+            : [(byte)tlvBytes.Length, .. tlvBytes];
 
         var command = new ApduCommand(
             0x00,

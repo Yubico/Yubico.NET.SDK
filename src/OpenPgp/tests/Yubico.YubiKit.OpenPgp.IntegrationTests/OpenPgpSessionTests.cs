@@ -353,8 +353,9 @@ public class OpenPgpSessionTests
                 await session.VerifyAdminAsync(DefaultAdminPin);
                 await session.GenerateEcKeyAsync(KeyRef.Sig, CurveOid.Secp256R1);
 
-                // Attest needs extended=true → P2=0x82 (non-signature operations)
-                await session.VerifyPinAsync(DefaultUserPin, extended: true);
+                // Attest uses default PIN verification (extended=false, P2=0x81)
+                // per ykman canonical: verify_pin(pin) before attest_key(key)
+                await session.VerifyPinAsync(DefaultUserPin);
                 var attestCert = await session.AttestKeyAsync(KeyRef.Sig);
                 Assert.NotNull(attestCert);
                 Assert.True(attestCert.RawData.Length > 0);

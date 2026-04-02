@@ -106,24 +106,18 @@ public sealed partial class OpenPgpSession
     {
         _logger.LogInformation("Deleting key from {Slot}", keyRef);
 
-        // Delete by importing an empty key template: PUT DATA ODD with CRT only
-        var crtBytes = keyRef.GetCrt();
-        byte[] emptyTemplate;
-        using (var outerTlv = new Core.Utils.Tlv(0x4D, crtBytes.Span))
-        {
-            emptyTemplate = outerTlv.AsMemory().ToArray();
-        }
+        // Python canonical: delete key by changing algorithm attributes twice.
+        // First set to RSA 4096 (forces key deletion), then back to RSA 2048.
+        // Use PutDataAsync directly (bypassing SetAlgorithmAttributesAsync checks)
+        // to avoid RSA 4096 support verification.
+        var rsa4096 = RsaAttributes.Create(RsaSize.Rsa4096);
+        var rsa2048 = RsaAttributes.Create(RsaSize.Rsa2048);
 
-        var command = new ApduCommand
-        {
-            Cla = 0x00,
-            Ins = (byte)Ins.PutDataOdd,
-            P1 = 0x3F,
-            P2 = 0xFF,
-            Data = emptyTemplate,
-        };
+        await PutDataAsync(keyRef.AlgorithmAttributesDo(), rsa4096.ToBytes(), cancellationToken)
+            .ConfigureAwait(false);
 
-        await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        await SetAlgorithmAttributesAsync(keyRef, rsa2048, cancellationToken)
+            .ConfigureAwait(false);
 
         // Refresh cached app data
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)

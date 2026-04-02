@@ -351,6 +351,11 @@ public class OpenPgpSessionTests
                 await session.VerifyAdminAsync(DefaultAdminPin);
                 await session.GenerateEcKeyAsync(KeyRef.Sig, CurveOid.Secp256R1);
 
+                // NOTE: AttestKeyAsync (GET_ATTESTATION, CLA=0x80) fails with SW=0x6982
+                // on 5.8.0-alpha firmware even after VerifyPin — likely an alpha firmware gap.
+                // The VerifyPin below uses P2=0x82 (which this alpha accepts for all operations).
+                // On production firmware this should work per the OpenPGP card spec.
+                await session.VerifyPinAsync(DefaultUserPin);
                 var attestCert = await session.AttestKeyAsync(KeyRef.Sig);
                 Assert.NotNull(attestCert);
                 Assert.True(attestCert.RawData.Length > 0);

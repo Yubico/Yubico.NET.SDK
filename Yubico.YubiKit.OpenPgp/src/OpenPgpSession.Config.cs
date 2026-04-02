@@ -59,9 +59,19 @@ public sealed partial class OpenPgpSession
     {
         _logger.LogDebug("Getting algorithm attributes for {Slot}", keyRef);
 
-        var data = await GetDataCoreAsync(keyRef.AlgorithmAttributesDo(), cancellationToken)
-            .ConfigureAwait(false);
-        return AlgorithmAttributes.Parse(data.Span);
+        // Per Python canonical: read from ApplicationRelatedData (DO 0x6E), not from
+        // individual algorithm attribute DOs (0xC1/0xC2/0xC3) directly. Direct GET_DATA
+        // for those DOs is not supported on all OpenPGP implementations.
+        var appData = await GetApplicationRelatedDataAsync(cancellationToken).ConfigureAwait(false);
+        return keyRef switch
+        {
+            KeyRef.Sig => appData.Discretionary.AlgorithmAttributesSig,
+            KeyRef.Dec => appData.Discretionary.AlgorithmAttributesDec,
+            KeyRef.Aut => appData.Discretionary.AlgorithmAttributesAut,
+            KeyRef.Att => appData.Discretionary.AlgorithmAttributesAtt
+                          ?? throw new NotSupportedException("ATT key slot not supported on this device"),
+            _ => throw new ArgumentOutOfRangeException(nameof(keyRef))
+        };
     }
 
     /// <inheritdoc />
@@ -86,39 +96,48 @@ public sealed partial class OpenPgpSession
 
         _logger.LogDebug("Getting algorithm information");
 
-        var data = await GetDataCoreAsync(DataObject.AlgorithmInformation, cancellationToken)
+        // GET_DATA returns TLV(0xFA, [TLV(DO_C1, attrs), TLV(DO_C2, attrs), ...]).
+        // Must unwrap the outer 0xFA TLV first, then parse the inner list.
+        // Each inner TLV tag is a DataObject (0xC1=Sig, 0xC2=Dec, 0xC3=Aut, 0xDA=Att)
+        // and maps to a KeyRef via KeyRef.AlgorithmAttributesDo().
+        // Python canonical: buf = Tlv.unpack(DO.ALGORITHM_INFORMATION, buf)
+        var rawData = await GetDataCoreAsync(DataObject.AlgorithmInformation, cancellationToken)
             .ConfigureAwait(false);
 
+        // Unwrap the outer 0xFA TLV to get the inner list
+        using var outerTlv = Tlv.Create(rawData.Span);
+        var innerSpan = outerTlv.Value.Span;
+
+        // Build reverse lookup: DataObject → KeyRef
+        var doToKeyRef = new Dictionary<DataObject, KeyRef>();
+        foreach (var keyRef in Enum.GetValues<KeyRef>())
+        {
+            doToKeyRef[keyRef.AlgorithmAttributesDo()] = keyRef;
+        }
+
         var result = new List<(KeyRef, AlgorithmAttributes)>();
-        var span = data.Span;
         var offset = 0;
 
-        while (offset < span.Length)
+        while (offset < innerSpan.Length)
         {
-            // Each entry: 1 byte key ref + algorithm attributes bytes
-            using var tlv = Tlv.Create(span[offset..]);
+            using var tlv = Tlv.Create(innerSpan[offset..]);
             offset += tlv.TotalLength;
 
-            var entryData = tlv.Value.Span;
-            if (entryData.Length < 2)
-            {
-                continue;
-            }
-
-            var keyRefByte = (KeyRef)entryData[0];
-            if (!Enum.IsDefined(keyRefByte))
+            // Tag is the DO (0xC1, 0xC2, 0xC3, 0xDA); value is algorithm attributes bytes
+            if (!Enum.IsDefined((DataObject)tlv.Tag) ||
+                !doToKeyRef.TryGetValue((DataObject)tlv.Tag, out var keyRef))
             {
                 continue;
             }
 
             try
             {
-                var attrs = AlgorithmAttributes.Parse(entryData[1..]);
-                result.Add((keyRefByte, attrs));
+                var attrs = AlgorithmAttributes.Parse(tlv.Value.Span);
+                result.Add((keyRef, attrs));
             }
             catch (ArgumentException)
             {
-                // Skip unsupported algorithm entries
+                // Skip unsupported algorithm attribute types
             }
         }
 

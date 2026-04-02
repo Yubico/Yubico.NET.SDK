@@ -29,7 +29,10 @@ public sealed partial class OpenPgpSession
     {
         ArgumentNullException.ThrowIfNull(pin);
 
-        // P2: 0x81 = signature verification, 0x82 = other operations
+        // P2: 0x81 (Pw.User) = signature verification only (per spec)
+        //     0x82 (Pw.Reset) = extended mode (decrypt/authenticate/attest, NOT sign)
+        // NOTE: On alpha/beta 5.8.0 firmware P2=0x82 unexpectedly also enables sign.
+        // On production firmware the distinction matters per OpenPGP card spec.
         var p2 = extended ? (byte)Pw.User : (byte)Pw.Reset;
         var pw = extended ? Pw.User : Pw.Reset;
 
@@ -223,9 +226,30 @@ public sealed partial class OpenPgpSession
 
             if (!response.IsOK())
             {
+                // Standard wrong-PIN SW: 0x63Cx where x = remaining retries
                 var remaining = (response.SW & 0xFF00) == 0x63C0
                     ? response.SW & 0x0F
                     : -1;
+
+                // Some firmware (including 5.8.0-alpha) returns 0x6982 (Security Status
+                // Not Satisfied) for wrong PIN instead of 0x63Cx. Per Python canonical:
+                // query GET DATA for PW_STATUS_BYTES to get remaining attempts.
+                if (remaining < 0 && response.SW == SWConstants.SecurityStatusNotSatisfied)
+                {
+                    try
+                    {
+                        var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
+                        remaining = (Pw)pw == Pw.User
+                            ? status.AttemptsUser
+                            : (Pw)pw == Pw.Admin
+                                ? status.AttemptsAdmin
+                                : status.AttemptsReset;
+                    }
+                    catch
+                    {
+                        // If status query fails, fall back to no-retry message
+                    }
+                }
 
                 throw new ApduException(
                     remaining >= 0

@@ -65,7 +65,9 @@ public class PivAuthenticationTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         
+        // Use a non-DES-weak wrong key (all-zeros is a DES weak key rejected by .NET)
         var wrongKey = new byte[24];
+        Array.Fill<byte>(wrongKey, 0xAB);
         
         await Assert.ThrowsAsync<ApduException>(
             () => session.AuthenticateAsync(wrongKey));

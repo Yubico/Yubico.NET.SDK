@@ -313,12 +313,7 @@ public sealed partial class PivSession
             
             if (keyType == PivManagementKeyType.TripleDes)
             {
-                using var des = TripleDES.Create();
-                des.Key = keyBuffer.AsSpan(0, key.Length).ToArray();
-                des.Mode = CipherMode.ECB;
-                des.Padding = PaddingMode.None;
-                using var decryptor = des.CreateDecryptor();
-                decryptor.TransformBlock(inputBuffer, 0, input.Length, decryptedBuffer, 0);
+                TripleDesDecryptManual(keyBuffer.AsSpan(0, key.Length), inputBuffer.AsSpan(0, input.Length), decryptedBuffer.AsSpan(0, input.Length));
             }
             else
             {
@@ -329,7 +324,7 @@ public sealed partial class PivSession
                 using var decryptor = aes.CreateDecryptor();
                 decryptor.TransformBlock(inputBuffer, 0, input.Length, decryptedBuffer, 0);
             }
-            
+
             decryptedBuffer.AsSpan(0, input.Length).CopyTo(output);
         }
         finally
@@ -370,12 +365,7 @@ public sealed partial class PivSession
             
             if (keyType == PivManagementKeyType.TripleDes)
             {
-                using var des = TripleDES.Create();
-                des.Key = keyBuffer.AsSpan(0, key.Length).ToArray();
-                des.Mode = CipherMode.ECB;
-                des.Padding = PaddingMode.None;
-                using var encryptor = des.CreateEncryptor();
-                encryptor.TransformBlock(inputBuffer, 0, input.Length, encryptedBuffer, 0);
+                TripleDesEncryptManual(keyBuffer.AsSpan(0, key.Length), inputBuffer.AsSpan(0, input.Length), encryptedBuffer.AsSpan(0, input.Length));
             }
             else
             {
@@ -386,7 +376,7 @@ public sealed partial class PivSession
                 using var encryptor = aes.CreateEncryptor();
                 encryptor.TransformBlock(inputBuffer, 0, input.Length, encryptedBuffer, 0);
             }
-            
+
             encryptedBuffer.AsSpan(0, input.Length).CopyTo(output);
         }
         finally
@@ -405,6 +395,80 @@ public sealed partial class PivSession
                 CryptographicOperations.ZeroMemory(encryptedBuffer.AsSpan(0, input.Length));
                 ArrayPool<byte>.Shared.Return(encryptedBuffer);
             }
+        }
+    }
+
+    /// <summary>
+    /// Manually implements 3DES-ECB decryption using individual DES operations.
+    /// This avoids .NET's TripleDES weak key rejection, which blocks the default
+    /// PIV management key (0102030405060708 repeated) mandated by the PIV spec.
+    /// 3DES Decrypt = DES-Decrypt(K1) ∘ DES-Encrypt(K2) ∘ DES-Decrypt(K3)
+    /// </summary>
+    private static void TripleDesDecryptManual(ReadOnlySpan<byte> key24, ReadOnlySpan<byte> input, Span<byte> output)
+    {
+        Span<byte> temp1 = stackalloc byte[8];
+        Span<byte> temp2 = stackalloc byte[8];
+        try
+        {
+            DesBlockOperation(key24[16..24], input, temp1, encrypt: false);
+            DesBlockOperation(key24[8..16], temp1, temp2, encrypt: true);
+            DesBlockOperation(key24[..8], temp2, output, encrypt: false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(temp1);
+            CryptographicOperations.ZeroMemory(temp2);
+        }
+    }
+
+    /// <summary>
+    /// Manually implements 3DES-ECB encryption using individual DES operations.
+    /// 3DES Encrypt = DES-Encrypt(K3) ∘ DES-Decrypt(K2) ∘ DES-Encrypt(K1)
+    /// </summary>
+    private static void TripleDesEncryptManual(ReadOnlySpan<byte> key24, ReadOnlySpan<byte> input, Span<byte> output)
+    {
+        Span<byte> temp1 = stackalloc byte[8];
+        Span<byte> temp2 = stackalloc byte[8];
+        try
+        {
+            DesBlockOperation(key24[..8], input, temp1, encrypt: true);
+            DesBlockOperation(key24[8..16], temp1, temp2, encrypt: false);
+            DesBlockOperation(key24[16..24], temp2, output, encrypt: true);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(temp1);
+            CryptographicOperations.ZeroMemory(temp2);
+        }
+    }
+
+    /// <summary>
+    /// Performs a single DES block encrypt or decrypt operation (ECB, no padding).
+    /// </summary>
+    /// <remarks>
+    /// .NET rejects DES weak keys (e.g., all-zeros). The default PIV management key
+    /// (0102030405060708) is not a DES weak key, so this is not an issue in practice.
+    /// If a weak key is encountered, the CryptographicException will propagate.
+    /// </remarks>
+    private static void DesBlockOperation(ReadOnlySpan<byte> key8, ReadOnlySpan<byte> input, Span<byte> output, bool encrypt)
+    {
+        byte[] keyArr = key8.ToArray();
+        byte[] inputArr = input.ToArray();
+        byte[] outputArr = new byte[8];
+        try
+        {
+            using var des = DES.Create();
+            des.Key = keyArr;
+            des.Mode = CipherMode.ECB;
+            des.Padding = PaddingMode.None;
+            using var transform = encrypt ? des.CreateEncryptor() : des.CreateDecryptor();
+            transform.TransformBlock(inputArr, 0, 8, outputArr, 0);
+            outputArr.AsSpan().CopyTo(output);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(keyArr);
+            CryptographicOperations.ZeroMemory(outputArr);
         }
     }
 

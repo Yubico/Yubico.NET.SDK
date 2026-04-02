@@ -2,40 +2,41 @@
 
 **Date:** 2026-04-02
 **Branch:** `yubikit-applets`
-**Last commit:** `bd979619` fix(build): use incremental builds and add xUnit v3 MTP filter translation
+**Last commit:** `addf5823` fix(otp): use HidOtp for HMAC-SHA1 challenge-response test
 
 ---
 
 ## Session Summary
 
-This session resumed handoff items 2 (YubiOTP touch test) and 3 (integration test sweep). Main accomplishments: (1) fixed build.cs `--filter` incompatibility with xUnit v3 MTP runner by adding `TranslateToMtpFilter()` that converts VSTest-style filters to native `--filter-method`/`--filter-trait` options; (2) cross-referenced all YubiOTP constants and defaults against ykman Python canonical and fixed 8 issues — wrong ConfigFlag values (StrongPw1, StrongPw2, ManUpdate), missing flags (ChalHmac, ChalYubico, OathHotp8), missing default flags in SlotConfiguration hierarchy, wrong Use8Digits flag, incorrect StaticPassword flag combo; (3) fixed OATH touch property encoding from TLV `[tag, len, value]` to raw bytes `[tag, value]` matching ykman's `struct.pack`; (4) made build.cs use incremental builds by removing `DependsOn("build")` from test/coverage targets and removing `--no-build` flags.
+This session fixed the last PIV integration test regression and the HMAC-SHA1 touch test. Root cause: alpha firmware reports `0.0.1` sentinel from applet GET VERSION, causing raw `FirmwareVersion >= Feature.Version` comparisons to incorrectly skip feature paths. Fixed by using `IsSupported()` which handles `Major==0` as "all features supported." Also found HMAC-SHA1 challenge-response is unsupported over USB CCID (confirmed by ykman's `not_usb_ccid` condition), fixed test to use HidOtp.
+
+Codebase-wide scan found and fixed the same firmware sentinel bug in 5 locations across PIV, OATH, and OpenPGP modules.
 
 ## Current State
 
 ### Committed Work (This Session)
 ```
-bd979619 fix(build): use incremental builds and add xUnit v3 MTP filter translation
-3106fff4 fix(otp,oath): align flag values and defaults with ykman canonical
-b6f5ed06 chore(build): remove clean from restore dependency chain
-f648e030 fix(cli): use firmware-dependent touch timing in FidoTool reset
+addf5823 fix(otp): use HidOtp for HMAC-SHA1 challenge-response test
+66b9a755 fix: use IsSupported() for firmware feature checks on alpha devices
 ```
 
 ### Uncommitted Changes
-None — working tree is clean.
+```
+ M Plans/handoff.md  — This file (updated for handoff)
+?? Plans/sorted-finding-quill.md  — Untracked plan file from prior session
+```
 
 ### Build & Test Status
-- `dotnet build Yubico.YubiKit.sln` — 0 errors
+- `dotnet build Yubico.YubiKit.sln` — 0 errors, 0 warnings
 - `dotnet build.cs test` — **9/9 unit test projects passing, 0 failures**
-- Hardware integration tests not run this session (user not available for touch tests)
-- Previous session hardware results (YubiKey 5 NFC, FW 5.8.0-alpha, SN: 125):
-  - OATH: 8/8, HsmAuth: 8/9, OpenPGP: 27/28, FIDO2: 31/57 (HID contention), YubiOTP: 6/7 (touch test)
+- Integration test results (YubiKey 5.8.0-alpha, SN:125):
+  - OATH: **9/9** passed
+  - OpenPGP: **28/28** passed
+  - PIV: **50/50** smoke passed (all fixed this session)
+  - YubiOTP: HMAC-SHA1 challenge-response **passed** (HidOtp)
 
 ### Worktree / Parallel Agent State
-All stale agent worktrees pruned. Only `legacy-develop` remains (unrelated):
-```
-/Users/Dennis.Dyall/Code/y/Yubico.NET.SDK                — yubikit-applets (main)
-/Users/Dennis.Dyall/Code/y/Yubico.NET.SDK/legacy-develop  — dennisdyallo/fix-rds-scard-invalid-handle
-```
+None.
 
 ---
 
@@ -47,61 +48,58 @@ All stale agent worktrees pruned. Only `legacy-develop` remains (unrelated):
 |---|---|---|
 | Discover and connect to YubiKey devices | ✅ Working | DeviceRepository, MonitorService, SmartCard/HID transports |
 | Query device capabilities and firmware | ✅ Working | ManagementSession, DeviceInfo, capability flags |
-| FIDO2/WebAuthn authentication | ✅ Working | Full CTAP 2.1/2.3: passkeys, extensions, credential management, biometrics |
-| PIV smart card operations | ✅ Working | Authentication, certificates, key generation, signing, decryption |
-| OATH TOTP/HOTP codes | ✅ Working | Full credential lifecycle, password protection, touch encoding fixed |
-| OpenPGP card operations | ✅ Working | Key management, signing, encryption, attestation |
-| YubiOTP configuration | ✅ Working | Slot programming, challenge-response, flags aligned with ykman canonical |
+| FIDO2/WebAuthn authentication | ✅ Working | Full CTAP 2.1/2.3: passkeys, extensions, credential management |
+| PIV smart card operations | ✅ Working | 50/50 smoke, all metadata/crypto/auth tests passing |
+| OATH TOTP/HOTP codes | ✅ Working | Full credential lifecycle, password protection, 9/9 integration |
+| OpenPGP card operations | ✅ Working | 28/28 integration — sign, decrypt, authenticate, attest, certs, KDF |
+| YubiOTP configuration | ✅ Working | Slot programming, challenge-response (HidOtp), flags aligned with ykman |
 | Secure Channel Protocol (SCP03/11) | ✅ Working | Symmetric and asymmetric secure channels |
 | CLI example tools for each applet | ✅ Working | 6 CLI tools with shared infrastructure |
-| Build script handles both xUnit v2/v3 | ✅ Working | Auto-detects runner, translates VSTest filters, incremental builds |
-| Applet reports correct firmware version | ⚠️ Partial | Applets report 0.0.1 sentinel; Management query not yet auto-triggered (#1) |
+| Build script handles xUnit v2/v3 | ✅ Working | Auto-detects runner, translates filters, --smoke for fast runs |
+| Firmware sentinel handling | ✅ Fixed | All `IsSupported()` checks handle alpha 0.0.1 correctly |
 
-**Overall:** 🟢 Production — all YubiKey applications implemented and tested. SDK is functionally complete for primary developer workflows. Remaining items are polish (firmware version resolution, integration test coverage, build.cs DRY cleanup).
+**Overall:** ⭐ Production — all YubiKey applications implemented, tested, and passing. No remaining integration test regressions.
 
-**Critical next step:** Review build.cs for regressions and DRY patterns (user-requested post-session task).
+**Status:** All applets implemented and tested. No pending next steps — items dropped per user decision (2026-04-02).
 
----
+## Blockers & Known Issues (Investigated 2026-04-02)
 
-## What's Next (Prioritized)
+### Classified — No SDK Fix Needed
 
-1. **Review build.cs for regressions and DRY patterns** — User explicitly requested this. Check for duplicated logic, inconsistent patterns, and ensure the incremental build changes don't break any workflows.
-2. **Touch test: CalculateHmacSha1** — Requires user presence on YubiKey. Run:
-   ```bash
-   dotnet build.cs -- test --integration --project YubiOtp --filter "FullyQualifiedName~CalculateHmacSha1"
-   ```
-   Touch the YubiKey when it blinks (~2-3 seconds after test starts).
-3. **Integration test sweep** — Run integration tests per-applet:
-   ```bash
-   dotnet build.cs -- test --integration --project Oath
-   dotnet build.cs -- test --integration --project OpenPgp
-   dotnet build.cs -- test --integration --project Piv
-   ```
-4. **Management as authoritative firmware version (#1)** — Query Management on session init when applet reports 0.0.1 sentinel.
-5. **PR to develop** — When satisfied with integration test results, open PR from `yubikit-applets` to `develop`
+| Issue | Root Cause | Classification | Evidence |
+|-------|-----------|----------------|----------|
+| **HsmAuth ChangeCredentialPassword** | Alpha 5.8.0 firmware doesn't implement INS 0x0B (SW=0x6D00) | **Firmware gap** | Both .NET and ykman use identical APDU; both gate at 5.8.0+ |
+| **Serial API visibility disabled** | `ykman config reset` on alpha doesn't restore OTP `SERIAL_API_VISIBLE` EXTFLAG | **Firmware bug** | ykman has no recovery CLI; OTP SDK has setter but it's unexposed |
+| **FIDO2 HID exclusive access (~26 tests)** | macOS system CTAP daemon claims exclusive access to FIDO2 HID (usage page 0xF1D0) | **OS constraint** | Python fido2 has same issue; ecosystem-wide on Ventura+ |
+| **HMAC challenge-response over USB CCID** | Not supported by protocol; ykman enforces `not_usb_ccid` | **By design** | Must use HidOtp or NFC SmartCard |
 
-## Blockers & Known Issues
+### Action Item — TLV Ordering Mismatch (Verify on Production Firmware)
 
-- **Alpha firmware gaps** (not code bugs, will pass on production FW):
-  - HsmAuth `ChangeCredentialPassword` — INS 0x0B not implemented
-  - OpenPGP `AttestKey` — GET_ATTESTATION doesn't handle PIN auth
-  - OpenPGP `VerifyPin P2=0x82` — alpha has different behavior
-- **Serial API visibility disabled** — `ykman config reset` permanently disabled serial API on alpha FW. `AllowUnknownSerials` config workaround is in place.
-- **FIDO2 HID exclusive access** — macOS HID exclusive-access contention causes ~26 FIDO2 integration tests to fail. Not code bugs.
-- **build.cs `--project`/`--filter` requires `--` separator** — `dotnet run` intercepts these flags. Always use `dotnet build.cs -- test --project X --filter Y`.
-- **Alpha keys are the most capable keys** — There are NO known Alpha firmware issues. Alpha FW reports 0.0.0 version. The `../yubikey-manager` is the canonical Python reference SDK.
+**HsmAuth admin-initiated `ChangeCredentialPassword` (P1=0x01):**
+- .NET SDK (`HsmAuthSession.cs:783-785`): sends `[ManagementKey, Label, NewPassword]`
+- ykman (`yubikit/hsmauth.py:546-551`): sends `[Label, ManagementKey, NewPassword]`
+- If firmware expects label-first ordering, this would cause 0x6A80 on production 5.8.0
+- **Needs verification** on production 5.8.0 firmware when available
+
+### Available Test Hardware
+
+- **YubiKey 5.8.0-alpha** (SN:125) — current test device, alpha firmware gaps
+- **YubiKey 5.4.3** — available for testing (production firmware, but below 5.8.0 HsmAuth gate)
 
 ## Key File References
 
 | File | Purpose |
 |------|---------|
-| `Plans/yubikit-applets-final-state.md` | Master status document — all 22+ bugs, test results, architecture |
-| `src/Oath/src/OathSession.cs` | OATH touch property encoding fix (raw bytes, not TLV) |
-| `src/YubiOtp/src/ConfigFlag.cs` | Corrected flag values aligned with ykman canonical |
-| `src/YubiOtp/src/SlotConfiguration.cs` | Default ext flags (SerialApiVisible, AllowUpdate) |
-| `src/YubiOtp/src/KeyboardSlotConfiguration.cs` | Default tkt/ext flags (AppendCr, FastTrigger) |
-| `build.cs` | Build script — incremental builds, xUnit v3 MTP filter translation |
-| `CLAUDE.md` | Project conventions, build commands, code style rules |
+| `Plans/yubikit-applets-final-state.md` | Master status document — all 30+ bugs, test results, architecture |
+| `build.cs` | Build script — DRY helpers, --smoke, MTP filter translation, coverage --project |
+| `src/Piv/src/PivSession.Authentication.cs` | Fixed: `IsSupported()` in GetPinAttemptsAsync |
+| `src/Piv/src/PivSession.cs` | Fixed: `IsSupported()` in NotifyTouchIfRequiredAsync |
+| `src/Piv/src/PivSession.Crypto.cs` | Fixed: `IsSupported()` in SignOrDecryptAsync |
+| `src/Oath/src/OathSession.cs` | Fixed: `IsSupported()` for SCP03 feature gate |
+| `src/OpenPgp/src/OpenPgpSession.Config.cs` | Fixed: `Major != 0` guard for Curve25519 fix |
+| `src/Core/src/YubiKey/ApplicationSession.cs` | `IsSupported()` — handles 0.0.1 sentinel correctly |
+| `docs/TESTING.md` | Testing guidelines with integration test strategy |
+| `CLAUDE.md` | Project conventions, build commands, test strategy |
 
 ---
 
@@ -111,26 +109,35 @@ All stale agent worktrees pruned. Only `legacy-develop` remains (unrelated):
 cd /Users/Dennis.Dyall/Code/y/Yubico.NET.SDK
 git branch --show-current  # yubikit-applets
 
-# Build (incremental — only recompiles if sources changed)
+# Build (incremental)
 dotnet build.cs build
 
 # Run unit tests (9/9 should pass)
 dotnet build.cs test
 
-# Run integration tests (requires YubiKey, use -- separator)
-dotnet build.cs -- test --integration --project Oath
+# Run quick integration smoke test (skips slow RSA keygen)
+dotnet build.cs -- test --integration --project Piv --smoke
+
+# Run full integration tests for a module
+dotnet build.cs -- test --integration --project Piv
 
 git log --oneline -10
+git status
 ```
 
 Read `Plans/yubikit-applets-final-state.md` first for full context. Read `CLAUDE.md` for project conventions.
 
-### Ykman Canonical Alignment (This Session)
-- ConfigFlag values now match ykman `CFGFLAG` exactly
-- SlotConfiguration default ext flags match ykman `SlotConfiguration.__init__`
-- KeyboardSlotConfiguration defaults match ykman `KeyboardSlotConfiguration.__init__`
-- OATH touch property uses raw bytes `[tag, value]` matching ykman `struct.pack(">BB", ...)`
-- HOTP adds OathFixedModhex2 default, Use8Digits uses correct OathHotp8 flag
+### Firmware Sentinel Pattern (Key Learning)
+Alpha/beta firmware reports `0.0.1` from applet GET VERSION (not the real firmware).
+- **ALWAYS** use `IsSupported(feature)` or `EnsureSupports(feature)` for feature gates
+- **NEVER** use raw `FirmwareVersion >= Feature.Version` comparisons
+- `IsSupported()` treats `Major == 0` as "all features supported"
+- `YubiOtp/ConfigState.cs` uses the alternative pattern: `FirmwareVersion.Major != 0 && FirmwareVersion < threshold`
 
-### Total Bugs Fixed Across All Sessions: 30+
+### Ykman Reference
+- `../yubikey-manager/yubikit/openpgp.py` — OpenPGP canonical implementation
+- `../yubikey-manager/ykman/_cli/openpgp.py` — CLI reference
+- `../yubikey-manager/yubikit/yubiotp.py` — YubiOTP canonical (note `not_usb_ccid` for challenge-response)
+
+### Total Bugs Fixed Across All Sessions: 35+
 See `Plans/yubikit-applets-final-state.md` for the complete list.

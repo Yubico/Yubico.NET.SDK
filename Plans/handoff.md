@@ -2,18 +2,20 @@
 
 **Date:** 2026-04-02
 **Branch:** `yubikit-applets`
-**Last commit:** `b6f5ed06` chore(build): remove clean from restore dependency chain
+**Last commit:** `bd979619` fix(build): use incremental builds and add xUnit v3 MTP filter translation
 
 ---
 
 ## Session Summary
 
-This session focused on the FidoTool reset flow (#30). Cross-referenced the `ykman fido reset` implementation (both the checked-out dev repo v0.0.0-rc.1 and the installed v5.8.0) to identify gaps in our FidoTool. Key finding: ykman 5.8.0 uses `AuthenticatorInfo.LongTouchForReset` (CBOR key 0x18) to show "10 seconds" for newer firmware (5.8+, 0.0.0 keys) vs "Touch" for older keys. Our code parsed this field but never used it. Fixed the FidoTool reset to use firmware-dependent touch messaging, added transport restrictions check, and fixed `--force` to skip reinsertion entirely (matching ykman behavior).
+This session resumed handoff items 2 (YubiOTP touch test) and 3 (integration test sweep). Main accomplishments: (1) fixed build.cs `--filter` incompatibility with xUnit v3 MTP runner by adding `TranslateToMtpFilter()` that converts VSTest-style filters to native `--filter-method`/`--filter-trait` options; (2) cross-referenced all YubiOTP constants and defaults against ykman Python canonical and fixed 8 issues — wrong ConfigFlag values (StrongPw1, StrongPw2, ManUpdate), missing flags (ChalHmac, ChalYubico, OathHotp8), missing default flags in SlotConfiguration hierarchy, wrong Use8Digits flag, incorrect StaticPassword flag combo; (3) fixed OATH touch property encoding from TLV `[tag, len, value]` to raw bytes `[tag, value]` matching ykman's `struct.pack`; (4) made build.cs use incremental builds by removing `DependsOn("build")` from test/coverage targets and removing `--no-build` flags.
 
 ## Current State
 
 ### Committed Work (This Session)
 ```
+bd979619 fix(build): use incremental builds and add xUnit v3 MTP filter translation
+3106fff4 fix(otp,oath): align flag values and defaults with ykman canonical
 b6f5ed06 chore(build): remove clean from restore dependency chain
 f648e030 fix(cli): use firmware-dependent touch timing in FidoTool reset
 ```
@@ -24,12 +26,12 @@ None — working tree is clean.
 ### Build & Test Status
 - `dotnet build Yubico.YubiKit.sln` — 0 errors
 - `dotnet build.cs test` — **9/9 unit test projects passing, 0 failures**
-- Hardware integration tests not run this session
+- Hardware integration tests not run this session (user not available for touch tests)
 - Previous session hardware results (YubiKey 5 NFC, FW 5.8.0-alpha, SN: 125):
   - OATH: 8/8, HsmAuth: 8/9, OpenPGP: 27/28, FIDO2: 31/57 (HID contention), YubiOTP: 6/7 (touch test)
 
 ### Worktree / Parallel Agent State
-Only `legacy-develop` remains (unrelated legacy branch):
+All stale agent worktrees pruned. Only `legacy-develop` remains (unrelated):
 ```
 /Users/Dennis.Dyall/Code/y/Yubico.NET.SDK                — yubikit-applets (main)
 /Users/Dennis.Dyall/Code/y/Yubico.NET.SDK/legacy-develop  — dennisdyallo/fix-rds-scard-invalid-handle
@@ -47,37 +49,36 @@ Only `legacy-develop` remains (unrelated legacy branch):
 | Query device capabilities and firmware | ✅ Working | ManagementSession, DeviceInfo, capability flags |
 | FIDO2/WebAuthn authentication | ✅ Working | Full CTAP 2.1/2.3: passkeys, extensions, credential management, biometrics |
 | PIV smart card operations | ✅ Working | Authentication, certificates, key generation, signing, decryption |
-| OATH TOTP/HOTP codes | ✅ Working | Full credential lifecycle, password protection |
+| OATH TOTP/HOTP codes | ✅ Working | Full credential lifecycle, password protection, touch encoding fixed |
 | OpenPGP card operations | ✅ Working | Key management, signing, encryption, attestation |
-| YubiOTP configuration | ✅ Working | Slot programming, challenge-response, serial reading |
+| YubiOTP configuration | ✅ Working | Slot programming, challenge-response, flags aligned with ykman canonical |
 | Secure Channel Protocol (SCP03/11) | ✅ Working | Symmetric and asymmetric secure channels |
 | CLI example tools for each applet | ✅ Working | 6 CLI tools with shared infrastructure |
-| FidoTool reset matches ykman behavior | ✅ Working | Firmware-dependent touch timing, transport checks, --force flow |
+| Build script handles both xUnit v2/v3 | ✅ Working | Auto-detects runner, translates VSTest filters, incremental builds |
 | Applet reports correct firmware version | ⚠️ Partial | Applets report 0.0.1 sentinel; Management query not yet auto-triggered (#1) |
 
-**Overall:** 🟢 Production — all YubiKey applications implemented and tested. SDK is functionally complete for primary developer workflows. Remaining items are polish (firmware version resolution, integration test coverage).
+**Overall:** 🟢 Production — all YubiKey applications implemented and tested. SDK is functionally complete for primary developer workflows. Remaining items are polish (firmware version resolution, integration test coverage, build.cs DRY cleanup).
 
-**Critical next step:** Implement Management-as-authoritative-firmware-version (#1) so sessions auto-query Management when an applet reports the 0.0.1 sentinel version.
+**Critical next step:** Review build.cs for regressions and DRY patterns (user-requested post-session task).
 
 ---
 
 ## What's Next (Prioritized)
 
-1. **Management as authoritative firmware version (#1)** — Query Management on session init when applet reports 0.0.1 sentinel. Design decision needed on where this logic lives.
+1. **Review build.cs for regressions and DRY patterns** — User explicitly requested this. Check for duplicated logic, inconsistent patterns, and ensure the incremental build changes don't break any workflows.
 2. **Touch test: CalculateHmacSha1** — Requires user presence on YubiKey. Run:
    ```bash
    dotnet build.cs -- test --integration --project YubiOtp --filter "FullyQualifiedName~CalculateHmacSha1"
    ```
    Touch the YubiKey when it blinks (~2-3 seconds after test starts).
-   **NOTE:** Must use `--` separator before `test` because `dotnet run` intercepts `--project` and `--filter` otherwise.
 3. **Integration test sweep** — Run integration tests per-applet:
    ```bash
    dotnet build.cs -- test --integration --project Oath
    dotnet build.cs -- test --integration --project OpenPgp
    dotnet build.cs -- test --integration --project Piv
-   # etc.
    ```
-4. **PR to develop** — When satisfied with integration test results, open PR from `yubikit-applets` to `develop`
+4. **Management as authoritative firmware version (#1)** — Query Management on session init when applet reports 0.0.1 sentinel.
+5. **PR to develop** — When satisfied with integration test results, open PR from `yubikit-applets` to `develop`
 
 ## Blockers & Known Issues
 
@@ -88,19 +89,18 @@ Only `legacy-develop` remains (unrelated legacy branch):
 - **Serial API visibility disabled** — `ykman config reset` permanently disabled serial API on alpha FW. `AllowUnknownSerials` config workaround is in place.
 - **FIDO2 HID exclusive access** — macOS HID exclusive-access contention causes ~26 FIDO2 integration tests to fail. Not code bugs.
 - **build.cs `--project`/`--filter` requires `--` separator** — `dotnet run` intercepts these flags. Always use `dotnet build.cs -- test --project X --filter Y`.
+- **Alpha keys are the most capable keys** — There are NO known Alpha firmware issues. Alpha FW reports 0.0.0 version. The `../yubikey-manager` is the canonical Python reference SDK.
 
 ## Key File References
 
 | File | Purpose |
 |------|---------|
 | `Plans/yubikit-applets-final-state.md` | Master status document — all 22+ bugs, test results, architecture |
-| `Plans/cli-shared-infrastructure.md` | CLI extraction plan with phases and decision log |
-| `src/Fido2/examples/FidoTool/FidoExamples/ResetAuthenticator.cs` | Reset with preflight info (LongTouchForReset, TransportsForReset) |
-| `src/Fido2/examples/FidoTool/Cli/Menus/ResetMenu.cs` | Interactive reset menu with transport checks |
-| `src/Cli.Shared/src/` | Shared CLI project (11 source files including InteractiveMenuBuilder, SessionHelper) |
-| `src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs` | Auto-adds RequiresHardware+Integration traits |
-| `build.cs` | Build script — `test` runs unit tests only, `--integration --project X` for integration |
-| `docs/TESTING.md` | ALWAYS use `dotnet build.cs test`, never `dotnet test` directly |
+| `src/Oath/src/OathSession.cs` | OATH touch property encoding fix (raw bytes, not TLV) |
+| `src/YubiOtp/src/ConfigFlag.cs` | Corrected flag values aligned with ykman canonical |
+| `src/YubiOtp/src/SlotConfiguration.cs` | Default ext flags (SerialApiVisible, AllowUpdate) |
+| `src/YubiOtp/src/KeyboardSlotConfiguration.cs` | Default tkt/ext flags (AppendCr, FastTrigger) |
+| `build.cs` | Build script — incremental builds, xUnit v3 MTP filter translation |
 | `CLAUDE.md` | Project conventions, build commands, code style rules |
 
 ---
@@ -109,51 +109,28 @@ Only `legacy-develop` remains (unrelated legacy branch):
 
 ```bash
 cd /Users/Dennis.Dyall/Code/y/Yubico.NET.SDK
-
-# Verify branch
 git branch --show-current  # yubikit-applets
 
-# Build
+# Build (incremental — only recompiles if sources changed)
 dotnet build.cs build
 
 # Run unit tests (9/9 should pass)
 dotnet build.cs test
 
-# Run integration tests for a specific applet (requires YubiKey)
-# NOTE: Use -- separator!
+# Run integration tests (requires YubiKey, use -- separator)
 dotnet build.cs -- test --integration --project Oath
 
-# Check status
 git log --oneline -10
-git status
 ```
 
 Read `Plans/yubikit-applets-final-state.md` first for full context. Read `CLAUDE.md` for project conventions.
 
-### Project Structure (after restructure)
-All project folders live under `src/` with stripped `Yubico.YubiKit.` prefix:
-```
-src/Core/          src/Fido2/         src/Management/
-src/Oath/          src/OpenPgp/       src/Piv/
-src/SecurityDomain/ src/YubiHsm/      src/YubiOtp/
-src/Cli.Shared/    src/Tests.Shared/  src/Tests.TestProject/
-```
-DLL output names remain `Yubico.YubiKit.*.dll`. Namespaces unchanged.
+### Ykman Canonical Alignment (This Session)
+- ConfigFlag values now match ykman `CFGFLAG` exactly
+- SlotConfiguration default ext flags match ykman `SlotConfiguration.__init__`
+- KeyboardSlotConfiguration defaults match ykman `KeyboardSlotConfiguration.__init__`
+- OATH touch property uses raw bytes `[tag, value]` matching ykman `struct.pack(">BB", ...)`
+- HOTP adds OathFixedModhex2 default, Use8Digits uses correct OathHotp8 flag
 
-### FidoTool Reset Research (This Session)
-Cross-referenced with ykman 5.8.0 (`/usr/local/bin/ykman`). Key findings:
-- `long_touch_for_reset` (CBOR key 0x18) — firmware reports whether 10s hold is needed
-- `transports_for_reset` (CBOR key 0x1A) — firmware restricts allowed transports
-- Checked-out yubikey-manager repo (v0.0.0-rc.1) says "5 seconds" but installed v5.8.0 says "10 seconds"
-- ykman uses device polling (0.5s intervals) for removal/reinsertion detection — we use Console.ReadLine()
-- ykman has keepalive callback for "DO NOT REMOVE" during processing — we silently consume keepalives
-
-### Remaining FidoTool Reset Gaps (Not Fixed This Session)
-- No automatic device removal/reinsertion polling (uses Console.ReadLine instead)
-- No keepalive callback for "DO NOT REMOVE YOUR YUBIKEY" during reset processing
-- No same-device verification after reinsertion (serial/version comparison)
-- No `reset_blocked` check (requires ManagementSession query)
-- No YK4 FIPS reset path (edge case, legacy hardware)
-
-### Total Bugs Fixed Across All Sessions: 22+
-See `Plans/yubikit-applets-final-state.md` section "Bugs Fixed Across Entire Session History" for the complete list.
+### Total Bugs Fixed Across All Sessions: 30+
+See `Plans/yubikit-applets-final-state.md` for the complete list.

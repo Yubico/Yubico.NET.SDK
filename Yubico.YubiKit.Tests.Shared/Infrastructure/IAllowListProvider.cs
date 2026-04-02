@@ -31,4 +31,10 @@ public interface IAllowListProvider
     /// </summary>
     /// <returns>Error message with instructions for configuring the allow list.</returns>
     string OnInvalidInputErrorMessage();
+
+    /// <summary>
+    ///     Gets whether devices without serial numbers should be allowed for testing.
+    ///     Useful for alpha firmware or devices where serial API visibility is disabled.
+    /// </summary>
+    bool AllowUnknownSerials => false;
 }

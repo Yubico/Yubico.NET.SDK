@@ -50,8 +50,9 @@ public sealed class AllowList
 
         var serialList = provider.GetList();
         _allowedSerials = [..serialList];
+        AllowUnknownSerials = provider.AllowUnknownSerials;
 
-        if (_allowedSerials.Count == 0)
+        if (_allowedSerials.Count == 0 && !AllowUnknownSerials)
         {
             var errorMessage = provider.OnInvalidInputErrorMessage();
             logger?.LogCritical("{ErrorMessage}", errorMessage);
@@ -60,7 +61,14 @@ public sealed class AllowList
         }
 
         logger?.LogInformation("AllowList initialized with {Count} allowed serial numbers", _allowedSerials.Count);
+        if (AllowUnknownSerials)
+            logger?.LogWarning("AllowUnknownSerials is enabled — devices without serial numbers will be authorized");
     }
+
+    /// <summary>
+    ///     Gets whether devices without serial numbers are allowed for testing.
+    /// </summary>
+    public bool AllowUnknownSerials { get; }
 
     /// <summary>
     ///     Determines whether the specified serial number is in the allow list.

@@ -212,11 +212,8 @@ internal static class YubiKeyTestInfrastructure
                     {
                         if (AllowList.IsDeviceAllowed(deviceInfo.Value.SerialNumber))
                         {
-                            // Get device info
                             var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.ConnectionType);
                             authorizedDevices.Add(testDevice);
-
-                            // Add to cache for deserialization
                             YubiKeyDeviceCache.AddDevice(testDevice);
 
                             Console.WriteLine(
@@ -230,18 +227,28 @@ internal static class YubiKeyTestInfrastructure
                                 $"[YubiKey Infrastructure] Device SN:{deviceInfo.Value.SerialNumber} FILTERED (not in allow list)");
                         }
                     }
+                    else if (deviceInfo is not null && AllowList.AllowUnknownSerials)
+                    {
+                        var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.ConnectionType);
+                        authorizedDevices.Add(testDevice);
+                        YubiKeyDeviceCache.AddDevice(testDevice);
+
+                        Console.WriteLine(
+                            $"[YubiKey Infrastructure] Device ({device.ConnectionType}) authorized (unknown serial, AllowUnknownSerials=true, " +
+                            $"FW:{deviceInfo.Value.FirmwareVersion}, {deviceInfo.Value.FormFactor})");
+                    }
                     else
                     {
                         filteredCount++;
                         Console.WriteLine("[YubiKey Infrastructure] Device with unknown serial FILTERED");
                     }
                 }
-                catch (SCardException scardException)
+                catch (Exception deviceEx)
                 {
                     filteredCount++;
                     Console.WriteLine(
-                        $"[YubiKey Infrastructure] DeviceId :{device.DeviceId} FILTERED " +
-                        $"(allow list check failed: {scardException.Message})");
+                        $"[YubiKey Infrastructure] DeviceId:{device.DeviceId} SKIPPED " +
+                        $"(initialization failed: {deviceEx.GetType().Name}: {deviceEx.Message})");
                 }
 
             // Hard fail if no authorized devices

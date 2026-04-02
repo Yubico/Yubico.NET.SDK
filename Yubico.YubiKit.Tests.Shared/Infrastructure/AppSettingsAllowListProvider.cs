@@ -36,6 +36,7 @@ public sealed class AppSettingsAllowListProvider : IAllowListProvider
 {
     private const string ConfigSection = "YubiKeyTests";
     private const string AllowedSerialsKey = "AllowedSerialNumbers";
+    private const string AllowUnknownSerialsKey = "AllowUnknownSerials";
 
     private readonly IConfiguration _configuration;
 
@@ -68,6 +69,24 @@ public sealed class AppSettingsAllowListProvider : IAllowListProvider
         catch (Exception)
         {
             return [];
+        }
+    }
+
+    /// <inheritdoc />
+    public bool AllowUnknownSerials
+    {
+        get
+        {
+            try
+            {
+                return _configuration
+                    .GetSection(ConfigSection)
+                    .GetValue<bool>(AllowUnknownSerialsKey);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 

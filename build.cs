@@ -160,7 +160,7 @@ Target("clean", () =>
     }
 });
 
-Target("restore", DependsOn("clean"), () =>
+Target("restore", () =>
 {
     PrintHeader("Restoring dependencies");
     Run("dotnet", $"restore {solutionFile}");

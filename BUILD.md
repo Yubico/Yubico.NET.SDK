@@ -35,12 +35,12 @@ dotnet build.cs -- build --project Piv --clean
 
 ### Available Targets
 
-- **clean** - Remove artifacts directory (and optionally run `dotnet clean`)
-- **restore** - Restore NuGet dependencies (depends on: clean)
-- **build** - Build the solution (depends on: clean, restore)
-- **test** - Run unit tests with nice summary output (depends on: clean, restore, build)
-- **coverage** - Run tests with code coverage collection (depends on: clean, restore, build)
-- **pack** - Create NuGet packages (depends on: clean, restore, build)
+- **clean** - Remove artifacts directory (and optionally run `dotnet clean`); must be specified explicitly
+- **restore** - Restore NuGet dependencies
+- **build** - Build the solution (depends on: restore)
+- **test** - Run unit tests with nice summary output (depends on: restore, build)
+- **coverage** - Run tests with code coverage collection (depends on: restore, build)
+- **pack** - Create NuGet packages (depends on: restore, build)
 - **setup-feed** - Configure local NuGet feed
 - **publish** - Publish packages to local feed (depends on: pack, setup-feed)
 - **default** - Run tests and publish (depends on: test, publish)
@@ -91,8 +91,8 @@ dotnet build.cs publish --package-version 1.0.0-preview.2
 # Dry run to see what would be published
 dotnet build.cs publish --dry-run
 
-# Full clean build
-dotnet build.cs build --clean
+# Full clean build (delete artifacts, then build)
+dotnet build.cs clean build
 ```
 
 ## Target Dependencies
@@ -102,11 +102,12 @@ default
 ├── test
 │   └── build
 │       └── restore
-│           └── clean
 └── publish
     ├── pack
     │   └── build (shared)
     └── setup-feed
+
+clean  (standalone — must be specified explicitly)
 ```
 
 ## Output

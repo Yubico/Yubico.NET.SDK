@@ -38,8 +38,10 @@ jobs:
           # and open socket permissions so the test runner user can connect
           sudo mkdir -p /run/pcscd
           sudo pcscd --foreground &
-          sleep 2
-          sudo chmod 777 /run/pcscd/pcscd.comm || true
+          # Wait for socket to appear (more robust than fixed sleep)
+          timeout 10 bash -c 'until [ -S /run/pcscd/pcscd.comm ]; do sleep 0.2; done' || true
+          # Open socket read/write for the runner user (sockets don't need +x)
+          sudo chmod 666 /run/pcscd/pcscd.comm || true
 
       - name: Build
         run: dotnet build.cs build

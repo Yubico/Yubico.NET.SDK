@@ -492,7 +492,7 @@ public class SlotConfigurationTests
     }
 
     [Fact]
-    public void StaticPassword_SetsShortTicketAndStaticTicketFlags()
+    public void StaticPassword_SetsShortTicketFlag()
     {
         byte[] scanCodes = [0x04];
 
@@ -501,7 +501,8 @@ public class SlotConfigurationTests
 
         byte cfgFlags = result[CfgFlagsOffset];
         Assert.Equal((byte)ConfigFlag.ShortTicket, cfgFlags & (byte)ConfigFlag.ShortTicket);
-        Assert.Equal((byte)ConfigFlag.StaticTicket, cfgFlags & (byte)ConfigFlag.StaticTicket);
+        // ykman canonical: StaticPassword only sets SHORT_TICKET, not STATIC_TICKET
+        Assert.Equal(0, cfgFlags & (byte)ConfigFlag.StaticTicket & ~(byte)ConfigFlag.ShortTicket);
     }
 
     [Fact]
@@ -720,11 +721,13 @@ public class SlotConfigurationTests
         config.AllowUpdate().Dormant().SerialApiVisible().InvertLed();
         var result = config.GetConfig();
 
+        // Includes defaults: SerialApiVisible + AllowUpdate (base) + FastTrigger (keyboard)
         byte expected = (byte)(
             ExtendedFlag.AllowUpdate |
             ExtendedFlag.Dormant |
             ExtendedFlag.SerialApiVisible |
-            ExtendedFlag.InvertLed);
+            ExtendedFlag.InvertLed |
+            ExtendedFlag.FastTrigger);
 
         Assert.Equal(expected, result[ExtFlagsOffset]);
         AssertValidCrc(result);

@@ -215,13 +215,15 @@ public sealed class OathSession : ApplicationSession, IOathSession
             // Calculate total size for all TLVs
             int totalSize = nameTlv.TotalLength + keyTlv.TotalLength;
 
-            Tlv? propTlv = null;
+            // TAG_PROPERTY is raw bytes [tag, value], NOT TLV-encoded (no length field).
+            // This matches the ykman Python canonical: struct.pack(">BB", TAG_PROPERTY, PROP_REQUIRE_TOUCH)
+            byte[]? propBytes = null;
             Tlv? imfTlv = null;
 
             if (requireTouch)
             {
-                propTlv = new Tlv(OathConstants.TagProperty, [OathConstants.PropRequireTouch]);
-                totalSize += propTlv.TotalLength;
+                propBytes = [OathConstants.TagProperty, OathConstants.PropRequireTouch];
+                totalSize += propBytes.Length;
             }
 
             if (credentialData.OathType == OathType.Hotp && credentialData.Counter > 0)
@@ -243,10 +245,10 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 keyTlv.AsSpan().CopyTo(data.AsSpan(offset));
                 offset += keyTlv.TotalLength;
 
-                if (propTlv is not null)
+                if (propBytes is not null)
                 {
-                    propTlv.AsSpan().CopyTo(data.AsSpan(offset));
-                    offset += propTlv.TotalLength;
+                    propBytes.CopyTo(data.AsSpan(offset));
+                    offset += propBytes.Length;
                 }
 
                 if (imfTlv is not null)
@@ -260,7 +262,6 @@ public sealed class OathSession : ApplicationSession, IOathSession
             }
             finally
             {
-                propTlv?.Dispose();
                 imfTlv?.Dispose();
             }
 

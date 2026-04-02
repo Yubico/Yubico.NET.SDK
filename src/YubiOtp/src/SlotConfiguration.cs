@@ -44,7 +44,7 @@ public abstract class SlotConfiguration : IDisposable
     protected readonly byte[] _uid = new byte[YubiOtpConstants.UidSize];
     protected readonly byte[] _key = new byte[YubiOtpConstants.KeySize];
     protected byte _fixedSize;
-    protected ExtendedFlag _extFlags;
+    protected ExtendedFlag _extFlags = ExtendedFlag.SerialApiVisible | ExtendedFlag.AllowUpdate;
     protected TicketFlag _tktFlags;
     protected ConfigFlag _cfgFlags;
     private bool _disposed;

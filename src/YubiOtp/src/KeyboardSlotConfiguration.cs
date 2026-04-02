@@ -21,6 +21,12 @@ namespace Yubico.YubiKit.YubiOtp;
 /// </summary>
 public abstract class KeyboardSlotConfiguration : SlotConfiguration
 {
+    protected KeyboardSlotConfiguration()
+    {
+        _tktFlags |= TicketFlag.AppendCr;
+        _extFlags |= ExtendedFlag.FastTrigger;
+    }
+
     /// <summary>
     /// Appends a carriage return after the OTP output.
     /// </summary>

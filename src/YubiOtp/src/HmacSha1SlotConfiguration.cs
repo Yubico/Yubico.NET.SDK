@@ -65,6 +65,7 @@ public sealed class HmacSha1SlotConfiguration : SlotConfiguration
         CryptographicOperations.ZeroMemory(processedKey);
 
         _tktFlags |= TicketFlag.ChalResp;
+        _cfgFlags |= ConfigFlag.ChalHmac | ConfigFlag.HmacLt64;
     }
 
     public override FirmwareVersion MinimumFirmwareVersion => new(2, 2, 0);

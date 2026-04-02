@@ -71,6 +71,6 @@ public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
         }
 
         _fixedSize = (byte)Math.Min(scanCodes.Length, YubiOtpConstants.FixedSize);
-        _cfgFlags |= ConfigFlag.ShortTicket | ConfigFlag.StaticTicket;
+        _cfgFlags |= ConfigFlag.ShortTicket;
     }
 }

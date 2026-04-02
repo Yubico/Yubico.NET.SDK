@@ -85,6 +85,7 @@ public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
         }
 
         _tktFlags |= TicketFlag.OathHotp;
+        _cfgFlags |= ConfigFlag.OathFixedModhex2;
     }
 
     public override FirmwareVersion MinimumFirmwareVersion => new(2, 1, 0);
@@ -94,7 +95,7 @@ public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
     /// </summary>
     public HotpSlotConfiguration Use8Digits(bool enable = true)
     {
-        SetCfgFlag(ConfigFlag.OathFixedModhex1, enable);
+        SetCfgFlag(ConfigFlag.OathHotp8, enable);
         return this;
     }
 }

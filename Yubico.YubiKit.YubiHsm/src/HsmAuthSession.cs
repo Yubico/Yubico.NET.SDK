@@ -498,29 +498,17 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         await _protocol!.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        // Reset initialization flag so InitializeCoreAsync will run again
-        IsInitialized = false;
-
-        // Re-SELECT the applet after reset to refresh cached state
-        var smartCardProtocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create()
-            .Create(_connection);
-
-        var selectResponse = await smartCardProtocol
+        // Re-SELECT the applet using the existing protocol to refresh cached state.
+        // Do NOT create a new protocol here — that would abandon the current one without
+        // disposing it, leaking the PCSC transaction and causing SW=0x6985 on next operation.
+        var selectResponse = await _protocol!
             .SelectAsync(ApplicationIds.YubiHsmAuth, cancellationToken)
             .ConfigureAwait(false);
 
         var resolvedFirmwareVersion = ParseVersionFromSelectResponse(selectResponse)
             ?? FeatureHsmAuth.Version;
 
-        await InitializeCoreAsync(
-                smartCardProtocol,
-                resolvedFirmwareVersion,
-                scpKeyParams: _scpKeyParams,
-                cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        _protocol = Protocol as ISmartCardProtocol;
+        FirmwareVersion = resolvedFirmwareVersion;
     }
 
     /// <inheritdoc />
@@ -683,11 +671,14 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             credPwBytes = ParseCredentialPassword(credentialPassword);
 
+            // TAG_PRIVATE_KEY with empty value signals on-device key generation.
+            // Python canonical: _put_credential(management_key, label, b"", EC_P256, credential_password)
             var data = TlvHelper.EncodeList(
             [
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagAlgorithm, [(byte)HsmAuthAlgorithm.EcP256YubicoAuthentication]),
+                new Tlv(TagPrivateKey, ReadOnlySpan<byte>.Empty),
                 new Tlv(TagCredentialPassword, credPwBytes),
                 new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00])
             ]);

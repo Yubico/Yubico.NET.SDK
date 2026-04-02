@@ -15,10 +15,23 @@ namespace Yubico.YubiKit.YubiHsm.IntegrationTests;
 /// </summary>
 public class HsmAuthSessionTests
 {
-    private static readonly CancellationTokenSource Cts = new(TimeSpan.FromSeconds(60));
+    // Per-test CancellationToken — do not use a static CTS (shared state causes
+    // cancellation after cumulative timeout, breaking later tests in the suite).
+    private static CancellationToken NewToken(int timeoutSeconds = 30) =>
+        new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds)).Token;
 
-    // Default management key (all zeros)
+    // Default management key (all zeros after reset)
     private static readonly byte[] DefaultManagementKey = new byte[16];
+
+    // A management key that passes complexity requirements on Enhanced PIN devices.
+    // Note: alpha/beta firmware has non-standard complexity checks — this specific
+    // value is known to pass on 5.8.0-alpha YubiKeys. On production firmware,
+    // any 16-byte non-zero key should work.
+    private static readonly byte[] ComplexManagementKey =
+    [
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+    ];
 
     private const string TestLabel = "test-credential";
     private const string TestPassword = "password";
@@ -31,11 +44,11 @@ public class HsmAuthSessionTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
-                var credentials = await session.ListCredentialsAsync(Cts.Token);
+                var credentials = await session.ListCredentialsAsync(NewToken());
                 Assert.Empty(credentials);
             },
             resetBeforeUse: true,
-            cancellationToken: Cts.Token);
+            cancellationToken: NewToken());
 
     // ─── Put Symmetric → List → Delete → List ───────────────────────────────────
 
@@ -57,19 +70,19 @@ public class HsmAuthSessionTests
                         keyEnc,
                         keyMac,
                         TestPassword,
-                        cancellationToken: Cts.Token);
+                        cancellationToken: NewToken());
 
                     // List should contain exactly one credential
-                    var credentials = await session.ListCredentialsAsync(Cts.Token);
+                    var credentials = await session.ListCredentialsAsync(NewToken());
                     Assert.Single(credentials);
                     Assert.Equal(TestLabel, credentials[0].Label);
                     Assert.Equal(HsmAuthAlgorithm.Aes128YubicoAuthentication, credentials[0].Algorithm);
 
                     // Delete it
-                    await session.DeleteCredentialAsync(DefaultManagementKey, TestLabel, Cts.Token);
+                    await session.DeleteCredentialAsync(DefaultManagementKey, TestLabel, NewToken());
 
                     // List should now be empty
-                    var credentialsAfterDelete = await session.ListCredentialsAsync(Cts.Token);
+                    var credentialsAfterDelete = await session.ListCredentialsAsync(NewToken());
                     Assert.Empty(credentialsAfterDelete);
                 }
                 finally
@@ -79,7 +92,7 @@ public class HsmAuthSessionTests
                 }
             },
             resetBeforeUse: true,
-            cancellationToken: Cts.Token);
+            cancellationToken: NewToken());
 
     // ─── Put Derived → Verify Algorithm ──────────────────────────────────────────
 
@@ -94,14 +107,14 @@ public class HsmAuthSessionTests
                     TestLabel,
                     "my-derivation-password",
                     TestPassword,
-                    cancellationToken: Cts.Token);
+                    cancellationToken: NewToken());
 
-                var credentials = await session.ListCredentialsAsync(Cts.Token);
+                var credentials = await session.ListCredentialsAsync(NewToken());
                 Assert.Single(credentials);
                 Assert.Equal(HsmAuthAlgorithm.Aes128YubicoAuthentication, credentials[0].Algorithm);
             },
             resetBeforeUse: true,
-            cancellationToken: Cts.Token);
+            cancellationToken: NewToken());
 
     // ─── Change Management Key Round-Trip ────────────────────────────────────────
 
@@ -111,11 +124,13 @@ public class HsmAuthSessionTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
-                var newKey = RandomNumberGenerator.GetBytes(16);
+                // Use ComplexManagementKey — random bytes may fail PIN complexity
+                // on Enhanced PIN devices that enforce entropy requirements.
+                var newKey = (byte[])ComplexManagementKey.Clone();
                 try
                 {
                     // Change from default to new key
-                    await session.PutManagementKeyAsync(DefaultManagementKey, newKey, Cts.Token);
+                    await session.PutManagementKeyAsync(DefaultManagementKey, newKey, NewToken());
 
                     // Use the new key to store a credential (proves the key was changed)
                     var keyEnc = RandomNumberGenerator.GetBytes(16);
@@ -128,9 +143,9 @@ public class HsmAuthSessionTests
                             keyEnc,
                             keyMac,
                             TestPassword,
-                            cancellationToken: Cts.Token);
+                            cancellationToken: NewToken());
 
-                        var credentials = await session.ListCredentialsAsync(Cts.Token);
+                        var credentials = await session.ListCredentialsAsync(NewToken());
                         Assert.Single(credentials);
                     }
                     finally
@@ -145,7 +160,7 @@ public class HsmAuthSessionTests
                 }
             },
             resetBeforeUse: true,
-            cancellationToken: Cts.Token);
+            cancellationToken: NewToken());
 
     // ─── Get Retries == 8 After Reset ────────────────────────────────────────────
 
@@ -155,11 +170,11 @@ public class HsmAuthSessionTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
-                var retries = await session.GetManagementKeyRetriesAsync(Cts.Token);
+                var retries = await session.GetManagementKeyRetriesAsync(NewToken());
                 Assert.Equal(8, retries);
             },
             resetBeforeUse: true,
-            cancellationToken: Cts.Token);
+            cancellationToken: NewToken());
 
     // ─── Calculate Session Keys Symmetric → 48 bytes ─────────────────────────────
 
@@ -172,7 +187,7 @@ public class HsmAuthSessionTests
                 // Store a symmetric credential first
                 var keyEnc = RandomNumberGenerator.GetBytes(16);
                 var keyMac = RandomNumberGenerator.GetBytes(16);
-                var context = RandomNumberGenerator.GetBytes(32);
+                var context = RandomNumberGenerator.GetBytes(16);
 
                 try
                 {
@@ -182,14 +197,14 @@ public class HsmAuthSessionTests
                         keyEnc,
                         keyMac,
                         TestPassword,
-                        cancellationToken: Cts.Token);
+                        cancellationToken: NewToken());
 
                     // Calculate session keys
                     using var keys = await session.CalculateSessionKeysSymmetricAsync(
                         TestLabel,
                         context,
                         TestPassword,
-                        cancellationToken: Cts.Token);
+                        cancellationToken: NewToken());
 
                     // Each key is 16 bytes
                     Assert.Equal(16, keys.SEnc.Length);
@@ -204,7 +219,7 @@ public class HsmAuthSessionTests
                 }
             },
             resetBeforeUse: true,
-            cancellationToken: Cts.Token);
+            cancellationToken: NewToken());
 
     // ─── Version-Gated: Generate Asymmetric + Get Public Key (5.6.0+) ────────────
 
@@ -218,19 +233,19 @@ public class HsmAuthSessionTests
                     DefaultManagementKey,
                     TestLabel,
                     TestPassword,
-                    cancellationToken: Cts.Token);
+                    cancellationToken: NewToken());
 
-                var credentials = await session.ListCredentialsAsync(Cts.Token);
+                var credentials = await session.ListCredentialsAsync(NewToken());
                 Assert.Single(credentials);
                 Assert.Equal(HsmAuthAlgorithm.EcP256YubicoAuthentication, credentials[0].Algorithm);
 
                 // Get public key - should be 65 bytes (uncompressed EC point)
-                var publicKey = await session.GetPublicKeyAsync(TestLabel, Cts.Token);
+                var publicKey = await session.GetPublicKeyAsync(TestLabel, NewToken());
                 Assert.Equal(65, publicKey.Length);
                 Assert.Equal(0x04, publicKey.Span[0]); // Uncompressed point marker
             },
             resetBeforeUse: true,
-            cancellationToken: Cts.Token);
+            cancellationToken: NewToken());
 
     // ─── Version-Gated: Change Credential Password (5.8.0+) ─────────────────────
 
@@ -243,7 +258,7 @@ public class HsmAuthSessionTests
                 // Store a credential with the original password
                 var keyEnc = RandomNumberGenerator.GetBytes(16);
                 var keyMac = RandomNumberGenerator.GetBytes(16);
-                var context = RandomNumberGenerator.GetBytes(32);
+                var context = RandomNumberGenerator.GetBytes(16);
 
                 try
                 {
@@ -253,7 +268,7 @@ public class HsmAuthSessionTests
                         keyEnc,
                         keyMac,
                         TestPassword,
-                        cancellationToken: Cts.Token);
+                        cancellationToken: NewToken());
 
                     // Change the password
                     const string newPassword = "new-password";
@@ -261,14 +276,14 @@ public class HsmAuthSessionTests
                         TestLabel,
                         TestPassword,
                         newPassword,
-                        Cts.Token);
+                        NewToken());
 
                     // Calculate session keys with the new password should succeed
                     using var keys = await session.CalculateSessionKeysSymmetricAsync(
                         TestLabel,
                         context,
                         newPassword,
-                        cancellationToken: Cts.Token);
+                        cancellationToken: NewToken());
 
                     Assert.Equal(16, keys.SEnc.Length);
                 }
@@ -280,7 +295,7 @@ public class HsmAuthSessionTests
                 }
             },
             resetBeforeUse: true,
-            cancellationToken: Cts.Token);
+            cancellationToken: NewToken());
 
     // ─── Touch-Required Tests ────────────────────────────────────────────────────
 
@@ -303,9 +318,9 @@ public class HsmAuthSessionTests
                         keyMac,
                         TestPassword,
                         touchRequired: true,
-                        cancellationToken: Cts.Token);
+                        cancellationToken: NewToken());
 
-                    var credentials = await session.ListCredentialsAsync(Cts.Token);
+                    var credentials = await session.ListCredentialsAsync(NewToken());
                     Assert.Single(credentials);
                     Assert.True(credentials[0].TouchRequired);
                 }
@@ -316,5 +331,5 @@ public class HsmAuthSessionTests
                 }
             },
             resetBeforeUse: true,
-            cancellationToken: Cts.Token);
+            cancellationToken: NewToken());
 }

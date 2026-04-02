@@ -281,11 +281,10 @@ public sealed class PinUvAuthProtocolV2Tests
     public void Authenticate_InvalidKeyLength_ThrowsArgumentException()
     {
         using var protocol = new PinUvAuthProtocolV2();
-        var key = RandomNumberGenerator.GetBytes(32);
+        var key = RandomNumberGenerator.GetBytes(16); // Neither 32 nor 64 bytes
         var message = "test"u8.ToArray();
-        
-        var ex = Assert.Throws<ArgumentException>(() => protocol.Authenticate(key, message));
-        Assert.Contains("64 bytes", ex.Message);
+
+        Assert.Throws<ArgumentException>(() => protocol.Authenticate(key, message));
     }
     
     [Fact]

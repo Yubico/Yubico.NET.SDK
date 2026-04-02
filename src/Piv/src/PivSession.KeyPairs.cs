@@ -165,14 +165,14 @@ public sealed partial class PivSession
             if (pinPolicy != PivPinPolicy.Default)
             {
                 using var pinPolicyTlv = new Tlv(0xAA, [(byte)pinPolicy]);
-                keyData = [.. keyData, .. pinPolicyTlv.AsSpan().ToArray()];
+                keyData = [.. keyData, .. pinPolicyTlv.AsSpan()];
             }
 
             // Add touch policy TLV if not default
             if (touchPolicy != PivTouchPolicy.Default)
             {
                 using var touchPolicyTlv = new Tlv(0xAB, [(byte)touchPolicy]);
-                keyData = [.. keyData, .. touchPolicyTlv.AsSpan().ToArray()];
+                keyData = [.. keyData, .. touchPolicyTlv.AsSpan()];
             }
 
             // Send IMPORT KEY command: INS 0xFE, P1 = algorithm, P2 = slot
@@ -232,11 +232,11 @@ public sealed partial class PivSession
         using var iqTlv = new Tlv(0x05, PadToLength(parameters.InverseQ, componentLength));
 
         // Concatenate all TLVs
-        return [.. pTlv.AsSpan().ToArray(), 
-                .. qTlv.AsSpan().ToArray(), 
-                .. dpTlv.AsSpan().ToArray(), 
-                .. dqTlv.AsSpan().ToArray(), 
-                .. iqTlv.AsSpan().ToArray()];
+        return [.. pTlv.AsSpan(),
+                .. qTlv.AsSpan(),
+                .. dpTlv.AsSpan(),
+                .. dqTlv.AsSpan(),
+                .. iqTlv.AsSpan()];
     }
 
     /// <summary>

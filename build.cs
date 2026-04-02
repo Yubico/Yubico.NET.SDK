@@ -37,6 +37,7 @@
  *   --clean                        Run dotnet clean before build
  *   --filter <expression>          Test filter expression (e.g., "FullyQualifiedName~MyTest")
  *   --project <name>               Build/test specific project only (partial match)
+ *   --integration                  Include integration tests (requires --project, unit tests only by default)
  *
  * EXAMPLES:
  *   dotnet build.cs build
@@ -100,6 +101,7 @@ var dryRun = HasFlag("--dry-run");
 var shouldClean = HasFlag("--clean");
 var testFilter = GetArgument("--filter");
 var testProject = GetArgument("--project");
+var includeIntegration = HasFlag("--integration");
 
 // Dynamically discover projects using glob patterns
 
@@ -129,9 +131,13 @@ var integrationTestProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOpt
     .OrderBy(p => p)
     .ToArray();
 
-var testProjects = unitTestProjects
+var allTestProjects = unitTestProjects
     .Concat(integrationTestProjects)
     .ToArray();
+
+var testProjects = includeIntegration
+    ? allTestProjects
+    : unitTestProjects;
 
 var testProjectInfos = testProjects
     .Select(p => (ProjectPath: p, UsesTestingPlatformRunner: UsesMicrosoftTestingPlatformRunner(repoRoot, p)))
@@ -206,7 +212,20 @@ Target("build", DependsOn("restore"), () =>
 
 Target("test", DependsOn("build"), () =>
 {
-    PrintHeader("Running unit tests");
+    // --integration requires --project to prevent accidentally running all integration tests
+    if (includeIntegration && string.IsNullOrEmpty(testProject))
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Error: --integration requires --project to specify which module to test.");
+        Console.WriteLine("Example: dotnet build.cs test --integration --project Piv");
+        Console.ResetColor();
+        Console.WriteLine("\nAvailable integration test projects:");
+        foreach (var p in integrationTestProjects)
+            Console.WriteLine($"  - {Path.GetFileNameWithoutExtension(p)}");
+        throw new InvalidOperationException("--integration requires --project");
+    }
+
+    PrintHeader(includeIntegration ? "Running unit + integration tests" : "Running unit tests");
 
     var testResults = new List<(string Project, bool Passed, string? Error)>();
 
@@ -214,10 +233,10 @@ Target("test", DependsOn("build"), () =>
     var projectsToTest = testProjectInfos.AsEnumerable();
     if (!string.IsNullOrEmpty(testProject))
     {
-        projectsToTest = projectsToTest.Where(p => 
+        projectsToTest = projectsToTest.Where(p =>
             Path.GetFileNameWithoutExtension(p.ProjectPath)
                 .Contains(testProject, StringComparison.OrdinalIgnoreCase));
-        
+
         if (!projectsToTest.Any())
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -485,7 +504,9 @@ if (args.Contains("--help") || args.Contains("-h"))
 }
 
 // Run Bullseye
-var bullseyeArgs = FilterBullseyeArgs(args, "--project", "--filter");
+var bullseyeArgs = FilterBullseyeArgs(args,
+    optionsWithValues: ["--project", "--filter"],
+    flags: ["--integration", "--include-docs", "--dry-run", "--clean"]);
 await RunTargetsAndExitAsync(bullseyeArgs);
 
 // Helper functions
@@ -603,16 +624,22 @@ static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPa
             StringComparison.OrdinalIgnoreCase);
 }
 
-string[] FilterBullseyeArgs(string[] args, params string[] optionNames)
+string[] FilterBullseyeArgs(string[] args, string[] optionsWithValues, string[] flags)
 {
-    var options = new HashSet<string>(optionNames, StringComparer.OrdinalIgnoreCase);
+    var valueOptions = new HashSet<string>(optionsWithValues, StringComparer.OrdinalIgnoreCase);
+    var flagOptions = new HashSet<string>(flags, StringComparer.OrdinalIgnoreCase);
     var filtered = new List<string>();
 
     for (var i = 0; i < args.Length; i++)
     {
         var arg = args[i];
 
-        if (options.Contains(arg))
+        if (flagOptions.Contains(arg))
+        {
+            continue;
+        }
+
+        if (valueOptions.Contains(arg))
         {
             if (i + 1 < args.Length)
             {

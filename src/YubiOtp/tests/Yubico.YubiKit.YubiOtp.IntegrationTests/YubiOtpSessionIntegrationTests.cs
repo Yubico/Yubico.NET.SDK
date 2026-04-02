@@ -74,8 +74,7 @@ public class YubiOtpSessionIntegrationTests
     }
 
     [Theory]
-    [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.SmartCard)]
-    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     public async Task CalculateHmacSha1_WithKnownKey_ReturnsExpectedResponse(YubiKeyTestState state)
     {
         var connection = await state.Device.ConnectAsync();

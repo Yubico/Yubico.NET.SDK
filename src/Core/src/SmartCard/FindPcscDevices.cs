@@ -20,11 +20,25 @@ public class FindPcscDevices(ILogger<FindPcscDevices> logger) : IFindPcscDevices
     {
         logger.LogDebug("Getting list of PC/SC devices");
 
-        var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
-        if (result != ErrorCode.SCARD_S_SUCCESS)
-            throw new PlatformInteropException($"PC/SC service unavailable: SCardEstablishContext failed with error 0x{(uint)result:X8}");
+        uint establishResult;
+        SCardContext context;
+        try
+        {
+            establishResult = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out context);
+        }
+        catch (DllNotFoundException ex)
+        {
+            logger.LogWarning("PC/SC native library not available, returning no devices: {Message}", ex.Message);
+            return [];
+        }
 
-        result = NativeMethods.SCardListReaders(context, null, out var readerNames);
+        if (establishResult != ErrorCode.SCARD_S_SUCCESS)
+        {
+            logger.LogWarning("PC/SC service not available (0x{Code:X8}), returning no devices", establishResult);
+            return [];
+        }
+
+        var result = NativeMethods.SCardListReaders(context, null, out var readerNames);
         if (result != ErrorCode.SCARD_S_SUCCESS || readerNames.Length == 0) return [];
 
         var readerStates = SCARD_READER_STATE.CreateMany(readerNames);

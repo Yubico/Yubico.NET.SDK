@@ -21,7 +21,7 @@
     <!-- Third-party Dependencies -->
     <PackageVersion Include="System.Formats.Cbor" Version="10.0.2" />
     <PackageVersion Include="System.Reactive" Version="6.0.1" />
-    <PackageVersion Include="Yubico.NativeShims" Version="1.14.0" />
+    <PackageVersion Include="Yubico.NativeShims" Version="1.16.0" />
     <!-- Test Dependencies -->
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.v3" Version="3.0.0" />

@@ -22,7 +22,7 @@ public class TlvTests
     public void Constructor_ShortFormLength_EncodesCorrectly()
     {
         // Tag 0x5A, length 3, value 0x01 02 03
-        using var tlv = new Tlv(0x5A, new byte[] { 0x01, 0x02, 0x03 });
+        using var tlv = new Tlv(0x5A, [0x01, 0x02, 0x03]);
         var encoded = tlv.AsSpan();
 
         Assert.Equal(0x5A, encoded[0]);
@@ -68,7 +68,7 @@ public class TlvTests
     [Fact]
     public void Constructor_MultiByteTag_0x9F33_EncodesCorrectly()
     {
-        using var tlv = new Tlv(0x9F33, new byte[] { 0xDE, 0xAD });
+        using var tlv = new Tlv(0x9F33, [0xDE, 0xAD]);
         var encoded = tlv.AsSpan();
 
         Assert.Equal(0x9F, encoded[0]);
@@ -85,7 +85,7 @@ public class TlvTests
     public void Create_Parses_ShortForm()
     {
         // 5A 03 01 02 03
-        ReadOnlySpan<byte> bytes = new byte[] { 0x5A, 0x03, 0x01, 0x02, 0x03 };
+        ReadOnlySpan<byte> bytes = [0x5A, 0x03, 0x01, 0x02, 0x03];
         using var tlv = Tlv.Create(bytes);
 
         Assert.Equal(0x5A, tlv.Tag);
@@ -113,7 +113,7 @@ public class TlvTests
     public void Create_Parses_MultiByteTag()
     {
         // 9F 33 01 FF
-        ReadOnlySpan<byte> bytes = new byte[] { 0x9F, 0x33, 0x01, 0xFF };
+        ReadOnlySpan<byte> bytes = [0x9F, 0x33, 0x01, 0xFF];
         using var tlv = Tlv.Create(bytes);
         Assert.Equal(0x9F33, tlv.Tag);
         Assert.Equal(1, tlv.Length);
@@ -123,7 +123,7 @@ public class TlvTests
     [Fact]
     public void AsMemory_AsSpan_RoundTrip_Equals_EncodedBytes()
     {
-        using var tlv = new Tlv(0x7F49, new byte[] { 0x00, 0x01, 0x02, 0x03 });
+        using var tlv = new Tlv(0x7F49, [0x00, 0x01, 0x02, 0x03]);
         var encoded = tlv.AsSpan().ToArray();
         var mem = tlv.AsMemory().ToArray();
         Assert.True(encoded.AsSpan().SequenceEqual(mem));
@@ -132,7 +132,7 @@ public class TlvTests
     [Fact]
     public void Dispose_Zeros_Buffer_And_Resets_Properties()
     {
-        var tlv = new Tlv(0x5A, new byte[] { 0x01, 0x02, 0x03, 0x04 });
+        var tlv = new Tlv(0x5A, [0x01, 0x02, 0x03, 0x04]);
         var before = tlv.AsMemory().ToArray();
         Assert.Contains((byte)0x5A, before);
 
@@ -151,12 +151,12 @@ public class TlvTests
     [Fact]
     public void Create_Throws_On_Truncated_Length() =>
         // Tag present, but length byte missing
-        Assert.Throws<ArgumentException>(() => Tlv.Create(new byte[] { 0x5A }));
+        Assert.Throws<ArgumentException>(() => Tlv.Create([0x5A]));
 
     [Fact]
     public void ToString_Contains_Tag_Length_And_Value()
     {
-        using var tlv = new Tlv(0x5A, new byte[] { 0xAA, 0xBB });
+        using var tlv = new Tlv(0x5A, [0xAA, 0xBB]);
         var s = tlv.ToString();
         Assert.Contains("0x5A", s, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("2", s, StringComparison.Ordinal);

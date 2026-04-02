@@ -454,8 +454,8 @@ public class FirmwareVersionTests
     [Fact]
     public void FromBytes_InvalidLength_ThrowsArgumentException()
     {
-        Assert.Throws<ArgumentException>(() => FirmwareVersion.FromBytes(new byte[] { 5, 7 }));
-        Assert.Throws<ArgumentException>(() => FirmwareVersion.FromBytes(new byte[] { 5, 7, 2, 1 }));
+        Assert.Throws<ArgumentException>(() => FirmwareVersion.FromBytes([5, 7]));
+        Assert.Throws<ArgumentException>(() => FirmwareVersion.FromBytes([5, 7, 2, 1]));
         Assert.Throws<ArgumentException>(() => FirmwareVersion.FromBytes([]));
     }
 

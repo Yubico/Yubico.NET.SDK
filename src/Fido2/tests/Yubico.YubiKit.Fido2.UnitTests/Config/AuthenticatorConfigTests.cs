@@ -34,7 +34,7 @@ public class AuthenticatorConfigTests
     {
         _mockSession = Substitute.For<IFidoSession>();
         _testProtocol = new TestPinUvAuthProtocol();
-        _pinUvAuthToken = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+        _pinUvAuthToken = [ 0x01, 0x02, 0x03, 0x04 ];
         
         _config = new AuthenticatorConfig(_mockSession, _testProtocol, _pinUvAuthToken);
     }

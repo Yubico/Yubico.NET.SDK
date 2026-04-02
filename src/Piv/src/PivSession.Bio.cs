@@ -95,12 +95,12 @@ public sealed partial class PivSession
         if (checkOnly || !requestTemporaryPin)
         {
             // TAG 0x02: Check only, don't return temporary PIN
-            commandData = new byte[] { 0x02, 0x00 };
+            commandData = [ 0x02, 0x00 ];
         }
         else
         {
             // TAG 0x00: Return temporary PIN
-            commandData = new byte[] { 0x00, 0x00 };
+            commandData = [ 0x00, 0x00 ];
         }
         
         var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData);

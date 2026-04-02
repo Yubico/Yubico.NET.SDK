@@ -73,8 +73,8 @@ public class TlvHelperTests
         // Arrange (unordered input)
         var map = new Dictionary<int, byte[]?>
         {
-            { 0x9F33, new byte[] { 0xFF } },
-            { 0x5A, new byte[] { 0xAA } },
+            { 0x9F33, [0xFF] },
+            { 0x5A, [0xAA] },
         };
 
         // Act

@@ -50,32 +50,15 @@ internal partial class ScpState
         var cardChallenge = responseData[13..21];
         var cardCryptogram = responseData[21..29];
 
-        Console.WriteLine("[DEBUG] INITIALIZE UPDATE response:");
-        Console.WriteLine($"[DEBUG]   Key Info: {Convert.ToHexString(keyInfo)}");
-        Console.WriteLine($"[DEBUG]   Key Info[0] (Key Diversification): 0x{keyInfo[0]:X2}");
-        Console.WriteLine($"[DEBUG]   Key Info[1] (Key Version): 0x{keyInfo[1]:X2}");
-        Console.WriteLine($"[DEBUG]   Key Info[2] (SCP ID): 0x{keyInfo[2]:X2}");
-
         Span<byte> context = stackalloc byte[16];
         hostChallenge.AsSpan().CopyTo(context);
         cardChallenge.CopyTo(context[8..]);
 
-        Console.WriteLine($"[DEBUG] Host challenge: {Convert.ToHexString(hostChallenge)}");
-        Console.WriteLine($"[DEBUG] Card challenge: {Convert.ToHexString(cardChallenge)}");
-        Console.WriteLine($"[DEBUG] Context: {Convert.ToHexString(context)}");
-
         var sessionKeys = keyParams.Keys.Derive(context);
-
-        Console.WriteLine($"[DEBUG] S-ENC:  {Convert.ToHexString(sessionKeys.Senc)}");
-        Console.WriteLine($"[DEBUG] S-MAC:  {Convert.ToHexString(sessionKeys.Smac)}");
-        Console.WriteLine($"[DEBUG] S-RMAC: {Convert.ToHexString(sessionKeys.Srmac)}");
 
         Span<byte> genCardCryptogram = stackalloc byte[8];
         StaticKeys.DeriveKey(sessionKeys.Smac, DerivationTypeCardCryptogram, context, DerivationContextLength,
             genCardCryptogram);
-
-        Console.WriteLine($"[DEBUG] Generated card cryptogram: {Convert.ToHexString(genCardCryptogram)}");
-        Console.WriteLine($"[DEBUG] Received card cryptogram:  {Convert.ToHexString(cardCryptogram)}");
 
         if (!CryptographicOperations.FixedTimeEquals(genCardCryptogram, cardCryptogram))
             throw new BadResponseException(

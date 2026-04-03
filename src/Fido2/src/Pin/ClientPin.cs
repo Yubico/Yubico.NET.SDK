@@ -143,15 +143,17 @@ public sealed class ClientPin : IDisposable
         // Perform ECDH key agreement
         var (platformKey, sharedSecret) = _protocol.Encapsulate(authenticatorKey);
         
+        byte[]? pinBytes = null;
+        byte[]? newPinEnc = null;
         try
         {
             // Pad and encrypt PIN
-            var pinBytes = PadPin(newPin);
-            var newPinEnc = _protocol.Encrypt(sharedSecret, pinBytes);
-            
+            pinBytes = PadPin(newPin);
+            newPinEnc = _protocol.Encrypt(sharedSecret, pinBytes);
+
             // Compute pinUvAuthParam = authenticate(sharedSecret, newPinEnc)
             var pinUvAuthParam = _protocol.Authenticate(sharedSecret, newPinEnc);
-            
+
             var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.SetPin)
@@ -159,13 +161,15 @@ public sealed class ClientPin : IDisposable
                 .WithBytes(ClientPinParam.NewPinEnc, newPinEnc)
                 .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam)
                 .Build();
-            
+
             await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
         {
             CryptographicOperations.ZeroMemory(sharedSecret);
+            if (pinBytes is not null) CryptographicOperations.ZeroMemory(pinBytes);
+            if (newPinEnc is not null) CryptographicOperations.ZeroMemory(newPinEnc);
         }
     }
     
@@ -193,23 +197,28 @@ public sealed class ClientPin : IDisposable
         // Perform ECDH key agreement
         var (platformKey, sharedSecret) = _protocol.Encapsulate(authenticatorKey);
         
+        byte[]? pinHashEnc = null;
+        byte[]? newPinBytes = null;
+        byte[]? newPinEnc = null;
+        byte[]? message = null;
+        byte[]? currentPinHash = null;
         try
         {
             // Compute PIN hash for current PIN: LEFT(SHA-256(currentPin), 16)
-            var currentPinHash = ComputePinHash(currentPin);
-            var pinHashEnc = _protocol.Encrypt(sharedSecret, currentPinHash);
-            
+            currentPinHash = ComputePinHash(currentPin);
+            pinHashEnc = _protocol.Encrypt(sharedSecret, currentPinHash);
+
             // Pad and encrypt new PIN
-            var newPinBytes = PadPin(newPin);
-            var newPinEnc = _protocol.Encrypt(sharedSecret, newPinBytes);
-            
+            newPinBytes = PadPin(newPin);
+            newPinEnc = _protocol.Encrypt(sharedSecret, newPinBytes);
+
             // Compute pinUvAuthParam = authenticate(sharedSecret, newPinEnc || pinHashEnc)
-            var message = new byte[newPinEnc.Length + pinHashEnc.Length];
+            message = new byte[newPinEnc.Length + pinHashEnc.Length];
             newPinEnc.CopyTo(message.AsSpan());
             pinHashEnc.CopyTo(message.AsSpan(newPinEnc.Length));
-            
+
             var pinUvAuthParam = _protocol.Authenticate(sharedSecret, message);
-            
+
             var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.ChangePin)
@@ -218,13 +227,18 @@ public sealed class ClientPin : IDisposable
                 .WithBytes(ClientPinParam.NewPinEnc, newPinEnc)
                 .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam)
                 .Build();
-            
+
             await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
         {
             CryptographicOperations.ZeroMemory(sharedSecret);
+            if (currentPinHash is not null) CryptographicOperations.ZeroMemory(currentPinHash);
+            if (pinHashEnc is not null) CryptographicOperations.ZeroMemory(pinHashEnc);
+            if (newPinEnc is not null) CryptographicOperations.ZeroMemory(newPinEnc);
+            if (message is not null) CryptographicOperations.ZeroMemory(message);
+            if (newPinBytes is not null) CryptographicOperations.ZeroMemory(newPinBytes);
         }
     }
     
@@ -253,31 +267,35 @@ public sealed class ClientPin : IDisposable
         // Perform ECDH key agreement
         var (platformKey, sharedSecret) = _protocol.Encapsulate(authenticatorKey);
         
+        byte[]? pinHashEnc = null;
+        byte[]? pinHash = null;
         try
         {
             // Compute PIN hash: LEFT(SHA-256(pin), 16)
-            var pinHash = ComputePinHash(pin);
-            var pinHashEnc = _protocol.Encrypt(sharedSecret, pinHash);
-            
+            pinHash = ComputePinHash(pin);
+            pinHashEnc = _protocol.Encrypt(sharedSecret, pinHash);
+
             var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetPinToken)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
                 .WithBytes(ClientPinParam.PinHashEnc, pinHashEnc)
                 .Build();
-            
+
             var response = await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
-            
+
             var encryptedToken = ParsePinTokenResponse(response);
             return _protocol.Decrypt(sharedSecret, encryptedToken);
         }
         finally
         {
             CryptographicOperations.ZeroMemory(sharedSecret);
+            if (pinHash is not null) CryptographicOperations.ZeroMemory(pinHash);
+            if (pinHashEnc is not null) CryptographicOperations.ZeroMemory(pinHashEnc);
         }
     }
-    
+
     /// <summary>
     /// Gets a PIN/UV auth token using PIN with specified permissions (CTAP 2.1).
     /// </summary>
@@ -306,47 +324,51 @@ public sealed class ClientPin : IDisposable
     {
         EnsureNotDisposed();
         ValidatePin(pin);
-        
+
         if (permissions == PinUvAuthTokenPermissions.None)
         {
             throw new ArgumentException("At least one permission must be specified.", nameof(permissions));
         }
-        
+
         // Get authenticator's key agreement key
         var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
             .ConfigureAwait(false);
-        
+
         // Perform ECDH key agreement
         var (platformKey, sharedSecret) = _protocol.Encapsulate(authenticatorKey);
-        
+
+        byte[]? pinHashEnc = null;
+        byte[]? pinHash = null;
         try
         {
             // Compute PIN hash: LEFT(SHA-256(pin), 16)
-            var pinHash = ComputePinHash(pin);
-            var pinHashEnc = _protocol.Encrypt(sharedSecret, pinHash);
-            
+            pinHash = ComputePinHash(pin);
+            pinHashEnc = _protocol.Encrypt(sharedSecret, pinHash);
+
             var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin)
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetPinUvAuthTokenUsingPinWithPermissions)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
                 .WithBytes(ClientPinParam.PinHashEnc, pinHashEnc)
                 .WithUInt(ClientPinParam.Permissions, (uint)permissions);
-            
+
             if (!string.IsNullOrEmpty(rpId))
             {
                 builder.WithString(ClientPinParam.RpId, rpId);
             }
-            
+
             var request = builder.Build();
             var response = await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
-            
+
             var encryptedToken = ParsePinTokenResponse(response);
             return _protocol.Decrypt(sharedSecret, encryptedToken);
         }
         finally
         {
             CryptographicOperations.ZeroMemory(sharedSecret);
+            if (pinHash is not null) CryptographicOperations.ZeroMemory(pinHash);
+            if (pinHashEnc is not null) CryptographicOperations.ZeroMemory(pinHashEnc);
         }
     }
     
@@ -456,26 +478,36 @@ public sealed class ClientPin : IDisposable
     
     private static byte[] PadPin(string pin)
     {
-        // Convert PIN to UTF-8 and pad with zeros to 64 bytes
         var pinBytes = Encoding.UTF8.GetBytes(pin);
-        var padded = new byte[PinBlockSize];
-        
-        if (pinBytes.Length > PinBlockSize)
+        try
         {
-            throw new ArgumentException(
-                $"PIN UTF-8 encoding exceeds {PinBlockSize} bytes.", nameof(pin));
+            var padded = new byte[PinBlockSize];
+            if (pinBytes.Length > PinBlockSize)
+                throw new ArgumentException(
+                    $"PIN UTF-8 encoding exceeds {PinBlockSize} bytes.", nameof(pin));
+            pinBytes.CopyTo(padded.AsSpan());
+            return padded;
         }
-        
-        pinBytes.CopyTo(padded.AsSpan());
-        return padded;
+        finally
+        {
+            CryptographicOperations.ZeroMemory(pinBytes);
+        }
     }
     
     private static byte[] ComputePinHash(string pin)
     {
-        // PIN hash = LEFT(SHA-256(pin), 16)
         var pinBytes = Encoding.UTF8.GetBytes(pin);
-        var hash = SHA256.HashData(pinBytes);
-        return hash.AsSpan(0, 16).ToArray();
+        byte[]? hash = null;
+        try
+        {
+            hash = SHA256.HashData(pinBytes);
+            return hash.AsSpan(0, 16).ToArray();
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(pinBytes);
+            if (hash is not null) CryptographicOperations.ZeroMemory(hash);
+        }
     }
     
     private static void WriteCoseKey(CborWriter writer, Dictionary<int, object?> key)

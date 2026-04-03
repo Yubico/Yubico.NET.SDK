@@ -86,6 +86,10 @@ public class PcscProtocolScp : ISmartCardProtocol
         // SCP state is already established and doesn't need reconfiguration
         _baseProtocol.Configure(version, configuration);
 
-    public void Dispose() => _baseProtocol.Dispose();
+    public void Dispose()
+    {
+        (_scpProcessor as IDisposable)?.Dispose();
+        _baseProtocol.Dispose();
+    }
 
 }

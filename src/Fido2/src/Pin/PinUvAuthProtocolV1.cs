@@ -170,64 +170,78 @@ public sealed class PinUvAuthProtocolV1 : IPinUvAuthProtocol
         }
         
         using var aes = Aes.Create();
-        aes.Key = key.ToArray();
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
-        
-        // V1 uses zero IV
-        aes.IV = new byte[AesBlockSize];
-        
-        // Encrypt
-        var ciphertext = new byte[plaintext.Length];
-        
-        using (var encryptor = aes.CreateEncryptor())
+        byte[]? keyArray = null;
+        byte[]? inputArray = null;
+        try
         {
-            var inputArray = plaintext.ToArray();
-            encryptor.TransformBlock(inputArray, 0, inputArray.Length, ciphertext, 0);
-            CryptographicOperations.ZeroMemory(inputArray);
+            keyArray = key.ToArray();
+            aes.Key = keyArray;
+            aes.IV = new byte[AesBlockSize];
+
+            var ciphertext = new byte[plaintext.Length];
+
+            inputArray = plaintext.ToArray();
+            using (var encryptor = aes.CreateEncryptor())
+            {
+                encryptor.TransformBlock(inputArray, 0, inputArray.Length, ciphertext, 0);
+            }
+
+            return ciphertext;
         }
-        
-        // V1 returns ciphertext only (no IV prefix)
-        return ciphertext;
+        finally
+        {
+            if (keyArray is not null) CryptographicOperations.ZeroMemory(keyArray);
+            if (inputArray is not null) CryptographicOperations.ZeroMemory(inputArray);
+        }
     }
-    
+
     /// <inheritdoc />
     public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         if (key.Length != SharedSecretLength)
         {
             throw new ArgumentException(
                 $"Key must be {SharedSecretLength} bytes.", nameof(key));
         }
-        
+
         // V1 ciphertext format: encrypted data only (no IV prefix)
         if (ciphertext.Length == 0 || ciphertext.Length % AesBlockSize != 0)
         {
             throw new ArgumentException(
-                $"Ciphertext must be a non-empty multiple of {AesBlockSize}.", 
+                $"Ciphertext must be a non-empty multiple of {AesBlockSize}.",
                 nameof(ciphertext));
         }
-        
+
         using var aes = Aes.Create();
-        aes.Key = key.ToArray();
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
-        
-        // V1 uses zero IV
-        aes.IV = new byte[AesBlockSize];
-        
-        var plaintext = new byte[ciphertext.Length];
-        
-        using (var decryptor = aes.CreateDecryptor())
+        byte[]? keyArray = null;
+        byte[]? inputArray = null;
+        try
         {
-            var inputArray = ciphertext.ToArray();
-            decryptor.TransformBlock(inputArray, 0, inputArray.Length, plaintext, 0);
-            CryptographicOperations.ZeroMemory(inputArray);
+            keyArray = key.ToArray();
+            aes.Key = keyArray;
+            aes.IV = new byte[AesBlockSize];
+
+            var plaintext = new byte[ciphertext.Length];
+
+            inputArray = ciphertext.ToArray();
+            using (var decryptor = aes.CreateDecryptor())
+            {
+                decryptor.TransformBlock(inputArray, 0, inputArray.Length, plaintext, 0);
+            }
+
+            return plaintext;
         }
-        
-        return plaintext;
+        finally
+        {
+            if (keyArray is not null) CryptographicOperations.ZeroMemory(keyArray);
+            if (inputArray is not null) CryptographicOperations.ZeroMemory(inputArray);
+        }
     }
     
     /// <inheritdoc />

@@ -317,12 +317,21 @@ public sealed partial class PivSession
             }
             else
             {
-                using var aes = Aes.Create();
-                aes.Key = keyBuffer.AsSpan(0, key.Length).ToArray();
-                aes.Mode = CipherMode.ECB;
-                aes.Padding = PaddingMode.None;
-                using var decryptor = aes.CreateDecryptor();
-                decryptor.TransformBlock(inputBuffer, 0, input.Length, decryptedBuffer, 0);
+                byte[]? aesKeyArray = null;
+                try
+                {
+                    using var aes = Aes.Create();
+                    aesKeyArray = keyBuffer.AsSpan(0, key.Length).ToArray();
+                    aes.Key = aesKeyArray;
+                    aes.Mode = CipherMode.ECB;
+                    aes.Padding = PaddingMode.None;
+                    using var decryptor = aes.CreateDecryptor();
+                    decryptor.TransformBlock(inputBuffer, 0, input.Length, decryptedBuffer, 0);
+                }
+                finally
+                {
+                    if (aesKeyArray is not null) CryptographicOperations.ZeroMemory(aesKeyArray);
+                }
             }
 
             decryptedBuffer.AsSpan(0, input.Length).CopyTo(output);
@@ -369,12 +378,21 @@ public sealed partial class PivSession
             }
             else
             {
-                using var aes = Aes.Create();
-                aes.Key = keyBuffer.AsSpan(0, key.Length).ToArray();
-                aes.Mode = CipherMode.ECB;
-                aes.Padding = PaddingMode.None;
-                using var encryptor = aes.CreateEncryptor();
-                encryptor.TransformBlock(inputBuffer, 0, input.Length, encryptedBuffer, 0);
+                byte[]? aesKeyArray = null;
+                try
+                {
+                    using var aes = Aes.Create();
+                    aesKeyArray = keyBuffer.AsSpan(0, key.Length).ToArray();
+                    aes.Key = aesKeyArray;
+                    aes.Mode = CipherMode.ECB;
+                    aes.Padding = PaddingMode.None;
+                    using var encryptor = aes.CreateEncryptor();
+                    encryptor.TransformBlock(inputBuffer, 0, input.Length, encryptedBuffer, 0);
+                }
+                finally
+                {
+                    if (aesKeyArray is not null) CryptographicOperations.ZeroMemory(aesKeyArray);
+                }
             }
 
             encryptedBuffer.AsSpan(0, input.Length).CopyTo(output);

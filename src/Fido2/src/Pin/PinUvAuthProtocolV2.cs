@@ -202,32 +202,42 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
         
         // Extract AES key from shared secret
         var aesKey = key.Slice(HmacKeyLength, AesKeyLength);
-        
+
         using var aes = Aes.Create();
-        aes.Key = aesKey.ToArray();
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
-        
-        // Generate random IV
-        var iv = RandomNumberGenerator.GetBytes(AesBlockSize);
-        aes.IV = iv;
-        
-        // Encrypt
-        var ciphertext = new byte[plaintext.Length];
-        
-        using (var encryptor = aes.CreateEncryptor())
+        byte[]? keyArray = null;
+        byte[]? inputArray = null;
+        try
         {
-            var inputArray = plaintext.ToArray();
-            encryptor.TransformBlock(inputArray, 0, inputArray.Length, ciphertext, 0);
-            CryptographicOperations.ZeroMemory(inputArray);
+            keyArray = aesKey.ToArray();
+            aes.Key = keyArray;
+
+            // Generate random IV
+            var iv = RandomNumberGenerator.GetBytes(AesBlockSize);
+            aes.IV = iv;
+
+            // Encrypt
+            var ciphertext = new byte[plaintext.Length];
+
+            inputArray = plaintext.ToArray();
+            using (var encryptor = aes.CreateEncryptor())
+            {
+                encryptor.TransformBlock(inputArray, 0, inputArray.Length, ciphertext, 0);
+            }
+
+            // Return IV || ciphertext
+            var result = new byte[AesBlockSize + ciphertext.Length];
+            iv.CopyTo(result, 0);
+            ciphertext.CopyTo(result, AesBlockSize);
+
+            return result;
         }
-        
-        // Return IV || ciphertext
-        var result = new byte[AesBlockSize + ciphertext.Length];
-        iv.CopyTo(result, 0);
-        ciphertext.CopyTo(result, AesBlockSize);
-        
-        return result;
+        finally
+        {
+            if (keyArray is not null) CryptographicOperations.ZeroMemory(keyArray);
+            if (inputArray is not null) CryptographicOperations.ZeroMemory(inputArray);
+        }
     }
     
     /// <inheritdoc />
@@ -253,23 +263,36 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
         var aesKey = key.Slice(HmacKeyLength, AesKeyLength);
         var iv = ciphertext[..AesBlockSize];
         var encrypted = ciphertext[AesBlockSize..];
-        
+
         using var aes = Aes.Create();
-        aes.Key = aesKey.ToArray();
-        aes.IV = iv.ToArray();
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
-        
-        var plaintext = new byte[encrypted.Length];
-        
-        using (var decryptor = aes.CreateDecryptor())
+        byte[]? keyArray = null;
+        byte[]? ivArray = null;
+        byte[]? inputArray = null;
+        try
         {
-            var inputArray = encrypted.ToArray();
-            decryptor.TransformBlock(inputArray, 0, inputArray.Length, plaintext, 0);
-            CryptographicOperations.ZeroMemory(inputArray);
+            keyArray = aesKey.ToArray();
+            ivArray = iv.ToArray();
+            aes.Key = keyArray;
+            aes.IV = ivArray;
+
+            var plaintext = new byte[encrypted.Length];
+
+            inputArray = encrypted.ToArray();
+            using (var decryptor = aes.CreateDecryptor())
+            {
+                decryptor.TransformBlock(inputArray, 0, inputArray.Length, plaintext, 0);
+            }
+
+            return plaintext;
         }
-        
-        return plaintext;
+        finally
+        {
+            if (keyArray is not null) CryptographicOperations.ZeroMemory(keyArray);
+            if (ivArray is not null) CryptographicOperations.ZeroMemory(ivArray);
+            if (inputArray is not null) CryptographicOperations.ZeroMemory(inputArray);
+        }
     }
     
     /// <inheritdoc />

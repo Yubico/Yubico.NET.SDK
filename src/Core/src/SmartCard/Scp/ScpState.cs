@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// <summary>
 ///     Internal SCP state class for managing SCP state, handling encryption/decryption and MAC.
 /// </summary>
-internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpState>? logger = null)
+internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpState>? logger = null) : IDisposable
 {
     // Encryption/Padding Constants
     private const byte PaddingByte = 0x80; // ISO/IEC 9797-1 Padding Method 2
@@ -30,6 +30,15 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
 
     private int _encCounter = 1; // Counter for encryption (used for both command and response)
     private byte[] _macChain = macChain;
+    private bool _disposed;
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        keys.Dispose();
+        CryptographicOperations.ZeroMemory(_macChain);
+    }
 
     public DataEncryptor GetDataEncryptor() =>
         keys.Dek.IsEmpty
@@ -39,7 +48,7 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
     public byte[] Encrypt(ReadOnlySpan<byte> data)
     {
         // Pad the data
-        logger?.LogTrace("Plaintext data: {Data}", Convert.ToHexString(data));
+        logger?.LogTrace("Encrypting {ByteCount} bytes of command data", data.Length);
 
         var padLen = 16 - (data.Length % 16);
         var paddedLength = data.Length + padLen;
@@ -49,11 +58,14 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
         padded[data.Length] = PaddingByte;
 
         byte[]? iv = null;
+        byte[]? aesKeyArray = null;
         using var aes = Aes.Create();
-        aes.Key = keys.Senc.ToArray();
 
         try
         {
+            aesKeyArray = keys.Senc.ToArray();
+            aes.Key = aesKeyArray;
+
             // Generate IV using ECB encryption of counter
             Span<byte> ivData = stackalloc byte[16];
             BinaryPrimitives.WriteInt32BigEndian(ivData[12..], _encCounter++);
@@ -76,6 +88,8 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
             CryptographicOperations.ZeroMemory(padded);
             if (iv is not null)
                 CryptographicOperations.ZeroMemory(iv);
+            if (aesKeyArray is not null)
+                CryptographicOperations.ZeroMemory(aesKeyArray);
         }
     }
 
@@ -83,11 +97,13 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
     {
         byte[]? iv = null;
         byte[]? decrypted = null;
+        byte[]? aesKeyArray = null;
         using var aes = Aes.Create();
-        aes.Key = keys.Senc.ToArray();
 
         try
         {
+            aesKeyArray = keys.Senc.ToArray();
+            aes.Key = aesKeyArray;
             // Generate IV using ECB encryption of counter with prefix
             // Use encCounter - 1 to match the counter used during encryption of the command
             // (The counter was already incremented during Encrypt())
@@ -110,7 +126,7 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
             for (var i = decrypted.Length - 1; i > 0; i--)
                 if (decrypted[i] == PaddingByte)
                 {
-                    logger?.LogTrace("Plaintext resp: {Data}", Convert.ToHexString(decrypted.AsSpan(0, i)));
+                    logger?.LogTrace("Decrypted {ByteCount} bytes of response data", i);
                     var result = decrypted[..i];
                     return result;
                 }
@@ -127,6 +143,8 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
                 CryptographicOperations.ZeroMemory(iv);
             if (decrypted is not null)
                 CryptographicOperations.ZeroMemory(decrypted);
+            if (aesKeyArray is not null)
+                CryptographicOperations.ZeroMemory(aesKeyArray);
         }
     }
 
@@ -134,17 +152,10 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
     {
         try
         {
-            Console.WriteLine($"[MAC DEBUG] Computing MAC over {data.Length} bytes");
-            Console.WriteLine($"[MAC DEBUG] MAC chain: {Convert.ToHexString(_macChain)}");
-            Console.WriteLine($"[MAC DEBUG] Data: {Convert.ToHexString(data)}");
-
             using var mac = new AesCmac(keys.Smac);
             mac.AppendData(_macChain);
             mac.AppendData(data);
             _macChain = mac.GetHashAndReset();
-
-            Console.WriteLine($"[MAC DEBUG] Full MAC (16 bytes): {Convert.ToHexString(_macChain)}");
-            Console.WriteLine($"[MAC DEBUG] C-MAC (first 8 bytes): {Convert.ToHexString(_macChain.AsSpan()[..8])}");
 
             return _macChain[..8].ToArray();
         }
@@ -201,15 +212,25 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
 
     private static byte[] CbcEncrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> data)
     {
+        byte[]? aesKeyArray = null;
         using var aes = Aes.Create();
 
-        aes.Mode = CipherMode.CBC;
-        aes.Key = key.ToArray();
-        Span<byte> iv = stackalloc byte[16]; // Zero IV
-        var encrypted = new byte[data.Length];
-        var bytesWritten = aes.EncryptCbc(data, iv, encrypted, PaddingMode.None);
-        return bytesWritten != data.Length
-            ? throw new InvalidOperationException("CBC encryption failed")
-            : encrypted;
+        try
+        {
+            aes.Mode = CipherMode.CBC;
+            aesKeyArray = key.ToArray();
+            aes.Key = aesKeyArray;
+            Span<byte> iv = stackalloc byte[16]; // Zero IV
+            var encrypted = new byte[data.Length];
+            var bytesWritten = aes.EncryptCbc(data, iv, encrypted, PaddingMode.None);
+            return bytesWritten != data.Length
+                ? throw new InvalidOperationException("CBC encryption failed")
+                : encrypted;
+        }
+        finally
+        {
+            if (aesKeyArray is not null)
+                CryptographicOperations.ZeroMemory(aesKeyArray);
+        }
     }
 }

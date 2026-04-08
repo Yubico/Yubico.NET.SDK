@@ -82,6 +82,26 @@
 
 ---
 
+## E2E Test Results (YubiKey 5.8.0, session 2026-04-09)
+
+| Command | Exit | Result |
+|---------|------|--------|
+| `yk management info` | 0 | ✅ Device info displayed |
+| `yk openpgp info` | 0 | ✅ AID, key slots shown |
+| `yk oath info` | 0 | ✅ Version, no password |
+| `yk piv info` | 0 | ✅ FW, slot 9a RSA2048 |
+| `yk hsm-auth info` | 0 | ✅ Version, 1 credential |
+| `yk otp info` | 0 | ✅ Slots not configured |
+| `yk fido info` | 0 | ✅ CTAP 2.0/2.1/2.2 |
+| `yk fido access verify-pin --pin ***` | 0 | ✅ PIN correct |
+| `yk fido credentials list --pin ***` | 0 | ✅ No credentials stored |
+| `yk fido config toggle-always-uv --pin ***` | 0 | ✅ Toggled x2, state restored |
+| `yk fido fingerprints list --pin ***` | 1 | ⚠️ Exit 1, expected 7 — CTAP 0x40 not mapped to ExitCode.FeatureUnsupported |
+
+## Known Gaps
+
+- [ ] **CTAP exception exit code mapping**: CTAP errors (e.g., 0x40 operation-denied, 0x31 pin-invalid) return `ExitCode.GenericError (1)` instead of structured codes (`ExitCode.AuthenticationFailed (4)`, `ExitCode.FeatureUnsupported (7)`). Fix in `YkCommandBase` by catching typed CTAP exceptions before the generic catch.
+
 ## Final Status
 
 - [x] All 7 applets ported and wired

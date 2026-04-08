@@ -177,6 +177,7 @@ public class FidoAuthenticatorConfigTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task SetMinPinLength_ForceChangePin_SetsForcePinChangeFlag(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -230,6 +231,17 @@ public class FidoAuthenticatorConfigTests
             }
             finally
             {
+                // Clear the forcePinChange flag by performing a same-PIN change.
+                // This restores the key to a clean state for subsequent tests.
+                try
+                {
+                    await clientPin.ChangePinAsync(FidoTestData.Pin, FidoTestData.Pin);
+                }
+                catch
+                {
+                    // Best-effort cleanup — ignore errors if change fails
+                }
+
                 CryptographicOperations.ZeroMemory(configPinToken);
             }
         });

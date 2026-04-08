@@ -1,6 +1,7 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
+using System.ComponentModel;
 using Spectre.Console.Cli;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Cli.YkTool.Infrastructure;
@@ -9,11 +10,20 @@ using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Cli.YkTool.Commands.Management;
 
+// ── Settings ────────────────────────────────────────────────────────────────
+
+public sealed class ManagementResetSettings : GlobalSettings
+{
+    [CommandOption("-f|--force")]
+    [Description("Skip confirmation prompts.")]
+    public bool Force { get; init; }
+}
+
 /// <summary>
 ///     Factory resets the YubiKey, erasing all credentials, keys, and configuration.
-///     Requires firmware 5.6.0 or later. Prompts for double confirmation.
+///     Requires firmware 5.6.0 or later. Prompts for double confirmation unless --force is used.
 /// </summary>
-public sealed class ManagementResetCommand : YkCommandBase<GlobalSettings>
+public sealed class ManagementResetCommand : YkCommandBase<ManagementResetSettings>
 {
     private static readonly FirmwareVersion MinimumResetVersion = new(5, 6, 0);
 
@@ -21,7 +31,7 @@ public sealed class ManagementResetCommand : YkCommandBase<GlobalSettings>
         [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp];
 
     protected override async Task<int> ExecuteCommandAsync(
-        CommandContext context, GlobalSettings settings, YkDeviceContext deviceContext)
+        CommandContext context, ManagementResetSettings settings, YkDeviceContext deviceContext)
     {
         var info = deviceContext.Info;
         if (info is null)
@@ -39,11 +49,14 @@ public sealed class ManagementResetCommand : YkCommandBase<GlobalSettings>
             return ExitCode.FeatureUnsupported;
         }
 
-        if (!ConfirmationPrompts.ConfirmDestructive(
-                "factory reset this YubiKey, erasing ALL credentials, keys, and configuration"))
+        if (!settings.Force)
         {
-            OutputHelpers.WriteInfo("Reset cancelled.");
-            return ExitCode.UserCancelled;
+            if (!ConfirmationPrompts.ConfirmDestructive(
+                    "factory reset this YubiKey, erasing ALL credentials, keys, and configuration"))
+            {
+                OutputHelpers.WriteInfo("Reset cancelled.");
+                return ExitCode.UserCancelled;
+            }
         }
 
         await using var session = await deviceContext.Device.CreateManagementSessionAsync();

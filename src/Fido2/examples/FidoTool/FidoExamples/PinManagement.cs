@@ -183,10 +183,9 @@ public static class PinManagement
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+            pinToken = await clientPin.GetPinTokenAsync(
                 pin,
-                PinUvAuthTokenPermissions.GetAssertion,
-                cancellationToken: cancellationToken);
+                cancellationToken);
 
             return PinResult.Succeeded();
         }

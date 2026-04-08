@@ -252,13 +252,13 @@ static async Task<int> RunAccessVerbAsync(string[] args, CancellationToken cance
         }
 
         default:
-            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool access <subcommand> [options]");
+            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool access <subcommand> [[options]]");
             AnsiConsole.WriteLine();
             AnsiConsole.MarkupLine("[bold]Subcommands:[/]");
             AnsiConsole.MarkupLine(
-                "  [green]change-pin[/]    Change the PIN    [--pin PIN] [--new-pin PIN]");
+                "  [green]change-pin[/]    Change the PIN    [[--pin PIN]] [[--new-pin PIN]]");
             AnsiConsole.MarkupLine(
-                "  [green]verify-pin[/]    Verify the PIN    [--pin PIN]");
+                "  [green]verify-pin[/]    Verify the PIN    [[--pin PIN]]");
             return 0;
     }
 }
@@ -317,13 +317,13 @@ static async Task<int> RunConfigVerbAsync(string[] args, CancellationToken cance
         }
 
         default:
-            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool config <subcommand> [options]");
+            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool config <subcommand> [[options]]");
             AnsiConsole.WriteLine();
             AnsiConsole.MarkupLine("[bold]Subcommands:[/]");
             AnsiConsole.MarkupLine(
-                "  [green]toggle-always-uv[/]        Toggle always-UV    [--pin PIN]");
+                "  [green]toggle-always-uv[/]        Toggle always-UV    [[--pin PIN]]");
             AnsiConsole.MarkupLine(
-                "  [green]enable-ep-attestation[/]    Enable enterprise attestation    [--pin PIN]");
+                "  [green]enable-ep-attestation[/]    Enable enterprise attestation    [[--pin PIN]]");
             return 0;
     }
 }
@@ -439,13 +439,13 @@ static async Task<int> RunCredentialsVerbAsync(string[] args, CancellationToken 
         }
 
         default:
-            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool credentials <subcommand> [options]");
+            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool credentials <subcommand> [[options]]");
             AnsiConsole.WriteLine();
             AnsiConsole.MarkupLine("[bold]Subcommands:[/]");
             AnsiConsole.MarkupLine(
-                "  [green]list[/]      List discoverable credentials    [--pin PIN]");
+                "  [green]list[/]      List discoverable credentials    [[--pin PIN]]");
             AnsiConsole.MarkupLine(
-                "  [green]delete[/]    Delete a credential              CREDENTIAL_ID [--pin PIN] [-f]");
+                "  [green]delete[/]    Delete a credential              CREDENTIAL_ID [[--pin PIN]] [[-f]]");
             return 0;
     }
 }
@@ -630,17 +630,17 @@ static async Task<int> RunFingerprintsVerbAsync(string[] args, CancellationToken
         }
 
         default:
-            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool fingerprints <subcommand> [options]");
+            AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool fingerprints <subcommand> [[options]]");
             AnsiConsole.WriteLine();
             AnsiConsole.MarkupLine("[bold]Subcommands:[/]");
             AnsiConsole.MarkupLine(
-                "  [green]list[/]      List enrolled fingerprints           [--pin PIN]");
+                "  [green]list[/]      List enrolled fingerprints           [[--pin PIN]]");
             AnsiConsole.MarkupLine(
-                "  [green]add[/]       Enroll new fingerprint               NAME [--pin PIN]");
+                "  [green]add[/]       Enroll new fingerprint               NAME [[--pin PIN]]");
             AnsiConsole.MarkupLine(
-                "  [green]delete[/]    Delete a fingerprint enrollment      FINGERPRINT_ID [--pin PIN] [-f]");
+                "  [green]delete[/]    Delete a fingerprint enrollment      FINGERPRINT_ID [[--pin PIN]] [[-f]]");
             AnsiConsole.MarkupLine(
-                "  [green]rename[/]    Rename a fingerprint enrollment      FINGERPRINT_ID NAME [--pin PIN]");
+                "  [green]rename[/]    Rename a fingerprint enrollment      FINGERPRINT_ID NAME [[--pin PIN]]");
             return 0;
     }
 }
@@ -669,11 +669,11 @@ static bool HasFlag(string[] args, string flag) =>
 // ---------------------------------------------------------------------------
 static int ShowHelp()
 {
-    AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool <command> [subcommand] [options]");
+    AnsiConsole.MarkupLine("[bold]Usage:[/] FidoTool <command> [[subcommand]] [[options]]");
     AnsiConsole.WriteLine();
     AnsiConsole.MarkupLine("[bold]Commands:[/]");
     AnsiConsole.MarkupLine("  [green]info[/]            Display general status of the FIDO2 application");
-    AnsiConsole.MarkupLine("  [green]reset[/]           Reset all FIDO applications [-f]");
+    AnsiConsole.MarkupLine("  [green]reset[/]           Reset all FIDO applications [[-f]]");
     AnsiConsole.MarkupLine("  [green]access[/]          Manage PIN (change-pin, verify-pin)");
     AnsiConsole.MarkupLine("  [green]config[/]          Configure authenticator settings (toggle-always-uv, enable-ep-attestation)");
     AnsiConsole.MarkupLine("  [green]credentials[/]     Manage discoverable credentials (list, delete)");

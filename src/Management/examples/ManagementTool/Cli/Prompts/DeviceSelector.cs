@@ -25,11 +25,12 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
 /// </summary>
 public static class DeviceSelector
 {
+    // Management operations require SmartCard (CCID/APDU) transport only.
+    // Listing all connection types would return 3 entries per physical key
+    // (SmartCard + HidFido + HidOtp), causing spurious multi-device prompts.
     private static readonly ConnectionType[] SupportedConnectionTypes =
     [
-        ConnectionType.SmartCard,
-        ConnectionType.HidFido,
-        ConnectionType.HidOtp
+        ConnectionType.SmartCard
     ];
 
     /// <summary>

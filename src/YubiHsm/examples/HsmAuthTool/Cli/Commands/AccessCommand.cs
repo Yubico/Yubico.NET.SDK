@@ -77,7 +77,7 @@ internal static class AccessCommand
 
     private static void PrintUsage()
     {
-        AnsiConsole.MarkupLine("[bold]Usage:[/] HsmAuthTool access change-management-key [options]");
+        AnsiConsole.MarkupLine("[bold]Usage:[/] HsmAuthTool access change-management-key [[options]]");
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold]Options:[/]");
         AnsiConsole.MarkupLine("  --management-key HEX       Current management key (hex, 16 bytes)");

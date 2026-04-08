@@ -91,7 +91,7 @@ internal static class CredentialsCommand
         if (label is null)
         {
             OutputHelpers.WriteError("Missing required argument: LABEL");
-            AnsiConsole.MarkupLine("[bold]Usage:[/] HsmAuthTool credentials add LABEL [options]");
+            AnsiConsole.MarkupLine("[bold]Usage:[/] HsmAuthTool credentials add LABEL [[options]]");
             return 1;
         }
 
@@ -267,7 +267,7 @@ internal static class CredentialsCommand
         if (label is null)
         {
             OutputHelpers.WriteError("Missing required argument: LABEL");
-            AnsiConsole.MarkupLine("[bold]Usage:[/] HsmAuthTool credentials delete LABEL [options]");
+            AnsiConsole.MarkupLine("[bold]Usage:[/] HsmAuthTool credentials delete LABEL [[options]]");
             return 1;
         }
 
@@ -318,7 +318,7 @@ internal static class CredentialsCommand
         {
             OutputHelpers.WriteError("Missing required argument: LABEL");
             AnsiConsole.MarkupLine(
-                "[bold]Usage:[/] HsmAuthTool credentials generate LABEL [options]");
+                "[bold]Usage:[/] HsmAuthTool credentials generate LABEL [[options]]");
             return 1;
         }
 
@@ -408,7 +408,7 @@ internal static class CredentialsCommand
 
     private static void PrintUsage()
     {
-        AnsiConsole.MarkupLine("[bold]Usage:[/] HsmAuthTool credentials <command> [options]");
+        AnsiConsole.MarkupLine("[bold]Usage:[/] HsmAuthTool credentials <command> [[options]]");
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold]Commands:[/]");
         AnsiConsole.MarkupLine("  list                        List all stored credentials");

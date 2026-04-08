@@ -97,16 +97,16 @@ static int PrintUnknownCommand(string command)
 static void PrintUsage()
 {
     AnsiConsole.WriteLine();
-    AnsiConsole.MarkupLine("[bold]Usage:[/] HsmAuthTool <command> [options]");
+    AnsiConsole.MarkupLine("[bold]Usage:[/] HsmAuthTool <command> [[options]]");
     AnsiConsole.WriteLine();
     AnsiConsole.MarkupLine("[bold]Commands:[/]");
     AnsiConsole.MarkupLine("  info                                  Display general status");
-    AnsiConsole.MarkupLine("  reset [-f]                            Reset all data");
+    AnsiConsole.MarkupLine("  reset [[-f]]                            Reset all data");
     AnsiConsole.MarkupLine("  access change-management-key          Change the management key");
     AnsiConsole.MarkupLine("  credentials list                      List all credentials");
-    AnsiConsole.MarkupLine("  credentials add LABEL [options]       Add a credential");
-    AnsiConsole.MarkupLine("  credentials delete LABEL [-f]         Delete a credential");
-    AnsiConsole.MarkupLine("  credentials generate LABEL [options]  Generate asymmetric credential");
+    AnsiConsole.MarkupLine("  credentials add LABEL [[options]]       Add a credential");
+    AnsiConsole.MarkupLine("  credentials delete LABEL [[-f]]         Delete a credential");
+    AnsiConsole.MarkupLine("  credentials generate LABEL [[options]]  Generate asymmetric credential");
     AnsiConsole.WriteLine();
     AnsiConsole.MarkupLine("[bold]Global options:[/]");
     AnsiConsole.MarkupLine("  -h, --help                            Show this help message");

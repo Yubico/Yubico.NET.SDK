@@ -432,8 +432,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
             var command = new ApduCommand { Ins = InsCalculate, Data = data };
             var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, cancellationToken: cancellationToken)
+                    command, throwOnError: false, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
+
+            ThrowOnCredentialPasswordFailure(response, command);
+            if (!response.IsOK())
+                throw ApduException.FromResponse(response, command, "CALCULATE symmetric session keys failed");
 
             return SessionKeys.Parse(response.Data.Span);
         }
@@ -515,8 +519,9 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task<SessionKeys> CalculateSessionKeysAsymmetricAsync(
         string label,
         ReadOnlyMemory<byte> context,
+        ReadOnlyMemory<byte> publicKey,
         string credentialPassword,
-        ReadOnlyMemory<byte>? cardCryptogram = null,
+        ReadOnlyMemory<byte> cardCryptogram,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -528,23 +533,25 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             credPwBytes = ParseCredentialPassword(credentialPassword);
 
-            var tlvs = new List<Tlv>
-            {
-                new(TagLabel, labelBytes),
-                new(TagContext, context.Span)
-            };
-
-            if (cardCryptogram is { } cc)
-                tlvs.Add(new Tlv(TagResponse, cc.Span));
-
-            tlvs.Add(new Tlv(TagCredentialPassword, credPwBytes));
-
-            var data = TlvHelper.EncodeList([.. tlvs]);
+            // APDU payload order matches Python canonical SDK:
+            // TAG_LABEL, TAG_CONTEXT, TAG_PUBLIC_KEY, TAG_RESPONSE, TAG_CREDENTIAL_PASSWORD
+            var data = TlvHelper.EncodeList(
+            [
+                new Tlv(TagLabel, labelBytes),
+                new Tlv(TagContext, context.Span),
+                new Tlv(TagPublicKey, publicKey.Span),
+                new Tlv(TagResponse, cardCryptogram.Span),
+                new Tlv(TagCredentialPassword, credPwBytes)
+            ]);
 
             var command = new ApduCommand { Ins = InsCalculate, Data = data };
             var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, cancellationToken: cancellationToken)
+                    command, throwOnError: false, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
+
+            ThrowOnCredentialPasswordFailure(response, command);
+            if (!response.IsOK())
+                throw ApduException.FromResponse(response, command, "CALCULATE asymmetric session keys failed");
 
             return SessionKeys.Parse(response.Data.Span);
         }
@@ -844,6 +851,28 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
         throw new ApduException(
             $"Management key verification failed, {retries} attempt(s) remaining (SW=0x{response.SW:X4})")
+        {
+            SW = response.SW,
+            Cla = command.Cla,
+            Ins = command.Ins,
+            P1 = command.P1,
+            P2 = command.P2
+        };
+    }
+
+    /// <summary>
+    ///     Checks an APDU response for the 0x63Cx credential password verification failure pattern.
+    ///     Throws <see cref="ApduException" /> with retry information if detected.
+    ///     Matches the Python SDK behavior in <c>_calculate_session_keys</c>.
+    /// </summary>
+    private static void ThrowOnCredentialPasswordFailure(ApduResponse response, ApduCommand command)
+    {
+        var retries = ExtractRetries(response.SW);
+        if (retries is null)
+            return;
+
+        throw new ApduException(
+            $"Invalid credential password, {retries} attempt(s) remaining (SW=0x{response.SW:X4})")
         {
             SW = response.SW,
             Cla = command.Cla,

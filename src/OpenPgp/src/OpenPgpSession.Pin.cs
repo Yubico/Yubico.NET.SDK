@@ -137,23 +137,30 @@ public sealed partial class OpenPgpSession
 
         byte[]? resetBytes = null;
         byte[]? newPinBytes = null;
-        byte[]? combined = null;
+        byte[]? data = null;
         try
         {
             var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
-
-            resetBytes = useAdmin
-                ? kdf.Process(Pw.Admin, resetCode)
-                : kdf.Process(Pw.Reset, resetCode);
             newPinBytes = kdf.Process(Pw.User, newPin);
 
-            combined = new byte[resetBytes.Length + newPinBytes.Length];
-            resetBytes.CopyTo(combined.AsSpan());
-            newPinBytes.CopyTo(combined.AsSpan(resetBytes.Length));
-
-            // P1: 0x00 = reset code, 0x02 = admin PIN
+            // P1=0x02 (admin): Admin PIN (PW3) must have been verified beforehand
+            //   by the caller via VerifyAdminAsync. Data = new PIN only.
+            // P1=0x00 (reset code): data = resetCode + newPin concatenated.
             var p1 = useAdmin ? (byte)0x02 : (byte)0x00;
-            var command = new ApduCommand(0x00, (int)Ins.ResetRetryCounter, p1, (int)Pw.User, combined);
+
+            if (useAdmin)
+            {
+                data = newPinBytes;
+            }
+            else
+            {
+                resetBytes = kdf.Process(Pw.Reset, resetCode);
+                data = new byte[resetBytes.Length + newPinBytes.Length];
+                resetBytes.CopyTo(data.AsSpan());
+                newPinBytes.CopyTo(data.AsSpan(resetBytes.Length));
+            }
+
+            var command = new ApduCommand(0x00, (int)Ins.ResetRetryCounter, p1, (int)Pw.User, data);
 
             await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
         }
@@ -163,8 +170,9 @@ public sealed partial class OpenPgpSession
                 CryptographicOperations.ZeroMemory(resetBytes);
             if (newPinBytes is not null)
                 CryptographicOperations.ZeroMemory(newPinBytes);
-            if (combined is not null)
-                CryptographicOperations.ZeroMemory(combined);
+            // Only zero 'data' separately if it's the combined buffer (not same ref as newPinBytes)
+            if (data is not null && !ReferenceEquals(data, newPinBytes))
+                CryptographicOperations.ZeroMemory(data);
         }
     }
 

@@ -122,16 +122,23 @@ public interface IHsmAuthSession : IApplicationSession
     ///     Requires firmware 5.6.0+.
     /// </summary>
     /// <param name="label">The credential label.</param>
-    /// <param name="context">The context data (EPK-OCE public key + EPK-SD public key).</param>
+    /// <param name="context">The context data (EPK-OCE public key + EPK-SD public key, 130 bytes).</param>
+    /// <param name="publicKey">
+    ///     The uncompressed EC P256 public key of the YubiHSM 2 device (65 bytes: 0x04 || X || Y).
+    /// </param>
     /// <param name="credentialPassword">The credential password.</param>
-    /// <param name="cardCryptogram">Optional card cryptogram for mutual authentication.</param>
+    /// <param name="cardCryptogram">
+    ///     The card cryptogram from the YubiHSM 2 device. Required for asymmetric session key calculation
+    ///     as it is used for mutual authentication between the YubiKey and the YubiHSM 2.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Session keys that must be disposed after use.</returns>
     Task<SessionKeys> CalculateSessionKeysAsymmetricAsync(
         string label,
         ReadOnlyMemory<byte> context,
+        ReadOnlyMemory<byte> publicKey,
         string credentialPassword,
-        ReadOnlyMemory<byte>? cardCryptogram = null,
+        ReadOnlyMemory<byte> cardCryptogram,
         CancellationToken cancellationToken = default);
 
     /// <summary>

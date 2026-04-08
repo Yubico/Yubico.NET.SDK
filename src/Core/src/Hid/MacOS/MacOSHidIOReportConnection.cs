@@ -90,9 +90,12 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
         IOKitNativeMethods.IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
 
-        var dequeued = _reportsQueue.TryDequeue(out report);
+        if (!_reportsQueue.TryDequeue(out report))
+            throw new InvalidOperationException(
+                "Failed to receive HID report: RunLoop completed but no report was queued. " +
+                "This may indicate a timing issue with the macOS HID subsystem.");
 
-        return report!;
+        return report;
     }
 
     public void SetReport(byte[] report)

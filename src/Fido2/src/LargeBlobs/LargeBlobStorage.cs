@@ -363,18 +363,18 @@ public sealed class LargeBlobStorage
         Span<byte> fragmentHash = stackalloc byte[32];
         SHA256.HashData(fragment.Span, fragmentHash);
         
-        // Build auth message: 0xff (1) || 0x0C (1) || 0x00 (1) || length (int as u32 BE, 4) || offset (int as u32 BE, 4) || fragmentHash (32)
-        // Per CTAP 2.1: authenticate(pinUvAuthToken, 32*0xff || 0x0c || uint32LittleEndian(offset) || SHA-256(contents of set byte string))
-        // Actually: 32 bytes of 0xff, then the command byte, offset as little-endian u32, then hash
-        var authMessage = new byte[32 + 1 + 4 + 32];
+        // Build auth message per CTAP 2.1 spec section 6.10.3:
+        // authenticate(pinUvAuthToken, 32*0xff || 0x0C || 0x00 || uint32LittleEndian(offset) || SHA-256(contents of set byte string))
+        var authMessage = new byte[32 + 2 + 4 + 32];
         authMessage.AsSpan(0, 32).Fill(0xff);
-        authMessage[32] = CtapCommand.LargeBlobs;
-        BitConverter.TryWriteBytes(authMessage.AsSpan(33, 4), offset);
+        authMessage[32] = CtapCommand.LargeBlobs; // 0x0C
+        authMessage[33] = 0x00;
+        BitConverter.TryWriteBytes(authMessage.AsSpan(34, 4), offset);
         if (!BitConverter.IsLittleEndian)
         {
-            authMessage.AsSpan(33, 4).Reverse();
+            authMessage.AsSpan(34, 4).Reverse();
         }
-        fragmentHash.CopyTo(authMessage.AsSpan(37));
+        fragmentHash.CopyTo(authMessage.AsSpan(38));
         
         var pinUvAuthParam = _protocol!.Authenticate(_pinUvAuthToken.Span, authMessage);
         

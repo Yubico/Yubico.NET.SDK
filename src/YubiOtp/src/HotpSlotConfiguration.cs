@@ -85,7 +85,6 @@ public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
         }
 
         _tktFlags |= TicketFlag.OathHotp;
-        _cfgFlags |= ConfigFlag.OathFixedModhex2;
     }
 
     public override FirmwareVersion MinimumFirmwareVersion => new(2, 1, 0);
@@ -96,6 +95,37 @@ public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
     public HotpSlotConfiguration Use8Digits(bool enable = true)
     {
         SetCfgFlag(ConfigFlag.OathHotp8, enable);
+        return this;
+    }
+
+    /// <summary>
+    /// Configures an OATH token ID prefix for the HOTP output.
+    /// </summary>
+    /// <param name="tokenId">The raw token ID value (up to 16 bytes).</param>
+    /// <param name="fixedModhex1">Output the first byte of the token ID as modhex.</param>
+    /// <param name="fixedModhex2">Output the first two bytes of the token ID as modhex.</param>
+    /// <returns>This configuration for chaining.</returns>
+    /// <remarks>
+    /// If both <paramref name="fixedModhex1"/> and <paramref name="fixedModhex2"/> are set,
+    /// the entire token ID is sent as modhex.
+    /// </remarks>
+    public HotpSlotConfiguration TokenId(
+        ReadOnlySpan<byte> tokenId,
+        bool fixedModhex1 = false,
+        bool fixedModhex2 = false)
+    {
+        if (tokenId.Length > YubiOtpConstants.FixedSize)
+        {
+            throw new ArgumentException(
+                $"Token ID must be at most {YubiOtpConstants.FixedSize} bytes.",
+                nameof(tokenId));
+        }
+
+        _fixed.AsSpan().Clear();
+        tokenId.CopyTo(_fixed);
+        _fixedSize = (byte)tokenId.Length;
+        SetCfgFlag(ConfigFlag.OathFixedModhex1, fixedModhex1);
+        SetCfgFlag(ConfigFlag.OathFixedModhex2, fixedModhex2);
         return this;
     }
 }

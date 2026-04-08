@@ -174,10 +174,12 @@ public sealed class AuthenticatorConfig
     
     private ReadOnlyMemory<byte> BuildCommandPayload(byte subCommand)
     {
-        // Build PIN/UV auth param over just the subcommand (0xff || subCommand)
-        Span<byte> message = stackalloc byte[2];
-        message[0] = 0xff; // Magic prefix for config command auth
-        message[1] = subCommand;
+        // Build PIN/UV auth param: authenticate(pinUvAuthToken, 32*0xff || 0x0D || subCommand)
+        // Per CTAP 2.1 spec section 6.8
+        Span<byte> message = stackalloc byte[32 + 1 + 1];
+        message[..32].Fill(0xff);
+        message[32] = CtapCommand.Config; // 0x0D
+        message[33] = subCommand;
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, message);
         
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -240,13 +242,15 @@ public sealed class AuthenticatorConfig
         paramsWriter.WriteEndMap();
         var subCommandParams = paramsWriter.Encode();
         
-        // Build PIN/UV auth param over (0xff || subCommand || params)
+        // Build PIN/UV auth param: authenticate(pinUvAuthToken, 32*0xff || 0x0D || subCommand || subCommandParams)
+        // Per CTAP 2.1 spec section 6.8
         var subCommand = ConfigSubCommand.SetMinPinLength;
-        var messageLength = 2 + subCommandParams.Length;
+        var messageLength = 32 + 1 + 1 + subCommandParams.Length;
         var message = new byte[messageLength];
-        message[0] = 0xff;
-        message[1] = subCommand;
-        subCommandParams.CopyTo(message.AsMemory(2));
+        message.AsSpan(0, 32).Fill(0xff);
+        message[32] = CtapCommand.Config; // 0x0D
+        message[33] = subCommand;
+        subCommandParams.CopyTo(message.AsMemory(34));
         
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, message);
         

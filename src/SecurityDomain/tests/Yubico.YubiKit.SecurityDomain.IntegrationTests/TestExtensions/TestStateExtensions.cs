@@ -46,6 +46,7 @@ public static class TestStateExtensions
                         .CreateSecurityDomainSessionAsync(
                             sharedConnection,
                             configuration: configuration,
+                            firmwareVersion: state.FirmwareVersion,
                             cancellationToken: cancellationToken)
                         .ConfigureAwait(false);
 
@@ -57,6 +58,7 @@ public static class TestStateExtensions
                         sharedConnection,
                         scpKeyParams,
                         configuration,
+                        firmwareVersion: state.FirmwareVersion,
                         cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
@@ -138,6 +140,7 @@ public static class TestStateExtensions
                         .CreateSecurityDomainSessionAsync(
                             sharedConnection,
                             configuration: configuration,
+                            firmwareVersion: state.FirmwareVersion,
                             cancellationToken: cancellationToken)
                         .ConfigureAwait(false);
 

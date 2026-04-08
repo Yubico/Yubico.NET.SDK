@@ -47,6 +47,7 @@ public sealed class ExtensionBuilder
     private HmacSecretInput? _hmacSecret;
     private bool _hmacSecretMc;
     private bool _minPinLength;
+    private bool _largeBlobKey;
     private bool _prf;
     private PrfInput? _prfInput;
     
@@ -108,6 +109,28 @@ public sealed class ExtensionBuilder
         return this;
     }
     
+    /// <summary>
+    /// Adds the largeBlobKey CTAP extension for makeCredential or getAssertion.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is the CTAP-level extension ("largeBlobKey": true) that instructs the
+    /// authenticator to return a 32-byte large blob key with the credential response.
+    /// This key is then used to encrypt/decrypt data in the large blob array.
+    /// </para>
+    /// <para>
+    /// This is distinct from the WebAuthn-level "largeBlob" extension which uses
+    /// "support": "required"/"preferred" semantics. Use <see cref="WithLargeBlob"/>
+    /// for the WebAuthn-level extension.
+    /// </para>
+    /// </remarks>
+    /// <returns>This builder for chaining.</returns>
+    public ExtensionBuilder WithLargeBlobKey()
+    {
+        _largeBlobKey = true;
+        return this;
+    }
+
     /// <summary>
     /// Adds the hmac-secret extension for getAssertion.
     /// </summary>
@@ -285,13 +308,19 @@ public sealed class ExtensionBuilder
             writer.WriteTextString(ExtensionIdentifiers.LargeBlob);
             _largeBlob.Encode(writer);
         }
-        
+
         if (_largeBlobAssertion is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.LargeBlob);
             _largeBlobAssertion.Encode(writer);
         }
-        
+
+        if (_largeBlobKey)
+        {
+            writer.WriteTextString(ExtensionIdentifiers.LargeBlobKey);
+            writer.WriteBoolean(true);
+        }
+
         if (_minPinLength)
         {
             writer.WriteTextString(ExtensionIdentifiers.MinPinLength);
@@ -348,6 +377,7 @@ public sealed class ExtensionBuilder
                _credBlob.HasValue ||
                _largeBlob is not null ||
                _largeBlobAssertion is not null ||
+               _largeBlobKey ||
                _hmacSecret is not null ||
                _hmacSecretMc ||
                _minPinLength ||
@@ -360,6 +390,7 @@ public sealed class ExtensionBuilder
         if (_credProtect.HasValue) count++;
         if (_credBlob.HasValue) count++;
         if (_largeBlob is not null || _largeBlobAssertion is not null) count++;
+        if (_largeBlobKey) count++;
         if (_hmacSecret is not null) count++;
         if (_hmacSecretMc) count++;
         if (_minPinLength) count++;

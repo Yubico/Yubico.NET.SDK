@@ -118,12 +118,22 @@ public interface IOpenPgpSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Resets the User PIN using either the Reset Code or the Admin PIN.
+    ///     Resets the User PIN using either the Reset Code or Admin PIN privilege.
     /// </summary>
-    /// <param name="resetCode">The Reset Code or Admin PIN.</param>
+    /// <remarks>
+    ///     When <paramref name="useAdmin" /> is <c>true</c>, the caller must have already
+    ///     verified the Admin PIN via <see cref="VerifyAdminAsync" /> before calling this method.
+    ///     The <paramref name="resetCode" /> parameter is ignored in admin mode; only the
+    ///     <paramref name="newPin" /> is sent to the card.
+    /// </remarks>
+    /// <param name="resetCode">
+    ///     The Reset Code (when <paramref name="useAdmin" /> is <c>false</c>).
+    ///     Ignored when <paramref name="useAdmin" /> is <c>true</c>.
+    /// </param>
     /// <param name="newPin">The new User PIN.</param>
     /// <param name="useAdmin">
-    ///     If <c>true</c>, uses the Admin PIN (P1=0x02). If <c>false</c>, uses the Reset Code (P1=0x00).
+    ///     If <c>true</c>, assumes Admin PIN (PW3) has been verified and sends
+    ///     RESET RETRY COUNTER with P1=0x02. If <c>false</c>, uses the Reset Code with P1=0x00.
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     Task ResetPinAsync(

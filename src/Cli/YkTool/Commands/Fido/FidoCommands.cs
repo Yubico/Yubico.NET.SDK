@@ -579,7 +579,7 @@ internal sealed class FidoFingerprintsListCommand : YkCommandBase<FidoFingerprin
         catch (CtapException ex)
         {
             OutputHelpers.WriteError(FidoHelpers.MapCtapBioError(ex));
-            return ExitCode.GenericError;
+            return FidoHelpers.MapCtapBioExitCode(ex);
         }
         finally
         {
@@ -647,7 +647,7 @@ internal sealed class FidoFingerprintsAddCommand : YkCommandBase<FidoFingerprint
         catch (CtapException ex)
         {
             OutputHelpers.WriteError(FidoHelpers.MapCtapBioError(ex));
-            return ExitCode.GenericError;
+            return FidoHelpers.MapCtapBioExitCode(ex);
         }
         finally
         {
@@ -708,7 +708,7 @@ internal sealed class FidoFingerprintsDeleteCommand : YkCommandBase<FidoFingerpr
         catch (CtapException ex)
         {
             OutputHelpers.WriteError(FidoHelpers.MapCtapBioError(ex));
-            return ExitCode.GenericError;
+            return FidoHelpers.MapCtapBioExitCode(ex);
         }
         finally
         {
@@ -760,7 +760,7 @@ internal sealed class FidoFingerprintsRenameCommand : YkCommandBase<FidoFingerpr
         catch (CtapException ex)
         {
             OutputHelpers.WriteError(FidoHelpers.MapCtapBioError(ex));
-            return ExitCode.GenericError;
+            return FidoHelpers.MapCtapBioExitCode(ex);
         }
         finally
         {
@@ -1020,6 +1020,25 @@ internal static class FidoHelpers
                 "Operation not allowed. Bio enrollment may not be supported.",
             CtapStatus.InvalidCommand =>
                 "Bio enrollment is not supported on this authenticator.",
+            CtapStatus.UnauthorizedPermission =>
+                "This YubiKey does not support biometric authentication.",
             _ => $"CTAP error: {ex.Message} (0x{(byte)ex.Status:X2})"
+        };
+
+    public static int MapCtapBioExitCode(CtapException ex) =>
+        ex.Status switch
+        {
+            CtapStatus.UnauthorizedPermission or
+            CtapStatus.NotAllowed or
+            CtapStatus.InvalidCommand or
+            CtapStatus.UnsupportedOption => ExitCode.FeatureUnsupported,
+
+            CtapStatus.PinInvalid or
+            CtapStatus.PinBlocked or
+            CtapStatus.PinAuthInvalid or
+            CtapStatus.PinAuthBlocked or
+            CtapStatus.PinNotSet => ExitCode.AuthenticationFailed,
+
+            _ => ExitCode.GenericError
         };
 }

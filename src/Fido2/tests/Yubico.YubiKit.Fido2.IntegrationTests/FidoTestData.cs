@@ -44,10 +44,13 @@ public static class FidoTestData
     public const string UserDisplayName = "Test User";
     
     /// <summary>
-    /// Test PIN that meets enhanced complexity requirements (8+ chars, mixed case + numbers).
+    /// Known test PIN used for all FIDO2 integration tests. Must match the PIN
+    /// physically set on the test YubiKey. Satisfies 5.7+ complexity requirements
+    /// (8 digits, at least 2 unique characters).
+    /// To set: ykman fido access change-pin --new-pin 11234567
     /// </summary>
-    public const string Pin = "Abc12345";
-    
+    public const string Pin = TestExtensions.FidoTestStateExtensions.KnownTestPinString;
+
     /// <summary>
     /// Simple PIN for devices without complexity enforcement.
     /// </summary>

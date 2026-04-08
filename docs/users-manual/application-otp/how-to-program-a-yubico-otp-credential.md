@@ -51,12 +51,22 @@ credential as follows:
 ```C#
 using (OtpSession otp = new OtpSession(yKey))
 {
-  // privateId and aesKey are Memory<byte> references.
-  otp.ConfigureYubicoOtp(Slot.ShortPress)
-    .UseSerialNumberAsPublicId()
-    .UsePrivateId(privateId)
-    .UseKey(aesKey)
-    .Execute();
+  try
+  {
+    // privateId and aesKey are Memory<byte> references.
+    otp.ConfigureYubicoOtp(Slot.ShortPress)
+      .UseSerialNumberAsPublicId()
+      .UsePrivateId(privateId)
+      .UseKey(aesKey)
+      .Execute();
+
+    // Do whatever is needed with privateId and aesKey before clearing them from memory.
+  }
+  finally
+  {
+    CryptographicOperations.ZeroMemory(privateId.Span);
+    CryptographicOperations.ZeroMemory(aesKey.Span);
+  }
 }
 ```
 

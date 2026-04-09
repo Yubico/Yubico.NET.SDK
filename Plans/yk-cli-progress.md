@@ -96,11 +96,11 @@
 | `yk fido access verify-pin --pin ***` | 0 | ✅ PIN correct |
 | `yk fido credentials list --pin ***` | 0 | ✅ No credentials stored |
 | `yk fido config toggle-always-uv --pin ***` | 0 | ✅ Toggled x2, state restored |
-| `yk fido fingerprints list --pin ***` | 1 | ⚠️ Exit 1, expected 7 — CTAP 0x40 not mapped to ExitCode.FeatureUnsupported |
+| `yk fido fingerprints list --pin ***` | 7 | ✅ Exit 7 (FeatureUnsupported) — CTAP 0x40 mapped correctly (fixed d175b78a) |
 
 ## Known Gaps
 
-- [ ] **CTAP exception exit code mapping**: CTAP errors (e.g., 0x40 operation-denied, 0x31 pin-invalid) return `ExitCode.GenericError (1)` instead of structured codes (`ExitCode.AuthenticationFailed (4)`, `ExitCode.FeatureUnsupported (7)`). Fix in `YkCommandBase` by catching typed CTAP exceptions before the generic catch.
+- [x] **CTAP exception exit code mapping** *(fixed 2026-04-09, commit d175b78a)*: Added `MapCtapBioExitCode()` to `FidoHelpers` — maps `UnauthorizedPermission`/`NotAllowed`/`InvalidCommand` → `7`, PIN errors → `4`. All 4 fingerprint commands updated.
 
 ## Final Status
 

@@ -58,6 +58,7 @@ internal class ScpProcessor(
         byte[]? scpCommandData = null;
         byte[]? finalCommandData = null;
         byte[]? mac = null;
+        byte[]? encryptedData = null; // Declared here so finally can zero it (T11)
 
         try
         {
@@ -66,7 +67,7 @@ internal class ScpProcessor(
             var commandData = command.Data;
             if (encrypt)
             {
-                var encryptedData = State.Encrypt(commandData.Span);
+                encryptedData = State.Encrypt(commandData.Span);
                 commandData = encryptedData;
             }
 
@@ -139,6 +140,7 @@ internal class ScpProcessor(
         }
         finally
         {
+            if (encryptedData is not null) CryptographicOperations.ZeroMemory(encryptedData);
             if (scpCommandData is not null) CryptographicOperations.ZeroMemory(scpCommandData);
             if (finalCommandData is not null) CryptographicOperations.ZeroMemory(finalCommandData);
             if (mac is not null) CryptographicOperations.ZeroMemory(mac);

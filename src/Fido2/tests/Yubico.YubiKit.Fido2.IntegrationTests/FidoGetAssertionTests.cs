@@ -46,7 +46,7 @@ public class FidoGetAssertionTests
 
             try
             {
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
                 var rp = FidoTestData.CreateRelyingParty();
                 var user = FidoTestData.CreateUser();
@@ -61,13 +61,13 @@ public class FidoGetAssertionTests
                 if (supportsPermissions)
                 {
                     makePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.MakeCredential,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var makePinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
@@ -93,13 +93,13 @@ public class FidoGetAssertionTests
                 if (supportsPermissions)
                 {
                     assertPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.GetAssertion,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    assertPinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    assertPinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var assertPinUvAuthParam = FidoTestHelpers.ComputeGetAssertionAuthParam(
@@ -143,7 +143,7 @@ public class FidoGetAssertionTests
 
             try
             {
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
                 var rp = FidoTestData.CreateRelyingParty();
                 expectedUserId = FidoTestData.GenerateUserId();
@@ -158,13 +158,13 @@ public class FidoGetAssertionTests
                 if (supportsPermissions)
                 {
                     makePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.MakeCredential,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var makePinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
@@ -190,13 +190,13 @@ public class FidoGetAssertionTests
                 if (supportsPermissions)
                 {
                     assertPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.GetAssertion,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    assertPinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    assertPinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var assertPinUvAuthParam = FidoTestHelpers.ComputeGetAssertionAuthParam(
@@ -236,7 +236,7 @@ public class FidoGetAssertionTests
         {
             var uniqueRpId = $"test-{Guid.NewGuid()}.example.com";
 
-            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
             var info = await session.GetInfoAsync();
             var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
@@ -247,13 +247,13 @@ public class FidoGetAssertionTests
             if (supportsPermissions)
             {
                 pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    FidoTestData.Pin,
+                    FidoTestData.PinUtf8,
                     PinUvAuthTokenPermissions.GetAssertion,
                     uniqueRpId);
             }
             else
             {
-                pinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                pinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
             }
 
             var pinUvAuthParam = FidoTestHelpers.ComputeGetAssertionAuthParam(
@@ -279,7 +279,7 @@ public class FidoGetAssertionTests
         try
         {
             var (pinToken, clientPin, protocol) = await FidoTestHelpers.GetCredManTokenAsync(
-                session, FidoTestData.Pin);
+                session, FidoTestData.PinUtf8);
 
             using (clientPin)
             {

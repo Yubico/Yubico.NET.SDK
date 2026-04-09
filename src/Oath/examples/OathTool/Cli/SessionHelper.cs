@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Cli.Shared.Device;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
@@ -63,7 +64,7 @@ public static class OathSessionHelper
         byte[]? key = null;
         try
         {
-            key = session.DeriveKey(password);
+            key = session.DeriveKey(Encoding.UTF8.GetBytes(password));
             await session.ValidateAsync(key);
             return true;
         }

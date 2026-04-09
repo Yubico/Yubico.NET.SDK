@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Text;
 using NSubstitute;
 using Xunit;
 using Yubico.YubiKit.Fido2.Pin;
@@ -112,113 +113,118 @@ public sealed class ClientPinTests : IDisposable
     public async Task SetPinAsync_WithShortPin_ThrowsArgumentException(string shortPin)
     {
         using var clientPin = CreateClientPin();
-        
-        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(shortPin, TestContext.Current.CancellationToken));
+
+        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(Encoding.UTF8.GetBytes(shortPin), TestContext.Current.CancellationToken));
     }
-    
+
     [Fact]
-    public async Task SetPinAsync_WithNullPin_ThrowsArgumentNullException()
+    public async Task SetPinAsync_WithEmptyPin_ThrowsArgumentException()
     {
         using var clientPin = CreateClientPin();
-        
-        await Assert.ThrowsAsync<ArgumentNullException>(() => clientPin.SetPinAsync(null!, TestContext.Current.CancellationToken));
+
+        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
     }
-    
+
     [Fact]
     public async Task SetPinAsync_WithTooLongPin_ThrowsArgumentException()
     {
         using var clientPin = CreateClientPin();
-        
-        var longPin = new string('a', 64);
+
+        var longPin = new byte[64];
         await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(longPin, TestContext.Current.CancellationToken));
     }
-    
+
     [Fact]
     public async Task SetPinAsync_WithValidPin_SendsCommand()
     {
         using var clientPin = CreateClientPin();
-        
+
         // Setup mock responses
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var emptyResponse = CreateEmptyResponse();
-        
+
         _mockSession.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(keyAgreementResponse, emptyResponse);
-        
-        await clientPin.SetPinAsync("1234", TestContext.Current.CancellationToken);
-        
+
+        await clientPin.SetPinAsync(Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken);
+
         // Verify two commands were sent (GetKeyAgreement and SetPin)
         await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
     }
-    
+
     [Fact]
     public async Task ChangePinAsync_WithValidPins_SendsCommand()
     {
         using var clientPin = CreateClientPin();
-        
+
         // Setup mock responses
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var emptyResponse = CreateEmptyResponse();
-        
+
         _mockSession.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(keyAgreementResponse, emptyResponse);
-        
-        await clientPin.ChangePinAsync("oldpin1234", "newpin5678", TestContext.Current.CancellationToken);
-        
+
+        await clientPin.ChangePinAsync(Encoding.UTF8.GetBytes("oldpin1234"), Encoding.UTF8.GetBytes("newpin5678"), TestContext.Current.CancellationToken);
+
         // Verify two commands were sent (GetKeyAgreement and ChangePin)
         await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
     }
-    
-    [Theory]
-    [InlineData("ab", "1234")]
-    [InlineData("1234", "ab")]
-    [InlineData("ab", "cd")]
-    public async Task ChangePinAsync_WithInvalidPins_ThrowsArgumentException(string currentPin, string newPin)
+
+    [Fact]
+    public async Task ChangePinAsync_WithShortCurrentPin_ThrowsArgumentException()
     {
         using var clientPin = CreateClientPin();
-        
-        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(currentPin, newPin, TestContext.Current.CancellationToken));
+
+        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(Encoding.UTF8.GetBytes("ab"), Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken));
     }
-    
+
+    [Fact]
+    public async Task ChangePinAsync_WithShortNewPin_ThrowsArgumentException()
+    {
+        using var clientPin = CreateClientPin();
+
+        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(Encoding.UTF8.GetBytes("1234"), Encoding.UTF8.GetBytes("ab"), TestContext.Current.CancellationToken));
+    }
+
     [Fact]
     public async Task GetPinTokenAsync_ReturnsDecryptedToken()
     {
         using var clientPin = CreateClientPin();
-        
+
         // Setup mock responses
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var encryptedToken = new byte[32];
         var tokenResponse = CreatePinTokenResponse(encryptedToken);
-        
+
         _mockSession.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
-        
-        var token = await clientPin.GetPinTokenAsync("1234", TestContext.Current.CancellationToken);
-        
+
+        var token = await clientPin.GetPinTokenAsync(Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken);
+
         // Token is decrypted by the fake protocol
         Assert.NotNull(token);
         Assert.Equal(encryptedToken.Length, token.Length);
     }
-    
+
     [Fact]
     public async Task GetPinUvAuthTokenUsingPinAsync_WithNoPermissions_ThrowsArgumentException()
     {
         using var clientPin = CreateClientPin();
-        
+
         await Assert.ThrowsAsync<ArgumentException>(
-            () => clientPin.GetPinUvAuthTokenUsingPinAsync("1234", PinUvAuthTokenPermissions.None, cancellationToken: TestContext.Current.CancellationToken));
+            () => clientPin.GetPinUvAuthTokenUsingPinAsync(Encoding.UTF8.GetBytes("1234"), PinUvAuthTokenPermissions.None, cancellationToken: TestContext.Current.CancellationToken));
     }
-    
+
     [Fact]
     public async Task GetPinUvAuthTokenUsingPinAsync_WithPermissions_ReturnsToken()
     {
         using var clientPin = CreateClientPin();
-        
+
         // Setup mock responses
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var tokenResponse = CreatePinTokenResponse(new byte[32]);
-        
+
         _mockSession.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
-        
-        var token = await clientPin.GetPinUvAuthTokenUsingPinAsync("1234", PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion, "example.com", TestContext.Current.CancellationToken);
-        
+
+        var token = await clientPin.GetPinUvAuthTokenUsingPinAsync(Encoding.UTF8.GetBytes("1234"), PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion, "example.com", TestContext.Current.CancellationToken);
+
         Assert.NotNull(token);
     }
     

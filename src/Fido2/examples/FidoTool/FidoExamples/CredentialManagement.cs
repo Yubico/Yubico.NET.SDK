@@ -109,7 +109,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinBytes,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -163,7 +163,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinBytes,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -218,7 +218,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinBytes,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -273,7 +273,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinBytes,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -332,7 +332,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinBytes,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 

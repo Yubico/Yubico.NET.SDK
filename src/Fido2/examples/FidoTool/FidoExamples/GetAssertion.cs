@@ -86,7 +86,7 @@ public static class GetAssertion
                 using var clientPin = new ClientPin(session, protocol);
 
                 pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    pin,
+                    pinBytes,
                     PinUvAuthTokenPermissions.GetAssertion,
                     rpId,
                     cancellationToken);

@@ -3,6 +3,7 @@
 
 using Spectre.Console.Cli;
 using System.ComponentModel;
+using System.Text;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
@@ -41,7 +42,7 @@ public sealed class AccessUnblockPinCommand : OpenPgpCommand<AccessUnblockPinCom
             }
         }
 
-        await session.ResetPinAsync(resetCode, newPin, useAdmin: false);
+        await session.ResetPinAsync(Encoding.UTF8.GetBytes(resetCode), Encoding.UTF8.GetBytes(newPin), useAdmin: false);
         OutputHelpers.WriteSuccess("User PIN has been unblocked.");
         return 0;
     }

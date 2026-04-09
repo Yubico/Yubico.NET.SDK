@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
@@ -86,7 +87,7 @@ public static class AccessCommand
         byte[]? key = null;
         try
         {
-            key = session.DeriveKey(newPassword);
+            key = session.DeriveKey(Encoding.UTF8.GetBytes(newPassword));
             await session.SetKeyAsync(key, cancellationToken);
             OutputHelpers.WriteSuccess("OATH access password set.");
             return 0;

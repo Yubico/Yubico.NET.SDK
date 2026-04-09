@@ -86,7 +86,7 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Derives a key from a password using PBKDF2-HMAC-SHA1 with the device salt.
     /// </summary>
-    byte[] DeriveKey(string password);
+    byte[] DeriveKey(ReadOnlyMemory<byte> passwordUtf8);
 
     /// <summary>
     ///     Validates the access key using mutual HMAC-SHA1 challenge-response authentication.

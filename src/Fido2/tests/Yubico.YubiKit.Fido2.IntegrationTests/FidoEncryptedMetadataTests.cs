@@ -93,7 +93,7 @@ public class FidoEncryptedMetadataTests
             Assert.True(info.EncIdentifier.HasValue, "EncIdentifier should be present on 5.8+ firmware");
             Assert.True(info.EncCredStoreState.HasValue, "EncCredStoreState should be present on 5.8+ firmware");
 
-            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
             var ppuat = await GetPpuatAsync(session, clientPin);
 
             try
@@ -129,7 +129,7 @@ public class FidoEncryptedMetadataTests
                 return;
             }
 
-            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
             var realPpuat = await GetPpuatAsync(session, clientPin);
 
             try
@@ -173,7 +173,7 @@ public class FidoEncryptedMetadataTests
                 return;
             }
 
-            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
             var ppuat = await GetPpuatAsync(session, clientPin);
 
             try
@@ -208,7 +208,7 @@ public class FidoEncryptedMetadataTests
                 return;
             }
 
-            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
             var ppuat = await GetPpuatAsync(session, clientPin);
 
             try
@@ -238,10 +238,10 @@ public class FidoEncryptedMetadataTests
         if (supportsPermissions)
         {
             return await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                FidoTestData.Pin,
+                FidoTestData.PinUtf8,
                 PinUvAuthTokenPermissions.CredentialManagementRO);
         }
 
-        return await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+        return await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
     }
 }

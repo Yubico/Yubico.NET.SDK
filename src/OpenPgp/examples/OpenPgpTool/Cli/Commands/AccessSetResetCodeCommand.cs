@@ -3,6 +3,7 @@
 
 using Spectre.Console.Cli;
 using System.ComponentModel;
+using System.Text;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
@@ -41,8 +42,8 @@ public sealed class AccessSetResetCodeCommand : OpenPgpCommand<AccessSetResetCod
             }
         }
 
-        await session.VerifyAdminAsync(adminPin);
-        await session.SetResetCodeAsync(resetCode);
+        await session.VerifyAdminAsync(Encoding.UTF8.GetBytes(adminPin));
+        await session.SetResetCodeAsync(Encoding.UTF8.GetBytes(resetCode));
         OutputHelpers.WriteSuccess("Reset Code has been set.");
         return 0;
     }

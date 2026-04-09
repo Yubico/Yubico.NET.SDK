@@ -108,7 +108,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinBytes,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -163,7 +163,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinBytes,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -251,7 +251,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinBytes,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -305,7 +305,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinBytes,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -358,7 +358,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinBytes,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 

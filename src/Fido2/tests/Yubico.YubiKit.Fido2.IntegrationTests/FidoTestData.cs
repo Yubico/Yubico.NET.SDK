@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 
@@ -47,7 +48,12 @@ public static class FidoTestData
     /// Test PIN that meets enhanced complexity requirements (8+ chars, mixed case + numbers).
     /// </summary>
     public const string Pin = "Abc12345";
-    
+
+    /// <summary>
+    /// Test PIN as UTF-8 bytes for use with ClientPin methods.
+    /// </summary>
+    public static readonly byte[] PinUtf8 = Encoding.UTF8.GetBytes(Pin);
+
     /// <summary>
     /// Simple PIN for devices without complexity enforcement.
     /// </summary>

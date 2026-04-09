@@ -14,7 +14,6 @@
 
 using System.Buffers.Binary;
 using System.Security.Cryptography;
-using System.Text;
 using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.OpenPgp;
@@ -40,12 +39,12 @@ public abstract class Kdf
     public abstract int Algorithm { get; }
 
     /// <summary>
-    ///     Derives PIN bytes from the given PIN string for the specified PIN type.
+    ///     Derives PIN bytes from the given UTF-8 PIN bytes for the specified PIN type.
     /// </summary>
     /// <param name="pw">The PIN type (User, Reset, or Admin).</param>
-    /// <param name="pin">The PIN string.</param>
+    /// <param name="pinUtf8Bytes">The PIN as UTF-8 encoded bytes.</param>
     /// <returns>The derived PIN bytes.</returns>
-    public abstract byte[] Process(Pw pw, string pin);
+    public abstract byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8Bytes);
 
     /// <summary>
     ///     Serializes the KDF configuration to its wire format (concatenated TLVs).
@@ -81,8 +80,8 @@ public sealed class KdfNone : Kdf
     public override int Algorithm => 0;
 
     /// <inheritdoc />
-    public override byte[] Process(Pw pw, string pin) =>
-        Encoding.UTF8.GetBytes(pin);
+    public override byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8Bytes) =>
+        pinUtf8Bytes.ToArray();
 
     /// <inheritdoc />
     public override byte[] ToBytes()
@@ -168,15 +167,14 @@ public sealed class KdfIterSaltedS2k : Kdf
         };
 
     /// <inheritdoc />
-    public override byte[] Process(Pw pw, string pin)
+    public override byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8Bytes)
     {
         var salt = GetSalt(pw);
-        var pinBytes = Encoding.UTF8.GetBytes(pin);
 
-        // data = salt + pinBytes
-        var data = new byte[salt.Length + pinBytes.Length];
+        // data = salt + pinUtf8Bytes
+        var data = new byte[salt.Length + pinUtf8Bytes.Length];
         salt.Span.CopyTo(data);
-        pinBytes.CopyTo(data.AsSpan(salt.Length));
+        pinUtf8Bytes.CopyTo(data.AsSpan(salt.Length));
 
         try
         {
@@ -185,7 +183,6 @@ public sealed class KdfIterSaltedS2k : Kdf
         finally
         {
             CryptographicOperations.ZeroMemory(data);
-            CryptographicOperations.ZeroMemory(pinBytes);
         }
     }
 

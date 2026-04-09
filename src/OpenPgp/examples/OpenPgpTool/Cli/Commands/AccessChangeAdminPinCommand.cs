@@ -3,6 +3,7 @@
 
 using Spectre.Console.Cli;
 using System.ComponentModel;
+using System.Text;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
@@ -41,7 +42,7 @@ public sealed class AccessChangeAdminPinCommand : OpenPgpCommand<AccessChangeAdm
             }
         }
 
-        await session.ChangeAdminAsync(currentPin, newPin);
+        await session.ChangeAdminAsync(Encoding.UTF8.GetBytes(currentPin), Encoding.UTF8.GetBytes(newPin));
         OutputHelpers.WriteSuccess("Admin PIN has been changed.");
         return 0;
     }

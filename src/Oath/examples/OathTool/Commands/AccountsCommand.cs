@@ -1,6 +1,7 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
+using System.Buffers;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 
@@ -15,10 +16,10 @@ public static class AccountsCommand
     /// Lists all OATH credentials on the device.
     /// </summary>
     public static async Task<int> ListAsync(
-        string? password = null,
+        IMemoryOwner<byte>? passwordBytes = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await OathSessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
         if (result is null)
         {
             return 1;
@@ -58,7 +59,7 @@ public static class AccountsCommand
         int period = 30,
         bool touch = false,
         bool force = false,
-        string? password = null,
+        IMemoryOwner<byte>? passwordBytes = null,
         CancellationToken cancellationToken = default)
     {
         byte[] secretBytes;
@@ -96,7 +97,7 @@ public static class AccountsCommand
             }
         }
 
-        var result = await OathSessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
         if (result is null)
         {
             return 1;
@@ -125,10 +126,10 @@ public static class AccountsCommand
     /// </summary>
     public static async Task<int> CodeAsync(
         string? query = null,
-        string? password = null,
+        IMemoryOwner<byte>? passwordBytes = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await OathSessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
         if (result is null)
         {
             return 1;
@@ -152,10 +153,10 @@ public static class AccountsCommand
     public static async Task<int> DeleteAsync(
         string name,
         bool force = false,
-        string? password = null,
+        IMemoryOwner<byte>? passwordBytes = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await OathSessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
         if (result is null)
         {
             return 1;
@@ -204,10 +205,10 @@ public static class AccountsCommand
         string name,
         string newName,
         bool force = false,
-        string? password = null,
+        IMemoryOwner<byte>? passwordBytes = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await OathSessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
         if (result is null)
         {
             return 1;
@@ -273,7 +274,7 @@ public static class AccountsCommand
         string uri,
         bool touch = false,
         bool force = false,
-        string? password = null,
+        IMemoryOwner<byte>? passwordBytes = null,
         CancellationToken cancellationToken = default)
     {
         CredentialData credentialData;
@@ -300,7 +301,7 @@ public static class AccountsCommand
             }
         }
 
-        var result = await OathSessionHelper.CreateUnlockedSessionAsync(password, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
         if (result is null)
         {
             return 1;

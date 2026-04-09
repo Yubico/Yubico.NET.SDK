@@ -81,11 +81,16 @@ public static class ConfigMenu
         OutputHelpers.WriteInfo(
             "This toggles the always-UV setting. When enabled, user verification is required for every operation.");
 
-        var pin = OutputHelpers.PromptForPin();
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var result = await AnsiConsole.Status()
             .StartAsync("Toggling always-UV...", async _ =>
-                await ConfigManagement.ToggleAlwaysUvAsync(device, pin, cancellationToken));
+                await ConfigManagement.ToggleAlwaysUvAsync(device, pinOwner.Memory, cancellationToken));
 
         if (result.Success)
         {
@@ -109,12 +114,17 @@ public static class ConfigMenu
             return;
         }
 
-        var pin = OutputHelpers.PromptForPin();
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var result = await AnsiConsole.Status()
             .StartAsync("Enabling enterprise attestation...", async _ =>
                 await ConfigManagement.EnableEnterpriseAttestationAsync(
-                    device, pin, cancellationToken));
+                    device, pinOwner.Memory, cancellationToken));
 
         if (result.Success)
         {
@@ -134,12 +144,17 @@ public static class ConfigMenu
         var forceChange = AnsiConsole.Confirm(
             "Force PIN change before next use?", defaultValue: false);
 
-        var pin = OutputHelpers.PromptForPin();
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var result = await AnsiConsole.Status()
             .StartAsync("Setting minimum PIN length...", async _ =>
                 await ConfigManagement.SetMinPinLengthAsync(
-                    device, pin, length, forceChangePin: forceChange,
+                    device, pinOwner.Memory, length, forceChangePin: forceChange,
                     cancellationToken: cancellationToken));
 
         if (result.Success)

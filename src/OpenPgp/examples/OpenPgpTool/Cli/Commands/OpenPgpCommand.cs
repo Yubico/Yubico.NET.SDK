@@ -1,9 +1,13 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
+using System.Buffers;
+using System.Text;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Prompts;
@@ -80,18 +84,38 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
             _ => keyRef.ToString()
         };
 
+    private static readonly ConsoleCredentialReader CredentialReader = new();
+
     /// <summary>
-    ///     Gets a PIN value, using the provided option or prompting interactively.
+    ///     Gets a credential value as secure bytes, using the provided option or prompting interactively.
     /// </summary>
-    protected static string GetPin(string? provided, string promptLabel)
+    protected static IMemoryOwner<byte>? GetCredential(string? provided, CredentialReaderOptions options)
     {
         if (!string.IsNullOrEmpty(provided))
         {
-            return provided;
+            return DisposableArrayPoolBuffer.CreateFromSpan(Encoding.UTF8.GetBytes(provided));
         }
 
-        return OutputHelpers.PromptPin(promptLabel);
+        return CredentialReader.ReadCredential(options);
     }
+
+    /// <summary>
+    ///     Gets the OpenPGP User PIN (6-127 characters).
+    /// </summary>
+    protected static IMemoryOwner<byte>? GetPin(string? provided) =>
+        GetCredential(provided, CredentialReaderOptions.ForOpenPgpPin());
+
+    /// <summary>
+    ///     Gets the OpenPGP Admin PIN (8-127 characters).
+    /// </summary>
+    protected static IMemoryOwner<byte>? GetAdminPin(string? provided) =>
+        GetCredential(provided, CredentialReaderOptions.ForOpenPgpAdminPin());
+
+    /// <summary>
+    ///     Gets the OpenPGP Reset Code (8-127 characters).
+    /// </summary>
+    protected static IMemoryOwner<byte>? GetResetCode(string? provided) =>
+        GetCredential(provided, CredentialReaderOptions.ForOpenPgpResetCode());
 
     /// <summary>
     ///     Confirms a destructive action. If <paramref name="force" /> is true, skips the prompt.

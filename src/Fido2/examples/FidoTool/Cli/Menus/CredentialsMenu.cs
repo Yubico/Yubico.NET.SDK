@@ -82,11 +82,16 @@ public static class CredentialsMenu
 
     private static async Task RunMetadataAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = OutputHelpers.PromptForPin();
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var result = await AnsiConsole.Status()
             .StartAsync("Querying credential metadata...", async _ =>
-                await CredentialManagementExample.GetMetadataAsync(device, pin, cancellationToken));
+                await CredentialManagementExample.GetMetadataAsync(device, pinOwner.Memory, cancellationToken));
 
         if (!result.Success)
         {
@@ -104,12 +109,17 @@ public static class CredentialsMenu
 
     private static async Task RunListAllAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = OutputHelpers.PromptForPin();
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var rpResult = await AnsiConsole.Status()
             .StartAsync("Enumerating relying parties...", async _ =>
                 await CredentialManagementExample.EnumerateRelyingPartiesAsync(
-                    device, pin, cancellationToken));
+                    device, pinOwner.Memory, cancellationToken));
 
         if (!rpResult.Success)
         {
@@ -139,7 +149,7 @@ public static class CredentialsMenu
 
             // Enumerate credentials for this RP
             var credResult = await CredentialManagementExample.EnumerateCredentialsAsync(
-                device, pin, rp.RpIdHash, cancellationToken);
+                device, pinOwner.Memory, rp.RpIdHash, cancellationToken);
 
             if (!credResult.Success)
             {
@@ -158,7 +168,12 @@ public static class CredentialsMenu
 
     private static async Task RunDeleteAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = OutputHelpers.PromptForPin();
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var credIdHex = AnsiConsole.Ask<string>("Credential ID (hex):");
         byte[] credentialId;
@@ -181,7 +196,7 @@ public static class CredentialsMenu
         var result = await AnsiConsole.Status()
             .StartAsync("Deleting credential...", async _ =>
                 await CredentialManagementExample.DeleteCredentialAsync(
-                    device, pin, credentialId, cancellationToken));
+                    device, pinOwner.Memory, credentialId, cancellationToken));
 
         if (result.Success)
         {
@@ -195,7 +210,12 @@ public static class CredentialsMenu
 
     private static async Task RunUpdateUserAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = OutputHelpers.PromptForPin();
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var credIdHex = AnsiConsole.Ask<string>("Credential ID (hex):");
         byte[] credentialId;
@@ -227,7 +247,7 @@ public static class CredentialsMenu
         var result = await AnsiConsole.Status()
             .StartAsync("Updating user information...", async _ =>
                 await CredentialManagementExample.UpdateUserInfoAsync(
-                    device, pin, credentialId, userName, displayName, userId, cancellationToken));
+                    device, pinOwner.Memory, credentialId, userName, displayName, userId, cancellationToken));
 
         if (result.Success)
         {

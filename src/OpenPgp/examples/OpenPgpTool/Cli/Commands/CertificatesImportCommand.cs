@@ -5,7 +5,6 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
@@ -58,8 +57,14 @@ public sealed class CertificatesImportCommand : OpenPgpCommand<CertificatesImpor
         OutputHelpers.WriteKeyValue("Issuer", cert.Issuer);
         OutputHelpers.WriteKeyValue("Thumbprint", cert.Thumbprint);
 
-        var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        await session.VerifyAdminAsync(Encoding.UTF8.GetBytes(adminPin));
+        using var adminPin = GetAdminPin(settings.AdminPin);
+        if (adminPin is null)
+        {
+            OutputHelpers.WriteError("Admin PIN is required.");
+            return 1;
+        }
+
+        await session.VerifyAdminAsync(adminPin.Memory);
         await session.PutCertificateAsync(keyRef, cert);
 
         OutputHelpers.WriteSuccess(

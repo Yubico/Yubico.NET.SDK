@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using System.Text;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -57,7 +56,7 @@ public static class MakeCredential
     /// <param name="rpId">The relying party identifier (e.g., "example.com").</param>
     /// <param name="userName">The user name (e.g., "user@example.com").</param>
     /// <param name="displayName">The user display name.</param>
-    /// <param name="pin">Optional PIN for user verification.</param>
+    /// <param name="pinUtf8">Optional PIN as UTF-8 bytes for user verification.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The operation result containing the credential response.</returns>
     public static async Task<MakeCredentialResult> CreateAsync(
@@ -65,10 +64,9 @@ public static class MakeCredential
         string rpId,
         string userName,
         string? displayName,
-        string? pin = null,
+        ReadOnlyMemory<byte>? pinUtf8 = null,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
@@ -100,15 +98,13 @@ public static class MakeCredential
             };
 
             // If PIN is provided, get a PIN token for user verification
-            if (pin is not null)
+            if (pinUtf8 is not null)
             {
-                pinBytes = Encoding.UTF8.GetBytes(pin);
-
                 using var protocol = new PinUvAuthProtocolV2();
                 using var clientPin = new ClientPin(session, protocol);
 
                 pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    pinBytes,
+                    pinUtf8.Value.ToArray(),
                     PinUvAuthTokenPermissions.MakeCredential,
                     rpId,
                     cancellationToken);
@@ -138,11 +134,6 @@ public static class MakeCredential
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);

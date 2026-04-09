@@ -3,7 +3,6 @@
 
 using Spectre.Console.Cli;
 using System.ComponentModel;
-using System.Text;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
@@ -37,9 +36,14 @@ public sealed class AccessSetRetriesCommand : OpenPgpCommand<AccessSetRetriesCom
         Settings settings,
         IOpenPgpSession session)
     {
-        var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
+        using var adminPin = GetAdminPin(settings.AdminPin);
+        if (adminPin is null)
+        {
+            OutputHelpers.WriteError("Admin PIN is required.");
+            return 1;
+        }
 
-        await session.VerifyAdminAsync(Encoding.UTF8.GetBytes(adminPin));
+        await session.VerifyAdminAsync(adminPin.Memory);
         await session.SetPinAttemptsAsync(
             settings.UserRetries,
             settings.ResetRetries,

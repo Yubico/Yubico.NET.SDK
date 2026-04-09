@@ -76,22 +76,23 @@ public static class AccessMenu
 
     private static async Task RunChangePinAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var currentPin = OutputHelpers.PromptForPin("Current PIN");
-        var newPin = OutputHelpers.PromptForPin("New PIN");
-
-        var confirmPin = AnsiConsole.Prompt(
-            new TextPrompt<string>("Confirm new PIN:")
-                .Secret());
-
-        if (!string.Equals(newPin, confirmPin, StringComparison.Ordinal))
+        using var currentPinOwner = FidoPinHelper.PromptForPin("Enter current PIN: ");
+        if (currentPinOwner is null)
         {
-            OutputHelpers.WriteError("New PINs do not match.");
+            OutputHelpers.WriteError("Current PIN is required.");
+            return;
+        }
+
+        using var newPinOwner = FidoPinHelper.PromptForNewPin("Enter new PIN: ");
+        if (newPinOwner is null)
+        {
+            OutputHelpers.WriteError("New PIN is required.");
             return;
         }
 
         var result = await AnsiConsole.Status()
             .StartAsync("Changing PIN...", async _ =>
-                await PinManagement.ChangePinAsync(device, currentPin, newPin, cancellationToken));
+                await PinManagement.ChangePinAsync(device, currentPinOwner.Memory, newPinOwner.Memory, cancellationToken));
 
         if (result.Success)
         {
@@ -105,11 +106,16 @@ public static class AccessMenu
 
     private static async Task RunVerifyPinAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = OutputHelpers.PromptForPin("PIN");
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var result = await AnsiConsole.Status()
             .StartAsync("Verifying PIN...", async _ =>
-                await PinManagement.VerifyPinAsync(device, pin, cancellationToken));
+                await PinManagement.VerifyPinAsync(device, pinOwner.Memory, cancellationToken));
 
         if (result.Success)
         {
@@ -123,21 +129,16 @@ public static class AccessMenu
 
     private static async Task RunSetPinAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var newPin = OutputHelpers.PromptForPin("New PIN (4-63 characters)");
-
-        var confirmPin = AnsiConsole.Prompt(
-            new TextPrompt<string>("Confirm new PIN:")
-                .Secret());
-
-        if (!string.Equals(newPin, confirmPin, StringComparison.Ordinal))
+        using var newPinOwner = FidoPinHelper.PromptForNewPin("Enter new PIN (4-63 characters): ");
+        if (newPinOwner is null)
         {
-            OutputHelpers.WriteError("PINs do not match.");
+            OutputHelpers.WriteError("New PIN is required.");
             return;
         }
 
         var result = await AnsiConsole.Status()
             .StartAsync("Setting PIN...", async _ =>
-                await PinManagement.SetPinAsync(device, newPin, cancellationToken));
+                await PinManagement.SetPinAsync(device, newPinOwner.Memory, cancellationToken));
 
         if (result.Success)
         {

@@ -207,8 +207,10 @@ static async Task<int> RunAccessVerbAsync(string[] args, CancellationToken cance
     {
         case "set-pin":
         {
-            var newPin = ParseOption(args, "--new-pin") ?? OutputHelpers.PromptForPin("New PIN");
-            var result = await PinManagement.SetPinAsync(selection.Device, newPin, cancellationToken);
+            using var newPinOwner = FidoPinHelper.GetNewPin(ParseOption(args, "--new-pin"));
+            if (newPinOwner is null) { OutputHelpers.WriteError("PIN required."); return 1; }
+
+            var result = await PinManagement.SetPinAsync(selection.Device, newPinOwner.Memory, cancellationToken);
             if (result.Success) { OutputHelpers.WriteSuccess("PIN set successfully."); return 0; }
             OutputHelpers.WriteError(result.ErrorMessage!);
             return 1;
@@ -216,11 +218,14 @@ static async Task<int> RunAccessVerbAsync(string[] args, CancellationToken cance
 
         case "change-pin":
         {
-            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("Current PIN");
-            var newPin = ParseOption(args, "--new-pin") ?? OutputHelpers.PromptForPin("New PIN");
+            using var pinOwner = FidoPinHelper.GetPin(ParseOption(args, "--pin"), "Enter current PIN: ");
+            if (pinOwner is null) { OutputHelpers.WriteError("Current PIN required."); return 1; }
+
+            using var newPinOwner = FidoPinHelper.GetNewPin(ParseOption(args, "--new-pin"));
+            if (newPinOwner is null) { OutputHelpers.WriteError("New PIN required."); return 1; }
 
             var result = await PinManagement.ChangePinAsync(
-                selection.Device, pin, newPin, cancellationToken);
+                selection.Device, pinOwner.Memory, newPinOwner.Memory, cancellationToken);
 
             if (result.Success)
             {
@@ -234,12 +239,11 @@ static async Task<int> RunAccessVerbAsync(string[] args, CancellationToken cance
 
         case "verify-pin":
         {
-            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+            using var pinOwner = FidoPinHelper.GetPin(ParseOption(args, "--pin"));
+            if (pinOwner is null) { OutputHelpers.WriteError("PIN required."); return 1; }
 
-            // Verify PIN by attempting to get retries after PIN auth
-            // The simplest way to verify is to get a PIN token
             var result = await PinManagement.VerifyPinAsync(
-                selection.Device, pin, cancellationToken);
+                selection.Device, pinOwner.Memory, cancellationToken);
 
             if (result.Success)
             {
@@ -284,10 +288,11 @@ static async Task<int> RunConfigVerbAsync(string[] args, CancellationToken cance
     {
         case "toggle-always-uv":
         {
-            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+            using var pinOwner = FidoPinHelper.GetPin(ParseOption(args, "--pin"));
+            if (pinOwner is null) { OutputHelpers.WriteError("PIN required."); return 1; }
 
             var result = await ConfigManagement.ToggleAlwaysUvAsync(
-                selection.Device, pin, cancellationToken);
+                selection.Device, pinOwner.Memory, cancellationToken);
 
             if (result.Success)
             {
@@ -301,10 +306,11 @@ static async Task<int> RunConfigVerbAsync(string[] args, CancellationToken cance
 
         case "enable-ep-attestation":
         {
-            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+            using var pinOwner = FidoPinHelper.GetPin(ParseOption(args, "--pin"));
+            if (pinOwner is null) { OutputHelpers.WriteError("PIN required."); return 1; }
 
             var result = await ConfigManagement.EnableEnterpriseAttestationAsync(
-                selection.Device, pin, cancellationToken);
+                selection.Device, pinOwner.Memory, cancellationToken);
 
             if (result.Success)
             {
@@ -349,10 +355,11 @@ static async Task<int> RunCredentialsVerbAsync(string[] args, CancellationToken 
     {
         case "list":
         {
-            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+            using var pinOwner = FidoPinHelper.GetPin(ParseOption(args, "--pin"));
+            if (pinOwner is null) { OutputHelpers.WriteError("PIN required."); return 1; }
 
             var rpResult = await CredentialManagementExample.EnumerateRelyingPartiesAsync(
-                selection.Device, pin, cancellationToken);
+                selection.Device, pinOwner.Memory, cancellationToken);
 
             if (!rpResult.Success)
             {
@@ -375,7 +382,7 @@ static async Task<int> RunCredentialsVerbAsync(string[] args, CancellationToken 
                 OutputHelpers.WriteHex("    RP ID Hash", rp.RpIdHash);
 
                 var credResult = await CredentialManagementExample.EnumerateCredentialsAsync(
-                    selection.Device, pin, rp.RpIdHash, cancellationToken);
+                    selection.Device, pinOwner.Memory, rp.RpIdHash, cancellationToken);
 
                 if (credResult.Success)
                 {
@@ -423,10 +430,11 @@ static async Task<int> RunCredentialsVerbAsync(string[] args, CancellationToken 
                 }
             }
 
-            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+            using var pinOwner = FidoPinHelper.GetPin(ParseOption(args, "--pin"));
+            if (pinOwner is null) { OutputHelpers.WriteError("PIN required."); return 1; }
 
             var deleteResult = await CredentialManagementExample.DeleteCredentialAsync(
-                selection.Device, pin, credentialId, cancellationToken);
+                selection.Device, pinOwner.Memory, credentialId, cancellationToken);
 
             if (deleteResult.Success)
             {
@@ -473,10 +481,15 @@ static async Task<int> RunFingerprintsVerbAsync(string[] args, CancellationToken
     {
         case "list":
         {
-            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+            using var pinOwner = FidoPinHelper.GetPin(ParseOption(args, "--pin"));
+            if (pinOwner is null)
+            {
+                OutputHelpers.WriteError("PIN is required.");
+                return 1;
+            }
 
             var result = await BioEnrollmentExample.EnumerateEnrollmentsAsync(
-                selection.Device, pin, cancellationToken);
+                selection.Device, pinOwner.Memory, cancellationToken);
 
             if (!result.Success)
             {
@@ -510,13 +523,18 @@ static async Task<int> RunFingerprintsVerbAsync(string[] args, CancellationToken
                 friendlyName = args[2];
             }
 
-            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+            using var pinOwner = FidoPinHelper.GetPin(ParseOption(args, "--pin"));
+            if (pinOwner is null)
+            {
+                OutputHelpers.WriteError("PIN is required.");
+                return 1;
+            }
 
             AnsiConsole.MarkupLine("[yellow]Touch your YubiKey now...[/]");
 
             var result = await BioEnrollmentExample.EnrollFingerprintAsync(
                 selection.Device,
-                pin,
+                pinOwner.Memory,
                 friendlyName,
                 onSampleCaptured: (sample, remaining, status) =>
                 {
@@ -573,10 +591,15 @@ static async Task<int> RunFingerprintsVerbAsync(string[] args, CancellationToken
                 }
             }
 
-            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+            using var pinOwner = FidoPinHelper.GetPin(ParseOption(args, "--pin"));
+            if (pinOwner is null)
+            {
+                OutputHelpers.WriteError("PIN is required.");
+                return 1;
+            }
 
             var result = await BioEnrollmentExample.RemoveEnrollmentAsync(
-                selection.Device, pin, templateId, cancellationToken);
+                selection.Device, pinOwner.Memory, templateId, cancellationToken);
 
             if (result.Success)
             {
@@ -614,10 +637,15 @@ static async Task<int> RunFingerprintsVerbAsync(string[] args, CancellationToken
                 return 1;
             }
 
-            var pin = ParseOption(args, "--pin") ?? OutputHelpers.PromptForPin("PIN");
+            using var pinOwner = FidoPinHelper.GetPin(ParseOption(args, "--pin"));
+            if (pinOwner is null)
+            {
+                OutputHelpers.WriteError("PIN is required.");
+                return 1;
+            }
 
             var result = await BioEnrollmentExample.RenameEnrollmentAsync(
-                selection.Device, pin, templateId, newName, cancellationToken);
+                selection.Device, pinOwner.Memory, templateId, newName, cancellationToken);
 
             if (result.Success)
             {

@@ -1,10 +1,10 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
+using System.Buffers;
 using System.Security.Cryptography;
-using System.Text;
-using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Cli.Shared.Device;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts;
 
@@ -17,11 +17,16 @@ public static class OathSessionHelper
 {
     /// <summary>
     /// Selects a device and creates an OATH session. If the session is locked,
-    /// prompts for (or uses the provided) password to unlock it.
+    /// prompts for (or uses the provided) password bytes to unlock it.
     /// Returns null if device selection fails or unlock fails.
     /// </summary>
+    /// <param name="passwordBytes">
+    /// Pre-encoded password bytes (e.g., from CLI flag). Caller retains ownership; this method does not dispose.
+    /// If null and the session is locked, the user will be prompted interactively.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     public static async Task<(DeviceSelection Selection, OathSession Session)?> CreateUnlockedSessionAsync(
-        string? password = null,
+        IMemoryOwner<byte>? passwordBytes = null,
         CancellationToken cancellationToken = default)
     {
         var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
@@ -35,7 +40,7 @@ public static class OathSessionHelper
 
         if (session.IsLocked)
         {
-            if (!await UnlockSessionAsync(session, password))
+            if (!await UnlockSessionAsync(session, passwordBytes))
             {
                 await session.DisposeAsync();
                 return null;
@@ -47,24 +52,36 @@ public static class OathSessionHelper
 
     /// <summary>
     /// Unlocks a password-protected OATH session.
-    /// Uses the provided password string, or prompts on stdin if null.
+    /// Uses the provided password bytes, or prompts interactively via <see cref="ConsoleCredentialReader"/> if null.
     /// </summary>
+    /// <param name="session">The locked OATH session.</param>
+    /// <param name="passwordBytes">
+    /// Pre-encoded password bytes. Caller retains ownership; this method does not dispose.
+    /// If null, the user is prompted interactively.
+    /// </param>
     public static async Task<bool> UnlockSessionAsync(
         IOathSession session,
-        string? password = null)
+        IMemoryOwner<byte>? passwordBytes = null)
     {
-        password ??= SessionHelper.ReadPasswordMasked("Enter OATH password");
-
-        if (string.IsNullOrEmpty(password))
-        {
-            OutputHelpers.WriteError("Password required but not provided.");
-            return false;
-        }
-
+        IMemoryOwner<byte>? prompted = null;
         byte[]? key = null;
+
         try
         {
-            key = session.DeriveKey(Encoding.UTF8.GetBytes(password));
+            if (passwordBytes is null)
+            {
+                var reader = new ConsoleCredentialReader();
+                prompted = reader.ReadCredential(CredentialReaderOptions.ForOathPassword());
+                if (prompted is null)
+                {
+                    OutputHelpers.WriteError("Password required but not provided.");
+                    return false;
+                }
+
+                passwordBytes = prompted;
+            }
+
+            key = session.DeriveKey(passwordBytes.Memory);
             await session.ValidateAsync(key);
             return true;
         }
@@ -79,6 +96,8 @@ public static class OathSessionHelper
             {
                 CryptographicOperations.ZeroMemory(key);
             }
+
+            prompted?.Dispose();
         }
     }
 }

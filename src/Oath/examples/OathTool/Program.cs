@@ -1,6 +1,9 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
+using System.Buffers;
+using System.Text;
+using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Oath;
 using Yubico.YubiKit.Oath.Examples.OathTool.Commands;
@@ -74,7 +77,9 @@ static async Task<int> DispatchAccessChangeAsync(string[] args)
     string? newPassword = GetArgValue(args, "--new-password", "-n");
     bool clear = HasFlag(args, "--clear", "-c");
 
-    return await AccessCommand.ChangeAsync(password, newPassword, clear);
+    using var passwordBytes = EncodePassword(password);
+    using var newPasswordBytes = EncodePassword(newPassword);
+    return await AccessCommand.ChangeAsync(passwordBytes, newPasswordBytes, clear);
 }
 
 // --- oath accounts ---
@@ -106,7 +111,8 @@ static async Task<int> DispatchAccountsAsync(string[] args)
 static async Task<int> DispatchAccountsListAsync(string[] args)
 {
     string? password = GetArgValue(args, "--password", "-p");
-    return await AccountsCommand.ListAsync(password);
+    using var passwordBytes = EncodePassword(password);
+    return await AccountsCommand.ListAsync(passwordBytes);
 }
 
 static async Task<int> DispatchAccountsAddAsync(string[] args)
@@ -148,8 +154,9 @@ static async Task<int> DispatchAccountsAddAsync(string[] args)
     string? periodStr = GetArgValue(args, "--period");
     int period = periodStr is not null ? int.Parse(periodStr) : 30;
 
+    using var passwordBytes = EncodePassword(password);
     return await AccountsCommand.AddAsync(
-        name, secret, issuer, oathType, digits, algorithm, period, touch, force, password);
+        name, secret, issuer, oathType, digits, algorithm, period, touch, force, passwordBytes);
 }
 
 static async Task<int> DispatchAccountsCodeAsync(string[] args)
@@ -158,7 +165,8 @@ static async Task<int> DispatchAccountsCodeAsync(string[] args)
     string? query = positional.Count > 0 ? positional[0] : null;
     string? password = GetArgValue(args, "--password", "-p");
 
-    return await AccountsCommand.CodeAsync(query, password);
+    using var passwordBytes = EncodePassword(password);
+    return await AccountsCommand.CodeAsync(query, passwordBytes);
 }
 
 static async Task<int> DispatchAccountsDeleteAsync(string[] args)
@@ -174,7 +182,8 @@ static async Task<int> DispatchAccountsDeleteAsync(string[] args)
     bool force = HasFlag(args, "--force", "-f");
     string? password = GetArgValue(args, "--password", "-p");
 
-    return await AccountsCommand.DeleteAsync(name, force, password);
+    using var passwordBytes = EncodePassword(password);
+    return await AccountsCommand.DeleteAsync(name, force, passwordBytes);
 }
 
 static async Task<int> DispatchAccountsRenameAsync(string[] args)
@@ -191,7 +200,8 @@ static async Task<int> DispatchAccountsRenameAsync(string[] args)
     bool force = HasFlag(args, "--force", "-f");
     string? password = GetArgValue(args, "--password", "-p");
 
-    return await AccountsCommand.RenameAsync(name, newName, force, password);
+    using var passwordBytes = EncodePassword(password);
+    return await AccountsCommand.RenameAsync(name, newName, force, passwordBytes);
 }
 
 static async Task<int> DispatchAccountsUriAsync(string[] args)
@@ -208,7 +218,26 @@ static async Task<int> DispatchAccountsUriAsync(string[] args)
     bool force = HasFlag(args, "--force", "-f");
     string? password = GetArgValue(args, "--password", "-p");
 
-    return await AccountsCommand.UriAsync(uri, touch, force, password);
+    using var passwordBytes = EncodePassword(password);
+    return await AccountsCommand.UriAsync(uri, touch, force, passwordBytes);
+}
+
+// --- Password encoding ---
+
+// Encodes a CLI-provided password string into IMemoryOwner<byte>
+// containing UTF-8 bytes. Returns null if the password is null.
+// The returned buffer securely zeros memory on disposal.
+static IMemoryOwner<byte>? EncodePassword(string? password)
+{
+    if (password is null)
+    {
+        return null;
+    }
+
+    int byteCount = Encoding.UTF8.GetByteCount(password);
+    var buffer = new DisposableArrayPoolBuffer(byteCount);
+    Encoding.UTF8.GetBytes(password, buffer.Span);
+    return buffer;
 }
 
 // --- Argument parsing helpers ---

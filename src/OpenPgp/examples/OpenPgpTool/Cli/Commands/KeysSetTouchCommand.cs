@@ -3,7 +3,6 @@
 
 using Spectre.Console.Cli;
 using System.ComponentModel;
-using System.Text;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
@@ -66,8 +65,14 @@ public sealed class KeysSetTouchCommand : OpenPgpCommand<KeysSetTouchCommand.Set
             return 1;
         }
 
-        var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        await session.VerifyAdminAsync(Encoding.UTF8.GetBytes(adminPin));
+        using var adminPin = GetAdminPin(settings.AdminPin);
+        if (adminPin is null)
+        {
+            OutputHelpers.WriteError("Admin PIN is required.");
+            return 1;
+        }
+
+        await session.VerifyAdminAsync(adminPin.Memory);
         await session.SetUifAsync(keyRef, uif);
 
         OutputHelpers.WriteSuccess(

@@ -65,9 +65,11 @@ internal static class FidoPinHelper
     {
         if (cliArg is not null)
         {
-            // CLI arg is already a string in process memory -- minimal additional risk
-            var bytes = Encoding.UTF8.GetBytes(cliArg);
-            return DisposableArrayPoolBuffer.CreateFromSpan(bytes);
+            // CLI arg is already a string in process memory -- encode directly to avoid extra heap copy
+            var byteCount = Encoding.UTF8.GetByteCount(cliArg);
+            var buffer = new DisposableArrayPoolBuffer(byteCount, clearOnCreate: false);
+            Encoding.UTF8.GetBytes(cliArg, buffer.Span);
+            return buffer;
         }
 
         return PromptForPin(prompt);
@@ -83,8 +85,11 @@ internal static class FidoPinHelper
     {
         if (cliArg is not null)
         {
-            var bytes = Encoding.UTF8.GetBytes(cliArg);
-            return DisposableArrayPoolBuffer.CreateFromSpan(bytes);
+            // Encode directly to avoid extra heap copy of new PIN bytes
+            var byteCount = Encoding.UTF8.GetByteCount(cliArg);
+            var buffer = new DisposableArrayPoolBuffer(byteCount, clearOnCreate: false);
+            Encoding.UTF8.GetBytes(cliArg, buffer.Span);
+            return buffer;
         }
 
         return PromptForNewPin(prompt);

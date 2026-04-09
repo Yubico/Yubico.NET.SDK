@@ -56,7 +56,7 @@ public static class ConfigManagement
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8.ToArray(),
+                pinUtf8,
                 PinUvAuthTokenPermissions.AuthenticatorConfig,
                 cancellationToken: cancellationToken);
 
@@ -100,7 +100,7 @@ public static class ConfigManagement
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8.ToArray(),
+                pinUtf8,
                 PinUvAuthTokenPermissions.AuthenticatorConfig,
                 cancellationToken: cancellationToken);
 
@@ -147,7 +147,7 @@ public static class ConfigManagement
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8.ToArray(),
+                pinUtf8,
                 PinUvAuthTokenPermissions.AuthenticatorConfig,
                 cancellationToken: cancellationToken);
 

@@ -104,7 +104,7 @@ public static class MakeCredential
                 using var clientPin = new ClientPin(session, protocol);
 
                 pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    pinUtf8.Value.ToArray(),
+                    pinUtf8.Value,
                     PinUvAuthTokenPermissions.MakeCredential,
                     rpId,
                     cancellationToken);

@@ -73,7 +73,7 @@ public static class PinManagement
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            await clientPin.SetPinAsync(newPinUtf8.ToArray(), cancellationToken);
+            await clientPin.SetPinAsync(newPinUtf8, cancellationToken);
 
             return PinResult.Succeeded();
         }
@@ -113,7 +113,7 @@ public static class PinManagement
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            await clientPin.ChangePinAsync(currentPinUtf8.ToArray(), newPinUtf8.ToArray(), cancellationToken);
+            await clientPin.ChangePinAsync(currentPinUtf8, newPinUtf8, cancellationToken);
 
             return PinResult.Succeeded();
         }
@@ -153,7 +153,7 @@ public static class PinManagement
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8.ToArray(),
+                pinUtf8,
                 PinUvAuthTokenPermissions.GetAssertion,
                 cancellationToken: cancellationToken);
 

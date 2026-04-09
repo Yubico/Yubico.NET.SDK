@@ -94,7 +94,11 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     {
         if (!string.IsNullOrEmpty(provided))
         {
-            return DisposableArrayPoolBuffer.CreateFromSpan(Encoding.UTF8.GetBytes(provided));
+            // Encode directly to avoid extra heap copy of credential bytes
+            var byteCount = Encoding.UTF8.GetByteCount(provided);
+            var buffer = new DisposableArrayPoolBuffer(byteCount, clearOnCreate: false);
+            Encoding.UTF8.GetBytes(provided, buffer.Span);
+            return buffer;
         }
 
         return CredentialReader.ReadCredential(options);

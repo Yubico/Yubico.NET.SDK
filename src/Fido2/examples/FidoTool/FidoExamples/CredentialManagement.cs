@@ -105,7 +105,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8.ToArray(),
+                pinUtf8,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -151,7 +151,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8.ToArray(),
+                pinUtf8,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -198,7 +198,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8.ToArray(),
+                pinUtf8,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -245,14 +245,14 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8.ToArray(),
+                pinUtf8,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
             var credMgmt = new Fido2.CredentialManagement.CredentialManagement(
                 session, protocol, pinToken);
 
-            var descriptor = new PublicKeyCredentialDescriptor(credentialId.ToArray());
+            var descriptor = new PublicKeyCredentialDescriptor(credentialId);
             await credMgmt.DeleteCredentialAsync(descriptor, cancellationToken);
 
             return CredMgmtResult.Succeeded();
@@ -296,15 +296,15 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8.ToArray(),
+                pinUtf8,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
             var credMgmt = new Fido2.CredentialManagement.CredentialManagement(
                 session, protocol, pinToken);
 
-            var descriptor = new PublicKeyCredentialDescriptor(credentialId.ToArray());
-            var user = new PublicKeyCredentialUserEntity(userId.ToArray(), userName, displayName);
+            var descriptor = new PublicKeyCredentialDescriptor(credentialId);
+            var user = new PublicKeyCredentialUserEntity(userId, userName, displayName);
             await credMgmt.UpdateUserInformationAsync(descriptor, user, cancellationToken);
 
             return CredMgmtResult.Succeeded();

@@ -203,7 +203,7 @@ public sealed class CredentialManagement : IDisposable
 
         if (MemoryMarshal.TryGetArray(_pinUvAuthToken, out var segment) && segment.Array is not null)
         {
-            CryptographicOperations.ZeroMemory(segment.Array);
+            CryptographicOperations.ZeroMemory(segment.AsSpan(segment.Offset, segment.Count));
         }
 
         _disposed = true;

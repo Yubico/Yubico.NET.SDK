@@ -160,8 +160,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
             var report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
             var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
 
-            _logger.LogTrace("WaitForReadyToRead: statusByte=0x{Status:X2}, report={Report}",
-                statusByte, Convert.ToHexString(report.Span));
+            _logger.LogTrace("WaitForReadyToRead: statusByte=0x{Status:X2}, report={ByteCount} bytes",
+                statusByte, report.Length);
 
             // Check for touch pending
             if ((statusByte & OtpConstants.ResponseTimeoutWaitFlag) != 0)
@@ -397,8 +397,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
             // Set sequence with write flag
             report[OtpConstants.FeatureReportDataSize] = (byte)(OtpConstants.SlotWriteFlag | seq);
             await AwaitReadyToWriteAsync(cancellationToken).ConfigureAwait(false);
-            _logger.LogTrace("Sending report #{Count} (seq={Seq}): {Report}", 
-                sentCount, seq, Convert.ToHexString(report));
+            _logger.LogTrace("Sending report #{Count} (seq={Seq}): {ByteCount} bytes",
+                sentCount, seq, report.Length);
             await WriteFeatureReportAsync(report, cancellationToken).ConfigureAwait(false);
             sentCount++;
 

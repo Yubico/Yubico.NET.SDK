@@ -70,6 +70,12 @@ public interface IOpenPgpSession : IApplicationSession
     /// <summary>
     ///     Verifies the User PIN. If KDF is configured, the PIN is derived before sending.
     /// </summary>
+    /// <remarks>
+    ///     <b>Breaking change:</b> PIN parameters changed from <c>string</c> to
+    ///     <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers to zero
+    ///     sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(pin)</c> and zero
+    ///     the resulting array when finished.
+    /// </remarks>
     /// <param name="pinUtf8">The User PIN as UTF-8 encoded bytes.</param>
     /// <param name="extended">
     ///     If <c>true</c>, verifies for signing (P2=0x81). If <c>false</c>, verifies for

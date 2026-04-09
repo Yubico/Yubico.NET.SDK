@@ -204,6 +204,7 @@ public sealed partial class PivSession
         }
         finally
         {
+            CryptographicOperations.ZeroMemory(preparedData);
             CryptographicOperations.ZeroMemory(commandData);
         }
     }

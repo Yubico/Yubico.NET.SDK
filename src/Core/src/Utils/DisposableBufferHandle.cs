@@ -16,6 +16,17 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Core.Utils;
 
+/// <summary>
+///     Wraps a <see cref="Memory{T}"/> buffer and zeroes it when disposed.
+/// </summary>
+/// <remarks>
+///     <b>Ownership transfer:</b> This type takes ownership of the provided buffer.
+///     The buffer is zeroed via <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory"/>
+///     when <see cref="Dispose"/> is called. Callers must not read from or write to
+///     the original <paramref name="data"/> after disposing this handle.
+///     Always pass a freshly-allocated or rented buffer — never wrap caller-held memory
+///     that must survive beyond the scope of this handle.
+/// </remarks>
 public class DisposableBufferHandle(Memory<byte> data) : IDisposable
 {
     public int Length => _disposed ? 0 : data.Length;

@@ -155,8 +155,11 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
             using var mac = new AesCmac(keys.Smac);
             mac.AppendData(_macChain);
             mac.AppendData(data);
-            _macChain = mac.GetHashAndReset();
 
+            var previousMacChain = _macChain;
+            var newMacChain = mac.GetHashAndReset();
+            _macChain = newMacChain;
+            CryptographicOperations.ZeroMemory(previousMacChain);
             return _macChain[..8].ToArray();
         }
         catch (Exception e)

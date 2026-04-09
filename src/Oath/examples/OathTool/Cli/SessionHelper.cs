@@ -5,6 +5,7 @@ using System.Buffers;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Cli.Shared.Device;
 using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Oath.Credentials;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts;
 
@@ -71,7 +72,7 @@ public static class OathSessionHelper
             if (passwordBytes is null)
             {
                 var reader = new ConsoleCredentialReader();
-                prompted = reader.ReadCredential(CredentialReaderOptions.ForOathPassword());
+                prompted = reader.ReadCredential(OathCredentialOptions.ForOathPassword());
                 if (prompted is null)
                 {
                     OutputHelpers.WriteError("Password required but not provided.");

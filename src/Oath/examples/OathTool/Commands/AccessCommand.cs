@@ -4,6 +4,7 @@
 using System.Buffers;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Oath.Credentials;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts;
@@ -74,7 +75,7 @@ public static class AccessCommand
             if (newPasswordBytes is null)
             {
                 var reader = new ConsoleCredentialReader();
-                var options = CredentialReaderOptions.ForOathPassword() with
+                var options = OathCredentialOptions.ForOathPassword() with
                 {
                     Prompt = "Enter new OATH password: ",
                     ConfirmPrompt = "Confirm new OATH password: "

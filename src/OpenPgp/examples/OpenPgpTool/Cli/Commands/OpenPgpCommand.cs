@@ -7,6 +7,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.OpenPgp.Credentials;
 using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
@@ -103,19 +104,19 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     ///     Gets the OpenPGP User PIN (6-127 characters).
     /// </summary>
     protected static IMemoryOwner<byte>? GetPin(string? provided) =>
-        GetCredential(provided, CredentialReaderOptions.ForOpenPgpPin());
+        GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpPin());
 
     /// <summary>
     ///     Gets the OpenPGP Admin PIN (8-127 characters).
     /// </summary>
     protected static IMemoryOwner<byte>? GetAdminPin(string? provided) =>
-        GetCredential(provided, CredentialReaderOptions.ForOpenPgpAdminPin());
+        GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpAdminPin());
 
     /// <summary>
     ///     Gets the OpenPGP Reset Code (8-127 characters).
     /// </summary>
     protected static IMemoryOwner<byte>? GetResetCode(string? provided) =>
-        GetCredential(provided, CredentialReaderOptions.ForOpenPgpResetCode());
+        GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpResetCode());
 
     /// <summary>
     ///     Confirms a destructive action. If <paramref name="force" /> is true, skips the prompt.

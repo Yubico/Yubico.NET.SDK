@@ -20,8 +20,14 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// Configuration options for credential input.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Use the factory methods <see cref="ForPin"/>, <see cref="ForPuk"/>, <see cref="ForPassphrase"/>,
 /// or <see cref="ForHexKey"/> to create pre-configured options for common credential types.
+/// </para>
+/// <para>
+/// For module-specific presets (FIDO2, OpenPGP, OATH), see the credential options classes
+/// in each module's <c>Credentials</c> namespace.
+/// </para>
 /// </remarks>
 public sealed record CredentialReaderOptions
 {
@@ -125,58 +131,4 @@ public sealed record CredentialReaderOptions
         CharacterFilter = static c => char.IsAsciiHexDigit(c) || c is ' ' or ':' or '-'
     };
 
-    /// <summary>
-    /// Creates options configured for FIDO2 PIN input (4-63 bytes UTF-8).
-    /// </summary>
-    public static CredentialReaderOptions ForFido2Pin() => new()
-    {
-        Prompt = "Enter FIDO2 PIN: ",
-        ConfirmPrompt = "Confirm FIDO2 PIN: ",
-        MinLength = 4,
-        MaxLength = 63
-    };
-
-    /// <summary>
-    /// Creates options configured for OpenPGP user PIN input (6-127 characters).
-    /// </summary>
-    public static CredentialReaderOptions ForOpenPgpPin() => new()
-    {
-        Prompt = "Enter OpenPGP PIN: ",
-        ConfirmPrompt = "Confirm OpenPGP PIN: ",
-        MinLength = 6,
-        MaxLength = 127
-    };
-
-    /// <summary>
-    /// Creates options configured for OpenPGP admin PIN input (8-127 characters).
-    /// </summary>
-    public static CredentialReaderOptions ForOpenPgpAdminPin() => new()
-    {
-        Prompt = "Enter Admin PIN: ",
-        ConfirmPrompt = "Confirm Admin PIN: ",
-        MinLength = 8,
-        MaxLength = 127
-    };
-
-    /// <summary>
-    /// Creates options configured for OpenPGP reset code input.
-    /// </summary>
-    public static CredentialReaderOptions ForOpenPgpResetCode() => new()
-    {
-        Prompt = "Enter Reset Code: ",
-        ConfirmPrompt = "Confirm Reset Code: ",
-        MinLength = 8,
-        MaxLength = 127
-    };
-
-    /// <summary>
-    /// Creates options configured for OATH password input.
-    /// </summary>
-    public static CredentialReaderOptions ForOathPassword() => new()
-    {
-        Prompt = "Enter OATH password: ",
-        ConfirmPrompt = "Confirm OATH password: ",
-        MinLength = 1,
-        MaxLength = 128
-    };
 }

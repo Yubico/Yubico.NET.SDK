@@ -16,6 +16,7 @@ using System.Buffers;
 using System.Text;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Utils;
+using Yubico.YubiKit.Fido2.Credentials;
 
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Prompts;
 
@@ -34,7 +35,7 @@ internal static class FidoPinHelper
     /// <returns>The PIN as UTF-8 bytes in a memory owner, or null if cancelled.</returns>
     public static IMemoryOwner<byte>? PromptForPin(string prompt = "Enter FIDO2 PIN: ")
     {
-        var options = CredentialReaderOptions.ForFido2Pin() with { Prompt = prompt };
+        var options = FidoCredentialOptions.ForFido2Pin() with { Prompt = prompt };
         return Reader.ReadCredential(options);
     }
 
@@ -45,7 +46,7 @@ internal static class FidoPinHelper
     /// <returns>The new PIN as UTF-8 bytes in a memory owner, or null if cancelled or mismatch.</returns>
     public static IMemoryOwner<byte>? PromptForNewPin(string prompt = "Enter new PIN: ")
     {
-        var options = CredentialReaderOptions.ForFido2Pin() with
+        var options = FidoCredentialOptions.ForFido2Pin() with
         {
             Prompt = prompt,
             ConfirmPrompt = "Confirm new PIN: "

@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2.Cbor;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -201,11 +199,8 @@ public sealed class CredentialManagement : IDisposable
         if (_disposed)
             return;
 
-        if (MemoryMarshal.TryGetArray(_pinUvAuthToken, out var segment) && segment.Array is not null)
-        {
-            CryptographicOperations.ZeroMemory(segment.AsSpan(segment.Offset, segment.Count));
-        }
-
+        // _pinUvAuthToken is caller-provided — the caller retains zeroing responsibility.
+        // Zeroing it here would corrupt the caller's view of the buffer (T12 ownership violation).
         _disposed = true;
     }
 

@@ -35,11 +35,22 @@ Detects sensitive-data-handling violations across the YubiKit codebase using a t
 | T2 | `Encoding.UTF8.GetBytes()` → intermediate `byte[]` | LOW | grep |
 | T3 | `Convert.ToHexString()` inside `LogTrace`/`LogDebug` | MEDIUM | grep |
 | T4 | `ArrayPool.Return` without prior `ZeroMemory` or `clearArray:true` | MEDIUM | grep |
-| T5 | Early return before `ZeroMemory` (control-flow) | — | **AGENT ONLY** |
+| T5 | Early return before `ZeroMemory` (ZeroMemory after try/finally) | — | **AGENT ONLY** |
 | T6 | `string` parameter for `pin`/`password`/`secret` in public API | MEDIUM | grep |
 | T7 | `IDisposable` missing on class holding key material | — | **AGENT ONLY** |
 | T8 | `Console.Write` in production source | LOW | grep |
 | T9 | Crypto disposable (`AesCmac`/`IncrementalHash`) without `using` | HIGH | grep |
+| T10 | `IDisposable` not disposed on exception/failure paths | — | **AGENT ONLY** |
+| T11 | Conditional `byte[]` allocation not covered by `ZeroMemory` | — | **AGENT ONLY** |
+| T12 | `Dispose()` zeros caller-provided buffer (ownership violation) | — | **AGENT ONLY** |
+
+**T10 vs T7 vs T9:** T7 = class never *has* IDisposable. T9 = crypto object created without `using`. T10 = object IS IDisposable and created correctly, but exception/failure paths skip `Dispose()` entirely.
+
+**T11 vs T5:** T5 = `ZeroMemory` placed *after* the try/finally (wrong position). T11 = `ZeroMemory` IS inside finally, but the buffer was allocated conditionally (inside `if`) so the finally has no reference to zero it.
+
+**T12 distinction:** All other entries are about *failing* to zero. T12 is zeroing memory you don't own — a correctness and ownership bug that can corrupt caller-held data.
+
+**Known API limitation (T1 subtype):** `ApduCommand` internally does `Data = data?.ToArray()`, creating an untracked clone that callers cannot zero. This is a framework-level issue; flag only at the `ApduCommand` API design layer, not at individual call sites.
 
 Run `scripts/security-audit.sh --help` for taxonomy descriptions and false-positive guidance.
 
@@ -66,12 +77,12 @@ Run `scripts/security-audit.sh --help` for taxonomy descriptions and false-posit
 
 ---
 
-## Phase 2: Semantic Agent Analysis (T5 + T7)
+## Phase 2: Semantic Agent Analysis (T5, T7, T10, T11, T12)
 
 Dispatch a `general-purpose` subagent with this prompt:
 
 ```
-You are performing a YubiKit security audit for two taxonomy items that require semantic analysis.
+You are performing a YubiKit security audit for taxonomy items that require semantic analysis.
 This is a READ-ONLY pass — do NOT modify any files.
 
 **Project root:** {cwd}
@@ -100,7 +111,6 @@ try
 {
     if (!Authenticate())
         return false;        // EARLY RETURN — ZeroMemory below never runs
-    
     ProcessPin(pin);
 }
 finally
@@ -108,23 +118,6 @@ finally
     ArrayPool<byte>.Shared.Return(pin);
 }
 CryptographicOperations.ZeroMemory(pin);   // BUG: unreachable on early return
-```
-
-**Example — GOOD:**
-```csharp
-var pin = ArrayPool<byte>.Shared.Rent(8);
-try
-{
-    if (!Authenticate())
-        return false;
-    
-    ProcessPin(pin);
-}
-finally
-{
-    CryptographicOperations.ZeroMemory(pin);   // Always runs, including on early return
-    ArrayPool<byte>.Shared.Return(pin, clearArray: false);
-}
 ```
 
 ---
@@ -144,20 +137,154 @@ Find classes that:
 
 ---
 
+## T10: IDisposable Not Disposed on Exception/Failure Paths
+
+Find methods that create an `IDisposable` object holding key material, where the
+object is NOT wrapped in `using var` and NOT disposed in all exit paths (including
+exception paths and early-return/failure conditions).
+
+**Distinct from T7** (class lacks IDisposable) **and T9** (crypto obj without `using`).
+T10 = the class IS IDisposable, but callers don't call Dispose() on failure paths.
+
+**What to look for:**
+1. `var x = new SomeDisposable(...)` without `using var` in a method that creates
+   objects holding session keys, MAC chains, or other sensitive material
+2. The method has a failure path (throw, early return on non-success status word)
+   where `x.Dispose()` is never called
+3. A `finally` block either doesn't exist or doesn't dispose `x`
+
+**Key classes to focus on:** `ScpProcessor`, `ScpState`, `SessionKeys`, any class
+implementing `IDisposable` in `src/Core/src/SmartCard/Scp/`
+
+**Example — BAD:**
+```csharp
+var processor = new ScpProcessor(state);
+await TransmitAsync(authCommand);          // throws on auth failure
+// processor.Dispose() never called if throw
+```
+
+**Example — GOOD:**
+```csharp
+var processor = new ScpProcessor(state);
+try
+{
+    await TransmitAsync(authCommand);
+}
+catch
+{
+    processor.Dispose();
+    throw;
+}
+```
+
+---
+
+## T11: Conditional Buffer Allocation Not Covered by ZeroMemory
+
+Find methods where a `byte[]` holding sensitive data is allocated inside a
+conditional branch (e.g. `if (encrypt)`, `if (compress)`), but the `finally`
+block's ZeroMemory call only covers unconditionally-allocated variables.
+
+**Distinct from T5:** T5 = ZeroMemory is in the wrong position (after try/finally).
+T11 = ZeroMemory IS in the finally, but the conditionally-allocated buffer is
+outside its scope because the variable was declared inside the `if` block.
+
+**What to look for:**
+1. A method has a `try/finally` with ZeroMemory calls in the finally
+2. Inside the `try`, there is an `if` branch that allocates a new `byte[]`
+   for sensitive data (encryption output, padding, etc.)
+3. The `finally` does NOT zero this conditionally-allocated variable
+4. The variable goes out of scope without zeroing (declared inside the `if` block)
+
+**Example — BAD:**
+```csharp
+try
+{
+    if (encrypt)
+    {
+        byte[] encryptedData = State.Encrypt(plaintext);   // allocated in branch
+        // ... use encryptedData
+    }
+}
+finally
+{
+    ZeroMemory(scpCommandData);   // zeros unconditional buffer
+    ZeroMemory(mac);              // zeros unconditional buffer
+    // encryptedData is never zeroed — it's out of scope here
+}
+```
+
+**Example — GOOD:**
+```csharp
+byte[]? encryptedData = null;
+try
+{
+    if (encrypt)
+    {
+        encryptedData = State.Encrypt(plaintext);
+    }
+}
+finally
+{
+    if (encryptedData is not null)
+        ZeroMemory(encryptedData);
+    ZeroMemory(scpCommandData);
+    ZeroMemory(mac);
+}
+```
+
+---
+
+## T12: Dispose() Zeros Caller-Provided Buffer (Ownership Violation)
+
+Find `Dispose()` methods that call `CryptographicOperations.ZeroMemory()` on
+a field whose backing array was provided by the caller (via constructor parameter
+or property setter), rather than allocated by this class itself.
+
+**This is an inverted pattern** — all other taxonomy items are about *failing* to
+zero. T12 is zeroing memory *you don't own*, which corrupts the caller's view.
+
+**What to look for:**
+1. A class receives `ReadOnlyMemory<byte>` or `byte[]` from a constructor parameter
+2. The class stores it in a field
+3. `Dispose()` calls `ZeroMemory` on that field's backing array
+4. The caller may still hold a reference to the same memory and see unexpected zeros
+
+**Key question:** Was the backing array allocated by *this class* (e.g. via `.ToArray()`
+on a span, or via `ArrayPool.Rent()`)? If so, zeroing is correct. If the memory
+came from the caller's allocation, zeroing it is an ownership violation.
+
+---
+
 ## Output Format
 
 ### T5 Findings
-- [T5] file:line — description of the early-return path and where ZeroMemory is misplaced
+- [T5] file:line — description of early-return path and where ZeroMemory is misplaced
   Risk: which sensitive data escapes zeroing
   Fix: move ZeroMemory into the finally block
 
 ### T7 Findings
 - [T7] file:line (class name) — field `_name : byte[]` not zeroed on disposal
-  Risk: key material survives Dispose() call, lingering until GC
+  Risk: key material survives Dispose(), lingering until GC
   Fix: implement IDisposable; call ZeroMemory(field) in Dispose()
 
+### T10 Findings
+- [T10] file:line (method name) — `ClassName` created but not disposed on [failure path]
+  Risk: session keys / MAC chain in memory until GC
+  Fix: use `using var`, or dispose in catch/finally
+
+### T11 Findings
+- [T11] file:line — `variableName` allocated inside `if (condition)`, not zeroed in finally
+  Risk: sensitive bytes remain on heap after method returns
+  Fix: declare variable before try block (= null); ZeroMemory if not null in finally
+
+### T12 Findings
+- [T12] file:line (class name) — Dispose() zeros `_fieldName` which was caller-provided
+  Risk: caller's memory unexpectedly zeroed; potential corruption of shared buffer
+  Fix: only zero memory this class allocated; document caller retains zeroing responsibility
+
 ### Clean Bill
-If no findings: state "T5: No findings" and "T7: No findings" explicitly.
+State "Tx: No findings" explicitly for each taxonomy checked.
 ```
 
 ---

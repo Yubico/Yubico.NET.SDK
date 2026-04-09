@@ -3,8 +3,9 @@
 # security-audit.sh — Sensitive Data Handling Audit
 # =============================================================================
 #
-# Mechanically scans production source for the 9 security taxonomy errors
+# Mechanically scans production source for security taxonomy errors
 # identified during the worktree-security-remediation review (April 2026).
+# T1-T9 from original review; T10-T12 added after Copilot round-3 analysis.
 #
 # Usage:
 #   ./scripts/security-audit.sh              # scan src/*/src/**
@@ -29,6 +30,9 @@
 #   T7  IDisposable missing on class holding key material      AGENT ONLY
 #   T8  Console.Write in production source                      Low FP
 #   T9  Crypto disposable created without 'using'              Medium FP
+#   T10 IDisposable not disposed on exception/failure paths    AGENT ONLY
+#   T11 Conditional buffer allocation not covered by ZeroMemory AGENT ONLY
+#   T12 Dispose() zeros caller-provided buffer (ownership bug)  AGENT ONLY
 # =============================================================================
 
 set -euo pipefail
@@ -53,6 +57,9 @@ T1: Untracked .ToArray() copies of sensitive buffers
            plaintext persists until GC.
   False Positives: .ToArray() inside try/finally with ZeroMemory is correct.
                    Also triggers on non-sensitive contexts (e.g. protocol IDs).
+  Known API exception: ApduCommand internally does Data = data?.ToArray() — callers
+                   that zero their own buffer cannot prevent this infrastructure clone.
+                   This is a known limitation; flag at ApduCommand API layer only.
   Fix: Pass ReadOnlyMemory<byte> directly, or capture the array and zero in finally.
 
 T2: Encoding.UTF8.GetBytes() → untracked temp byte[]
@@ -114,6 +121,50 @@ T9: Crypto disposable created without 'using'
   False Positives: Multiline 'using var' where 'using' is on the preceding line.
                    PCRE2 lookbehind cannot see across lines.
   Fix: Always wrap with 'using var mac = new AesCmac(...)'.
+
+T10: IDisposable not disposed on exception/failure paths (AGENT-ONLY)
+  Problem: An IDisposable object (holding key material) is created in a try block.
+           If an exception is thrown or an early-exit condition is reached, the
+           finally block runs — but if Dispose() is not called in the finally,
+           the object's key material is never zeroed.
+  Distinction from T7: T7 = class never implements IDisposable. T9 = crypto object
+           created without 'using'. T10 = object IS IDisposable and IS created
+           correctly, but exception/failure paths bypass Dispose() entirely.
+  Example: new ScpProcessor() in a try block; if EXTERNAL AUTHENTICATE fails
+           the processor is never disposed and session keys remain in memory.
+  Note: Cannot be expressed as a grep. Requires control-flow analysis.
+  Fix: Wrap creation in 'using var', or explicitly dispose in a finally block.
+
+T11: Conditional buffer allocation not covered by ZeroMemory (AGENT-ONLY)
+  Problem: A byte[] is allocated inside a conditional branch (e.g. if encrypt=true).
+           The finally block calls ZeroMemory on variables that exist unconditionally,
+           but the conditionally-allocated buffer is not zeroed because it was null
+           on non-allocating paths — the finally has no reference to it.
+  Distinction from T5: T5 = ZeroMemory is placed AFTER the try/finally (wrong
+           position). T11 = ZeroMemory IS in the finally, but the buffer it needs
+           to zero was allocated conditionally and may not be in scope.
+  Example: byte[] encryptedData allocated only when encrypt=true; finally zeros
+           scpCommandData and mac, but encryptedData is left on the heap.
+  Note: Cannot be expressed as a grep. Requires data-flow analysis.
+  Fix: Declare the conditional buffer before the try block (= null), then
+       ZeroMemory it in finally if not null.
+
+T12: Dispose() zeros caller-provided buffer — ownership violation (AGENT-ONLY)
+  Problem: A class receives a ReadOnlyMemory<byte> or byte[] from the caller
+           and zeroes the underlying backing array in Dispose(). The caller
+           may still hold a reference to the same memory and see unexpected zeros,
+           or the zeroing may corrupt unrelated data if the memory is a slice
+           of a larger caller-owned array.
+  Distinction: Most taxonomy entries are about FAILING to zero. T12 is the
+           opposite: zeroing memory you don't own, which creates correctness
+           and ownership bugs.
+  Example: CredentialManagement receives pinUvAuthToken from caller, then
+           Dispose() calls ZeroMemory on that token's backing array.
+  Note: Cannot be expressed as a grep. Requires ownership/provenance analysis.
+  Fix: Only zero buffers allocated by this class (via new or ArrayPool.Rent).
+       For caller-provided memory, document that the caller retains zeroing
+       responsibility. If ownership transfer is intended, document it explicitly
+       in the constructor signature (e.g. by taking byte[] not ReadOnlyMemory<byte>).
 
 EOF
     exit 0
@@ -254,6 +305,40 @@ echo "         1. Find classes with byte[] fields named _key/_mac/_salt/_session
 echo "         2. Verify each implements IDisposable and calls ZeroMemory in Dispose()"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
+# ── T10: Note — requires agent ────────────────────────────────────────────────
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  [T10] IDisposable not disposed on exception/failure paths (control-flow)"
+echo "  Note: Different from T7 (class lacks IDisposable) and T9 (no 'using')."
+echo "        T10 = object IS IDisposable but Dispose() is not called on error paths."
+echo "        Look for: IDisposable objects created in try blocks without 'using var',"
+echo "        where a failure branch (throw, early return) exits without disposing."
+echo "  Workaround: grep for 'var scp\|var processor\|var state' in SCP/session code,"
+echo "              then trace whether all exit paths call Dispose()."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# ── T11: Note — requires agent ────────────────────────────────────────────────
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  [T11] Conditional buffer allocation not covered by ZeroMemory (data-flow)"
+echo "  Note: Different from T5 (ZeroMemory in wrong position)."
+echo "        T11 = ZeroMemory is in finally but the buffer was allocated conditionally"
+echo "        (e.g. inside 'if encrypt') and the finally has no reference to zero it."
+echo "  Workaround: grep for 'if.*encrypt\b' or 'if.*compress\b' near byte[] allocations"
+echo "              in try blocks, then verify finally covers those variables."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# ── T12: Note — requires agent ────────────────────────────────────────────────
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  [T12] Dispose() zeros caller-provided buffer — ownership violation"
+echo "  Note: Inverted pattern — not failing to zero but zeroing memory not owned."
+echo "        Find: Dispose() methods that call ZeroMemory on fields whose backing"
+echo "        arrays came from constructor parameters rather than internal allocation."
+echo "  Workaround: grep for 'ZeroMemory' in Dispose methods; trace whether the"
+echo "              zeroed field was allocated by this class or passed in by caller."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
 # ── T8: Console.Write in production source ────────────────────────────────────
 run_check \
     "Console.Write in production source (not AnsiConsole, not comments)" \
@@ -286,6 +371,7 @@ else
     echo "  ⚠  AUDIT FLAGGED — $TOTAL_FINDINGS finding(s) require review"
     echo "  Each finding above needs human verification before declaring clean."
     echo "  See --help for false-positive guidance per taxonomy."
+    echo "  Note: T5, T7, T10, T11, T12 require agent-based analysis (see above)."
 fi
 echo "=============================================================================="
 

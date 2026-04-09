@@ -75,6 +75,7 @@ Each module directory may contain:
 - ✅ ALWAYS dispose crypto objects: `using var aes = Aes.Create()`
 - ❌ NEVER log PINs, keys, or sensitive payloads
 - ❌ NEVER use timing-vulnerable comparisons (use `FixedTimeEquals`)
+- ❌ NEVER put a heap-allocated sensitive payload (`byte[]`, `ReadOnlyMemory<byte>`) in a `struct` or `readonly record struct`. Structs are copied by value — you cannot zero all copies. Use a `sealed class` with `IDisposable`; call `ZeroMemory` in `Dispose()`. See `ApduCommand` as the canonical example.
 
 **Modern C#:**
 - ✅ ALWAYS use `is null` / `is not null` (never `== null`)

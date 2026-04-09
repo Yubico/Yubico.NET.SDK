@@ -116,10 +116,10 @@ public class ApduException : Exception
         if (command is null)
             return exception;
 
-        exception.Cla = command.Value.Cla;
-        exception.Ins = command.Value.Ins;
-        exception.P1 = command.Value.P1;
-        exception.P2 = command.Value.P2;
+        exception.Cla = command.Cla;
+        exception.Ins = command.Ins;
+        exception.P1 = command.P1;
+        exception.P2 = command.P2;
 
         return exception;
     }

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
+
 namespace Yubico.YubiKit.Core.SmartCard.Scp;
 
 /// <summary>
@@ -80,24 +82,31 @@ internal static class ScpInitializer
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        // Create SCP processor with base processor's formatter
-        var scpProcessor = new ScpProcessor(baseProcessor, state);
+        try
+        {
+            // Create SCP processor with base processor's formatter
+            var scpProcessor = new ScpProcessor(baseProcessor, state);
 
-        // Send EXTERNAL AUTHENTICATE with host cryptogram
-        var authCommand = new ApduCommand(
-            CLA_SECURE_MESSAGING,
-            INS_EXTERNAL_AUTHENTICATE,
-            SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC,
-            0x00,
-            hostCryptogram);
+            // Send EXTERNAL AUTHENTICATE with host cryptogram
+            var authCommand = new ApduCommand(
+                CLA_SECURE_MESSAGING,
+                INS_EXTERNAL_AUTHENTICATE,
+                SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC,
+                0x00,
+                hostCryptogram);
 
-        var authResponse = await scpProcessor.TransmitAsync(authCommand, true, false, cancellationToken)
-            .ConfigureAwait(false);
-        if (authResponse.SW != SWConstants.Success)
-            throw ApduException.FromResponse(authResponse, authCommand, "SCP03 EXTERNAL AUTHENTICATE failed");
+            var authResponse = await scpProcessor.TransmitAsync(authCommand, true, false, cancellationToken)
+                .ConfigureAwait(false);
+            if (authResponse.SW != SWConstants.Success)
+                throw ApduException.FromResponse(authResponse, authCommand, "SCP03 EXTERNAL AUTHENTICATE failed");
 
-        var dataEncryptor = state.GetDataEncryptor();
-        return (scpProcessor, dataEncryptor);
+            var dataEncryptor = state.GetDataEncryptor();
+            return (scpProcessor, dataEncryptor);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(hostCryptogram);
+        }
     }
 
     /// <summary>

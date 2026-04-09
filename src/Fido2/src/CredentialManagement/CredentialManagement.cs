@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2.Cbor;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -33,8 +35,9 @@ namespace Yubico.YubiKit.Fido2.CredentialManagement;
 /// Requires YubiKey firmware 5.2 or later.
 /// </para>
 /// </remarks>
-public sealed class CredentialManagement
+public sealed class CredentialManagement : IDisposable
 {
+    private bool _disposed;
     private readonly FidoSession _session;
     private readonly IPinUvAuthProtocol _protocol;
     private readonly ReadOnlyMemory<byte> _pinUvAuthToken;
@@ -193,6 +196,19 @@ public sealed class CredentialManagement
             .ConfigureAwait(false);
     }
     
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        if (MemoryMarshal.TryGetArray(_pinUvAuthToken, out var segment) && segment.Array is not null)
+        {
+            CryptographicOperations.ZeroMemory(segment.Array);
+        }
+
+        _disposed = true;
+    }
+
     private async Task<ReadOnlyMemory<byte>> SendCredentialManagementCommandAsync(
         ReadOnlyMemory<byte> payload,
         CancellationToken cancellationToken)

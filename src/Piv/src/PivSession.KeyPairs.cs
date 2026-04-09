@@ -60,47 +60,58 @@ public sealed partial class PivSession
         CheckAlgorithmSupport(algorithm);
 
         // Build the command data: TAG 0xAC [ TAG 0x80 (algorithm) + optional policies ]
-        var dataList = new List<byte>();
-        
-        // TAG 0xAC (Template)
-        var templateStart = dataList.Count;
-        dataList.Add(0xAC);
-        dataList.Add(0x00); // Length placeholder
-
-        // TAG 0x80 (Algorithm)
-        dataList.Add(0x80);
-        dataList.Add(0x01);
-        dataList.Add((byte)algorithm);
-
-        // TAG 0xAA (PIN policy) - only if not default
+        // Pre-compute size: 0xAC + len + (0x80,0x01,algo) + optional (0xAA,0x01,pin) + optional (0xAB,0x01,touch)
+        int innerLength = 3; // TAG 0x80 (algorithm) is always present
         if (pinPolicy != PivPinPolicy.Default)
-        {
-            dataList.Add(0xAA);
-            dataList.Add(0x01);
-            dataList.Add((byte)pinPolicy);
-        }
-
-        // TAG 0xAB (Touch policy) - only if not default
+            innerLength += 3;
         if (touchPolicy != PivTouchPolicy.Default)
+            innerLength += 3;
+
+        var data = new byte[2 + innerLength]; // 0xAC + length byte + inner content
+        try
         {
-            dataList.Add(0xAB);
-            dataList.Add(0x01);
-            dataList.Add((byte)touchPolicy);
+            int offset = 0;
+
+            // TAG 0xAC (Template)
+            data[offset++] = 0xAC;
+            data[offset++] = (byte)innerLength;
+
+            // TAG 0x80 (Algorithm)
+            data[offset++] = 0x80;
+            data[offset++] = 0x01;
+            data[offset++] = (byte)algorithm;
+
+            // TAG 0xAA (PIN policy) - only if not default
+            if (pinPolicy != PivPinPolicy.Default)
+            {
+                data[offset++] = 0xAA;
+                data[offset++] = 0x01;
+                data[offset++] = (byte)pinPolicy;
+            }
+
+            // TAG 0xAB (Touch policy) - only if not default
+            if (touchPolicy != PivTouchPolicy.Default)
+            {
+                data[offset++] = 0xAB;
+                data[offset++] = 0x01;
+                data[offset++] = (byte)touchPolicy;
+            }
+
+            var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, data);
+            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsOK())
+            {
+                throw ApduException.FromStatusWord(response.SW, $"Key generation failed for slot 0x{(byte)slot:X2}");
+            }
+
+            // Parse public key from response (TAG 0x7F49)
+            return ParsePublicKey(response.Data, algorithm);
         }
-
-        // Update template length
-        dataList[templateStart + 1] = (byte)(dataList.Count - templateStart - 2);
-
-        var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, dataList.ToArray());
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-
-        if (!response.IsOK())
+        finally
         {
-            throw ApduException.FromStatusWord(response.SW, $"Key generation failed for slot 0x{(byte)slot:X2}");
+            CryptographicOperations.ZeroMemory(data);
         }
-
-        // Parse public key from response (TAG 0x7F49)
-        return ParsePublicKey(response.Data, algorithm);
     }
 
     /// <summary>

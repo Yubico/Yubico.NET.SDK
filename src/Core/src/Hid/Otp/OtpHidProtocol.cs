@@ -258,8 +258,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         }
 
         var rawResponse = stream.ToArray();
-        _logger.LogDebug("{Length} bytes read over HID: {Response}",
-            rawResponse.Length, Convert.ToHexString(rawResponse));
+        _logger.LogDebug("{Length} bytes read over HID", rawResponse.Length);
 
         return rawResponse;
     }
@@ -379,8 +378,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         var statusReport = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
         var programmingSequence = statusReport.Span[OtpConstants.StatusOffsetProgSeq];
 
-        _logger.LogDebug("Initial programming sequence: {ProgSeq}, statusReport: {Report}",
-            programmingSequence, Convert.ToHexString(statusReport.Span));
+        _logger.LogDebug("Initial programming sequence: {ProgSeq}, statusReport: {ByteCount} bytes",
+            programmingSequence, statusReport.Length);
 
         // Send frame as 8-byte feature reports
         var report = new byte[OtpConstants.FeatureReportSize];

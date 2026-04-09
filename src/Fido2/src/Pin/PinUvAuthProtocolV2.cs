@@ -208,17 +208,19 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
         aes.Padding = PaddingMode.None;
         byte[]? keyArray = null;
         byte[]? inputArray = null;
+        byte[]? iv = null;
+        byte[]? ciphertext = null;
         try
         {
             keyArray = aesKey.ToArray();
             aes.Key = keyArray;
 
             // Generate random IV
-            var iv = RandomNumberGenerator.GetBytes(AesBlockSize);
+            iv = RandomNumberGenerator.GetBytes(AesBlockSize);
             aes.IV = iv;
 
             // Encrypt
-            var ciphertext = new byte[plaintext.Length];
+            ciphertext = new byte[plaintext.Length];
 
             inputArray = plaintext.ToArray();
             using (var encryptor = aes.CreateEncryptor())
@@ -237,6 +239,8 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
         {
             if (keyArray is not null) CryptographicOperations.ZeroMemory(keyArray);
             if (inputArray is not null) CryptographicOperations.ZeroMemory(inputArray);
+            if (iv is not null) CryptographicOperations.ZeroMemory(iv);
+            if (ciphertext is not null) CryptographicOperations.ZeroMemory(ciphertext);
         }
     }
     

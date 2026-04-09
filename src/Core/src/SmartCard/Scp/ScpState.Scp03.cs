@@ -61,7 +61,10 @@ internal partial class ScpState
             genCardCryptogram);
 
         if (!CryptographicOperations.FixedTimeEquals(genCardCryptogram, cardCryptogram))
+        {
+            sessionKeys.Dispose();
             throw new BadResponseException("Wrong SCP03 key set - card cryptogram verification failed");
+        }
 
         Span<byte> hostCryptogramBytes = stackalloc byte[8];
         StaticKeys.DeriveKey(sessionKeys.Smac, DerivationTypeHostCryptogram, context, DerivationContextLength,

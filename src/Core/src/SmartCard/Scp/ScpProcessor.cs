@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Buffers;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Core.SmartCard.Scp;
@@ -55,7 +55,9 @@ internal class ScpProcessor(
         if (!useScp)
             return await @delegate.TransmitAsync(command, false, cancellationToken).ConfigureAwait(false);
 
-        byte[]? rentedMacData = null;
+        byte[]? scpCommandData = null;
+        byte[]? finalCommandData = null;
+        byte[]? mac = null;
 
         try
         {
@@ -77,8 +79,9 @@ internal class ScpProcessor(
 
             // Step 4: Create command with FULL length (data + MAC space)
             // This ensures Lc in formatted APDU = data.length + 8
+            scpCommandData = macedData.Span.ToArray();
             ApduCommand scpCommand =
-                new(cla, command.Ins, command.P1, command.P2, macedData.Span.ToArray(), command.Le);
+                new(cla, command.Ins, command.P1, command.P2, scpCommandData, command.Le);
 
             // Step 5: Format the APDU with full length
             ReadOnlyMemory<byte> formattedApdu;
@@ -102,14 +105,15 @@ internal class ScpProcessor(
                 // Extended APDU has 3-byte Le, short APDU has 1-byte Le
                 macLength -= isExtendedApdu ? 3 : 1;
 
-            var mac = State.Mac(apduToMac[..macLength]);
+            mac = State.Mac(apduToMac[..macLength]);
 
             // Step 7: Fill in the MAC in the last 8 bytes
             mac.AsSpan().CopyTo(macedData.Span[commandData.Length..]);
 
             // Step 8: Create final command with MAC filled in
+            finalCommandData = macedData.Span.ToArray();
             ApduCommand finalCommand =
-                new(cla, command.Ins, command.P1, command.P2, macedData.Span.ToArray(), command.Le);
+                new(cla, command.Ins, command.P1, command.P2, finalCommandData, command.Le);
 
             // Step 9: Transmit the command (useScp=false because we already wrapped it with SCP)
             var response = await @delegate.TransmitAsync(finalCommand, false, cancellationToken).ConfigureAwait(false);
@@ -135,7 +139,9 @@ internal class ScpProcessor(
         }
         finally
         {
-            if (rentedMacData is not null) ArrayPool<byte>.Shared.Return(rentedMacData);
+            if (scpCommandData is not null) CryptographicOperations.ZeroMemory(scpCommandData);
+            if (finalCommandData is not null) CryptographicOperations.ZeroMemory(finalCommandData);
+            if (mac is not null) CryptographicOperations.ZeroMemory(mac);
         }
     }
 

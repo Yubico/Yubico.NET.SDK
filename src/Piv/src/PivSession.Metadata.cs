@@ -127,23 +127,29 @@ public sealed partial class PivSession
 
         // Build data: [algorithm] [slot 0x9B] [length] [key data]
         // Format per Yubico PIV spec: algorithm byte, slot byte, length byte, key bytes
-        var dataList = new List<byte>
+        var dataLength = 3 + newKey.Length; // header (3 bytes) + key
+        var data = new byte[dataLength];
+        try
         {
-            (byte)keyType,      // Algorithm byte (0x03=3DES, 0x08=AES128, 0x0A=AES192, 0x0C=AES256)
-            0x9B,               // Slot 9B (management key slot)
-            (byte)newKey.Length // Key length
-        };
-        dataList.AddRange(newKey.ToArray());
+            data[0] = (byte)keyType;      // Algorithm byte (0x03=3DES, 0x08=AES128, 0x0A=AES192, 0x0C=AES256)
+            data[1] = 0x9B;               // Slot 9B (management key slot)
+            data[2] = (byte)newKey.Length; // Key length
+            newKey.Span.CopyTo(data.AsSpan(3));
 
-        // INS 0xFF (SET MANAGEMENT KEY), P1 = 0xFF
-        // P2 = touch policy: 0xFF (no touch), 0xFE (touch required), 0xFD (cached touch)
-        byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
-        var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, dataList.ToArray());
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            // INS 0xFF (SET MANAGEMENT KEY), P1 = 0xFF
+            // P2 = touch policy: 0xFF (no touch), 0xFE (touch required), 0xFD (cached touch)
+            byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
+            var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, data);
+            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
-        if (!response.IsOK())
+            if (!response.IsOK())
+            {
+                throw ApduException.FromStatusWord(response.SW, "Failed to set management key");
+            }
+        }
+        finally
         {
-            throw ApduException.FromStatusWord(response.SW, "Failed to set management key");
+            CryptographicOperations.ZeroMemory(data);
         }
 
         // Update cached key type

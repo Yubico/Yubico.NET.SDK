@@ -145,6 +145,7 @@ public sealed class ClientPin : IDisposable
         
         byte[]? pinBytes = null;
         byte[]? newPinEnc = null;
+        byte[]? pinUvAuthParam = null;
         try
         {
             // Pad and encrypt PIN
@@ -152,7 +153,7 @@ public sealed class ClientPin : IDisposable
             newPinEnc = _protocol.Encrypt(sharedSecret, pinBytes);
 
             // Compute pinUvAuthParam = authenticate(sharedSecret, newPinEnc)
-            var pinUvAuthParam = _protocol.Authenticate(sharedSecret, newPinEnc);
+            pinUvAuthParam = _protocol.Authenticate(sharedSecret, newPinEnc);
 
             var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
@@ -170,6 +171,7 @@ public sealed class ClientPin : IDisposable
             CryptographicOperations.ZeroMemory(sharedSecret);
             if (pinBytes is not null) CryptographicOperations.ZeroMemory(pinBytes);
             if (newPinEnc is not null) CryptographicOperations.ZeroMemory(newPinEnc);
+            if (pinUvAuthParam is not null) CryptographicOperations.ZeroMemory(pinUvAuthParam);
         }
     }
     
@@ -202,6 +204,7 @@ public sealed class ClientPin : IDisposable
         byte[]? newPinEnc = null;
         byte[]? message = null;
         byte[]? currentPinHash = null;
+        byte[]? pinUvAuthParam = null;
         try
         {
             // Compute PIN hash for current PIN: LEFT(SHA-256(currentPin), 16)
@@ -217,7 +220,7 @@ public sealed class ClientPin : IDisposable
             newPinEnc.CopyTo(message.AsSpan());
             pinHashEnc.CopyTo(message.AsSpan(newPinEnc.Length));
 
-            var pinUvAuthParam = _protocol.Authenticate(sharedSecret, message);
+            pinUvAuthParam = _protocol.Authenticate(sharedSecret, message);
 
             var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
@@ -239,6 +242,7 @@ public sealed class ClientPin : IDisposable
             if (newPinEnc is not null) CryptographicOperations.ZeroMemory(newPinEnc);
             if (message is not null) CryptographicOperations.ZeroMemory(message);
             if (newPinBytes is not null) CryptographicOperations.ZeroMemory(newPinBytes);
+            if (pinUvAuthParam is not null) CryptographicOperations.ZeroMemory(pinUvAuthParam);
         }
     }
     

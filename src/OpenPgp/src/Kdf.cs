@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Buffers.Binary;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Utils;
 
@@ -31,7 +32,7 @@ public enum KdfHashAlgorithm : byte
 ///     Base class for OpenPGP Key Derivation Function (KDF) configuration.
 ///     Dispatches parsing to <see cref="KdfNone" /> or <see cref="KdfIterSaltedS2k" />.
 /// </summary>
-public abstract class Kdf
+public abstract class Kdf : IDisposable
 {
     /// <summary>
     ///     The KDF algorithm identifier.
@@ -50,6 +51,9 @@ public abstract class Kdf
     ///     Serializes the KDF configuration to its wire format (concatenated TLVs).
     /// </summary>
     public abstract byte[] ToBytes();
+
+    /// <inheritdoc />
+    public virtual void Dispose() { }
 
     /// <summary>
     ///     Parses a KDF configuration from the encoded TLV data (DO 0xF9).
@@ -259,6 +263,17 @@ public sealed class KdfIterSaltedS2k : Kdf
         }
     }
 
+    /// <inheritdoc />
+    public override void Dispose()
+    {
+        ZeroProperty(SaltUser);
+        ZeroProperty(SaltReset);
+        ZeroProperty(SaltAdmin);
+        ZeroProperty(InitialHashUser);
+        ZeroProperty(InitialHashAdmin);
+        GC.SuppressFinalize(this);
+    }
+
     internal static KdfIterSaltedS2k ParseData(IDictionary<int, ReadOnlyMemory<byte>> data) =>
         new()
         {
@@ -270,4 +285,12 @@ public sealed class KdfIterSaltedS2k : Kdf
             InitialHashUser = data.TryGetValue(0x87, out var hu) ? hu.ToArray() : null,
             InitialHashAdmin = data.TryGetValue(0x88, out var ha) ? ha.ToArray() : null,
         };
+
+    private static void ZeroProperty(ReadOnlyMemory<byte>? memory)
+    {
+        if (memory is { } m && MemoryMarshal.TryGetArray(m, out var segment) && segment.Array is not null)
+        {
+            CryptographicOperations.ZeroMemory(segment.AsSpan(segment.Offset, segment.Count));
+        }
+    }
 }

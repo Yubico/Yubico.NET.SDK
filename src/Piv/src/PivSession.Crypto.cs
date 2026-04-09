@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Buffers;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
@@ -183,7 +183,8 @@ public sealed partial class PivSession
             preparedData.CopyTo(commandData.AsSpan(offset));
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
-            var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, commandData);
+            // 'using var' ensures command.Dispose() zeroes the internal data copy before finally runs
+            using var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, commandData);
             var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
@@ -401,7 +402,8 @@ public sealed partial class PivSession
             peerKeyData.CopyTo(data.AsSpan(offset));
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
-            var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, data);
+            // 'using var' ensures command.Dispose() zeroes the internal data copy before finally runs
+            using var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, data);
             var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
@@ -440,7 +442,7 @@ public sealed partial class PivSession
         };
 
         var span = data.Span;
-        
+
         // RSA: Pad with leading zeros if too short, truncate if too long
         if (algorithm == PivAlgorithm.Rsa1024 || algorithm == PivAlgorithm.Rsa2048 ||
             algorithm == PivAlgorithm.Rsa3072 || algorithm == PivAlgorithm.Rsa4096)

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Buffers;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
@@ -97,7 +97,7 @@ public sealed partial class PivSession
                 data[offset++] = (byte)touchPolicy;
             }
 
-            var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, data);
+            using var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, data);
             var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
@@ -133,7 +133,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(privateKey);
-        
+
         Logger.LogDebug("PIV: Importing key into slot 0x{Slot:X2}, key type {KeyType}", (byte)slot, privateKey.KeyType);
 
         if (_protocol is null)
@@ -187,7 +187,7 @@ public sealed partial class PivSession
             }
 
             // Send IMPORT KEY command: INS 0xFE, P1 = algorithm, P2 = slot
-            var command = new ApduCommand(0x00, 0xFE, (byte)algorithm, (byte)slot, keyData);
+            using var command = new ApduCommand(0x00, 0xFE, (byte)algorithm, (byte)slot, keyData);
             var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
@@ -215,18 +215,18 @@ public sealed partial class PivSession
     private static byte[] EncodeRsaPrivateKey(RSAPrivateKey rsaKey)
     {
         var parameters = rsaKey.Parameters;
-        
+
         // Validate RSA exponent is 65537 (standard requirement)
-        if (parameters.Exponent is null || 
-            !(parameters.Exponent.Length == 3 && 
-              parameters.Exponent[0] == 0x01 && 
-              parameters.Exponent[1] == 0x00 && 
+        if (parameters.Exponent is null ||
+            !(parameters.Exponent.Length == 3 &&
+              parameters.Exponent[0] == 0x01 &&
+              parameters.Exponent[1] == 0x00 &&
               parameters.Exponent[2] == 0x01))
         {
             throw new NotSupportedException("RSA exponent must be 65537 (0x010001)");
         }
 
-        if (parameters.P is null || parameters.Q is null || 
+        if (parameters.P is null || parameters.Q is null ||
             parameters.DP is null || parameters.DQ is null || parameters.InverseQ is null)
         {
             throw new ArgumentException("RSA private key is missing required CRT parameters (P, Q, DP, DQ, InverseQ)");
@@ -257,7 +257,7 @@ public sealed partial class PivSession
     private static byte[] EncodeEcPrivateKey(ECPrivateKey ecKey, PivAlgorithm algorithm)
     {
         var parameters = ecKey.Parameters;
-        
+
         if (parameters.D is null)
         {
             throw new ArgumentException("EC private key is missing D value");
@@ -266,7 +266,7 @@ public sealed partial class PivSession
         // D should be padded to the curve size
         var curveSize = algorithm == PivAlgorithm.EccP256 ? 32 : 48;
         using var dTlv = new Tlv(0x06, PadToLength(parameters.D, curveSize));
-        
+
         return dTlv.AsSpan().ToArray();
     }
 
@@ -279,7 +279,7 @@ public sealed partial class PivSession
     {
         var tag = curveKey.KeyType == KeyType.Ed25519 ? 0x07 : 0x08;
         using var tlv = new Tlv(tag, curveKey.PrivateKey.Span);
-        
+
         return tlv.AsSpan().ToArray();
     }
 
@@ -311,7 +311,7 @@ public sealed partial class PivSession
         PivSlot destinationSlot,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Moving key from slot 0x{Source:X2} to slot 0x{Dest:X2}", 
+        Logger.LogDebug("PIV: Moving key from slot 0x{Source:X2} to slot 0x{Dest:X2}",
             (byte)sourceSlot, (byte)destinationSlot);
 
         if (_protocol is null)
@@ -338,7 +338,7 @@ public sealed partial class PivSession
 
         if (!response.IsOK())
         {
-            throw ApduException.FromStatusWord(response.SW, 
+            throw ApduException.FromStatusWord(response.SW,
                 $"Failed to move key from slot 0x{(byte)sourceSlot:X2} to 0x{(byte)destinationSlot:X2}");
         }
     }
@@ -371,7 +371,7 @@ public sealed partial class PivSession
 
         if (!response.IsOK())
         {
-            throw ApduException.FromStatusWord(response.SW, 
+            throw ApduException.FromStatusWord(response.SW,
                 $"Failed to delete key from slot 0x{(byte)slot:X2}");
         }
     }
@@ -400,7 +400,7 @@ public sealed partial class PivSession
 
         if (!response.IsOK())
         {
-            throw ApduException.FromStatusWord(response.SW, 
+            throw ApduException.FromStatusWord(response.SW,
                 $"Failed to attest key in slot 0x{(byte)slot:X2}");
         }
 
@@ -435,7 +435,7 @@ public sealed partial class PivSession
         {
             PivAlgorithm.EccP256 or PivAlgorithm.EccP384 => ParseEccPublicKey(keyData, algorithm),
             PivAlgorithm.Ed25519 or PivAlgorithm.X25519 => ParseCurve25519PublicKey(keyData, algorithm),
-            PivAlgorithm.Rsa1024 or PivAlgorithm.Rsa2048 or PivAlgorithm.Rsa3072 or PivAlgorithm.Rsa4096 
+            PivAlgorithm.Rsa1024 or PivAlgorithm.Rsa2048 or PivAlgorithm.Rsa3072 or PivAlgorithm.Rsa4096
                 => ParseRsaPublicKey(keyData),
             _ => throw new NotSupportedException($"Unsupported algorithm: {algorithm}")
         };
@@ -456,8 +456,8 @@ public sealed partial class PivSession
         var point = data.Slice(offset, length);
 
         // Convert to ECPublicKey using the Core cryptography types
-        var curve = algorithm == PivAlgorithm.EccP256 
-            ? ECCurve.NamedCurves.nistP256 
+        var curve = algorithm == PivAlgorithm.EccP256
+            ? ECCurve.NamedCurves.nistP256
             : ECCurve.NamedCurves.nistP384;
 
         var parameters = new ECParameters
@@ -486,7 +486,7 @@ public sealed partial class PivSession
         offset++;
 
         var point = data.Slice(offset, length);
-        
+
         var keyType = algorithm == PivAlgorithm.Ed25519 ? KeyType.Ed25519 : KeyType.X25519;
         return Curve25519PublicKey.CreateFromValue(point.ToArray(), keyType);
     }
@@ -495,12 +495,12 @@ public sealed partial class PivSession
     {
         // RSA public key format: TAG 0x81 (modulus) + TAG 0x82 (public exponent)
         var tlvDict = TlvHelper.DecodeDictionary(data);
-        
+
         if (!tlvDict.TryGetValue(0x81, out var modulusMemory))
         {
             throw new ApduException("Invalid RSA public key format: missing modulus");
         }
-        
+
         if (!tlvDict.TryGetValue(0x82, out var exponentMemory))
         {
             throw new ApduException("Invalid RSA public key format: missing exponent");

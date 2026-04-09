@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Utils;
 
@@ -59,6 +60,7 @@ internal class ScpProcessor(
         byte[]? finalCommandData = null;
         byte[]? mac = null;
         byte[]? encryptedData = null; // Declared here so finally can zero it (T11)
+        byte[]? formattedApduArray = null; // Backing array of formattedApdu — zeroed after MAC is computed
         ApduCommand? scpCommand = null;   // Declared before try so finally can dispose (zero internal copy)
         ApduCommand? finalCommand = null; // Same
 
@@ -98,6 +100,10 @@ internal class ScpProcessor(
                 formattedApdu = Formatter.Format(scpCommand);
                 isExtendedApdu = Formatter is ApduFormatterExtended;
             }
+
+            // Capture the backing array so we can zero it in finally after MAC computation
+            if (MemoryMarshal.TryGetArray(formattedApdu, out var fmtSeg))
+                formattedApduArray = fmtSeg.Array;
 
             // Step 6: Compute MAC over formatted APDU minus last MacLength bytes (the MAC space)
             // Exclude Le field if present
@@ -144,6 +150,7 @@ internal class ScpProcessor(
             scpCommand?.ZeroData();
             finalCommand?.ZeroData();
             if (encryptedData is not null) CryptographicOperations.ZeroMemory(encryptedData);
+            if (formattedApduArray is not null) CryptographicOperations.ZeroMemory(formattedApduArray);
             if (scpCommandData is not null) CryptographicOperations.ZeroMemory(scpCommandData);
             if (finalCommandData is not null) CryptographicOperations.ZeroMemory(finalCommandData);
             if (mac is not null) CryptographicOperations.ZeroMemory(mac);

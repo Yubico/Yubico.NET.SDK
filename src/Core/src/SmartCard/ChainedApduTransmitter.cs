@@ -33,7 +33,7 @@ internal class ChainedApduTransmitter(ISmartCardConnection connection, IApduForm
         var offset = 0;
         while (offset + ShortApduMaxChunk < data.Length)
         {
-            var chunk = data[offset..ShortApduMaxChunk];
+            var chunk = data[offset..(offset + ShortApduMaxChunk)];
             var chainedCommand = new ApduCommand(command.Cla | HasMoreData, command.Ins, command.P1, command.P2, chunk, command.Le);
 
             var result = await base.TransmitAsync(chainedCommand, useScp, cancellationToken).ConfigureAwait(false);

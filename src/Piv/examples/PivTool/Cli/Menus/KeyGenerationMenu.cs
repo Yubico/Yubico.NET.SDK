@@ -89,7 +89,7 @@ public static class KeyGenerationMenu
             return;
         }
 
-        var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory.Span.ToArray(), cancellationToken);
+        var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory, cancellationToken);
         if (!authResult.Success)
         {
             OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");

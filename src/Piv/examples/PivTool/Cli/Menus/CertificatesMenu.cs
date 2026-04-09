@@ -119,7 +119,7 @@ public static class CertificatesMenu
             return;
         }
 
-        var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory.Span.ToArray(), ct);
+        var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory, ct);
         if (!authResult.Success)
         {
             OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");
@@ -157,7 +157,7 @@ public static class CertificatesMenu
             return;
         }
 
-        var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory.Span.ToArray(), ct);
+        var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory, ct);
         if (!authResult.Success)
         {
             OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");
@@ -171,7 +171,7 @@ public static class CertificatesMenu
             return;
         }
 
-        var pinResult = await PinManagement.VerifyPinAsync(session, pin.Memory.Span.ToArray(), ct);
+        var pinResult = await PinManagement.VerifyPinAsync(session, pin.Memory, ct);
         if (!pinResult.Success)
         {
             OutputHelpers.WriteError(pinResult.ErrorMessage ?? "PIN verification failed");
@@ -233,7 +233,7 @@ public static class CertificatesMenu
             return;
         }
 
-        var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory.Span.ToArray(), ct);
+        var authResult = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory, ct);
         if (!authResult.Success)
         {
             OutputHelpers.WriteError(authResult.ErrorMessage ?? "Failed to authenticate");

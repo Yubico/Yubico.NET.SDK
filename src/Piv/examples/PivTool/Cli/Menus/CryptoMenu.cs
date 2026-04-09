@@ -70,7 +70,7 @@ public static class CryptoMenu
             return;
         }
 
-        var pinResult = await PinManagement.VerifyPinAsync(session, pin.Memory.Span.ToArray(), ct);
+        var pinResult = await PinManagement.VerifyPinAsync(session, pin.Memory, ct);
         if (!pinResult.Success)
         {
             OutputHelpers.WriteError(pinResult.ErrorMessage ?? "PIN verification failed");
@@ -147,7 +147,7 @@ public static class CryptoMenu
             return;
         }
 
-        var pinResult = await PinManagement.VerifyPinAsync(session, pin.Memory.Span.ToArray(), ct);
+        var pinResult = await PinManagement.VerifyPinAsync(session, pin.Memory, ct);
         if (!pinResult.Success)
         {
             OutputHelpers.WriteError(pinResult.ErrorMessage ?? "PIN verification failed");

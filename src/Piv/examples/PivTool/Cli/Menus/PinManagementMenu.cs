@@ -78,7 +78,7 @@ public static class PinManagementMenu
             return;
         }
 
-        var result = await PinManagement.VerifyPinAsync(session, pin.Memory.Span.ToArray(), ct);
+        var result = await PinManagement.VerifyPinAsync(session, pin.Memory, ct);
         if (result.Success)
         {
             OutputHelpers.WriteSuccess("PIN verified successfully");
@@ -107,7 +107,7 @@ public static class PinManagementMenu
             return;
         }
 
-        var result = await PinManagement.ChangePinAsync(session, currentPin.Memory.Span.ToArray(), newPin.Memory.Span.ToArray(), ct);
+        var result = await PinManagement.ChangePinAsync(session, currentPin.Memory, newPin.Memory, ct);
         if (result.Success)
         {
             OutputHelpers.WriteSuccess("PIN changed successfully");
@@ -136,7 +136,7 @@ public static class PinManagementMenu
             return;
         }
 
-        var result = await PinManagement.ChangePukAsync(session, currentPuk.Memory.Span.ToArray(), newPuk.Memory.Span.ToArray(), ct);
+        var result = await PinManagement.ChangePukAsync(session, currentPuk.Memory, newPuk.Memory, ct);
         if (result.Success)
         {
             OutputHelpers.WriteSuccess("PUK changed successfully");
@@ -165,7 +165,7 @@ public static class PinManagementMenu
             return;
         }
 
-        var result = await PinManagement.UnblockPinAsync(session, puk.Memory.Span.ToArray(), newPin.Memory.Span.ToArray(), ct);
+        var result = await PinManagement.UnblockPinAsync(session, puk.Memory, newPin.Memory, ct);
         if (result.Success)
         {
             OutputHelpers.WriteSuccess("PIN unblocked successfully");
@@ -188,7 +188,7 @@ public static class PinManagementMenu
             return;
         }
 
-        var result = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory.Span.ToArray(), ct);
+        var result = await PinManagement.AuthenticateAsync(session, mgmtKey.Memory, ct);
         if (result.Success)
         {
             OutputHelpers.WriteSuccess("Management key authenticated successfully");
@@ -209,7 +209,7 @@ public static class PinManagementMenu
             return;
         }
 
-        var authResult = await PinManagement.AuthenticateAsync(session, currentKey.Memory.Span.ToArray(), ct);
+        var authResult = await PinManagement.AuthenticateAsync(session, currentKey.Memory, ct);
         if (!authResult.Success)
         {
             OutputHelpers.WriteError(authResult.ErrorMessage ?? "Authentication failed");
@@ -225,7 +225,7 @@ public static class PinManagementMenu
             return;
         }
 
-        var changeResult = await PinManagement.ChangeManagementKeyAsync(session, newKey.Memory.Span.ToArray(), cancellationToken: ct);
+        var changeResult = await PinManagement.ChangeManagementKeyAsync(session, newKey.Memory, cancellationToken: ct);
         if (changeResult.Success)
         {
             OutputHelpers.WriteSuccess("Management key changed successfully");

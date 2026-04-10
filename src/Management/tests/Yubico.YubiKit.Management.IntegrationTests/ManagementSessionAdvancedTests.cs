@@ -67,7 +67,7 @@ public class ManagementSessionAdvancedTests
     ///     Demonstrates SCP03/SCP11 testing on modern firmware.
     /// </summary>
     [SkippableTheory]
-    [WithYubiKey(MinFirmware = "5.3.0")]
+    [WithYubiKey(MinFirmware = "5.3.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task ModernFeatures_FirmwareAtLeast530_SupportsAdvancedProtocols(YubiKeyTestState state)
     {
         // This test only runs on devices with firmware 5.3.0 or newer
@@ -345,7 +345,7 @@ public class ManagementSessionAdvancedTests
     ///     Useful for benchmarking across different device types.
     /// </summary>
     [SkippableTheory]
-    [WithYubiKey]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task Performance_GetDeviceInfo_CompletesQuickly(YubiKeyTestState state) =>
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
         {
@@ -354,7 +354,7 @@ public class ManagementSessionAdvancedTests
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
             sw.Stop();
 
-            // Device info retrieval should be fast (< 1 second)
+            // Device info retrieval should be fast (< 1 second) over SmartCard
             Assert.True(sw.ElapsedMilliseconds < 1000,
                 $"GetDeviceInfo took {sw.ElapsedMilliseconds}ms on device {state}");
 

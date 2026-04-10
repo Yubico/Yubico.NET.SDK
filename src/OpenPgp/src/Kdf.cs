@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Buffers.Binary;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Utils;
 
@@ -119,6 +118,15 @@ public sealed class KdfIterSaltedS2k : Kdf
 {
     internal const int KdfAlgorithm = 3;
 
+    // Backing fields — KdfIterSaltedS2k always owns these arrays.
+    // The init setters clone caller-provided memory so Dispose() can safely
+    // zero them without risk of zeroing buffers owned by the caller (T12).
+    private byte[] _saltUser = [];
+    private byte[]? _saltReset;
+    private byte[]? _saltAdmin;
+    private byte[]? _initialHashUser;
+    private byte[]? _initialHashAdmin;
+
     /// <inheritdoc />
     public override int Algorithm => KdfAlgorithm;
 
@@ -134,28 +142,55 @@ public sealed class KdfIterSaltedS2k : Kdf
 
     /// <summary>
     ///     8-byte salt for the User PIN.
+    ///     <para>The setter copies the provided memory — this instance owns the backing array.</para>
     /// </summary>
-    public ReadOnlyMemory<byte> SaltUser { get; init; }
+    public ReadOnlyMemory<byte> SaltUser
+    {
+        get => _saltUser;
+        init => _saltUser = value.ToArray();
+    }
 
     /// <summary>
     ///     8-byte salt for the Reset Code. Null if not configured.
+    ///     <para>The setter copies the provided memory — this instance owns the backing array.</para>
     /// </summary>
-    public ReadOnlyMemory<byte>? SaltReset { get; init; }
+    public ReadOnlyMemory<byte>? SaltReset
+    {
+        // Explicit null guard: byte[]? null → implicit ReadOnlyMemory<byte> conversion
+        // yields Empty (non-null Nullable), breaking ?? fallback in GetSalt.
+        get => _saltReset is { } s ? (ReadOnlyMemory<byte>?)s : null;
+        init => _saltReset = value?.ToArray();
+    }
 
     /// <summary>
     ///     8-byte salt for the Admin PIN. Null if not configured.
+    ///     <para>The setter copies the provided memory — this instance owns the backing array.</para>
     /// </summary>
-    public ReadOnlyMemory<byte>? SaltAdmin { get; init; }
+    public ReadOnlyMemory<byte>? SaltAdmin
+    {
+        get => _saltAdmin is { } s ? (ReadOnlyMemory<byte>?)s : null;
+        init => _saltAdmin = value?.ToArray();
+    }
 
     /// <summary>
     ///     Pre-computed hash of the default User PIN. Null if not stored.
+    ///     <para>The setter copies the provided memory — this instance owns the backing array.</para>
     /// </summary>
-    public ReadOnlyMemory<byte>? InitialHashUser { get; init; }
+    public ReadOnlyMemory<byte>? InitialHashUser
+    {
+        get => _initialHashUser is { } s ? (ReadOnlyMemory<byte>?)s : null;
+        init => _initialHashUser = value?.ToArray();
+    }
 
     /// <summary>
     ///     Pre-computed hash of the default Admin PIN. Null if not stored.
+    ///     <para>The setter copies the provided memory — this instance owns the backing array.</para>
     /// </summary>
-    public ReadOnlyMemory<byte>? InitialHashAdmin { get; init; }
+    public ReadOnlyMemory<byte>? InitialHashAdmin
+    {
+        get => _initialHashAdmin is { } s ? (ReadOnlyMemory<byte>?)s : null;
+        init => _initialHashAdmin = value?.ToArray();
+    }
 
     /// <summary>
     ///     Gets the salt for the specified PIN type. Falls back to <see cref="SaltUser" />
@@ -266,11 +301,12 @@ public sealed class KdfIterSaltedS2k : Kdf
     /// <inheritdoc />
     public override void Dispose()
     {
-        ZeroProperty(SaltUser);
-        ZeroProperty(SaltReset);
-        ZeroProperty(SaltAdmin);
-        ZeroProperty(InitialHashUser);
-        ZeroProperty(InitialHashAdmin);
+        // Directly zero the owned backing arrays — no MemoryMarshal needed.
+        CryptographicOperations.ZeroMemory(_saltUser);
+        if (_saltReset is not null) CryptographicOperations.ZeroMemory(_saltReset);
+        if (_saltAdmin is not null) CryptographicOperations.ZeroMemory(_saltAdmin);
+        if (_initialHashUser is not null) CryptographicOperations.ZeroMemory(_initialHashUser);
+        if (_initialHashAdmin is not null) CryptographicOperations.ZeroMemory(_initialHashAdmin);
         GC.SuppressFinalize(this);
     }
 
@@ -279,18 +315,10 @@ public sealed class KdfIterSaltedS2k : Kdf
         {
             HashAlgorithm = (KdfHashAlgorithm)data[0x82].Span[0],
             IterationCount = (int)BinaryPrimitives.ReadUInt32BigEndian(data[0x83].Span),
-            SaltUser = data[0x84].ToArray(),
-            SaltReset = data.TryGetValue(0x85, out var sr) ? sr.ToArray() : null,
-            SaltAdmin = data.TryGetValue(0x86, out var sa) ? sa.ToArray() : null,
-            InitialHashUser = data.TryGetValue(0x87, out var hu) ? hu.ToArray() : null,
-            InitialHashAdmin = data.TryGetValue(0x88, out var ha) ? ha.ToArray() : null,
+            SaltUser = data[0x84],                                                // init setter clones
+            SaltReset = data.TryGetValue(0x85, out var sr) ? sr : null,           // init setter clones
+            SaltAdmin = data.TryGetValue(0x86, out var sa) ? sa : null,           // init setter clones
+            InitialHashUser = data.TryGetValue(0x87, out var hu) ? hu : null,     // init setter clones
+            InitialHashAdmin = data.TryGetValue(0x88, out var ha) ? ha : null,    // init setter clones
         };
-
-    private static void ZeroProperty(ReadOnlyMemory<byte>? memory)
-    {
-        if (memory is { } m && MemoryMarshal.TryGetArray(m, out var segment) && segment.Array is not null)
-        {
-            CryptographicOperations.ZeroMemory(segment.AsSpan(segment.Offset, segment.Count));
-        }
-    }
 }

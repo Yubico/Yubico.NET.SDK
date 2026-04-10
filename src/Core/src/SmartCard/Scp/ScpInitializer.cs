@@ -53,10 +53,10 @@ internal static class ScpInitializer
             return keyParams switch
             {
                 Scp03KeyParameters scp03Parameters => mainProcessor.FirmwareVersion.IsAtLeast(5, 3, 0)
-                    ? await InitScp03Async(mainProcessor, scp03Parameters, cancellationToken)
+                    ? await InitScp03Async(mainProcessor, scp03Parameters, cancellationToken).ConfigureAwait(false)
                     : throw new NotSupportedException("SCP03 only supported on YubiKey 5.3.0 and later"),
                 Scp11KeyParameters scp11Parameters => mainProcessor.FirmwareVersion.IsAtLeast(5, 7, 2)
-                    ? await InitScp11Async(mainProcessor, scp11Parameters, cancellationToken)
+                    ? await InitScp11Async(mainProcessor, scp11Parameters, cancellationToken).ConfigureAwait(false)
                     : throw new NotSupportedException("SCP11 only supported on YubiKey 5.7.2 and later"),
                 _ => throw new ArgumentException("Unsupported SCP key parameters type")
             };

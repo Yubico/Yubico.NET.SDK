@@ -37,13 +37,13 @@ public class FindYubiKeys(
 
         if (type.HasFlag(ConnectionType.SmartCard))
         {
-            var ccidKeys = await FindAllCcid(cancellationToken);
+            var ccidKeys = await FindAllCcid(cancellationToken).ConfigureAwait(false);
             yubiKeys.AddRange(ccidKeys);
         }
 
         if (type.HasFlag(ConnectionType.Hid))
         {
-            var hidKeys = await FindAllHid(cancellationToken);
+            var hidKeys = await FindAllHid(cancellationToken).ConfigureAwait(false);
             yubiKeys.AddRange(hidKeys);
         }
 
@@ -53,13 +53,13 @@ public class FindYubiKeys(
 
     private async Task<IReadOnlyList<IYubiKey>> FindAllHid(CancellationToken cancellationToken = default)
     {
-        var hidDevices = await findHidService.FindAllAsync(cancellationToken);
+        var hidDevices = await findHidService.FindAllAsync(cancellationToken).ConfigureAwait(false);
         return hidDevices.Select(yubiKeyFactory.Create).ToList();
     }
 
     private async Task<IReadOnlyList<IYubiKey>> FindAllCcid(CancellationToken cancellationToken = default)
     {
-        var pcscDevices = await findPcscService.FindAllAsync(cancellationToken);
+        var pcscDevices = await findPcscService.FindAllAsync(cancellationToken).ConfigureAwait(false);
         return pcscDevices.Select(yubiKeyFactory.Create).ToList();
     }
 

@@ -43,7 +43,7 @@ internal partial class ScpState
 
         // Perform Security Operation for SCP11a and SCP11c to send certificate chain
         if (kid is ScpKid.SCP11a or ScpKid.SCP11c)
-            await PerformSecurityOperation(processor, keyParams, cancellationToken);
+            await PerformSecurityOperation(processor, keyParams, cancellationToken).ConfigureAwait(false);
 
         // Prepare Authenticate command (sd elliptic curve key agreement)
         var scpTypeParam = kid switch

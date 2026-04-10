@@ -684,7 +684,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
             var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, keyReference.Kid,
                 buffer.WrittenMemory);
-            var response = await TransmitAndGetResponseDataAsync(command, cancellationToken);
+            var response = await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
 
             Span<byte> expectedResponseData = new[] { keyReference.Kvn };
             ValidateCheckSum(response.Span, expectedResponseData);

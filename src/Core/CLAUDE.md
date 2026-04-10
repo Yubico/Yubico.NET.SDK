@@ -266,6 +266,7 @@ protocol.Configure(firmwareVersion);
 ### Sending APDUs
 
 ```csharp
+// Non-sensitive command — no zeroing needed
 var command = new ApduCommand
 {
     Cla = 0x00,
@@ -274,8 +275,13 @@ var command = new ApduCommand
     P2 = 0x00,
     Data = applicationId
 };
-
 var responseData = await protocol.TransmitAndReceiveAsync(command, ct);
+
+// Sensitive command (PIN, key material) — caller zeroes source buffer after transmission
+// ApduCommand is a readonly record struct: it stores a reference, not a clone.
+var command = new ApduCommand(0x00, InsVerify, 0x00, 0x80, pinnedPin.AsMemory(0, 8));
+var response = await protocol.TransmitAndReceiveAsync(command, ct);
+CryptographicOperations.ZeroMemory(pinnedPin); // zeroes what command.Data referenced
 ```
 
 ### Error Handling

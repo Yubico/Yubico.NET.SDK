@@ -14,6 +14,7 @@
 
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.OpenPgp.IntegrationTests.TestExtensions;
@@ -24,8 +25,8 @@ namespace Yubico.YubiKit.OpenPgp.IntegrationTests;
 
 public class OpenPgpSessionTests
 {
-    private const string DefaultUserPin = "123456";
-    private const string DefaultAdminPin = "12345678";
+    private static readonly byte[] DefaultUserPin = Encoding.UTF8.GetBytes("123456");
+    private static readonly byte[] DefaultAdminPin = Encoding.UTF8.GetBytes("12345678");
 
     // ── Reset & Clean State ──────────────────────────────────────────
 
@@ -90,7 +91,7 @@ public class OpenPgpSessionTests
             action: async session =>
             {
                 var ex = await Assert.ThrowsAsync<ApduException>(
-                    () => session.VerifyPinAsync("999999"));
+                    () => session.VerifyPinAsync(Encoding.UTF8.GetBytes("999999")));
                 Assert.Contains("attempts remaining", ex.Message);
             });
 
@@ -101,7 +102,7 @@ public class OpenPgpSessionTests
             resetBeforeUse: true,
             action: async session =>
             {
-                const string newPin = "654321";
+                var newPin = Encoding.UTF8.GetBytes("654321");
 
                 // Change PIN
                 await session.ChangePinAsync(DefaultUserPin, newPin);
@@ -123,7 +124,7 @@ public class OpenPgpSessionTests
             resetBeforeUse: true,
             action: async session =>
             {
-                const string newAdminPin = "87654321";
+                var newAdminPin = Encoding.UTF8.GetBytes("87654321");
 
                 await session.ChangeAdminAsync(DefaultAdminPin, newAdminPin);
                 await session.VerifyAdminAsync(newAdminPin);

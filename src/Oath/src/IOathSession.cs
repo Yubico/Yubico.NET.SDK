@@ -86,7 +86,13 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Derives a key from a password using PBKDF2-HMAC-SHA1 with the device salt.
     /// </summary>
-    byte[] DeriveKey(string password);
+    /// <remarks>
+    ///     <b>Breaking change:</b> The <c>password</c> parameter changed from <c>string</c>
+    ///     to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers to zero
+    ///     sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c> and
+    ///     zero the resulting array when finished.
+    /// </remarks>
+    byte[] DeriveKey(ReadOnlyMemory<byte> passwordUtf8);
 
     /// <summary>
     ///     Validates the access key using mutual HMAC-SHA1 challenge-response authentication.

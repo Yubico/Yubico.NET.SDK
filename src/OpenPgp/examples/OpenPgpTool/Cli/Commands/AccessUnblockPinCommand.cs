@@ -28,20 +28,21 @@ public sealed class AccessUnblockPinCommand : OpenPgpCommand<AccessUnblockPinCom
         Settings settings,
         IOpenPgpSession session)
     {
-        var resetCode = GetPin(settings.ResetCode, "Enter Reset Code");
-        var newPin = GetPin(settings.NewPin, "Enter new User PIN");
-
-        if (string.IsNullOrEmpty(settings.NewPin))
+        using var resetCode = GetResetCode(settings.ResetCode);
+        if (resetCode is null)
         {
-            var confirm = OutputHelpers.PromptPin("Confirm new User PIN");
-            if (!string.Equals(newPin, confirm, StringComparison.Ordinal))
-            {
-                OutputHelpers.WriteError("New PINs do not match.");
-                return 1;
-            }
+            OutputHelpers.WriteError("Reset Code is required.");
+            return 1;
         }
 
-        await session.ResetPinAsync(resetCode, newPin, useAdmin: false);
+        using var newPin = GetPin(settings.NewPin);
+        if (newPin is null)
+        {
+            OutputHelpers.WriteError("New User PIN is required.");
+            return 1;
+        }
+
+        await session.ResetPinAsync(resetCode.Memory, newPin.Memory, useAdmin: false);
         OutputHelpers.WriteSuccess("User PIN has been unblocked.");
         return 0;
     }

@@ -11,8 +11,8 @@ namespace Yubico.YubiKit.OpenPgp.IntegrationTests;
 
 public class OpenPgpPinManagementTests
 {
-    private const string DefaultUserPin = "123456";
-    private const string DefaultAdminPin = "12345678";
+    private static readonly byte[] DefaultUserPin = "123456"u8.ToArray();
+    private static readonly byte[] DefaultAdminPin = "12345678"u8.ToArray();
 
     // ── PIN Reset via Reset Code ────────────────────────────────────
 
@@ -26,7 +26,7 @@ public class OpenPgpPinManagementTests
                 // Admin must be verified to set the reset code
                 await session.VerifyAdminAsync(DefaultAdminPin);
 
-                const string resetCode = "12345678";
+                byte[] resetCode = "12345678"u8.ToArray();
                 await session.SetResetCodeAsync(resetCode);
 
                 // Block the User PIN by exhausting all attempts
@@ -34,7 +34,7 @@ public class OpenPgpPinManagementTests
                 {
                     try
                     {
-                        await session.VerifyPinAsync("000000");
+                        await session.VerifyPinAsync("000000"u8.ToArray());
                     }
                     catch (ApduException)
                     {
@@ -47,7 +47,7 @@ public class OpenPgpPinManagementTests
                 Assert.Equal(0, status.AttemptsUser);
 
                 // Reset PIN using the reset code
-                const string newPin = "654321";
+                byte[] newPin = "654321"u8.ToArray();
                 await session.ResetPinAsync(resetCode, newPin);
 
                 // Verify the new PIN works
@@ -142,7 +142,7 @@ public class OpenPgpPinManagementTests
                 {
                     try
                     {
-                        await session.VerifyPinAsync("000000");
+                        await session.VerifyPinAsync("000000"u8.ToArray());
                     }
                     catch (ApduException)
                     {
@@ -162,7 +162,7 @@ public class OpenPgpPinManagementTests
                 // Use a PIN that satisfies PIN complexity requirements (FW 5.7+
                 // requires at least 2 unique characters; "111111" would fail with
                 // SW=0x6985 "Conditions of use not satisfied").
-                const string newPin = "654321";
+                byte[] newPin = "654321"u8.ToArray();
                 await session.ResetPinAsync(DefaultAdminPin, newPin, useAdmin: true);
 
                 // Verify the new PIN works

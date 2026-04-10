@@ -20,8 +20,14 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// Configuration options for credential input.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Use the factory methods <see cref="ForPin"/>, <see cref="ForPuk"/>, <see cref="ForPassphrase"/>,
 /// or <see cref="ForHexKey"/> to create pre-configured options for common credential types.
+/// </para>
+/// <para>
+/// For module-specific presets (FIDO2, OpenPGP, OATH), see the credential options classes
+/// in each module's <c>Credentials</c> namespace.
+/// </para>
 /// </remarks>
 public sealed record CredentialReaderOptions
 {
@@ -124,4 +130,5 @@ public sealed record CredentialReaderOptions
         ExpectedByteLength = byteLength,
         CharacterFilter = static c => char.IsAsciiHexDigit(c) || c is ' ' or ':' or '-'
     };
+
 }

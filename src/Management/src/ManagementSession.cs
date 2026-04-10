@@ -171,7 +171,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
 
     private async Task<FirmwareVersion> GetVersionAsync(CancellationToken cancellationToken)
     {
-        var defaultVersion = await GetVersionFromManagementHeader(cancellationToken);
+        var defaultVersion = await GetVersionFromManagementHeader(cancellationToken).ConfigureAwait(false);
         try
         {
             var deviceInfo = await GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);

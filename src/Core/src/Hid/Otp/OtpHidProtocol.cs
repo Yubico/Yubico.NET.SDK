@@ -136,7 +136,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         {
             // Status-only response (config command, sequence updated)
             var status = firstReport.Slice(1, 6).ToArray();
-            _logger.LogDebug("Status-only response: {Status}", Convert.ToHexString(status));
+            _logger.LogDebug("Status-only response received ({ByteCount} bytes)", status.Length);
             return status;
         }
 
@@ -160,8 +160,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
             var report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
             var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
 
-            _logger.LogTrace("WaitForReadyToRead: statusByte=0x{Status:X2}, report={Report}",
-                statusByte, Convert.ToHexString(report.Span));
+            _logger.LogTrace("WaitForReadyToRead: statusByte=0x{Status:X2}, report={ByteCount} bytes",
+                statusByte, report.Length);
 
             // Check for touch pending
             if ((statusByte & OtpConstants.ResponseTimeoutWaitFlag) != 0)
@@ -258,8 +258,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         }
 
         var rawResponse = stream.ToArray();
-        _logger.LogDebug("{Length} bytes read over HID: {Response}",
-            rawResponse.Length, Convert.ToHexString(rawResponse));
+        _logger.LogDebug("{Length} bytes read over HID", rawResponse.Length);
 
         return rawResponse;
     }
@@ -310,7 +309,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     private byte[] ReadFeatureReport()
     {
         var report = _connection.ReceiveAsync(CancellationToken.None).GetAwaiter().GetResult();
-        _logger.LogTrace("Read feature report: {Report}", Convert.ToHexString(report.Span));
+        _logger.LogTrace("Read feature report ({ByteCount} bytes)", report.Span.Length);
         return report.ToArray();
     }
 
@@ -320,7 +319,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     private async Task<ReadOnlyMemory<byte>> ReadFeatureReportAsync(CancellationToken cancellationToken)
     {
         var report = await _connection.ReceiveAsync(cancellationToken).ConfigureAwait(false);
-        _logger.LogTrace("Read feature report: {Report}", Convert.ToHexString(report.Span));
+        _logger.LogTrace("Read feature report ({ByteCount} bytes)", report.Span.Length);
         return report;
     }
 
@@ -329,7 +328,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     /// </summary>
     private async Task WriteFeatureReportAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
     {
-        _logger.LogTrace("Write feature report: {Report}", Convert.ToHexString(buffer.Span));
+        _logger.LogTrace("Write feature report ({ByteCount} bytes)", buffer.Span.Length);
         await _connection.SendAsync(buffer, cancellationToken).ConfigureAwait(false);
     }
 
@@ -361,7 +360,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     private async Task<int> SendFrameAsync(byte slot, byte[] payload, CancellationToken cancellationToken)
     {
         _logger.LogDebug("SendFrameAsync: slot=0x{Slot:X2}, payloadLen={Len}", slot, payload.Length);
-        _logger.LogTrace("Sending payload to slot 0x{Slot:X2}: {Payload}", slot, Convert.ToHexString(payload));
+        _logger.LogTrace("Sending {ByteCount}-byte payload to slot 0x{Slot:X2}", payload.Length, slot);
 
         // Format 70-byte frame: [64-byte payload][1-byte slot][2-byte CRC][3-byte filler]
         var frame = new byte[OtpConstants.FrameSize];
@@ -373,14 +372,14 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         BinaryPrimitives.WriteUInt16LittleEndian(frame.AsSpan(OtpConstants.SlotDataSize + 1), crc);
         // Last 3 bytes are filler (already zero)
 
-        _logger.LogTrace("Frame (70 bytes): {Frame}", Convert.ToHexString(frame));
+        _logger.LogTrace("Prepared 70-byte frame for transmission");
 
         // Get current programming sequence
         var statusReport = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
         var programmingSequence = statusReport.Span[OtpConstants.StatusOffsetProgSeq];
 
-        _logger.LogDebug("Initial programming sequence: {ProgSeq}, statusReport: {Report}",
-            programmingSequence, Convert.ToHexString(statusReport.Span));
+        _logger.LogDebug("Initial programming sequence: {ProgSeq}, statusReport: {ByteCount} bytes",
+            programmingSequence, statusReport.Length);
 
         // Send frame as 8-byte feature reports
         var report = new byte[OtpConstants.FeatureReportSize];
@@ -398,8 +397,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
             // Set sequence with write flag
             report[OtpConstants.FeatureReportDataSize] = (byte)(OtpConstants.SlotWriteFlag | seq);
             await AwaitReadyToWriteAsync(cancellationToken).ConfigureAwait(false);
-            _logger.LogTrace("Sending report #{Count} (seq={Seq}): {Report}", 
-                sentCount, seq, Convert.ToHexString(report));
+            _logger.LogTrace("Sending report #{Count} (seq={Seq}): {ByteCount} bytes",
+                sentCount, seq, report.Length);
             await WriteFeatureReportAsync(report, cancellationToken).ConfigureAwait(false);
             sentCount++;
 

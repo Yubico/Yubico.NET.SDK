@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using System.Text;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
@@ -58,26 +57,23 @@ public static class PinManagement
     /// Sets the initial PIN on the authenticator.
     /// </summary>
     /// <param name="yubiKey">The YubiKey device.</param>
-    /// <param name="newPin">The PIN to set.</param>
+    /// <param name="newPinUtf8">The PIN as UTF-8 bytes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The operation result.</returns>
     public static async Task<PinResult> SetPinAsync(
         IYubiKey yubiKey,
-        string newPin,
+        ReadOnlyMemory<byte> newPinUtf8,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(newPin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            await clientPin.SetPinAsync(newPin, cancellationToken);
+            await clientPin.SetPinAsync(newPinUtf8, cancellationToken);
 
             return PinResult.Succeeded();
         }
@@ -93,43 +89,31 @@ public static class PinManagement
         {
             return PinResult.Failed($"Failed to set PIN: {ex.Message}");
         }
-        finally
-        {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-        }
     }
 
     /// <summary>
     /// Changes the existing PIN on the authenticator.
     /// </summary>
     /// <param name="yubiKey">The YubiKey device.</param>
-    /// <param name="currentPin">The current PIN.</param>
-    /// <param name="newPin">The new PIN to set.</param>
+    /// <param name="currentPinUtf8">The current PIN as UTF-8 bytes.</param>
+    /// <param name="newPinUtf8">The new PIN as UTF-8 bytes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The operation result.</returns>
     public static async Task<PinResult> ChangePinAsync(
         IYubiKey yubiKey,
-        string currentPin,
-        string newPin,
+        ReadOnlyMemory<byte> currentPinUtf8,
+        ReadOnlyMemory<byte> newPinUtf8,
         CancellationToken cancellationToken = default)
     {
-        byte[]? currentPinBytes = null;
-        byte[]? newPinBytes = null;
         try
         {
-            currentPinBytes = Encoding.UTF8.GetBytes(currentPin);
-            newPinBytes = Encoding.UTF8.GetBytes(newPin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            await clientPin.ChangePinAsync(currentPin, newPin, cancellationToken);
+            await clientPin.ChangePinAsync(currentPinUtf8, newPinUtf8, cancellationToken);
 
             return PinResult.Succeeded();
         }
@@ -145,47 +129,33 @@ public static class PinManagement
         {
             return PinResult.Failed($"Failed to change PIN: {ex.Message}");
         }
-        finally
-        {
-            if (currentPinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(currentPinBytes);
-            }
-
-            if (newPinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(newPinBytes);
-            }
-        }
     }
 
     /// <summary>
     /// Verifies the PIN by attempting to obtain a PIN token.
     /// </summary>
     /// <param name="yubiKey">The YubiKey device.</param>
-    /// <param name="pin">The PIN to verify.</param>
+    /// <param name="pinUtf8">The PIN as UTF-8 bytes to verify.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The operation result.</returns>
     public static async Task<PinResult> VerifyPinAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            pinToken = await clientPin.GetPinTokenAsync(
-                pin,
-                cancellationToken);
+            pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+                pinUtf8,
+                PinUvAuthTokenPermissions.GetAssertion,
+                cancellationToken: cancellationToken);
 
             return PinResult.Succeeded();
         }
@@ -203,11 +173,6 @@ public static class PinManagement
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);

@@ -30,7 +30,7 @@ public class ConsoleCredentialReaderTests
         var options = CredentialReaderOptions.ForPin();
 
         // Act
-        using var result = reader.ReadCredential(options);
+        using var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -52,7 +52,7 @@ public class ConsoleCredentialReaderTests
         var options = CredentialReaderOptions.ForPin();
 
         // Act
-        using var result = reader.ReadCredential(options);
+        using var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -71,7 +71,7 @@ public class ConsoleCredentialReaderTests
         var options = CredentialReaderOptions.ForPin();
 
         // Act
-        var result = reader.ReadCredential(options);
+        var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Null(result);
@@ -91,7 +91,7 @@ public class ConsoleCredentialReaderTests
         var options = CredentialReaderOptions.ForPin();
 
         // Act
-        using var result = reader.ReadCredential(options);
+        using var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -111,7 +111,7 @@ public class ConsoleCredentialReaderTests
         var options = CredentialReaderOptions.ForPin(); // Digits only
 
         // Act
-        using var result = reader.ReadCredential(options);
+        using var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -130,7 +130,7 @@ public class ConsoleCredentialReaderTests
         var options = CredentialReaderOptions.ForPin(); // Max 8
 
         // Act
-        using var result = reader.ReadCredential(options);
+        using var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -154,7 +154,7 @@ public class ConsoleCredentialReaderTests
         var options = CredentialReaderOptions.ForPin();
 
         // Act
-        using var result = reader.ReadCredentialWithConfirmation(options);
+        using var result = reader.ReadCredentialWithConfirmation(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -177,7 +177,7 @@ public class ConsoleCredentialReaderTests
         var options = CredentialReaderOptions.ForPin();
 
         // Act
-        var result = reader.ReadCredentialWithConfirmation(options);
+        var result = reader.ReadCredentialWithConfirmation(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Null(result);
@@ -195,7 +195,7 @@ public class ConsoleCredentialReaderTests
         var options = CredentialReaderOptions.ForPin();
 
         // Act
-        using var result = reader.ReadCredential(options);
+        using var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);

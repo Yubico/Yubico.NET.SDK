@@ -5,6 +5,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Cli.YkTool.Infrastructure;
 using Yubico.YubiKit.Core.YubiKey;
@@ -115,7 +116,16 @@ public sealed class OpenPgpKeysSetTouchCommand : YkCommandBase<KeysSetTouchSetti
         }
 
         var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        await session.VerifyAdminAsync(adminPin);
+        byte[] adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
+        try
+        {
+            await session.VerifyAdminAsync(adminPinBytes);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(adminPinBytes);
+        }
+
         await session.SetUifAsync(keyRef, uif);
 
         OutputHelpers.WriteSuccess($"Touch policy for {FormatKeyRef(keyRef)} set to {settings.Policy}.");
@@ -156,7 +166,15 @@ public sealed class OpenPgpKeysImportCommand : YkCommandBase<KeysImportSettings>
         }
 
         var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        await session.VerifyAdminAsync(adminPin);
+        byte[] adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
+        try
+        {
+            await session.VerifyAdminAsync(adminPinBytes);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(adminPinBytes);
+        }
 
         await AnsiConsole.Status()
             .StartAsync("Importing private key...", async _ =>
@@ -238,7 +256,15 @@ public sealed class OpenPgpKeysGenerateCommand : YkCommandBase<KeysGenerateSetti
 
         var keyRef = ParseKeyRef(settings.Key);
         var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        await session.VerifyAdminAsync(adminPin);
+        byte[] adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
+        try
+        {
+            await session.VerifyAdminAsync(adminPinBytes);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(adminPinBytes);
+        }
 
         var alg = settings.Algorithm.ToUpperInvariant();
 

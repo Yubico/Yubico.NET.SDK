@@ -12,8 +12,8 @@ namespace Yubico.YubiKit.OpenPgp.IntegrationTests;
 
 public class OpenPgpAdvancedTests
 {
-    private const string DefaultUserPin = "123456";
-    private const string DefaultAdminPin = "12345678";
+    private static readonly byte[] DefaultUserPin = "123456"u8.ToArray();
+    private static readonly byte[] DefaultAdminPin = "12345678"u8.ToArray();
 
     // ── X25519 Key Generation ───────────────────────────────────────
 
@@ -62,8 +62,8 @@ public class OpenPgpAdvancedTests
                 };
 
                 // Compute initial hashes for default PINs before setting KDF
-                var initialHashUser = kdf.Process(Pw.User, DefaultUserPin);
-                var initialHashAdmin = kdf.Process(Pw.Admin, DefaultAdminPin);
+                var initialHashUser = kdf.Process(Pw.User, DefaultUserPin.AsSpan());
+                var initialHashAdmin = kdf.Process(Pw.Admin, DefaultAdminPin.AsSpan());
 
                 try
                 {

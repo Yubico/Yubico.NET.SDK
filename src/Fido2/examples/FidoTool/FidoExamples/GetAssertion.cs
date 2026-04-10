@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using System.Text;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -55,16 +54,15 @@ public static class GetAssertion
     /// </summary>
     /// <param name="yubiKey">The YubiKey device.</param>
     /// <param name="rpId">The relying party identifier (e.g., "example.com").</param>
-    /// <param name="pin">The PIN for user verification.</param>
+    /// <param name="pinUtf8">The PIN as UTF-8 bytes for user verification, or null.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The operation result containing the assertion response.</returns>
     public static async Task<GetAssertionResult> AssertAsync(
         IYubiKey yubiKey,
         string rpId,
-        string? pin = null,
+        ReadOnlyMemory<byte>? pinUtf8 = null,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
@@ -78,15 +76,13 @@ public static class GetAssertion
             var options = new GetAssertionOptions();
 
             // If PIN is provided, get a PIN token for user verification
-            if (pin is not null)
+            if (pinUtf8 is not null)
             {
-                pinBytes = Encoding.UTF8.GetBytes(pin);
-
                 using var protocol = new PinUvAuthProtocolV2();
                 using var clientPin = new ClientPin(session, protocol);
 
                 pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    pin,
+                    pinUtf8.Value,
                     PinUvAuthTokenPermissions.GetAssertion,
                     rpId,
                     cancellationToken);
@@ -116,11 +112,6 @@ public static class GetAssertion
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);

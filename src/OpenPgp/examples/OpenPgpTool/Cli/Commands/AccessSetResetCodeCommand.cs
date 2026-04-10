@@ -28,21 +28,22 @@ public sealed class AccessSetResetCodeCommand : OpenPgpCommand<AccessSetResetCod
         Settings settings,
         IOpenPgpSession session)
     {
-        var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        var resetCode = GetPin(settings.ResetCode, "Enter new Reset Code");
-
-        if (string.IsNullOrEmpty(settings.ResetCode))
+        using var adminPin = GetAdminPin(settings.AdminPin);
+        if (adminPin is null)
         {
-            var confirm = OutputHelpers.PromptPin("Confirm new Reset Code");
-            if (!string.Equals(resetCode, confirm, StringComparison.Ordinal))
-            {
-                OutputHelpers.WriteError("Reset Codes do not match.");
-                return 1;
-            }
+            OutputHelpers.WriteError("Admin PIN is required.");
+            return 1;
         }
 
-        await session.VerifyAdminAsync(adminPin);
-        await session.SetResetCodeAsync(resetCode);
+        using var resetCode = GetResetCode(settings.ResetCode);
+        if (resetCode is null)
+        {
+            OutputHelpers.WriteError("Reset Code is required.");
+            return 1;
+        }
+
+        await session.VerifyAdminAsync(adminPin.Memory);
+        await session.SetResetCodeAsync(resetCode.Memory);
         OutputHelpers.WriteSuccess("Reset Code has been set.");
         return 0;
     }

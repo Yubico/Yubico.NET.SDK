@@ -12,8 +12,8 @@ namespace Yubico.YubiKit.OpenPgp.IntegrationTests;
 
 public class OpenPgpMultiCurveTests
 {
-    private const string DefaultUserPin = "123456";
-    private const string DefaultAdminPin = "12345678";
+    private static readonly byte[] DefaultUserPin = "123456"u8.ToArray();
+    private static readonly byte[] DefaultAdminPin = "12345678"u8.ToArray();
 
     // ── P-384 Key Generation and Signing ────────────────────────────
 
@@ -81,7 +81,7 @@ public class OpenPgpMultiCurveTests
                 await session.VerifyAdminAsync(DefaultAdminPin);
 
                 // Set a reset code so the card tracks reset attempts
-                await session.SetResetCodeAsync("12345678");
+                await session.SetResetCodeAsync("12345678"u8.ToArray());
 
                 // Set custom retry counts: user=5, reset=3, admin=5
                 await session.SetPinAttemptsAsync(5, 3, 5);

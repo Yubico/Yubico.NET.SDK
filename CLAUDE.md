@@ -75,6 +75,8 @@ Each module directory may contain:
 - ✅ ALWAYS dispose crypto objects: `using var aes = Aes.Create()`
 - ❌ NEVER log PINs, keys, or sensitive payloads
 - ❌ NEVER use timing-vulnerable comparisons (use `FixedTimeEquals`)
+- ❌ NEVER store a privately-cloned `byte[]` of sensitive data in a `struct`. Struct copies each hold their own reference — you cannot zero all copies. Use a `sealed class` with `IDisposable` and call `ZeroMemory` in `Dispose()`.
+- ✅ `ReadOnlyMemory<byte>` passthrough **is** safe in a `readonly record struct` — all copies reference the same caller-owned memory, so zeroing the source zeroes all views. Caller is responsible for zeroing after transmission. See `ApduCommand` as the canonical passthrough example.
 
 **Modern C#:**
 - ✅ ALWAYS use `is null` / `is not null` (never `== null`)
@@ -673,11 +675,11 @@ public sealed class DeviceInfo
 
 #### Common Mistakes
 
-**❌ BAD: Large struct**
+**❌ BAD: Large struct with owned byte[] clone**
 ```csharp
-public struct ApduCommand  // 32+ bytes!
+public struct SensitivePayload  // 32+ bytes, owns private clone!
 {
-    public byte[] Data { get; set; }  // Reference type in struct!
+    private readonly byte[] _data;  // Each struct copy has its own reference — can't zero all copies
     public DateTime Timestamp { get; set; }
     public Guid CorrelationId { get; set; }
 }
@@ -691,8 +693,9 @@ list[0].Value = 10;  // Modifies COPY, not original!
 
 **✅ GOOD: readonly struct or class**
 ```csharp
-public readonly struct ApduHeader { /* 4 bytes */ }
-public sealed class ApduCommand { /* Contains byte[] */ }
+public readonly struct ApduHeader { /* 4 bytes, no sensitive payload */ }
+public readonly record struct ApduCommand { /* ReadOnlyMemory<byte> passthrough — caller owns and zeroes */ }
+public sealed class SessionKey : IDisposable { /* Owns private byte[] clone — zeroes in Dispose() */ }
 ```
 
 #### Decision Matrix

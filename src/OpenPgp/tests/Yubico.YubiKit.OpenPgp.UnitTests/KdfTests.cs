@@ -24,7 +24,7 @@ public class KdfTests
     {
         var kdf = new KdfNone();
 
-        var result = kdf.Process(Pw.User, "123456");
+        var result = kdf.Process(Pw.User, "123456"u8);
 
         Assert.Equal("123456"u8.ToArray(), result);
     }
@@ -52,7 +52,7 @@ public class KdfTests
         // Test that iteration_count means total bytes fed to hash, not rounds.
         // Use a known salt and PIN, then verify the output matches manual computation.
         byte[] salt = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
-        var pin = "123456";
+        var pinBytes = Encoding.UTF8.GetBytes("123456");
         var iterationCount = 100; // Small count for testing
 
         var kdf = new KdfIterSaltedS2k
@@ -62,13 +62,12 @@ public class KdfTests
             SaltUser = salt,
         };
 
-        var result = kdf.Process(Pw.User, pin);
+        var result = kdf.Process(Pw.User, pinBytes);
 
         // Manually compute expected value:
         // data = salt + "123456" (UTF-8) = 14 bytes
         // data_count = 100 / 14 = 7, trailing = 100 % 14 = 2
         // Feed data 7 times (98 bytes) + data[..2] (2 bytes) = 100 bytes total
-        var pinBytes = Encoding.UTF8.GetBytes(pin);
         var data = new byte[salt.Length + pinBytes.Length]; // 14 bytes
         salt.CopyTo(data, 0);
         pinBytes.CopyTo(data, salt.Length);
@@ -98,7 +97,7 @@ public class KdfTests
             SaltUser = salt,
         };
 
-        var result = kdf.Process(Pw.User, "123456");
+        var result = kdf.Process(Pw.User, "123456"u8);
 
         Assert.Equal(64, result.Length); // SHA512 produces 64 bytes
     }
@@ -117,8 +116,8 @@ public class KdfTests
             SaltAdmin = saltAdmin,
         };
 
-        var userResult = kdf.Process(Pw.User, "123456");
-        var adminResult = kdf.Process(Pw.Admin, "123456");
+        var userResult = kdf.Process(Pw.User, "123456"u8);
+        var adminResult = kdf.Process(Pw.Admin, "123456"u8);
 
         // Different salts must produce different outputs
         Assert.NotEqual(userResult, adminResult);
@@ -209,7 +208,7 @@ public class KdfTests
     {
         // When iterationCount is exact multiple of data length, trailing = 0
         byte[] salt = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
-        var pin = "123456"; // data = salt(8) + pin(6) = 14 bytes
+        var pinBytes = Encoding.UTF8.GetBytes("123456"); // data = salt(8) + pin(6) = 14 bytes
         var iterationCount = 14 * 5; // Exact multiple: 70
 
         var kdf = new KdfIterSaltedS2k
@@ -219,12 +218,12 @@ public class KdfTests
             SaltUser = salt,
         };
 
-        var result = kdf.Process(Pw.User, pin);
+        var result = kdf.Process(Pw.User, pinBytes);
 
         // Verify manually
         var data = new byte[14];
         salt.CopyTo(data, 0);
-        Encoding.UTF8.GetBytes(pin).CopyTo(data, 8);
+        pinBytes.CopyTo(data, 8);
 
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         for (var i = 0; i < 5; i++)

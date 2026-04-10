@@ -30,7 +30,7 @@ public class HexParsingTests
         var options = CredentialReaderOptions.ForHexKey(24);
 
         // Act
-        using var result = reader.ReadCredential(options);
+        using var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -52,7 +52,7 @@ public class HexParsingTests
         var options = CredentialReaderOptions.ForHexKey(24);
 
         // Act
-        using var result = reader.ReadCredential(options);
+        using var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -71,7 +71,7 @@ public class HexParsingTests
         var options = CredentialReaderOptions.ForHexKey(24);
 
         // Act
-        using var result = reader.ReadCredential(options);
+        using var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -90,7 +90,7 @@ public class HexParsingTests
         var options = CredentialReaderOptions.ForHexKey(8);
 
         // Act
-        using var result = reader.ReadCredential(options);
+        using var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -112,7 +112,7 @@ public class HexParsingTests
         var options = CredentialReaderOptions.ForHexKey(2); // Expect 2 bytes
 
         // Act
-        var result = reader.ReadCredential(options);
+        var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Null(result);
@@ -131,7 +131,7 @@ public class HexParsingTests
         var options = CredentialReaderOptions.ForHexKey(4);
 
         // Act
-        using var result = reader.ReadCredential(options);
+        using var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -151,7 +151,7 @@ public class HexParsingTests
         var options = CredentialReaderOptions.ForHexKey(4);
 
         // Act
-        using var result = reader.ReadCredential(options);
+        using var result = reader.ReadCredential(options, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);

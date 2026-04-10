@@ -12,8 +12,8 @@ namespace Yubico.YubiKit.OpenPgp.IntegrationTests;
 
 public class OpenPgpDecryptTests
 {
-    private const string DefaultUserPin = "123456";
-    private const string DefaultAdminPin = "12345678";
+    private static readonly byte[] DefaultUserPin = "123456"u8.ToArray();
+    private static readonly byte[] DefaultAdminPin = "12345678"u8.ToArray();
 
     // ── RSA PKCS#1 Decrypt ──────────────────────────────────────────
 

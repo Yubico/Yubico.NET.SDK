@@ -1,8 +1,10 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
+using System.Buffers;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Cli.Shared.Cli;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Oath.Credentials;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts;
@@ -17,9 +19,17 @@ public static class AccessCommand
     /// <summary>
     /// Changes the OATH access password. If --clear is set, removes the password.
     /// </summary>
+    /// <param name="passwordBytes">
+    /// Current password bytes for unlocking (caller retains ownership). Null to prompt interactively.
+    /// </param>
+    /// <param name="newPasswordBytes">
+    /// New password bytes to set (caller retains ownership). Null to prompt interactively.
+    /// </param>
+    /// <param name="clear">If true, removes the password instead of setting a new one.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     public static async Task<int> ChangeAsync(
-        string? password = null,
-        string? newPassword = null,
+        IMemoryOwner<byte>? passwordBytes = null,
+        IMemoryOwner<byte>? newPasswordBytes = null,
         bool clear = false,
         CancellationToken cancellationToken = default)
     {
@@ -35,7 +45,7 @@ public static class AccessCommand
         // Unlock if currently locked
         if (session.IsLocked)
         {
-            if (!await OathSessionHelper.UnlockSessionAsync(session, password))
+            if (!await OathSessionHelper.UnlockSessionAsync(session, passwordBytes))
             {
                 return 1;
             }
@@ -57,36 +67,32 @@ public static class AccessCommand
         }
 
         // Set or change password
-        if (newPassword is null)
-        {
-            if (!Console.IsInputRedirected)
-            {
-                newPassword = SessionHelper.ReadPasswordMasked("Enter new OATH password");
-
-                var confirm = SessionHelper.ReadPasswordMasked("Confirm new OATH password");
-
-                if (!string.Equals(newPassword, confirm, StringComparison.Ordinal))
-                {
-                    OutputHelpers.WriteError("Passwords do not match.");
-                    return 1;
-                }
-            }
-            else
-            {
-                newPassword = Console.ReadLine();
-            }
-        }
-
-        if (string.IsNullOrEmpty(newPassword))
-        {
-            OutputHelpers.WriteError("New password cannot be empty. Use --clear to remove password protection.");
-            return 1;
-        }
-
+        IMemoryOwner<byte>? prompted = null;
         byte[]? key = null;
+
         try
         {
-            key = session.DeriveKey(newPassword);
+            if (newPasswordBytes is null)
+            {
+                var reader = new ConsoleCredentialReader();
+                var options = OathCredentialOptions.ForOathPassword() with
+                {
+                    Prompt = "Enter new OATH password: ",
+                    ConfirmPrompt = "Confirm new OATH password: "
+                };
+
+                prompted = reader.ReadCredentialWithConfirmation(options);
+                if (prompted is null)
+                {
+                    OutputHelpers.WriteError(
+                        "New password cannot be empty. Use --clear to remove password protection.");
+                    return 1;
+                }
+
+                newPasswordBytes = prompted;
+            }
+
+            key = session.DeriveKey(newPasswordBytes.Memory);
             await session.SetKeyAsync(key, cancellationToken);
             OutputHelpers.WriteSuccess("OATH access password set.");
             return 0;
@@ -102,6 +108,8 @@ public static class AccessCommand
             {
                 CryptographicOperations.ZeroMemory(key);
             }
+
+            prompted?.Dispose();
         }
     }
 }

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using System.Text;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Fido2.BioEnrollment;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -92,15 +91,12 @@ public static class BioEnrollmentExample
     /// </summary>
     public static async Task<SensorInfoResult> GetSensorInfoAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -108,7 +104,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -127,11 +123,6 @@ public static class BioEnrollmentExample
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -145,17 +136,14 @@ public static class BioEnrollmentExample
     /// </summary>
     public static async Task<EnrollResult> EnrollFingerprintAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         string? friendlyName,
         Action<int, int, FingerprintSampleStatus>? onSampleCaptured = null,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -163,7 +151,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -218,11 +206,6 @@ public static class BioEnrollmentExample
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -235,15 +218,12 @@ public static class BioEnrollmentExample
     /// </summary>
     public static async Task<EnumerateResult> EnumerateEnrollmentsAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -251,7 +231,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -270,11 +250,6 @@ public static class BioEnrollmentExample
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -287,17 +262,14 @@ public static class BioEnrollmentExample
     /// </summary>
     public static async Task<BioResult> RenameEnrollmentAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         ReadOnlyMemory<byte> templateId,
         string friendlyName,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -305,7 +277,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -324,11 +296,6 @@ public static class BioEnrollmentExample
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -341,16 +308,13 @@ public static class BioEnrollmentExample
     /// </summary>
     public static async Task<BioResult> RemoveEnrollmentAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         ReadOnlyMemory<byte> templateId,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -358,7 +322,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -377,11 +341,6 @@ public static class BioEnrollmentExample
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);

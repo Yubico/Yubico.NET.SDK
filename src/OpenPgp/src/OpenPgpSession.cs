@@ -368,6 +368,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
             return;
 
         _protocol = null;
+        _kdf?.Dispose();
         _kdf = null;
         base.Dispose(disposing);
     }

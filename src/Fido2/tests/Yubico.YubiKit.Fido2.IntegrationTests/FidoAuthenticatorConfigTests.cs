@@ -46,7 +46,7 @@ public class FidoAuthenticatorConfigTests
                 return;
             }
 
-            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
             var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
                                        info.Versions.Contains("FIDO_2_1_PRE");
@@ -55,12 +55,12 @@ public class FidoAuthenticatorConfigTests
             if (supportsPermissions)
             {
                 configPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    FidoTestData.Pin,
+                    FidoTestData.PinUtf8,
                     PinUvAuthTokenPermissions.AuthenticatorConfig);
             }
             else
             {
-                configPinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                configPinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
             }
 
             try
@@ -87,12 +87,12 @@ public class FidoAuthenticatorConfigTests
                 if (supportsPermissions)
                 {
                     restorePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.AuthenticatorConfig);
                 }
                 else
                 {
-                    restorePinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    restorePinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var restoreConfig = new AuthenticatorConfig(session, clientPin.Protocol, restorePinToken);
@@ -126,7 +126,7 @@ public class FidoAuthenticatorConfigTests
                 return;
             }
 
-            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
             var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
                                        info.Versions.Contains("FIDO_2_1_PRE");
@@ -135,12 +135,12 @@ public class FidoAuthenticatorConfigTests
             if (supportsPermissions)
             {
                 configPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    FidoTestData.Pin,
+                    FidoTestData.PinUtf8,
                     PinUvAuthTokenPermissions.AuthenticatorConfig);
             }
             else
             {
-                configPinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                configPinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
             }
 
             try
@@ -195,7 +195,7 @@ public class FidoAuthenticatorConfigTests
                 return;
             }
 
-            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
             var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
                                        info.Versions.Contains("FIDO_2_1_PRE");
@@ -204,12 +204,12 @@ public class FidoAuthenticatorConfigTests
             if (supportsPermissions)
             {
                 configPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    FidoTestData.Pin,
+                    FidoTestData.PinUtf8,
                     PinUvAuthTokenPermissions.AuthenticatorConfig);
             }
             else
             {
-                configPinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                configPinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
             }
 
             try
@@ -235,7 +235,7 @@ public class FidoAuthenticatorConfigTests
                 // This restores the key to a clean state for subsequent tests.
                 try
                 {
-                    await clientPin.ChangePinAsync(FidoTestData.Pin, FidoTestData.Pin);
+                    await clientPin.ChangePinAsync(FidoTestData.PinUtf8, FidoTestData.PinUtf8);
                 }
                 catch
                 {

@@ -31,7 +31,7 @@ public class YubiKeyDeviceManagerTests
         findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
 
         // Act
-        var devices = await manager.FindAllAsync();
+        var devices = await manager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Single(devices);
@@ -48,7 +48,7 @@ public class YubiKeyDeviceManagerTests
         findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
 
         // First call - triggers scan
-        await manager.FindAllAsync();
+        await manager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
         Assert.Equal(1, findYubiKeys.ScanCount);
 
         // Change available devices (should not be seen)
@@ -58,7 +58,7 @@ public class YubiKeyDeviceManagerTests
         ]);
 
         // Act - Second call
-        var devices = await manager.FindAllAsync();
+        var devices = await manager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert - Returns cached result, no new scan
         Assert.Single(devices);
@@ -75,7 +75,7 @@ public class YubiKeyDeviceManagerTests
         findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
 
         // First call
-        await manager.FindAllAsync();
+        await manager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
         Assert.Equal(1, findYubiKeys.ScanCount);
 
         // Change available devices
@@ -85,7 +85,7 @@ public class YubiKeyDeviceManagerTests
         ]);
 
         // Act - Force rescan
-        var devices = await manager.FindAllAsync(forceRescan: true);
+        var devices = await manager.FindAllAsync(forceRescan: true, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert - Sees new devices
         Assert.Equal(2, devices.Count);
@@ -102,7 +102,7 @@ public class YubiKeyDeviceManagerTests
         findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
 
         // Populate cache with an initial scan before monitoring starts
-        await manager.FindAllAsync();
+        await manager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Start monitoring (event-driven, does not trigger its own scan)
         manager.StartMonitoring(TimeSpan.FromSeconds(10));
@@ -110,7 +110,7 @@ public class YubiKeyDeviceManagerTests
         var scanCountAfterStart = findYubiKeys.ScanCount;
 
         // Act - Call FindAllAsync while monitoring
-        var devices = await manager.FindAllAsync();
+        var devices = await manager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert - Returns cache, no additional scan
         Assert.Single(devices);
@@ -132,8 +132,8 @@ public class YubiKeyDeviceManagerTests
         ]);
 
         // Act
-        var smartCardDevices = await manager.FindAllAsync(ConnectionType.SmartCard);
-        var hidFidoDevices = await manager.FindAllAsync(ConnectionType.HidFido);
+        var smartCardDevices = await manager.FindAllAsync(ConnectionType.SmartCard, cancellationToken: TestContext.Current.CancellationToken);
+        var hidFidoDevices = await manager.FindAllAsync(ConnectionType.HidFido, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(2, smartCardDevices.Count);
@@ -155,7 +155,7 @@ public class YubiKeyDeviceManagerTests
         findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
 
         // Act
-        await manager.FindAllAsync(forceRescan: true);
+        await manager.FindAllAsync(forceRescan: true, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Single(events);
@@ -263,7 +263,7 @@ public class YubiKeyDeviceManagerTests
         await manager.DisposeAsync();
 
         // Act & Assert
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => manager.FindAllAsync());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => manager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]

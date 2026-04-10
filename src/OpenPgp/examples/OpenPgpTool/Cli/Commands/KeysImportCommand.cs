@@ -58,8 +58,14 @@ public sealed class KeysImportCommand : OpenPgpCommand<KeysImportCommand.Setting
             return 1;
         }
 
-        var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        await session.VerifyAdminAsync(adminPin);
+        using var adminPin = GetAdminPin(settings.AdminPin);
+        if (adminPin is null)
+        {
+            OutputHelpers.WriteError("Admin PIN is required.");
+            return 1;
+        }
+
+        await session.VerifyAdminAsync(adminPin.Memory);
 
         await AnsiConsole.Status()
             .StartAsync("Importing private key...", async _ =>

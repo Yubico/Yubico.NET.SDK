@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using System.Text;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Fido2.CredentialManagement;
 using Yubico.YubiKit.Fido2.Credentials;
@@ -93,15 +92,12 @@ public static class CredentialManagementExample
     /// </summary>
     public static async Task<MetadataResult> GetMetadataAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -109,7 +105,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -130,11 +126,6 @@ public static class CredentialManagementExample
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -147,15 +138,12 @@ public static class CredentialManagementExample
     /// </summary>
     public static async Task<EnumerateRpsResult> EnumerateRelyingPartiesAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -163,7 +151,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -184,11 +172,6 @@ public static class CredentialManagementExample
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -201,16 +184,13 @@ public static class CredentialManagementExample
     /// </summary>
     public static async Task<EnumerateCredentialsResult> EnumerateCredentialsAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         ReadOnlyMemory<byte> rpIdHash,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -218,7 +198,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -239,11 +219,6 @@ public static class CredentialManagementExample
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -256,16 +231,13 @@ public static class CredentialManagementExample
     /// </summary>
     public static async Task<CredMgmtResult> DeleteCredentialAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         ReadOnlyMemory<byte> credentialId,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -273,14 +245,14 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
             var credMgmt = new Fido2.CredentialManagement.CredentialManagement(
                 session, protocol, pinToken);
 
-            var descriptor = new PublicKeyCredentialDescriptor(credentialId.ToArray());
+            var descriptor = new PublicKeyCredentialDescriptor(credentialId);
             await credMgmt.DeleteCredentialAsync(descriptor, cancellationToken);
 
             return CredMgmtResult.Succeeded();
@@ -295,11 +267,6 @@ public static class CredentialManagementExample
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -312,19 +279,16 @@ public static class CredentialManagementExample
     /// </summary>
     public static async Task<CredMgmtResult> UpdateUserInfoAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         ReadOnlyMemory<byte> credentialId,
         string userName,
         string displayName,
         ReadOnlyMemory<byte> userId,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -332,15 +296,15 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
             var credMgmt = new Fido2.CredentialManagement.CredentialManagement(
                 session, protocol, pinToken);
 
-            var descriptor = new PublicKeyCredentialDescriptor(credentialId.ToArray());
-            var user = new PublicKeyCredentialUserEntity(userId.ToArray(), userName, displayName);
+            var descriptor = new PublicKeyCredentialDescriptor(credentialId);
+            var user = new PublicKeyCredentialUserEntity(userId, userName, displayName);
             await credMgmt.UpdateUserInformationAsync(descriptor, user, cancellationToken);
 
             return CredMgmtResult.Succeeded();
@@ -355,11 +319,6 @@ public static class CredentialManagementExample
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);

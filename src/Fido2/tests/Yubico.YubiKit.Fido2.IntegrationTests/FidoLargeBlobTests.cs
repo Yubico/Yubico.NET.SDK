@@ -50,7 +50,7 @@ public class FidoLargeBlobTests
 
             try
             {
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
                 var rp = FidoTestData.CreateRelyingParty();
                 var user = FidoTestData.CreateUser();
@@ -63,13 +63,13 @@ public class FidoLargeBlobTests
                 if (supportsPermissions)
                 {
                     makePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.MakeCredential,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var makePinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
@@ -106,12 +106,12 @@ public class FidoLargeBlobTests
                 if (supportsPermissions)
                 {
                     writePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.LargeBlobWrite);
                 }
                 else
                 {
-                    writePinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    writePinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 // Write data to the large blob
@@ -132,7 +132,7 @@ public class FidoLargeBlobTests
             }
             finally
             {
-                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.Pin);
+                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.PinUtf8);
             }
         });
 
@@ -153,7 +153,7 @@ public class FidoLargeBlobTests
 
             try
             {
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
                 var rp = FidoTestData.CreateRelyingParty();
                 var user = FidoTestData.CreateUser();
@@ -166,13 +166,13 @@ public class FidoLargeBlobTests
                 if (supportsPermissions)
                 {
                     makePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.MakeCredential,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var makePinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
@@ -204,12 +204,12 @@ public class FidoLargeBlobTests
                 if (supportsPermissions)
                 {
                     writePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.LargeBlobWrite);
                 }
                 else
                 {
-                    writePinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    writePinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var largeBlobStorage = new LargeBlobStorage(
@@ -229,7 +229,7 @@ public class FidoLargeBlobTests
             }
             finally
             {
-                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.Pin);
+                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.PinUtf8);
             }
         });
 }

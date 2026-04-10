@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Text;
 using Xunit;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Fido2.Credentials;
@@ -32,6 +33,8 @@ public class FidoPinManagementTests
 {
     private const string OriginalPin = "Abc12345";
     private const string ChangedPin = "Xyz98765";
+    private static readonly byte[] OriginalPinUtf8 = Encoding.UTF8.GetBytes(OriginalPin);
+    private static readonly byte[] ChangedPinUtf8 = Encoding.UTF8.GetBytes(ChangedPin);
 
     /// <summary>
     /// Tests that the PIN can be changed and the new PIN works for subsequent operations.
@@ -48,10 +51,10 @@ public class FidoPinManagementTests
             try
             {
                 // Ensure PIN is set to our known value
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, OriginalPin);
+                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, OriginalPinUtf8);
 
                 // Change the PIN
-                await clientPin.ChangePinAsync(OriginalPin, ChangedPin);
+                await clientPin.ChangePinAsync(OriginalPinUtf8, ChangedPinUtf8);
 
                 // Verify the new PIN works by getting a PIN token
                 var info = await session.GetInfoAsync();
@@ -62,13 +65,13 @@ public class FidoPinManagementTests
                 if (supportsPermissions)
                 {
                     pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        ChangedPin,
+                        ChangedPinUtf8,
                         PinUvAuthTokenPermissions.MakeCredential,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    pinToken = await clientPin.GetPinTokenAsync(ChangedPin);
+                    pinToken = await clientPin.GetPinTokenAsync(ChangedPinUtf8);
                 }
 
                 Assert.NotNull(pinToken);
@@ -93,7 +96,7 @@ public class FidoPinManagementTests
                         : new PinUvAuthProtocolV1();
 
                     using var restorePin = new ClientPin(session, protocol);
-                    await restorePin.ChangePinAsync(ChangedPin, OriginalPin);
+                    await restorePin.ChangePinAsync(ChangedPinUtf8, OriginalPinUtf8);
                 }
                 catch
                 {
@@ -119,7 +122,7 @@ public class FidoPinManagementTests
                 ClientPin clientPin;
                 try
                 {
-                    clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+                    clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
                 }
                 catch (CtapException ex) when (ex.Status is CtapStatus.PinBlocked or CtapStatus.PinAuthBlocked)
                 {
@@ -142,13 +145,13 @@ public class FidoPinManagementTests
                 if (supportsPermissions)
                 {
                     pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.MakeCredential,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    pinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    pinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var pinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
@@ -188,7 +191,7 @@ public class FidoPinManagementTests
             finally
             {
                 await FidoTestHelpers.DeleteAllCredentialsForRpAsync(
-                    session, FidoTestData.RpId, FidoTestData.Pin);
+                    session, FidoTestData.RpId, FidoTestData.PinUtf8);
             }
         });
 }

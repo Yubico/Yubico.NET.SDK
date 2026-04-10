@@ -59,7 +59,7 @@ public class FidoCredentialManagementExtendedTests
 
             try
             {
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
                 var rp = FidoTestData.CreateRelyingParty();
                 var userId = FidoTestData.GenerateUserId();
@@ -67,7 +67,7 @@ public class FidoCredentialManagementExtendedTests
                 var makeChallenge = FidoTestData.GenerateChallenge();
 
                 var makePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    FidoTestData.Pin,
+                    FidoTestData.PinUtf8,
                     PinUvAuthTokenPermissions.MakeCredential,
                     FidoTestData.RpId);
 
@@ -90,7 +90,7 @@ public class FidoCredentialManagementExtendedTests
 
                 // Update the user display name
                 var (pinToken, clientPinForCredMan, protocol) = await FidoTestHelpers.GetCredManTokenAsync(
-                    session, FidoTestData.Pin);
+                    session, FidoTestData.PinUtf8);
 
                 using (clientPinForCredMan)
                 {
@@ -119,7 +119,7 @@ public class FidoCredentialManagementExtendedTests
             }
             finally
             {
-                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.Pin);
+                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.PinUtf8);
             }
         });
 
@@ -143,7 +143,7 @@ public class FidoCredentialManagementExtendedTests
 
             try
             {
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
                 var rp = FidoTestData.CreateRelyingParty();
 
@@ -162,13 +162,13 @@ public class FidoCredentialManagementExtendedTests
                     if (supportsPermissions)
                     {
                         makePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                            FidoTestData.Pin,
+                            FidoTestData.PinUtf8,
                             PinUvAuthTokenPermissions.MakeCredential,
                             FidoTestData.RpId);
                     }
                     else
                     {
-                        makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                        makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                     }
 
                     var makePinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
@@ -191,7 +191,7 @@ public class FidoCredentialManagementExtendedTests
 
                 // Enumerate credentials for the RP
                 var (pinToken, clientPinForCredMan, protocol) = await FidoTestHelpers.GetCredManTokenAsync(
-                    session, FidoTestData.Pin);
+                    session, FidoTestData.PinUtf8);
 
                 using (clientPinForCredMan)
                 {
@@ -215,7 +215,7 @@ public class FidoCredentialManagementExtendedTests
             }
             finally
             {
-                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.Pin);
+                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.PinUtf8);
             }
         });
 }

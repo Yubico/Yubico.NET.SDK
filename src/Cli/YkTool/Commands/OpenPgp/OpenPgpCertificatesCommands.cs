@@ -6,6 +6,7 @@ using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Cli.YkTool.Infrastructure;
 using Yubico.YubiKit.Core.YubiKey;
@@ -135,7 +136,16 @@ public sealed class OpenPgpCertificatesImportCommand : YkCommandBase<Certificate
         OutputHelpers.WriteKeyValue("Thumbprint", cert.Thumbprint);
 
         var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        await session.VerifyAdminAsync(adminPin);
+        byte[] adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
+        try
+        {
+            await session.VerifyAdminAsync(adminPinBytes);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(adminPinBytes);
+        }
+
         await session.PutCertificateAsync(keyRef, cert);
 
         OutputHelpers.WriteSuccess($"Certificate imported to {FormatKeyRef(keyRef)} slot.");
@@ -161,7 +171,16 @@ public sealed class OpenPgpCertificatesDeleteCommand : YkCommandBase<Certificate
         }
 
         var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        await session.VerifyAdminAsync(adminPin);
+        byte[] adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
+        try
+        {
+            await session.VerifyAdminAsync(adminPinBytes);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(adminPinBytes);
+        }
+
         await session.DeleteCertificateAsync(keyRef);
 
         OutputHelpers.WriteSuccess($"Certificate deleted from {FormatKeyRef(keyRef)} slot.");

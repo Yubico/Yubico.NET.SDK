@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Buffers;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
@@ -121,77 +121,92 @@ public sealed partial class PivSession
         var preparedData = PrepareDataForCrypto(algorithm, data);
 
         // Build command data: TAG 0x7C [ TAG 0x82 (response) + TAG 0x81 (challenge) ]
-        var dataList = new List<byte>();
-        
-        // TAG 0x7C (Dynamic Auth Template)
-        var templateStart = dataList.Count;
-        dataList.Add(0x7C);
-        dataList.Add(0x00); // Length placeholder
+        // Pre-compute lengths to avoid List<byte> resizing (which can leave unzeroed copies)
 
-        // TAG 0x82 (Expected response length - empty for "give me everything")
-        dataList.Add(0x82);
-        dataList.Add(0x00);
+        // Inner content: TAG 0x82 (2 bytes) + TAG 0x81 + length encoding + data
+        int dataLenEncodingSize = preparedData.Length > 255 ? 3
+            : preparedData.Length > 127 ? 2 : 1;
+        int innerLength = 2 + 1 + dataLenEncodingSize + preparedData.Length; // 0x82,0x00 + 0x81 + len + data
 
-        // TAG 0x81 (Challenge/data to sign/decrypt)
-        dataList.Add(0x81);
-        if (preparedData.Length > 255)
-        {
-            // Two-byte length encoding: 0x82 followed by 2 length bytes (big-endian)
-            dataList.Add(0x82);
-            dataList.Add((byte)(preparedData.Length >> 8));
-            dataList.Add((byte)(preparedData.Length & 0xFF));
-        }
-        else if (preparedData.Length > 127)
-        {
-            // One-byte length encoding: 0x81 followed by 1 length byte
-            dataList.Add(0x81);
-            dataList.Add((byte)preparedData.Length);
-        }
-        else
-        {
-            dataList.Add((byte)preparedData.Length);
-        }
-        dataList.AddRange(preparedData);
+        // Template: TAG 0x7C + length encoding + inner content
+        int templateLenEncodingSize = innerLength > 255 ? 3
+            : innerLength > 127 ? 2 : 1;
+        int totalLength = 1 + templateLenEncodingSize + innerLength; // 0x7C + template len + inner
 
-        // Update template length
-        int templateLength = dataList.Count - templateStart - 2;
-        if (templateLength > 255)
+        var commandData = new byte[totalLength];
+        try
         {
-            // Two-byte length encoding for template
-            dataList.Insert(templateStart + 2, (byte)(templateLength & 0xFF));
-            dataList.Insert(templateStart + 2, (byte)(templateLength >> 8));
-            dataList[templateStart + 1] = 0x82;
-        }
-        else if (templateLength > 127)
-        {
-            // One-byte length encoding for template
-            dataList.Insert(templateStart + 2, (byte)templateLength);
-            dataList[templateStart + 1] = 0x81;
-        }
-        else
-        {
-            dataList[templateStart + 1] = (byte)templateLength;
-        }
+            int offset = 0;
 
-        // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
-        var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, dataList.ToArray());
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            // TAG 0x7C
+            commandData[offset++] = 0x7C;
 
-        if (!response.IsOK())
-        {
-            // Check if PIN verification is required
-            if (response.SW == 0x6982)
+            // Template length encoding
+            if (innerLength > 255)
             {
-                throw new InvalidOperationException(
-                    "Security status not satisfied. PIN verification may be required before this operation.");
+                commandData[offset++] = 0x82;
+                commandData[offset++] = (byte)(innerLength >> 8);
+                commandData[offset++] = (byte)(innerLength & 0xFF);
             }
-            
-            throw ApduException.FromStatusWord(response.SW, 
-                $"Sign/decrypt operation failed for slot 0x{(byte)slot:X2}");
-        }
+            else if (innerLength > 127)
+            {
+                commandData[offset++] = 0x81;
+                commandData[offset++] = (byte)innerLength;
+            }
+            else
+            {
+                commandData[offset++] = (byte)innerLength;
+            }
 
-        // Parse response: TAG 0x7C [ TAG 0x82 (response data) ]
-        return ParseCryptoResponse(response.Data);
+            // TAG 0x82 (Expected response - empty)
+            commandData[offset++] = 0x82;
+            commandData[offset++] = 0x00;
+
+            // TAG 0x81 (Challenge/data to sign/decrypt)
+            commandData[offset++] = 0x81;
+            if (preparedData.Length > 255)
+            {
+                commandData[offset++] = 0x82;
+                commandData[offset++] = (byte)(preparedData.Length >> 8);
+                commandData[offset++] = (byte)(preparedData.Length & 0xFF);
+            }
+            else if (preparedData.Length > 127)
+            {
+                commandData[offset++] = 0x81;
+                commandData[offset++] = (byte)preparedData.Length;
+            }
+            else
+            {
+                commandData[offset++] = (byte)preparedData.Length;
+            }
+
+            preparedData.CopyTo(commandData.AsSpan(offset));
+
+            // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
+            var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, commandData);
+            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsOK())
+            {
+                // Check if PIN verification is required
+                if (response.SW == 0x6982)
+                {
+                    throw new InvalidOperationException(
+                        "Security status not satisfied. PIN verification may be required before this operation.");
+                }
+
+                throw ApduException.FromStatusWord(response.SW,
+                    $"Sign/decrypt operation failed for slot 0x{(byte)slot:X2}");
+            }
+
+            // Parse response: TAG 0x7C [ TAG 0x82 (response data) ]
+            return ParseCryptoResponse(response.Data);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(preparedData);
+            CryptographicOperations.ZeroMemory(commandData);
+        }
     }
 
     /// <inheritdoc/>
@@ -338,60 +353,76 @@ public sealed partial class PivSession
         var peerKeyData = EncodePeerPublicKey(peerPublicKey);
 
         // Build command data: TAG 0x7C [ TAG 0x82 (response) + TAG 0x85 (exponentiation) ]
-        var dataList = new List<byte>();
-        
-        // TAG 0x7C (Dynamic Auth Template)
-        var templateStart = dataList.Count;
-        dataList.Add(0x7C);
-        dataList.Add(0x00); // Length placeholder
+        // Pre-compute lengths to avoid List<byte> resizing (which can leave unzeroed copies)
 
-        // TAG 0x82 (Expected response length - empty)
-        dataList.Add(0x82);
-        dataList.Add(0x00);
+        // Inner content: TAG 0x82 (2 bytes) + TAG 0x85 + length encoding + data
+        int keyLenEncodingSize = peerKeyData.Length > 127 ? 2 : 1;
+        int innerLength = 2 + 1 + keyLenEncodingSize + peerKeyData.Length; // 0x82,0x00 + 0x85 + len + data
 
-        // TAG 0x85 (Exponentiation data - peer public key)
-        dataList.Add(0x85);
-        if (peerKeyData.Length > 127)
-        {
-            dataList.Add(0x81);
-            dataList.Add((byte)peerKeyData.Length);
-        }
-        else
-        {
-            dataList.Add((byte)peerKeyData.Length);
-        }
-        dataList.AddRange(peerKeyData);
+        // Template: TAG 0x7C + length encoding + inner content
+        int templateLenEncodingSize = innerLength > 127 ? 2 : 1;
+        int totalLength = 1 + templateLenEncodingSize + innerLength; // 0x7C + template len + inner
 
-        // Update template length
-        int templateLength = dataList.Count - templateStart - 2;
-        if (templateLength > 127)
+        var data = new byte[totalLength];
+        try
         {
-            dataList.Insert(templateStart + 2, (byte)templateLength);
-            dataList[templateStart + 1] = 0x81;
-        }
-        else
-        {
-            dataList[templateStart + 1] = (byte)templateLength;
-        }
+            int offset = 0;
 
-        // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
-        var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, dataList.ToArray());
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            // TAG 0x7C
+            data[offset++] = 0x7C;
 
-        if (!response.IsOK())
-        {
-            if (response.SW == 0x6982)
+            // Template length encoding
+            if (innerLength > 127)
             {
-                throw new InvalidOperationException(
-                    "Security status not satisfied. PIN verification may be required before this operation.");
+                data[offset++] = 0x81;
+                data[offset++] = (byte)innerLength;
             }
-            
-            throw ApduException.FromStatusWord(response.SW, 
-                $"ECDH operation failed for slot 0x{(byte)slot:X2}");
-        }
+            else
+            {
+                data[offset++] = (byte)innerLength;
+            }
 
-        // Parse response: TAG 0x7C [ TAG 0x82 (shared secret) ]
-        return ParseCryptoResponse(response.Data);
+            // TAG 0x82 (Expected response - empty)
+            data[offset++] = 0x82;
+            data[offset++] = 0x00;
+
+            // TAG 0x85 (Exponentiation data - peer public key)
+            data[offset++] = 0x85;
+            if (peerKeyData.Length > 127)
+            {
+                data[offset++] = 0x81;
+                data[offset++] = (byte)peerKeyData.Length;
+            }
+            else
+            {
+                data[offset++] = (byte)peerKeyData.Length;
+            }
+
+            peerKeyData.CopyTo(data.AsSpan(offset));
+
+            // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
+            var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, data);
+            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsOK())
+            {
+                if (response.SW == 0x6982)
+                {
+                    throw new InvalidOperationException(
+                        "Security status not satisfied. PIN verification may be required before this operation.");
+                }
+
+                throw ApduException.FromStatusWord(response.SW,
+                    $"ECDH operation failed for slot 0x{(byte)slot:X2}");
+            }
+
+            // Parse response: TAG 0x7C [ TAG 0x82 (shared secret) ]
+            return ParseCryptoResponse(response.Data);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(data);
+        }
     }
 
     private byte[] PrepareDataForCrypto(PivAlgorithm algorithm, ReadOnlyMemory<byte> data)
@@ -409,7 +440,7 @@ public sealed partial class PivSession
         };
 
         var span = data.Span;
-        
+
         // RSA: Pad with leading zeros if too short, truncate if too long
         if (algorithm == PivAlgorithm.Rsa1024 || algorithm == PivAlgorithm.Rsa2048 ||
             algorithm == PivAlgorithm.Rsa3072 || algorithm == PivAlgorithm.Rsa4096)

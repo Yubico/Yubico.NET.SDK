@@ -44,9 +44,8 @@ public static class CredentialMenu
         var userName = AnsiConsole.Ask("User Name:", "test@example.com");
         var displayName = AnsiConsole.Ask("Display Name:", userName);
 
-        var pin = AnsiConsole.Confirm("Provide a PIN for user verification?", defaultValue: true)
-            ? new TextPrompt<string>("PIN:").Secret().ShowAsync(AnsiConsole.Console, cancellationToken)
-                .GetAwaiter().GetResult()
+        using var pinOwner = AnsiConsole.Confirm("Provide a PIN for user verification?", defaultValue: true)
+            ? FidoPinHelper.PromptForPin()
             : null;
 
         OutputHelpers.WriteWarning(
@@ -63,7 +62,7 @@ public static class CredentialMenu
                     rpId,
                     userName,
                     displayName,
-                    pin,
+                    pinOwner?.Memory,
                     cancellationToken));
 
         if (!result.Success)
@@ -93,9 +92,8 @@ public static class CredentialMenu
 
         var rpId = AnsiConsole.Ask("Relying Party ID:", "example.com");
 
-        var pin = AnsiConsole.Confirm("Provide a PIN for user verification?", defaultValue: true)
-            ? new TextPrompt<string>("PIN:").Secret().ShowAsync(AnsiConsole.Console, cancellationToken)
-                .GetAwaiter().GetResult()
+        using var pinOwner = AnsiConsole.Confirm("Provide a PIN for user verification?", defaultValue: true)
+            ? FidoPinHelper.PromptForPin()
             : null;
 
         OutputHelpers.WriteWarning(
@@ -110,7 +108,7 @@ public static class CredentialMenu
                 await GetAssertion.AssertAsync(
                     selection.Device,
                     rpId,
-                    pin,
+                    pinOwner?.Memory,
                     cancellationToken));
 
         if (!result.Success)

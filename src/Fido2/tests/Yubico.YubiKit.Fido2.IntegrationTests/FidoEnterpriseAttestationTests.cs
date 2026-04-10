@@ -51,7 +51,7 @@ public class FidoEnterpriseAttestationTests
 
             try
             {
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
                 var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
                                            info.Versions.Contains("FIDO_2_1_PRE");
@@ -60,7 +60,7 @@ public class FidoEnterpriseAttestationTests
                 if (supportsPermissions)
                 {
                     var configPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.AuthenticatorConfig);
 
                     var config = new AuthenticatorConfig(session, clientPin.Protocol, configPinToken);
@@ -75,13 +75,13 @@ public class FidoEnterpriseAttestationTests
                 if (supportsPermissions)
                 {
                     makePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.MakeCredential,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var makePinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
@@ -116,7 +116,7 @@ public class FidoEnterpriseAttestationTests
             }
             finally
             {
-                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.Pin);
+                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.PinUtf8);
             }
         });
 }

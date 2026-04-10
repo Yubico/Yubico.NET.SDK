@@ -28,20 +28,21 @@ public sealed class AccessChangePinCommand : OpenPgpCommand<AccessChangePinComma
         Settings settings,
         IOpenPgpSession session)
     {
-        var currentPin = GetPin(settings.Pin, "Enter current User PIN");
-        var newPin = GetPin(settings.NewPin, "Enter new User PIN");
-
-        if (string.IsNullOrEmpty(settings.NewPin))
+        using var currentPin = GetPin(settings.Pin);
+        if (currentPin is null)
         {
-            var confirm = OutputHelpers.PromptPin("Confirm new User PIN");
-            if (!string.Equals(newPin, confirm, StringComparison.Ordinal))
-            {
-                OutputHelpers.WriteError("New PINs do not match.");
-                return 1;
-            }
+            OutputHelpers.WriteError("Current User PIN is required.");
+            return 1;
         }
 
-        await session.ChangePinAsync(currentPin, newPin);
+        using var newPin = GetPin(settings.NewPin);
+        if (newPin is null)
+        {
+            OutputHelpers.WriteError("New User PIN is required.");
+            return 1;
+        }
+
+        await session.ChangePinAsync(currentPin.Memory, newPin.Memory);
         OutputHelpers.WriteSuccess("User PIN has been changed.");
         return 0;
     }

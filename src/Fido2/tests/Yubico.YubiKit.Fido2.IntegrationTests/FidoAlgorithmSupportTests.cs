@@ -60,7 +60,7 @@ public class FidoAlgorithmSupportTests
 
             try
             {
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
                 var info = await session.GetInfoAsync();
                 var supported = info.Algorithms.Any(a => a.Algorithm == algorithm);
@@ -81,13 +81,13 @@ public class FidoAlgorithmSupportTests
                 if (supportsPermissions)
                 {
                     pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.MakeCredential,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    pinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    pinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var pinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
@@ -129,7 +129,7 @@ public class FidoAlgorithmSupportTests
         try
         {
             var (pinToken, clientPin, protocol) = await FidoTestHelpers.GetCredManTokenAsync(
-                session, FidoTestData.Pin);
+                session, FidoTestData.PinUtf8);
 
             using (clientPin)
             {

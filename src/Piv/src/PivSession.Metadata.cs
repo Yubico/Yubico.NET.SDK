@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.Utils;
@@ -55,7 +55,7 @@ public sealed partial class PivSession
 
         if (!response.IsOK())
         {
-            throw ApduException.FromStatusWord(response.SW, 
+            throw ApduException.FromStatusWord(response.SW,
                 $"Failed to get metadata for slot 0x{(byte)slot:X2}");
         }
 
@@ -127,23 +127,29 @@ public sealed partial class PivSession
 
         // Build data: [algorithm] [slot 0x9B] [length] [key data]
         // Format per Yubico PIV spec: algorithm byte, slot byte, length byte, key bytes
-        var dataList = new List<byte>
+        var dataLength = 3 + newKey.Length; // header (3 bytes) + key
+        var data = new byte[dataLength];
+        try
         {
-            (byte)keyType,      // Algorithm byte (0x03=3DES, 0x08=AES128, 0x0A=AES192, 0x0C=AES256)
-            0x9B,               // Slot 9B (management key slot)
-            (byte)newKey.Length // Key length
-        };
-        dataList.AddRange(newKey.ToArray());
+            data[0] = (byte)keyType;      // Algorithm byte (0x03=3DES, 0x08=AES128, 0x0A=AES192, 0x0C=AES256)
+            data[1] = 0x9B;               // Slot 9B (management key slot)
+            data[2] = (byte)newKey.Length; // Key length
+            newKey.Span.CopyTo(data.AsSpan(3));
 
-        // INS 0xFF (SET MANAGEMENT KEY), P1 = 0xFF
-        // P2 = touch policy: 0xFF (no touch), 0xFE (touch required), 0xFD (cached touch)
-        byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
-        var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, dataList.ToArray());
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            // INS 0xFF (SET MANAGEMENT KEY), P1 = 0xFF
+            // P2 = touch policy: 0xFF (no touch), 0xFE (touch required), 0xFD (cached touch)
+            byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
+            var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, data);
+            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
-        if (!response.IsOK())
+            if (!response.IsOK())
+            {
+                throw ApduException.FromStatusWord(response.SW, "Failed to set management key");
+            }
+        }
+        finally
         {
-            throw ApduException.FromStatusWord(response.SW, "Failed to set management key");
+            CryptographicOperations.ZeroMemory(data);
         }
 
         // Update cached key type
@@ -180,10 +186,10 @@ public sealed partial class PivSession
         // Parse TLV structure using TlvHelper
         // TAG 0x05 = isDefault, TAG 0x06 = retries [total, remaining]
         var tlvDict = TlvHelper.DecodeDictionary(response.Data);
-        
-        bool isDefault = tlvDict.TryGetValue(0x05, out var defaultValue) && 
+
+        bool isDefault = tlvDict.TryGetValue(0x05, out var defaultValue) &&
                          defaultValue.Length > 0 && defaultValue.Span[0] != 0;
-        
+
         int totalRetries = 0;
         int retriesRemaining = 0;
         if (tlvDict.TryGetValue(0x06, out var retriesValue) && retriesValue.Length >= 2)
@@ -207,7 +213,7 @@ public sealed partial class PivSession
         // INS 0xF7 (GET METADATA), P2 = 0x9B (SLOT_CARD_MANAGEMENT)
         const byte InsGetMetadata = 0xF7;
         const byte SlotCardManagement = 0x9B;
-        
+
         var command = new ApduCommand(0x00, InsGetMetadata, 0x00, SlotCardManagement, ReadOnlyMemory<byte>.Empty);
         var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
@@ -239,7 +245,7 @@ public sealed partial class PivSession
         var isDefault = tlvDict.TryGetValue(0x05, out var def) && def.Length > 0
             && def.Span[0] != 0;
 
-        Logger.LogDebug("PIV: Management key metadata: type={KeyType}, isDefault={IsDefault}, touchPolicy={TouchPolicy}", 
+        Logger.LogDebug("PIV: Management key metadata: type={KeyType}, isDefault={IsDefault}, touchPolicy={TouchPolicy}",
             keyType, isDefault, touchPolicy);
 
         return new PivManagementKeyMetadata(
@@ -312,7 +318,7 @@ public sealed partial class PivSession
                 {
                     throw new InvalidPinException(0, "PUK is blocked");
                 }
-                
+
                 int retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
                 if (retriesRemaining >= 0)
                 {

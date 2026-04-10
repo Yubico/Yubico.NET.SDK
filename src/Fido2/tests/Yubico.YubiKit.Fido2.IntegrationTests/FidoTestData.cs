@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 
@@ -50,6 +51,11 @@ public static class FidoTestData
     /// To set: ykman fido access change-pin --new-pin 11234567
     /// </summary>
     public const string Pin = TestExtensions.FidoTestStateExtensions.KnownTestPinString;
+
+    /// <summary>
+    /// Test PIN as UTF-8 bytes for use with ClientPin methods.
+    /// </summary>
+    public static readonly byte[] PinUtf8 = Encoding.UTF8.GetBytes(Pin);
 
     /// <summary>
     /// Simple PIN for devices without complexity enforcement.

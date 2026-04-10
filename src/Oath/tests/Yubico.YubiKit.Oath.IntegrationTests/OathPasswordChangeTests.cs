@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Oath.IntegrationTests.TestExtensions;
@@ -42,7 +43,7 @@ public class OathPasswordChangeTests
             string originalPassword = "original-password-123";
             string newPassword = "changed-password-456";
 
-            byte[] originalKey = session.DeriveKey(originalPassword);
+            byte[] originalKey = session.DeriveKey(Encoding.UTF8.GetBytes(originalPassword));
 
             try
             {
@@ -56,14 +57,14 @@ public class OathPasswordChangeTests
                 Assert.True(lockedSession1.IsLocked);
 
                 // Unlock with original password
-                byte[] validateKey1 = lockedSession1.DeriveKey(originalPassword);
+                byte[] validateKey1 = lockedSession1.DeriveKey(Encoding.UTF8.GetBytes(originalPassword));
                 try
                 {
                     await lockedSession1.ValidateAsync(validateKey1, NewToken());
                     Assert.False(lockedSession1.IsLocked);
 
                     // Change the password: set a new key on the unlocked session
-                    byte[] newKey = lockedSession1.DeriveKey(newPassword);
+                    byte[] newKey = lockedSession1.DeriveKey(Encoding.UTF8.GetBytes(newPassword));
                     try
                     {
                         await lockedSession1.SetKeyAsync(newKey, NewToken());
@@ -84,7 +85,7 @@ public class OathPasswordChangeTests
 
                 Assert.True(lockedSession2.IsLocked);
 
-                byte[] validateKey2 = lockedSession2.DeriveKey(newPassword);
+                byte[] validateKey2 = lockedSession2.DeriveKey(Encoding.UTF8.GetBytes(newPassword));
                 try
                 {
                     await lockedSession2.ValidateAsync(validateKey2, NewToken());
@@ -101,7 +102,7 @@ public class OathPasswordChangeTests
 
                 Assert.True(lockedSession3.IsLocked);
 
-                byte[] oldKey = lockedSession3.DeriveKey(originalPassword);
+                byte[] oldKey = lockedSession3.DeriveKey(Encoding.UTF8.GetBytes(originalPassword));
                 try
                 {
                     await Assert.ThrowsAnyAsync<Exception>(async () =>
@@ -119,7 +120,7 @@ public class OathPasswordChangeTests
                 // Clean up: remove the password so other tests are unaffected.
                 // The original session was created with reset, so it should still be valid.
                 // We need to unlock with the new password first since we changed it.
-                byte[] cleanupKey = session.DeriveKey(newPassword);
+                byte[] cleanupKey = session.DeriveKey(Encoding.UTF8.GetBytes(newPassword));
                 try
                 {
                     // The original session may have lost its auth state, so unlock again
@@ -153,7 +154,7 @@ public class OathPasswordChangeTests
         await state.WithOathSessionAsync(async session =>
         {
             string password = "temporary-password-789";
-            byte[] key = session.DeriveKey(password);
+            byte[] key = session.DeriveKey(Encoding.UTF8.GetBytes(password));
 
             try
             {

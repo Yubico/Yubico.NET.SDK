@@ -86,11 +86,16 @@ public static class FingerprintsMenu
 
     private static async Task RunSensorInfoAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = OutputHelpers.PromptForPin();
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var result = await AnsiConsole.Status()
             .StartAsync("Querying sensor info...", async _ =>
-                await BioEnrollmentExample.GetSensorInfoAsync(device, pin, cancellationToken));
+                await BioEnrollmentExample.GetSensorInfoAsync(device, pinOwner.Memory, cancellationToken));
 
         if (!result.Success)
         {
@@ -113,7 +118,12 @@ public static class FingerprintsMenu
 
     private static async Task RunAddAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = OutputHelpers.PromptForPin();
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var friendlyName = AnsiConsole.Ask("Friendly name (optional):", string.Empty);
         if (string.IsNullOrWhiteSpace(friendlyName))
@@ -127,7 +137,7 @@ public static class FingerprintsMenu
 
         var result = await BioEnrollmentExample.EnrollFingerprintAsync(
             device,
-            pin,
+            pinOwner.Memory,
             friendlyName,
             onSampleCaptured: (sample, remaining, status) =>
             {
@@ -159,11 +169,16 @@ public static class FingerprintsMenu
 
     private static async Task RunListAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = OutputHelpers.PromptForPin();
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var result = await AnsiConsole.Status()
             .StartAsync("Enumerating enrollments...", async _ =>
-                await BioEnrollmentExample.EnumerateEnrollmentsAsync(device, pin, cancellationToken));
+                await BioEnrollmentExample.EnumerateEnrollmentsAsync(device, pinOwner.Memory, cancellationToken));
 
         if (!result.Success)
         {
@@ -188,7 +203,12 @@ public static class FingerprintsMenu
 
     private static async Task RunDeleteAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = OutputHelpers.PromptForPin();
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var templateIdHex = AnsiConsole.Ask<string>("Fingerprint ID (hex):");
         byte[] templateId;
@@ -211,7 +231,7 @@ public static class FingerprintsMenu
         var result = await AnsiConsole.Status()
             .StartAsync("Removing enrollment...", async _ =>
                 await BioEnrollmentExample.RemoveEnrollmentAsync(
-                    device, pin, templateId, cancellationToken));
+                    device, pinOwner.Memory, templateId, cancellationToken));
 
         if (result.Success)
         {
@@ -225,7 +245,12 @@ public static class FingerprintsMenu
 
     private static async Task RunRenameAsync(IYubiKey device, CancellationToken cancellationToken)
     {
-        var pin = OutputHelpers.PromptForPin();
+        using var pinOwner = FidoPinHelper.PromptForPin();
+        if (pinOwner is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return;
+        }
 
         var templateIdHex = AnsiConsole.Ask<string>("Fingerprint ID (hex):");
         byte[] templateId;
@@ -244,7 +269,7 @@ public static class FingerprintsMenu
         var result = await AnsiConsole.Status()
             .StartAsync("Renaming enrollment...", async _ =>
                 await BioEnrollmentExample.RenameEnrollmentAsync(
-                    device, pin, templateId, newName, cancellationToken));
+                    device, pinOwner.Memory, templateId, newName, cancellationToken));
 
         if (result.Success)
         {

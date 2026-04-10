@@ -163,17 +163,9 @@ public sealed class StaticKeys : IDisposable
         derivationData[DerivationDataPrefixLength + 4] = DerivationDataCounter;
         context.CopyTo(derivationData[(DerivationDataPrefixLength + 5)..]);
 
-        Console.WriteLine($"[DEBUG] DeriveKey type=0x{derivationType:X2}, length=0x{lengthBits:X4}");
-        Console.WriteLine($"[DEBUG] DeriveKey key: {Convert.ToHexString(key)}");
-        Console.WriteLine($"[DEBUG] DeriveKey data: {Convert.ToHexString(derivationData)}");
-
         using var cmac = new AesCmac(key);
         cmac.AppendData(derivationData);
         var mac = cmac.GetHashAndReset();
-
-        Console.WriteLine($"[DEBUG] DeriveKey MAC (full 16 bytes): {Convert.ToHexString(mac)}");
-        Console.WriteLine(
-            $"[DEBUG] DeriveKey output ({lengthBits / 8} bytes): {Convert.ToHexString(mac.AsSpan(0, lengthBits / 8))}");
 
         try
         {

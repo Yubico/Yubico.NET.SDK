@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using System.Text;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Fido2.Config;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -44,15 +43,12 @@ public static class ConfigManagement
     /// </summary>
     public static async Task<ConfigResult> EnableEnterpriseAttestationAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -60,7 +56,7 @@ public static class ConfigManagement
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.AuthenticatorConfig,
                 cancellationToken: cancellationToken);
 
@@ -79,11 +75,6 @@ public static class ConfigManagement
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -96,15 +87,12 @@ public static class ConfigManagement
     /// </summary>
     public static async Task<ConfigResult> ToggleAlwaysUvAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -112,7 +100,7 @@ public static class ConfigManagement
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.AuthenticatorConfig,
                 cancellationToken: cancellationToken);
 
@@ -131,11 +119,6 @@ public static class ConfigManagement
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -148,18 +131,15 @@ public static class ConfigManagement
     /// </summary>
     public static async Task<ConfigResult> SetMinPinLengthAsync(
         IYubiKey yubiKey,
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         int newMinPinLength,
         IReadOnlyList<string>? rpIds = null,
         bool forceChangePin = false,
         CancellationToken cancellationToken = default)
     {
-        byte[]? pinBytes = null;
         byte[]? pinToken = null;
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await yubiKey.CreateFidoSessionAsync(
                 cancellationToken: cancellationToken);
 
@@ -167,7 +147,7 @@ public static class ConfigManagement
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
+                pinUtf8,
                 PinUvAuthTokenPermissions.AuthenticatorConfig,
                 cancellationToken: cancellationToken);
 
@@ -190,11 +170,6 @@ public static class ConfigManagement
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);

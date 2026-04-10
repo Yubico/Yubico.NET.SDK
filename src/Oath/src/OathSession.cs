@@ -127,10 +127,12 @@ public sealed class OathSession : ApplicationSession, IOathSession
                     break;
 
                 case OathConstants.TagName:
+                    CryptographicOperations.ZeroMemory(_salt);
                     _salt = tlv.Value.ToArray();
                     break;
 
                 case OathConstants.TagChallenge:
+                    CryptographicOperations.ZeroMemory(_challenge);
                     _challenge = tlv.Value.ToArray();
                     break;
             }
@@ -484,28 +486,14 @@ public sealed class OathSession : ApplicationSession, IOathSession
     }
 
     /// <inheritdoc />
-    public byte[] DeriveKey(string password)
+    public byte[] DeriveKey(ReadOnlyMemory<byte> passwordUtf8)
     {
-        ArgumentNullException.ThrowIfNull(password);
-
-        byte[] passwordBytes = System.Text.Encoding.UTF8.GetBytes(password);
-        byte[] key;
-
-        try
-        {
-            key = Rfc2898DeriveBytes.Pbkdf2(
-                passwordBytes,
-                _salt,
-                iterations: 1000,
-                HashAlgorithmName.SHA1,
-                outputLength: 16);
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(passwordBytes);
-        }
-
-        return key;
+        return Rfc2898DeriveBytes.Pbkdf2(
+            passwordUtf8.Span,
+            _salt,
+            iterations: 1000,
+            HashAlgorithmName.SHA1,
+            outputLength: 16);
     }
 
     /// <inheritdoc />
@@ -559,6 +547,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
                     throw new InvalidOperationException("Device mutual authentication failed.");
 
                 IsLocked = false;
+                CryptographicOperations.ZeroMemory(_challenge);
                 _challenge = [];
             }
             finally
@@ -627,6 +616,17 @@ public sealed class OathSession : ApplicationSession, IOathSession
         var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, keyTlv.AsMemory());
         await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            CryptographicOperations.ZeroMemory(_salt);
+            CryptographicOperations.ZeroMemory(_challenge);
+        }
+
+        base.Dispose(disposing);
     }
 
     private async Task<ReadOnlyMemory<byte>> CollectResponseData(

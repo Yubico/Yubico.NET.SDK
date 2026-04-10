@@ -65,7 +65,7 @@ public class FidoHmacSecretTests
                 return;
             }
 
-            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
             var rp = FidoTestData.CreateRelyingParty();
             var user = FidoTestData.CreateUser();
@@ -78,13 +78,13 @@ public class FidoHmacSecretTests
             if (supportsPermissions)
             {
                 pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    FidoTestData.Pin,
+                    FidoTestData.PinUtf8,
                     PinUvAuthTokenPermissions.MakeCredential,
                     FidoTestData.RpId);
             }
             else
             {
-                pinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                pinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
             }
 
             var pinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
@@ -140,7 +140,7 @@ public class FidoHmacSecretTests
 
             try
             {
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
                 var rp = FidoTestData.CreateRelyingParty();
                 var user = FidoTestData.CreateUser();
@@ -153,13 +153,13 @@ public class FidoHmacSecretTests
                 if (supportsPermissions)
                 {
                     makePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.MakeCredential,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var makePinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
@@ -189,13 +189,13 @@ public class FidoHmacSecretTests
                 if (supportsPermissions)
                 {
                     assertPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.GetAssertion,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    assertPinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    assertPinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var assertPinUvAuthParam = FidoTestHelpers.ComputeGetAssertionAuthParam(
@@ -238,7 +238,7 @@ public class FidoHmacSecretTests
             }
             finally
             {
-                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.Pin);
+                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.PinUtf8);
             }
         });
 
@@ -259,7 +259,7 @@ public class FidoHmacSecretTests
 
             try
             {
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
                 var rp = FidoTestData.CreateRelyingParty();
                 var user = FidoTestData.CreateUser();
@@ -272,13 +272,13 @@ public class FidoHmacSecretTests
                 if (supportsPermissions)
                 {
                     makePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.Pin,
+                        FidoTestData.PinUtf8,
                         PinUvAuthTokenPermissions.MakeCredential,
                         FidoTestData.RpId);
                 }
                 else
                 {
-                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                    makePinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                 }
 
                 var makePinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
@@ -315,13 +315,13 @@ public class FidoHmacSecretTests
                     if (supportsPermissions)
                     {
                         assertPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                            FidoTestData.Pin,
+                            FidoTestData.PinUtf8,
                             PinUvAuthTokenPermissions.GetAssertion,
                             FidoTestData.RpId);
                     }
                     else
                     {
-                        assertPinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                        assertPinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                     }
 
                     var assertPinUvAuthParam = FidoTestHelpers.ComputeGetAssertionAuthParam(
@@ -360,13 +360,13 @@ public class FidoHmacSecretTests
                     if (supportsPermissions)
                     {
                         assertPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                            FidoTestData.Pin,
+                            FidoTestData.PinUtf8,
                             PinUvAuthTokenPermissions.GetAssertion,
                             FidoTestData.RpId);
                     }
                     else
                     {
-                        assertPinToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                        assertPinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
                     }
 
                     var assertPinUvAuthParam = FidoTestHelpers.ComputeGetAssertionAuthParam(
@@ -407,7 +407,7 @@ public class FidoHmacSecretTests
             }
             finally
             {
-                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.Pin);
+                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(session, FidoTestData.RpId, FidoTestData.PinUtf8);
             }
         });
 }

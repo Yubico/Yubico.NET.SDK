@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
+
 namespace Yubico.YubiKit.Core.SmartCard.Scp;
 
 /// <summary>
@@ -51,10 +53,10 @@ internal static class ScpInitializer
             return keyParams switch
             {
                 Scp03KeyParameters scp03Parameters => mainProcessor.FirmwareVersion.IsAtLeast(5, 3, 0)
-                    ? await InitScp03Async(mainProcessor, scp03Parameters, cancellationToken)
+                    ? await InitScp03Async(mainProcessor, scp03Parameters, cancellationToken).ConfigureAwait(false)
                     : throw new NotSupportedException("SCP03 only supported on YubiKey 5.3.0 and later"),
                 Scp11KeyParameters scp11Parameters => mainProcessor.FirmwareVersion.IsAtLeast(5, 7, 2)
-                    ? await InitScp11Async(mainProcessor, scp11Parameters, cancellationToken)
+                    ? await InitScp11Async(mainProcessor, scp11Parameters, cancellationToken).ConfigureAwait(false)
                     : throw new NotSupportedException("SCP11 only supported on YubiKey 5.7.2 and later"),
                 _ => throw new ArgumentException("Unsupported SCP key parameters type")
             };
@@ -80,24 +82,43 @@ internal static class ScpInitializer
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        // Create SCP processor with base processor's formatter
-        var scpProcessor = new ScpProcessor(baseProcessor, state);
+        try
+        {
+            // Create SCP processor with base processor's formatter
+            var scpProcessor = new ScpProcessor(baseProcessor, state);
 
-        // Send EXTERNAL AUTHENTICATE with host cryptogram
-        var authCommand = new ApduCommand(
-            CLA_SECURE_MESSAGING,
-            INS_EXTERNAL_AUTHENTICATE,
-            SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC,
-            0x00,
-            hostCryptogram);
+            // Send EXTERNAL AUTHENTICATE with host cryptogram.
+            // Dispose scpProcessor (and its ScpState session keys) on any failure —
+            // otherwise session keys leak to the GC finalizer (T10).
+            try
+            {
+                var authCommand = new ApduCommand(
+                    CLA_SECURE_MESSAGING,
+                    INS_EXTERNAL_AUTHENTICATE,
+                    SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC,
+                    0x00,
+                    hostCryptogram);
 
-        var authResponse = await scpProcessor.TransmitAsync(authCommand, true, false, cancellationToken)
-            .ConfigureAwait(false);
-        if (authResponse.SW != SWConstants.Success)
-            throw ApduException.FromResponse(authResponse, authCommand, "SCP03 EXTERNAL AUTHENTICATE failed");
+                var authResponse = await scpProcessor.TransmitAsync(authCommand, true, false, cancellationToken)
+                    .ConfigureAwait(false);
+                if (authResponse.SW != SWConstants.Success)
+                    throw ApduException.FromResponse(authResponse, authCommand, "SCP03 EXTERNAL AUTHENTICATE failed");
+            }
+            catch
+            {
+                scpProcessor.Dispose();
+                throw;
+            }
 
-        var dataEncryptor = state.GetDataEncryptor();
-        return (scpProcessor, dataEncryptor);
+            var dataEncryptor = state.GetDataEncryptor();
+            return (scpProcessor, dataEncryptor);
+        }
+        finally
+        {
+            // Zero hostCryptogram here — ApduCommand stores a reference (no clone), so zeroing
+            // the source buffer is the caller's responsibility under the passthrough ownership model.
+            CryptographicOperations.ZeroMemory(hostCryptogram);
+        }
     }
 
     /// <summary>

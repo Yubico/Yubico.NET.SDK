@@ -86,7 +86,7 @@ public static class FidoTestStateExtensions
         if (!pinIsSet)
         {
             // No PIN configured yet -- set the known test PIN.
-            await clientPin.SetPinAsync(KnownTestPinString, cancellationToken)
+            await clientPin.SetPinAsync(KnownTestPin, cancellationToken)
                 .ConfigureAwait(false);
             return;
         }
@@ -94,7 +94,7 @@ public static class FidoTestStateExtensions
         // PIN is configured -- verify it matches the known test PIN.
         try
         {
-            _ = await clientPin.GetPinTokenAsync(KnownTestPinString, cancellationToken)
+            _ = await clientPin.GetPinTokenAsync(KnownTestPin, cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (CtapException ex) when (ex.Status is CtapStatus.PinInvalid)

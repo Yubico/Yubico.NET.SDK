@@ -40,7 +40,7 @@ public class FidoEnhancedPinTests
                 return;
             }
 
-            await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+            await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
             var updatedInfo = await session.GetInfoAsync();
             Assert.True(updatedInfo.Options.TryGetValue("clientPin", out var pinSet) && pinSet,
@@ -102,7 +102,7 @@ public class FidoEnhancedPinTests
             var info = await session.GetInfoAsync();
             if (!info.Options.TryGetValue("clientPin", out var pinConfigured) || !pinConfigured)
             {
-                await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+                await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
             }
 
             IPinUvAuthProtocol protocol = info.PinUvAuthProtocols.Contains(2)

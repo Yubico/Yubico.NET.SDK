@@ -70,14 +70,20 @@ public interface IOpenPgpSession : IApplicationSession
     /// <summary>
     ///     Verifies the User PIN. If KDF is configured, the PIN is derived before sending.
     /// </summary>
-    /// <param name="pin">The User PIN string.</param>
+    /// <remarks>
+    ///     <b>Breaking change:</b> PIN parameters changed from <c>string</c> to
+    ///     <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers to zero
+    ///     sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(pin)</c> and zero
+    ///     the resulting array when finished.
+    /// </remarks>
+    /// <param name="pinUtf8">The User PIN as UTF-8 encoded bytes.</param>
     /// <param name="extended">
     ///     If <c>true</c>, verifies for signing (P2=0x81). If <c>false</c>, verifies for
     ///     other operations (P2=0x82). Defaults to <c>false</c>.
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     Task VerifyPinAsync(
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         bool extended = false,
         CancellationToken cancellationToken = default);
 
@@ -85,7 +91,7 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Verifies the Admin PIN. If KDF is configured, the PIN is derived before sending.
     /// </summary>
     Task VerifyAdminAsync(
-        string pin,
+        ReadOnlyMemory<byte> pinUtf8,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -95,26 +101,26 @@ public interface IOpenPgpSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Changes the User PIN from <paramref name="currentPin" /> to <paramref name="newPin" />.
+    ///     Changes the User PIN from <paramref name="currentPinUtf8" /> to <paramref name="newPinUtf8" />.
     /// </summary>
     Task ChangePinAsync(
-        string currentPin,
-        string newPin,
+        ReadOnlyMemory<byte> currentPinUtf8,
+        ReadOnlyMemory<byte> newPinUtf8,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Changes the Admin PIN from <paramref name="currentPin" /> to <paramref name="newPin" />.
+    ///     Changes the Admin PIN from <paramref name="currentPinUtf8" /> to <paramref name="newPinUtf8" />.
     /// </summary>
     Task ChangeAdminAsync(
-        string currentPin,
-        string newPin,
+        ReadOnlyMemory<byte> currentPinUtf8,
+        ReadOnlyMemory<byte> newPinUtf8,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Sets the Reset Code used for resetting the User PIN without the Admin PIN.
     /// </summary>
     Task SetResetCodeAsync(
-        string resetCode,
+        ReadOnlyMemory<byte> resetCodeUtf8,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -123,22 +129,22 @@ public interface IOpenPgpSession : IApplicationSession
     /// <remarks>
     ///     When <paramref name="useAdmin" /> is <c>true</c>, the caller must have already
     ///     verified the Admin PIN via <see cref="VerifyAdminAsync" /> before calling this method.
-    ///     The <paramref name="resetCode" /> parameter is ignored in admin mode; only the
-    ///     <paramref name="newPin" /> is sent to the card.
+    ///     The <paramref name="resetCodeUtf8" /> parameter is ignored in admin mode; only the
+    ///     <paramref name="newPinUtf8" /> is sent to the card.
     /// </remarks>
-    /// <param name="resetCode">
-    ///     The Reset Code (when <paramref name="useAdmin" /> is <c>false</c>).
+    /// <param name="resetCodeUtf8">
+    ///     The Reset Code as UTF-8 bytes (when <paramref name="useAdmin" /> is <c>false</c>).
     ///     Ignored when <paramref name="useAdmin" /> is <c>true</c>.
     /// </param>
-    /// <param name="newPin">The new User PIN.</param>
+    /// <param name="newPinUtf8">The new User PIN as UTF-8 encoded bytes.</param>
     /// <param name="useAdmin">
     ///     If <c>true</c>, assumes Admin PIN (PW3) has been verified and sends
     ///     RESET RETRY COUNTER with P1=0x02. If <c>false</c>, uses the Reset Code with P1=0x00.
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     Task ResetPinAsync(
-        string resetCode,
-        string newPin,
+        ReadOnlyMemory<byte> resetCodeUtf8,
+        ReadOnlyMemory<byte> newPinUtf8,
         bool useAdmin = false,
         CancellationToken cancellationToken = default);
 

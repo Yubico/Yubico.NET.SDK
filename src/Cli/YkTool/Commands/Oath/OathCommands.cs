@@ -5,6 +5,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Cli.YkTool.Infrastructure;
 using Yubico.YubiKit.Core.YubiKey;
@@ -252,7 +253,7 @@ public sealed class OathAccessChangePasswordCommand : YkCommandBase<OathAccessCh
         byte[]? key = null;
         try
         {
-            key = session.DeriveKey(newPassword);
+            key = session.DeriveKey(Encoding.UTF8.GetBytes(newPassword));
             await session.SetKeyAsync(key);
             OutputHelpers.WriteSuccess("OATH access password set.");
             return ExitCode.Success;

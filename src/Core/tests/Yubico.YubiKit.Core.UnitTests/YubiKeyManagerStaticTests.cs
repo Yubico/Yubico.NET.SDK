@@ -30,7 +30,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     public async Task YubiKeyManager_FindAllAsync_IsStaticMethod()
     {
         // FindAllAsync should be callable as static method
-        var result = await YubiKeyManager.FindAllAsync();
+        var result = await YubiKeyManager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         Assert.IsAssignableFrom<IReadOnlyList<Yubico.YubiKit.Core.Interfaces.IYubiKey>>(result);
@@ -50,7 +50,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     public async Task YubiKeyManager_FindAllAsync_WorksWithoutDISetup()
     {
         // Verify method works without calling any initialization or DI setup
-        var result = await YubiKeyManager.FindAllAsync();
+        var result = await YubiKeyManager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
     }
@@ -59,7 +59,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     public async Task YubiKeyManager_FindAllAsync_ReturnsIReadOnlyList()
     {
         // Verify returns IReadOnlyList<IYubiKey>
-        var result = await YubiKeyManager.FindAllAsync();
+        var result = await YubiKeyManager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.IsAssignableFrom<IReadOnlyList<Yubico.YubiKit.Core.Interfaces.IYubiKey>>(result);
     }
@@ -68,7 +68,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     public async Task YubiKeyManager_FindAllAsync_NoDevices_ReturnsEmptyList()
     {
         // Handle no devices connected -> Return empty list (not null)
-        var result = await YubiKeyManager.FindAllAsync();
+        var result = await YubiKeyManager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         // In unit test environment, expect empty (no real devices)
@@ -399,7 +399,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
         Assert.True(YubiKeyManager.IsMonitoring);
 
-        await YubiKeyManager.ShutdownAsync();
+        await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
 
         Assert.False(YubiKeyManager.IsMonitoring);
     }
@@ -409,8 +409,8 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     {
         // Handle multiple Shutdown() calls -> Idempotent
         // Multiple shutdown calls should not throw
-        await YubiKeyManager.ShutdownAsync();
-        await YubiKeyManager.ShutdownAsync();
+        await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
+        await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
 
         Assert.False(YubiKeyManager.IsMonitoring);
     }
@@ -419,10 +419,10 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     public async Task YubiKeyManager_AfterShutdown_FindAllAsync_Works()
     {
         // Verify after shutdown, FindAllAsync performs fresh scan
-        await YubiKeyManager.ShutdownAsync();
+        await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
 
         // FindAllAsync should work after shutdown
-        var result = await YubiKeyManager.FindAllAsync();
+        var result = await YubiKeyManager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
         Assert.NotNull(result);
     }
 
@@ -430,7 +430,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     public async Task YubiKeyManager_AfterShutdown_StartMonitoring_Works()
     {
         // Verify after shutdown, StartMonitoring works correctly
-        await YubiKeyManager.ShutdownAsync();
+        await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
 
         // StartMonitoring should work after shutdown
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
@@ -441,12 +441,12 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     public async Task YubiKeyManager_ShutdownAsync_ResetsContext()
     {
         // After shutdown, a new context is created on next use
-        _ = await YubiKeyManager.FindAllAsync();
+        _ = await YubiKeyManager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        await YubiKeyManager.ShutdownAsync();
+        await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
 
         // Next call should create new context and work
-        var result = await YubiKeyManager.FindAllAsync();
+        var result = await YubiKeyManager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
         Assert.NotNull(result);
     }
 
@@ -454,7 +454,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     public async Task YubiKeyManager_DeviceChanges_AfterShutdown_AutoRecreatesContext()
     {
         // DeviceChanges after shutdown should auto-recreate context
-        await YubiKeyManager.ShutdownAsync();
+        await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
 
         // Accessing DeviceChanges should work
         var observable = YubiKeyManager.DeviceChanges;

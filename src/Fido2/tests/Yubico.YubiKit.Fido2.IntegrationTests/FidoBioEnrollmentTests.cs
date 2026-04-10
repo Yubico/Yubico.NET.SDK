@@ -50,7 +50,7 @@ public class FidoBioEnrollmentTests
 
             var usePreview = !hasBioEnroll && hasPrototypeBioEnroll;
 
-            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.Pin);
+            using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
             var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
                                        info.Versions.Contains("FIDO_2_1_PRE");
@@ -59,12 +59,12 @@ public class FidoBioEnrollmentTests
             if (supportsPermissions)
             {
                 bioToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    FidoTestData.Pin,
+                    FidoTestData.PinUtf8,
                     PinUvAuthTokenPermissions.BioEnrollment);
             }
             else
             {
-                bioToken = await clientPin.GetPinTokenAsync(FidoTestData.Pin);
+                bioToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
             }
 
             try

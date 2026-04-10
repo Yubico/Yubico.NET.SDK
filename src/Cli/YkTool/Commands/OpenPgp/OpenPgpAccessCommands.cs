@@ -3,6 +3,8 @@
 
 using Spectre.Console.Cli;
 using System.ComponentModel;
+using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Cli.YkTool.Infrastructure;
 using Yubico.YubiKit.Core.YubiKey;
@@ -88,13 +90,26 @@ public sealed class OpenPgpAccessSetRetriesCommand : YkCommandBase<AccessSetRetr
         await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();
 
         var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        await session.VerifyAdminAsync(adminPin);
-        await session.SetPinAttemptsAsync(settings.UserRetries, settings.ResetRetries, settings.AdminRetries);
+        byte[]? adminPinBytes = null;
 
-        OutputHelpers.WriteSuccess(
-            $"PIN retry counts set to User={settings.UserRetries}, " +
-            $"Reset={settings.ResetRetries}, Admin={settings.AdminRetries}.");
-        return ExitCode.Success;
+        try
+        {
+            adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
+            await session.VerifyAdminAsync(adminPinBytes);
+            await session.SetPinAttemptsAsync(settings.UserRetries, settings.ResetRetries, settings.AdminRetries);
+
+            OutputHelpers.WriteSuccess(
+                $"PIN retry counts set to User={settings.UserRetries}, " +
+                $"Reset={settings.ResetRetries}, Admin={settings.AdminRetries}.");
+            return ExitCode.Success;
+        }
+        finally
+        {
+            if (adminPinBytes is not null)
+            {
+                CryptographicOperations.ZeroMemory(adminPinBytes);
+            }
+        }
     }
 }
 
@@ -120,9 +135,29 @@ public sealed class OpenPgpAccessChangePinCommand : YkCommandBase<AccessChangePi
             }
         }
 
-        await session.ChangePinAsync(currentPin, newPin);
-        OutputHelpers.WriteSuccess("User PIN has been changed.");
-        return ExitCode.Success;
+        byte[]? currentPinBytes = null;
+        byte[]? newPinBytes = null;
+
+        try
+        {
+            currentPinBytes = Encoding.UTF8.GetBytes(currentPin);
+            newPinBytes = Encoding.UTF8.GetBytes(newPin);
+            await session.ChangePinAsync(currentPinBytes, newPinBytes);
+            OutputHelpers.WriteSuccess("User PIN has been changed.");
+            return ExitCode.Success;
+        }
+        finally
+        {
+            if (currentPinBytes is not null)
+            {
+                CryptographicOperations.ZeroMemory(currentPinBytes);
+            }
+
+            if (newPinBytes is not null)
+            {
+                CryptographicOperations.ZeroMemory(newPinBytes);
+            }
+        }
     }
 }
 
@@ -148,9 +183,29 @@ public sealed class OpenPgpAccessChangeAdminPinCommand : YkCommandBase<AccessCha
             }
         }
 
-        await session.ChangeAdminAsync(currentPin, newPin);
-        OutputHelpers.WriteSuccess("Admin PIN has been changed.");
-        return ExitCode.Success;
+        byte[]? currentPinBytes = null;
+        byte[]? newPinBytes = null;
+
+        try
+        {
+            currentPinBytes = Encoding.UTF8.GetBytes(currentPin);
+            newPinBytes = Encoding.UTF8.GetBytes(newPin);
+            await session.ChangeAdminAsync(currentPinBytes, newPinBytes);
+            OutputHelpers.WriteSuccess("Admin PIN has been changed.");
+            return ExitCode.Success;
+        }
+        finally
+        {
+            if (currentPinBytes is not null)
+            {
+                CryptographicOperations.ZeroMemory(currentPinBytes);
+            }
+
+            if (newPinBytes is not null)
+            {
+                CryptographicOperations.ZeroMemory(newPinBytes);
+            }
+        }
     }
 }
 
@@ -176,10 +231,30 @@ public sealed class OpenPgpAccessSetResetCodeCommand : YkCommandBase<AccessSetRe
             }
         }
 
-        await session.VerifyAdminAsync(adminPin);
-        await session.SetResetCodeAsync(resetCode);
-        OutputHelpers.WriteSuccess("Reset Code has been set.");
-        return ExitCode.Success;
+        byte[]? adminPinBytes = null;
+        byte[]? resetCodeBytes = null;
+
+        try
+        {
+            adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
+            resetCodeBytes = Encoding.UTF8.GetBytes(resetCode);
+            await session.VerifyAdminAsync(adminPinBytes);
+            await session.SetResetCodeAsync(resetCodeBytes);
+            OutputHelpers.WriteSuccess("Reset Code has been set.");
+            return ExitCode.Success;
+        }
+        finally
+        {
+            if (adminPinBytes is not null)
+            {
+                CryptographicOperations.ZeroMemory(adminPinBytes);
+            }
+
+            if (resetCodeBytes is not null)
+            {
+                CryptographicOperations.ZeroMemory(resetCodeBytes);
+            }
+        }
     }
 }
 
@@ -205,8 +280,28 @@ public sealed class OpenPgpAccessUnblockPinCommand : YkCommandBase<AccessUnblock
             }
         }
 
-        await session.ResetPinAsync(resetCode, newPin, useAdmin: false);
-        OutputHelpers.WriteSuccess("User PIN has been unblocked.");
-        return ExitCode.Success;
+        byte[]? resetCodeBytes = null;
+        byte[]? newPinBytes = null;
+
+        try
+        {
+            resetCodeBytes = Encoding.UTF8.GetBytes(resetCode);
+            newPinBytes = Encoding.UTF8.GetBytes(newPin);
+            await session.ResetPinAsync(resetCodeBytes, newPinBytes, useAdmin: false);
+            OutputHelpers.WriteSuccess("User PIN has been unblocked.");
+            return ExitCode.Success;
+        }
+        finally
+        {
+            if (resetCodeBytes is not null)
+            {
+                CryptographicOperations.ZeroMemory(resetCodeBytes);
+            }
+
+            if (newPinBytes is not null)
+            {
+                CryptographicOperations.ZeroMemory(newPinBytes);
+            }
+        }
     }
 }

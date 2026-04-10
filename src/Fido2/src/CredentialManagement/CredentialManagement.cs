@@ -33,8 +33,9 @@ namespace Yubico.YubiKit.Fido2.CredentialManagement;
 /// Requires YubiKey firmware 5.2 or later.
 /// </para>
 /// </remarks>
-public sealed class CredentialManagement
+public sealed class CredentialManagement : IDisposable
 {
+    private bool _disposed;
     private readonly FidoSession _session;
     private readonly IPinUvAuthProtocol _protocol;
     private readonly ReadOnlyMemory<byte> _pinUvAuthToken;
@@ -193,6 +194,16 @@ public sealed class CredentialManagement
             .ConfigureAwait(false);
     }
     
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        // _pinUvAuthToken is caller-provided — the caller retains zeroing responsibility.
+        // Zeroing it here would corrupt the caller's view of the buffer (T12 ownership violation).
+        _disposed = true;
+    }
+
     private async Task<ReadOnlyMemory<byte>> SendCredentialManagementCommandAsync(
         ReadOnlyMemory<byte> payload,
         CancellationToken cancellationToken)

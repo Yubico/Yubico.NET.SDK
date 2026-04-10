@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Oath.IntegrationTests.TestExtensions;
@@ -181,7 +182,7 @@ public class OathHashAlgorithmTests
         {
             // Set an access key to lock the OATH application
             string password = "locked-test-password";
-            byte[] key = session.DeriveKey(password);
+            byte[] key = session.DeriveKey(Encoding.UTF8.GetBytes(password));
 
             try
             {
@@ -194,7 +195,7 @@ public class OathHashAlgorithmTests
                 Assert.True(lockedSession.IsLocked);
 
                 // Validate with the wrong key should fail
-                byte[] wrongKey = session.DeriveKey("wrong-password");
+                byte[] wrongKey = session.DeriveKey(Encoding.UTF8.GetBytes("wrong-password"));
                 try
                 {
                     await Assert.ThrowsAnyAsync<Exception>(async () =>

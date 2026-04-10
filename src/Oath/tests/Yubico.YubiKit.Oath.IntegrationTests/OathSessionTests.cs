@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Text;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Oath.IntegrationTests.TestExtensions;
@@ -104,7 +105,7 @@ public class OathSessionTests
 
             // Derive and set an access key
             string password = "test-password-123";
-            byte[] key = session.DeriveKey(password);
+            byte[] key = session.DeriveKey(Encoding.UTF8.GetBytes(password));
 
             try
             {
@@ -117,7 +118,7 @@ public class OathSessionTests
                 Assert.True(lockedSession.IsLocked);
 
                 // Validate with the correct key
-                byte[] validateKey = lockedSession.DeriveKey(password);
+                byte[] validateKey = lockedSession.DeriveKey(Encoding.UTF8.GetBytes(password));
                 try
                 {
                     await lockedSession.ValidateAsync(validateKey, NewToken());

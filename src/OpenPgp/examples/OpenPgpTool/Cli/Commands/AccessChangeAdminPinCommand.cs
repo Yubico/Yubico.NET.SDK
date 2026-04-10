@@ -28,20 +28,21 @@ public sealed class AccessChangeAdminPinCommand : OpenPgpCommand<AccessChangeAdm
         Settings settings,
         IOpenPgpSession session)
     {
-        var currentPin = GetPin(settings.AdminPin, "Enter current Admin PIN");
-        var newPin = GetPin(settings.NewAdminPin, "Enter new Admin PIN");
-
-        if (string.IsNullOrEmpty(settings.NewAdminPin))
+        using var currentPin = GetAdminPin(settings.AdminPin);
+        if (currentPin is null)
         {
-            var confirm = OutputHelpers.PromptPin("Confirm new Admin PIN");
-            if (!string.Equals(newPin, confirm, StringComparison.Ordinal))
-            {
-                OutputHelpers.WriteError("New Admin PINs do not match.");
-                return 1;
-            }
+            OutputHelpers.WriteError("Current Admin PIN is required.");
+            return 1;
         }
 
-        await session.ChangeAdminAsync(currentPin, newPin);
+        using var newPin = GetAdminPin(settings.NewAdminPin);
+        if (newPin is null)
+        {
+            OutputHelpers.WriteError("New Admin PIN is required.");
+            return 1;
+        }
+
+        await session.ChangeAdminAsync(currentPin.Memory, newPin.Memory);
         OutputHelpers.WriteSuccess("Admin PIN has been changed.");
         return 0;
     }

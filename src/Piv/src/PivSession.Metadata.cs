@@ -139,7 +139,7 @@ public sealed partial class PivSession
             // INS 0xFF (SET MANAGEMENT KEY), P1 = 0xFF
             // P2 = touch policy: 0xFF (no touch), 0xFE (touch required), 0xFD (cached touch)
             byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
-            using var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, data);
+            var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, data);
             var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
@@ -272,7 +272,7 @@ public sealed partial class PivSession
         try
         {
             // INS 0x24 (CHANGE REFERENCE DATA), P2=0x81 (PUK reference)
-            using var command = new ApduCommand(0x00, 0x24, 0x00, 0x81, pukPair);
+            var command = new ApduCommand(0x00, 0x24, 0x00, 0x81, pukPair);
             var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
@@ -308,7 +308,7 @@ public sealed partial class PivSession
         try
         {
             // INS 0x2C (RESET RETRY COUNTER), P2=0x80 (PIN reference)
-            using var command = new ApduCommand(0x00, 0x2C, 0x00, 0x80, pukPinPair);
+            var command = new ApduCommand(0x00, 0x2C, 0x00, 0x80, pukPinPair);
             var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())

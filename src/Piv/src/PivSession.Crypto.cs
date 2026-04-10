@@ -183,8 +183,7 @@ public sealed partial class PivSession
             preparedData.CopyTo(commandData.AsSpan(offset));
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
-            // 'using var' ensures command.Dispose() zeroes the internal data copy before finally runs
-            using var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, commandData);
+            var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, commandData);
             var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
@@ -402,8 +401,7 @@ public sealed partial class PivSession
             peerKeyData.CopyTo(data.AsSpan(offset));
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
-            // 'using var' ensures command.Dispose() zeroes the internal data copy before finally runs
-            using var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, data);
+            var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, data);
             var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())

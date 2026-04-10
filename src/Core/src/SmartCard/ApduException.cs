@@ -113,13 +113,13 @@ public class ApduException : Exception
 
         var exception = new ApduException(message) { SW = response.SW };
 
-        if (command is null)
+        if (command is not { } cmd)
             return exception;
 
-        exception.Cla = command.Cla;
-        exception.Ins = command.Ins;
-        exception.P1 = command.P1;
-        exception.P2 = command.P2;
+        exception.Cla = cmd.Cla;
+        exception.Ins = cmd.Ins;
+        exception.P1 = cmd.P1;
+        exception.P2 = cmd.P2;
 
         return exception;
     }

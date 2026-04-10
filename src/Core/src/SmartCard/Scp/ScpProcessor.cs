@@ -61,8 +61,6 @@ internal class ScpProcessor(
         byte[]? mac = null;
         byte[]? encryptedData = null; // Declared here so finally can zero it (T11)
         byte[]? formattedApduArray = null; // Backing array of formattedApdu — zeroed after MAC is computed
-        ApduCommand? scpCommand = null;   // Declared before try so finally can dispose (zero internal copy)
-        ApduCommand? finalCommand = null; // Same
 
         try
         {
@@ -85,7 +83,7 @@ internal class ScpProcessor(
             // Step 4: Create command with FULL length (data + MAC space)
             // This ensures Lc in formatted APDU = data.length + 8
             scpCommandData = macedData.Span.ToArray();
-            scpCommand = new(cla, command.Ins, command.P1, command.P2, scpCommandData, command.Le);
+            var scpCommand = new ApduCommand(cla, command.Ins, command.P1, command.P2, scpCommandData, command.Le);
 
             // Step 5: Format the APDU with full length
             ReadOnlyMemory<byte> formattedApdu;
@@ -120,7 +118,7 @@ internal class ScpProcessor(
 
             // Step 8: Create final command with MAC filled in
             finalCommandData = macedData.Span.ToArray();
-            finalCommand = new(cla, command.Ins, command.P1, command.P2, finalCommandData, command.Le);
+            var finalCommand = new ApduCommand(cla, command.Ins, command.P1, command.P2, finalCommandData, command.Le);
 
             // Step 9: Transmit the command (useScp=false because we already wrapped it with SCP)
             var response = await @delegate.TransmitAsync(finalCommand, false, cancellationToken).ConfigureAwait(false);
@@ -146,9 +144,6 @@ internal class ScpProcessor(
         }
         finally
         {
-            // Zero the ApduCommand-internal copies first, then the source buffers
-            scpCommand?.ZeroData();
-            finalCommand?.ZeroData();
             if (encryptedData is not null) CryptographicOperations.ZeroMemory(encryptedData);
             if (formattedApduArray is not null) CryptographicOperations.ZeroMemory(formattedApduArray);
             if (scpCommandData is not null) CryptographicOperations.ZeroMemory(scpCommandData);

@@ -97,7 +97,7 @@ public sealed partial class PivSession
                 data[offset++] = (byte)touchPolicy;
             }
 
-            using var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, data);
+            var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, data);
             var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
@@ -187,7 +187,7 @@ public sealed partial class PivSession
             }
 
             // Send IMPORT KEY command: INS 0xFE, P1 = algorithm, P2 = slot
-            using var command = new ApduCommand(0x00, 0xFE, (byte)algorithm, (byte)slot, keyData);
+            var command = new ApduCommand(0x00, 0xFE, (byte)algorithm, (byte)slot, keyData);
             var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
@@ -395,7 +395,7 @@ public sealed partial class PivSession
 
         // INS 0xF9 (ATTEST), P1 = slot, P2 = 0, NO DATA, no explicit Le
         // The formatter adds a trailing 00 byte for Case 1 commands (no data, no Le)
-        var command = new ApduCommand(0x00, 0xF9, (byte)slot, 0x00, null, 0);
+        var command = new ApduCommand(0x00, 0xF9, (byte)slot, 0x00);
         var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())

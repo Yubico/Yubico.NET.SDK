@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Core.SmartCard;
@@ -22,45 +21,33 @@ namespace Yubico.YubiKit.Core.SmartCard;
 /// </summary>
 /// <remarks>
 ///     <para>
-///     <b>Ownership and zeroing:</b> <see cref="ApduCommand"/> copies caller-provided data
-///     internally via <c>data.ToArray()</c>. Implement <see cref="IDisposable"/> or call
-///     <see cref="ZeroData"/> after transmission to zero the internal copy when the command
-///     carries sensitive material (PIN bytes, key material, cryptograms).
+///     <b>Ownership and zeroing:</b> <see cref="ApduCommand"/> stores a reference to the caller-provided
+///     <see cref="Data"/> buffer — it does <b>not</b> clone it. When the payload carries sensitive material
+///     such as PIN bytes, key material, or cryptograms, the <b>caller</b> is responsible for zeroing the
+///     source buffer after the command has been transmitted.
 ///     </para>
-///     <para>
-///     Non-sensitive commands (SELECT, GET, RESET, etc.) do not require explicit disposal.
-///     </para>
+///     <code>
+///     // ✅ Correct — caller zeroes the source buffer after transmission
+///     var command = new ApduCommand(0x00, InsVerify, 0x00, 0x80, pinnedPin.AsMemory(0, 8));
+///     await protocol.TransmitAndReceiveAsync(command, ct);
+///     CryptographicOperations.ZeroMemory(pinnedPin); // zeroes the buffer command.Data referenced
+///
+///     // ✅ Non-sensitive commands need no special handling
+///     var command = new ApduCommand(0x00, InsSelect, 0x04, 0x00, appId);
+///     var response = await protocol.TransmitAndReceiveAsync(command, ct);
+///     </code>
 /// </remarks>
-public sealed class ApduCommand : IDisposable
+public readonly record struct ApduCommand
 {
-    // Backing field for Data — stored as byte[] so ZeroMemory can clear it.
-    private byte[] _dataBytes = [];
-
-    /// <summary>Initializes an empty <see cref="ApduCommand"/> for use with object-initializer syntax.</summary>
-    public ApduCommand()
-    {
-    }
-
-    private ApduCommand(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte>? data = null, int le = 0)
-    {
-        Cla = cla;
-        Ins = ins;
-        P1 = p1;
-        P2 = p2;
-        Le = le;
-        _dataBytes = data?.ToArray() ?? [];
-    }
-
     /// <summary>Initializes a new <see cref="ApduCommand"/> with explicit header bytes and optional data payload.</summary>
-    public ApduCommand(int cla, int ins, int p1, int p2, ReadOnlyMemory<byte>? data = null, int le = 0)
-        : this(
-            ByteUtils.ValidateByte(cla, nameof(cla)),
-            ByteUtils.ValidateByte(ins, nameof(ins)),
-            ByteUtils.ValidateByte(p1, nameof(p1)),
-            ByteUtils.ValidateByte(p2, nameof(p2)),
-            data,
-            le)
+    public ApduCommand(int cla, int ins, int p1, int p2, ReadOnlyMemory<byte> data = default, int le = 0)
     {
+        Cla = ByteUtils.ValidateByte(cla, nameof(cla));
+        Ins = ByteUtils.ValidateByte(ins, nameof(ins));
+        P1  = ByteUtils.ValidateByte(p1,  nameof(p1));
+        P2  = ByteUtils.ValidateByte(p2,  nameof(p2));
+        Data = data;
+        Le   = le;
     }
 
     /// <summary>Gets the CLA byte.</summary>
@@ -79,33 +66,19 @@ public sealed class ApduCommand : IDisposable
     public int Le { get; init; }
 
     /// <summary>
-    ///     Gets or sets the optional command data payload.
+    ///     Gets the optional command data payload.
     /// </summary>
     /// <remarks>
-    ///     The setter copies the provided memory into an internally-owned <c>byte[]</c>.
-    ///     Use <see cref="ZeroData"/> or <see cref="Dispose"/> to clear the internal copy
-    ///     when the payload contains sensitive material.
+    ///     This is a direct reference to the caller-provided memory. The caller is responsible
+    ///     for zeroing the underlying buffer after transmission if it contains sensitive material.
     /// </remarks>
-    public ReadOnlyMemory<byte> Data
-    {
-        get => _dataBytes;
-        init => _dataBytes = value.ToArray();
-    }
-
-    /// <summary>
-    ///     Zeroes the internal data buffer. Safe to call multiple times.
-    ///     Does not affect the object's usability — <see cref="Data"/> will return zeroed bytes after this call.
-    /// </summary>
-    public void ZeroData() => CryptographicOperations.ZeroMemory(_dataBytes);
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        ZeroData();
-        GC.SuppressFinalize(this);
-    }
+    public ReadOnlyMemory<byte> Data { get; init; }
 
     /// <inheritdoc />
     public override string ToString() =>
         $"CLA: 0x{Cla:X2} INS: 0x{Ins:X2} P1: 0x{P1:X2} P2: 0x{P2:X2} Le: {Le} Data: {Data.Length} bytes";
+
+    // NOTE: record struct auto-generates Equals/GetHashCode over all properties.
+    // ReadOnlyMemory<byte> uses reference equality (pointer + offset + length), not content equality.
+    // Do not use ApduCommand in Dictionary, HashSet, or == comparisons that expect content-based equality.
 }

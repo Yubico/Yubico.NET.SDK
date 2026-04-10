@@ -673,6 +673,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
             // TAG_PRIVATE_KEY with empty value signals on-device key generation.
             // Python canonical: _put_credential(management_key, label, b"", EC_P256, credential_password)
+            // TODO: Dispose of all Tlv instances created here.
             var data = TlvHelper.EncodeList(
             [
                 new Tlv(TagManagementKey, managementKey.Span),

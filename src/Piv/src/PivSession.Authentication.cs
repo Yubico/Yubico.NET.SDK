@@ -59,6 +59,7 @@ public sealed partial class PivSession
     /// <summary>
     /// Gets whether the session has been authenticated with the management key.
     /// </summary>
+    // TODO Disambiguate with IsAuthenticated
     public new bool IsAuthenticated => _isAuthenticated;
 
     /// <summary>

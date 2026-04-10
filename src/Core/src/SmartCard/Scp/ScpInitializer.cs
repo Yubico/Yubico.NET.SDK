@@ -92,9 +92,7 @@ internal static class ScpInitializer
             // otherwise session keys leak to the GC finalizer (T10).
             try
             {
-                // authCommand carries the hostCryptogram — use 'using' so the internal
-                // copy is zeroed immediately after transmission.
-                using var authCommand = new ApduCommand(
+                var authCommand = new ApduCommand(
                     CLA_SECURE_MESSAGING,
                     INS_EXTERNAL_AUTHENTICATE,
                     SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC,
@@ -117,6 +115,8 @@ internal static class ScpInitializer
         }
         finally
         {
+            // Zero hostCryptogram here — ApduCommand stores a reference (no clone), so zeroing
+            // the source buffer is the caller's responsibility under the passthrough ownership model.
             CryptographicOperations.ZeroMemory(hostCryptogram);
         }
     }

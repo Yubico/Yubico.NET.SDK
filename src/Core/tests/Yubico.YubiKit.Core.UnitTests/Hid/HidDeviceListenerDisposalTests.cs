@@ -310,8 +310,8 @@ public class HidDeviceListenerDisposalTests
         }
 
         // Act & Assert - must complete within 10 seconds
-        var disposeTask = Task.Run(() => listener.Dispose());
-        bool completed = disposeTask.Wait(TimeSpan.FromSeconds(10));
+        var disposeTask = Task.Run(() => listener.Dispose(), TestContext.Current.CancellationToken);
+        bool completed = disposeTask.Wait(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
 
         Assert.True(completed, "Dispose should complete within 10 seconds");
     }
@@ -339,8 +339,8 @@ public class HidDeviceListenerDisposalTests
         }
 
         // Act & Assert - should complete very quickly
-        var disposeTask = Task.Run(() => listener.Dispose());
-        bool completed = disposeTask.Wait(TimeSpan.FromSeconds(1));
+        var disposeTask = Task.Run(() => listener.Dispose(), TestContext.Current.CancellationToken);
+        bool completed = disposeTask.Wait(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
 
         Assert.True(completed, "Dispose should complete within 1 second when not started");
     }

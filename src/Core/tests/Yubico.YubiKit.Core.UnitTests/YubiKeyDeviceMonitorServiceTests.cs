@@ -35,7 +35,7 @@ public class YubiKeyDeviceMonitorServiceTests
         var service = new YubiKeyDeviceMonitorService(repository, findYubiKeys);
 
         // Act
-        await service.RescanAsync();
+        await service.RescanAsync(TestContext.Current.CancellationToken);
 
         // Assert
         var devices = repository.GetAll();
@@ -55,7 +55,7 @@ public class YubiKeyDeviceMonitorServiceTests
         var service = new YubiKeyDeviceMonitorService(repository, findYubiKeys);
 
         // Act - First scan
-        await service.RescanAsync();
+        await service.RescanAsync(TestContext.Current.CancellationToken);
         Assert.Single(repository.GetAll());
 
         // Change what FindYubiKeys returns
@@ -65,7 +65,7 @@ public class YubiKeyDeviceMonitorServiceTests
         ]);
 
         // Act - Second scan
-        await service.RescanAsync();
+        await service.RescanAsync(TestContext.Current.CancellationToken);
 
         // Assert
         var devices = repository.GetAll();
@@ -90,7 +90,7 @@ public class YubiKeyDeviceMonitorServiceTests
         using var subscription = repository.DeviceChanges.Subscribe(events.Add);
 
         // Act
-        await service.RescanAsync();
+        await service.RescanAsync(TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Single(events);
@@ -268,7 +268,7 @@ public class YubiKeyDeviceMonitorServiceTests
         await service.DisposeAsync();
 
         // Act & Assert
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => service.RescanAsync());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => service.RescanAsync(TestContext.Current.CancellationToken));
 
         repository.Dispose();
     }

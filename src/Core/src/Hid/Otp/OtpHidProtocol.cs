@@ -152,7 +152,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         int programmingSequence,
         CancellationToken cancellationToken)
     {
-        const int timeLimitMs = 1023; // Same as legacy SDK short timeout
+        const int timeLimitMs = 3000; // 3s: HMAC-SHA1 slot writes can take ~1s on some firmware
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         while (stopwatch.ElapsedMilliseconds < timeLimitMs)

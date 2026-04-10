@@ -48,7 +48,7 @@ public class YubiOtpSessionIntegrationTests
     }
 
     [Theory]
-    [WithYubiKey(MinFirmware = "2.2.0")]
+    [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task PutConfiguration_HmacSha1_ThenDelete_Succeeds(YubiKeyTestState state)
     {
         var connection = await state.Device.ConnectAsync();

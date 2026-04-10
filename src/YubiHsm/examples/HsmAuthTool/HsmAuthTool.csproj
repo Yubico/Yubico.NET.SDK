@@ -20,6 +20,7 @@
     <ProjectReference Include="..\..\..\Core\src\Yubico.YubiKit.Core.csproj" />
     <ProjectReference Include="..\..\..\Management\src\Yubico.YubiKit.Management.csproj" />
     <ProjectReference Include="..\..\..\Cli.Shared\src\Yubico.YubiKit.Cli.Shared.csproj" />
+    <ProjectReference Include="..\..\..\Cli.Commands\src\Yubico.YubiKit.Cli.Commands.csproj" />
   </ItemGroup>
 
 </Project>

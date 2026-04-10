@@ -2,14 +2,14 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console.Cli;
-using Yubico.YubiKit.Cli.YkTool.Commands.Management;
-using Yubico.YubiKit.Cli.YkTool.Commands.Oath;
-using Yubico.YubiKit.Cli.YkTool.Commands.OpenPgp;
-using Yubico.YubiKit.Cli.YkTool.Commands.HsmAuth;
-using Yubico.YubiKit.Cli.YkTool.Commands.Otp;
-using Yubico.YubiKit.Cli.YkTool.Commands.Piv;
-using Yubico.YubiKit.Cli.YkTool.Commands.Fido;
-using Yubico.YubiKit.Cli.YkTool.Infrastructure;
+using Yubico.YubiKit.Cli.Commands.Management;
+using Yubico.YubiKit.Cli.Commands.Oath;
+using Yubico.YubiKit.Cli.Commands.OpenPgp;
+using Yubico.YubiKit.Cli.Commands.HsmAuth;
+using Yubico.YubiKit.Cli.Commands.Otp;
+using Yubico.YubiKit.Cli.Commands.Piv;
+using Yubico.YubiKit.Cli.Commands.Fido;
+using Yubico.YubiKit.Cli.Commands.Infrastructure;
 
 var app = new CommandApp();
 

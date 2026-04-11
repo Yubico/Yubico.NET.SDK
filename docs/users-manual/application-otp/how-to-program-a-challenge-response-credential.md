@@ -107,12 +107,22 @@ the button during a challenge-response operation.
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
 {
-  // The secret key, hmacKey, was set elsewhere.
-  otp.ConfigureChallengeResponse(Slot.ShortPress)
-    .UseHmacSha1()
-    .UseKey(hmacKey)
-    .UseButton()
-    .Execute();
+  try
+  {
+    // The secret key, hmacKey, was set elsewhere.
+    otp.ConfigureChallengeResponse(Slot.ShortPress)
+      .UseHmacSha1()
+      .UseKey(hmacKey)
+      .UseButton()
+      .Execute();
+
+    // Share the secret key with the validation server (if you haven't already) 
+    // before clearing.
+  }
+  finally
+  {
+    CryptographicOperations.ZeroMemory(hmacKey.Span);
+  }
 }
 ```
 

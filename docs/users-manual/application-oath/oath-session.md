@@ -277,7 +277,7 @@ oathSession.RenameCredential(credentialTotp, "Test", "example@test.com");
 // Or 
 
 // Pass Issuer, AccountName, Type and Period of the credential you want to rename, as well as the new Issuer and AccountName.
-Credential credential = RemoveCredential(
+Credential credential = oathSession.RenameCredential(
     "Yubico",
     "test@yubico.com",
     "Test",
@@ -286,7 +286,7 @@ Credential credential = RemoveCredential(
     CredentialPeriod.Period60);
 
 // Pass just the current and new Issuer and AccountName if the credential has TOTP type and default period.
-Credential credential = RemoveCredential(
+Credential credential = oathSession.RenameCredential(
     "Yubico",
     "test@yubico.com",
     "Test",

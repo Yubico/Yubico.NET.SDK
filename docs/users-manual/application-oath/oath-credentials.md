@@ -136,7 +136,7 @@ The URI specification [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986).
 If you are unable to capture the QR code and use a URI string, you can manually create the credential by adding the
 account information. The Issuer is recommended, but not required.
 
-```
+```csharp
 // create TOTP credential
 var credential = new Credential {
     Issuer = "Yubico",
@@ -146,7 +146,7 @@ var credential = new Credential {
     Digits = 6,
     Secret = "HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ",
     RequireTouch = false
-}
+};
 
 // create HOTP credential
 var credential = new Credential {
@@ -157,5 +157,5 @@ var credential = new Credential {
     Counter = 0,
     Secret = "HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ",
     RequireTouch = false
-}
+};
 ```

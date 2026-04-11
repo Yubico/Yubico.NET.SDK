@@ -204,6 +204,7 @@ this.
 
 ```csharp
     char[] pinChars = CollectPin();
+    // Note: string cannot be securely wiped from memory — see tradeoff discussion above.
     string pinAsString = new string(pinChars);
     string normalizedPin = pinAsString.Normalize();
     byte[] utf8Pin = Encoding.UTF8.GetBytes(normalizedPin);

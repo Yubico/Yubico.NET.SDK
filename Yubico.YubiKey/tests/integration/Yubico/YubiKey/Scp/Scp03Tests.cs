@@ -547,6 +547,79 @@ namespace Yubico.YubiKey.Scp
             return pin;
         }
 
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        public void Scp03_Piv_RSA2048Sign_WithCommandChaining_Succeeds(
+            StandardTestDevice desiredDeviceType,
+            Transport transport)
+        {
+            // This test validates the fix for YESDK-1260: SCP03 command chaining.
+            // RSA 2048 signing sends 256 bytes of formatted data which exceeds the
+            // 239-byte SCP chunk limit, triggering command chaining.
+
+            var testDevice = GetDevice(desiredDeviceType, transport);
+            Assert.True(testDevice.HasFeature(YubiKeyFeature.Scp03));
+
+            bool useComplexCreds = testDevice.IsFipsSeries || testDevice.IsPinComplexityEnabled;
+            var mgmtKey = useComplexCreds
+                ? (ReadOnlyMemory<byte>)PivSessionIntegrationTestBase.ComplexManagementKey
+                : PivSessionIntegrationTestBase.DefaultManagementKey;
+
+            // Reset PIV and generate key WITHOUT SCP03 (simpler setup)
+            IPublicKey publicKey;
+            const byte slotNumber = PivSlot.Retired12;
+            using (var setupSession = new PivSession(testDevice))
+            {
+                setupSession.ResetApplication();
+
+                if (useComplexCreds)
+                {
+                    setupSession.TryChangePin(PivSessionIntegrationTestBase.DefaultPin,
+                        PivSessionIntegrationTestBase.ComplexPin, out _);
+                    setupSession.TryChangePuk(PivSessionIntegrationTestBase.DefaultPuk,
+                        PivSessionIntegrationTestBase.ComplexPuk, out _);
+                    setupSession.TryChangeManagementKey(
+                        PivSessionIntegrationTestBase.DefaultManagementKey,
+                        PivSessionIntegrationTestBase.ComplexManagementKey);
+                }
+
+                Assert.True(setupSession.TryAuthenticateManagementKey(mgmtKey));
+
+                publicKey = setupSession.GenerateKeyPair(
+                    slotNumber, KeyType.RSA2048, PivPinPolicy.Never, PivTouchPolicy.Never);
+            }
+
+            // Now open a new session WITH SCP03 to perform the sign operation
+            using var pivSession = new PivSession(testDevice, Scp03KeyParameters.DefaultKey);
+
+            // Sign data — 256 bytes of PKCS#1 formatted data triggers command chaining
+            var dataToSign = new byte[128];
+            Random.Shared.NextBytes(dataToSign);
+
+            using var digester = CryptographyProviders.Sha256Creator();
+            _ = digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
+
+            var formattedData = RsaFormat.FormatPkcs1Sign(
+                digester.Hash,
+                RsaFormat.Sha256,
+                KeyType.RSA2048.GetKeyDefinition().LengthInBits);
+
+            // This is the critical operation — 256 bytes through SCP03 with command chaining
+            var signature = pivSession.Sign(slotNumber, formattedData);
+
+            // Verify signature using the generated public key
+            var rsaPublicKey = (RSAPublicKey)publicKey;
+            using var rsa = RSA.Create();
+            rsa.ImportParameters(rsaPublicKey.Parameters);
+            var isVerified = rsa.VerifyData(
+                dataToSign,
+                signature,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+
+            Assert.True(isVerified, "RSA 2048 signature over SCP03 should be valid");
+        }
+
         #region Helpers
 
         private static StaticKeys RandomStaticKeys() =>

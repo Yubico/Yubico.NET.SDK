@@ -33,6 +33,7 @@ namespace Yubico.YubiKey.Scp
             : base(smartCardDevice, application, null)
         {
             var scpPipeline = CreateScpPipeline(keyParameters);
+
             var withErrorHandling = CreateParentPipeline(scpPipeline, application);
 
             // Have the base class use the new error augmented pipeline
@@ -61,13 +62,10 @@ namespace Yubico.YubiKey.Scp
 
         private ScpApduTransform CreateScpPipeline(ScpKeyParameters keyParameters)
         {
-            // Get the current pipeline
-            var previousPipeline = GetPipeline();
+            // Use GetPipeline() which includes CommandChaining(255).
+            // Transport-level chaining handles large encrypted APDUs.
+            var scpApduTransform = new ScpApduTransform(GetPipeline(), keyParameters);
 
-            // Wrap the pipeline in ScpApduTransform
-            var scpApduTransform = new ScpApduTransform(previousPipeline, keyParameters);
-
-            // Return both pipeline
             return scpApduTransform;
         }
 

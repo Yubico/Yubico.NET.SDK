@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.OpenPgp;
@@ -83,25 +84,37 @@ public abstract class PrivateKeyTemplate
             }
 
             var values = new byte[valueSize];
-            var valueOffset = 0;
-            foreach (var c in components)
+            byte[]? inner = null;
+            try
             {
-                c.Value.Span.CopyTo(values.AsSpan(valueOffset));
-                valueOffset += c.Length;
+                var valueOffset = 0;
+                foreach (var c in components)
+                {
+                    c.Value.Span.CopyTo(values.AsSpan(valueOffset));
+                    valueOffset += c.Length;
+                }
+
+                // Build the final structure: CRT + TLV(0x7F48, headers) + TLV(0x5F48, values)
+                using var headerTlv = new Tlv(0x7F48, headers);
+                using var valueTlv = new Tlv(0x5F48, values);
+
+                var innerSize = CrtBytes.Length + headerTlv.TotalLength + valueTlv.TotalLength;
+                inner = new byte[innerSize];
+                CrtBytes.Span.CopyTo(inner);
+                headerTlv.AsSpan().CopyTo(inner.AsSpan(CrtBytes.Length));
+                valueTlv.AsSpan().CopyTo(inner.AsSpan(CrtBytes.Length + headerTlv.TotalLength));
+
+                using var outerTlv = new Tlv(0x4D, inner);
+                return outerTlv.AsMemory().ToArray();
             }
-
-            // Build the final structure: CRT + TLV(0x7F48, headers) + TLV(0x5F48, values)
-            using var headerTlv = new Tlv(0x7F48, headers);
-            using var valueTlv = new Tlv(0x5F48, values);
-
-            var innerSize = CrtBytes.Length + headerTlv.TotalLength + valueTlv.TotalLength;
-            var inner = new byte[innerSize];
-            CrtBytes.Span.CopyTo(inner);
-            headerTlv.AsSpan().CopyTo(inner.AsSpan(CrtBytes.Length));
-            valueTlv.AsSpan().CopyTo(inner.AsSpan(CrtBytes.Length + headerTlv.TotalLength));
-
-            using var outerTlv = new Tlv(0x4D, inner);
-            return outerTlv.AsMemory().ToArray();
+            finally
+            {
+                CryptographicOperations.ZeroMemory(values);
+                if (inner is not null)
+                {
+                    CryptographicOperations.ZeroMemory(inner);
+                }
+            }
         }
         finally
         {

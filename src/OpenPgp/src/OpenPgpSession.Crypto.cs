@@ -189,11 +189,30 @@ public sealed partial class OpenPgpSession
 
         // SEQUENCE { r INTEGER, s INTEGER }
         var seqLength = rDer.Length + sDer.Length;
-        var result = new byte[2 + seqLength]; // 0x30 + length + r + s
-        result[0] = 0x30;
-        result[1] = (byte)seqLength;
-        rDer.CopyTo(result.AsSpan(2));
-        sDer.CopyTo(result.AsSpan(2 + rDer.Length));
+
+        byte[] result;
+        int contentOffset;
+
+        if (seqLength >= 128)
+        {
+            // Long-form DER length encoding: 0x30 0x81 <length> <content>
+            result = new byte[3 + seqLength];
+            result[0] = 0x30;
+            result[1] = 0x81;
+            result[2] = (byte)seqLength;
+            contentOffset = 3;
+        }
+        else
+        {
+            // Short-form DER length encoding: 0x30 <length> <content>
+            result = new byte[2 + seqLength];
+            result[0] = 0x30;
+            result[1] = (byte)seqLength;
+            contentOffset = 2;
+        }
+
+        rDer.CopyTo(result.AsSpan(contentOffset));
+        sDer.CopyTo(result.AsSpan(contentOffset + rDer.Length));
 
         return result;
     }

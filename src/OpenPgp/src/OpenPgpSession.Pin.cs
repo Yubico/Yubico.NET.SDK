@@ -170,6 +170,9 @@ public sealed partial class OpenPgpSession
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(userAttempts);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(resetAttempts);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(adminAttempts);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(userAttempts, 255);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(resetAttempts, 255);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(adminAttempts, 255);
 
         _logger.LogDebug(
             "Setting PIN attempts (user={User}, reset={Reset}, admin={Admin})",
@@ -230,9 +233,9 @@ public sealed partial class OpenPgpSession
                     try
                     {
                         var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
-                        remaining = (Pw)pw == Pw.User
+                        remaining = pw == Pw.User
                             ? status.AttemptsUser
-                            : (Pw)pw == Pw.Admin
+                            : pw == Pw.Admin
                                 ? status.AttemptsAdmin
                                 : status.AttemptsReset;
                     }

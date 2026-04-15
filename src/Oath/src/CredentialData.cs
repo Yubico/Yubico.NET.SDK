@@ -143,13 +143,19 @@ public sealed class CredentialData
         };
 
         string? digitsParam = queryParams["digits"];
-        int digits = digitsParam is not null ? int.Parse(digitsParam) : OathConstants.DefaultDigits;
+        int digits = digitsParam is not null
+            ? int.Parse(digitsParam, System.Globalization.CultureInfo.InvariantCulture)
+            : OathConstants.DefaultDigits;
 
         string? periodParam = queryParams["period"];
-        int period = periodParam is not null ? int.Parse(periodParam) : OathConstants.DefaultPeriod;
+        int period = periodParam is not null
+            ? int.Parse(periodParam, System.Globalization.CultureInfo.InvariantCulture)
+            : OathConstants.DefaultPeriod;
 
         string? counterParam = queryParams["counter"];
-        int counter = counterParam is not null ? int.Parse(counterParam) : OathConstants.DefaultImf;
+        int counter = counterParam is not null
+            ? int.Parse(counterParam, System.Globalization.CultureInfo.InvariantCulture)
+            : OathConstants.DefaultImf;
 
         return new CredentialData
         {

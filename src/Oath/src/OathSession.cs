@@ -236,9 +236,10 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 totalSize += imfTlv.TotalLength;
             }
 
+            byte[]? data = null;
             try
             {
-                var data = new byte[totalSize];
+                data = new byte[totalSize];
                 int offset = 0;
 
                 nameTlv.AsSpan().CopyTo(data.AsSpan(offset));
@@ -264,6 +265,11 @@ public sealed class OathSession : ApplicationSession, IOathSession
             }
             finally
             {
+                if (data is not null)
+                {
+                    CryptographicOperations.ZeroMemory(data);
+                }
+
                 imfTlv?.Dispose();
             }
 

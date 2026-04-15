@@ -281,10 +281,9 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Getting certificates for Key Reference: {KeyReference}", keyReference);
-        var nestedTlv = new Tlv(
-            TagControlReference,
-            new Tlv(TagKidKvn, keyReference.AsSpan()).AsSpan()
-        ).AsMemory();
+        using var kidKvnTlv = new Tlv(TagKidKvn, keyReference.AsSpan());
+        using var nestedTlvObj = new Tlv(TagControlReference, kidKvnTlv.AsSpan());
+        var nestedTlv = nestedTlvObj.AsMemory();
 
         var certificateTlvData =
             await GetDataAsync(TagCertificateStore, nestedTlv, cancellationToken: cancellationToken)
@@ -337,7 +336,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         var caIdentifiers = new List<CaIdentifier>();
         using var caTlvList = TlvHelper.DecodeList(arrayBufferWriter.WrittenSpan);
         var caTlvObjects = caTlvList.AsSpan();
-        while (!caTlvObjects.IsEmpty)
+        while (caTlvObjects.Length >= 2)
         {
             var caIdentifierTlv = caTlvObjects[0];
             var keyReferenceTlv = caTlvObjects[1];
@@ -391,11 +390,10 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             // Build the TLV structure:
             // - Control Reference (0xA6) containing Key ID/KVN (0x83)
             // - Certificate Store (0xBF21) containing the concatenated certificate data
-            var storeData = TlvHelper.EncodeList(
-            [
-                new Tlv(TagControlReference, new Tlv(TagKidKvn, keyReference.AsSpan()).AsSpan()),
-                new Tlv(TagCertificateStore, buffer.WrittenSpan)
-            ]);
+            using var kidKvnTlv = new Tlv(TagKidKvn, keyReference.AsSpan());
+            using var controlRefTlv = new Tlv(TagControlReference, kidKvnTlv.AsSpan());
+            using var certStoreTlv = new Tlv(TagCertificateStore, buffer.WrittenSpan);
+            var storeData = TlvHelper.EncodeList([controlRefTlv, certStoreTlv]);
 
             await StoreDataAsync(storeData, cancellationToken).ConfigureAwait(false);
 
@@ -635,7 +633,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             throw new ArgumentException("Private key must be of type NIST P-256");
 
         var encryptedKey = EncryptData(parameters.D.AsSpan());
-        CryptographicOperations.ZeroMemory(parameters.D);
+        // NOTE: Do not zero parameters.D here — it belongs to the caller's ECPrivateKey.
+        // The caller is responsible for calling ECPrivateKey.Clear() when done with the key.
 
         await PutEcKeyAsync(keyReference, KeyTypeEccPrivateKey, (ReadOnlyMemory<byte>)encryptedKey, replaceKvn,
             cancellationToken).ConfigureAwait(false);
@@ -722,16 +721,14 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         var buffer = new ArrayBufferWriter<byte>();
         foreach (var serial in serials)
         {
-            var serialTlvBytes = new Tlv(TagSerial, Convert.FromHexString(serial)).AsMemory();
-            buffer.Write(serialTlvBytes.Span);
+            using var serialTlv = new Tlv(TagSerial, Convert.FromHexString(serial));
+            buffer.Write(serialTlv.AsSpan());
         }
 
-        var serialsDataTl = TlvHelper.EncodeList(
-            [
-                new Tlv(TagControlReference, new Tlv(TagKidKvn, keyReference.AsSpan()).AsSpan()),
-                new Tlv(TagSerialsAllowList, buffer.WrittenSpan)
-            ]
-        );
+        using var kidKvnTlv = new Tlv(TagKidKvn, keyReference.AsSpan());
+        using var controlRefTlv = new Tlv(TagControlReference, kidKvnTlv.AsSpan());
+        using var serialsListTlv = new Tlv(TagSerialsAllowList, buffer.WrittenSpan);
+        var serialsDataTl = TlvHelper.EncodeList([controlRefTlv, serialsListTlv]);
 
         await StoreDataAsync(serialsDataTl, cancellationToken).ConfigureAwait(false);
 
@@ -800,14 +797,11 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         };
 
         // Create and serialize data
-        var caIssuerData = new Tlv(TagControlReference,
-            TlvHelper.EncodeList([
-                    new Tlv(ClaGlobalPlatform, [klcc]),
-                    new Tlv(0x42, ski.Span), // GlobalPlatform tag for CA issuer SKI
-                    new Tlv(TagKidKvn, keyReference.AsSpan())
-                ]
-            ).Span
-        );
+        using var klccTlv = new Tlv(ClaGlobalPlatform, [klcc]);
+        using var skiTlv = new Tlv(0x42, ski.Span); // GlobalPlatform tag for CA issuer SKI
+        using var kidKvnTlv = new Tlv(TagKidKvn, keyReference.AsSpan());
+        var encodedList = TlvHelper.EncodeList([klccTlv, skiTlv, kidKvnTlv]);
+        using var caIssuerData = new Tlv(TagControlReference, encodedList.Span);
 
         // Send store data command
         await StoreDataAsync(caIssuerData.AsMemory(), cancellationToken).ConfigureAwait(false);

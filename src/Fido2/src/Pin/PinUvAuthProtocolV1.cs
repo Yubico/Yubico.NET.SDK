@@ -275,7 +275,14 @@ public sealed class PinUvAuthProtocolV1 : IPinUvAuthProtocol
         }
         
         var expected = Authenticate(key, message);
-        return CryptographicOperations.FixedTimeEquals(expected, signature);
+        try
+        {
+            return CryptographicOperations.FixedTimeEquals(expected, signature);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(expected);
+        }
     }
     
     /// <inheritdoc />

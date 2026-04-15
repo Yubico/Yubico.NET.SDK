@@ -84,10 +84,6 @@ public sealed class LargeBlobEntry
         {
             return null;
         }
-        catch (Exception)
-        {
-            return null;
-        }
     }
     
     /// <summary>

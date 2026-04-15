@@ -51,8 +51,10 @@ public sealed class CredentialManagement : IDisposable
         IPinUvAuthProtocol protocol,
         ReadOnlyMemory<byte> pinUvAuthToken)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
-        _protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(protocol);
+        _session = session;
+        _protocol = protocol;
         _pinUvAuthToken = pinUvAuthToken;
     }
     

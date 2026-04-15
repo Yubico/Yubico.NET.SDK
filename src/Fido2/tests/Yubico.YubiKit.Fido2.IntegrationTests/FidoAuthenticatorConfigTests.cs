@@ -34,6 +34,7 @@ public class FidoAuthenticatorConfigTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task ToggleAlwaysUv_TogglesAlwaysUvOption(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -108,6 +109,7 @@ public class FidoAuthenticatorConfigTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task SetMinPinLength_IncreasesMinimum(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

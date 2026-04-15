@@ -34,7 +34,7 @@ public class FidoCredBlobTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task CredBlob_StoreAndRetrieve_ReturnsStoredData(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -173,7 +173,7 @@ public class FidoCredBlobTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task CredBlob_MaxLength_StoresSuccessfully(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

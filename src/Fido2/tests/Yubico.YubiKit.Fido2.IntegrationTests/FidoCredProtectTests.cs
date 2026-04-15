@@ -32,7 +32,7 @@ public class FidoCredProtectTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task CredProtect_Level2_RequiresAllowListForDiscovery(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -147,7 +147,7 @@ public class FidoCredProtectTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task CredProtect_Level3_RequiresUserVerification(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

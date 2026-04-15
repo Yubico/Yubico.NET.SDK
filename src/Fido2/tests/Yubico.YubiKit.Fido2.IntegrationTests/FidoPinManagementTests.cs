@@ -43,7 +43,6 @@ public class FidoPinManagementTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task ChangePin_WithValidCurrentPin_AllowsAuthWithNewPin(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -113,7 +112,7 @@ public class FidoPinManagementTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_WithUvDiscouraged_CreatesCredentialSuccessfully(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

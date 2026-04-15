@@ -54,7 +54,7 @@ public class FidoHmacSecretTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_WithHmacSecretEnabled_ReturnsHmacSecretExtension(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -125,7 +125,7 @@ public class FidoHmacSecretTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetAssertion_WithHmacSecret_ReturnsDerivedSecret(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -244,7 +244,7 @@ public class FidoHmacSecretTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetAssertion_WithSameSalt_ReturnsSameSecret(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

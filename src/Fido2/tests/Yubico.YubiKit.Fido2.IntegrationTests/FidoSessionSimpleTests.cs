@@ -28,7 +28,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 /// </summary>
 /// <remarks>
 /// Tests requiring user presence or PIN verification are excluded from automated runs.
-/// Mark such tests with [Trait("RequiresUserPresence", "true")] to exclude them.
+/// Mark such tests with [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)] to exclude them.
 /// </remarks>
 public class FidoSessionSimpleTests
 {
@@ -159,7 +159,7 @@ public class FidoSessionSimpleTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task SelectionAsync_RequiresTouch(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -171,7 +171,7 @@ public class FidoSessionSimpleTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task ResetAsync_RequiresUserPresence(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

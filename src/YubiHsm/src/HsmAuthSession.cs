@@ -304,16 +304,14 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             credPwBytes = ParseCredentialPassword(credentialPassword);
 
-            var data = TlvHelper.EncodeList(
-            [
+            var data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagAlgorithm, [(byte)HsmAuthAlgorithm.Aes128YubicoAuthentication]),
                 new Tlv(TagKeyEnc, keyEnc.Span),
                 new Tlv(TagKeyMac, keyMac.Span),
                 new Tlv(TagCredentialPassword, credPwBytes),
-                new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00])
-            ]);
+                new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00]));
 
             var command = new ApduCommand { Ins = InsPut, Data = data };
             await TransmitWithRetryCheckAsync(
@@ -370,11 +368,9 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ValidateManagementKey(managementKey.Span);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        var data = TlvHelper.EncodeList(
-        [
+        var data = TlvHelper.EncodeAndDisposeList(
             new Tlv(TagManagementKey, managementKey.Span),
-            new Tlv(TagLabel, labelBytes)
-        ]);
+            new Tlv(TagLabel, labelBytes));
 
         var command = new ApduCommand { Ins = InsDelete, Data = data };
         await TransmitWithRetryCheckAsync(
@@ -408,7 +404,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
             tlvs.Add(new Tlv(TagCredentialPassword, credPwBytes));
 
-            var data = TlvHelper.EncodeList([.. tlvs]);
+            var data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
 
             var command = new ApduCommand { Ins = InsCalculate, Data = data };
             var response = await TransmitWithRetryCheckAsync(
@@ -452,11 +448,9 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ValidateManagementKey(currentManagementKey.Span);
         ValidateManagementKey(newManagementKey.Span);
 
-        var data = TlvHelper.EncodeList(
-        [
+        var data = TlvHelper.EncodeAndDisposeList(
             new Tlv(TagManagementKey, currentManagementKey.Span),
-            new Tlv(TagManagementKey, newManagementKey.Span)
-        ]);
+            new Tlv(TagManagementKey, newManagementKey.Span));
 
         var command = new ApduCommand { Ins = InsPutManagementKey, Data = data };
         await TransmitWithRetryCheckAsync(
@@ -505,14 +499,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
             // APDU payload order matches Python canonical SDK:
             // TAG_LABEL, TAG_CONTEXT, TAG_PUBLIC_KEY, TAG_RESPONSE, TAG_CREDENTIAL_PASSWORD
-            var data = TlvHelper.EncodeList(
-            [
+            var data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagContext, context.Span),
                 new Tlv(TagPublicKey, publicKey.Span),
                 new Tlv(TagResponse, cardCryptogram.Span),
-                new Tlv(TagCredentialPassword, credPwBytes)
-            ]);
+                new Tlv(TagCredentialPassword, credPwBytes));
 
             var command = new ApduCommand { Ins = InsCalculate, Data = data };
             var response = await TransmitWithRetryCheckAsync(
@@ -556,7 +548,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                     nameof(credentialPassword));
             }
 
-            var data = TlvHelper.EncodeList([.. tlvs]);
+            var data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
 
             var command = new ApduCommand { Ins = InsGetChallenge, Data = data };
             var response = await _protocol!.TransmitAndReceiveAsync(
@@ -597,15 +589,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             credPwBytes = ParseCredentialPassword(credentialPassword);
 
-            data = TlvHelper.EncodeList(
-            [
+            data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagAlgorithm, [(byte)HsmAuthAlgorithm.EcP256YubicoAuthentication]),
                 new Tlv(TagPrivateKey, privateKey.Span),
                 new Tlv(TagCredentialPassword, credPwBytes),
-                new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00])
-            ]);
+                new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00]));
 
             var command = new ApduCommand { Ins = InsPut, Data = data };
             await TransmitWithRetryCheckAsync(
@@ -640,15 +630,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
             // TAG_PRIVATE_KEY with empty value signals on-device key generation.
             // Python canonical: _put_credential(management_key, label, b"", EC_P256, credential_password)
-            var data = TlvHelper.EncodeList(
-            [
+            var data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagAlgorithm, [(byte)HsmAuthAlgorithm.EcP256YubicoAuthentication]),
                 new Tlv(TagPrivateKey, ReadOnlySpan<byte>.Empty),
                 new Tlv(TagCredentialPassword, credPwBytes),
-                new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00])
-            ]);
+                new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00]));
 
             var command = new ApduCommand { Ins = InsPut, Data = data };
             await TransmitWithRetryCheckAsync(
@@ -670,7 +658,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         EnsureSupports(FeatureAsymmetric);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        var data = TlvHelper.EncodeList([new Tlv(TagLabel, labelBytes)]);
+        var data = TlvHelper.EncodeAndDisposeList(new Tlv(TagLabel, labelBytes));
 
         var command = new ApduCommand { Ins = InsGetPublicKey, Data = data };
         var response = await _protocol!.TransmitAndReceiveAsync(
@@ -703,12 +691,10 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             currentPwBytes = ParseCredentialPassword(currentPassword);
             newPwBytes = ParseCredentialPassword(newPassword);
 
-            var data = TlvHelper.EncodeList(
-            [
+            var data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagCredentialPassword, currentPwBytes),
-                new Tlv(TagCredentialPassword, newPwBytes)
-            ]);
+                new Tlv(TagCredentialPassword, newPwBytes));
 
             var command = new ApduCommand { Ins = InsChangeCredentialPassword, P1 = 0x00, Data = data };
             await TransmitWithRetryCheckAsync(
@@ -740,12 +726,10 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             newPwBytes = ParseCredentialPassword(newPassword);
 
-            var data = TlvHelper.EncodeList(
-            [
+            var data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagManagementKey, managementKey.Span),
-                new Tlv(TagCredentialPassword, newPwBytes)
-            ]);
+                new Tlv(TagCredentialPassword, newPwBytes));
 
             var command = new ApduCommand { Ins = InsChangeCredentialPassword, P1 = 0x01, Data = data };
             await TransmitWithRetryCheckAsync(

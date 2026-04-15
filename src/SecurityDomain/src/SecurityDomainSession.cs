@@ -220,7 +220,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             .ConfigureAwait(false);
 
         if (response.IsEmpty)
-            return Array.Empty<KeyInfo>();
+            return [];
 
         var keyInformation = new List<KeyInfo>();
 
@@ -290,9 +290,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
                 .ConfigureAwait(false);
 
         _logger.LogDebug("Certificates retrieved (KeyReference: {KeyReference})", keyReference);
-        return TlvHelper.DecodeList(certificateTlvData)
-            .Select(tlv => X509CertificateLoader.LoadCertificate(tlv.AsSpan()))
-            .ToList();
+        using var tlvList = TlvHelper.DecodeList(certificateTlvData);
+        return tlvList.Select(tlv => X509CertificateLoader.LoadCertificate(tlv.AsSpan())).ToList();
     }
 
     /// <summary>
@@ -335,7 +334,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             }
 
         var caIdentifiers = new List<CaIdentifier>();
-        var caTlvObjects = TlvHelper.DecodeList(arrayBufferWriter.WrittenSpan).AsSpan();
+        using var caTlvList = TlvHelper.DecodeList(arrayBufferWriter.WrittenSpan);
+        var caTlvObjects = caTlvList.AsSpan();
         while (!caTlvObjects.IsEmpty)
         {
             var caIdentifierTlv = caTlvObjects[0];
@@ -620,7 +620,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             // Write the EC parameters
             using var paramsTlv = new Tlv(KeyTypeEccKeyParams, stackalloc byte[1]);
             buffer.Write(paramsTlv.AsSpan());
-            buffer.Write(new byte[] { 0 });
+            buffer.Write((ReadOnlySpan<byte>)[0]);
 
             // Create and send the command
             var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, keyReference.Kid,
@@ -628,7 +628,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             var response = await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
 
             // Get and validate the response
-            Span<byte> expectedResponseData = new[] { keyReference.Kvn };
+            ReadOnlySpan<byte> expectedResponseData = [keyReference.Kvn];
             ValidateCheckSum(expectedResponseData, response.Span);
 
             _logger.LogInformation("Successfully put public key for KeyReference: {KeyReference}", keyReference);
@@ -675,19 +675,20 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             buffer.Write([keyReference.Kvn]);
 
             var encryptedKey = EncryptData(parameters.D.AsSpan());
+            CryptographicOperations.ZeroMemory(parameters.D);
             using var encryptedKeyTlv = new Tlv(KeyTypeEccPrivateKey, encryptedKey);
             buffer.Write(encryptedKeyTlv.AsSpan());
 
             using var paramsTlv = new Tlv(KeyTypeEccKeyParams, [0x00]);
             buffer.Write(paramsTlv.AsSpan());
-            buffer.Write(new byte[] { 0 });
+            buffer.Write((ReadOnlySpan<byte>)[0]);
 
             var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, keyReference.Kid,
                 buffer.WrittenMemory);
             var response = await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
 
-            Span<byte> expectedResponseData = new[] { keyReference.Kvn };
-            ValidateCheckSum(response.Span, expectedResponseData);
+            ReadOnlySpan<byte> expectedResponseData = [keyReference.Kvn];
+            ValidateCheckSum(expectedResponseData, response.Span);
 
             _logger.LogInformation("Successfully put private key for Key Reference: {KeyReference}", keyReference);
         }
@@ -718,7 +719,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// </param>
     /// <param name="cancellationToken"></param>
     /// <exception cref="ArgumentException">Thrown when a serial number cannot be encoded properly.</exception>
-    public async Task StoreAllowlistAsync(KeyReference keyReference, IReadOnlyCollection<string> serials,
+    public async Task StoreAllowListAsync(KeyReference keyReference, IReadOnlyCollection<string> serials,
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Storing allow list (KeyReference: {KeyReference})", keyReference);
@@ -745,9 +746,11 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <summary>
     ///     Clears the allow list for the given <see cref="KeyReference" />
     /// </summary>
-    /// <seealso cref="StoreAllowlistAsync" />
+    /// <seealso cref="StoreAllowListAsync" />
     /// <param name="keyReference">The key reference that holds the allow list</param>
-    public Task ClearAllowListAsync(KeyReference keyReference) => StoreAllowlistAsync(keyReference, []);
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    public Task ClearAllowListAsync(KeyReference keyReference, CancellationToken cancellationToken = default) =>
+        StoreAllowListAsync(keyReference, [], cancellationToken);
 
     /// <summary>
     ///     Stores data in the Security Domain or targeted Application on the YubiKey using the GlobalPlatform STORE DATA
@@ -764,7 +767,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     </para>
     ///     <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.</para>
     ///     The <see cref="SecurityDomainSession" /> makes use of this method to store data in the Security Domain. Such as the
-    ///     <see cref="StoreCaIssuerAsync" />, <see cref="StoreCertificatesAsync" />, <see cref="StoreAllowlistAsync" />, and
+    ///     <see cref="StoreCaIssuerAsync" />, <see cref="StoreCertificatesAsync" />, <see cref="StoreAllowListAsync" />, and
     ///     other data.
     /// </remarks>
     /// <param name="data">
@@ -853,72 +856,6 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
         await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
     }
-
-    private static IReadOnlyList<X509Certificate2> ParseCertificateBundle(ReadOnlySpan<byte> data)
-    {
-        var certificates = new List<X509Certificate2>();
-        using var tlvList = TlvHelper.DecodeList(data);
-
-        foreach (var tlv in tlvList)
-            if (tlv.Tag == 0x30) // X.509 certificate DER tag
-                certificates.Add(X509CertificateLoader.LoadCertificate(tlv.AsSpan()));
-
-        return certificates;
-    }
-
-    private static void ParseCaIdentifiers(ReadOnlySpan<byte> data,
-        Dictionary<KeyReference, ReadOnlyMemory<byte>> results)
-    {
-        if (data.IsEmpty) return;
-
-        // GlobalPlatform CA identifiers are typically returned as pairs of TLVs: [Identifier, KeyReference]
-        // or as single TLVs with nested KeyReference. We handle both for robustness.
-        using var tlvList = TlvHelper.DecodeList(data);
-        var tlvArray = tlvList.ToArray();
-
-        for (var i = 0; i < tlvArray.Length; i++)
-        {
-            var tlv = tlvArray[i];
-
-            // Case 1: Adjacent KeyReference (as in legacy C# SDK)
-            // The CA identifiers are returned as a list of TLVs where the identifier tag
-            // is followed by a TagKidKvn (0x83) tag identifying which key it belongs to.
-            if (i + 1 < tlvArray.Length && tlvArray[i + 1].Tag == TagKidKvn)
-            {
-                var keyRefData = tlvArray[i + 1].Value.Span;
-                if (keyRefData.Length >= 2)
-                {
-                    var keyRef = new KeyReference(keyRefData[0], keyRefData[1]);
-                    // We store the first TLV's value as the identifier
-                    results[keyRef] = tlv.Value.ToArray();
-                    i++; // Skip the next TLV as we processed it
-                    continue;
-                }
-            }
-
-            // Case 2: Nested KeyReference (as in Java SDK)
-            if (TlvHelper.TryFindValue(TagKidKvn, tlv.Value.Span, out var kidKvn) && kidKvn.Length >= 2)
-            {
-                var keyRef = new KeyReference(kidKvn.Span[0], kidKvn.Span[1]);
-                results[keyRef] = tlv.Value.ToArray();
-            }
-        }
-    }
-
-    private static ReadOnlyMemory<byte> EncodeControlReference(KeyReference keyRef)
-    {
-        var keyRefEncoded = EncodeKeyReference(keyRef);
-        using var crt = new Tlv(TagControlReference, keyRefEncoded.Span);
-        return crt.AsMemory().ToArray();
-    }
-
-    private static ReadOnlyMemory<byte> EncodeKeyReference(KeyReference keyRef)
-    {
-        var dict = new Dictionary<int, byte[]?> { [TagKidKvn] = [keyRef.Kid, keyRef.Kvn] };
-
-        return TlvHelper.EncodeDictionary(dict);
-    }
-
 
     private void EnsureInitializedProtocol()
     {
@@ -1054,7 +991,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     private static void ValidateCheckSum(ReadOnlySpan<byte> expected, ReadOnlySpan<byte> actual)
     {
         if (!CryptographicOperations.FixedTimeEquals(expected, actual))
-            throw new InvalidOperationException("ExceptionMessages.ChecksumError");
+            throw new InvalidOperationException("Checksum validation failed");
     }
 
     /// <summary>

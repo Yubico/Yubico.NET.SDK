@@ -101,7 +101,7 @@ public class SecurityDomainSession_Scp11Tests
             async session =>
             {
                 // Only the above serials shall work.
-                await session.StoreAllowlistAsync(oceKeyRef, serials);
+                await session.StoreAllowListAsync(oceKeyRef, serials);
             }, scpKeyParams: keyParams, cancellationToken: CancellationTokenSource.Token);
 
         await state.WithSecurityDomainSessionAsync(false,

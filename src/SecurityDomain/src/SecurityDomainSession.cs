@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core;
@@ -602,46 +603,12 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     public async Task PutKeyAsync(KeyReference keyReference, ECPublicKey publicKey, int replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Importing SCP11 public key into KeyReference: {KeyReference}", keyReference);
-
         var pkParams = publicKey.Parameters;
         if (pkParams.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
             throw new ArgumentException("Public key must be of type NIST P-256");
 
-        var buffer = new ArrayBufferWriter<byte>();
-        try
-        {
-            buffer.Write([keyReference.Kvn]);
-
-            // Write the EC public key
-            using var publicKeyTlv = new Tlv(KeyTypeEccPublicKey, publicKey.PublicPoint.Span);
-            buffer.Write(publicKeyTlv.AsSpan());
-
-            // Write the EC parameters
-            using var paramsTlv = new Tlv(KeyTypeEccKeyParams, stackalloc byte[1]);
-            buffer.Write(paramsTlv.AsSpan());
-            buffer.Write((ReadOnlySpan<byte>)[0]);
-
-            // Create and send the command
-            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, keyReference.Kid,
-                buffer.WrittenMemory);
-            var response = await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
-
-            // Get and validate the response
-            ReadOnlySpan<byte> expectedResponseData = [keyReference.Kvn];
-            ValidateCheckSum(expectedResponseData, response.Span);
-
-            _logger.LogInformation("Successfully put public key for KeyReference: {KeyReference}", keyReference);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to put public key for KeyReference: {KeyReference}", keyReference);
-            throw;
-        }
-        finally
-        {
-            buffer.Clear();
-        }
+        await PutEcKeyAsync(keyReference, KeyTypeEccPublicKey, publicKey.PublicPoint, replaceKvn,
+            cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -663,38 +630,66 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         int replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Importing SCP11 private key into Key Reference: {KeyReference}", keyReference);
-
         var parameters = privateKey.Parameters;
         if (parameters.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
             throw new ArgumentException("Private key must be of type NIST P-256");
+
+        var encryptedKey = EncryptData(parameters.D.AsSpan());
+        CryptographicOperations.ZeroMemory(parameters.D);
+
+        await PutEcKeyAsync(keyReference, KeyTypeEccPrivateKey, (ReadOnlyMemory<byte>)encryptedKey, replaceKvn,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Shared helper for importing an EC key (public or private) into the Security Domain.
+    /// </summary>
+    /// <param name="keyReference">The key reference identifying where to store the key.</param>
+    /// <param name="keyType">The GlobalPlatform key type byte (e.g. 0xB0 for public, 0xB1 for private).</param>
+    /// <param name="keyData">The key data to embed in the TLV payload (already encrypted for private keys).</param>
+    /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    private async Task PutEcKeyAsync(
+        KeyReference keyReference,
+        byte keyType,
+        ReadOnlyMemory<byte> keyData,
+        int replaceKvn,
+        CancellationToken cancellationToken)
+    {
+        var keyKindLabel = keyType == KeyTypeEccPublicKey ? "public" : "private";
+        _logger.LogInformation("Importing SCP11 {KeyKind} key into Key Reference: {KeyReference}",
+            keyKindLabel, keyReference);
 
         var buffer = new ArrayBufferWriter<byte>();
         try
         {
             buffer.Write([keyReference.Kvn]);
 
-            var encryptedKey = EncryptData(parameters.D.AsSpan());
-            CryptographicOperations.ZeroMemory(parameters.D);
-            using var encryptedKeyTlv = new Tlv(KeyTypeEccPrivateKey, encryptedKey);
-            buffer.Write(encryptedKeyTlv.AsSpan());
+            // Write the EC key data TLV
+            using var keyTlv = new Tlv(keyType, keyData.Span);
+            buffer.Write(keyTlv.AsSpan());
 
-            using var paramsTlv = new Tlv(KeyTypeEccKeyParams, [0x00]);
+            // Write the EC parameters
+            using var paramsTlv = new Tlv(KeyTypeEccKeyParams, stackalloc byte[1]);
             buffer.Write(paramsTlv.AsSpan());
             buffer.Write((ReadOnlySpan<byte>)[0]);
 
+            // Create and send the command
             var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, keyReference.Kid,
                 buffer.WrittenMemory);
             var response = await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
 
+            // Validate the checksum response
             ReadOnlySpan<byte> expectedResponseData = [keyReference.Kvn];
             ValidateCheckSum(expectedResponseData, response.Span);
 
-            _logger.LogInformation("Successfully put private key for Key Reference: {KeyReference}", keyReference);
+            _logger.LogInformation("Successfully put {KeyKind} key for Key Reference: {KeyReference}",
+                keyKindLabel, keyReference);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to put private key for Key Reference: {KeyReference}", keyReference);
+            _logger.LogError(ex, "Failed to put {KeyKind} key for Key Reference: {KeyReference}",
+                keyKindLabel, keyReference);
             throw;
         }
         finally
@@ -857,6 +852,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
+    [MemberNotNull(nameof(_protocol))]
     private void EnsureInitializedProtocol()
     {
         if (!IsInitialized)
@@ -871,7 +867,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         CancellationToken cancellationToken)
     {
         EnsureInitializedProtocol();
-        var response = await _protocol!.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
         return response.Data;
     }
 

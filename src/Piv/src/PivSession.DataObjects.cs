@@ -104,16 +104,9 @@ public sealed partial class PivSession
         if (data.HasValue && !data.Value.IsEmpty)
         {
             var dataSpan = data.Value.Span;
-            if (dataSpan.Length > 127)
-            {
-                cmdData.Add(0x82);
-                cmdData.Add((byte)(dataSpan.Length >> 8));
-                cmdData.Add((byte)(dataSpan.Length & 0xFF));
-            }
-            else
-            {
-                cmdData.Add((byte)dataSpan.Length);
-            }
+            var dataLenBuf = new byte[BerLength.EncodingSize(dataSpan.Length)];
+            BerLength.Write(dataLenBuf, dataSpan.Length);
+            cmdData.AddRange(dataLenBuf);
             cmdData.AddRange(dataSpan.ToArray());
         }
         else

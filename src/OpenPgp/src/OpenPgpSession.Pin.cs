@@ -221,9 +221,7 @@ public sealed partial class OpenPgpSession
             if (!response.IsOK())
             {
                 // Standard wrong-PIN SW: 0x63Cx where x = remaining retries
-                var remaining = (response.SW & 0xFF00) == 0x63C0
-                    ? response.SW & 0x0F
-                    : -1;
+                var remaining = SWConstants.ExtractRetryCount(response.SW) ?? -1;
 
                 // Some firmware (including 5.8.0-alpha) returns 0x6982 (Security Status
                 // Not Satisfied) for wrong PIN instead of 0x63Cx. Per Python canonical:

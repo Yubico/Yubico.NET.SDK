@@ -228,14 +228,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// </summary>
     /// <param name="sw">The status word from an APDU response.</param>
     /// <returns>The number of remaining retries, or <c>null</c> if the SW is not a retry indicator.</returns>
-    internal static int? ExtractRetries(short sw)
-    {
-        // 0x63Cx where x = remaining retries
-        if ((sw & 0xFFF0) == 0x63C0)
-            return sw & 0x000F;
-
-        return null;
-    }
+    internal static int? ExtractRetries(short sw) =>
+        SWConstants.ExtractRetryCount(sw);
 
     // ─── IHsmAuthSession implementations ─────────────────────────────────────
 

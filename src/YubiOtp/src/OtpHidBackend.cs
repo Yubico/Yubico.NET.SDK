@@ -45,6 +45,12 @@ internal sealed class OtpHidBackend : IYubiOtpBackend
         var response = await _protocol.SendAndReceiveAsync((byte)slot, data, cancellationToken)
             .ConfigureAwait(false);
 
+        if (response.Length < YubiOtpConstants.StatusBytesLength)
+        {
+            throw new BadResponseException(
+                $"WriteUpdate response too short. Expected at least {YubiOtpConstants.StatusBytesLength} bytes, got {response.Length}.");
+        }
+
         return response;
     }
 

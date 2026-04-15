@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.YubiOtp;
@@ -46,23 +45,7 @@ public sealed class HmacSha1SlotConfiguration : SlotConfiguration
             throw new ArgumentException("HMAC key must not be empty.", nameof(hmacKey));
         }
 
-        Span<byte> processedKey = stackalloc byte[YubiOtpConstants.HmacKeySize];
-
-        if (hmacKey.Length > YubiOtpConstants.HmacKeySize)
-        {
-            SHA1.HashData(hmacKey, processedKey);
-        }
-        else
-        {
-            hmacKey.CopyTo(processedKey);
-            // Remaining bytes are already zero from stackalloc
-        }
-
-        // Split: first 16 bytes -> _key, next 4 bytes -> _uid[0..4]
-        processedKey[..YubiOtpConstants.KeySize].CopyTo(_key);
-        processedKey[YubiOtpConstants.KeySize..].CopyTo(_uid);
-
-        CryptographicOperations.ZeroMemory(processedKey);
+        ProcessHmacKey(hmacKey, _key, _uid);
 
         _tktFlags |= TicketFlag.ChalResp;
         _cfgFlags |= ConfigFlag.ChalHmac | ConfigFlag.HmacLt64;

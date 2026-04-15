@@ -139,7 +139,7 @@ public sealed partial class PivSession
             try
             {
                 decryptedWitness = ArrayPool<byte>.Shared.Rent(challengeLength);
-                CryptoBlock(keyBytes.AsSpan(0, expectedKeyLength), witnessBytes, decryptedWitness.AsSpan(0, challengeLength), ManagementKeyType, encrypt: false);
+                DecryptBlock(keyBytes.AsSpan(0, expectedKeyLength), witnessBytes, decryptedWitness.AsSpan(0, challengeLength), ManagementKeyType);
 
                 // Step 3: Generate our challenge
                 challenge = ArrayPool<byte>.Shared.Rent(challengeLength);
@@ -165,7 +165,7 @@ public sealed partial class PivSession
 
                 // Encrypt our challenge and compare
                 expectedResponse = ArrayPool<byte>.Shared.Rent(challengeLength);
-                CryptoBlock(keyBytes.AsSpan(0, expectedKeyLength), challenge.AsSpan(0, challengeLength), expectedResponse.AsSpan(0, challengeLength), ManagementKeyType, encrypt: true);
+                EncryptBlock(keyBytes.AsSpan(0, expectedKeyLength), challenge.AsSpan(0, challengeLength), expectedResponse.AsSpan(0, challengeLength), ManagementKeyType);
 
                 if (!CryptographicOperations.FixedTimeEquals(encryptedChallenge, expectedResponse.AsSpan(0, challengeLength)))
                 {
@@ -271,9 +271,21 @@ public sealed partial class PivSession
     }
 
     /// <summary>
-    /// Encrypts or decrypts a single block using ECB mode with the specified key type.
+    /// Encrypts a single block using ECB mode with the specified key type.
     /// </summary>
-    private static void CryptoBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, PivManagementKeyType keyType, bool encrypt)
+    private static void EncryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext, Span<byte> ciphertext, PivManagementKeyType keyType) =>
+        CryptoBlockCore(key, plaintext, ciphertext, keyType, encrypt: true);
+
+    /// <summary>
+    /// Decrypts a single block using ECB mode with the specified key type.
+    /// </summary>
+    private static void DecryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext, Span<byte> plaintext, PivManagementKeyType keyType) =>
+        CryptoBlockCore(key, ciphertext, plaintext, keyType, encrypt: false);
+
+    /// <summary>
+    /// Shared implementation for single-block ECB encrypt/decrypt with buffer management.
+    /// </summary>
+    private static void CryptoBlockCore(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, PivManagementKeyType keyType, bool encrypt)
     {
         byte[]? keyBuffer = null;
         byte[]? inputBuffer = null;

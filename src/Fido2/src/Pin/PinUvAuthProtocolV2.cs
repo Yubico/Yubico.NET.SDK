@@ -50,19 +50,7 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
     // HKDF info strings as per CTAP2.1 spec
     private static ReadOnlySpan<byte> HkdfInfoHmacKey => "CTAP2 HMAC key"u8;
     private static ReadOnlySpan<byte> HkdfInfoAesKey => "CTAP2 AES key"u8;
-    
-    // COSE key parameter labels
-    private const int CoseKeyType = 1;
-    private const int CoseAlgorithm = 3;
-    private const int CoseEC2Curve = -1;
-    private const int CoseEC2X = -2;
-    private const int CoseEC2Y = -3;
-    
-    // COSE values
-    private const int CoseKeyTypeEC2 = 2;
-    private const int CoseAlgEcdhEsHkdf256 = -25;
-    private const int CoseEC2CurveP256 = 1;
-    
+
     private bool _disposed;
     
     /// <inheritdoc />
@@ -76,71 +64,17 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
         IReadOnlyDictionary<int, object?> peerCoseKey)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(peerCoseKey);
-        
-        // Validate and extract peer's public key coordinates
-        if (!peerCoseKey.TryGetValue(CoseEC2X, out var xObj) || xObj is not byte[] peerX)
-        {
-            throw new ArgumentException("Peer COSE key missing or invalid X coordinate (-2).", nameof(peerCoseKey));
-        }
-        
-        if (!peerCoseKey.TryGetValue(CoseEC2Y, out var yObj) || yObj is not byte[] peerY)
-        {
-            throw new ArgumentException("Peer COSE key missing or invalid Y coordinate (-3).", nameof(peerCoseKey));
-        }
-        
-        // Validate coordinate lengths (P-256 uses 32-byte coordinates)
-        if (peerX.Length != 32)
-        {
-            throw new ArgumentException($"Invalid X coordinate length: expected 32, got {peerX.Length}.", nameof(peerCoseKey));
-        }
-        
-        if (peerY.Length != 32)
-        {
-            throw new ArgumentException($"Invalid Y coordinate length: expected 32, got {peerY.Length}.", nameof(peerCoseKey));
-        }
-        
-        // Generate ephemeral ECDH key pair
-        using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
-        var ourParams = ecdh.ExportParameters(includePrivateParameters: false);
-        
-        // Import peer's public key
-        var peerParams = new ECParameters
-        {
-            Curve = ECCurve.NamedCurves.nistP256,
-            Q = new ECPoint { X = peerX, Y = peerY }
-        };
-        
-        using var peerEcdh = ECDiffieHellman.Create(peerParams);
-        
-        // Derive raw shared secret (X coordinate of ECDH shared point)
-        byte[] z;
+
+        var (keyAgreement, rawZ) = PinUvAuthHelpers.PerformEcdhKeyAgreement(peerCoseKey);
         try
         {
-            z = ecdh.DeriveRawSecretAgreement(peerEcdh.PublicKey);
+            var sharedSecret = Kdf(rawZ);
+            return (keyAgreement, sharedSecret);
         }
-        catch (CryptographicException ex)
+        finally
         {
-            throw new ArgumentException("Failed to derive shared secret. Peer key may be invalid.", nameof(peerCoseKey), ex);
+            CryptographicOperations.ZeroMemory(rawZ);
         }
-        
-        // Apply KDF to get shared secret
-        var sharedSecret = Kdf(z);
-        
-        // Clear raw shared secret
-        CryptographicOperations.ZeroMemory(z);
-        
-        // Build our COSE key for key agreement
-        var keyAgreement = new Dictionary<int, object?>
-        {
-            { CoseKeyType, CoseKeyTypeEC2 },
-            { CoseAlgorithm, CoseAlgEcdhEsHkdf256 },
-            { CoseEC2Curve, CoseEC2CurveP256 },
-            { CoseEC2X, ourParams.Q.X },
-            { CoseEC2Y, ourParams.Q.Y }
-        };
-        
-        return (keyAgreement, sharedSecret);
     }
     
     /// <inheritdoc />

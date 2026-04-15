@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Buffers;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Logging;
@@ -93,6 +92,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         IConnection connection,
         ScpKeyParameters? scpKeyParams = null)
     {
+        ArgumentNullException.ThrowIfNull(connection);
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
 
@@ -486,17 +486,24 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         var remaining = uri[bestPrefixLength..];
         var remainingBytes = Encoding.UTF8.GetBytes(remaining);
 
-        int dataLength = Math.Min(remainingBytes.Length + 1, YubiOtpConstants.NdefDataSize);
+        // 1 byte for prefix index + remaining URI bytes must fit in the data area
+        int totalDataLength = remainingBytes.Length + 1;
+        if (totalDataLength > YubiOtpConstants.NdefDataSize)
+        {
+            throw new ArgumentException(
+                $"URI content exceeds the maximum NDEF data size of {YubiOtpConstants.NdefDataSize} bytes. " +
+                $"After prefix compression, the URI requires {totalDataLength} bytes.",
+                nameof(uri));
+        }
 
         // payload[0] = length of NDEF data (prefix index byte + remaining URI bytes)
-        payload[0] = (byte)dataLength;
+        payload[0] = (byte)totalDataLength;
 
         // First byte of data area is the URI prefix index
         payload[2] = (byte)bestPrefixIndex;
 
         // Copy remaining URI bytes
-        int copyLength = Math.Min(remainingBytes.Length, YubiOtpConstants.NdefDataSize - 1);
-        Array.Copy(remainingBytes, 0, payload, 3, copyLength);
+        Array.Copy(remainingBytes, 0, payload, 3, remainingBytes.Length);
     }
 
     private static void BuildNdefText(string text, byte[] payload)
@@ -506,16 +513,26 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         ReadOnlySpan<byte> langCode = "en"u8;
         var textBytes = Encoding.UTF8.GetBytes(text);
 
-        int dataLength = Math.Min(1 + langCode.Length + textBytes.Length, YubiOtpConstants.NdefDataSize);
-        payload[0] = (byte)dataLength;
+        // 1 byte for language length + 2 bytes for "en" + text bytes must fit in the data area
+        int totalDataLength = 1 + langCode.Length + textBytes.Length;
+        if (totalDataLength > YubiOtpConstants.NdefDataSize)
+        {
+            int maxTextBytes = YubiOtpConstants.NdefDataSize - 1 - langCode.Length;
+            throw new ArgumentException(
+                $"Text content exceeds the maximum NDEF data size of {YubiOtpConstants.NdefDataSize} bytes. " +
+                $"The text requires {totalDataLength} bytes (including language header), " +
+                $"but only {maxTextBytes} bytes are available for text content.",
+                nameof(text));
+        }
+
+        payload[0] = (byte)totalDataLength;
 
         // Language header
         payload[2] = languageLength;
         langCode.CopyTo(payload.AsSpan(3));
 
         // Text content
-        int textCopyLength = Math.Min(textBytes.Length, YubiOtpConstants.NdefDataSize - 1 - langCode.Length);
-        textBytes.AsSpan(0, textCopyLength).CopyTo(payload.AsSpan(3 + langCode.Length));
+        textBytes.AsSpan().CopyTo(payload.AsSpan(3 + langCode.Length));
     }
 
     private async Task WriteConfigAsync(

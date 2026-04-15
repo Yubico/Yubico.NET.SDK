@@ -346,6 +346,7 @@ public sealed partial class PivSession
             }
             if (inputBuffer is not null)
             {
+                CryptographicOperations.ZeroMemory(inputBuffer.AsSpan(0, input.Length));
                 ArrayPool<byte>.Shared.Return(inputBuffer);
             }
             if (decryptedBuffer is not null)
@@ -407,6 +408,7 @@ public sealed partial class PivSession
             }
             if (inputBuffer is not null)
             {
+                CryptographicOperations.ZeroMemory(inputBuffer.AsSpan(0, input.Length));
                 ArrayPool<byte>.Shared.Return(inputBuffer);
             }
             if (encryptedBuffer is not null)

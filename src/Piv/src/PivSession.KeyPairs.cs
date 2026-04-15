@@ -56,8 +56,11 @@ public sealed partial class PivSession
             throw new InvalidOperationException("Management key authentication required to generate keys");
         }
 
-        // Check version requirements
-        CheckAlgorithmSupport(algorithm);
+        // NOTE: Algorithm support is determined by firmware version, but PIV GET VERSION returns
+        // the PIV application version (typically 0.0.1), not the firmware version.
+        // Rather than incorrectly gate features, we let the commands fail with appropriate SW codes
+        // if the algorithm is not supported. The device will return SW 0x6A86 (incorrect parameters)
+        // or 0x6D00 (instruction not supported) for unsupported algorithms.
 
         // Build the command data: TAG 0xAC [ TAG 0x80 (algorithm) + optional policies ]
         // Pre-compute size: 0xAC + len + (0x80,0x01,algo) + optional (0xAA,0x01,pin) + optional (0xAB,0x01,touch)
@@ -408,15 +411,6 @@ public sealed partial class PivSession
 #pragma warning disable SYSLIB0057 // X509Certificate2(byte[]) is obsolete
         return new X509Certificate2(response.Data.ToArray());
 #pragma warning restore SYSLIB0057
-    }
-
-    private void CheckAlgorithmSupport(PivAlgorithm algorithm)
-    {
-        // NOTE: Algorithm support is determined by firmware version, but PIV GET VERSION returns
-        // the PIV application version (typically 0.0.1), not the firmware version.
-        // Rather than incorrectly gate features, we let the commands fail with appropriate SW codes
-        // if the algorithm is not supported. The device will return SW 0x6A86 (incorrect parameters)
-        // or 0x6D00 (instruction not supported) for unsupported algorithms.
     }
 
     private IPublicKey ParsePublicKey(ReadOnlyMemory<byte> data, PivAlgorithm algorithm)

@@ -127,11 +127,16 @@ public sealed partial class PivSession
 
         // TAG 0x70 (Certificate)
         dataList.Add(0x70);
-        if (certBytes.Length > 127)
+        if (certBytes.Length > 255)
         {
             dataList.Add(0x82); // 2-byte length
             dataList.Add((byte)(certBytes.Length >> 8));
             dataList.Add((byte)(certBytes.Length & 0xFF));
+        }
+        else if (certBytes.Length > 127)
+        {
+            dataList.Add(0x81); // 1-byte length
+            dataList.Add((byte)certBytes.Length);
         }
         else
         {

@@ -197,6 +197,12 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
     private static FirmwareVersion ParseVersionResponse(ReadOnlySpan<byte> response)
     {
         // Expected format: [major, minor, patch, 0x90, 0x00]
+        if (response.Length < 3)
+        {
+            throw new InvalidOperationException(
+                $"Invalid version response: expected at least 3 bytes, got {response.Length}");
+        }
+
         return new FirmwareVersion(response[0], response[1], response[2]);
     }
 

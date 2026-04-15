@@ -301,21 +301,28 @@ public sealed partial class PivSession
         var result = System.Numerics.BigInteger.ModPow(b, exp, mod);
         var raw = result.ToByteArray(isUnsigned: true, isBigEndian: true);
 
-        if (raw.Length > outputLength)
+        try
         {
-            throw new CryptographicException(
-                $"ModPow result ({raw.Length} bytes) exceeds expected output length ({outputLength} bytes).");
-        }
+            if (raw.Length > outputLength)
+            {
+                throw new CryptographicException(
+                    $"ModPow result ({raw.Length} bytes) exceeds expected output length ({outputLength} bytes).");
+            }
 
-        if (raw.Length == outputLength)
+            if (raw.Length == outputLength)
+            {
+                return raw;
+            }
+
+            // Pad with leading zeros if result is shorter than key size (leading zeros lost in BigInteger)
+            var padded = new byte[outputLength];
+            raw.CopyTo(padded.AsSpan(outputLength - raw.Length));
+            return padded;
+        }
+        finally
         {
-            return raw;
+            CryptographicOperations.ZeroMemory(raw);
         }
-
-        // Pad with leading zeros if result is shorter than key size (leading zeros lost in BigInteger)
-        var padded = new byte[outputLength];
-        raw.CopyTo(padded.AsSpan(outputLength - raw.Length));
-        return padded;
     }
 
     /// <summary>

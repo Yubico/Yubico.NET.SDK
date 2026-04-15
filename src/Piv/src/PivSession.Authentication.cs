@@ -213,15 +213,15 @@ public sealed partial class PivSession
     /// Parses an authentication response TLV: 7C [len] [expectedInnerTag] [len] [data].
     /// Used for both witness (tag 0x80) and challenge (tag 0x82) responses.
     /// </summary>
-    private static ReadOnlySpan<byte> ParseAuthResponse(ReadOnlySpan<byte> response, byte expectedInnerTag, int expectedLength)
+    private static byte[] ParseAuthResponse(ReadOnlySpan<byte> response, byte expectedInnerTag, int expectedLength)
     {
-        var outer = Tlv.Create(response);
+        using var outer = Tlv.Create(response);
         if (outer.Tag != 0x7C)
         {
             throw new ApduException($"Invalid auth response - expected TAG 0x7C, got 0x{outer.Tag:X2}");
         }
 
-        var inner = Tlv.Create(outer.Value.Span);
+        using var inner = Tlv.Create(outer.Value.Span);
         if (inner.Tag != expectedInnerTag)
         {
             throw new ApduException($"Invalid auth response - expected TAG 0x{expectedInnerTag:X2}, got 0x{inner.Tag:X2}");
@@ -232,7 +232,7 @@ public sealed partial class PivSession
             throw new ApduException($"Invalid auth response length - expected {expectedLength}, got {inner.Length}");
         }
 
-        return inner.Value.Span;
+        return inner.Value.Span.ToArray();
     }
 
     /// <summary>

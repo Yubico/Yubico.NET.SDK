@@ -72,9 +72,9 @@ public sealed partial class PivSession
             return data;
         }
 
-        // Use Tlv to parse the wrapper
-        var wrapper = Tlv.Create(span);
-        return wrapper.Value;
+        // Use Tlv to parse the wrapper, copy value before disposing
+        using var wrapper = Tlv.Create(span);
+        return wrapper.Value.ToArray();
     }
 
     /// <summary>

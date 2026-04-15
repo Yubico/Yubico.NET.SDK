@@ -437,20 +437,21 @@ public sealed partial class PivSession
     private ReadOnlyMemory<byte> ParseCryptoResponse(ReadOnlyMemory<byte> data)
     {
         // Parse outer TLV (0x7C - Dynamic Auth Template)
-        var outer = Tlv.Create(data.Span);
+        using var outer = Tlv.Create(data.Span);
         if (outer.Tag != 0x7C)
         {
             throw new ApduException("Invalid crypto response format");
         }
 
         // Parse inner TLV (0x82 - Response data)
-        var inner = Tlv.Create(outer.Value.Span);
+        using var inner = Tlv.Create(outer.Value.Span);
         if (inner.Tag != 0x82)
         {
             throw new ApduException("Invalid crypto response - expected TAG 0x82");
         }
 
-        return inner.Value;
+        // Copy the value before the Tlv objects are disposed
+        return inner.Value.ToArray();
     }
 
     private byte[] EncodePeerPublicKey(IPublicKey publicKey)

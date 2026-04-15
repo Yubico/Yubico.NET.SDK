@@ -1,102 +1,140 @@
-# Handoff — yubikit-applets
+# Handoff — yubikey-codeaudit
 
-**Date:** 2026-04-10
-**Branch:** `yubikit-applets`
-**Last commit:** `59b629e6` — merge: integrate security remediation into yubikit-applets
+**Date:** 2026-04-15
+**Branch:** `yubikey-codeaudit` (base: `yubikit-applets`)
+**Last commit:** `52d9450b` refactor(piv): split CryptoBlock into EncryptBlock/DecryptBlock with shared core
+**PR:** Yubico/Yubico.NET.SDK#455
 
 ---
 
 ## Session Summary
 
-Merged the `worktree-security-remediation` branch (27 commits) into `yubikit-applets` (13 unique commits), combining security hardening with the unified CLI. Resolved 5 git conflicts manually and adapted 24 files for the `string` → `ReadOnlyMemory<byte>` PIN/password API migration. Build succeeds with 0 errors; 8/9 unit test suites pass.
+Comprehensive 5-stage code audit and remediation of all 7 YubiKey applet modules (Piv, Fido2, Oath, YubiOtp, OpenPgp, SecurityDomain, YubiHsm) plus Core. Started with parallel CodeAudit agents identifying ~133 findings, iterated through fix → re-audit → fix → architect review cycles across 5 stages. Final CryptoBlock refactor split into EncryptBlock/DecryptBlock. Created 19 Jira issues (YESDK-1559 through YESDK-1577) for remaining TODO items and a prioritized work plan.
+
+**28 commits, 87+ files changed, ~113 findings fixed, net -244 lines.**
 
 ## Current State
 
-### Committed Work
-- `59b629e6` merge: integrate security remediation into yubikit-applets
-  - Security: IDisposable on ScpProcessor/ScpState with buffer zeroing
-  - Security: ConfigureAwait(false) throughout async code
-  - Bugfix: ChainedApduTransmitter range calculation (`offset..max` → `offset..offset+max`)
-  - Security: Console.WriteLine debug output removed from SCP
-  - Breaking: PIN/password APIs changed from `string` to `ReadOnlyMemory<byte>`
-  - Security: SCP auth failure error path cleanup
-  - CLI: All 7 applets consolidated into unified `yk` tool
-  - CLI: CTAP bio error exit codes mapped
+### Committed Work (28 commits)
+
+**Stage 1 — Bug fixes & security (7 commits):** TLV encoding, swapped args, key zeroing, connection leaks, dead code
+**Stage 2 — DRY & interface expansion (7 commits):** EnsureProtocol, CryptoBlock merge, CoseKeyWriter, Credential.Id immutability, KeyRef consolidation, interface expansion, retry handler
+**Stage 3 — Core extraction (4 commits):** BerLength, ExtractRetryCount, connection leak fix (6 modules), EnsureReady removal
+**Stage 4 — Remaining + deferred (6 commits):** DES zeroing, CBOR parse fix, CredentialData IDisposable, access code validation, hash zeroing, Tlv disposal, DI param
+**Stage 5 — Tlv disposal extraction (3 commits):** EncodeAndDisposeList in Core, YubiHsm 10 sites, PIV 5 sites
+**Stage 6 — Refactor (1 commit):** Split CryptoBlock into EncryptBlock/DecryptBlock with CryptoBlockCore
 
 ### Uncommitted Changes
-None — clean working tree.
+
+Modified `Plans/handoff.md` (this file). Untracked:
+- `Plans/foamy-swimming-summit.md` — Stage 4 plan
+- `Plans/todo-backlog-workplan.md` — Jira TODO backlog work plan
+- `docs/vslsp-proposals.md` — pre-existing, unrelated
 
 ### Build & Test Status
-- `dotnet build Yubico.YubiKit.sln`: **0 errors, 0 warnings**
-- Unit tests: **8/9 pass** — Core, Management, Oath, OpenPgp, Piv, SecurityDomain, YubiHsm, YubiOtp all pass
-- Fido2 unit tests: **test runner crash** (pre-existing `testhost.deps.json` version mismatch, not related to merge)
+
+- **Build:** 0 errors, 0 warnings
+- **Unit tests:** 8/9 pass (Fido2 failure pre-existing testhost issue)
+- **Integration tests:** Not run (require physical YubiKey)
 
 ### Worktree / Parallel Agent State
-None. Single worktree at `/Users/Dennis.Dyall/Code/y/Yubico.NET.SDK`. The `worktree-security-remediation` branch is now fully merged and can be deleted.
+
+None. Single worktree only.
 
 ---
 
 ## Readiness Assessment
 
-**Target:** .NET developers integrating YubiKey hardware authentication into their applications, who need a reliable SDK and CLI for PIV, FIDO2, OpenPGP, OATH, OTP, HSM Auth, and Security Domain operations.
+**Target:** .NET developers integrating YubiKey hardware security into their applications, who need a reliable, secure, and well-structured SDK.
 
 | Need | Status | Notes |
 |---|---|---|
-| Discover and connect to YubiKey devices | ✅ Working | Core device management, SmartCard/HID connections |
-| Authenticate users via FIDO2/WebAuthn | ✅ Working | Full CTAP 2.1/2.3 support with PIN/UV auth |
-| Manage PIV certificates and keys | ✅ Working | Generate, import, attest, sign operations |
-| Generate TOTP/HOTP codes via OATH | ✅ Working | Full credential lifecycle |
-| Configure OpenPGP keys and certificates | ✅ Working | Key gen, import, sign, decrypt, KDF support |
-| Secure channel communication (SCP03/11) | ✅ Working | IDisposable with proper key zeroing |
-| CLI tool for all YubiKey operations | ✅ Working | Unified `yk` tool with all 7 applets, E2E tested |
-| Sensitive data handled securely in memory | ✅ Working | ZeroMemory on PINs, keys, cryptograms; buffer ownership documented |
-| Fido2 unit test suite | ⚠️ Partial | Test runner version mismatch — tests don't execute |
+| Correct APDU/TLV encoding | ✅ Working | TLV, DER, BER bugs fixed; BerLength utility in Core |
+| Sensitive data zeroed after use | ✅ Working | Comprehensive audit, IDisposable on CredentialData, EncodeAndDisposeList |
+| No resource leaks | ✅ Working | Connection leak fixed in all 8 modules, Tlv disposal across 3 modules |
+| Consistent error handling | ✅ Working | Retry extraction centralized, cancellation not swallowed |
+| DRY codebase | ✅ Working | 20+ violations resolved, shared helpers in Core and per-module |
+| Clean interfaces for DI/mocking | ✅ Working | ISecurityDomainSession 6→15 methods, DI delegate updated |
+| No dead code | ✅ Working | 14 placeholder tests, 4 dead methods, unused classes removed |
+| Modern C# patterns | ✅ Working | GeneratedRegex, collection expressions, ThrowIfNull throughout |
+| TODO items tracked | ✅ Working | 19 Jira issues created (YESDK-1559–1577) |
 
-**Overall:** 🟢 Production — SDK is reliable for all primary workflows. Security remediation complete. CLI fully operational with all 7 applets.
+**Overall:** 🟢 Production — all primary code quality goals met. Remaining TODOs tracked in Jira backlog.
 
-**Critical next step:** Fix the Fido2 unit test runner issue (`testhost.deps.json` version mismatch) so all 9 test suites pass.
+**Critical next step:** Run integration tests on physical YubiKey to verify behavioral changes before merging PR #455.
 
 ---
 
 ## What's Next (Prioritized)
 
-1. **Fix Fido2 unit test runner** — resolve `testhost.deps.json` version mismatch (xUnit v3 / test host 18.0.1 issue)
-2. **Delete `worktree-security-remediation` branch** — fully merged, no longer needed
-3. **PR to develop** — create pull request from `yubikit-applets` → `develop` with the consolidated work
-4. **Integration testing** — run full integration test suite against physical YubiKey for FIDO2, PIV, OpenPGP
-5. **Consider `dotnet format`** — run format check on all post-merge files
+1. **Run integration tests on physical YubiKey** — PIV mutual auth, SecurityDomain EC key import, Fido2 large blob, Oath CRUD, OpenPgp P-521 signing
+2. **Review and merge PR #455** — 28 commits across 5 stages + refactor
+3. **Work through TODO backlog** — see `Plans/todo-backlog-workplan.md` (19 Jira issues, prioritized)
+4. **Fix Fido2 unit test runner** — pre-existing testhost infrastructure issue
 
 ## Blockers & Known Issues
 
-- **Fido2 unit test runner crash**: `testhost.deps.json` cannot find `testhost.dll` v18.0.1. Pre-existing issue, not caused by merge. Likely needs NuGet package version alignment for the test host.
-- **Breaking API change**: All PIN/password APIs now take `ReadOnlyMemory<byte>` instead of `string`. Any downstream consumers will need to adapt (wrap with `Encoding.UTF8.GetBytes()`).
+- **Fido2 unit tests:** pre-existing testhost infrastructure issue (YESDK-1499 area)
+- **PIV bio metadata:** positional parsing needs Bio YubiKey verification (YESDK-1571)
+- **4 intentionally skipped audit items:** Fido2 CBOR construction DRY, YubiOtp UpdateConfiguration, Oath DeriveKey return type, YubiOtp PadHmacChallenge
+
+## Jira Issues Created This Session
+
+| Key | Summary |
+|-----|---------|
+| YESDK-1559 | Incomplete TODO in DeviceInfo.cs |
+| YESDK-1560 | Validate timeout max values |
+| YESDK-1561 | Add try-catch to ManagementSession TLV retrieval |
+| YESDK-1562 | ECPrivateKey: evaluate ECDH wrapping TODO |
+| YESDK-1563 | Verify ECPublicKey.CreateFromSubjectPublicKeyInfo |
+| YESDK-1564 | FirmwareVersion on IApduProcessor interface |
+| YESDK-1565 | ChainedApduTransmitter composition refactor |
+| YESDK-1566 | Determine transport type in UsbSmartCardConnection |
+| YESDK-1567 | Extended APDU support per device model |
+| YESDK-1568 | Avoid allocation in ApduFormatterShort.Format |
+| YESDK-1569 | Disambiguate PivSession.IsAuthenticated |
+| YESDK-1570 | PIV: Check bio before reset (Phase 7) |
+| YESDK-1571 | PIV: Migrate GetBioMetadataAsync to TLV |
+| YESDK-1572 | Upgrade CodeAnalysis analyzers to 10.0.102 |
+| YESDK-1573 | Make CapabilityMapper internal |
+| YESDK-1574 | SCARD_W_RESET_CARD resilience |
+| YESDK-1575 | HID: Windows platform support |
+| YESDK-1576 | HID: Linux platform support |
+| YESDK-1577 | PIV: Ed25519 signature verification tests |
 
 ## Key File References
 
 | File | Purpose |
 |------|---------|
-| `src/Core/src/SmartCard/ChainedApduTransmitter.cs` | Fixed range bug in APDU chaining |
-| `src/Core/src/SmartCard/Scp/ScpProcessor.cs` | Now IDisposable with buffer zeroing |
-| `src/Core/src/SmartCard/Scp/ScpState.cs` | Now IDisposable with key zeroing |
-| `src/Core/src/SmartCard/Scp/ScpInitializer.cs` | Auth failure cleanup (dispose on error) |
-| `src/Cli/YkTool/` | Unified CLI with all 7 applets |
-| `Plans/yk-cli-progress.md` | CLI port tracking with E2E test results |
-| `CLAUDE.md` | Updated project conventions and code patterns |
+| `src/Core/src/Utils/BerLength.cs` | NEW: BER-TLV length encoding utility |
+| `src/Core/src/Utils/TlvHelper.cs` | MODIFIED: EncodeAndDisposeList |
+| `src/Core/src/SmartCard/SWConstants.cs` | MODIFIED: ExtractRetryCount |
+| `src/Fido2/src/Pin/PinUvAuthHelpers.cs` | NEW: Shared ECDH helper |
+| `src/Fido2/src/Cbor/CoseKeyWriter.cs` | NEW: Shared COSE key encoding |
+| `Plans/todo-backlog-workplan.md` | Prioritized TODO backlog (19 Jira issues) |
+| `Plans/foamy-swimming-summit.md` | Stage 4 plan with deferred item analysis |
 
 ---
 
 ## Quick Start for New Agent
 
 ```bash
+# Current state
+git checkout yubikey-codeaudit
+git log --oneline yubikit-applets..HEAD  # 28 commits
+
 # Build
-dotnet build Yubico.YubiKit.sln
+dotnet build Yubico.YubiKit.sln  # 0 errors, 0 warnings
 
-# Run unit tests
-dotnet build.cs test
+# Test
+dotnet build.cs test  # 8/9 pass (Fido2 pre-existing)
 
-# Check what's on this branch
-git log --oneline -10
+# PR
+gh pr view 455
 
-# Resume from handoff
+# TODO backlog
+cat Plans/todo-backlog-workplan.md
+
+# Resume
 /resume-handoff
 ```

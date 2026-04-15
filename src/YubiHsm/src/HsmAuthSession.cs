@@ -82,7 +82,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
     // PBKDF2 derivation constants
     internal const int Pbkdf2Iterations = 10_000;
-    internal static readonly byte[] Pbkdf2Salt = "Yubico"u8.ToArray();
+    internal static ReadOnlySpan<byte> Pbkdf2Salt => "Yubico"u8;
     internal const int Pbkdf2DerivedKeyLength = 32;
 
     private readonly ISmartCardConnection _connection;
@@ -214,10 +214,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ArgumentException.ThrowIfNullOrEmpty(label);
 
         var encoded = Encoding.UTF8.GetBytes(label);
-        if (encoded.Length < MinLabelLength)
-            throw new ArgumentException(
-                $"Label must be at least {MinLabelLength} UTF-8 byte(s).",
-                nameof(label));
 
         if (encoded.Length > MaxLabelLength)
             throw new ArgumentException(
@@ -680,7 +676,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
             // TAG_PRIVATE_KEY with empty value signals on-device key generation.
             // Python canonical: _put_credential(management_key, label, b"", EC_P256, credential_password)
-            // TODO: Dispose of all Tlv instances created here.
             var data = TlvHelper.EncodeList(
             [
                 new Tlv(TagManagementKey, managementKey.Span),
@@ -723,7 +718,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        return response.Data;
+        var publicKey = response.Data;
+        if (publicKey.Length != EcP256PublicKeyLength)
+            throw new InvalidOperationException(
+                $"Expected {EcP256PublicKeyLength}-byte public key, got {publicKey.Length}");
+
+        return publicKey;
     }
 
     /// <inheritdoc />
@@ -756,7 +756,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                     command, throwOnError: false, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
-            ThrowOnManagementKeyFailure(response, command);
+            ThrowOnCredentialPasswordFailure(response, command);
             if (!response.IsOK())
                 throw ApduException.FromResponse(response, command, "CHANGE credential password failed");
         }

@@ -322,13 +322,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             ]);
 
             var command = new ApduCommand { Ins = InsPut, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnManagementKeyFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "PUT credential failed");
+            await TransmitWithRetryCheckAsync(
+                command, ThrowOnManagementKeyFailure, "PUT credential", cancellationToken);
         }
         finally
         {
@@ -388,13 +383,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ]);
 
         var command = new ApduCommand { Ins = InsDelete, Data = data };
-        var response = await _protocol!.TransmitAndReceiveAsync(
-                command, throwOnError: false, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        ThrowOnManagementKeyFailure(response, command);
-        if (!response.IsOK())
-            throw ApduException.FromResponse(response, command, "DELETE credential failed");
+        await TransmitWithRetryCheckAsync(
+            command, ThrowOnManagementKeyFailure, "DELETE credential", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -427,13 +417,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             var data = TlvHelper.EncodeList([.. tlvs]);
 
             var command = new ApduCommand { Ins = InsCalculate, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnCredentialPasswordFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "CALCULATE symmetric session keys failed");
+            var response = await TransmitWithRetryCheckAsync(
+                command, ThrowOnCredentialPasswordFailure, "CALCULATE symmetric session keys", cancellationToken);
 
             return SessionKeys.Parse(response.Data.Span);
         }
@@ -480,13 +465,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ]);
 
         var command = new ApduCommand { Ins = InsPutManagementKey, Data = data };
-        var response = await _protocol!.TransmitAndReceiveAsync(
-                command, throwOnError: false, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        ThrowOnManagementKeyFailure(response, command);
-        if (!response.IsOK())
-            throw ApduException.FromResponse(response, command, "PUT management key failed");
+        await TransmitWithRetryCheckAsync(
+            command, ThrowOnManagementKeyFailure, "PUT management key", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -541,13 +521,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             ]);
 
             var command = new ApduCommand { Ins = InsCalculate, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnCredentialPasswordFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "CALCULATE asymmetric session keys failed");
+            var response = await TransmitWithRetryCheckAsync(
+                command, ThrowOnCredentialPasswordFailure, "CALCULATE asymmetric session keys", cancellationToken);
 
             return SessionKeys.Parse(response.Data.Span);
         }
@@ -639,13 +614,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             ]);
 
             var command = new ApduCommand { Ins = InsPut, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnManagementKeyFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "PUT asymmetric credential failed");
+            await TransmitWithRetryCheckAsync(
+                command, ThrowOnManagementKeyFailure, "PUT asymmetric credential", cancellationToken);
         }
         finally
         {
@@ -687,13 +657,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             ]);
 
             var command = new ApduCommand { Ins = InsPut, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnManagementKeyFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "GENERATE asymmetric credential failed");
+            await TransmitWithRetryCheckAsync(
+                command, ThrowOnManagementKeyFailure, "GENERATE asymmetric credential", cancellationToken);
         }
         finally
         {
@@ -752,13 +717,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             ]);
 
             var command = new ApduCommand { Ins = InsChangeCredentialPassword, P1 = 0x00, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnCredentialPasswordFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "CHANGE credential password failed");
+            await TransmitWithRetryCheckAsync(
+                command, ThrowOnCredentialPasswordFailure, "CHANGE credential password", cancellationToken);
         }
         finally
         {
@@ -794,13 +754,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             ]);
 
             var command = new ApduCommand { Ins = InsChangeCredentialPassword, P1 = 0x01, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnManagementKeyFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "CHANGE credential password (admin) failed");
+            await TransmitWithRetryCheckAsync(
+                command, ThrowOnManagementKeyFailure, "CHANGE credential password (admin)", cancellationToken);
         }
         finally
         {
@@ -832,6 +787,28 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
     }
 
+    /// <summary>
+    ///     Transmits an APDU command with <c>throwOnError: false</c>, checks for retry failures
+    ///     using the specified checker, and throws <see cref="ApduException" /> if the response
+    ///     does not indicate success.
+    /// </summary>
+    private async Task<ApduResponse> TransmitWithRetryCheckAsync(
+        ApduCommand command,
+        Action<ApduResponse, ApduCommand> retryChecker,
+        string operationName,
+        CancellationToken cancellationToken)
+    {
+        var response = await _protocol!.TransmitAndReceiveAsync(
+                command, throwOnError: false, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        retryChecker(response, command);
+        if (!response.IsOK())
+            throw ApduException.FromResponse(response, command, $"{operationName} failed");
+
+        return response;
+    }
+
     private static void ValidateManagementKey(ReadOnlySpan<byte> managementKey)
     {
         if (managementKey.Length != ManagementKeyLength)
@@ -841,17 +818,17 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     }
 
     /// <summary>
-    ///     Checks an APDU response for the 0x63Cx management key verification failure pattern.
-    ///     Throws <see cref="ApduException" /> with retry information if detected.
+    ///     Checks an APDU response for the 0x63Cx retry failure pattern and throws
+    ///     <see cref="ApduException" /> with retry information if detected.
     /// </summary>
-    private static void ThrowOnManagementKeyFailure(ApduResponse response, ApduCommand command)
+    private static void ThrowOnRetryFailure(ApduResponse response, ApduCommand command, string errorContext)
     {
         var retries = ExtractRetries(response.SW);
         if (retries is null)
             return;
 
         throw new ApduException(
-            $"Management key verification failed, {retries} attempt(s) remaining (SW=0x{response.SW:X4})")
+            $"{errorContext}, {retries} attempt(s) remaining (SW=0x{response.SW:X4})")
         {
             SW = response.SW,
             Cla = command.Cla,
@@ -862,24 +839,17 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     }
 
     /// <summary>
+    ///     Checks an APDU response for the 0x63Cx management key verification failure pattern.
+    ///     Throws <see cref="ApduException" /> with retry information if detected.
+    /// </summary>
+    private static void ThrowOnManagementKeyFailure(ApduResponse response, ApduCommand command) =>
+        ThrowOnRetryFailure(response, command, "Management key verification failed");
+
+    /// <summary>
     ///     Checks an APDU response for the 0x63Cx credential password verification failure pattern.
     ///     Throws <see cref="ApduException" /> with retry information if detected.
     ///     Matches the Python SDK behavior in <c>_calculate_session_keys</c>.
     /// </summary>
-    private static void ThrowOnCredentialPasswordFailure(ApduResponse response, ApduCommand command)
-    {
-        var retries = ExtractRetries(response.SW);
-        if (retries is null)
-            return;
-
-        throw new ApduException(
-            $"Invalid credential password, {retries} attempt(s) remaining (SW=0x{response.SW:X4})")
-        {
-            SW = response.SW,
-            Cla = command.Cla,
-            Ins = command.Ins,
-            P1 = command.P1,
-            P2 = command.P2
-        };
-    }
+    private static void ThrowOnCredentialPasswordFailure(ApduResponse response, ApduCommand command) =>
+        ThrowOnRetryFailure(response, command, "Invalid credential password");
 }

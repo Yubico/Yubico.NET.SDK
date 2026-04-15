@@ -62,7 +62,7 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Calculates the full HMAC response for a single credential.
     /// </summary>
-    Task<byte[]> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge,
+    Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default);
 
     /// <summary>

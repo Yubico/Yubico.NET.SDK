@@ -44,7 +44,7 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
     /// <summary>
     ///     Gets the raw credential ID bytes in wire format.
     /// </summary>
-    public byte[] Id { get; }
+    public ReadOnlyMemory<byte> Id { get; }
 
     /// <summary>
     ///     Gets the credential issuer, if present.
@@ -77,7 +77,7 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
     /// </summary>
     public Credential(
         string deviceId,
-        byte[] id,
+        ReadOnlyMemory<byte> id,
         string? issuer,
         string name,
         OathType oathType,
@@ -85,7 +85,7 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
         bool? touchRequired)
     {
         DeviceId = deviceId;
-        Id = id;
+        Id = id.ToArray(); // Defensive copy to prevent external mutation
         Issuer = issuer;
         Name = name;
         OathType = oathType;
@@ -174,7 +174,7 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
             return false;
         }
 
-        return DeviceId == other.DeviceId && Id.AsSpan().SequenceEqual(other.Id);
+        return DeviceId == other.DeviceId && Id.Span.SequenceEqual(other.Id.Span);
     }
 
     /// <inheritdoc />
@@ -185,7 +185,7 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
     {
         var hash = new HashCode();
         hash.Add(DeviceId);
-        foreach (byte b in Id)
+        foreach (byte b in Id.Span)
         {
             hash.Add(b);
         }

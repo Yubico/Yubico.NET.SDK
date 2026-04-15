@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
@@ -307,16 +308,13 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ArgumentNullException.ThrowIfNull(credential);
         EnsureSupports(FeatureRenameCredential);
 
-        byte[] oldId = credential.Id;
+        ReadOnlyMemory<byte> oldId = credential.Id;
         byte[] newId = Credential.FormatCredentialId(newIssuer, newName, credential.OathType, credential.Period);
 
         using var oldNameTlv = new Tlv(OathConstants.TagName, oldId);
         using var newNameTlv = new Tlv(OathConstants.TagName, newId);
 
-        var data = new byte[oldNameTlv.TotalLength + newNameTlv.TotalLength];
-        oldNameTlv.AsSpan().CopyTo(data);
-        newNameTlv.AsSpan().CopyTo(data.AsSpan(oldNameTlv.TotalLength));
-
+        byte[] data = ConcatTlvs(oldNameTlv.AsSpan(), newNameTlv.AsSpan());
         var command = new ApduCommand(0x00, OathConstants.InsRename, 0x00, 0x00, data);
         await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
@@ -332,7 +330,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     }
 
     /// <inheritdoc />
-    public async Task<byte[]> CalculateAsync(
+    public async Task<ReadOnlyMemory<byte>> CalculateAsync(
         Credential credential,
         ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default)
@@ -343,10 +341,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
 
-        var data = new byte[nameTlv.TotalLength + challengeTlv.TotalLength];
-        nameTlv.AsSpan().CopyTo(data);
-        challengeTlv.AsSpan().CopyTo(data.AsSpan(nameTlv.TotalLength));
-
+        byte[] data = ConcatTlvs(nameTlv.AsSpan(), challengeTlv.AsSpan());
         var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x00, data);
         var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
@@ -387,10 +382,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
 
-        var data = new byte[nameTlv.TotalLength + challengeTlv.TotalLength];
-        nameTlv.AsSpan().CopyTo(data);
-        challengeTlv.AsSpan().CopyTo(data.AsSpan(nameTlv.TotalLength));
-
+        byte[] data = ConcatTlvs(nameTlv.AsSpan(), challengeTlv.AsSpan());
         // P2=0x01 requests truncated response
         var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x01, data);
         var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
@@ -522,10 +514,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             using var responseTlv = new Tlv(OathConstants.TagResponse, clientResponse);
             using var challengeTlv = new Tlv(OathConstants.TagChallenge, clientChallenge);
 
-            var data = new byte[responseTlv.TotalLength + challengeTlv.TotalLength];
-            responseTlv.AsSpan().CopyTo(data);
-            challengeTlv.AsSpan().CopyTo(data.AsSpan(responseTlv.TotalLength));
-
+            byte[] data = ConcatTlvs(responseTlv.AsSpan(), challengeTlv.AsSpan());
             var command = new ApduCommand(0x00, OathConstants.InsValidate, 0x00, 0x00, data);
             var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
@@ -593,11 +582,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             using var challengeTlv = new Tlv(OathConstants.TagChallenge, clientChallenge);
             using var responseTlv = new Tlv(OathConstants.TagResponse, clientResponse);
 
-            var data = new byte[keyTlv.TotalLength + challengeTlv.TotalLength + responseTlv.TotalLength];
-            keyTlv.AsSpan().CopyTo(data);
-            challengeTlv.AsSpan().CopyTo(data.AsSpan(keyTlv.TotalLength));
-            responseTlv.AsSpan().CopyTo(data.AsSpan(keyTlv.TotalLength + challengeTlv.TotalLength));
-
+            byte[] data = ConcatTlvs(keyTlv.AsSpan(), challengeTlv.AsSpan(), responseTlv.AsSpan());
             var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, data);
             await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
@@ -624,6 +609,23 @@ public sealed class OathSession : ApplicationSession, IOathSession
             .ConfigureAwait(false);
     }
 
+    private static byte[] ConcatTlvs(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
+    {
+        var result = new byte[a.Length + b.Length];
+        a.CopyTo(result);
+        b.CopyTo(result.AsSpan(a.Length));
+        return result;
+    }
+
+    private static byte[] ConcatTlvs(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b, ReadOnlySpan<byte> c)
+    {
+        var result = new byte[a.Length + b.Length + c.Length];
+        a.CopyTo(result);
+        b.CopyTo(result.AsSpan(a.Length));
+        c.CopyTo(result.AsSpan(a.Length + b.Length));
+        return result;
+    }
+
     protected override void Dispose(bool disposing)
     {
         if (disposing)
@@ -646,9 +648,9 @@ public sealed class OathSession : ApplicationSession, IOathSession
         if (response.SW1 != 0x61)
             return response.Data;
 
-        // Collect all chained data using MemoryStream to avoid repeated ToArray() calls
-        using var stream = new MemoryStream();
-        stream.Write(response.Data.Span);
+        // Collect all chained data using ArrayBufferWriter to avoid the double allocation from MemoryStream.ToArray()
+        var buffer = new ArrayBufferWriter<byte>();
+        buffer.Write(response.Data.Span);
 
         var currentResponse = response;
         while (currentResponse.SW1 == 0x61)
@@ -657,9 +659,9 @@ public sealed class OathSession : ApplicationSession, IOathSession
             currentResponse = await _protocol
                 .TransmitAndReceiveAsync(sendRemaining, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
-            stream.Write(currentResponse.Data.Span);
+            buffer.Write(currentResponse.Data.Span);
         }
 
-        return stream.ToArray();
+        return buffer.WrittenMemory;
     }
 }

@@ -335,6 +335,17 @@ public sealed class ClientPin : IDisposable
             throw new ArgumentException("At least one permission must be specified.", nameof(permissions));
         }
 
+        // Check if authenticator supports pinUvAuthToken (CTAP 2.1 permissions-based tokens).
+        // If not, fall back to legacy getPinToken (subcommand 0x05) without permissions.
+        // This matches python-fido2's ClientPin.get_pin_token() logic.
+        var info = await _session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
+        bool supportsTokenWithPermissions = info.Options.TryGetValue("pinUvAuthToken", out var supported) && supported;
+
+        if (!supportsTokenWithPermissions)
+        {
+            return await GetPinTokenAsync(pinUtf8, cancellationToken).ConfigureAwait(false);
+        }
+
         // Get authenticator's key agreement key
         var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
             .ConfigureAwait(false);

@@ -277,7 +277,7 @@ public sealed partial class PivSession
 
             if (raw.Length == outputLength)
             {
-                return raw;
+                return raw.AsSpan().ToArray();
             }
 
             // Pad with leading zeros if result is shorter than key size (leading zeros lost in BigInteger)

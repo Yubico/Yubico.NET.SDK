@@ -153,9 +153,15 @@ public sealed class LargeBlobEntry
                     // Empty byte string key = data field
                     data = reader.ReadByteString();
                 }
+                else if (key is null)
+                {
+                    // Key was not consumed (PeekState wasn't ByteString), skip both key and value
+                    reader.SkipValue();
+                    reader.SkipValue();
+                }
                 else
                 {
-                    reader.SkipValue();
+                    // Key was consumed by ReadByteString(), only skip the value
                     reader.SkipValue();
                 }
             }

@@ -97,12 +97,12 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Validates the access key using mutual HMAC-SHA1 challenge-response authentication.
     /// </summary>
-    Task ValidateAsync(byte[] key, CancellationToken cancellationToken = default);
+    Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Sets or changes the access key for the OATH applet.
     /// </summary>
-    Task SetKeyAsync(byte[] key, CancellationToken cancellationToken = default);
+    Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Removes the access key from the OATH applet.

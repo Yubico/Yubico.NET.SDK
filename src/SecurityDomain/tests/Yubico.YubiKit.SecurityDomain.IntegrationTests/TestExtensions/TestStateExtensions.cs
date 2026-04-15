@@ -151,6 +151,7 @@ public static class TestStateExtensions
                     sharedConnection,
                     configuration,
                     scpKeyParams,
+                    state.FirmwareVersion,
                     cancellationToken).ConfigureAwait(false);
 
                 await action(session).ConfigureAwait(false);

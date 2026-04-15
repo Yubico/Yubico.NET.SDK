@@ -94,6 +94,25 @@ public static class TlvHelper
         return writer.WrittenMemory.ToArray();
     }
 
+    /// <summary>
+    ///     Encodes a collection of TLV objects into a single byte sequence, then disposes each TLV.
+    ///     Use this when the TLV objects are created inline and not needed after encoding.
+    /// </summary>
+    public static Memory<byte> EncodeAndDisposeList(params Tlv[] tlvData)
+    {
+        try
+        {
+            return EncodeList(tlvData);
+        }
+        finally
+        {
+            foreach (var tlv in tlvData)
+            {
+                tlv.Dispose();
+            }
+        }
+    }
+
     // /// <summary>
     // ///     Encodes an array of Tlvs into a sequence of BER-TLV encoded data.
     // /// </summary>

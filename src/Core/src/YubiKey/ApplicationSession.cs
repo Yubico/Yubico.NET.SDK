@@ -89,20 +89,6 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
     }
 
-    /// <summary>
-    /// Throws if the session is disposed or not initialized.
-    /// Call this at the start of public methods that require an active session.
-    /// </summary>
-    protected void EnsureReady()
-    {
-        ThrowIfDisposed();
-        if (!IsInitialized)
-        {
-            throw new InvalidOperationException(
-                $"{GetType().Name} is not initialized. Use the static CreateAsync() factory method.");
-        }
-    }
-
     public void Dispose()
     {
         Dispose(true);

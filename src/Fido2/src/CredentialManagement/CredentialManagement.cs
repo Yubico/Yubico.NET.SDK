@@ -36,6 +36,12 @@ namespace Yubico.YubiKit.Fido2.CredentialManagement;
 public sealed class CredentialManagement : IDisposable
 {
     private bool _disposed;
+
+    // NOTE: This field is typed as FidoSession (concrete) because it calls the internal
+    // SendCborAsync(byte, ReadOnlyMemory<byte>?, CancellationToken) method which is not
+    // exposed on IFidoSession. Changing to IFidoSession would require either promoting
+    // SendCborAsync to the public interface (leaking internal protocol details) or
+    // refactoring all call sites to assemble the full command+payload buffer manually.
     private readonly FidoSession _session;
     private readonly IPinUvAuthProtocol _protocol;
     private readonly ReadOnlyMemory<byte> _pinUvAuthToken;

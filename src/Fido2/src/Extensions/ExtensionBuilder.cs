@@ -303,16 +303,17 @@ public sealed class ExtensionBuilder
             writer.WriteBoolean(true);
         }
         
-        if (_largeBlob is not null)
+        if (_largeBlobAssertion is not null)
+        {
+            // Assertion input takes precedence over makeCredential input;
+            // both use the same "largeBlob" key, so only one may be written.
+            writer.WriteTextString(ExtensionIdentifiers.LargeBlob);
+            _largeBlobAssertion.Encode(writer);
+        }
+        else if (_largeBlob is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.LargeBlob);
             _largeBlob.Encode(writer);
-        }
-
-        if (_largeBlobAssertion is not null)
-        {
-            writer.WriteTextString(ExtensionIdentifiers.LargeBlob);
-            _largeBlobAssertion.Encode(writer);
         }
 
         if (_largeBlobKey)

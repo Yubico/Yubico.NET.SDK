@@ -17,6 +17,8 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2.Cbor;
 using Yubico.YubiKit.Fido2.Ctap;
 
+using static Yubico.YubiKit.Fido2.Cbor.CoseKeyWriter;
+
 namespace Yubico.YubiKit.Fido2.Pin;
 
 /// <summary>
@@ -496,37 +498,6 @@ public sealed class ClientPin : IDisposable
         {
             CryptographicOperations.ZeroMemory(hash);
         }
-    }
-    
-    private static void WriteCoseKey(CborWriter writer, Dictionary<int, object?> key)
-    {
-        // Write COSE_Key as map, keys sorted numerically (negative < positive)
-        var sortedKeys = key.Keys.OrderBy(k => k).ToList();
-        
-        writer.WriteStartMap(key.Count);
-        
-        foreach (var k in sortedKeys)
-        {
-            writer.WriteInt32(k);
-            
-            switch (key[k])
-            {
-                case int intVal:
-                    writer.WriteInt32(intVal);
-                    break;
-                case byte[] bytes:
-                    writer.WriteByteString(bytes);
-                    break;
-                case null:
-                    writer.WriteNull();
-                    break;
-                default:
-                    throw new InvalidOperationException(
-                        $"Unsupported COSE key value type: {key[k]?.GetType().Name}");
-            }
-        }
-        
-        writer.WriteEndMap();
     }
     
     private static (int Retries, bool PowerCycleRequired) ParsePinRetriesResponse(ReadOnlyMemory<byte> data)

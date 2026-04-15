@@ -140,16 +140,17 @@ public sealed class EcAttributes : AlgorithmAttributes
     /// <summary>
     ///     Creates EC attributes for the given key slot and curve.
     ///     The algorithm ID is automatically determined:
-    ///     Ed25519 → EdDSA (0x16), DEC slot → ECDH (0x12), others → ECDSA (0x13).
+    ///     Ed25519 → EdDSA (0x16), X25519 → ECDH (0x12), DEC slot → ECDH (0x12), others → ECDSA (0x13).
     /// </summary>
     public static EcAttributes Create(KeyRef keyRef, CurveOid oid) =>
         new()
         {
-            AlgorithmId = oid == CurveOid.Ed25519
-                ? EddsaAlgorithmId
-                : keyRef == KeyRef.Dec
-                    ? EcdhAlgorithmId
-                    : EcdsaAlgorithmId,
+            AlgorithmId = oid switch
+            {
+                CurveOid.Ed25519 => EddsaAlgorithmId,
+                CurveOid.X25519 => EcdhAlgorithmId,
+                _ => keyRef == KeyRef.Dec ? EcdhAlgorithmId : EcdsaAlgorithmId,
+            },
             Oid = oid,
             ImportFormat = EcImportFormat.Standard,
         };

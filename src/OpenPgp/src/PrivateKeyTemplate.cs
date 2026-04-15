@@ -105,7 +105,7 @@ public abstract class PrivateKeyTemplate
                 valueTlv.AsSpan().CopyTo(inner.AsSpan(CrtBytes.Length + headerTlv.TotalLength));
 
                 using var outerTlv = new Tlv(0x4D, inner);
-                return outerTlv.AsMemory().ToArray();
+                return outerTlv.AsSpan().ToArray();
             }
             finally
             {

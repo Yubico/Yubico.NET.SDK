@@ -172,7 +172,7 @@ public sealed partial class OpenPgpSession
         using var innerTlv = new Tlv(0x86, ephemeralPublicKey);
         using var middleTlv = new Tlv(0x7F49, innerTlv.AsSpan());
         using var outerTlv = new Tlv(0xA6, middleTlv.AsSpan());
-        return outerTlv.AsMemory().ToArray();
+        return outerTlv.AsSpan().ToArray();
     }
 
     /// <summary>

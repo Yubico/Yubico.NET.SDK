@@ -193,7 +193,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
                 managementVersion = new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2]);
             }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger.LogDebug(ex, "Could not get version from Management SELECT, continuing with OTP SELECT.");
         }

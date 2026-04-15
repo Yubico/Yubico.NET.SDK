@@ -141,8 +141,14 @@ public abstract class SlotConfiguration : IDisposable
 
         if (!accCode.IsEmpty)
         {
-            int accLen = Math.Min(accCode.Length, YubiOtpConstants.AccessCodeSize);
-            accCode[..accLen].CopyTo(config.AsSpan(38, accLen));
+            if (accCode.Length != YubiOtpConstants.AccessCodeSize)
+            {
+                throw new ArgumentException(
+                    $"Access code must be exactly {YubiOtpConstants.AccessCodeSize} bytes, got {accCode.Length}.",
+                    nameof(accCode));
+            }
+
+            accCode.CopyTo(config.AsSpan(38, YubiOtpConstants.AccessCodeSize));
         }
 
         config[44] = _fixedSize;

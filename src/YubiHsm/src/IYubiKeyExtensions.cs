@@ -46,13 +46,21 @@ public static class IYubiKeyExtensions
         {
             var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
                 .ConfigureAwait(false);
-            return await HsmAuthSession.CreateAsync(
-                    connection,
-                    configuration,
-                    scpKeyParams,
-                    firmwareVersion,
-                    cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                return await HsmAuthSession.CreateAsync(
+                        connection,
+                        configuration,
+                        scpKeyParams,
+                        firmwareVersion,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch
+            {
+                await connection.DisposeAsync().ConfigureAwait(false);
+                throw;
+            }
         }
 
         /// <summary>

@@ -34,11 +34,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Getting certificate from slot 0x{Slot:X2}", (byte)slot);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // Get the object ID for this slot
         int objectId = GetCertificateObjectId(slot);
@@ -97,11 +93,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Storing certificate in slot 0x{Slot:X2}", (byte)slot);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {
@@ -166,11 +158,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Deleting certificate from slot 0x{Slot:X2}", (byte)slot);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {

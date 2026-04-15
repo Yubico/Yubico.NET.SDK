@@ -108,11 +108,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken)
     {
         Logger.LogDebug("PIV: Signing/decrypting with slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // Notify user if touch may be required
         await NotifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
@@ -338,11 +334,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Calculating shared secret with slot 0x{Slot:X2}", (byte)slot);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // Notify user if touch may be required
         await NotifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);

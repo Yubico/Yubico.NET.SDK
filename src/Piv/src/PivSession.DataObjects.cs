@@ -32,37 +32,10 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Getting data object 0x{ObjectId:X6}", objectId);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
-
-        // Build command data: TAG 0x5C [ object ID bytes ]
-        var idBytes = new List<byte>();
-        idBytes.Add(0x5C);
-        
-        if (objectId <= 0xFF)
-        {
-            idBytes.Add(0x01);
-            idBytes.Add((byte)objectId);
-        }
-        else if (objectId <= 0xFFFF)
-        {
-            idBytes.Add(0x02);
-            idBytes.Add((byte)(objectId >> 8));
-            idBytes.Add((byte)(objectId & 0xFF));
-        }
-        else
-        {
-            idBytes.Add(0x03);
-            idBytes.Add((byte)(objectId >> 16));
-            idBytes.Add((byte)((objectId >> 8) & 0xFF));
-            idBytes.Add((byte)(objectId & 0xFF));
-        }
+        EnsureProtocol();
 
         // INS 0xCB (GET DATA)
-        var command = new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, idBytes.ToArray());
+        var command = new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, EncodeObjectId(objectId));
         var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (response.SW == 0x6A82) // File not found
@@ -115,11 +88,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Putting data object 0x{ObjectId:X6}", objectId);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {
@@ -128,27 +97,7 @@ public sealed partial class PivSession
 
         // Build command data: TAG 0x5C [ object ID ] + TAG 0x53 [ data ]
         var cmdData = new List<byte>();
-        
-        // TAG 0x5C (Object ID)
-        cmdData.Add(0x5C);
-        if (objectId <= 0xFF)
-        {
-            cmdData.Add(0x01);
-            cmdData.Add((byte)objectId);
-        }
-        else if (objectId <= 0xFFFF)
-        {
-            cmdData.Add(0x02);
-            cmdData.Add((byte)(objectId >> 8));
-            cmdData.Add((byte)(objectId & 0xFF));
-        }
-        else
-        {
-            cmdData.Add(0x03);
-            cmdData.Add((byte)(objectId >> 16));
-            cmdData.Add((byte)((objectId >> 8) & 0xFF));
-            cmdData.Add((byte)(objectId & 0xFF));
-        }
+        cmdData.AddRange(EncodeObjectId(objectId));
 
         // TAG 0x53 (Data) - always required, even if empty for delete
         cmdData.Add(0x53);
@@ -179,8 +128,26 @@ public sealed partial class PivSession
 
         if (!response.IsOK())
         {
-            throw ApduException.FromStatusWord(response.SW, 
+            throw ApduException.FromStatusWord(response.SW,
                 $"Failed to write data object 0x{objectId:X6}");
         }
+    }
+
+    /// <summary>
+    /// Encodes an object ID as a TLV with tag 0x5C.
+    /// </summary>
+    private static byte[] EncodeObjectId(int objectId)
+    {
+        if (objectId <= 0xFF)
+        {
+            return [0x5C, 0x01, (byte)objectId];
+        }
+
+        if (objectId <= 0xFFFF)
+        {
+            return [0x5C, 0x02, (byte)(objectId >> 8), (byte)(objectId & 0xFF)];
+        }
+
+        return [0x5C, 0x03, (byte)(objectId >> 16), (byte)((objectId >> 8) & 0xFF), (byte)(objectId & 0xFF)];
     }
 }

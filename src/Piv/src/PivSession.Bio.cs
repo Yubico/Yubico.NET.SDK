@@ -31,12 +31,8 @@ public sealed partial class PivSession
     public async Task<PivBioMetadata> GetBioMetadataAsync(CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
-        
+        EnsureProtocol();
+
         Logger.LogDebug("PIV: Getting biometric metadata");
         
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x96, ReadOnlyMemory<byte>.Empty);
@@ -82,12 +78,8 @@ public sealed partial class PivSession
     public async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(bool requestTemporaryPin = false, bool checkOnly = false, CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
-        
+        EnsureProtocol();
+
         Logger.LogDebug("PIV: Verifying user via biometric (checkOnly={CheckOnly})", checkOnly);
         
         // Build command data
@@ -154,12 +146,8 @@ public sealed partial class PivSession
     public async Task VerifyTemporaryPinAsync(ReadOnlyMemory<byte> temporaryPin, CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
-        
+        EnsureProtocol();
+
         if (temporaryPin.IsEmpty)
         {
             throw new ArgumentException("Temporary PIN cannot be empty", nameof(temporaryPin));

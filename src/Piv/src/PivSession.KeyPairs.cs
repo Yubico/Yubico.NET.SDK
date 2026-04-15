@@ -45,11 +45,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Generating key in slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {
@@ -138,11 +134,7 @@ public sealed partial class PivSession
         ArgumentNullException.ThrowIfNull(privateKey);
 
         Logger.LogDebug("PIV: Importing key into slot 0x{Slot:X2}, key type {KeyType}", (byte)slot, privateKey.KeyType);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {
@@ -316,11 +308,7 @@ public sealed partial class PivSession
     {
         Logger.LogDebug("PIV: Moving key from slot 0x{Source:X2} to slot 0x{Dest:X2}",
             (byte)sourceSlot, (byte)destinationSlot);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {
@@ -354,11 +342,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Deleting key from slot 0x{Slot:X2}", (byte)slot);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {
@@ -387,11 +371,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Attesting key in slot 0x{Slot:X2}", (byte)slot);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // Key attestation is supported on firmware 4.3.0+. Rather than check version (which uses PIV app
         // version, not firmware version), we try the command and let it fail with appropriate SW.

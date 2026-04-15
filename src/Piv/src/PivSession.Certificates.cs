@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers;
 using System.IO.Compression;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
@@ -115,27 +116,29 @@ public sealed partial class PivSession
 
         // Build TLV: TAG 0x70 (cert) + TAG 0x71 (info) + TAG 0xFE (LRC)
         // Note: PutObjectAsync adds the outer 0x53 wrapper
-        var dataList = new List<byte>();
+        int certLenSize = BerLength.EncodingSize(certBytes.Length);
+        int totalSize = 1 + certLenSize + certBytes.Length + 3 + 2; // 0x70 + len + cert + 0x71 01 xx + 0xFE 00
+        var writer = new ArrayBufferWriter<byte>(totalSize);
 
         // TAG 0x70 (Certificate)
-        dataList.Add(0x70);
-        var certLenBuf = new byte[BerLength.EncodingSize(certBytes.Length)];
-        BerLength.Write(certLenBuf, certBytes.Length);
-        dataList.AddRange(certLenBuf);
-        dataList.AddRange(certBytes);
+        ReadOnlySpan<byte> certTag = [0x70];
+        writer.Write(certTag);
+        var lenSpan = writer.GetSpan(certLenSize);
+        BerLength.Write(lenSpan, certBytes.Length);
+        writer.Advance(certLenSize);
+        writer.Write(certBytes);
 
         // TAG 0x71 (Certificate info)
-        dataList.Add(0x71);
-        dataList.Add(0x01);
-        dataList.Add((byte)(shouldCompress ? 0x01 : 0x00));
+        ReadOnlySpan<byte> infoTlv = [0x71, 0x01, (byte)(shouldCompress ? 0x01 : 0x00)];
+        writer.Write(infoTlv);
 
         // TAG 0xFE (LRC - error detection)
-        dataList.Add(0xFE);
-        dataList.Add(0x00);
+        ReadOnlySpan<byte> lrcTlv = [0xFE, 0x00];
+        writer.Write(lrcTlv);
 
         // Write to object
         int objectId = GetCertificateObjectId(slot);
-        await PutObjectAsync(objectId, dataList.ToArray(), cancellationToken).ConfigureAwait(false);
+        await PutObjectAsync(objectId, writer.WrittenMemory, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

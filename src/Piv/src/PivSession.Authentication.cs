@@ -147,8 +147,8 @@ public sealed partial class PivSession
 
                 // Step 4: Build and send response with decrypted witness and our challenge
                 // Send: 7C [len] 80 [len] [decrypted witness] 81 [len] [challenge]
-                // Max size: 2 (header) + 2 + challengeLength + 2 + challengeLength = 6 + 2*challengeLength
-                int responseSize = 6 + (2 * challengeLength);
+                // Max size: 1 (tag) + 3 (BER len) + 1 (tag) + 3 (BER len) + challengeLength + 1 (tag) + 3 (BER len) + challengeLength
+                int responseSize = 12 + (2 * challengeLength);
                 responseBuffer = ArrayPool<byte>.Shared.Rent(responseSize);
                 int bytesWritten = BuildAuthResponse(decryptedWitness.AsSpan(0, challengeLength), challenge.AsSpan(0, challengeLength), responseBuffer.AsSpan(0, responseSize));
                 var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseBuffer.AsMemory(0, bytesWritten));
@@ -190,7 +190,7 @@ public sealed partial class PivSession
                 }
                 if (responseBuffer is not null)
                 {
-                    int responseSize = 6 + (2 * challengeLength);
+                    int responseSize = 12 + (2 * challengeLength);
                     CryptographicOperations.ZeroMemory(responseBuffer.AsSpan(0, responseSize));
                     ArrayPool<byte>.Shared.Return(responseBuffer);
                 }
@@ -246,24 +246,27 @@ public sealed partial class PivSession
     {
         int witnessLen = decryptedWitness.Length;
         int challengeLen = challenge.Length;
-        
+
         // Inner: 80 [len] [witness] 81 [len] [challenge]
-        int innerLen = 2 + witnessLen + 2 + challengeLen;
-        int totalLen = 2 + innerLen;
-        
+        int witnessLenSize = BerLength.EncodingSize(witnessLen);
+        int challengeLenSize = BerLength.EncodingSize(challengeLen);
+        int innerLen = 1 + witnessLenSize + witnessLen + 1 + challengeLenSize + challengeLen;
+        int outerLenSize = BerLength.EncodingSize(innerLen);
+        int totalLen = 1 + outerLenSize + innerLen;
+
         // Outer: 7C [len] [inner]
         int offset = 0;
-        
+
         destination[offset++] = 0x7C;
-        destination[offset++] = (byte)innerLen;
+        offset += BerLength.Write(destination[offset..], innerLen);
         destination[offset++] = 0x80;
-        destination[offset++] = (byte)witnessLen;
+        offset += BerLength.Write(destination[offset..], witnessLen);
         decryptedWitness.CopyTo(destination[offset..]);
         offset += witnessLen;
         destination[offset++] = 0x81;
-        destination[offset++] = (byte)challengeLen;
+        offset += BerLength.Write(destination[offset..], challengeLen);
         challenge.CopyTo(destination[offset..]);
-        
+
         return totalLen;
     }
 
@@ -406,6 +409,7 @@ public sealed partial class PivSession
         finally
         {
             CryptographicOperations.ZeroMemory(keyArr);
+            CryptographicOperations.ZeroMemory(inputArr);
             CryptographicOperations.ZeroMemory(outputArr);
         }
     }
@@ -456,10 +460,8 @@ public sealed partial class PivSession
                 return;
             }
 
-            // Parse retry count from status word (0x63Cx where x is attempts remaining)
-            if ((response.SW & 0xFFF0) == SWConstants.VerifyFail)
+            if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
             {
-                var retriesRemaining = (int)(response.SW & 0x0F);
                 throw new InvalidPinException(retriesRemaining);
             }
 
@@ -509,10 +511,9 @@ public sealed partial class PivSession
         var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
         var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
-        // Parse retry count from status word (0x63Cx where x is attempts remaining)
-        if ((response.SW & 0xFFF0) == SWConstants.VerifyFail)
+        if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
         {
-            return (int)(response.SW & 0x0F);
+            return retriesRemaining;
         }
 
         // PIN is blocked
@@ -570,10 +571,8 @@ public sealed partial class PivSession
                 return;
             }
 
-            // Parse retry count from status word (0x63Cx where x is attempts remaining)
-            if ((response.SW & 0xFFF0) == SWConstants.VerifyFail)
+            if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
             {
-                var retriesRemaining = (int)(response.SW & 0x0F);
                 throw new InvalidPinException(retriesRemaining, "PIN change failed - current PIN incorrect");
             }
 

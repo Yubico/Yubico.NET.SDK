@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
@@ -96,27 +97,33 @@ public sealed partial class PivSession
         }
 
         // Build command data: TAG 0x5C [ object ID ] + TAG 0x53 [ data ]
-        var cmdData = new List<byte>();
-        cmdData.AddRange(EncodeObjectId(objectId));
+        var objectIdBytes = EncodeObjectId(objectId);
+        int dataLen = data.HasValue && !data.Value.IsEmpty ? data.Value.Length : 0;
+        int dataLenSize = dataLen > 0 ? BerLength.EncodingSize(dataLen) : 1; // 1 byte for 0x00 (empty)
+        int estimatedSize = objectIdBytes.Length + 1 + dataLenSize + dataLen;
+        var writer = new ArrayBufferWriter<byte>(estimatedSize);
+
+        writer.Write(objectIdBytes);
 
         // TAG 0x53 (Data) - always required, even if empty for delete
-        cmdData.Add(0x53);
+        ReadOnlySpan<byte> dataTag = [0x53];
+        writer.Write(dataTag);
         if (data.HasValue && !data.Value.IsEmpty)
         {
-            var dataSpan = data.Value.Span;
-            var dataLenBuf = new byte[BerLength.EncodingSize(dataSpan.Length)];
-            BerLength.Write(dataLenBuf, dataSpan.Length);
-            cmdData.AddRange(dataLenBuf);
-            cmdData.AddRange(dataSpan.ToArray());
+            var lenSpan = writer.GetSpan(dataLenSize);
+            BerLength.Write(lenSpan, dataLen);
+            writer.Advance(dataLenSize);
+            writer.Write(data.Value.Span);
         }
         else
         {
             // Empty data for delete operations
-            cmdData.Add(0x00);
+            ReadOnlySpan<byte> emptyLen = [0x00];
+            writer.Write(emptyLen);
         }
 
         // INS 0xDB (PUT DATA)
-        var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, cmdData.ToArray());
+        var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, writer.WrittenMemory);
         var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())

@@ -495,10 +495,12 @@ public sealed class OathSession : ApplicationSession, IOathSession
     }
 
     /// <inheritdoc />
-    public async Task ValidateAsync(byte[] key, CancellationToken cancellationToken = default)
+    public async Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        ArgumentNullException.ThrowIfNull(key);
+
+        if (key.Length == 0)
+            throw new ArgumentException("Key must not be empty.", nameof(key));
 
         if (_challenge.Length == 0)
             throw new InvalidOperationException("Device is not locked; no challenge to validate against.");
@@ -508,7 +510,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         try
         {
-            clientResponse = HMACSHA1.HashData(key, _challenge);
+            clientResponse = HMACSHA1.HashData(key.Span, _challenge);
             RandomNumberGenerator.Fill(clientChallenge);
 
             using var responseTlv = new Tlv(OathConstants.TagResponse, clientResponse);
@@ -520,7 +522,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 .ConfigureAwait(false);
 
             // Verify device's response
-            byte[] expectedResponse = HMACSHA1.HashData(key, clientChallenge);
+            byte[] expectedResponse = HMACSHA1.HashData(key.Span, clientChallenge);
             byte[]? deviceResponse = null;
             try
             {
@@ -561,10 +563,12 @@ public sealed class OathSession : ApplicationSession, IOathSession
     }
 
     /// <inheritdoc />
-    public async Task SetKeyAsync(byte[] key, CancellationToken cancellationToken = default)
+    public async Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        ArgumentNullException.ThrowIfNull(key);
+
+        if (key.Length == 0)
+            throw new ArgumentException("Key must not be empty.", nameof(key));
 
         byte[] clientChallenge = new byte[OathConstants.ChallengeLength];
         byte[]? clientResponse = null;
@@ -573,10 +577,12 @@ public sealed class OathSession : ApplicationSession, IOathSession
         try
         {
             RandomNumberGenerator.Fill(clientChallenge);
-            clientResponse = HMACSHA1.HashData(key, clientChallenge);
+            clientResponse = HMACSHA1.HashData(key.Span, clientChallenge);
 
             byte typeByte = (byte)((byte)OathType.Totp | (byte)OathHashAlgorithm.Sha1);
-            keyValue = [typeByte, .. key];
+            keyValue = new byte[1 + key.Length];
+            keyValue[0] = typeByte;
+            key.Span.CopyTo(keyValue.AsSpan(1));
 
             using var keyTlv = new Tlv(OathConstants.TagKey, keyValue);
             using var challengeTlv = new Tlv(OathConstants.TagChallenge, clientChallenge);

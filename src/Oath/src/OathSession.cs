@@ -313,20 +313,27 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         using var oldNameTlv = new Tlv(OathConstants.TagName, oldId);
         using var newNameTlv = new Tlv(OathConstants.TagName, newId);
+        byte[] data = [..oldNameTlv.AsSpan(), ..newNameTlv.AsSpan()];
 
-        byte[] data = ConcatTlvs(oldNameTlv.AsSpan(), newNameTlv.AsSpan());
-        var command = new ApduCommand(0x00, OathConstants.InsRename, 0x00, 0x00, data);
-        await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+        try
+        {
+            var command = new ApduCommand(0x00, OathConstants.InsRename, 0x00, 0x00, data);
+            await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
 
-        return new Credential(
-            DeviceId,
-            newId,
-            newIssuer,
-            newName,
-            credential.OathType,
-            credential.Period,
-            credential.TouchRequired);
+            return new Credential(
+                DeviceId,
+                newId,
+                newIssuer,
+                newName,
+                credential.OathType,
+                credential.Period,
+                credential.TouchRequired);   
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(data);
+        }
     }
 
     /// <inheritdoc />
@@ -341,19 +348,26 @@ public sealed class OathSession : ApplicationSession, IOathSession
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
 
-        byte[] data = ConcatTlvs(nameTlv.AsSpan(), challengeTlv.AsSpan());
-        var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x00, data);
-        var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
-        foreach (var tlv in responseTlvs)
+        byte[] data = [..nameTlv.AsSpan(), ..challengeTlv.AsSpan()];
+        try
         {
-            if (tlv.Tag == OathConstants.TagResponse)
-                return tlv.Value.ToArray();
-        }
+            var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x00, data);
+            var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
 
-        throw new BadResponseException("No TAG_RESPONSE in CALCULATE response.");
+            using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
+            foreach (var tlv in responseTlvs)
+            {
+                if (tlv.Tag == OathConstants.TagResponse)
+                    return tlv.Value.ToArray();
+            }
+
+            throw new BadResponseException("No TAG_RESPONSE in CALCULATE response.");
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(data);
+        }
     }
 
     /// <inheritdoc />
@@ -382,20 +396,27 @@ public sealed class OathSession : ApplicationSession, IOathSession
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
 
-        byte[] data = ConcatTlvs(nameTlv.AsSpan(), challengeTlv.AsSpan());
-        // P2=0x01 requests truncated response
-        var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x01, data);
-        var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
-        foreach (var tlv in responseTlvs)
+        byte[] data = [..nameTlv.AsSpan(), ..challengeTlv.AsSpan()];
+        try
         {
-            if (tlv.Tag == OathConstants.TagTruncated)
-                return Code.FormatCode(credential, ts, tlv.Value.Span);
-        }
+            // P2=0x01 requests truncated response
+            var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x01, data);
+            var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
 
-        throw new BadResponseException("No TAG_TRUNCATED in CALCULATE response.");
+            using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
+            foreach (var tlv in responseTlvs)
+            {
+                if (tlv.Tag == OathConstants.TagTruncated)
+                    return Code.FormatCode(credential, ts, tlv.Value.Span);
+            }
+
+            throw new BadResponseException("No TAG_TRUNCATED in CALCULATE response.");
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(data);
+        }
     }
 
     /// <inheritdoc />
@@ -516,42 +537,49 @@ public sealed class OathSession : ApplicationSession, IOathSession
             using var responseTlv = new Tlv(OathConstants.TagResponse, clientResponse);
             using var challengeTlv = new Tlv(OathConstants.TagChallenge, clientChallenge);
 
-            byte[] data = ConcatTlvs(responseTlv.AsSpan(), challengeTlv.AsSpan());
-            var command = new ApduCommand(0x00, OathConstants.InsValidate, 0x00, 0x00, data);
-            var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            // Verify device's response
-            byte[] expectedResponse = HMACSHA1.HashData(key.Span, clientChallenge);
-            byte[]? deviceResponse = null;
+            byte[] data = [..responseTlv.AsSpan(), ..challengeTlv.AsSpan()];
             try
             {
-                using var deviceTlvs = TlvHelper.DecodeList(response.Data.Span);
+                var command = new ApduCommand(0x00, OathConstants.InsValidate, 0x00, 0x00, data);
+                var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
 
-                foreach (var tlv in deviceTlvs)
+                // Verify device's response
+                byte[] expectedResponse = HMACSHA1.HashData(key.Span, clientChallenge);
+                byte[]? deviceResponse = null;
+                try
                 {
-                    if (tlv.Tag == OathConstants.TagResponse)
+                    using var deviceTlvs = TlvHelper.DecodeList(response.Data.Span);
+
+                    foreach (var tlv in deviceTlvs)
                     {
-                        deviceResponse = tlv.Value.ToArray();
-                        break;
+                        if (tlv.Tag == OathConstants.TagResponse)
+                        {
+                            deviceResponse = tlv.Value.ToArray();
+                            break;
+                        }
                     }
+
+                    if (deviceResponse is null)
+                        throw new BadResponseException("No TAG_RESPONSE in VALIDATE response.");
+
+                    if (!CryptographicOperations.FixedTimeEquals(expectedResponse, deviceResponse))
+                        throw new InvalidOperationException("Device mutual authentication failed.");
+
+                    IsLocked = false;
+                    CryptographicOperations.ZeroMemory(_challenge);
+                    _challenge = [];
                 }
-
-                if (deviceResponse is null)
-                    throw new BadResponseException("No TAG_RESPONSE in VALIDATE response.");
-
-                if (!CryptographicOperations.FixedTimeEquals(expectedResponse, deviceResponse))
-                    throw new InvalidOperationException("Device mutual authentication failed.");
-
-                IsLocked = false;
-                CryptographicOperations.ZeroMemory(_challenge);
-                _challenge = [];
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(expectedResponse);
+                    if (deviceResponse is not null)
+                        CryptographicOperations.ZeroMemory(deviceResponse);
+                }
             }
             finally
             {
-                CryptographicOperations.ZeroMemory(expectedResponse);
-                if (deviceResponse is not null)
-                    CryptographicOperations.ZeroMemory(deviceResponse);
+                CryptographicOperations.ZeroMemory(data);
             }
         }
         finally
@@ -588,10 +616,17 @@ public sealed class OathSession : ApplicationSession, IOathSession
             using var challengeTlv = new Tlv(OathConstants.TagChallenge, clientChallenge);
             using var responseTlv = new Tlv(OathConstants.TagResponse, clientResponse);
 
-            byte[] data = ConcatTlvs(keyTlv.AsSpan(), challengeTlv.AsSpan(), responseTlv.AsSpan());
-            var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, data);
-            await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+            byte[] data = [..keyTlv.AsSpan(), ..challengeTlv.AsSpan(), ..responseTlv.AsSpan()];
+            try
+            {
+                var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, data);
+                await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(data);
+            }
         }
         finally
         {
@@ -613,23 +648,6 @@ public sealed class OathSession : ApplicationSession, IOathSession
         var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, keyTlv.AsMemory());
         await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-    }
-
-    private static byte[] ConcatTlvs(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
-    {
-        var result = new byte[a.Length + b.Length];
-        a.CopyTo(result);
-        b.CopyTo(result.AsSpan(a.Length));
-        return result;
-    }
-
-    private static byte[] ConcatTlvs(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b, ReadOnlySpan<byte> c)
-    {
-        var result = new byte[a.Length + b.Length + c.Length];
-        a.CopyTo(result);
-        b.CopyTo(result.AsSpan(a.Length));
-        c.CopyTo(result.AsSpan(a.Length + b.Length));
-        return result;
     }
 
     protected override void Dispose(bool disposing)

@@ -81,4 +81,11 @@ public static class TestCategories
     /// Test requires specific firmware version features.
     /// </summary>
     public const string RequiresFirmware = "RequiresFirmware";
+
+    /// <summary>
+    /// Test makes permanent device state changes that survive across test runs.
+    /// Only a factory reset (physical reinsertion within 10s) can undo them.
+    /// Examples: increasing minPinLength, enabling enterprise attestation.
+    /// </summary>
+    public const string PermanentDeviceState = "PermanentDeviceState";
 }

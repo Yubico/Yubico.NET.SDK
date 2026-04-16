@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -89,6 +90,31 @@ public static class FidoTestStateExtensions
             await clientPin.SetPinAsync(KnownTestPin, cancellationToken)
                 .ConfigureAwait(false);
             return;
+        }
+
+        // If a prior test left forcePinChange set, clear it via PIN change.
+        // ChangePinAsync uses direct PIN hash encryption (not PIN tokens), so it
+        // works even when forcePinChange blocks token requests.
+        // We use a reversed-PIN temporary value because Enhanced PIN keys (5.7+)
+        // reject same-PIN changes with PinPolicyViolation.
+        if (info.ForcePinChange == true)
+        {
+            try
+            {
+                byte[] tempPin = KnownTestPin.Reverse().ToArray();
+                await clientPin.ChangePinAsync(KnownTestPin, tempPin, cancellationToken)
+                    .ConfigureAwait(false);
+                await clientPin.ChangePinAsync(tempPin, KnownTestPin, cancellationToken)
+                    .ConfigureAwait(false);
+                CryptographicOperations.ZeroMemory(tempPin);
+            }
+            catch (CtapException ex) when (ex.Status is CtapStatus.PinInvalid
+                                               or CtapStatus.PinPolicyViolation)
+            {
+                Skip.If(true,
+                    $"FIDO2 forcePinChange recovery failed ({ex.Status}). PIN differs from " +
+                    "known test PIN '11234567' or policy rejects it. Reset: ykman fido reset");
+            }
         }
 
         // PIN is configured -- verify it matches the known test PIN.

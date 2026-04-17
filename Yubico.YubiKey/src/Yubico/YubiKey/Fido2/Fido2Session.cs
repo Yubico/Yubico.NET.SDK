@@ -126,7 +126,7 @@ namespace Yubico.YubiKey.Fido2
         public AuthenticatorInfo AuthenticatorInfo => _authenticatorInfo ??= GetAuthenticatorInfoInternal();
 
         /// <summary>
-        /// Retrieves and decrypts the authenticator's unique 128-bit device identifier.
+        /// Retrieves and decrypts the authenticator's unique 128-bit device identifier. It will call the KeyCollector to retrieve a persistent PIN/UV Authentication Token (PPUAT), which is required to perform the decryption operation.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -135,12 +135,12 @@ namespace Yubico.YubiKey.Fido2
         /// containing a device identifier that is unique to the authenticator.
         /// </para>
         /// <para>
-        /// A valid and active persistent PIN/UV Authentication Token is automatically obtained if needed.
+        /// A valid and active PPUAT is automatically obtained.
         /// The authenticator must support and return the `encIdentifier` in its `getInfo` response (YubiKeys v5.8.0 and later).
         /// </para>
         /// <para>
-        /// The identifier remains constant across PIN changes and resets, allowing platforms to track
-        /// the same physical authenticator across different sessions and states.
+        /// The identifier remains constant across PIN changes and other FIDO2 operations, allowing platforms to track
+        /// the same physical authenticator across different sessions and states. The identifier is only set to a new random value when the YubiKey's FIDO2 application is reset, as is required by the CTAP 2.3 spec (<see href="https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#authenticatorReset">section 6.6</see>).
         /// </para>
         /// </remarks>
         /// <returns>
@@ -149,9 +149,9 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// <para>
         /// Returns <c>null</c> if:
-        /// - The YubiKey firmware does not support this feature (firmware &lt; 5.8.0)
-        /// - The persistent PIN/UV auth token could not be obtained
-        /// - The user cancels PIN entry when prompted
+        /// <br/> - The YubiKey firmware does not support this feature (firmware &lt; 5.8.0).
+        /// <br/> - The PPUAT could not be obtained.
+        /// <br/> - The user cancels PIN entry when prompted.
         /// </para>
         /// <para>
         /// Always check <c>result.HasValue</c> before accessing <c>result.Value</c>.
@@ -170,22 +170,21 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Retrieves and decrypts the authenticator's credential store state.
+        /// Retrieves and decrypts the authenticator's credential store state. It will call the KeyCollector to retrieve a persistent PIN/UV Authentication Token (PPUAT), which is required to perform the decryption operation.
         /// </summary>
         /// <remarks>
         /// <para>
         /// This property leverages the <c>encCredStoreState</c> value obtained from the authenticator's
         /// <c>authenticatorGetInfo</c> response. The <c>encCredStoreState</c> is an encrypted byte string
-        /// that platforms can use to detect credential store changes across resets.
+        /// that platforms can use to detect credential store changes. The credential store state is only set to a new random value after resetting the FIDO2 application, adding or deleting a discoverable credential, and updating a credential's user information, as required by the CTAP 2.3 spec (see <see href="https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#authenticatorReset">section 6.6</see>, <see href="https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#op-makecred-step-rk">section 6.1.2</see>, <see href="https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#deleteCredential">section 6.8.5</see>, and <see href="https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#updateUserInformation">section 6.8.6</see>)
         /// </para>
         /// <para>
-        /// A valid and active persistent PIN/UV Authentication Token is automatically obtained if needed.
+        /// A valid and active PPUAT is automatically obtained.
         /// The authenticator must support and return the `encCredStoreState` in its `getInfo` response (YubiKeys v5.8.0 and later).
         /// </para>
         /// <para>
         /// By comparing the credential store state before and after operations (or across sessions), platforms can detect
-        /// when credentials have been added, removed, or when the authenticator has been reset. The state changes
-        /// whenever the credential store is modified.
+        /// when important authenticator operations have taken place and react accordingly (e.g. remove a deleted credential from a list of credentials displayed in an application window).
         /// </para>
         /// </remarks>
         /// <returns>
@@ -194,9 +193,9 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// <para>
         /// Returns <c>null</c> if:
-        /// - The YubiKey firmware does not support this feature (firmware &lt; 5.8.0)
-        /// - The persistent PIN/UV auth token could not be obtained
-        /// - The user cancels PIN entry when prompted
+        /// <br/> - The YubiKey firmware does not support this feature (firmware &lt; 5.8.0).
+        /// <br/> - The PPUAT could not be obtained.
+        /// <br/> - The user cancels PIN entry when prompted.
         /// </para>
         /// <para>
         /// Always check <c>result.HasValue</c> before accessing <c>result.Value</c>.

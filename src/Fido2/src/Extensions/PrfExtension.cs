@@ -68,16 +68,16 @@ public sealed class PrfInput
     /// <returns>The 32-byte salt for hmac-secret.</returns>
     public static byte[] ComputeSalt(ReadOnlySpan<byte> input)
     {
-        using var sha256 = System.Security.Cryptography.SHA256.Create();
-        
         // "WebAuthn PRF" || 0x00 || input
         var prefix = "WebAuthn PRF"u8;
         var data = new byte[prefix.Length + 1 + input.Length];
         prefix.CopyTo(data);
         data[prefix.Length] = 0x00;
         input.CopyTo(data.AsSpan(prefix.Length + 1));
-        
-        return sha256.ComputeHash(data);
+
+        var hash = new byte[32];
+        System.Security.Cryptography.SHA256.HashData(data, hash);
+        return hash;
     }
 }
 

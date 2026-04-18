@@ -34,7 +34,7 @@ public class FidoEnterpriseAttestationTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task EnterpriseAttestation_VendorFacilitated_ReturnsAttestationStatement(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

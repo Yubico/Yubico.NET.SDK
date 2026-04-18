@@ -34,19 +34,19 @@ public class FidoAlgorithmSupportTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_ES256_ReturnsES256Credential(YubiKeyTestState state) =>
         await TestAlgorithmAsync(state, CoseAlgorithmIdentifier.ES256);
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_EdDSA_ReturnsEdDSACredential(YubiKeyTestState state) =>
         await TestAlgorithmAsync(state, CoseAlgorithmIdentifier.EdDSA, skipIfUnsupported: true);
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_ES384_ReturnsES384Credential(YubiKeyTestState state) =>
         await TestAlgorithmAsync(state, CoseAlgorithmIdentifier.ES384, skipIfUnsupported: true);
 

@@ -45,19 +45,18 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Generating key in slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {
             throw new InvalidOperationException("Management key authentication required to generate keys");
         }
 
-        // Check version requirements
-        CheckAlgorithmSupport(algorithm);
+        // NOTE: Algorithm support is determined by firmware version, but PIV GET VERSION returns
+        // the PIV application version (typically 0.0.1), not the firmware version.
+        // Rather than incorrectly gate features, we let the commands fail with appropriate SW codes
+        // if the algorithm is not supported. The device will return SW 0x6A86 (incorrect parameters)
+        // or 0x6D00 (instruction not supported) for unsupported algorithms.
 
         // Build the command data: TAG 0xAC [ TAG 0x80 (algorithm) + optional policies ]
         // Pre-compute size: 0xAC + len + (0x80,0x01,algo) + optional (0xAA,0x01,pin) + optional (0xAB,0x01,touch)
@@ -135,11 +134,7 @@ public sealed partial class PivSession
         ArgumentNullException.ThrowIfNull(privateKey);
 
         Logger.LogDebug("PIV: Importing key into slot 0x{Slot:X2}, key type {KeyType}", (byte)slot, privateKey.KeyType);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {
@@ -313,11 +308,7 @@ public sealed partial class PivSession
     {
         Logger.LogDebug("PIV: Moving key from slot 0x{Source:X2} to slot 0x{Dest:X2}",
             (byte)sourceSlot, (byte)destinationSlot);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {
@@ -351,11 +342,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Deleting key from slot 0x{Slot:X2}", (byte)slot);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {
@@ -384,11 +371,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Attesting key in slot 0x{Slot:X2}", (byte)slot);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // Key attestation is supported on firmware 4.3.0+. Rather than check version (which uses PIV app
         // version, not firmware version), we try the command and let it fail with appropriate SW.
@@ -410,19 +393,10 @@ public sealed partial class PivSession
 #pragma warning restore SYSLIB0057
     }
 
-    private void CheckAlgorithmSupport(PivAlgorithm algorithm)
-    {
-        // NOTE: Algorithm support is determined by firmware version, but PIV GET VERSION returns
-        // the PIV application version (typically 0.0.1), not the firmware version.
-        // Rather than incorrectly gate features, we let the commands fail with appropriate SW codes
-        // if the algorithm is not supported. The device will return SW 0x6A86 (incorrect parameters)
-        // or 0x6D00 (instruction not supported) for unsupported algorithms.
-    }
-
     private IPublicKey ParsePublicKey(ReadOnlyMemory<byte> data, PivAlgorithm algorithm)
     {
         // Parse 0x7F49 (Public key template) - Tlv handles 2-byte tags
-        var template = Tlv.Create(data.Span);
+        using var template = Tlv.Create(data.Span);
         if (template.Tag != 0x7F49)
         {
             throw new ApduException("Invalid public key response format");

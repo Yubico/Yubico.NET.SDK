@@ -141,8 +141,14 @@ public abstract class SlotConfiguration : IDisposable
 
         if (!accCode.IsEmpty)
         {
-            int accLen = Math.Min(accCode.Length, YubiOtpConstants.AccessCodeSize);
-            accCode[..accLen].CopyTo(config.AsSpan(38, accLen));
+            if (accCode.Length != YubiOtpConstants.AccessCodeSize)
+            {
+                throw new ArgumentException(
+                    $"Access code must be exactly {YubiOtpConstants.AccessCodeSize} bytes, got {accCode.Length}.",
+                    nameof(accCode));
+            }
+
+            accCode.CopyTo(config.AsSpan(38, YubiOtpConstants.AccessCodeSize));
         }
 
         config[44] = _fixedSize;
@@ -209,6 +215,35 @@ public abstract class SlotConfiguration : IDisposable
         {
             _cfgFlags &= ~flag;
         }
+    }
+
+    /// <summary>
+    /// Processes an HMAC key for wire format storage: keys longer than 20 bytes are
+    /// shortened via SHA-1; keys shorter are zero-padded. The result is split into
+    /// <paramref name="key"/> (16 bytes) and <paramref name="uid"/> (4 bytes).
+    /// </summary>
+    /// <param name="hmacKey">The raw HMAC key (must not be empty).</param>
+    /// <param name="key">Destination for the first 16 bytes of the processed key.</param>
+    /// <param name="uid">Destination for bytes 16-19 of the processed key (written to first 4 bytes).</param>
+    protected static void ProcessHmacKey(ReadOnlySpan<byte> hmacKey, Span<byte> key, Span<byte> uid)
+    {
+        Span<byte> processedKey = stackalloc byte[YubiOtpConstants.HmacKeySize];
+
+        if (hmacKey.Length > YubiOtpConstants.HmacKeySize)
+        {
+            SHA1.HashData(hmacKey, processedKey);
+        }
+        else
+        {
+            hmacKey.CopyTo(processedKey);
+            // Remaining bytes are already zero from stackalloc
+        }
+
+        // Split: first 16 bytes -> key, next 4 bytes -> uid[0..4]
+        processedKey[..YubiOtpConstants.KeySize].CopyTo(key);
+        processedKey[YubiOtpConstants.KeySize..].CopyTo(uid);
+
+        CryptographicOperations.ZeroMemory(processedKey);
     }
 
     protected void ThrowIfDisposed() =>

@@ -17,6 +17,8 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2.Cbor;
 using Yubico.YubiKit.Fido2.Ctap;
 
+using static Yubico.YubiKit.Fido2.Cbor.CoseKeyWriter;
+
 namespace Yubico.YubiKit.Fido2.Pin;
 
 /// <summary>
@@ -333,6 +335,17 @@ public sealed class ClientPin : IDisposable
             throw new ArgumentException("At least one permission must be specified.", nameof(permissions));
         }
 
+        // Check if authenticator supports pinUvAuthToken (CTAP 2.1 permissions-based tokens).
+        // If not, fall back to legacy getPinToken (subcommand 0x05) without permissions.
+        // This matches python-fido2's ClientPin.get_pin_token() logic.
+        var info = await _session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
+        bool supportsTokenWithPermissions = info.Options.TryGetValue("pinUvAuthToken", out var supported) && supported;
+
+        if (!supportsTokenWithPermissions)
+        {
+            return await GetPinTokenAsync(pinUtf8, cancellationToken).ConfigureAwait(false);
+        }
+
         // Get authenticator's key agreement key
         var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -496,37 +509,6 @@ public sealed class ClientPin : IDisposable
         {
             CryptographicOperations.ZeroMemory(hash);
         }
-    }
-    
-    private static void WriteCoseKey(CborWriter writer, Dictionary<int, object?> key)
-    {
-        // Write COSE_Key as map, keys sorted numerically (negative < positive)
-        var sortedKeys = key.Keys.OrderBy(k => k).ToList();
-        
-        writer.WriteStartMap(key.Count);
-        
-        foreach (var k in sortedKeys)
-        {
-            writer.WriteInt32(k);
-            
-            switch (key[k])
-            {
-                case int intVal:
-                    writer.WriteInt32(intVal);
-                    break;
-                case byte[] bytes:
-                    writer.WriteByteString(bytes);
-                    break;
-                case null:
-                    writer.WriteNull();
-                    break;
-                default:
-                    throw new InvalidOperationException(
-                        $"Unsupported COSE key value type: {key[k]?.GetType().Name}");
-            }
-        }
-        
-        writer.WriteEndMap();
     }
     
     private static (int Retries, bool PowerCycleRequired) ParsePinRetriesResponse(ReadOnlyMemory<byte> data)

@@ -46,67 +46,45 @@ public enum KeyRef : byte
 public static class KeyRefExtensions
 {
     /// <summary>
+    ///     Consolidated lookup mapping each <see cref="KeyRef" /> to its associated Data Object tags and CRT.
+    /// </summary>
+    private static (DataObject AlgoAttr, DataObject Uif, DataObject GenTime, DataObject Fingerprint, ReadOnlyMemory<byte> Crt)
+        GetKeyRefData(KeyRef keyRef) => keyRef switch
+        {
+            KeyRef.Sig => (DataObject.AlgorithmAttributesSig, DataObject.UifSig, DataObject.GenerationTimeSig, DataObject.FingerprintSig, Crt.Sig),
+            KeyRef.Dec => (DataObject.AlgorithmAttributesDec, DataObject.UifDec, DataObject.GenerationTimeDec, DataObject.FingerprintDec, Crt.Dec),
+            KeyRef.Aut => (DataObject.AlgorithmAttributesAut, DataObject.UifAut, DataObject.GenerationTimeAut, DataObject.FingerprintAut, Crt.Aut),
+            KeyRef.Att => (DataObject.AlgorithmAttributesAtt, DataObject.UifAtt, DataObject.GenerationTimeAtt, DataObject.FingerprintAtt, Crt.Att),
+            _ => throw new ArgumentOutOfRangeException(nameof(keyRef)),
+        };
+
+    /// <summary>
     ///     Gets the <see cref="DataObject" /> tag for this key slot's algorithm attributes.
     /// </summary>
     public static DataObject AlgorithmAttributesDo(this KeyRef keyRef) =>
-        keyRef switch
-        {
-            KeyRef.Sig => DataObject.AlgorithmAttributesSig,
-            KeyRef.Dec => DataObject.AlgorithmAttributesDec,
-            KeyRef.Aut => DataObject.AlgorithmAttributesAut,
-            KeyRef.Att => DataObject.AlgorithmAttributesAtt,
-            _ => throw new ArgumentOutOfRangeException(nameof(keyRef)),
-        };
+        GetKeyRefData(keyRef).AlgoAttr;
 
     /// <summary>
     ///     Gets the <see cref="DataObject" /> tag for this key slot's User Interaction Flag.
     /// </summary>
     public static DataObject UifDo(this KeyRef keyRef) =>
-        keyRef switch
-        {
-            KeyRef.Sig => DataObject.UifSig,
-            KeyRef.Dec => DataObject.UifDec,
-            KeyRef.Aut => DataObject.UifAut,
-            KeyRef.Att => DataObject.UifAtt,
-            _ => throw new ArgumentOutOfRangeException(nameof(keyRef)),
-        };
+        GetKeyRefData(keyRef).Uif;
 
     /// <summary>
     ///     Gets the <see cref="DataObject" /> tag for this key slot's generation timestamp.
     /// </summary>
     public static DataObject GenerationTimeDo(this KeyRef keyRef) =>
-        keyRef switch
-        {
-            KeyRef.Sig => DataObject.GenerationTimeSig,
-            KeyRef.Dec => DataObject.GenerationTimeDec,
-            KeyRef.Aut => DataObject.GenerationTimeAut,
-            KeyRef.Att => DataObject.GenerationTimeAtt,
-            _ => throw new ArgumentOutOfRangeException(nameof(keyRef)),
-        };
+        GetKeyRefData(keyRef).GenTime;
 
     /// <summary>
     ///     Gets the <see cref="DataObject" /> tag for this key slot's fingerprint.
     /// </summary>
     public static DataObject FingerprintDo(this KeyRef keyRef) =>
-        keyRef switch
-        {
-            KeyRef.Sig => DataObject.FingerprintSig,
-            KeyRef.Dec => DataObject.FingerprintDec,
-            KeyRef.Aut => DataObject.FingerprintAut,
-            KeyRef.Att => DataObject.FingerprintAtt,
-            _ => throw new ArgumentOutOfRangeException(nameof(keyRef)),
-        };
+        GetKeyRefData(keyRef).Fingerprint;
 
     /// <summary>
     ///     Gets the Control Reference Template bytes for this key slot.
     /// </summary>
     public static ReadOnlyMemory<byte> GetCrt(this KeyRef keyRef) =>
-        keyRef switch
-        {
-            KeyRef.Sig => Crt.Sig,
-            KeyRef.Dec => Crt.Dec,
-            KeyRef.Aut => Crt.Aut,
-            KeyRef.Att => Crt.Att,
-            _ => throw new ArgumentOutOfRangeException(nameof(keyRef)),
-        };
+        GetKeyRefData(keyRef).Crt;
 }

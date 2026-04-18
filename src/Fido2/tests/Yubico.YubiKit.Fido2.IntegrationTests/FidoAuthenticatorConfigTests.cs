@@ -34,6 +34,7 @@ public class FidoAuthenticatorConfigTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task ToggleAlwaysUv_TogglesAlwaysUvOption(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -108,6 +109,8 @@ public class FidoAuthenticatorConfigTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.PermanentDeviceState)]
     public async Task SetMinPinLength_IncreasesMinimum(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -119,7 +122,6 @@ public class FidoAuthenticatorConfigTests
                 return;
             }
 
-            // Check for setMinPINLength support
             if (!info.Options.TryGetValue("setMinPINLength", out var setMinPinSupported) || !setMinPinSupported)
             {
                 Skip.If(true, "YubiKey does not support setMinPINLength option");
@@ -145,29 +147,32 @@ public class FidoAuthenticatorConfigTests
 
             try
             {
-                var currentMinLength = info.MinPinLength ?? 4;
-                // Set min PIN length to current + 1 (capped at a reasonable value)
-                // Note: this is a one-way operation - min length can only increase
-                var newMinLength = Math.Max(currentMinLength + 1, 6);
+                // Fixed target well below our 8-char test PIN. Using a constant
+                // avoids the old currentMinLength+1 pattern that accumulated
+                // across runs until it exceeded the test PIN length.
+                const int testMinPinLength = 6;
 
-                // Only proceed if the new length is within acceptable range
-                if (newMinLength > 63)
+                var currentMinLength = info.MinPinLength ?? 4;
+
+                // setMinPINLength is one-way (increase only, factory reset to undo).
+                // If already above our target, skip with diagnostic.
+                if (currentMinLength > testMinPinLength)
                 {
-                    Skip.If(true, "Cannot increase minimum PIN length further (at max)");
+                    Skip.If(true,
+                        $"minPinLength is already {currentMinLength} (> target {testMinPinLength}). " +
+                        "Factory reset required: ykman fido reset");
                     return;
                 }
 
                 var config = new AuthenticatorConfig(session, clientPin.Protocol, configPinToken);
 
-                // Set the minimum PIN length with our RP ID allowed to see it
                 await config.SetMinPinLengthAsync(
-                    newMinLength,
+                    testMinPinLength,
                     rpIds: [FidoTestData.RpId]);
 
-                // Verify the change by reading info again
                 var updatedInfo = await session.GetInfoAsync();
-                Assert.True(updatedInfo.MinPinLength >= newMinLength,
-                    $"Min PIN length should be at least {newMinLength}, was {updatedInfo.MinPinLength}");
+                Assert.True(updatedInfo.MinPinLength >= testMinPinLength,
+                    $"Min PIN length should be >= {testMinPinLength}, was {updatedInfo.MinPinLength}");
             }
             finally
             {
@@ -175,10 +180,15 @@ public class FidoAuthenticatorConfigTests
             }
         });
 
+    /// <summary>
+    /// Tests the full forcePinChange lifecycle: set the flag, verify PIN tokens are
+    /// blocked, change PIN to clear the flag, verify tokens work again.
+    /// Matches the python-fido2 test_force_pin_change pattern.
+    /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
-    public async Task SetMinPinLength_ForceChangePin_SetsForcePinChangeFlag(YubiKeyTestState state) =>
+    public async Task SetMinPinLength_ForceChangePin_FullCycle(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
             var info = await session.GetInfoAsync();
@@ -195,6 +205,10 @@ public class FidoAuthenticatorConfigTests
                 return;
             }
 
+            // Pre-condition: forcePinChange should not be set (NormalizePinAsync clears it)
+            Assert.True(info.ForcePinChange != true,
+                "ForcePinChange should not be set before test. NormalizePinAsync should have cleared it.");
+
             using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
             var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
@@ -215,34 +229,58 @@ public class FidoAuthenticatorConfigTests
             try
             {
                 var config = new AuthenticatorConfig(session, clientPin.Protocol, configPinToken);
-
-                // Force PIN change with a minimum length
                 var currentMinLength = info.MinPinLength ?? 4;
-                var newMinLength = Math.Max(currentMinLength, 4);
 
-                await config.SetMinPinLengthAsync(
-                    newMinLength,
-                    forceChangePin: true);
+                // Step 1: Set forcePinChange flag
+                await config.SetMinPinLengthAsync(currentMinLength, forceChangePin: true);
 
-                // Verify forcePinChange is set
-                var updatedInfo = await session.GetInfoAsync();
-                Assert.True(updatedInfo.ForcePinChange,
+                // Step 2: Verify flag is set
+                var flaggedInfo = await session.GetInfoAsync();
+                Assert.True(flaggedInfo.ForcePinChange,
                     "ForcePinChange should be true after SetMinPinLength with forceChangePin=true");
+
+                // Step 3: Verify PIN token requests are blocked
+                var ex = await Assert.ThrowsAsync<Ctap.CtapException>(
+                    () => clientPin.GetPinTokenAsync(FidoTestData.PinUtf8));
+                Assert.Equal(Ctap.CtapStatus.PinInvalid, ex.Status);
+
+                // Step 4: Clear flag via PIN change (reverse then restore, matching python-fido2 pattern)
+                byte[] reversedPin = FidoTestData.PinUtf8.Reverse().ToArray();
+                await clientPin.ChangePinAsync(FidoTestData.PinUtf8, reversedPin);
+                await clientPin.ChangePinAsync(reversedPin, FidoTestData.PinUtf8);
+                CryptographicOperations.ZeroMemory(reversedPin);
+
+                // Step 5: Verify PIN tokens work again
+                var restoredToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
+                Assert.NotEmpty(restoredToken);
+                CryptographicOperations.ZeroMemory(restoredToken);
+
+                // Step 6: Verify flag is cleared
+                var clearedInfo = await session.GetInfoAsync();
+                Assert.True(clearedInfo.ForcePinChange != true,
+                    "ForcePinChange should be cleared after PIN change");
             }
             finally
             {
-                // Clear the forcePinChange flag by performing a same-PIN change.
-                // This restores the key to a clean state for subsequent tests.
+                CryptographicOperations.ZeroMemory(configPinToken);
+
+                // Safety net: if test failed before step 4, clear forcePinChange.
+                // Uses reversed-PIN pattern because Enhanced PIN keys reject same-PIN changes.
                 try
                 {
-                    await clientPin.ChangePinAsync(FidoTestData.PinUtf8, FidoTestData.PinUtf8);
+                    var checkInfo = await session.GetInfoAsync();
+                    if (checkInfo.ForcePinChange == true)
+                    {
+                        byte[] tempPin = FidoTestData.PinUtf8.Reverse().ToArray();
+                        await clientPin.ChangePinAsync(FidoTestData.PinUtf8, tempPin);
+                        await clientPin.ChangePinAsync(tempPin, FidoTestData.PinUtf8);
+                        CryptographicOperations.ZeroMemory(tempPin);
+                    }
                 }
                 catch
                 {
-                    // Best-effort cleanup — ignore errors if change fails
+                    // Best-effort — NormalizePinAsync will also attempt recovery
                 }
-
-                CryptographicOperations.ZeroMemory(configPinToken);
             }
         });
 }

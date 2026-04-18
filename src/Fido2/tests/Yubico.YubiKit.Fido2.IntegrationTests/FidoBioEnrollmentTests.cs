@@ -33,6 +33,7 @@ public class FidoBioEnrollmentTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetFingerprintSensorInfo_ReturnsSensorCapabilities(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

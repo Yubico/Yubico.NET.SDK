@@ -36,6 +36,7 @@ public class FidoEncryptedMetadataTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido, MinFirmware = "5.7.0")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task DecryptIdentifier_TwoSessions_SamePlaintext(YubiKeyTestState state)
     {
         // Session 1: Get encIdentifier and decrypt with PPUAT
@@ -63,6 +64,7 @@ public class FidoEncryptedMetadataTests
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido, MinFirmware = "5.8.0")]
     [Trait("RequiresFirmware", "5.8+")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task DecryptCredStoreState_WithPpuat_Succeeds(YubiKeyTestState state)
     {
         var (encCredStoreState, decryptedState) = await GetEncryptedCredStoreStateWithDecryptionAsync(state);
@@ -80,6 +82,7 @@ public class FidoEncryptedMetadataTests
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido, MinFirmware = "5.8.0")]
     [Trait("RequiresFirmware", "5.8+")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetInfo_Firmware58Plus_BothEncryptedFieldsPresent(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -119,6 +122,7 @@ public class FidoEncryptedMetadataTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido, MinFirmware = "5.7.0")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task DecryptIdentifier_WrongPpuat_ReturnsGarbage(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

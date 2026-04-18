@@ -31,13 +31,19 @@ public sealed partial class OpenPgpSession
 
         var sigAttrs = _appData.Discretionary.AlgorithmAttributesSig;
         var payload = FormatSignPayload(sigAttrs, message.Span, hashAlgorithm);
+        try
+        {
+            // PSO: COMPUTE DIGITAL SIGNATURE — INS=0x2A, P1=0x9E, P2=0x9A
+            var command = new ApduCommand(0x00, (int)Ins.Pso, 0x9E, 0x9A, payload);
+            var response = await TransmitWithResponseAsync(command, cancellationToken)
+                .ConfigureAwait(false);
 
-        // PSO: COMPUTE DIGITAL SIGNATURE — INS=0x2A, P1=0x9E, P2=0x9A
-        var command = new ApduCommand(0x00, (int)Ins.Pso, 0x9E, 0x9A, payload);
-        var response = await TransmitWithResponseAsync(command, cancellationToken)
-            .ConfigureAwait(false);
-
-        return FormatSignResponse(sigAttrs, response.Data);
+            return FormatSignResponse(sigAttrs, response.Data);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(payload);
+        }
     }
 
     /// <inheritdoc />
@@ -68,13 +74,19 @@ public sealed partial class OpenPgpSession
 
         var autAttrs = _appData.Discretionary.AlgorithmAttributesAut;
         var payload = FormatSignPayload(autAttrs, data.Span, hashAlgorithm);
+        try
+        {
+            // INTERNAL AUTHENTICATE — INS=0x88, P1=0x00, P2=0x00
+            var command = new ApduCommand(0x00, (int)Ins.InternalAuthenticate, 0x00, 0x00, payload);
+            var response = await TransmitWithResponseAsync(command, cancellationToken)
+                .ConfigureAwait(false);
 
-        // INTERNAL AUTHENTICATE — INS=0x88, P1=0x00, P2=0x00
-        var command = new ApduCommand(0x00, (int)Ins.InternalAuthenticate, 0x00, 0x00, payload);
-        var response = await TransmitWithResponseAsync(command, cancellationToken)
-            .ConfigureAwait(false);
-
-        return FormatSignResponse(autAttrs, response.Data);
+            return FormatSignResponse(autAttrs, response.Data);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(payload);
+        }
     }
 
     // ── Private Helpers ───────────────────────────────────────────────
@@ -172,7 +184,7 @@ public sealed partial class OpenPgpSession
         using var innerTlv = new Tlv(0x86, ephemeralPublicKey);
         using var middleTlv = new Tlv(0x7F49, innerTlv.AsSpan());
         using var outerTlv = new Tlv(0xA6, middleTlv.AsSpan());
-        return outerTlv.AsMemory().ToArray();
+        return outerTlv.AsSpan().ToArray();
     }
 
     /// <summary>
@@ -189,21 +201,42 @@ public sealed partial class OpenPgpSession
 
         // SEQUENCE { r INTEGER, s INTEGER }
         var seqLength = rDer.Length + sDer.Length;
-        var result = new byte[2 + seqLength]; // 0x30 + length + r + s
-        result[0] = 0x30;
-        result[1] = (byte)seqLength;
-        rDer.CopyTo(result.AsSpan(2));
-        sDer.CopyTo(result.AsSpan(2 + rDer.Length));
+
+        byte[] result;
+        int contentOffset;
+
+        if (seqLength >= 128)
+        {
+            // Long-form DER length encoding: 0x30 0x81 <length> <content>
+            result = new byte[3 + seqLength];
+            result[0] = 0x30;
+            result[1] = 0x81;
+            result[2] = (byte)seqLength;
+            contentOffset = 3;
+        }
+        else
+        {
+            // Short-form DER length encoding: 0x30 <length> <content>
+            result = new byte[2 + seqLength];
+            result[0] = 0x30;
+            result[1] = (byte)seqLength;
+            contentOffset = 2;
+        }
+
+        rDer.CopyTo(result.AsSpan(contentOffset));
+        sDer.CopyTo(result.AsSpan(contentOffset + rDer.Length));
 
         return result;
     }
 
     /// <summary>
     ///     Encodes a big-endian unsigned integer as ASN.1 INTEGER.
+    ///     Trims leading zeros, adds a 0x00 pad if the high bit is set,
+    ///     and uses BER length encoding to support values longer than 127 bytes.
     /// </summary>
     private static byte[] EncodeAsn1Integer(ReadOnlySpan<byte> value)
     {
-        // Skip leading zeros
+        // Trim leading zeros (keep at least one byte)
         var startIndex = 0;
         while (startIndex < value.Length - 1 && value[startIndex] == 0)
         {
@@ -212,20 +245,22 @@ public sealed partial class OpenPgpSession
 
         var trimmed = value[startIndex..];
         var needsPadding = (trimmed[0] & 0x80) != 0;
-        var length = trimmed.Length + (needsPadding ? 1 : 0);
+        var integerLength = trimmed.Length + (needsPadding ? 1 : 0);
 
-        var result = new byte[2 + length]; // tag + length + value
+        // tag (0x02) + BER length + value
+        var headerSize = 1 + BerLength.EncodingSize(integerLength);
+        var result = new byte[headerSize + integerLength];
         result[0] = 0x02; // INTEGER tag
-        result[1] = (byte)length;
+        var offset = 1 + BerLength.Write(result.AsSpan(1), integerLength);
 
         if (needsPadding)
         {
-            result[2] = 0x00;
-            trimmed.CopyTo(result.AsSpan(3));
+            result[offset] = 0x00;
+            trimmed.CopyTo(result.AsSpan(offset + 1));
         }
         else
         {
-            trimmed.CopyTo(result.AsSpan(2));
+            trimmed.CopyTo(result.AsSpan(offset));
         }
 
         return result;

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Buffers.Binary;
-using System.Security.Cryptography;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.YubiOtp;
@@ -60,22 +59,7 @@ public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
                 nameof(imf));
         }
 
-        Span<byte> processedKey = stackalloc byte[YubiOtpConstants.HmacKeySize];
-
-        if (hmacKey.Length > YubiOtpConstants.HmacKeySize)
-        {
-            SHA1.HashData(hmacKey, processedKey);
-        }
-        else
-        {
-            hmacKey.CopyTo(processedKey);
-        }
-
-        // Split key: first 16 bytes -> _key, next 4 bytes -> _uid[0..4]
-        processedKey[..YubiOtpConstants.KeySize].CopyTo(_key);
-        processedKey[YubiOtpConstants.KeySize..].CopyTo(_uid);
-
-        CryptographicOperations.ZeroMemory(processedKey);
+        ProcessHmacKey(hmacKey, _key, _uid);
 
         // Store IMF / 0x10000 as big-endian in uid[4..6]
         if (imf != 0)

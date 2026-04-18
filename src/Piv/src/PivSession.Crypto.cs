@@ -108,11 +108,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken)
     {
         Logger.LogDebug("PIV: Signing/decrypting with slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // Notify user if touch may be required
         await NotifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
@@ -124,13 +120,11 @@ public sealed partial class PivSession
         // Pre-compute lengths to avoid List<byte> resizing (which can leave unzeroed copies)
 
         // Inner content: TAG 0x82 (2 bytes) + TAG 0x81 + length encoding + data
-        int dataLenEncodingSize = preparedData.Length > 255 ? 3
-            : preparedData.Length > 127 ? 2 : 1;
+        int dataLenEncodingSize = BerLength.EncodingSize(preparedData.Length);
         int innerLength = 2 + 1 + dataLenEncodingSize + preparedData.Length; // 0x82,0x00 + 0x81 + len + data
 
         // Template: TAG 0x7C + length encoding + inner content
-        int templateLenEncodingSize = innerLength > 255 ? 3
-            : innerLength > 127 ? 2 : 1;
+        int templateLenEncodingSize = BerLength.EncodingSize(innerLength);
         int totalLength = 1 + templateLenEncodingSize + innerLength; // 0x7C + template len + inner
 
         var commandData = new byte[totalLength];
@@ -142,21 +136,7 @@ public sealed partial class PivSession
             commandData[offset++] = 0x7C;
 
             // Template length encoding
-            if (innerLength > 255)
-            {
-                commandData[offset++] = 0x82;
-                commandData[offset++] = (byte)(innerLength >> 8);
-                commandData[offset++] = (byte)(innerLength & 0xFF);
-            }
-            else if (innerLength > 127)
-            {
-                commandData[offset++] = 0x81;
-                commandData[offset++] = (byte)innerLength;
-            }
-            else
-            {
-                commandData[offset++] = (byte)innerLength;
-            }
+            offset += BerLength.Write(commandData.AsSpan(offset), innerLength);
 
             // TAG 0x82 (Expected response - empty)
             commandData[offset++] = 0x82;
@@ -164,21 +144,7 @@ public sealed partial class PivSession
 
             // TAG 0x81 (Challenge/data to sign/decrypt)
             commandData[offset++] = 0x81;
-            if (preparedData.Length > 255)
-            {
-                commandData[offset++] = 0x82;
-                commandData[offset++] = (byte)(preparedData.Length >> 8);
-                commandData[offset++] = (byte)(preparedData.Length & 0xFF);
-            }
-            else if (preparedData.Length > 127)
-            {
-                commandData[offset++] = 0x81;
-                commandData[offset++] = (byte)preparedData.Length;
-            }
-            else
-            {
-                commandData[offset++] = (byte)preparedData.Length;
-            }
+            offset += BerLength.Write(commandData.AsSpan(offset), preparedData.Length);
 
             preparedData.CopyTo(commandData.AsSpan(offset));
 
@@ -301,21 +267,28 @@ public sealed partial class PivSession
         var result = System.Numerics.BigInteger.ModPow(b, exp, mod);
         var raw = result.ToByteArray(isUnsigned: true, isBigEndian: true);
 
-        if (raw.Length > outputLength)
+        try
         {
-            throw new CryptographicException(
-                $"ModPow result ({raw.Length} bytes) exceeds expected output length ({outputLength} bytes).");
-        }
+            if (raw.Length > outputLength)
+            {
+                throw new CryptographicException(
+                    $"ModPow result ({raw.Length} bytes) exceeds expected output length ({outputLength} bytes).");
+            }
 
-        if (raw.Length == outputLength)
+            if (raw.Length == outputLength)
+            {
+                return raw.AsSpan().ToArray();
+            }
+
+            // Pad with leading zeros if result is shorter than key size (leading zeros lost in BigInteger)
+            var padded = new byte[outputLength];
+            raw.CopyTo(padded.AsSpan(outputLength - raw.Length));
+            return padded;
+        }
+        finally
         {
-            return raw;
+            CryptographicOperations.ZeroMemory(raw);
         }
-
-        // Pad with leading zeros if result is shorter than key size (leading zeros lost in BigInteger)
-        var padded = new byte[outputLength];
-        raw.CopyTo(padded.AsSpan(outputLength - raw.Length));
-        return padded;
     }
 
     /// <summary>
@@ -331,11 +304,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Calculating shared secret with slot 0x{Slot:X2}", (byte)slot);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // Notify user if touch may be required
         await NotifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
@@ -356,11 +325,11 @@ public sealed partial class PivSession
         // Pre-compute lengths to avoid List<byte> resizing (which can leave unzeroed copies)
 
         // Inner content: TAG 0x82 (2 bytes) + TAG 0x85 + length encoding + data
-        int keyLenEncodingSize = peerKeyData.Length > 127 ? 2 : 1;
+        int keyLenEncodingSize = BerLength.EncodingSize(peerKeyData.Length);
         int innerLength = 2 + 1 + keyLenEncodingSize + peerKeyData.Length; // 0x82,0x00 + 0x85 + len + data
 
         // Template: TAG 0x7C + length encoding + inner content
-        int templateLenEncodingSize = innerLength > 127 ? 2 : 1;
+        int templateLenEncodingSize = BerLength.EncodingSize(innerLength);
         int totalLength = 1 + templateLenEncodingSize + innerLength; // 0x7C + template len + inner
 
         var data = new byte[totalLength];
@@ -372,15 +341,7 @@ public sealed partial class PivSession
             data[offset++] = 0x7C;
 
             // Template length encoding
-            if (innerLength > 127)
-            {
-                data[offset++] = 0x81;
-                data[offset++] = (byte)innerLength;
-            }
-            else
-            {
-                data[offset++] = (byte)innerLength;
-            }
+            offset += BerLength.Write(data.AsSpan(offset), innerLength);
 
             // TAG 0x82 (Expected response - empty)
             data[offset++] = 0x82;
@@ -388,15 +349,7 @@ public sealed partial class PivSession
 
             // TAG 0x85 (Exponentiation data - peer public key)
             data[offset++] = 0x85;
-            if (peerKeyData.Length > 127)
-            {
-                data[offset++] = 0x81;
-                data[offset++] = (byte)peerKeyData.Length;
-            }
-            else
-            {
-                data[offset++] = (byte)peerKeyData.Length;
-            }
+            offset += BerLength.Write(data.AsSpan(offset), peerKeyData.Length);
 
             peerKeyData.CopyTo(data.AsSpan(offset));
 
@@ -484,20 +437,21 @@ public sealed partial class PivSession
     private ReadOnlyMemory<byte> ParseCryptoResponse(ReadOnlyMemory<byte> data)
     {
         // Parse outer TLV (0x7C - Dynamic Auth Template)
-        var outer = Tlv.Create(data.Span);
+        using var outer = Tlv.Create(data.Span);
         if (outer.Tag != 0x7C)
         {
             throw new ApduException("Invalid crypto response format");
         }
 
         // Parse inner TLV (0x82 - Response data)
-        var inner = Tlv.Create(outer.Value.Span);
+        using var inner = Tlv.Create(outer.Value.Span);
         if (inner.Tag != 0x82)
         {
             throw new ApduException("Invalid crypto response - expected TAG 0x82");
         }
 
-        return inner.Value;
+        // Copy the value before the Tlv objects are disposed
+        return inner.Value.ToArray();
     }
 
     private byte[] EncodePeerPublicKey(IPublicKey publicKey)

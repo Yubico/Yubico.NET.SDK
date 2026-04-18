@@ -71,7 +71,8 @@ public sealed class LargeBlobStorage
     /// </remarks>
     public LargeBlobStorage(IFidoSession session, int maxFragmentLength = 1024)
     {
-        _session = session ?? throw new ArgumentNullException(nameof(session));
+        ArgumentNullException.ThrowIfNull(session);
+        _session = session;
         _maxFragmentLength = maxFragmentLength > 0 
             ? maxFragmentLength 
             : throw new ArgumentOutOfRangeException(nameof(maxFragmentLength));
@@ -95,7 +96,8 @@ public sealed class LargeBlobStorage
         int maxFragmentLength = 1024)
         : this(session, maxFragmentLength)
     {
-        _protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
+        ArgumentNullException.ThrowIfNull(protocol);
+        _protocol = protocol;
         _pinUvAuthToken = pinUvAuthToken;
     }
     

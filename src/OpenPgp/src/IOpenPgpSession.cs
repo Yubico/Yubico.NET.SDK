@@ -78,8 +78,8 @@ public interface IOpenPgpSession : IApplicationSession
     /// </remarks>
     /// <param name="pinUtf8">The User PIN as UTF-8 encoded bytes.</param>
     /// <param name="extended">
-    ///     If <c>true</c>, verifies for signing (P2=0x81). If <c>false</c>, verifies for
-    ///     other operations (P2=0x82). Defaults to <c>false</c>.
+    ///     If <c>true</c>, verifies for extended operations (decrypt/authenticate, P2=0x82).
+    ///     If <c>false</c>, verifies for signature operations (P2=0x81). Defaults to <c>false</c>.
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     Task VerifyPinAsync(

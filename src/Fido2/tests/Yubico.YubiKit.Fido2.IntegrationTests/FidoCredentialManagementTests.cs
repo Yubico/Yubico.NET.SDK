@@ -35,7 +35,7 @@ public class FidoCredentialManagementTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task EnumerateCredentials_WithResidentKeys_ReturnsCredentialList(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -116,7 +116,7 @@ public class FidoCredentialManagementTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task EnumerateCredentials_NoCredentials_ReturnsEmptyOrThrows(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -154,7 +154,7 @@ public class FidoCredentialManagementTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task DeleteCredential_ExistingCredential_RemovesFromDevice(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -252,6 +252,7 @@ public class FidoCredentialManagementTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetCredentialsMetadata_ReturnsValidCounts(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

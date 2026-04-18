@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.Oath;
 /// <summary>
 ///     Holds the data needed to create an OATH credential on a YubiKey.
 /// </summary>
-public sealed class CredentialData
+public sealed class CredentialData : IDisposable
 {
     /// <summary>
     ///     Gets or sets the account name.
@@ -107,7 +107,7 @@ public sealed class CredentialData
         }
 
         string name;
-        if (path.Contains(':'))
+        if (path.Contains(':', StringComparison.Ordinal))
         {
             int colonIndex = path.IndexOf(':');
             issuer = path[..colonIndex];
@@ -143,13 +143,19 @@ public sealed class CredentialData
         };
 
         string? digitsParam = queryParams["digits"];
-        int digits = digitsParam is not null ? int.Parse(digitsParam) : OathConstants.DefaultDigits;
+        int digits = digitsParam is not null
+            ? int.Parse(digitsParam, System.Globalization.CultureInfo.InvariantCulture)
+            : OathConstants.DefaultDigits;
 
         string? periodParam = queryParams["period"];
-        int period = periodParam is not null ? int.Parse(periodParam) : OathConstants.DefaultPeriod;
+        int period = periodParam is not null
+            ? int.Parse(periodParam, System.Globalization.CultureInfo.InvariantCulture)
+            : OathConstants.DefaultPeriod;
 
         string? counterParam = queryParams["counter"];
-        int counter = counterParam is not null ? int.Parse(counterParam) : OathConstants.DefaultImf;
+        int counter = counterParam is not null
+            ? int.Parse(counterParam, System.Globalization.CultureInfo.InvariantCulture)
+            : OathConstants.DefaultImf;
 
         return new CredentialData
         {
@@ -169,6 +175,17 @@ public sealed class CredentialData
     /// </summary>
     /// <returns>The credential ID as UTF-8 encoded bytes.</returns>
     public byte[] GetId() => Credential.FormatCredentialId(Issuer, Name, OathType, Period);
+
+    /// <summary>
+    ///     Zeros the shared secret to prevent sensitive key material from lingering in memory.
+    /// </summary>
+    public void Dispose()
+    {
+        if (Secret is not null)
+        {
+            CryptographicOperations.ZeroMemory(Secret);
+        }
+    }
 
     /// <summary>
     ///     Shortens an HMAC key per RFC 2104: if the key is longer than the hash
@@ -225,7 +242,17 @@ public sealed class CredentialData
     internal byte[] GetProcessedSecret()
     {
         byte[] shortened = HmacShortenKey(Secret, HashAlgorithm);
-        return PadSecret(shortened);
+        byte[] padded = PadSecret(shortened);
+
+        // If HmacShortenKey produced a new array (key was longer than block size)
+        // and PadSecret produced yet another array (shortened was under minimum size),
+        // the intermediate must be zeroed to avoid leaking key material.
+        if (!ReferenceEquals(shortened, Secret) && !ReferenceEquals(shortened, padded))
+        {
+            CryptographicOperations.ZeroMemory(shortened);
+        }
+
+        return padded;
     }
 
     /// <summary>

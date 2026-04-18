@@ -24,6 +24,10 @@ public sealed partial class OpenPgpSession
     /// <summary>Firmware version that fixes Curve25519 algorithm information entries.</summary>
     private static readonly FirmwareVersion AlgorithmInfoFixVersion = new(5, 6, 1);
 
+    /// <summary>Reverse lookup from algorithm attribute Data Object tag to KeyRef, built once.</summary>
+    private static readonly Dictionary<DataObject, KeyRef> AlgoAttributeToKeyRef =
+        Enum.GetValues<KeyRef>().ToDictionary(kr => kr.AlgorithmAttributesDo(), kr => kr);
+
     /// <inheritdoc />
     public async Task<Uif> GetUifAsync(
         KeyRef keyRef,
@@ -126,13 +130,6 @@ public sealed partial class OpenPgpSession
             ? outerTlv.Value.Span[..^2]
             : outerTlv.Value.Span;
 
-        // Build reverse lookup: DataObject → KeyRef
-        var doToKeyRef = new Dictionary<DataObject, KeyRef>();
-        foreach (var keyRef in Enum.GetValues<KeyRef>())
-        {
-            doToKeyRef[keyRef.AlgorithmAttributesDo()] = keyRef;
-        }
-
         var result = new List<(KeyRef, AlgorithmAttributes)>();
         var offset = 0;
 
@@ -143,7 +140,7 @@ public sealed partial class OpenPgpSession
 
             // Tag is the DO (0xC1, 0xC2, 0xC3, 0xDA); value is algorithm attributes bytes
             if (!Enum.IsDefined((DataObject)tlv.Tag) ||
-                !doToKeyRef.TryGetValue((DataObject)tlv.Tag, out var keyRef))
+                !AlgoAttributeToKeyRef.TryGetValue((DataObject)tlv.Tag, out var keyRef))
             {
                 continue;
             }

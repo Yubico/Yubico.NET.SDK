@@ -38,7 +38,7 @@ public class FidoGetAssertionTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetAssertion_AfterMakeCredential_ReturnsValidSignature(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -134,7 +134,7 @@ public class FidoGetAssertionTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetAssertion_ResidentKey_ReturnsUserHandle(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -230,7 +230,7 @@ public class FidoGetAssertionTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetAssertion_NoCredentials_ThrowsNoCredentials(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

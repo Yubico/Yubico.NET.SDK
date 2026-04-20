@@ -602,19 +602,21 @@ namespace Yubico.YubiKey.Scp
             // Now open a new session WITH SCP03 to perform the sign operation
             using var pivSession = new PivSession(testDevice, Scp03KeyParameters.DefaultKey);
 
-            // Sign data — 256 bytes of PKCS#1 formatted data triggers command chaining
+            // Raw data to sign (arbitrary size — gets hashed to 32 bytes by SHA-256)
             var dataToSign = new byte[128];
             Random.Shared.NextBytes(dataToSign);
 
             using var digester = CryptographyProviders.Sha256Creator();
             _ = digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
 
+            // PKCS#1 pads the 32-byte hash to match the RSA key size: 2048 bits = 256 bytes.
+            // 256 bytes exceeds the SCP03 transport limit (~239 bytes after encryption
+            // overhead), which forces command chaining — the scenario under test.
             var formattedData = RsaFormat.FormatPkcs1Sign(
                 digester.Hash,
                 RsaFormat.Sha256,
                 KeyType.RSA2048.GetKeyDefinition().LengthInBits);
 
-            // This is the critical operation — 256 bytes through SCP03 with command chaining
             var signature = pivSession.Sign(slotNumber, formattedData);
 
             // Verify signature using the generated public key

@@ -574,13 +574,23 @@ namespace Yubico.YubiKey.Scp
 
                 if (useComplexCreds)
                 {
-                    setupSession.TryChangePin(PivSessionIntegrationTestBase.DefaultPin,
-                        PivSessionIntegrationTestBase.ComplexPin, out _);
-                    setupSession.TryChangePuk(PivSessionIntegrationTestBase.DefaultPuk,
-                        PivSessionIntegrationTestBase.ComplexPuk, out _);
-                    setupSession.TryChangeManagementKey(
-                        PivSessionIntegrationTestBase.DefaultManagementKey,
-                        PivSessionIntegrationTestBase.ComplexManagementKey);
+                    Assert.True(
+                        setupSession.TryChangePin(
+                            PivSessionIntegrationTestBase.DefaultPin,
+                            PivSessionIntegrationTestBase.ComplexPin,
+                            out _),
+                        "Changing the PIN during test setup should succeed.");
+                    Assert.True(
+                        setupSession.TryChangePuk(
+                            PivSessionIntegrationTestBase.DefaultPuk,
+                            PivSessionIntegrationTestBase.ComplexPuk,
+                            out _),
+                        "Changing the PUK during test setup should succeed.");
+                    Assert.True(
+                        setupSession.TryChangeManagementKey(
+                            PivSessionIntegrationTestBase.DefaultManagementKey,
+                            PivSessionIntegrationTestBase.ComplexManagementKey),
+                        "Changing the management key during test setup should succeed.");
                 }
 
                 Assert.True(setupSession.TryAuthenticateManagementKey(mgmtKey));
@@ -608,7 +618,7 @@ namespace Yubico.YubiKey.Scp
             var signature = pivSession.Sign(slotNumber, formattedData);
 
             // Verify signature using the generated public key
-            var rsaPublicKey = (RSAPublicKey)publicKey;
+            var rsaPublicKey = Assert.IsType<RSAPublicKey>(publicKey);
             using var rsa = RSA.Create();
             rsa.ImportParameters(rsaPublicKey.Parameters);
             var isVerified = rsa.VerifyData(

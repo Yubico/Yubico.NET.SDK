@@ -360,15 +360,21 @@ namespace Yubico.YubiKey.Fido2
         public IReadOnlyList<string> TransportsForReset { get; } = new List<string>();
 
         /// <summary>
-        /// If present, an encrypted identifier that the platform can use to identify the authenticator across resets.
-        /// The platform must use the persistent UV auth token as input to decrypt the identifier.
-        /// If <c>null</c>, the authenticator does not support this feature.
+        /// <para>
+        /// If present, an encrypted identifier that the platform can use to identify the authenticator across various sessions, states, and operations. The identifier is only set to a new random value when the YubiKey's FIDO2 application is reset, as is required by the CTAP 2.3 spec (<see href="https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#authenticatorReset">section 6.6</see>).
+        /// </para>
+        /// <para>
+        /// The platform must use the Persistent PinUvAuthToken (PPUAT) as input to decrypt the identifier (see <see cref="GetIdentifier"/>).
         /// The encrypted identifier is 32 bytes: the first 16 bytes are the IV,
         /// and the second 16 bytes are the ciphertext.
         /// The encryption algorithm is AES-128-CBC.
-        /// The key is derived from the persistent UV auth token using HKDF-SHA-256
+        /// The key is derived from the PPUAT using HKDF-SHA-256
         /// with the info string "encIdentifier" and a salt of 32 bytes of 0x00.
         /// The plaintext is 16 bytes.
+        /// </para>
+        /// <para>
+        /// EncIdentifier is supported in YubiKey firmware version 5.8 and later. If <c>null</c>, the authenticator does not support this feature.
+        /// </para>
         /// </summary>
         public ReadOnlyMemory<byte>? EncIdentifier { get; }
 
@@ -389,15 +395,21 @@ namespace Yubico.YubiKey.Fido2
         public IReadOnlyList<string> AttestationFormats { get; } = new List<string>();
 
         /// <summary>
-        /// If present, an encrypted credential store state that the platform can use to detect credential store changes across resets.
-        /// The platform must use the persistent UV auth token as input to decrypt the state.
-        /// If <c>null</c>, the authenticator does not support this feature.
+        /// <para>
+        /// If present, an encrypted credential store state that the platform can use to detect credential store changes. The credential store state is only set to a new random value after resetting the FIDO2 application, adding or deleting a discoverable credential, and updating a credential's user information, as required by the CTAP 2.3 spec (see <see href="https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#authenticatorReset">section 6.6</see>, <see href="https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#op-makecred-step-rk">section 6.1.2</see>, <see href="https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#deleteCredential">section 6.8.5</see>, and <see href="https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#updateUserInformation">section 6.8.6</see>)
+        /// </para>
+        /// <para>
+        /// The platform must use the Persistent PinUvAuthToken (PPUAT) as input to decrypt the credential store state (see <see cref="GetCredStoreState"/>).
         /// The encrypted state is 32 bytes: the first 16 bytes are the IV,
         /// and the second 16 bytes are the ciphertext.
         /// The encryption algorithm is AES-128-CBC.
-        /// The key is derived from the persistent UV auth token using HKDF-SHA-256
+        /// The key is derived from the PPUAT using HKDF-SHA-256
         /// with the info string "encCredStoreState" and a salt of 32 bytes of 0x00.
         /// The plaintext is 16 bytes.
+        /// </para>
+        /// <para>
+        /// EncCredStoreState is supported in YubiKey firmware version 5.8 and later. If <c>null</c>, the authenticator does not support this feature.
+        /// </para>
         /// </summary>
         public ReadOnlyMemory<byte>? EncCredStoreState { get; }
 

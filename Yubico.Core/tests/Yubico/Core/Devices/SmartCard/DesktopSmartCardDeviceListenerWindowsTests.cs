@@ -54,6 +54,9 @@ using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.SmartCard.UnitTests
 {
+    [CollectionDefinition("WindowsOnlyTests", DisableParallelization = true)]
+    public class WindowsOnlyTestsCollection { }
+
     [Collection("WindowsOnlyTests")]
     public class DesktopSmartCardDeviceListenerWindowsTests
     {

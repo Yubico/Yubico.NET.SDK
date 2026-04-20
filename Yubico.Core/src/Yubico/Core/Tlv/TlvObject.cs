@@ -181,6 +181,12 @@ namespace Yubico.Core.Tlv
             int length = buffer[0];
             buffer = buffer[1..];
 
+            // Reject indefinite length form (0x80) — only determinate lengths are supported.
+            if (length == 0x80)
+            {
+                throw new TlvException(ExceptionMessages.TlvUnsupportedLengthField);
+            }
+
             // If the length is more than one byte, process remaining bytes.
             if (length > 0x80)
             {

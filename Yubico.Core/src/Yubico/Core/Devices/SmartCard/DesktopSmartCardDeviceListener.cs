@@ -443,24 +443,25 @@ namespace Yubico.Core.Devices.SmartCard
         /// </remarks>
         private void UpdateCurrentContext()
         {
+            // Dispose the old context BEFORE establishing a new one to prevent
+            // handle-value recycling: if the old handle was externally invalidated
+            // (e.g. RDS disconnect), Windows may recycle its IntPtr value for the
+            // new context, and disposing the old SafeHandle afterward would call
+            // SCardReleaseContext on the recycled value, destroying the new context.
+            if (!_context.IsInvalid && !_context.IsClosed)
+            {
+                _context.Dispose();
+            }
+
             uint result = _scard.EstablishContext(SCARD_SCOPE.USER, out SCardContext newContext);
             _log.SCardApiCall(nameof(NativeMethods.SCardEstablishContext), result);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {
-                // Establishment failed (e.g. Smart Card Service is still transitioning).
-                // Discard the invalid new handle and keep the existing _context so the caller
-                // can identify and retry on the next iteration.
                 newContext.Dispose();
+                _context = new SCardContext(IntPtr.Zero);
                 _log.LogWarning("Failed to re-establish smart card context during recovery (error: {Error:X}).", result);
                 return;
-            }
-
-            // Explicitly release the old context before replacing it to avoid leaking the
-            // native handle while waiting for the SafeHandle finalizer.
-            if (!_context.IsInvalid && !_context.IsClosed)
-            {
-                _context.Dispose();
             }
 
             _context = newContext;

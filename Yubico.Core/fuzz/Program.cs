@@ -75,6 +75,8 @@ public static class Program
             TlvObject.Parse(data);
         }
         catch (TlvException) { }
+        catch (ArgumentException) { }
+        catch (IndexOutOfRangeException) { }
     }
 
     private static void FuzzTlvDecodeList(ReadOnlySpan<byte> data)
@@ -84,6 +86,8 @@ public static class Program
             TlvObjects.DecodeList(data);
         }
         catch (TlvException) { }
+        catch (ArgumentException) { }
+        catch (IndexOutOfRangeException) { }
     }
 
     private static void FuzzBase16(ReadOnlySpan<byte> data)

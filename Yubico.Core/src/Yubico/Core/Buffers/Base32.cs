@@ -200,7 +200,7 @@ namespace Yubico.Core.Buffers
             int length = encoded.Length;
             if (length > 0)
             {
-                while (encoded[length - 1] == '=')
+                while (length > 0 && encoded[length - 1] == '=')
                 {
                     --length;
                 }

@@ -185,12 +185,21 @@ namespace Yubico.Core.Tlv
             if (length > 0x80)
             {
                 int lengthLn = length - 0x80;
+                if (buffer.Length < lengthLn)
+                {
+                    throw new ArgumentException("Insufficient data for length");
+                }
                 length = 0;
                 for (int i = 0; i < lengthLn; i++)
                 {
                     length = (length << 8) | buffer[0];
                     buffer = buffer[1..];
                 }
+            }
+
+            if (buffer.Length < length)
+            {
+                throw new ArgumentException("Insufficient data for length");
             }
 
             ReadOnlySpan<byte> value = buffer[..length];

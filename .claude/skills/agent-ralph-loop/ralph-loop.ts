@@ -143,11 +143,11 @@ You are executing a task from a progress file. Follow this protocol for EVERY ta
 
 ## TDD Loop
 1. **RED:** Write a failing test that asserts the task's expected behavior
-   - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
+   - Run: \`dotnet toolchain.cs test --filter "FullyQualifiedName~{TestClass}"\`
    - Expect: FAILURE (test must fail first to prove it tests something)
 
 2. **GREEN:** Write minimal code to make the test pass
-   - Run: \`dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"\`
+   - Run: \`dotnet toolchain.cs test --filter "FullyQualifiedName~{TestClass}"\`
    - Expect: SUCCESS
 
 3. **REFACTOR:** Clean up code, verify security, add XML docs if public API
@@ -166,9 +166,9 @@ You are executing a task from a progress file. Follow this protocol for EVERY ta
 - [ ] Input validation for lengths and ranges
 
 ## Build Commands (MANDATORY - never use raw dotnet commands)
-- Build: \`dotnet build.cs build\`
-- Test: \`dotnet build.cs test\`
-- Test filtered: \`dotnet build.cs test --filter "..."\`
+- Build: \`dotnet toolchain.cs build\`
+- Test: \`dotnet toolchain.cs test\`
+- Test filtered: \`dotnet toolchain.cs test --filter "..."\`
 
 **CRITICAL - xUnit v2/v3 MIXED CODEBASE:**
 This repo uses BOTH xUnit v2 and v3 test projects with different CLI requirements:

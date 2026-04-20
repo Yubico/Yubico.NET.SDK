@@ -2,7 +2,7 @@
 
 This file provides guidance to AI agents when working with code in this repository.
 
-**IMPORTANT:** If you are working in a subproject directory (e.g., `Yubico.YubiKit.SecurityDomain/`, `Yubico.YubiKit.Piv/`, etc.), you MUST also read that subproject's `CLAUDE.md` file if it exists. Subproject CLAUDE.md files contain specific patterns, test harness details, and context for that module.
+**IMPORTANT:** If you are working in a subproject directory (e.g., `src/SecurityDomain/`, `src/Piv/`, etc.), you MUST also read that subproject's `CLAUDE.md` file if it exists. Subproject CLAUDE.md files contain specific patterns, test harness details, and context for that module.
 
 ## Project Overview
 
@@ -17,24 +17,29 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 
 The SDK is organized into the following modules:
 
+All project folders live under `src/` with the `Yubico.YubiKit.` prefix stripped from directory names. Assembly names, namespaces, and DLL output names remain unchanged (e.g., `Yubico.YubiKit.Core`).
+
 **Core Infrastructure:**
-- `Yubico.YubiKit.Core/` - Device management, connection abstractions, APDU protocol handling, platform interop
-- `Yubico.YubiKit.Management/` - Device information queries, capability detection, firmware version
+- `src/Core/` - Device management, connection abstractions, APDU protocol handling, platform interop
+- `src/Management/` - Device information queries, capability detection, firmware version
 
 **YubiKey Applications:**
-- `Yubico.YubiKit.Piv/` - PIV (Personal Identity Verification) smart card functionality
-- `Yubico.YubiKit.Fido2/` - FIDO2/WebAuthn authentication
-- `Yubico.YubiKit.Oath/` - TOTP/HOTP one-time password generation
-- `Yubico.YubiKit.YubiOtp/` - Yubico OTP configuration and generation
-- `Yubico.YubiKit.OpenPgp/` - OpenPGP card implementation
-- `Yubico.YubiKit.SecurityDomain/` - Secure Channel Protocol (SCP03), key management
+- `src/Piv/` - PIV (Personal Identity Verification) smart card functionality
+- `src/Fido2/` - FIDO2/WebAuthn authentication
+- `src/Oath/` - TOTP/HOTP one-time password generation
+- `src/YubiOtp/` - Yubico OTP configuration and generation
+- `src/OpenPgp/` - OpenPGP card implementation
+- `src/SecurityDomain/` - Secure Channel Protocol (SCP03), key management
 
 **Hardware Security Modules:**
-- `Yubico.YubiKit.YubiHsm/` - YubiHSM 2 hardware security module integration
+- `src/YubiHsm/` - YubiHSM 2 hardware security module integration
+
+**Shared Infrastructure:**
+- `src/Cli.Shared/` - Shared CLI infrastructure for example tools
 
 **Testing Infrastructure:**
-- `Yubico.YubiKit.Tests.Shared/` - Shared test utilities, multi-transport test harness
-- `Yubico.YubiKit.Tests.TestProject/` - xUnit v3 test project structure
+- `src/Tests.Shared/` - Shared test utilities, multi-transport test harness
+- `src/Tests.TestProject/` - xUnit v3 test project structure
 
 **Module-Specific Documentation:**
 Each module directory may contain:
@@ -70,6 +75,8 @@ Each module directory may contain:
 - ✅ ALWAYS dispose crypto objects: `using var aes = Aes.Create()`
 - ❌ NEVER log PINs, keys, or sensitive payloads
 - ❌ NEVER use timing-vulnerable comparisons (use `FixedTimeEquals`)
+- ❌ NEVER store a privately-cloned `byte[]` of sensitive data in a `struct`. Struct copies each hold their own reference — you cannot zero all copies. Use a `sealed class` with `IDisposable` and call `ZeroMemory` in `Dispose()`.
+- ✅ `ReadOnlyMemory<byte>` passthrough **is** safe in a `readonly record struct` — all copies reference the same caller-owned memory, so zeroing the source zeroes all views. Caller is responsible for zeroing after transmission. See `ApduCommand` as the canonical passthrough example.
 
 **Modern C#:**
 - ✅ ALWAYS use `is null` / `is not null` (never `== null`)
@@ -98,7 +105,7 @@ Each module directory may contain:
 - ❌ AVOID: `SHA256.Create().ComputeHash(data)` (allocates array)
 
 **Testing:**
-- ✅ ALWAYS use `dotnet build.cs test` (handles xUnit v2/v3 runner differences automatically)
+- ✅ ALWAYS use `dotnet toolchain.cs test` (handles xUnit v2/v3 runner differences automatically)
 - ❌ NEVER use `dotnet test` directly (fails on xUnit v3 projects with wrong syntax)
 - See `docs/TESTING.md` for full testing guidance
 
@@ -111,7 +118,7 @@ Each module directory may contain:
 
 ## Build and Test Commands
 
-**IMPORTANT: Use the build script (`build.cs`) for all build, test, and packaging operations.**
+**IMPORTANT: Use the build script (`toolchain.cs`) for all build, test, and packaging operations.**
 
 The project uses a Bullseye-based build script that provides consistent, well-tested build workflows.
 
@@ -119,19 +126,19 @@ The project uses a Bullseye-based build script that provides consistent, well-te
 
 ```bash
 # Build the solution
-dotnet build.cs build
+dotnet toolchain.cs build
 
 # Run unit tests
-dotnet build.cs test
+dotnet toolchain.cs test
 
 # Run tests with code coverage
-dotnet build.cs coverage
+dotnet toolchain.cs coverage
 
 # Create NuGet packages
-dotnet build.cs pack
+dotnet toolchain.cs pack
 
 # Publish packages to local feed
-dotnet build.cs publish
+dotnet toolchain.cs publish
 ```
 
 ### Available Build Targets
@@ -150,19 +157,19 @@ dotnet build.cs publish
 
 ```bash
 # Override package version
-dotnet build.cs pack --package-version 1.0.0-preview.2
+dotnet toolchain.cs pack --package-version 1.0.0-preview.2
 
 # Include XML documentation in packages
-dotnet build.cs pack --include-docs
+dotnet toolchain.cs pack --include-docs
 
 # Dry run (show what would be published)
-dotnet build.cs publish --dry-run
+dotnet toolchain.cs publish --dry-run
 
 # Full clean build
-dotnet build.cs build --clean
+dotnet toolchain.cs build --clean
 
 # Custom NuGet feed
-dotnet build.cs publish --nuget-feed-name MyFeed --nuget-feed-path ~/my-feed
+dotnet toolchain.cs publish --nuget-feed-name MyFeed --nuget-feed-path ~/my-feed
 ```
 
 ### Direct dotnet Commands (Fallback)
@@ -177,13 +184,13 @@ dotnet build Yubico.YubiKit.sln
 dotnet test Yubico.YubiKit.sln
 
 # Run specific test project
-dotnet test Yubico.YubiKit.Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj
+dotnet test src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj
 
 # Run with coverage directly
 dotnet test --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 ```
 
-**Note:** Prefer using `dotnet build.cs [target]` for better output formatting, error handling, and consistent workflows.
+**Note:** Prefer using `dotnet toolchain.cs [target]` for better output formatting, error handling, and consistent workflows.
 
 ## Architecture
 
@@ -668,11 +675,11 @@ public sealed class DeviceInfo
 
 #### Common Mistakes
 
-**❌ BAD: Large struct**
+**❌ BAD: Large struct with owned byte[] clone**
 ```csharp
-public struct ApduCommand  // 32+ bytes!
+public struct SensitivePayload  // 32+ bytes, owns private clone!
 {
-    public byte[] Data { get; set; }  // Reference type in struct!
+    private readonly byte[] _data;  // Each struct copy has its own reference — can't zero all copies
     public DateTime Timestamp { get; set; }
     public Guid CorrelationId { get; set; }
 }
@@ -686,8 +693,9 @@ list[0].Value = 10;  // Modifies COPY, not original!
 
 **✅ GOOD: readonly struct or class**
 ```csharp
-public readonly struct ApduHeader { /* 4 bytes */ }
-public sealed class ApduCommand { /* Contains byte[] */ }
+public readonly struct ApduHeader { /* 4 bytes, no sensitive payload */ }
+public readonly record struct ApduCommand { /* ReadOnlyMemory<byte> passthrough — caller owns and zeroes */ }
+public sealed class SessionKey : IDisposable { /* Owns private byte[] clone — zeroes in Dispose() */ }
 ```
 
 #### Decision Matrix
@@ -1141,6 +1149,21 @@ bool isValid = expected.SequenceEqual(actual);
 
 ## Testing
 
+### Integration Test Strategy
+
+**Run only what's affected.** Don't run the full integration suite unless you're finishing a module or touching shared infrastructure.
+
+| Phase | What to run | Command |
+|-------|------------|---------|
+| **During development** | Smoke test on affected module only | `dotnet toolchain.cs -- test --integration --project Piv --smoke` |
+| **Targeted check** | Specific test you touched | `dotnet toolchain.cs -- test --integration --project Oath --filter "FullyQualifiedName~Calculate"` |
+| **Finishing a module** | Full integration for that module | `dotnet toolchain.cs -- test --integration --project Piv` |
+| **Before PR** | Full integration for all affected modules | Run per-module, not all modules |
+
+**`--smoke` skips:** `Slow` tests (RSA 3072/4096 keygen, 30+ sec each) and `RequiresUserPresence` tests (need physical touch).
+
+**Mark slow tests:** Any integration test that generates RSA 3072+ keys or has delays >5s must have `[Trait(TestCategories.Category, TestCategories.Slow)]`.
+
 ### Test Philosophy: Value Over Coverage
 
 **CRITICAL: Only write tests that provide real value. Don't create tests just to increase coverage metrics.**
@@ -1345,8 +1368,8 @@ See `docs/COMMIT_GUIDELINES.md` for detailed rules.
 
 Before committing:
 1. ✅ Ran `git status` to verify only your files are being committed
-2. ✅ Code builds without warnings: `dotnet build.cs build`
-3. ✅ All tests pass: `dotnet build.cs test`
+2. ✅ Code builds without warnings: `dotnet toolchain.cs build`
+3. ✅ All tests pass: `dotnet toolchain.cs test`
 4. ✅ Code formatted: `dotnet format`
 5. ✅ No nullable reference warnings
 6. ✅ Sensitive data properly zeroed

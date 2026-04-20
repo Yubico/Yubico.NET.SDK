@@ -140,7 +140,7 @@ Tests requiring user presence should log status:
 
 ✅ **Test execution flow is clear:**
 - Section 3.1: Step-by-step attribute → state → callback → cleanup flow
-- Section 5.1: Must use `dotnet build.cs test` (not `dotnet test`)
+- Section 5.1: Must use `dotnet toolchain.cs test` (not `dotnet test`)
 - Section 9.2: Test class structure shows organization
 
 ✅ **Test setup/teardown well-defined:**

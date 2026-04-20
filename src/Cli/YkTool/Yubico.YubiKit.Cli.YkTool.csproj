@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>yk</AssemblyName>
+    <RootNamespace>Yubico.YubiKit.Cli.YkTool</RootNamespace>
+    <IsPackable>false</IsPackable>
+
+    <!-- Suppress analyzer warnings that are noisy for example/CLI apps -->
+    <NoWarn>$(NoWarn);CA1852</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" />
+    <PackageReference Include="Spectre.Console.Cli" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Infrastructure dependencies -->
+    <ProjectReference Include="..\..\Core\src\Yubico.YubiKit.Core.csproj" />
+    <ProjectReference Include="..\..\Management\src\Yubico.YubiKit.Management.csproj" />
+    <ProjectReference Include="..\..\Cli.Shared\src\Yubico.YubiKit.Cli.Shared.csproj" />
+
+    <!-- Shared commands library (populated by DevTeam iterations) -->
+    <ProjectReference Include="..\..\Cli.Commands\src\Yubico.YubiKit.Cli.Commands.csproj" />
+  </ItemGroup>
+
+</Project>

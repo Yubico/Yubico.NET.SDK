@@ -31,7 +31,7 @@
 **Step 1: Reproduce the failure**
 Run the failing integration tests:
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~CreateFidoSession_With_SmartCard"
+dotnet toolchain.cs test --filter "FullyQualifiedName~CreateFidoSession_With_SmartCard"
 ```
 Expected: FAIL with SW=0x6A82
 
@@ -49,8 +49,8 @@ Based on debugging, fix the selection issue. Possible causes:
 
 **Step 4: Verify the fix**
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~CreateFidoSession_With_SmartCard"
-dotnet build.cs test --filter "FullyQualifiedName~CreateFidoSession_With_FactoryInstance"
+dotnet toolchain.cs test --filter "FullyQualifiedName~CreateFidoSession_With_SmartCard"
+dotnet toolchain.cs test --filter "FullyQualifiedName~CreateFidoSession_With_FactoryInstance"
 ```
 Expected: PASS
 
@@ -63,8 +63,8 @@ git commit -m "fix(fido2): resolve SmartCard connection selection error SW=0x6A8
 
 **Verification:**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~CreateFidoSession_With_SmartCard"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~CreateFidoSession_With_SmartCard"
 ```
 Expected: Build passes, SmartCard tests pass
 
@@ -100,13 +100,13 @@ Search for `FidoBackend` in Management project and update to `ManagementFidoHidB
 
 **Step 4: Verify build**
 ```bash
-dotnet build.cs build
+dotnet toolchain.cs build
 ```
 Expected: Build succeeds
 
 **Step 5: Run tests**
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~Management"
+dotnet toolchain.cs test --filter "FullyQualifiedName~Management"
 ```
 Expected: All Management tests pass
 
@@ -120,8 +120,8 @@ git commit -m "refactor(management): rename FidoBackend to ManagementFidoHidBack
 
 **Verification:**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~Management"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~Management"
 ```
 Expected: Build passes, all Management tests pass
 
@@ -170,8 +170,8 @@ Update tests to mock `IFidoSession` instead of the removed interfaces.
 
 **Step 6: Verify**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~Fido2"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~Fido2"
 ```
 Expected: Build succeeds, all tests pass
 
@@ -194,8 +194,8 @@ git commit -m "refactor(fido2): remove IBioEnrollmentCommands and IClientPinComm
 
 **Verification:**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~Fido2"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~Fido2"
 ```
 Expected: Build passes, all FIDO2 tests pass
 
@@ -267,9 +267,9 @@ Replace duplicated map-reading loops with calls to `CtapResponseParser.ReadIntKe
 
 **Step 4: Verify**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~CtapResponseParser"
-dotnet build.cs test --filter "FullyQualifiedName~CredentialManagement"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~CtapResponseParser"
+dotnet toolchain.cs test --filter "FullyQualifiedName~CredentialManagement"
 ```
 Expected: All tests pass
 
@@ -284,9 +284,9 @@ git commit -m "refactor(fido2): add CtapResponseParser to reduce CBOR deserializ
 
 **Verification:**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~CtapResponseParser"
-dotnet build.cs test --filter "FullyQualifiedName~CredentialManagement"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~CtapResponseParser"
+dotnet toolchain.cs test --filter "FullyQualifiedName~CredentialManagement"
 ```
 Expected: All tests pass
 
@@ -313,8 +313,8 @@ Convert manual CBOR building to use `CtapRequestBuilder` fluent API.
 
 **Step 3: Verify**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~Fido2"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~Fido2"
 ```
 Expected: All tests pass
 
@@ -327,8 +327,8 @@ git commit -m "refactor(fido2): standardize CBOR request building with CtapReque
 
 **Verification:**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~Fido2"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~Fido2"
 ```
 Expected: All tests pass
 
@@ -354,8 +354,8 @@ Delete `GetKeyType()` (lines 120-143) and `GetAlgorithm()` (lines 149-172) from 
 
 **Step 3: Verify**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~Fido2"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~Fido2"
 ```
 Expected: Build succeeds, all tests pass
 
@@ -368,8 +368,8 @@ git commit -m "refactor(fido2): remove unused GetKeyType and GetAlgorithm method
 
 **Verification:**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~Fido2"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~Fido2"
 ```
 Expected: Build passes, all tests pass
 
@@ -394,8 +394,8 @@ Add `[WithYubiKey()]` attribute to FIDO2 integration tests that require hardware
 
 **Step 3: Verify**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~Fido2.IntegrationTests"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~Fido2.IntegrationTests"
 ```
 Expected: Tests pass (hardware tests skipped if no device)
 
@@ -408,7 +408,7 @@ git commit -m "test(fido2): update integration tests to use WithYubiKey attribut
 
 **Verification:**
 ```bash
-dotnet build.cs build
+dotnet toolchain.cs build
 ```
 Expected: Build passes (hardware tests skipped if no device)
 
@@ -443,8 +443,8 @@ Write tests that verify the exception is thrown for non-SmartCard connections wi
 
 **Step 4: Verify**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~IYubiKeyExtensions"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~IYubiKeyExtensions"
 ```
 Expected: All tests pass
 
@@ -458,8 +458,8 @@ git commit -m "fix(core): validate connection type when ScpKeyParameters provide
 
 **Verification:**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~IYubiKeyExtensions"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~IYubiKeyExtensions"
 ```
 Expected: All tests pass
 
@@ -542,8 +542,8 @@ File saved and git status shows clean commit.
 
 ## Verification Requirements (MUST PASS BEFORE COMPLETION)
 
-1. **Build:** `dotnet build.cs build` (must exit 0)
-2. **Unit Tests:** `dotnet build.cs test` (all unit tests must pass)
+1. **Build:** `dotnet toolchain.cs build` (must exit 0)
+2. **Unit Tests:** `dotnet toolchain.cs test` (all unit tests must pass)
 3. **Integration Tests:** Best-effort for hardware tests; document any that require specific device configuration
 4. **No Regressions:** All existing tests pass
 

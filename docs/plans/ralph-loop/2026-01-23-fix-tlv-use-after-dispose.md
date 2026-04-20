@@ -101,12 +101,12 @@ return inner.Value.Span;  // ← _bytes still valid
 
 - [ ] 1.3: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 - [ ] 1.4: **Test authentication**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~PivAuthenticationTests"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivAuthenticationTests"
   ```
   Expected: `AuthenticateAsync_WithDefaultKey_Succeeds` should PASS.
 
@@ -152,7 +152,7 @@ return inner.Value.Span;  // ← _bytes still valid
 
 - [ ] 2.2: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 ---
@@ -177,7 +177,7 @@ return inner.Value.Span;  // ← _bytes still valid
 
 - [ ] 3.2: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 ---
@@ -202,7 +202,7 @@ return inner.Value.Span;  // ← _bytes still valid
 
 - [ ] 4.2: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 ---
@@ -227,7 +227,7 @@ return inner.Value.Span;  // ← _bytes still valid
 
 - [ ] 5.2: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 ---
@@ -252,7 +252,7 @@ return inner.Value.Span;  // ← _bytes still valid
 
 - [ ] 6.2: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 ---
@@ -265,7 +265,7 @@ return inner.Value.Span;  // ← _bytes still valid
 
 - [ ] 7.1: **Run all PIV integration tests**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"
   ```
   
   Expected results:
@@ -299,7 +299,7 @@ return inner.Value.Span;  // ← _bytes still valid
 
 ## Verification Requirements (MUST PASS BEFORE COMPLETION)
 
-1. **Build:** `dotnet build.cs build` (must exit 0)
+1. **Build:** `dotnet toolchain.cs build` (must exit 0)
 2. **Auth test:** `AuthenticateAsync_WithDefaultKey_Succeeds` must PASS
 3. **PIV integration tests:** No tests should FAIL (SKIP is acceptable)
 4. **Commit:** Changes committed with descriptive message

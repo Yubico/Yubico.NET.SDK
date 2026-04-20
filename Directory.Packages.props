@@ -3,7 +3,7 @@
     <!-- Enable Central Package Management -->
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <!-- SDK Version - ALL packages ship with same version -->
-    <YubiKitVersion>1.0.0-preview.1</YubiKitVersion>
+    <YubiKitVersion>2.0.0-preview.1</YubiKitVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Microsoft Dependencies -->
@@ -21,7 +21,7 @@
     <!-- Third-party Dependencies -->
     <PackageVersion Include="System.Formats.Cbor" Version="10.0.2" />
     <PackageVersion Include="System.Reactive" Version="6.0.1" />
-    <PackageVersion Include="Yubico.NativeShims" Version="1.14.0" />
+    <PackageVersion Include="Yubico.NativeShims" Version="1.16.0" />
     <!-- Test Dependencies -->
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.v3" Version="3.0.0" />
@@ -37,6 +37,7 @@
     <PackageVersion Include="Xunit.SkippableFact" Version="1.5.23" />
     <!-- CLI / Console Tools -->
     <PackageVersion Include="Spectre.Console" Version="0.49.1" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.49.1" />
     <!-- Build Tools -->
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />

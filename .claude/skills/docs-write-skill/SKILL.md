@@ -112,7 +112,7 @@ The `description` field in frontmatter is **critical** - it's what triggers skil
 | ❌ Weak | ✅ Strong |
 |---------|-----------|
 | `Helps with testing` | `Use when implementing features - write failing test first, then minimal code to pass` |
-| `Build tool` | `Use when compiling, testing, or packaging .NET code - runs build.cs targets (NEVER use dotnet test directly)` |
+| `Build tool` | `Use when compiling, testing, or packaging .NET code - runs toolchain.cs targets (NEVER use dotnet test directly)` |
 | `For debugging` | `Use when encountering bugs, test failures, or unexpected behavior - systematic root cause analysis before fixes` |
 
 **Rules:**
@@ -168,7 +168,7 @@ Use numbered steps for sequential processes, subsections for parallel concerns.
 ## Core Build Command
 
 ```bash
-dotnet build.cs [target] [options]
+dotnet toolchain.cs [target] [options]
 ```
 
 ## Available Targets

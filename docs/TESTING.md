@@ -4,7 +4,7 @@
 
 ## The #1 Rule
 
-**ALWAYS use `dotnet build.cs test` - NEVER use `dotnet test` directly.**
+**ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
 
 This codebase uses a mix of xUnit v2 and xUnit v3 test projects that require different CLI invocations. The build script handles this automatically.
 
@@ -24,20 +24,56 @@ If you use the wrong command or filter syntax, tests will fail with confusing er
 
 ```bash
 # Run all tests
-dotnet build.cs test
+dotnet toolchain.cs test
 
 # Run tests for a specific module (partial match)
-dotnet build.cs test --project Core
-dotnet build.cs test --project Fido2
-dotnet build.cs test --project Piv
+dotnet toolchain.cs test --project Core
+dotnet toolchain.cs test --project Fido2
+dotnet toolchain.cs test --project Piv
 
 # Run tests with a filter
-dotnet build.cs test --filter "FullyQualifiedName~MyTestClass"
-dotnet build.cs test --filter "Method~Sign"
+dotnet toolchain.cs test --filter "FullyQualifiedName~MyTestClass"
+dotnet toolchain.cs test --filter "Method~Sign"
 
 # Combine project and filter
-dotnet build.cs test --project Piv --filter "Method~Sign"
+dotnet toolchain.cs test --project Piv --filter "Method~Sign"
 ```
+
+## Integration Test Strategy
+
+Integration tests require a physical YubiKey and can be slow (especially RSA keygen). Follow this tiered approach:
+
+### During Development
+
+Run integration tests **only for the module you changed**:
+
+```bash
+# Quick smoke test — skips slow keygen and user-presence tests
+dotnet toolchain.cs -- test --integration --project Piv --smoke
+
+# Targeted test for a specific method you touched
+dotnet toolchain.cs -- test --integration --project Oath --filter "FullyQualifiedName~CalculateAll"
+```
+
+### When Finishing a Module
+
+Run the **full integration suite** for the affected module (no `--smoke`):
+
+```bash
+dotnet toolchain.cs -- test --integration --project Piv
+```
+
+### Before PR / Final Validation
+
+Run full integration for all affected modules. You do **not** need to run all modules unless changes touch Core or shared infrastructure.
+
+### What `--smoke` Skips
+
+The `--smoke` flag excludes tests with these traits:
+- **`Slow`** — RSA 3072/4096 key generation (30+ seconds each), long delays
+- **`RequiresUserPresence`** — Tests needing physical touch or device insert/remove
+
+This typically cuts PIV integration time from ~4 minutes to under 1 minute.
 
 ## Common Mistakes
 
@@ -49,7 +85,7 @@ dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Yubico.Yub
 dotnet test --filter "FullyQualifiedName~MyTest"
 
 # CORRECT - Always use the build script
-dotnet build.cs test --project Fido2 --filter "FullyQualifiedName~MyTest"
+dotnet toolchain.cs test --project Fido2 --filter "FullyQualifiedName~MyTest"
 ```
 
 ## How Detection Works
@@ -72,7 +108,7 @@ Yubico.YubiKit.Piv/tests/Yubico.YubiKit.Piv.UnitTests/
 ... etc
 ```
 
-Run `dotnet build.cs -- --help` to see all discovered test projects.
+Run `dotnet toolchain.cs -- --help` to see all discovered test projects.
 
 ## Filter Syntax Reference
 
@@ -89,7 +125,7 @@ When running filtered tests **outside** the build script (ad-hoc debugging), syn
 - `3.x.x` → xUnit v3 syntax
 - `2.x.x` → xUnit v2 syntax
 
-**Recommendation:** Use `dotnet build.cs test --filter "..."` which handles this automatically.
+**Recommendation:** Use `dotnet toolchain.cs test --filter "..."` which handles this automatically.
 
 ### Standard Filter Expressions
 
@@ -102,11 +138,11 @@ Name!=SkipMe                   Exclude tests named 'SkipMe'
 
 ## Summary
 
-1. **Always** use `dotnet build.cs test`
+1. **Always** use `dotnet toolchain.cs test`
 2. **Never** use `dotnet test` directly
 3. Use `--project` for module filtering
 4. Use `--filter` for test filtering
-5. When in doubt, run `dotnet build.cs test` without filters first
+5. When in doubt, run `dotnet toolchain.cs test` without filters first
 
 ## xUnit v3 Known Limitations
 
@@ -293,16 +329,16 @@ public class MyTests
 
 ```bash
 # Skip tests requiring user interaction (for CI/agents)
-dotnet build.cs test --filter "Category!=RequiresUserPresence"
+dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"
 
 # Skip slow tests
-dotnet build.cs test --filter "Category!=Slow"
+dotnet toolchain.cs test --filter "Category!=Slow"
 
 # Skip hardware tests (run only unit tests)
-dotnet build.cs test --filter "Category!=RequiresHardware"
+dotnet toolchain.cs test --filter "Category!=RequiresHardware"
 
 # Run only fast unit tests (no hardware, no user presence, not slow)
-dotnet build.cs test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
+dotnet toolchain.cs test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
 ```
 
 ### When to Apply Each Trait
@@ -339,5 +375,5 @@ dotnet build.cs test --filter "Category!=RequiresHardware&Category!=RequiresUser
 
 **Agents should skip `RequiresUserPresence` tests** when running test suites:
 ```bash
-dotnet build.cs test --filter "Category!=RequiresUserPresence"
+dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"
 ```

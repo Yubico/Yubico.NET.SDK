@@ -129,7 +129,7 @@
 - ❌ NEVER use `#region`
 
 **Build/Test:**
-- Use `dotnet build.cs build` and `dotnet build.cs test`
+- Use `dotnet toolchain.cs build` and `dotnet toolchain.cs test`
 
 ---
 
@@ -362,8 +362,8 @@ Output `<promise>DONE</promise>` when all tasks verified.
 
 ## Verification Checklist
 
-- [x] `dotnet build.cs build` passes
-- [x] `dotnet build.cs test` passes (with expected hardware test skips)
+- [x] `dotnet toolchain.cs build` passes
+- [x] `dotnet toolchain.cs test` passes (with expected hardware test skips)
 - [x] HID enumeration works on macOS (manual test)
 - [x] `FindYubiKeys.FindAllAsync()` returns both PCSC and HID devices
 - [x] `HidYubiKey.ConnectAsync<IFidoConnection>()` works

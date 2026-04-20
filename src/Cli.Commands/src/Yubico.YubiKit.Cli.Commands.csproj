@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Yubico.YubiKit.Cli.Commands</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.Cli.Commands</AssemblyName>
+    <IsPackable>false</IsPackable>
+
+    <!-- Suppress analyzer warnings that are noisy for example/CLI apps -->
+    <NoWarn>$(NoWarn);CA1852</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" />
+    <PackageReference Include="Spectre.Console.Cli" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\src\Yubico.YubiKit.Core.csproj" />
+    <ProjectReference Include="..\..\Management\src\Yubico.YubiKit.Management.csproj" />
+    <ProjectReference Include="..\..\Fido2\src\Yubico.YubiKit.Fido2.csproj" />
+    <ProjectReference Include="..\..\Piv\src\Yubico.YubiKit.Piv.csproj" />
+    <ProjectReference Include="..\..\Oath\src\Yubico.YubiKit.Oath.csproj" />
+    <ProjectReference Include="..\..\OpenPgp\src\Yubico.YubiKit.OpenPgp.csproj" />
+    <ProjectReference Include="..\..\YubiHsm\src\Yubico.YubiKit.YubiHsm.csproj" />
+    <ProjectReference Include="..\..\YubiOtp\src\Yubico.YubiKit.YubiOtp.csproj" />
+    <ProjectReference Include="..\..\Cli.Shared\src\Yubico.YubiKit.Cli.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -157,8 +157,8 @@ All code **MUST** follow [`CLAUDE.md`](../../CLAUDE.md) (authoritative source fo
 dotnet run experiment_feature.cs
 
 # Then integrate
-dotnet build.cs build
-dotnet build.cs test
+dotnet toolchain.cs build
+dotnet toolchain.cs test
 ```
 
 ## Git Workflow

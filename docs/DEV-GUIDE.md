@@ -28,5 +28,5 @@
 
 ## Continuous Integration Expectations
 
-- CI should run `dotnet build.cs test` at minimum. Add a dedicated formatting or analyzer step (`dotnet format --verify-no-changes`) if you want the pipeline to enforce style automatically.
+- CI should run `dotnet toolchain.cs test` at minimum. Add a dedicated formatting or analyzer step (`dotnet format --verify-no-changes`) if you want the pipeline to enforce style automatically.
 - Suppress diagnostics only with justification. Prefer targeted `.editorconfig` overrides or `[SuppressMessage]` attributes over global disables.

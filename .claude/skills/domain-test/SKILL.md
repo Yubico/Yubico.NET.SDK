@@ -7,9 +7,9 @@ description: REQUIRED for running tests - NEVER use dotnet test directly
 
 ## Overview
 
-Run tests for Yubico.NET.SDK using the custom `build.cs` script. This handles xUnit v2/v3 differences automatically.
+Run tests for Yubico.NET.SDK using the custom `toolchain.cs` script. This handles xUnit v2/v3 differences automatically.
 
-**Core principle:** Always use `dotnet build.cs test` - never `dotnet test` directly.
+**Core principle:** Always use `dotnet toolchain.cs test` - never `dotnet test` directly.
 
 ## Use when
 
@@ -28,7 +28,7 @@ Run tests for Yubico.NET.SDK using the custom `build.cs` script. This handles xU
 ## Core Command
 
 ```bash
-dotnet build.cs test [options]
+dotnet toolchain.cs test [options]
 ```
 
 ## Available Targets
@@ -51,34 +51,34 @@ dotnet build.cs test [options]
 ### Run All Tests
 
 ```bash
-dotnet build.cs test
+dotnet toolchain.cs test
 ```
 
 ### Run Tests for Specific Project
 
 ```bash
-dotnet build.cs test --project Piv
-dotnet build.cs test --project Fido2
-dotnet build.cs test --project SecurityDomain
+dotnet toolchain.cs test --project Piv
+dotnet toolchain.cs test --project Fido2
+dotnet toolchain.cs test --project SecurityDomain
 ```
 
 ### Run Specific Test(s) with Filter
 
 ```bash
 # Single test method
-dotnet build.cs test --filter "FullyQualifiedName~MyTestMethod"
+dotnet toolchain.cs test --filter "FullyQualifiedName~MyTestMethod"
 
 # All tests in a class
-dotnet build.cs test --filter "ClassName~SignatureTests"
+dotnet toolchain.cs test --filter "ClassName~SignatureTests"
 
 # Combine project and filter
-dotnet build.cs test --project Piv --filter "Method~Sign"
+dotnet toolchain.cs test --project Piv --filter "Method~Sign"
 ```
 
 ### Run Tests with Coverage
 
 ```bash
-dotnet build.cs coverage
+dotnet toolchain.cs coverage
 ```
 
 ## Test Filter Syntax
@@ -111,10 +111,10 @@ Tests are categorized using `TestCategories` constants from `Yubico.YubiKit.Test
 
 ```bash
 # Run tests without user presence requirement
-dotnet build.cs test --filter "Category!=RequiresUserPresence"
+dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"
 
 # Run only fast unit tests (no hardware, no user presence, not slow)
-dotnet build.cs test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
+dotnet toolchain.cs test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
 ```
 
 **When writing new tests**, apply traits using constants:
@@ -134,7 +134,7 @@ public async Task MyDeviceInsertionTest() { }
 
 ### xUnit v3 Direct Runner (Advanced)
 
-When running xUnit v3 test projects directly (not through `build.cs`), filter syntax differs:
+When running xUnit v3 test projects directly (not through `toolchain.cs`), filter syntax differs:
 
 | xUnit v2 (`dotnet test`) | xUnit v3 Direct | Notes |
 |--------------------------|-----------------|-------|
@@ -142,7 +142,7 @@ When running xUnit v3 test projects directly (not through `build.cs`), filter sy
 | `--filter "Name=Method"` | `--filter-method MethodName` | Method filter |
 | No matches → 0 tests run | No matches → **test failure** | v3 fails on empty results |
 
-**Avoid this complexity** - use `dotnet build.cs test` which handles xUnit v2/v3 differences automatically.
+**Avoid this complexity** - use `dotnet toolchain.cs test` which handles xUnit v2/v3 differences automatically.
 
 ## Project Discovery
 
@@ -184,18 +184,18 @@ If no match is found, the script lists available projects.
 
 ```bash
 # Run with project filter to see details
-dotnet build.cs test --project <project>
+dotnet toolchain.cs test --project <project>
 
 # Run specific failing test
-dotnet build.cs test --filter "Name=FailingTestMethod"
+dotnet toolchain.cs test --filter "Name=FailingTestMethod"
 ```
 
 ### Build Required First
 
 If tests fail to run, ensure the project builds:
 ```bash
-dotnet build.cs build
-dotnet build.cs test
+dotnet toolchain.cs build
+dotnet toolchain.cs test
 ```
 
 ## Verification

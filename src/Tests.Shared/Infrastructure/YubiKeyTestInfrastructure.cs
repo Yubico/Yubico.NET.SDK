@@ -1,0 +1,296 @@
+// Copyright 2025 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
+using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Management;
+
+namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
+
+/// <summary>
+///     Centralized infrastructure for YubiKey integration tests.
+///     Provides shared static instances of logger, allow list, device discovery, and filtering logic.
+/// </summary>
+internal static class YubiKeyTestInfrastructure
+{
+    private static readonly ILoggerFactory LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
+    {
+        builder
+            .AddConsole()
+            .SetMinimumLevel(LogLevel.Information);
+    });
+
+    /// <summary>
+    ///     Gets the shared AllowList instance for test infrastructure.
+    /// </summary>
+    /// <remarks>
+    ///     Initialized once per test run with AppSettingsAllowListProvider.
+    ///     Thread-safe via static initialization.
+    /// </remarks>
+    public static AllowList AllowList { get; } = new(
+        new AppSettingsAllowListProvider(),
+        LoggerFactory.CreateLogger<AllowList>());
+
+    private static readonly Lazy<IReadOnlyList<YubiKeyTestState>> LazyAuthorizedDevices =
+        new(InitializeDevicesAsync, LazyThreadSafetyMode.ExecutionAndPublication);
+
+    /// <summary>
+    ///     Gets whether the device infrastructure has been initialized.
+    /// </summary>
+    /// <remarks>
+    ///     Returns true only if AllAuthorizedDevices has been accessed and initialization completed.
+    ///     Use this to check if we're in discovery mode (not yet initialized) vs execution mode.
+    /// </remarks>
+    public static bool IsInitialized => LazyAuthorizedDevices.IsValueCreated;
+
+    /// <summary>
+    ///     Gets all authorized YubiKey devices discovered during test run initialization.
+    /// </summary>
+    /// <remarks>
+    ///     Devices are discovered lazily on first access (not during type loading).
+    ///     Includes only devices that passed allow list verification.
+    /// </remarks>
+    public static IReadOnlyList<YubiKeyTestState> AllAuthorizedDevices => LazyAuthorizedDevices.Value;
+
+    /// <summary>
+    ///     Filters devices based on test attribute criteria.
+    /// </summary>
+    /// <param name="devices">Devices to filter.</param>
+    /// <param name="criteria">Filter criteria to apply.</param>
+    /// <returns>Filtered list of devices matching all criteria.</returns>
+    public static IEnumerable<YubiKeyTestState> FilterDevices(
+        IEnumerable<YubiKeyTestState> devices,
+        FilterCriteria criteria)
+    {
+        var filtered = devices;
+
+        // Filter by minimum firmware
+        if (!string.IsNullOrEmpty(criteria.MinFirmware))
+        {
+            var minFw = FirmwareVersion.FromString(criteria.MinFirmware);
+            if (minFw is not null)
+                filtered = filtered.Where(d => d.FirmwareVersion >= minFw);
+        }
+
+        // Filter by form factor
+        if (criteria.FormFactor != FormFactor.Unknown)
+            filtered = filtered.Where(d => d.FormFactor == criteria.FormFactor);
+
+        // Filter by USB transport
+        if (criteria.RequireUsb)
+            filtered = filtered.Where(d => d.IsUsbTransport);
+
+        // Filter by NFC transport
+        if (criteria.RequireNfc)
+            filtered = filtered.Where(d => d.IsNfcTransport);
+
+        // Filter by connection type
+        if (criteria.ConnectionType != ConnectionType.Unknown)
+            filtered = filtered.Where(d => d.ConnectionType == criteria.ConnectionType);
+
+        // Filter by capability
+        if (criteria.Capability != DeviceCapabilities.None)
+            filtered = filtered.Where(d => d.HasCapability(criteria.Capability));
+
+        // Filter by FIPS-capable
+        if (criteria.FipsCapable != DeviceCapabilities.None)
+            filtered = filtered.Where(d => d.IsFipsCapable(criteria.FipsCapable));
+
+        // Filter by FIPS-approved
+        if (criteria.FipsApproved != DeviceCapabilities.None)
+            filtered = filtered.Where(d => d.IsFipsApproved(criteria.FipsApproved));
+
+        // Apply custom filter if provided
+        var customFilterType = criteria.CustomFilterType;
+        if (customFilterType is not null)
+        {
+            var filter = InstantiateCustomFilter(customFilterType);
+            if (filter is not null)
+                filtered = filtered.Where(d => filter.Matches(d));
+        }
+
+        return filtered;
+    }
+
+    /// <summary>
+    ///     Instantiates a custom filter from the specified type.
+    /// </summary>
+    /// <param name="filterType">The type implementing IYubiKeyFilter.</param>
+    /// <returns>An instance of the filter, or null if instantiation fails.</returns>
+    internal static IYubiKeyFilter? InstantiateCustomFilter(Type filterType)
+    {
+        try
+        {
+            // Validate type implements IYubiKeyFilter
+            if (!typeof(IYubiKeyFilter).IsAssignableFrom(filterType))
+            {
+                Console.Error.WriteLine(
+                    $"[YubiKey Infrastructure] ERROR: Custom filter type '{filterType.FullName}' " +
+                    $"does not implement IYubiKeyFilter");
+                return null;
+            }
+
+            // Validate type has parameterless constructor
+            var constructor = filterType.GetConstructor(Type.EmptyTypes);
+            if (constructor is null)
+            {
+                Console.Error.WriteLine(
+                    $"[YubiKey Infrastructure] ERROR: Custom filter type '{filterType.FullName}' " +
+                    $"does not have a parameterless constructor");
+                return null;
+            }
+
+            // Instantiate the filter
+            if (Activator.CreateInstance(filterType) is not IYubiKeyFilter filter)
+            {
+                Console.Error.WriteLine(
+                    $"[YubiKey Infrastructure] ERROR: Failed to instantiate custom filter '{filterType.FullName}'");
+                return null;
+            }
+
+            return filter;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(
+                $"[YubiKey Infrastructure] ERROR: Exception while instantiating custom filter '{filterType.FullName}': {ex.Message}");
+            return null;
+        }
+    }
+
+
+    /// <summary>
+    ///     Initializes all authorized YubiKey devices (runs once per test run).
+    /// </summary>
+    /// <remarks>
+    ///     This method:
+    ///     1. Discovers all connected YubiKey devices
+    ///     2. Filters by allow list (hard fail if no authorized devices)
+    ///     3. Retrieves device information for each authorized device
+    ///     4. Caches devices for use in tests
+    ///     Uses GetAwaiter().GetResult() to call async methods from static context.
+    ///     This is acceptable for test infrastructure initialization (not hot path).
+    /// </remarks>
+    private static List<YubiKeyTestState> InitializeDevicesAsync()
+    {
+        Console.WriteLine("[YubiKey Infrastructure] Initializing devices (once per test run)...");
+
+        try
+        {
+            // Discover all devices
+            var allDevices = YubiKeyManager.FindAllAsync().GetAwaiter().GetResult();
+            Console.WriteLine($"[YubiKey Infrastructure] Found {allDevices.Count} device(s)");
+
+            if (allDevices.Count == 0)
+            {
+                Console.WriteLine("[YubiKey Infrastructure] No YubiKey devices found");
+                return [];
+            }
+
+            // Filter by allow list
+            var authorizedDevices = new List<YubiKeyTestState>();
+            var filteredCount = 0;
+
+            foreach (var device in allDevices)
+                try
+                {
+                    DeviceInfo? deviceInfo = device.GetDeviceInfoAsync().GetAwaiter().GetResult();
+                    if (deviceInfo is { SerialNumber: not null })
+                    {
+                        if (AllowList.IsDeviceAllowed(deviceInfo.Value.SerialNumber))
+                        {
+                            var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.ConnectionType);
+                            authorizedDevices.Add(testDevice);
+                            YubiKeyDeviceCache.AddDevice(testDevice);
+
+                            Console.WriteLine(
+                                $"[YubiKey Infrastructure] Device SN:{deviceInfo.Value.SerialNumber} ({device.ConnectionType}) authorized " +
+                                $"(FW:{deviceInfo.Value.FirmwareVersion}, {deviceInfo.Value.FormFactor})");
+                        }
+                        else
+                        {
+                            filteredCount++;
+                            Console.WriteLine(
+                                $"[YubiKey Infrastructure] Device SN:{deviceInfo.Value.SerialNumber} FILTERED (not in allow list)");
+                        }
+                    }
+                    else if (deviceInfo is not null && AllowList.AllowUnknownSerials)
+                    {
+                        var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.ConnectionType);
+                        authorizedDevices.Add(testDevice);
+                        YubiKeyDeviceCache.AddDevice(testDevice);
+
+                        Console.WriteLine(
+                            $"[YubiKey Infrastructure] Device ({device.ConnectionType}) authorized (unknown serial, AllowUnknownSerials=true, " +
+                            $"FW:{deviceInfo.Value.FirmwareVersion}, {deviceInfo.Value.FormFactor})");
+                    }
+                    else
+                    {
+                        filteredCount++;
+                        Console.WriteLine("[YubiKey Infrastructure] Device with unknown serial FILTERED");
+                    }
+                }
+                catch (Exception deviceEx)
+                {
+                    filteredCount++;
+                    Console.WriteLine(
+                        $"[YubiKey Infrastructure] DeviceId:{device.DeviceId} SKIPPED " +
+                        $"(initialization failed: {deviceEx.GetType().Name}: {deviceEx.Message})");
+                }
+
+            // Hard fail if no authorized devices
+            if (authorizedDevices.Count == 0)
+            {
+                var errorMessage =
+                    "═══════════════════════════════════════════════════════════════════════════\n" +
+                    "                        NO AUTHORIZED DEVICES FOUND\n" +
+                    "═══════════════════════════════════════════════════════════════════════════\n" +
+                    "\n" +
+                    $"Found {allDevices.Count} YubiKey device(s), but NONE are authorized for testing.\n" +
+                    "\n" +
+                    "Tests can only run on YubiKeys explicitly listed in the allow list.\n" +
+                    "Add device serial numbers to appsettings.json in your test project:\n" +
+                    "\n" +
+                    "{\n" +
+                    "  \"YubiKeyTests\": {\n" +
+                    "    \"AllowedSerialNumbers\": [\n" +
+                    "      12345678,\n" +
+                    "      87654321\n" +
+                    "    ]\n" +
+                    "  }\n" +
+                    "}\n" +
+                    "\n" +
+                    "═══════════════════════════════════════════════════════════════════════════\n" +
+                    "                        TESTS WILL NOT RUN\n" +
+                    "═══════════════════════════════════════════════════════════════════════════";
+
+                Console.Error.WriteLine(errorMessage);
+                return []; // Return empty list - tests will be skipped during discovery
+            }
+
+            Console.WriteLine(
+                $"[YubiKey Infrastructure] Initialization complete: {authorizedDevices.Count} authorized, {filteredCount} filtered");
+
+            return authorizedDevices;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[YubiKey Infrastructure] FATAL: Device initialization failed: {ex.Message}");
+            Console.Error.WriteLine(ex.StackTrace);
+            return []; // Return empty list - tests will be skipped during discovery
+        }
+    }
+
+}

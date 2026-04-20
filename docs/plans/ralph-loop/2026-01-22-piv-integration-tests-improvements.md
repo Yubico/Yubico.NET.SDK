@@ -27,7 +27,7 @@ status: complete
 - [x] 1.5: Fix `GetBioMetadataAsync_NonBioDevice_ThrowsOrReturnsError` to only accept `NotSupportedException` or `ApduException` with specific SW codes (0x6D00, 0x6A81, 0x6985)
 - [x] 1.6: Clean up `CompleteWorkflow_GenerateSignVerify` - remove unused certificate storage, rename to `CompleteWorkflow_GenerateKeySignVerify`
 - [x] 1.7: Fix `MoveKeyAsync_MovesToNewSlot` to verify key remains functional by signing with moved key - rename to `MoveKeyAsync_MovesToNewSlot_KeyRemainsFunctional`
-- [x] 1.8: Run tests and verify all fixes: `dotnet build.cs test --project Piv`
+- [x] 1.8: Run tests and verify all fixes: `dotnet toolchain.cs test --project Piv`
 - [x] 1.9: Commit phase 1 changes
 
 ### Notes
@@ -47,7 +47,7 @@ status: complete
 - [x] 2.1: Add `SignOrDecryptAsync_EccP384Sign_ProducesValidSignature` test (MinFirmware 4.0.0) - generate P384 key, sign SHA384 hash, verify with ECDsa
 - [x] 2.2: Add `CalculateSecretAsync_X25519_ProducesSharedSecret` test (MinFirmware 5.7.0) - generate X25519 key, verify public key is 32 bytes, document software verification as TBD
 - [x] 2.3: Fix `SignOrDecryptAsync_Ed25519_ProducesSignature` test to document limitation (no .NET 10 EdDSA support), verify signature is 64 bytes and public key is 32 bytes
-- [x] 2.4: Run ECC tests: `dotnet build.cs test --project Piv --filter "FullyQualifiedName~Ecc|Ed25519|X25519"`
+- [x] 2.4: Run ECC tests: `dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~Ecc|Ed25519|X25519"`
 - [x] 2.5: Commit phase 2 changes
 
 ### Notes
@@ -70,7 +70,7 @@ status: complete
 - [x] 3.4: Add `SignOrDecryptAsync_Rsa1024Sign_ProducesValidSignature` test (MinFirmware 4.3.5) - 128 byte modulus
 - [x] 3.5: Add `SignOrDecryptAsync_Rsa3072And4096Sign_ProducesValidSignature` parameterized test (MinFirmware 5.7.0) - 384 and 512 byte modulus sizes
 - [x] 3.6: Add `SignOrDecryptAsync_Rsa2048Decrypt_DecryptsCorrectly` test - encrypt with public key, decrypt with YubiKey, verify PKCS#1 encryption padding removal
-- [x] 3.7: Run RSA tests: `dotnet build.cs test --project Piv --filter "FullyQualifiedName~Rsa"`
+- [x] 3.7: Run RSA tests: `dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~Rsa"`
 - [x] 3.8: Commit phase 3 changes
 
 ### Notes
@@ -94,7 +94,7 @@ status: complete
 - [x] 4.4: Add `UnblockPinAsync_AfterBlockedPin_RestoresAccess` test - block PIN, verify blocked (0 retries), unblock with PUK, verify new PIN works
 - [x] 4.5: Add `GetPukMetadataAsync_ReturnsValidMetadata` test (MinFirmware 5.3.0) - verify IsDefault, TotalRetries=3, RetriesRemaining=3
 - [x] 4.6: Add `SetPinAttemptsAsync_CustomLimit_EnforcesLimit` test - set 5 PIN / 4 PUK attempts, verify via metadata and GetPinAttemptsAsync
-- [x] 4.7: Run PUK tests: `dotnet build.cs test --project Piv --filter "FullyQualifiedName~Puk|SetPinAttempts"`
+- [x] 4.7: Run PUK tests: `dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~Puk|SetPinAttempts"`
 - [x] 4.8: Commit phase 4 changes
 
 ### Notes
@@ -114,7 +114,7 @@ status: complete
 - [x] 5.1: Create `PivManagementKeyTests.cs` with shared management key constants
 - [x] 5.2: Add `SetManagementKeyAsync_ChangesToNewKey` test - change key, create new session, verify old key fails, new key works, reset to restore
 - [x] 5.3: Add `SetManagementKeyAsync_AES256_Succeeds` test (MinFirmware 5.4.2) - change to AES256 (32 bytes), verify via GetManagementKeyMetadataAsync
-- [x] 5.4: Run management key tests: `dotnet build.cs test --project Piv --filter "FullyQualifiedName~PivManagementKeyTests"`
+- [x] 5.4: Run management key tests: `dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~PivManagementKeyTests"`
 - [x] 5.5: Commit phase 5 changes
 
 ### Notes
@@ -136,7 +136,7 @@ status: complete
 - [x] 6.2: Add `DeleteKeyAsync_RemovesKey_SlotBecomesEmpty` test (MinFirmware 5.7.0) - generate key, verify exists, delete, verify slot empty via metadata
 - [x] 6.3: Add `PutObjectAsync_GetObjectAsync_RoundTrip` test - write test data to PivDataObject.Printed, read back, verify match, delete by writing null
 - [x] 6.4: Add `GetSerialNumberAsync_ReturnsDeviceSerial` test (MinFirmware 5.0.0) - get serial, verify matches state.SerialNumber
-- [x] 6.5: Run key operations tests: `dotnet build.cs test --project Piv --filter "FullyQualifiedName~Import|Delete|PutObject|GetSerialNumber"`
+- [x] 6.5: Run key operations tests: `dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~Import|Delete|PutObject|GetSerialNumber"`
 - [x] 6.6: Commit phase 6 changes
 
 ### Notes
@@ -169,7 +169,7 @@ status: complete
 - [ ] 7.8: Update `PivFullWorkflowTests.cs` to use PivTestHelpers
 - [ ] 7.9: Update `PivPukTests.cs` to use PivTestHelpers
 - [ ] 7.10: Update `PivManagementKeyTests.cs` to use PivTestHelpers
-- [ ] 7.11: Run all PIV tests: `dotnet build.cs test --project Piv`
+- [ ] 7.11: Run all PIV tests: `dotnet toolchain.cs test --project Piv`
 - [ ] 7.12: Commit phase 7 changes
 
 ### Notes
@@ -184,7 +184,7 @@ status: complete
 **Goal:** Verify all tests pass and coverage is complete
 
 ### Tasks
-- [x] 8.1: Run complete PIV integration test suite: `dotnet build.cs test --project Piv`
+- [x] 8.1: Run complete PIV integration test suite: `dotnet toolchain.cs test --project Piv`
 - [x] 8.2: Verify no compiler warnings in test project
 - [x] 8.3: Verify test count increased (should have ~40+ tests total) - Now have 47 tests
 - [x] 8.4: Review test output for any flaky tests

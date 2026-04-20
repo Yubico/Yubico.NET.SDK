@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TargetFrameworks inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.Management</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.Management</AssemblyName>
+
+    <!-- Package Metadata -->
+    <Description>Management interface for YubiKey devices including device info queries, firmware version detection, and capability management.</Description>
+    <PackageTags>yubikey;yubico;management;device-info;configuration</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\src\Yubico.YubiKit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -73,13 +73,13 @@
 
 **Tech Stack:** C# 14, .NET 8+, HID native interop (IOKit/HID.dll), xUnit for testing
 
-**Build & Test:** This project uses `build.cs` for all build and test operations:
-- Build: `dotnet run --project build.cs build`
-- Test: `dotnet run --project build.cs test`
-- Test specific project: `dotnet run --project build.cs test --project Management.IntegrationTests`
-- Test with filter: `dotnet run --project build.cs test --project UnitTests --filter "FullyQualifiedName~MyTest"`
+**Build & Test:** This project uses `toolchain.cs` for all build and test operations:
+- Build: `dotnet run --project toolchain.cs build`
+- Test: `dotnet run --project toolchain.cs test`
+- Test specific project: `dotnet run --project toolchain.cs test --project Management.IntegrationTests`
+- Test with filter: `dotnet run --project toolchain.cs test --project UnitTests --filter "FullyQualifiedName~MyTest"`
 
-See `BUILD.md` for full build.cs documentation.
+See `BUILD.md` for full toolchain.cs documentation.
 
 ---
 
@@ -156,7 +156,7 @@ internal static class CtapConstants
 **Step 2: Build to verify syntax**
 
 ```bash
-dotnet run --project build.cs build
+dotnet run --project toolchain.cs build
 ```
 
 Expected: SUCCESS
@@ -212,7 +212,7 @@ public interface IHidProtocol : IProtocol
 **Step 2: Build to verify**
 
 ```bash
-dotnet run --project build.cs build
+dotnet run --project toolchain.cs build
 ```
 
 Expected: SUCCESS
@@ -358,7 +358,7 @@ internal class HidProtocol : IHidProtocol
 **Step 2: Build to verify structure**
 
 ```bash
-dotnet run --project build.cs build
+dotnet run --project toolchain.cs build
 ```
 
 Expected: SUCCESS
@@ -472,7 +472,7 @@ Replace the `SendRequest` method stub:
 **Step 3: Build to verify**
 
 ```bash
-dotnet run --project build.cs build
+dotnet run --project toolchain.cs build
 ```
 
 Expected: SUCCESS
@@ -562,7 +562,7 @@ Replace the `ReceiveResponse` method stub:
 **Step 3: Build to verify**
 
 ```bash
-dotnet run --project build.cs build
+dotnet run --project toolchain.cs build
 ```
 
 Expected: SUCCESS
@@ -670,7 +670,7 @@ Replace the `TransmitAndReceiveAsync` method:
 **Step 2: Build to verify**
 
 ```bash
-dotnet run --project build.cs build
+dotnet run --project toolchain.cs build
 ```
 
 Expected: SUCCESS
@@ -736,7 +736,7 @@ public class HidProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
 **Step 2: Build to verify**
 
 ```bash
-dotnet run --project build.cs build
+dotnet run --project toolchain.cs build
 ```
 
 Expected: SUCCESS
@@ -778,7 +778,7 @@ This should already exist. No changes needed.
 **Step 2: Build Management project**
 
 ```bash
-dotnet run --project build.cs build
+dotnet run --project toolchain.cs build
 ```
 
 Expected: SUCCESS (the previous error should now be resolved)
@@ -841,7 +841,7 @@ This task needs more investigation. Let's defer until we see the actual compilat
 **Step 1: Build the entire solution**
 
 ```bash
-dotnet run --project build.cs build
+dotnet run --project toolchain.cs build
 ```
 
 Expected: SUCCESS or specific errors to fix
@@ -849,7 +849,7 @@ Expected: SUCCESS or specific errors to fix
 **Step 2: Run the HID integration test**
 
 ```bash
-dotnet run --project build.cs test --project Management.IntegrationTests \
+dotnet run --project toolchain.cs test --project Management.IntegrationTests \
   --filter "FullyQualifiedName~CreateManagementSession_with_Hid_CreateAsync"
 ```
 
@@ -918,7 +918,7 @@ Same as above.
 **Step 1: Run all HID-related tests**
 
 ```bash
-dotnet run --project build.cs test --project Management.IntegrationTests \
+dotnet run --project toolchain.cs test --project Management.IntegrationTests \
   --filter "FullyQualifiedName~Hid"
 ```
 
@@ -937,7 +937,7 @@ Verify test output shows serial number 125 for your physical YubiKey.
 **Step 4: Run full Management test suite**
 
 ```bash
-dotnet run --project build.cs test --project Management.IntegrationTests
+dotnet run --project toolchain.cs test --project Management.IntegrationTests
 ```
 
 Expected: All tests PASS (SmartCard tests should still work)
@@ -989,7 +989,7 @@ public class HidProtocolTests
 **Step 2: Run unit tests**
 
 ```bash
-dotnet run --project build.cs test --project UnitTests \
+dotnet run --project toolchain.cs test --project UnitTests \
   --filter "FullyQualifiedName~HidProtocolTests"
 ```
 
@@ -1053,7 +1053,7 @@ git commit -m "docs: add HID protocol documentation"
 **Step 1: Run full solution build**
 
 ```bash
-dotnet run --project build.cs build
+dotnet run --project toolchain.cs build
 ```
 
 Expected: SUCCESS with no warnings
@@ -1061,7 +1061,7 @@ Expected: SUCCESS with no warnings
 **Step 2: Run all tests**
 
 ```bash
-dotnet run --project build.cs test
+dotnet run --project toolchain.cs test
 ```
 
 Expected: All tests PASS
@@ -1069,7 +1069,7 @@ Expected: All tests PASS
 **Step 3: Test with physical YubiKey**
 
 ```bash
-dotnet run --project build.cs test --project Management.IntegrationTests \
+dotnet run --project toolchain.cs test --project Management.IntegrationTests \
   --filter "FullyQualifiedName~CreateManagementSession_with_Hid_CreateAsync"
 ```
 

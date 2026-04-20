@@ -7,9 +7,9 @@ description: REQUIRED for building/compiling .NET code - NEVER use dotnet build 
 
 ## Overview
 
-Build the Yubico.NET.SDK using the custom `build.cs` script with Bullseye task runner.
+Build the Yubico.NET.SDK using the custom `toolchain.cs` script with Bullseye task runner.
 
-**Core principle:** Always use `dotnet build.cs build` - never `dotnet build` directly.
+**Core principle:** Always use `dotnet toolchain.cs build` - never `dotnet build` directly.
 
 ## Use when
 
@@ -28,7 +28,7 @@ Build the Yubico.NET.SDK using the custom `build.cs` script with Bullseye task r
 ## Core Command
 
 ```bash
-dotnet build.cs build [options]
+dotnet toolchain.cs build [options]
 ```
 
 ## Available Targets
@@ -57,34 +57,34 @@ dotnet build.cs build [options]
 ### Build Everything
 
 ```bash
-dotnet build.cs build
+dotnet toolchain.cs build
 ```
 
 ### Build Specific Project
 
 ```bash
 # Partial match on project name
-dotnet build.cs build --project Piv
-dotnet build.cs build --project Fido2
+dotnet toolchain.cs build --project Piv
+dotnet toolchain.cs build --project Fido2
 ```
 
 ### Clean Build from Scratch
 
 ```bash
-dotnet build.cs build --clean
+dotnet toolchain.cs build --clean
 ```
 
 ### Create Packages
 
 ```bash
 # Default version from project files
-dotnet build.cs pack
+dotnet toolchain.cs pack
 
 # Custom version
-dotnet build.cs publish --package-version 1.0.0-preview.1
+dotnet toolchain.cs publish --package-version 1.0.0-preview.1
 
 # Dry run to verify
-dotnet build.cs publish --dry-run
+dotnet toolchain.cs publish --dry-run
 ```
 
 ## Project Discovery
@@ -94,7 +94,7 @@ The build script automatically discovers:
 
 To see discovered projects:
 ```bash
-dotnet build.cs -- --help
+dotnet toolchain.cs -- --help
 ```
 
 ## Output Locations
@@ -110,10 +110,10 @@ Use `--` when arguments might conflict with dotnet's own options:
 
 ```bash
 # REQUIRED for --help
-dotnet build.cs -- --help
+dotnet toolchain.cs -- --help
 
 # Optional but safer when using multiple options
-dotnet build.cs -- build --project Piv --clean
+dotnet toolchain.cs -- build --project Piv --clean
 ```
 
 ## Build Execution Time
@@ -136,19 +136,19 @@ If no match is found, the script lists available projects.
 
 ```bash
 # Clean and rebuild
-dotnet build.cs clean
-dotnet build.cs build --clean
+dotnet toolchain.cs clean
+dotnet toolchain.cs build --clean
 ```
 
 ### Package Issues
 
 ```bash
 # Dry run to verify
-dotnet build.cs publish --dry-run
+dotnet toolchain.cs publish --dry-run
 
 # Clean and repack
-dotnet build.cs clean
-dotnet build.cs pack
+dotnet toolchain.cs clean
+dotnet toolchain.cs pack
 ```
 
 ## Verification

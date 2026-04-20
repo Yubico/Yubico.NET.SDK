@@ -3,93 +3,189 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core", "Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj", "{55933217-B9D6-4D18-AB08-F4B10AEF83C3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core", "src\Core\src\Yubico.YubiKit.Core.csproj", "{55933217-B9D6-4D18-AB08-F4B10AEF83C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Management", "Yubico.YubiKit.Management\src\Yubico.YubiKit.Management.csproj", "{61A3106B-B029-4B55-8F93-70F79F2257C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Management", "src\Management\src\Yubico.YubiKit.Management.csproj", "{61A3106B-B029-4B55-8F93-70F79F2257C8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", "{29556DAF-D256-48EA-BE95-94E86BFE0D22}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{6BC51303-7F02-4271-99ED-4FB0EF4845D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Management.IntegrationTests", "Yubico.YubiKit.Management\tests\Yubico.YubiKit.Management.IntegrationTests\Yubico.YubiKit.Management.IntegrationTests.csproj", "{145CCD23-4ED6-443D-B520-3ED1F375A63F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Management.IntegrationTests", "src\Management\tests\Yubico.YubiKit.Management.IntegrationTests\Yubico.YubiKit.Management.IntegrationTests.csproj", "{145CCD23-4ED6-443D-B520-3ED1F375A63F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core.IntegrationTests", "Yubico.YubiKit.Core\tests\Yubico.YubiKit.Core.IntegrationTests\Yubico.YubiKit.Core.IntegrationTests.csproj", "{77FE41B9-A511-4546-B546-622E549CF6DF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core.IntegrationTests", "src\Core\tests\Yubico.YubiKit.Core.IntegrationTests\Yubico.YubiKit.Core.IntegrationTests.csproj", "{77FE41B9-A511-4546-B546-622E549CF6DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core.UnitTests", "Yubico.YubiKit.Core\tests\Yubico.YubiKit.Core.UnitTests\Yubico.YubiKit.Core.UnitTests.csproj", "{C344BDA9-9415-4F4A-9667-EBBE4EF6ABA6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core.UnitTests", "src\Core\tests\Yubico.YubiKit.Core.UnitTests\Yubico.YubiKit.Core.UnitTests.csproj", "{C344BDA9-9415-4F4A-9667-EBBE4EF6ABA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Management.UnitTests", "Yubico.YubiKit.Management\tests\Yubico.YubiKit.Management.UnitTests\Yubico.YubiKit.Management.UnitTests.csproj", "{580B62D6-CCF0-43B9-A414-FBD7F47136FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Management.UnitTests", "src\Management\tests\Yubico.YubiKit.Management.UnitTests\Yubico.YubiKit.Management.UnitTests.csproj", "{580B62D6-CCF0-43B9-A414-FBD7F47136FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.Shared", "Yubico.YubiKit.Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj", "{C7A6467C-78A6-46BB-9FBA-DF8F1A94E2C7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.Shared", "src\Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj", "{C7A6467C-78A6-46BB-9FBA-DF8F1A94E2C7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{84F8A6A2-2296-4DD5-8CF7-04249163AA8B}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.targets = Directory.Build.targets
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props
-		build.cs = build.cs
+		toolchain.cs = toolchain.cs
 		BUILD.md = BUILD.md
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Piv", "Piv", "{FCB028EE-3C3B-4880-02AA-3A3FE9961568}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Piv", "Yubico.YubiKit.Piv\src\Yubico.YubiKit.Piv.csproj", "{41AA3C7D-DC51-44C2-A5C8-1E6543A0AEF5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Piv", "src\Piv\src\Yubico.YubiKit.Piv.csproj", "{41AA3C7D-DC51-44C2-A5C8-1E6543A0AEF5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Piv.UnitTests", "Yubico.YubiKit.Piv\tests\Yubico.YubiKit.Piv.UnitTests\Yubico.YubiKit.Piv.UnitTests.csproj", "{A6C19E70-3600-4A43-ABFA-975F494B30A9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Piv.UnitTests", "src\Piv\tests\Yubico.YubiKit.Piv.UnitTests\Yubico.YubiKit.Piv.UnitTests.csproj", "{A6C19E70-3600-4A43-ABFA-975F494B30A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Piv.IntegrationTests", "Yubico.YubiKit.Piv\tests\Yubico.YubiKit.Piv.IntegrationTests\Yubico.YubiKit.Piv.IntegrationTests.csproj", "{9495B036-DB74-48C3-9063-276915E1D9F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Piv.IntegrationTests", "src\Piv\tests\Yubico.YubiKit.Piv.IntegrationTests\Yubico.YubiKit.Piv.IntegrationTests.csproj", "{9495B036-DB74-48C3-9063-276915E1D9F5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fido2", "Fido2", "{51E56800-A682-637B-22A4-3BC77FC77BA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Fido2", "Yubico.YubiKit.Fido2\src\Yubico.YubiKit.Fido2.csproj", "{A349BF39-72AB-4C36-91A6-D32BF5C69335}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Fido2", "src\Fido2\src\Yubico.YubiKit.Fido2.csproj", "{A349BF39-72AB-4C36-91A6-D32BF5C69335}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Fido2.UnitTests", "Yubico.YubiKit.Fido2\tests\Yubico.YubiKit.Fido2.UnitTests\Yubico.YubiKit.Fido2.UnitTests.csproj", "{F0197B15-101A-425D-A806-41A147DAB616}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Fido2.IntegrationTests", "Yubico.YubiKit.Fido2\tests\Yubico.YubiKit.Fido2.IntegrationTests\Yubico.YubiKit.Fido2.IntegrationTests.csproj", "{E4725041-8CBA-4B47-AD9D-54C3C1426300}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Fido2.UnitTests", "src\Fido2\tests\Yubico.YubiKit.Fido2.UnitTests\Yubico.YubiKit.Fido2.UnitTests.csproj", "{F0197B15-101A-425D-A806-41A147DAB616}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SecurityDomain", "SecurityDomain", "{F2480220-81FA-427B-4AAF-84FFB7AA017A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.SecurityDomain", "Yubico.YubiKit.SecurityDomain\src\Yubico.YubiKit.SecurityDomain.csproj", "{B3DD879C-0BB5-48F3-9417-BB239D9DA76C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.SecurityDomain", "src\SecurityDomain\src\Yubico.YubiKit.SecurityDomain.csproj", "{B3DD879C-0BB5-48F3-9417-BB239D9DA76C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.SecurityDomain.UnitTests", "Yubico.YubiKit.SecurityDomain\tests\Yubico.YubiKit.SecurityDomain.UnitTests\Yubico.YubiKit.SecurityDomain.UnitTests.csproj", "{980CFD1C-3167-40CD-B24F-98B4209E64B2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.SecurityDomain.UnitTests", "src\SecurityDomain\tests\Yubico.YubiKit.SecurityDomain.UnitTests\Yubico.YubiKit.SecurityDomain.UnitTests.csproj", "{980CFD1C-3167-40CD-B24F-98B4209E64B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.SecurityDomain.IntegrationTests", "Yubico.YubiKit.SecurityDomain\tests\Yubico.YubiKit.SecurityDomain.IntegrationTests\Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj", "{A638DF9D-20B7-44FD-963F-C155629C80BF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.SecurityDomain.IntegrationTests", "src\SecurityDomain\tests\Yubico.YubiKit.SecurityDomain.IntegrationTests\Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj", "{A638DF9D-20B7-44FD-963F-C155629C80BF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Oath", "Oath", "{5580EB4C-A97D-3F56-7F83-5211FD8E74B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Oath", "Yubico.YubiKit.Oath\src\Yubico.YubiKit.Oath.csproj", "{46BC1BB4-654F-4AB1-A7A9-5CC8AE94EB29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Oath", "src\Oath\src\Yubico.YubiKit.Oath.csproj", "{46BC1BB4-654F-4AB1-A7A9-5CC8AE94EB29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Oath.UnitTests", "Yubico.YubiKit.Oath\tests\Yubico.YubiKit.Oath.UnitTests\Yubico.YubiKit.Oath.UnitTests.csproj", "{3F51838A-FDAC-4193-805E-41CB2983AE2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Oath.UnitTests", "src\Oath\tests\Yubico.YubiKit.Oath.UnitTests\Yubico.YubiKit.Oath.UnitTests.csproj", "{3F51838A-FDAC-4193-805E-41CB2983AE2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Oath.IntegrationTests", "Yubico.YubiKit.Oath\tests\Yubico.YubiKit.Oath.IntegrationTests\Yubico.YubiKit.Oath.IntegrationTests.csproj", "{3CDBC4B0-ABF4-4646-A7BA-A028881C0756}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Oath.IntegrationTests", "src\Oath\tests\Yubico.YubiKit.Oath.IntegrationTests\Yubico.YubiKit.Oath.IntegrationTests.csproj", "{3CDBC4B0-ABF4-4646-A7BA-A028881C0756}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiHsm", "YubiHsm", "{502A3771-F1A2-C5AE-E304-4CB2B675D6C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.YubiHsm", "Yubico.YubiKit.YubiHsm\src\Yubico.YubiKit.YubiHsm.csproj", "{594FD35A-2751-4980-BE0E-954424E7D3D0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.YubiHsm", "src\YubiHsm\src\Yubico.YubiKit.YubiHsm.csproj", "{594FD35A-2751-4980-BE0E-954424E7D3D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.YubiHsm.UnitTests", "Yubico.YubiKit.YubiHsm\tests\Yubico.YubiKit.YubiHsm.UnitTests\Yubico.YubiKit.YubiHsm.UnitTests.csproj", "{3AF7FBDB-9E1C-41C8-84A0-C93DF1D15CBC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.YubiHsm.UnitTests", "src\YubiHsm\tests\Yubico.YubiKit.YubiHsm.UnitTests\Yubico.YubiKit.YubiHsm.UnitTests.csproj", "{3AF7FBDB-9E1C-41C8-84A0-C93DF1D15CBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.YubiHsm.IntegrationTests", "Yubico.YubiKit.YubiHsm\tests\Yubico.YubiKit.YubiHsm.IntegrationTests\Yubico.YubiKit.YubiHsm.IntegrationTests.csproj", "{92EB6904-92D2-4B4B-9871-5A8D1BDB08B7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.YubiHsm.IntegrationTests", "src\YubiHsm\tests\Yubico.YubiKit.YubiHsm.IntegrationTests\Yubico.YubiKit.YubiHsm.IntegrationTests.csproj", "{92EB6904-92D2-4B4B-9871-5A8D1BDB08B7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiOtp", "YubiOtp", "{B22083BC-7E17-C41F-F5A4-83AD80AC64A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.YubiOtp", "Yubico.YubiKit.YubiOtp\src\Yubico.YubiKit.YubiOtp.csproj", "{FAA756B3-E7E2-4762-88AA-7D6EB4E7C807}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.YubiOtp", "src\YubiOtp\src\Yubico.YubiKit.YubiOtp.csproj", "{FAA756B3-E7E2-4762-88AA-7D6EB4E7C807}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.YubiOtp.UnitTests", "Yubico.YubiKit.YubiOtp\tests\Yubico.YubiKit.YubiOtp.UnitTests\Yubico.YubiKit.YubiOtp.UnitTests.csproj", "{AD89C43E-D937-4BCA-886D-E0131A4992F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.YubiOtp.UnitTests", "src\YubiOtp\tests\Yubico.YubiKit.YubiOtp.UnitTests\Yubico.YubiKit.YubiOtp.UnitTests.csproj", "{AD89C43E-D937-4BCA-886D-E0131A4992F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.YubiOtp.IntegrationTests", "Yubico.YubiKit.YubiOtp\tests\Yubico.YubiKit.YubiOtp.IntegrationTests\Yubico.YubiKit.YubiOtp.IntegrationTests.csproj", "{4079B42F-58FB-4549-8A1E-D3C203410AEC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.YubiOtp.IntegrationTests", "src\YubiOtp\tests\Yubico.YubiKit.YubiOtp.IntegrationTests\Yubico.YubiKit.YubiOtp.IntegrationTests.csproj", "{4079B42F-58FB-4549-8A1E-D3C203410AEC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OpenPgp", "OpenPgp", "{A5BDC44E-1E16-6059-A821-C8C236504AAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.OpenPgp", "Yubico.YubiKit.OpenPgp\src\Yubico.YubiKit.OpenPgp.csproj", "{94E25705-295C-4BEB-9DC9-9AB862738B8D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.OpenPgp", "src\OpenPgp\src\Yubico.YubiKit.OpenPgp.csproj", "{94E25705-295C-4BEB-9DC9-9AB862738B8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.OpenPgp.UnitTests", "Yubico.YubiKit.OpenPgp\tests\Yubico.YubiKit.OpenPgp.UnitTests\Yubico.YubiKit.OpenPgp.UnitTests.csproj", "{1F9F7F46-43B4-4DB1-BAD8-AD508EB7B326}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.OpenPgp.UnitTests", "src\OpenPgp\tests\Yubico.YubiKit.OpenPgp.UnitTests\Yubico.YubiKit.OpenPgp.UnitTests.csproj", "{1F9F7F46-43B4-4DB1-BAD8-AD508EB7B326}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.OpenPgp.IntegrationTests", "Yubico.YubiKit.OpenPgp\tests\Yubico.YubiKit.OpenPgp.IntegrationTests\Yubico.YubiKit.OpenPgp.IntegrationTests.csproj", "{64153330-5664-4099-A821-B33BD5B51ED5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.OpenPgp.IntegrationTests", "src\OpenPgp\tests\Yubico.YubiKit.OpenPgp.IntegrationTests\Yubico.YubiKit.OpenPgp.IntegrationTests.csproj", "{64153330-5664-4099-A821-B33BD5B51ED5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.TestProject", "Yubico.YubiKit.Tests.TestProject\Yubico.YubiKit.Tests.TestProject.csproj", "{BE618201-B609-462D-B222-14C7A7F9EF45}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.TestProject", "src\Tests.TestProject\Yubico.YubiKit.Tests.TestProject.csproj", "{BE618201-B609-462D-B222-14C7A7F9EF45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagementTool", "Yubico.YubiKit.Management\examples\ManagementTool\ManagementTool.csproj", "{2AD12F83-CB52-4995-8499-B9FE03C80DF7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagementTool", "src\Management\examples\ManagementTool\ManagementTool.csproj", "{2AD12F83-CB52-4995-8499-B9FE03C80DF7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.YubiKit.YubiHsm", "Yubico.YubiKit.YubiHsm", "{32BE4BD5-3E89-AFCD-676E-A69696060D68}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{D3485944-465F-44FA-7C5D-D9FB6FA4FCBA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HsmAuthTool", "src\YubiHsm\examples\HsmAuthTool\HsmAuthTool.csproj", "{1776B205-A42C-4EB1-BE4C-09BFAA10A277}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FidoTool", "src\Fido2\examples\FidoTool\FidoTool.csproj", "{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.YubiKit.Fido2", "Yubico.YubiKit.Fido2", "{12C69724-0DC1-5964-411E-7268C2885289}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{230107ED-DD6D-43C2-80E9-99784904F745}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Fido2.IntegrationTests", "src\Fido2\tests\Yubico.YubiKit.Fido2.IntegrationTests\Yubico.YubiKit.Fido2.IntegrationTests.csproj", "{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E136893F-1AF3-4DD0-B553-618E22628355}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.YubiKit.Core", "Yubico.YubiKit.Core", "{C7060242-F3D1-605D-0449-B4D17A53ABB5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3876715B-EA7A-783A-AA43-497B6F3CDA64}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{B36A84DF-456D-A817-6EDD-3EC3E7F6E11F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Cli.Shared", "src\Cli.Shared\src\Yubico.YubiKit.Cli.Shared.csproj", "{663839D8-2D3B-47EB-8CEB-56040534866B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.YubiKit.Oath", "Yubico.YubiKit.Oath", "{21F9ED37-B2BD-2E2B-F937-19D6E895F39E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{D2597168-6E46-DDEC-DE7E-6C6DE63A0D71}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OathTool", "src\Oath\examples\OathTool\OathTool.csproj", "{C7F5A805-0E31-4C93-B324-0B47B6D416DA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FE4F94A5-B402-1A0B-26BE-89B92557C813}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.YubiKit.Management", "Yubico.YubiKit.Management", "{49AB4EA0-7ED9-97A9-8A34-E0D9D58DF415}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2E4510AE-02FF-867B-45DC-EA201BADB614}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.YubiKit.Cli.Shared", "Yubico.YubiKit.Cli.Shared", "{8F85CD27-48FC-A3CA-26F4-E23A041CC712}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C29BA021-FD31-F421-1081-842774CC578E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.YubiKit.OpenPgp", "Yubico.YubiKit.OpenPgp", "{3A8DF40F-D5C0-B3FB-F73B-283B54DC7BA1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{E12255C5-E216-4CC7-1EF9-02024D1DBAD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenPgpTool", "src\OpenPgp\examples\OpenPgpTool\OpenPgpTool.csproj", "{8714CDD0-EBE9-41CC-98E3-F93347456CC5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A4393EC0-2F15-E080-90F4-EF0943152A8D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cli.Commands", "Cli.Commands", "{5A2A6116-CAE0-4810-370B-8850F3110874}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E31009DE-5B33-BE78-C1C2-2968722320D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Cli.Commands", "src\Cli.Commands\src\Yubico.YubiKit.Cli.Commands.csproj", "{744F998C-D5CE-4780-B38F-5335CF077C99}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{8D626EA8-CB54-BC41-363A-217881BEBA6E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D5B37BAE-0322-6BA3-3511-B8DD51D54D8F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", "{F3244B3D-53C5-18F9-F232-08909C1DCBB5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7D0EB79F-CBCD-C6FF-F67F-61AE07FD7384}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fido2", "Fido2", "{566DC5E9-C284-68A9-25F4-274ACA4A4804}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{825731E8-3327-3B99-B501-D96DB1216992}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Piv", "Piv", "{ED35DF4A-3D61-DBF1-BB71-B961210A49B8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{18EAE487-2304-F63C-3A1A-D9C3D145B449}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Oath", "Oath", "{3361DE8A-9A24-E183-14E0-F43C23417753}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{63145709-3F0F-F534-E546-B894AF8B1DCC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OpenPgp", "OpenPgp", "{123B3CFB-FCD9-7B83-9D92-16171B8E56BB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9B30294A-6799-D8C2-F556-CD0E5863B596}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiHsm", "YubiHsm", "{D35874AA-DE7E-201D-E451-5EB8BA68307D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{5563EA8B-8595-24FA-2314-0CE44D382D18}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiOtp", "YubiOtp", "{9D2DC48D-95E6-351E-1EF8-9B5D77D760DE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{021B5F8B-5C41-7944-E55F-B1231E0D5852}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cli.Shared", "Cli.Shared", "{27C8A682-4598-7999-DA7F-AB556F4E3F61}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CA3630C8-46F6-7C88-585B-5554D17A5CD9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cli", "Cli", "{778427DF-EB2C-5228-964E-6D535DE253CA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YkTool", "YkTool", "{AE855F1C-9039-A91C-8BA3-D324D5C1482C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Cli.YkTool", "src\Cli\YkTool\Yubico.YubiKit.Cli.YkTool.csproj", "{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -245,18 +341,6 @@ Global
 		{F0197B15-101A-425D-A806-41A147DAB616}.Release|x64.Build.0 = Release|Any CPU
 		{F0197B15-101A-425D-A806-41A147DAB616}.Release|x86.ActiveCfg = Release|Any CPU
 		{F0197B15-101A-425D-A806-41A147DAB616}.Release|x86.Build.0 = Release|Any CPU
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300}.Debug|x64.Build.0 = Debug|Any CPU
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300}.Debug|x86.Build.0 = Debug|Any CPU
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300}.Release|x64.ActiveCfg = Release|Any CPU
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300}.Release|x64.Build.0 = Release|Any CPU
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300}.Release|x86.ActiveCfg = Release|Any CPU
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300}.Release|x86.Build.0 = Release|Any CPU
 		{B3DD879C-0BB5-48F3-9417-BB239D9DA76C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B3DD879C-0BB5-48F3-9417-BB239D9DA76C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3DD879C-0BB5-48F3-9417-BB239D9DA76C}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -461,6 +545,102 @@ Global
 		{2AD12F83-CB52-4995-8499-B9FE03C80DF7}.Release|x64.Build.0 = Release|Any CPU
 		{2AD12F83-CB52-4995-8499-B9FE03C80DF7}.Release|x86.ActiveCfg = Release|Any CPU
 		{2AD12F83-CB52-4995-8499-B9FE03C80DF7}.Release|x86.Build.0 = Release|Any CPU
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277}.Debug|x64.Build.0 = Debug|Any CPU
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277}.Debug|x86.Build.0 = Debug|Any CPU
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277}.Release|x64.ActiveCfg = Release|Any CPU
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277}.Release|x64.Build.0 = Release|Any CPU
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277}.Release|x86.ActiveCfg = Release|Any CPU
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277}.Release|x86.Build.0 = Release|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Debug|x64.Build.0 = Debug|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Debug|x86.Build.0 = Debug|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Release|x64.ActiveCfg = Release|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Release|x64.Build.0 = Release|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Release|x86.ActiveCfg = Release|Any CPU
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}.Release|x86.Build.0 = Release|Any CPU
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}.Debug|x64.Build.0 = Debug|Any CPU
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}.Debug|x86.Build.0 = Debug|Any CPU
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}.Release|x64.ActiveCfg = Release|Any CPU
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}.Release|x64.Build.0 = Release|Any CPU
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}.Release|x86.ActiveCfg = Release|Any CPU
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}.Release|x86.Build.0 = Release|Any CPU
+		{663839D8-2D3B-47EB-8CEB-56040534866B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{663839D8-2D3B-47EB-8CEB-56040534866B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{663839D8-2D3B-47EB-8CEB-56040534866B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{663839D8-2D3B-47EB-8CEB-56040534866B}.Debug|x64.Build.0 = Debug|Any CPU
+		{663839D8-2D3B-47EB-8CEB-56040534866B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{663839D8-2D3B-47EB-8CEB-56040534866B}.Debug|x86.Build.0 = Debug|Any CPU
+		{663839D8-2D3B-47EB-8CEB-56040534866B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{663839D8-2D3B-47EB-8CEB-56040534866B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{663839D8-2D3B-47EB-8CEB-56040534866B}.Release|x64.ActiveCfg = Release|Any CPU
+		{663839D8-2D3B-47EB-8CEB-56040534866B}.Release|x64.Build.0 = Release|Any CPU
+		{663839D8-2D3B-47EB-8CEB-56040534866B}.Release|x86.ActiveCfg = Release|Any CPU
+		{663839D8-2D3B-47EB-8CEB-56040534866B}.Release|x86.Build.0 = Release|Any CPU
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA}.Debug|x64.Build.0 = Debug|Any CPU
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA}.Debug|x86.Build.0 = Debug|Any CPU
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA}.Release|x64.ActiveCfg = Release|Any CPU
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA}.Release|x64.Build.0 = Release|Any CPU
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA}.Release|x86.ActiveCfg = Release|Any CPU
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA}.Release|x86.Build.0 = Release|Any CPU
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5}.Debug|x64.Build.0 = Debug|Any CPU
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5}.Debug|x86.Build.0 = Debug|Any CPU
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5}.Release|x64.ActiveCfg = Release|Any CPU
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5}.Release|x64.Build.0 = Release|Any CPU
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5}.Release|x86.ActiveCfg = Release|Any CPU
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5}.Release|x86.Build.0 = Release|Any CPU
+		{744F998C-D5CE-4780-B38F-5335CF077C99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{744F998C-D5CE-4780-B38F-5335CF077C99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{744F998C-D5CE-4780-B38F-5335CF077C99}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{744F998C-D5CE-4780-B38F-5335CF077C99}.Debug|x64.Build.0 = Debug|Any CPU
+		{744F998C-D5CE-4780-B38F-5335CF077C99}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{744F998C-D5CE-4780-B38F-5335CF077C99}.Debug|x86.Build.0 = Debug|Any CPU
+		{744F998C-D5CE-4780-B38F-5335CF077C99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{744F998C-D5CE-4780-B38F-5335CF077C99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{744F998C-D5CE-4780-B38F-5335CF077C99}.Release|x64.ActiveCfg = Release|Any CPU
+		{744F998C-D5CE-4780-B38F-5335CF077C99}.Release|x64.Build.0 = Release|Any CPU
+		{744F998C-D5CE-4780-B38F-5335CF077C99}.Release|x86.ActiveCfg = Release|Any CPU
+		{744F998C-D5CE-4780-B38F-5335CF077C99}.Release|x86.Build.0 = Release|Any CPU
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}.Debug|x64.Build.0 = Debug|Any CPU
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}.Debug|x86.Build.0 = Debug|Any CPU
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}.Release|x64.ActiveCfg = Release|Any CPU
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}.Release|x64.Build.0 = Release|Any CPU
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}.Release|x86.ActiveCfg = Release|Any CPU
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -477,7 +657,6 @@ Global
 		{9495B036-DB74-48C3-9063-276915E1D9F5} = {FCB028EE-3C3B-4880-02AA-3A3FE9961568}
 		{A349BF39-72AB-4C36-91A6-D32BF5C69335} = {51E56800-A682-637B-22A4-3BC77FC77BA1}
 		{F0197B15-101A-425D-A806-41A147DAB616} = {51E56800-A682-637B-22A4-3BC77FC77BA1}
-		{E4725041-8CBA-4B47-AD9D-54C3C1426300} = {51E56800-A682-637B-22A4-3BC77FC77BA1}
 		{B3DD879C-0BB5-48F3-9417-BB239D9DA76C} = {F2480220-81FA-427B-4AAF-84FFB7AA017A}
 		{980CFD1C-3167-40CD-B24F-98B4209E64B2} = {F2480220-81FA-427B-4AAF-84FFB7AA017A}
 		{A638DF9D-20B7-44FD-963F-C155629C80BF} = {F2480220-81FA-427B-4AAF-84FFB7AA017A}
@@ -494,6 +673,46 @@ Global
 		{1F9F7F46-43B4-4DB1-BAD8-AD508EB7B326} = {A5BDC44E-1E16-6059-A821-C8C236504AAA}
 		{64153330-5664-4099-A821-B33BD5B51ED5} = {A5BDC44E-1E16-6059-A821-C8C236504AAA}
 		{2AD12F83-CB52-4995-8499-B9FE03C80DF7} = {29556DAF-D256-48EA-BE95-94E86BFE0D22}
+		{D3485944-465F-44FA-7C5D-D9FB6FA4FCBA} = {32BE4BD5-3E89-AFCD-676E-A69696060D68}
+		{1776B205-A42C-4EB1-BE4C-09BFAA10A277} = {D3485944-465F-44FA-7C5D-D9FB6FA4FCBA}
+		{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741} = {51E56800-A682-637B-22A4-3BC77FC77BA1}
+		{230107ED-DD6D-43C2-80E9-99784904F745} = {12C69724-0DC1-5964-411E-7268C2885289}
+		{A970629C-B2A4-4BDD-9D49-F68C6F968EB7} = {230107ED-DD6D-43C2-80E9-99784904F745}
+		{E136893F-1AF3-4DD0-B553-618E22628355} = {12C69724-0DC1-5964-411E-7268C2885289}
+		{3876715B-EA7A-783A-AA43-497B6F3CDA64} = {C7060242-F3D1-605D-0449-B4D17A53ABB5}
+		{663839D8-2D3B-47EB-8CEB-56040534866B} = {B36A84DF-456D-A817-6EDD-3EC3E7F6E11F}
+		{D2597168-6E46-DDEC-DE7E-6C6DE63A0D71} = {21F9ED37-B2BD-2E2B-F937-19D6E895F39E}
+		{C7F5A805-0E31-4C93-B324-0B47B6D416DA} = {D2597168-6E46-DDEC-DE7E-6C6DE63A0D71}
+		{FE4F94A5-B402-1A0B-26BE-89B92557C813} = {21F9ED37-B2BD-2E2B-F937-19D6E895F39E}
+		{2E4510AE-02FF-867B-45DC-EA201BADB614} = {49AB4EA0-7ED9-97A9-8A34-E0D9D58DF415}
+		{C29BA021-FD31-F421-1081-842774CC578E} = {8F85CD27-48FC-A3CA-26F4-E23A041CC712}
+		{E12255C5-E216-4CC7-1EF9-02024D1DBAD4} = {3A8DF40F-D5C0-B3FB-F73B-283B54DC7BA1}
+		{8714CDD0-EBE9-41CC-98E3-F93347456CC5} = {E12255C5-E216-4CC7-1EF9-02024D1DBAD4}
+		{A4393EC0-2F15-E080-90F4-EF0943152A8D} = {3A8DF40F-D5C0-B3FB-F73B-283B54DC7BA1}
+		{5A2A6116-CAE0-4810-370B-8850F3110874} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{E31009DE-5B33-BE78-C1C2-2968722320D2} = {5A2A6116-CAE0-4810-370B-8850F3110874}
+		{744F998C-D5CE-4780-B38F-5335CF077C99} = {E31009DE-5B33-BE78-C1C2-2968722320D2}
+		{8D626EA8-CB54-BC41-363A-217881BEBA6E} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{D5B37BAE-0322-6BA3-3511-B8DD51D54D8F} = {8D626EA8-CB54-BC41-363A-217881BEBA6E}
+		{F3244B3D-53C5-18F9-F232-08909C1DCBB5} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{7D0EB79F-CBCD-C6FF-F67F-61AE07FD7384} = {F3244B3D-53C5-18F9-F232-08909C1DCBB5}
+		{566DC5E9-C284-68A9-25F4-274ACA4A4804} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{825731E8-3327-3B99-B501-D96DB1216992} = {566DC5E9-C284-68A9-25F4-274ACA4A4804}
+		{ED35DF4A-3D61-DBF1-BB71-B961210A49B8} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{18EAE487-2304-F63C-3A1A-D9C3D145B449} = {ED35DF4A-3D61-DBF1-BB71-B961210A49B8}
+		{3361DE8A-9A24-E183-14E0-F43C23417753} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{63145709-3F0F-F534-E546-B894AF8B1DCC} = {3361DE8A-9A24-E183-14E0-F43C23417753}
+		{123B3CFB-FCD9-7B83-9D92-16171B8E56BB} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{9B30294A-6799-D8C2-F556-CD0E5863B596} = {123B3CFB-FCD9-7B83-9D92-16171B8E56BB}
+		{D35874AA-DE7E-201D-E451-5EB8BA68307D} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{5563EA8B-8595-24FA-2314-0CE44D382D18} = {D35874AA-DE7E-201D-E451-5EB8BA68307D}
+		{9D2DC48D-95E6-351E-1EF8-9B5D77D760DE} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{021B5F8B-5C41-7944-E55F-B1231E0D5852} = {9D2DC48D-95E6-351E-1EF8-9B5D77D760DE}
+		{27C8A682-4598-7999-DA7F-AB556F4E3F61} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{CA3630C8-46F6-7C88-585B-5554D17A5CD9} = {27C8A682-4598-7999-DA7F-AB556F4E3F61}
+		{778427DF-EB2C-5228-964E-6D535DE253CA} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{AE855F1C-9039-A91C-8BA3-D324D5C1482C} = {778427DF-EB2C-5228-964E-6D535DE253CA}
+		{1D1ADFA7-8721-4FB1-A0EC-17304D360FE9} = {AE855F1C-9039-A91C-8BA3-D324D5C1482C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A15F6F16-41BD-43F1-BF4A-17B4695A4D45}

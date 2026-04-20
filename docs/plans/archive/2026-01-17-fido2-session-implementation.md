@@ -42,17 +42,17 @@ This is a comprehensive port of Java `yubikit-android` FIDO2/CTAP2 to C#.
 
 **Build:**
 ```bash
-dotnet build.cs build
+dotnet toolchain.cs build
 ```
 
 **Tests:**
 ```bash
-dotnet build.cs test
+dotnet toolchain.cs test
 ```
 
 **Coverage:**
 ```bash
-dotnet build.cs coverage
+dotnet toolchain.cs coverage
 ```
 
 ---
@@ -138,11 +138,11 @@ Before completing an iteration:
 Only after **ALL phases 1–13 are fully complete**, run the final verification:
 
 ### Build Verification
-- [ ] Run `dotnet build.cs build` → exits 0
+- [ ] Run `dotnet toolchain.cs build` → exits 0
 - [ ] No compiler errors or warnings (except pre-existing)
 
 ### Test Verification
-- [ ] Run `dotnet build.cs test --filter "RequiresUserPresence!=true"` → all non-user-presence tests pass
+- [ ] Run `dotnet toolchain.cs test --filter "RequiresUserPresence!=true"` → all non-user-presence tests pass
 - [ ] No test failures (user-presence tests are expected to be skipped/not-run)
 - [ ] Coverage ≥80% for new code (if tooling available, excluding user-presence tests)
 - [ ] If test filter syntax differs, use native test runner filters to exclude user-presence tests
@@ -171,14 +171,14 @@ Only after **ALL phases 1–13 are fully complete**, run the final verification:
 ### Build Fails
 1. Read error message carefully
 2. Fix root cause (not just symptoms)
-3. Re-run `dotnet build.cs build` until it passes
+3. Re-run `dotnet toolchain.cs build` until it passes
 4. **Do NOT continue** until build is green
 
 ### Tests Fail
 1. Identify which test(s) fail
 2. Check if test logic is correct or if implementation is wrong
 3. Fix implementation or test
-4. Re-run `dotnet build.cs test` until all pass
+4. Re-run `dotnet toolchain.cs test` until all pass
 5. **Do NOT continue** until all tests are green
 
 ### Ambiguous Decision

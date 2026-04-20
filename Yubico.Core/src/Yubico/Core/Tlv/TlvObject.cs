@@ -185,9 +185,9 @@ namespace Yubico.Core.Tlv
             if (length > 0x80)
             {
                 int lengthLn = length - 0x80;
-                if (buffer.Length < lengthLn)
+                if (lengthLn > 4 || buffer.Length < lengthLn)
                 {
-                    throw new ArgumentException("Insufficient data for length");
+                    throw new TlvException(ExceptionMessages.TlvUnsupportedLengthField);
                 }
                 length = 0;
                 for (int i = 0; i < lengthLn; i++)
@@ -199,7 +199,7 @@ namespace Yubico.Core.Tlv
 
             if (buffer.Length < length)
             {
-                throw new ArgumentException("Insufficient data for length");
+                throw new TlvException(ExceptionMessages.TlvUnexpectedEndOfBuffer);
             }
 
             ReadOnlySpan<byte> value = buffer[..length];

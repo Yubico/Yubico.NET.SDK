@@ -25,6 +25,8 @@ public delegate void FuzzTarget(ReadOnlySpan<byte> data);
 
 public static class Program
 {
+    private const int MaxStackAllocSize = 1024;
+
     private static readonly Dictionary<string, FuzzTarget> Targets = new()
     {
         ["tlv-reader"] = FuzzTlvReader,
@@ -62,7 +64,7 @@ public static class Program
             while (reader.HasData)
             {
                 int tag = reader.PeekTag();
-                reader.ReadValue(tag);
+                _ = reader.ReadValue(tag);
             }
         }
         catch (TlvException) { }
@@ -72,22 +74,20 @@ public static class Program
     {
         try
         {
-            TlvObject.Parse(data);
+            using var tlvObject = TlvObject.Parse(data);
         }
         catch (TlvException) { }
         catch (ArgumentException) { }
-        catch (IndexOutOfRangeException) { }
     }
 
     private static void FuzzTlvDecodeList(ReadOnlySpan<byte> data)
     {
         try
         {
-            TlvObjects.DecodeList(data);
+            _ = TlvObjects.DecodeList(data);
         }
         catch (TlvException) { }
         catch (ArgumentException) { }
-        catch (IndexOutOfRangeException) { }
     }
 
     private static void FuzzBase16(ReadOnlySpan<byte> data)
@@ -95,15 +95,19 @@ public static class Program
         try
         {
             int len = data.Length;
-            if (len == 0) return;
+            if (len == 0)
+            {
+                return;
+            }
 
-            Span<char> chars = stackalloc char[len];
+            Span<char> chars = len <= MaxStackAllocSize ? stackalloc char[len] : new char[len];
             for (int i = 0; i < len; i++)
             {
                 chars[i] = (char)data[i];
             }
 
-            Base16.DecodeText(chars, stackalloc byte[len]);
+            Span<byte> output = len <= MaxStackAllocSize ? stackalloc byte[len] : new byte[len];
+            Base16.DecodeText(chars, output);
         }
         catch (ArgumentException) { }
         catch (FormatException) { }
@@ -114,9 +118,12 @@ public static class Program
         try
         {
             int len = data.Length;
-            if (len == 0) return;
+            if (len == 0)
+            {
+                return;
+            }
 
-            Span<char> chars = stackalloc char[len];
+            Span<char> chars = len <= MaxStackAllocSize ? stackalloc char[len] : new char[len];
             for (int i = 0; i < len; i++)
             {
                 chars[i] = (char)data[i];
@@ -124,7 +131,8 @@ public static class Program
 
             int decodedSize = Base32.GetDecodedSize(chars);
             var decoder = new Base32();
-            decoder.Decode(chars, stackalloc byte[decodedSize]);
+            Span<byte> output = decodedSize <= MaxStackAllocSize ? stackalloc byte[decodedSize] : new byte[decodedSize];
+            decoder.Decode(chars, output);
         }
         catch (ArgumentException) { }
         catch (FormatException) { }
@@ -135,15 +143,19 @@ public static class Program
         try
         {
             int len = data.Length;
-            if (len == 0) return;
+            if (len == 0)
+            {
+                return;
+            }
 
-            Span<char> chars = stackalloc char[len];
+            Span<char> chars = len <= MaxStackAllocSize ? stackalloc char[len] : new char[len];
             for (int i = 0; i < len; i++)
             {
                 chars[i] = (char)data[i];
             }
 
-            ModHex.DecodeText(chars, stackalloc byte[len]);
+            Span<byte> output = len <= MaxStackAllocSize ? stackalloc byte[len] : new byte[len];
+            ModHex.DecodeText(chars, output);
         }
         catch (ArgumentException) { }
         catch (FormatException) { }
@@ -153,7 +165,10 @@ public static class Program
     {
         try
         {
-            if (data.Length < 2) return;
+            if (data.Length < 2)
+            {
+                return;
+            }
 
             var apdu = new ResponseApdu(data.ToArray());
             _ = apdu.SW;

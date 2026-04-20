@@ -132,8 +132,8 @@ status: complete
 **Files:** N/A
 
 ### Tasks
-- [x] 5.1: Full build - `dotnet build.cs build`
-- [x] 5.2: Full PIV test suite - `dotnet build.cs test --filter "FullyQualifiedName~Piv"` - 29/29 passing
+- [x] 5.1: Full build - `dotnet toolchain.cs build`
+- [x] 5.2: Full PIV test suite - `dotnet toolchain.cs test --filter "FullyQualifiedName~Piv"` - 29/29 passing
 - [x] 5.3: Verify no regressions in other integration tests
 
 ### Notes
@@ -149,8 +149,8 @@ status: complete
 
 Only emit `<promise>PIV_INTEGRATION_TESTS_PASSING</promise>` when:
 1. All Phase 1-5 tasks are marked `[x]`
-2. `dotnet build.cs build` exits 0
-3. `dotnet build.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"` shows all tests passing (28/28)
+2. `dotnet toolchain.cs build` exits 0
+3. `dotnet toolchain.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"` shows all tests passing (28/28)
 
 ---
 

@@ -378,11 +378,11 @@ The first pass identified 52 gaps. This second pass found **23 additional gaps**
 
 ### Post-Write Workflow
 
-1. **Build verification**: `dotnet build.cs build` — all 27 files must compile
+1. **Build verification**: `dotnet toolchain.cs build` — all 27 files must compile
 2. **Merge**: If worktrees used, merge branches. Otherwise already on `yubikit-applets`
 3. **Sequential testing** (one module at a time, one test at a time):
    - PIV → OATH → OpenPGP → YubiHSM → SecurityDomain → Management → FIDO2
-   - Command: `dotnet build.cs -- test --integration --project {Module} --filter "FullyQualifiedName~{TestName}"`
+   - Command: `dotnet toolchain.cs -- test --integration --project {Module} --filter "FullyQualifiedName~{TestName}"`
    - Fix failures between runs
 4. **Code review**: Each module's new tests reviewed for patterns, security, cleanup
 
@@ -393,7 +393,7 @@ MPE tests (XM-1, XM-2) require a new cross-module test project with references t
 ### Verification
 
 After all tests pass:
-- `dotnet build.cs build` — clean build
-- `dotnet build.cs test` — unit tests pass
+- `dotnet toolchain.cs build` — clean build
+- `dotnet toolchain.cs test` — unit tests pass
 - Integration tests pass per-module with `--filter` targeting new tests only
 - `dotnet format` — code style compliance

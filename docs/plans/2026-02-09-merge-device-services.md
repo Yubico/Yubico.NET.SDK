@@ -65,7 +65,7 @@ DeviceMonitorService  →  DeviceRepositoryCached
 
 ### Part C: Verify
 - [x] 19. Build — `dotnet build Yubico.YubiKit.sln`
-- [ ] 20. Test — `dotnet build.cs test` (skipped - some tests require device presence)
+- [ ] 20. Test — `dotnet toolchain.cs test` (skipped - some tests require device presence)
 - [ ] 21. Commit
 
 ## Files to Delete
@@ -236,7 +236,7 @@ dotnet build Yubico.YubiKit.sln
 
 ### Test
 ```bash
-dotnet build.cs test
+dotnet toolchain.cs test
 ```
 
 ### Manual smoke test

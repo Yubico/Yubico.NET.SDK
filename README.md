@@ -115,19 +115,19 @@ var credential = await fido2Session.MakeCredentialAsync(makeCredentialParams);
 
 ```bash
 # Build the solution
-dotnet build.cs build
+dotnet toolchain.cs build
 
 # Run tests
-dotnet build.cs test
+dotnet toolchain.cs test
 
 # Create NuGet packages
-dotnet build.cs pack
+dotnet toolchain.cs pack
 ```
 
 See [BUILD.md](BUILD.md) for detailed build instructions.
 
 ## Test Runner Support in IDEs
 
-- Unit test projects use xUnit v3 with the Microsoft Testing Platform (`<UseMicrosoftTestingPlatformRunner>true`). Run them via `dotnet run --project ... --no-build` or use the build script (`dotnet build.cs test`).
+- Unit test projects use xUnit v3 with the Microsoft Testing Platform (`<UseMicrosoftTestingPlatformRunner>true`). Run them via `dotnet run --project ... --no-build` or use the build script (`dotnet toolchain.cs test`).
 - Integration test projects remain on xUnit v2 with `Microsoft.NET.Test.Sdk`, so they will appear in VS Code’s Test Explorer.
 - VS Code’s C# extensions do **not** yet discover xUnit v3 / Testing Platform projects. Until Microsoft ships support, the unit tests are invisible in the Testing tab even though they run fine from the CLI.

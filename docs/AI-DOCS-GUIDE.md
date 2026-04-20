@@ -378,17 +378,17 @@ AI tools scan documents. Use headers, tables, and bullet points.
 
 ```markdown
 # ❌ Paragraph
-The build command is dotnet build.cs build and you can also run
-tests with dotnet build.cs test. For coverage you use dotnet build.cs
-coverage and to create packages use dotnet build.cs pack.
+The build command is dotnet toolchain.cs build and you can also run
+tests with dotnet toolchain.cs test. For coverage you use dotnet toolchain.cs
+coverage and to create packages use dotnet toolchain.cs pack.
 
 # ✅ Structured
 | Command | Purpose |
 |---------|---------|
-| `dotnet build.cs build` | Build solution |
-| `dotnet build.cs test` | Run tests |
-| `dotnet build.cs coverage` | Coverage report |
-| `dotnet build.cs pack` | Create packages |
+| `dotnet toolchain.cs build` | Build solution |
+| `dotnet toolchain.cs test` | Run tests |
+| `dotnet toolchain.cs coverage` | Coverage report |
+| `dotnet toolchain.cs pack` | Create packages |
 ```
 
 ### 4. Front-Load Critical Information
@@ -463,7 +463,7 @@ Write one minimal test showing what should happen.
 **MANDATORY. Never skip.**
 
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~MyTest"
+dotnet toolchain.cs test --filter "FullyQualifiedName~MyTest"
 ```
 
 ### GREEN - Minimal Code

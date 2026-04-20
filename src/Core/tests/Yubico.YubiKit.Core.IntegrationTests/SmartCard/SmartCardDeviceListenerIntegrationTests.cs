@@ -149,7 +149,7 @@ public class SmartCardDeviceListenerIntegrationTests
 
     [Fact]
     [Trait("RequiresDevice", "SmartCard")]
-    public void Dispose_CompletesWithin5Seconds()
+    public async Task Dispose_CompletesWithin5Seconds()
     {
         // Arrange
         DesktopSmartCardDeviceListener? listener = null;
@@ -165,10 +165,10 @@ public class SmartCardDeviceListenerIntegrationTests
 
         // Act
         var disposeTask = Task.Run(() => listener.Dispose());
-        var completed = disposeTask.Wait(TimeSpan.FromSeconds(5));
+        var completedTask = await Task.WhenAny(disposeTask, Task.Delay(TimeSpan.FromSeconds(5)));
 
         // Assert
-        Assert.True(completed, "Dispose should complete within 5 seconds");
+        Assert.True(completedTask == disposeTask, "Dispose should complete within 5 seconds");
         _output.WriteLine("Dispose completed within timeout");
     }
 }

@@ -115,11 +115,11 @@ When the engine detects a progress file, it injects these instructions automatic
 
 ```
 1. RED: Write failing test asserting the task's behavior
-   Run: `dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"`
+   Run: `dotnet toolchain.cs test --filter "FullyQualifiedName~{TestClass}"`
    Expect: FAILURE
 
 2. GREEN: Write minimal code to pass
-   Run: `dotnet build.cs test --filter "FullyQualifiedName~{TestClass}"`
+   Run: `dotnet toolchain.cs test --filter "FullyQualifiedName~{TestClass}"`
    Expect: SUCCESS
 
 3. REFACTOR: Clean up, check security, add docs
@@ -145,9 +145,9 @@ When the engine detects a progress file, it injects these instructions automatic
 
 | Action | Command |
 |--------|---------|
-| Build | `dotnet build.cs build` |
-| Test | `dotnet build.cs test` |
-| Test filtered | `dotnet build.cs test --filter "..."` |
+| Build | `dotnet toolchain.cs build` |
+| Test | `dotnet toolchain.cs test` |
+| Test filtered | `dotnet toolchain.cs test --filter "..."` |
 
 **NEVER use `dotnet build` or `dotnet test` directly** - they fail on mixed xUnit v2/v3.
 
@@ -246,7 +246,7 @@ bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
 
 ```bash
 bun .claude/skills/agent-ralph-loop/ralph-loop.ts \
-  "Run 'dotnet build.cs test'. Analyze failures. Fix code. Repeat until passing." \
+  "Run 'dotnet toolchain.cs test'. Analyze failures. Fix code. Repeat until passing." \
   --completion-promise "TESTS_PASSED" \
   --max-iterations 12 \
   --model claude-sonnet-4.5

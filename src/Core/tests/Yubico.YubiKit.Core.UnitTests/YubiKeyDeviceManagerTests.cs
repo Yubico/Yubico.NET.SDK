@@ -291,7 +291,7 @@ public class YubiKeyDeviceManagerTests
 
 
     [Fact]
-    public void Create_ReturnsValidInstance()
+    public async Task Create_ReturnsValidInstance()
     {
         // Act
         var manager = YubiKeyDeviceManager.Create();
@@ -300,7 +300,7 @@ public class YubiKeyDeviceManagerTests
         Assert.NotNull(manager);
         Assert.False(manager.IsMonitoring);
 
-        manager.DisposeAsync().GetAwaiter().GetResult();
+        await manager.DisposeAsync();
     }
 
 
@@ -317,7 +317,7 @@ public class YubiKeyDeviceManagerTests
         // Act
         for (int i = 0; i < concurrency; i++)
         {
-            tasks.Add(manager.FindAllAsync());
+            tasks.Add(manager.FindAllAsync(TestContext.Current.CancellationToken));
         }
 
         var results = await Task.WhenAll(tasks);

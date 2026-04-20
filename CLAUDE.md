@@ -105,7 +105,7 @@ Each module directory may contain:
 - ❌ AVOID: `SHA256.Create().ComputeHash(data)` (allocates array)
 
 **Testing:**
-- ✅ ALWAYS use `dotnet build.cs test` (handles xUnit v2/v3 runner differences automatically)
+- ✅ ALWAYS use `dotnet toolchain.cs test` (handles xUnit v2/v3 runner differences automatically)
 - ❌ NEVER use `dotnet test` directly (fails on xUnit v3 projects with wrong syntax)
 - See `docs/TESTING.md` for full testing guidance
 
@@ -118,7 +118,7 @@ Each module directory may contain:
 
 ## Build and Test Commands
 
-**IMPORTANT: Use the build script (`build.cs`) for all build, test, and packaging operations.**
+**IMPORTANT: Use the build script (`toolchain.cs`) for all build, test, and packaging operations.**
 
 The project uses a Bullseye-based build script that provides consistent, well-tested build workflows.
 
@@ -126,19 +126,19 @@ The project uses a Bullseye-based build script that provides consistent, well-te
 
 ```bash
 # Build the solution
-dotnet build.cs build
+dotnet toolchain.cs build
 
 # Run unit tests
-dotnet build.cs test
+dotnet toolchain.cs test
 
 # Run tests with code coverage
-dotnet build.cs coverage
+dotnet toolchain.cs coverage
 
 # Create NuGet packages
-dotnet build.cs pack
+dotnet toolchain.cs pack
 
 # Publish packages to local feed
-dotnet build.cs publish
+dotnet toolchain.cs publish
 ```
 
 ### Available Build Targets
@@ -157,19 +157,19 @@ dotnet build.cs publish
 
 ```bash
 # Override package version
-dotnet build.cs pack --package-version 1.0.0-preview.2
+dotnet toolchain.cs pack --package-version 1.0.0-preview.2
 
 # Include XML documentation in packages
-dotnet build.cs pack --include-docs
+dotnet toolchain.cs pack --include-docs
 
 # Dry run (show what would be published)
-dotnet build.cs publish --dry-run
+dotnet toolchain.cs publish --dry-run
 
 # Full clean build
-dotnet build.cs build --clean
+dotnet toolchain.cs build --clean
 
 # Custom NuGet feed
-dotnet build.cs publish --nuget-feed-name MyFeed --nuget-feed-path ~/my-feed
+dotnet toolchain.cs publish --nuget-feed-name MyFeed --nuget-feed-path ~/my-feed
 ```
 
 ### Direct dotnet Commands (Fallback)
@@ -190,7 +190,7 @@ dotnet test src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.Uni
 dotnet test --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 ```
 
-**Note:** Prefer using `dotnet build.cs [target]` for better output formatting, error handling, and consistent workflows.
+**Note:** Prefer using `dotnet toolchain.cs [target]` for better output formatting, error handling, and consistent workflows.
 
 ## Architecture
 
@@ -1155,9 +1155,9 @@ bool isValid = expected.SequenceEqual(actual);
 
 | Phase | What to run | Command |
 |-------|------------|---------|
-| **During development** | Smoke test on affected module only | `dotnet build.cs -- test --integration --project Piv --smoke` |
-| **Targeted check** | Specific test you touched | `dotnet build.cs -- test --integration --project Oath --filter "FullyQualifiedName~Calculate"` |
-| **Finishing a module** | Full integration for that module | `dotnet build.cs -- test --integration --project Piv` |
+| **During development** | Smoke test on affected module only | `dotnet toolchain.cs -- test --integration --project Piv --smoke` |
+| **Targeted check** | Specific test you touched | `dotnet toolchain.cs -- test --integration --project Oath --filter "FullyQualifiedName~Calculate"` |
+| **Finishing a module** | Full integration for that module | `dotnet toolchain.cs -- test --integration --project Piv` |
 | **Before PR** | Full integration for all affected modules | Run per-module, not all modules |
 
 **`--smoke` skips:** `Slow` tests (RSA 3072/4096 keygen, 30+ sec each) and `RequiresUserPresence` tests (need physical touch).
@@ -1368,8 +1368,8 @@ See `docs/COMMIT_GUIDELINES.md` for detailed rules.
 
 Before committing:
 1. ✅ Ran `git status` to verify only your files are being committed
-2. ✅ Code builds without warnings: `dotnet build.cs build`
-3. ✅ All tests pass: `dotnet build.cs test`
+2. ✅ Code builds without warnings: `dotnet toolchain.cs build`
+3. ✅ All tests pass: `dotnet toolchain.cs test`
 4. ✅ Code formatted: `dotnet format`
 5. ✅ No nullable reference warnings
 6. ✅ Sensitive data properly zeroed

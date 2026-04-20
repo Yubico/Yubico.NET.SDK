@@ -157,7 +157,7 @@ Each agent works in its own sub-worktree off `codebase-hygiene`, verified indepe
 
 **Why these parallelize safely:**
 - A touches comparison operators, B touches null checks, C touches region markers, D touches constructor expressions, E touches logger declarations, F touches switch blocks — all different syntactic elements, no overlap.
-- Each agent runs `dotnet build.cs build && dotnet build.cs test` before committing.
+- Each agent runs `dotnet toolchain.cs build && dotnet toolchain.cs test` before committing.
 
 ### Wave 2: Sequential (depends on Wave 1 merge)
 
@@ -173,21 +173,21 @@ Each agent works in its own sub-worktree off `codebase-hygiene`, verified indepe
 
 **Per-agent (Wave 1):**
 ```bash
-dotnet build.cs build   # 0 errors
-dotnet build.cs test    # 9/9 passing
+dotnet toolchain.cs build   # 0 errors
+dotnet toolchain.cs test    # 9/9 passing
 ```
 
 **After Wave 1 merge:**
 ```bash
-dotnet build.cs build   # 0 errors after merge
-dotnet build.cs test    # 9/9 passing after merge
+dotnet toolchain.cs build   # 0 errors after merge
+dotnet toolchain.cs test    # 9/9 passing after merge
 dotnet format --verify-no-changes  # clean
 ```
 
 **After Wave 2:**
 ```bash
-dotnet build.cs build
-dotnet build.cs test
+dotnet toolchain.cs build
+dotnet toolchain.cs test
 dotnet format --verify-no-changes
 # Spot-check: grep for residual violations
 grep -rn "== null\|!= null" src/ --include="*.cs" | grep -v "test" | wc -l  # should be 0

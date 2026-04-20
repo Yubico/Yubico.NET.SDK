@@ -144,7 +144,7 @@ status: in-progress
 
 - [x] 1.6: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
@@ -169,7 +169,7 @@ status: in-progress
 
 - [x] 1.8: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Credential"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Credential"
   ```
   All credential tests must pass.
 
@@ -254,13 +254,13 @@ status: in-progress
 
 - [x] 2.6: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [x] 2.7: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Credential"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Credential"
   ```
   All credential tests must pass.
 
@@ -327,13 +327,13 @@ status: in-progress
 
 - [x] 3.5: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [x] 3.6: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Credential"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Credential"
   ```
   All tests must pass.
 
@@ -385,13 +385,13 @@ status: in-progress
 
 - [x] 4.3: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [x] 4.4: **Test verification**
   ```bash
-  dotnet build.cs test
+  dotnet toolchain.cs test
   ```
   All tests must pass.
 
@@ -466,7 +466,7 @@ status: in-progress
 
 - [x] 5.3: **Build and test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Credential|FullyQualifiedName~DisposableArrayPoolBuffer"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Credential|FullyQualifiedName~DisposableArrayPoolBuffer"
   ```
   All tests must pass.
 
@@ -486,19 +486,19 @@ status: in-progress
 
 - [x] 6.1: **Full solution build**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [x] 6.2: **Full credential test suite**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Credential"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Credential"
   ```
   All tests must pass.
 
 - [x] 6.3: **Core module tests**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Core"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Core"
   ```
   No regressions in Core tests.
 
@@ -519,8 +519,8 @@ status: in-progress
 Only emit `<promise>SECURE_PIN_AUDIT_FIXES_COMPLETE</promise>` when:
 
 1. All Phase 1-6 tasks are marked `[x]`
-2. `dotnet build.cs build` exits 0
-3. `dotnet build.cs test --filter "FullyQualifiedName~Credential"` shows all tests passing
+2. `dotnet toolchain.cs build` exits 0
+3. `dotnet toolchain.cs test --filter "FullyQualifiedName~Credential"` shows all tests passing
 4. Security audit checklist passes
 5. `SecureMemoryOwner.cs` deleted
 6. No duplicate `ArrayPoolMemoryOwner` in PivTool

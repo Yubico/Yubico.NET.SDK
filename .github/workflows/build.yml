@@ -47,18 +47,14 @@ jobs:
           sudo chmod 666 /run/pcscd/pcscd.comm || true
 
       - name: Build
-        run: dotnet build.cs build
+        run: dotnet toolchain.cs build
 
       - name: Run unit tests
-        run: dotnet build.cs test
+        run: dotnet toolchain.cs test
 
       - name: Pack NuGet packages
-        run: dotnet build.cs pack --package-version 2.0.0-preview.${{ github.run_number }}
+        run: dotnet toolchain.cs pack --package-version 2.0.0-preview.${{ github.run_number }}
 
       - name: Publish to GitHub Packages
         if: github.event_name == 'push'
-        run: |
-          dotnet nuget push "artifacts/packages/*.nupkg" \
-            --source https://nuget.pkg.github.com/Yubico/index.json \
-            --api-key ${{ secrets.GITHUB_TOKEN }} \
-            --skip-duplicate
+        run: dotnet toolchain.cs publish-remote --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json --nuget-api-key ${{ secrets.GITHUB_TOKEN }}

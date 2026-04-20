@@ -126,6 +126,6 @@ Need to verify `RsaImportFormat` enum values to pick the right one for CRT.
 3. Write `OpenPgpDecryptTests.cs`
 4. Write `OpenPgpAdvancedTests.cs`
 5. Write `HsmAuthAsymmetricTests.cs`
-6. Run `dotnet build.cs build` to verify compilation
+6. Run `dotnet toolchain.cs build` to verify compilation
 7. Fix any compilation errors
 8. Re-verify build is clean

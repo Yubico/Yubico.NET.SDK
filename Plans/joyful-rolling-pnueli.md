@@ -209,7 +209,7 @@ Each iteration ports one applet. The agent receives this plan and executes these
 
 ### After Writing Code
 
-9. Build: `dotnet build.cs build` -- must compile with zero warnings.
+9. Build: `dotnet toolchain.cs build` -- must compile with zero warnings.
 10. Verify `yk --help` shows the applet with all subcommands.
 11. Verify `yk <applet> --help` shows correct descriptions.
 12. Update `Plans/yk-cli-progress.md` -- check off completed items.
@@ -331,7 +331,7 @@ After each iteration, confirm:
 - [ ] All commands from the individual tool are ported to `src/Cli.Commands/src/<Applet>/`
 - [ ] All commands are wired in `src/Cli/YkTool/Program.cs`
 - [ ] The corresponding stub file is deleted from `Commands/Stubs/`
-- [ ] `dotnet build.cs build` compiles with zero warnings
+- [ ] `dotnet toolchain.cs build` compiles with zero warnings
 - [ ] `yk --help` lists the applet
 - [ ] `yk <applet> --help` lists all subcommands with descriptions
 - [ ] `Plans/yk-cli-progress.md` is updated with checked items

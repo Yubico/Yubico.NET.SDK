@@ -26,7 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		Directory.Build.targets = Directory.Build.targets
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props
-		build.cs = build.cs
+		toolchain.cs = toolchain.cs
 		BUILD.md = BUILD.md
 		README.md = README.md
 	EndProjectSection

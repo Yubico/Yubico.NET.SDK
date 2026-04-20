@@ -83,7 +83,7 @@ Every file MUST:
 - `#region` (split large classes instead)
 - `.ToArray()` in hot paths
 - Injected `ILogger` (use static `LoggingFactory`)
-- `dotnet test` (use `dotnet build.cs test`)
+- `dotnet test` (use `dotnet toolchain.cs test`)
 - `git add .` or `git add -A`
 - Old switch statements
 - Exceptions for control flow
@@ -100,7 +100,7 @@ Every file MUST:
 ## Build & Test
 
 ```bash
-dotnet build.cs build    # Must succeed with zero warnings
+dotnet toolchain.cs build    # Must succeed with zero warnings
 dotnet format            # Must produce no changes
 ```
 

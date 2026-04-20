@@ -123,7 +123,7 @@ Use `/DevTeam Ship` — dispatch 6 parallel DevTeam Engineer agents (one per mod
 
 After all agents complete:
 1. `dotnet build Yubico.YubiKit.sln` — 0 errors
-2. `dotnet build.cs test` — 8/9 pass (Fido2 pre-existing)
+2. `dotnet toolchain.cs test` — 8/9 pass (Fido2 pre-existing)
 3. Create per-module commits on `yubikey-codeaudit`
 4. `git push` and update PR #455 description
 
@@ -136,7 +136,7 @@ After all agents complete:
 ## Verification
 
 1. `dotnet build Yubico.YubiKit.sln` — 0 errors, 0 warnings
-2. `dotnet build.cs test` — 8/9 pass
+2. `dotnet toolchain.cs test` — 8/9 pass
 3. LSP `find_usages` on `PinUvAuthHelpers.PerformEcdhKeyAgreement` (should have 2 usages)
 4. LSP `find_usages` on `CredentialData.Dispose` (should have 6+ usages)
 5. Manual integration tests (user runs):

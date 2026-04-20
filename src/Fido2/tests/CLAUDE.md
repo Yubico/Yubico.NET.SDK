@@ -4,7 +4,7 @@ This file provides guidance for the FIDO2 module test infrastructure.
 
 ## Required Reading
 
-**CRITICAL:** Read [`docs/TESTING.md`](../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet build.cs test` - NEVER use `dotnet test` directly.**
+**CRITICAL:** Read [`docs/TESTING.md`](../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
 
 For FIDO2-specific test patterns, CBOR encoding, and backend abstractions, see the **Key Patterns** and **Architecture Overview** sections in [`../CLAUDE.md`](../CLAUDE.md).
 
@@ -88,16 +88,16 @@ public async Task TestWithCleanState(YubiKeyTestState state)
 
 ```bash
 # Run all FIDO2 tests
-dotnet build.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Fido2"
+dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Fido2"
 
 # Run unit tests only
-dotnet build.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Fido2.UnitTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Fido2.UnitTests"
 
 # Run integration tests only (requires YubiKey with FIDO2)
-dotnet build.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Fido2.IntegrationTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Fido2.IntegrationTests"
 
 # Run specific test class
-dotnet build.cs test --filter "FullyQualifiedName~FidoSessionTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~FidoSessionTests"
 ```
 
 ## Common Test Patterns

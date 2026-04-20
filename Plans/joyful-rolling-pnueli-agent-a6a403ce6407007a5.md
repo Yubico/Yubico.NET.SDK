@@ -165,7 +165,7 @@ FidoTool accepts `--pin` on the command line (insecure, visible in process list)
 The plan says "All existing per-tool tests pass unchanged (business logic untouched)." This is true for the business logic layer but false for the CLI layer itself. Who tests that `yk fido info` actually dispatches correctly? Who tests that `--serial` filtering works? The plan needs a test strategy for the CLI routing/dispatch layer, even if it's "we test this manually."
 
 **F. Build integration.**
-How does the monolith CLI build? Is it added to the solution? Is it a `dotnet tool`? Does `dotnet build.cs build` include it? None of this is specified.
+How does the monolith CLI build? Is it added to the solution? Is it a `dotnet tool`? Does `dotnet toolchain.cs build` include it? None of this is specified.
 
 ### 7. Naming and structural concerns
 

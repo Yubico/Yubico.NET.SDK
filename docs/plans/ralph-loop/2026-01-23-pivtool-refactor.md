@@ -22,7 +22,7 @@ git log --oneline -5 --grep="pivtool\|PivTool\|SDK examples"
 ls -la Yubico.YubiKit.Piv/examples/PivTool/
 
 # Establish build baseline
-dotnet build.cs build 2>&1 | grep -E "error (CS|MSB)" | sort > /tmp/baseline-errors.txt || true
+dotnet toolchain.cs build 2>&1 | grep -E "error (CS|MSB)" | sort > /tmp/baseline-errors.txt || true
 ```
 
 **Rule:** If evidence shows work partially done, continue from that state. Do NOT redo completed work.
@@ -1211,7 +1211,7 @@ dotnet build.cs build 2>&1 | grep -E "error (CS|MSB)" | sort > /tmp/baseline-err
 
 - [ ] 7.3: **Full solution build**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 - [ ] 7.4: **Commit**
@@ -1230,7 +1230,7 @@ dotnet build.cs build 2>&1 | grep -E "error (CS|MSB)" | sort > /tmp/baseline-err
 
 1. **Build:**
    ```bash
-   dotnet build.cs build
+   dotnet toolchain.cs build
    ```
    Must exit 0 with no NEW errors.
 

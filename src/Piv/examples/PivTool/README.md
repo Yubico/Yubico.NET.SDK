@@ -77,7 +77,7 @@ if (result.Success)
 
 ```bash
 # From the repository root
-dotnet build.cs build
+dotnet toolchain.cs build
 ```
 
 ## Running

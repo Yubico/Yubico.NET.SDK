@@ -1,7 +1,7 @@
 # Plan: Integration Tests for PIV and OATH Modules
 
 ## Summary
-Write new integration test files for PIV (3 files) and OATH (1 file) modules, then verify compilation with `dotnet build.cs build`.
+Write new integration test files for PIV (3 files) and OATH (1 file) modules, then verify compilation with `dotnet toolchain.cs build`.
 
 ## Research Complete
 All source APIs and existing test patterns have been read and understood:
@@ -47,7 +47,7 @@ Tests:
 - `LockedSession_CalculateBlocked_ThrowsOrReturnsError` - Same but with CalculateCodeAsync
 
 ## Compilation
-After writing all 4 files, run `dotnet build.cs build` and fix any errors until clean.
+After writing all 4 files, run `dotnet toolchain.cs build` and fix any errors until clean.
 
 ## Key Decisions
 - For RSA import test decrypt: Use `DecryptAsync(slot, cipherText, RSAEncryptionPadding.Pkcs1)` instead of manual PKCS#1 padding parsing (it's the higher-level API)

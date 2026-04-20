@@ -21,7 +21,7 @@ This file provides guidance to GitHub Copilot CLI and other LLM-based tools when
 
 ### Testing
 
-**ALWAYS use `dotnet build.cs test` - NEVER use `dotnet test` directly.**
+**ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
 
 This codebase uses a mix of xUnit v2 and xUnit v3 test projects that require different CLI invocations. The build script handles this automatically.
 

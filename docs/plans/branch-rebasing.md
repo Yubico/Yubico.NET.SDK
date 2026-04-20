@@ -48,7 +48,7 @@ yubikit (a98e8716) ─── shared infra, NO Fido2/Piv business logic
 - `Yubico.YubiKit.SecurityDomain/` (all)
 - For other projects: metadata only (README, CLAUDE.md, .csproj, xunit.runner.json)
 - `experiments/` (shared tooling)
-- Build scripts: `build.cs`, `sign.cs`
+- Build scripts: `toolchain.cs`, `sign.cs`
 
 ### Feature-Specific
 - `Yubico.YubiKit.Fido2/` → yubikit-fido branch

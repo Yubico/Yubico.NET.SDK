@@ -43,9 +43,9 @@ Execute complex, multi-step engineering tasks autonomously by:
 
 ```bash
 # ✅ CORRECT - Always use build script
-dotnet build.cs build                    # Build entire solution
-dotnet build.cs build --project Piv      # Build specific project (partial match)
-dotnet build.cs build --clean            # Clean rebuild
+dotnet toolchain.cs build                    # Build entire solution
+dotnet toolchain.cs build --project Piv      # Build specific project (partial match)
+dotnet toolchain.cs build --clean            # Clean rebuild
 
 # ❌ WRONG - Never use directly
 dotnet build                             # FORBIDDEN
@@ -56,12 +56,12 @@ dotnet restore                           # FORBIDDEN
 
 ```bash
 # ✅ CORRECT - Handles xUnit v2/v3 automatically
-dotnet build.cs test                                           # All tests
-dotnet build.cs test --project Fido2                           # Module tests (partial match)
-dotnet build.cs test --filter "FullyQualifiedName~MyTest"      # Filter by full name
-dotnet build.cs test --filter "Name=ExactMethodName"           # Exact method match
-dotnet build.cs test --filter "ClassName~Integration"          # Filter by class name
-dotnet build.cs test --project Piv --filter "Method~Sign"      # Combine project + filter
+dotnet toolchain.cs test                                           # All tests
+dotnet toolchain.cs test --project Fido2                           # Module tests (partial match)
+dotnet toolchain.cs test --filter "FullyQualifiedName~MyTest"      # Filter by full name
+dotnet toolchain.cs test --filter "Name=ExactMethodName"           # Exact method match
+dotnet toolchain.cs test --filter "ClassName~Integration"          # Filter by class name
+dotnet toolchain.cs test --project Piv --filter "Method~Sign"      # Combine project + filter
 
 # ❌ WRONG - Fails on xUnit v3 projects
 dotnet test                              # FORBIDDEN
@@ -182,12 +182,12 @@ Load skills when encountering specific situations:
 
 ### Build Failures
 ```bash
-dotnet build.cs build --clean
+dotnet toolchain.cs build --clean
 ```
 
 ### Test Failures
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~FailingTest"
+dotnet toolchain.cs test --filter "FullyQualifiedName~FailingTest"
 ```
 
 ### Stuck
@@ -199,7 +199,7 @@ dotnet build.cs test --filter "FullyQualifiedName~FailingTest"
 
 ## Completion Protocol
 
-1. Run `dotnet build.cs build && dotnet build.cs test`
+1. Run `dotnet toolchain.cs build && dotnet toolchain.cs test`
 2. Verify all tasks `[x]`
 3. Output `<promise>DONE</promise>`
 

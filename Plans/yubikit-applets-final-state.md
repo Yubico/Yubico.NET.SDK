@@ -21,8 +21,8 @@ Then: Dev-Team review, CLI rewrites to match `ykman` command structure, and sequ
 ## Build & Test Status
 
 ```
-dotnet build.cs build   →  ✅ 0 errors, 0 warnings
-dotnet build.cs test    →  ✅ All unit tests pass (325+ tests)
+dotnet toolchain.cs build   →  ✅ 0 errors, 0 warnings
+dotnet toolchain.cs test    →  ✅ All unit tests pass (325+ tests)
 ```
 
 | Applet | Integration Tests | Notes |
@@ -132,7 +132,7 @@ During debugging of Bug 4, the isolated HMAC test ran with prog_seq still at 0. 
 
 The `CalculateHmacSha1` test requires user presence. To run it:
 ```bash
-dotnet build.cs -- build
+dotnet toolchain.cs -- build
 dotnet test Yubico.YubiKit.YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj \
   -c Release --no-build --logger "console;verbosity=normal" \
   --filter "FullyQualifiedName~CalculateHmacSha1"
@@ -240,11 +240,11 @@ yubikit (2.0 base)
 | `Yubico.YubiKit.Core/src/YubiKey/ApplicationSession.cs` | `IsSupported()` with Major==0 sentinel |
 | `Yubico.YubiKit.Core/src/SmartCard/PcscProtocol.cs` | Major==0 sentinel for APDU size config |
 | `Yubico.YubiKit.Core/src/Hid/Otp/OtpHidProtocol.cs` | 1023ms short timeout, 14s touch timeout |
-| `docs/TESTING.md` | **ALWAYS use `dotnet build.cs test`**, never `dotnet test` directly |
+| `docs/TESTING.md` | **ALWAYS use `dotnet toolchain.cs test`**, never `dotnet test` directly |
 | `Yubico.YubiKit.Tests.Shared/Infrastructure/` | AllowList, YubiKeyTestInfrastructure, WithYubiKeyAttribute |
 
 ### Critical Test Infrastructure Rules
-- **NEVER** use `dotnet test` directly for projects — mixed xUnit v2/v3 requires `dotnet build.cs test`
+- **NEVER** use `dotnet test` directly for projects — mixed xUnit v2/v3 requires `dotnet toolchain.cs test`
 - Integration tests require devices listed in `appsettings.json` `AllowedSerialNumbers`
 - `[WithYubiKey]` runs once per matching device per connection type (HidOtp, SmartCard, HidFido)
 - `RequiresUserPresence` tests cannot be run by autonomous agents — they need a human at the keyboard

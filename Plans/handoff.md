@@ -128,22 +128,22 @@ git checkout yubikey-codeaudit
 git log --oneline yubikit-applets..HEAD  # 32 commits
 
 # Build
-dotnet build.cs build  # 0 errors, 0 warnings
+dotnet toolchain.cs build  # 0 errors, 0 warnings
 
 # Unit tests
-dotnet build.cs test  # 8/9 pass (Fido2 pre-existing)
+dotnet toolchain.cs test  # 8/9 pass (Fido2 pre-existing)
 
 # Integration tests (non-touch, one module at a time)
-dotnet build.cs -- test --integration --project Management
-dotnet build.cs -- test --integration --project Piv --smoke
-dotnet build.cs -- test --integration --project Fido2 --filter "Category!=RequiresUserPresence"
+dotnet toolchain.cs -- test --integration --project Management
+dotnet toolchain.cs -- test --integration --project Piv --smoke
+dotnet toolchain.cs -- test --integration --project Fido2 --filter "Category!=RequiresUserPresence"
 
 # FIDO2 AuthenticatorConfig tests (requires touch)
 dotnet test src/Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/*.csproj \
   -c Release --filter "Feature=AuthenticatorConfig"
 
 # Skip permanent device state tests
-dotnet build.cs -- test --integration --project Fido2 \
+dotnet toolchain.cs -- test --integration --project Fido2 \
   --filter "Category!=PermanentDeviceState&Category!=RequiresUserPresence"
 
 # PIN state (ykman)

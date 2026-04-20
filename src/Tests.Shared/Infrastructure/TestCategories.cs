@@ -22,16 +22,16 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 /// <para><strong>Filter Examples:</strong></para>
 /// <code>
 /// # Skip tests requiring user interaction (for CI/agents)
-/// dotnet build.cs test --filter "Category!=RequiresUserPresence"
+/// dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"
 /// 
 /// # Skip slow tests
-/// dotnet build.cs test --filter "Category!=Slow"
+/// dotnet toolchain.cs test --filter "Category!=Slow"
 /// 
 /// # Skip hardware tests
-/// dotnet build.cs test --filter "Category!=RequiresHardware"
+/// dotnet toolchain.cs test --filter "Category!=RequiresHardware"
 /// 
 /// # Run only unit tests (no hardware, no user presence, not slow)
-/// dotnet build.cs test --filter "Category!=RequiresHardware&amp;Category!=RequiresUserPresence&amp;Category!=Slow"
+/// dotnet toolchain.cs test --filter "Category!=RequiresHardware&amp;Category!=RequiresUserPresence&amp;Category!=Slow"
 /// </code>
 /// </remarks>
 public static class TestCategories

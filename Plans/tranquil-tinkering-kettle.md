@@ -107,10 +107,10 @@ These files have `using var` wrapping non-sensitive or caller-managed data. Remo
 
 ```bash
 # 1. Build — must compile with zero errors
-dotnet build.cs build
+dotnet toolchain.cs build
 
 # 2. Unit tests — all green
-dotnet build.cs test
+dotnet toolchain.cs test
 
 # 3. Confirm no ZeroData/Dispose references remain on ApduCommand
 grep -rn "\.ZeroData()\|apduCommand.*Dispose\|using var.*ApduCommand\|using var.*= new ApduCommand" src/

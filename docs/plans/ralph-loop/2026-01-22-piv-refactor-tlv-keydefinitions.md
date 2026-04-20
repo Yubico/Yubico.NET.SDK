@@ -67,13 +67,13 @@ completion_promise: PIV_REFACTOR_COMPLETE
 
 - [ ] 1.6: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [ ] 1.7: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Piv"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Piv"
   ```
   All tests must pass (or skip cleanly).
 
@@ -129,13 +129,13 @@ completion_promise: PIV_REFACTOR_COMPLETE
 
 - [ ] 2.3: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [ ] 2.4: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~PivCrypto"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivCrypto"
   ```
   All crypto tests must pass.
 
@@ -194,13 +194,13 @@ completion_promise: PIV_REFACTOR_COMPLETE
 
 - [ ] 3.3: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [ ] 3.4: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~PivKeyOperations"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivKeyOperations"
   ```
   All key operations tests must pass.
 
@@ -256,13 +256,13 @@ completion_promise: PIV_REFACTOR_COMPLETE
 
 - [ ] 4.3: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [ ] 4.4: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~PivKeyOperations"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivKeyOperations"
   ```
   Tests using data objects must pass.
 
@@ -322,13 +322,13 @@ completion_promise: PIV_REFACTOR_COMPLETE
 
 - [ ] 5.4: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [ ] 5.5: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~PivMetadata"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivMetadata"
   ```
   All metadata tests must pass.
 
@@ -390,13 +390,13 @@ completion_promise: PIV_REFACTOR_COMPLETE
 
 - [ ] 6.4: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [ ] 6.5: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~PivManagementKey"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivManagementKey"
   ```
   All management key tests must pass.
 
@@ -451,13 +451,13 @@ completion_promise: PIV_REFACTOR_COMPLETE
 
 - [ ] 7.4: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [ ] 7.5: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Piv"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Piv"
   ```
   All PIV tests must pass.
 
@@ -481,13 +481,13 @@ completion_promise: PIV_REFACTOR_COMPLETE
 
 - [ ] 8.1: **Full build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0 with no new warnings.
 
 - [ ] 8.2: **Full test suite**
   ```bash
-  dotnet build.cs test
+  dotnet toolchain.cs test
   ```
   All tests must pass (or skip cleanly with documented reasons).
 
@@ -514,8 +514,8 @@ completion_promise: PIV_REFACTOR_COMPLETE
 
 ## Verification Requirements (MUST PASS BEFORE COMPLETION)
 
-1. **Build:** `dotnet build.cs build` (must exit 0)
-2. **Test:** `dotnet build.cs test` (all tests must pass or skip cleanly)
+1. **Build:** `dotnet toolchain.cs build` (must exit 0)
+2. **Test:** `dotnet toolchain.cs test` (all tests must pass or skip cleanly)
 3. **No regressions:** Existing tests pass, behavior unchanged
 4. **Grep verification:** No remaining manual TLV parsing patterns in PIV src
 

@@ -102,7 +102,7 @@ PIV and FIDO2 are NOT referenced. Adding project references would create unwante
 2. Create `SecurityDomainSession_Scp11cTests.cs`
 3. Create `SecurityDomainSession_NegativeTests.cs`
 4. Create `ManagementSessionCapabilityTests.cs`
-5. Run `dotnet build.cs build` and fix any compilation errors
+5. Run `dotnet toolchain.cs build` and fix any compilation errors
 
 ## Patterns to Follow
 

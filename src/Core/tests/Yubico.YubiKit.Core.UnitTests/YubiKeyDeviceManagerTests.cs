@@ -167,7 +167,7 @@ public class YubiKeyDeviceManagerTests
 
 
     [Fact]
-    public void IsMonitoring_InitiallyFalse()
+    public async Task IsMonitoring_InitiallyFalse()
     {
         // Arrange
         var (manager, _, _) = CreateManager();
@@ -175,11 +175,11 @@ public class YubiKeyDeviceManagerTests
         // Assert
         Assert.False(manager.IsMonitoring);
 
-        manager.DisposeAsync().GetAwaiter().GetResult();
+        await manager.DisposeAsync();
     }
 
     [Fact]
-    public void StartMonitoring_SetsIsMonitoringTrue()
+    public async Task StartMonitoring_SetsIsMonitoringTrue()
     {
         // Arrange
         var (manager, _, _) = CreateManager();
@@ -191,11 +191,11 @@ public class YubiKeyDeviceManagerTests
         Assert.True(manager.IsMonitoring);
 
         manager.StopMonitoring();
-        manager.DisposeAsync().GetAwaiter().GetResult();
+        await manager.DisposeAsync();
     }
 
     [Fact]
-    public void StopMonitoring_SetsIsMonitoringFalse()
+    public async Task StopMonitoring_SetsIsMonitoringFalse()
     {
         // Arrange
         var (manager, _, _) = CreateManager();
@@ -207,11 +207,11 @@ public class YubiKeyDeviceManagerTests
         // Assert
         Assert.False(manager.IsMonitoring);
 
-        manager.DisposeAsync().GetAwaiter().GetResult();
+        await manager.DisposeAsync();
     }
 
     [Fact]
-    public void StartMonitoring_CustomInterval()
+    public async Task StartMonitoring_CustomInterval()
     {
         // Arrange
         var (manager, _, _) = CreateManager();
@@ -223,7 +223,7 @@ public class YubiKeyDeviceManagerTests
         Assert.True(manager.IsMonitoring);
 
         manager.StopMonitoring();
-        manager.DisposeAsync().GetAwaiter().GetResult();
+        await manager.DisposeAsync();
     }
 
 

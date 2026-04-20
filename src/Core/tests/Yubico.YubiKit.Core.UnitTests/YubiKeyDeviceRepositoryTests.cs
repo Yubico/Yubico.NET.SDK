@@ -138,8 +138,8 @@ public class YubiKeyDeviceRepositoryTests
 
         // Assert
         Assert.Equal(2, events.Count);
-        Assert.Single(events.Where(e => e.Action == DeviceAction.Removed && e.Device.DeviceId == "device-A"));
-        Assert.Single(events.Where(e => e.Action == DeviceAction.Added && e.Device.DeviceId == "device-C"));
+        Assert.Single(events, e => e.Action == DeviceAction.Removed && e.Device.DeviceId == "device-A");
+        Assert.Single(events, e => e.Action == DeviceAction.Added && e.Device.DeviceId == "device-C");
     }
 
 

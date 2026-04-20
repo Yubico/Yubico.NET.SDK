@@ -30,8 +30,8 @@ limitations under the License. -->
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.1" />
-    <PackageReference Include="Microsoft.Bcl.Cryptography" Version="10.0.5" />
+    <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Bcl.Cryptography" Version="10.0.6" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="Xunit.SkippableFact" Version="1.5.61" />
   </ItemGroup>

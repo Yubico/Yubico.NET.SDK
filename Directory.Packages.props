@@ -3,7 +3,7 @@
     <!-- Enable Central Package Management -->
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <!-- SDK Version - ALL packages ship with same version -->
-    <YubiKitVersion>1.0.0-preview.1</YubiKitVersion>
+    <YubiKitVersion>2.0.0-preview.1</YubiKitVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Microsoft Dependencies -->

@@ -2,13 +2,16 @@ name: Build and Test (2.0)
 
 on:
   push:
-    branches: [ yubikit ]
+    branches: [ yubikit, yubikit-applets ]
   pull_request:
-    branches: [ yubikit ]
+    branches: [ yubikit, yubikit-applets ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     env:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_NOLOGO: 1
@@ -48,3 +51,14 @@ jobs:
 
       - name: Run unit tests
         run: dotnet build.cs test
+
+      - name: Pack NuGet packages
+        run: dotnet build.cs pack --package-version 2.0.0-preview.${{ github.run_number }}
+
+      - name: Publish to GitHub Packages
+        if: github.event_name == 'push'
+        run: |
+          dotnet nuget push "artifacts/packages/*.nupkg" \
+            --source https://nuget.pkg.github.com/Yubico/index.json \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate

@@ -317,7 +317,7 @@ public class YubiKeyDeviceManagerTests
         // Act
         for (int i = 0; i < concurrency; i++)
         {
-            tasks.Add(manager.FindAllAsync(TestContext.Current.CancellationToken));
+            tasks.Add(manager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken));
         }
 
         var results = await Task.WhenAll(tasks);

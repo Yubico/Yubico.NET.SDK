@@ -97,6 +97,7 @@ using static Bullseye.Targets;
 using static SimpleExec.Command;
 
 // Configuration
+const string ProjectPrefix = "Yubico.YubiKit.";
 var repoRoot = GetRepoRoot();
 var solutionFile = "Yubico.YubiKit.sln";
 var configuration = "Release";
@@ -104,7 +105,7 @@ var packageVersion = GetArgument("--package-version");
 var nugetFeedName = GetArgument("--nuget-feed-name") ?? "Yubico.YubiKit-LocalNuGet";
 var nugetFeedPath = GetArgument("--nuget-feed-path") ?? Path.Combine(repoRoot, "artifacts", "nuget-feed");
 var nugetFeedUrl  = GetArgument("--nuget-feed-url");
-var nugetApiKey   = GetArgument("--nuget-api-key");
+var nugetApiKey   = GetArgument("--nuget-api-key") ?? Environment.GetEnvironmentVariable("NUGET_API_KEY");
 var includeDocs = HasFlag("--include-docs");
 var dryRun = HasFlag("--dry-run");
 var shouldClean = HasFlag("--clean");
@@ -121,9 +122,9 @@ if (smokeTest)
 }
 
 // Dynamically discover projects using glob patterns
-var packableProjects = DiscoverProjects("src", "Yubico.YubiKit.");
-var unitTestProjects = DiscoverProjects("tests", ".UnitTests", "Yubico.YubiKit.");
-var integrationTestProjects = DiscoverProjects("tests", ".IntegrationTests", "Yubico.YubiKit.");
+var packableProjects = DiscoverProjects("src", ProjectPrefix);
+var unitTestProjects = DiscoverProjects("tests", ".UnitTests", ProjectPrefix);
+var integrationTestProjects = DiscoverProjects("tests", ".IntegrationTests", ProjectPrefix);
 
 var testProjects = includeIntegration
     ? [..unitTestProjects, ..integrationTestProjects]
@@ -237,7 +238,7 @@ Target("coverage", () =>
     foreach (var project in projectsToCover)
     {
         var projectName = Path.GetFileNameWithoutExtension(project);
-        Console.WriteLine($"\n{'='} Running coverage for: {projectName} {'='}");
+        PrintProjectHeader("Coverage", projectName);
 
         try
         {
@@ -309,8 +310,9 @@ Target("setup-feed", async () =>
             PrintInfo($"NuGet source already exists: {nugetFeedName}");
         }
     }
-    catch
+    catch (Exception ex)
     {
+        PrintColored($"Warning: Could not list NuGet sources ({ex.Message}), attempting to add anyway...", ConsoleColor.Yellow);
         Run("dotnet", $"nuget add source {nugetFeedPath} -n {nugetFeedName}");
         PrintInfo($"Added NuGet source: {nugetFeedName}");
     }
@@ -321,31 +323,10 @@ Target("publish", DependsOn("pack", "setup-feed"), () =>
     PrintHeader(dryRun ? "Dry run - packages to publish" : "Publishing packages");
 
     var packages = Directory.GetFiles(packagesDir, "*.nupkg");
-
-    if (packages.Length == 0)
+    PublishPackages(packages, dryRun, nugetFeedName, package =>
     {
-        Console.WriteLine("No packages found to publish");
-        return;
-    }
-
-    foreach (var package in packages)
-    {
-        var packageName = Path.GetFileName(package);
-
-        if (dryRun)
-        {
-            Console.WriteLine($"  Would publish: {packageName}");
-        }
-        else
-        {
-            Console.WriteLine($"\nPublishing: {packageName}");
-            Run("dotnet", $"nuget push {package} -s {nugetFeedName} --skip-duplicate");
-            PrintInfo($"Published {packageName}");
-        }
-    }
-
-    if (dryRun)
-        Console.WriteLine($"\n(Dry run - no packages were actually published)");
+        Run("dotnet", $"nuget push {package} -s {nugetFeedName} --skip-duplicate");
+    });
 });
 
 Target("publish-remote", () =>
@@ -355,31 +336,17 @@ Target("publish-remote", () =>
     if (string.IsNullOrEmpty(nugetFeedUrl))
         throw new InvalidOperationException("--nuget-feed-url is required for publish-remote");
     if (string.IsNullOrEmpty(nugetApiKey))
-        throw new InvalidOperationException("--nuget-api-key is required for publish-remote");
+        throw new InvalidOperationException("NUGET_API_KEY env var or --nuget-api-key argument is required for publish-remote");
 
     var packages = Directory.GetFiles(packagesDir, "*.nupkg");
 
     if (packages.Length == 0)
         throw new InvalidOperationException($"No packages found in {packagesDir}. Run 'pack' first.");
 
-    foreach (var package in packages)
+    PublishPackages(packages, dryRun, nugetFeedUrl, package =>
     {
-        var packageName = Path.GetFileName(package);
-
-        if (dryRun)
-        {
-            Console.WriteLine($"  Would publish to {nugetFeedUrl}: {packageName}");
-        }
-        else
-        {
-            Console.WriteLine($"\nPublishing: {packageName}");
-            Run("dotnet", $"nuget push {package} -s {nugetFeedUrl} --api-key {nugetApiKey} --skip-duplicate");
-            PrintInfo($"Published {packageName}");
-        }
-    }
-
-    if (dryRun)
-        Console.WriteLine($"\n(Dry run - no packages were actually published)");
+        Run("dotnet", $"nuget push {package} -s {nugetFeedUrl} --api-key {nugetApiKey} --skip-duplicate");
+    });
 });
 
 Target("default", DependsOn("test", "publish"));
@@ -387,7 +354,7 @@ Target("default", DependsOn("test", "publish"));
 // Handle --help before Bullseye processes args
 if (args.Contains("--help") || args.Contains("-h"))
 {
-    PrintHelp();
+    PrintHelp(packableProjects, testProjects);
     return;
 }
 
@@ -440,26 +407,65 @@ void PrintNoProjectsFound(string filter, string[] available)
     PrintProjectList(available);
 }
 
+void PrintProjectHeader(string label, string projectName) =>
+    Console.WriteLine($"\n=== {label}: {projectName} ===");
+
+void PublishPackages(string[] packages, bool dryRun, string feedLabel, Action<string> pushAction)
+{
+    if (packages.Length == 0)
+    {
+        Console.WriteLine("No packages found to publish");
+        return;
+    }
+
+    foreach (var package in packages)
+    {
+        var packageName = Path.GetFileName(package);
+        if (dryRun)
+        {
+            Console.WriteLine($"  Would publish to {feedLabel}: {packageName}");
+        }
+        else
+        {
+            Console.WriteLine($"\nPublishing: {packageName}");
+            pushAction(package);
+            PrintInfo($"Published {packageName}");
+        }
+    }
+
+    if (dryRun)
+        Console.WriteLine($"\n(Dry run - no packages were actually published)");
+}
+
+// Shared helper: filter a flat array of project paths by name, warn+list on miss.
+// Returns null when nothing matched and the caller should return early.
+string[]? FilterProjectPaths(string[] projectPaths, string? filter, string noMatchMessage)
+{
+    if (string.IsNullOrEmpty(filter)) return projectPaths;
+
+    var matched = projectPaths
+        .Where(p => Path.GetFileNameWithoutExtension(p).Contains(filter, StringComparison.OrdinalIgnoreCase))
+        .ToArray();
+
+    if (matched.Length > 0) return matched;
+
+    PrintColored($"⚠ {noMatchMessage} '{filter}'", ConsoleColor.Yellow);
+    Console.WriteLine("Available projects:");
+    PrintProjectList(projectPaths);
+    return null;
+}
+
 // Returns null when no projects matched and an error was already printed (caller should return early).
 List<(string ProjectPath, bool UsesTestingPlatformRunner)>? FilterToProject(
     (string ProjectPath, bool UsesTestingPlatformRunner)[] projectInfos,
     string? filter)
 {
-    if (string.IsNullOrEmpty(filter))
-        return [..projectInfos];
+    var paths = projectInfos.Select(p => p.ProjectPath).ToArray();
+    var matched = FilterProjectPaths(paths, filter, "No test projects match");
+    if (matched is null) return null;
 
-    var matched = projectInfos
-        .Where(p => Path.GetFileNameWithoutExtension(p.ProjectPath)
-            .Contains(filter, StringComparison.OrdinalIgnoreCase))
-        .ToList();
-
-    if (matched.Count > 0)
-        return matched;
-
-    PrintColored($"⚠ No test projects match '{filter}'", ConsoleColor.Yellow);
-    Console.WriteLine("Available test projects:");
-    PrintProjectList(projectInfos.Select(p => p.ProjectPath).ToArray());
-    return null;
+    var matchedSet = new HashSet<string>(matched, StringComparer.Ordinal);
+    return [..projectInfos.Where(p => matchedSet.Contains(p.ProjectPath))];
 }
 
 List<(string Project, bool Passed, string? Error)> RunTestProjects(
@@ -470,7 +476,7 @@ List<(string Project, bool Passed, string? Error)> RunTestProjects(
     foreach (var (projectPath, usesTestingPlatformRunner) in projects)
     {
         var projectName = Path.GetFileNameWithoutExtension(projectPath);
-        Console.WriteLine($"\n{'='} Testing: {projectName} {'='}");
+        PrintProjectHeader("Testing", projectName);
 
         try
         {
@@ -485,8 +491,8 @@ List<(string Project, bool Passed, string? Error)> RunTestProjects(
                     var (mtpFilter, hasPositiveFilters) = TranslateToMtpFilter(testFilter);
                     // --minimum-expected-tests is incompatible with exclusion-only simple filters
                     // (--filter-not-trait, etc.) in the MTP runner — only add for positive filters.
-                    var minTests = hasPositiveFilters ? " --minimum-expected-tests 0" : "";
-                    command += $" --{minTests} {mtpFilter}";
+                    var minTests = hasPositiveFilters ? "--minimum-expected-tests 0 " : "";
+                    command += $" -- {minTests}{mtpFilter}";
                 }
             }
             else
@@ -547,7 +553,7 @@ void PrintTestSummary(List<(string Project, bool Passed, string? Error)> results
     Console.WriteLine(separator);
 }
 
-void PrintHelp()
+void PrintHelp(string[] packableProjects, string[] testProjects)
 {
     Console.WriteLine(@"
 Yubico.YubiKit Toolchain Script
@@ -623,10 +629,9 @@ FILTER SYNTAX (for --filter):
 static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPath)
 {
     var fullPath = Path.Combine(repoRoot, projectPath);
-    return File.Exists(fullPath) &&
-           File.ReadAllText(fullPath).Contains(
-               "<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>",
-               StringComparison.OrdinalIgnoreCase);
+    return File.ReadAllText(fullPath).Contains(
+        "<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>",
+        StringComparison.OrdinalIgnoreCase);
 }
 
 // Translates a VSTest-style --filter expression to xUnit v3 MTP native filter arguments.
@@ -700,21 +705,8 @@ string[] DiscoverProjects(string subdirectory, string nameFilter, string? additi
 // Returns null when no projects matched and an error was already printed (caller should return early).
 List<string>? FilterProjectsByName(string[] projects, string? filter)
 {
-    if (string.IsNullOrEmpty(filter))
-        return [..projects];
-
-    var matched = projects
-        .Where(p => Path.GetFileNameWithoutExtension(p)
-            .Contains(filter, StringComparison.OrdinalIgnoreCase))
-        .ToList();
-
-    if (matched.Count > 0)
-        return matched;
-
-    PrintColored($"⚠ No projects match '{filter}'", ConsoleColor.Yellow);
-    Console.WriteLine("Available projects:");
-    PrintProjectList(projects);
-    return null;
+    var matched = FilterProjectPaths(projects, filter, "No projects match");
+    return matched is null ? null : [..matched];
 }
 
 string[] FilterBullseyeArgs(string[] args, string[] optionsWithValues, string[] flags)

@@ -161,6 +161,33 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             Assert.Null(exception);
         }
 
+        // -----------------------------------------------------------------------------------------
+        // Follow-up step 1 — Status resets to Started after a recovered managed exception
+        //
+        // ListenForReaderChanges sets Status = Error in its catch (Exception) block but never
+        // resets it. After the listener recovers (next poll succeeds), Status must reflect live
+        // health (Started), not the stale Error value.
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenPollSucceedsAfterManagedException_StatusResetsToStarted()
+        {
+            // Arrange: probe -> TIMEOUT (no PnP workaround). First post-probe poll throws,
+            // flipping Status to Error in ListenForReaderChanges' catch block. Subsequent
+            // polls return TIMEOUT (success path that reaches the end of CheckForUpdates).
+            var fake = new FakeSCardInterop(
+                probeResult: ErrorCode.SCARD_E_TIMEOUT,
+                defaultResult: ErrorCode.SCARD_E_TIMEOUT,
+                throwOnGetStatusChangeAfterProbe: true);
+
+            using var listener = new DesktopSmartCardDeviceListener(fake);
+
+            // Wait long enough for: probe + throw (Status=Error) + several successful polls.
+            Thread.Sleep(500);
+
+            Assert.Equal(DeviceListenerStatus.Started, listener.Status);
+        }
+
         // ─────────────────────────────────────────────────────────────────────────────────────────
         // Test double
         // ─────────────────────────────────────────────────────────────────────────────────────────
@@ -176,9 +203,11 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             private readonly uint _defaultResult;
             private readonly Queue<uint> _scheduledResults;
             private readonly bool _establishContextFailAfterFirstCall;
+            private readonly bool _throwOnGetStatusChangeAfterProbe;
 
             private int _establishContextCallCount;
             private int _getStatusChangeCallCount;
+            private int _hasThrownOnce;
 
             /// <summary>Total calls to EstablishContext. Safe to read from test thread after Thread.Sleep.</summary>
             public int EstablishContextCallCount => Volatile.Read(ref _establishContextCallCount);
@@ -202,11 +231,17 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             ///   When true, the second and subsequent calls to EstablishContext return
             ///   SCARD_E_NO_SERVICE to simulate the Smart Card Service being unavailable during recovery.
             /// </param>
+            /// <param name="throwOnGetStatusChangeAfterProbe">
+            ///   When true, the first GetStatusChange call after the probe throws
+            ///   InvalidOperationException to simulate a managed exception escaping into
+            ///   ListenForReaderChanges' catch block. Subsequent calls behave normally.
+            /// </param>
             public FakeSCardInterop(
                 uint probeResult = ErrorCode.SCARD_E_TIMEOUT,
                 uint defaultResult = ErrorCode.SCARD_E_TIMEOUT,
                 uint[]? scheduledResults = null,
-                bool establishContextFailAfterFirstCall = false)
+                bool establishContextFailAfterFirstCall = false,
+                bool throwOnGetStatusChangeAfterProbe = false)
             {
                 _probeResult = probeResult;
                 _defaultResult = defaultResult;
@@ -214,6 +249,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
                     ? new Queue<uint>()
                     : new Queue<uint>(scheduledResults);
                 _establishContextFailAfterFirstCall = establishContextFailAfterFirstCall;
+                _throwOnGetStatusChangeAfterProbe = throwOnGetStatusChangeAfterProbe;
             }
 
             public uint EstablishContext(SCARD_SCOPE scope, out SCardContext context)
@@ -239,6 +275,12 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
                 if (callNum == 1)
                 {
                     return _probeResult;
+                }
+
+                if (_throwOnGetStatusChangeAfterProbe
+                    && Interlocked.Exchange(ref _hasThrownOnce, 1) == 0)
+                {
+                    throw new InvalidOperationException("Simulated managed exception in GetStatusChange.");
                 }
 
                 lock (_scheduledResults)

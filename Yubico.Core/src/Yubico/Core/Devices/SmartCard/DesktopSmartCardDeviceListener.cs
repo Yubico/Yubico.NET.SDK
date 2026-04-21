@@ -315,6 +315,14 @@ namespace Yubico.Core.Devices.SmartCard
 
             FireEvents(arrivedDevices, removedDevices);
 
+            // A successful poll means the listener has recovered from any transient failure
+            // (e.g. a managed exception caught in ListenForReaderChanges that flipped Status
+            // to Error). Reset to Started so callers querying Status reflect live health.
+            if (Status == DeviceListenerStatus.Error)
+            {
+                Status = DeviceListenerStatus.Started;
+            }
+
             return true;
         }
 

@@ -558,4 +558,4 @@ TestResults/
 
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
-Yubico.Core/fuzz/corpus/
+Yubico.Core/fuzz/

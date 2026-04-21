@@ -29,6 +29,13 @@ namespace Yubico.Core.Devices.SmartCard
     /// </summary>
     internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener
     {
+        private enum CheckForUpdatesResult
+        {
+            Continue,
+            Stop,
+            Backoff
+        }
+
         private static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
         private readonly ILogger _log = Logging.Log.GetLogger<DesktopSmartCardDeviceListener>();
 
@@ -112,16 +119,22 @@ namespace Yubico.Core.Devices.SmartCard
             {
                 try
                 {
-                    bool result = CheckForUpdates(usePnpWorkaround);
-                    if (!result)
+                    CheckForUpdatesResult result = CheckForUpdates(usePnpWorkaround);
+                    if (result == CheckForUpdatesResult.Stop)
                     {
                         break;
-                    }    
+                    }
+
+                    if (result == CheckForUpdatesResult.Backoff)
+                    {
+                        Thread.Sleep(CheckForChangesWaitTime);
+                    }
                 }
                 catch (Exception e)
                 {
                     _log.LogError(e, "Exception occurred while listening for smart card reader changes.");
                     Status = DeviceListenerStatus.Error;
+                    Thread.Sleep(CheckForChangesWaitTime);
                 }
             }
         }
@@ -201,7 +214,19 @@ namespace Yubico.Core.Devices.SmartCard
             _listenerThread = null;
         }
 
-        private bool CheckForUpdates(bool usePnpWorkaround)
+        /// <summary>
+        /// Checks for smart-card reader and card state changes, and determines whether the
+        /// listener should continue normally, stop, or back off before retrying.
+        /// </summary>
+        /// <param name="usePnpWorkaround">
+        /// Use <c>SCardListReaders</c> instead of relying on the <c>\\?\Pnp\Notifications</c> device.
+        /// </param>
+        /// <returns>
+        /// <see cref="CheckForUpdatesResult.Continue"/> if processing should continue normally,
+        /// <see cref="CheckForUpdatesResult.Stop"/> if the listener should stop,
+        /// or <see cref="CheckForUpdatesResult.Backoff"/> if the caller should delay before retrying.
+        /// </returns>
+        private CheckForUpdatesResult CheckForUpdates(bool usePnpWorkaround)
         {
             var arrivedDevices = new List<ISmartCardDevice>();
             var removedDevices = new List<ISmartCardDevice>();
@@ -209,9 +234,21 @@ namespace Yubico.Core.Devices.SmartCard
             var newStates = (SCARD_READER_STATE[])_readerStates.Clone();
 
             uint getStatusChangeResult = SCardGetStatusChange(_context, (int)CheckForChangesWaitTime.TotalMilliseconds, newStates, newStates.Length);
+
+            if (getStatusChangeResult == ErrorCode.SCARD_E_TIMEOUT)
+            {
+                // Timeout is expected behavior in polling - don't log as it occurs every 100ms
+                return CheckForUpdatesResult.Continue;
+            }
+
             if (!HandleSCardGetStatusChangeResult(getStatusChangeResult, newStates))
             {
-                return false;
+                return CheckForUpdatesResult.Stop;
+            }
+
+            if (getStatusChangeResult != ErrorCode.SCARD_S_SUCCESS)
+            {
+                return CheckForUpdatesResult.Backoff;
             }
 
             while (ReaderListChangeDetected(ref newStates, usePnpWorkaround))
@@ -248,9 +285,19 @@ namespace Yubico.Core.Devices.SmartCard
                     _log.LogInformation("Additional smart card readers were found. Calling GetStatusChange for more information.");
                     getStatusChangeResult = SCardGetStatusChange(_context, 0, updatedStates, updatedStates.Length);
 
+                    if (getStatusChangeResult == ErrorCode.SCARD_E_TIMEOUT)
+                    {
+                        return CheckForUpdatesResult.Continue;
+                    }
+
                     if (!HandleSCardGetStatusChangeResult(getStatusChangeResult, updatedStates))
                     {
-                        return false;
+                        return CheckForUpdatesResult.Stop;
+                    }
+
+                    if (getStatusChangeResult != ErrorCode.SCARD_S_SUCCESS)
+                    {
+                        return CheckForUpdatesResult.Backoff;
                     }
                 }
 
@@ -260,9 +307,20 @@ namespace Yubico.Core.Devices.SmartCard
             if (RelevantChangesDetected(newStates))
             {
                 getStatusChangeResult = SCardGetStatusChange(_context, 0, newStates, newStates.Length);
+
+                if (getStatusChangeResult == ErrorCode.SCARD_E_TIMEOUT)
+                {
+                    return CheckForUpdatesResult.Continue;
+                }
+
                 if (!HandleSCardGetStatusChangeResult(getStatusChangeResult, newStates))
                 {
-                    return false;
+                    return CheckForUpdatesResult.Stop;
+                }
+
+                if (getStatusChangeResult != ErrorCode.SCARD_S_SUCCESS)
+                {
+                    return CheckForUpdatesResult.Backoff;
                 }
             }
 
@@ -277,7 +335,7 @@ namespace Yubico.Core.Devices.SmartCard
 
             FireEvents(arrivedDevices, removedDevices);
 
-            return true;
+            return CheckForUpdatesResult.Continue;
         }
 
         // So apparently not all platforms implement the virtual pnp reader semantics the same. They will still wait on
@@ -449,7 +507,7 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         /// <summary>
-        /// Handles common SCardGetStatusChange result codes including cancellation, timeouts, and non-critical errors.
+        /// Handles common SCardGetStatusChange result codes including cancellation and non-critical errors.
         /// Logs appropriately based on the result code.
         /// </summary>
         /// <param name="result">The result code from SCardGetStatusChange</param>
@@ -461,12 +519,6 @@ namespace Yubico.Core.Devices.SmartCard
             {
                 _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");
                 return false;
-            }
-
-            // Timeout is expected behavior in polling - don't log as it occurs every 100ms
-            if (result == ErrorCode.SCARD_E_TIMEOUT)
-            {
-                return true;
             }
 
             // Non-critical errors that need context update

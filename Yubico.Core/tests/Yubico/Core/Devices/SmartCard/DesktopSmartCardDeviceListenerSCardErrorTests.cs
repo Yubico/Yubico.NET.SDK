@@ -258,6 +258,30 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
                 "recovery waits must be cancellation-aware so Dispose unblocks immediately.");
         }
 
+        // -----------------------------------------------------------------------------------------
+        // Follow-up step 4 — Exponential backoff with cap
+        //
+        // Today's recovery path sleeps a fixed 1s. If WinSCard / Smart Card Service stays broken
+        // for minutes, the listener still polls every second. Exponential backoff with a cap
+        // gives up CPU more aggressively without losing eventual recovery.
+        // -----------------------------------------------------------------------------------------
+
+        [Theory]
+        [InlineData(0, 1000)]
+        [InlineData(1, 2000)]
+        [InlineData(2, 4000)]
+        [InlineData(3, 8000)]
+        [InlineData(4, 16000)]
+        [InlineData(5, 30000)] // capped
+        [InlineData(10, 30000)] // still capped
+        [InlineData(100, 30000)] // safe against overflow
+        public void CalculateRecoveryBackoff_DoublesUntilCap(int attempts, int expectedMs)
+        {
+            Assert.Equal(
+                TimeSpan.FromMilliseconds(expectedMs),
+                DesktopSmartCardDeviceListener.CalculateRecoveryBackoff(attempts));
+        }
+
         // ─────────────────────────────────────────────────────────────────────────────────────────
         // Test double
         // ─────────────────────────────────────────────────────────────────────────────────────────

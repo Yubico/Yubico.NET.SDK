@@ -50,6 +50,8 @@ namespace Yubico.Core.Devices.SmartCard
         // Prevents a tight polling loop when SCardGetStatusChange returns immediately (e.g.
         // SCARD_E_INVALID_HANDLE in an RDS environment). See GitHub issue #434.
         private static readonly TimeSpan RecoveryBackoffDelay = TimeSpan.FromMilliseconds(1000);
+        private static readonly TimeSpan MaxRecoveryBackoffDelay = TimeSpan.FromSeconds(30);
+        private int _consecutiveRecoveryAttempts;
 
         /// <summary>
         /// Constructs a <see cref="SmartCardDeviceListener"/> using the system SCard implementation.
@@ -140,7 +142,8 @@ namespace Yubico.Core.Devices.SmartCard
                 {
                     _log.LogError(e, "Exception occurred while listening for smart card reader changes.");
                     Status = DeviceListenerStatus.Error;
-                    _ = _stopRequested.Wait(RecoveryBackoffDelay);
+                    _ = _stopRequested.Wait(CalculateRecoveryBackoff(_consecutiveRecoveryAttempts));
+                    _consecutiveRecoveryAttempts++;
                 }
             }
         }
@@ -322,6 +325,8 @@ namespace Yubico.Core.Devices.SmartCard
             // A successful poll means the listener has recovered from any transient failure
             // (e.g. a managed exception caught in ListenForReaderChanges that flipped Status
             // to Error). Reset to Started so callers querying Status reflect live health.
+            // Also reset the exponential backoff counter.
+            _consecutiveRecoveryAttempts = 0;
             if (Status == DeviceListenerStatus.Error)
             {
                 Status = DeviceListenerStatus.Started;
@@ -554,7 +559,8 @@ namespace Yubico.Core.Devices.SmartCard
             // persistent error codes not yet classified as recoverable).
             _log.SCardApiCall(nameof(NativeMethods.SCardGetStatusChange), result);
             _log.LogInformation("Reader states:\n{States}", string.Join(Environment.NewLine, states.Select(s => s.ToString())));
-            _ = _stopRequested.Wait(RecoveryBackoffDelay);
+            _ = _stopRequested.Wait(CalculateRecoveryBackoff(_consecutiveRecoveryAttempts));
+            _consecutiveRecoveryAttempts++;
 
             return true;
         }
@@ -598,11 +604,27 @@ namespace Yubico.Core.Devices.SmartCard
                     // Back off before the next poll to avoid a tight loop when SCardGetStatusChange
                     // returns immediately (as it does with an invalid handle) and/or when the Smart
                     // Card Service is unavailable and EstablishContext also fails immediately.
-                    _ = _stopRequested.Wait(RecoveryBackoffDelay);
+                    _ = _stopRequested.Wait(CalculateRecoveryBackoff(_consecutiveRecoveryAttempts));
+                    _consecutiveRecoveryAttempts++;
                     return true;
                 default:
                     return false;
             }
+        }
+
+        /// <summary>
+        /// Calculates the exponential backoff delay for the current recovery attempt.
+        /// Doubles the base delay for each consecutive attempt, capped at 30 seconds.
+        /// </summary>
+        /// <param name="attempts">Number of consecutive recovery attempts (0-based).</param>
+        /// <returns>The backoff delay for this attempt.</returns>
+        internal static TimeSpan CalculateRecoveryBackoff(int attempts)
+        {
+            int safeAttempts = Math.Min(Math.Max(attempts, 0), 10); // 2^10 cap-safe
+            long ticks = RecoveryBackoffDelay.Ticks * (1L << safeAttempts);
+            return ticks > MaxRecoveryBackoffDelay.Ticks
+                ? MaxRecoveryBackoffDelay
+                : TimeSpan.FromTicks(ticks);
         }
 
         private class ReaderStateComparer : IEqualityComparer<SCARD_READER_STATE>

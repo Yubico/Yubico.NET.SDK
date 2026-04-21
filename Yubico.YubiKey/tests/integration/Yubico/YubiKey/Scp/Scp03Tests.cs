@@ -697,6 +697,91 @@ namespace Yubico.YubiKey.Scp
             return pin;
         }
 
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        public void Scp03_Piv_RSA2048Sign_WithCommandChaining_Succeeds(
+            StandardTestDevice desiredDeviceType,
+            Transport transport)
+        {
+            // This test validates the fix for YESDK-1260: SCP03 command chaining.
+            // RSA 2048 signing sends 256 bytes of formatted data which exceeds the
+            // 239-byte SCP chunk limit, triggering command chaining.
+
+            var testDevice = GetDevice(desiredDeviceType, transport);
+            Assert.True(testDevice.HasFeature(YubiKeyFeature.Scp03));
+
+            bool useComplexCreds = testDevice.IsFipsSeries || testDevice.IsPinComplexityEnabled;
+            var mgmtKey = useComplexCreds
+                ? (ReadOnlyMemory<byte>)PivSessionIntegrationTestBase.ComplexManagementKey
+                : PivSessionIntegrationTestBase.DefaultManagementKey;
+
+            // Reset PIV and generate key WITHOUT SCP03 (simpler setup)
+            IPublicKey publicKey;
+            const byte slotNumber = PivSlot.Retired12;
+            using (var setupSession = new PivSession(testDevice))
+            {
+                setupSession.ResetApplication();
+
+                if (useComplexCreds)
+                {
+                    Assert.True(
+                        setupSession.TryChangePin(
+                            PivSessionIntegrationTestBase.DefaultPin,
+                            PivSessionIntegrationTestBase.ComplexPin,
+                            out _),
+                        "Changing the PIN during test setup should succeed.");
+                    Assert.True(
+                        setupSession.TryChangePuk(
+                            PivSessionIntegrationTestBase.DefaultPuk,
+                            PivSessionIntegrationTestBase.ComplexPuk,
+                            out _),
+                        "Changing the PUK during test setup should succeed.");
+                    Assert.True(
+                        setupSession.TryChangeManagementKey(
+                            PivSessionIntegrationTestBase.DefaultManagementKey,
+                            PivSessionIntegrationTestBase.ComplexManagementKey),
+                        "Changing the management key during test setup should succeed.");
+                }
+
+                Assert.True(setupSession.TryAuthenticateManagementKey(mgmtKey));
+
+                publicKey = setupSession.GenerateKeyPair(
+                    slotNumber, KeyType.RSA2048, PivPinPolicy.Never, PivTouchPolicy.Never);
+            }
+
+            // Now open a new session WITH SCP03 to perform the sign operation
+            using var pivSession = new PivSession(testDevice, Scp03KeyParameters.DefaultKey);
+
+            // Raw data to sign (arbitrary size — gets hashed to 32 bytes by SHA-256)
+            var dataToSign = new byte[128];
+            Random.Shared.NextBytes(dataToSign);
+
+            using var digester = CryptographyProviders.Sha256Creator();
+            _ = digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
+
+            // PKCS#1 pads the 32-byte hash to match the RSA key size: 2048 bits = 256 bytes.
+            // 256 bytes exceeds the SCP03 transport limit (~239 bytes after encryption
+            // overhead), which forces command chaining — the scenario under test.
+            var formattedData = RsaFormat.FormatPkcs1Sign(
+                digester.Hash,
+                RsaFormat.Sha256,
+                KeyType.RSA2048.GetKeyDefinition().LengthInBits);
+
+            var signature = pivSession.Sign(slotNumber, formattedData);
+
+            // Verify signature using the generated public key
+            var rsaPublicKey = Assert.IsType<RSAPublicKey>(publicKey);
+            using var rsa = RSA.Create();
+            rsa.ImportParameters(rsaPublicKey.Parameters);
+            var isVerified = rsa.VerifyData(
+                dataToSign,
+                signature,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+
+            Assert.True(isVerified, "RSA 2048 signature over SCP03 should be valid");
+        }
+
         #region Helpers
 
         private static StaticKeys RandomStaticKeys() =>

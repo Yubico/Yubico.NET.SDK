@@ -471,7 +471,7 @@ namespace Yubico.Core.Devices.SmartCard
             }
 
             uint result = _scard.EstablishContext(SCARD_SCOPE.USER, out SCardContext newContext);
-            _log.SCardApiCall(nameof(NativeMethods.SCardEstablishContext), result);
+            _log.SCardApiCall(nameof(NativeMethods.SCardEstablishContext), result, knownRecoverable: true);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {
@@ -494,7 +494,7 @@ namespace Yubico.Core.Devices.SmartCard
             uint result = _scard.ListReaders(_context, null, out string[] readerNames);
             if (result != ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
             {
-                _log.SCardApiCall(nameof(NativeMethods.SCardListReaders), result);
+                _log.SCardApiCall(nameof(NativeMethods.SCardListReaders), result, knownRecoverable: true);
             }
 
             // We use this workaround as .NET 4.7 doesn't really support all of .NET Standard 2.0

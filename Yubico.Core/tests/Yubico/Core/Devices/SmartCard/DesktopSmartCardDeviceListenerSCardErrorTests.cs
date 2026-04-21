@@ -221,6 +221,43 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
                 "Expected < 5: catch block must throttle before retry.");
         }
 
+        // -----------------------------------------------------------------------------------------
+        // Follow-up step 3 — Dispose unblocks immediately when listener is in recovery wait
+        //
+        // Thread.Sleep(RecoveryBackoffDelay) blocks Dispose for up to 1 second per active wait
+        // site. _scard.Cancel(_context) only wakes a blocked syscall, not a sleeping thread.
+        // Step 3 replaces Thread.Sleep with ManualResetEventSlim.Wait(timeout) so StopListening
+        // can signal the wait and Dispose returns immediately.
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenDisposeCalledDuringRecoveryWait_DisposeReturnsQuickly()
+        {
+            // Arrange: schedule INVALID_HANDLE on every poll so the listener enters recovery wait.
+            var fake = new FakeSCardInterop(
+                probeResult: ErrorCode.SCARD_E_TIMEOUT,
+                defaultResult: ErrorCode.SCARD_E_INVALID_HANDLE);
+
+            var listener = new DesktopSmartCardDeviceListener(fake);
+
+            // Give the listener time to enter the recovery wait (probe + first INVALID_HANDLE poll
+            // + start of 1000ms wait).
+            Thread.Sleep(50);
+
+            // Act: measure Dispose duration.
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            listener.Dispose();
+            sw.Stop();
+
+            // Assert: Dispose must return in under 200ms.
+            // Pre-Step-3: Dispose would block on the full 1000ms Thread.Sleep.
+            // Post-Step-3: _stopRequested.Set() wakes the wait immediately.
+            Assert.True(
+                sw.ElapsedMilliseconds < 200,
+                $"Dispose took {sw.ElapsedMilliseconds}ms. Expected < 200ms: " +
+                "recovery waits must be cancellation-aware so Dispose unblocks immediately.");
+        }
+
         // ─────────────────────────────────────────────────────────────────────────────────────────
         // Test double
         // ─────────────────────────────────────────────────────────────────────────────────────────

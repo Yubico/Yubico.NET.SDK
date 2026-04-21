@@ -182,10 +182,43 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
 
             using var listener = new DesktopSmartCardDeviceListener(fake);
 
-            // Wait long enough for: probe + throw (Status=Error) + several successful polls.
-            Thread.Sleep(500);
+            // Wait long enough for: probe + throw (Status=Error) + 1000ms sleep + several successful polls.
+            Thread.Sleep(1500);
 
             Assert.Equal(DeviceListenerStatus.Started, listener.Status);
+        }
+
+        // -----------------------------------------------------------------------------------------
+        // Follow-up step 2 — ListenForReaderChanges catch block is throttled
+        //
+        // An unexpected managed exception from CheckForUpdates re-enters the while (_isListening)
+        // loop with no delay (pre-Step-2). This can cause a tight spin if the same exception
+        // recurs. Step 2 adds Thread.Sleep(RecoveryBackoffDelay) to throttle the retry.
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenCatchBlockTriggers_LoopThrottlesBeforeRetry()
+        {
+            // Arrange: probe -> TIMEOUT, then every poll throws.
+            var fake = new FakeSCardInterop(
+                probeResult: ErrorCode.SCARD_E_TIMEOUT,
+                defaultResult: ErrorCode.SCARD_E_TIMEOUT,
+                throwOnGetStatusChangeAfterProbe: true);
+
+            using var listener = new DesktopSmartCardDeviceListener(fake);
+
+            // Act: observe for ~600ms. Without throttle in the catch block, hundreds of
+            // GetStatusChange calls would occur. With throttle, only 1–2 fit in 600ms.
+            Thread.Sleep(600);
+
+            int callCount = fake.GetStatusChangeCallCount;
+
+            // Assert: fewer than 5 calls proves throttling is working.
+            // Expected: probe + 1 throw (~0ms) + 1000ms sleep → only ~2 calls total in 600ms.
+            Assert.True(
+                callCount < 5,
+                $"GetStatusChange was called {callCount} times in ~600ms. " +
+                "Expected < 5: catch block must throttle before retry.");
         }
 
         // ─────────────────────────────────────────────────────────────────────────────────────────

@@ -139,6 +139,7 @@ namespace Yubico.Core.Devices.SmartCard
                 {
                     _log.LogError(e, "Exception occurred while listening for smart card reader changes.");
                     Status = DeviceListenerStatus.Error;
+                    Thread.Sleep(RecoveryBackoffDelay);
                 }
             }
         }

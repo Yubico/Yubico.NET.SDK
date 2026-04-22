@@ -138,7 +138,7 @@ internal sealed class ExtensionPipeline
             // Merge standard entries + previewSign, sort by CTAP2 canonical (length-then-lex)
             var allEntries = new List<KeyValuePair<string, ReadOnlyMemory<byte>>>(standardEntries.Count + 1);
             allEntries.AddRange(standardEntries.Select(t => new KeyValuePair<string, ReadOnlyMemory<byte>>(t.key, t.value)));
-            allEntries.Add(new KeyValuePair<string, ReadOnlyMemory<byte>>("previewSign", previewSignCbor.Value));
+            allEntries.Add(new KeyValuePair<string, ReadOnlyMemory<byte>>("previewSign", previewSignCbor));
 
             allEntries.Sort((a, b) => Ctap2CanonicalKeyComparer.Instance.Compare(a.Key, b.Key));
 
@@ -251,7 +251,7 @@ internal sealed class ExtensionPipeline
             // Merge standard entries + previewSign, sort by CTAP2 canonical (length-then-lex)
             var allEntries = new List<KeyValuePair<string, ReadOnlyMemory<byte>>>(standardEntries.Count + 1);
             allEntries.AddRange(standardEntries.Select(t => new KeyValuePair<string, ReadOnlyMemory<byte>>(t.key, t.value)));
-            allEntries.Add(new KeyValuePair<string, ReadOnlyMemory<byte>>("previewSign", previewSignCbor.Value));
+            allEntries.Add(new KeyValuePair<string, ReadOnlyMemory<byte>>("previewSign", previewSignCbor));
 
             allEntries.Sort((a, b) => Ctap2CanonicalKeyComparer.Instance.Compare(a.Key, b.Key));
 
@@ -283,11 +283,13 @@ internal sealed class ExtensionPipeline
     /// </summary>
     /// <param name="inputs">The original inputs (to know what was requested).</param>
     /// <param name="authData">The authenticator data with extension outputs.</param>
+    /// <param name="unsignedExtensionOutputs">Top-level unsigned extension outputs map (CTAP key 8).</param>
     /// <param name="originalOptions">The original registration options.</param>
     /// <returns>The parsed extension outputs, or null if no extensions were requested.</returns>
     public static RegistrationExtensionOutputs? ParseRegistrationOutputs(
         RegistrationExtensionInputs? inputs,
         WebAuthnAuthenticatorData authData,
+        IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs,
         RegistrationOptions originalOptions)
     {
         if (inputs is null)
@@ -384,7 +386,7 @@ internal sealed class ExtensionPipeline
         {
             try
             {
-                previewSign = PreviewSignAdapter.ParseRegistrationOutput(authData);
+                previewSign = PreviewSignAdapter.ParseRegistrationOutput(authData, unsignedExtensionOutputs);
             }
             catch (System.Formats.Cbor.CborContentException)
             {

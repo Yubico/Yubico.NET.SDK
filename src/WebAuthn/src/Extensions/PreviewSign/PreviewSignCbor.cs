@@ -130,18 +130,23 @@ internal static class PreviewSignCbor
     /// Decodes unsigned registration output (nested attestation object).
     /// </summary>
     /// <param name="cbor">CBOR-encoded map with key {7: att-obj (nested CBOR)}.</param>
+    /// <param name="algorithm">Algorithm already read from authData.extensions["previewSign"].</param>
+    /// <param name="flags">Flags already read from authData.extensions["previewSign"].</param>
     /// <returns>
     /// A <see cref="PreviewSignRegistrationOutput"/> with the decoded attestation object.
     /// </returns>
     /// <remarks>
-    /// Per CTAP v4 draft §4, this is the PREFERRED output format. The attestation object
-    /// contains the authoritative public key, key handle (as credentialId), and flags
-    /// embedded in the authenticator data extensions.
+    /// Per spec §10.2.1 step 5, algorithm comes from authData.extensions["previewSign"][alg],
+    /// while the attestation object comes from unsignedExtensionOutputs["previewSign"][att-obj].
+    /// This method decodes the attestation object from unsignedExtensionOutputs.
     /// </remarks>
     /// <exception cref="WebAuthnClientError">
     /// Thrown when CBOR is malformed or the nested attestation object cannot be decoded (InvalidState).
     /// </exception>
-    public static PreviewSignRegistrationOutput DecodeUnsignedRegistrationOutput(ReadOnlyMemory<byte> cbor)
+    public static PreviewSignRegistrationOutput DecodeUnsignedRegistrationOutput(
+        ReadOnlyMemory<byte> cbor,
+        CoseAlgorithm algorithm,
+        PreviewSignFlags flags)
     {
         try
         {
@@ -175,56 +180,7 @@ internal static class PreviewSignCbor
             // Decode the nested attestation object
             var attestationObject = WebAuthnAttestationObject.Decode(attestationObjectBytes.Value);
 
-            // Extract the embedded previewSign extension output from authenticator data
-            var extensions = attestationObject.AuthenticatorData.ParsedExtensions;
-            if (!extensions.TryGetValue("previewSign", out var previewSignExtBytes))
-            {
-                throw new WebAuthnClientError(
-                    WebAuthnClientErrorCode.InvalidState,
-                    "previewSign attestation object missing embedded previewSign extension");
-            }
-
-            // Decode the embedded extension to extract flags
-            var extReader = new CborReader(previewSignExtBytes, CborConformanceMode.Ctap2Canonical);
-            int? extMapSize = extReader.ReadStartMap();
-
-            PreviewSignFlags? flags = null;
-            CoseAlgorithm? algorithm = null;
-
-            for (int i = 0; i < extMapSize; i++)
-            {
-                int key = extReader.ReadInt32();
-                switch (key)
-                {
-                    case Flags:
-                        flags = (PreviewSignFlags)extReader.ReadInt32();
-                        break;
-                    case Algorithm:
-                        algorithm = new CoseAlgorithm(extReader.ReadInt32());
-                        break;
-                    default:
-                        extReader.SkipValue();
-                        break;
-                }
-            }
-
-            extReader.ReadEndMap();
-
-            if (!flags.HasValue)
-            {
-                throw new WebAuthnClientError(
-                    WebAuthnClientErrorCode.InvalidState,
-                    "previewSign embedded extension missing flags (key 4)");
-            }
-
-            if (!algorithm.HasValue)
-            {
-                throw new WebAuthnClientError(
-                    WebAuthnClientErrorCode.InvalidState,
-                    "previewSign embedded extension missing algorithm (key 3)");
-            }
-
-            // Extract key handle from attestation object's attested credential data
+            // Extract key handle and public key from attested credential data
             var attestedCredData = attestationObject.AuthenticatorData.AttestedCredentialData;
             if (attestedCredData is null)
             {
@@ -234,16 +190,13 @@ internal static class PreviewSignCbor
             }
 
             ReadOnlyMemory<byte> keyHandle = attestedCredData.CredentialId;
-
-            // Decode the public key from attested credential data
             CoseKey publicKey = CoseKey.Decode(attestedCredData.CredentialPublicKey);
 
             var generatedKey = new GeneratedSigningKey(
                 KeyHandle: keyHandle,
                 PublicKey: publicKey,
-                Algorithm: algorithm.Value,
-                AttestationObject: attestationObject,
-                Flags: flags.Value);
+                Algorithm: algorithm,
+                AttestationObject: attestationObject);
 
             return new PreviewSignRegistrationOutput(generatedKey);
         }

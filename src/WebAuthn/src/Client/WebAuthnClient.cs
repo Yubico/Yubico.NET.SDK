@@ -890,6 +890,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         var extensionOutputs = ExtensionPipeline.ParseRegistrationOutputs(
             options.Extensions,
             webAuthnAuthData,
+            ctapResponse.UnsignedExtensionOutputs,
             options);
 
         return new RegistrationResponse

@@ -44,16 +44,11 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// May differ from the algorithm in PublicKey if using split-signing algorithms.
 /// </param>
 /// <param name="AttestationObject">
-/// The attestation object for the signing key pair. This contains the authoritative
-/// public key, authenticator data, and embedded previewSign extension output including flags.
-/// </param>
-/// <param name="Flags">
-/// The user presence/verification policy for this signing key. Extracted from the
-/// attestation object's embedded previewSign extension output.
+/// The attestation object for the signing key pair (nullable in fallback path).
+/// When present, contains the authoritative public key and authenticator data.
 /// </param>
 public sealed record class GeneratedSigningKey(
     ReadOnlyMemory<byte> KeyHandle,
     CoseKey PublicKey,
     CoseAlgorithm Algorithm,
-    WebAuthnAttestationObject AttestationObject,
-    PreviewSignFlags Flags);
+    WebAuthnAttestationObject? AttestationObject);

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.WebAuthn.Client.Registration;
+using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 using Yubico.YubiKit.WebAuthn.Preferences;
 
@@ -142,6 +143,7 @@ internal static class PreviewSignAdapter
     /// Parses the previewSign registration output from authenticator data.
     /// </summary>
     /// <param name="authData">The authenticator data with parsed extensions.</param>
+    /// <param name="unsignedExtensionOutputs">Top-level unsigned extension outputs (CTAP key 8).</param>
     /// <returns>
     /// A <see cref="PreviewSignRegistrationOutput"/> if the extension output is present and valid;
     /// otherwise null.
@@ -150,17 +152,14 @@ internal static class PreviewSignAdapter
     /// Thrown when the extension output is present but malformed (InvalidState).
     /// </exception>
     /// <remarks>
-    /// <para>
-    /// Per CTAP v4 draft §4, the unsigned attestation object form (att-obj key 7) is the
-    /// preferred authoritative source. This method tries the unsigned form FIRST, then falls
-    /// back to the signed form (keys 3,4,6) if unsigned is not present.
-    /// </para>
-    /// <para>
-    /// Verified attestation values supersede loose top-level fields when both are present.
-    /// </para>
+    /// Per spec §10.2.1 step 5 (registration), reads algorithm from authData.extensions["previewSign"]
+    /// and attestation object from unsignedExtensionOutputs["previewSign"] (top-level CTAP response map).
+    /// If unsignedExtensionOutputs is missing, builds GeneratedSigningKey from authData's attested
+    /// credential data (Swift fallback per PreviewSign.swift:170-176).
     /// </remarks>
     public static PreviewSignRegistrationOutput? ParseRegistrationOutput(
-        WebAuthnAuthenticatorData authData)
+        WebAuthnAuthenticatorData authData,
+        IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs)
     {
         const string ExtensionId = "previewSign";
 
@@ -169,10 +168,59 @@ internal static class PreviewSignAdapter
             return null;
         }
 
-        // Try unsigned form FIRST (preferred per spec §4)
-        var output = PreviewSignCbor.DecodeUnsignedRegistrationOutput(rawCbor);
+        // Read algorithm + flags from authData.extensions["previewSign"]
+        var reader = new System.Formats.Cbor.CborReader(rawCbor, System.Formats.Cbor.CborConformanceMode.Ctap2Canonical);
+        int? mapSize = reader.ReadStartMap();
 
-        return output;
+        CoseAlgorithm? algorithm = null;
+        PreviewSign.PreviewSignFlags? flags = null;
+
+        for (int i = 0; i < mapSize; i++)
+        {
+            int key = reader.ReadInt32();
+            switch (key)
+            {
+                case 3: // alg
+                    algorithm = new CoseAlgorithm(reader.ReadInt32());
+                    break;
+                case 4: // flags
+                    flags = (PreviewSign.PreviewSignFlags)reader.ReadInt32();
+                    break;
+                default:
+                    reader.SkipValue();
+                    break;
+            }
+        }
+
+        if (algorithm is null || flags is null)
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidState,
+                "previewSign output missing required algorithm or flags");
+        }
+
+        // Try to read attestation object from unsignedExtensionOutputs["previewSign"]
+        if (unsignedExtensionOutputs?.TryGetValue(ExtensionId, out var unsignedCbor) == true)
+        {
+            // Decode the unsigned output (contains att-obj)
+            return PreviewSignCbor.DecodeUnsignedRegistrationOutput(unsignedCbor, algorithm.Value, flags.Value);
+        }
+
+        // Fallback: build from authData's attested credential data (Swift PreviewSign.swift:170-176)
+        if (authData.AttestedCredentialData is null)
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidState,
+                "previewSign output requires attested credential data");
+        }
+
+        var generatedKey = new PreviewSign.GeneratedSigningKey(
+            KeyHandle: authData.AttestedCredentialData.CredentialId,
+            PublicKey: CoseKey.Decode(authData.AttestedCredentialData.CredentialPublicKey),
+            Algorithm: algorithm.Value,
+            AttestationObject: null); // No attestation object in fallback path
+
+        return new PreviewSign.PreviewSignRegistrationOutput(GeneratedKey: generatedKey);
     }
 
     /// <summary>

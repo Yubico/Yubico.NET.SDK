@@ -238,11 +238,17 @@ namespace Yubico.Core.Devices.SmartCard
                 return false;
             }
 
+            // Timeout is normal polling behavior - nothing changed, so return immediately
+            // without further processing that could trigger spurious events
+            if (getStatusChangeResult == ErrorCode.SCARD_E_TIMEOUT)
+            {
+                return true;
+            }
+
             // If a non-critical error triggered context recovery (UpdateCurrentContext refreshed
             // _readerStates), short-circuit so the next loop iteration starts with fresh state.
             // Without this, the stale newStates clone would overwrite _readerStates at the end.
-            if (getStatusChangeResult != ErrorCode.SCARD_S_SUCCESS
-                && getStatusChangeResult != ErrorCode.SCARD_E_TIMEOUT)
+            if (getStatusChangeResult != ErrorCode.SCARD_S_SUCCESS)
             {
                 return true;
             }

@@ -157,6 +157,15 @@ dotnet toolchain.cs publish
 ### Build Script Options
 
 ```bash
+# Run tests for a single module (skips building/running unrelated projects)
+dotnet toolchain.cs test --project WebAuthn
+
+# Run a specific test by name within a module
+dotnet toolchain.cs test --project WebAuthn --filter "FullyQualifiedName~PreviewSign"
+
+# Smoke test (skips Slow and RequiresUserPresence tests)
+dotnet toolchain.cs test --project Piv --smoke
+
 # Override package version
 dotnet toolchain.cs pack --package-version 1.0.0-preview.2
 
@@ -172,6 +181,11 @@ dotnet toolchain.cs build --clean
 # Custom NuGet feed
 dotnet toolchain.cs publish --nuget-feed-name MyFeed --nuget-feed-path ~/my-feed
 ```
+
+**Test filtering tips:**
+- Always combine `--project` with `--filter` to avoid building all projects (much faster)
+- Filter syntax: `FullyQualifiedName~Substring`, `Method~Name`, `Category!=Slow`
+- The toolchain auto-translates VSTest filter syntax to xUnit v3 native options
 
 ### Direct dotnet Commands (Fallback)
 

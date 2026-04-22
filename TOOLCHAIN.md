@@ -165,6 +165,19 @@ dotnet toolchain.cs test --filter "FullyQualifiedName~MyTest"
 dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Yubico.YubiKit.Fido2.UnitTests.csproj
 ```
 
+### Test Filtering Tips
+
+- **Always combine `--project` with `--filter`** to avoid building and running all test projects:
+  ```bash
+  # ✅ Fast — only builds and runs WebAuthn tests
+  dotnet toolchain.cs test --project WebAuthn --filter "FullyQualifiedName~PreviewSign"
+
+  # ⚠️ Slow — builds ALL test projects, runs filter against each (most find 0 matches)
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PreviewSign"
+  ```
+- Filter syntax: `FullyQualifiedName~Substring`, `Method~Name`, `Category!=Slow`
+- The toolchain auto-translates VSTest filter expressions to xUnit v3 native options (`--filter-method`, `--filter-trait`, etc.)
+
 ### For AI Agents / Automation
 
 When writing scripts or automation that runs tests:
@@ -172,4 +185,4 @@ When writing scripts or automation that runs tests:
 1. **Always use `dotnet toolchain.cs test`** - it handles the complexity for you
 2. **Never assume** `dotnet test` will work for all projects
 3. **Use `--project`** to filter to specific projects: `dotnet toolchain.cs test --project Fido2`
-4. **Use `--filter`** for test filtering: `dotnet toolchain.cs test --filter "Method~Sign"`
+4. **Combine `--project` with `--filter`** for targeted test runs: `dotnet toolchain.cs test --project Fido2 --filter "Method~Sign"`

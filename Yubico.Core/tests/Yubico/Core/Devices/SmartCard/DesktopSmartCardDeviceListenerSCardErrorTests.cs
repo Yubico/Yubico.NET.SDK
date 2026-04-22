@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using Xunit;
 using Yubico.PlatformInterop;
@@ -343,6 +344,89 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             Assert.Equal(DeviceListenerStatus.Started, listener.Status);
         }
 
+        // -----------------------------------------------------------------------------------------
+        // Internal feedback (PR #460) — broader invariant: SCARD_STATE.CHANGED on the PnP reader
+        // without a real reader-list delta must NOT fire arrival/removal events
+        //
+        // This pins the invariant one level deeper than the SCARD_E_TIMEOUT short-circuit. The
+        // pre-#460 code returned SCARD_S_SUCCESS from GetStatusChange on a CHANGED toggle, entered
+        // the ReaderListChangeDetected branch, and was capable of producing spurious removal events
+        // from a stale-clone comparison.
+        //
+        // Honest scope note: the user's exact reported bug ("arrival → 110 ms later removal" every
+        // ~3 s) requires a real reader entry in _readerStates with PRESENT set in CurrentState,
+        // followed by an Except() mismatch against a freshly-fetched reader list that flips that
+        // entry's PRESENT bit. Reproducing that end-to-end in the mock harness would require
+        // recreating non-trivial WinSCard state-machine semantics in test code (multi-phase
+        // ListReaders responses, post-AcknowledgeChanges state transitions). This test pins the
+        // simpler — and still important — invariant: a SUCCESS poll where only the synthetic PnP
+        // reader has CHANGED set, with no underlying reader-list delta, must produce zero events.
+        // The user's specific repro path remains an integration-level scenario (real WinSCard or
+        // pcscd, real reader, real RDS state churn).
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenGetStatusChangeReturnsChangedWithoutReaderDelta_NoEventsFire()
+        {
+            // Arrange: probe returns TIMEOUT (no PnP workaround), then every poll returns SUCCESS
+            // with the synthetic PnP reader having CHANGED set in EventState but no actual reader
+            // topology change (ListReaders still returns empty). This mirrors the upstream tick
+            // pattern the user observed at ~3 s intervals.
+            var fake = new FakeSCardInterop(
+                probeResult: ErrorCode.SCARD_E_TIMEOUT,
+                defaultResult: ErrorCode.SCARD_S_SUCCESS,
+                stateApplier: SetPnpReaderChangedFlag);
+
+            using var listener = new DesktopSmartCardDeviceListener(fake);
+
+            int arrivedCount = 0;
+            int removedCount = 0;
+            listener.Arrived += (_, _) => Interlocked.Increment(ref arrivedCount);
+            listener.Removed += (_, _) => Interlocked.Increment(ref removedCount);
+
+            // Act: observe across several poll iterations (each 100 ms). With the bug, we'd see
+            // spurious paired arrival/removal events on every iteration where CHANGED was set
+            // and the stale-clone comparison fired.
+            Thread.Sleep(600);
+
+            // Assert: no real device topology change occurred, so no events should fire — even
+            // though SUCCESS came back and CHANGED was set.
+            Assert.Equal(0, Volatile.Read(ref arrivedCount));
+            Assert.Equal(0, Volatile.Read(ref removedCount));
+        }
+
+        /// <summary>
+        /// Mutates the PnP reader entry (always element 0 — see GetReaderStateList) to have
+        /// SCARD_STATE.CHANGED set in EventState while leaving CurrentState untouched. This
+        /// simulates the upstream "something happened in the reader topology" tick from
+        /// WinSCard / pcscd without actually changing the reader list ListReaders sees.
+        /// </summary>
+        /// <remarks>
+        /// SCARD_READER_STATE's _eventState field is private (it is populated by P/Invoke from
+        /// the unmanaged WinSCard / pcscd layer). For testing we mutate it via reflection — the
+        /// cleanest alternative would be a SetStateForTesting helper on the struct itself, but
+        /// that pollutes the production type with a test-only seam. Reflection is contained to
+        /// this single helper.
+        /// </remarks>
+        private static void SetPnpReaderChangedFlag(SCARD_READER_STATE[] states)
+        {
+            if (states.Length == 0)
+            {
+                return;
+            }
+
+            FieldInfo eventStateField = typeof(SCARD_READER_STATE).GetField(
+                "_eventState",
+                BindingFlags.Instance | BindingFlags.NonPublic)
+                ?? throw new InvalidOperationException("SCARD_READER_STATE._eventState field not found.");
+
+            // Box, mutate, unbox-back. Necessary because SCARD_READER_STATE is a value type and
+            // FieldInfo.SetValue on a struct array element requires going through a boxed copy.
+            object boxed = states[0];
+            eventStateField.SetValue(boxed, (uint)SCARD_STATE.CHANGED);
+            states[0] = (SCARD_READER_STATE)boxed;
+        }
+
         // ─────────────────────────────────────────────────────────────────────────────────────────
         // Test double
         // ─────────────────────────────────────────────────────────────────────────────────────────
@@ -359,6 +443,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             private readonly Queue<uint> _scheduledResults;
             private readonly bool _establishContextFailAfterFirstCall;
             private readonly bool _throwOnGetStatusChangeAfterProbe;
+            private readonly Action<SCARD_READER_STATE[]>? _stateApplier;
 
             private int _establishContextCallCount;
             private int _getStatusChangeCallCount;
@@ -391,12 +476,20 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             ///   InvalidOperationException to simulate a managed exception escaping into
             ///   ListenForReaderChanges' catch block. Subsequent calls behave normally.
             /// </param>
+            /// <param name="stateApplier">
+            ///   Optional callback invoked on every post-probe GetStatusChange call. The callback
+            ///   receives the listener's <c>newStates</c> array (as cloned from <c>_readerStates</c>)
+            ///   and may mutate it in place to simulate WinSCard / pcscd populating reader state
+            ///   flags (e.g. <c>SCARD_STATE.CHANGED</c>) before returning. Required for tests that
+            ///   need to exercise the state-comparison paths inside <c>CheckForUpdates</c>.
+            /// </param>
             public FakeSCardInterop(
                 uint probeResult = ErrorCode.SCARD_E_TIMEOUT,
                 uint defaultResult = ErrorCode.SCARD_E_TIMEOUT,
                 uint[]? scheduledResults = null,
                 bool establishContextFailAfterFirstCall = false,
-                bool throwOnGetStatusChangeAfterProbe = false)
+                bool throwOnGetStatusChangeAfterProbe = false,
+                Action<SCARD_READER_STATE[]>? stateApplier = null)
             {
                 _probeResult = probeResult;
                 _defaultResult = defaultResult;
@@ -405,6 +498,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
                     : new Queue<uint>(scheduledResults);
                 _establishContextFailAfterFirstCall = establishContextFailAfterFirstCall;
                 _throwOnGetStatusChangeAfterProbe = throwOnGetStatusChangeAfterProbe;
+                _stateApplier = stateApplier;
             }
 
             public uint EstablishContext(SCARD_SCOPE scope, out SCardContext context)
@@ -437,6 +531,10 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
                 {
                     throw new InvalidOperationException("Simulated managed exception in GetStatusChange.");
                 }
+
+                // Allow tests to mutate the reader state in place before returning, mirroring how
+                // real WinSCard / pcscd populates _eventState during a successful poll.
+                _stateApplier?.Invoke(states);
 
                 lock (_scheduledResults)
                 {

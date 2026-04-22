@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -25,14 +26,24 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions;
 
 public class ExtensionPipelineTests
 {
+    private static RegistrationOptions CreateMockOptions() =>
+        new()
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
+            User = new WebAuthnUser { Id = RandomNumberGenerator.GetBytes(16), Name = "user", DisplayName = "User" },
+            PubKeyCredParams = [CoseAlgorithm.Es256]
+        };
+
     [Fact]
     public void BuildRegistrationExtensionsCbor_NoExtensions_ReturnsNull()
     {
         // Arrange - No extensions
         RegistrationExtensionInputs? inputs = null;
+        var options = CreateMockOptions();
 
         // Act
-        var result = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs);
+        var result = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs, options);
 
         // Assert
         Assert.Null(result);
@@ -44,9 +55,10 @@ public class ExtensionPipelineTests
         // Arrange
         var inputs = new RegistrationExtensionInputs(
             CredProtect: new CredProtectInput(CredProtectPolicy.UserVerificationRequired));
+        var options = CreateMockOptions();
 
         // Act
-        var cborBytes = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs);
+        var cborBytes = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs, options);
 
         // Assert
         Assert.NotNull(cborBytes);
@@ -71,9 +83,10 @@ public class ExtensionPipelineTests
         var blobData = new byte[] { 0x01, 0x02, 0x03, 0x04 };
         var inputs = new RegistrationExtensionInputs(
             CredBlob: new WebAuthn.Extensions.Inputs.CredBlobInput(blobData));
+        var options = CreateMockOptions();
 
         // Act
-        var cborBytes = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs);
+        var cborBytes = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs, options);
 
         // Assert
         Assert.NotNull(cborBytes);

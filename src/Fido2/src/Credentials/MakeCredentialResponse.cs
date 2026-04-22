@@ -73,6 +73,16 @@ public sealed class MakeCredentialResponse
     /// Gets the CBOR-encoded extension outputs, if any.
     /// </summary>
     public ReadOnlyMemory<byte>? ExtensionOutputs { get; }
+
+    /// <summary>
+    /// Gets the unsigned extension outputs map (CTAP v4 key 8).
+    /// </summary>
+    /// <remarks>
+    /// Per CTAP draft, unsigned extension outputs is a map keyed by extension
+    /// identifier (text string) with values as raw CBOR bytes. Used by extensions
+    /// like previewSign to deliver attestation objects via top-level response.
+    /// </remarks>
+    public IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? UnsignedExtensionOutputs { get; }
     
     private MakeCredentialResponse(
         string format,
@@ -81,7 +91,8 @@ public sealed class MakeCredentialResponse
         AttestationStatement attestationStatement,
         bool? enterpriseAttestation,
         ReadOnlyMemory<byte>? largeBlobKey,
-        ReadOnlyMemory<byte>? extensionOutputs)
+        ReadOnlyMemory<byte>? extensionOutputs,
+        IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs)
     {
         Format = format;
         AuthenticatorData = authenticatorData;
@@ -90,6 +101,7 @@ public sealed class MakeCredentialResponse
         EnterpriseAttestation = enterpriseAttestation;
         LargeBlobKey = largeBlobKey;
         ExtensionOutputs = extensionOutputs;
+        UnsignedExtensionOutputs = unsignedExtensionOutputs;
     }
     
     /// <summary>
@@ -127,6 +139,7 @@ public sealed class MakeCredentialResponse
         bool? epAtt = null;
         byte[]? largeBlobKey = null;
         ReadOnlyMemory<byte>? extensionOutputs = null;
+        Dictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs = null;
 
         // Track offset for raw CBOR capture
         int attStmtOffset = -1;
@@ -173,6 +186,27 @@ public sealed class MakeCredentialResponse
                 case 5: // largeBlobKey
                     largeBlobKey = reader.ReadByteString();
                     break;
+                case 8: // unsignedExtensionOutputs (CTAP v4 draft)
+                    unsignedExtensionOutputs = new Dictionary<string, ReadOnlyMemory<byte>>();
+                    int? extMapSize = reader.ReadStartMap();
+                    for (int j = 0; j < extMapSize; j++)
+                    {
+                        string extId = reader.ReadTextString();
+
+                        // Capture the raw CBOR value bytes
+                        int bytesRemainingBefore = reader.BytesRemaining;
+                        reader.SkipValue();
+                        int bytesConsumed = bytesRemainingBefore - reader.BytesRemaining;
+
+                        // Extract the value from fullCbor if available
+                        if (fullCbor.HasValue)
+                        {
+                            int valueOffset = fullCbor.Value.Length - bytesRemainingBefore;
+                            unsignedExtensionOutputs[extId] = fullCbor.Value.Slice(valueOffset, bytesConsumed);
+                        }
+                    }
+                    reader.ReadEndMap();
+                    break;
                 default:
                     reader.SkipValue();
                     break;
@@ -200,7 +234,8 @@ public sealed class MakeCredentialResponse
             attStmt,
             epAtt,
             largeBlobKey,
-            extensionOutputs);
+            extensionOutputs,
+            unsignedExtensionOutputs);
     }
     
     /// <summary>

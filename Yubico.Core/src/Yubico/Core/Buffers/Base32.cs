@@ -1,4 +1,4 @@
-﻿// Copyright 2025 Yubico AB
+﻿// Copyright 2026 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -200,7 +200,7 @@ namespace Yubico.Core.Buffers
             int length = encoded.Length;
             if (length > 0)
             {
-                while (encoded[length - 1] == '=')
+                while (length > 0 && encoded[length - 1] == '=')
                 {
                     --length;
                 }

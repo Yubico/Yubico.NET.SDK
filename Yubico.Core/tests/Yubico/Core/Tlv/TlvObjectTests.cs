@@ -1,4 +1,4 @@
-﻿// Copyright 2025 Yubico AB
+﻿// Copyright 2026 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -184,6 +184,31 @@ namespace Yubico.Core.Tlv.UnitTests
             var input = new byte[] { 0x01, 0x00 };
             var result = TlvObjects.UnpackValue(0x01, input);
             Assert.Empty(result.ToArray());
+        }
+
+        [Fact]
+        public void Parse_IndefiniteLengthByte_ThrowsTlvException()
+        {
+            // Tag 0x01 followed by length byte 0x80 (BER-TLV indefinite length form).
+            // TlvObject only supports determinate lengths, so this must be rejected.
+            var input = new byte[] { 0x01, 0x80, 0x00, 0x00 };
+            Assert.Throws<TlvException>(() => TlvObject.Parse(input));
+        }
+
+        [Fact]
+        public void Parse_MultiByteLengthTooManyOctets_ThrowsTlvException()
+        {
+            // Tag 0x01 followed by 0x85 (5 length octets), which exceeds the 4-octet cap.
+            var input = new byte[] { 0x01, 0x85, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            Assert.Throws<TlvException>(() => TlvObject.Parse(input));
+        }
+
+        [Fact]
+        public void Parse_TruncatedValue_ThrowsTlvException()
+        {
+            // Tag 0x01, length 0x05, but only 2 bytes of value data provided.
+            var input = new byte[] { 0x01, 0x05, 0xAA, 0xBB };
+            Assert.Throws<TlvException>(() => TlvObject.Parse(input));
         }
     }
 }

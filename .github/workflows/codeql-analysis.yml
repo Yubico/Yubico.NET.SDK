@@ -67,10 +67,10 @@ jobs:
       # Setup .NET with authenticated NuGet source
       - name: Setup .NET
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7  # v5.2.0
-        with:
-          source-url: https://nuget.pkg.github.com/Yubico/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Register GitHub Packages NuGet source
+        run: |
+          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL

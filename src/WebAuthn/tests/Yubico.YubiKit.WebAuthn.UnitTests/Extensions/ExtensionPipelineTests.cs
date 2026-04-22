@@ -20,6 +20,7 @@ using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
+using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 using Yubico.YubiKit.WebAuthn.Preferences;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions;
@@ -144,6 +145,46 @@ public class ExtensionPipelineTests
         Assert.NotNull(result);
         Assert.NotNull(result.CredProps);
         Assert.True(result.CredProps.ResidentKey); // Required → true
+    }
+
+    [Fact(Timeout = 5000)]
+    public void BuildRegistrationExtensionsCbor_PreviewSignWithMultipleStandardExtensions_ProducesCtap2CanonicalOrder()
+    {
+        // Arrange - combine previewSign with standard extensions that have different lengths
+        var inputs = new RegistrationExtensionInputs(
+            CredProtect: new CredProtectInput(CredProtectPolicy.UserVerificationRequired), // length 11
+            CredBlob: new WebAuthn.Extensions.Inputs.CredBlobInput([0x01, 0x02]), // length 8
+            PreviewSign: new PreviewSignRegistrationInput(
+                Algorithms: [CoseAlgorithm.Es256SplitArkgPlaceholder],
+                Flags: PreviewSignFlags.RequireUserVerification)); // length 11
+        var options = CreateMockOptions();
+        options.UserVerification = UserVerificationPreference.Required;
+
+        // Act
+        var cborBytes = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs, options);
+
+        // Assert - Verify CBOR doesn't throw when encoding (canonical mode validates order)
+        Assert.NotNull(cborBytes);
+
+        // Decode and verify CTAP2 canonical order: length-ascending, then lex within same-length
+        var reader = new CborReader(cborBytes.Value, CborConformanceMode.Ctap2Canonical);
+        int? mapLength = reader.ReadStartMap();
+        Assert.NotNull(mapLength);
+        Assert.Equal(3, mapLength.Value); // credBlob + credProtect + previewSign
+
+        // Expected order: credBlob(8), credProtect(11), previewSign(11)
+        var key1 = reader.ReadTextString();
+        Assert.Equal("credBlob", key1); // length 8 comes first
+
+        reader.SkipValue(); // skip credBlob value
+
+        var key2 = reader.ReadTextString();
+        Assert.Equal("credProtect", key2); // length 11, lex before previewSign
+
+        reader.SkipValue(); // skip credProtect value
+
+        var key3 = reader.ReadTextString();
+        Assert.Equal("previewSign", key3); // length 11, lex after credProtect
     }
 
     private static WebAuthnAuthenticatorData CreateMockAuthenticatorData()

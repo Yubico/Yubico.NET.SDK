@@ -135,29 +135,21 @@ internal sealed class ExtensionPipeline
                 standardEntries.Add((key, value));
             }
 
-            // Write merged map with previewSign inserted in sorted order
+            // Merge standard entries + previewSign, sort by CTAP2 canonical (length-then-lex)
+            var allEntries = new List<KeyValuePair<string, ReadOnlyMemory<byte>>>(standardEntries.Count + 1);
+            allEntries.AddRange(standardEntries.Select(t => new KeyValuePair<string, ReadOnlyMemory<byte>>(t.key, t.value)));
+            allEntries.Add(new KeyValuePair<string, ReadOnlyMemory<byte>>("previewSign", previewSignCbor.Value));
+
+            allEntries.Sort((a, b) => Ctap2CanonicalKeyComparer.Instance.Compare(a.Key, b.Key));
+
+            // Write canonically-ordered map
             var mergedWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
-            mergedWriter.WriteStartMap(standardEntries.Count + 1);
+            mergedWriter.WriteStartMap(allEntries.Count);
 
-            bool previewSignWritten = false;
-            foreach (var (key, value) in standardEntries)
+            foreach (var (key, value) in allEntries)
             {
-                // Canonical sort: "previewSign" comes after "prf" but before others alphabetically
-                if (!previewSignWritten && string.CompareOrdinal(key, "previewSign") > 0)
-                {
-                    mergedWriter.WriteTextString("previewSign");
-                    mergedWriter.WriteEncodedValue(previewSignCbor);
-                    previewSignWritten = true;
-                }
-
                 mergedWriter.WriteTextString(key);
                 mergedWriter.WriteEncodedValue(value.Span);
-            }
-
-            if (!previewSignWritten)
-            {
-                mergedWriter.WriteTextString("previewSign");
-                mergedWriter.WriteEncodedValue(previewSignCbor);
             }
 
             mergedWriter.WriteEndMap();
@@ -256,29 +248,21 @@ internal sealed class ExtensionPipeline
                 standardEntries.Add((key, value));
             }
 
-            // Write merged map with previewSign inserted in sorted order
+            // Merge standard entries + previewSign, sort by CTAP2 canonical (length-then-lex)
+            var allEntries = new List<KeyValuePair<string, ReadOnlyMemory<byte>>>(standardEntries.Count + 1);
+            allEntries.AddRange(standardEntries.Select(t => new KeyValuePair<string, ReadOnlyMemory<byte>>(t.key, t.value)));
+            allEntries.Add(new KeyValuePair<string, ReadOnlyMemory<byte>>("previewSign", previewSignCbor.Value));
+
+            allEntries.Sort((a, b) => Ctap2CanonicalKeyComparer.Instance.Compare(a.Key, b.Key));
+
+            // Write canonically-ordered map
             var mergedWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
-            mergedWriter.WriteStartMap(standardEntries.Count + 1);
+            mergedWriter.WriteStartMap(allEntries.Count);
 
-            bool previewSignWritten = false;
-            foreach (var (key, value) in standardEntries)
+            foreach (var (key, value) in allEntries)
             {
-                // Canonical sort: "previewSign" comes after "prf" but before others alphabetically
-                if (!previewSignWritten && string.CompareOrdinal(key, "previewSign") > 0)
-                {
-                    mergedWriter.WriteTextString("previewSign");
-                    mergedWriter.WriteEncodedValue(previewSignCbor);
-                    previewSignWritten = true;
-                }
-
                 mergedWriter.WriteTextString(key);
                 mergedWriter.WriteEncodedValue(value.Span);
-            }
-
-            if (!previewSignWritten)
-            {
-                mergedWriter.WriteTextString("previewSign");
-                mergedWriter.WriteEncodedValue(previewSignCbor);
             }
 
             mergedWriter.WriteEndMap();
@@ -497,5 +481,35 @@ internal sealed class ExtensionPipeline
             LargeBlob: largeBlob,
             Prf: prf,
             PreviewSign: previewSign);
+    }
+}
+
+/// <summary>
+/// Comparer for CTAP2 canonical key ordering (length-ascending, then lexicographic).
+/// </summary>
+internal sealed class Ctap2CanonicalKeyComparer : IComparer<string>
+{
+    public static readonly Ctap2CanonicalKeyComparer Instance = new();
+
+    private Ctap2CanonicalKeyComparer() { }
+
+    public int Compare(string? a, string? b)
+    {
+        if (ReferenceEquals(a, b))
+        {
+            return 0;
+        }
+        if (a is null)
+        {
+            return -1;
+        }
+        if (b is null)
+        {
+            return 1;
+        }
+
+        // CTAP2 canonical: length first, then lexicographic
+        int lengthDiff = a.Length - b.Length;
+        return lengthDiff != 0 ? lengthDiff : string.CompareOrdinal(a, b);
     }
 }

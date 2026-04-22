@@ -170,20 +170,56 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
     }
 
     /// <inheritdoc/>
-    public Task<GetAssertionResponse> GetAssertionAsync(
+    public async Task<GetAssertionResponse> GetAssertionAsync(
         BackendGetAssertionRequest request,
         IProgress<CtapStatus>? progress,
         CancellationToken cancellationToken)
     {
-        // Phase 4 implementation
-        throw new NotImplementedException("GetAssertion is implemented in Phase 4");
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        ArgumentNullException.ThrowIfNull(request);
+
+        // Build options
+        var options = new GetAssertionOptions();
+
+        // Map allow list if provided
+        if (request.AllowList is not null && request.AllowList.Count > 0)
+        {
+            options.AllowList = request.AllowList;
+        }
+
+        // Set user verification option
+        if (request.Options?.TryGetValue("uv", out var uv) == true)
+        {
+            options.UserVerification = uv;
+        }
+
+        // Add PIN/UV auth if provided
+        if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
+        {
+            options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();
+            options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
+        }
+
+        // Extensions passthrough (opaque for Phase 4)
+        if (request.Extensions is not null)
+        {
+            // Extensions will be fully wired in Phase 6
+        }
+
+        return await _session.GetAssertionAsync(
+            request.RpId,
+            request.ClientDataHash,
+            options,
+            cancellationToken);
     }
 
     /// <inheritdoc/>
-    public Task<GetAssertionResponse> GetNextAssertionAsync(CancellationToken cancellationToken)
+    public async Task<GetAssertionResponse> GetNextAssertionAsync(CancellationToken cancellationToken)
     {
-        // Phase 4 implementation
-        throw new NotImplementedException("GetNextAssertion is implemented in Phase 4");
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        return await _session.GetNextAssertionAsync(cancellationToken);
     }
 
     /// <inheritdoc/>

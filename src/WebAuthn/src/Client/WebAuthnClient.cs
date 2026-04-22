@@ -417,7 +417,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
         {
             if (pinOwner is not null)
             {
-                CryptographicOperations.ZeroMemory(pinOwner.Memory.Span[..pinByteCount]);
+                // Zero entire rented buffer for defense-in-depth even though only [..pinByteCount] was written.
+                CryptographicOperations.ZeroMemory(pinOwner.Memory.Span);
                 pinOwner.Dispose();
             }
         }
@@ -490,7 +491,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
         {
             if (pinOwner is not null)
             {
-                CryptographicOperations.ZeroMemory(pinOwner.Memory.Span[..pinByteCount]);
+                // Zero entire rented buffer for defense-in-depth even though only [..pinByteCount] was written.
+                CryptographicOperations.ZeroMemory(pinOwner.Memory.Span);
                 pinOwner.Dispose();
             }
         }

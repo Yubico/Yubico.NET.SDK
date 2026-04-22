@@ -55,6 +55,14 @@ internal static class PrfAdapter
 
             if (filteredEvals.Any())
             {
+                // CTAP only supports a single salt pair per request
+                if (filteredEvals.Count > 1)
+                {
+                    throw new Client.WebAuthnClientError(
+                        Client.WebAuthnClientErrorCode.NotSupported,
+                        "PRF evalByCredential matched multiple credentials in allowList; CTAP supports only a single salt pair per request. Scope your allow list or use 'eval' instead.");
+                }
+
                 // Use the first matching credential's evaluation
                 var firstEval = filteredEvals.First().Value;
                 var prfInput = new Fido2.Extensions.PrfInput

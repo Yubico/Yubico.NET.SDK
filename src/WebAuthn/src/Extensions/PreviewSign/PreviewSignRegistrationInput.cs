@@ -42,21 +42,54 @@ public sealed record class PreviewSignRegistrationInput
     /// <summary>
     /// Gets the user presence and verification policy for signing operations.
     /// </summary>
-    public PreviewSignFlags Flags { get; }
+    /// <remarks>
+    /// NOTE: Per WebAuthn previewSign spec §10.2.1 step 4, flags are derived from
+    /// RegistrationOptions.UserVerification and SHOULD NOT be user-controllable at the
+    /// WebAuthn client layer. This field is internal and set by the adapter based on UV preference.
+    /// </remarks>
+    internal PreviewSignFlags Flags { get; init; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="PreviewSignRegistrationInput"/>.
     /// </summary>
     /// <param name="algorithms">Ordered list of acceptable COSE algorithms.</param>
-    /// <param name="flags">User presence/verification policy.</param>
     /// <exception cref="WebAuthnClientError">
-    /// Thrown when:
-    /// - Algorithms list is empty (InvalidRequest)
-    /// - Flags value is not one of the three valid patterns (InvalidRequest)
+    /// Thrown when algorithms list is empty (InvalidRequest).
     /// </exception>
-    public PreviewSignRegistrationInput(
+    /// <remarks>
+    /// Flags are derived from RegistrationOptions.UserVerification per spec and are not
+    /// user-controllable at this layer.
+    /// </remarks>
+    public PreviewSignRegistrationInput(IReadOnlyList<CoseAlgorithm> algorithms)
+    {
+        if (algorithms.Count == 0)
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidRequest,
+                "previewSign requires at least one algorithm");
+        }
+
+        Algorithms = algorithms;
+        Flags = PreviewSignFlags.RequireUserPresence; // Default, overridden by adapter
+    }
+
+    /// <summary>
+    /// Creates a registration input for generating a new signing key.
+    /// </summary>
+    /// <param name="algorithms">Ordered list of acceptable algorithms.</param>
+    /// <returns>A <see cref="PreviewSignRegistrationInput"/> with default flags (RequireUserPresence).</returns>
+    /// <remarks>
+    /// This factory method provides parity with Swift's <c>PreviewSign.Registration.Input.generateKey(algorithms:)</c>.
+    /// </remarks>
+    public static PreviewSignRegistrationInput GenerateKey(params CoseAlgorithm[] algorithms) =>
+        new(algorithms);
+
+    /// <summary>
+    /// Internal test helper to create input with explicit flags for encoder testing.
+    /// </summary>
+    internal static PreviewSignRegistrationInput WithFlags(
         IReadOnlyList<CoseAlgorithm> algorithms,
-        PreviewSignFlags flags = PreviewSignFlags.RequireUserPresence)
+        PreviewSignFlags flags)
     {
         if (algorithms.Count == 0)
         {
@@ -72,18 +105,6 @@ public sealed record class PreviewSignRegistrationInput
                 "Invalid previewSign flags value");
         }
 
-        Algorithms = algorithms;
-        Flags = flags;
+        return new PreviewSignRegistrationInput(algorithms) { Flags = flags };
     }
-
-    /// <summary>
-    /// Creates a registration input for generating a new signing key.
-    /// </summary>
-    /// <param name="algorithms">Ordered list of acceptable algorithms.</param>
-    /// <returns>A <see cref="PreviewSignRegistrationInput"/> with default flags (RequireUserPresence).</returns>
-    /// <remarks>
-    /// This factory method provides parity with Swift's <c>PreviewSign.Registration.Input.generateKey(algorithms:)</c>.
-    /// </remarks>
-    public static PreviewSignRegistrationInput GenerateKey(params CoseAlgorithm[] algorithms) =>
-        new(algorithms);
 }

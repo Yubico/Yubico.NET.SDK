@@ -54,7 +54,7 @@ public class PreviewSignCborTests
     {
         // Arrange
         var algorithms = new[] { CoseAlgorithm.Es256, CoseAlgorithm.Esp256 };
-        var input = new PreviewSignRegistrationInput(algorithms, PreviewSignFlags.RequireUserPresence);
+        var input = PreviewSignRegistrationInput.WithFlags(algorithms, PreviewSignFlags.RequireUserPresence);
 
         // Act
         byte[] encoded = PreviewSignCbor.EncodeRegistrationInput(input);
@@ -266,7 +266,7 @@ public class PreviewSignCborTests
 
         // Act & Assert
         var ex = Assert.Throws<WebAuthnClientError>(() =>
-            new PreviewSignRegistrationInput(algorithms, invalidFlags));
+            PreviewSignRegistrationInput.WithFlags(algorithms, invalidFlags));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
         Assert.Contains("Invalid previewSign flags", ex.Message);
@@ -280,7 +280,7 @@ public class PreviewSignCborTests
 
         // Act & Assert
         var ex = Assert.Throws<WebAuthnClientError>(() =>
-            new PreviewSignRegistrationInput(emptyAlgorithms, PreviewSignFlags.RequireUserPresence));
+            new PreviewSignRegistrationInput(emptyAlgorithms));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
         Assert.Contains("at least one algorithm", ex.Message);

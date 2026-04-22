@@ -69,32 +69,15 @@ internal static class PreviewSignAdapter
             return null;
         }
 
-        // Resolve effective flags per spec §8 UV preference rule
-        var effectiveFlags = input.Flags;
+        // Derive flags from UserVerification per spec §10.2.1 step 4 (line 4962):
+        // "The CDDL value 0b101 if pkOptions.authenticatorSelection.userVerification is
+        // set to required, otherwise the CDDL value 0b001."
+        var resolvedFlags = options.UserVerification == UserVerificationPreference.Required
+            ? PreviewSignFlags.RequireUserVerification
+            : PreviewSignFlags.RequireUserPresence;
 
-        if (options.UserVerification == UserVerificationPreference.Required)
-        {
-            // UV is required — flags MUST include UV bit
-            if (input.Flags == PreviewSignFlags.RequireUserPresence)
-            {
-                // User didn't specify explicit flags (used default) — promote to UV
-                effectiveFlags = PreviewSignFlags.RequireUserVerification;
-            }
-            else if (input.Flags != PreviewSignFlags.RequireUserVerification)
-            {
-                // User explicitly requested incompatible flags (e.g., Unattended)
-                throw new WebAuthnClientError(
-                    WebAuthnClientErrorCode.InvalidRequest,
-                    "previewSign Flags conflict with UserVerification preference: " +
-                    $"UserVerification=Required but Flags={input.Flags}");
-            }
-            // else: user explicitly requested RequireUserVerification — use as-is
-        }
-
-        // Build CBOR input with resolved flags
-        var resolvedInput = new PreviewSignRegistrationInput(
-            algorithms: input.Algorithms,
-            flags: effectiveFlags);
+        // Build CBOR input with derived flags
+        var resolvedInput = input with { Flags = resolvedFlags };
 
         return PreviewSignCbor.EncodeRegistrationInput(resolvedInput);
     }

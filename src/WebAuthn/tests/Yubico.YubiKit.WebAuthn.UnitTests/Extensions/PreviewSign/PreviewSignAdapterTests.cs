@@ -29,70 +29,51 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
 public class PreviewSignAdapterTests
 {
     [Fact(Timeout = 5000)]
-    public void PreviewSign_Registration_BuildsCtapInput_FromAlgorithms_AndUvPreferencePromotion()
+    public void PreviewSign_Registration_DerivesFlagsFromUserVerificationPreference()
     {
-        // Arrange - default flags (RequireUserPresence) + UV Required preference
+        // Arrange - flags are derived from UserVerification, not user-controllable
         var input = new PreviewSignRegistrationInput(
-            algorithms: [CoseAlgorithm.Es256, CoseAlgorithm.EdDsa],
-            flags: PreviewSignFlags.RequireUserPresence);  // Default
+            algorithms: [CoseAlgorithm.Es256, CoseAlgorithm.EdDsa]);
 
-        var options = new RegistrationOptions
+        var optionsUvRequired = new RegistrationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
             User = new WebAuthnUser { Id = RandomNumberGenerator.GetBytes(16), Name = "user@example.com", DisplayName = "User" },
             PubKeyCredParams = [CoseAlgorithm.Es256],
-            UserVerification = UserVerificationPreference.Required  // UV promotion trigger
+            UserVerification = UserVerificationPreference.Required
         };
 
-        // Act - build CBOR with UV promotion
-        var cbor = PreviewSignAdapter.BuildRegistrationCbor(input, options);
+        var optionsUvNotRequired = optionsUvRequired with
+        {
+            UserVerification = UserVerificationPreference.Preferred
+        };
 
-        // Assert - flags should be promoted to RequireUserVerification (0b101 = 5)
-        Assert.NotNull(cbor);
+        // Act
+        var cborUvRequired = PreviewSignAdapter.BuildRegistrationCbor(input, optionsUvRequired);
+        var cborUvNotRequired = PreviewSignAdapter.BuildRegistrationCbor(input, optionsUvNotRequired);
 
-        var reader = new CborReader(cbor, CborConformanceMode.Ctap2Canonical);
-        int? mapSize = reader.ReadStartMap();
-        Assert.Equal(2, mapSize);
+        // Assert - UV=Required → flags=0b101, otherwise → flags=0b001
+        Assert.NotNull(cborUvRequired);
+        Assert.NotNull(cborUvNotRequired);
 
-        // Read key 3: algorithms
-        Assert.Equal(3, reader.ReadInt32());
-        int? algArraySize = reader.ReadStartArray();
-        Assert.Equal(2, algArraySize);
-        Assert.Equal(-7, reader.ReadInt32());  // ES256
-        Assert.Equal(-8, reader.ReadInt32());  // EdDSA
-        reader.ReadEndArray();
-
-        // Read key 4: flags (promoted to 0b101)
-        Assert.Equal(4, reader.ReadInt32());
-        Assert.Equal(5, reader.ReadInt32());  // 0b101 = RequireUserVerification
-
+        // Read UV=Required case
+        var reader = new CborReader(cborUvRequired, CborConformanceMode.Ctap2Canonical);
+        reader.ReadStartMap();
+        reader.ReadInt32(); // key 3
+        reader.SkipValue(); // algorithms array
+        Assert.Equal(4, reader.ReadInt32()); // key 4
+        Assert.Equal(5, reader.ReadInt32()); // 0b101 = RequireUserVerification
         reader.ReadEndMap();
-    }
 
-    [Fact(Timeout = 5000)]
-    public void PreviewSign_Registration_FlagsConflict_ThrowsInvalidRequest()
-    {
-        // Arrange - explicit Unattended flags + UV Required preference → contradiction
-        var input = new PreviewSignRegistrationInput(
-            algorithms: [CoseAlgorithm.Es256],
-            flags: PreviewSignFlags.Unattended);  // Explicitly requested no UP/UV
-
-        var options = new RegistrationOptions
-        {
-            Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
-            User = new WebAuthnUser { Id = RandomNumberGenerator.GetBytes(16), Name = "user@example.com", DisplayName = "User" },
-            PubKeyCredParams = [CoseAlgorithm.Es256],
-            UserVerification = UserVerificationPreference.Required  // Contradicts Unattended
-        };
-
-        // Act & Assert - should throw BEFORE any backend call
-        var ex = Assert.Throws<WebAuthnClientError>(() =>
-            PreviewSignAdapter.BuildRegistrationCbor(input, options));
-
-        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
-        Assert.Contains("Flags conflict", ex.Message);
+        // Read UV!=Required case
+        reader = new CborReader(cborUvNotRequired, CborConformanceMode.Ctap2Canonical);
+        reader.ReadStartMap();
+        reader.ReadInt32(); // key 3
+        reader.SkipValue(); // algorithms array
+        Assert.Equal(4, reader.ReadInt32()); // key 4
+        Assert.Equal(1, reader.ReadInt32()); // 0b001 = RequireUserPresence
+        reader.ReadEndMap();
     }
 
     [Fact(Timeout = 5000)]

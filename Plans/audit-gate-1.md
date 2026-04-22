@@ -267,3 +267,36 @@
   1. Fix H-3 (retry loop semantics) and add the deferred Phase 3 tests.
   2. Fix H-2 (link producer cancellation to iterator disposal).
   3. Add a single CBOR-error → WebAuthnClientError wrapper in ExtensionPipeline (kills M-1, M-2, M-3, L-7 in one stroke).
+
+## Resolutions
+
+**Gate 1 Fixup — Branch:** webauthn/gate-1-fixup
+
+| Finding | Status | Commit | Notes |
+|---------|--------|--------|-------|
+| H-1 PIN buffer zeroing | ✅ FIXED | 8e31e732 | Standardized on full rented-buffer zeroing |
+| H-2 Producer cancellation | ✅ FIXED | f7ae5cb1 | Linked iterator disposal to producer CTS |
+| H-3 Retry loop dead code | ✅ FIXED | 46e52334 | Removed retry loop; throw NotSupported |
+| H-4 CancellationToken ignored | ✅ FIXED | 897d97ec | Wire token via WaitAsync(ct) |
+| M-1 CBOR parse no guards | ✅ FIXED | 64006988 | Wrap all adapter parse in try/catch |
+| M-2 CredBlob length check | ✅ FIXED | 58e60248 | Validate 1-32 byte range |
+| M-3 CredProtect CBOR throw | ✅ FIXED | 64006988 | Same as M-1 |
+| M-4 PRF filter picks first | ✅ FIXED | 11088aed | Throw if count > 1 |
+| M-5 LargeBlob ignores Support | ✅ FIXED | 510ced7f | Throw NotSupported on Required |
+| M-6 LargeBlob empty CBOR | ✅ FIXED | 510ced7f | Throw NotSupported on auth use |
+| M-7 PinUvAuthParam ToArray | 🔴 DEFERRED | - | Out of audit scope; Fido2 API needs fix |
+| L-1 LoggingFactory missing | 🔴 DEFERRED | - | CLAUDE.md out of date; WebAuthn has no logging |
+| L-2 Aaguid byte[] in struct | ✅ FIXED | 1f78c46e | Added clarifying comment |
+| L-3 Aaguid SequenceEqual | ✅ PASS-AS-IS | - | Public identifier; not sensitive |
+| L-4 ExtensionPipeline internal | ✅ PASS-AS-IS | - | Design choice; integration tests cover |
+| L-5 PubKeyCredParams validation | 🔴 DEFERRED | - | Authenticator validates; not block-ship |
+| L-6 previousSession unused | 🔴 DEFERRED | - | Dead code; cosmetic noise |
+| L-7 InvalidOperationException | ✅ FIXED | 64006988 | Converted to WebAuthnClientError(InvalidState) |
+| L-8 Test PinUvAuthProtocolV2 | 🔴 DEFERRED | - | Test hygiene; not shipped code |
+| L-9 Base64Url allocations | 🔴 DEFERRED | - | Bounded impact; perf tuning deferred |
+
+**Summary:**
+- **Applied:** 10 fixes
+- **Deferred:** 5 items (M-7, L-1, L-5, L-6, L-8, L-9 — none block-ship)
+
+**Re-audit verdict:** 0 High remaining. Block-ship status: **CLEARED**.

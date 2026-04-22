@@ -1,6 +1,7 @@
 # CLAUDE.md
 
 This file provides guidance to AI agents when working with code in this repository.
+This is a complete rewrite of the .NET SDK in the `develop` and `main` branch. The root of the 2.0 version of this SDK is the `yubikit` branch.
 
 **IMPORTANT:** If you are working in a subproject directory (e.g., `src/SecurityDomain/`, `src/Piv/`, etc.), you MUST also read that subproject's `CLAUDE.md` file if it exists. Subproject CLAUDE.md files contain specific patterns, test harness details, and context for that module.
 

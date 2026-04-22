@@ -71,7 +71,13 @@ internal static class CredBlobAdapter
         // Authentication returns byte string
         if (reader.PeekState() == CborReaderState.ByteString)
         {
-            return new Outputs.CredBlobAssertionOutput(reader.ReadByteString());
+            var blob = reader.ReadByteString();
+            // Per CTAP2.1, credBlob must be 1-32 bytes
+            if (blob.Length is < 1 or > 32)
+            {
+                return null;
+            }
+            return new Outputs.CredBlobAssertionOutput(blob);
         }
 
         return null;

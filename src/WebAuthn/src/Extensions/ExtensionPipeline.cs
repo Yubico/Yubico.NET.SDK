@@ -107,8 +107,10 @@ internal sealed class ExtensionPipeline
         // LargeBlob (read operations during assertion)
         if (inputs.LargeBlob is not null)
         {
-            // Phase 6 simplified scope - just signal support
-            hasExtensions = true;
+            // Phase 6 scope deferred - not yet fully implemented
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.NotSupported,
+                "LargeBlob authentication operations are not yet implemented (Phase 6 scope deferred). Upgrade SDK for full support.");
         }
 
         // PRF

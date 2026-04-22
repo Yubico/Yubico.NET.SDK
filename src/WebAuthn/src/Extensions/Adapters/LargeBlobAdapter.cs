@@ -29,6 +29,14 @@ internal static class LargeBlobAdapter
     /// </summary>
     public static void ApplyToBuilder(ExtensionBuilder builder, Inputs.LargeBlobInput input)
     {
+        // Check if Required enforcement was requested (not yet implemented)
+        if (input.Support == Inputs.LargeBlobSupport.Required)
+        {
+            throw new Client.WebAuthnClientError(
+                Client.WebAuthnClientErrorCode.NotSupported,
+                "LargeBlob support 'Required' enforcement is not yet implemented (Phase 6 scope deferred). Use 'Preferred' or upgrade SDK.");
+        }
+
         // For registration, signal largeBlobKey request
         builder.WithLargeBlobKey();
     }

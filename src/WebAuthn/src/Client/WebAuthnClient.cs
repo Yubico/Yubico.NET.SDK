@@ -48,8 +48,6 @@ public sealed class WebAuthnClient : IAsyncDisposable
     private readonly IReadOnlySet<string> _enterpriseRpIds;
     private bool _disposed;
 
-    private const int MaxPinAuthRetries = 3;
-
     /// <summary>
     /// Initializes a new instance of <see cref="WebAuthnClient"/>.
     /// </summary>
@@ -730,6 +728,21 @@ public sealed class WebAuthnClient : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Acquires a PIN/UV auth token from the backend.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// On PinAuthInvalid, this method throws immediately without retrying.
+    /// The original Swift retry was for transient encryption-state mismatches
+    /// that no longer apply in our current PinUvAuthProtocolV2 implementation.
+    /// Retrying with identical PIN bytes would burn YubiKey PIN attempts on wrong-PIN scenarios.
+    /// </para>
+    /// <para>
+    /// Callers experiencing PinAuthInvalid should re-invoke MakeCredentialAsync/GetAssertionAsync
+    /// with fresh PIN bytes (after re-prompting the user).
+    /// </para>
+    /// </remarks>
     private async Task<PinUvAuthTokenSession> AcquirePinUvTokenWithRetryAsync(
         PinUvAuthMethod method,
         PinUvAuthTokenPermissions permissions,
@@ -737,49 +750,27 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ReadOnlyMemory<byte>? pinBytes,
         CancellationToken cancellationToken)
     {
-        int attempt = 0;
-        PinUvAuthTokenSession? previousSession = null;
-
-        while (attempt < MaxPinAuthRetries)
+        try
         {
-            attempt++;
+            var session = await _backend.GetPinUvTokenAsync(
+                method,
+                permissions,
+                rpId,
+                pinBytes,
+                progress: null,
+                cancellationToken).ConfigureAwait(false);
 
-            try
-            {
-
-                var session = await _backend.GetPinUvTokenAsync(
-                    method,
-                    permissions,
-                    rpId,
-                    pinBytes,
-                    progress: null,
-                    cancellationToken).ConfigureAwait(false);
-
-                return session;
-            }
-            catch (CtapException ex) when (ex.Status == CtapStatus.PinAuthInvalid && attempt < MaxPinAuthRetries)
-            {
-
-                // Dispose the previous session (if any) to zero the token
-                previousSession?.Dispose();
-                previousSession = null;
-
-                // Continue to next attempt
-            }
-            catch (CtapException ex) when (ex.Status == CtapStatus.PinAuthInvalid)
-            {
-                // Max retries exhausted
-                throw new WebAuthnClientError(
-                    WebAuthnClientErrorCode.Security,
-                    $"PIN/UV authentication failed after {MaxPinAuthRetries} attempts",
-                    ex);
-            }
+            return session;
         }
-
-        // Should not reach here
-        throw new WebAuthnClientError(
-            WebAuthnClientErrorCode.Unknown,
-            "Unexpected state in PIN/UV token acquisition");
+        catch (CtapException ex) when (ex.Status == CtapStatus.PinAuthInvalid)
+        {
+            // Throw immediately - do NOT retry with the same PIN bytes.
+            // Retrying would burn PIN attempts on the hardware.
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.NotAllowed,
+                "PIN authentication failed",
+                ex);
+        }
     }
 
     private BackendMakeCredentialRequest BuildMakeCredentialRequest(

@@ -81,10 +81,7 @@ public sealed record class AuthenticationOptions
     public string? TopOrigin { get; init; }
 
     /// <summary>
-    /// Gets the raw extension inputs JSON.
+    /// Gets the WebAuthn extension inputs for this authentication.
     /// </summary>
-    /// <remarks>
-    /// Placeholder for Phase 6. Extension framework will replace this field.
-    /// </remarks>
-    public string? ExtensionsRaw { get; init; }
+    public WebAuthn.Extensions.AuthenticationExtensionInputs? Extensions { get; init; }
 }

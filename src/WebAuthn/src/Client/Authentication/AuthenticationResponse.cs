@@ -63,10 +63,7 @@ public sealed record class AuthenticationResponse
     public required WebAuthnClientData ClientData { get; init; }
 
     /// <summary>
-    /// Gets the extension outputs.
+    /// Gets the client extension results.
     /// </summary>
-    /// <remarks>
-    /// Placeholder for Phase 6. Extension framework will replace this field.
-    /// </remarks>
-    public object? ClientExtensionResults { get; init; }
+    public WebAuthn.Extensions.AuthenticationExtensionOutputs? ClientExtensionResults { get; init; }
 }

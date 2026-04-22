@@ -28,6 +28,7 @@ using Yubico.YubiKit.WebAuthn.Client.Status;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Client.Validation;
 using Yubico.YubiKit.WebAuthn.Cose;
+using Yubico.YubiKit.WebAuthn.Extensions;
 using Fido2AttestationStatement = Yubico.YubiKit.Fido2.Credentials.AttestationStatement;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
@@ -556,7 +557,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 .ConfigureAwait(false);
 
             // Build WebAuthn response
-            return BuildRegistrationResponse(ctapResponse, clientData);
+            return BuildRegistrationResponse(ctapResponse, clientData, options);
         }
         finally
         {
@@ -662,7 +663,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                     id: credId,
                     user: user,
                     requiresSelection: requiresSelection,
-                    responseFactory: _ => Task.FromResult(BuildAuthenticationResponse(response, clientData)));
+                    responseFactory: _ => Task.FromResult(BuildAuthenticationResponse(response, clientData, options)));
 
                 results.Add(matchedCred);
             }
@@ -811,6 +812,9 @@ public sealed class WebAuthnClient : IAsyncDisposable
             pinUvAuthProtocol = (byte)tokenSession.Protocol.Version;
         }
 
+        // Build extensions CBOR via pipeline
+        var extensionsCbor = ExtensionPipeline.BuildRegistrationExtensionsCbor(options.Extensions);
+
         return new BackendMakeCredentialRequest
         {
             ClientDataHash = clientData.Hash,
@@ -820,6 +824,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 .Select(alg => new PublicKeyCredentialParameters { Algorithm = (CoseAlgorithmIdentifier)alg.Value })
                 .ToList(),
             ExcludeList = options.ExcludeCredentials,
+            Extensions = extensionsCbor,
             Options = optionsDict.Count > 0 ? optionsDict : null,
             PinUvAuthParam = pinUvAuthParam,
             PinUvAuthProtocol = pinUvAuthProtocol
@@ -828,7 +833,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
     private RegistrationResponse BuildRegistrationResponse(
         MakeCredentialResponse ctapResponse,
-        WebAuthnClientData clientData)
+        WebAuthnClientData clientData,
+        RegistrationOptions options)
     {
         // Extract attested credential data from AuthenticatorData
         var attestedCred = ctapResponse.AuthenticatorData.AttestedCredentialData!;
@@ -853,6 +859,12 @@ public sealed class WebAuthnClient : IAsyncDisposable
         // Decode the raw bytes to create the WebAuthnAttestationObject
         var attestationObject = WebAuthnAttestationObject.Decode(rawAttestationObject);
 
+        // Parse extension outputs via pipeline
+        var extensionOutputs = ExtensionPipeline.ParseRegistrationOutputs(
+            options.Extensions,
+            webAuthnAuthData,
+            options);
+
         return new RegistrationResponse
         {
             CredentialId = attestedCred.CredentialId,
@@ -861,12 +873,12 @@ public sealed class WebAuthnClient : IAsyncDisposable
             AuthenticatorData = webAuthnAuthData,
             RawAuthenticatorData = ctapResponse.AuthenticatorDataRaw,
             AttestationStatement = webAuthnStatement,
-            Transports = null, // Phase 6
+            Transports = null, // TODO Phase 6+
             PublicKey = publicKey,
             Aaguid = new Aaguid(attestedCred.Aaguid),
             SignCount = ctapResponse.AuthenticatorData.SignCount,
             ClientData = clientData,
-            ClientExtensionResults = null // Phase 6
+            ClientExtensionResults = extensionOutputs
         };
     }
 
@@ -907,12 +919,17 @@ public sealed class WebAuthnClient : IAsyncDisposable
             pinUvAuthProtocol = (byte)tokenSession.Protocol.Version;
         }
 
+        // Build extensions CBOR via pipeline
+        var extensionsCbor = ExtensionPipeline.BuildAuthenticationExtensionsCbor(
+            options.Extensions,
+            options.AllowCredentials);
+
         return new BackendGetAssertionRequest
         {
             ClientDataHash = clientData.Hash,
             RpId = options.RpId,
             AllowList = allowList,
-            Extensions = null, // Phase 6
+            Extensions = extensionsCbor,
             Options = optionsDict.Count > 0 ? optionsDict : null,
             PinUvAuthParam = pinUvAuthParam,
             PinUvAuthProtocol = pinUvAuthProtocol
@@ -921,7 +938,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
     private static AuthenticationResponse BuildAuthenticationResponse(
         GetAssertionResponse ctapResponse,
-        WebAuthnClientData clientData)
+        WebAuthnClientData clientData,
+        AuthenticationOptions options)
     {
         // Wrap authenticator data
         var webAuthnAuthData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);
@@ -941,6 +959,11 @@ public sealed class WebAuthnClient : IAsyncDisposable
             };
         }
 
+        // Parse extension outputs via pipeline
+        var extensionOutputs = ExtensionPipeline.ParseAuthenticationOutputs(
+            options.Extensions,
+            webAuthnAuthData);
+
         return new AuthenticationResponse
         {
             CredentialId = credentialId,
@@ -950,7 +973,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
             User = user,
             SignCount = ctapResponse.AuthenticatorData.SignCount,
             ClientData = clientData,
-            ClientExtensionResults = null // Phase 6
+            ClientExtensionResults = extensionOutputs
         };
     }
 

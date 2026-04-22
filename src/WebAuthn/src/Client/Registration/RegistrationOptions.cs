@@ -68,9 +68,9 @@ public sealed record class RegistrationOptions
     public TimeSpan? Timeout { get; init; }
 
     /// <summary>
-    /// Gets the raw CBOR extensions map (opaque passthrough for Phase 3, typed in Phase 6).
+    /// Gets the WebAuthn extension inputs for this registration.
     /// </summary>
-    public string? ExtensionsRaw { get; init; }
+    public WebAuthn.Extensions.RegistrationExtensionInputs? Extensions { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether this is a cross-origin request.

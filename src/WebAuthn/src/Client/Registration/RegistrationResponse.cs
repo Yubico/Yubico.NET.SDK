@@ -78,7 +78,7 @@ public sealed record class RegistrationResponse
     public required WebAuthnClientData ClientData { get; init; }
 
     /// <summary>
-    /// Gets the client extension results (typed in Phase 6, placeholder for Phase 3).
+    /// Gets the client extension results.
     /// </summary>
-    public object? ClientExtensionResults { get; init; }
+    public WebAuthn.Extensions.RegistrationExtensionOutputs? ClientExtensionResults { get; init; }
 }

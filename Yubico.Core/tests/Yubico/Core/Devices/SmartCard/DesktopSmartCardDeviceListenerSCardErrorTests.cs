@@ -282,6 +282,67 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
                 DesktopSmartCardDeviceListener.CalculateRecoveryBackoff(attempts));
         }
 
+        // -----------------------------------------------------------------------------------------
+        // Internal feedback (PR #460) — SCARD_E_TIMEOUT must NOT trigger arrival/removal events
+        //
+        // Internal testers reported that after PR #445 + the recovery hardening stack landed,
+        // YubiKeyDeviceListener was reprocessing the device tree every ~3 seconds with no actual
+        // hardware change. Trace showed CheckForUpdates continuing past a SCARD_E_TIMEOUT result,
+        // comparing CurrentState vs EventState on a stale clone and firing spurious Arrived/Removed
+        // events. The fix returns immediately from the poll iteration on SCARD_E_TIMEOUT.
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenGetStatusChangeReturnsTimeout_NoArrivalOrRemovalEventsFire()
+        {
+            // Arrange: every poll returns SCARD_E_TIMEOUT (the normal "nothing happened" outcome).
+            var fake = new FakeSCardInterop(
+                probeResult: ErrorCode.SCARD_E_TIMEOUT,
+                defaultResult: ErrorCode.SCARD_E_TIMEOUT);
+
+            using var listener = new DesktopSmartCardDeviceListener(fake);
+
+            int arrivedCount = 0;
+            int removedCount = 0;
+            listener.Arrived += (_, _) => Interlocked.Increment(ref arrivedCount);
+            listener.Removed += (_, _) => Interlocked.Increment(ref removedCount);
+
+            // Act: observe across several poll iterations (each poll is 100 ms).
+            Thread.Sleep(600);
+
+            // Assert: timeouts must short-circuit before reaching DetectRelevantChanges/FireEvents.
+            Assert.Equal(0, Volatile.Read(ref arrivedCount));
+            Assert.Equal(0, Volatile.Read(ref removedCount));
+        }
+
+        // -----------------------------------------------------------------------------------------
+        // Internal feedback (PR #460) — SCARD_E_TIMEOUT still resets recovery health
+        //
+        // A SCARD_E_TIMEOUT proves the syscall path is healthy (the timeout fired naturally), so
+        // the early-return path must still clear DeviceListenerStatus.Error and reset the
+        // exponential-backoff counter — same as the SCARD_S_SUCCESS path at the end of CheckForUpdates.
+        // Without this, Step 1's Status-reset and Step 4's backoff-reset are skipped whenever
+        // recovery happens to be followed by quiet polling (the common case).
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenPollTimesOutAfterManagedException_StatusResetsToStarted()
+        {
+            // Arrange: probe -> TIMEOUT (no PnP workaround). First post-probe poll throws,
+            // flipping Status to Error. Subsequent polls return TIMEOUT (the realistic quiet case).
+            var fake = new FakeSCardInterop(
+                probeResult: ErrorCode.SCARD_E_TIMEOUT,
+                defaultResult: ErrorCode.SCARD_E_TIMEOUT,
+                throwOnGetStatusChangeAfterProbe: true);
+
+            using var listener = new DesktopSmartCardDeviceListener(fake);
+
+            // Wait long enough for: probe + throw (Status=Error) + 1000ms sleep + several timeout polls.
+            Thread.Sleep(1500);
+
+            Assert.Equal(DeviceListenerStatus.Started, listener.Status);
+        }
+
         // ─────────────────────────────────────────────────────────────────────────────────────────
         // Test double
         // ─────────────────────────────────────────────────────────────────────────────────────────

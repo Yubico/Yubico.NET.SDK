@@ -239,9 +239,16 @@ namespace Yubico.Core.Devices.SmartCard
             }
 
             // Timeout is normal polling behavior - nothing changed, so return immediately
-            // without further processing that could trigger spurious events
+            // without further processing that could trigger spurious events.
+            // A timeout still proves the syscall path is healthy, so reset the recovery
+            // counter and clear the Error status (mirrors the success-path reset below).
             if (getStatusChangeResult == ErrorCode.SCARD_E_TIMEOUT)
             {
+                _consecutiveRecoveryAttempts = 0;
+                if (Status == DeviceListenerStatus.Error)
+                {
+                    Status = DeviceListenerStatus.Started;
+                }
                 return true;
             }
 

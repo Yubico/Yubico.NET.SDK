@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
+using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions;
 
@@ -25,19 +26,23 @@ namespace Yubico.YubiKit.WebAuthn.Extensions;
 /// <param name="LargeBlob">Large blob support request.</param>
 /// <param name="Prf">Pseudo-random function extension.</param>
 /// <param name="CredProps">Credential properties request.</param>
+/// <param name="PreviewSign">Signing key generation request (CTAP v4 draft).</param>
 public sealed record class RegistrationExtensionInputs(
     CredProtectInput? CredProtect = null,
     CredBlobInput? CredBlob = null,
     MinPinLengthInput? MinPinLength = null,
     LargeBlobInput? LargeBlob = null,
     PrfInput? Prf = null,
-    CredPropsInput? CredProps = null);
+    CredPropsInput? CredProps = null,
+    PreviewSignRegistrationInput? PreviewSign = null);
 
 /// <summary>
 /// Extension inputs for WebAuthn authentication (GetAssertion).
 /// </summary>
 /// <param name="LargeBlob">Large blob operations (read/write).</param>
 /// <param name="Prf">Pseudo-random function evaluation.</param>
+/// <param name="PreviewSign">Arbitrary data signing request (CTAP v4 draft).</param>
 public sealed record class AuthenticationExtensionInputs(
     LargeBlobInput? LargeBlob = null,
-    PrfInput? Prf = null);
+    PrfInput? Prf = null,
+    PreviewSignAuthenticationInput? PreviewSign = null);

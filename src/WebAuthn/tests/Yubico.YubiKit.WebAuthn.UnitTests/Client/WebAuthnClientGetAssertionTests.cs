@@ -176,11 +176,11 @@ public class WebAuthnClientGetAssertionTests
             .Returns(CreateMockGetAssertionResponse(credentialId));
 
         // Act
-        var result = await _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None);
+        var result = await _client.GetAssertionAsync(options, pinBytes: null, TestContext.Current.CancellationToken);
         var matched = result[0];
 
-        var response1 = await matched.SelectAsync();
-        var response2 = await matched.SelectAsync();
+        var response1 = await matched.SelectAsync(TestContext.Current.CancellationToken);
+        var response2 = await matched.SelectAsync(TestContext.Current.CancellationToken);
 
         // Assert - same instance or value-equal
         Assert.Equal(response1.CredentialId.ToArray(), response2.CredentialId.ToArray());
@@ -212,8 +212,8 @@ public class WebAuthnClientGetAssertionTests
             .Returns(CreateMockGetAssertionResponse(credentialId, signature: signature));
 
         // Act
-        var result = await _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None);
-        var response = await result[0].SelectAsync();
+        var result = await _client.GetAssertionAsync(options, pinBytes: null, TestContext.Current.CancellationToken);
+        var response = await result[0].SelectAsync(TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(credentialId, response.CredentialId.ToArray());
@@ -393,15 +393,16 @@ public class WebAuthnClientGetAssertionTests
         var credentialId = RandomNumberGenerator.GetBytes(32);
         var tcs = new TaskCompletionSource<AuthenticationResponse>();
 
+        var rawAuthData = BuildAuthData();
         var mockResponse = new AuthenticationResponse
         {
             CredentialId = credentialId,
-            RawAuthenticatorData = BuildAuthData(),
+            RawAuthenticatorData = rawAuthData,
             Signature = RandomNumberGenerator.GetBytes(64),
             SignCount = 1,
             ClientData = WebAuthnClientData.Create("webauthn.get", RandomNumberGenerator.GetBytes(32), _origin, null, null),
             ClientExtensionResults = null,
-            AuthenticatorData = null,
+            AuthenticatorData = WebAuthnAuthenticatorData.Parse(rawAuthData),
             User = null
         };
 

@@ -587,8 +587,16 @@ public sealed class WebAuthnClient : IAsyncDisposable
             var request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision);
 
             // Execute MakeCredential
-            var ctapResponse = await _backend.MakeCredentialAsync(request, progress: null, cancellationToken)
-                .ConfigureAwait(false);
+            MakeCredentialResponse ctapResponse;
+            try
+            {
+                ctapResponse = await _backend.MakeCredentialAsync(request, progress: null, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (CtapException ex) when (options.Extensions?.PreviewSign is not null)
+            {
+                throw Extensions.PreviewSign.PreviewSignErrors.MapCtapError(ex);
+            }
 
             // Build WebAuthn response
             return BuildRegistrationResponse(ctapResponse, clientData, options);
@@ -618,6 +626,9 @@ public sealed class WebAuthnClient : IAsyncDisposable
         StatusChannel<IReadOnlyList<MatchedCredential>>? channel,
         CancellationToken cancellationToken)
     {
+        // TODO: Wire PreviewSignErrors.MapCtapError when GetAssertion backend integration is complete
+        // (Phase 9 - authentication ceremonies not yet fully implemented)
+
         // Validate options
         ValidateAuthenticationOptions(options);
 

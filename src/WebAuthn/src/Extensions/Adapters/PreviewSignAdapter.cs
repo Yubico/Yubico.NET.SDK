@@ -36,6 +36,8 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
 /// </remarks>
 internal static class PreviewSignAdapter
 {
+    private const string ExtensionId = "previewSign";
+
     /// <summary>
     /// Builds the CBOR-encoded previewSign extension input for registration.
     /// </summary>
@@ -183,8 +185,6 @@ internal static class PreviewSignAdapter
         WebAuthnAuthenticatorData authData,
         IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs)
     {
-        const string ExtensionId = "previewSign";
-
         if (!authData.ParsedExtensions.TryGetValue(ExtensionId, out var rawCbor))
         {
             return null;
@@ -214,12 +214,15 @@ internal static class PreviewSignAdapter
             }
         }
 
-        if (algorithm is null || flags is null)
+        if (algorithm is null)
         {
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidState,
-                "previewSign output missing required algorithm or flags");
+                "previewSign output missing required algorithm");
         }
+
+        // Flags are input-only per CTAP v4 draft; default when absent from response
+        flags ??= PreviewSign.PreviewSignFlags.RequireUserPresence;
 
         // Try to read attestation object from unsignedExtensionOutputs["previewSign"]
         if (unsignedExtensionOutputs?.TryGetValue(ExtensionId, out var unsignedCbor) == true)
@@ -259,8 +262,6 @@ internal static class PreviewSignAdapter
     public static PreviewSignAuthenticationOutput? ParseAuthenticationOutput(
         WebAuthnAuthenticatorData authData)
     {
-        const string ExtensionId = "previewSign";
-
         if (!authData.ParsedExtensions.TryGetValue(ExtensionId, out var rawCbor))
         {
             return null;

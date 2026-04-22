@@ -197,6 +197,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{ED1DF609
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.WebAuthn.UnitTests", "src\WebAuthn\tests\Yubico.YubiKit.WebAuthn.UnitTests\Yubico.YubiKit.WebAuthn.UnitTests.csproj", "{7540DFA5-255F-42BC-80A0-C7EF4678FCDE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.WebAuthn.IntegrationTests", "src\WebAuthn\tests\Yubico.YubiKit.WebAuthn.IntegrationTests\Yubico.YubiKit.WebAuthn.IntegrationTests.csproj", "{AB382676-460B-425C-887C-842AA3B0D8DC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests.Shared", "Tests.Shared", "{6CFDB4EB-571D-3373-4FC3-E25713F7438A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -675,6 +679,18 @@ Global
 		{7540DFA5-255F-42BC-80A0-C7EF4678FCDE}.Release|x64.Build.0 = Release|Any CPU
 		{7540DFA5-255F-42BC-80A0-C7EF4678FCDE}.Release|x86.ActiveCfg = Release|Any CPU
 		{7540DFA5-255F-42BC-80A0-C7EF4678FCDE}.Release|x86.Build.0 = Release|Any CPU
+		{AB382676-460B-425C-887C-842AA3B0D8DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB382676-460B-425C-887C-842AA3B0D8DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB382676-460B-425C-887C-842AA3B0D8DC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AB382676-460B-425C-887C-842AA3B0D8DC}.Debug|x64.Build.0 = Debug|Any CPU
+		{AB382676-460B-425C-887C-842AA3B0D8DC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AB382676-460B-425C-887C-842AA3B0D8DC}.Debug|x86.Build.0 = Debug|Any CPU
+		{AB382676-460B-425C-887C-842AA3B0D8DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB382676-460B-425C-887C-842AA3B0D8DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB382676-460B-425C-887C-842AA3B0D8DC}.Release|x64.ActiveCfg = Release|Any CPU
+		{AB382676-460B-425C-887C-842AA3B0D8DC}.Release|x64.Build.0 = Release|Any CPU
+		{AB382676-460B-425C-887C-842AA3B0D8DC}.Release|x86.ActiveCfg = Release|Any CPU
+		{AB382676-460B-425C-887C-842AA3B0D8DC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -752,6 +768,8 @@ Global
 		{62C66080-961A-4799-92D3-2BB26B2593C1} = {582F6744-8E74-BDC9-9822-D791018F01C9}
 		{ED1DF609-B78A-E361-CAFB-E7940761E691} = {4E8AC6CB-1761-28BF-ABD9-AD2E5A7B9AB1}
 		{7540DFA5-255F-42BC-80A0-C7EF4678FCDE} = {ED1DF609-B78A-E361-CAFB-E7940761E691}
+		{AB382676-460B-425C-887C-842AA3B0D8DC} = {ED1DF609-B78A-E361-CAFB-E7940761E691}
+		{6CFDB4EB-571D-3373-4FC3-E25713F7438A} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A15F6F16-41BD-43F1-BF4A-17B4695A4D45}

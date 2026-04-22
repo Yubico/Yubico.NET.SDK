@@ -151,10 +151,9 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
             options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
         }
 
-        // Extensions passthrough (opaque for Phase 3)
         if (request.Extensions is not null)
         {
-            // For Phase 3, extensions are passed as raw CBOR - defer to Phase 6 for full wiring
+            options.Extensions = request.Extensions;
         }
 
         var response = await _session.MakeCredentialAsync(
@@ -201,10 +200,9 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
             options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
         }
 
-        // Extensions passthrough (opaque for Phase 4)
         if (request.Extensions is not null)
         {
-            // Extensions will be fully wired in Phase 6
+            options.Extensions = request.Extensions;
         }
 
         return await _session.GetAssertionAsync(

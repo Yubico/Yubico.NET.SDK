@@ -100,7 +100,7 @@ public sealed class MakeCredentialResponse
     public static MakeCredentialResponse Decode(ReadOnlyMemory<byte> data)
     {
         var reader = new CborReader(data, CborConformanceMode.Lax);
-        return Decode(reader);
+        return DecodeInternal(reader, data);
     }
     
     /// <summary>
@@ -108,10 +108,18 @@ public sealed class MakeCredentialResponse
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The parsed response.</returns>
-    public static MakeCredentialResponse Decode(CborReader reader)
+    public static MakeCredentialResponse Decode(CborReader reader) =>
+        DecodeInternal(reader, fullCbor: null);
+
+    /// <summary>
+    /// Internal decoder that optionally captures raw CBOR for attestation statement.
+    /// </summary>
+    private static MakeCredentialResponse DecodeInternal(
+        CborReader reader,
+        ReadOnlyMemory<byte>? fullCbor)
     {
         var mapLength = reader.ReadStartMap();
-        
+
         string? format = null;
         byte[]? authDataRaw = null;
         AuthenticatorData? authData = null;
@@ -119,7 +127,11 @@ public sealed class MakeCredentialResponse
         bool? epAtt = null;
         byte[]? largeBlobKey = null;
         ReadOnlyMemory<byte>? extensionOutputs = null;
-        
+
+        // Track offset for raw CBOR capture
+        int attStmtOffset = -1;
+        int attStmtLength = -1;
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadInt32();
@@ -137,7 +149,23 @@ public sealed class MakeCredentialResponse
                     }
                     break;
                 case 3: // attStmt
-                    attStmt = AttestationStatement.Decode(reader);
+                    if (fullCbor.HasValue)
+                    {
+                        // Calculate offset before reading
+                        var bytesRemainingBefore = reader.BytesRemaining;
+
+                        // Parse the attestation statement
+                        attStmt = AttestationStatement.Decode(reader);
+
+                        // Calculate how many bytes were consumed
+                        var bytesConsumed = bytesRemainingBefore - reader.BytesRemaining;
+                        attStmtLength = bytesConsumed;
+                        attStmtOffset = fullCbor.Value.Length - bytesRemainingBefore;
+                    }
+                    else
+                    {
+                        attStmt = AttestationStatement.Decode(reader);
+                    }
                     break;
                 case 4: // epAtt
                     epAtt = reader.ReadBoolean();
@@ -150,14 +178,21 @@ public sealed class MakeCredentialResponse
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
-        
+
         if (format is null || authData is null || authDataRaw is null || attStmt is null)
         {
             throw new InvalidOperationException("MakeCredential response missing required fields.");
         }
-        
+
+        // If we captured the offset, decode again with raw data
+        if (fullCbor.HasValue && attStmtOffset >= 0 && attStmtLength > 0)
+        {
+            var rawAttStmt = fullCbor.Value.Slice(attStmtOffset, attStmtLength);
+            attStmt = AttestationStatement.DecodeWithRawData(rawAttStmt);
+        }
+
         return new MakeCredentialResponse(
             format,
             authData,
@@ -244,18 +279,35 @@ public sealed class AttestationStatement
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The parsed attestation statement.</returns>
-    public static AttestationStatement Decode(CborReader reader)
+    internal static AttestationStatement Decode(CborReader reader) =>
+        DecodeWithRawData(reader, shouldCaptureRawData: false);
+
+    /// <summary>
+    /// Decodes an attestation statement from CBOR with optional raw data capture.
+    /// </summary>
+    /// <param name="rawCbor">The raw CBOR bytes containing the attestation statement map.</param>
+    /// <returns>The parsed attestation statement with populated RawData.</returns>
+    internal static AttestationStatement DecodeWithRawData(ReadOnlyMemory<byte> rawCbor)
     {
-        // Capture raw data by encoding what we read
-        var startPosition = reader.BytesRemaining;
-        
+        var reader = new CborReader(rawCbor, CborConformanceMode.Lax);
+        return DecodeWithRawData(reader, shouldCaptureRawData: true, rawCbor);
+    }
+
+    /// <summary>
+    /// Internal decoder with optional raw data capture.
+    /// </summary>
+    private static AttestationStatement DecodeWithRawData(
+        CborReader reader,
+        bool shouldCaptureRawData,
+        ReadOnlyMemory<byte>? rawCbor = null)
+    {
         var mapLength = reader.ReadStartMap();
-        
+
         byte[]? sig = null;
         List<ReadOnlyMemory<byte>>? x5c = null;
         byte[]? ecdaaKeyId = null;
         int? alg = null;
-        
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadTextString();
@@ -284,19 +336,17 @@ public sealed class AttestationStatement
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
-        
-        var bytesConsumed = startPosition - reader.BytesRemaining;
-        // Note: We don't have easy access to the raw bytes from CborReader,
-        // so RawData will be empty for now. In practice, callers should use
-        // the full response raw data if needed.
-        var rawData = ReadOnlyMemory<byte>.Empty;
-        
+
+        var rawData = shouldCaptureRawData && rawCbor.HasValue
+            ? rawCbor.Value
+            : ReadOnlyMemory<byte>.Empty;
+
         // Explicitly convert null byte arrays to null ReadOnlyMemory<byte>?
         ReadOnlyMemory<byte>? sigMemory = sig is not null ? (ReadOnlyMemory<byte>?)new ReadOnlyMemory<byte>(sig) : (ReadOnlyMemory<byte>?)null;
         ReadOnlyMemory<byte>? ecdaaKeyIdMemory = ecdaaKeyId is not null ? (ReadOnlyMemory<byte>?)new ReadOnlyMemory<byte>(ecdaaKeyId) : (ReadOnlyMemory<byte>?)null;
-        
+
         return new AttestationStatement(sigMemory, x5c, ecdaaKeyIdMemory, alg, rawData);
     }
 }

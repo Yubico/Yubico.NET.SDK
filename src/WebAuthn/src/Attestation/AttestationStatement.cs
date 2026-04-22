@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using Yubico.YubiKit.WebAuthn.Client;
 
 namespace Yubico.YubiKit.WebAuthn.Attestation;
 
@@ -130,7 +131,7 @@ public sealed record PackedAttestationStatement : AttestationStatement
 
         if (alg is null || sig is null)
         {
-            throw new InvalidOperationException("Packed attestation statement missing required fields (alg, sig).");
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "Packed attestation statement missing required fields (alg, sig).");
         }
 
         ReadOnlyMemory<byte>? ecdaaKeyIdMemory = ecdaaKeyId is not null
@@ -201,7 +202,7 @@ public sealed record FidoU2FAttestationStatement : AttestationStatement
 
         if (sig is null || x5c is null || x5c.Count == 0)
         {
-            throw new InvalidOperationException("FIDO U2F attestation statement missing required fields (sig, x5c).");
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "FIDO U2F attestation statement missing required fields (sig, x5c).");
         }
 
         return new FidoU2FAttestationStatement(sig, x5c, rawCbor);
@@ -256,7 +257,7 @@ public sealed record AppleAttestationStatement : AttestationStatement
 
         if (x5c is null || x5c.Count == 0)
         {
-            throw new InvalidOperationException("Apple attestation statement missing required field (x5c).");
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "Apple attestation statement missing required field (x5c).");
         }
 
         return new AppleAttestationStatement(x5c, rawCbor);

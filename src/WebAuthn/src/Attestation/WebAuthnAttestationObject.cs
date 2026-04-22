@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using Yubico.YubiKit.WebAuthn.Client;
 
 namespace Yubico.YubiKit.WebAuthn.Attestation;
 
@@ -101,7 +102,7 @@ public sealed class WebAuthnAttestationObject
 
         if (fmt is null || authDataBytes is null || !attStmtRawCbor.HasValue)
         {
-            throw new InvalidOperationException("Attestation object missing required fields (fmt, authData, attStmt).");
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "Attestation object missing required fields (fmt, authData, attStmt).");
         }
 
         var authenticatorData = WebAuthnAuthenticatorData.Decode(authDataBytes);

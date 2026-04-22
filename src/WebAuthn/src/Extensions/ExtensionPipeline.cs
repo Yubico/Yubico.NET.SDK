@@ -153,31 +153,71 @@ internal sealed class ExtensionPipeline
         // CredProtect
         if (inputs.CredProtect is not null)
         {
-            credProtect = CredProtectAdapter.ParseRegistrationOutput(authData.ParsedExtensions);
+            try
+            {
+                credProtect = CredProtectAdapter.ParseRegistrationOutput(authData.ParsedExtensions);
+            }
+            catch (System.Formats.Cbor.CborContentException)
+            {
+                // Malformed extension output: skip silently per WebAuthn spec; some authenticators return junk.
+                credProtect = null;
+            }
         }
 
         // CredBlob
         if (inputs.CredBlob is not null)
         {
-            credBlob = CredBlobAdapter.ParseRegistrationOutput(authData.ParsedExtensions);
+            try
+            {
+                credBlob = CredBlobAdapter.ParseRegistrationOutput(authData.ParsedExtensions);
+            }
+            catch (System.Formats.Cbor.CborContentException)
+            {
+                // Malformed extension output: skip silently per WebAuthn spec; some authenticators return junk.
+                credBlob = null;
+            }
         }
 
         // MinPinLength
         if (inputs.MinPinLength is not null)
         {
-            minPinLength = MinPinLengthAdapter.ParseOutput(authData.ParsedExtensions);
+            try
+            {
+                minPinLength = MinPinLengthAdapter.ParseOutput(authData.ParsedExtensions);
+            }
+            catch (System.Formats.Cbor.CborContentException)
+            {
+                // Malformed extension output: skip silently per WebAuthn spec; some authenticators return junk.
+                minPinLength = null;
+            }
         }
 
         // LargeBlob
         if (inputs.LargeBlob is not null)
         {
-            largeBlob = LargeBlobAdapter.ParseRegistrationOutput(authData.ParsedExtensions);
+            try
+            {
+                largeBlob = LargeBlobAdapter.ParseRegistrationOutput(authData.ParsedExtensions);
+            }
+            catch (System.Formats.Cbor.CborContentException)
+            {
+                // Malformed extension output: skip silently per WebAuthn spec; some authenticators return junk.
+                largeBlob = null;
+            }
         }
 
         // PRF
         if (inputs.Prf is not null)
         {
-            prf = PrfAdapter.ParseRegistrationOutput(authData.ParsedExtensions);
+            try
+            {
+                prf = PrfAdapter.ParseRegistrationOutput(authData.ParsedExtensions);
+            }
+            catch (System.Formats.Cbor.CborContentException)
+            {
+                // Malformed extension output: skip silently per WebAuthn spec; some authenticators return junk.
+                prf = null;
+            }
         }
 
         // CredProps - client-derived from residentKey option
@@ -215,18 +255,42 @@ internal sealed class ExtensionPipeline
         Outputs.PrfAuthenticationOutput? prf = null;
 
         // CredBlob - always check (can be present even if not explicitly requested)
-        credBlob = CredBlobAdapter.ParseAuthenticationOutput(authData.ParsedExtensions);
+        try
+        {
+            credBlob = CredBlobAdapter.ParseAuthenticationOutput(authData.ParsedExtensions);
+        }
+        catch (System.Formats.Cbor.CborContentException)
+        {
+            // Malformed extension output: skip silently per WebAuthn spec; some authenticators return junk.
+            credBlob = null;
+        }
 
         // LargeBlob
         if (inputs.LargeBlob is not null)
         {
-            largeBlob = LargeBlobAdapter.ParseAuthenticationOutput(authData.ParsedExtensions);
+            try
+            {
+                largeBlob = LargeBlobAdapter.ParseAuthenticationOutput(authData.ParsedExtensions);
+            }
+            catch (System.Formats.Cbor.CborContentException)
+            {
+                // Malformed extension output: skip silently per WebAuthn spec; some authenticators return junk.
+                largeBlob = null;
+            }
         }
 
         // PRF
         if (inputs.Prf is not null)
         {
-            prf = PrfAdapter.ParseAuthenticationOutput(authData.ParsedExtensions);
+            try
+            {
+                prf = PrfAdapter.ParseAuthenticationOutput(authData.ParsedExtensions);
+            }
+            catch (System.Formats.Cbor.CborContentException)
+            {
+                // Malformed extension output: skip silently per WebAuthn spec; some authenticators return junk.
+                prf = null;
+            }
         }
 
         return new AuthenticationExtensionOutputs(

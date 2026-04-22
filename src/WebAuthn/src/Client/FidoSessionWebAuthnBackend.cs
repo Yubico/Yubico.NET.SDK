@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.Logging;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
+using Fido2AttestationStatement = Yubico.YubiKit.Fido2.Credentials.AttestationStatement;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
@@ -29,8 +28,6 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// </remarks>
 internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
 {
-    private static readonly ILogger Logger = LoggingFactory.CreateLogger<FidoSessionWebAuthnBackend>();
-
     private readonly IFidoSession _session;
     private PinUvAuthProtocolV2? _protocol;
     private AuthenticatorInfo? _cachedInfo;
@@ -52,7 +49,6 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
 
         if (_cachedInfo is null)
         {
-            Logger.LogDebug("Fetching authenticator info (first call, will cache)");
             _cachedInfo = await _session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
         }
 
@@ -65,17 +61,10 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         EnsureProtocolInitialized();
-        var clientPin = new ClientPin(_session, _protocol);
+        var clientPin = new ClientPin(_session, _protocol!);
 
-        try
-        {
-            return await clientPin.GetUvRetriesAsync(cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Failed to get UV retries");
-            throw;
-        }
+        var (retries, _) = await clientPin.GetUvRetriesAsync(cancellationToken).ConfigureAwait(false);
+        return retries;
     }
 
     /// <inheritdoc/>
@@ -84,18 +73,10 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         EnsureProtocolInitialized();
-        var clientPin = new ClientPin(_session, _protocol);
+        var clientPin = new ClientPin(_session, _protocol!);
 
-        try
-        {
-            var retries = await clientPin.GetPinRetriesAsync(cancellationToken).ConfigureAwait(false);
-            return new PinRetriesResult(retries, PowerCycleState: null); // Power cycle state not exposed by current API
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Failed to get PIN retries");
-            throw;
-        }
+        var (retries, powerCycleRequired) = await clientPin.GetPinRetriesAsync(cancellationToken).ConfigureAwait(false);
+        return new PinRetriesResult(retries, powerCycleRequired);
     }
 
     /// <inheritdoc/>
@@ -110,36 +91,25 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         EnsureProtocolInitialized();
-        var clientPin = new ClientPin(_session, _protocol);
+        var clientPin = new ClientPin(_session, _protocol!);
 
-        Logger.LogDebug("Acquiring PIN/UV token using method: {Method}, permissions: {Permissions}", method, permissions);
-
-        try
+        byte[] token = method switch
         {
-            byte[] token = method switch
-            {
-                PinUvAuthMethod.Pin when pinBytes is not null =>
-                    await clientPin.GetPinUvAuthTokenUsingPinAsync(pinBytes.Value, permissions, rpId, cancellationToken)
-                        .ConfigureAwait(false),
+            PinUvAuthMethod.Pin when pinBytes is not null =>
+                await clientPin.GetPinUvAuthTokenUsingPinAsync(pinBytes.Value, permissions, rpId, cancellationToken)
+                    .ConfigureAwait(false),
 
-                PinUvAuthMethod.Uv =>
-                    await clientPin.GetPinUvAuthTokenUsingUvAsync(permissions, rpId, cancellationToken)
-                        .ConfigureAwait(false),
+            PinUvAuthMethod.Uv =>
+                await clientPin.GetPinUvAuthTokenUsingUvAsync(permissions, rpId, cancellationToken)
+                    .ConfigureAwait(false),
 
-                PinUvAuthMethod.Pin =>
-                    throw new ArgumentNullException(nameof(pinBytes), "PIN bytes required when method is PIN"),
+            PinUvAuthMethod.Pin =>
+                throw new ArgumentNullException(nameof(pinBytes), "PIN bytes required when method is PIN"),
 
-                _ => throw new ArgumentOutOfRangeException(nameof(method), method, "Invalid PIN/UV auth method")
-            };
+            _ => throw new ArgumentOutOfRangeException(nameof(method), method, "Invalid PIN/UV auth method")
+        };
 
-            Logger.LogDebug("PIN/UV token acquired successfully (length: {Length} bytes)", token.Length);
-            return new PinUvAuthTokenSession(_protocol, token);
-        }
-        catch (CtapException ex)
-        {
-            Logger.LogError(ex, "CTAP error during token acquisition: {Status}", ex.Status);
-            throw;
-        }
+        return new PinUvAuthTokenSession(_protocol!, token);
     }
 
     /// <inheritdoc/>
@@ -152,32 +122,23 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
 
         ArgumentNullException.ThrowIfNull(request);
 
-        Logger.LogDebug("MakeCredential for RP: {RpId}", request.Rp.Id);
-
         // Map WebAuthnRelyingParty to PublicKeyCredentialRpEntity
-        var rpEntity = new PublicKeyCredentialRpEntity
-        {
-            Id = request.Rp.Id,
-            Name = request.Rp.Name
-        };
+        var rpEntity = new PublicKeyCredentialRpEntity(request.Rp.Id, request.Rp.Name);
 
         // Map WebAuthnUser to PublicKeyCredentialUserEntity
-        var userEntity = new PublicKeyCredentialUserEntity
-        {
-            Id = request.User.Id.ToArray(),
-            Name = request.User.Name,
-            DisplayName = request.User.DisplayName
-        };
+        var userEntity = new PublicKeyCredentialUserEntity(
+            request.User.Id,
+            request.User.Name!,
+            request.User.DisplayName!);
 
         // Build options
         var options = new MakeCredentialOptions
         {
-            ExcludeList = request.ExcludeList?.Select(desc => new PublicKeyCredentialDescriptor
-            {
-                Type = desc.Type,
-                Id = desc.Id.ToArray(),
-                Transports = desc.Transports?.Select(t => t.Value).ToArray()
-            }).ToList(),
+            ExcludeList = request.ExcludeList?.Select(desc => new PublicKeyCredentialDescriptor(
+                desc.Id,
+                desc.Type,
+                desc.Transports?.Select(t => t.Value).ToList()
+            )).ToList(),
 
             ResidentKey = request.Options?.TryGetValue("rk", out var rk) == true && rk,
             UserVerification = request.Options?.TryGetValue("uv", out var uv) == true && uv
@@ -194,28 +155,18 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
         if (request.Extensions is not null)
         {
             // For Phase 3, extensions are passed as raw CBOR - defer to Phase 6 for full wiring
-            Logger.LogDebug("Extensions present but not yet fully wired (Phase 6 feature)");
         }
 
-        try
-        {
-            var response = await _session.MakeCredentialAsync(
-                request.ClientDataHash,
-                rpEntity,
-                userEntity,
-                request.PubKeyCredParams,
-                options,
-                cancellationToken
-            ).ConfigureAwait(false);
+        var response = await _session.MakeCredentialAsync(
+            request.ClientDataHash,
+            rpEntity,
+            userEntity,
+            request.PubKeyCredParams,
+            options,
+            cancellationToken
+        ).ConfigureAwait(false);
 
-            Logger.LogDebug("MakeCredential succeeded, credential ID length: {Length}", response.AttestedCredentialData.CredentialId.Length);
-            return response;
-        }
-        catch (CtapException ex)
-        {
-            Logger.LogError(ex, "MakeCredential failed with CTAP status: {Status}", ex.Status);
-            throw;
-        }
+        return response;
     }
 
     /// <inheritdoc/>
@@ -240,7 +191,6 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
     {
         if (!_disposed)
         {
-            Logger.LogDebug("Disposing FidoSessionWebAuthnBackend");
 
             _protocol?.Dispose();
             _protocol = null;
@@ -262,7 +212,6 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
     {
         if (_protocol is null)
         {
-            Logger.LogDebug("Initializing PinUvAuthProtocolV2");
             _protocol = new PinUvAuthProtocolV2();
             // Protocol initialization is async in the session context, but we defer it
             // until the first use in ClientPin methods which handle initialization

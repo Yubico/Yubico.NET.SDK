@@ -14,6 +14,7 @@
 
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
@@ -22,8 +23,8 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// Result of PIN retries query.
 /// </summary>
 /// <param name="Retries">The number of PIN retries remaining.</param>
-/// <param name="PowerCycleState">Indicates if the authenticator requires a power cycle to retry PIN, or null if not applicable.</param>
-public sealed record class PinRetriesResult(int Retries, bool? PowerCycleState);
+/// <param name="PowerCycleRequired">Indicates if the authenticator requires a power cycle to retry PIN.</param>
+public sealed record class PinRetriesResult(int Retries, bool PowerCycleRequired);
 
 /// <summary>
 /// Internal abstraction over CTAP2 operations for testability.

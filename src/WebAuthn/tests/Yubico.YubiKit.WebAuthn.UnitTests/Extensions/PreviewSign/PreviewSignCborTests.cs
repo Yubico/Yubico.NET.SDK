@@ -327,4 +327,26 @@ public class PreviewSignCborTests
         Assert.False(comparer.Equals(bytes1a, bytes3));
         Assert.False(comparer.Equals(bytes2, bytes3));
     }
+
+    [Fact(Timeout = 5000)]
+    public void PreviewSignAuthenticationInput_RebuildsDictionary_WithCorrectComparer()
+    {
+        // Arrange - Create dictionary with default comparer (wrong)
+        var credId1 = new ReadOnlyMemory<byte>([0x01, 0x02, 0x03]);
+        var credId2Copy = new ReadOnlyMemory<byte>([0x01, 0x02, 0x03]); // same bytes, different array
+
+        var defaultDict = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
+        {
+            [credId1] = new PreviewSignSigningParams(
+                KeyHandle: new byte[] { 0xAA },
+                Tbs: new byte[] { 0xBB })
+        };
+
+        // Act - Constructor should rebuild with ByteArrayKeyComparer
+        var input = new PreviewSignAuthenticationInput(defaultDict);
+
+        // Assert - Lookups by independent ReadOnlyMemory<byte> with same bytes should work
+        Assert.True(input.SignByCredential.ContainsKey(credId2Copy));
+        Assert.Equal(0xAA, input.SignByCredential[credId2Copy].KeyHandle.Span[0]);
+    }
 }

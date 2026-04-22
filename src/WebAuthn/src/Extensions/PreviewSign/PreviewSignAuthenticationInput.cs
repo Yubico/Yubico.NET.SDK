@@ -54,7 +54,35 @@ public sealed record class PreviewSignAuthenticationInput
                 "previewSign authentication requires at least one credential mapping");
         }
 
-        SignByCredential = signByCredential;
+        // Defensively rebuild dictionary with ByteArrayKeyComparer if needed
+        if (signByCredential is Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams> dict &&
+            !ReferenceEquals(dict.Comparer, ByteArrayKeyComparer.Instance))
+        {
+            var rebuilt = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(
+                signByCredential.Count,
+                ByteArrayKeyComparer.Instance);
+            foreach (var kvp in signByCredential)
+            {
+                rebuilt[kvp.Key] = kvp.Value;
+            }
+            SignByCredential = rebuilt;
+        }
+        else if (signByCredential is not Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>)
+        {
+            // Not a Dictionary, rebuild to ensure correct comparer
+            var rebuilt = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(
+                signByCredential.Count,
+                ByteArrayKeyComparer.Instance);
+            foreach (var kvp in signByCredential)
+            {
+                rebuilt[kvp.Key] = kvp.Value;
+            }
+            SignByCredential = rebuilt;
+        }
+        else
+        {
+            SignByCredential = signByCredential;
+        }
     }
 
     /// <summary>

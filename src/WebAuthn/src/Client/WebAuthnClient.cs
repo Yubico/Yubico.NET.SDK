@@ -493,7 +493,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         var uvDecision = UvDecisionLogic.Decide(
             info,
             options.UserVerification,
-            pinAvailable: false, // Stream mode determines dynamically
+            pinAvailable: channel is not null, // Stream mode can request PIN interactively
             requestedPermissions: PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion);
 
         // Acquire PIN/UV token with retry on PinAuthInvalid
@@ -590,7 +590,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         var uvDecision = UvDecisionLogic.Decide(
             info,
             options.UserVerification,
-            pinAvailable: false, // Stream mode determines dynamically
+            pinAvailable: channel is not null, // Stream mode can request PIN interactively
             requestedPermissions: PinUvAuthTokenPermissions.GetAssertion);
 
         // Acquire PIN/UV token with retry on PinAuthInvalid

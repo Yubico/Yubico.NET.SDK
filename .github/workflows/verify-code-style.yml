@@ -48,10 +48,6 @@ jobs:
         with:
           global-json-file: "./global.json"
 
-      - name: Register GitHub Packages NuGet source
-        run: |
-          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
-
       #- name: Build Yubico.NET.SDK.sln
       #  run: dotnet build --nologo --verbosity normal Yubico.NET.SDK.sln
       - name: "Add DOTNET to path explicitly to address bug where it cannot be found"

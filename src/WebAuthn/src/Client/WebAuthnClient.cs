@@ -20,6 +20,7 @@ using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Attestation;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Client.Validation;
@@ -152,6 +153,118 @@ public sealed class WebAuthnClient : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Authenticates using an existing credential (GetAssertion).
+    /// </summary>
+    /// <param name="options">The authentication options.</param>
+    /// <param name="pinBytes">Optional PIN bytes (UTF-8 encoded).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>
+    /// A list of matched credentials. Each credential exposes <see cref="MatchedCredential.SelectAsync"/>
+    /// to complete the authentication and retrieve the assertion response.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// This method follows the deferred-selection pattern: the authenticator enumerates
+    /// all matching credentials, and the caller can present a credential picker UI before
+    /// calling <see cref="MatchedCredential.SelectAsync"/> to retrieve the assertion.
+    /// </para>
+    /// <para>
+    /// If the allow list is empty, discoverable credentials for the RP ID are returned.
+    /// If no credentials match, an empty list is returned (not an exception).
+    /// </para>
+    /// </remarks>
+    public async Task<IReadOnlyList<MatchedCredential>> GetAssertionAsync(
+        AuthenticationOptions options,
+        ReadOnlyMemory<byte>? pinBytes,
+        CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(options);
+
+        // Validate options
+        ValidateAuthenticationOptions(options);
+
+        // Validate RP ID against origin
+        RpIdValidator.EnsureValid(options.RpId, _origin, _enterpriseRpIds, _isPublicSuffix);
+
+        // Build client data
+        var clientData = WebAuthnClientData.Create(
+            type: "webauthn.get",
+            challenge: options.Challenge,
+            origin: _origin,
+            crossOrigin: options.CrossOrigin,
+            topOrigin: options.TopOrigin);
+
+        // Get authenticator info
+        var info = await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
+
+        // Determine UV/PIN strategy
+        var uvDecision = UvDecisionLogic.Decide(
+            info,
+            options.UserVerification,
+            pinAvailable: pinBytes is not null,
+            requestedPermissions: PinUvAuthTokenPermissions.GetAssertion);
+
+        // Acquire PIN/UV token with retry on PinAuthInvalid
+        PinUvAuthTokenSession? tokenSession = null;
+        IMemoryOwner<byte>? pinOwner = null;
+
+        try
+        {
+            // Copy PIN bytes into a secure buffer for the duration of this operation
+            if (pinBytes is not null)
+            {
+                pinOwner = MemoryPool<byte>.Shared.Rent(pinBytes.Value.Length);
+                pinBytes.Value.Span.CopyTo(pinOwner.Memory.Span);
+            }
+
+            if (uvDecision.UseToken)
+            {
+                tokenSession = await AcquirePinUvTokenWithRetryAsync(
+                    uvDecision.Method!.Value,
+                    uvDecision.Permissions,
+                    options.RpId,
+                    pinOwner?.Memory.Slice(0, pinBytes!.Value.Length),
+                    cancellationToken).ConfigureAwait(false);
+            }
+
+            // Build backend request
+            var request = BuildGetAssertionRequest(options, clientData, tokenSession, uvDecision);
+
+            // Match credentials (handles allow-list probing and discoverable enumeration)
+            var matches = await CredentialMatcher.MatchAsync(_backend, request, cancellationToken)
+                .ConfigureAwait(false);
+
+            // Wrap each match into a MatchedCredential with deferred SelectAsync
+            var results = new List<MatchedCredential>();
+            bool requiresSelection = matches.Count > 1;
+
+            foreach (var (credId, user, response) in matches)
+            {
+                var matchedCred = new MatchedCredential(
+                    id: credId,
+                    user: user,
+                    requiresSelection: requiresSelection,
+                    responseFactory: _ => Task.FromResult(BuildAuthenticationResponse(response, clientData)));
+
+                results.Add(matchedCred);
+            }
+
+            return results;
+        }
+        finally
+        {
+            tokenSession?.Dispose();
+
+            if (pinOwner is not null)
+            {
+                CryptographicOperations.ZeroMemory(pinOwner.Memory.Span);
+                pinOwner.Dispose();
+            }
+        }
+    }
+
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
@@ -190,6 +303,23 @@ public sealed class WebAuthnClient : IAsyncDisposable
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidRequest,
                 "At least one public key credential parameter is required");
+        }
+    }
+
+    private static void ValidateAuthenticationOptions(AuthenticationOptions options)
+    {
+        if (options.Challenge.Length == 0)
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidRequest,
+                "Challenge cannot be empty");
+        }
+
+        if (string.IsNullOrWhiteSpace(options.RpId))
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidRequest,
+                "RP ID cannot be null or empty");
         }
     }
 
@@ -328,6 +458,90 @@ public sealed class WebAuthnClient : IAsyncDisposable
             Transports = null, // Phase 6
             PublicKey = publicKey,
             Aaguid = new Aaguid(attestedCred.Aaguid),
+            SignCount = ctapResponse.AuthenticatorData.SignCount,
+            ClientData = clientData,
+            ClientExtensionResults = null // Phase 6
+        };
+    }
+
+    private BackendGetAssertionRequest BuildGetAssertionRequest(
+        AuthenticationOptions options,
+        WebAuthnClientData clientData,
+        PinUvAuthTokenSession? tokenSession,
+        UvDecision uvDecision)
+    {
+        // Map options to backend request
+        var optionsDict = new Dictionary<string, bool>();
+
+        if (uvDecision.UvOption.HasValue)
+        {
+            optionsDict["uv"] = uvDecision.UvOption.Value;
+        }
+
+        // Map allow credentials to backend descriptors
+        IReadOnlyList<PublicKeyCredentialDescriptor>? allowList = null;
+        if (options.AllowCredentials is not null && options.AllowCredentials.Count > 0)
+        {
+            allowList = options.AllowCredentials
+                .Select(desc => new PublicKeyCredentialDescriptor(
+                    desc.Id,
+                    desc.Type,
+                    desc.Transports?.Select(t => t.Value).ToList()))
+                .ToList();
+        }
+
+        // Build PIN/UV auth params
+        ReadOnlyMemory<byte>? pinUvAuthParam = null;
+        byte? pinUvAuthProtocol = null;
+
+        if (tokenSession is not null)
+        {
+            // Compute pinUvAuthParam = HMAC(token, clientDataHash)
+            pinUvAuthParam = tokenSession.Protocol.Authenticate(tokenSession.Token, clientData.Hash.Span);
+            pinUvAuthProtocol = (byte)tokenSession.Protocol.Version;
+        }
+
+        return new BackendGetAssertionRequest
+        {
+            ClientDataHash = clientData.Hash,
+            RpId = options.RpId,
+            AllowList = allowList,
+            Extensions = null, // Phase 6
+            Options = optionsDict.Count > 0 ? optionsDict : null,
+            PinUvAuthParam = pinUvAuthParam,
+            PinUvAuthProtocol = pinUvAuthProtocol
+        };
+    }
+
+    private static AuthenticationResponse BuildAuthenticationResponse(
+        GetAssertionResponse ctapResponse,
+        WebAuthnClientData clientData)
+    {
+        // Wrap authenticator data
+        var webAuthnAuthData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);
+
+        // Extract credential ID from the response or use empty if not present
+        var credentialId = ctapResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
+
+        // Map user if present
+        WebAuthnUser? user = null;
+        if (ctapResponse.User is not null)
+        {
+            user = new WebAuthnUser
+            {
+                Id = ctapResponse.User.Id,
+                Name = ctapResponse.User.Name ?? string.Empty,
+                DisplayName = ctapResponse.User.DisplayName ?? ctapResponse.User.Name ?? string.Empty
+            };
+        }
+
+        return new AuthenticationResponse
+        {
+            CredentialId = credentialId,
+            AuthenticatorData = webAuthnAuthData,
+            RawAuthenticatorData = ctapResponse.AuthenticatorDataRaw,
+            Signature = ctapResponse.Signature,
+            User = user,
             SignCount = ctapResponse.AuthenticatorData.SignCount,
             ClientData = clientData,
             ClientExtensionResults = null // Phase 6

@@ -18,6 +18,8 @@ using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 
+using CredentialManagementClass = Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement;
+
 namespace Yubico.YubiKit.WebAuthn.IntegrationTests;
 
 // Test-only PIN constant. Not zeroed because it is reused across tests.
@@ -82,5 +84,68 @@ internal static class WebAuthnTestHelpers
     {
         var info = await session.GetInfoAsync();
         return info.Extensions?.Contains("previewSign") == true;
+    }
+
+    /// <summary>
+    /// Deletes all credentials for the specified relying party.
+    /// Gracefully ignores "no credentials" error.
+    /// </summary>
+    /// <param name="session">The FIDO session.</param>
+    /// <param name="rpId">The relying party ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    internal static async Task DeleteAllCredentialsForRpAsync(
+        FidoSession session,
+        string rpId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var info = await session.GetInfoAsync(cancellationToken);
+
+            // Determine which protocol to use
+            var protocolVersion = info.PinUvAuthProtocols.Contains(2) ? 2 : 1;
+            IPinUvAuthProtocol protocol = protocolVersion == 2
+                ? new PinUvAuthProtocolV2()
+                : new PinUvAuthProtocolV1();
+
+            using var clientPin = new ClientPin(session, protocol);
+
+            // Get token with credential management permission
+            byte[] pinToken;
+
+            // Check if device supports CTAP 2.1 permissions
+            var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
+                                       info.Versions.Contains("FIDO_2_1_PRE");
+
+            if (supportsPermissions)
+            {
+                pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+                    KnownTestPin,
+                    PinUvAuthTokenPermissions.CredentialManagement,
+                    cancellationToken: cancellationToken);
+            }
+            else
+            {
+                // Fallback to basic PIN token
+                pinToken = await clientPin.GetPinTokenAsync(KnownTestPin, cancellationToken);
+            }
+
+            var credMan = new CredentialManagementClass(session, protocol, pinToken);
+
+            // Get RP ID hash
+            var rpIdHash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(rpId));
+
+            // Enumerate and delete credentials
+            var credentials = await credMan.EnumerateCredentialsAsync(rpIdHash, cancellationToken);
+
+            foreach (var cred in credentials)
+            {
+                await credMan.DeleteCredentialAsync(cred.CredentialId, cancellationToken);
+            }
+        }
+        catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
+        {
+            // No credentials to delete - that's fine
+        }
     }
 }

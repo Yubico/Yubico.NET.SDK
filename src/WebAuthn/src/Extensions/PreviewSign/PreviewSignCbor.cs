@@ -190,11 +190,23 @@ internal static class PreviewSignCbor
 
             return new PreviewSignRegistrationOutput(generatedKey);
         }
-        catch (Exception ex) when (ex is CborContentException or InvalidOperationException)
+        catch (WebAuthnClientError)
+        {
+            // Already typed WebAuthnClientError - propagate as-is
+            throw;
+        }
+        catch (CborContentException ex)
         {
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidState,
-                "previewSign unsigned output is malformed",
+                "previewSign nested attestation CBOR is malformed",
+                ex);
+        }
+        catch (InvalidOperationException ex)
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidState,
+                "previewSign nested attestation parse failed",
                 ex);
         }
     }

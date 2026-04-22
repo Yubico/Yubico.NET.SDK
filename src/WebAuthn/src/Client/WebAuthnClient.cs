@@ -212,6 +212,10 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
+        // Create linked CTS to cancel producer when iterator is disposed
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var producerCt = linked.Token;
+
         var channel = new StatusChannel<RegistrationResponse>();
 
         // Start producer in background
@@ -219,38 +223,51 @@ public sealed class WebAuthnClient : IAsyncDisposable
         {
             try
             {
-                await channel.WriteAsync(new WebAuthnStatusProcessing(), cancellationToken).ConfigureAwait(false);
+                await channel.WriteAsync(new WebAuthnStatusProcessing(), producerCt).ConfigureAwait(false);
 
                 // Delegate to core implementation
-                var result = await MakeCredentialCoreAsync(options, channel, cancellationToken).ConfigureAwait(false);
+                var result = await MakeCredentialCoreAsync(options, channel, producerCt).ConfigureAwait(false);
 
                 // Emit terminal success
-                await channel.WriteAsync(new WebAuthnStatusFinished<RegistrationResponse>(result), cancellationToken)
+                await channel.WriteAsync(new WebAuthnStatusFinished<RegistrationResponse>(result), producerCt)
                     .ConfigureAwait(false);
             }
             catch (WebAuthnClientError error)
             {
-                await channel.WriteAsync(new WebAuthnStatusFailed(error), cancellationToken).ConfigureAwait(false);
+                await channel.WriteAsync(new WebAuthnStatusFailed(error), CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 var wrappedError = new WebAuthnClientError(WebAuthnClientErrorCode.Unknown, "Unexpected error", ex);
-                await channel.WriteAsync(new WebAuthnStatusFailed(wrappedError), cancellationToken).ConfigureAwait(false);
+                await channel.WriteAsync(new WebAuthnStatusFailed(wrappedError), CancellationToken.None).ConfigureAwait(false);
             }
             finally
             {
                 channel.Complete();
             }
-        }, cancellationToken);
+        }, producerCt);
 
-        // Yield statuses as they arrive
-        await foreach (var status in channel.Reader(cancellationToken).ConfigureAwait(false))
+        try
         {
-            yield return status;
+            // Yield statuses as they arrive
+            await foreach (var status in channel.Reader(cancellationToken).ConfigureAwait(false))
+            {
+                yield return status;
+            }
         }
-
-        // Ensure producer completed (propagate exceptions if any)
-        await producerTask.ConfigureAwait(false);
+        finally
+        {
+            // Cancel producer if consumer broke early (iterator disposal)
+            linked.Cancel();
+            try
+            {
+                await producerTask.ConfigureAwait(false);
+            }
+            catch
+            {
+                // Exceptions already observed via Failed status
+            }
+        }
     }
 
     /// <summary>
@@ -275,6 +292,10 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
+        // Create linked CTS to cancel producer when iterator is disposed
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var producerCt = linked.Token;
+
         var channel = new StatusChannel<IReadOnlyList<MatchedCredential>>();
 
         // Start producer in background
@@ -282,38 +303,51 @@ public sealed class WebAuthnClient : IAsyncDisposable
         {
             try
             {
-                await channel.WriteAsync(new WebAuthnStatusProcessing(), cancellationToken).ConfigureAwait(false);
+                await channel.WriteAsync(new WebAuthnStatusProcessing(), producerCt).ConfigureAwait(false);
 
                 // Delegate to core implementation
-                var result = await GetAssertionCoreAsync(options, channel, cancellationToken).ConfigureAwait(false);
+                var result = await GetAssertionCoreAsync(options, channel, producerCt).ConfigureAwait(false);
 
                 // Emit terminal success
-                await channel.WriteAsync(new WebAuthnStatusFinished<IReadOnlyList<MatchedCredential>>(result), cancellationToken)
+                await channel.WriteAsync(new WebAuthnStatusFinished<IReadOnlyList<MatchedCredential>>(result), producerCt)
                     .ConfigureAwait(false);
             }
             catch (WebAuthnClientError error)
             {
-                await channel.WriteAsync(new WebAuthnStatusFailed(error), cancellationToken).ConfigureAwait(false);
+                await channel.WriteAsync(new WebAuthnStatusFailed(error), CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 var wrappedError = new WebAuthnClientError(WebAuthnClientErrorCode.Unknown, "Unexpected error", ex);
-                await channel.WriteAsync(new WebAuthnStatusFailed(wrappedError), cancellationToken).ConfigureAwait(false);
+                await channel.WriteAsync(new WebAuthnStatusFailed(wrappedError), CancellationToken.None).ConfigureAwait(false);
             }
             finally
             {
                 channel.Complete();
             }
-        }, cancellationToken);
+        }, producerCt);
 
-        // Yield statuses as they arrive
-        await foreach (var status in channel.Reader(cancellationToken).ConfigureAwait(false))
+        try
         {
-            yield return status;
+            // Yield statuses as they arrive
+            await foreach (var status in channel.Reader(cancellationToken).ConfigureAwait(false))
+            {
+                yield return status;
+            }
         }
-
-        // Ensure producer completed (propagate exceptions if any)
-        await producerTask.ConfigureAwait(false);
+        finally
+        {
+            // Cancel producer if consumer broke early (iterator disposal)
+            linked.Cancel();
+            try
+            {
+                await producerTask.ConfigureAwait(false);
+            }
+            catch
+            {
+                // Exceptions already observed via Failed status
+            }
+        }
     }
 
     /// <summary>

@@ -16,6 +16,7 @@ using System.Security.Cryptography;
 using System.Text;
 using NSubstitute;
 using Xunit;
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
@@ -323,5 +324,77 @@ public class WebAuthnStatusStreamTests
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>());
+    }
+
+    [Fact(Timeout = 5000)]
+    public async Task MakeCredentialStream_ConsumerBreaks_ProducerCancelledQuickly()
+    {
+        // Arrange - Mock backend with cancellable long-running operation
+        var mockBackend = Substitute.For<IWebAuthnBackend>();
+        var mockInfo = MockFido2Responses.CreateMockAuthenticatorInfo(
+            clientPinSupported: false,
+            uvSupported: false);
+        mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(mockInfo);
+
+        // Track whether MakeCredentialAsync received a cancellation request
+        var receivedCancellation = false;
+        mockBackend.MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(async callInfo =>
+            {
+                var ct = callInfo.ArgAt<CancellationToken>(2);
+                try
+                {
+                    // Wait indefinitely OR until cancelled
+                    await Task.Delay(Timeout.Infinite, ct);
+                    return MockFido2Responses.CreateMockMakeCredentialResponse();
+                }
+                catch (OperationCanceledException)
+                {
+                    receivedCancellation = true;
+                    throw;
+                }
+            });
+
+        if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
+            throw new InvalidOperationException("Failed to parse origin");
+
+        await using var client = new WebAuthnClient(mockBackend, origin, _ => false);
+
+        var options = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
+            User = new WebAuthnUser
+            {
+                Id = RandomNumberGenerator.GetBytes(16),
+                Name = "user@example.com",
+                DisplayName = "User"
+            },
+            PubKeyCredParams = [new CoseAlgorithm(-7)],
+            UserVerification = UserVerificationPreference.Discouraged
+        };
+
+        // Act - Consumer breaks after first Processing status
+        var sawProcessing = false;
+        await foreach (var status in client.MakeCredentialStreamAsync(options))
+        {
+            if (status is WebAuthnStatusProcessing)
+            {
+                sawProcessing = true;
+                break; // Consumer breaks early (iterator disposed → linked CTS cancelled)
+            }
+        }
+
+        // Assert - Consumer saw Processing before breaking
+        Assert.True(sawProcessing);
+
+        // Give producer a small window to receive cancellation
+        await Task.Delay(100);
+
+        // Verify producer received cancellation (not stuck waiting)
+        Assert.True(receivedCancellation, "Producer should have received cancellation when consumer broke");
     }
 }

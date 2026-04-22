@@ -195,25 +195,65 @@ public class PreviewSignAdapterTests
     }
 
     [Fact(Timeout = 5000)]
-    public void PreviewSign_Authentication_RoutesCorrectSigningParams_ToBackend()
+    public void PreviewSign_Authentication_EncodesAsFlatSingleCredentialMap()
     {
-        // Arrange - two credentials with different signing params
-        var credA = RandomNumberGenerator.GetBytes(32);
-        var credB = RandomNumberGenerator.GetBytes(32);
+        // Arrange - single allowed credential with single signByCredential entry
+        var credA = new ReadOnlyMemory<byte>([0x01, 0x02, 0x03]);
 
         var paramsA = new PreviewSignSigningParams(
-            keyHandle: RandomNumberGenerator.GetBytes(16),
-            tbs: "Data for credential A"u8.ToArray());
-
-        var paramsB = new PreviewSignSigningParams(
-            keyHandle: RandomNumberGenerator.GetBytes(16),
-            tbs: "Data for credential B"u8.ToArray());
+            KeyHandle: new byte[] { 0xAA, 0xBB },
+            Tbs: new byte[] { 0xCC, 0xDD, 0xEE });
 
         var input = new PreviewSignAuthenticationInput(
             new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
             {
-                [credA] = paramsA,
-                [credB] = paramsB
+                [credA] = paramsA
+            });
+
+        var allowCredentials = new List<WebAuthnCredentialDescriptor>
+        {
+            new(credA)
+        };
+
+        // Act - build authentication CBOR
+        var cbor = PreviewSignAdapter.BuildAuthenticationCbor(input, allowCredentials);
+
+        // Assert - CBOR should be a FLAT map {2: kh, 6: tbs} (no outer credential-keyed wrapper)
+        Assert.NotNull(cbor);
+
+        var reader = new CborReader(cbor, CborConformanceMode.Ctap2Canonical);
+        int? mapSize = reader.ReadStartMap();
+        Assert.Equal(2, mapSize);  // Just kh + tbs
+
+        // Key 2: keyHandle
+        Assert.Equal(2, reader.ReadInt32());
+        var keyHandle = reader.ReadByteString();
+        Assert.Equal(paramsA.KeyHandle.ToArray(), keyHandle);
+
+        // Key 6: tbs
+        Assert.Equal(6, reader.ReadInt32());
+        var tbs = reader.ReadByteString();
+        Assert.Equal(paramsA.Tbs.ToArray(), tbs);
+
+        reader.ReadEndMap();
+
+        // Byte-exact hex check
+        string hex = Convert.ToHexString(cbor);
+        Assert.Equal("A20242AABB0643CCDDEE", hex);
+    }
+
+    [Fact(Timeout = 5000)]
+    public void PreviewSign_Authentication_MultipleSignByCredentialEntries_Throws_NotSupported()
+    {
+        // Arrange - two signByCredential entries (multi-credential probe not yet implemented)
+        var credA = new ReadOnlyMemory<byte>([0x01, 0x02]);
+        var credB = new ReadOnlyMemory<byte>([0x03, 0x04]);
+
+        var input = new PreviewSignAuthenticationInput(
+            new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
+            {
+                [credA] = new PreviewSignSigningParams([0xAA], [0xBB]),
+                [credB] = new PreviewSignSigningParams([0xCC], [0xDD])
             });
 
         var allowCredentials = new List<WebAuthnCredentialDescriptor>
@@ -222,50 +262,39 @@ public class PreviewSignAdapterTests
             new(credB)
         };
 
-        // Act - build authentication CBOR
-        var cbor = PreviewSignAdapter.BuildAuthenticationCbor(input, allowCredentials);
+        // Act & Assert
+        var ex = Assert.Throws<WebAuthnClientError>(() =>
+            PreviewSignAdapter.BuildAuthenticationCbor(input, allowCredentials));
 
-        // Assert - CBOR should contain BOTH entries (authenticator filters down)
-        Assert.NotNull(cbor);
+        Assert.Equal(WebAuthnClientErrorCode.NotSupported, ex.Code);
+        Assert.Contains("single credential", ex.Message);
+        Assert.Contains("Phase 9", ex.Message);
+    }
 
-        var reader = new CborReader(cbor, CborConformanceMode.Ctap2Canonical);
-        int? mapSize = reader.ReadStartMap();
-        Assert.Equal(2, mapSize);  // Both credentials present
+    [Fact(Timeout = 5000)]
+    public void PreviewSign_Authentication_SignByCredentialMismatchesAllowList_Throws_InvalidRequest()
+    {
+        // Arrange - signByCredential has credB, but allowCredentials has credA
+        var credA = new ReadOnlyMemory<byte>([0x01, 0x02]);
+        var credB = new ReadOnlyMemory<byte>([0x03, 0x04]);
 
-        // Read first entry (credA or credB, order determined by canonical sort)
-        var firstCredId = reader.ReadByteString();
-        int? firstParamsSize = reader.ReadStartMap();
-        Assert.Equal(2, firstParamsSize);  // kh + tbs
+        var input = new PreviewSignAuthenticationInput(
+            new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
+            {
+                [credB] = new PreviewSignSigningParams([0xAA], [0xBB])
+            });
 
-        var firstKeyHandleKey = reader.ReadInt32();
-        Assert.Equal(2, firstKeyHandleKey);
-        var firstKeyHandle = reader.ReadByteString();
+        var allowCredentials = new List<WebAuthnCredentialDescriptor>
+        {
+            new(credA)
+        };
 
-        var firstTbsKey = reader.ReadInt32();
-        Assert.Equal(6, firstTbsKey);
-        var firstTbs = reader.ReadByteString();
-        reader.ReadEndMap();
+        // Act & Assert
+        var ex = Assert.Throws<WebAuthnClientError>(() =>
+            PreviewSignAdapter.BuildAuthenticationCbor(input, allowCredentials));
 
-        // Read second entry
-        var secondCredId = reader.ReadByteString();
-        int? secondParamsSize = reader.ReadStartMap();
-        Assert.Equal(2, secondParamsSize);
-
-        var secondKeyHandleKey = reader.ReadInt32();
-        Assert.Equal(2, secondKeyHandleKey);
-        var secondKeyHandle = reader.ReadByteString();
-
-        var secondTbsKey = reader.ReadInt32();
-        Assert.Equal(6, secondTbsKey);
-        var secondTbs = reader.ReadByteString();
-        reader.ReadEndMap();
-
-        reader.ReadEndMap();
-
-        // Verify both parameter sets are present (order may vary due to canonical CBOR)
-        var allTbs = new[] { firstTbs, secondTbs };
-        Assert.Contains(paramsA.Tbs.ToArray(), allTbs);
-        Assert.Contains(paramsB.Tbs.ToArray(), allTbs);
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
+        Assert.Contains("must match allowCredentials[0]", ex.Message);
     }
 
     // Helper methods for building mock CBOR structures

@@ -135,8 +135,30 @@ internal static class PreviewSignAdapter
             }
         }
 
-        // All validation passed — encode the full signByCredential map
-        return PreviewSignCbor.EncodeAuthenticationInput(input);
+        // Phase 8.5 limitation: single-credential only (multi-credential probe deferred to Phase 9)
+        if (input.SignByCredential.Count != 1)
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.NotSupported,
+                "previewSign authentication currently requires scoping to a single credential; " +
+                "multi-credential probe-selection (CTAP up=false probe per spec §10.2.1 step 7) " +
+                "is not yet implemented. Reduce signByCredential to one entry matching the single " +
+                "allowed credential, or wait for Phase 9.");
+        }
+
+        // Extract the single credential's params
+        var (credentialId, signingParams) = input.SignByCredential.First();
+
+        // Verify it matches the single allowCredentials entry
+        if (allowCredentials.Count != 1 || !allowCredentials[0].Id.Span.SequenceEqual(credentialId.Span))
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidRequest,
+                "previewSign signByCredential's single entry must match allowCredentials[0]");
+        }
+
+        // Encode the flat single-credential map per spec §10.2.1 step 9
+        return PreviewSignCbor.EncodeAuthenticationInput(signingParams);
     }
 
     /// <summary>

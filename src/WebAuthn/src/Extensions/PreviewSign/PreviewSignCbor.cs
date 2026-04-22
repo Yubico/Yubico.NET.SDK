@@ -76,49 +76,39 @@ internal static class PreviewSignCbor
     }
 
     /// <summary>
-    /// Encodes authentication input (signByCredential dictionary) as canonical CBOR.
+    /// Encodes authentication input for a single chosen credential as canonical CBOR.
     /// </summary>
-    /// <param name="input">The authentication input.</param>
+    /// <param name="signingParams">The signing parameters for the chosen credential.</param>
     /// <returns>
-    /// CBOR-encoded map keyed by credential ID (bstr) with values {2: kh, 6: tbs, 7?: args}.
+    /// CBOR-encoded flat map {2: kh, 6: tbs, 7?: args} for the single credential.
     /// </returns>
     /// <remarks>
-    /// Per CTAP v4 draft §5.2, the wire format is a map from credentialId → signing params.
-    /// Each signing params map contains:
+    /// Per spec §10.2.1 step 9, the client sends the chosen credential's params as a flat map:
     /// - 2 (kh): key handle (bstr)
     /// - 6 (tbs): to-be-signed data (bstr)
-    /// - 7 (args): optional additional args wrapped as bstr
+    /// - 7 (args): optional additional args wrapped as bstr (omitted if null)
+    /// The credential selection happens client-side before encoding (via probe or single-credential scope).
     /// </remarks>
-    public static byte[] EncodeAuthenticationInput(PreviewSignAuthenticationInput input)
+    public static byte[] EncodeAuthenticationInput(PreviewSignSigningParams signingParams)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(input.SignByCredential.Count);
 
-        foreach (var (credId, signingParams) in input.SignByCredential)
+        int paramCount = signingParams.AdditionalArgs.HasValue ? 3 : 2;
+        writer.WriteStartMap(paramCount);
+
+        // Key 2: keyHandle
+        writer.WriteInt32(KeyHandle);
+        writer.WriteByteString(signingParams.KeyHandle.Span);
+
+        // Key 6: tbs
+        writer.WriteInt32(ToBeSigned);
+        writer.WriteByteString(signingParams.Tbs.Span);
+
+        // Key 7: args (optional, wrapped as bstr)
+        if (signingParams.AdditionalArgs.HasValue)
         {
-            // Key: credential ID as byte string
-            writer.WriteByteString(credId.Span);
-
-            // Value: map with kh, tbs, and optional args
-            int paramCount = signingParams.AdditionalArgs.HasValue ? 3 : 2;
-            writer.WriteStartMap(paramCount);
-
-            // Key 2: keyHandle
-            writer.WriteInt32(KeyHandle);
-            writer.WriteByteString(signingParams.KeyHandle.Span);
-
-            // Key 6: tbs
-            writer.WriteInt32(ToBeSigned);
-            writer.WriteByteString(signingParams.Tbs.Span);
-
-            // Key 7: args (optional, wrapped as bstr)
-            if (signingParams.AdditionalArgs.HasValue)
-            {
-                writer.WriteInt32(AdditionalArgs);
-                writer.WriteByteString(signingParams.AdditionalArgs.Value.Span);
-            }
-
-            writer.WriteEndMap();
+            writer.WriteInt32(AdditionalArgs);
+            writer.WriteByteString(signingParams.AdditionalArgs.Value.Span);
         }
 
         writer.WriteEndMap();

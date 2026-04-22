@@ -35,6 +35,14 @@ public sealed record class PreviewSignAuthenticationInput
     /// Gets the dictionary mapping credential IDs to signing parameters.
     /// Keys are the raw credential ID bytes.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Phase 8.5 limitation: Currently only single-credential authentication is supported.
+    /// The dictionary MUST contain exactly one entry matching the single allowed credential.
+    /// Multi-credential probe-selection (CTAP up=false probe per spec §10.2.1 step 7) will be
+    /// implemented in Phase 9.
+    /// </para>
+    /// </remarks>
     public IReadOnlyDictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams> SignByCredential { get; }
 
     /// <summary>

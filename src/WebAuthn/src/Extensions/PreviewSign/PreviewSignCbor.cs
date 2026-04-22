@@ -125,67 +125,6 @@ internal static class PreviewSignCbor
         return writer.Encode();
     }
 
-    /// <summary>
-    /// Decodes signed registration output (algorithm + signature + flags).
-    /// </summary>
-    /// <param name="cbor">CBOR-encoded map with keys {3: alg, 6: sig, 4: flags}.</param>
-    /// <returns>
-    /// A <see cref="PreviewSignRegistrationOutput"/> if decoding succeeds; otherwise null.
-    /// </returns>
-    /// <remarks>
-    /// This is the SIGNED variant of registration output. Per CTAP v4 draft §4, the
-    /// unsigned variant (att-obj) is preferred as the authoritative source.
-    /// This method is provided for completeness but should be considered a fallback.
-    /// </remarks>
-    /// <exception cref="WebAuthnClientError">
-    /// Thrown when CBOR is malformed (InvalidState).
-    /// </exception>
-    public static PreviewSignRegistrationOutput? DecodeSignedRegistrationOutput(ReadOnlyMemory<byte> cbor)
-    {
-        try
-        {
-            var reader = new CborReader(cbor, CborConformanceMode.Ctap2Canonical);
-            int? mapSize = reader.ReadStartMap();
-
-            CoseAlgorithm? algorithm = null;
-            ReadOnlyMemory<byte>? signature = null;
-            PreviewSignFlags? flags = null;
-
-            for (int i = 0; i < mapSize; i++)
-            {
-                int key = reader.ReadInt32();
-                switch (key)
-                {
-                    case Algorithm:
-                        algorithm = new CoseAlgorithm(reader.ReadInt32());
-                        break;
-                    case Signature:
-                        signature = reader.ReadByteString();
-                        break;
-                    case Flags:
-                        flags = (PreviewSignFlags)reader.ReadInt32();
-                        break;
-                    default:
-                        reader.SkipValue();
-                        break;
-                }
-            }
-
-            reader.ReadEndMap();
-
-            // For signed output, we don't have the full GeneratedSigningKey structure
-            // This variant is less trusted per spec §4
-            // Return null to indicate we should prefer the unsigned att-obj variant
-            return null;
-        }
-        catch (Exception ex) when (ex is CborContentException or InvalidOperationException)
-        {
-            throw new WebAuthnClientError(
-                WebAuthnClientErrorCode.InvalidState,
-                "previewSign output is malformed",
-                ex);
-        }
-    }
 
     /// <summary>
     /// Decodes unsigned registration output (nested attestation object).

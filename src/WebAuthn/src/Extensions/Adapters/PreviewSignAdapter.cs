@@ -172,9 +172,6 @@ internal static class PreviewSignAdapter
         // Try unsigned form FIRST (preferred per spec §4)
         var output = PreviewSignCbor.DecodeUnsignedRegistrationOutput(rawCbor);
 
-        // Fallback to signed form
-        output ??= PreviewSignCbor.DecodeSignedRegistrationOutput(rawCbor);
-
         return output;
     }
 

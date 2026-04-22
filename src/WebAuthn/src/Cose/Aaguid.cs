@@ -25,6 +25,8 @@ namespace Yubico.YubiKit.WebAuthn.Cose;
 /// </remarks>
 public readonly struct Aaguid : IEquatable<Aaguid>
 {
+    // NOTE: AAGUID is a public identifier per WebAuthn spec, not sensitive —
+    // byte[] storage in struct is intentional and safe per CLAUDE.md exception.
     private readonly byte[] _bytes;
 
     /// <summary>

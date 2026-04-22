@@ -32,7 +32,7 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client.Status;
 /// </summary>
 public class WebAuthnStatusStreamTests
 {
-    [Fact]
+    [Fact(Timeout = 5000)]
     public async Task MakeCredentialStream_HappyPath_EmitsProcessing_ThenFinished()
     {
         // Arrange - Mock backend that returns success without needing PIN/UV
@@ -84,7 +84,7 @@ public class WebAuthnStatusStreamTests
         Assert.NotNull(finished.Result.PublicKey);
     }
 
-    [Fact]
+    [Fact(Timeout = 5000)]
     public async Task MakeCredentialStream_NoPin_EmitsRequestingPin_AndResumesAfterSubmit()
     {
         // Arrange - Mock backend whose UvDecision wants PIN
@@ -95,7 +95,7 @@ public class WebAuthnStatusStreamTests
         mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(mockInfo);
 
         // Mock GetPinUvTokenAsync to capture the submitted PIN
-        ReadOnlyMemory<byte>? capturedPinBytes = null;
+        byte[]? capturedPinBytes = null;
         var mockTokenSession = new PinUvAuthTokenSession(
             new PinUvAuthProtocolV2(),
             RandomNumberGenerator.GetBytes(32));
@@ -104,7 +104,7 @@ public class WebAuthnStatusStreamTests
             Arg.Any<PinUvAuthMethod>(),
             Arg.Any<PinUvAuthTokenPermissions>(),
             Arg.Any<string?>(),
-            Arg.Do<ReadOnlyMemory<byte>?>(pin => capturedPinBytes = pin),
+            Arg.Do<ReadOnlyMemory<byte>?>(pin => capturedPinBytes = pin.HasValue ? pin.Value.ToArray() : null),
             Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(mockTokenSession);
@@ -162,10 +162,10 @@ public class WebAuthnStatusStreamTests
         // Verify PIN was submitted to backend
         Assert.NotNull(capturedPinBytes);
         var expectedPin = Encoding.UTF8.GetBytes("123456");
-        Assert.Equal(expectedPin, capturedPinBytes.Value.ToArray());
+        Assert.Equal(expectedPin, capturedPinBytes);
     }
 
-    [Fact]
+    [Fact(Timeout = 5000)]
     public async Task MakeCredentialStream_DeduplicatesConsecutiveProcessing()
     {
         // Focused unit test on StatusChannel itself to verify deduplication
@@ -206,7 +206,7 @@ public class WebAuthnStatusStreamTests
         }
     }
 
-    [Fact]
+    [Fact(Timeout = 5000)]
     public async Task MakeCredentialDrainConvenience_AutoRespondsWithProvidedPin()
     {
         // Arrange - Backend wants PIN
@@ -216,7 +216,7 @@ public class WebAuthnStatusStreamTests
             uvSupported: false);
         mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(mockInfo);
 
-        ReadOnlyMemory<byte>? capturedPinBytes = null;
+        byte[]? capturedPinBytes = null;
         var mockTokenSession = new PinUvAuthTokenSession(
             new PinUvAuthProtocolV2(),
             RandomNumberGenerator.GetBytes(32));
@@ -225,7 +225,7 @@ public class WebAuthnStatusStreamTests
             Arg.Any<PinUvAuthMethod>(),
             Arg.Any<PinUvAuthTokenPermissions>(),
             Arg.Any<string?>(),
-            Arg.Do<ReadOnlyMemory<byte>?>(pin => capturedPinBytes = pin),
+            Arg.Do<ReadOnlyMemory<byte>?>(pin => capturedPinBytes = pin.HasValue ? pin.Value.ToArray() : null),
             Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(mockTokenSession);
@@ -273,10 +273,10 @@ public class WebAuthnStatusStreamTests
 
         Assert.NotNull(capturedPinBytes);
         var expectedPin = Encoding.UTF8.GetBytes("654321");
-        Assert.Equal(expectedPin, capturedPinBytes.Value.ToArray());
+        Assert.Equal(expectedPin, capturedPinBytes);
     }
 
-    [Fact]
+    [Fact(Timeout = 5000)]
     public async Task MakeCredentialDrainConvenience_NullPinWhenRequired_ThrowsNotAllowed()
     {
         // Arrange - Backend wants PIN

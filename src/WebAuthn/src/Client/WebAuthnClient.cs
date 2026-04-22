@@ -215,35 +215,43 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
         var channel = new StatusChannel<RegistrationResponse>();
 
-        try
+        // Start producer in background
+        var producerTask = Task.Run(async () =>
         {
-            await channel.WriteAsync(new WebAuthnStatusProcessing(), cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await channel.WriteAsync(new WebAuthnStatusProcessing(), cancellationToken).ConfigureAwait(false);
 
-            // Delegate to core implementation
-            var result = await MakeCredentialCoreAsync(options, channel, cancellationToken).ConfigureAwait(false);
+                // Delegate to core implementation
+                var result = await MakeCredentialCoreAsync(options, channel, cancellationToken).ConfigureAwait(false);
 
-            // Emit terminal success
-            await channel.WriteAsync(new WebAuthnStatusFinished<RegistrationResponse>(result), cancellationToken)
-                .ConfigureAwait(false);
-        }
-        catch (WebAuthnClientError error)
-        {
-            await channel.WriteAsync(new WebAuthnStatusFailed(error), cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            var wrappedError = new WebAuthnClientError(WebAuthnClientErrorCode.Unknown, "Unexpected error", ex);
-            await channel.WriteAsync(new WebAuthnStatusFailed(wrappedError), cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            channel.Complete();
-        }
+                // Emit terminal success
+                await channel.WriteAsync(new WebAuthnStatusFinished<RegistrationResponse>(result), cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (WebAuthnClientError error)
+            {
+                await channel.WriteAsync(new WebAuthnStatusFailed(error), cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                var wrappedError = new WebAuthnClientError(WebAuthnClientErrorCode.Unknown, "Unexpected error", ex);
+                await channel.WriteAsync(new WebAuthnStatusFailed(wrappedError), cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                channel.Complete();
+            }
+        }, cancellationToken);
 
+        // Yield statuses as they arrive
         await foreach (var status in channel.Reader(cancellationToken).ConfigureAwait(false))
         {
             yield return status;
         }
+
+        // Ensure producer completed (propagate exceptions if any)
+        await producerTask.ConfigureAwait(false);
     }
 
     /// <summary>
@@ -270,35 +278,43 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
         var channel = new StatusChannel<IReadOnlyList<MatchedCredential>>();
 
-        try
+        // Start producer in background
+        var producerTask = Task.Run(async () =>
         {
-            await channel.WriteAsync(new WebAuthnStatusProcessing(), cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await channel.WriteAsync(new WebAuthnStatusProcessing(), cancellationToken).ConfigureAwait(false);
 
-            // Delegate to core implementation
-            var result = await GetAssertionCoreAsync(options, channel, cancellationToken).ConfigureAwait(false);
+                // Delegate to core implementation
+                var result = await GetAssertionCoreAsync(options, channel, cancellationToken).ConfigureAwait(false);
 
-            // Emit terminal success
-            await channel.WriteAsync(new WebAuthnStatusFinished<IReadOnlyList<MatchedCredential>>(result), cancellationToken)
-                .ConfigureAwait(false);
-        }
-        catch (WebAuthnClientError error)
-        {
-            await channel.WriteAsync(new WebAuthnStatusFailed(error), cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            var wrappedError = new WebAuthnClientError(WebAuthnClientErrorCode.Unknown, "Unexpected error", ex);
-            await channel.WriteAsync(new WebAuthnStatusFailed(wrappedError), cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            channel.Complete();
-        }
+                // Emit terminal success
+                await channel.WriteAsync(new WebAuthnStatusFinished<IReadOnlyList<MatchedCredential>>(result), cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (WebAuthnClientError error)
+            {
+                await channel.WriteAsync(new WebAuthnStatusFailed(error), cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                var wrappedError = new WebAuthnClientError(WebAuthnClientErrorCode.Unknown, "Unexpected error", ex);
+                await channel.WriteAsync(new WebAuthnStatusFailed(wrappedError), cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                channel.Complete();
+            }
+        }, cancellationToken);
 
+        // Yield statuses as they arrive
         await foreach (var status in channel.Reader(cancellationToken).ConfigureAwait(false))
         {
             yield return status;
         }
+
+        // Ensure producer completed (propagate exceptions if any)
+        await producerTask.ConfigureAwait(false);
     }
 
     /// <summary>
@@ -340,10 +356,9 @@ public sealed class WebAuthnClient : IAsyncDisposable
                     case WebAuthnStatusRequestingPin requestingPin:
                         if (pinOwner is null)
                         {
+                            // Cancel and continue iteration to drain Failed status
                             await requestingPin.Cancel().ConfigureAwait(false);
-                            throw new WebAuthnClientError(
-                                WebAuthnClientErrorCode.NotAllowed,
-                                "PIN required but not provided");
+                            break; // Continue iteration - producer will emit Failed
                         }
 
                         await requestingPin.SubmitPin(pinOwner.Memory[..pinByteCount]).ConfigureAwait(false);
@@ -414,10 +429,9 @@ public sealed class WebAuthnClient : IAsyncDisposable
                     case WebAuthnStatusRequestingPin requestingPin:
                         if (pinOwner is null)
                         {
+                            // Cancel and continue iteration to drain Failed status
                             await requestingPin.Cancel().ConfigureAwait(false);
-                            throw new WebAuthnClientError(
-                                WebAuthnClientErrorCode.NotAllowed,
-                                "PIN required but not provided");
+                            break; // Continue iteration - producer will emit Failed
                         }
 
                         await requestingPin.SubmitPin(pinOwner.Memory[..pinByteCount]).ConfigureAwait(false);

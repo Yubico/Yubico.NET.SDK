@@ -165,9 +165,45 @@ public sealed record class BackendMakeCredentialRequest
 }
 
 /// <summary>
-/// Request parameters for CTAP2 GetAssertion via backend (Phase 4).
+/// Request parameters for CTAP2 GetAssertion via backend.
 /// </summary>
 public sealed record class BackendGetAssertionRequest
 {
-    // Placeholder for Phase 4
+    /// <summary>
+    /// Hash of the client data JSON.
+    /// </summary>
+    public required ReadOnlyMemory<byte> ClientDataHash { get; init; }
+
+    /// <summary>
+    /// Relying party identifier.
+    /// </summary>
+    public required string RpId { get; init; }
+
+    /// <summary>
+    /// List of allowed credential descriptors.
+    /// </summary>
+    /// <remarks>
+    /// If null or empty, the authenticator will search for discoverable credentials.
+    /// </remarks>
+    public IReadOnlyList<PublicKeyCredentialDescriptor>? AllowList { get; init; }
+
+    /// <summary>
+    /// Raw CBOR-encoded extensions map (opaque passthrough).
+    /// </summary>
+    public ReadOnlyMemory<byte>? Extensions { get; init; }
+
+    /// <summary>
+    /// Authenticator options (e.g., up, uv).
+    /// </summary>
+    public IReadOnlyDictionary<string, bool>? Options { get; init; }
+
+    /// <summary>
+    /// PIN/UV auth parameter (signature over clientDataHash).
+    /// </summary>
+    public ReadOnlyMemory<byte>? PinUvAuthParam { get; init; }
+
+    /// <summary>
+    /// PIN/UV auth protocol version (1 or 2).
+    /// </summary>
+    public byte? PinUvAuthProtocol { get; init; }
 }

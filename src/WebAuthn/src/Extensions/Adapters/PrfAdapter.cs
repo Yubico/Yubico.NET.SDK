@@ -58,8 +58,8 @@ internal static class PrfAdapter
                 // CTAP only supports a single salt pair per request
                 if (filteredEvals.Count > 1)
                 {
-                    throw new Client.WebAuthnClientError(
-                        Client.WebAuthnClientErrorCode.NotSupported,
+                    throw new WebAuthnClientError(
+                        WebAuthnClientErrorCode.NotSupported,
                         "PRF evalByCredential matched multiple credentials in allowList; CTAP supports only a single salt pair per request. Scope your allow list or use 'eval' instead.");
                 }
 

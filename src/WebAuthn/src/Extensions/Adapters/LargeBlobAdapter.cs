@@ -32,8 +32,8 @@ internal static class LargeBlobAdapter
         // Check if Required enforcement was requested (not yet implemented)
         if (input.Support == Inputs.LargeBlobSupport.Required)
         {
-            throw new Client.WebAuthnClientError(
-                Client.WebAuthnClientErrorCode.NotSupported,
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.NotSupported,
                 "LargeBlob support 'Required' enforcement is not yet implemented (Phase 6 scope deferred). Use 'Preferred' or upgrade SDK.");
         }
 

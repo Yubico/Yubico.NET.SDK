@@ -117,7 +117,7 @@ public class ExtensionPipelineTests
         };
 
         // Act
-        var result = ExtensionPipeline.ParseRegistrationOutputs(null, authData, options);
+        var result = ExtensionPipeline.ParseRegistrationOutputs(null, authData, null, options);
 
         // Assert
         Assert.Null(result);
@@ -139,7 +139,7 @@ public class ExtensionPipelineTests
         };
 
         // Act
-        var result = ExtensionPipeline.ParseRegistrationOutputs(inputs, authData, options);
+        var result = ExtensionPipeline.ParseRegistrationOutputs(inputs, authData, null, options);
 
         // Assert
         Assert.NotNull(result);
@@ -153,12 +153,11 @@ public class ExtensionPipelineTests
         // Arrange - combine previewSign with standard extensions that have different lengths
         var inputs = new RegistrationExtensionInputs(
             CredProtect: new CredProtectInput(CredProtectPolicy.UserVerificationRequired), // length 11
-            CredBlob: new WebAuthn.Extensions.Inputs.CredBlobInput([0x01, 0x02]), // length 8
+            CredBlob: new WebAuthn.Extensions.Inputs.CredBlobInput(new byte[] { 0x01, 0x02 }), // length 8
             PreviewSign: new PreviewSignRegistrationInput(
-                Algorithms: [CoseAlgorithm.Es256SplitArkgPlaceholder],
-                Flags: PreviewSignFlags.RequireUserVerification)); // length 11
+                algorithms: new[] { CoseAlgorithm.Es256 })); // length 11
         var options = CreateMockOptions();
-        options.UserVerification = UserVerificationPreference.Required;
+        
 
         // Act
         var cborBytes = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs, options);

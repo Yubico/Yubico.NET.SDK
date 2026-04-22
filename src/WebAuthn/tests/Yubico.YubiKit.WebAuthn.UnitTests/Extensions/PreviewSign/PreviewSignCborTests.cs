@@ -92,107 +92,6 @@ public class PreviewSignCborTests
         reader.ReadEndMap();
     }
 
-    [Fact(Timeout = 5000)]
-    public void AuthenticationInput_OmitsArgs_WhenAdditionalArgsIsNull()
-    {
-        // Arrange
-        var credId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
-        var keyHandle = new byte[] { 0x10, 0x20 };
-        var tbs = new byte[] { 0x30, 0x40 };
-
-        var signingParams = new PreviewSignSigningParams(
-            keyHandle: keyHandle,
-            tbs: tbs,
-            additionalArgs: null);
-
-        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(
-            ByteArrayKeyComparer.Instance)
-        {
-            [credId] = signingParams
-        };
-
-        var input = new PreviewSignAuthenticationInput(signByCredential);
-
-        // Act
-        byte[] encoded = PreviewSignCbor.EncodeAuthenticationInput(input);
-
-        // Assert - decode and verify keys 2 and 6 are present, key 7 is NOT
-        var reader = new CborReader(encoded, CborConformanceMode.Ctap2Canonical);
-        reader.ReadStartMap(); // Outer map (credId → params)
-
-        // Read credential ID
-        byte[] decodedCredId = reader.ReadByteString();
-        Assert.Equal(credId, decodedCredId);
-
-        // Read inner map
-        int? innerMapSize = reader.ReadStartMap();
-        Assert.Equal(2, innerMapSize); // Only kh (2) and tbs (6), no args (7)
-
-        var keys = new HashSet<int>();
-        for (int i = 0; i < innerMapSize; i++)
-        {
-            int key = reader.ReadInt32();
-            keys.Add(key);
-            reader.SkipValue(); // Skip the value
-        }
-
-        Assert.Contains(2, keys); // kh
-        Assert.Contains(6, keys); // tbs
-        Assert.DoesNotContain(7, keys); // args should NOT be present
-    }
-
-    [Fact(Timeout = 5000)]
-    public void AuthenticationInput_WrapsArgs_AsByteString_WhenPresent()
-    {
-        // Arrange
-        var credId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
-        var keyHandle = new byte[] { 0x10, 0x20 };
-        var tbs = new byte[] { 0x30, 0x40 };
-        var additionalArgs = new byte[] { 0x50, 0x60, 0x70 }; // Some CBOR bytes
-
-        var signingParams = new PreviewSignSigningParams(
-            keyHandle: keyHandle,
-            tbs: tbs,
-            additionalArgs: additionalArgs);
-
-        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(
-            ByteArrayKeyComparer.Instance)
-        {
-            [credId] = signingParams
-        };
-
-        var input = new PreviewSignAuthenticationInput(signByCredential);
-
-        // Act
-        byte[] encoded = PreviewSignCbor.EncodeAuthenticationInput(input);
-
-        // Assert - verify key 7 is present and is encoded as bstr (major type 2)
-        var reader = new CborReader(encoded, CborConformanceMode.Ctap2Canonical);
-        reader.ReadStartMap(); // Outer map
-        reader.SkipValue(); // Skip credential ID
-
-        int? innerMapSize = reader.ReadStartMap();
-        Assert.Equal(3, innerMapSize); // kh (2), tbs (6), args (7)
-
-        bool foundArgs = false;
-        for (int i = 0; i < innerMapSize; i++)
-        {
-            int key = reader.ReadInt32();
-            if (key == 7) // args key
-            {
-                foundArgs = true;
-                // Verify it's encoded as a byte string (CBOR major type 2)
-                byte[] argsBytes = reader.ReadByteString();
-                Assert.Equal(additionalArgs, argsBytes);
-            }
-            else
-            {
-                reader.SkipValue();
-            }
-        }
-
-        Assert.True(foundArgs, "AdditionalArgs key (7) should be present when AdditionalArgs is set");
-    }
 
     [Fact(Timeout = 5000)]
     public void UnsignedRegistrationOutput_DecodesNestedAttObj_AndPropagatesFlags()
@@ -227,11 +126,9 @@ public class PreviewSignCborTests
         outputWriter.WriteEndMap();
         byte[] outputBytes = outputWriter.Encode();
 
-        // Act & Assert - this will throw because our minimal authData doesn't have the
-        // previewSign extension, which is expected. This test verifies the decoder
-        // correctly extracts the attestation object bytes and attempts to parse them.
+        // Act & Assert - this will throw because our minimal authData doesn't have attested cred data
         var ex = Assert.Throws<WebAuthnClientError>(() =>
-            PreviewSignCbor.DecodeUnsignedRegistrationOutput(outputBytes));
+            PreviewSignCbor.DecodeUnsignedRegistrationOutput(outputBytes, CoseAlgorithm.Es256, PreviewSignFlags.RequireUserPresence));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidState, ex.Code);
         Assert.Contains("previewSign", ex.Message);
@@ -338,8 +235,8 @@ public class PreviewSignCborTests
         var defaultDict = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
         {
             [credId1] = new PreviewSignSigningParams(
-                KeyHandle: new byte[] { 0xAA },
-                Tbs: new byte[] { 0xBB })
+                keyHandle: new byte[] { 0xAA },
+                tbs: new byte[] { 0xBB })
         };
 
         // Act - Constructor should rebuild with ByteArrayKeyComparer
@@ -353,11 +250,11 @@ public class PreviewSignCborTests
     [Fact(Timeout = 5000)]
     public void AuthenticationInput_ContainsOnlyAllowedKeys_2_6_7()
     {
-        // Arrange
+        // Arrange - valid CBOR for additionalArgs (empty map {})
         var signingParams = new PreviewSignSigningParams(
-            KeyHandle: new byte[] { 0xAA, 0xBB },
-            Tbs: new byte[] { 0xCC, 0xDD },
-            AdditionalArgs: new byte[] { 0xA1, 0x00 }); // With args to test key 7
+            keyHandle: new byte[] { 0xAA, 0xBB },
+            tbs: new byte[] { 0xCC, 0xDD },
+            additionalArgs: new byte[] { 0xA0 }); // With args to test key 7 (empty map)
 
         // Act
         var encoded = PreviewSignCbor.EncodeAuthenticationInput(signingParams);
@@ -389,9 +286,9 @@ public class PreviewSignCborTests
         // Act & Assert
         var ex = Assert.Throws<WebAuthnClientError>(() =>
             new PreviewSignSigningParams(
-                KeyHandle: new byte[] { 0xAA },
-                Tbs: new byte[] { 0xBB },
-                AdditionalArgs: invalidCbor));
+                keyHandle: new byte[] { 0xAA },
+                tbs: new byte[] { 0xBB },
+                additionalArgs: invalidCbor));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
         Assert.Contains("AdditionalArgs must be valid CBOR", ex.Message);

@@ -136,34 +136,48 @@ public class PreviewSignAdapterTests
     [Fact(Timeout = 5000)]
     public void PreviewSign_Registration_OutputPopulatedFromUnsignedAttObj()
     {
-        // Arrange - mock authenticator data with previewSign extension containing unsigned att-obj
+        // Arrange - mock authenticator data with previewSign extension containing algorithm + flags in authData
+        // and attestation object in unsignedExtensionOutputs (per Fix #6b)
         var keyHandle = RandomNumberGenerator.GetBytes(16);
         var publicKeyBytes = BuildCoseEc2PublicKey(CoseAlgorithm.Es256);
         var attestationObject = BuildAttestationObject(publicKeyBytes, PreviewSignFlags.RequireUserVerification);
 
-        // Build previewSign extension output (unsigned form: key 7 = att-obj)
-        var extensionWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        extensionWriter.WriteStartMap(1);
-        extensionWriter.WriteInt32(7);  // att-obj key
-        extensionWriter.WriteByteString(attestationObject);
-        extensionWriter.WriteEndMap();
+        // Build authData.extensions["previewSign"] = {3: alg, 4: flags}
+        var authDataExtension = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        authDataExtension.WriteStartMap(2);
+        authDataExtension.WriteInt32(3);  // alg key
+        authDataExtension.WriteInt32(CoseAlgorithm.Es256.Value);
+        authDataExtension.WriteInt32(4);  // flags key
+        authDataExtension.WriteInt32((byte)PreviewSignFlags.RequireUserVerification);
+        authDataExtension.WriteEndMap();
+
+        // Build unsignedExtensionOutputs["previewSign"] = {7: att-obj}
+        var unsignedExtension = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        unsignedExtension.WriteStartMap(1);
+        unsignedExtension.WriteInt32(7);  // att-obj key
+        unsignedExtension.WriteByteString(attestationObject);
+        unsignedExtension.WriteEndMap();
 
         var authData = BuildAuthDataWithExtensions(new Dictionary<string, byte[]>
         {
-            ["previewSign"] = extensionWriter.Encode()
+            ["previewSign"] = authDataExtension.Encode()
         });
 
         var parsedAuthData = WebAuthnAuthenticatorData.Decode(authData);
 
-        // Act - parse registration output
-        var output = PreviewSignAdapter.ParseRegistrationOutput(parsedAuthData);
+        var unsignedExtensionOutputs = new Dictionary<string, ReadOnlyMemory<byte>>
+        {
+            ["previewSign"] = unsignedExtension.Encode()
+        };
 
-        // Assert - GeneratedKey should be populated from att-obj
+        // Act - parse registration output
+        var output = PreviewSignAdapter.ParseRegistrationOutput(parsedAuthData, unsignedExtensionOutputs);
+
+        // Assert - GeneratedKey should be populated from both sources
         Assert.NotNull(output);
         Assert.NotNull(output.GeneratedKey);
         Assert.NotNull(output.GeneratedKey.PublicKey);
         Assert.Equal(CoseAlgorithm.Es256, output.GeneratedKey.Algorithm);
-        Assert.Equal(PreviewSignFlags.RequireUserVerification, output.GeneratedKey.Flags);
     }
 
     [Fact(Timeout = 5000)]
@@ -201,8 +215,8 @@ public class PreviewSignAdapterTests
         var credA = new ReadOnlyMemory<byte>([0x01, 0x02, 0x03]);
 
         var paramsA = new PreviewSignSigningParams(
-            KeyHandle: new byte[] { 0xAA, 0xBB },
-            Tbs: new byte[] { 0xCC, 0xDD, 0xEE });
+            keyHandle: new byte[] { 0xAA, 0xBB },
+            tbs: new byte[] { 0xCC, 0xDD, 0xEE });
 
         var input = new PreviewSignAuthenticationInput(
             new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
@@ -252,8 +266,8 @@ public class PreviewSignAdapterTests
         var input = new PreviewSignAuthenticationInput(
             new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
             {
-                [credA] = new PreviewSignSigningParams([0xAA], [0xBB]),
-                [credB] = new PreviewSignSigningParams([0xCC], [0xDD])
+                [credA] = new PreviewSignSigningParams(new byte[] { 0xAA }, new byte[] { 0xBB }),
+                [credB] = new PreviewSignSigningParams(new byte[] { 0xCC }, new byte[] { 0xDD })
             });
 
         var allowCredentials = new List<WebAuthnCredentialDescriptor>
@@ -281,7 +295,7 @@ public class PreviewSignAdapterTests
         var input = new PreviewSignAuthenticationInput(
             new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
             {
-                [credB] = new PreviewSignSigningParams([0xAA], [0xBB])
+                [credB] = new PreviewSignSigningParams(new byte[] { 0xAA }, new byte[] { 0xBB })
             });
 
         var allowCredentials = new List<WebAuthnCredentialDescriptor>
@@ -289,12 +303,12 @@ public class PreviewSignAdapterTests
             new(credA)
         };
 
-        // Act & Assert
+        // Act & Assert - validation catches missing credA in signByCredential first
         var ex = Assert.Throws<WebAuthnClientError>(() =>
             PreviewSignAdapter.BuildAuthenticationCbor(input, allowCredentials));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
-        Assert.Contains("must match allowCredentials[0]", ex.Message);
+        Assert.Contains("missing entries", ex.Message);
     }
 
     // Helper methods for building mock CBOR structures

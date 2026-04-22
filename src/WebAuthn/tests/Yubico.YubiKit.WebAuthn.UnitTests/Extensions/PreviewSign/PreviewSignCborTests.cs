@@ -349,4 +349,34 @@ public class PreviewSignCborTests
         Assert.True(input.SignByCredential.ContainsKey(credId2Copy));
         Assert.Equal(0xAA, input.SignByCredential[credId2Copy].KeyHandle.Span[0]);
     }
+
+    [Fact(Timeout = 5000)]
+    public void AuthenticationInput_ContainsOnlyAllowedKeys_2_6_7()
+    {
+        // Arrange
+        var signingParams = new PreviewSignSigningParams(
+            KeyHandle: new byte[] { 0xAA, 0xBB },
+            Tbs: new byte[] { 0xCC, 0xDD },
+            AdditionalArgs: new byte[] { 0xA1, 0x00 }); // With args to test key 7
+
+        // Act
+        var encoded = PreviewSignCbor.EncodeAuthenticationInput(signingParams);
+
+        // Assert - Decode and verify keys are subset of {2, 6, 7}
+        var reader = new CborReader(encoded, CborConformanceMode.Ctap2Canonical);
+        int count = reader.ReadStartMap()!.Value;
+        var seenKeys = new HashSet<int>();
+
+        for (int i = 0; i < count; i++)
+        {
+            seenKeys.Add(reader.ReadInt32());
+            reader.SkipValue();
+        }
+
+        reader.ReadEndMap();
+
+        var allowedKeys = new HashSet<int> { 2, 6, 7 };
+        Assert.Subset(allowedKeys, seenKeys); // All seen keys must be in allowed set
+        Assert.Equal(3, seenKeys.Count); // Should have all 3 when args is present
+    }
 }

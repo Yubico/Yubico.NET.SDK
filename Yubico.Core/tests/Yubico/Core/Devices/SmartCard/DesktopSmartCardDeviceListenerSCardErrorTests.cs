@@ -33,6 +33,29 @@ using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.SmartCard.UnitTests
 {
+    /// <summary>
+    /// Tests for smart card listener error handling, recovery, and backoff behavior.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Timing-based assertion strategy:</b> Several tests use <c>Thread.Sleep</c> to
+    /// observe listener behavior over a fixed window, then assert that call counts or
+    /// elapsed times fall within expected bounds. This is necessary because the listener
+    /// runs on a background thread with inherently asynchronous behavior.
+    /// </para>
+    /// <para>
+    /// Thresholds include significant headroom above expected values to avoid flaky failures
+    /// on slow CI runners: spin-prevention tests allow 15 calls in 600 ms (expected ~2,
+    /// headroom ~7x); dispose-speed tests allow 200 ms (expected &lt;10 ms, headroom ~20x);
+    /// recovery tests observe for 2500 ms with assertion ">= 2 calls" (expected within ~1 s,
+    /// headroom ~2.5x).
+    /// </para>
+    /// <para>
+    /// The <c>[Collection("SCardErrorTests")]</c> attribute disables parallel execution
+    /// with other tests in this collection, preventing thread-pool contention from skewing
+    /// timing measurements.
+    /// </para>
+    /// </remarks>
     [Collection("SCardErrorTests")]
     public class DesktopSmartCardDeviceListenerSCardErrorTests
     {
@@ -94,6 +117,34 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         }
 
         // -----------------------------------------------------------------------------------------
+        // Unknown / unclassified error codes — fallthrough backoff path
+        //
+        // HandleSCardGetStatusChangeResult lines 570-578: error codes not matched by
+        // UpdateContextIfNonCritical fall through to a backoff sleep. This prevents a tight
+        // spin on persistent unrecognized errors (e.g. future WinSCard error codes).
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenGetStatusChangeReturnsUnknownError_LoopDoesNotSpin()
+        {
+            const uint unknownError = 0xDEADBEEF;
+            var fake = new FakeSCardInterop(
+                probeResult: ErrorCode.SCARD_E_TIMEOUT,
+                defaultResult: unknownError);
+
+            using var listener = new DesktopSmartCardDeviceListener(fake);
+
+            Thread.Sleep(600);
+
+            int callCount = fake.GetStatusChangeCallCount;
+
+            Assert.True(
+                callCount < 15,
+                $"GetStatusChange was called {callCount} times in ~600ms. " +
+                "Expected < 15: unrecognised error codes must not cause an unthrottled polling loop.");
+        }
+
+        // -----------------------------------------------------------------------------------------
         // Issue #434 — SCARD_E_SYSTEM_CANCELLED (RDS session disconnect/logoff) also recovers
         // -----------------------------------------------------------------------------------------
 
@@ -112,6 +163,36 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             => AssertErrorTriggersContextReestablishment(
                 ErrorCode.ERROR_BROKEN_PIPE,
                 "ERROR_BROKEN_PIPE (RDS smart card redirection error)");
+
+        // -----------------------------------------------------------------------------------------
+        // Issue #434 — SCARD_E_SERVICE_STOPPED (Smart Card Service stopped) also recovers
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenGetStatusChangeReturnsServiceStopped_ContextIsReestablished()
+            => AssertErrorTriggersContextReestablishment(
+                ErrorCode.SCARD_E_SERVICE_STOPPED,
+                "SCARD_E_SERVICE_STOPPED (Smart Card Service stopped)");
+
+        // -----------------------------------------------------------------------------------------
+        // Issue #434 — SCARD_E_NO_READERS_AVAILABLE (no readers present) also recovers
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenGetStatusChangeReturnsNoReadersAvailable_ContextIsReestablished()
+            => AssertErrorTriggersContextReestablishment(
+                ErrorCode.SCARD_E_NO_READERS_AVAILABLE,
+                "SCARD_E_NO_READERS_AVAILABLE (no readers present)");
+
+        // -----------------------------------------------------------------------------------------
+        // Issue #434 — SCARD_E_NO_SERVICE (Smart Card Service not running) also recovers
+        // -----------------------------------------------------------------------------------------
+
+        [Fact]
+        public void WhenGetStatusChangeReturnsNoService_ContextIsReestablished()
+            => AssertErrorTriggersContextReestablishment(
+                ErrorCode.SCARD_E_NO_SERVICE,
+                "SCARD_E_NO_SERVICE (Smart Card Service not running)");
 
         /// <summary>
         /// Verifies that a given non-critical SCard error triggers context re-establishment.

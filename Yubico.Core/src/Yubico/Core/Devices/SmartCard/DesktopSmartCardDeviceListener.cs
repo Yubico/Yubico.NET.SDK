@@ -38,7 +38,7 @@ namespace Yubico.Core.Devices.SmartCard
         private SCARD_READER_STATE[] _readerStates;
 
         private Thread? _listenerThread;
-        private bool _isListening;
+        private volatile bool _isListening;
         private bool _isDisposed;
         private readonly object _startStopLock = new object();
         private readonly object _disposeLock = new object();
@@ -496,6 +496,7 @@ namespace Yubico.Core.Devices.SmartCard
 
             _context = newContext;
             _readerStates = GetReaderStateList();
+            _log.LogDebug("Smart card context re-established successfully.");
         }
 
         /// <summary>

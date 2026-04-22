@@ -66,7 +66,10 @@ namespace Yubico.Core.Performance.Benchmarks
         [GlobalCleanup]
         public void Report()
         {
-            // Last-iteration counters surface to the BDN stdout file.
+            // FORMAT CONTRACT — parsed by .github/workflows/perf-regression.yml (lines 132, 140).
+            // CI extracts counts via regex: \[FINAL\] Legacy invocations:\s*(\d+) and
+            // \[FINAL\] Fixed\s+invocations:\s*(\d+). Do not change the format without
+            // updating the workflow.
             Console.WriteLine($"[FINAL] Legacy invocations: {_legacyMock?.Invocations ?? -1}");
             Console.WriteLine($"[FINAL] Fixed  invocations: {_fixedMock?.Invocations ?? -1}");
         }

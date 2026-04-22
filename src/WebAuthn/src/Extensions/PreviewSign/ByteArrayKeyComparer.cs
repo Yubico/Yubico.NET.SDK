@@ -44,9 +44,7 @@ internal sealed class ByteArrayKeyComparer : IEqualityComparer<ReadOnlyMemory<by
     /// Returns a hash code for a byte sequence.
     /// </summary>
     /// <remarks>
-    /// Uses the first 4 bytes (or fewer if shorter) as a simple hash.
-    /// This is not a cryptographic hash but provides reasonable distribution
-    /// for credential IDs which are typically random.
+    /// Uses full-content hashing via <see cref="HashCode.AddBytes"/> for robust distribution.
     /// </remarks>
     public int GetHashCode(ReadOnlyMemory<byte> obj)
     {
@@ -56,17 +54,8 @@ internal sealed class ByteArrayKeyComparer : IEqualityComparer<ReadOnlyMemory<by
             return 0;
         }
 
-        if (span.Length >= 4)
-        {
-            return BinaryPrimitives.ReadInt32LittleEndian(span[..4]);
-        }
-
-        // For shorter sequences, combine available bytes
-        int hash = 0;
-        for (int i = 0; i < span.Length; i++)
-        {
-            hash = (hash << 8) | span[i];
-        }
-        return hash;
+        var hashCode = new HashCode();
+        hashCode.AddBytes(span);
+        return hashCode.ToHashCode();
     }
 }

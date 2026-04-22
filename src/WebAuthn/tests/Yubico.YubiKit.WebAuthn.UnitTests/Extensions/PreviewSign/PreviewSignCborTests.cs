@@ -299,4 +299,32 @@ public class PreviewSignCborTests
         Assert.Equal(WebAuthnClientErrorCode.InvalidState, ex.Code);
         Assert.Contains("malformed", ex.Message);
     }
+
+    [Fact(Timeout = 5000)]
+    public void ByteArrayKeyComparer_HashesEqualBytesIdentically_AndDifferentBytesDifferently()
+    {
+        // Arrange
+        var comparer = ByteArrayKeyComparer.Instance;
+
+        var bytes1a = new ReadOnlyMemory<byte>([0x01, 0x02, 0x03, 0x04, 0x05]);
+        var bytes1b = new ReadOnlyMemory<byte>([0x01, 0x02, 0x03, 0x04, 0x05]); // same content, different array
+        var bytes2 = new ReadOnlyMemory<byte>([0x01, 0x02, 0x03, 0x04, 0x06]); // different last byte
+        var bytes3 = new ReadOnlyMemory<byte>([0xFF, 0xFE, 0xFD]); // different length and content
+
+        // Act
+        int hash1a = comparer.GetHashCode(bytes1a);
+        int hash1b = comparer.GetHashCode(bytes1b);
+        int hash2 = comparer.GetHashCode(bytes2);
+        int hash3 = comparer.GetHashCode(bytes3);
+
+        // Assert - Equal content must produce equal hashes
+        Assert.Equal(hash1a, hash1b);
+        Assert.True(comparer.Equals(bytes1a, bytes1b));
+
+        // Different content should produce different hashes (not guaranteed, but highly likely with full-content hashing)
+        // At minimum, verify the equality contract holds
+        Assert.False(comparer.Equals(bytes1a, bytes2));
+        Assert.False(comparer.Equals(bytes1a, bytes3));
+        Assert.False(comparer.Equals(bytes2, bytes3));
+    }
 }

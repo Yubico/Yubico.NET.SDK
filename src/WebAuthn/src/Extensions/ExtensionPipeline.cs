@@ -1,0 +1,237 @@
+// Copyright Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.WebAuthn.Client.Registration;
+using Yubico.YubiKit.WebAuthn.Extensions.Adapters;
+using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
+using Yubico.YubiKit.WebAuthn.Preferences;
+
+namespace Yubico.YubiKit.WebAuthn.Extensions;
+
+/// <summary>
+/// Orchestrates extension input/output processing for WebAuthn operations.
+/// </summary>
+internal sealed class ExtensionPipeline
+{
+    /// <summary>
+    /// Builds the CBOR extensions map for registration (MakeCredential).
+    /// </summary>
+    /// <param name="inputs">The extension inputs.</param>
+    /// <returns>The CBOR-encoded extensions map, or null if no extensions requested.</returns>
+    public static ReadOnlyMemory<byte>? BuildRegistrationExtensionsCbor(RegistrationExtensionInputs? inputs)
+    {
+        if (inputs is null)
+        {
+            return null;
+        }
+
+        var builder = new ExtensionBuilder();
+        var hasExtensions = false;
+
+        // CredProtect
+        if (inputs.CredProtect is not null)
+        {
+            CredProtectAdapter.ApplyToBuilder(builder, inputs.CredProtect);
+            hasExtensions = true;
+        }
+
+        // CredBlob
+        if (inputs.CredBlob is not null)
+        {
+            CredBlobAdapter.ApplyToBuilder(builder, inputs.CredBlob);
+            hasExtensions = true;
+        }
+
+        // MinPinLength
+        if (inputs.MinPinLength is not null)
+        {
+            MinPinLengthAdapter.ApplyToBuilder(builder);
+            hasExtensions = true;
+        }
+
+        // LargeBlob
+        if (inputs.LargeBlob is not null)
+        {
+            LargeBlobAdapter.ApplyToBuilder(builder, inputs.LargeBlob);
+            hasExtensions = true;
+        }
+
+        // PRF
+        if (inputs.Prf is not null)
+        {
+            PrfAdapter.ApplyToBuilderForRegistration(builder, inputs.Prf);
+            hasExtensions = true;
+        }
+
+        // CredProps - no CTAP input, client-side only
+        // (credProps is derived from residentKey option, not sent to authenticator)
+
+        if (!hasExtensions)
+        {
+            return null;
+        }
+
+        return builder.Build();
+    }
+
+    /// <summary>
+    /// Builds the CBOR extensions map for authentication (GetAssertion).
+    /// </summary>
+    /// <param name="inputs">The extension inputs.</param>
+    /// <param name="allowCredentials">The allow list for filtering per-credential inputs.</param>
+    /// <returns>The CBOR-encoded extensions map, or null if no extensions requested.</returns>
+    public static ReadOnlyMemory<byte>? BuildAuthenticationExtensionsCbor(
+        AuthenticationExtensionInputs? inputs,
+        IReadOnlyList<WebAuthnCredentialDescriptor>? allowCredentials)
+    {
+        if (inputs is null)
+        {
+            return null;
+        }
+
+        var builder = new ExtensionBuilder();
+        var hasExtensions = false;
+
+        // LargeBlob (read operations during assertion)
+        if (inputs.LargeBlob is not null)
+        {
+            // Phase 6 simplified scope - just signal support
+            hasExtensions = true;
+        }
+
+        // PRF
+        if (inputs.Prf is not null)
+        {
+            PrfAdapter.ApplyToBuilderForAuthentication(builder, inputs.Prf, allowCredentials);
+            hasExtensions = true;
+        }
+
+        if (!hasExtensions)
+        {
+            return null;
+        }
+
+        return builder.Build();
+    }
+
+    /// <summary>
+    /// Parses registration extension outputs from authenticator data.
+    /// </summary>
+    /// <param name="inputs">The original inputs (to know what was requested).</param>
+    /// <param name="authData">The authenticator data with extension outputs.</param>
+    /// <param name="originalOptions">The original registration options.</param>
+    /// <returns>The parsed extension outputs, or null if no extensions were requested.</returns>
+    public static RegistrationExtensionOutputs? ParseRegistrationOutputs(
+        RegistrationExtensionInputs? inputs,
+        WebAuthnAuthenticatorData authData,
+        RegistrationOptions originalOptions)
+    {
+        if (inputs is null)
+        {
+            return null;
+        }
+
+        Outputs.CredProtectOutput? credProtect = null;
+        Outputs.CredBlobOutput? credBlob = null;
+        Outputs.MinPinLengthOutput? minPinLength = null;
+        Outputs.LargeBlobRegistrationOutput? largeBlob = null;
+        Outputs.PrfRegistrationOutput? prf = null;
+        Outputs.CredPropsOutput? credProps = null;
+
+        // CredProtect
+        if (inputs.CredProtect is not null)
+        {
+            credProtect = CredProtectAdapter.ParseRegistrationOutput(authData.ParsedExtensions);
+        }
+
+        // CredBlob
+        if (inputs.CredBlob is not null)
+        {
+            credBlob = CredBlobAdapter.ParseRegistrationOutput(authData.ParsedExtensions);
+        }
+
+        // MinPinLength
+        if (inputs.MinPinLength is not null)
+        {
+            minPinLength = MinPinLengthAdapter.ParseOutput(authData.ParsedExtensions);
+        }
+
+        // LargeBlob
+        if (inputs.LargeBlob is not null)
+        {
+            largeBlob = LargeBlobAdapter.ParseRegistrationOutput(authData.ParsedExtensions);
+        }
+
+        // PRF
+        if (inputs.Prf is not null)
+        {
+            prf = PrfAdapter.ParseRegistrationOutput(authData.ParsedExtensions);
+        }
+
+        // CredProps - client-derived from residentKey option
+        if (inputs.CredProps is not null)
+        {
+            credProps = CredPropsAdapter.DeriveOutput(originalOptions.ResidentKey);
+        }
+
+        return new RegistrationExtensionOutputs(
+            CredProtect: credProtect,
+            CredBlob: credBlob,
+            MinPinLength: minPinLength,
+            LargeBlob: largeBlob,
+            Prf: prf,
+            CredProps: credProps);
+    }
+
+    /// <summary>
+    /// Parses authentication extension outputs from authenticator data.
+    /// </summary>
+    /// <param name="inputs">The original inputs (to know what was requested).</param>
+    /// <param name="authData">The authenticator data with extension outputs.</param>
+    /// <returns>The parsed extension outputs, or null if no extensions were requested.</returns>
+    public static AuthenticationExtensionOutputs? ParseAuthenticationOutputs(
+        AuthenticationExtensionInputs? inputs,
+        WebAuthnAuthenticatorData authData)
+    {
+        if (inputs is null)
+        {
+            return null;
+        }
+
+        Outputs.CredBlobAssertionOutput? credBlob = null;
+        Outputs.LargeBlobAuthenticationOutput? largeBlob = null;
+        Outputs.PrfAuthenticationOutput? prf = null;
+
+        // CredBlob - always check (can be present even if not explicitly requested)
+        credBlob = CredBlobAdapter.ParseAuthenticationOutput(authData.ParsedExtensions);
+
+        // LargeBlob
+        if (inputs.LargeBlob is not null)
+        {
+            largeBlob = LargeBlobAdapter.ParseAuthenticationOutput(authData.ParsedExtensions);
+        }
+
+        // PRF
+        if (inputs.Prf is not null)
+        {
+            prf = PrfAdapter.ParseAuthenticationOutput(authData.ParsedExtensions);
+        }
+
+        return new AuthenticationExtensionOutputs(
+            CredBlob: credBlob,
+            LargeBlob: largeBlob,
+            Prf: prf);
+    }
+}

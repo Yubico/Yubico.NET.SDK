@@ -89,12 +89,14 @@ public sealed class MatchedCredential
     /// The underlying authenticator assertion was already computed during credential
     /// matching; this method packages that result without additional hardware interaction.
     /// </para>
+    /// <para>
+    /// The cancellation token can interrupt waiting for the response factory if it is
+    /// still computing when this method is called. The factory itself runs to completion;
+    /// cancellation only affects the wait.
+    /// </para>
     /// </remarks>
     public Task<AuthenticationResponse> SelectAsync(CancellationToken cancellationToken = default)
     {
-        // Note: The Lazy pattern ignores the cancellationToken for simplicity,
-        // since the response is already computed. If cancellation is needed,
-        // the caller can cancel the outer GetAssertionAsync operation.
-        return _responseFactory.Value;
+        return _responseFactory.Value.WaitAsync(cancellationToken);
     }
 }

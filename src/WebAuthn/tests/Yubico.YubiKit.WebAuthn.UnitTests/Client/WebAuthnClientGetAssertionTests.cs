@@ -385,4 +385,44 @@ public class WebAuthnClientGetAssertionTests
 
         return AuthenticatorInfo.Decode(writer.Encode());
     }
+
+    [Fact(Timeout = 5000)]
+    public async Task MatchedCredential_SelectAsync_HonorsCancellationToken()
+    {
+        // Arrange - Create a MatchedCredential with a slow-completing factory
+        var credentialId = RandomNumberGenerator.GetBytes(32);
+        var tcs = new TaskCompletionSource<AuthenticationResponse>();
+
+        var mockResponse = new AuthenticationResponse
+        {
+            CredentialId = credentialId,
+            RawAuthenticatorData = BuildAuthData(),
+            Signature = RandomNumberGenerator.GetBytes(64),
+            SignCount = 1,
+            ClientData = WebAuthnClientData.Create("webauthn.get", RandomNumberGenerator.GetBytes(32), _origin, null, null),
+            ClientExtensionResults = null,
+            AuthenticatorData = null,
+            User = null
+        };
+
+        // Use reflection or create via internal constructor pattern
+        var match = new MatchedCredential(
+            credentialId,
+            user: null,
+            requiresSelection: false,
+            responseFactory: _ => tcs.Task);
+
+        // Act - Call with already-cancelled token (factory hasn't completed yet)
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => match.SelectAsync(cts.Token));
+
+        // Complete the factory
+        tcs.SetResult(mockResponse);
+
+        // Verify calling again with None works (lazy is now complete)
+        var response = await match.SelectAsync(CancellationToken.None);
+        Assert.NotNull(response);
+        Assert.Equal(credentialId, response.CredentialId.ToArray());
+    }
 }

@@ -840,7 +840,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         }
 
         // Build extensions CBOR via pipeline
-        var extensionsCbor = ExtensionPipeline.BuildRegistrationExtensionsCbor(options.Extensions);
+        var extensionsCbor = ExtensionPipeline.BuildRegistrationExtensionsCbor(options.Extensions, options);
 
         return new BackendMakeCredentialRequest
         {

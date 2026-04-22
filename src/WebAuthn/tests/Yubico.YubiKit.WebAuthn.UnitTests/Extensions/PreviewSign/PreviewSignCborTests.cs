@@ -379,4 +379,21 @@ public class PreviewSignCborTests
         Assert.Subset(allowedKeys, seenKeys); // All seen keys must be in allowed set
         Assert.Equal(3, seenKeys.Count); // Should have all 3 when args is present
     }
+
+    [Fact(Timeout = 5000)]
+    public void SigningParams_AdditionalArgs_NotCbor_Throws()
+    {
+        // Arrange - Invalid CBOR (random bytes)
+        var invalidCbor = new byte[] { 0xFF, 0xFE, 0xFD };
+
+        // Act & Assert
+        var ex = Assert.Throws<WebAuthnClientError>(() =>
+            new PreviewSignSigningParams(
+                KeyHandle: new byte[] { 0xAA },
+                Tbs: new byte[] { 0xBB },
+                AdditionalArgs: invalidCbor));
+
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
+        Assert.Contains("AdditionalArgs must be valid CBOR", ex.Message);
+    }
 }

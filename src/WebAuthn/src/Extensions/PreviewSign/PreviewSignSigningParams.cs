@@ -80,6 +80,23 @@ public sealed record class PreviewSignSigningParams
                 "previewSign Tbs (to-be-signed data) must not be empty");
         }
 
+        // Validate AdditionalArgs is well-formed CBOR if present
+        if (additionalArgs.HasValue)
+        {
+            try
+            {
+                var reader = new System.Formats.Cbor.CborReader(additionalArgs.Value, System.Formats.Cbor.CborConformanceMode.Ctap2Canonical);
+                reader.SkipValue(); // Attempt to parse one CBOR data item
+            }
+            catch (System.Formats.Cbor.CborContentException ex)
+            {
+                throw new WebAuthnClientError(
+                    WebAuthnClientErrorCode.InvalidRequest,
+                    "previewSign AdditionalArgs must be valid CBOR-encoded data",
+                    ex);
+            }
+        }
+
         KeyHandle = keyHandle;
         Tbs = tbs;
         AdditionalArgs = additionalArgs;

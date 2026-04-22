@@ -31,22 +31,52 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// - kh (key handle) = 2
 /// - alg (algorithm) = 3
 /// - flags (UP/UV policy) = 4
-/// - tbs (to-be-signed) = 6
-/// - args (additional args) = 7
-/// - sig (signature) = 6
-/// - att-obj (attestation object) = 7
+/// - tbs (to-be-signed) = 6 (authentication input)
+/// - args (additional args) = 7 (authentication input)
+/// - sig (signature) = 6 (authentication output)
+/// - att-obj (attestation object) = 7 (registration output)
+/// </para>
+/// <para>
+/// Note: Key 6 and 7 have different semantics in registration vs authentication contexts,
+/// so they are scoped to nested classes to avoid name collisions.
 /// </para>
 /// </remarks>
 internal static class PreviewSignCbor
 {
-    // CBOR integer map keys per CTAP v4 draft spec
-    private const int KeyHandle = 2;
-    private const int Algorithm = 3;
-    private const int Flags = 4;
-    private const int ToBeSigned = 6;
-    private const int AdditionalArgs = 7;
-    private const int Signature = 6;
-    private const int AttestationObject = 7;
+    /// <summary>
+    /// CBOR keys for registration input.
+    /// </summary>
+    private static class RegistrationInputKeys
+    {
+        internal const int Algorithm = 3;
+        internal const int Flags = 4;
+    }
+
+    /// <summary>
+    /// CBOR keys for registration output (unsigned extension outputs).
+    /// </summary>
+    private static class RegistrationOutputKeys
+    {
+        internal const int AttestationObject = 7;
+    }
+
+    /// <summary>
+    /// CBOR keys for authentication input.
+    /// </summary>
+    private static class AuthenticationInputKeys
+    {
+        internal const int KeyHandle = 2;
+        internal const int ToBeSigned = 6;
+        internal const int AdditionalArgs = 7;
+    }
+
+    /// <summary>
+    /// CBOR keys for authentication output.
+    /// </summary>
+    private static class AuthenticationOutputKeys
+    {
+        internal const int Signature = 6;
+    }
 
     /// <summary>
     /// Encodes registration input (algorithm list + flags) as canonical CBOR.
@@ -59,7 +89,7 @@ internal static class PreviewSignCbor
         writer.WriteStartMap(2); // Two keys: alg (3) and flags (4)
 
         // Key 3: algorithms array
-        writer.WriteInt32(Algorithm);
+        writer.WriteInt32(RegistrationInputKeys.Algorithm);
         writer.WriteStartArray(input.Algorithms.Count);
         foreach (var alg in input.Algorithms)
         {
@@ -68,7 +98,7 @@ internal static class PreviewSignCbor
         writer.WriteEndArray();
 
         // Key 4: flags byte
-        writer.WriteInt32(Flags);
+        writer.WriteInt32(RegistrationInputKeys.Flags);
         writer.WriteInt32((byte)input.Flags);
 
         writer.WriteEndMap();
@@ -97,17 +127,17 @@ internal static class PreviewSignCbor
         writer.WriteStartMap(paramCount);
 
         // Key 2: keyHandle
-        writer.WriteInt32(KeyHandle);
+        writer.WriteInt32(AuthenticationInputKeys.KeyHandle);
         writer.WriteByteString(signingParams.KeyHandle.Span);
 
         // Key 6: tbs
-        writer.WriteInt32(ToBeSigned);
+        writer.WriteInt32(AuthenticationInputKeys.ToBeSigned);
         writer.WriteByteString(signingParams.Tbs.Span);
 
         // Key 7: args (optional, wrapped as bstr)
         if (signingParams.AdditionalArgs.HasValue)
         {
-            writer.WriteInt32(AdditionalArgs);
+            writer.WriteInt32(AuthenticationInputKeys.AdditionalArgs);
             writer.WriteByteString(signingParams.AdditionalArgs.Value.Span);
         }
 
@@ -148,7 +178,7 @@ internal static class PreviewSignCbor
             for (int i = 0; i < mapSize; i++)
             {
                 int key = reader.ReadInt32();
-                if (key == AttestationObject)
+                if (key == RegistrationOutputKeys.AttestationObject)
                 {
                     attestationObjectBytes = reader.ReadByteString();
                 }
@@ -233,7 +263,7 @@ internal static class PreviewSignCbor
             for (int i = 0; i < mapSize; i++)
             {
                 int key = reader.ReadInt32();
-                if (key == Signature)
+                if (key == AuthenticationOutputKeys.Signature)
                 {
                     signature = reader.ReadByteString();
                 }

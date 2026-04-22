@@ -402,7 +402,7 @@ public class WebAuthnClientGetAssertionTests
             SignCount = 1,
             ClientData = WebAuthnClientData.Create("webauthn.get", RandomNumberGenerator.GetBytes(32), _origin, null, null),
             ClientExtensionResults = null,
-            AuthenticatorData = WebAuthnAuthenticatorData.Parse(rawAuthData),
+            AuthenticatorData = WebAuthnAuthenticatorData.Decode(rawAuthData),
             User = null
         };
 

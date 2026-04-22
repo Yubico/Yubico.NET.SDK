@@ -276,17 +276,19 @@ public ReadOnlySpan<byte> Data
 
 ### Logging Conventions
 
-**Use Static LoggingFactory - NEVER inject ILogger:**
+**Use Static YubiKitLogging - NEVER inject ILogger:**
 ```csharp
-// ✅ CORRECT: Static logger from factory
+// ✅ CORRECT: Static logger from YubiKitLogging
 public class FidoSession
 {
-    private static readonly ILogger Logger = LoggingFactory.CreateLogger<FidoSession>();
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<FidoSession>();
 }
 
 // ❌ WRONG: Injected logger (breaks consistency)
 public class FidoSession(ILogger<FidoSession> logger) { }
 ```
+
+**Canonical logger factory:** `YubiKitLogging.CreateLogger<T>()` at `src/Core/src/YubiKitLogging.cs:20`.
 
 **Log Levels:**
 - `Trace` - Raw APDU/CBOR bytes, detailed protocol steps

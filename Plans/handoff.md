@@ -1,95 +1,103 @@
-# Handoff — Phase 9.1 shipped + parity evidence in hand, awaiting Phase 9.2 direction
+# Handoff — Phase 9 closed, PR #466 open against `yubikit-applets`
 
-**Date:** 2026-04-22 (evening)
-**Active branch:** `webauthn/phase-9.1-hygiene` (tip `5f7ab705`)
-**Base for this branch:** `webauthn/gate-2-fixup` (tip `95abc0c5`)
-**Eventual merge target:** `yubikit-applets` (NOT `develop`, NOT `yubikit`)
-**Plan reference:** [`Plans/yes-we-have-started-composed-horizon.md`](yes-we-have-started-composed-horizon.md) — the approved Phase 9 plan; supersedes the prior session's "Phase 9 deferrals" list (which had 3 inaccurate items)
+**Date:** 2026-04-23
+**Active branch:** `webauthn/phase-9.2-rust-port` (tip `5b67f7d6`, pushed)
+**PR:** [Yubico/Yubico.NET.SDK#466](https://github.com/Yubico/Yubico.NET.SDK/pull/466) — `feat(webauthn): WebAuthn Client + previewSign extension (Phase 9 close)`
+**Eventual merge target:** `yubikit-applets` (NOT `develop`, NOT `yubikit`, NOT `main`)
+**Strategy frame:** [`Plans/yes-we-have-started-composed-horizon.md`](yes-we-have-started-composed-horizon.md) (rev 2)
+**Execution log for this session:** [`Plans/next-instruction-for-moving-unified-scott.md`](next-instruction-for-moving-unified-scott.md) — all 9 steps complete
+**Supersedes:** prior `Plans/handoff.md` from 2026-04-22 evening (which had 3 open decisions; all resolved)
 
 ---
 
 ## Critical next step (read first)
 
-**The user has 3 open decisions blocking Phase 9.2 startup.** They were posed at the end of the prior turn and not yet answered:
+**No active blockers; PR is open and ready for review.** The next session should:
 
-1. **Commit the 3 uncommitted plan/report files** (`Plans/handoff.md`, `Plans/yes-we-have-started-composed-horizon.md`, `Plans/libfido2-previewsign-parity.md`, `Plans/yubikit-android-previewsign-parity.md`) to the hygiene branch? Or branch 9.2 off `webauthn/gate-2-fixup` and let plans land separately?
-2. **Dispatch the 9.2 Step 1 Engineer agent now**, or pause first?
-3. **Short-circuit 9.2 Step 1 entirely** and go directly to path 2B (close the previewSign auth surface), trusting the parity evidence already in hand?
+1. **Monitor PR #466 for review feedback** from Yubico maintainers — the PR body has the full audit + hardware-verification record, so reviewers should have everything they need
+2. **If review surfaces fixable items**, address inline on the same branch and push (no rebase)
+3. **Do NOT start Phase 10 work in this session** — Phase 10 (ARKG `additional_args` builder + multi-credential probe + signature verify) should be a fresh branch off `yubikit-applets` *after* PR #466 lands. The orchestrator should propose it as a candidate "Path B" branch when the user is ready.
 
-**Recommended (per the principle "only ship what an upstream reference has proven works"):** option 3 — go directly to path 2B for the **authentication** entry point only (registration is proven and ships unmarked). The combined libfido2 + yubikit-android evidence is sufficient — running a fourth Swift investigation would produce the same DEFER verdict.
+The user explicitly said "save B for later, we can try that in a separate branch later" — Phase 10 is that later.
 
 ---
 
-## Readiness assessment
+## Readiness Assessment
 
 **Target user (inferred from `CLAUDE.md`, `src/Fido2/CLAUDE.md`, `src/WebAuthn/CLAUDE.md`):**
 - .NET 10 application developers integrating YubiKey WebAuthn / passkey flows
 - Browser/RP implementers building WebAuthn-spec-compliant clients on top of CTAP2
 - Security-engineering teams requiring auditable, modern-C# crypto handling
 
-| Need | Status | Notes |
+| Capability | Status | Notes |
 |---|---|---|
 | WebAuthn data model (RP, User, Descriptor, COSE, AAGUID, preferences) | ✅ Working | Phase 1; 110+ unit tests |
 | `clientDataJSON` + `AttestationObject` + `AuthenticatorData` | ✅ Working | Phase 2; byte-parity with Swift via hand-rolled JSON |
-| `WebAuthnClient.MakeCredentialAsync` (terminal) | ✅ Working | Phase 3 + Phase 5 stream-drain refactor |
-| `WebAuthnClient.GetAssertionAsync` + `MatchedCredential.SelectAsync` | ✅ Working | Phase 4; idempotent via `Lazy<Task<>>` |
-| Status streaming (`IAsyncEnumerable<WebAuthnStatus>`) + interactive PIN/UV | ✅ Working | Phase 5; deadlock-fixed |
-| Extension framework (CredProtect, CredBlob, MinPinLength, LargeBlob, PRF, CredProps) | ✅ Working | Phase 6 + commit `95abc0c5` (CRITICAL bugfix — extensions were silently dropped before; now wired) |
-| previewSign **registration** (key generation) | ✅ Working | Phase 7+8+Gate-2 fixes; hardware-validated on YubiKey 5.8.0 (`Registration_WithPreviewSign_ReturnsGeneratedSigningKey` passes) |
-| previewSign **authentication** (sign-by-credential) | ⚠️ Partial | Code path exists; throws `CtapException: Invalid length` on hardware. **No upstream SDK has hardware-tested it** (libfido2: NONE; Swift: untested; yubikit-android: code exists, not hardware-tested) |
-| previewSign multi-credential probe-selection | ❌ Missing | Deferred — `signByCredential.Count != 1` throws `NotSupported`. Blocked on auth path proving viable |
-| Module documentation (`src/WebAuthn/CLAUDE.md`) | ✅ Working | NEW in 9.1 — 8/8 sections present |
-| Logging factory guidance | ✅ Working | NEW in 9.1 — root `CLAUDE.md` corrected `LoggingFactory`→`YubiKitLogging` |
-| Integration test project | ⚠️ Partial | 8 tests exist on hardware (registration paths pass; one previewSign auth test SKIPPED with diagnostic notes). No no-UP tests yet |
-| Test cleanup helper (`DeleteAllCredentialsForRpAsync`) | ✅ Working | NEW in 9.1 — copied from Fido2 pattern |
-| Unit-test warnings (xUnit1051, CS8625) | ✅ Working | NEW in 9.1 — 0 warnings on `dotnet toolchain.cs build` |
+| `WebAuthnClient.MakeCredentialAsync` (terminal) | ✅ Working | Hardware-verified 2026-04-23 (5 tests covering resident/non-resident/stream/no-PIN/full-ceremony) |
+| `WebAuthnClient.GetAssertionAsync` + `MatchedCredential.SelectAsync` | ✅ Working | Hardware-verified 2026-04-23 (`GetAssertion_DiscoverableCredential_ReturnsUserInfo` + `FullCeremony_RegisterThenAuthenticate_Succeeds`) |
+| Status streaming (`IAsyncEnumerable<WebAuthnStatus>`) + interactive PIN/UV | ✅ Working | Hardware-verified 2026-04-23 (`MakeCredentialStream_EmitsProcessingThenFinished`) |
+| Extension framework (CredProtect, CredBlob, MinPinLength, LargeBlob, PRF, CredProps) | ✅ Working | Phase 6 + commit `95abc0c5` (CRITICAL bugfix; extensions were silently dropped before) |
+| `previewSign` **registration** (key generation) | ✅ Working | Hardware-verified 2026-04-23 (`Registration_WithPreviewSign_ReturnsGeneratedSigningKey`) on YubiKey 5.8.0-beta |
+| `previewSign` **single-credential authentication** (encoder) | ✅ Encoder byte-correct | 4 deterministic byte-level unit tests vs Rust upstream reference (`PreviewSignCborEncodingTests`); end-to-end hardware verification deferred to Phase 10 (ARKG block — see below) |
+| `previewSign` **single-credential authentication** (hardware ceremony) | ⚠️ Skipped | Test re-skipped via `Skip.If(true, ...)` — YubiKey 5.8.0-beta firmware accepts only `Esp256` (ARKG) for previewSign; ARKG `additional_args` not yet built. See `Plans/phase-10-previewsign-auth.md §3` |
+| `previewSign` **multi-credential probe-selection** | ⚠️ Throws `NotSupported` | Throw at `PreviewSignAdapter.cs:141-150` cites `Plans/phase-10-previewsign-auth.md` |
+| Module documentation (`src/WebAuthn/CLAUDE.md`) | ✅ Working | 8/8 sections; created in Phase 9.1 |
+| Logging factory guidance | ✅ Working | Root `CLAUDE.md` corrected `LoggingFactory`→`YubiKitLogging` in Phase 9.1 |
+| WebAuthn integration test project | ✅ Working | 8 tests; 7/7 testable PASS on YubiKey 5.8.0-beta; 1 SKIP (previewSign auth, ARKG-blocked) |
+| `[SkippableTheory]` attribute compliance | ✅ Working | All 8 `[Theory]` decorations migrated to `[SkippableTheory]` so `xunit.SkippableFact` Skip API reports correctly |
+| Test cleanup helper (`DeleteAllCredentialsForRpAsync`) | ✅ Working | Added Phase 9.1; exercised during 9.3 hardware sweep |
+| Build state | ✅ Clean | `dotnet toolchain.cs build` → 0 errors, 0 warnings |
+| Unit test state | ✅ Clean | `dotnet toolchain.cs -- test --project WebAuthn` → 104/0 |
 
-**Overall readiness:** 🟢 **Production** for the spec-conformant subset (registration + single-credential authentication for *non-previewSign* extensions). previewSign **registration** ships clean; previewSign **authentication** + multi-credential probe should ship with a `[Experimental]` attribute + `NotSupported` throw per the Phase 9.2 path 2B plan, with a `Plans/phase-10-previewsign-auth.md` follow-up tracker.
+**Overall readiness:** 🟢 **Production-ready for the spec-conformant subset.**
+
+Single-credential authentication for non-ARKG previewSign and the entire standard WebAuthn surface ship. Beta-firmware-specific limitation (only ARKG accepted for previewSign) is documented and tracked. Multi-credential probe is explicitly not supported with a clear `NotSupported` throw + Phase 10 reference.
+
+**Critical next step:** Land PR #466 (review + merge to `yubikit-applets`).
 
 ---
 
-## Session summary
+## Session summary (2026-04-23)
 
-This session did three things:
+This session executed Phase 9.2 → 9.3 → PR end-to-end. Three significant strategic discoveries shifted the path versus the prior session's plan:
 
-1. **Diagnosed the prior handoff's "Phase 9 deferrals" list as partially wrong.** Three of the eight items were inaccurate: M-5 (raw RP-ready `AttestationObject` bytes) is **already done** (`WebAuthnAttestationObject.RawCbor` exists at line 49); the integration test project was **partially built** with a previously-unknown CRITICAL wire-format bug discovered by hardware testing (`previewSign` authentication throws `CtapException: Invalid length` *before* user-presence prompt); and the most recent commit (`95abc0c5`) revealed a **latent Phase-6 bug** — the entire extension framework's CBOR was silently dropped because `options.Extensions = request.Extensions` was never assigned in the backend. All visible to the integration tests, none visible to Audit Gates 1 or 2.
+1. **Rust upstream evidence flipped Phase 9.2 from path 2B (defer) to path 2A (port the wire format).** The user proposed scanning `~/Code/y/cnh-authenticator-rs-extension` at end-of-cycle; an early scan returned **HARDWARE-PROVEN previewSign authentication** with documented integer-keyed CBOR wire format. Path 2A was adopted.
 
-2. **Wrote and got approval for the Phase 9 plan** at `Plans/yes-we-have-started-composed-horizon.md`. Three sub-phases:
-   - **9.0** — Parallel libfido2 investigation (background)
-   - **9.1** — Module hygiene bundle (CLAUDE.md, logging fix, helper, constants split, warning cleanup)
-   - **9.2** — Swift+libfido2 parity check, then conditional auth/probe work (path 2A=port wire fix + probe; path 2B=close auth surface)
-   - **9.3** — Hardware verification + integration test expansion (when user is back to touch the YubiKey 5.8.0-beta)
+2. **The Rust port turned out to be a non-event** — the byte-level unit tests proved the C# encoder was already byte-correct against the Rust reference. The `Invalid length (0x03)` integration test failure was caused by an ARKG-vs-non-ARKG algorithm mismatch in the test, not by the encoder.
 
-3. **Executed Phases 9.0 + 9.1 in parallel** using the proven DevTeam Ship → CodeAudit → Ping rhythm:
-   - **9.0** → libfido2 v1.17.0 has **zero** previewSign code paths (verdict NONE)
-   - **9.0 bonus** → user requested yubikit-android parity check too; found v3.1.0 has full code paths for **both** registration and authentication, with hardware-tested **registration only**, authentication code untested
-   - **9.1** → 5 commits, audit verdict **PASS-WITH-NOTES** (better than engineer self-reported: 0 warnings vs claimed-residue-of-8; constants split finer than asked; all 8/8 CLAUDE.md sections; scope discipline excellent)
+3. **Hardware verification revealed a deeper constraint** — YubiKey 5.8.0-beta firmware **only accepts `Esp256` (ARKG) for previewSign** at registration. Non-ARKG algorithms (`Es256`, `EdDsa`) fail with `Unsupported algorithm`. This means single-credential previewSign authentication cannot be hardware-tested without ARKG `additional_args` support. **ARKG was promoted from Phase 10 nice-to-have to Phase 10 gating prerequisite for any auth-path hardware verification.** Path 2A reverted to a 2B-equivalent ship: the audit-proven encoder lands; the integration test re-skips with the refined diagnostic.
 
-**Key finding:** The combined parity evidence (Swift untested + libfido2 NONE + yubikit-android registration-tested-but-auth-untested) creates a clean **registration vs authentication asymmetry**. Registration is hardware-proven across two SDKs (Android + the C# port itself). Authentication is unimplemented (libfido2) or untested (Swift, Android). The Phase 9.2 plan's path 2B should be tightened to mark **only the authentication entry point** as `[Experimental]`, not the whole previewSign API.
+4. **Bonus discovery during the hardware sweep:** the `xunit.SkippableFact` API requires `[SkippableTheory]` attribute decoration for the runner to catch `Xunit.SkipException`. Without it (8 `[Theory]` decorations), Skip.If(true) reports as Failed instead of Skipped. Surfaced because Phase 9.1 audit only ran unit tests, never the integration suite. Fixed in `197e0dd7`.
+
+5. **Post-9 Fido2 coverage assessment came back favorably** — 4 minor unit-test polish gaps, no functional defects. Filed as `Plans/phase-9.4-fido2-extension-coverage.md` (deferred tracker, non-blocking).
 
 ---
 
 ## Branch state
 
 ```
-develop  (mainline — DO NOT TARGET)
-  └── yubikit  (SDK rewrite root)
-      └── yubikit-applets  (per-applet branch — MERGE TARGET; tip b76b6144)
-          └── webauthn/phase-1-data-model
-              └── ... (8 phase + 2 audit-fixup branches; see prior handoff for tree) ...
-                  └── webauthn/gate-2-fixup  (tip 95abc0c5; +2 commits beyond prior handoff:)
-                      ├── 95abc0c5 fix(webauthn): wire extension passthrough and fix previewSign parser  ← CRITICAL bugfix
-                      └── 97a502d5 docs: clarify --project + --filter usage for targeted test runs
-                       │
-                       └── webauthn/phase-9.1-hygiene  (tip 5f7ab705; ← CURRENT, 5 commits:)
-                           ├── fbe45bc4 docs(webauthn): add module CLAUDE.md
-                           ├── f90bbc8f test(webauthn): add DeleteAllCredentialsForRpAsync helper
-                           ├── 63adea35 refactor(webauthn): split PreviewSignCbor key constants into scoped classes
-                           ├── eadb8fc3 test(webauthn): fix xUnit1051 warnings and CS8625 in GetAssertionTests
-                           └── 5f7ab705 docs: correct LoggingFactory→YubiKitLogging in root CLAUDE.md
+yubikit-applets (merge target)
+  └── ... 64 commits prior phases ...
+      └── webauthn/gate-2-fixup (95abc0c5)
+          └── webauthn/phase-9.1-hygiene (5f7ab705)
+              └── webauthn/phase-9.2-rust-port (5b67f7d6) ← CURRENT, pushed, PR #466 open
 ```
 
-**Total work since `yubikit-applets`:** 64 (prior phases) + 2 (post-handoff, on gate-2-fixup) + 5 (9.1 hygiene) = **71 commits across 11 branches**.
+**13 commits this session-chain on `webauthn/phase-9.2-rust-port`:**
+```
+5b67f7d6 docs(fido2): file Phase 9.4 tracker for canonical extension coverage polish
+bd4e0fd2 docs(webauthn): record Phase 9.3 hardware verification results
+197e0dd7 test(webauthn): use [SkippableTheory] so xunit.SkippableFact catches Skip.If
+b54bc0cc test(webauthn): re-skip previewSign auth integration test — ARKG is gating prerequisite
+b26ef2aa test(webauthn): drop validation-only previewSign test per repo test-philosophy
+d6691747 fix(webauthn): enable previewSign auth test with non-ARKG algorithms
+3983cc99 refactor(webauthn): update multi-credential NotSupported message to reference Phase 10
+36c98688 test(webauthn): add byte-level CBOR encoding tests for previewSign authentication
+0b6fa310 docs(webauthn): pivot Phase 9.2 to path 2A — Rust upstream is hardware-proven
+56dfbd53 docs(webauthn): land Phase 9 plan + libfido2/android parity reports + handoff
+```
+
+(plus 5 Phase 9.1 commits + 2 gate-2-fixup commits below.)
 
 ---
 
@@ -97,73 +105,57 @@ develop  (mainline — DO NOT TARGET)
 
 | Check | Status |
 |---|---|
-| `dotnet toolchain.cs build` | **0 errors / 0 warnings** (improved from prior session's ~12 xUnit1051) |
-| `dotnet toolchain.cs test` | **All 10 projects pass** (~1246+ unit tests) |
-| `dotnet toolchain.cs -- test --project WebAuthn` | **101 / 0** (WebAuthn unit tests) |
-| Fido2 cross-module regression | ✅ Green (Phase 2's `RawData` + Gate-2's `UnsignedExtensionOutputs` Fido2-internal additions still cohere) |
-| Hardware integration (registration) | ✅ Passes on YubiKey 5.8.0-beta (per `PreviewSignTests.cs`) |
-| Hardware integration (previewSign auth) | ❌ `CtapException: Invalid length (0x03)` — test `Skip.If(true)`'d with diagnostic notes at `PreviewSignTests.cs:89-114` |
+| `dotnet toolchain.cs build` | **0 errors / 0 warnings** |
+| `dotnet toolchain.cs test` | **All 10 projects pass** |
+| `dotnet toolchain.cs -- test --project WebAuthn` | **104 / 0 / 0** |
+| WebAuthn integration suite on YubiKey 5.8.0-beta (2026-04-23) | **7 / 0 / 1** (1 SKIP = previewSign auth, ARKG-blocked) |
+| `git status` | Clean working tree on `webauthn/phase-9.2-rust-port` |
+| Branch ↔ origin sync | Up to date with `origin/webauthn/phase-9.2-rust-port` |
 
 ---
 
-## Files added/modified this session
+## Open work (no active blockers)
 
-**Uncommitted on hygiene branch (need user direction whether to commit here, on 9.2 branch, or separately):**
-- `Plans/handoff.md` — this file (overwrote prior session's handoff)
-- `Plans/yes-we-have-started-composed-horizon.md` — approved Phase 9 plan
-- `Plans/libfido2-previewsign-parity.md` — Phase 9.0 deliverable; verdict NONE
-- `Plans/yubikit-android-previewsign-parity.md` — bonus parity report; verdict PROVEN-registration / untested-authentication
+| # | Item | Disposition | Owner | Path / Tracker |
+|---|---|---|---|---|
+| 1 | Land PR #466 — review + merge to `yubikit-applets` | Awaiting Yubico maintainer review | external | https://github.com/Yubico/Yubico.NET.SDK/pull/466 |
+| 2 | Phase 10 — ARKG `additional_args` first-class builder | Deferred; gating prerequisite for any auth-path hardware test | TBD | `Plans/phase-10-previewsign-auth.md §3` |
+| 3 | Phase 10 — multi-credential probe-selection (CTAP §10.2.1 step 7) | Deferred; no upstream SDK has hardware-tested it | TBD | `Plans/phase-10-previewsign-auth.md §1` |
+| 4 | Phase 10 — cryptographic signature verification helper | Deferred; post-9.3 polish | TBD | `Plans/phase-10-previewsign-auth.md §2` |
+| 5 | Phase 9.4 — 4 Fido2 unit-test polish gaps | Deferred; non-functional | TBD | `Plans/phase-9.4-fido2-extension-coverage.md` |
 
-**Committed in 9.1 (5 commits, see branch state above):**
-- `src/WebAuthn/CLAUDE.md` (new, 265 lines, 8 sections)
-- `src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnTestHelpers.cs` (added `DeleteAllCredentialsForRpAsync`)
-- `src/WebAuthn/src/Extensions/PreviewSign/PreviewSignCbor.cs` (split into 4 nested static classes — `RegistrationInputKeys`, `RegistrationOutputKeys`, `AuthenticationInputKeys`, `AuthenticationOutputKeys`)
-- `src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/.../WebAuthnClientGetAssertionTests.cs` (xUnit1051 + CS8625 fixes; CS8625 now uses `WebAuthnAuthenticatorData.Decode(rawAuthData)` — structural)
-- Root `CLAUDE.md` (`LoggingFactory` → `YubiKitLogging` with citation to `src/Core/src/YubiKitLogging.cs:20`)
+**No item in the above list blocks PR #466.** All deferred work has clear unblock criteria in its tracker.
 
 ---
 
-## Phase 9 sub-phase status
+## Parity evidence base (frozen 2026-04-23)
 
-| Sub-phase | Status | Branch | Notes |
-|---|---|---|---|
-| **9.0** Parallel libfido2 + yubikit-android parity | ✅ Done | (no branch — read-only investigations) | Reports landed in `Plans/`; both feed 9.2 verdict |
-| **9.1** Module hygiene bundle | ✅ Done — audit PASS-WITH-NOTES | `webauthn/phase-9.1-hygiene` | 5 commits, 0 build warnings, 101/0 tests |
-| **9.2** Parity verdict + conditional auth/probe | 🔜 Next — awaiting user direction | TBD (`webauthn/phase-9.2-*`) | Three open decisions; recommend skipping Step 1 → straight to path 2B for auth entry point |
-| **9.3** Hardware verification + integration expansion | ⏸️ Blocked on 9.2 + user presence | `webauthn/phase-9.3-integration` | Requires user physically present at YubiKey 5.8.0-beta |
-| **Post-9** Fido2 canonical extension coverage assessment | ⏸️ Tracked, post-9.3 | (no branch — assessment only) | Spawn 1 Explore agent; trivial gaps → 9.4, substantial gaps → separate deferred plan |
+| SDK | Version / commit | Reg code | Auth code | HW-proven reg | HW-proven single-cred auth | HW-proven multi-cred probe |
+|---|---|---|---|---|---|---|
+| yubikit-swift | release/1.3.0 | yes | yes | unverified | no | no |
+| libfido2 | v1.17.0 | none | none | n/a | n/a | n/a |
+| yubikit-android | v3.1.0 | yes | yes | ✅ | no | no |
+| **cnh-authenticator-rs-extension** | commit `c83cbce` | yes | yes | (test runs reg first) | ✅ (`hid-test` binary) | no |
+| **Yubico.NET.SDK (this PR)** | `5b67f7d6` | yes | encoder byte-correct, throws on Count!=1 | ✅ YubiKey 5.8.0-beta | encoder verified vs Rust; HW pending ARKG | n/a (Phase 10) |
 
----
-
-## Audit cross-references
-
-### Prior gates (still authoritative)
-- **Gate 1** (after Phase 6) — `Plans/audit-gate-1.md` — 0 Critical / 4 High / 7 Med / 9 Low; all High + 6 Med fixed
-- **Gate 2** (after Phase 8) — `Plans/audit-gate-2.md` — 3 Critical / 4 High / 5 Med / 4 Low; all Critical + High + 4 Med fixed
-
-### This session
-- **9.1 Hygiene Audit** (this session) — verdict PASS-WITH-NOTES; notes are observational only, none blocking. Highlights: build cleaner than self-reported (0 warnings), constants split improved beyond plan ask (4 nested classes vs 2), CLAUDE.md exceeds 6/8 bar (8/8). Full audit verdict captured in this session's transcript.
+Reports:
+- `Plans/libfido2-previewsign-parity.md`
+- `Plans/yubikit-android-previewsign-parity.md`
+- `Plans/cnh-authenticator-rs-previewsign-parity.md`
+- `Plans/swift-previewsign-parity.md` (retroactive)
 
 ---
 
-## Parity evidence base for Phase 9.2 verdict (combined)
+## Audit history
 
-| SDK | Version | previewSign code paths | Hardware-tested registration | Hardware-tested authentication | Verdict source |
-|---|---|---|---|---|---|
-| **yubikit-swift** | release/1.3.0 | both reg + auth | unverified | **none** (PreviewSignTests.swift has only registration) | per existing `PreviewSignTests.cs:107` diagnostic |
-| **libfido2** | v1.17.0 | **none** | n/a | n/a | `Plans/libfido2-previewsign-parity.md` |
-| **yubikit-android** | v3.1.0 | both reg + auth | ✅ instrumented + integration tests | **none** | `Plans/yubikit-android-previewsign-parity.md` |
-| **Yubico.NET.SDK (this port)** | webauthn/phase-9.1-hygiene | both reg + auth (auth currently throws) | ✅ on YubiKey 5.8.0-beta | ❌ `CtapException: Invalid length` (wire-format bug) | this session's investigation |
-
-**Synthesis:** Registration is hardware-proven in 2 of 4 implementations (Android + C#). Authentication is hardware-proven in **0 of 4**. Per the user-stated principle "only ship what an upstream reference has proven works on hardware," authentication should be deferred via path 2B with `[Experimental]` + `NotSupported` on the auth entry point only. Registration ships unmarked. Phase 10 follow-up tracker captures unblocking criteria.
-
----
-
-## Open risks (non-blocking, named for awareness)
-
-1. **`[Experimental]` is a public-API commitment.** Once shipped, removing it later (in Phase 10) is binary-compatible (fine); adding new throws is not (avoid). Mitigation: keep the throw site narrow (auth entry point only).
-2. **YubiKey 5.8.0-beta firmware behaviors** may differ from production firmware. Document any beta-specific findings in PR description for Yubico reviewers.
-3. **Three Plans/ files are uncommitted on the hygiene branch.** If the user picks "branch 9.2 off gate-2-fixup" route, those files won't travel automatically — the resumer must explicitly cherry-pick or re-create them.
+| Audit | Verdict | File |
+|---|---|---|
+| Gate 1 (after Phase 6) | 0 Critical / 4 High / 7 Med / 9 Low; all High + 6 Med fixed | `Plans/audit-gate-1.md` |
+| Gate 2 (after Phase 8) | 3 Critical / 4 High / 5 Med / 4 Low; all Critical + High + 4 Med fixed | `Plans/audit-gate-2.md` |
+| Phase 9.1 hygiene audit | PASS-WITH-NOTES (observational only) | (in conversation; not filed) |
+| Phase 9.2 path 2A audit | PASS-WITH-NOTES (encoder byte-correctness independently verified vs Rust source; 5 observational findings, 1 actioned — validation-only test removed) | (in conversation; not filed) |
+| Phase 9.3 hardware sweep | 7/7 testable PASS, 1 SKIP, 0 regressions | Recorded in `Plans/yes-we-have-started-composed-horizon.md` § "Phase 9.3 — Hardware verification record (2026-04-23)" |
+| Post-9 Fido2 coverage assessment | 4 minor gaps, no functional defects → Phase 9.4 deferred tracker | `Plans/phase-9.4-fido2-extension-coverage.md` |
 
 ---
 
@@ -171,14 +163,13 @@ develop  (mainline — DO NOT TARGET)
 
 No active worktrees:
 ```
-/Users/Dennis.Dyall/Code/y/Yubico.NET.SDK 5f7ab705 [webauthn/phase-9.1-hygiene]
+/Users/Dennis.Dyall/Code/y/Yubico.NET.SDK 5b67f7d6 [webauthn/phase-9.2-rust-port]
 ```
 
 All session agents have terminated cleanly:
-- `phase9.1-hygiene-engineer` (Engineer agent for Phase 9.1) — completed; 5 commits landed
-- `libfido2-parity-explorer` (Explore agent for Phase 9.0, ran in background) — completed; report at `Plans/libfido2-previewsign-parity.md`
-- `yubikit-android-parity-explorer` (Explore agent, bonus investigation) — completed; report at `Plans/yubikit-android-previewsign-parity.md`
-- `phase9.1-hygiene-auditor` (general-purpose audit gate agent) — completed; verdict PASS-WITH-NOTES
+- Engineer (Phase 9.2 wire-format fix) — completed; 3 commits landed
+- general-purpose audit agent (Phase 9.2 path 2A audit gate) — completed; verdict PASS-WITH-NOTES
+- Explore (Fido2 canonical coverage assessment) — completed; matrix returned, 4 gaps filed as Phase 9.4 tracker
 
 No `.claude/worktrees/` directory exists.
 
@@ -187,39 +178,49 @@ No `.claude/worktrees/` directory exists.
 ## Quick start for fresh agent
 
 ```bash
-# 1. Confirm branch
-git checkout webauthn/phase-9.1-hygiene
-git log --oneline -10                              # confirm 5 hygiene commits + 95abc0c5 below them
+# 1. Confirm branch + state
+git checkout webauthn/phase-9.2-rust-port      # or: git fetch && git checkout webauthn/phase-9.2-rust-port
+git log --oneline -10                          # confirm tip is 5b67f7d6
+git status                                     # expect: clean
 
-# 2. Verify state
-dotnet toolchain.cs build                          # expect 0 errors / 0 warnings
-dotnet toolchain.cs -- test --project WebAuthn     # expect 101 / 0
+# 2. Verify build/test state
+dotnet toolchain.cs build                      # expect 0 errors / 0 warnings
+dotnet toolchain.cs -- test --project WebAuthn # expect 104/0
 
-# 3. Read the plan + parity reports IN ORDER
-cat Plans/yes-we-have-started-composed-horizon.md  # the approved Phase 9 plan
-cat Plans/libfido2-previewsign-parity.md           # 9.0 deliverable, verdict NONE
-cat Plans/yubikit-android-previewsign-parity.md    # bonus, verdict PROVEN-reg-only
-cat Plans/audit-gate-1.md                          # historical, still authoritative
-cat Plans/audit-gate-2.md                          # historical, still authoritative
+# 3. Read the strategy frame + parity reports IN ORDER
+cat Plans/yes-we-have-started-composed-horizon.md    # rev 2 strategy doc — start here
+cat Plans/phase-10-previewsign-auth.md               # deferred work tracker — most likely next destination
+cat Plans/phase-9.4-fido2-extension-coverage.md      # smaller deferred tracker
+cat Plans/cnh-authenticator-rs-previewsign-parity.md # the hardware-proven Rust upstream evidence
+cat Plans/libfido2-previewsign-parity.md             # historical
+cat Plans/yubikit-android-previewsign-parity.md      # historical
+cat Plans/swift-previewsign-parity.md                # retroactive
+cat Plans/next-instruction-for-moving-unified-scott.md  # this session's execution log (all 9 steps done)
 
-# 4. Resume — present the 3 open decisions to user (see "Critical next step" above) and wait for direction
+# 4. Check PR status
+gh pr view 466                                 # state, review status, any comments
 
-# 5. If user picks "go straight to 2B" (recommended):
-#    - Branch webauthn/phase-9.2-defer-auth off webauthn/phase-9.1-hygiene (or gate-2-fixup; user will say)
-#    - Engineer prompt skeleton is in Plans/yes-we-have-started-composed-horizon.md §Phase 9.2 Step 2B
-#    - Key tasks: improve NotSupported message at PreviewSignAuthenticationInput.cs:58, add [Experimental("YK-PreviewSignAuth")]
-#      to the auth entry point, replace Skip.If(true) integration test with a unit test asserting the throw, create
-#      Plans/phase-10-previewsign-auth.md follow-up tracker, write Plans/swift-previewsign-parity.md retroactively
-#      synthesizing the libfido2 + android findings (so the Step 1 deliverable still lands)
-#    - Then /CodeAudit gate per §9.2 path-2B audit criteria
-#    - Then /Ping user with results
-#    - Then queue up 9.3 hardware verification (DO NOT START 9.3 without user physically present at YubiKey)
-
-# 6. If user picks "dispatch 9.2 Step 1 first":
-#    - Engineer prompt skeleton in §Phase 9.2 Step 1
-#    - Engineer must STOP and Ping user with verdict (PROVEN/PARTIAL/DEFER) before any code change
-#    - Most likely verdict given existing libfido2+android evidence: DEFER → routes to 2B
+# 5. If review feedback arrives → address inline; if user wants Phase 10 → see Phase 10 §3 (ARKG is the unblock)
 ```
 
-**Do not** rebase or fast-forward across the 11 branches individually — later commits supersede earlier choices.
-**Do not** PR against `develop` or `yubikit` directly — `yubikit-applets` is the only valid target.
+**Do not** branch Phase 10 work off `webauthn/phase-9.2-rust-port` — branch off `yubikit-applets` after PR #466 lands.
+**Do not** PR against `develop` or `yubikit` — `yubikit-applets` is the only valid target for the WebAuthn module work.
+**Do not** rebase or fast-forward across the phase branches individually — the squash-merge happens at PR #466 land time.
+
+---
+
+## Open risks (non-blocking, named for awareness)
+
+Codebase is preview-stage; binary-compatibility / public-API stability is **not** a constraint. Breaking changes are acceptable.
+
+1. **Rust `hid-test` ARKG key derivation may differ from a future C# port.** When Phase 10 ARKG support is built, signature returned ≠ signature verified. Cryptographic verification is itself a Phase 10 §2 item.
+2. **YubiKey 5.8.0-beta firmware behavior may differ from production firmware.** The "only ARKG algorithm accepted for previewSign" finding is beta-specific; flag for Yubico reviewers in PR #466 (already noted in PR description).
+3. **PR review may surface scope-expansion requests.** If reviewers ask for ARKG support to be in this PR, the orchestrator should push back to Phase 10 — the parity evidence supports the encoder-only ship and Phase 10 has a clear path.
+
+---
+
+## Lessons captured (for future audit rubrics)
+
+1. **If any helper uses `Skip.If` from `xunit.SkippableFact`, the audit must run the integration suite (not just unit tests) to confirm Skip behavior.** Phase 9.1 audit ran only unit tests; the `[Theory]` vs `[SkippableTheory]` mismatch was invisible until Phase 9.3 hardware sweep.
+2. **Single-source DEFER verdicts are fragile; multi-source parity matrices flip cleanly when new evidence arrives.** Phase 9.0 originally surveyed only libfido2; expanding to libfido2 + android + Rust + Swift gave a verdict that survived the strategic-finding cross-check during the audit gate.
+3. **Engineer surprise findings need an audit cross-check that asks "is the new framing snapshot-tautological or independently derived?"** The Phase 9.2 audit's strategic-finding cross-check confirmed the byte-level unit tests asserted CBOR-spec-derived bytes (`0xA2`, `0x58`), not snapshots of the C# encoder's own output.

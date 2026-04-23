@@ -305,7 +305,9 @@ Codebase is preview-stage; binary-compatibility / public-API stability is **not*
 
 ## Post-Phase-9 follow-up — Fido2 module test coverage assessment
 
-**Conclude before closing this work, but do not block Phase 9 on it.** Substantively unchanged from rev 1.
+**Status:** ✅ **Done** — assessment executed 2026-04-23. **4 minor unit-test polish gaps; no functional defects.** Filed as `Plans/phase-9.4-fido2-extension-coverage.md` (deferred tracker, non-blocking for the Phase 9 PR). The earlier WebAuthn-side bug (extensions silently dropped at backend, fixed in `95abc0c5`) has no equivalent latent functional gap in the Fido2 surface — every implemented extension has end-to-end integration coverage on real hardware.
+
+### Original framing (rev 1, kept for context)
 
 The WebAuthn port revealed gaps in Fido2 itself:
 - The Phase 6 extension framework was silently dropped at the backend boundary for ≈ 2 weeks of audit cycles before the integration test caught it. A stronger Fido2 test would have demanded that *some* test send extensions through `FidoSession.MakeCredentialAsync` / `GetAssertionAsync` and observe them round-trip from the device. That test does not exist in `src/Fido2/tests/`.

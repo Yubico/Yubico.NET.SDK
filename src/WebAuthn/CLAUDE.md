@@ -171,10 +171,12 @@ var output = adapter.DecodeOutput(response.UnsignedExtensionOutputs);
 - Authentication path: ⚠️ **DEFERRED** — throws `NotSupported` if `signByCredential.Count != 1` (awaiting Swift parity confirmation in Phase 9.2)
 
 **Key Files:**
-- `src/Extensions/PreviewSign/PreviewSignAdapter.cs` — Main adapter
-- `src/Extensions/PreviewSign/PreviewSignCbor.cs` — CBOR key constants (split in Phase 9.1)
+- `src/Extensions/PreviewSign/PreviewSignAdapter.cs` — WebAuthn-level adapter (translates to Fido2)
+- `../../Fido2/src/Extensions/PreviewSignExtension.cs` — Canonical Fido2 types and encoder
 - `src/Extensions/PreviewSign/PreviewSignAuthenticationInput.cs:58` — Auth defer point
 - `Plans/previewSign_Implementation_Requirements.md` — Full spec
+
+**Architectural Note:** The CBOR encoding logic lives in the Fido2 layer (`Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor`), ensuring a single canonical encoder shared by both Fido2 and WebAuthn. The WebAuthn adapter translates WebAuthn-level types to Fido2 types and delegates encoding to the Fido2 layer.
 
 ## Security Boundary
 

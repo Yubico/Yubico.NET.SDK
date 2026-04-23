@@ -150,10 +150,10 @@ The SDK uses the **ExtensionBuilder** fluent pattern for all WebAuthn/CTAP exten
 | credBlob | `.WithCredBlob()` | Per-credential blob storage (32-64 bytes) | 5.5+ |
 | largeBlob | `.WithLargeBlobKey()` | Large blob storage key | 5.5+ |
 | minPinLength | `.WithMinPinLength()` | Require minimum PIN length | 5.4+ |
+| previewSign | `.WithPreviewSign(...)` | Delegated signing of arbitrary bytes (CTAP v4) | YubiKey FW with previewSign support |
 | prf | `.WithPrf()` | WebAuthn PRF extension (wraps hmac-secret) | 5.2+ |
-| previewSign | (WebAuthn-level) | Delegated signing of arbitrary bytes | YubiKey FW with previewSign support |
 
-> **Note:** The `previewSign` extension is implemented at the WebAuthn layer (`Yubico.YubiKit.WebAuthn.Extensions.PreviewSign`), not in the Fido2 ExtensionBuilder, because it has its own CBOR map shape that doesn't fit the existing builder pattern.
+> **Note:** The `previewSign` extension is a first-class Fido2 extension via `WithPreviewSign(PreviewSignRegistrationInput)` and `WithPreviewSign(PreviewSignAuthenticationInput)`. WebAuthn provides a high-level adapter (`Yubico.YubiKit.WebAuthn.Extensions.PreviewSign`) for Client API consumers; both layers share the canonical encoder in Fido2.
 
 #### Example Usage
 

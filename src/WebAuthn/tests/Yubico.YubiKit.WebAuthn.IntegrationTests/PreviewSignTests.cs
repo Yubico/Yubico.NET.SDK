@@ -86,32 +86,14 @@ public class PreviewSignTests
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task FullCeremony_RegisterWithPreviewSign_ThenSign_ReturnsSignature(YubiKeyTestState state)
     {
-        // BLOCKED: previewSign authentication (signing) fails with CTAP InvalidLength (0x03).
+        // TODO Phase 9.3: Hardware verification with user presence
+        // This test requires physical touch (two times: registration + authentication).
+        // The wire format has been verified byte-for-byte against the Rust reference (cnh-authenticator-rs).
+        // See PreviewSignCborEncodingTests for deterministic byte-level assertions.
         //
-        // What works:
-        //   - Registration with previewSign extension succeeds (see Registration_WithPreviewSign test)
-        //   - Extension CBOR passthrough is wired in FidoSessionWebAuthnBackend
-        //   - GeneratedSigningKey is returned with valid KeyHandle, PublicKey, Algorithm
-        //
-        // What fails:
-        //   - GetAssertion with previewSign extension → CtapException "Invalid length"
-        //   - Error occurs immediately (no user presence prompt), so the CTAP request itself is malformed
-        //   - Tried raw TBS bytes (40 bytes) and SHA-256 hashed TBS (32 bytes) — both fail
-        //
-        // Investigation notes:
-        //   - PreviewSignCbor.EncodeAuthenticationInput produces flat map {2: kh, 6: tbs [, 7: args]}
-        //   - ExtensionPipeline wraps it as {"previewSign": {2: kh, 6: tbs}}
-        //   - FidoSession.GetAssertionAsync serializes at CTAP key 0x04 via WriteEncodedValue
-        //   - Swift reference (PreviewSign.swift:193-206) produces identical structure
-        //   - yubikit-swift's PreviewSignTests.swift has NO authentication test — only registration
-        //   - YubiKey FW 5.8.0 accepted Esp256 (-9) algorithm during registration
-        //
-        // Next steps for investigating agent:
-        //   1. Capture raw CTAP request bytes and compare with Swift's CBOR output
-        //   2. Check if keyHandle format from registration output needs transformation
-        //   3. Verify the extensions map is at the right position in the GetAssertion CBOR
-        //   4. Check if Esp256 algorithm requires specific TBS length or format constraints
-        Skip.If(true, "previewSign authentication encoding needs CTAP v4 wire format investigation");
+        // Note: Esp256 (-9) is an ARKG algorithm requiring additional_args (COSE_Sign_Args with arkg_kh + ctx).
+        // ARKG support is deferred to Phase 10. For Phase 9.2/9.3, this test should use non-ARKG algorithms
+        // (Es256 or EdDsa) to avoid requiring ARKG additional_args during authentication.
 
         // --- Phase 1: Registration with previewSign key generation ---
         await using var session1 = await state.Device.CreateFidoSessionAsync();
@@ -138,8 +120,9 @@ public class PreviewSignTests
             UserVerification = UserVerificationPreference.Discouraged,
             Extensions = new RegistrationExtensionInputs(
                 PreviewSign: PreviewSignRegistrationInput.GenerateKey(
-                    CoseAlgorithm.Esp256, CoseAlgorithm.EdDsa, CoseAlgorithm.Es256,
-                    CoseAlgorithm.Esp256SplitArkgPlaceholder))
+                    CoseAlgorithm.Es256, CoseAlgorithm.EdDsa))
+                // Phase 9.2: Using non-ARKG algorithms only. Esp256 and Esp256SplitArkgPlaceholder
+                // require ARKG additional_args during authentication (deferred to Phase 10).
         };
 
         var regResponse = await regClient.MakeCredentialAsync(

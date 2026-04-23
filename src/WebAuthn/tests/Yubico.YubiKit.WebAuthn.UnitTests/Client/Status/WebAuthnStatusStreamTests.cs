@@ -69,7 +69,7 @@ public class WebAuthnStatusStreamTests
 
         // Act - Iterate the stream and collect statuses
         var statuses = new List<WebAuthnStatus>();
-        await foreach (var status in client.MakeCredentialStreamAsync(options))
+        await foreach (var status in client.MakeCredentialStreamAsync(options, TestContext.Current.CancellationToken))
         {
             statuses.Add(status);
         }
@@ -139,7 +139,7 @@ public class WebAuthnStatusStreamTests
         bool pinRequested = false;
         RegistrationResponse? result = null;
 
-        await foreach (var status in client.MakeCredentialStreamAsync(options))
+        await foreach (var status in client.MakeCredentialStreamAsync(options, TestContext.Current.CancellationToken))
         {
             switch (status)
             {
@@ -177,16 +177,16 @@ public class WebAuthnStatusStreamTests
         // Act - Write multiple identical Processing statuses, then a Finished
         var writeTask = Task.Run(async () =>
         {
-            await channel.WriteAsync(new WebAuthnStatusProcessing());
-            await channel.WriteAsync(new WebAuthnStatusProcessing()); // Should be deduplicated
-            await channel.WriteAsync(new WebAuthnStatusProcessing()); // Should be deduplicated
-            await channel.WriteAsync(new WebAuthnStatusFinished<int>(42));
+            await channel.WriteAsync(new WebAuthnStatusProcessing(), TestContext.Current.CancellationToken);
+            await channel.WriteAsync(new WebAuthnStatusProcessing(), TestContext.Current.CancellationToken); // Should be deduplicated
+            await channel.WriteAsync(new WebAuthnStatusProcessing(), TestContext.Current.CancellationToken); // Should be deduplicated
+            await channel.WriteAsync(new WebAuthnStatusFinished<int>(42), TestContext.Current.CancellationToken);
             channel.Complete();
-        });
+        }, TestContext.Current.CancellationToken);
 
         // Collect statuses from reader
         var statuses = new List<WebAuthnStatus>();
-        await foreach (var status in channel.Reader())
+        await foreach (var status in channel.Reader(TestContext.Current.CancellationToken))
         {
             statuses.Add(status);
         }
@@ -257,7 +257,7 @@ public class WebAuthnStatusStreamTests
         };
 
         // Act - Use convenience overload with string PIN
-        var result = await client.MakeCredentialAsync(options, pin: "654321", useUv: false);
+        var result = await client.MakeCredentialAsync(options, pin: "654321", useUv: false, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -315,7 +315,7 @@ public class WebAuthnStatusStreamTests
 
         // Act & Assert - Expect WebAuthnClientError with NotAllowed
         var ex = await Assert.ThrowsAsync<WebAuthnClientError>(
-            async () => await client.MakeCredentialAsync(options, pin: null, useUv: false));
+            async () => await client.MakeCredentialAsync(options, pin: null, useUv: false, TestContext.Current.CancellationToken));
 
         Assert.Equal(WebAuthnClientErrorCode.NotAllowed, ex.Code);
 
@@ -379,7 +379,7 @@ public class WebAuthnStatusStreamTests
 
         // Act - Consumer breaks after first Processing status
         var sawProcessing = false;
-        await foreach (var status in client.MakeCredentialStreamAsync(options))
+        await foreach (var status in client.MakeCredentialStreamAsync(options, TestContext.Current.CancellationToken))
         {
             if (status is WebAuthnStatusProcessing)
             {
@@ -392,7 +392,7 @@ public class WebAuthnStatusStreamTests
         Assert.True(sawProcessing);
 
         // Give producer a small window to receive cancellation
-        await Task.Delay(100);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
 
         // Verify producer received cancellation (not stuck waiting)
         Assert.True(receivedCancellation, "Producer should have received cancellation when consumer broke");

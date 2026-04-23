@@ -888,14 +888,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
         // Wrap authenticator data
         var webAuthnAuthData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);
 
-        // Build raw attestation object by encoding the CBOR map structure
-        var rawAttestationObject = EncodeAttestationObject(
-            ctapResponse.Format,
-            ctapResponse.AuthenticatorDataRaw,
-            ctapResponse.AttestationStatement.RawData);
-
-        // Decode the raw bytes to create the WebAuthnAttestationObject
-        var attestationObject = WebAuthnAttestationObject.Decode(rawAttestationObject);
+        // Create attestation object from decoded components
+        var attestationObject = WebAuthnAttestationObject.Create(webAuthnAuthData, webAuthnStatement);
 
         // Parse extension outputs via pipeline
         var extensionOutputs = ExtensionPipeline.ParseRegistrationOutputs(
@@ -908,7 +902,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         {
             CredentialId = attestedCred.CredentialId,
             AttestationObject = attestationObject,
-            RawAttestationObject = rawAttestationObject,
+            RawAttestationObject = attestationObject.RawCbor,
             AuthenticatorData = webAuthnAuthData,
             RawAuthenticatorData = ctapResponse.AuthenticatorDataRaw,
             AttestationStatement = webAuthnStatement,
@@ -1016,27 +1010,4 @@ public sealed class WebAuthnClient : IAsyncDisposable
         };
     }
 
-    private static byte[] EncodeAttestationObject(
-        string format,
-        ReadOnlyMemory<byte> authData,
-        ReadOnlyMemory<byte> attStmtRawCbor)
-    {
-        var writer = new System.Formats.Cbor.CborWriter(System.Formats.Cbor.CborConformanceMode.Ctap2Canonical);
-
-        writer.WriteStartMap(3);
-
-        // Keys are sorted lexicographically: "authData", "attStmt", "fmt"
-        writer.WriteTextString("authData");
-        writer.WriteByteString(authData.Span);
-
-        writer.WriteTextString("attStmt");
-        writer.WriteEncodedValue(attStmtRawCbor.Span);
-
-        writer.WriteTextString("fmt");
-        writer.WriteTextString(format);
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
-    }
 }

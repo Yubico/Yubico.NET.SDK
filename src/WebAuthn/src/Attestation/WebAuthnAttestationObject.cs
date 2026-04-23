@@ -113,10 +113,46 @@ public sealed class WebAuthnAttestationObject
     }
 
     /// <summary>
+    /// Creates an attestation object from decoded components.
+    /// </summary>
+    /// <param name="authenticatorData">The decoded authenticator data.</param>
+    /// <param name="statement">The decoded attestation statement.</param>
+    /// <returns>The attestation object with encoded raw CBOR.</returns>
+    public static WebAuthnAttestationObject Create(
+        WebAuthnAuthenticatorData authenticatorData,
+        AttestationStatement statement)
+    {
+        var rawCbor = EncodeAttestationObject(
+            authenticatorData.Raw,
+            statement.RawCbor,
+            statement.Format.Value);
+
+        return new WebAuthnAttestationObject(authenticatorData, statement, rawCbor);
+    }
+
+    /// <summary>
     /// Encodes the attestation object to CBOR bytes.
     /// </summary>
     /// <returns>The CBOR-encoded attestation object.</returns>
     public byte[] Encode()
+    {
+        return EncodeAttestationObject(
+            AuthenticatorData.Raw,
+            Statement.RawCbor,
+            Statement.Format.Value);
+    }
+
+    /// <summary>
+    /// Encodes an attestation object CBOR map from its components.
+    /// </summary>
+    /// <param name="authData">The authenticator data bytes.</param>
+    /// <param name="attStmtRawCbor">The raw CBOR attestation statement.</param>
+    /// <param name="format">The attestation format identifier.</param>
+    /// <returns>The CBOR-encoded attestation object.</returns>
+    private static byte[] EncodeAttestationObject(
+        ReadOnlyMemory<byte> authData,
+        ReadOnlyMemory<byte> attStmtRawCbor,
+        string format)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
@@ -124,15 +160,15 @@ public sealed class WebAuthnAttestationObject
 
         // "authData" key (CBOR text string keys are sorted lexicographically in canonical mode)
         writer.WriteTextString("authData");
-        writer.WriteByteString(AuthenticatorData.Raw.Span);
+        writer.WriteByteString(authData.Span);
 
         // "attStmt" key
         writer.WriteTextString("attStmt");
-        writer.WriteEncodedValue(Statement.RawCbor.Span);
+        writer.WriteEncodedValue(attStmtRawCbor.Span);
 
         // "fmt" key
         writer.WriteTextString("fmt");
-        writer.WriteTextString(Statement.Format.Value);
+        writer.WriteTextString(format);
 
         writer.WriteEndMap();
 

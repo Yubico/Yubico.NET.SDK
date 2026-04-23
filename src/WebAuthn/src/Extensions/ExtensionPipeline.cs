@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Formats.Cbor;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions.Adapters;
@@ -41,123 +40,56 @@ internal sealed class ExtensionPipeline
             return null;
         }
 
-        // PreviewSign has its own CBOR format - cannot use ExtensionBuilder
-        var previewSignCbor = PreviewSignAdapter.BuildRegistrationCbor(inputs.PreviewSign, options);
-
-        // If ONLY previewSign is present, return its CBOR directly wrapped in the extensions map
-        if (previewSignCbor is not null &&
-            inputs.CredProtect is null &&
-            inputs.CredBlob is null &&
-            inputs.MinPinLength is null &&
-            inputs.LargeBlob is null &&
-            inputs.Prf is null)
-        {
-            var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-            writer.WriteStartMap(1);
-            writer.WriteTextString("previewSign");
-            writer.WriteEncodedValue(previewSignCbor);
-            writer.WriteEndMap();
-            return writer.Encode();
-        }
-
-        // Build standard extensions via ExtensionBuilder
+        // Build all extensions via ExtensionBuilder
         var builder = new ExtensionBuilder();
-        var hasStandardExtensions = false;
+        var hasExtensions = false;
 
         // CredProtect
         if (inputs.CredProtect is not null)
         {
             CredProtectAdapter.ApplyToBuilder(builder, inputs.CredProtect);
-            hasStandardExtensions = true;
+            hasExtensions = true;
         }
 
         // CredBlob
         if (inputs.CredBlob is not null)
         {
             CredBlobAdapter.ApplyToBuilder(builder, inputs.CredBlob);
-            hasStandardExtensions = true;
+            hasExtensions = true;
         }
 
         // MinPinLength
         if (inputs.MinPinLength is not null)
         {
             MinPinLengthAdapter.ApplyToBuilder(builder);
-            hasStandardExtensions = true;
+            hasExtensions = true;
         }
 
         // LargeBlob
         if (inputs.LargeBlob is not null)
         {
             LargeBlobAdapter.ApplyToBuilder(builder, inputs.LargeBlob);
-            hasStandardExtensions = true;
+            hasExtensions = true;
         }
 
         // PRF
         if (inputs.Prf is not null)
         {
             PrfAdapter.ApplyToBuilderForRegistration(builder, inputs.Prf);
-            hasStandardExtensions = true;
+            hasExtensions = true;
+        }
+
+        // PreviewSign
+        if (inputs.PreviewSign is not null)
+        {
+            PreviewSignAdapter.ApplyToBuilderForRegistration(builder, inputs.PreviewSign, options);
+            hasExtensions = true;
         }
 
         // CredProps - no CTAP input, client-side only
         // (credProps is derived from residentKey option, not sent to authenticator)
 
-        // If previewSign AND standard extensions are present, merge them
-        if (previewSignCbor is not null && hasStandardExtensions)
-        {
-            // Build standard extensions map via ExtensionBuilder
-            var standardCbor = builder.Build();
-            if (standardCbor is null)
-            {
-                // This shouldn't happen (hasStandardExtensions is true), but handle defensively
-                var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-                writer.WriteStartMap(1);
-                writer.WriteTextString("previewSign");
-                writer.WriteEncodedValue(previewSignCbor);
-                writer.WriteEndMap();
-                return writer.Encode();
-            }
-
-            // Parse the standard map, count entries, and re-encode with previewSign
-            var reader = new CborReader(standardCbor.Value, CborConformanceMode.Ctap2Canonical);
-            int? standardMapSize = reader.ReadStartMap();
-            var standardEntries = new List<(string key, ReadOnlyMemory<byte> value)>();
-
-            for (int i = 0; i < (standardMapSize ?? int.MaxValue); i++)
-            {
-                if (reader.PeekState() == CborReaderState.EndMap) break;
-                var key = reader.ReadTextString();
-                var valueStart = reader.BytesRemaining;
-                reader.SkipValue();
-                var valueEnd = reader.BytesRemaining;
-                var valueLength = valueStart - valueEnd;
-                var value = standardCbor.Value.Slice(standardCbor.Value.Length - valueStart, valueLength);
-                standardEntries.Add((key, value));
-            }
-
-            // Merge standard entries + previewSign, sort by CTAP2 canonical (length-then-lex)
-            var allEntries = new List<KeyValuePair<string, ReadOnlyMemory<byte>>>(standardEntries.Count + 1);
-            allEntries.AddRange(standardEntries.Select(t => new KeyValuePair<string, ReadOnlyMemory<byte>>(t.key, t.value)));
-            allEntries.Add(new KeyValuePair<string, ReadOnlyMemory<byte>>("previewSign", previewSignCbor));
-
-            allEntries.Sort((a, b) => Ctap2CanonicalKeyComparer.Instance.Compare(a.Key, b.Key));
-
-            // Write canonically-ordered map
-            var mergedWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
-            mergedWriter.WriteStartMap(allEntries.Count);
-
-            foreach (var (key, value) in allEntries)
-            {
-                mergedWriter.WriteTextString(key);
-                mergedWriter.WriteEncodedValue(value.Span);
-            }
-
-            mergedWriter.WriteEndMap();
-            return mergedWriter.Encode();
-        }
-
-        // Only standard extensions (no previewSign)
-        if (!hasStandardExtensions && previewSignCbor is null)
+        if (!hasExtensions)
         {
             return null;
         }
@@ -180,24 +112,8 @@ internal sealed class ExtensionPipeline
             return null;
         }
 
-        // PreviewSign has its own CBOR format - cannot use ExtensionBuilder
-        var previewSignCbor = PreviewSignAdapter.BuildAuthenticationCbor(inputs.PreviewSign, allowCredentials);
-
-        // If ONLY previewSign is present, return its CBOR directly wrapped in the extensions map
-        if (previewSignCbor is not null &&
-            inputs.LargeBlob is null &&
-            inputs.Prf is null)
-        {
-            var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-            writer.WriteStartMap(1);
-            writer.WriteTextString("previewSign");
-            writer.WriteEncodedValue(previewSignCbor);
-            writer.WriteEndMap();
-            return writer.Encode();
-        }
-
         var builder = new ExtensionBuilder();
-        var hasStandardExtensions = false;
+        var hasExtensions = false;
 
         // LargeBlob (read operations during assertion)
         if (inputs.LargeBlob is not null)
@@ -212,65 +128,17 @@ internal sealed class ExtensionPipeline
         if (inputs.Prf is not null)
         {
             PrfAdapter.ApplyToBuilderForAuthentication(builder, inputs.Prf, allowCredentials);
-            hasStandardExtensions = true;
+            hasExtensions = true;
         }
 
-        // If previewSign AND standard extensions are present, merge them
-        if (previewSignCbor is not null && hasStandardExtensions)
+        // PreviewSign
+        if (inputs.PreviewSign is not null)
         {
-            // Build standard extensions map via ExtensionBuilder
-            var standardCbor = builder.Build();
-            if (standardCbor is null)
-            {
-                // This shouldn't happen (hasStandardExtensions is true), but handle defensively
-                var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-                writer.WriteStartMap(1);
-                writer.WriteTextString("previewSign");
-                writer.WriteEncodedValue(previewSignCbor);
-                writer.WriteEndMap();
-                return writer.Encode();
-            }
-
-            // Parse the standard map, count entries, and re-encode with previewSign
-            var reader = new CborReader(standardCbor.Value, CborConformanceMode.Ctap2Canonical);
-            int? standardMapSize = reader.ReadStartMap();
-            var standardEntries = new List<(string key, ReadOnlyMemory<byte> value)>();
-
-            for (int i = 0; i < (standardMapSize ?? int.MaxValue); i++)
-            {
-                if (reader.PeekState() == CborReaderState.EndMap) break;
-                var key = reader.ReadTextString();
-                var valueStart = reader.BytesRemaining;
-                reader.SkipValue();
-                var valueEnd = reader.BytesRemaining;
-                var valueLength = valueStart - valueEnd;
-                var value = standardCbor.Value.Slice(standardCbor.Value.Length - valueStart, valueLength);
-                standardEntries.Add((key, value));
-            }
-
-            // Merge standard entries + previewSign, sort by CTAP2 canonical (length-then-lex)
-            var allEntries = new List<KeyValuePair<string, ReadOnlyMemory<byte>>>(standardEntries.Count + 1);
-            allEntries.AddRange(standardEntries.Select(t => new KeyValuePair<string, ReadOnlyMemory<byte>>(t.key, t.value)));
-            allEntries.Add(new KeyValuePair<string, ReadOnlyMemory<byte>>("previewSign", previewSignCbor));
-
-            allEntries.Sort((a, b) => Ctap2CanonicalKeyComparer.Instance.Compare(a.Key, b.Key));
-
-            // Write canonically-ordered map
-            var mergedWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
-            mergedWriter.WriteStartMap(allEntries.Count);
-
-            foreach (var (key, value) in allEntries)
-            {
-                mergedWriter.WriteTextString(key);
-                mergedWriter.WriteEncodedValue(value.Span);
-            }
-
-            mergedWriter.WriteEndMap();
-            return mergedWriter.Encode();
+            PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, inputs.PreviewSign, allowCredentials);
+            hasExtensions = true;
         }
 
-        // Only standard extensions (no previewSign)
-        if (!hasStandardExtensions && previewSignCbor is null)
+        if (!hasExtensions)
         {
             return null;
         }
@@ -483,35 +351,5 @@ internal sealed class ExtensionPipeline
             LargeBlob: largeBlob,
             Prf: prf,
             PreviewSign: previewSign);
-    }
-}
-
-/// <summary>
-/// Comparer for CTAP2 canonical key ordering (length-ascending, then lexicographic).
-/// </summary>
-internal sealed class Ctap2CanonicalKeyComparer : IComparer<string>
-{
-    public static readonly Ctap2CanonicalKeyComparer Instance = new();
-
-    private Ctap2CanonicalKeyComparer() { }
-
-    public int Compare(string? a, string? b)
-    {
-        if (ReferenceEquals(a, b))
-        {
-            return 0;
-        }
-        if (a is null)
-        {
-            return -1;
-        }
-        if (b is null)
-        {
-            return 1;
-        }
-
-        // CTAP2 canonical: length first, then lexicographic
-        int lengthDiff = a.Length - b.Length;
-        return lengthDiff != 0 ? lengthDiff : string.CompareOrdinal(a, b);
     }
 }

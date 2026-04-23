@@ -40,13 +40,11 @@ internal static class PreviewSignAdapter
     private const string ExtensionId = "previewSign";
 
     /// <summary>
-    /// Builds the CBOR-encoded previewSign extension input for registration.
+    /// Applies previewSign input to the CTAP extension builder for registration.
     /// </summary>
-    /// <param name="input">The previewSign registration input, or null if not requested.</param>
+    /// <param name="builder">The extension builder.</param>
+    /// <param name="input">The previewSign registration input.</param>
     /// <param name="options">The original registration options (used for UV preference).</param>
-    /// <returns>
-    /// CBOR-encoded map fragment {3: [alg...], 4: flags}, or null if input is null.
-    /// </returns>
     /// <exception cref="WebAuthnClientError">
     /// Thrown when:
     /// - Explicit flags conflict with UserVerification preference (InvalidRequest)
@@ -64,15 +62,11 @@ internal static class PreviewSignAdapter
     /// the caller must resolve.
     /// </para>
     /// </remarks>
-    public static byte[]? BuildRegistrationCbor(
-        PreviewSign.PreviewSignRegistrationInput? input,
+    public static void ApplyToBuilderForRegistration(
+        ExtensionBuilder builder,
+        PreviewSign.PreviewSignRegistrationInput input,
         RegistrationOptions options)
     {
-        if (input is null)
-        {
-            return null;
-        }
-
         // Derive flags from UserVerification per spec §10.2.1 step 4 (line 4962):
         // "The CDDL value 0b101 if pkOptions.authenticatorSelection.userVerification is
         // set to required, otherwise the CDDL value 0b001."
@@ -85,17 +79,15 @@ internal static class PreviewSignAdapter
             algorithms: input.Algorithms.Select(a => a.Value).ToList(),
             flags: resolvedFlags);
 
-        return Fido2.Extensions.PreviewSignCbor.EncodeRegistrationInput(fido2Input);
+        builder.WithPreviewSign(fido2Input);
     }
 
     /// <summary>
-    /// Builds the CBOR-encoded previewSign extension input for authentication.
+    /// Applies previewSign input to the CTAP extension builder for authentication.
     /// </summary>
-    /// <param name="input">The previewSign authentication input, or null if not requested.</param>
+    /// <param name="builder">The extension builder.</param>
+    /// <param name="input">The previewSign authentication input.</param>
     /// <param name="allowCredentials">The allow list from authentication options.</param>
-    /// <returns>
-    /// CBOR-encoded map {credId: {2: kh, 6: tbs, 7?: args}}, or null if input is null.
-    /// </returns>
     /// <exception cref="WebAuthnClientError">
     /// Thrown when:
     /// - allowCredentials is null or empty (InvalidRequest)
@@ -108,15 +100,11 @@ internal static class PreviewSignAdapter
     ///
     /// This validation happens BEFORE any CTAP roundtrip to fail fast on client-side errors.
     /// </remarks>
-    public static byte[]? BuildAuthenticationCbor(
-        PreviewSign.PreviewSignAuthenticationInput? input,
+    public static void ApplyToBuilderForAuthentication(
+        ExtensionBuilder builder,
+        PreviewSign.PreviewSignAuthenticationInput input,
         IReadOnlyList<WebAuthnCredentialDescriptor>? allowCredentials)
     {
-        if (input is null)
-        {
-            return null;
-        }
-
         // Spec §8 validation: allowCredentials MUST NOT be empty
         if (allowCredentials is null || allowCredentials.Count == 0)
         {
@@ -169,8 +157,14 @@ internal static class PreviewSignAdapter
             tbs: signingParams.Tbs,
             additionalArgs: signingParams.AdditionalArgs);
 
-        // Encode the flat single-credential map per spec §10.2.1 step 9
-        return Fido2.Extensions.PreviewSignCbor.EncodeAuthenticationInput(fido2SigningParams);
+        // Translate to Fido2 authentication input (expects dictionary)
+        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, Fido2.Extensions.PreviewSignSigningParams>(
+            ByteArrayKeyComparer.Instance)
+        {
+            [credentialId] = fido2SigningParams
+        };
+        var fido2Input = new Fido2.Extensions.PreviewSignAuthenticationInput(signByCredential);
+        builder.WithPreviewSign(fido2Input);
     }
 
     /// <summary>

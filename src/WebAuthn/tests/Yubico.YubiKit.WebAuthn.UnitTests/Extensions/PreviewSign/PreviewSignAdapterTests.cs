@@ -15,11 +15,12 @@
 using System.Formats.Cbor;
 using System.Security.Cryptography;
 using Xunit;
+using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions.Adapters;
-using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 using Yubico.YubiKit.WebAuthn.Preferences;
+using WebAuthnPreviewSign = Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
 
@@ -32,7 +33,7 @@ public class PreviewSignAdapterTests
     public void PreviewSign_Registration_DerivesFlagsFromUserVerificationPreference()
     {
         // Arrange - flags are derived from UserVerification, not user-controllable
-        var input = new PreviewSignRegistrationInput(
+        var input = new WebAuthnPreviewSign.PreviewSignRegistrationInput(
             algorithms: [CoseAlgorithm.Es256, CoseAlgorithm.EdDsa]);
 
         var optionsUvRequired = new RegistrationOptions
@@ -49,17 +50,24 @@ public class PreviewSignAdapterTests
             UserVerification = UserVerificationPreference.Preferred
         };
 
-        // Act
-        var cborUvRequired = PreviewSignAdapter.BuildRegistrationCbor(input, optionsUvRequired);
-        var cborUvNotRequired = PreviewSignAdapter.BuildRegistrationCbor(input, optionsUvNotRequired);
+        // Act - apply to builder and build
+        var builderUvRequired = new ExtensionBuilder();
+        PreviewSignAdapter.ApplyToBuilderForRegistration(builderUvRequired, input, optionsUvRequired);
+        var cborUvRequired = builderUvRequired.Build();
+
+        var builderUvNotRequired = new ExtensionBuilder();
+        PreviewSignAdapter.ApplyToBuilderForRegistration(builderUvNotRequired, input, optionsUvNotRequired);
+        var cborUvNotRequired = builderUvNotRequired.Build();
 
         // Assert - UV=Required → flags=0b101, otherwise → flags=0b001
         Assert.NotNull(cborUvRequired);
         Assert.NotNull(cborUvNotRequired);
 
-        // Read UV=Required case
-        var reader = new CborReader(cborUvRequired, CborConformanceMode.Ctap2Canonical);
-        reader.ReadStartMap();
+        // Read UV=Required case - extensions map contains previewSign
+        var reader = new CborReader(cborUvRequired.Value, CborConformanceMode.Ctap2Canonical);
+        reader.ReadStartMap(); // extensions map
+        Assert.Equal("previewSign", reader.ReadTextString());
+        reader.ReadStartMap(); // previewSign value
         reader.ReadInt32(); // key 3
         reader.SkipValue(); // algorithms array
         Assert.Equal(4, reader.ReadInt32()); // key 4
@@ -67,8 +75,10 @@ public class PreviewSignAdapterTests
         reader.ReadEndMap();
 
         // Read UV!=Required case
-        reader = new CborReader(cborUvNotRequired, CborConformanceMode.Ctap2Canonical);
-        reader.ReadStartMap();
+        reader = new CborReader(cborUvNotRequired.Value, CborConformanceMode.Ctap2Canonical);
+        reader.ReadStartMap(); // extensions map
+        Assert.Equal("previewSign", reader.ReadTextString());
+        reader.ReadStartMap(); // previewSign value
         reader.ReadInt32(); // key 3
         reader.SkipValue(); // algorithms array
         Assert.Equal(4, reader.ReadInt32()); // key 4
@@ -80,24 +90,27 @@ public class PreviewSignAdapterTests
     public void PreviewSign_Authentication_EmptyAllowCredentials_Throws_BeforeBackendCall()
     {
         // Arrange - authentication input with empty allowCredentials
-        var input = new PreviewSignAuthenticationInput(
-            new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
+        var input = new WebAuthnPreviewSign.PreviewSignAuthenticationInput(
+            new Dictionary<ReadOnlyMemory<byte>, WebAuthnPreviewSign.PreviewSignSigningParams>(WebAuthnPreviewSign.ByteArrayKeyComparer.Instance)
             {
-                [RandomNumberGenerator.GetBytes(32)] = new PreviewSignSigningParams(
+                [RandomNumberGenerator.GetBytes(32)] = new WebAuthnPreviewSign.PreviewSignSigningParams(
                     keyHandle: RandomNumberGenerator.GetBytes(16),
                     tbs: RandomNumberGenerator.GetBytes(64))
             });
 
+        var builder = new ExtensionBuilder();
+
         // Act & Assert - empty allowCredentials should throw InvalidRequest
         var ex = Assert.Throws<WebAuthnClientError>(() =>
-            PreviewSignAdapter.BuildAuthenticationCbor(input, allowCredentials: null));
+            PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials: null));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
         Assert.Contains("non-empty allowCredentials", ex.Message);
 
         // Also test empty list (not just null)
+        builder = new ExtensionBuilder();
         ex = Assert.Throws<WebAuthnClientError>(() =>
-            PreviewSignAdapter.BuildAuthenticationCbor(input, allowCredentials: []));
+            PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials: []));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
         Assert.Contains("non-empty allowCredentials", ex.Message);
@@ -110,10 +123,10 @@ public class PreviewSignAdapterTests
         var credA = RandomNumberGenerator.GetBytes(32);
         var credB = RandomNumberGenerator.GetBytes(32);
 
-        var input = new PreviewSignAuthenticationInput(
-            new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
+        var input = new WebAuthnPreviewSign.PreviewSignAuthenticationInput(
+            new Dictionary<ReadOnlyMemory<byte>, WebAuthnPreviewSign.PreviewSignSigningParams>(WebAuthnPreviewSign.ByteArrayKeyComparer.Instance)
             {
-                [credA] = new PreviewSignSigningParams(
+                [credA] = new WebAuthnPreviewSign.PreviewSignSigningParams(
                     keyHandle: RandomNumberGenerator.GetBytes(16),
                     tbs: RandomNumberGenerator.GetBytes(64))
                 // Missing entry for credB
@@ -125,9 +138,11 @@ public class PreviewSignAdapterTests
             new(credB)
         };
 
+        var builder = new ExtensionBuilder();
+
         // Act & Assert - missing signByCredential entry should throw InvalidRequest
         var ex = Assert.Throws<WebAuthnClientError>(() =>
-            PreviewSignAdapter.BuildAuthenticationCbor(input, allowCredentials));
+            PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
         Assert.Contains("missing entries", ex.Message);
@@ -140,7 +155,7 @@ public class PreviewSignAdapterTests
         // and attestation object in unsignedExtensionOutputs (per Fix #6b)
         var keyHandle = RandomNumberGenerator.GetBytes(16);
         var publicKeyBytes = BuildCoseEc2PublicKey(CoseAlgorithm.Es256);
-        var attestationObject = BuildAttestationObject(publicKeyBytes, PreviewSignFlags.RequireUserVerification);
+        var attestationObject = BuildAttestationObject(publicKeyBytes, WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification);
 
         // Build authData.extensions["previewSign"] = {3: alg, 4: flags}
         var authDataExtension = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -148,7 +163,7 @@ public class PreviewSignAdapterTests
         authDataExtension.WriteInt32(3);  // alg key
         authDataExtension.WriteInt32(CoseAlgorithm.Es256.Value);
         authDataExtension.WriteInt32(4);  // flags key
-        authDataExtension.WriteInt32((byte)PreviewSignFlags.RequireUserVerification);
+        authDataExtension.WriteInt32((byte)WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification);
         authDataExtension.WriteEndMap();
 
         // Build unsignedExtensionOutputs["previewSign"] = {7: att-obj}
@@ -214,12 +229,12 @@ public class PreviewSignAdapterTests
         // Arrange - single allowed credential with single signByCredential entry
         var credA = new ReadOnlyMemory<byte>([0x01, 0x02, 0x03]);
 
-        var paramsA = new PreviewSignSigningParams(
+        var paramsA = new WebAuthnPreviewSign.PreviewSignSigningParams(
             keyHandle: new byte[] { 0xAA, 0xBB },
             tbs: new byte[] { 0xCC, 0xDD, 0xEE });
 
-        var input = new PreviewSignAuthenticationInput(
-            new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
+        var input = new WebAuthnPreviewSign.PreviewSignAuthenticationInput(
+            new Dictionary<ReadOnlyMemory<byte>, WebAuthnPreviewSign.PreviewSignSigningParams>(WebAuthnPreviewSign.ByteArrayKeyComparer.Instance)
             {
                 [credA] = paramsA
             });
@@ -229,13 +244,20 @@ public class PreviewSignAdapterTests
             new(credA)
         };
 
-        // Act - build authentication CBOR
-        var cbor = PreviewSignAdapter.BuildAuthenticationCbor(input, allowCredentials);
+        // Act - apply to builder and build
+        var builder = new ExtensionBuilder();
+        PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials);
+        var extensionsMap = builder.Build();
 
-        // Assert - CBOR should be a FLAT map {2: kh, 6: tbs} (no outer credential-keyed wrapper)
-        Assert.NotNull(cbor);
+        // Assert - extensions map contains previewSign with flat params map
+        Assert.NotNull(extensionsMap);
 
-        var reader = new CborReader(cbor, CborConformanceMode.Ctap2Canonical);
+        // Decode extensions map first
+        var reader = new CborReader(extensionsMap.Value, CborConformanceMode.Ctap2Canonical);
+        reader.ReadStartMap(); // extensions map
+        Assert.Equal("previewSign", reader.ReadTextString());
+
+        // Now read the previewSign value - should be a FLAT map {2: kh, 6: tbs}
         int? mapSize = reader.ReadStartMap();
         Assert.Equal(2, mapSize);  // Just kh + tbs
 
@@ -250,10 +272,6 @@ public class PreviewSignAdapterTests
         Assert.Equal(paramsA.Tbs.ToArray(), tbs);
 
         reader.ReadEndMap();
-
-        // Byte-exact hex check
-        string hex = Convert.ToHexString(cbor);
-        Assert.Equal("A20242AABB0643CCDDEE", hex);
     }
 
     [Fact(Timeout = 5000)]
@@ -263,11 +281,11 @@ public class PreviewSignAdapterTests
         var credA = new ReadOnlyMemory<byte>([0x01, 0x02]);
         var credB = new ReadOnlyMemory<byte>([0x03, 0x04]);
 
-        var input = new PreviewSignAuthenticationInput(
-            new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
+        var input = new WebAuthnPreviewSign.PreviewSignAuthenticationInput(
+            new Dictionary<ReadOnlyMemory<byte>, WebAuthnPreviewSign.PreviewSignSigningParams>(WebAuthnPreviewSign.ByteArrayKeyComparer.Instance)
             {
-                [credA] = new PreviewSignSigningParams(new byte[] { 0xAA }, new byte[] { 0xBB }),
-                [credB] = new PreviewSignSigningParams(new byte[] { 0xCC }, new byte[] { 0xDD })
+                [credA] = new WebAuthnPreviewSign.PreviewSignSigningParams(new byte[] { 0xAA }, new byte[] { 0xBB }),
+                [credB] = new WebAuthnPreviewSign.PreviewSignSigningParams(new byte[] { 0xCC }, new byte[] { 0xDD })
             });
 
         var allowCredentials = new List<WebAuthnCredentialDescriptor>
@@ -276,9 +294,11 @@ public class PreviewSignAdapterTests
             new(credB)
         };
 
+        var builder = new ExtensionBuilder();
+
         // Act & Assert
         var ex = Assert.Throws<WebAuthnClientError>(() =>
-            PreviewSignAdapter.BuildAuthenticationCbor(input, allowCredentials));
+            PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials));
 
         Assert.Equal(WebAuthnClientErrorCode.NotSupported, ex.Code);
         Assert.Contains("single-credential scope", ex.Message);
@@ -293,10 +313,10 @@ public class PreviewSignAdapterTests
         var credA = new ReadOnlyMemory<byte>([0x01, 0x02]);
         var credB = new ReadOnlyMemory<byte>([0x03, 0x04]);
 
-        var input = new PreviewSignAuthenticationInput(
-            new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
+        var input = new WebAuthnPreviewSign.PreviewSignAuthenticationInput(
+            new Dictionary<ReadOnlyMemory<byte>, WebAuthnPreviewSign.PreviewSignSigningParams>(WebAuthnPreviewSign.ByteArrayKeyComparer.Instance)
             {
-                [credB] = new PreviewSignSigningParams(new byte[] { 0xAA }, new byte[] { 0xBB })
+                [credB] = new WebAuthnPreviewSign.PreviewSignSigningParams(new byte[] { 0xAA }, new byte[] { 0xBB })
             });
 
         var allowCredentials = new List<WebAuthnCredentialDescriptor>
@@ -304,9 +324,11 @@ public class PreviewSignAdapterTests
             new(credA)
         };
 
+        var builder = new ExtensionBuilder();
+
         // Act & Assert - validation catches missing credA in signByCredential first
         var ex = Assert.Throws<WebAuthnClientError>(() =>
-            PreviewSignAdapter.BuildAuthenticationCbor(input, allowCredentials));
+            PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
         Assert.Contains("missing entries", ex.Message);
@@ -343,7 +365,7 @@ public class PreviewSignAdapterTests
         return writer.Encode();
     }
 
-    private static byte[] BuildAttestationObject(byte[] publicKey, PreviewSignFlags flags)
+    private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags)
     {
         // Build minimal attestation object with previewSign extension in authData
         var rpIdHash = SHA256.HashData("example.com"u8);

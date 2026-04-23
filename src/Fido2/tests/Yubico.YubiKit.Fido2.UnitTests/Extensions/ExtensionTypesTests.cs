@@ -93,12 +93,31 @@ public class ExtensionTypesTests
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteByteString(outputData);
         var encoded = writer.Encode();
-        
+
         // Act
         var output = HmacSecretOutput.Decode(encoded);
-        
+
         // Assert
         Assert.Equal(48, output.Output.Length);
+    }
+
+    [Fact]
+    public void HmacSecretMcOutput_DecodesCorrectly()
+    {
+        // Arrange - Create CBOR byte string simulating authenticator hmac-secret-mc response
+        // hmac-secret-mc output format is identical to hmac-secret (just a CBOR byte string)
+        var outputData = new byte[48]; // 16 IV + 32 encrypted output (PIN protocol 2)
+        Random.Shared.NextBytes(outputData);
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteByteString(outputData);
+        var encoded = writer.Encode();
+
+        // Act - Use the same decoder as hmac-secret (wire format is identical)
+        var output = HmacSecretOutput.Decode(encoded);
+
+        // Assert
+        Assert.Equal(48, output.Output.Length);
+        Assert.Equal(outputData, output.Output.ToArray());
     }
     
     
@@ -359,10 +378,28 @@ public class ExtensionTypesTests
     {
         // Arrange
         var decrypted = new byte[16]; // Too short
-        
+
         // Act & Assert
         Assert.Throws<ArgumentException>(
             () => PrfOutput.FromHmacSecretOutput(decrypted));
     }
-    
+
+    [Fact]
+    public void ExtensionOutput_WithUnsupportedExtension_YieldsEmptyOutputMap()
+    {
+        // Arrange - Simulate authenticator response with NO extension outputs
+        // (firmware silently dropped unsupported extension request)
+        var emptyExtensions = ReadOnlyMemory<byte>.Empty;
+
+        // Act
+        var output = ExtensionOutput.Decode(emptyExtensions);
+
+        // Assert - SDK handles missing extensions gracefully without throwing
+        Assert.False(output.HasExtensions);
+        Assert.Empty(output.ExtensionIds);
+        Assert.False(output.TryGetCredProtect(out _));
+        Assert.False(output.TryGetMinPinLength(out _));
+    }
+
 }
+

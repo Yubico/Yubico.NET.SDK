@@ -61,7 +61,7 @@ Codebase is preview-stage; binary-compatibility / public-API stability is **not*
 | **9.0** Parallel parity investigations (libfido2, android, Rust, retroactive Swift) | ✅ **Closed** | (no branch — read-only) | Four parity reports landed; supersedes the original "Step 1 (Swift) is gating" structure. Multi-source parity matrix is the new artifact. |
 | **9.1** Module hygiene bundle | ✅ **Shipped** — audit PASS-WITH-NOTES | `webauthn/phase-9.1-hygiene` | 5 commits, 0 build warnings, 101/0 WebAuthn unit tests; +1 commit landing parity reports + handoff |
 | **9.2** Path 2A attempted → reverted to 2B-equivalent shape | ✅ **Shipped (encoder only)** | `webauthn/phase-9.2-rust-port` | Encoder verified byte-correct (audit PASS-WITH-NOTES). Hardware verification of auth path BLOCKED on ARKG: YubiKey 5.8.0-beta only accepts `Esp256` (ARKG) for previewSign and rejects non-ARKG algorithms with `Unsupported algorithm`. Integration test re-skipped citing `Plans/phase-10-previewsign-auth.md §3`. ARKG promoted to gating prerequisite for any auth-path hardware test (Phase 10 / candidate "Path B" branch). |
-| **9.3** Hardware verification + integration test expansion | ⏸️ Blocked on 9.2 + user presence | `webauthn/phase-9.3-integration` | Substantively unchanged from rev 1; runs once 9.2 passes audit and user is at YubiKey |
+| **9.3** Hardware verification + integration test expansion | ✅ **Done** — executed 2026-04-23 on `webauthn/phase-9.2-rust-port` | (consolidated onto 9.2 branch) | Full WebAuthn integration suite ran on YubiKey 5.8.0-beta. **7 of 8 tests PASS** (all standard WebAuthn registration/authentication, status streaming, no-PIN throw, discoverable assertion). **1 SKIP** — `FullCeremony_RegisterWithPreviewSign_ThenSign_ReturnsSignature`, blocked on ARKG (Phase 10 §3). Skip-reporting fixed by migrating `[Theory]` → `[SkippableTheory]` (`xunit.SkippableFact` requires the matching attribute for the runner to catch `SkipException`). See "Phase 9.3 — Hardware verification record (2026-04-23)" section below. |
 | **Post-9** Fido2 canonical extension coverage assessment | ⏸️ Tracked, post-9.3 | (no branch — assessment only) | Substantively unchanged from rev 1 |
 
 ---
@@ -157,6 +157,38 @@ Audit verdict: PASS-WITH-NOTES — notes were observational only (build cleaner 
 **`/Ping` checkpoint:** "Phase 9.3 hardware verification complete — full module is shippable; ready to squash-merge the chain into `yubikit-applets`."
 
 **UP testing:** This sub-phase IS the UP testing. User must be present.
+
+---
+
+### Phase 9.3 — Hardware verification record (2026-04-23)
+
+**Executed against:** YubiKey 5 NFC Enhanced PIN, firmware `5.8.0.beta.0`, serial 103, transports OTP+FIDO+CCID
+**Branch tested:** `webauthn/phase-9.2-rust-port` at commit `b54bc0cc` (pre-`SkippableTheory` fix; Skip API quirk discovered during this run)
+**Test command:** `dotnet toolchain.cs -- test --integration --project WebAuthn`
+**Total duration:** ~21 s execution time across 8 tests (2nd attempt; 1st attempt missed UP touches)
+
+**Per-test outcomes:**
+
+| # | Test | Result | Time | Touches |
+|---|---|---|---|---|
+| 1 | `PreviewSignTests.Registration_WithPreviewSign_ReturnsGeneratedSigningKey` | ✅ PASS | 5 s | 1 |
+| 2 | `PreviewSignTests.FullCeremony_RegisterWithPreviewSign_ThenSign_ReturnsSignature` | 🟡 SKIPPED (ARKG block, Phase 10 §3) | 1 ms | 0 |
+| 3 | `WebAuthnClientTests.MakeCredential_NonResident_ReturnsValidResponse` | ✅ PASS | 1 s | 1 |
+| 4 | `WebAuthnClientTests.MakeCredential_ResidentKey_ReturnsCredentialWithAaguid` | ✅ PASS | 1 s | 1 |
+| 5 | `WebAuthnClientTests.MakeCredentialStream_EmitsProcessingThenFinished` | ✅ PASS | 935 ms | 1 |
+| 6 | `WebAuthnClientTests.FullCeremony_RegisterThenAuthenticate_Succeeds` | ✅ PASS | 2 s | 2 |
+| 7 | `WebAuthnClientTests.GetAssertion_DiscoverableCredential_ReturnsUserInfo` | ✅ PASS | 3 s | 2 |
+| 8 | `WebAuthnClientTests.MakeCredential_NoPinProvided_ThrowsNotAllowed` | ✅ PASS | 188 ms | 0 |
+
+**Net: 7 of 7 testable PASS · 1 SKIP · 0 hardware regressions.**
+
+**Discoveries during this run (all addressed in branch tip):**
+
+1. **Skip-reporting quirk** — `Skip.If(true, ...)` from `xunit.SkippableFact` threw `Xunit.SkipException`, but the test was decorated with `[Theory]` rather than `[SkippableTheory]`, so the runner reported it as Failed instead of Skipped. Fixed in `197e0dd7` (8 `[Theory]` → `[SkippableTheory]` migrations across both integration test files; the helpers also call `Skip.If` so all transitive consumers needed the attribute).
+
+2. **YubiKey 5.8.0-beta only accepts ARKG algorithms for previewSign** — the only firmware-accepted algorithm for previewSign at registration is `Esp256` (-9), which is ARKG. Non-ARKG algorithms (`Es256`, `EdDsa`) fail with `CtapException: Unsupported algorithm`. This means single-credential previewSign authentication cannot be hardware-tested without ARKG `additional_args` support → ARKG promoted to gating prerequisite at `Plans/phase-10-previewsign-auth.md §3`.
+
+3. **The original `Skip.If(true)` pattern was already dead code in the test suite** — the suite would have reported it as Failed if anyone had ever run integration tests. Phase 9.1 audit only ran unit tests, so the quirk was never surfaced. **Audit-rubric gap for future phases:** if any helper uses `Skip.If`, the audit must run the integration suite (not just unit tests) to confirm Skip behavior. Documented for next agent.
 
 ---
 

@@ -137,15 +137,16 @@ internal static class PreviewSignAdapter
             }
         }
 
-        // Phase 8.5 limitation: single-credential only (multi-credential probe deferred to Phase 9)
+        // Phase 9.2 limitation: single-credential only (multi-credential probe deferred to Phase 10)
         if (input.SignByCredential.Count != 1)
         {
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.NotSupported,
-                "previewSign authentication currently requires scoping to a single credential; " +
-                "multi-credential probe-selection (CTAP up=false probe per spec §10.2.1 step 7) " +
-                "is not yet implemented. Reduce signByCredential to one entry matching the single " +
-                "allowed credential, or wait for Phase 9.");
+                "previewSign authentication currently supports only single-credential scope; " +
+                "multi-credential probe-selection (CTAP up=false probe per CTAP v4 §10.2.1 step 7) " +
+                "is deferred to Phase 10. See Plans/phase-10-previewsign-auth.md for tracking. " +
+                "To use previewSign now: scope signByCredential to exactly one credential " +
+                "that matches the single entry in allowCredentials.");
         }
 
         // Extract the single credential's params

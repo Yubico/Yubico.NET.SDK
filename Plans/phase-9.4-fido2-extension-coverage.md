@@ -1,10 +1,26 @@
 # Phase 9.4 — Fido2 Canonical Extension Coverage Polish
 
 **Created:** 2026-04-23
-**Status:** Tracker — deferred (non-blocking for the WebAuthn Phase 9 PR)
-**Owner:** TBD
+**Status:** ✅ **Done — 2026-04-23 (late session)** — all 4 tests shipped via DevTeam Ship cycle (commit `28238098`); Reviewer verdict PASS-WITH-NOTES. See "Completion record" section below.
+**Owner:** Closed
 **Predecessor:** Phase 9 WebAuthn port (Phases 1–9.3)
 **Source:** Post-Phase-9 Fido2 canonical extension coverage assessment (2026-04-23, single Explore agent run per `Plans/yes-we-have-started-composed-horizon.md` Post-Phase-9 section)
+
+## Completion record (2026-04-23 late session)
+
+**DevTeam Ship cycle:** Engineer commit `28238098` "test(fido2): add Phase 9.4 extension coverage tests"; Reviewer verdict **PASS-WITH-NOTES**.
+
+**Tests landed (file:line):**
+1. `Build_WithLargeBlobKey_EncodesCorrectly` — `src/Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Extensions/ExtensionBuilderTests.cs:175`
+2. `HmacSecretMcOutput_DecodesCorrectly` — `src/Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Extensions/ExtensionTypesTests.cs:105`
+3. `ExtensionOutput_WithUnsupportedExtension_YieldsEmptyOutputMap` — `src/Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Extensions/ExtensionTypesTests.cs:388`
+4. `Build_WithCredBlobOversized_AllowsOversizedInput` — `src/Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Extensions/ExtensionBuilderTests.cs:193`
+
+**Build/test:** 0 errors, 0 warnings · 357 Fido2 unit tests pass (was 353; +4)
+
+**Reviewer notes (non-blocking):**
+- **Test #2 marginal value:** `HmacSecretMcOutput_DecodesCorrectly` does not exercise an `hmac-secret-mc`-specific decode path because none exists in production (`ExtensionOutput.cs:140` only handles `ExtensionIdentifiers.HmacSecret`, not `HmacSecretMakeCredential` at `ExtensionIdentifiers.cs:41`). Test mostly re-tests `HmacSecretOutput.Decode` already covered by `HmacSecretOutput_DecodesCorrectly`. Adds round-trip-preservation assertion the original lacked. Slightly misleading name. Consider removing or renaming in a future cleanup.
+- **Test #4 surfaced production gap:** `ExtensionBuilder.WithCredBlob` accepts blobs of ANY size — no validation against CTAP 2.1 §11.1 32-byte limit. Filed as separate hardening tracker `Plans/phase-9.6-credblob-validation.md`.
 
 ## Context
 

@@ -45,7 +45,7 @@ The constraining principle has not changed: **only ship what an upstream referen
 | Surface | Hardware-proven references | Ship target | Verdict |
 |---|---|---|---|
 | `previewSign` registration (key generation) | 2 of 4 (android + this port) | **Phase 9.2 — ship unmarked** | Already shipped via Phases 7+8+Gate-2-fixup; no Phase 9.2 action needed beyond keeping it untouched |
-| `previewSign` single-credential authentication | 1 of 4 (Rust, with documented wire format) | **Phase 9.2 path 2A — ship unmarked once wire fix lands and hardware passes** | Active work — see `Plans/next-instruction-for-moving-unified-scott.md` |
+| `previewSign` single-credential authentication (encoder) | 1 of 4 (Rust, byte-validated against C# encoder) | **Phase 9.2 — encoder shipped; integration test re-skipped pending ARKG (Phase 10)** | YubiKey 5.8.0-beta only accepts ARKG algorithms for previewSign — ARKG `additional_args` is the gating prerequisite for hardware verification. See Phase 10 tracker §3. |
 | `previewSign` multi-credential probe (CTAP §10.2.1 step 7) | 0 of 4 | **Phase 10** | Tracker file: `Plans/phase-10-previewsign-auth.md`; throw at `PreviewSignAdapter.cs:141-149` cites this |
 | Cryptographic signature verification helper | n/a | **Phase 10 (post-9.3)** | Tracker file: `Plans/phase-10-previewsign-auth.md` §2 |
 | ARKG `additional_args` first-class builder | n/a | **Phase 10 (post-9.3)** | Tracker file: `Plans/phase-10-previewsign-auth.md` §3 |
@@ -60,7 +60,7 @@ Codebase is preview-stage; binary-compatibility / public-API stability is **not*
 |---|---|---|---|
 | **9.0** Parallel parity investigations (libfido2, android, Rust, retroactive Swift) | ✅ **Closed** | (no branch — read-only) | Four parity reports landed; supersedes the original "Step 1 (Swift) is gating" structure. Multi-source parity matrix is the new artifact. |
 | **9.1** Module hygiene bundle | ✅ **Shipped** — audit PASS-WITH-NOTES | `webauthn/phase-9.1-hygiene` | 5 commits, 0 build warnings, 101/0 WebAuthn unit tests; +1 commit landing parity reports + handoff |
-| **9.2** Path 2A — port Rust wire format | 🔧 **Active** | `webauthn/phase-9.2-rust-port` (off `webauthn/phase-9.1-hygiene`) | Execution sequence in `Plans/next-instruction-for-moving-unified-scott.md`. Engineer agent dispatched against the `PreviewSignAdapter.BuildAuthenticationCbor` byte-format fix. |
+| **9.2** Path 2A attempted → reverted to 2B-equivalent shape | ✅ **Shipped (encoder only)** | `webauthn/phase-9.2-rust-port` | Encoder verified byte-correct (audit PASS-WITH-NOTES). Hardware verification of auth path BLOCKED on ARKG: YubiKey 5.8.0-beta only accepts `Esp256` (ARKG) for previewSign and rejects non-ARKG algorithms with `Unsupported algorithm`. Integration test re-skipped citing `Plans/phase-10-previewsign-auth.md §3`. ARKG promoted to gating prerequisite for any auth-path hardware test (Phase 10 / candidate "Path B" branch). |
 | **9.3** Hardware verification + integration test expansion | ⏸️ Blocked on 9.2 + user presence | `webauthn/phase-9.3-integration` | Substantively unchanged from rev 1; runs once 9.2 passes audit and user is at YubiKey |
 | **Post-9** Fido2 canonical extension coverage assessment | ⏸️ Tracked, post-9.3 | (no branch — assessment only) | Substantively unchanged from rev 1 |
 

@@ -86,14 +86,23 @@ public class PreviewSignTests
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task FullCeremony_RegisterWithPreviewSign_ThenSign_ReturnsSignature(YubiKeyTestState state)
     {
-        // TODO Phase 9.3: Hardware verification with user presence
-        // This test requires physical touch (two times: registration + authentication).
-        // The wire format has been verified byte-for-byte against the Rust reference (cnh-authenticator-rs).
-        // See PreviewSignCborEncodingTests for deterministic byte-level assertions.
+        // SKIPPED: hardware verification of single-credential previewSign authentication is BLOCKED on ARKG.
         //
-        // Note: Esp256 (-9) is an ARKG algorithm requiring additional_args (COSE_Sign_Args with arkg_kh + ctx).
-        // ARKG support is deferred to Phase 10. For Phase 9.2/9.3, this test should use non-ARKG algorithms
-        // (Es256 or EdDsa) to avoid requiring ARKG additional_args during authentication.
+        // Phase 9.2 status:
+        //   - Wire format: ✅ verified byte-for-byte against the Rust reference (cnh-authenticator-rs);
+        //                  see PreviewSignCborEncodingTests for deterministic byte-level assertions
+        //   - Hardware registration with non-ARKG algorithms (Es256, EdDsa): ❌ YubiKey 5.8.0-beta firmware
+        //                  rejects with CtapException "Unsupported algorithm" (verified 2026-04-23)
+        //   - Hardware registration with ARKG algorithm (Esp256, -9): ✅ works, but authentication then
+        //                  requires additional_args (COSE_Sign_Args map: {3: alg, -1: arkg_kh, -2: ctx})
+        //                  which our adapter does not yet build
+        //
+        // → Hardware verification of the auth path requires ARKG support (Phase 10).
+        //   See Plans/phase-10-previewsign-auth.md §3 for the ARKG additional_args first-class builder tracker.
+        //
+        // The encoder is already byte-correct; what blocks end-to-end hardware test is the ARKG plumbing.
+        Skip.If(true, "previewSign authentication hardware test requires ARKG support — deferred to Phase 10. " +
+                      "See Plans/phase-10-previewsign-auth.md §3.");
 
         // --- Phase 1: Registration with previewSign key generation ---
         await using var session1 = await state.Device.CreateFidoSessionAsync();

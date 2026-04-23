@@ -34,13 +34,22 @@ Phase 9.2 Step 8 asserts only that a signature is **returned** (non-null, non-em
 
 **Suspected technical scope:** P-256 ECDSA verify using the public key returned by registration; surface a verification helper on the `PreviewSignAdapter` (or as a static utility) that callers can use to validate `tbs` → signature for the ARKG-signed shape.
 
-### 3. ARKG `additional_args` first-class support
+### 3. ARKG `additional_args` first-class support — **PROMOTED: prerequisite for any auth-path hardware test**
 
 The current code path treats `additional_args` (CBOR key 7) as an opaque byte string. The Rust hid-test demonstrates the ARKG-specific `COSE_Sign_Args` shape: `{3: alg, -1: arkg_kh, -2: ctx}` (per `native/crates/hid-test/src/main.rs:272-277` and `arkg::encode_arkg_sign_args`).
 
-**Unblocking criteria:** RP-side demand for ARKG, or a Yubico statement about ARKG production support.
+**Hardware finding (2026-04-23, Phase 9.2 Step 8):** YubiKey 5.8.0-beta firmware **rejects non-ARKG algorithms** (`Es256`, `EdDsa`) for previewSign at registration with `CtapException: Unsupported algorithm`. The only algorithm the firmware accepts for previewSign is **`Esp256` (-9), which is ARKG**. Therefore single-credential previewSign authentication cannot be hardware-tested at all without ARKG `additional_args`. ARKG is no longer optional for end-to-end verification — it is the **gating prerequisite**.
 
-**Suspected technical scope:** A first-class ARKG sign-args builder in the C# port that mirrors `arkg::encode_arkg_sign_args` rather than requiring callers to hand-encode the inner CBOR map.
+**Unblocking criteria:**
+- RP-side demand for ARKG (still relevant for shipping the public API), OR
+- Anyone wanting to hardware-verify the auth path — even just the encoder integration end-to-end (now mandatory)
+
+**Suspected technical scope:**
+- ARKG public-key derivation (port of `arkg::arkg_derive_public_key` — P-256 elliptic-curve operations)
+- COSE_Sign_Args CBOR encoder for the `{3: alg, -1: arkg_kh, -2: ctx}` map (port of `arkg::encode_arkg_sign_args`)
+- A first-class `additional_args` builder API in `PreviewSignSigningParams` that takes ARKG seed + context and produces the bytes — rather than requiring callers to hand-encode
+- Reference implementations: `~/Code/y/cnh-authenticator-rs-extension/native/crates/hid-test/src/arkg.rs` (and the wider crate that defines the helpers)
+- Path B candidate: do this work in a separate branch off `webauthn/phase-9.2-rust-port` so the encoder ship from Phase 9.2 is not blocked
 
 ## Reference snapshot (frozen at Phase 9.2 ship time)
 

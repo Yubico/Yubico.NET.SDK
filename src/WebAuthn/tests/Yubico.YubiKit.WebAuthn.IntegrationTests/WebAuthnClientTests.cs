@@ -55,7 +55,7 @@ public class WebAuthnClientTests
         };
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_NonResident_ReturnsValidResponse(YubiKeyTestState state)
@@ -84,7 +84,7 @@ public class WebAuthnClientTests
         Assert.NotNull(response.ClientData);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_ResidentKey_ReturnsCredentialWithAaguid(YubiKeyTestState state)
@@ -108,7 +108,7 @@ public class WebAuthnClientTests
         Assert.NotEqual(Guid.Empty, response.Aaguid.Value);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredentialStream_EmitsProcessingThenFinished(YubiKeyTestState state)
@@ -147,7 +147,7 @@ public class WebAuthnClientTests
         Assert.True(finished.Result.CredentialId.Length > 0);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task FullCeremony_RegisterThenAuthenticate_Succeeds(YubiKeyTestState state)
@@ -209,7 +209,7 @@ public class WebAuthnClientTests
         Assert.NotNull(authResponse.ClientData);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetAssertion_DiscoverableCredential_ReturnsUserInfo(YubiKeyTestState state)
@@ -259,7 +259,7 @@ public class WebAuthnClientTests
         Assert.True(authResponse.Signature.Length > 0);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_NoPinProvided_ThrowsNotAllowed(YubiKeyTestState state)

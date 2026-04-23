@@ -154,7 +154,7 @@ public class ExtensionPipelineTests
         var inputs = new RegistrationExtensionInputs(
             CredProtect: new CredProtectInput(CredProtectPolicy.UserVerificationRequired), // length 11
             CredBlob: new WebAuthn.Extensions.Inputs.CredBlobInput(new byte[] { 0x01, 0x02 }), // length 8
-            PreviewSign: new PreviewSignRegistrationInput(
+            PreviewSign: new WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput(
                 algorithms: new[] { CoseAlgorithm.Es256 })); // length 11
         var options = CreateMockOptions();
         

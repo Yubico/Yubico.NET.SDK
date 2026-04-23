@@ -14,9 +14,9 @@
 
 using System.Formats.Cbor;
 using Xunit;
-using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
+using Yubico.YubiKit.Fido2.Extensions;
 
-namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
+namespace Yubico.YubiKit.Fido2.UnitTests.Extensions;
 
 /// <summary>
 /// Byte-level verification that the C# CBOR encoder produces wire format matching the Rust reference.
@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
 /// The Rust upstream uses BTreeMap with Value::Integer keys and Value::Bytes values, which serializes
 /// keys in ascending order: 2 → 6 → 7.
 /// </remarks>
-public class PreviewSignCborEncodingTests
+public class PreviewSignCborTests
 {
     [Fact]
     public void EncodeAuthenticationInput_SingleCredential_NoArgs_MatchesRustByteStructure()
@@ -143,5 +143,38 @@ public class PreviewSignCborEncodingTests
         // Major type 2 (0b010_00000) | info 24 (1-byte length follows) = 0x58
         Assert.Equal(0x58, cborBytes[2]);
         Assert.Equal(64, cborBytes[3]); // Length byte
+    }
+
+    [Fact]
+    public void EncodeRegistrationInput_MatchesCborStructure()
+    {
+        // Arrange
+        var input = new PreviewSignRegistrationInput(
+            algorithms: [-7, -257], // Es256, Rs256
+            flags: 0x01);           // RequireUserPresence
+
+        // Act
+        byte[] cborBytes = PreviewSignCbor.EncodeRegistrationInput(input);
+
+        // Assert: Decode and verify structure {3: [-7, -257], 4: 1}
+        var reader = new CborReader(cborBytes, CborConformanceMode.Ctap2Canonical);
+        int? mapSize = reader.ReadStartMap();
+        Assert.Equal(2, mapSize);
+
+        // Key 3: algorithms array
+        int key1 = reader.ReadInt32();
+        Assert.Equal(3, key1);
+        int? arraySize = reader.ReadStartArray();
+        Assert.Equal(2, arraySize);
+        Assert.Equal(-7, reader.ReadInt32());
+        Assert.Equal(-257, reader.ReadInt32());
+        reader.ReadEndArray();
+
+        // Key 4: flags byte
+        int key2 = reader.ReadInt32();
+        Assert.Equal(4, key2);
+        Assert.Equal(1, reader.ReadInt32());
+
+        reader.ReadEndMap();
     }
 }

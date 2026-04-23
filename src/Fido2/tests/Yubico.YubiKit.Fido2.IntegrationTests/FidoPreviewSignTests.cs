@@ -110,20 +110,22 @@ public class FidoPreviewSignTests
                 var pinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
                     clientPin.Protocol, pinToken, challenge);
 
-                // Build previewSign extension input manually (CBOR-encoded):
-                // {3: [-9], 4: 1}
-                // Key 3 = algorithm array (using Esp256 = -9, the only algorithm YubiKey 5.8.0-beta accepts)
-                // Key 4 = flags byte (1 = RequireUserPresence)
-                var extensionCbor = BuildPreviewSignRegistrationInput(
-                    algorithms: [-9], // Esp256 (ARKG) - only algorithm accepted by YubiKey 5.8.0-beta
+                // Build previewSign extension input via ExtensionBuilder
+                // Using Esp256 (-9, ARKG) - only algorithm YubiKey 5.8.0-beta accepts for previewSign
+                var previewSignInput = new Extensions.PreviewSignRegistrationInput(
+                    algorithms: [-9], // Esp256 (ARKG)
                     flags: 0x01);     // RequireUserPresence
+
+                var extensions = new Extensions.ExtensionBuilder()
+                    .WithPreviewSign(previewSignInput)
+                    .Build();
 
                 var options = new MakeCredentialOptions
                 {
                     ResidentKey = true,
                     PinUvAuthParam = pinUvAuthParam,
                     PinUvAuthProtocol = clientPin.Protocol.Version,
-                    Extensions = extensionCbor
+                    Extensions = extensions
                 };
 
                 // Act
@@ -186,34 +188,6 @@ public class FidoPreviewSignTests
                 }
             }
         });
-
-    /// <summary>
-    /// Builds CBOR-encoded previewSign registration input per CTAP v4 draft.
-    /// </summary>
-    /// <param name="algorithms">List of COSE algorithm identifiers.</param>
-    /// <param name="flags">PreviewSign flags byte (1 = RequireUserPresence, 5 = RequireUserVerification).</param>
-    /// <returns>CBOR-encoded extension map {3: [alg...], 4: flags}.</returns>
-    private static ReadOnlyMemory<byte> BuildPreviewSignRegistrationInput(int[] algorithms, byte flags)
-    {
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2); // Two keys: alg (3) and flags (4)
-
-        // Key 3: algorithms array
-        writer.WriteInt32(3);
-        writer.WriteStartArray(algorithms.Length);
-        foreach (var alg in algorithms)
-        {
-            writer.WriteInt32(alg);
-        }
-        writer.WriteEndArray();
-
-        // Key 4: flags byte
-        writer.WriteInt32(4);
-        writer.WriteInt32(flags);
-
-        writer.WriteEndMap();
-        return writer.Encode();
-    }
 
     /// <summary>
     /// Decodes the algorithm from previewSign extension output CBOR.

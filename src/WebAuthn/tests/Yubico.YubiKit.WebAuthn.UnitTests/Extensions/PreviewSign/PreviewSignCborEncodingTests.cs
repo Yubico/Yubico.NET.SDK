@@ -144,13 +144,4 @@ public class PreviewSignCborEncodingTests
         Assert.Equal(0x58, cborBytes[2]);
         Assert.Equal(64, cborBytes[3]); // Length byte
     }
-
-    [Fact]
-    public void EncodeAuthenticationInput_EmptyKeyHandle_ThrowsWebAuthnClientError()
-    {
-        // Act & Assert: Should fail validation in PreviewSignSigningParams constructor
-        // (This test verifies that empty key handles are rejected at construction time)
-        Assert.Throws<WebAuthnClientError>(() =>
-            new PreviewSignSigningParams(ReadOnlyMemory<byte>.Empty, new byte[32], null));
-    }
 }

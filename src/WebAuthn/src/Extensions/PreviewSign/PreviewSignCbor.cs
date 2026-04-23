@@ -19,39 +19,17 @@ using Yubico.YubiKit.WebAuthn.Cose;
 namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 /// <summary>
-/// CBOR encoding and decoding for previewSign extension wire format.
+/// CBOR decoding for previewSign extension output (WebAuthn-specific types).
 /// </summary>
 /// <remarks>
 /// <para>
-/// Per CTAP v4 draft Web Authentication sign extension, previewSign uses integer-keyed
-/// CBOR maps with canonical encoding (sorted keys).
-/// </para>
-/// <para>
-/// CBOR map keys (all integer-keyed):
-/// - kh (key handle) = 2
-/// - alg (algorithm) = 3
-/// - flags (UP/UV policy) = 4
-/// - tbs (to-be-signed) = 6 (authentication input)
-/// - args (additional args) = 7 (authentication input)
-/// - sig (signature) = 6 (authentication output)
-/// - att-obj (attestation object) = 7 (registration output)
-/// </para>
-/// <para>
-/// Note: Key 6 and 7 have different semantics in registration vs authentication contexts,
-/// so they are scoped to nested classes to avoid name collisions.
+/// Encoding logic lives in Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.
+/// This file contains only WebAuthn-level decoding that works with WebAuthn-specific
+/// types like WebAuthnAttestationObject and GeneratedSigningKey.
 /// </para>
 /// </remarks>
 internal static class PreviewSignCbor
 {
-    /// <summary>
-    /// CBOR keys for registration input.
-    /// </summary>
-    private static class RegistrationInputKeys
-    {
-        internal const int Algorithm = 3;
-        internal const int Flags = 4;
-    }
-
     /// <summary>
     /// CBOR keys for registration output (unsigned extension outputs).
     /// </summary>
@@ -61,90 +39,12 @@ internal static class PreviewSignCbor
     }
 
     /// <summary>
-    /// CBOR keys for authentication input.
-    /// </summary>
-    private static class AuthenticationInputKeys
-    {
-        internal const int KeyHandle = 2;
-        internal const int ToBeSigned = 6;
-        internal const int AdditionalArgs = 7;
-    }
-
-    /// <summary>
     /// CBOR keys for authentication output.
     /// </summary>
     private static class AuthenticationOutputKeys
     {
         internal const int Signature = 6;
     }
-
-    /// <summary>
-    /// Encodes registration input (algorithm list + flags) as canonical CBOR.
-    /// </summary>
-    /// <param name="input">The registration input.</param>
-    /// <returns>CBOR-encoded map with keys {3: [alg...], 4: flags}.</returns>
-    public static byte[] EncodeRegistrationInput(PreviewSignRegistrationInput input)
-    {
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2); // Two keys: alg (3) and flags (4)
-
-        // Key 3: algorithms array
-        writer.WriteInt32(RegistrationInputKeys.Algorithm);
-        writer.WriteStartArray(input.Algorithms.Count);
-        foreach (var alg in input.Algorithms)
-        {
-            writer.WriteInt32(alg.Value);
-        }
-        writer.WriteEndArray();
-
-        // Key 4: flags byte
-        writer.WriteInt32(RegistrationInputKeys.Flags);
-        writer.WriteInt32((byte)input.Flags);
-
-        writer.WriteEndMap();
-        return writer.Encode();
-    }
-
-    /// <summary>
-    /// Encodes authentication input for a single chosen credential as canonical CBOR.
-    /// </summary>
-    /// <param name="signingParams">The signing parameters for the chosen credential.</param>
-    /// <returns>
-    /// CBOR-encoded flat map {2: kh, 6: tbs, 7?: args} for the single credential.
-    /// </returns>
-    /// <remarks>
-    /// Per spec §10.2.1 step 9, the client sends the chosen credential's params as a flat map:
-    /// - 2 (kh): key handle (bstr)
-    /// - 6 (tbs): to-be-signed data (bstr)
-    /// - 7 (args): optional additional args wrapped as bstr (omitted if null)
-    /// The credential selection happens client-side before encoding (via probe or single-credential scope).
-    /// </remarks>
-    public static byte[] EncodeAuthenticationInput(PreviewSignSigningParams signingParams)
-    {
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-
-        int paramCount = signingParams.AdditionalArgs.HasValue ? 3 : 2;
-        writer.WriteStartMap(paramCount);
-
-        // Key 2: keyHandle
-        writer.WriteInt32(AuthenticationInputKeys.KeyHandle);
-        writer.WriteByteString(signingParams.KeyHandle.Span);
-
-        // Key 6: tbs
-        writer.WriteInt32(AuthenticationInputKeys.ToBeSigned);
-        writer.WriteByteString(signingParams.Tbs.Span);
-
-        // Key 7: args (optional, wrapped as bstr)
-        if (signingParams.AdditionalArgs.HasValue)
-        {
-            writer.WriteInt32(AuthenticationInputKeys.AdditionalArgs);
-            writer.WriteByteString(signingParams.AdditionalArgs.Value.Span);
-        }
-
-        writer.WriteEndMap();
-        return writer.Encode();
-    }
-
 
     /// <summary>
     /// Decodes unsigned registration output (nested attestation object).

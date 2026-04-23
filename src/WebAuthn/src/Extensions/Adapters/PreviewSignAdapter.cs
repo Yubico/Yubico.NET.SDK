@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
@@ -64,7 +65,7 @@ internal static class PreviewSignAdapter
     /// </para>
     /// </remarks>
     public static byte[]? BuildRegistrationCbor(
-        PreviewSignRegistrationInput? input,
+        PreviewSign.PreviewSignRegistrationInput? input,
         RegistrationOptions options)
     {
         if (input is null)
@@ -75,14 +76,16 @@ internal static class PreviewSignAdapter
         // Derive flags from UserVerification per spec §10.2.1 step 4 (line 4962):
         // "The CDDL value 0b101 if pkOptions.authenticatorSelection.userVerification is
         // set to required, otherwise the CDDL value 0b001."
-        var resolvedFlags = options.UserVerification == UserVerificationPreference.Required
-            ? PreviewSignFlags.RequireUserVerification
-            : PreviewSignFlags.RequireUserPresence;
+        byte resolvedFlags = options.UserVerification == UserVerificationPreference.Required
+            ? (byte)PreviewSignFlags.RequireUserVerification
+            : (byte)PreviewSignFlags.RequireUserPresence;
 
-        // Build CBOR input with derived flags
-        var resolvedInput = input with { Flags = resolvedFlags };
+        // Translate WebAuthn input to Fido2 input
+        var fido2Input = new Fido2.Extensions.PreviewSignRegistrationInput(
+            algorithms: input.Algorithms.Select(a => a.Value).ToList(),
+            flags: resolvedFlags);
 
-        return PreviewSignCbor.EncodeRegistrationInput(resolvedInput);
+        return Fido2.Extensions.PreviewSignCbor.EncodeRegistrationInput(fido2Input);
     }
 
     /// <summary>
@@ -106,7 +109,7 @@ internal static class PreviewSignAdapter
     /// This validation happens BEFORE any CTAP roundtrip to fail fast on client-side errors.
     /// </remarks>
     public static byte[]? BuildAuthenticationCbor(
-        PreviewSignAuthenticationInput? input,
+        PreviewSign.PreviewSignAuthenticationInput? input,
         IReadOnlyList<WebAuthnCredentialDescriptor>? allowCredentials)
     {
         if (input is null)
@@ -160,8 +163,14 @@ internal static class PreviewSignAdapter
                 "previewSign signByCredential's single entry must match allowCredentials[0]");
         }
 
+        // Translate WebAuthn SigningParams to Fido2 SigningParams
+        var fido2SigningParams = new Fido2.Extensions.PreviewSignSigningParams(
+            keyHandle: signingParams.KeyHandle,
+            tbs: signingParams.Tbs,
+            additionalArgs: signingParams.AdditionalArgs);
+
         // Encode the flat single-credential map per spec §10.2.1 step 9
-        return PreviewSignCbor.EncodeAuthenticationInput(signingParams);
+        return Fido2.Extensions.PreviewSignCbor.EncodeAuthenticationInput(fido2SigningParams);
     }
 
     /// <summary>
@@ -182,7 +191,7 @@ internal static class PreviewSignAdapter
     /// If unsignedExtensionOutputs is missing, builds GeneratedSigningKey from authData's attested
     /// credential data (Swift fallback per PreviewSign.swift:170-176).
     /// </remarks>
-    public static PreviewSignRegistrationOutput? ParseRegistrationOutput(
+    public static PreviewSign.PreviewSignRegistrationOutput? ParseRegistrationOutput(
         WebAuthnAuthenticatorData authData,
         IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs)
     {
@@ -229,7 +238,7 @@ internal static class PreviewSignAdapter
         if (unsignedExtensionOutputs?.TryGetValue(ExtensionId, out var unsignedCbor) == true)
         {
             // Decode the unsigned output (contains att-obj)
-            return PreviewSignCbor.DecodeUnsignedRegistrationOutput(unsignedCbor, algorithm.Value, flags.Value);
+            return PreviewSign.PreviewSignCbor.DecodeUnsignedRegistrationOutput(unsignedCbor, algorithm.Value, flags.Value);
         }
 
         // Fallback: build from authData's attested credential data (Swift PreviewSign.swift:170-176)
@@ -260,7 +269,7 @@ internal static class PreviewSignAdapter
     /// <exception cref="WebAuthnClientError">
     /// Thrown when the extension output is present but malformed (InvalidState).
     /// </exception>
-    public static PreviewSignAuthenticationOutput? ParseAuthenticationOutput(
+    public static PreviewSign.PreviewSignAuthenticationOutput? ParseAuthenticationOutput(
         WebAuthnAuthenticatorData authData)
     {
         if (!authData.ParsedExtensions.TryGetValue(ExtensionId, out var rawCbor))
@@ -268,6 +277,6 @@ internal static class PreviewSignAdapter
             return null;
         }
 
-        return PreviewSignCbor.DecodeAuthenticationOutput(rawCbor);
+        return PreviewSign.PreviewSignCbor.DecodeAuthenticationOutput(rawCbor);
     }
 }

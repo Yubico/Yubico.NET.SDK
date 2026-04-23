@@ -1,158 +1,225 @@
-# Handoff — yubikey-codeaudit
+# Handoff — Phase 9.1 shipped + parity evidence in hand, awaiting Phase 9.2 direction
 
-**Date:** 2026-04-16
-**Branch:** `yubikey-codeaudit` (base: `yubikit-applets`)
-**Last commit:** `16c0c270` fix(fido2): ChangePin test uses KnownTestPin instead of hardcoded PIN
-**PR:** Yubico/Yubico.NET.SDK#455
-
----
-
-## Session Summary
-
-Fixed FIDO2 AuthenticatorConfig integration test design to produce valuable, non-cascading signal. Three problems addressed: (1) SetMinPinLength test accumulated state across runs (incrementing min PIN length each time until it exceeded the test PIN), (2) ForceChangePin test only asserted a flag was set without testing the full lifecycle, risking cascade failures, (3) NormalizePinAsync couldn't recover from leftover forcePinChange state. Referenced python-fido2's `test_force_pin_change` pattern for the full-cycle test design. Discovered that Enhanced PIN keys (5.8.0-beta) reject same-PIN changes with PinPolicyViolation, requiring reversed-PIN pattern for recovery.
-
-**32 commits total, 110+ files changed. 4 fix commits from prior session + uncommitted AuthenticatorConfig test fixes this session.**
-
-## Current State
-
-### Committed Work (32 commits)
-
-**Prior audit (28 commits):** See previous handoff for stages 1-6 detail.
-
-**Integration test session (4 committed):**
-- `24db19cb` fix(piv): clone ModPow result before zeroing BigInteger allocation
-- `01e4b999` test(fido2): standardize RequiresUserPresence trait to TestCategories format
-- `c4c591be` fix(core,fido2): HID DeviceId collision and CTAP2.0 PIN token fallback
-- `16c0c270` fix(fido2): ChangePin test uses KnownTestPin instead of hardcoded PIN
-
-### Uncommitted Changes
-
-Modified (ready to commit):
-- `src/Tests.Shared/Infrastructure/TestCategories.cs` — Added `PermanentDeviceState` trait constant
-- `src/Fido2/tests/.../TestExtensions/FidoTestStateExtensions.cs` — NormalizePinAsync forcePinChange recovery (reversed-PIN pattern)
-- `src/Fido2/tests/.../FidoAuthenticatorConfigTests.cs` — Rewritten SetMinPinLength (idempotent) + ForceChangePin (full-cycle)
-- `Plans/handoff.md` — This file
-
-Untracked:
-- `docs/plans/2026-04-15-integrationtest-plan.md` — Integration test execution plan
-- `docs/plans/2026-04-15-integrationtest-report.md` — Integration test results report
-
-### Build & Test Status
-
-- **Build:** 0 errors, 0 warnings
-- **Unit tests:** 8/9 pass (Fido2 2 pre-existing assertion failures in AuthenticatorConfigTests)
-- **Integration tests (non-FIDO):** All 8 modules PASS (251 tests, 7 pre-existing failures, 12 skipped)
-- **Integration tests (FIDO2 no-touch):** 25/29 pass (4 NFC tests fail — no NFC reader)
-- **Integration tests (FIDO2 touch):** 35/35 core operations pass; AuthenticatorConfig 3/3 pass
-- **AuthenticatorConfig tests:** All 3 pass (ToggleAlwaysUv, SetMinPinLength, ForceChangePin_FullCycle)
-
-### Worktree / Parallel Agent State
-
-One external worktree at `/home/dyallo/Code/y/Yubico.NET.SDK-zig-glibc` on `develop` branch — unrelated.
+**Date:** 2026-04-22 (evening)
+**Active branch:** `webauthn/phase-9.1-hygiene` (tip `5f7ab705`)
+**Base for this branch:** `webauthn/gate-2-fixup` (tip `95abc0c5`)
+**Eventual merge target:** `yubikit-applets` (NOT `develop`, NOT `yubikit`)
+**Plan reference:** [`Plans/yes-we-have-started-composed-horizon.md`](yes-we-have-started-composed-horizon.md) — the approved Phase 9 plan; supersedes the prior session's "Phase 9 deferrals" list (which had 3 inaccurate items)
 
 ---
 
-## Readiness Assessment
+## Critical next step (read first)
 
-**Target:** .NET developers integrating YubiKey hardware security into their applications, who need a reliable, secure, and well-structured SDK.
+**The user has 3 open decisions blocking Phase 9.2 startup.** They were posed at the end of the prior turn and not yet answered:
+
+1. **Commit the 3 uncommitted plan/report files** (`Plans/handoff.md`, `Plans/yes-we-have-started-composed-horizon.md`, `Plans/libfido2-previewsign-parity.md`, `Plans/yubikit-android-previewsign-parity.md`) to the hygiene branch? Or branch 9.2 off `webauthn/gate-2-fixup` and let plans land separately?
+2. **Dispatch the 9.2 Step 1 Engineer agent now**, or pause first?
+3. **Short-circuit 9.2 Step 1 entirely** and go directly to path 2B (close the previewSign auth surface), trusting the parity evidence already in hand?
+
+**Recommended (per the principle "only ship what an upstream reference has proven works"):** option 3 — go directly to path 2B for the **authentication** entry point only (registration is proven and ships unmarked). The combined libfido2 + yubikit-android evidence is sufficient — running a fourth Swift investigation would produce the same DEFER verdict.
+
+---
+
+## Readiness assessment
+
+**Target user (inferred from `CLAUDE.md`, `src/Fido2/CLAUDE.md`, `src/WebAuthn/CLAUDE.md`):**
+- .NET 10 application developers integrating YubiKey WebAuthn / passkey flows
+- Browser/RP implementers building WebAuthn-spec-compliant clients on top of CTAP2
+- Security-engineering teams requiring auditable, modern-C# crypto handling
 
 | Need | Status | Notes |
 |---|---|---|
-| Correct APDU/TLV encoding | ✅ Working | TLV, DER, BER bugs fixed; verified by 251 integration tests |
-| Sensitive data zeroed after use | ✅ Working | Comprehensive audit; ModPow zero-after-return bug found and fixed |
-| No resource leaks | ✅ Working | Connection leak fixed in all 8 modules |
-| PIV crypto operations | ✅ Working | RSA sign + decrypt (PKCS1/OAEP-SHA1/OAEP-SHA256), ECC, Ed25519 — 66/66 pass |
-| SCP03/SCP11 secure channels | ✅ Working | 25/25 tests pass (SCP03, SCP11a/b/c, key lifecycle) |
-| OATH TOTP/HOTP | ✅ Working | 15/15 pass (CRUD, hash algorithms, password management) |
-| OpenPGP operations | ✅ Working | 46/46 pass (keygen, sign, decrypt, PIN, KDF, certificates) |
-| YubiHSM Auth | ✅ Working | 11/11 pass (symmetric, asymmetric, password change) |
-| FIDO2 core (GetInfo, session) | ✅ Working | 25 non-touch tests pass |
-| FIDO2 credential operations | ✅ Working | 35/35 core touch operations pass |
-| FIDO2 authenticator config | ✅ Working | 3/3 pass (alwaysUv toggle, minPinLength, forcePinChange full cycle) |
-| Multi-key HID discovery | ✅ Working | Fixed DeviceId collision; 6 devices discovered |
-| CTAP2.0 compatibility | ✅ Working | getPinToken fallback for devices without pinUvAuthToken |
-| Enhanced PIN complexity support | ✅ Working | Reversed-PIN pattern handles Enhanced PIN policy |
-| Test harness self-healing | ✅ Working | NormalizePinAsync recovers from leftover forcePinChange state |
+| WebAuthn data model (RP, User, Descriptor, COSE, AAGUID, preferences) | ✅ Working | Phase 1; 110+ unit tests |
+| `clientDataJSON` + `AttestationObject` + `AuthenticatorData` | ✅ Working | Phase 2; byte-parity with Swift via hand-rolled JSON |
+| `WebAuthnClient.MakeCredentialAsync` (terminal) | ✅ Working | Phase 3 + Phase 5 stream-drain refactor |
+| `WebAuthnClient.GetAssertionAsync` + `MatchedCredential.SelectAsync` | ✅ Working | Phase 4; idempotent via `Lazy<Task<>>` |
+| Status streaming (`IAsyncEnumerable<WebAuthnStatus>`) + interactive PIN/UV | ✅ Working | Phase 5; deadlock-fixed |
+| Extension framework (CredProtect, CredBlob, MinPinLength, LargeBlob, PRF, CredProps) | ✅ Working | Phase 6 + commit `95abc0c5` (CRITICAL bugfix — extensions were silently dropped before; now wired) |
+| previewSign **registration** (key generation) | ✅ Working | Phase 7+8+Gate-2 fixes; hardware-validated on YubiKey 5.8.0 (`Registration_WithPreviewSign_ReturnsGeneratedSigningKey` passes) |
+| previewSign **authentication** (sign-by-credential) | ⚠️ Partial | Code path exists; throws `CtapException: Invalid length` on hardware. **No upstream SDK has hardware-tested it** (libfido2: NONE; Swift: untested; yubikit-android: code exists, not hardware-tested) |
+| previewSign multi-credential probe-selection | ❌ Missing | Deferred — `signByCredential.Count != 1` throws `NotSupported`. Blocked on auth path proving viable |
+| Module documentation (`src/WebAuthn/CLAUDE.md`) | ✅ Working | NEW in 9.1 — 8/8 sections present |
+| Logging factory guidance | ✅ Working | NEW in 9.1 — root `CLAUDE.md` corrected `LoggingFactory`→`YubiKitLogging` |
+| Integration test project | ⚠️ Partial | 8 tests exist on hardware (registration paths pass; one previewSign auth test SKIPPED with diagnostic notes). No no-UP tests yet |
+| Test cleanup helper (`DeleteAllCredentialsForRpAsync`) | ✅ Working | NEW in 9.1 — copied from Fido2 pattern |
+| Unit-test warnings (xUnit1051, CS8625) | ✅ Working | NEW in 9.1 — 0 warnings on `dotnet toolchain.cs build` |
 
-**Overall:** 🟢 Production — all SDK code quality goals met, integration tests pass across all 9 modules. FIDO2 fully verified including AuthenticatorConfig.
-
-**Critical next step:** Commit the AuthenticatorConfig test fixes and push to PR #455.
+**Overall readiness:** 🟢 **Production** for the spec-conformant subset (registration + single-credential authentication for *non-previewSign* extensions). previewSign **registration** ships clean; previewSign **authentication** + multi-credential probe should ship with a `[Experimental]` attribute + `NotSupported` throw per the Phase 9.2 path 2B plan, with a `Plans/phase-10-previewsign-auth.md` follow-up tracker.
 
 ---
 
-## What's Next (Prioritized)
+## Session summary
 
-1. **Commit AuthenticatorConfig test fixes** — 3 modified files ready to commit
-2. **Push commits and update PR #455** — 5 new commits since last push
-3. **Multi-key test iteration** — Current infra picks first matching device. Should iterate over ALL compatible devices per test
-4. **Work through TODO backlog** — see `Plans/todo-backlog-workplan.md` (19 Jira issues, prioritized)
+This session did three things:
 
-## Blockers & Known Issues
+1. **Diagnosed the prior handoff's "Phase 9 deferrals" list as partially wrong.** Three of the eight items were inaccurate: M-5 (raw RP-ready `AttestationObject` bytes) is **already done** (`WebAuthnAttestationObject.RawCbor` exists at line 49); the integration test project was **partially built** with a previously-unknown CRITICAL wire-format bug discovered by hardware testing (`previewSign` authentication throws `CtapException: Invalid length` *before* user-presence prompt); and the most recent commit (`95abc0c5`) revealed a **latent Phase-6 bug** — the entire extension framework's CBOR was silently dropped because `options.Extensions = request.Extensions` was never assigned in the backend. All visible to the integration tests, none visible to Audit Gates 1 or 2.
 
-- **FIDO2 NFC tests:** Require NFC reader (not available in current USB setup)
-- **Core device listeners:** 2 pre-existing Linux HID/SmartCard listener status tests fail (start as Stopped)
-- **Fido2 unit tests:** 2 pre-existing assertion failures in AuthenticatorConfigTests (Expected: 2, Actual: 34)
-- **EnterpriseAttestation test:** Needs key with EA enabled
-- **ExcludeListStress test:** Needs 17 touches, timed out
-- **BioEnrollment test:** Needs bio key
+2. **Wrote and got approval for the Phase 9 plan** at `Plans/yes-we-have-started-composed-horizon.md`. Three sub-phases:
+   - **9.0** — Parallel libfido2 investigation (background)
+   - **9.1** — Module hygiene bundle (CLAUDE.md, logging fix, helper, constants split, warning cleanup)
+   - **9.2** — Swift+libfido2 parity check, then conditional auth/probe work (path 2A=port wire fix + probe; path 2B=close auth surface)
+   - **9.3** — Hardware verification + integration test expansion (when user is back to touch the YubiKey 5.8.0-beta)
 
-## Key Findings This Session
+3. **Executed Phases 9.0 + 9.1 in parallel** using the proven DevTeam Ship → CodeAudit → Ping rhythm:
+   - **9.0** → libfido2 v1.17.0 has **zero** previewSign code paths (verdict NONE)
+   - **9.0 bonus** → user requested yubikit-android parity check too; found v3.1.0 has full code paths for **both** registration and authentication, with hardware-tested **registration only**, authentication code untested
+   - **9.1** → 5 commits, audit verdict **PASS-WITH-NOTES** (better than engineer self-reported: 0 warnings vs claimed-residue-of-8; constants split finer than asked; all 8/8 CLAUDE.md sections; scope discipline excellent)
 
-### Enhanced PIN rejects same-PIN changes
-On 5.8.0-beta Enhanced PIN keys, `ChangePinAsync(pin, pin)` throws `PinPolicyViolation`. The fix is to use a reversed-PIN pattern: change to reversed value, then change back. This applies to both NormalizePinAsync recovery and ForceChangePin test cleanup.
-
-### python-fido2 ForceChangePin pattern
-python-fido2 (`tests/device/test_config.py:74-89`) tests the full lifecycle: set flag → verify tokens blocked → change PIN → verify restored. Our test now matches this pattern, giving signal about the protocol behavior rather than just "did a flag change."
-
-### setMinPINLength is one-way
-CTAP spec: min PIN length can only increase, never decrease. Only factory reset reverts it. Our test now uses a fixed target (6) instead of incrementing, making it idempotent across runs.
-
-## Key File References
-
-| File | Purpose |
-|------|---------|
-| `src/Tests.Shared/Infrastructure/TestCategories.cs` | New `PermanentDeviceState` trait constant |
-| `src/Fido2/tests/.../TestExtensions/FidoTestStateExtensions.cs:94-111` | NormalizePinAsync forcePinChange recovery |
-| `src/Fido2/tests/.../FidoAuthenticatorConfigTests.cs:110-181` | Idempotent SetMinPinLength test |
-| `src/Fido2/tests/.../FidoAuthenticatorConfigTests.cs:183-280` | Full-cycle ForceChangePin test |
-| `../python-fido2/tests/device/test_config.py:74-89` | Reference: python-fido2 force_pin_change test |
-| `Plans/todo-backlog-workplan.md` | Prioritized TODO backlog (19 Jira issues) |
+**Key finding:** The combined parity evidence (Swift untested + libfido2 NONE + yubikit-android registration-tested-but-auth-untested) creates a clean **registration vs authentication asymmetry**. Registration is hardware-proven across two SDKs (Android + the C# port itself). Authentication is unimplemented (libfido2) or untested (Swift, Android). The Phase 9.2 plan's path 2B should be tightened to mark **only the authentication entry point** as `[Experimental]`, not the whole previewSign API.
 
 ---
 
-## Quick Start for New Agent
+## Branch state
+
+```
+develop  (mainline — DO NOT TARGET)
+  └── yubikit  (SDK rewrite root)
+      └── yubikit-applets  (per-applet branch — MERGE TARGET; tip b76b6144)
+          └── webauthn/phase-1-data-model
+              └── ... (8 phase + 2 audit-fixup branches; see prior handoff for tree) ...
+                  └── webauthn/gate-2-fixup  (tip 95abc0c5; +2 commits beyond prior handoff:)
+                      ├── 95abc0c5 fix(webauthn): wire extension passthrough and fix previewSign parser  ← CRITICAL bugfix
+                      └── 97a502d5 docs: clarify --project + --filter usage for targeted test runs
+                       │
+                       └── webauthn/phase-9.1-hygiene  (tip 5f7ab705; ← CURRENT, 5 commits:)
+                           ├── fbe45bc4 docs(webauthn): add module CLAUDE.md
+                           ├── f90bbc8f test(webauthn): add DeleteAllCredentialsForRpAsync helper
+                           ├── 63adea35 refactor(webauthn): split PreviewSignCbor key constants into scoped classes
+                           ├── eadb8fc3 test(webauthn): fix xUnit1051 warnings and CS8625 in GetAssertionTests
+                           └── 5f7ab705 docs: correct LoggingFactory→YubiKitLogging in root CLAUDE.md
+```
+
+**Total work since `yubikit-applets`:** 64 (prior phases) + 2 (post-handoff, on gate-2-fixup) + 5 (9.1 hygiene) = **71 commits across 11 branches**.
+
+---
+
+## Build & test status (verified at handoff time)
+
+| Check | Status |
+|---|---|
+| `dotnet toolchain.cs build` | **0 errors / 0 warnings** (improved from prior session's ~12 xUnit1051) |
+| `dotnet toolchain.cs test` | **All 10 projects pass** (~1246+ unit tests) |
+| `dotnet toolchain.cs -- test --project WebAuthn` | **101 / 0** (WebAuthn unit tests) |
+| Fido2 cross-module regression | ✅ Green (Phase 2's `RawData` + Gate-2's `UnsignedExtensionOutputs` Fido2-internal additions still cohere) |
+| Hardware integration (registration) | ✅ Passes on YubiKey 5.8.0-beta (per `PreviewSignTests.cs`) |
+| Hardware integration (previewSign auth) | ❌ `CtapException: Invalid length (0x03)` — test `Skip.If(true)`'d with diagnostic notes at `PreviewSignTests.cs:89-114` |
+
+---
+
+## Files added/modified this session
+
+**Uncommitted on hygiene branch (need user direction whether to commit here, on 9.2 branch, or separately):**
+- `Plans/handoff.md` — this file (overwrote prior session's handoff)
+- `Plans/yes-we-have-started-composed-horizon.md` — approved Phase 9 plan
+- `Plans/libfido2-previewsign-parity.md` — Phase 9.0 deliverable; verdict NONE
+- `Plans/yubikit-android-previewsign-parity.md` — bonus parity report; verdict PROVEN-registration / untested-authentication
+
+**Committed in 9.1 (5 commits, see branch state above):**
+- `src/WebAuthn/CLAUDE.md` (new, 265 lines, 8 sections)
+- `src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnTestHelpers.cs` (added `DeleteAllCredentialsForRpAsync`)
+- `src/WebAuthn/src/Extensions/PreviewSign/PreviewSignCbor.cs` (split into 4 nested static classes — `RegistrationInputKeys`, `RegistrationOutputKeys`, `AuthenticationInputKeys`, `AuthenticationOutputKeys`)
+- `src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/.../WebAuthnClientGetAssertionTests.cs` (xUnit1051 + CS8625 fixes; CS8625 now uses `WebAuthnAuthenticatorData.Decode(rawAuthData)` — structural)
+- Root `CLAUDE.md` (`LoggingFactory` → `YubiKitLogging` with citation to `src/Core/src/YubiKitLogging.cs:20`)
+
+---
+
+## Phase 9 sub-phase status
+
+| Sub-phase | Status | Branch | Notes |
+|---|---|---|---|
+| **9.0** Parallel libfido2 + yubikit-android parity | ✅ Done | (no branch — read-only investigations) | Reports landed in `Plans/`; both feed 9.2 verdict |
+| **9.1** Module hygiene bundle | ✅ Done — audit PASS-WITH-NOTES | `webauthn/phase-9.1-hygiene` | 5 commits, 0 build warnings, 101/0 tests |
+| **9.2** Parity verdict + conditional auth/probe | 🔜 Next — awaiting user direction | TBD (`webauthn/phase-9.2-*`) | Three open decisions; recommend skipping Step 1 → straight to path 2B for auth entry point |
+| **9.3** Hardware verification + integration expansion | ⏸️ Blocked on 9.2 + user presence | `webauthn/phase-9.3-integration` | Requires user physically present at YubiKey 5.8.0-beta |
+| **Post-9** Fido2 canonical extension coverage assessment | ⏸️ Tracked, post-9.3 | (no branch — assessment only) | Spawn 1 Explore agent; trivial gaps → 9.4, substantial gaps → separate deferred plan |
+
+---
+
+## Audit cross-references
+
+### Prior gates (still authoritative)
+- **Gate 1** (after Phase 6) — `Plans/audit-gate-1.md` — 0 Critical / 4 High / 7 Med / 9 Low; all High + 6 Med fixed
+- **Gate 2** (after Phase 8) — `Plans/audit-gate-2.md` — 3 Critical / 4 High / 5 Med / 4 Low; all Critical + High + 4 Med fixed
+
+### This session
+- **9.1 Hygiene Audit** (this session) — verdict PASS-WITH-NOTES; notes are observational only, none blocking. Highlights: build cleaner than self-reported (0 warnings), constants split improved beyond plan ask (4 nested classes vs 2), CLAUDE.md exceeds 6/8 bar (8/8). Full audit verdict captured in this session's transcript.
+
+---
+
+## Parity evidence base for Phase 9.2 verdict (combined)
+
+| SDK | Version | previewSign code paths | Hardware-tested registration | Hardware-tested authentication | Verdict source |
+|---|---|---|---|---|---|
+| **yubikit-swift** | release/1.3.0 | both reg + auth | unverified | **none** (PreviewSignTests.swift has only registration) | per existing `PreviewSignTests.cs:107` diagnostic |
+| **libfido2** | v1.17.0 | **none** | n/a | n/a | `Plans/libfido2-previewsign-parity.md` |
+| **yubikit-android** | v3.1.0 | both reg + auth | ✅ instrumented + integration tests | **none** | `Plans/yubikit-android-previewsign-parity.md` |
+| **Yubico.NET.SDK (this port)** | webauthn/phase-9.1-hygiene | both reg + auth (auth currently throws) | ✅ on YubiKey 5.8.0-beta | ❌ `CtapException: Invalid length` (wire-format bug) | this session's investigation |
+
+**Synthesis:** Registration is hardware-proven in 2 of 4 implementations (Android + C#). Authentication is hardware-proven in **0 of 4**. Per the user-stated principle "only ship what an upstream reference has proven works on hardware," authentication should be deferred via path 2B with `[Experimental]` + `NotSupported` on the auth entry point only. Registration ships unmarked. Phase 10 follow-up tracker captures unblocking criteria.
+
+---
+
+## Open risks (non-blocking, named for awareness)
+
+1. **`[Experimental]` is a public-API commitment.** Once shipped, removing it later (in Phase 10) is binary-compatible (fine); adding new throws is not (avoid). Mitigation: keep the throw site narrow (auth entry point only).
+2. **YubiKey 5.8.0-beta firmware behaviors** may differ from production firmware. Document any beta-specific findings in PR description for Yubico reviewers.
+3. **Three Plans/ files are uncommitted on the hygiene branch.** If the user picks "branch 9.2 off gate-2-fixup" route, those files won't travel automatically — the resumer must explicitly cherry-pick or re-create them.
+
+---
+
+## Worktree / parallel-agent state
+
+No active worktrees:
+```
+/Users/Dennis.Dyall/Code/y/Yubico.NET.SDK 5f7ab705 [webauthn/phase-9.1-hygiene]
+```
+
+All session agents have terminated cleanly:
+- `phase9.1-hygiene-engineer` (Engineer agent for Phase 9.1) — completed; 5 commits landed
+- `libfido2-parity-explorer` (Explore agent for Phase 9.0, ran in background) — completed; report at `Plans/libfido2-previewsign-parity.md`
+- `yubikit-android-parity-explorer` (Explore agent, bonus investigation) — completed; report at `Plans/yubikit-android-previewsign-parity.md`
+- `phase9.1-hygiene-auditor` (general-purpose audit gate agent) — completed; verdict PASS-WITH-NOTES
+
+No `.claude/worktrees/` directory exists.
+
+---
+
+## Quick start for fresh agent
 
 ```bash
-# Current state
-git checkout yubikey-codeaudit
-git log --oneline yubikit-applets..HEAD  # 32 commits
+# 1. Confirm branch
+git checkout webauthn/phase-9.1-hygiene
+git log --oneline -10                              # confirm 5 hygiene commits + 95abc0c5 below them
 
-# Build
-dotnet toolchain.cs build  # 0 errors, 0 warnings
+# 2. Verify state
+dotnet toolchain.cs build                          # expect 0 errors / 0 warnings
+dotnet toolchain.cs -- test --project WebAuthn     # expect 101 / 0
 
-# Unit tests
-dotnet toolchain.cs test  # 8/9 pass (Fido2 pre-existing)
+# 3. Read the plan + parity reports IN ORDER
+cat Plans/yes-we-have-started-composed-horizon.md  # the approved Phase 9 plan
+cat Plans/libfido2-previewsign-parity.md           # 9.0 deliverable, verdict NONE
+cat Plans/yubikit-android-previewsign-parity.md    # bonus, verdict PROVEN-reg-only
+cat Plans/audit-gate-1.md                          # historical, still authoritative
+cat Plans/audit-gate-2.md                          # historical, still authoritative
 
-# Integration tests (non-touch, one module at a time)
-dotnet toolchain.cs -- test --integration --project Management
-dotnet toolchain.cs -- test --integration --project Piv --smoke
-dotnet toolchain.cs -- test --integration --project Fido2 --filter "Category!=RequiresUserPresence"
+# 4. Resume — present the 3 open decisions to user (see "Critical next step" above) and wait for direction
 
-# FIDO2 AuthenticatorConfig tests (requires touch)
-dotnet test src/Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/*.csproj \
-  -c Release --filter "Feature=AuthenticatorConfig"
+# 5. If user picks "go straight to 2B" (recommended):
+#    - Branch webauthn/phase-9.2-defer-auth off webauthn/phase-9.1-hygiene (or gate-2-fixup; user will say)
+#    - Engineer prompt skeleton is in Plans/yes-we-have-started-composed-horizon.md §Phase 9.2 Step 2B
+#    - Key tasks: improve NotSupported message at PreviewSignAuthenticationInput.cs:58, add [Experimental("YK-PreviewSignAuth")]
+#      to the auth entry point, replace Skip.If(true) integration test with a unit test asserting the throw, create
+#      Plans/phase-10-previewsign-auth.md follow-up tracker, write Plans/swift-previewsign-parity.md retroactively
+#      synthesizing the libfido2 + android findings (so the Step 1 deliverable still lands)
+#    - Then /CodeAudit gate per §9.2 path-2B audit criteria
+#    - Then /Ping user with results
+#    - Then queue up 9.3 hardware verification (DO NOT START 9.3 without user physically present at YubiKey)
 
-# Skip permanent device state tests
-dotnet toolchain.cs -- test --integration --project Fido2 \
-  --filter "Category!=PermanentDeviceState&Category!=RequiresUserPresence"
-
-# PIN state (ykman)
-ykman list
-ykman fido info
-
-# PR
-gh pr view 455
-
-# Resume
-/resume-handoff
+# 6. If user picks "dispatch 9.2 Step 1 first":
+#    - Engineer prompt skeleton in §Phase 9.2 Step 1
+#    - Engineer must STOP and Ping user with verdict (PROVEN/PARTIAL/DEFER) before any code change
+#    - Most likely verdict given existing libfido2+android evidence: DEFER → routes to 2B
 ```
+
+**Do not** rebase or fast-forward across the 11 branches individually — later commits supersede earlier choices.
+**Do not** PR against `develop` or `yubikit` directly — `yubikit-applets` is the only valid target.

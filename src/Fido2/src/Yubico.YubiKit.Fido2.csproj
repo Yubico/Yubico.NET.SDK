@@ -13,6 +13,7 @@
   <ItemGroup>
     <!-- For NSubstitute to mock internal types in tests -->
     <InternalsVisibleTo Include="Yubico.YubiKit.Fido2.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.WebAuthn" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
 

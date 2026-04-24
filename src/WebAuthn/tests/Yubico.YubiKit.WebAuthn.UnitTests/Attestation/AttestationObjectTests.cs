@@ -14,6 +14,7 @@
 
 using System.Formats.Cbor;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.WebAuthn.Attestation;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Attestation;

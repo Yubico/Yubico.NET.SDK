@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.Fido2.UnitTests.Credentials;
 public class AttestationStatementTests
 {
     [Fact]
-    public void DecodeWithRawData_PopulatesRawData()
+    public void Decode_PackedAttestation_PopulatesRawData()
     {
         // Arrange - Construct a minimal packed attestation statement CBOR map
         // Map with keys: "alg" => -7 (ES256), "sig" => dummy signature bytes
@@ -38,51 +38,57 @@ public class AttestationStatementTests
         var rawCbor = writer.Encode();
 
         // Act
-        var statement = AttestationStatement.DecodeWithRawData(rawCbor);
+        var statement = AttestationStatement.Decode(AttestationFormat.Packed, rawCbor);
 
         // Assert
         Assert.NotNull(statement);
-        Assert.Equal(-7, statement.Algorithm);
-        Assert.NotNull(statement.Signature);
-        Assert.Equal(4, statement.Signature.Value.Length);
+        Assert.IsType<PackedAttestationStatement>(statement);
 
-        // Critical assertion: RawData should now be populated
-        Assert.False(statement.RawData.IsEmpty);
-        Assert.Equal(rawCbor.Length, statement.RawData.Length);
-        Assert.True(rawCbor.AsSpan().SequenceEqual(statement.RawData.Span));
+        var packed = (PackedAttestationStatement)statement;
+        Assert.Equal(-7, packed.Algorithm);
+        Assert.False(packed.Signature.IsEmpty);
+        Assert.Equal(4, packed.Signature.Length);
+
+        // Critical assertion: RawCbor should be populated
+        Assert.False(packed.RawCbor.IsEmpty);
+        Assert.Equal(rawCbor.Length, packed.RawCbor.Length);
+        Assert.True(rawCbor.AsSpan().SequenceEqual(packed.RawCbor.Span));
     }
 
     [Fact]
-    public void Decode_LegacyPath_HasEmptyRawData()
+    public void Decode_FidoU2F_ParsesCorrectly()
     {
-        // Arrange - Same CBOR but via the legacy reader-based Decode
+        // Arrange - FIDO U2F attestation statement with sig and x5c
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(2);
-
-        writer.WriteTextString("alg");
-        writer.WriteInt32(-7);
 
         writer.WriteTextString("sig");
         writer.WriteByteString([0x01, 0x02, 0x03, 0x04]);
 
+        writer.WriteTextString("x5c");
+        writer.WriteStartArray(1);
+        writer.WriteByteString([0xAA, 0xBB, 0xCC]);
+        writer.WriteEndArray();
+
         writer.WriteEndMap();
 
         var rawCbor = writer.Encode();
-        var reader = new CborReader(rawCbor, CborConformanceMode.Lax);
 
         // Act
-        var statement = AttestationStatement.Decode(reader);
+        var statement = AttestationStatement.Decode(AttestationFormat.FidoU2F, rawCbor);
 
         // Assert
         Assert.NotNull(statement);
-        Assert.Equal(-7, statement.Algorithm);
+        Assert.IsType<FidoU2FAttestationStatement>(statement);
 
-        // Legacy path doesn't capture RawData
-        Assert.True(statement.RawData.IsEmpty);
+        var fidoU2F = (FidoU2FAttestationStatement)statement;
+        Assert.Equal(4, fidoU2F.Signature.Length);
+        Assert.Single(fidoU2F.X5c);
+        Assert.Equal(3, fidoU2F.X5c[0].Length);
     }
 
     [Fact]
-    public void DecodeWithRawData_NoneAttestation_PopulatesRawData()
+    public void Decode_NoneAttestation_PopulatesRawData()
     {
         // Arrange - Empty map for "none" attestation
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -92,12 +98,14 @@ public class AttestationStatementTests
         var rawCbor = writer.Encode();
 
         // Act
-        var statement = AttestationStatement.DecodeWithRawData(rawCbor);
+        var statement = AttestationStatement.Decode(AttestationFormat.None, rawCbor);
 
         // Assert
         Assert.NotNull(statement);
-        Assert.True(statement.IsNone);
-        Assert.False(statement.RawData.IsEmpty);
-        Assert.True(rawCbor.AsSpan().SequenceEqual(statement.RawData.Span));
+        Assert.IsType<NoneAttestationStatement>(statement);
+
+        var none = (NoneAttestationStatement)statement;
+        Assert.False(none.RawCbor.IsEmpty);
+        Assert.True(rawCbor.AsSpan().SequenceEqual(none.RawCbor.Span));
     }
 }

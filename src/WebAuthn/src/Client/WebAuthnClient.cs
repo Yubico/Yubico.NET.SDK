@@ -881,10 +881,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
         // Decode public key from COSE
         var publicKey = CoseKey.Decode(attestedCred.CredentialPublicKey);
 
-        // Build WebAuthn attestation statement from CTAP response
-        var webAuthnStatement = Attestation.AttestationStatement.Decode(
-            new AttestationFormat(ctapResponse.Format),
-            ctapResponse.AttestationStatement.RawData);
+        // Use the typed attestation statement from CTAP response (already decoded)
+        var webAuthnStatement = ctapResponse.AttestationStatement;
 
         // Wrap authenticator data
         var webAuthnAuthData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);

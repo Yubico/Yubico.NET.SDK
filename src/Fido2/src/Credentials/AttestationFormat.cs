@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.WebAuthn.Attestation;
+namespace Yubico.YubiKit.Fido2.Credentials;
 
 /// <summary>
 /// Attestation statement format identifier.

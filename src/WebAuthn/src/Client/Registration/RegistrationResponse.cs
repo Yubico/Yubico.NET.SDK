@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Fido2.Cose;
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.WebAuthn.Attestation;
 using Yubico.YubiKit.WebAuthn.Cose;
 

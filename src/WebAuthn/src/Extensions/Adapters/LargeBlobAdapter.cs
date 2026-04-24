@@ -14,7 +14,6 @@
 
 using System.Formats.Cbor;
 using Yubico.YubiKit.Fido2.Extensions;
-using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
@@ -27,10 +26,10 @@ internal static class LargeBlobAdapter
     /// <summary>
     /// Applies largeBlob input to the CTAP extension builder for registration.
     /// </summary>
-    public static void ApplyToBuilder(ExtensionBuilder builder, Inputs.LargeBlobInput input)
+    public static void ApplyToBuilder(ExtensionBuilder builder, LargeBlobInput input)
     {
         // Check if Required enforcement was requested (not yet implemented)
-        if (input.Support == Inputs.LargeBlobSupport.Required)
+        if (input.Support == LargeBlobSupport.Required)
         {
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.NotSupported,

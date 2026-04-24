@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
@@ -28,13 +29,13 @@ namespace Yubico.YubiKit.WebAuthn.Extensions;
 /// <param name="CredProps">Credential properties output.</param>
 /// <param name="PreviewSign">Generated signing key details (CTAP v4 draft).</param>
 public sealed record class RegistrationExtensionOutputs(
-    CredProtectOutput? CredProtect = null,
-    CredBlobOutput? CredBlob = null,
+    Outputs.CredProtectOutput? CredProtect = null,
+    CredBlobMakeCredentialOutput? CredBlob = null,
     MinPinLengthOutput? MinPinLength = null,
-    LargeBlobRegistrationOutput? LargeBlob = null,
-    PrfRegistrationOutput? Prf = null,
-    CredPropsOutput? CredProps = null,
-    PreviewSignRegistrationOutput? PreviewSign = null);
+    Outputs.LargeBlobRegistrationOutput? LargeBlob = null,
+    Outputs.PrfRegistrationOutput? Prf = null,
+    Outputs.CredPropsOutput? CredProps = null,
+    PreviewSign.PreviewSignRegistrationOutput? PreviewSign = null);
 
 /// <summary>
 /// Extension outputs from WebAuthn authentication (GetAssertion).
@@ -45,6 +46,6 @@ public sealed record class RegistrationExtensionOutputs(
 /// <param name="PreviewSign">Signature over to-be-signed data (CTAP v4 draft).</param>
 public sealed record class AuthenticationExtensionOutputs(
     CredBlobAssertionOutput? CredBlob = null,
-    LargeBlobAuthenticationOutput? LargeBlob = null,
-    PrfAuthenticationOutput? Prf = null,
-    PreviewSignAuthenticationOutput? PreviewSign = null);
+    Outputs.LargeBlobAuthenticationOutput? LargeBlob = null,
+    Outputs.PrfAuthenticationOutput? Prf = null,
+    PreviewSign.PreviewSignAuthenticationOutput? PreviewSign = null);

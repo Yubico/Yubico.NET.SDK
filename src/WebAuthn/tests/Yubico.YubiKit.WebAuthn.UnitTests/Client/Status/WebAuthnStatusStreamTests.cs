@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using NSubstitute;
 using System.Security.Cryptography;
 using System.Text;
-using NSubstitute;
 using Xunit;
+using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Client.Status;
-using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
@@ -56,13 +56,11 @@ public class WebAuthnStatusStreamTests
         var options = new RegistrationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
-            User = new WebAuthnUser
-            {
-                Id = RandomNumberGenerator.GetBytes(16),
-                Name = "user@example.com",
-                DisplayName = "User"
-            },
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(
+                RandomNumberGenerator.GetBytes(16),
+                "user@example.com",
+                "User"),
             PubKeyCredParams = [new CoseAlgorithm(-7)],
             UserVerification = UserVerificationPreference.Discouraged
         };
@@ -124,13 +122,11 @@ public class WebAuthnStatusStreamTests
         var options = new RegistrationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
-            User = new WebAuthnUser
-            {
-                Id = RandomNumberGenerator.GetBytes(16),
-                Name = "user@example.com",
-                DisplayName = "User"
-            },
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(
+                RandomNumberGenerator.GetBytes(16),
+                "user@example.com",
+                "User"),
             PubKeyCredParams = [new CoseAlgorithm(-7)],
             UserVerification = UserVerificationPreference.Required
         };
@@ -245,13 +241,11 @@ public class WebAuthnStatusStreamTests
         var options = new RegistrationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
-            User = new WebAuthnUser
-            {
-                Id = RandomNumberGenerator.GetBytes(16),
-                Name = "user@example.com",
-                DisplayName = "User"
-            },
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(
+                RandomNumberGenerator.GetBytes(16),
+                "user@example.com",
+                "User"),
             PubKeyCredParams = [new CoseAlgorithm(-7)],
             UserVerification = UserVerificationPreference.Required
         };
@@ -302,13 +296,11 @@ public class WebAuthnStatusStreamTests
         var options = new RegistrationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
-            User = new WebAuthnUser
-            {
-                Id = RandomNumberGenerator.GetBytes(16),
-                Name = "user@example.com",
-                DisplayName = "User"
-            },
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(
+                RandomNumberGenerator.GetBytes(16),
+                "user@example.com",
+                "User"),
             PubKeyCredParams = [new CoseAlgorithm(-7)],
             UserVerification = UserVerificationPreference.Required
         };
@@ -366,13 +358,11 @@ public class WebAuthnStatusStreamTests
         var options = new RegistrationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
-            User = new WebAuthnUser
-            {
-                Id = RandomNumberGenerator.GetBytes(16),
-                Name = "user@example.com",
-                DisplayName = "User"
-            },
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(
+                RandomNumberGenerator.GetBytes(16),
+                "user@example.com",
+                "User"),
             PubKeyCredParams = [new CoseAlgorithm(-7)],
             UserVerification = UserVerificationPreference.Discouraged
         };

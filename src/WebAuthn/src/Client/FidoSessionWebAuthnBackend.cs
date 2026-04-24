@@ -16,7 +16,6 @@ using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
-using Fido2AttestationStatement = Yubico.YubiKit.Fido2.Credentials.AttestationStatement;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
@@ -122,22 +121,13 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
 
         ArgumentNullException.ThrowIfNull(request);
 
-        // Map WebAuthnRelyingParty to PublicKeyCredentialRpEntity
-        var rpEntity = new PublicKeyCredentialRpEntity(request.Rp.Id, request.Rp.Name);
-
-        // Map WebAuthnUser to PublicKeyCredentialUserEntity
-        var userEntity = new PublicKeyCredentialUserEntity(
-            request.User.Id,
-            request.User.Name!,
-            request.User.DisplayName!);
-
         // Build options
         var options = new MakeCredentialOptions
         {
             ExcludeList = request.ExcludeList?.Select(desc => new PublicKeyCredentialDescriptor(
                 desc.Id,
                 desc.Type,
-                desc.Transports?.Select(t => t.Value).ToList()
+                desc.Transports
             )).ToList(),
 
             ResidentKey = request.Options?.TryGetValue("rk", out var rk) == true && rk,
@@ -158,8 +148,8 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
 
         var response = await _session.MakeCredentialAsync(
             request.ClientDataHash,
-            rpEntity,
-            userEntity,
+            request.Rp,
+            request.User,
             request.PubKeyCredParams,
             options,
             cancellationToken

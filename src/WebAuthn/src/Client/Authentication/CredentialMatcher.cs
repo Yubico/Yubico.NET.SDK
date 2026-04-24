@@ -36,7 +36,7 @@ internal sealed class CredentialMatcher
     /// A list of tuples containing credential ID, optional user, and the GetAssertionResponse.
     /// May be empty if no credentials match.
     /// </returns>
-    internal static async Task<IReadOnlyList<(ReadOnlyMemory<byte> CredentialId, WebAuthnUser? User, GetAssertionResponse Response)>>
+    internal static async Task<IReadOnlyList<(ReadOnlyMemory<byte> CredentialId, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)>>
         MatchAsync(
             IWebAuthnBackend backend,
             BackendGetAssertionRequest request,
@@ -51,14 +51,14 @@ internal sealed class CredentialMatcher
         catch (CtapException ex) when (IsNoCredentialsError(ex.Status))
         {
             // Authenticator has no matching credentials - return empty list
-            return Array.Empty<(ReadOnlyMemory<byte>, WebAuthnUser?, GetAssertionResponse)>();
+            return Array.Empty<(ReadOnlyMemory<byte>, PublicKeyCredentialUserEntity?, GetAssertionResponse)>();
         }
 
-        var results = new List<(ReadOnlyMemory<byte>, WebAuthnUser?, GetAssertionResponse)>();
+        var results = new List<(ReadOnlyMemory<byte>, PublicKeyCredentialUserEntity?, GetAssertionResponse)>();
 
         // Add the first response
         var firstCredId = firstResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
-        results.Add((firstCredId, MapUser(firstResponse.User), firstResponse));
+        results.Add((firstCredId, firstResponse.User, firstResponse));
 
         // Check if there are more credentials to enumerate
         int? numberOfCredentials = firstResponse.NumberOfCredentials;
@@ -71,7 +71,7 @@ internal sealed class CredentialMatcher
             {
                 var nextResponse = await backend.GetNextAssertionAsync(cancellationToken);
                 var nextCredId = nextResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
-                results.Add((nextCredId, MapUser(nextResponse.User), nextResponse));
+                results.Add((nextCredId, nextResponse.User, nextResponse));
             }
         }
 
@@ -83,18 +83,5 @@ internal sealed class CredentialMatcher
         return status == CtapStatus.NoCredentials
             || status == CtapStatus.InvalidCredential
             || status == CtapStatus.NotAllowed;
-    }
-
-    private static WebAuthnUser? MapUser(PublicKeyCredentialUserEntity? fidoUser)
-    {
-        if (fidoUser is null)
-            return null;
-
-        return new WebAuthnUser
-        {
-            Id = fidoUser.Id,
-            Name = fidoUser.Name ?? string.Empty,
-            DisplayName = fidoUser.DisplayName ?? fidoUser.Name ?? string.Empty
-        };
     }
 }

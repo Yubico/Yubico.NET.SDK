@@ -14,7 +14,6 @@
 
 using System.Formats.Cbor;
 using Yubico.YubiKit.Fido2.Extensions;
-using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
 
@@ -34,7 +33,7 @@ internal static class MinPinLengthAdapter
     /// <summary>
     /// Parses minPinLength output from authenticator data extensions.
     /// </summary>
-    public static Outputs.MinPinLengthOutput? ParseOutput(
+    public static MinPinLengthOutput? ParseOutput(
         IReadOnlyDictionary<string, ReadOnlyMemory<byte>> extensions)
     {
         if (!extensions.TryGetValue(ExtensionIdentifiers.MinPinLength, out var rawValue))
@@ -43,8 +42,6 @@ internal static class MinPinLengthAdapter
         }
 
         var reader = new CborReader(rawValue, CborConformanceMode.Lax);
-        var minLength = (uint)reader.ReadInt32();
-
-        return new Outputs.MinPinLengthOutput(minLength);
+        return MinPinLengthOutput.Decode(reader);
     }
 }

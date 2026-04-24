@@ -121,12 +121,12 @@ public sealed record class BackendMakeCredentialRequest
     /// <summary>
     /// Relying party information.
     /// </summary>
-    public required WebAuthnRelyingParty Rp { get; init; }
+    public required PublicKeyCredentialRpEntity Rp { get; init; }
 
     /// <summary>
     /// User information.
     /// </summary>
-    public required WebAuthnUser User { get; init; }
+    public required PublicKeyCredentialUserEntity User { get; init; }
 
     /// <summary>
     /// Supported public key credential parameters.
@@ -136,7 +136,7 @@ public sealed record class BackendMakeCredentialRequest
     /// <summary>
     /// Credentials to exclude (already registered).
     /// </summary>
-    public IReadOnlyList<WebAuthnCredentialDescriptor>? ExcludeList { get; init; }
+    public IReadOnlyList<PublicKeyCredentialDescriptor>? ExcludeList { get; init; }
 
     /// <summary>
     /// Raw CBOR-encoded extensions map (opaque passthrough for Phase 3).

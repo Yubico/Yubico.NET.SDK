@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Fido2.Credentials;
+
 namespace Yubico.YubiKit.WebAuthn.Client.Authentication;
 
 /// <summary>
@@ -41,7 +43,7 @@ public sealed class MatchedCredential
     /// <remarks>
     /// Only present for discoverable credentials when user verification is performed.
     /// </remarks>
-    public WebAuthnUser? User { get; }
+    public PublicKeyCredentialUserEntity? User { get; }
 
     /// <summary>
     /// Gets whether this credential requires explicit user selection.
@@ -62,7 +64,7 @@ public sealed class MatchedCredential
     /// <param name="responseFactory">Factory that produces the authentication response.</param>
     internal MatchedCredential(
         ReadOnlyMemory<byte> id,
-        WebAuthnUser? user,
+        PublicKeyCredentialUserEntity? user,
         bool requiresSelection,
         Func<CancellationToken, Task<AuthenticationResponse>> responseFactory)
     {

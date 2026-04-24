@@ -265,6 +265,24 @@ public static class PreviewSignCbor
     }
 
     /// <summary>
+    /// CBOR keys for registration output.
+    /// </summary>
+    private static class RegistrationOutputKeys
+    {
+        internal const int Algorithm = 3;
+        internal const int Flags = 4;
+        internal const int AttestationObject = 7;
+    }
+
+    /// <summary>
+    /// CBOR keys for authentication output.
+    /// </summary>
+    private static class AuthenticationOutputKeys
+    {
+        internal const int Signature = 6;
+    }
+
+    /// <summary>
     /// Encodes registration input (algorithm list + flags) as canonical CBOR.
     /// </summary>
     /// <param name="input">The registration input.</param>
@@ -332,5 +350,140 @@ public static class PreviewSignCbor
 
         writer.WriteEndMap();
         return writer.Encode();
+    }
+
+    /// <summary>
+    /// Decodes registration output from authData.extensions["previewSign"].
+    /// </summary>
+    /// <param name="reader">CBOR reader positioned at the start of the previewSign output map.</param>
+    /// <returns>
+    /// A tuple containing (algorithm, flags) where flags may be null (YubiKey 5.8.0-beta behavior).
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the output is missing the required algorithm key or is malformed.
+    /// </exception>
+    /// <remarks>
+    /// Per CTAP v4 draft §10.2.1 step 5, the output contains keys 3 (alg) and optionally 4 (flags).
+    /// Swift's implementation (PreviewSign.swift:132-176) treats flags as optional (absent on YubiKey 5.8.0-beta).
+    /// </remarks>
+    public static (int Algorithm, int? Flags) DecodeRegistrationOutput(CborReader reader)
+    {
+        int? mapSize = reader.ReadStartMap();
+
+        int? algorithm = null;
+        int? flags = null;
+
+        for (int i = 0; i < mapSize; i++)
+        {
+            int key = reader.ReadInt32();
+            switch (key)
+            {
+                case RegistrationOutputKeys.Algorithm:
+                    algorithm = reader.ReadInt32();
+                    break;
+                case RegistrationOutputKeys.Flags:
+                    flags = reader.ReadInt32();
+                    break;
+                default:
+                    reader.SkipValue();
+                    break;
+            }
+        }
+
+        reader.ReadEndMap();
+
+        if (algorithm is null)
+        {
+            throw new InvalidOperationException("previewSign registration output missing required algorithm (key 3)");
+        }
+
+        return (algorithm.Value, flags);
+    }
+
+    /// <summary>
+    /// Decodes unsigned registration output from unsignedExtensionOutputs["previewSign"].
+    /// </summary>
+    /// <param name="cbor">CBOR-encoded map with key {7: att-obj}.</param>
+    /// <returns>
+    /// The raw attestation object bytes.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when CBOR is malformed or attestation object is missing.
+    /// </exception>
+    /// <remarks>
+    /// Per CTAP v4 draft, the unsigned output contains key 7 (att-obj) with a nested attestation object.
+    /// Caller is responsible for decoding the nested attestation object.
+    /// </remarks>
+    public static ReadOnlyMemory<byte> DecodeUnsignedRegistrationOutput(ReadOnlyMemory<byte> cbor)
+    {
+        var reader = new CborReader(cbor, CborConformanceMode.Ctap2Canonical);
+        int? mapSize = reader.ReadStartMap();
+
+        ReadOnlyMemory<byte>? attestationObjectBytes = null;
+
+        for (int i = 0; i < mapSize; i++)
+        {
+            int key = reader.ReadInt32();
+            if (key == RegistrationOutputKeys.AttestationObject)
+            {
+                attestationObjectBytes = reader.ReadByteString();
+            }
+            else
+            {
+                reader.SkipValue();
+            }
+        }
+
+        reader.ReadEndMap();
+
+        if (!attestationObjectBytes.HasValue)
+        {
+            throw new InvalidOperationException("previewSign unsigned output missing attestation object (key 7)");
+        }
+
+        return attestationObjectBytes.Value;
+    }
+
+    /// <summary>
+    /// Decodes authentication output from authData.extensions["previewSign"].
+    /// </summary>
+    /// <param name="cbor">CBOR-encoded map with key {6: sig}.</param>
+    /// <returns>
+    /// The signature bytes.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when CBOR is malformed or signature is missing.
+    /// </exception>
+    /// <remarks>
+    /// Per CTAP v4 draft §10.2.1 step 10, the output contains key 6 (sig) with the signature.
+    /// </remarks>
+    public static ReadOnlyMemory<byte> DecodeAuthenticationOutput(ReadOnlyMemory<byte> cbor)
+    {
+        var reader = new CborReader(cbor, CborConformanceMode.Ctap2Canonical);
+        int? mapSize = reader.ReadStartMap();
+
+        ReadOnlyMemory<byte>? signature = null;
+
+        for (int i = 0; i < mapSize; i++)
+        {
+            int key = reader.ReadInt32();
+            if (key == AuthenticationOutputKeys.Signature)
+            {
+                signature = reader.ReadByteString();
+            }
+            else
+            {
+                reader.SkipValue();
+            }
+        }
+
+        reader.ReadEndMap();
+
+        if (!signature.HasValue)
+        {
+            throw new InvalidOperationException("previewSign authentication output missing signature (key 6)");
+        }
+
+        return signature.Value;
     }
 }

@@ -15,9 +15,10 @@
 using System.Formats.Cbor;
 using System.Security.Cryptography;
 using Xunit;
+using Yubico.YubiKit.Fido2.Cose;
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
-using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
@@ -31,8 +32,8 @@ public class ExtensionPipelineTests
         new()
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
-            User = new WebAuthnUser { Id = RandomNumberGenerator.GetBytes(16), Name = "user", DisplayName = "User" },
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user", "User"),
             PubKeyCredParams = [CoseAlgorithm.Es256]
         };
 
@@ -83,7 +84,7 @@ public class ExtensionPipelineTests
         // Arrange
         var blobData = new byte[] { 0x01, 0x02, 0x03, 0x04 };
         var inputs = new RegistrationExtensionInputs(
-            CredBlob: new WebAuthn.Extensions.Inputs.CredBlobInput(blobData));
+            CredBlob: new Fido2.Extensions.CredBlobInput { Blob = blobData });
         var options = CreateMockOptions();
 
         // Act
@@ -111,8 +112,8 @@ public class ExtensionPipelineTests
         var options = new RegistrationOptions
         {
             Challenge = new byte[32],
-            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
-            User = new WebAuthnUser { Id = new byte[16], Name = "user", DisplayName = "User" },
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(new byte[16], "user", "User"),
             PubKeyCredParams = [new CoseAlgorithm(-7)]
         };
 
@@ -132,8 +133,8 @@ public class ExtensionPipelineTests
         var options = new RegistrationOptions
         {
             Challenge = new byte[32],
-            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
-            User = new WebAuthnUser { Id = new byte[16], Name = "user", DisplayName = "User" },
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(new byte[16], "user", "User"),
             PubKeyCredParams = [new CoseAlgorithm(-7)],
             ResidentKey = ResidentKeyPreference.Required
         };
@@ -153,11 +154,11 @@ public class ExtensionPipelineTests
         // Arrange - combine previewSign with standard extensions that have different lengths
         var inputs = new RegistrationExtensionInputs(
             CredProtect: new CredProtectInput(CredProtectPolicy.UserVerificationRequired), // length 11
-            CredBlob: new WebAuthn.Extensions.Inputs.CredBlobInput(new byte[] { 0x01, 0x02 }), // length 8
+            CredBlob: new Fido2.Extensions.CredBlobInput { Blob = new byte[] { 0x01, 0x02 } }, // length 8
             PreviewSign: new WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput(
                 algorithms: new[] { CoseAlgorithm.Es256 })); // length 11
         var options = CreateMockOptions();
-        
+
 
         // Act
         var cborBytes = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs, options);

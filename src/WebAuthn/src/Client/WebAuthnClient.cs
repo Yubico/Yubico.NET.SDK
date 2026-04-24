@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Fido2;
+using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
@@ -937,7 +938,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 .Select(desc => new PublicKeyCredentialDescriptor(
                     desc.Id,
                     desc.Type,
-                    desc.Transports?.Select(t => t.Value).ToList()))
+                    desc.Transports))
                 .ToList();
         }
 
@@ -980,17 +981,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
         // Extract credential ID from the response or use empty if not present
         var credentialId = ctapResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
 
-        // Map user if present
-        WebAuthnUser? user = null;
-        if (ctapResponse.User is not null)
-        {
-            user = new WebAuthnUser
-            {
-                Id = ctapResponse.User.Id,
-                Name = ctapResponse.User.Name ?? string.Empty,
-                DisplayName = ctapResponse.User.DisplayName ?? ctapResponse.User.Name ?? string.Empty
-            };
-        }
+        // User from CTAP response can be used directly
+        var user = ctapResponse.User;
 
         // Parse extension outputs via pipeline
         var extensionOutputs = ExtensionPipeline.ParseAuthenticationOutputs(

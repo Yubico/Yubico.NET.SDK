@@ -14,7 +14,6 @@
 
 using System.Formats.Cbor;
 using Yubico.YubiKit.Fido2.Extensions;
-using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
@@ -27,16 +26,15 @@ internal static class CredBlobAdapter
     /// <summary>
     /// Applies credBlob input to the CTAP extension builder.
     /// </summary>
-    public static void ApplyToBuilder(ExtensionBuilder builder, Inputs.CredBlobInput input)
+    public static void ApplyToBuilder(ExtensionBuilder builder, CredBlobInput input)
     {
-        input.Validate();
         builder.WithCredBlob(input.Blob);
     }
 
     /// <summary>
     /// Parses credBlob output from registration (returns boolean "stored" indicator).
     /// </summary>
-    public static Outputs.CredBlobOutput? ParseRegistrationOutput(
+    public static CredBlobMakeCredentialOutput? ParseRegistrationOutput(
         IReadOnlyDictionary<string, ReadOnlyMemory<byte>> extensions)
     {
         if (!extensions.TryGetValue(ExtensionIdentifiers.CredBlob, out var rawValue))
@@ -45,20 +43,13 @@ internal static class CredBlobAdapter
         }
 
         var reader = new CborReader(rawValue, CborConformanceMode.Lax);
-
-        // Registration returns boolean
-        if (reader.PeekState() == CborReaderState.Boolean)
-        {
-            return new Outputs.CredBlobOutput(reader.ReadBoolean());
-        }
-
-        return null;
+        return CredBlobMakeCredentialOutput.Decode(reader);
     }
 
     /// <summary>
     /// Parses credBlob output from authentication (returns actual blob data).
     /// </summary>
-    public static Outputs.CredBlobAssertionOutput? ParseAuthenticationOutput(
+    public static CredBlobAssertionOutput? ParseAuthenticationOutput(
         IReadOnlyDictionary<string, ReadOnlyMemory<byte>> extensions)
     {
         if (!extensions.TryGetValue(ExtensionIdentifiers.CredBlob, out var rawValue))
@@ -67,19 +58,6 @@ internal static class CredBlobAdapter
         }
 
         var reader = new CborReader(rawValue, CborConformanceMode.Lax);
-
-        // Authentication returns byte string
-        if (reader.PeekState() == CborReaderState.ByteString)
-        {
-            var blob = reader.ReadByteString();
-            // Per CTAP2.1, credBlob must be 1-32 bytes
-            if (blob.Length is < 1 or > 32)
-            {
-                return null;
-            }
-            return new Outputs.CredBlobAssertionOutput(blob);
-        }
-
-        return null;
+        return CredBlobAssertionOutput.Decode(reader);
     }
 }

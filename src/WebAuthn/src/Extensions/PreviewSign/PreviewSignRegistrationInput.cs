@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.WebAuthn.Cose;
+using Yubico.YubiKit.Fido2.Cose;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 

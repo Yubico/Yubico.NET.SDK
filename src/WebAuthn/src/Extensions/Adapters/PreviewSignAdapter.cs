@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.WebAuthn.Attestation;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
-using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 using Yubico.YubiKit.WebAuthn.Preferences;
 
@@ -103,7 +104,7 @@ internal static class PreviewSignAdapter
     public static void ApplyToBuilderForAuthentication(
         ExtensionBuilder builder,
         PreviewSign.PreviewSignAuthenticationInput input,
-        IReadOnlyList<WebAuthnCredentialDescriptor>? allowCredentials)
+        IReadOnlyList<Fido2.Credentials.PublicKeyCredentialDescriptor>? allowCredentials)
     {
         // Spec §8 validation: allowCredentials MUST NOT be empty
         if (allowCredentials is null || allowCredentials.Count == 0)
@@ -194,45 +195,41 @@ internal static class PreviewSignAdapter
             return null;
         }
 
-        // Read algorithm + flags from authData.extensions["previewSign"]
+        // Decode algorithm + flags from authData.extensions["previewSign"] via Fido2 decoder
         var reader = new System.Formats.Cbor.CborReader(rawCbor, System.Formats.Cbor.CborConformanceMode.Ctap2Canonical);
-        int? mapSize = reader.ReadStartMap();
 
-        CoseAlgorithm? algorithm = null;
-        PreviewSign.PreviewSignFlags? flags = null;
+        (int algorithmInt, int? flagsInt) = Fido2.Extensions.PreviewSignCbor.DecodeRegistrationOutput(reader);
 
-        for (int i = 0; i < mapSize; i++)
-        {
-            int key = reader.ReadInt32();
-            switch (key)
-            {
-                case 3: // alg
-                    algorithm = new CoseAlgorithm(reader.ReadInt32());
-                    break;
-                case 4: // flags
-                    flags = (PreviewSign.PreviewSignFlags)reader.ReadInt32();
-                    break;
-                default:
-                    reader.SkipValue();
-                    break;
-            }
-        }
-
-        if (algorithm is null)
-        {
-            throw new WebAuthnClientError(
-                WebAuthnClientErrorCode.InvalidState,
-                "previewSign output missing required algorithm");
-        }
-
-        // Flags are input-only per CTAP v4 draft; default when absent from response
-        flags ??= PreviewSign.PreviewSignFlags.RequireUserPresence;
+        var algorithm = new CoseAlgorithm(algorithmInt);
+        var flags = flagsInt.HasValue
+            ? (PreviewSign.PreviewSignFlags)flagsInt.Value
+            : PreviewSign.PreviewSignFlags.RequireUserPresence;
 
         // Try to read attestation object from unsignedExtensionOutputs["previewSign"]
         if (unsignedExtensionOutputs?.TryGetValue(ExtensionId, out var unsignedCbor) == true)
         {
-            // Decode the unsigned output (contains att-obj)
-            return PreviewSign.PreviewSignCbor.DecodeUnsignedRegistrationOutput(unsignedCbor, algorithm.Value, flags.Value);
+            // Decode the unsigned output (contains att-obj) via Fido2 decoder
+            ReadOnlyMemory<byte> attestationObjectBytes = Fido2.Extensions.PreviewSignCbor.DecodeUnsignedRegistrationOutput(unsignedCbor);
+
+            // Decode the nested attestation object
+            var attestationObject = WebAuthnAttestationObject.Decode(attestationObjectBytes);
+
+            // Extract key handle and public key from attested credential data
+            var attestedCredData = attestationObject.AuthenticatorData.AttestedCredentialData;
+            if (attestedCredData is null)
+            {
+                throw new WebAuthnClientError(
+                    WebAuthnClientErrorCode.InvalidState,
+                    "previewSign attestation object missing attested credential data");
+            }
+
+            var generatedKey = new PreviewSign.GeneratedSigningKey(
+                KeyHandle: attestedCredData.CredentialId,
+                PublicKey: CoseKey.Decode(attestedCredData.CredentialPublicKey),
+                Algorithm: algorithm,
+                AttestationObject: attestationObject);
+
+            return new PreviewSign.PreviewSignRegistrationOutput(generatedKey);
         }
 
         // Fallback: build from authData's attested credential data (Swift PreviewSign.swift:170-176)
@@ -243,13 +240,13 @@ internal static class PreviewSignAdapter
                 "previewSign output requires attested credential data");
         }
 
-        var generatedKey = new PreviewSign.GeneratedSigningKey(
+        var fallbackKey = new PreviewSign.GeneratedSigningKey(
             KeyHandle: authData.AttestedCredentialData.CredentialId,
             PublicKey: CoseKey.Decode(authData.AttestedCredentialData.CredentialPublicKey),
-            Algorithm: algorithm.Value,
+            Algorithm: algorithm,
             AttestationObject: null); // No attestation object in fallback path
 
-        return new PreviewSign.PreviewSignRegistrationOutput(GeneratedKey: generatedKey);
+        return new PreviewSign.PreviewSignRegistrationOutput(GeneratedKey: fallbackKey);
     }
 
     /// <summary>
@@ -271,6 +268,9 @@ internal static class PreviewSignAdapter
             return null;
         }
 
-        return PreviewSign.PreviewSignCbor.DecodeAuthenticationOutput(rawCbor);
+        // Decode signature via Fido2 decoder
+        ReadOnlyMemory<byte> signature = Fido2.Extensions.PreviewSignCbor.DecodeAuthenticationOutput(rawCbor);
+
+        return new PreviewSign.PreviewSignAuthenticationOutput(signature);
     }
 }

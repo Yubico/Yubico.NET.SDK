@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.WebAuthn.Cose;
+using Yubico.YubiKit.Fido2.Cose;
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.WebAuthn.Preferences;
 
 namespace Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -30,12 +31,12 @@ public sealed record class RegistrationOptions
     /// <summary>
     /// Gets the relying party information.
     /// </summary>
-    public required WebAuthnRelyingParty Rp { get; init; }
+    public required PublicKeyCredentialRpEntity Rp { get; init; }
 
     /// <summary>
     /// Gets the user information.
     /// </summary>
-    public required WebAuthnUser User { get; init; }
+    public required PublicKeyCredentialUserEntity User { get; init; }
 
     /// <summary>
     /// Gets the list of supported public key credential algorithms in preference order.
@@ -45,7 +46,7 @@ public sealed record class RegistrationOptions
     /// <summary>
     /// Gets the list of credentials to exclude (already registered).
     /// </summary>
-    public IReadOnlyList<WebAuthnCredentialDescriptor>? ExcludeCredentials { get; init; }
+    public IReadOnlyList<PublicKeyCredentialDescriptor>? ExcludeCredentials { get; init; }
 
     /// <summary>
     /// Gets the resident key preference.

@@ -15,12 +15,13 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Fido2;
+using Yubico.YubiKit.Fido2.Cose;
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Client.Status;
-using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using static Yubico.YubiKit.WebAuthn.IntegrationTests.WebAuthnTestHelpers;
 
@@ -42,13 +43,9 @@ public class WebAuthnClientTests
         return new RegistrationOptions
         {
             Challenge = challenge ?? challengeBytes.ToArray(),
-            Rp = new WebAuthnRelyingParty { Id = TestRpId, Name = "Example Corp" },
-            User = new WebAuthnUser
-            {
-                Id = userId.ToArray(),
-                Name = "testuser@example.com",
-                DisplayName = "Test User"
-            },
+            Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example Corp"),
+            User = new PublicKeyCredentialUserEntity(userId.ToArray(), "testuser@example.com", "Test User"
+            ),
             PubKeyCredParams = [CoseAlgorithm.Es256],
             ResidentKey = residentKey,
             UserVerification = UserVerificationPreference.Discouraged
@@ -187,7 +184,7 @@ public class WebAuthnClientTests
             RpId = TestRpId,
             AllowCredentials =
             [
-                new WebAuthnCredentialDescriptor(credentialId)
+                new PublicKeyCredentialDescriptor(credentialId)
             ],
             UserVerification = UserVerificationPreference.Discouraged
         };

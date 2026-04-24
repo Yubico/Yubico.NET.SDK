@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
-using System.Text;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using System.Security.Cryptography;
+using System.Text;
+using Xunit;
 using Yubico.YubiKit.Fido2;
+using Yubico.YubiKit.Fido2.Cose;
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
-using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
-using Xunit;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 
@@ -80,8 +81,8 @@ public sealed class WebAuthnClientPinRetryTests
 
         var options = new RegistrationOptions
         {
-            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
-            User = new WebAuthnUser { Id = RandomNumberGenerator.GetBytes(16), Name = "user", DisplayName = "User" },
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user", "User"),
             Challenge = RandomNumberGenerator.GetBytes(32),
             PubKeyCredParams = [new CoseAlgorithm(-7)],
             UserVerification = UserVerificationPreference.Required
@@ -122,7 +123,7 @@ public sealed class WebAuthnClientPinRetryTests
             UserVerification = UserVerificationPreference.Required,
             AllowCredentials =
             [
-                new WebAuthnCredentialDescriptor(RandomNumberGenerator.GetBytes(64))
+                new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(64))
             ]
         };
 

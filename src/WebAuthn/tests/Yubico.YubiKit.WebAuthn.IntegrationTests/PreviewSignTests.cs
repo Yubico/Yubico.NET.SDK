@@ -16,11 +16,12 @@ using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Fido2;
+using Yubico.YubiKit.Fido2.Cose;
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
-using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 using Yubico.YubiKit.WebAuthn.Preferences;
@@ -48,13 +49,9 @@ public class PreviewSignTests
         var regOptions = new RegistrationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new WebAuthnRelyingParty { Id = TestRpId, Name = "Example Corp" },
-            User = new WebAuthnUser
-            {
-                Id = RandomNumberGenerator.GetBytes(16),
-                Name = "testuser@example.com",
-                DisplayName = "Test User"
-            },
+            Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example Corp"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "testuser@example.com", "Test User"
+            ),
             PubKeyCredParams = [CoseAlgorithm.Es256],
             ResidentKey = ResidentKeyPreference.Required,
             UserVerification = UserVerificationPreference.Discouraged,
@@ -117,21 +114,17 @@ public class PreviewSignTests
         var regOptions = new RegistrationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new WebAuthnRelyingParty { Id = TestRpId, Name = "Example Corp" },
-            User = new WebAuthnUser
-            {
-                Id = RandomNumberGenerator.GetBytes(16),
-                Name = "signer@example.com",
-                DisplayName = "Signer"
-            },
+            Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example Corp"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "signer@example.com", "Signer"
+            ),
             PubKeyCredParams = [CoseAlgorithm.Es256],
             ResidentKey = ResidentKeyPreference.Required,
             UserVerification = UserVerificationPreference.Discouraged,
             Extensions = new RegistrationExtensionInputs(
                 PreviewSign: PreviewSignRegistrationInput.GenerateKey(
                     CoseAlgorithm.Es256, CoseAlgorithm.EdDsa))
-                // Phase 9.2: Using non-ARKG algorithms only. Esp256 and Esp256SplitArkgPlaceholder
-                // require ARKG additional_args during authentication (deferred to Phase 10).
+            // Phase 9.2: Using non-ARKG algorithms only. Esp256 and Esp256SplitArkgPlaceholder
+            // require ARKG additional_args during authentication (deferred to Phase 10).
         };
 
         var regResponse = await regClient.MakeCredentialAsync(
@@ -169,7 +162,7 @@ public class PreviewSignTests
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = TestRpId,
-            AllowCredentials = [new WebAuthnCredentialDescriptor(credentialId)],
+            AllowCredentials = [new PublicKeyCredentialDescriptor(credentialId)],
             UserVerification = UserVerificationPreference.Discouraged,
             Extensions = new AuthenticationExtensionInputs(
                 PreviewSign: new PreviewSignAuthenticationInput(signByCredential))

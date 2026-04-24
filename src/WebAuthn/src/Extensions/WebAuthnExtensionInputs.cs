@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
@@ -28,13 +29,13 @@ namespace Yubico.YubiKit.WebAuthn.Extensions;
 /// <param name="CredProps">Credential properties request.</param>
 /// <param name="PreviewSign">Signing key generation request (CTAP v4 draft).</param>
 public sealed record class RegistrationExtensionInputs(
-    CredProtectInput? CredProtect = null,
+    Inputs.CredProtectInput? CredProtect = null,
     CredBlobInput? CredBlob = null,
     MinPinLengthInput? MinPinLength = null,
     LargeBlobInput? LargeBlob = null,
     PrfInput? Prf = null,
-    CredPropsInput? CredProps = null,
-    PreviewSignRegistrationInput? PreviewSign = null);
+    Inputs.CredPropsInput? CredProps = null,
+    PreviewSign.PreviewSignRegistrationInput? PreviewSign = null);
 
 /// <summary>
 /// Extension inputs for WebAuthn authentication (GetAssertion).
@@ -45,4 +46,4 @@ public sealed record class RegistrationExtensionInputs(
 public sealed record class AuthenticationExtensionInputs(
     LargeBlobInput? LargeBlob = null,
     PrfInput? Prf = null,
-    PreviewSignAuthenticationInput? PreviewSign = null);
+    PreviewSign.PreviewSignAuthenticationInput? PreviewSign = null);

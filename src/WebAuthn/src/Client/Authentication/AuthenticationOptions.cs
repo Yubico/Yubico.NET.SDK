@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.WebAuthn.Preferences;
 
 namespace Yubico.YubiKit.WebAuthn.Client.Authentication;
@@ -45,7 +46,7 @@ public sealed record class AuthenticationOptions
     /// If null or empty, the authenticator will search for discoverable credentials
     /// matching the <see cref="RpId"/>.
     /// </remarks>
-    public IReadOnlyList<WebAuthnCredentialDescriptor>? AllowCredentials { get; init; }
+    public IReadOnlyList<PublicKeyCredentialDescriptor>? AllowCredentials { get; init; }
 
     /// <summary>
     /// Gets the user verification requirement for this authentication.

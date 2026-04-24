@@ -15,9 +15,10 @@
 using System.Formats.Cbor;
 using System.Security.Cryptography;
 using Xunit;
+using Yubico.YubiKit.Fido2.Cose;
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
-using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions.Adapters;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using WebAuthnPreviewSign = Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
@@ -39,8 +40,8 @@ public class PreviewSignAdapterTests
         var optionsUvRequired = new RegistrationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new WebAuthnRelyingParty { Id = "example.com", Name = "Example" },
-            User = new WebAuthnUser { Id = RandomNumberGenerator.GetBytes(16), Name = "user@example.com", DisplayName = "User" },
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
             PubKeyCredParams = [CoseAlgorithm.Es256],
             UserVerification = UserVerificationPreference.Required
         };
@@ -132,7 +133,7 @@ public class PreviewSignAdapterTests
                 // Missing entry for credB
             });
 
-        var allowCredentials = new List<WebAuthnCredentialDescriptor>
+        var allowCredentials = new List<PublicKeyCredentialDescriptor>
         {
             new(credA),
             new(credB)
@@ -239,7 +240,7 @@ public class PreviewSignAdapterTests
                 [credA] = paramsA
             });
 
-        var allowCredentials = new List<WebAuthnCredentialDescriptor>
+        var allowCredentials = new List<PublicKeyCredentialDescriptor>
         {
             new(credA)
         };
@@ -288,7 +289,7 @@ public class PreviewSignAdapterTests
                 [credB] = new WebAuthnPreviewSign.PreviewSignSigningParams(new byte[] { 0xCC }, new byte[] { 0xDD })
             });
 
-        var allowCredentials = new List<WebAuthnCredentialDescriptor>
+        var allowCredentials = new List<PublicKeyCredentialDescriptor>
         {
             new(credA),
             new(credB)
@@ -319,7 +320,7 @@ public class PreviewSignAdapterTests
                 [credB] = new WebAuthnPreviewSign.PreviewSignSigningParams(new byte[] { 0xAA }, new byte[] { 0xBB })
             });
 
-        var allowCredentials = new List<WebAuthnCredentialDescriptor>
+        var allowCredentials = new List<PublicKeyCredentialDescriptor>
         {
             new(credA)
         };

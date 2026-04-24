@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Runtime.InteropServices;
+using Yubico.YubiKit.Fido2.Cbor;
 
 namespace Yubico.YubiKit.WebAuthn.Cose;
 
@@ -52,22 +53,7 @@ public readonly struct Aaguid : IEquatable<Aaguid>
     /// </remarks>
     public Aaguid(Guid guid)
     {
-        // .NET Guid.ToByteArray() produces mixed endianness:
-        // - First 4 bytes (time_low): little-endian
-        // - Next 2 bytes (time_mid): little-endian
-        // - Next 2 bytes (time_hi_and_version): little-endian
-        // - Last 8 bytes (clock_seq_and_node): big-endian
-        // WebAuthn AAGUID is fully big-endian, so we need to reverse the first three components.
-        Span<byte> bytes = stackalloc byte[16];
-        guid.TryWriteBytes(bytes);
-
-        // Reverse first 3 components to convert to big-endian
-        bytes[0..4].Reverse();  // time_low
-        bytes[4..6].Reverse();  // time_mid
-        bytes[6..8].Reverse();  // time_hi_and_version
-        // bytes[8..16] already big-endian
-
-        _bytes = bytes.ToArray();
+        _bytes = AaguidConverter.ToBigEndianBytes(guid);
     }
 
     /// <summary>
@@ -91,17 +77,7 @@ public readonly struct Aaguid : IEquatable<Aaguid>
                 return Guid.Empty;
             }
 
-            // Convert from big-endian AAGUID to mixed-endian Guid
-            Span<byte> temp = stackalloc byte[16];
-            _bytes.AsSpan().CopyTo(temp);
-
-            // Reverse first 3 components to convert from big-endian to .NET's mixed-endian
-            temp[0..4].Reverse();  // time_low
-            temp[4..6].Reverse();  // time_mid
-            temp[6..8].Reverse();  // time_hi_and_version
-            // temp[8..16] stays big-endian
-
-            return new Guid(temp);
+            return AaguidConverter.FromBigEndianBytes(_bytes);
         }
     }
 

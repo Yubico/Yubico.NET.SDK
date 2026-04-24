@@ -81,7 +81,7 @@ var client = new WebAuthnClient(backend);
 // Registration
 var createOptions = new WebAuthnCredentialCreateOptions
 {
-    Rp = new PublicKeyCredentialRpEntity { Id = "example.com", Name = "Example" },
+    Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
     User = new PublicKeyCredentialUserEntity { Id = userId, Name = "user@example.com" },
     Challenge = challenge,
     PubKeyCredParams = [new PublicKeyCredentialParameters { Alg = -7, Type = "public-key" }],

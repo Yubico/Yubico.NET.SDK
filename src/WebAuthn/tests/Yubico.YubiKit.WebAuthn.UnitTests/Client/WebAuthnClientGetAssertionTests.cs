@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using NSubstitute;
 using System.Formats.Cbor;
 using System.Security.Cryptography;
-using NSubstitute;
 using Xunit;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
@@ -104,7 +104,7 @@ public class WebAuthnClientGetAssertionTests
             RpId = "example.com",
             AllowCredentials =
             [
-                new WebAuthnCredentialDescriptor(credentialId)
+                new PublicKeyCredentialDescriptor(credentialId)
             ]
         };
 

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions.Adapters;
@@ -105,7 +106,7 @@ internal sealed class ExtensionPipeline
     /// <returns>The CBOR-encoded extensions map, or null if no extensions requested.</returns>
     public static ReadOnlyMemory<byte>? BuildAuthenticationExtensionsCbor(
         AuthenticationExtensionInputs? inputs,
-        IReadOnlyList<WebAuthnCredentialDescriptor>? allowCredentials)
+        IReadOnlyList<PublicKeyCredentialDescriptor>? allowCredentials)
     {
         if (inputs is null)
         {
@@ -166,8 +167,8 @@ internal sealed class ExtensionPipeline
         }
 
         Outputs.CredProtectOutput? credProtect = null;
-        Outputs.CredBlobOutput? credBlob = null;
-        Outputs.MinPinLengthOutput? minPinLength = null;
+        CredBlobMakeCredentialOutput? credBlob = null;
+        MinPinLengthOutput? minPinLength = null;
         Outputs.LargeBlobRegistrationOutput? largeBlob = null;
         Outputs.PrfRegistrationOutput? prf = null;
         Outputs.CredPropsOutput? credProps = null;
@@ -288,7 +289,7 @@ internal sealed class ExtensionPipeline
             return null;
         }
 
-        Outputs.CredBlobAssertionOutput? credBlob = null;
+        CredBlobAssertionOutput? credBlob = null;
         Outputs.LargeBlobAuthenticationOutput? largeBlob = null;
         Outputs.PrfAuthenticationOutput? prf = null;
 

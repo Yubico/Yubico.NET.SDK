@@ -13,9 +13,8 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
-using Yubico.YubiKit.WebAuthn.Client;
 
-namespace Yubico.YubiKit.WebAuthn.Cose;
+namespace Yubico.YubiKit.Fido2.Cose;
 
 /// <summary>
 /// COSE_Key base type representing cryptographic public keys.
@@ -57,7 +56,7 @@ public abstract record CoseKey
             {
                 CborReaderState.ByteString => reader.ReadByteString(),
                 CborReaderState.UnsignedInteger or CborReaderState.NegativeInteger => reader.ReadInt32(),
-                _ => throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, $"Unsupported CBOR type for COSE key parameter {key}")
+                _ => throw new InvalidOperationException($"Unsupported CBOR type for COSE key parameter {key}")
             };
             parameters[key] = value;
             entriesRead++;
@@ -66,9 +65,9 @@ public abstract record CoseKey
 
         // Extract common parameters
         int kty = parameters.TryGetValue(1, out var ktyValue) && ktyValue is int k ? k :
-            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "Missing required kty parameter");
+            throw new InvalidOperationException("Missing required kty parameter");
         int alg = parameters.TryGetValue(3, out var algValue) && algValue is int a ? a :
-            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "Missing required alg parameter");
+            throw new InvalidOperationException("Missing required alg parameter");
 
         CoseAlgorithm algorithm = new(alg);
 
@@ -84,11 +83,11 @@ public abstract record CoseKey
     private static CoseEc2Key DecodeEc2(Dictionary<int, object?> parameters, CoseAlgorithm algorithm)
     {
         int crv = parameters.TryGetValue(-1, out var crvValue) && crvValue is int c ? c :
-            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "Missing curve parameter for EC2 key");
+            throw new InvalidOperationException("Missing curve parameter for EC2 key");
         byte[] x = parameters.TryGetValue(-2, out var xValue) && xValue is byte[] xBytes ? xBytes :
-            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "Missing x coordinate for EC2 key");
+            throw new InvalidOperationException("Missing x coordinate for EC2 key");
         byte[] y = parameters.TryGetValue(-3, out var yValue) && yValue is byte[] yBytes ? yBytes :
-            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "Missing y coordinate for EC2 key");
+            throw new InvalidOperationException("Missing y coordinate for EC2 key");
 
         return new CoseEc2Key(algorithm, crv, x, y);
     }
@@ -96,9 +95,9 @@ public abstract record CoseKey
     private static CoseOkpKey DecodeOkp(Dictionary<int, object?> parameters, CoseAlgorithm algorithm)
     {
         int crv = parameters.TryGetValue(-1, out var crvValue) && crvValue is int c ? c :
-            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "Missing curve parameter for OKP key");
+            throw new InvalidOperationException("Missing curve parameter for OKP key");
         byte[] x = parameters.TryGetValue(-2, out var xValue) && xValue is byte[] xBytes ? xBytes :
-            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "Missing x coordinate for OKP key");
+            throw new InvalidOperationException("Missing x coordinate for OKP key");
 
         return new CoseOkpKey(algorithm, crv, x);
     }
@@ -106,9 +105,9 @@ public abstract record CoseKey
     private static CoseRsaKey DecodeRsa(Dictionary<int, object?> parameters, CoseAlgorithm algorithm)
     {
         byte[] n = parameters.TryGetValue(-1, out var nValue) && nValue is byte[] nBytes ? nBytes :
-            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "Missing modulus for RSA key");
+            throw new InvalidOperationException("Missing modulus for RSA key");
         byte[] e = parameters.TryGetValue(-2, out var eValue) && eValue is byte[] eBytes ? eBytes :
-            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, "Missing exponent for RSA key");
+            throw new InvalidOperationException("Missing exponent for RSA key");
 
         return new CoseRsaKey(algorithm, n, e);
     }

@@ -1,55 +1,60 @@
-# Handoff — ExcludeList preflight token re-mint + 4 CodeAudit Critical fixes shipped
+# Handoff — Audit cleanup wave: ExcludeList fix + 4 Criticals + 4 HIGH-severity finds shipped
 
 **Date:** 2026-04-28
-**Active branch:** `webauthn/phase-9.2-rust-port` (tip `a0070db5`)
-**HEAD ↔ origin:** **In sync** — pushed `d4b95038..a0070db5` this session (6 commits flushed to origin including the 2 from prior handoff)
+**Active branch:** `webauthn/phase-9.2-rust-port` (tip `2b1b0852`)
+**HEAD ↔ origin:** **In sync** — pushed `cfea6e1f..2b1b0852` this session
 **PR:** [Yubico/Yubico.NET.SDK#466](https://github.com/Yubico/Yubico.NET.SDK/pull/466) — `feat(webauthn): WebAuthn Client + previewSign extension (Phase 9 close)` — OPEN, no review decision yet
 **Eventual merge target:** `yubikit-applets` (NOT `develop`, NOT `yubikit`, NOT `main`)
 **Strategy frame:** [`Plans/yes-we-have-started-composed-horizon.md`](yes-we-have-started-composed-horizon.md) (rev 2)
-**Supersedes:** `Plans/handoff.md` from 2026-04-27 (post-consolidation cleanup; tip `43ea328d`)
+**Supersedes:** `Plans/handoff.md` mid-session 2026-04-28 (post-`cfea6e1f`; the prior 2026-04-27 handoff covered up to `43ea328d`)
 
 ---
 
 ## Critical next step (read first)
 
-**No active blockers. Branch is in sync with origin; continue monitoring PR #466 and consider addressing remaining HIGH-severity CodeAudit findings.** This session resolved the `WebAuthnExcludeListStressTests` failure that was open at the prior handoff (was failing with `LimitExceeded`/`PinAuthInvalid` depending on how you read it; now passes in 34s isolated), then ran a CodeAudit pass and shipped 4 Critical fixes on top.
+**No active blockers. Branch is in sync with origin; continue monitoring PR #466.** This long session resolved the WebAuthn excludeList stress test failure, then ran a vslsp-driven CodeAudit, then shipped all 4 Critical findings + 4 of 7 HIGH findings (one was "deferred to next session" turned out actually-required, see lessons #2 below).
 
 The next session should:
 
-1. **Monitor PR #466** for Yubico maintainer review feedback (now ~20 commits beyond the prior handoff's tip)
+1. **Monitor PR #466** for Yubico maintainer review feedback (now ~22 commits beyond the 2026-04-27 handoff's tip)
 2. **If review surfaces fixable items** → address inline on this branch and push
-3. **Optionally address the remaining HIGH CodeAudit findings** (8 remain — see "Open follow-ups" section below)
-4. **NFC test SkipException edge-case** still open from prior handoff — `FidoNfcTests` (3 methods) need `NotSupportedException` catch guards. Lower priority since the audit found bigger fish.
-5. **Phase 10 ARKG work still belongs on a fresh branch off `yubikit-applets`** — do NOT branch it off this one.
+3. **Optionally tackle the remaining 3 HIGH audit findings** (Tier B + Tier C — see "Open follow-ups #2-#4" below). Tier B needs a design call from Dennis on ExtensionPipeline error semantics. Tier C is the WebAuthnClient.cs split, which absorbs both DRY findings.
+4. **Phase 10 ARKG work still belongs on a fresh branch off `yubikit-applets`** — do NOT branch it off this one.
 
 ---
 
-## Session summary (2026-04-28)
+## Session summary (2026-04-28, single long session)
 
-This session was a **bug-fix + audit + critical-cleanup pass**. Sequence:
+This session ran **fix → audit → cleanup** across three waves, plus a parallel investigation:
 
-1. **Resumed from prior handoff** — pushed nothing yet, started by re-reading the handoff and confirming branch state. Discovered the 2 unpushed commits had grown to 4 (the handoff was already drift; commit `f62c7c4b feat(webauthn): add client-layer excludeList pre-flight (Java parity)` had landed since the handoff was written).
+### Wave 1 — ExcludeList preflight bug fix
+1. **Resumed from 2026-04-27 handoff** (tip `43ea328d`); discovered 2 unpushed commits had grown to 4 (`f62c7c4b feat(webauthn): add client-layer excludeList pre-flight (Java parity)` had landed since the handoff was written).
+2. **Ran `WebAuthnExcludeListStressTests`** — failed in 51s with `WebAuthnClientError(Unknown)` wrapping `CtapException: PIN authentication failed` on the 18th MakeCredential.
+3. **Three-agent forensic investigation** vs yubikit-android:
+   - Agent A (wire-format): identical CBOR encoding
+   - Agent B (lifecycle): both stacks share token across preflight + MakeCredential
+   - **Agent C (preflight semantics)**: found the smoking gun in commit `f62c7c4b`'s own KNOWN ISSUE section — CTAP 2.1 §6.5.5.7 permission consumption invalidates the whole token after `GetAssertion(up=false)`
+4. **Shipped fix `dc2ed141`** — re-mint pinUvAuthToken between preflight and MakeCredential, scoped to MC-only permissions. Test went FAIL → PASS in 34s.
 
-2. **Ran `WebAuthnExcludeListStressTests` integration test** — failed in 51s with `WebAuthnClientError(Unknown)` wrapping `CtapException: PIN authentication failed` on the 18th MakeCredential call (the excluded one). Specifically: 17 creates succeeded, then the final excluded MakeCredential after preflight failed.
+### Wave 2 — CodeAudit + 4 Critical findings
+5. **Invoked `/CodeAudit` skill** (general-purpose agent + vslsp daemon) scoped to WebAuthn + adjacent Fido2 (Credentials/Extensions/Pin/CredentialManagement/FidoSession). Returned 4 Critical / 8 High / 6 Medium / 6 Low. Diagnostic baseline: 0 errors / 0 warnings.
+6. **Shipped fix `a0070db5`** — addressed all 4 Criticals:
+   - `PinUvAuthTokenSession` finalizer fallback (defensive zeroing if Dispose forgotten)
+   - `CredentialMatcher.IsNoCredentialsError` no longer swallows `CtapStatus.NotAllowed`
+   - `WebAuthnClient` torn-state guard between dispose and re-mint (`tokenSession = null`)
+   - General `MapCtapStatusToWebAuthnError` helper + general catch arms in MakeCredentialCoreAsync + GetAssertionCoreAsync (was previewSign-only)
 
-3. **Three-agent forensic comparison** of our test vs yubikit-android's `Ctap2ClientTests.testMakeCredentialWithExcludeList`:
-   - **Agent A** (wire format): identical CBOR encoding for excludeList; identified that Java mints token with `MC | (excludeCredentials.isEmpty() ? 0 : GA)` while C# always mints `MC|GA` upfront
-   - **Agent B** (lifecycle): both stacks share token across preflight + MakeCredential within a single client call
-   - **Agent C** (preflight semantics): **found the smoking gun** — the commit message of `f62c7c4b` itself documented this exact bug as a "KNOWN ISSUE" and specified the exact fix (re-mint token between preflight and MakeCredential per CTAP 2.1 §6.5.5.7 "authenticators MAY consume permissions on use")
+### Wave 3 — HIGH audit findings (4 of 7 closed)
+7. **Shipped `489c8539`** — removed dead `CreateUvRequest` + `_uvResponseTcs` from `StatusChannel.cs` (verified zero usages via vslsp `find_usages`). HIGH #1.
+8. **Shipped `f547fca9` via `/DevTeam Ship`** — Engineer agent diagnosed that the catch guards in `FidoNfcTests` were already in place (from prior `37ff02fc`); the actual gap was a missing `using Xunit;` import. One-line fix landed. NOT a CodeAudit finding but addressed parallel open-follow-up from prior handoff.
+9. **Shipped `2b1b0852` (Tier A cleanup)** — closes 3 more HIGH audit findings:
+   - Added `WebAuthnClientErrorCode.Cancelled` + `OperationCanceledException` catch arm in both producer Task.Run lambdas (HIGH #7)
+   - Removed dead `BackendMakeCredentialRequest.EnterpriseAttestation` (HIGH #2)
+   - Removed dead `IWebAuthnBackend.GetUvRetriesAsync`/`GetPinRetriesAsync` + the now-orphan `PinRetriesResult` record (HIGH #3)
 
-4. **Fix #1: token re-mint** (Sia committed `dc2ed141`) — between `ExcludeListPreflight.FindFirstMatchAsync` and the actual MakeCredential dispatch, dispose the original `tokenSession` and re-mint with `MakeCredential`-only permissions. Also added `tokenCopy` zeroing in finally for hygiene. **Test went FAIL → PASS in 34s on freshly-Reset YK 5.8.0**.
-
-5. **CodeAudit pass** (skill invocation, vslsp daemon used for diagnostics + structure) — scoped to `src/WebAuthn/src` plus adjacent Fido2 areas (Credentials/Extensions/Pin/CredentialManagement/FidoSession). Returned 4 Critical / 8 High / 6 Medium / 6 Low findings. Diagnostic baseline: **0 errors / 0 warnings**.
-
-6. **Fix #2-5: 4 Critical CodeAudit findings addressed** (Sia committed `a0070db5`):
-   - **PinUvAuthTokenSession finalizer** — class owns sensitive `byte[]` clone but had no finalizer; if a caller forgets `Dispose()`, bytes never zero. Added finalizer with `GC.SuppressFinalize` in Dispose.
-   - **CredentialMatcher.IsNoCredentialsError** — was treating `CtapStatus.NotAllowed` (0x30, "device denied") as "no credentials." Removed that case so `NotAllowed` propagates and gets mapped properly.
-   - **WebAuthnClient torn-state guard** — added `tokenSession = null` between Dispose and re-acquire so the outer finally is a clean no-op if the re-mint throws.
-   - **CTAP→WebAuthn typed error mapping** — added private `MapCtapStatusToWebAuthnError` helper + general catch arms in both `MakeCredentialCoreAsync` and `GetAssertionCoreAsync`. Previously only previewSign-requested registrations had typed mapping; everything else leaked raw `CtapException`. New mapping covers PinAuth*/PinBlocked/NotAllowed/OperationDenied → NotAllowed; KeyStoreFull/LimitExceeded/Timeout → Constraint; Unsupported* → NotSupported; PinNotSet/UpRequired → Security; NoCredentials/InvalidCredential → InvalidState; everything else → Unknown.
-
-7. **Pushed all 6 unpushed commits** to `origin/webauthn/phase-9.2-rust-port` (`d4b95038..a0070db5`).
-
-8. **"Cosmetic" toolchain bug noted** — when the test filter matches no unit tests, `domain-test` toolchain wrapper invokes the xUnit v3 runner with `--minimum-expected-tests 0`, which the runner rejects with "expects a single non-zero positive integer value." Reports as project failure with no test ever running. Worth a follow-up bug in the toolchain wrapper but **not a code defect**.
+### Parallel housekeeping
+10. **Pushed all commits** to `origin/webauthn/phase-9.2-rust-port` (now 8 ahead of yesterday's origin).
+11. **Captured "cosmetic toolchain bug"** — `domain-test` invokes xUnit v3 runner with `--minimum-expected-tests 0` when filter selects no tests; runner rejects flag, project reports as failed despite no tests running. Tracker logged in Open Follow-ups #11.
 
 ---
 
@@ -60,19 +65,27 @@ yubikit-applets (merge target, origin)
   └── ... 73 commits prior phases ...
       └── webauthn/gate-2-fixup (95abc0c5)
           └── webauthn/phase-9.1-hygiene (5f7ab705)
-              └── webauthn/phase-9.2-rust-port (a0070db5) ← CURRENT, in sync with origin
+              └── webauthn/phase-9.2-rust-port (2b1b0852) ← CURRENT, in sync with origin
 ```
 
-**31 commits since `webauthn/phase-9.1-hygiene`; 104 commits since `yubikit-applets`.**
+**34 commits since `webauthn/phase-9.1-hygiene`; 107 commits since `yubikit-applets`.**
 
-Latest 6 commits on this branch (all pushed):
+Commits this session (5 fixes + 1 doc; all pushed):
 ```
-a0070db5 fix(webauthn): address 4 critical CodeAudit findings (token hygiene, error mapping)  ← Sia, today
-dc2ed141 fix(webauthn): re-mint pinUvAuthToken between excludeList preflight and MakeCredential ← Sia, today
-f62c7c4b feat(webauthn): add client-layer excludeList pre-flight (Java parity)               ← Dennis (prior session), now landed
-37ff02fc fix(fido2,test): guard FidoNfcTests against NotSupportedException on USB-only devices ← prior session
-43ea328d fix(fido2,test): re-mint pinUvAuthToken between GetAssertion calls in CredProtect L2 ← prior session
-3107bd5c fix(fido2): parse previewSign unsignedExtensionOutputs at CTAP key 6 not 8           ← prior session
+2b1b0852 chore(webauthn): Tier A audit cleanup — typed cancellation + remove dead public API
+f547fca9 fix(fido2,test): add missing 'using Xunit;' to FidoNfcTests for Skip resolution
+489c8539 chore(webauthn): remove dead CreateUvRequest + _uvResponseTcs from StatusChannel
+cfea6e1f docs(handoff): 2026-04-28 — ExcludeList preflight token re-mint + 4 CodeAudit Critical fixes
+a0070db5 fix(webauthn): address 4 critical CodeAudit findings (token hygiene, error mapping)
+dc2ed141 fix(webauthn): re-mint pinUvAuthToken between excludeList preflight and MakeCredential
+```
+
+Carried from prior session (also pushed this session):
+```
+f62c7c4b feat(webauthn): add client-layer excludeList pre-flight (Java parity)
+37ff02fc fix(fido2,test): guard FidoNfcTests against NotSupportedException on USB-only devices
+43ea328d fix(fido2,test): re-mint pinUvAuthToken between GetAssertion calls in CredProtect L2
+3107bd5c fix(fido2): parse previewSign unsignedExtensionOutputs at CTAP key 6 not 8
 ```
 
 ---
@@ -82,11 +95,11 @@ f62c7c4b feat(webauthn): add client-layer excludeList pre-flight (Java parity)  
 | Check | Status |
 |---|---|
 | `dotnet toolchain.cs build` | **0 errors** (1 pre-existing third-party `IL2026/IL3050` warning from `Microsoft.AspNetCore`) |
-| `dotnet toolchain.cs -- test --project WebAuthn` (unit) | **All pass** (post-fix) |
+| `dotnet toolchain.cs -- test --project WebAuthn` (unit) | **All pass** |
 | `vslsp get_diagnostics_summary` over solution | **0 errors / 0 warnings** baseline |
-| `dotnet toolchain.cs -- test --integration --project WebAuthn --filter WebAuthnExcludeListStressTests` | **PASS in 34s** on freshly-Reset YK 5.8.0 (was FAIL in prior handoff) |
+| `dotnet toolchain.cs -- test --integration --project WebAuthn --filter WebAuthnExcludeListStressTests` | **PASS in 34s** on freshly-Reset YK 5.8.0 (was FAIL at start of session) |
 | `git status` | Clean (only `Plans/handoff.md` modified — being rewritten by this handoff) |
-| Branch ↔ origin sync | **In sync** at `a0070db5` |
+| Branch ↔ origin sync | **In sync** at `2b1b0852` |
 
 ---
 
@@ -98,7 +111,7 @@ None. Single working tree at `/Users/Dennis.Dyall/Code/y/Yubico.NET.SDK` on `web
 
 ## Readiness Assessment
 
-**Target:** .NET 10 application developers integrating YubiKey WebAuthn / passkey flows; browser/RP implementers building WebAuthn-spec-compliant clients on top of CTAP2; security-engineering teams requiring auditable, modern-C# crypto handling. Now with **closed silent-failure paths around excludeList ceremonies and proper token finalization**.
+**Target:** .NET 10 application developers integrating YubiKey WebAuthn / passkey flows; browser/RP implementers building WebAuthn-spec-compliant clients on top of CTAP2; security-engineering teams requiring auditable, modern-C# crypto handling. Now with **closed silent-failure paths around excludeList ceremonies, defensive token finalization, comprehensive typed error mapping, and tightened public API surface**.
 
 | Need | Status | Notes |
 |---|---|---|
@@ -106,80 +119,112 @@ None. Single working tree at `/Users/Dennis.Dyall/Code/y/Yubico.NET.SDK` on `web
 | `WebAuthnClient.MakeCredentialAsync` + `GetAssertionAsync` | ✅ Working | Hardware-verified |
 | Status streaming (`IAsyncEnumerable<WebAuthnStatus>`) | ✅ Working | Hardware-verified |
 | Extension framework (CredProtect, CredBlob, MinPinLength, LargeBlob, PRF, CredProps, previewSign) | ✅ Working | All inputs/outputs in Fido2 |
-| `previewSign` registration encoder | ✅ Working | Hardware-verified for the byte path that completes |
-| `previewSign` registration decoder (unsignedExtensionOutputs) | ✅ Correct (CTAP key 6) | Fixed `3107bd5c` (prior session) |
-| `previewSign` single-credential authentication (encoder + decoder) | ✅ Encoder + decoder byte-correct | Decoder lives in Fido2 (Phase 9.7 F1) |
+| `previewSign` registration encoder/decoder | ✅ Working | Hardware-verified post-`3107bd5c` |
 | `previewSign` single-credential authentication (hardware ceremony) | ⚠️ Skipped | Blocked on ARKG (Phase 10) |
 | `previewSign` multi-credential probe-selection | ⚠️ Throws `NotSupported` | Phase 10 |
 | **Architectural layering (Fido2 = canonical, WebAuthn = adapter)** | ✅ **Strict — zero duplication** | Maintained |
-| Identity types, COSE typed model, AAGUID helper, AttestationStatement typed hierarchy | ✅ Single source in Fido2 | Maintained |
-| **CredProtect Level 2 integration test** | ✅ Passing | Per-test re-mint via `43ea328d` (prior session) |
-| **WebAuthn excludeList stress test (17 RKs + preflight)** | ✅ **Now passing** | This session: token re-mint via `dc2ed141` |
-| **PinUvAuthTokenSession finalizer fallback** | ✅ Added | Defensive zeroing if Dispose is forgotten |
-| **CTAP error code → typed WebAuthn error mapping** | ✅ Comprehensive | Was previewSign-only; now general |
-| **`CtapStatus.NotAllowed` propagation** | ✅ Fixed | No longer swallowed as "no credentials" |
-| **NFC integration tests (3 methods)** | ⚠️ SkipException edge case | Open since prior handoff — needs `NotSupportedException` catch guards |
-| **WebAuthnClient.cs god-object (1067 LOC)** | ⚠️ Above 500-LOC threshold | Audit HIGH finding; not addressed this session |
+| **CredProtect Level 2 integration test** | ✅ Passing | `43ea328d` (prior session) |
+| **WebAuthn excludeList stress test (17 RKs + preflight)** | ✅ **Now passing** | This session: `dc2ed141` |
+| **PinUvAuthTokenSession finalizer fallback** | ✅ Added | `a0070db5` |
+| **CTAP error code → typed WebAuthn error mapping** | ✅ Comprehensive | `a0070db5` (was previewSign-only); `2b1b0852` adds typed cancellation |
+| **`CtapStatus.NotAllowed` propagation** | ✅ Fixed | `a0070db5` |
+| **Cancellation surfaces as typed `WebAuthnClientErrorCode.Cancelled`** | ✅ New | `2b1b0852` |
+| **WebAuthn dead public API surface** | ✅ Trimmed | `489c8539` + `2b1b0852` removed `CreateUvRequest`, `EnterpriseAttestation`, `Get*RetriesAsync` |
+| **NFC integration tests (`Skip.If` resolution)** | ✅ Fixed | `f547fca9` added missing `using Xunit;` |
+| **WebAuthnClient.cs god-object (now ~1130 LOC)** | ⚠️ Above 500-LOC threshold | Audit MEDIUM finding still open; absorbs both remaining DRY HIGH findings |
+| **ExtensionPipeline silent CborContentException swallow** | ⚠️ Open | Audit HIGH #4 (Tier B) — needs design call |
 | Build state | ✅ Clean | 0 errors |
 | Unit test state | ✅ Green | All projects pass |
-| Hardware integration sweep | ✅ Done 2026-04-27/28 | 67/76 + the previously-failing ExcludeList now PASS |
+| Hardware integration sweep | ✅ Done 2026-04-27/28 | All flagged failures from prior handoff resolved or explained |
 
-**Overall:** 🟢 **Production-ready for the spec-conformant subset, with strict Fido2/WebAuthn layering, full canonical extension coverage at the Fido2 layer, comprehensive CTAP→WebAuthn error mapping, defensive token finalization, and a passing excludeList stress ceremony.**
+**Overall:** 🟢 **Production-ready for the spec-conformant subset, with strict Fido2/WebAuthn layering, full canonical extension coverage at the Fido2 layer, comprehensive CTAP→WebAuthn typed error mapping (including cancellation), defensive token finalization, a passing excludeList stress ceremony, and a trimmed public API surface.**
 
-PR #466 contains the complete Phase 9 arc plus today's two response-decoder/test fixes plus today's ExcludeList correctness fix plus today's 4 audit fixes.
-
-**Critical next step:** Continue monitoring PR #466 for review feedback.
+PR #466 is now noticeably higher-quality than at the start of this session. **Critical next step:** Continue monitoring PR #466 for review feedback.
 
 ---
 
 ## What's Next (Prioritized)
 
 1. **Monitor PR #466** for maintainer review; address inline on this branch if fixable items surface — Critical next step
-2. **Optionally fix remaining HIGH CodeAudit findings** (8 — see audit detail in "Open follow-ups"). Notable: dead `CreateUvRequest` + `_uvResponseTcs` field, unset `BackendMakeCredentialRequest.EnterpriseAttestation`, never-called `GetUvRetriesAsync`/`GetPinRetriesAsync` on `IWebAuthnBackend`, two large-scale DRY duplications between MakeCredential and GetAssertion overloads, `ExtensionPipeline` silent `CborContentException` swallowing, missing `OperationCanceledException` arm in producer Task.Run lambdas
-3. **Fix NFC test SkipException edge case** — add `NotSupportedException` catch guards to 3 `FidoNfcTests` methods (open since prior handoff; pattern exists in `FidoTransportTests`)
-4. **WebAuthnClient.cs split** — 1067 LOC, 8 audit findings; extract Builders + Validators into static helpers (audit MEDIUM)
-5. **Test #2 marginal value** — `HmacSecretMcOutput_DecodesCorrectly` either delete or rename. Open since 2026-04-23
-6. **Phase 10 work** (ARKG, multi-cred probe, sig-verify) stays deferred to a fresh branch off `yubikit-applets` *after* PR #466 lands
-7. **C3 + C4 envelope helpers** deferred-as-optional. Tracker in `Plans/phase-9.8-attestation-typed-variants.md`
-8. **Toolchain bug** — `domain-test` should not pass `--minimum-expected-tests 0` when the filter selects no tests in a project; should skip the project or omit the flag
+2. **Tier B audit cleanup (1 HIGH finding)** — `ExtensionPipeline` silent `CborContentException` swallow. Needs a design decision from Dennis: (a) log-and-continue + add diagnostic, or (b) surface a typed `MalformedExtension` flag on the output. (a) is cheaper; (b) is more honest to consumers
+3. **Tier C audit cleanup (2 HIGH findings + 1 MEDIUM)** — `WebAuthnClient.cs` is ~1130 LOC god-object; the two DRY HIGH findings (#4 below) are best addressed as part of an extract-Builders/Validators/CTAP-Mapper-into-static-helpers task. Out of scope for PR #466 cleanup; defer to a focused follow-up branch
+4. **Audit MEDIUM/LOW backlog** — 6 MEDIUM + 6 LOW findings remain (see Open follow-ups). Not blocking. Pick at leisure
+5. **Phase 10 work** (ARKG, multi-cred probe, sig-verify) stays deferred to a fresh branch off `yubikit-applets` *after* PR #466 lands
+6. **C3 + C4 envelope helpers** deferred-as-optional. Tracker in `Plans/phase-9.8-attestation-typed-variants.md`
+7. **Toolchain bug** — `domain-test` should not pass `--minimum-expected-tests 0` when the filter selects no tests; should skip the project or omit the flag
 
 ---
 
 ## Blockers & Known Issues
 
-- **None blocking PR #466.** All known regressions and silent-failure paths from the prior handoff are now closed.
-- **8 HIGH CodeAudit findings remain.** Not blocking, but worth attention if review feedback prompts a cleanup pass. Full list available by re-reading session context or re-running `/CodeAudit` on the same scope.
-- **Phase 10 work is still deferred.** ARKG `-9` rejected by this YubiKey's firmware; investigate when starting Phase 10 (off `yubikit-applets`).
+- **None blocking PR #466.** All known regressions, silent-failure paths, and Critical audit findings from this session are now closed.
+- **3 HIGH CodeAudit findings remain.** All non-blocking, all documented below with file:line.
 
 ---
 
 ## Open follow-ups (no active blockers)
 
+### From CodeAudit (post-`dc2ed141`, scoped to WebAuthn + adjacent Fido2)
+
+#### Tier B — needs a design call (1 HIGH)
+
+| # | Item | File:line | Effort | Notes |
+|---|---|---|---|---|
+| 2 | **`ExtensionPipeline` silent `CborContentException` swallow** — caller cannot distinguish "extension absent" from "device returned malformed CBOR" | `src/WebAuthn/src/Extensions/ExtensionPipeline.cs:179-265, 296-348` | M | Two design options: (a) log-and-continue with Warning + extension id, (b) surface typed `MalformedExtension` flag on output. Pick before implementing |
+
+#### Tier C — depends on WebAuthnClient.cs split (2 HIGH + 1 MEDIUM)
+
+| # | Item | File:line | Effort | Notes |
+|---|---|---|---|---|
+| 3 | **DRY: 4-arg `MakeCredentialAsync` ↔ 4-arg `GetAssertionAsync`** — ~50 LOC mirror PIN-encoding + switch loop | `src/WebAuthn/src/Client/WebAuthnClient.cs:373-425` ↔ `441-500` | M | Extract `DrivePinUvAsync<TResult>` helper |
+| 4 | **DRY: 2-arg `MakeCredentialAsync` ↔ 2-arg `GetAssertionAsync`** — same pattern at smaller scale | `WebAuthnClient.cs:84-124` ↔ `152-192` | S | Combinable with #3 in one helper |
+| 5 | **MEDIUM: `WebAuthnClient.cs` god-object (~1130 LOC)** — orchestration + validation + builders + response shaping + error mapping all in one file | `src/WebAuthn/src/Client/WebAuthnClient.cs` (whole file) | L | Extract Builders + Validators + CTAP mapper to static helpers; closes #3 + #4 in the process |
+
+#### Audit MEDIUM backlog (6 items)
+
+| # | Item | File:line | Effort |
+|---|---|---|---|
+| 6 | `.ToArray()` allocation on hot CTAP path for `PinUvAuthParam` | `FidoSessionWebAuthnBackend.cs:140, 189` | S |
+| 7 | DRY: PIN-request + MemoryPool-rent + copy block twice in MakeCredentialCoreAsync vs GetAssertionCoreAsync | `WebAuthnClient.cs:551-577` and `716-743` | S |
+| 8 | `EnsureProtocolInitialized` defers async init to ClientPin's first use; commented as wishful thinking | `FidoSessionWebAuthnBackend.cs:235-243` | M |
+| 9 | `ClientPin.GetPinUvAuthTokenUsingUvAsync` doesn't dispose `platformKey`; only `sharedSecret` zeroed | `src/Fido2/src/Pin/ClientPin.cs:412-455` | S |
+| 10 | `ExcludeListPreflight` doesn't zero `pinUvAuthParam` HMAC output in finally | `src/WebAuthn/src/Internal/ExcludeListPreflight.cs:100, 141` | S |
+| — | (Other MEDIUM #5 in original audit was the WebAuthnClient god-object, listed above as Tier C #5) | | |
+
+#### Audit LOW backlog (6 items, optional)
+
+| # | Item | File:line |
+|---|---|---|
+| L1 | Unused `IProgress<CtapStatus>? progress` parameter on backend methods | `FidoSessionWebAuthnBackend.cs:87, 117, 165` |
+| L2 | `string.EndsWith(string)` allocation in RP-id suffix check (hot path) | `RpIdValidator.cs:69` |
+| L3 | `CredentialMatcher` trusts device's `numberOfCredentials` field; cap defensively | `CredentialMatcher.cs:64-75` |
+| L4 | `ByteArrayKeyComparer.GetHashCode` uses randomized `HashCode` — non-stable across processes | `Extensions/PreviewSign/ByteArrayKeyComparer.cs:49-60` |
+| L5 | Unused `using System.Buffers.Binary;` import | `Extensions/PreviewSign/ByteArrayKeyComparer.cs:15` |
+| L6 | Two-arg overloads' inline switch loops — pattern smell, see DRY HIGH | `WebAuthnClient.cs:104-107, 167-170` |
+
+### Other open items (carried forward)
+
 | # | Item | Disposition | Owner | Path / Tracker |
 |---|---|---|---|---|
-| 1 | Land PR #466 — review + merge to `yubikit-applets` | Awaiting Yubico maintainer review | external | https://github.com/Yubico/Yubico.NET.SDK/pull/466 |
-| 2 | **NFC tests `NotSupportedException` guard** | Open — pattern exists in FidoTransportTests | TBD | `FidoNfcTests.cs:38, 53, 72` — add `catch (NotSupportedException) { Skip.If(true, ...); }` |
-| 3 | **HIGH: dead `CreateUvRequest` + `_uvResponseTcs`** | Open from CodeAudit | TBD | `src/WebAuthn/src/Client/Status/StatusChannel.cs:125-137` |
-| 4 | **HIGH: unset `BackendMakeCredentialRequest.EnterpriseAttestation`** | Open from CodeAudit | TBD | `src/WebAuthn/src/Client/IWebAuthnBackend.cs:164` — wire it through or remove |
-| 5 | **HIGH: never-called `GetUvRetriesAsync`/`GetPinRetriesAsync`** | Open from CodeAudit | TBD | `src/WebAuthn/src/Client/IWebAuthnBackend.cs:46,51` — wire into PIN-failure flow or remove |
-| 6 | **HIGH: DRY between MakeCredential and GetAssertion overloads** | Open from CodeAudit | TBD | `src/WebAuthn/src/Client/WebAuthnClient.cs:84-124 vs 152-192` and `373-425 vs 441-500` |
-| 7 | **HIGH: ExtensionPipeline swallows `CborContentException`** | Open from CodeAudit | TBD | `src/WebAuthn/src/Extensions/ExtensionPipeline.cs:179-265, 296-348` — log + surface MalformedExtension |
-| 8 | **HIGH: missing `OperationCanceledException` arm in producer Task.Run** | Open from CodeAudit | TBD | `src/WebAuthn/src/Client/WebAuthnClient.cs:236-244, 316-324` — add Cancelled enum value |
-| 9 | **MEDIUM: WebAuthnClient.cs god-object (1067 LOC)** | Open from CodeAudit | TBD | Extract Builders + Validators to static helpers |
-| 10 | **Test #2 marginal value** — `HmacSecretMcOutput_DecodesCorrectly` either delete or rename | Open follow-up — undecided since 2026-04-23 | Dennis | `src/Fido2/tests/.../ExtensionTypesTests.cs:105` |
-| 11 | **Phase 9.8 C3** — Fido2 envelope writer helper | Deferred-as-optional | TBD | `Plans/phase-9.8-attestation-typed-variants.md` |
-| 12 | **Phase 9.8 C4** — Fido2 envelope decoder helper | Deferred-as-optional | TBD | Same tracker |
-| 13 | Phase 10 — ARKG `additional_args` first-class builder | Deferred; gating prereq for any auth-path hardware test | TBD | `Plans/phase-10-previewsign-auth.md §3` |
-| 14 | Phase 10 — multi-credential probe-selection | Deferred | TBD | `Plans/phase-10-previewsign-auth.md §1` |
-| 15 | Phase 10 — cryptographic signature verification helper | Deferred | TBD | `Plans/phase-10-previewsign-auth.md §2` |
-| 16 | **PreviewSign hardware re-verification** | Open — ARKG `-9` algorithm rejected by this YubiKey | TBD | `src/Fido2/tests/.../FidoPreviewSignTests.cs` |
-| 17 | **Toolchain wrapper bug** — `--minimum-expected-tests 0` rejected by xUnit v3 runner | Open — flag should be omitted or project skipped when filter selects nothing | TBD | `dotnet toolchain.cs` test target |
+| 11 | Land PR #466 — review + merge to `yubikit-applets` | Awaiting Yubico maintainer review | external | https://github.com/Yubico/Yubico.NET.SDK/pull/466 |
+| 12 | **Test #2 marginal value** — `HmacSecretMcOutput_DecodesCorrectly` either delete or rename | Open follow-up — undecided since 2026-04-23 | Dennis | `src/Fido2/tests/.../ExtensionTypesTests.cs:105` |
+| 13 | **Phase 9.8 C3** — Fido2 envelope writer helper | Deferred-as-optional | TBD | `Plans/phase-9.8-attestation-typed-variants.md` |
+| 14 | **Phase 9.8 C4** — Fido2 envelope decoder helper | Deferred-as-optional | TBD | Same tracker |
+| 15 | Phase 10 — ARKG `additional_args` first-class builder | Deferred; gating prereq for any auth-path hardware test | TBD | `Plans/phase-10-previewsign-auth.md §3` |
+| 16 | Phase 10 — multi-credential probe-selection | Deferred | TBD | `Plans/phase-10-previewsign-auth.md §1` |
+| 17 | Phase 10 — cryptographic signature verification helper | Deferred | TBD | `Plans/phase-10-previewsign-auth.md §2` |
+| 18 | **PreviewSign hardware re-verification** | Open — ARKG `-9` algorithm rejected by this YubiKey | TBD | `src/Fido2/tests/.../FidoPreviewSignTests.cs` |
+| 19 | **Toolchain wrapper bug** — `--minimum-expected-tests 0` rejected by xUnit v3 runner | Open — flag should be omitted or project skipped when filter selects nothing | TBD | `dotnet toolchain.cs` test target |
 
-**Resolved this session:**
+**Resolved this session (chronological):**
 - ✅ WebAuthn excludeList stress test went FAIL → PASS via `dc2ed141` token re-mint
-- ✅ 4 Critical CodeAudit findings landed in `a0070db5` (finalizer, NotAllowed propagation, torn-state guard, general CTAP→WebAuthn mapping)
-- ✅ All 6 unpushed commits from prior + this session pushed to origin
-- ✅ Wisdom: CTAP 2.1 §6.5.5.7 permission-consumption rule confirmed via three-agent triangulation
+- ✅ 4 Critical CodeAudit findings landed in `a0070db5` (finalizer, NotAllowed propagation, torn-state guard, CTAP→WebAuthn mapping)
+- ✅ All session commits pushed to origin
+- ✅ HIGH #1: dead `CreateUvRequest` + `_uvResponseTcs` removed (`489c8539`)
+- ✅ NFC test `Skip.If` resolution fix (`f547fca9`) — Engineer agent caught existing guards + diagnosed the actual missing `using Xunit;`
+- ✅ HIGH #2: dead `BackendMakeCredentialRequest.EnterpriseAttestation` removed (`2b1b0852`)
+- ✅ HIGH #3: dead `IWebAuthnBackend.GetUvRetriesAsync`/`GetPinRetriesAsync` + orphan `PinRetriesResult` removed (`2b1b0852`)
+- ✅ HIGH #7: typed `Cancelled` enum + `OperationCanceledException` arms in producer Task.Run lambdas (`2b1b0852`)
 
 ---
 
@@ -187,12 +232,16 @@ PR #466 contains the complete Phase 9 arc plus today's two response-decoder/test
 
 | File | Purpose |
 |---|---|
-| `src/WebAuthn/src/Client/WebAuthnClient.cs` | Public client orchestration; lines 595-635 contain the preflight + token re-mint sequence; lines 887-911 contain the new `MapCtapStatusToWebAuthnError` helper; god-object at 1067 LOC |
-| `src/WebAuthn/src/Client/PinUvAuthTokenSession.cs` | Sensitive token wrapper with new finalizer fallback (lines 76-83) |
+| `src/WebAuthn/src/Client/WebAuthnClient.cs` | Public client orchestration; ~1130 LOC god-object; lines 595-635 contain preflight + token re-mint; lines 887-911 contain `MapCtapStatusToWebAuthnError`; lines 240/325 contain new `OperationCanceledException` arms |
+| `src/WebAuthn/src/Client/PinUvAuthTokenSession.cs` | Sensitive token wrapper with finalizer fallback (lines 76-83) |
 | `src/WebAuthn/src/Client/Authentication/CredentialMatcher.cs` | `IsNoCredentialsError` no longer swallows `NotAllowed` (lines 81-87) |
+| `src/WebAuthn/src/Client/IWebAuthnBackend.cs` | Trimmed: removed `GetUvRetriesAsync`, `GetPinRetriesAsync`, `PinRetriesResult`, `BackendMakeCredentialRequest.EnterpriseAttestation` |
+| `src/WebAuthn/src/Client/FidoSessionWebAuthnBackend.cs` | Trimmed: removed corresponding implementations |
+| `src/WebAuthn/src/WebAuthnClientError.cs` | New `Cancelled` enum value |
 | `src/WebAuthn/src/Internal/ExcludeListPreflight.cs` | Client-layer preflight from `f62c7c4b`; consumed by WebAuthnClient at line 595 |
-| `src/WebAuthn/tests/.../WebAuthnExcludeListStressTests.cs` | Integration test now passing in 34s |
-| `~/.claude/projects/.../memory/feedback_ppuat_token_reuse.md` | Prior wisdom: regular pinUvAuthToken regeneration; this session's bug is the related-but-distinct "permission consumption invalidates whole token" |
+| `src/WebAuthn/src/Extensions/ExtensionPipeline.cs` | **Tier B HIGH finding lives here** — silent CborContentException swallow at lines 179-265, 296-348 |
+| `src/Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/FidoNfcTests.cs` | `using Xunit;` added so `Skip.If` resolves; existing catch guards preserved |
+| `~/.claude/projects/.../memory/feedback_ppuat_token_reuse.md` | Prior wisdom; this session's bug is the related-but-distinct "permission consumption invalidates whole token" rule |
 | `Plans/yes-we-have-started-composed-horizon.md` | Strategy frame (rev 2) |
 | `Plans/phase-9.7-soc-consolidation.md` | SoC consolidation PRD + completion record |
 | `Plans/phase-9.8-attestation-typed-variants.md` | AttestationStatement breaking-change record + C3/C4 deferred-as-optional |
@@ -223,9 +272,11 @@ cat Plans/phase-10-previewsign-auth.md                 # most-likely next destin
 # 4. Check PR status
 gh pr view 466
 
-# 5. If picking up audit cleanup → start with HIGH findings #3-8 in Open Follow-ups
-# 6. If picking up NFC NotSupportedException guards → see Open Follow-ups #2
-# 7. If user wants Phase 10 → branch off yubikit-applets, NOT off this branch
+# 5. Pick up audit cleanup if desired:
+#    - Tier B (#2 above): ExtensionPipeline error semantics — needs Dennis design call first
+#    - Tier C (#3 + #4 + #5): WebAuthnClient.cs split — bigger task, absorbs both DRY findings
+#    - MEDIUM/LOW: pick freely, see Open follow-ups #6-#10 + L1-L6
+# 6. If user wants Phase 10 → branch off yubikit-applets, NOT off this branch
 ```
 
 **Do not** branch Phase 10 work off `webauthn/phase-9.2-rust-port` — branch off `yubikit-applets` after PR #466 lands.
@@ -235,17 +286,25 @@ gh pr view 466
 
 ## Lessons captured (this session — for future audit rubrics + Sia behavior)
 
-1. **Three-agent isolated forensic comparisons converge powerfully.** When facing a non-trivial bug ambiguous between multiple root-cause families (wire format vs lifecycle vs semantics), spawning three Explore agents with hard-walled lenses produced a confident diagnosis in one round. Convergence = high confidence; divergence = where to dig. Agent C found the smoking gun (the bug we ourselves had documented in the prior commit message) faster than a single-agent investigation would have.
+1. **Three-agent isolated forensic comparisons converge powerfully when bugs span families.** When facing a non-trivial bug ambiguous between multiple root-cause families (wire format vs lifecycle vs semantics), spawning three Explore agents with hard-walled lenses produces a confident diagnosis in one round. Convergence = high confidence; divergence = where to dig. Agent C found the smoking gun (the bug we ourselves had documented in the prior commit message) faster than a single-agent investigation would have.
 
-2. **CTAP 2.1 §6.5.5.7 — permission consumption invalidates the whole token, not just the consumed permission.** When a `pinUvAuthToken` is minted with `MC|GA` and a `GetAssertion(up=false)` consumes the GA permission, the token can no longer authorize ANY operation including MakeCredential (whose MC permission slot is logically untouched). The fix is always: re-mint between operations. This is a superset of the prior PPUAT rule.
+2. **The commit message is part of the verification surface.** `f62c7c4b`'s "KNOWN ISSUE" section was the smoking gun. Always read commit messages of recent changes when triaging.
 
-3. **The commit message is part of the verification surface.** `f62c7c4b`'s "KNOWN ISSUE" section was the smoking gun for this session's bug. Always read commit messages of recent changes when triaging — they often document exactly the gap you're hitting.
+3. **CTAP 2.1 §6.5.5.7 — permission consumption invalidates the whole token, not just the consumed permission.** Mint-MC-only-after-preflight is the correct shape. Superset of the prior PPUAT rule.
 
-4. **vslsp daemon-driven CodeAudit is dramatically more thorough than grep-based.** Using `find_usages` to verify dead-code claims before reporting prevents false positives. Using `get_code_structure` with file_filter prevents context overflow. Daemon was running through the audit + fix cycle and continued to surface diagnostics on every file save.
+4. **vslsp-driven CodeAudit beats grep-based dramatically.** `find_usages` to verify dead-code claims before reporting prevents false positives. `get_code_structure` with `file_filter` prevents context overflow.
 
-5. **"Cosmetic" failure summaries deserve real explanation.** When the test summary line shows red but the actual integration test passed, the toolchain itself is misreporting due to its xUnit-runner contract. Capture this as a separate toolchain bug so it doesn't keep eating future agents' time.
+5. **vslsp `find_usages` resolves to the wrong symbol when names are ambiguous.** `GetUvRetriesAsync` exists in both Fido2 `ClientPin` AND WebAuthn `IWebAuthnBackend`; vslsp picked the wrong one. **Lesson**: when the audit cites a specific file:line, prefer reading that file directly over symbol lookup.
 
-6. **CodeAudit then immediately address the Criticals — don't defer.** The audit was 25 findings; addressing all of them at once would have been a separate big project. Addressing the 4 Criticals immediately while context was warm cost ~30 min and produced a clean follow-up commit. The HIGH/MEDIUM findings can wait for a dedicated cleanup pass without losing the Critical-level safety wins.
+6. **CodeAudit then immediately address the Criticals — don't defer.** Cleared all 4 Criticals + 4 of 7 HIGH in this session while context was warm. The remaining HIGH (Tier B + Tier C) require design decisions or larger refactor scope; correctly deferred as separate scoped tasks.
+
+7. **DevTeam Ship saved a redundant edit.** When dispatched to add NFC catch guards, the Engineer agent VERIFIED the existing file state and discovered the catch guards already existed — only `using Xunit;` was missing. A blind inline edit would have produced duplicate guards. This is the value of the Engineer→verify-first pattern over direct execution.
+
+8. **"Cosmetic" failure summaries deserve real explanation.** The toolchain reports red because xUnit v3 runner rejects `--minimum-expected-tests 0`; the actual test passed. Captured as Open Follow-up #19.
+
+9. **Removing dead public API surface deliberately is fine for preview-stage projects.** WebAuthn isn't binary-compatibility constrained (per CLAUDE.md). Better to remove `EnterpriseAttestation` / `Get*RetriesAsync` now than to ship them as "coming soon" surface that consumers depend on.
+
+10. **`OperationCanceledException` MUST be caught before general `Exception`.** OCE is an `Exception` subclass; catching the general arm first shadows the typed cancellation arm and silently makes cancellation indistinguishable from device errors. The original code had this exact bug (audit HIGH #7) — the new arms are correctly ordered.
 
 (Lessons #1-9 from prior handoffs still apply — see `git show 43ea328d:Plans/handoff.md` for the full prior list.)
 
@@ -256,7 +315,7 @@ gh pr view 466
 Codebase is preview-stage; binary-compatibility / public-API stability is **not** a constraint *except* for the Fido2 public surface, which Dennis explicitly froze (and which Phase 9.8 deliberately broke for `AttestationStatement` only, with sign-off).
 
 1. **Fido2 `AttestationStatement` breaking change is in PR #466.** A maintainer reviewing the PR should be flagged to commit `32145357`. Same risk profile as the prior handoff.
-2. **WebAuthnClient.cs is now 1067 LOC** with concerns spanning orchestration, validation, request-building, response-building, error mapping, and PIN/UV state handling. CodeAudit flagged it as a god-object. Not blocking PR #466 but a sensible cleanup target before Phase 10.
-3. **9 build warnings (CS7022) from `Microsoft.NET.Test.Sdk` infrastructure** — pre-existing third-party. Could be suppressed via `<NoWarn>`.
-4. **YubiKey 5.8.0 firmware behaviors** confirmed via this session's hardware run. Documented in PR #466 description.
+2. **WebAuthn public-API removals this session** (`EnterpriseAttestation` field on `BackendMakeCredentialRequest`; `GetUvRetriesAsync` + `GetPinRetriesAsync` on `IWebAuthnBackend`; `PinRetriesResult` record; `WebAuthnClientErrorCode.Cancelled` added). All justified; all flagged in commit `2b1b0852` body. Worth surfacing in the PR description before merge.
+3. **WebAuthnClient.cs is now ~1130 LOC** with concerns spanning orchestration, validation, request-building, response-building, error mapping, and PIN/UV state handling. CodeAudit MEDIUM finding still open. Sensible cleanup target before Phase 10.
+4. **9 build warnings (CS7022) from `Microsoft.NET.Test.Sdk` infrastructure** — pre-existing third-party. Could be suppressed via `<NoWarn>`.
 5. **PR review may surface scope-expansion requests.** If reviewers ask for ARKG support to land in this PR, push back to Phase 10 — the parity evidence supports the encoder-only ship.

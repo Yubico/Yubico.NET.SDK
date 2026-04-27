@@ -467,9 +467,12 @@ namespace Yubico.Core.Devices.SmartCard
         /// Re-establishes the SCARDCONTEXT and refreshes the reader state list.
         /// </summary>
         /// <remarks>
-        /// Guards against failed establishment: if <c>SCardEstablishContext</c> returns
-        /// non-success (e.g. Smart Card Service still restarting), the existing <c>_context</c>
-        /// is preserved rather than replaced with a failed handle.
+        /// The previous <c>_context</c> is disposed before <c>SCardEstablishContext</c> is called
+        /// to prevent handle-value recycling (see inline comment). On success, <c>_context</c>
+        /// is replaced with the new handle and <c>_readerStates</c> is refreshed. On failure
+        /// (e.g. Smart Card Service still restarting), <c>_context</c> is set to an invalid
+        /// (<c>IntPtr.Zero</c>) <see cref="SCardContext"/> so the next poll re-enters recovery,
+        /// and a warning is logged.
         /// </remarks>
         private void UpdateCurrentContext()
         {

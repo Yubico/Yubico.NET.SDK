@@ -1,4 +1,4 @@
-# Copyright 2025 Yubico AB
+# Copyright 2026 Yubico AB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ jobs:
     permissions:
       contents: read
       packages: read
-      pull-requests: write  # Required to comment on PRs with benchmark results
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
@@ -59,7 +58,7 @@ jobs:
 
       - name: Run benchmarks
         run: |
-          dotnet run --configuration Release --no-build --project Yubico.Core/perf/Yubico.Core.Performance.csproj -- --filter '*SmartCardListenerInvalidHandleBenchmark*' --exporters json
+          dotnet run --configuration Release --no-build --project Yubico.Core/perf/Yubico.Core.Performance.csproj -- --filter '*SmartCardListenerInvalidHandleBenchmark*' --exporters fullJson
         continue-on-error: true
         id: benchmark-run
 
@@ -130,7 +129,7 @@ jobs:
 
             # Extract the [FINAL] lines from GlobalCleanup
             if ($consoleOutput -match '\[FINAL\] Legacy invocations:\s*(\d+)') {
-              $legacyInvocations = [int]$matches[1]
+              $legacyInvocations = [long]$matches[1]
               Write-Host "Legacy invocations: $legacyInvocations"
             } else {
               Write-Error "Could not parse legacy invocation count from console output"
@@ -138,7 +137,7 @@ jobs:
             }
 
             if ($consoleOutput -match '\[FINAL\] Fixed\s+invocations:\s*(\d+)') {
-              $fixedInvocations = [int]$matches[1]
+              $fixedInvocations = [long]$matches[1]
               Write-Host "Fixed invocations: $fixedInvocations"
             } else {
               Write-Error "Could not parse fixed invocation count from console output"

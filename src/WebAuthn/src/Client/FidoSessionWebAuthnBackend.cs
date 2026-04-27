@@ -55,30 +55,6 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
     }
 
     /// <inheritdoc/>
-    public async Task<int> GetUvRetriesAsync(CancellationToken cancellationToken)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
-        EnsureProtocolInitialized();
-        var clientPin = new ClientPin(_session, _protocol!);
-
-        var (retries, _) = await clientPin.GetUvRetriesAsync(cancellationToken).ConfigureAwait(false);
-        return retries;
-    }
-
-    /// <inheritdoc/>
-    public async Task<PinRetriesResult> GetPinRetriesAsync(CancellationToken cancellationToken)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
-        EnsureProtocolInitialized();
-        var clientPin = new ClientPin(_session, _protocol!);
-
-        var (retries, powerCycleRequired) = await clientPin.GetPinRetriesAsync(cancellationToken).ConfigureAwait(false);
-        return new PinRetriesResult(retries, powerCycleRequired);
-    }
-
-    /// <inheritdoc/>
     public async Task<PinUvAuthTokenSession> GetPinUvTokenAsync(
         PinUvAuthMethod method,
         PinUvAuthTokenPermissions permissions,

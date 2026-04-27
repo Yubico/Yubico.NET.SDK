@@ -50,6 +50,11 @@ public enum WebAuthnClientErrorCode
     Security,
 
     /// <summary>
+    /// The operation was cancelled by the caller (e.g., via CancellationToken).
+    /// </summary>
+    Cancelled,
+
+    /// <summary>
     /// An unknown or unclassified error occurred.
     /// </summary>
     Unknown

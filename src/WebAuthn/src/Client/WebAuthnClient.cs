@@ -237,6 +237,16 @@ public sealed class WebAuthnClient : IAsyncDisposable
             {
                 await channel.WriteAsync(new WebAuthnStatusFailed(error), CancellationToken.None).ConfigureAwait(false);
             }
+            catch (OperationCanceledException oce)
+            {
+                // Cancellation is semantically distinct from a backend failure; surface
+                // a typed Cancelled error so consumers can distinguish "I cancelled" from
+                // "device errored." Must precede the general Exception arm because
+                // OperationCanceledException is an Exception subclass.
+                var cancelledError = new WebAuthnClientError(
+                    WebAuthnClientErrorCode.Cancelled, "Operation was cancelled", oce);
+                await channel.WriteAsync(new WebAuthnStatusFailed(cancelledError), CancellationToken.None).ConfigureAwait(false);
+            }
             catch (Exception ex)
             {
                 var wrappedError = new WebAuthnClientError(WebAuthnClientErrorCode.Unknown, "Unexpected error", ex);
@@ -316,6 +326,16 @@ public sealed class WebAuthnClient : IAsyncDisposable
             catch (WebAuthnClientError error)
             {
                 await channel.WriteAsync(new WebAuthnStatusFailed(error), CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException oce)
+            {
+                // Cancellation is semantically distinct from a backend failure; surface
+                // a typed Cancelled error so consumers can distinguish "I cancelled" from
+                // "device errored." Must precede the general Exception arm because
+                // OperationCanceledException is an Exception subclass.
+                var cancelledError = new WebAuthnClientError(
+                    WebAuthnClientErrorCode.Cancelled, "Operation was cancelled", oce);
+                await channel.WriteAsync(new WebAuthnStatusFailed(cancelledError), CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

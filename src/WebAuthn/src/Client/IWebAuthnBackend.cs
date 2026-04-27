@@ -20,13 +20,6 @@ using Yubico.YubiKit.Fido2.Pin;
 namespace Yubico.YubiKit.WebAuthn.Client;
 
 /// <summary>
-/// Result of PIN retries query.
-/// </summary>
-/// <param name="Retries">The number of PIN retries remaining.</param>
-/// <param name="PowerCycleRequired">Indicates if the authenticator requires a power cycle to retry PIN.</param>
-public sealed record class PinRetriesResult(int Retries, bool PowerCycleRequired);
-
-/// <summary>
 /// Internal abstraction over CTAP2 operations for testability.
 /// </summary>
 /// <remarks>
@@ -39,16 +32,6 @@ public interface IWebAuthnBackend : IAsyncDisposable
     /// Gets cached authenticator info (does not require user presence).
     /// </summary>
     Task<AuthenticatorInfo> GetCachedInfoAsync(CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Gets the number of user verification retries remaining.
-    /// </summary>
-    Task<int> GetUvRetriesAsync(CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Gets the number of PIN retries remaining and power-cycle state.
-    /// </summary>
-    Task<PinRetriesResult> GetPinRetriesAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Obtains a PIN/UV auth token with the specified permissions.
@@ -157,11 +140,6 @@ public sealed record class BackendMakeCredentialRequest
     /// PIN/UV auth protocol version (1 or 2).
     /// </summary>
     public byte? PinUvAuthProtocol { get; init; }
-
-    /// <summary>
-    /// Enterprise attestation mode.
-    /// </summary>
-    public int? EnterpriseAttestation { get; init; }
 }
 
 /// <summary>

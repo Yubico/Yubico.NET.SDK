@@ -48,60 +48,186 @@ namespace Yubico.YubiKey.Fido2.Commands
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void MakeCredentialWithPreviewSign_ReturnsGeneratedKey()
         {
-            // Phase 1: Skeleton implementation - will throw NotImplementedException when YubiKey is present
-            // Skip if previewSign extension is not supported by the YubiKey
             Skip.IfNot(
                 _deviceInfo.IsExtensionSupported(Extensions.PreviewSign),
                 "YubiKey does not advertise previewSign extension");
 
-            // TODO Phase 5+: Implement full test
-            // 1. Create MakeCredentialParameters with previewSign extension
-            // 2. Call MakeCredential (requires user presence - touch YubiKey)
-            // 3. Verify MakeCredentialData contains generated key via GetPreviewSignGeneratedKey()
-            // 4. Assert non-null KeyHandle, BlindingPublicKey, KemPublicKey
+            var isValid = GetMakeCredentialParams(out var makeParams);
+            Assert.True(isValid);
 
-            throw new NotImplementedException("Phase 1: Test scaffolding only");
+            makeParams.AddPreviewSignGenerateKeyExtension(
+                _deviceInfo,
+                new[] { CoseAlgorithmIdentifier.ArkgP256Esp256 });
+
+            var cmd = new MakeCredentialCommand(makeParams);
+            var rsp = Connection.SendCommand(cmd);
+            Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+            var credData = rsp.GetData();
+            isValid = credData.VerifyAttestation(makeParams.ClientDataHash);
+            Assert.True(isValid);
+
+            var generatedKey = credData.GetPreviewSignGeneratedKey();
+            Assert.NotNull(generatedKey);
+            Assert.NotEmpty(generatedKey.KeyHandle.Span.ToArray());
+            Assert.Equal(65, generatedKey.BlindingPublicKey.Length);
+            Assert.Equal(0x04, generatedKey.BlindingPublicKey.Span[0]);
+            Assert.Equal(65, generatedKey.KemPublicKey.Length);
+            Assert.Equal(0x04, generatedKey.KemPublicKey.Span[0]);
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void FullCeremony_RegisterDeriveSignVerify_RoundTrip()
         {
-            // Phase 1: Skeleton implementation - will throw NotImplementedException when YubiKey is present
-            // Skip if previewSign extension is not supported by the YubiKey
             Skip.IfNot(
                 _deviceInfo.IsExtensionSupported(Extensions.PreviewSign),
                 "YubiKey does not advertise previewSign extension");
 
-            // TODO Phase 5+: Implement full ceremony
-            // Step A: Register with previewSign (requires user presence)
-            // Step B: Offline derive public key using returned generated key
-            // Step C: Sign with derived credential (requires user presence)
-            // Step D: Offline verify signature with derived public key
-            // Assert signature verification succeeds
+            // Step A: Register with previewSign (requires user presence - touch #1)
+            var isValid = GetMakeCredentialParams(out var makeParams);
+            Assert.True(isValid);
 
-            throw new NotImplementedException("Phase 1: Test scaffolding only");
+            makeParams.AddPreviewSignGenerateKeyExtension(
+                _deviceInfo,
+                new[] { CoseAlgorithmIdentifier.ArkgP256Esp256 });
+
+            var makeCmd = new MakeCredentialCommand(makeParams);
+            var makeRsp = Connection.SendCommand(makeCmd);
+            Assert.Equal(ResponseStatus.Success, makeRsp.Status);
+
+            var credData = makeRsp.GetData();
+            var generatedKey = credData.GetPreviewSignGeneratedKey();
+            Assert.NotNull(generatedKey);
+
+            // Step B: Offline derive public key
+            byte[] ikm = new byte[32];
+            new Random(42).NextBytes(ikm);
+            byte[] ctx = System.Text.Encoding.ASCII.GetBytes("integration-test-ctx");
+
+            var derived = generatedKey.DerivePublicKey(ikm, ctx);
+            Assert.Equal(65, derived.PublicKey.Length);
+            Assert.NotEmpty(derived.ArkgKeyHandle.Span.ToArray());
+
+            // Step C: Sign with derived credential (requires user presence - touch #2)
+            byte[] message = System.Text.Encoding.ASCII.GetBytes("hello-previewsign-integration-test");
+
+            isValid = GetGetAssertionParams(out var assertionParams);
+            Assert.True(isValid);
+
+            assertionParams.AddPreviewSignByCredentialExtension(_deviceInfo, derived, message);
+
+            var assertCmd = new GetAssertionCommand(assertionParams);
+            var assertRsp = Connection.SendCommand(assertCmd);
+            Assert.Equal(ResponseStatus.Success, assertRsp.Status);
+
+            var assertData = assertRsp.GetData();
+            var signature = assertData.AuthenticatorData.GetPreviewSignSignature();
+            Assert.NotNull(signature);
+
+            // Step D: Offline verify signature
+            bool verified = derived.VerifySignature(message, signature);
+            Assert.True(verified);
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
-        public void GetAssertionWithUnsupportedAlgorithm_Throws()
+        public void MakeCredentialWithUnsupportedAlgorithm_Fails()
         {
-            // Phase 1: Skeleton implementation - will throw NotImplementedException when YubiKey is present
-            // Skip if previewSign extension is not supported by the YubiKey
             Skip.IfNot(
                 _deviceInfo.IsExtensionSupported(Extensions.PreviewSign),
                 "YubiKey does not advertise previewSign extension");
 
-            // TODO Phase 5+: Implement unsupported algorithm test
-            // Create credential with ES256 (if possible, may need to skip this test if no unsupported alg available)
-            // Attempt to sign with ES256 (not Esp256)
-            // Assert appropriate exception or error response (requires user presence)
+            var isValid = GetMakeCredentialParams(out var makeParams);
+            Assert.True(isValid);
 
-            throw new NotImplementedException("Phase 1: Test scaffolding only");
+            // Request previewSign with ES256 (not Esp256)
+            // Hardware should reject this as unsupported for previewSign
+            makeParams.AddPreviewSignGenerateKeyExtension(
+                _deviceInfo,
+                new[] { CoseAlgorithmIdentifier.ES256 });
+
+            var cmd = new MakeCredentialCommand(makeParams);
+            var rsp = Connection.SendCommand(cmd);
+
+            // YubiKey 5.8.0-beta should reject unsupported algorithms
+            Assert.NotEqual(ResponseStatus.Success, rsp.Status);
         }
 
-        // Helper methods will be added in Phase 5+ following the pattern from HmacSecretTests
-        // private bool GetMakeCredentialParams(out MakeCredentialParameters makeParams) { ... }
-        // private bool GetGetAssertionParams(out GetAssertionParameters assertionParams) { ... }
-        // private bool GetPinToken(PinUvAuthTokenPermissions permissions, out byte[] pinToken) { ... }
+        private bool GetMakeCredentialParams(out MakeCredentialParameters makeParams)
+        {
+            makeParams = new MakeCredentialParameters(FidoSessionIntegrationTestBase.Rp, FidoSessionIntegrationTestBase.UserEntity);
+
+            if (!GetPinToken(PinUvAuthTokenPermissions.MakeCredential, out var pinToken))
+            {
+                return false;
+            }
+
+            var pinUvAuthParam = _protocol.AuthenticateUsingPinToken(pinToken, FidoSessionIntegrationTestBase.ClientDataHash);
+
+            makeParams.ClientDataHash = FidoSessionIntegrationTestBase.ClientDataHash;
+            makeParams.Protocol = _protocol.Protocol;
+            makeParams.PinUvAuthParam = pinUvAuthParam;
+
+            makeParams.AddOption(AuthenticatorOptions.rk, true);
+
+            return true;
+        }
+
+        private bool GetGetAssertionParams(out GetAssertionParameters assertionParams)
+        {
+            assertionParams = new GetAssertionParameters(FidoSessionIntegrationTestBase.Rp, FidoSessionIntegrationTestBase.ClientDataHash);
+
+            var permissions =
+                PinUvAuthTokenPermissions.GetAssertion | PinUvAuthTokenPermissions.CredentialManagement;
+
+            if (!GetPinToken(permissions, out var pinToken))
+            {
+                return false;
+            }
+
+            var pinUvAuthParam = _protocol.AuthenticateUsingPinToken(pinToken, FidoSessionIntegrationTestBase.ClientDataHash);
+
+            assertionParams.Protocol = _protocol.Protocol;
+            assertionParams.PinUvAuthParam = pinUvAuthParam;
+
+            return true;
+        }
+
+        private bool GetPinToken(
+            PinUvAuthTokenPermissions permissions,
+            out byte[] pinToken)
+        {
+            pinToken = Array.Empty<byte>();
+
+            string? rpId = null;
+            if (permissions.HasFlag(PinUvAuthTokenPermissions.MakeCredential) ||
+                permissions.HasFlag(PinUvAuthTokenPermissions.GetAssertion))
+            {
+                rpId = FidoSessionIntegrationTestBase.Rp.Id;
+            }
+
+            ResponseStatus status;
+            do
+            {
+                var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(_protocol, FidoSessionIntegrationTestBase.TestPin1, permissions, rpId);
+                var getTokenRsp = Connection.SendCommand(getTokenCmd);
+                if (getTokenRsp.Status == ResponseStatus.Success)
+                {
+                    pinToken = getTokenRsp.GetData().ToArray();
+                    return true;
+                }
+
+                if (getTokenRsp.StatusWord != 0x6F35)
+                {
+                    return false;
+                }
+
+                var setPinCmd = new SetPinCommand(_protocol, FidoSessionIntegrationTestBase.TestPin1);
+                var setPinRsp = Connection.SendCommand(setPinCmd);
+                status = setPinRsp.Status;
+
+            } while (status == ResponseStatus.Success);
+
+            return false;
+        }
     }
 }

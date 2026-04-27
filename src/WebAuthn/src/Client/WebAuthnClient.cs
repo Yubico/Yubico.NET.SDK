@@ -549,6 +549,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         // Acquire PIN/UV token with retry on PinAuthInvalid
         PinUvAuthTokenSession? tokenSession = null;
         IMemoryOwner<byte>? pinOwner = null;
+        ReadOnlyMemory<byte>? pinBytes = null;
 
         try
         {
@@ -556,7 +557,6 @@ public sealed class WebAuthnClient : IAsyncDisposable
             if (uvDecision.UseToken)
             {
                 // Request PIN from consumer if needed
-                ReadOnlyMemory<byte>? pinBytes = null;
                 if (uvDecision.Method == PinUvAuthMethod.Pin && channel is not null)
                 {
                     var (pinStatus, pinResponseTask) = channel.CreatePinRequest();
@@ -613,6 +613,24 @@ public sealed class WebAuthnClient : IAsyncDisposable
                         "This authenticator may not support silent excludeList probing.",
                         preflightEx);
                 }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(tokenCopy);
+                }
+
+                // Re-mint the pinUvAuthToken between pre-flight and MakeCredential.
+                // CTAP 2.1 §6.5.5.7: authenticators MAY consume permissions on use. On
+                // YubiKey 5.8.0, the pre-flight's GetAssertion(up=false) consumes the
+                // GetAssertion permission and the same token can no longer authorize a
+                // subsequent MakeCredential — the device returns PinAuthInvalid.
+                // Mint a fresh token scoped to MakeCredential only for the actual ceremony.
+                tokenSession.Dispose();
+                tokenSession = await AcquirePinUvTokenWithRetryAsync(
+                    uvDecision.Method!.Value,
+                    PinUvAuthTokenPermissions.MakeCredential,
+                    options.Rp.Id,
+                    pinBytes,
+                    cancellationToken).ConfigureAwait(false);
             }
 
             // Build backend request with filtered exclude list

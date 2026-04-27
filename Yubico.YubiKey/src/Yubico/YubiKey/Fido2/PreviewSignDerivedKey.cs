@@ -21,8 +21,21 @@ namespace Yubico.YubiKey.Fido2
     /// Represents a derived public key produced by ARKG-P256 derivation.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// This class contains the derived public key and handles needed for
-    /// authentication via the previewSign extension.
+    /// authentication via the previewSign extension. Instances are obtained
+    /// by calling <see cref="PreviewSignGeneratedKey.DerivePublicKey"/> with
+    /// application-provided input keying material and a context string.
+    /// </para>
+    /// <para>
+    /// The derived public key can be used to verify signatures produced by the
+    /// YubiKey when signing with the corresponding ARKG key handle and context.
+    /// Use <see cref="VerifySignature"/> to validate signatures against this key.
+    /// </para>
+    /// <para>
+    /// To request a signature from the YubiKey using this derived key, pass this
+    /// object to <see cref="GetAssertionParameters.AddPreviewSignByCredentialExtension"/>.
+    /// </para>
     /// </remarks>
     public sealed class PreviewSignDerivedKey
     {
@@ -68,10 +81,33 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// Verifies a signature against the derived public key.
         /// </summary>
-        /// <param name="message">The message that was signed.</param>
-        /// <param name="signature">The signature to verify.</param>
-        /// <returns><c>true</c> if the signature is valid; otherwise, <c>false</c>.</returns>
-        /// <exception cref="NotImplementedException">This method is not yet implemented.</exception>
+        /// <remarks>
+        /// <para>
+        /// This method verifies that a signature produced by the YubiKey (obtained via
+        /// <see cref="AuthenticatorData.GetPreviewSignSignature"/>) is valid for the
+        /// given message using the derived public key from ARKG-P256 derivation.
+        /// </para>
+        /// <para>
+        /// The signature must be in DER-encoded ECDSA format, as returned by the
+        /// YubiKey's previewSign extension. The message is the raw data that was
+        /// signed, not a hash.
+        /// </para>
+        /// </remarks>
+        /// <param name="message">
+        /// The message that was signed. This method will hash the message internally
+        /// before verifying the signature.
+        /// </param>
+        /// <param name="signature">
+        /// The DER-encoded ECDSA signature to verify, as returned by
+        /// <see cref="AuthenticatorData.GetPreviewSignSignature"/>.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the signature is valid for the message using the derived
+        /// public key; otherwise, <c>false</c>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// The <paramref name="message"/> or <paramref name="signature"/> is null.
+        /// </exception>
         public bool VerifySignature(byte[] message, byte[] signature)
         {
             if (message is null)

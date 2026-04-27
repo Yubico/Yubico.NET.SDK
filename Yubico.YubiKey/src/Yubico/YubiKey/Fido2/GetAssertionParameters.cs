@@ -413,15 +413,28 @@ namespace Yubico.YubiKey.Fido2
         /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
         /// This method will verify that the YubiKey supports the previewSign extension.
         /// </para>
+        /// <para>
+        /// The <paramref name="derivedKey"/> should be obtained by calling
+        /// <see cref="PreviewSignGeneratedKey.DerivePublicKey"/> on the generated
+        /// key material from the original credential creation. The message is
+        /// hashed (SHA-256) internally before being sent to the YubiKey for signing.
+        /// </para>
+        /// <para>
+        /// After the assertion succeeds, retrieve the signature using
+        /// <see cref="AuthenticatorData.GetPreviewSignSignature"/> and verify it
+        /// with <see cref="PreviewSignDerivedKey.VerifySignature"/>.
+        /// </para>
         /// </remarks>
         /// <param name="authenticatorInfo">
         /// The FIDO2 <see cref="AuthenticatorInfo"/> for the YubiKey being used.
         /// </param>
         /// <param name="derivedKey">
-        /// The derived key containing the ARKG key handle and context.
+        /// The derived key containing the ARKG key handle and context, obtained
+        /// from <see cref="PreviewSignGeneratedKey.DerivePublicKey"/>.
         /// </param>
         /// <param name="message">
-        /// The message to be signed.
+        /// The message to be signed. This will be hashed with SHA-256 before
+        /// being sent to the YubiKey.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <paramref name="authenticatorInfo"/>, <paramref name="derivedKey"/>, or

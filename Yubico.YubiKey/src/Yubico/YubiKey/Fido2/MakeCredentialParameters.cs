@@ -742,12 +742,21 @@ namespace Yubico.YubiKey.Fido2
         /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
         /// This method will verify that the YubiKey supports the previewSign extension.
         /// </para>
+        /// <para>
+        /// After credential creation, retrieve the generated key material using
+        /// <see cref="MakeCredentialData.GetPreviewSignGeneratedKey"/>, then use
+        /// <see cref="PreviewSignGeneratedKey.DerivePublicKey"/> to derive public
+        /// keys offline. The YubiKey can sign with any derived key when provided
+        /// the corresponding ARKG key handle and context via
+        /// <see cref="GetAssertionParameters.AddPreviewSignByCredentialExtension"/>.
+        /// </para>
         /// </remarks>
         /// <param name="authenticatorInfo">
         /// The FIDO2 <see cref="AuthenticatorInfo"/> for the YubiKey being used.
         /// </param>
         /// <param name="algorithms">
-        /// The algorithms to use for key generation, ordered by preference.
+        /// The algorithms to use for key generation, ordered by preference. For
+        /// ARKG-P256, include <see cref="Cose.CoseAlgorithmIdentifier.ArkgP256Esp256"/>.
         /// </param>
         /// <param name="requireUv">
         /// If <c>true</c>, requires user verification; otherwise, only user presence is required.

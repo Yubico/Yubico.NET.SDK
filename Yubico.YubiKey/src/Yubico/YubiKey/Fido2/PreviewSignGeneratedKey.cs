@@ -23,8 +23,23 @@ namespace Yubico.YubiKey.Fido2
     /// previewSign extension registration.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// This class contains the key handle and public key components needed to
-    /// perform offline ARKG key derivation via <see cref="DerivePublicKey"/>.
+    /// perform offline ARKG (Asynchronous Remote Key Generation) key derivation
+    /// via <see cref="DerivePublicKey"/>.
+    /// </para>
+    /// <para>
+    /// Instances of this class are obtained by calling
+    /// <see cref="MakeCredentialData.GetPreviewSignGeneratedKey"/> after creating
+    /// a credential with the previewSign extension enabled via
+    /// <see cref="MakeCredentialParameters.AddPreviewSignGenerateKeyExtension"/>.
+    /// </para>
+    /// <para>
+    /// The generated key material enables offline derivation of multiple public
+    /// keys from a single credential, each identified by a unique context string.
+    /// The YubiKey can sign with any derived key when provided the corresponding
+    /// ARKG key handle and context.
+    /// </para>
     /// </remarks>
     public sealed class PreviewSignGeneratedKey
     {
@@ -70,10 +85,40 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// Derives a public key using the ARKG-P256 algorithm.
         /// </summary>
-        /// <param name="ikm">Input keying material for derivation.</param>
-        /// <param name="ctx">Context string for derivation.</param>
-        /// <returns>A <see cref="PreviewSignDerivedKey"/> containing the derived public key and handles.</returns>
-        /// <exception cref="NotImplementedException">This method is not yet implemented.</exception>
+        /// <remarks>
+        /// <para>
+        /// This method performs offline key derivation using the ARKG-P256 algorithm.
+        /// The derived public key can be used to verify signatures created by the
+        /// YubiKey when provided with the corresponding ARKG key handle and context.
+        /// </para>
+        /// <para>
+        /// Multiple independent public keys can be derived from the same generated
+        /// key by using different context strings. Each context produces a unique
+        /// derived key pair.
+        /// </para>
+        /// <para>
+        /// To use the derived key for signing, pass the returned
+        /// <see cref="PreviewSignDerivedKey"/> to
+        /// <see cref="GetAssertionParameters.AddPreviewSignByCredentialExtension"/>.
+        /// The YubiKey will produce a signature that can be verified using
+        /// <see cref="PreviewSignDerivedKey.VerifySignature"/>.
+        /// </para>
+        /// </remarks>
+        /// <param name="ikm">
+        /// Input keying material for HKDF derivation. This should be random data
+        /// unique to the derivation context.
+        /// </param>
+        /// <param name="ctx">
+        /// Context string for domain separation. Different contexts produce
+        /// different derived keys from the same input keying material.
+        /// </param>
+        /// <returns>
+        /// A <see cref="PreviewSignDerivedKey"/> containing the derived public key,
+        /// ARKG key handle, device key handle, and context.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// The <paramref name="ikm"/> or <paramref name="ctx"/> is null.
+        /// </exception>
         public PreviewSignDerivedKey DerivePublicKey(byte[] ikm, byte[] ctx)
         {
             if (ikm is null)

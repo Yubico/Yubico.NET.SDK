@@ -59,6 +59,20 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <summary>
         /// ECDSA with SHA-256 using NIST P-256, for previewSign extension.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This algorithm identifier (ESP256) is used by the YubiKey hardware when
+        /// performing previewSign signing operations. The YubiKey signs with
+        /// ESP256, not with ARKG-P256-ESP256.
+        /// </para>
+        /// <para>
+        /// When requesting a previewSign credential via
+        /// <see cref="MakeCredentialParameters.AddPreviewSignGenerateKeyExtension"/>,
+        /// specify <c>ArkgP256Esp256</c> in the algorithms array. The YubiKey will
+        /// generate key material using ARKG-P256, but actual signatures will be
+        /// produced using ESP256.
+        /// </para>
+        /// </remarks>
         Esp256 = -9,
 
         /// <summary>
@@ -68,8 +82,21 @@ namespace Yubico.YubiKey.Fido2.Cose
         RS256 = -257,
 
         /// <summary>
-        /// ARKG-P256 with Esp256 for previewSign extension.
+        /// ARKG-P256 with Esp256 for previewSign extension key generation.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This algorithm identifier is used during previewSign credential creation
+        /// to request ARKG-P256 key generation. When this algorithm is specified in
+        /// <see cref="MakeCredentialParameters.AddPreviewSignGenerateKeyExtension"/>,
+        /// the YubiKey generates ARKG-P256 key material.
+        /// </para>
+        /// <para>
+        /// Note: The YubiKey uses <c>Esp256</c> for the actual signing algorithm,
+        /// not ARKG-P256-ESP256. This identifier is only for requesting ARKG key
+        /// generation during credential creation.
+        /// </para>
+        /// </remarks>
         ArkgP256Esp256 = -65539,
     }
 }

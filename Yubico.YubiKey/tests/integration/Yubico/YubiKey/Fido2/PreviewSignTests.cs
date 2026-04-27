@@ -29,23 +29,34 @@ namespace Yubico.YubiKey.Fido2
     /// </remarks>
     public class PreviewSignTests : FidoSessionIntegrationTestBase
     {
-        // Force a synchronous device enumeration before any instance
-        // constructor runs. On macOS the YubiKeyDeviceListener populates
-        // its cache asynchronously; without this warm-up the base class
-        // ctor's GetSession() call races the listener and throws
-        // DeviceNotFoundException even when a supported YubiKey is
-        // plugged in. Using FindAll() triggers a synchronous poll that
-        // populates the cache that FindByTransport(All) later reads.
+        // Wait for the YubiKeyDeviceListener's internal cache to populate
+        // before any instance constructor runs. On macOS the listener's
+        // _internalCache (read by FindByTransport(All).GetAll()) is
+        // populated asynchronously by background USB notifications; without
+        // this poll the base class ctor's GetSession() call races the
+        // listener and throws DeviceNotFoundException even when a supported
+        // YubiKey is plugged in.
+        //
+        // Polls every 100ms for up to 5 seconds. Returns as soon as at least
+        // one device is visible, OR after the timeout (in which case the
+        // tests SKIP cleanly via [SkippableFact(typeof(DeviceNotFoundException))]).
         static PreviewSignTests()
         {
             try
             {
-                _ = YubiKeyDevice.FindAll().ToList();
+                for (int i = 0; i < 50; i++)
+                {
+                    if (YubiKeyDevice.FindAll().Any())
+                    {
+                        return;
+                    }
+                    System.Threading.Thread.Sleep(100);
+                }
             }
             catch
             {
-                // Swallow — if no device is connected the integration
-                // tests will SKIP via DeviceNotFoundException anyway.
+                // Swallow — if enumeration throws, tests SKIP via
+                // DeviceNotFoundException anyway.
             }
         }
 
@@ -128,8 +139,9 @@ namespace Yubico.YubiKey.Fido2
                 Session.AuthenticatorInfo,
                 new[] { CoseAlgorithmIdentifier.ES256 });
 
-            // YubiKey 5.8.0-beta should reject unsupported algorithms
-            Assert.Throws<Ctap2DataException>(() => Session.MakeCredential(MakeCredentialParameters));
+            // YubiKey 5.8.0-beta rejects unsupported algorithms via
+            // Fido2Exception (wrapping the underlying CTAP error code).
+            Assert.Throws<Fido2Exception>(() => Session.MakeCredential(MakeCredentialParameters));
         }
     }
 }

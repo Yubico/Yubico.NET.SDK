@@ -131,3 +131,35 @@ jobs:
 
     - name: Wait 30 seconds for Fastly cache to purge
       run: sleep 30
+
+  deploy-us2:
+    name: Deploy docs (US2)
+    runs-on: ubuntu-latest
+    if: inputs.gitops-branch != 'stage'
+
+    steps:
+    - name: Harden the runner (Audit all outbound calls)
+      uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+      with:
+        egress-policy: audit
+
+    - id: auth
+      name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093  # v3.0.0
+      with:
+        workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: yesdk-ci-builder@support-cluster-769001.iam.gserviceaccount.com
+
+    - name: Create Flux-compatible image tag (dev)
+      if: inputs.gitops-branch == 'dev'
+      run: |
+        gcloud artifacts docker tags add \
+          "us-docker.pkg.dev/support-cluster-769001/yesdk/yesdk-docserver:${{ inputs.image-tag }}" \
+          "us-docker.pkg.dev/support-cluster-769001/yesdk/yesdk-docserver:$(date +%s)-${{ inputs.image-tag }}"
+
+    - name: Create Flux-compatible image tag (prod)
+      if: inputs.gitops-branch == 'prod'
+      run: |
+        gcloud artifacts docker tags add \
+          "us-docker.pkg.dev/support-cluster-769001/yesdk/yesdk-docserver:${{ inputs.image-tag }}" \
+          "us-docker.pkg.dev/support-cluster-769001/yesdk/yesdk-docserver:yesdk-$(date +%s)-${{ inputs.image-tag }}"

@@ -726,6 +726,46 @@ namespace Yubico.YubiKey.Fido2
             AuthenticatorInfo authenticatorInfo) =>
             AddCredProtectExtension(credProtectPolicy, true, authenticatorInfo);
 
+        /// <summary>
+        /// Adds the previewSign extension for generating a key that can be used
+        /// for offline public key derivation and signing.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The previewSign extension enables ARKG (Asynchronous Remote Key Generation)
+        /// functionality, allowing offline derivation of public keys from a generated
+        /// key material returned by the YubiKey.
+        /// </para>
+        /// <para>
+        /// The caller supplies the <see cref="AuthenticatorInfo"/> for the YubiKey,
+        /// obtained by calling the <see cref="Commands.GetInfoCommand"/> or
+        /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
+        /// This method will verify that the YubiKey supports the previewSign extension.
+        /// </para>
+        /// </remarks>
+        /// <param name="authenticatorInfo">
+        /// The FIDO2 <see cref="AuthenticatorInfo"/> for the YubiKey being used.
+        /// </param>
+        /// <param name="algorithms">
+        /// The algorithms to use for key generation, ordered by preference.
+        /// </param>
+        /// <param name="requireUv">
+        /// If <c>true</c>, requires user verification; otherwise, only user presence is required.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <paramref name="authenticatorInfo"/> or <paramref name="algorithms"/> is null.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// The YubiKey does not support the previewSign extension.
+        /// </exception>
+        public void AddPreviewSignGenerateKeyExtension(
+            AuthenticatorInfo authenticatorInfo,
+            Cose.CoseAlgorithmIdentifier[] algorithms,
+            bool requireUv = false)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <inheritdoc/>
         public override byte[] CborEncode() =>
             new CborMapWriter<int>()

@@ -148,6 +148,15 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public ReadOnlyMemory<byte>? LargeBlobKey { get; private set; }
 
+        /// <summary>
+        /// Gets the unsigned extension outputs returned by the authenticator, if any.
+        /// </summary>
+        /// <remarks>
+        /// This dictionary contains extension outputs that are not included in the
+        /// signed authenticator data. The previewSign extension uses this to return
+        /// generated key material.
+        /// </remarks>
+        public IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? UnsignedExtensionOutputs { get; private set; }
 
         /// <summary>
         /// This returns the raw CBOR encoded credential data from the YubiKey, as returned by the MakeCredential operation.
@@ -253,6 +262,29 @@ namespace Yubico.YubiKey.Fido2
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Retrieves the previewSign generated key from the unsigned extension outputs.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The previewSign extension returns generated key material in the unsigned
+        /// extension outputs (CTAP response key 0x06). This method parses that data
+        /// and returns a <see cref="PreviewSignGeneratedKey"/> instance containing
+        /// the key handle and public key components.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="PreviewSignGeneratedKey"/> if the extension was used and returned
+        /// data; otherwise, <c>null</c>.
+        /// </returns>
+        /// <exception cref="NotImplementedException">
+        /// This method is not yet implemented.
+        /// </exception>
+        public PreviewSignGeneratedKey? GetPreviewSignGeneratedKey()
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

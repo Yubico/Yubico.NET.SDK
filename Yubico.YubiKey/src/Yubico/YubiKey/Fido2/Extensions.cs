@@ -39,4 +39,9 @@ public static class Extensions
     /// The third party payment extension identifier.
     /// </summary>
     public const string ThirdPartyPayment = "thirdPartyPayment";
+
+    /// <summary>
+    /// The preview sign extension identifier.
+    /// </summary>
+    public const string PreviewSign = "previewSign";
 }

@@ -57,9 +57,19 @@ namespace Yubico.YubiKey.Fido2.Cose
         EdDSA = -8,
 
         /// <summary>
+        /// ECDSA with SHA-256 using NIST P-256, for previewSign extension.
+        /// </summary>
+        Esp256 = -9,
+
+        /// <summary>
         /// RSASSA-PKCS1-v1_5 with SHA-256
         /// Currently, not supported by any YubiKey
         /// </summary>
         RS256 = -257,
+
+        /// <summary>
+        /// ARKG-P256 with Esp256 for previewSign extension.
+        /// </summary>
+        ArkgP256Esp256 = -65539,
     }
 }

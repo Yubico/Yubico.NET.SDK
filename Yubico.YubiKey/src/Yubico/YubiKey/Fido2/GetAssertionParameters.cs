@@ -394,6 +394,46 @@ namespace Yubico.YubiKey.Fido2
             AddExtension(Fido2.Extensions.HmacSecret, _hmacSecretEncoding);
         }
 
+        /// <summary>
+        /// Adds the previewSign extension for signing with a derived credential.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The previewSign extension enables signing operations using a public key
+        /// derived offline via ARKG (Asynchronous Remote Key Generation) from a
+        /// generated key returned during credential creation.
+        /// </para>
+        /// <para>
+        /// The caller supplies the <see cref="AuthenticatorInfo"/> for the YubiKey,
+        /// obtained by calling the <see cref="Commands.GetInfoCommand"/> or
+        /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
+        /// This method will verify that the YubiKey supports the previewSign extension.
+        /// </para>
+        /// </remarks>
+        /// <param name="authenticatorInfo">
+        /// The FIDO2 <see cref="AuthenticatorInfo"/> for the YubiKey being used.
+        /// </param>
+        /// <param name="derivedKey">
+        /// The derived key containing the ARKG key handle and context.
+        /// </param>
+        /// <param name="message">
+        /// The message to be signed.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <paramref name="authenticatorInfo"/>, <paramref name="derivedKey"/>, or
+        /// <paramref name="message"/> is null.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// The YubiKey does not support the previewSign extension.
+        /// </exception>
+        public void AddPreviewSignByCredentialExtension(
+            AuthenticatorInfo authenticatorInfo,
+            PreviewSignDerivedKey derivedKey,
+            byte[] message)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <inheritdoc/>
         public override byte[] CborEncode()
             => new CborMapWriter<int>()

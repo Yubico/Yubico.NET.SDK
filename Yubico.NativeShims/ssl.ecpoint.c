@@ -64,3 +64,19 @@ Native_EC_POINT_mul(
 {
     return EC_POINT_mul(group, r, n, q, m, ctx);
 }
+
+// Validates that an EC_POINT lies on the curve defined by the EC_GROUP.
+// Returns 1 if the point is on the curve, 0 if not, -1 on error.
+// Required for ARKG-P256 input validation: untrusted public keys (pkBl, pkKem)
+// received from authenticator responses MUST be validated before use to prevent
+// invalid-curve attacks.
+int32_t
+NATIVEAPI
+Native_EC_POINT_is_on_curve(
+    const Native_EC_GROUP group,
+    const Native_EC_POINT point,
+    Native_BN_CTX ctx
+    )
+{
+    return EC_POINT_is_on_curve(group, point, ctx);
+}

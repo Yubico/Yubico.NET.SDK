@@ -625,6 +625,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 // subsequent MakeCredential — the device returns PinAuthInvalid.
                 // Mint a fresh token scoped to MakeCredential only for the actual ceremony.
                 tokenSession.Dispose();
+                tokenSession = null; // explicit torn-state guard — outer finally is a no-op until reassigned
                 tokenSession = await AcquirePinUvTokenWithRetryAsync(
                     uvDecision.Method!.Value,
                     PinUvAuthTokenPermissions.MakeCredential,
@@ -655,6 +656,12 @@ public sealed class WebAuthnClient : IAsyncDisposable
             catch (CtapException ex) when (options.Extensions?.PreviewSign is not null)
             {
                 throw Extensions.PreviewSign.PreviewSignErrors.MapCtapError(ex);
+            }
+            catch (CtapException ex)
+            {
+                // Map remaining CTAP statuses to typed WebAuthn errors per CLAUDE.md:
+                // "never expose raw CTAP status codes to high-level API consumers".
+                throw MapCtapStatusToWebAuthnError(ex);
             }
 
             // Build WebAuthn response
@@ -754,8 +761,18 @@ public sealed class WebAuthnClient : IAsyncDisposable
             var request = BuildGetAssertionRequest(options, clientData, tokenSession, uvDecision);
 
             // Match credentials (handles allow-list probing and discoverable enumeration)
-            var matches = await CredentialMatcher.MatchAsync(_backend, request, cancellationToken)
-                .ConfigureAwait(false);
+            IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)> matches;
+            try
+            {
+                matches = await CredentialMatcher.MatchAsync(_backend, request, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (CtapException ex)
+            {
+                // Map remaining CTAP statuses to typed WebAuthn errors per CLAUDE.md:
+                // "never expose raw CTAP status codes to high-level API consumers".
+                throw MapCtapStatusToWebAuthnError(ex);
+            }
 
             // Wrap each match into a MatchedCredential with deferred SelectAsync
             var results = new List<MatchedCredential>();
@@ -849,6 +866,32 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// with fresh PIN bytes (after re-prompting the user).
     /// </para>
     /// </remarks>
+    /// <summary>
+    /// Maps a raw <see cref="CtapException"/> to a typed <see cref="WebAuthnClientError"/> per
+    /// the WebAuthn module rule that low-level CTAP status codes never escape the public API.
+    /// CredentialExcluded and previewSign-specific statuses are handled by their own catch arms
+    /// upstream and never reach this mapper.
+    /// </summary>
+    private static WebAuthnClientError MapCtapStatusToWebAuthnError(CtapException ex) =>
+        ex.Status switch
+        {
+            CtapStatus.PinAuthInvalid or CtapStatus.PinInvalid or CtapStatus.PinAuthBlocked
+                or CtapStatus.PinBlocked or CtapStatus.PinPolicyViolation
+                or CtapStatus.PuvathRequired or CtapStatus.NotAllowed or CtapStatus.OperationDenied
+                => new WebAuthnClientError(WebAuthnClientErrorCode.NotAllowed, ex.Message, ex),
+            CtapStatus.KeyStoreFull or CtapStatus.LargeBlobStorageFull or CtapStatus.FpDatabaseFull
+                or CtapStatus.LimitExceeded or CtapStatus.RequestTooLarge or CtapStatus.UserActionTimeout
+                or CtapStatus.ActionTimeout or CtapStatus.Timeout
+                => new WebAuthnClientError(WebAuthnClientErrorCode.Constraint, ex.Message, ex),
+            CtapStatus.UnsupportedAlgorithm or CtapStatus.UnsupportedOption or CtapStatus.InvalidOption
+                => new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported, ex.Message, ex),
+            CtapStatus.PinNotSet or CtapStatus.UpRequired
+                => new WebAuthnClientError(WebAuthnClientErrorCode.Security, ex.Message, ex),
+            CtapStatus.NoCredentials or CtapStatus.InvalidCredential
+                => new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState, ex.Message, ex),
+            _ => new WebAuthnClientError(WebAuthnClientErrorCode.Unknown, ex.Message, ex),
+        };
+
     private async Task<PinUvAuthTokenSession> AcquirePinUvTokenWithRetryAsync(
         PinUvAuthMethod method,
         PinUvAuthTokenPermissions permissions,

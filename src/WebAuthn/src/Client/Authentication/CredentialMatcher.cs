@@ -80,8 +80,10 @@ internal sealed class CredentialMatcher
 
     private static bool IsNoCredentialsError(CtapStatus status)
     {
+        // NotAllowed (0x30) is "device denied the operation" (user cancel, policy reject) —
+        // semantically distinct from "no matching credential" and must propagate so callers
+        // map it to WebAuthnClientErrorCode.NotAllowed instead of treating as empty match.
         return status == CtapStatus.NoCredentials
-            || status == CtapStatus.InvalidCredential
-            || status == CtapStatus.NotAllowed;
+            || status == CtapStatus.InvalidCredential;
     }
 }

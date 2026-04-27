@@ -68,5 +68,18 @@ public sealed class PinUvAuthTokenSession : IDisposable
             CryptographicOperations.ZeroMemory(_token);
             _disposed = true;
         }
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Finalizer fallback: zeroes the token bytes if Dispose was not called.
+    /// CLAUDE.md mandates IDisposable + defensive zeroing for owned sensitive byte[].
+    /// </summary>
+    ~PinUvAuthTokenSession()
+    {
+        if (!_disposed)
+        {
+            CryptographicOperations.ZeroMemory(_token);
+        }
     }
 }

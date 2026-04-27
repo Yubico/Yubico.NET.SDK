@@ -32,7 +32,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Feature", "EnterpriseAttestation")]
 public class FidoEnterpriseAttestationTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task EnterpriseAttestation_VendorFacilitated_ReturnsAttestationStatement(YubiKeyTestState state) =>

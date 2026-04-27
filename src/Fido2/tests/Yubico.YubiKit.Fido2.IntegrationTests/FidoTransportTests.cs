@@ -39,7 +39,7 @@ public class FidoTransportTests
     /// FIDO2 over SmartCard is only supported via NFC - USB CCID is intentionally
     /// blocked because YubiKey exposes FIDO2 via USB HID FIDO interface, not USB CCID.
     /// </remarks>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireNfc = true)]
     [Trait("RequiresNfc", "true")]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]

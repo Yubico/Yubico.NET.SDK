@@ -35,7 +35,7 @@ public class FidoNfcTests
     /// <summary>
     /// Tests that creating a FidoSession over NFC SmartCard succeeds and returns valid info.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireNfc = true)]
     public async Task CreateFidoSession_With_NfcSmartCard_SucceedsAndReturnsInfo(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -50,7 +50,7 @@ public class FidoNfcTests
     /// <summary>
     /// Tests that GetInfo over NFC SmartCard returns valid FIDO2 versions.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireNfc = true)]
     public async Task GetInfo_Over_NfcSmartCard_ReturnsValidFido2Version(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -69,7 +69,7 @@ public class FidoNfcTests
     /// <summary>
     /// Tests that GetInfo over NFC returns supported algorithms including ES256.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireNfc = true)]
     public async Task GetInfo_Over_NfcSmartCard_ReturnsSupportedAlgorithms(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>

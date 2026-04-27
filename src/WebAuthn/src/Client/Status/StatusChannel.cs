@@ -34,7 +34,6 @@ internal sealed class StatusChannel<TResult> : IAsyncDisposable
     private WebAuthnStatus? _lastWritten;
     private bool _readerStarted;
     private TaskCompletionSource<ReadOnlyMemory<byte>?>? _pinResponseTcs;
-    private TaskCompletionSource<bool>? _uvResponseTcs;
 
     public StatusChannel()
     {
@@ -116,24 +115,6 @@ internal sealed class StatusChannel<TResult> : IAsyncDisposable
             });
 
         return (status, _pinResponseTcs.Task);
-    }
-
-    /// <summary>
-    /// Creates a UV request status that the producer can await.
-    /// </summary>
-    /// <returns>A tuple of (status, response task).</returns>
-    public (WebAuthnStatusRequestingUv Status, Task<bool> ResponseTask) CreateUvRequest()
-    {
-        _uvResponseTcs = new TaskCompletionSource<bool>();
-
-        var status = new WebAuthnStatusRequestingUv(
-            SetUseUv: useUv =>
-            {
-                _uvResponseTcs?.TrySetResult(useUv);
-                return ValueTask.CompletedTask;
-            });
-
-        return (status, _uvResponseTcs.Task);
     }
 
     /// <inheritdoc/>

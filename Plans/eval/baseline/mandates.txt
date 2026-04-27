@@ -1,0 +1,190 @@
+6:**IMPORTANT:** If you are working in a subproject directory (e.g., `src/SecurityDomain/`, `src/Piv/`, etc.), you MUST also read that subproject's `CLAUDE.md` file if it exists. Subproject CLAUDE.md files contain specific patterns, test harness details, and context for that module.
+54:- ✅ ALWAYS use Context7 MCP (`context7-query-docs` tool) to look up library/API documentation, code patterns, setup/configuration steps, and framework usage without requiring explicit request
+55:- ✅ Use Perplexity AI (`.claude/skills/tool-perplexity-search/SKILL.md`) for current events, recent releases, or up-to-date web information
+68:- ✅ Sync + ≤512 bytes → `Span<byte>` with `stackalloc`
+69:- ✅ Sync + >512 bytes → `ArrayPool<byte>.Shared.Rent()`
+70:- ✅ Async → `Memory<byte>` or `IMemoryOwner<byte>`
+71:- ❌ NEVER use `.ToArray()` unless data must escape scope
+72:- ❌ NEVER forget to return `ArrayPool` buffers (use try/finally)
+75:- ✅ ALWAYS zero sensitive data: `CryptographicOperations.ZeroMemory()`
+76:- ✅ ALWAYS dispose crypto objects: `using var aes = Aes.Create()`
+77:- ❌ NEVER log PINs, keys, or sensitive payloads
+78:- ❌ NEVER use timing-vulnerable comparisons (use `FixedTimeEquals`)
+79:- ❌ NEVER store a privately-cloned `byte[]` of sensitive data in a `struct`. Struct copies each hold their own reference — you cannot zero all copies. Use a `sealed class` with `IDisposable` and call `ZeroMemory` in `Dispose()`.
+80:- ✅ `ReadOnlyMemory<byte>` passthrough **is** safe in a `readonly record struct` — all copies reference the same caller-owned memory, so zeroing the source zeroes all views. Caller is responsible for zeroing after transmission. See `ApduCommand` as the canonical passthrough example.
+83:- ✅ ALWAYS use `is null` / `is not null` (never `== null`)
+84:- ✅ ALWAYS use switch expressions (never old switch statements)
+85:- ✅ ALWAYS use file-scoped namespaces
+86:- ✅ ALWAYS use collection expressions `[..]` (C# 12)
+87:- ❌ NEVER suppress nullable warnings with `!` without justification
+90:- ✅ ALWAYS follow `.editorconfig` (run `dotnet format` before commit)
+91:- ✅ ALWAYS handle `CancellationToken` in async methods
+92:- ✅ ALWAYS use `readonly` on fields that don't change
+93:- ❌ NEVER use `#region` (split large classes instead)
+94:- ❌ NEVER use exceptions for control flow
+97:- ✅ ALWAYS do forensic byte-level analysis before implementing
+98:- ✅ ALWAYS read actual source code line-by-line, not just documentation
+99:- ✅ ALWAYS trace through with concrete examples (input → output bytes)
+100:- ✅ ALWAYS document the exact wire format/data structure before coding
+101:- ❌ NEVER implement based on conceptual understanding alone
+102:- ❌ NEVER skip verifying exact encoding details (TLV structure, byte order, flags)
+105:- ✅ USE: `SHA256.HashData(data, outputSpan)` (Span-based)
+106:- ❌ AVOID: `SHA256.Create().ComputeHash(data)` (allocates array)
+109:- ✅ ALWAYS use `dotnet toolchain.cs test` (handles xUnit v2/v3 runner differences automatically)
+110:- ❌ NEVER use `dotnet test` directly (fails on xUnit v3 projects with wrong syntax)
+114:- ✅ Run `codemapper .` to generate API surface maps (~1.5s for entire repo)
+115:- ✅ Maps output to `./codebase_ast/` - one file per project (gitignored but readable by agents)
+116:- ✅ Find symbols: `grep -rn "IYubiKey" ./codebase_ast/`
+117:- ✅ Load context: `cat ./codebase_ast/Yubico.YubiKit.Core.txt`
+252:- ✅ `{ get; init; }` - Immutable properties set only at construction
+253:- ✅ `{ get; private set; }` - Properties modified only within the class
+254:- ⚠️ `{ get; set; }` - Use sparingly, only for configuration/mutable DTOs
+263:// ✅ Expression-bodied for simple computations
+266:// ✅ Traditional getter for complex logic
+279:**Use Static YubiKitLogging - NEVER inject ILogger:**
+281:// ✅ CORRECT: Static logger from YubiKitLogging
+287:// ❌ WRONG: Injected logger (breaks consistency)
+301:- ❌ NEVER log PINs, keys, or credentials
+302:- ✅ Log credential IDs as hex (public identifier)
+303:- ✅ Log lengths, not contents, of sensitive buffers
+330:// ✅ Zero allocation, stack-based
+334:// ✅ Slicing without allocation
+338:// ✅ Parameters for zero-copy
+352:// ✅ Async-safe
+358:// ✅ Convert to Span when sync context resumes
+366:// ✅ Use IMemoryOwner for temporary buffers in async
+377:// ✅ Rent, use, return
+389:// ✅ Zero sensitive data before returning
+417:// ❌ BAD - Allocates every call
+423:// ✅ BETTER - Use Span
+426:// ✅ OR - Use ArrayPool
+449:│  ├─ ≤512 bytes? → Span<byte> with stackalloc ✅ BEST
+450:│  └─ >512 bytes? → ArrayPool<byte>.Shared.Rent() ✅
+452:│  ├─ Temporary? → IMemoryOwner<byte> with MemoryPool ✅
+453:│  └─ Parameter? → Memory<byte> ✅
+455:   ├─ Caller provides? → Accept Span<byte> or Memory<byte> ✅
+456:   └─ Must allocate? → new byte[] ⚠️ LAST RESORT
+465:**✅ When:**
+471:**✅ Benefits:**
+477:// ✅ BEST - Small, immutable, value semantics
+489:// ✅ GOOD - Wraps small data
+496:// ✅ GOOD - Protocol metadata
+514:**❌ Don't use for:**
+521:**⚠️ Use sparingly - only when mutation is truly needed:**
+525:// ⚠️ Acceptable - Mutable builder pattern
+543:**❌ Problems with mutable structs:**
+550:// ✅ BETTER - Immutable with builder
+576:**✅ When:**
+583:// ✅ GOOD - Large data structure
+593:// ✅ GOOD - Contains managed resources
+602:// ✅ GOOD - Service/manager
+616:// ✅ CommandApdu - Use readonly struct if small OR class if contains byte[]
+644:// ✅ ResponseApdu - Class (contains byte array)
+663:// ✅ 16 bytes - OK for readonly struct
+669:// ✅ 8 bytes - Excellent for readonly struct
+675:// ❌ 24+ bytes - Use class instead
+684:// ✅ Convert to class
+695:**❌ BAD: Large struct with owned byte[] clone**
+705:**❌ BAD: Mutable struct in collection**
+711:**✅ GOOD: readonly struct or class**
+725:| Hot path | ✅ Ideal | ⚠️ Careful | ✅ OK |
+726:| Stack allocation | ✅ Yes | ✅ Yes | ❌ Heap only |
+727:| Defensive copies | ✅ None | ❌ Many | N/A |
+728:| GC pressure | ✅ None | ✅ None | ❌ Yes |
+734:**❌ NEVER: Unnecessary ToArray()**
+736:// ❌ BAD
+740:// ✅ GOOD
+744:**❌ NEVER: LINQ on byte spans**
+746:// ❌ BAD
+749:// ✅ GOOD
+757:**❌ NEVER: Forget to return rented arrays**
+759:// ❌ BAD - Memory leak
+764:// ✅ GOOD
+781:// ✅ Hashing
+785:// ✅ HMAC
+789:// ✅ Random
+793:// ✅ AES
+799:**❌ AVOID legacy APIs:**
+801:// ❌ OLD - Allocates
+805:// ✅ NEW - Zero allocation
+812:**CRITICAL: YubiKey operations involve PINs, passwords, private keys. All sensitive material must be cleared from memory.**
+814:**✅ Dispose cryptographic objects:**
+822:**✅ Zero sensitive buffers:**
+824:// ✅ BEST - Span on stack
+829:// ✅ GOOD - Rented array
+847:**⚠️ Sensitive data includes:**
+855:**❌ NEVER log sensitive data:**
+857:// ❌ NEVER
+861:// ✅ YES - Log metadata only
+892:**✅ Prefer Span for APDU data:**
+907:**✅ Use Span slicing:**
+909:// ❌ BAD
+913:// ✅ GOOD
+923:**CRITICAL: All code must follow `.editorconfig` rules.**
+936:// ✅ Pattern matching
+940:// ❌ Avoid
+947:// ✅ Modern switch
+957:// ✅ Property patterns
+965:// ✅ Type pattern with declaration
+974:// ✅ Modern
+979:// ❌ Verbose
+985:// ✅ When type is obvious
+992:// ✅ Records for immutable DTOs
+1001:// ✅ Init for immutable properties
+1011:// ✅ REQUIRED
+1016:// ❌ NEVER use block-scoped
+1021:// ✅ For simple DI
+1030:// ✅ Modern
+1038:**❌ NO string concatenation in loops:**
+1040:// ❌ BAD
+1044:// ✅ GOOD
+1049:**❌ NO nullable warnings suppression without justification:**
+1051:// ❌ BAD
+1054:// ✅ GOOD
+1058:**❌ NO exceptions for control flow:**
+1060:// ❌ BAD
+1070:// ✅ GOOD
+1074:**❌ NO public mutable state:**
+1076:// ❌ BAD
+1079:// ✅ GOOD
+1085:**❌ NO #region:**
+1087:// ❌ If you need regions, the class is too big - split it
+1090:**❌ NO var when type isn't obvious:**
+1092:// ❌ BAD
+1095:// ✅ GOOD - Type obvious
+1099:// ✅ GOOD - Explicit when unclear
+1105:**✅ Prefer immutable types:**
+1118:**✅ Use readonly:**
+1133:**✅ Use ValueTask for hot paths:**
+1143:**✅ Validate external input:**
+1158:**✅ Use constant-time comparisons:**
+1160:// ✅ Prevents timing attacks
+1163:// ❌ Timing attack vulnerable
+1186:**CRITICAL: Only write tests that provide real value. Don't create tests just to increase coverage metrics.**
+1188:#### ❌ DON'T Write These Tests
+1192:// ❌ BAD - Only tests ArgumentNullException.ThrowIfNull()
+1200:// ❌ BAD - Only tests basic type checking
+1217:// ❌ BAD - Creating a test that will never be implemented
+1230:#### ✅ DO Write These Tests
+1234:// ✅ GOOD - Tests real protocol configuration logic
+1248:// ✅ GOOD - Tests actual SCP handshake with real hardware
+1299:- ✅ Does this test actual behavior or just input validation?
+1300:- ✅ Would this catch a real bug if behavior changed?
+1301:- ✅ Can I explain what value this test provides?
+1302:- ✅ Would I trust this test to catch regressions?
+1314:**✅ Test all public APIs:**
+1331:**✅ Use descriptive test names:**
+1333:// ✅ GOOD
+1337:// ❌ BAD
+1342:**✅ Clean up in integration tests:**
+1367:### Commit Discipline (CRITICAL for Agents)
+1375:# Add only YOUR files explicitly - NEVER use git add . or git add -A
+1387:1. ✅ Ran `git status` to verify only your files are being committed
+1388:2. ✅ Code builds without warnings: `dotnet toolchain.cs build`
+1389:3. ✅ All tests pass: `dotnet toolchain.cs test`
+1390:4. ✅ Code formatted: `dotnet format`
+1391:5. ✅ No nullable reference warnings
+1392:6. ✅ Sensitive data properly zeroed
+1393:7. ✅ No unnecessary allocations in hot paths
+1394:8. ✅ Modern C# patterns (is null, switch expressions, etc.)
+1395:9. ✅ EditorConfig rules followed

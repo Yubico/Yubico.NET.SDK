@@ -555,3 +555,7 @@ cython_debug/
 # Coverage / Test Results 
 coveragereport/
 TestResults/
+
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+Yubico.Core/fuzz/

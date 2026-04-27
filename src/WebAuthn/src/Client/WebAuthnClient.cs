@@ -584,8 +584,39 @@ public sealed class WebAuthnClient : IAsyncDisposable
                     cancellationToken).ConfigureAwait(false);
             }
 
-            // Build backend request
-            var request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision);
+            // Pre-flight excludeList when non-empty (mirroring yubikit-android Ctap2Client.filterCreds)
+            PublicKeyCredentialDescriptor? matchedExclude = null;
+            if (options.ExcludeCredentials is not null && options.ExcludeCredentials.Count > 0 && tokenSession is not null)
+            {
+                // ToArray() creates a copy; pre-flight needs to pass token across async boundary
+                var tokenCopy = tokenSession.Token.ToArray();
+                try
+                {
+                    matchedExclude = await Internal.ExcludeListPreflight.FindFirstMatchAsync(
+                        _backend,
+                        options.Rp.Id,
+                        options.ExcludeCredentials,
+                        info,
+                        tokenCopy,
+                        tokenSession.Protocol,
+                        cancellationToken).ConfigureAwait(false);
+                }
+                catch (CtapException preflightEx)
+                {
+                    // Pre-flight failed (e.g., authenticator does not support up=false probes,
+                    // or returned an unexpected status). Fall back: pass the full exclude list
+                    // and surface a typed error if the device then rejects with CredentialExcluded
+                    // or similar. We attach the pre-flight cause to the diagnostic surface.
+                    throw new WebAuthnClientError(
+                        WebAuthnClientErrorCode.Unknown,
+                        $"Pre-flight excludeList probe failed (device returned {preflightEx.Status}). " +
+                        "This authenticator may not support silent excludeList probing.",
+                        preflightEx);
+                }
+            }
+
+            // Build backend request with filtered exclude list
+            var request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude);
 
             // Execute MakeCredential
             MakeCredentialResponse ctapResponse;
@@ -593,6 +624,15 @@ public sealed class WebAuthnClient : IAsyncDisposable
             {
                 ctapResponse = await _backend.MakeCredentialAsync(request, progress: null, cancellationToken)
                     .ConfigureAwait(false);
+            }
+            catch (CtapException ex) when (ex.Status == CtapStatus.CredentialExcluded)
+            {
+                // WebAuthn L2 §5.1.3 step 3: when the authenticator returns
+                // CredentialExcluded, the client surfaces an InvalidStateError.
+                throw new WebAuthnClientError(
+                    WebAuthnClientErrorCode.InvalidState,
+                    "A credential matching the exclude list already exists on this authenticator.",
+                    ex);
             }
             catch (CtapException ex) when (options.Extensions?.PreviewSign is not null)
             {
@@ -825,7 +865,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
         RegistrationOptions options,
         WebAuthnClientData clientData,
         PinUvAuthTokenSession? tokenSession,
-        UvDecision uvDecision)
+        UvDecision uvDecision,
+        PublicKeyCredentialDescriptor? matchedExclude)
     {
         // Map options to backend request
         var optionsDict = new Dictionary<string, bool>();
@@ -854,6 +895,12 @@ public sealed class WebAuthnClient : IAsyncDisposable
         // Build extensions CBOR via pipeline
         var extensionsCbor = ExtensionPipeline.BuildRegistrationExtensionsCbor(options.Extensions, options);
 
+        // Use filtered exclude list: if pre-flight found a match, send only that one credential.
+        // If pre-flight found no match, send empty list. If no pre-flight (empty original list), send null.
+        IReadOnlyList<PublicKeyCredentialDescriptor>? excludeList = matchedExclude is not null
+            ? new[] { matchedExclude }
+            : (options.ExcludeCredentials is not null && options.ExcludeCredentials.Count > 0 ? Array.Empty<PublicKeyCredentialDescriptor>() : null);
+
         return new BackendMakeCredentialRequest
         {
             ClientDataHash = clientData.Hash,
@@ -862,7 +909,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
             PubKeyCredParams = options.PubKeyCredParams
                 .Select(alg => new PublicKeyCredentialParameters { Algorithm = (CoseAlgorithmIdentifier)alg.Value })
                 .ToList(),
-            ExcludeList = options.ExcludeCredentials,
+            ExcludeList = excludeList,
             Extensions = extensionsCbor,
             Options = optionsDict.Count > 0 ? optionsDict : null,
             PinUvAuthParam = pinUvAuthParam,

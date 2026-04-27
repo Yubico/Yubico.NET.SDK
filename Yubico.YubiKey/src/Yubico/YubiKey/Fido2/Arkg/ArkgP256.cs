@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
+using Yubico.Core.Cryptography;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Fido2.Arkg
 {
@@ -20,29 +21,34 @@ namespace Yubico.YubiKey.Fido2.Arkg
     /// Provides ARKG-P256 (Asynchronous Remote Key Generation for P-256) operations.
     /// </summary>
     /// <remarks>
-    /// This implementation follows draft-bradleylundberg-cfrg-arkg-09 and performs
-    /// offline public key derivation without requiring YubiKey interaction.
+    /// Thin wrapper that routes to the OpenSSL-backed
+    /// <see cref="IArkgPrimitives"/>. The full algorithm body lives in
+    /// <c>Yubico.Core.Cryptography.ArkgPrimitivesOpenSsl.Derive</c> because
+    /// it needs Yubico.Core's internal OpenSSL P/Invoke surface, which is not
+    /// visible from Yubico.YubiKey. Conforms to draft-bradleylundberg-cfrg-arkg-09;
+    /// reference implementation in
+    /// cnh-authenticator-rs-extension/native/crates/hid-test/src/arkg.rs.
     /// </remarks>
     internal static class ArkgP256
     {
         /// <summary>
-        /// Derives a public key using ARKG-P256 algorithm.
+        /// Derives a public key using the ARKG-P256 algorithm.
         /// </summary>
-        /// <param name="pkBl">The blinding public key.</param>
-        /// <param name="pkKem">The KEM public key.</param>
+        /// <param name="pkBl">The blinding public key (SEC1 uncompressed, 65 bytes).</param>
+        /// <param name="pkKem">The KEM public key (SEC1 uncompressed, 65 bytes).</param>
         /// <param name="ikm">Input keying material for derivation.</param>
-        /// <param name="ctx">Context string for derivation.</param>
+        /// <param name="ctx">Context string for derivation. Must be at most 64 bytes.</param>
         /// <returns>
-        /// A tuple containing the derived public key and the ARKG key handle.
+        /// A tuple containing the SEC1 uncompressed derived public key
+        /// (65 bytes) and the ARKG key handle to send to the authenticator.
         /// </returns>
-        /// <exception cref="NotImplementedException">This method is not yet implemented.</exception>
         public static (byte[] derivedPk, byte[] arkgKeyHandle) DerivePublicKey(
             byte[] pkBl,
             byte[] pkKem,
             byte[] ikm,
             byte[] ctx)
         {
-            throw new NotImplementedException();
+            return CryptographyProviders.ArkgPrimitivesCreator().Derive(pkBl, pkKem, ikm, ctx);
         }
     }
 }

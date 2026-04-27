@@ -763,7 +763,16 @@ namespace Yubico.YubiKey.Fido2
             Cose.CoseAlgorithmIdentifier[] algorithms,
             bool requireUv = false)
         {
-            throw new NotImplementedException();
+            Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
+            Guard.IsNotNull(algorithms, nameof(algorithms));
+
+            if (!authenticatorInfo.IsExtensionSupported(Fido2.Extensions.PreviewSign))
+            {
+                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+            }
+
+            byte[] encoded = PreviewSignExtension.EncodeGenerateKeyInput(algorithms, requireUv);
+            AddExtension(Fido2.Extensions.PreviewSign, encoded);
         }
 
         /// <inheritdoc/>

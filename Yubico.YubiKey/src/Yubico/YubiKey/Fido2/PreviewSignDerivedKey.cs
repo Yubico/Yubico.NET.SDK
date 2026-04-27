@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -73,7 +74,24 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="NotImplementedException">This method is not yet implemented.</exception>
         public bool VerifySignature(byte[] message, byte[] signature)
         {
-            throw new NotImplementedException();
+            if (message is null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            if (signature is null)
+            {
+                throw new ArgumentNullException(nameof(signature));
+            }
+
+            // PublicKey is SEC1 uncompressed: 0x04 || X(32) || Y(32).
+            if (PublicKey.Length != 65 || PublicKey.Span[0] != 0x04)
+            {
+                return false;
+            }
+
+            var verifier = new EcdsaVerify(PublicKey);
+            return verifier.VerifyData(message, signature, isStandardSignature: true);
         }
     }
 }

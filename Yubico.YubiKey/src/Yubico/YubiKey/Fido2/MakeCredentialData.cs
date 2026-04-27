@@ -38,6 +38,7 @@ namespace Yubico.YubiKey.Fido2
         private const int KeyAttestationStatement = 3;
         private const int KeyEnterpriseAttestation = 4;
         private const int KeyLargeBlob = 5;
+        private const int KeyUnsignedExtensionOutputs = 6;
 
         private const int MaxAttestationMapCount = 3;
 
@@ -213,6 +214,12 @@ namespace Yubico.YubiKey.Fido2
                 {
                     LargeBlobKey = map.ReadByteString(KeyLargeBlob);
                 }
+
+                if (map.Contains(KeyUnsignedExtensionOutputs))
+                {
+                    var unsignedMap = map.ReadMap<string>(KeyUnsignedExtensionOutputs);
+                    UnsignedExtensionOutputs = PreviewSignExtension.ParseUnsignedExtensionOutputs(unsignedMap.Encoded);
+                }
             }
             catch (CborContentException cborException)
             {
@@ -284,7 +291,13 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public PreviewSignGeneratedKey? GetPreviewSignGeneratedKey()
         {
-            throw new NotImplementedException();
+            if (UnsignedExtensionOutputs is null
+                || !UnsignedExtensionOutputs.TryGetValue(Extensions.PreviewSign, out ReadOnlyMemory<byte> value))
+            {
+                return null;
+            }
+
+            return PreviewSignExtension.DecodeGeneratedKey(value);
         }
 
         /// <summary>

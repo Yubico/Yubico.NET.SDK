@@ -14,6 +14,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Formats.Cbor;
+using System.Security.Cryptography;
+using CommunityToolkit.Diagnostics;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
@@ -431,7 +435,48 @@ namespace Yubico.YubiKey.Fido2
             PreviewSignDerivedKey derivedKey,
             byte[] message)
         {
-            throw new NotImplementedException();
+            Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
+            Guard.IsNotNull(derivedKey, nameof(derivedKey));
+            Guard.IsNotNull(message, nameof(message));
+
+            if (!authenticatorInfo.IsExtensionSupported(Fido2.Extensions.PreviewSign))
+            {
+                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+            }
+
+            byte[] tbs;
+            using (SHA256 sha = CryptographyProviders.Sha256Creator())
+            {
+                tbs = sha.ComputeHash(message);
+            }
+
+            byte[] additionalArgs = EncodeArkgSignArgs(derivedKey);
+
+            byte[] encoded = PreviewSignExtension.EncodeSignByCredentialInput(
+                derivedKey.DeviceKeyHandle,
+                tbs,
+                additionalArgs);
+            AddExtension(Fido2.Extensions.PreviewSign, encoded);
+        }
+
+        private static byte[] EncodeArkgSignArgs(PreviewSignDerivedKey derivedKey)
+        {
+            // COSE_Sign_Args for ESP256-ARKG, per the Rust reference's
+            // encode_arkg_sign_args: {3: alg, -1: arkg_kh, -2: ctx}.
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(3);
+
+            cbor.WriteInt32(3);
+            cbor.WriteInt32((int)Cose.CoseAlgorithmIdentifier.Esp256);
+
+            cbor.WriteInt32(-1);
+            cbor.WriteByteString(derivedKey.ArkgKeyHandle.Span);
+
+            cbor.WriteInt32(-2);
+            cbor.WriteByteString(derivedKey.Context.Span);
+
+            cbor.WriteEndMap();
+            return cbor.Encode();
         }
 
         /// <inheritdoc/>

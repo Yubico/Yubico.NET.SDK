@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Yubico.YubiKey.Fido2.Arkg;
 using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2
@@ -75,7 +76,27 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="NotImplementedException">This method is not yet implemented.</exception>
         public PreviewSignDerivedKey DerivePublicKey(byte[] ikm, byte[] ctx)
         {
-            throw new NotImplementedException();
+            if (ikm is null)
+            {
+                throw new ArgumentNullException(nameof(ikm));
+            }
+
+            if (ctx is null)
+            {
+                throw new ArgumentNullException(nameof(ctx));
+            }
+
+            (byte[] derivedPk, byte[] arkgKeyHandle) = ArkgP256.DerivePublicKey(
+                BlindingPublicKey.ToArray(),
+                KemPublicKey.ToArray(),
+                ikm,
+                ctx);
+
+            return new PreviewSignDerivedKey(
+                derivedPk,
+                arkgKeyHandle,
+                KeyHandle,
+                ctx);
         }
     }
 }

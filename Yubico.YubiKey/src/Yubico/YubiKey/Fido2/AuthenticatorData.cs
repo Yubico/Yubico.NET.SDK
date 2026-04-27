@@ -406,7 +406,12 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public byte[]? GetPreviewSignSignature()
         {
-            throw new NotImplementedException();
+            if (!TryGetExtensionData(Fido2.Extensions.PreviewSign, out Memory<byte> encodedValue))
+            {
+                return null;
+            }
+
+            return PreviewSignExtension.DecodeSignature(encodedValue);
         }
 
         private bool TryGetExtensionData(string extensionKey, out Memory<byte> encodedValue)

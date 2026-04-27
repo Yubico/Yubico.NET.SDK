@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.Core", "Yubico.Core", "{35B82F4E-0C73-6F12-221E-2697E560332E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "perf", "perf", "{BDBE9F52-5D81-C56A-52B8-264AD34193D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.Core.Performance", "Yubico.Core\perf\Yubico.Core.Performance.csproj", "{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.Core", "Yubico.Core\src\Yubico.Core.csproj", "{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}.Debug|x64.Build.0 = Debug|Any CPU
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}.Debug|x86.Build.0 = Debug|Any CPU
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}.Release|x64.ActiveCfg = Release|Any CPU
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}.Release|x64.Build.0 = Release|Any CPU
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}.Release|x86.ActiveCfg = Release|Any CPU
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1}.Release|x86.Build.0 = Release|Any CPU
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}.Debug|x64.Build.0 = Debug|Any CPU
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}.Debug|x86.Build.0 = Debug|Any CPU
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}.Release|x64.ActiveCfg = Release|Any CPU
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}.Release|x64.Build.0 = Release|Any CPU
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}.Release|x86.ActiveCfg = Release|Any CPU
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BDBE9F52-5D81-C56A-52B8-264AD34193D7} = {35B82F4E-0C73-6F12-221E-2697E560332E}
+		{8E70D7C2-EA69-4ED6-BE78-67573EA1BBB1} = {BDBE9F52-5D81-C56A-52B8-264AD34193D7}
+		{A4F23AEC-4D6D-45D6-9AE2-324FBCAEE58C} = {BDBE9F52-5D81-C56A-52B8-264AD34193D7}
+	EndGlobalSection
+EndGlobal

@@ -38,10 +38,11 @@ namespace Yubico.Core.Devices.SmartCard
         private SCARD_READER_STATE[] _readerStates;
 
         private Thread? _listenerThread;
-        private bool _isListening;
+        private volatile bool _isListening;
         private bool _isDisposed;
         private readonly object _startStopLock = new object();
         private readonly object _disposeLock = new object();
+        private readonly ManualResetEventSlim _stopRequested = new ManualResetEventSlim(false);
         private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
         private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
 
@@ -49,6 +50,8 @@ namespace Yubico.Core.Devices.SmartCard
         // Prevents a tight polling loop when SCardGetStatusChange returns immediately (e.g.
         // SCARD_E_INVALID_HANDLE in an RDS environment). See GitHub issue #434.
         private static readonly TimeSpan RecoveryBackoffDelay = TimeSpan.FromMilliseconds(1000);
+        private static readonly TimeSpan MaxRecoveryBackoffDelay = TimeSpan.FromSeconds(30);
+        private int _consecutiveRecoveryAttempts;
 
         /// <summary>
         /// Constructs a <see cref="SmartCardDeviceListener"/> using the system SCard implementation.
@@ -139,6 +142,8 @@ namespace Yubico.Core.Devices.SmartCard
                 {
                     _log.LogError(e, "Exception occurred while listening for smart card reader changes.");
                     Status = DeviceListenerStatus.Error;
+                    _ = _stopRequested.Wait(CalculateRecoveryBackoff(_consecutiveRecoveryAttempts));
+                    _consecutiveRecoveryAttempts++;
                 }
             }
         }
@@ -173,6 +178,7 @@ namespace Yubico.Core.Devices.SmartCard
 
                         // Now it's safe to dispose the context
                         _context.Dispose();
+                        _stopRequested.Dispose();
                     }
                 }
                 catch (Exception ex)
@@ -207,6 +213,7 @@ namespace Yubico.Core.Devices.SmartCard
 
             _isListening = false;
             Status = DeviceListenerStatus.Stopped;
+            _stopRequested.Set();
 
             // Wait for thread to exit with timeout to prevent indefinite blocking
             bool exited = threadToJoin.Join(MaxDisposalWaitTime);
@@ -231,11 +238,24 @@ namespace Yubico.Core.Devices.SmartCard
                 return false;
             }
 
+            // Timeout is normal polling behavior - nothing changed, so return immediately
+            // without further processing that could trigger spurious events.
+            // A timeout still proves the syscall path is healthy, so reset the recovery
+            // counter and clear the Error status (mirrors the success-path reset below).
+            if (getStatusChangeResult == ErrorCode.SCARD_E_TIMEOUT)
+            {
+                _consecutiveRecoveryAttempts = 0;
+                if (Status == DeviceListenerStatus.Error)
+                {
+                    Status = DeviceListenerStatus.Started;
+                }
+                return true;
+            }
+
             // If a non-critical error triggered context recovery (UpdateCurrentContext refreshed
             // _readerStates), short-circuit so the next loop iteration starts with fresh state.
             // Without this, the stale newStates clone would overwrite _readerStates at the end.
-            if (getStatusChangeResult != ErrorCode.SCARD_S_SUCCESS
-                && getStatusChangeResult != ErrorCode.SCARD_E_TIMEOUT)
+            if (getStatusChangeResult != ErrorCode.SCARD_S_SUCCESS)
             {
                 return true;
             }
@@ -314,6 +334,16 @@ namespace Yubico.Core.Devices.SmartCard
             _readerStates = newStates;
 
             FireEvents(arrivedDevices, removedDevices);
+
+            // A successful poll means the listener has recovered from any transient failure
+            // (e.g. a managed exception caught in ListenForReaderChanges that flipped Status
+            // to Error). Reset to Started so callers querying Status reflect live health.
+            // Also reset the exponential backoff counter.
+            _consecutiveRecoveryAttempts = 0;
+            if (Status == DeviceListenerStatus.Error)
+            {
+                Status = DeviceListenerStatus.Started;
+            }
 
             return true;
         }
@@ -454,7 +484,7 @@ namespace Yubico.Core.Devices.SmartCard
             }
 
             uint result = _scard.EstablishContext(SCARD_SCOPE.USER, out SCardContext newContext);
-            _log.SCardApiCall(nameof(NativeMethods.SCardEstablishContext), result);
+            _log.SCardApiCall(nameof(NativeMethods.SCardEstablishContext), result, knownRecoverable: true);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {
@@ -466,6 +496,7 @@ namespace Yubico.Core.Devices.SmartCard
 
             _context = newContext;
             _readerStates = GetReaderStateList();
+            _log.LogDebug("Smart card context re-established successfully.");
         }
 
         /// <summary>
@@ -477,7 +508,7 @@ namespace Yubico.Core.Devices.SmartCard
             uint result = _scard.ListReaders(_context, null, out string[] readerNames);
             if (result != ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
             {
-                _log.SCardApiCall(nameof(NativeMethods.SCardListReaders), result);
+                _log.SCardApiCall(nameof(NativeMethods.SCardListReaders), result, knownRecoverable: true);
             }
 
             // We use this workaround as .NET 4.7 doesn't really support all of .NET Standard 2.0
@@ -542,7 +573,8 @@ namespace Yubico.Core.Devices.SmartCard
             // persistent error codes not yet classified as recoverable).
             _log.SCardApiCall(nameof(NativeMethods.SCardGetStatusChange), result);
             _log.LogInformation("Reader states:\n{States}", string.Join(Environment.NewLine, states.Select(s => s.ToString())));
-            Thread.Sleep(RecoveryBackoffDelay);
+            _ = _stopRequested.Wait(CalculateRecoveryBackoff(_consecutiveRecoveryAttempts));
+            _consecutiveRecoveryAttempts++;
 
             return true;
         }
@@ -586,11 +618,27 @@ namespace Yubico.Core.Devices.SmartCard
                     // Back off before the next poll to avoid a tight loop when SCardGetStatusChange
                     // returns immediately (as it does with an invalid handle) and/or when the Smart
                     // Card Service is unavailable and EstablishContext also fails immediately.
-                    Thread.Sleep(RecoveryBackoffDelay);
+                    _ = _stopRequested.Wait(CalculateRecoveryBackoff(_consecutiveRecoveryAttempts));
+                    _consecutiveRecoveryAttempts++;
                     return true;
                 default:
                     return false;
             }
+        }
+
+        /// <summary>
+        /// Calculates the exponential backoff delay for the current recovery attempt.
+        /// Doubles the base delay for each consecutive attempt, capped at 30 seconds.
+        /// </summary>
+        /// <param name="attempts">Number of consecutive recovery attempts (0-based).</param>
+        /// <returns>The backoff delay for this attempt.</returns>
+        internal static TimeSpan CalculateRecoveryBackoff(int attempts)
+        {
+            int safeAttempts = Math.Min(Math.Max(attempts, 0), 10); // 2^10 cap-safe
+            long ticks = RecoveryBackoffDelay.Ticks * (1L << safeAttempts);
+            return ticks > MaxRecoveryBackoffDelay.Ticks
+                ? MaxRecoveryBackoffDelay
+                : TimeSpan.FromTicks(ticks);
         }
 
         private class ReaderStateComparer : IEqualityComparer<SCARD_READER_STATE>

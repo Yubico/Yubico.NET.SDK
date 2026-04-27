@@ -31,6 +31,7 @@ namespace Yubico.YubiKit.Fido2.Credentials;
 /// - 0x03: attStmt (map) - attestation statement
 /// - 0x04: epAtt (bool, optional) - enterprise attestation used
 /// - 0x05: largeBlobKey (byte string, optional) - large blob key
+/// - 0x06: unsignedExtensionOutputs (map, optional) - unsigned extension outputs (CTAP 2.2 / WebAuthn L3)
 /// </para>
 /// </remarks>
 public sealed class MakeCredentialResponse
@@ -75,12 +76,13 @@ public sealed class MakeCredentialResponse
     public ReadOnlyMemory<byte>? ExtensionOutputs { get; }
 
     /// <summary>
-    /// Gets the unsigned extension outputs map (CTAP v4 key 8).
+    /// Gets the unsigned extension outputs map (CTAP 2.2 / WebAuthn L3 key 6).
     /// </summary>
     /// <remarks>
-    /// Per CTAP draft, unsigned extension outputs is a map keyed by extension
+    /// Per CTAP 2.2 / WebAuthn L3, unsigned extension outputs is a map keyed by extension
     /// identifier (text string) with values as raw CBOR bytes. Used by extensions
     /// like previewSign to deliver attestation objects via top-level response.
+    /// Aligned with yubikit-swift, yubikit-android, yubikit-python.
     /// </remarks>
     public IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? UnsignedExtensionOutputs { get; }
     
@@ -181,7 +183,7 @@ public sealed class MakeCredentialResponse
                 case 5: // largeBlobKey
                     largeBlobKey = reader.ReadByteString();
                     break;
-                case 8: // unsignedExtensionOutputs (CTAP v4 draft)
+                case 6: // unsignedExtensionOutputs (CTAP 2.2 / WebAuthn L3, aligned with sister SDKs)
                     unsignedExtensionOutputs = new Dictionary<string, ReadOnlyMemory<byte>>();
                     int? extMapSize = reader.ReadStartMap();
                     for (int j = 0; j < extMapSize; j++)

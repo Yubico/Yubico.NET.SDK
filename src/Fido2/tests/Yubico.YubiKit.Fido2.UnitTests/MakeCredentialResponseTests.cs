@@ -23,39 +23,10 @@ public class MakeCredentialResponseTests
     [Fact(Timeout = 5000)]
     public void Decode_WithUnsignedExtensionOutputs_CapturesExtensionMap()
     {
-        // Arrange - Build a minimal MakeCredential response with key 8 (unsignedExtensionOutputs)
-        var writer = new CborWriter(CborConformanceMode.Lax);
-        writer.WriteStartMap(4); // fmt, authData, attStmt, unsignedExtensionOutputs
-
-        // Key 1: fmt
-        writer.WriteInt32(1);
-        writer.WriteTextString("none");
-
-        // Key 2: authData (minimal: rpIdHash + flags + signCount = 37 bytes)
-        writer.WriteInt32(2);
-        var authData = new byte[37];
-        authData[32] = 0x01; // UP bit set
-        writer.WriteByteString(authData);
-
-        // Key 3: attStmt (empty for "none" format)
-        writer.WriteInt32(3);
-        writer.WriteStartMap(0);
-        writer.WriteEndMap();
-
-        // Key 8: unsignedExtensionOutputs
-        writer.WriteInt32(8);
-        writer.WriteStartMap(1); // One extension
-        writer.WriteTextString("previewSign");
-        // Nested CBOR value (just a simple map for test)
-        writer.WriteStartMap(1);
-        writer.WriteInt32(7); // att-obj key
-        writer.WriteByteString(new byte[] { 0xAA, 0xBB }); // Mock attestation object
-        writer.WriteEndMap();
-        writer.WriteEndMap();
-
-        writer.WriteEndMap();
-
-        byte[] cbor = writer.Encode();
+        // Arrange - Build a minimal MakeCredential response with key 6 (unsignedExtensionOutputs).
+        // Per CTAP 2.2 / WebAuthn L3, key 6 is the canonical position for unsignedExtensionOutputs,
+        // aligned with yubikit-swift, yubikit-android, and yubikit-python.
+        byte[] cbor = BuildMakeCredentialResponseCbor(unsignedExtensionOutputsKey: 6);
 
         // Act
         var response = MakeCredentialResponse.Decode(cbor);
@@ -64,5 +35,50 @@ public class MakeCredentialResponseTests
         Assert.NotNull(response.UnsignedExtensionOutputs);
         Assert.True(response.UnsignedExtensionOutputs.ContainsKey("previewSign"));
         Assert.True(response.UnsignedExtensionOutputs["previewSign"].Length > 0);
+    }
+
+    [Fact(Timeout = 5000)]
+    public void Decode_WithUnsignedExtensionOutputsAtLegacyKey8_IsSilentlyDropped()
+    {
+        // Regression guard: an early CTAP v4 draft used key 8 for unsignedExtensionOutputs,
+        // and v2 .NET historically parsed at that key (silent data loss against real firmware
+        // emitting key 6). This test pins the new behavior: a response carrying the legacy
+        // key 8 must NOT populate UnsignedExtensionOutputs (the parser should ignore it).
+        byte[] cbor = BuildMakeCredentialResponseCbor(unsignedExtensionOutputsKey: 8);
+
+        var response = MakeCredentialResponse.Decode(cbor);
+
+        Assert.Null(response.UnsignedExtensionOutputs);
+    }
+
+    private static byte[] BuildMakeCredentialResponseCbor(int unsignedExtensionOutputsKey)
+    {
+        var writer = new CborWriter(CborConformanceMode.Lax);
+        writer.WriteStartMap(4);
+
+        writer.WriteInt32(1);
+        writer.WriteTextString("none");
+
+        writer.WriteInt32(2);
+        var authData = new byte[37];
+        authData[32] = 0x01;
+        writer.WriteByteString(authData);
+
+        writer.WriteInt32(3);
+        writer.WriteStartMap(0);
+        writer.WriteEndMap();
+
+        writer.WriteInt32(unsignedExtensionOutputsKey);
+        writer.WriteStartMap(1);
+        writer.WriteTextString("previewSign");
+        writer.WriteStartMap(1);
+        writer.WriteInt32(7);
+        writer.WriteByteString(new byte[] { 0xAA, 0xBB });
+        writer.WriteEndMap();
+        writer.WriteEndMap();
+
+        writer.WriteEndMap();
+
+        return writer.Encode();
     }
 }

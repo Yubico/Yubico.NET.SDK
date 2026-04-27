@@ -81,13 +81,13 @@ jobs:
     if: inputs.build-coverage-report == true
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
         with:
           egress-policy: audit
 
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
       - name: Combine Coverage Reports # This is because one report is produced per project, and we want one result for all of them.
-        uses: danielpalme/ReportGenerator-GitHub-Action@cf6fe1b38ed5becc89ffe056c1f240825993be5b  # 5.5.4
+        uses: danielpalme/ReportGenerator-GitHub-Action@ee3806a36b8b2eb9594cb3e5fae045af7e5ead10  # 5.5.6
         with:
           reports: "**/*.cobertura.xml" # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
           targetdir: "${{ github.workspace }}" # REQUIRED # The directory where the generated report should be saved.
@@ -129,7 +129,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
         with:
           egress-policy: audit
 
@@ -157,7 +157,7 @@ jobs:
     if: github.event_name == 'pull_request' 
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
         with:
           egress-policy: audit
 

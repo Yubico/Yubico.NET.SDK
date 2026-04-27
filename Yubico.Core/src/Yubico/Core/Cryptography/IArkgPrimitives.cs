@@ -21,7 +21,7 @@ namespace Yubico.Core.Cryptography
     /// This interface abstracts platform-specific implementations of
     /// elliptic curve operations needed for Asynchronous Remote Key Generation.
     /// </remarks>
-    internal interface IArkgPrimitives
+    public interface IArkgPrimitives
     {
         /// <summary>
         /// Verifies that an elliptic curve point lies on the P-256 curve.

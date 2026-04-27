@@ -13,81 +13,123 @@
 // limitations under the License.
 
 using System;
+using System.Security;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace Yubico.Core.Cryptography
 {
     public class ArkgPrimitivesTests
     {
-        [Fact]
-        public void IsPointOnCurve_ValidP256Point_ReturnsTrue()
+        // P-256 generator G (SEC1 uncompressed: 0x04 || Gx || Gy). Authoritative
+        // reference: SEC2 v2 §2.4.2.
+        private static readonly byte[] P256Generator =
         {
-            // Phase 1: Placeholder test - will fail when IArkgPrimitives factory doesn't exist
-            // TODO Phase 3: Instantiate IArkgPrimitives via factory (CryptographyProviders pattern)
-            // TODO Phase 3: Use a known valid P-256 point in uncompressed SEC1 format
-            // TODO Phase 3: Assert IsPointOnCurve returns true
+            0x04,
+            0x6B, 0x17, 0xD1, 0xF2, 0xE1, 0x2C, 0x42, 0x47,
+            0xF8, 0xBC, 0xE6, 0xE5, 0x63, 0xA4, 0x40, 0xF2,
+            0x77, 0x03, 0x7D, 0x81, 0x2D, 0xEB, 0x33, 0xA0,
+            0xF4, 0xA1, 0x39, 0x45, 0xD8, 0x98, 0xC2, 0x96,
+            0x4F, 0xE3, 0x42, 0xE2, 0xFE, 0x1A, 0x7F, 0x9B,
+            0x8E, 0xE7, 0xEB, 0x4A, 0x7C, 0x0F, 0x9E, 0x16,
+            0x2B, 0xCE, 0x33, 0x57, 0x6B, 0x31, 0x5E, 0xCE,
+            0xCB, 0xB6, 0x40, 0x68, 0x37, 0xBF, 0x51, 0xF5,
+        };
 
-            // TODO Phase 3: byte[] validPoint = new byte[65];  // replace with real valid P-256 point
-            // TODO Phase 3: validPoint[0] = 0x04; // Uncompressed point marker
-            // TODO Phase 3: var primitives = CryptographyProviders.ArkgPrimitivesCreator();
-            // TODO Phase 3: Assert.True(primitives.IsPointOnCurve(validPoint));
+        [Fact]
+        public void IsPointOnCurve_ValidP256Generator_ReturnsTrue()
+        {
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
 
-            throw new NotImplementedException("IArkgPrimitives factory not yet implemented");
+            Assert.True(primitives.IsPointOnCurve(P256Generator));
         }
 
         [Fact]
         public void IsPointOnCurve_OffCurvePoint_ReturnsFalse()
         {
-            // Phase 1: Placeholder test - will fail when IArkgPrimitives factory doesn't exist
-            // TODO Phase 3: Instantiate IArkgPrimitives via factory
-            // TODO Phase 3: Use a point that is NOT on the P-256 curve
-            // TODO Phase 3: Assert IsPointOnCurve returns false
+            byte[] offCurve = (byte[])P256Generator.Clone();
+            offCurve[64] ^= 0x01; // Flip the lowest bit of Y → no longer on curve.
 
-            // TODO Phase 3: byte[] offCurvePoint = new byte[65];  // replace with real off-curve point
-            // TODO Phase 3: offCurvePoint[0] = 0x04; // Uncompressed point marker
-            // TODO Phase 3: fill with coordinates that don't satisfy P-256 curve equation
-            // TODO Phase 3: var primitives = CryptographyProviders.ArkgPrimitivesCreator();
-            // TODO Phase 3: Assert.False(primitives.IsPointOnCurve(offCurvePoint));
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
 
-            throw new NotImplementedException("IArkgPrimitives factory not yet implemented");
+            Assert.False(primitives.IsPointOnCurve(offCurve));
         }
 
         [Fact]
-        public void ComputeEcdhSharedSecret_KnownInputs_ProducesExpectedOutput()
+        public void IsPointOnCurve_MalformedLength_ReturnsFalse()
         {
-            // Phase 1: Placeholder test - will fail when IArkgPrimitives factory doesn't exist
-            // TODO Phase 3: Use ECDH test vectors (NIST or custom)
-            // TODO Phase 3: Verify computed shared secret matches expected value
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
 
-            // TODO Phase 3: byte[] privateScalar = new byte[32];  // replace with real test vector
-            // TODO Phase 3: byte[] publicPoint = new byte[65];    // replace with real test vector
-            // TODO Phase 3: byte[] expectedSecret = new byte[32]; // replace with expected shared secret
-            // TODO Phase 3: var primitives = CryptographyProviders.ArkgPrimitivesCreator();
-            // TODO Phase 3: var sharedSecret = primitives.ComputeEcdhSharedSecret(privateScalar, publicPoint);
-            // TODO Phase 3: Assert.Equal(expectedSecret, sharedSecret);
-
-            throw new NotImplementedException("IArkgPrimitives factory not yet implemented");
+            Assert.False(primitives.IsPointOnCurve(new byte[10]));
         }
 
         [Fact]
-        public void Derive_KnownInputs_ProducesExpectedDerivedKey()
+        public void IsPointOnCurve_WrongTagByte_ReturnsFalse()
         {
-            // Phase 1: Placeholder test - will fail when IArkgPrimitives factory doesn't exist
-            // TODO Phase 3: Use ARKG test vectors (from Rust reference or custom)
-            // TODO Phase 3: Verify derived public key and ARKG key handle match expected values
+            byte[] compressedTag = (byte[])P256Generator.Clone();
+            compressedTag[0] = 0x02;
 
-            // TODO Phase 3: byte[] pkBl = new byte[65];              // replace with real test vector
-            // TODO Phase 3: byte[] pkKem = new byte[65];             // replace with real test vector
-            // TODO Phase 3: byte[] ikm = new byte[32];               // replace with real test vector
-            // TODO Phase 3: byte[] ctx = new byte[16];               // replace with real test vector
-            // TODO Phase 3: byte[] expectedDerivedPk = new byte[65]; // replace with expected output
-            // TODO Phase 3: byte[] expectedArkgKh = new byte[32];    // replace with expected output
-            // TODO Phase 3: var primitives = CryptographyProviders.ArkgPrimitivesCreator();
-            // TODO Phase 3: var (derivedPk, arkgKh) = primitives.Derive(pkBl, pkKem, ikm, ctx);
-            // TODO Phase 3: Assert.Equal(expectedDerivedPk, derivedPk);
-            // TODO Phase 3: Assert.Equal(expectedArkgKh, arkgKh);
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
 
-            throw new NotImplementedException("IArkgPrimitives factory not yet implemented");
+            Assert.False(primitives.IsPointOnCurve(compressedTag));
+        }
+
+        [Fact]
+        public void IsPointOnCurve_NullPoint_Throws()
+        {
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+
+            _ = Assert.Throws<ArgumentNullException>(() => primitives.IsPointOnCurve(null!));
+        }
+
+        [Fact]
+        public void ComputeEcdhSharedSecret_RoundTrip_MatchesPeer()
+        {
+            using var alice = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+            using var bob = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+
+            ECParameters aliceParams = alice.ExportParameters(includePrivateParameters: true);
+            ECParameters bobParams = bob.ExportParameters(includePrivateParameters: true);
+
+            byte[] alicePub = ToSec1(bobParams);
+            byte[] bobPub = ToSec1(aliceParams);
+
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+            byte[] secretFromAlice = primitives.ComputeEcdhSharedSecret(aliceParams.D!, alicePub);
+            byte[] secretFromBob = primitives.ComputeEcdhSharedSecret(bobParams.D!, bobPub);
+
+            Assert.Equal(secretFromAlice, secretFromBob);
+            Assert.Equal(32, secretFromAlice.Length);
+        }
+
+        [Fact]
+        public void ComputeEcdhSharedSecret_OffCurvePublicPoint_Throws()
+        {
+            byte[] offCurve = (byte[])P256Generator.Clone();
+            offCurve[64] ^= 0x01;
+
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+
+            _ = Assert.Throws<SecurityException>(
+                () => primitives.ComputeEcdhSharedSecret(new byte[32] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, offCurve));
+        }
+
+        [Fact]
+        public void ComputeEcdhSharedSecret_MalformedPublicPoint_Throws()
+        {
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+
+            _ = Assert.Throws<ArgumentException>(
+                () => primitives.ComputeEcdhSharedSecret(new byte[32], new byte[10]));
+        }
+
+        private static byte[] ToSec1(ECParameters p)
+        {
+            byte[] sec1 = new byte[65];
+            sec1[0] = 0x04;
+            Buffer.BlockCopy(p.Q.X!, 0, sec1, 1, 32);
+            Buffer.BlockCopy(p.Q.Y!, 0, sec1, 33, 32);
+            return sec1;
         }
     }
 }

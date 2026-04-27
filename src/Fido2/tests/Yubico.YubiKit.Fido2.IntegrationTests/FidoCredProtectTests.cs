@@ -126,13 +126,32 @@ public class FidoCredProtectTests
                         PinUvAuthProtocol = clientPin.Protocol.Version
                     });
 
+                // Per CTAP 2.x: a regular pinUvAuthToken must be regenerated for each
+                // authenticator invocation (PPUAT is the read-only exception, not used here).
+                // Re-mint the token + auth param before the second GetAssertion call.
+                byte[] allowListPinToken;
+                if (supportsPermissions)
+                {
+                    allowListPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+                        FidoTestData.PinUtf8,
+                        PinUvAuthTokenPermissions.GetAssertion,
+                        FidoTestData.RpId);
+                }
+                else
+                {
+                    allowListPinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
+                }
+
+                var allowListPinUvAuthParam = FidoTestHelpers.ComputeGetAssertionAuthParam(
+                    clientPin.Protocol, allowListPinToken, assertChallenge);
+
                 var withAllowListResult = await session.GetAssertionAsync(
                     rpId: FidoTestData.RpId,
                     clientDataHash: assertChallenge,
                     options: new GetAssertionOptions
                     {
                         AllowList = [new PublicKeyCredentialDescriptor(credentialId)],
-                        PinUvAuthParam = assertPinUvAuthParam,
+                        PinUvAuthParam = allowListPinUvAuthParam,
                         PinUvAuthProtocol = clientPin.Protocol.Version
                     });
 

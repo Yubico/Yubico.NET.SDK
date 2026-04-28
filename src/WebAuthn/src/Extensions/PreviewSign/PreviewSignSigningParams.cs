@@ -26,7 +26,9 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// Per CTAP v4 draft specification §3.2:
 /// - KeyHandle identifies which signing key to use (from prior registration)
 /// - Tbs (to-be-signed) is the raw data to sign, unaltered by the authenticator
-/// - AdditionalArgs is optional CBOR-encoded COSE_Sign_Args for two-party signing algorithms
+/// - CoseSignArgs is the typed, optional <c>COSE_Sign_Args</c> for two-party signing algorithms
+///   (e.g. ARKG). The WebAuthn layer re-exports the Fido2 <see cref="Fido2.Extensions.CoseSignArgs"/>
+///   type rather than wrapping it: there is exactly one canonical encoder and it lives in Fido2.
 /// </para>
 /// </remarks>
 public sealed record class PreviewSignSigningParams
@@ -45,17 +47,20 @@ public sealed record class PreviewSignSigningParams
     public ReadOnlyMemory<byte> Tbs { get; }
 
     /// <summary>
-    /// Gets the optional CBOR-encoded COSE_Sign_Args for algorithms requiring additional parameters
-    /// (e.g., split-signing algorithms). Must be valid CBOR when present.
+    /// Gets the optional typed <c>COSE_Sign_Args</c> for algorithms requiring additional
+    /// parameters (e.g. ARKG-P256). Construct with
+    /// <see cref="Fido2.Extensions.CoseSignArgs.ArkgP256(ReadOnlyMemory{byte}, ReadOnlyMemory{byte})"/>.
+    /// The Fido2 layer owns the canonical CBOR encoder; WebAuthn passes this value through
+    /// unchanged.
     /// </summary>
-    public ReadOnlyMemory<byte>? AdditionalArgs { get; }
+    public Fido2.Extensions.CoseSignArgs? CoseSignArgs { get; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="PreviewSignSigningParams"/>.
     /// </summary>
     /// <param name="keyHandle">The key handle for the signing key.</param>
     /// <param name="tbs">Data to be signed.</param>
-    /// <param name="additionalArgs">Optional additional signing arguments.</param>
+    /// <param name="coseSignArgs">Optional typed <c>COSE_Sign_Args</c> (required for ARKG algorithms).</param>
     /// <exception cref="WebAuthnClientError">
     /// Thrown when:
     /// - KeyHandle is empty (InvalidRequest)
@@ -64,7 +69,7 @@ public sealed record class PreviewSignSigningParams
     public PreviewSignSigningParams(
         ReadOnlyMemory<byte> keyHandle,
         ReadOnlyMemory<byte> tbs,
-        ReadOnlyMemory<byte>? additionalArgs = null)
+        Fido2.Extensions.CoseSignArgs? coseSignArgs = null)
     {
         if (keyHandle.Length == 0)
         {
@@ -80,25 +85,8 @@ public sealed record class PreviewSignSigningParams
                 "previewSign Tbs (to-be-signed data) must not be empty");
         }
 
-        // Validate AdditionalArgs is well-formed CBOR if present
-        if (additionalArgs.HasValue)
-        {
-            try
-            {
-                var reader = new System.Formats.Cbor.CborReader(additionalArgs.Value, System.Formats.Cbor.CborConformanceMode.Ctap2Canonical);
-                reader.SkipValue(); // Attempt to parse one CBOR data item
-            }
-            catch (System.Formats.Cbor.CborContentException ex)
-            {
-                throw new WebAuthnClientError(
-                    WebAuthnClientErrorCode.InvalidRequest,
-                    "previewSign AdditionalArgs must be valid CBOR-encoded data",
-                    ex);
-            }
-        }
-
         KeyHandle = keyHandle;
         Tbs = tbs;
-        AdditionalArgs = additionalArgs;
+        CoseSignArgs = coseSignArgs;
     }
 }

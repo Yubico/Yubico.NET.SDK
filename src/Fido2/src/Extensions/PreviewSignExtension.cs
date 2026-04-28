@@ -114,7 +114,7 @@ public sealed class PreviewSignAuthenticationInput
 /// Per CTAP v4 draft specification:
 /// - KeyHandle identifies which signing key to use (from prior registration)
 /// - Tbs (to-be-signed) is the raw data to sign
-/// - AdditionalArgs is optional CBOR-encoded COSE_Sign_Args for two-party signing algorithms
+/// - CoseSignArgs is the typed, optional COSE_Sign_Args for two-party signing algorithms (e.g. ARKG)
 /// </para>
 /// </remarks>
 public sealed class PreviewSignSigningParams
@@ -130,20 +130,22 @@ public sealed class PreviewSignSigningParams
     public ReadOnlyMemory<byte> Tbs { get; init; }
 
     /// <summary>
-    /// Gets the optional CBOR-encoded COSE_Sign_Args for algorithms requiring additional parameters.
+    /// Gets the optional typed <c>COSE_Sign_Args</c> for algorithms requiring additional parameters
+    /// (e.g. ARKG). When present, the encoder emits canonical CBOR under authentication input
+    /// key 7 (wrapped as bstr).
     /// </summary>
-    public ReadOnlyMemory<byte>? AdditionalArgs { get; init; }
+    public CoseSignArgs? CoseSignArgs { get; init; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="PreviewSignSigningParams"/>.
     /// </summary>
     /// <param name="keyHandle">The key handle for the signing key.</param>
     /// <param name="tbs">Data to be signed.</param>
-    /// <param name="additionalArgs">Optional additional signing arguments.</param>
+    /// <param name="coseSignArgs">Optional typed <c>COSE_Sign_Args</c> (required for ARKG algorithms).</param>
     public PreviewSignSigningParams(
         ReadOnlyMemory<byte> keyHandle,
         ReadOnlyMemory<byte> tbs,
-        ReadOnlyMemory<byte>? additionalArgs = null)
+        CoseSignArgs? coseSignArgs = null)
     {
         if (keyHandle.Length == 0)
         {
@@ -157,7 +159,7 @@ public sealed class PreviewSignSigningParams
 
         KeyHandle = keyHandle;
         Tbs = tbs;
-        AdditionalArgs = additionalArgs;
+        CoseSignArgs = coseSignArgs;
     }
 }
 
@@ -283,6 +285,75 @@ public static class PreviewSignCbor
     }
 
     /// <summary>
+    /// CBOR keys inside a <c>COSE_Sign_Args</c> map.
+    /// </summary>
+    /// <remarks>
+    /// Key 3 (alg) is the request signing-op algorithm; algorithm-specific payload
+    /// keys live in negative integer space (-1, -2, ...). For ARKG-P256:
+    /// <c>-1 = arkg_kh</c>, <c>-2 = ctx</c>.
+    /// </remarks>
+    private static class CoseSignArgsKeys
+    {
+        internal const int Algorithm = 3;
+        internal const int ArkgKeyHandle = -1;
+        internal const int ArkgContext = -2;
+    }
+
+    /// <summary>
+    /// Encodes a typed <see cref="CoseSignArgs"/> as CTAP2-canonical CBOR. The returned bytes
+    /// are the inner payload that <see cref="EncodeAuthenticationInput"/> wraps as a CBOR
+    /// byte-string under authentication input key 7.
+    /// </summary>
+    /// <param name="args">The typed <c>COSE_Sign_Args</c> value to encode.</param>
+    /// <returns>CTAP2-canonical CBOR bytes for the <c>COSE_Sign_Args</c> map.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="args"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when the runtime <see cref="CoseSignArgs"/> subtype is not supported by this SDK
+    /// build. Forward-compat trap: if a future Yubico-internal subtype is added without an
+    /// encoder branch here, the call fails fast rather than silently emitting empty bytes.
+    /// </exception>
+    public static byte[] EncodeCoseSignArgs(CoseSignArgs args)
+    {
+        ArgumentNullException.ThrowIfNull(args);
+
+        return args switch
+        {
+            ArkgP256SignArgs arkg => EncodeArkgP256SignArgs(arkg),
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(args),
+                $"COSE_Sign_Args subtype '{args.GetType().FullName}' is not supported by this SDK build."),
+        };
+    }
+
+    /// <summary>
+    /// Encodes an <see cref="ArkgP256SignArgs"/> as the 3-key CBOR map
+    /// <c>{3: -65539, -1: kh, -2: ctx}</c> in CTAP2-canonical order.
+    /// </summary>
+    /// <remarks>
+    /// CTAP2-canonical orders integer keys by ascending unsigned encoding: positive ints
+    /// (3) precede negative ints (-1, -2). Verified against
+    /// <c>cnh-authenticator-rs/src/get_assertion.rs:290-323</c> and
+    /// <c>Yubico.NET.SDK-Legacy/Yubico.YubiKey/src/Yubico/YubiKey/Fido2/GetAssertionParameters.cs:402-499</c>.
+    /// </remarks>
+    private static byte[] EncodeArkgP256SignArgs(ArkgP256SignArgs arkg)
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(3);
+
+        writer.WriteInt32(CoseSignArgsKeys.Algorithm);
+        writer.WriteInt32(arkg.Algorithm);
+
+        writer.WriteInt32(CoseSignArgsKeys.ArkgKeyHandle);
+        writer.WriteByteString(arkg.KeyHandle.Span);
+
+        writer.WriteInt32(CoseSignArgsKeys.ArkgContext);
+        writer.WriteByteString(arkg.Context.Span);
+
+        writer.WriteEndMap();
+        return writer.Encode();
+    }
+
+    /// <summary>
     /// Encodes registration input (algorithm list + flags) as canonical CBOR.
     /// </summary>
     /// <param name="input">The registration input.</param>
@@ -330,7 +401,7 @@ public static class PreviewSignCbor
 
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
-        int paramCount = signingParams.AdditionalArgs.HasValue ? 3 : 2;
+        int paramCount = signingParams.CoseSignArgs is not null ? 3 : 2;
         writer.WriteStartMap(paramCount);
 
         // Key 2: keyHandle
@@ -341,11 +412,11 @@ public static class PreviewSignCbor
         writer.WriteInt32(AuthenticationInputKeys.ToBeSigned);
         writer.WriteByteString(signingParams.Tbs.Span);
 
-        // Key 7: args (optional, wrapped as bstr)
-        if (signingParams.AdditionalArgs.HasValue)
+        // Key 7: typed COSE_Sign_Args (optional, wrapped as bstr)
+        if (signingParams.CoseSignArgs is not null)
         {
             writer.WriteInt32(AuthenticationInputKeys.AdditionalArgs);
-            writer.WriteByteString(signingParams.AdditionalArgs.Value.Span);
+            writer.WriteByteString(EncodeCoseSignArgs(signingParams.CoseSignArgs));
         }
 
         writer.WriteEndMap();

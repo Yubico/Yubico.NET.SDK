@@ -152,11 +152,13 @@ internal static class PreviewSignAdapter
                 "previewSign signByCredential's single entry must match allowCredentials[0]");
         }
 
-        // Translate WebAuthn SigningParams to Fido2 SigningParams
+        // Translate WebAuthn SigningParams to Fido2 SigningParams.
+        // CoseSignArgs is the same Fido2 type re-exported by WebAuthn — pass through unchanged
+        // (no clone, no CBOR built here; Fido2 owns the canonical encoder).
         var fido2SigningParams = new Fido2.Extensions.PreviewSignSigningParams(
             keyHandle: signingParams.KeyHandle,
             tbs: signingParams.Tbs,
-            additionalArgs: signingParams.AdditionalArgs);
+            coseSignArgs: signingParams.CoseSignArgs);
 
         // Translate to Fido2 authentication input (expects dictionary)
         var signByCredential = new Dictionary<ReadOnlyMemory<byte>, Fido2.Extensions.PreviewSignSigningParams>(

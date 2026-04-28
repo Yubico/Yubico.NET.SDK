@@ -25,6 +25,7 @@ using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 using Yubico.YubiKit.WebAuthn.Preferences;
+using Fido2Extensions = Yubico.YubiKit.Fido2.Extensions;
 using static Yubico.YubiKit.WebAuthn.IntegrationTests.WebAuthnTestHelpers;
 
 namespace Yubico.YubiKit.WebAuthn.IntegrationTests;
@@ -83,28 +84,34 @@ public class PreviewSignTests
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task FullCeremony_RegisterWithPreviewSign_ThenSign_ReturnsSignature(YubiKeyTestState state)
     {
-        // SKIPPED: hardware verification of single-credential previewSign authentication is BLOCKED on ARKG.
+        // SKIPPED for automated CI: this test exercises the full ARKG-P256 previewSign
+        // authentication ceremony end-to-end. It requires:
+        //   - Physical YubiKey 5.8.0-beta over USB HID
+        //   - User touch (presence) at the GetAssertion call
+        //   - A real ARKG (arkg_kh, ctx) pair derived from the registration's COSE seed key.
         //
-        // Phase 9.2 status:
-        //   - Wire format: ✅ verified byte-for-byte against the Rust reference (cnh-authenticator-rs);
-        //                  see PreviewSignCborEncodingTests for deterministic byte-level assertions
-        //   - Hardware registration with non-ARKG algorithms (Es256, EdDsa): ❌ YubiKey 5.8.0-beta firmware
-        //                  rejects with CtapException "Unsupported algorithm" (verified 2026-04-23)
-        //   - Hardware registration with ARKG (Esp256SplitArkgPlaceholder, -65539): ✅ works.
-        //                  NOTE: -65539 is the correct request alg, NOT -9 (Esp256). -9 names the
-        //                  *output* signature alg only and is rejected at protocol-decode time if
-        //                  sent on the wire. Verified against Yubico.NET.SDK-Legacy commit fe82b007.
-        //                  Authentication then requires additional_args (COSE_Sign_Args map:
-        //                  {3: -65539, -1: arkg_kh, -2: ctx}) which our adapter does not yet build.
+        // Phase 10 §3 (this PRD) ships the typed CoseSignArgs builder so the body below can be
+        // written. ARKG seed-key derivation (which produces arkg_kh and ctx) lives in a separate
+        // Phase 10 follow-up (Yubico.Core port of ArkgPrimitivesOpenSsl.cs) — until that lands,
+        // the placeholder bytes below will not survive firmware verification, so the test stays
+        // skipped in CI. Dennis runs this manually against hardware once a real (kh, ctx) pair
+        // is available.
         //
-        // → Hardware verification of the auth path requires ARKG support (Phase 10).
-        //   See Plans/phase-10-previewsign-auth.md §3 for the ARKG additional_args first-class builder tracker.
+        // Verified Phase 10 §3 builder invariants (covered by unit tests):
+        //   ✅ Wire alg = -65539 (CoseAlgorithm.ArkgP256), NOT -9 (output sig alg)
+        //   ✅ KH must be exactly 81 bytes (16-byte HMAC tag || 65-byte SEC1 P-256 point)
+        //   ✅ CTX must be ≤64 bytes (HKDF length-byte prefix bound)
+        //   ✅ COSE_Sign_Args map = {3: -65539, -1: kh, -2: ctx}, CTAP2-canonical order
+        //   ✅ Wrapped as bstr at outer authentication input key 7
         //
-        // The encoder is already byte-correct; what blocks end-to-end hardware test is the ARKG plumbing.
-        Skip.If(true, "previewSign authentication hardware test requires ARKG support — deferred to Phase 10. " +
-                      "See Plans/phase-10-previewsign-auth.md §3.");
+        // Engineer-implemented (Phase 10 §3 typed CoseSignArgs builder),
+        // awaiting Dennis hardware verification once ARKG seed-key derivation lands.
+        Skip.If(true,
+            "previewSign FullCeremony requires hardware (USB HID + user touch) AND a real " +
+            "ARKG (kh, ctx) pair. Engineer-implemented (Phase 10 §3 typed CoseSignArgs builder), " +
+            "awaiting Dennis hardware verification.");
 
-        // --- Phase 1: Registration with previewSign key generation ---
+        // --- Phase 1: Registration with previewSign ARKG-P256 key generation ---
         await using var session1 = await state.Device.CreateFidoSessionAsync();
 
         Skip.IfNot(await SupportsPreviewSignAsync(session1),
@@ -123,11 +130,12 @@ public class PreviewSignTests
             PubKeyCredParams = [CoseAlgorithm.Es256],
             ResidentKey = ResidentKeyPreference.Required,
             UserVerification = UserVerificationPreference.Discouraged,
+            // ARKG-P256 (-65539) is the only algorithm YK 5.8.0-beta accepts for the auth path.
+            // -9 (Esp256) is the OUTPUT signature alg, not the request alg — sending -9 here
+            // is the bug class the typed CoseSignArgs builder makes unrepresentable.
             Extensions = new RegistrationExtensionInputs(
                 PreviewSign: PreviewSignRegistrationInput.GenerateKey(
-                    CoseAlgorithm.Es256, CoseAlgorithm.EdDsa))
-            // Phase 9.2: Using non-ARKG algorithms only. Esp256 and Esp256SplitArkgPlaceholder
-            // require ARKG additional_args during authentication (deferred to Phase 10).
+                    CoseAlgorithm.ArkgP256))
         };
 
         var regResponse = await regClient.MakeCredentialAsync(
@@ -143,9 +151,16 @@ public class PreviewSignTests
 
         Assert.True(keyHandle.Length > 0);
 
+        // TODO(Phase 10 follow-up): replace placeholder ARKG (kh, ctx) with a real pair derived
+        // from generatedKey.PublicKey via the (forthcoming) Yubico.Core ARKG port. Until then
+        // the firmware will reject this auth. The encoder shape itself is exercised by unit tests.
+        byte[] arkgKeyHandle = new byte[81];
+        arkgKeyHandle[16] = 0x04; // SEC1 leading byte
+        byte[] arkgContext = "ARKG-P256.test vectors"u8.ToArray();
+
         await regClient.DisposeAsync();
 
-        // --- Phase 2: Authentication with previewSign signing ---
+        // --- Phase 2: Authentication with typed CoseSignArgs (Phase 10 §3 builder) ---
         await using var session2 = await state.Device.CreateFidoSessionAsync();
 
         await using var authClient = CreateClient(session2);
@@ -158,7 +173,8 @@ public class PreviewSignTests
         {
             [credentialId] = new PreviewSignSigningParams(
                 keyHandle: keyHandle,
-                tbs: toBeSigned)
+                tbs: toBeSigned,
+                coseSignArgs: Fido2Extensions.CoseSignArgs.ArkgP256(arkgKeyHandle, arkgContext))
         };
 
         var authOptions = new AuthenticationOptions

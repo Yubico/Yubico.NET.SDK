@@ -53,7 +53,32 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     /// <summary>
     /// ESP256 split-key ARKG placeholder (CTAP v4 draft previewSign extension).
     /// </summary>
+    /// <remarks>
+    /// This is the wire-level COSE algorithm identifier for the ARKG-P256-ESP256 signing operation,
+    /// written under key 3 of a <c>COSE_Sign_Args</c> map (previewSign authentication request).
+    /// Do NOT confuse with the seed-key COSE-key alg identifier <c>-65700</c>
+    /// (<c>ARKG_P256_PLACEHOLDER.ALGORITHM</c> in python-fido2) which lives at a different protocol layer.
+    /// </remarks>
     public static readonly CoseAlgorithm Esp256SplitArkgPlaceholder = new(-65539);
+
+    /// <summary>
+    /// ARKG-P256-ESP256 signing-operation algorithm identifier (alias of
+    /// <see cref="Esp256SplitArkgPlaceholder"/>; value <c>-65539</c>).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Stable, intent-revealing alias for the ARKG-P256 signing-operation alg ID. Use this on
+    /// <c>ArkgP256SignArgs.Algorithm</c> and any caller-facing API that names the request alg.
+    /// The underlying value is intentionally identical to <see cref="Esp256SplitArkgPlaceholder"/>;
+    /// when Yubico finalises the alg ID we can rename one without churning consumers of the other.
+    /// </para>
+    /// <para>
+    /// Wire value: <c>-65539</c>. This is the request-side signing algorithm and goes on the wire
+    /// at <c>COSE_Sign_Args</c> key 3. It is NOT the seed-key COSE-key alg (which is <c>-65700</c>
+    /// in python-fido2's <c>ARKG_P256_PLACEHOLDER</c>).
+    /// </para>
+    /// </remarks>
+    public static readonly CoseAlgorithm ArkgP256 = Esp256SplitArkgPlaceholder;
 
     /// <summary>
     /// Gets a value indicating whether this is a known algorithm.

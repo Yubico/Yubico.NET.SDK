@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Fido2.Cose;
+using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Attestation;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -210,11 +211,20 @@ internal static class PreviewSignAdapter
         // Try to read attestation object from unsignedExtensionOutputs["previewSign"]
         if (unsignedExtensionOutputs?.TryGetValue(ExtensionId, out var unsignedCbor) == true)
         {
-            // Decode the unsigned output (contains att-obj) via Fido2 decoder
-            ReadOnlyMemory<byte> attestationObjectBytes = Fido2.Extensions.PreviewSignCbor.DecodeUnsignedRegistrationOutput(unsignedCbor);
+            // Decode the CTAP-shaped inner attestation object via the Fido2 decoder.
+            // The wire payload is {1:fmt, 2:authData, 3:attStmt} (integer keys, NOT WebAuthn
+            // text-string keys). Feeding the inner bytes directly to WebAuthnAttestationObject.Decode
+            // would crash on "next CBOR data item is of major type '0'" because the WebAuthn
+            // decoder expects text keys. Per legacy SDK reference (Yubico.NET.SDK-Legacy
+            // Fido2/PreviewSignExtension.cs:144-147 and 249-282) and python-fido2 the inner
+            // shape is canonical CTAP. Fido2 owns this decode; WebAuthn rebuilds the spec object.
+            Fido2.Extensions.PreviewSignCbor.InnerAttestationObject inner =
+                Fido2.Extensions.PreviewSignCbor.DecodeUnsignedRegistrationOutput(unsignedCbor);
 
-            // Decode the nested attestation object
-            var attestationObject = WebAuthnAttestationObject.Decode(attestationObjectBytes);
+            var innerAuthData = WebAuthnAuthenticatorData.Decode(inner.AuthData);
+            var format = new AttestationFormat(inner.Fmt);
+            var statement = AttestationStatement.Decode(format, inner.AttStmtRawCbor);
+            var attestationObject = WebAuthnAttestationObject.Create(innerAuthData, statement);
 
             // Extract key handle and public key from attested credential data
             var attestedCredData = attestationObject.AuthenticatorData.AttestedCredentialData;

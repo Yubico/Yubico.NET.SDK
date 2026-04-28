@@ -472,32 +472,64 @@ public static class PreviewSignCbor
     }
 
     /// <summary>
+    /// CBOR keys inside the previewSign nested attestation object (CTAP-shaped, integer-keyed).
+    /// </summary>
+    /// <remarks>
+    /// The previewSign unsigned-extension-output payload wraps an inner attestation object whose
+    /// keys are CTAP-style integers ({1:fmt, 2:authData, 3:attStmt}), NOT WebAuthn-style text
+    /// strings ({"fmt","authData","attStmt"}). This matches the legacy SDK
+    /// (Yubico.NET.SDK-Legacy/Yubico/YubiKey/Fido2/PreviewSignExtension.cs:144-147 and 249-282)
+    /// and is what YubiKey 5.8.0-beta firmware actually returns on the wire.
+    /// </remarks>
+    private static class InnerAttestationObjectKeys
+    {
+        internal const int Fmt = 1;
+        internal const int AuthData = 2;
+        internal const int AttStmt = 3;
+    }
+
+    /// <summary>
+    /// Decoded components of the inner attestation object embedded in
+    /// unsignedExtensionOutputs["previewSign"][7].
+    /// </summary>
+    /// <param name="Fmt">Attestation format identifier (e.g. "none", "packed").</param>
+    /// <param name="AuthData">Raw CTAP authenticator-data bytes.</param>
+    /// <param name="AttStmtRawCbor">Raw CBOR slice of the attStmt map (caller decodes with the appropriate AttestationStatement decoder).</param>
+    public readonly record struct InnerAttestationObject(
+        string Fmt,
+        ReadOnlyMemory<byte> AuthData,
+        ReadOnlyMemory<byte> AttStmtRawCbor);
+
+    /// <summary>
     /// Decodes unsigned registration output from unsignedExtensionOutputs["previewSign"].
     /// </summary>
-    /// <param name="cbor">CBOR-encoded map with key {7: att-obj}.</param>
+    /// <param name="cbor">CBOR-encoded outer map with key {7: inner-att-obj}.</param>
     /// <returns>
-    /// The raw attestation object bytes.
+    /// The decoded inner attestation object components (fmt, authData, attStmt raw CBOR).
     /// </returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when CBOR is malformed or attestation object is missing.
+    /// Thrown when CBOR is malformed or required fields are missing.
     /// </exception>
     /// <remarks>
-    /// Per CTAP v4 draft, the unsigned output contains key 7 (att-obj) with a nested attestation object.
-    /// Caller is responsible for decoding the nested attestation object.
+    /// Per CTAP v4 draft, the unsigned output contains key 7 (att-obj) wrapping a CTAP-shaped
+    /// attestation object map {1:fmt, 2:authData, 3:attStmt}. NOTE: the inner map uses integer
+    /// keys (not the WebAuthn text-string keys "fmt"/"authData"/"attStmt"). Callers that need a
+    /// WebAuthn-spec attestation object must rebuild it from these components rather than feeding
+    /// the inner CBOR directly to a WebAuthn decoder.
     /// </remarks>
-    public static ReadOnlyMemory<byte> DecodeUnsignedRegistrationOutput(ReadOnlyMemory<byte> cbor)
+    public static InnerAttestationObject DecodeUnsignedRegistrationOutput(ReadOnlyMemory<byte> cbor)
     {
         var reader = new CborReader(cbor, CborConformanceMode.Ctap2Canonical);
-        int? mapSize = reader.ReadStartMap();
+        int? outerMapSize = reader.ReadStartMap();
 
-        ReadOnlyMemory<byte>? attestationObjectBytes = null;
+        ReadOnlyMemory<byte>? innerCbor = null;
 
-        for (int i = 0; i < mapSize; i++)
+        for (int i = 0; i < outerMapSize; i++)
         {
             int key = reader.ReadInt32();
             if (key == RegistrationOutputKeys.AttestationObject)
             {
-                attestationObjectBytes = reader.ReadByteString();
+                innerCbor = reader.ReadByteString();
             }
             else
             {
@@ -507,12 +539,69 @@ public static class PreviewSignCbor
 
         reader.ReadEndMap();
 
-        if (!attestationObjectBytes.HasValue)
+        if (!innerCbor.HasValue)
         {
             throw new InvalidOperationException("previewSign unsigned output missing attestation object (key 7)");
         }
 
-        return attestationObjectBytes.Value;
+        return DecodeInnerAttestationObject(innerCbor.Value);
+    }
+
+    /// <summary>
+    /// Decodes the CTAP-shaped inner attestation object: {1:fmt, 2:authData, 3:attStmt}.
+    /// Captures the raw CBOR slice for attStmt so callers can route it to a format-specific decoder.
+    /// </summary>
+    private static InnerAttestationObject DecodeInnerAttestationObject(ReadOnlyMemory<byte> innerCbor)
+    {
+        var reader = new CborReader(innerCbor, CborConformanceMode.Ctap2Canonical);
+        int? mapSize = reader.ReadStartMap();
+
+        string? fmt = null;
+        ReadOnlyMemory<byte>? authData = null;
+        ReadOnlyMemory<byte>? attStmtRaw = null;
+
+        for (int i = 0; i < mapSize; i++)
+        {
+            int key = reader.ReadInt32();
+            switch (key)
+            {
+                case InnerAttestationObjectKeys.Fmt:
+                    fmt = reader.ReadTextString();
+                    break;
+                case InnerAttestationObjectKeys.AuthData:
+                    authData = reader.ReadByteString();
+                    break;
+                case InnerAttestationObjectKeys.AttStmt:
+                    var bytesBefore = reader.BytesRemaining;
+                    reader.SkipValue();
+                    var bytesConsumed = bytesBefore - reader.BytesRemaining;
+                    var offset = innerCbor.Length - bytesBefore;
+                    attStmtRaw = innerCbor.Slice(offset, bytesConsumed);
+                    break;
+                default:
+                    reader.SkipValue();
+                    break;
+            }
+        }
+
+        reader.ReadEndMap();
+
+        if (fmt is null)
+        {
+            throw new InvalidOperationException("previewSign inner attestation object missing fmt (key 1)");
+        }
+
+        if (!authData.HasValue)
+        {
+            throw new InvalidOperationException("previewSign inner attestation object missing authData (key 2)");
+        }
+
+        if (!attStmtRaw.HasValue)
+        {
+            throw new InvalidOperationException("previewSign inner attestation object missing attStmt (key 3)");
+        }
+
+        return new InnerAttestationObject(fmt, authData.Value, attStmtRaw.Value);
     }
 
     /// <summary>

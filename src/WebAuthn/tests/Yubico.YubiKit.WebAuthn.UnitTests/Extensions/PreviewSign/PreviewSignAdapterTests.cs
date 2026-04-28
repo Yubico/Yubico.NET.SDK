@@ -368,7 +368,16 @@ public class PreviewSignAdapterTests
 
     private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags)
     {
-        // Build minimal attestation object with previewSign extension in authData
+        // Build minimal CTAP-shaped inner attestation object with previewSign extension in authData.
+        //
+        // IMPORTANT (regression-test for hardware bug observed on YK 5.8.0-beta):
+        // The previewSign unsigned-extension-output wraps an inner attestation object whose keys
+        // are CTAP-style INTEGERS ({1:fmt, 2:authData, 3:attStmt}), NOT WebAuthn-style text strings
+        // ({"fmt","authData","attStmt"}). The legacy SDK decoded it that way (Yubico.NET.SDK-Legacy
+        // Fido2/PreviewSignExtension.cs:144-147 and 249-282) and that matches what firmware emits.
+        // An earlier version of this test produced a WebAuthn-shaped (text-keyed) attestation object,
+        // which masked the parser bug in PreviewSignAdapter.ParseRegistrationOutput. This rewrite
+        // reproduces the on-the-wire shape so the test exercises the actual decode path.
         var rpIdHash = SHA256.HashData("example.com"u8);
         var credId = RandomNumberGenerator.GetBytes(32);
 
@@ -412,20 +421,21 @@ public class PreviewSignAdapterTests
         extensionWriter.WriteEndMap();
         authDataList.AddRange(extensionWriter.Encode());
 
-        // Build attestation object
+        // Build CTAP-shaped inner attestation object: {1: fmt, 2: authData, 3: attStmt}
+        // (canonical CBOR sorts unsigned-int keys ascending: 1, 2, 3)
         var attObjWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
         attObjWriter.WriteStartMap(3);
 
-        // fmt
-        attObjWriter.WriteTextString("fmt");
+        // 1 -> fmt
+        attObjWriter.WriteInt32(1);
         attObjWriter.WriteTextString("none");
 
-        // authData
-        attObjWriter.WriteTextString("authData");
+        // 2 -> authData
+        attObjWriter.WriteInt32(2);
         attObjWriter.WriteByteString(authDataList.ToArray());
 
-        // attStmt (empty)
-        attObjWriter.WriteTextString("attStmt");
+        // 3 -> attStmt (empty map)
+        attObjWriter.WriteInt32(3);
         attObjWriter.WriteStartMap(0);
         attObjWriter.WriteEndMap();
 

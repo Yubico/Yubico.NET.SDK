@@ -29,36 +29,10 @@ namespace Yubico.YubiKey.Fido2
     /// </remarks>
     public class PreviewSignTests : FidoSessionIntegrationTestBase
     {
-        // Wait for the YubiKeyDeviceListener's internal cache to populate
-        // before any instance constructor runs. On macOS the listener's
-        // _internalCache (read by FindByTransport(All).GetAll()) is
-        // populated asynchronously by background USB notifications; without
-        // this poll the base class ctor's GetSession() call races the
-        // listener and throws DeviceNotFoundException even when a supported
-        // YubiKey is plugged in.
-        //
-        // Polls every 100ms for up to 5 seconds. Returns as soon as at least
-        // one device is visible, OR after the timeout (in which case the
-        // tests SKIP cleanly via [SkippableFact(typeof(DeviceNotFoundException))]).
-        static PreviewSignTests()
-        {
-            try
-            {
-                for (int i = 0; i < 50; i++)
-                {
-                    if (YubiKeyDevice.FindAll().Any())
-                    {
-                        return;
-                    }
-                    System.Threading.Thread.Sleep(100);
-                }
-            }
-            catch
-            {
-                // Swallow — if enumeration throws, tests SKIP via
-                // DeviceNotFoundException anyway.
-            }
-        }
+        // Defeat the macOS YubiKeyDeviceListener startup race before the
+        // base class's instance ctor runs. See DeviceListenerCacheWarmup
+        // for the full rationale.
+        static PreviewSignTests() => DeviceListenerCacheWarmup.WaitForFirstDevice();
 
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void MakeCredentialWithPreviewSign_ReturnsGeneratedKey()

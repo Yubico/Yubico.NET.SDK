@@ -268,7 +268,7 @@ namespace Yubico.Core.Cryptography
                 Encoding.ASCII.GetBytes("ARKG-KEM-HMAC-mac."),
                 dstAug,
                 ctx);
-            byte[] mk = HkdfSha256(kPrime, salt: Array.Empty<byte>(), info: macInfo, length: 32);
+            byte[] mk = HkdfUtilities.DeriveKey(kPrime, salt: ReadOnlySpan<byte>.Empty, contextInfo: macInfo, length: 32).ToArray();
 
             byte[] tag;
             try
@@ -288,7 +288,7 @@ namespace Yubico.Core.Cryptography
                 Encoding.ASCII.GetBytes("ARKG-KEM-HMAC-shared."),
                 dstAug,
                 ctx);
-            byte[] shared = HkdfSha256(kPrime, salt: Array.Empty<byte>(), info: sharedInfo, length: kPrime.Length);
+            byte[] shared = HkdfUtilities.DeriveKey(kPrime, salt: ReadOnlySpan<byte>.Empty, contextInfo: sharedInfo, length: kPrime.Length).ToArray();
             CryptographicOperations.ZeroMemory(kPrime);
 
             // Ciphertext = MAC tag || ephemeral public key.
@@ -410,56 +410,6 @@ namespace Yubico.Core.Cryptography
             }
 
             return result;
-        }
-
-        // ---------------------------------------------------------------------
-        // HKDF-SHA256 (RFC 5869) — local copy because Yubico.Core can't depend
-        // on Yubico.YubiKey's HkdfUtilities.
-        // ---------------------------------------------------------------------
-
-        private static byte[] HkdfSha256(byte[] ikm, byte[] salt, byte[] info, int length)
-        {
-            const int HashLen = 32;
-            byte[] effectiveSalt = (salt == null || salt.Length == 0) ? new byte[HashLen] : salt;
-
-            byte[] prk;
-            using (HMACSHA256 hmac = new HMACSHA256(effectiveSalt))
-            {
-                prk = hmac.ComputeHash(ikm);
-            }
-
-            try
-            {
-                byte[] okm = new byte[length];
-                int blocks = (length + HashLen - 1) / HashLen;
-                byte[] previous = Array.Empty<byte>();
-
-                using HMACSHA256 expandHmac = new HMACSHA256(prk);
-                for (int i = 1; i <= blocks; i++)
-                {
-                    byte[] input = new byte[previous.Length + (info?.Length ?? 0) + 1];
-                    Buffer.BlockCopy(previous, 0, input, 0, previous.Length);
-                    if (info != null)
-                    {
-                        Buffer.BlockCopy(info, 0, input, previous.Length, info.Length);
-                    }
-
-                    input[^1] = (byte)i;
-
-                    expandHmac.Initialize();
-                    byte[] block = expandHmac.ComputeHash(input);
-                    int off = (i - 1) * HashLen;
-                    int copy = Math.Min(HashLen, length - off);
-                    Buffer.BlockCopy(block, 0, okm, off, copy);
-                    previous = block;
-                }
-
-                return okm;
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(prk);
-            }
         }
 
         // ---------------------------------------------------------------------

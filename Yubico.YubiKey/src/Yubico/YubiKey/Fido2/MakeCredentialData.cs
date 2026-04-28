@@ -286,9 +286,6 @@ namespace Yubico.YubiKey.Fido2
         /// A <see cref="PreviewSignGeneratedKey"/> if the extension was used and returned
         /// data; otherwise, <c>null</c>.
         /// </returns>
-        /// <exception cref="NotImplementedException">
-        /// This method is not yet implemented.
-        /// </exception>
         public PreviewSignGeneratedKey? GetPreviewSignGeneratedKey()
         {
             if (UnsignedExtensionOutputs is null

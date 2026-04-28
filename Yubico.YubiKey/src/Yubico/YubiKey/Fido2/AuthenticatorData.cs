@@ -401,9 +401,6 @@ namespace Yubico.YubiKey.Fido2
         /// <returns>
         /// The signature bytes if the extension was used and returned data; otherwise, <c>null</c>.
         /// </returns>
-        /// <exception cref="NotImplementedException">
-        /// This method is not yet implemented.
-        /// </exception>
         public byte[]? GetPreviewSignSignature()
         {
             if (!TryGetExtensionData(Fido2.Extensions.PreviewSign, out Memory<byte> encodedValue))

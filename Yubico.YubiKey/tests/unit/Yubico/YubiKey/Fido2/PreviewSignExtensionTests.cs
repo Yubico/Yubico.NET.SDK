@@ -179,6 +179,25 @@ namespace Yubico.YubiKey.Fido2
                     new byte[] { 0xAA }));
         }
 
+        [Fact]
+        public void AddPreviewSignByCredential_ThrowsWhenAllowListEmpty()
+        {
+            var info = BuildAuthenticatorInfoWithPreviewSign();
+            var parameters = new GetAssertionParameters(
+                new RelyingParty("rp.example"),
+                new byte[32]);
+
+            PreviewSignDerivedKey derivedKey = BuildDerivedKeyFixture();
+
+            var ex = Assert.Throws<InvalidOperationException>(
+                () => parameters.AddPreviewSignByCredentialExtension(
+                    info,
+                    derivedKey,
+                    new byte[] { 0xAA }));
+
+            Assert.Contains("AllowCredential", ex.Message);
+        }
+
         // ==================================================================
         // Helpers
         // ==================================================================
@@ -394,6 +413,31 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteInt32(2);
             cbor.WriteStartArray(1);
             cbor.WriteTextString("credBlob"); // anything BUT previewSign
+            cbor.WriteEndArray();
+
+            cbor.WriteInt32(3);
+            cbor.WriteByteString(aaguid);
+
+            cbor.WriteEndMap();
+            return new AuthenticatorInfo(cbor.Encode());
+        }
+
+        // Builds a synthetic AuthenticatorInfo WITH previewSign in its
+        // Extensions list.
+        private static AuthenticatorInfo BuildAuthenticatorInfoWithPreviewSign()
+        {
+            byte[] aaguid = new byte[16];
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(3);
+
+            cbor.WriteInt32(1);
+            cbor.WriteStartArray(1);
+            cbor.WriteTextString("FIDO_2_1");
+            cbor.WriteEndArray();
+
+            cbor.WriteInt32(2);
+            cbor.WriteStartArray(1);
+            cbor.WriteTextString(Extensions.PreviewSign);
             cbor.WriteEndArray();
 
             cbor.WriteInt32(3);

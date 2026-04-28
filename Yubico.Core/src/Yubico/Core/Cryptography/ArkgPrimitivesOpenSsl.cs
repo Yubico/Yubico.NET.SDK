@@ -213,26 +213,33 @@ namespace Yubico.Core.Cryptography
         private static byte[] BlBlindPublicKey(byte[] pkBl, BigInteger tau)
         {
             byte[] tauBytes = ScalarToBytes(tau);
-            using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(
-                ECCurve.NamedCurves.nistP256.ToSslCurveId());
-            using SafeEcPoint pkBlPoint = SecToPoint(group, pkBl);
-            using SafeEcPoint result = NativeMethods.EcPointNew(group);
-            using SafeBigNum tauBn = NativeMethods.BnBinaryToBigNum(tauBytes);
-            using SafeBigNum oneBn = NativeMethods.BnBinaryToBigNum(new byte[] { 0x01 });
-
-            // r = tau*G + 1*pkBl  =>  r = pkBl + tau*G.
-            int rc = NativeMethods.EcPointMul(
-                group,
-                result,
-                tauBn.DangerousGetHandle(),
-                pkBlPoint.DangerousGetHandle(),
-                oneBn.DangerousGetHandle());
-            if (rc != 1)
+            try
             {
-                throw new CryptographicException("EC_POINT_mul failed in BlBlindPublicKey.");
-            }
+                using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(
+                    ECCurve.NamedCurves.nistP256.ToSslCurveId());
+                using SafeEcPoint pkBlPoint = SecToPoint(group, pkBl);
+                using SafeEcPoint result = NativeMethods.EcPointNew(group);
+                using SafeBigNum tauBn = NativeMethods.BnBinaryToBigNum(tauBytes);
+                using SafeBigNum oneBn = NativeMethods.BnBinaryToBigNum(new byte[] { 0x01 });
 
-            return PointToSec(group, result);
+                // r = tau*G + 1*pkBl  =>  r = pkBl + tau*G.
+                int rc = NativeMethods.EcPointMul(
+                    group,
+                    result,
+                    tauBn.DangerousGetHandle(),
+                    pkBlPoint.DangerousGetHandle(),
+                    oneBn.DangerousGetHandle());
+                if (rc != 1)
+                {
+                    throw new CryptographicException("EC_POINT_mul failed in BlBlindPublicKey.");
+                }
+
+                return PointToSec(group, result);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(tauBytes);
+            }
         }
 
         // ---------------------------------------------------------------------

@@ -443,6 +443,10 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="NotSupportedException">
         /// The YubiKey does not support the previewSign extension.
         /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The allow-list is null or empty. The previewSign extension requires at least one credential
+        /// in the allow-list.
+        /// </exception>
         public void AddPreviewSignByCredentialExtension(
             AuthenticatorInfo authenticatorInfo,
             PreviewSignDerivedKey derivedKey,
@@ -455,6 +459,13 @@ namespace Yubico.YubiKey.Fido2
             if (!authenticatorInfo.IsExtensionSupported(Fido2.Extensions.PreviewSign))
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+            }
+
+            if (AllowList is null || AllowList.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "The previewSign extension's sign-by-credential mode requires at least one credential in the allow-list. " +
+                    "Call AllowCredential() with the credential ID returned from MakeCredential before invoking AddPreviewSignByCredentialExtension().");
             }
 
             byte[] tbs;

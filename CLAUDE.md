@@ -37,7 +37,6 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 - ✅ Use Perplexity AI (`.claude/skills/tool-perplexity-search/SKILL.md`) for current events, recent releases, up-to-date web information
 
 **Skills to apply when coding here** (load via Skill tool when intent matches):
-- `tool-codemapper` — generate API surface maps
 - `domain-build` — building/compiling .NET code (NEVER `dotnet build` directly)
 - `domain-test` — running tests (NEVER `dotnet test` directly)
 - `domain-yubikit-compare` — porting between Java YubiKit and C# SDK (byte-level analysis)

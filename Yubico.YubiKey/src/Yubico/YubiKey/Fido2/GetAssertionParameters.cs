@@ -474,13 +474,15 @@ namespace Yubico.YubiKey.Fido2
 
         private static byte[] EncodeArkgSignArgs(PreviewSignDerivedKey derivedKey)
         {
-            // COSE_Sign_Args for ESP256-ARKG, per the Rust reference's
-            // encode_arkg_sign_args: {3: alg, -1: arkg_kh, -2: ctx}.
+            // COSE_Sign_Args map {3: alg, -1: arkg_kh, -2: ctx}. The alg field
+            // identifies the SIGN-ARGS request as ARKG-derived (-65539), not the
+            // raw signing algorithm. Rust hid-test, python-fido2, and the JS
+            // test page all pass -65539 here; firmware rejects other values.
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(3);
 
             cbor.WriteInt32(3);
-            cbor.WriteInt32((int)Cose.CoseAlgorithmIdentifier.Esp256);
+            cbor.WriteInt32((int)Cose.CoseAlgorithmIdentifier.ArkgP256Esp256);
 
             cbor.WriteInt32(-1);
             cbor.WriteByteString(derivedKey.ArkgKeyHandle.Span);

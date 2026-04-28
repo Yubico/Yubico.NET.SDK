@@ -112,6 +112,14 @@ namespace Yubico.YubiKey.Fido2
             // Step C: Sign with derived credential (requires user presence - touch #2)
             byte[] message = System.Text.Encoding.ASCII.GetBytes("hello-previewsign-integration-test");
 
+            // sign-by-credential requires an allowList so the YubiKey knows
+            // which credential to use; the firmware rejects the GetAssertion
+            // at protocol level with "option or extension invalid" if it is
+            // missing. Mirror what the upstream demo does: pass the FIDO2
+            // credential ID returned from MakeCredential.
+            byte[] credentialId = credData.AuthenticatorData.CredentialId!.Id.ToArray();
+            GetAssertionParameters.AllowCredential(new CredentialId { Id = credentialId });
+
             GetAssertionParameters.AddPreviewSignByCredentialExtension(
                 Session.AuthenticatorInfo,
                 derived,

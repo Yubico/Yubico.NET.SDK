@@ -377,3 +377,69 @@ dotnet toolchain.cs test --filter "Category!=RequiresHardware&Category!=Requires
 ```bash
 dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"
 ```
+
+---
+
+## Writing New Tests
+
+> READ WHEN authoring a new unit or integration test, naming a test method, or writing setup/cleanup for hardware-dependent tests.
+
+### Test Project Layout
+
+- **UnitTests** — xUnit, no hardware required
+- **IntegrationTests** — xUnit, requires physical YubiKey
+- **TestProject** — ASP.NET Core with NSubstitute, targets .NET 9 with AOT
+
+### Test All Public APIs
+
+```csharp
+[Fact]
+public async Task ConnectAsync_WhenDeviceAvailable_ReturnsConnection()
+{
+    // Arrange
+    var device = new MockYubiKey { IsConnected = true };
+
+    // Act
+    var connection = await device.ConnectAsync<ISmartCardConnection>();
+
+    // Assert
+    Assert.NotNull(connection);
+    Assert.True(connection.IsConnected);
+}
+```
+
+### Use Descriptive Test Names
+
+```csharp
+// ✅ GOOD
+[Fact]
+public void CommandApdu_WithNullData_ThrowsArgumentNullException()
+
+// ❌ BAD
+[Fact]
+public void Test1()
+```
+
+Naming pattern: `Subject_WhenCondition_ExpectedBehavior`.
+
+### Clean Up in Integration Tests
+
+```csharp
+[Fact]
+public async Task IntegrationTest_WithRealDevice()
+{
+    await using var connection = await _device.ConnectAsync<ISmartCardConnection>();
+
+    try
+    {
+        var result = await connection.TransmitAsync(apdu);
+        Assert.NotNull(result);
+    }
+    finally
+    {
+        await ResetDeviceAsync(connection);
+    }
+}
+```
+
+> The **Test Philosophy: Value Over Coverage** rules (no validation-only tests, no skipped tests as placeholders) live in `CLAUDE.md` verbatim — those mandates are load-on-startup because they catch the most common AI-agent failure mode.

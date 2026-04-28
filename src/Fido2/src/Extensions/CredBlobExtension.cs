@@ -38,15 +38,27 @@ namespace Yubico.YubiKit.Fido2.Extensions;
 /// </remarks>
 public sealed class CredBlobInput
 {
+    private ReadOnlyMemory<byte> _blob;
+
     /// <summary>
     /// Gets or sets the blob data to store with the credential.
     /// </summary>
     /// <remarks>
-    /// Must not exceed the authenticator's maxCredBlobLength.
-    /// Minimum supported size is 32 bytes.
+    /// Must be between 1 and 32 bytes per CTAP2.1.
     /// </remarks>
-    public required ReadOnlyMemory<byte> Blob { get; init; }
-    
+    public required ReadOnlyMemory<byte> Blob
+    {
+        get => _blob;
+        init
+        {
+            if (value.Length is < 1 or > 32)
+            {
+                throw new ArgumentException("CredBlob must be between 1 and 32 bytes", nameof(Blob));
+            }
+            _blob = value;
+        }
+    }
+
     /// <summary>
     /// Encodes this credBlob input as CBOR (the raw blob bytes).
     /// </summary>
@@ -54,11 +66,11 @@ public sealed class CredBlobInput
     public void Encode(CborWriter writer)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        
+
         // credBlob input is just the byte string
         writer.WriteByteString(Blob.Span);
     }
-    
+
     /// <summary>
     /// Encodes this credBlob input as a CBOR byte array.
     /// </summary>
@@ -87,7 +99,7 @@ public sealed class CredBlobMakeCredentialOutput
     /// False if storage failed (e.g., blob too large).
     /// </remarks>
     public bool Stored { get; init; }
-    
+
     /// <summary>
     /// Decodes credBlob output from a CBOR reader (makeCredential response).
     /// </summary>
@@ -96,10 +108,10 @@ public sealed class CredBlobMakeCredentialOutput
     public static CredBlobMakeCredentialOutput Decode(CborReader reader)
     {
         ArgumentNullException.ThrowIfNull(reader);
-        
+
         // Output is a boolean indicating success
         var stored = reader.ReadBoolean();
-        
+
         return new CredBlobMakeCredentialOutput { Stored = stored };
     }
 }
@@ -120,7 +132,7 @@ public sealed class CredBlobAssertionOutput
     /// Empty if no blob was stored.
     /// </remarks>
     public ReadOnlyMemory<byte> Blob { get; init; }
-    
+
     /// <summary>
     /// Decodes credBlob output from a CBOR reader (getAssertion response).
     /// </summary>
@@ -129,10 +141,10 @@ public sealed class CredBlobAssertionOutput
     public static CredBlobAssertionOutput Decode(CborReader reader)
     {
         ArgumentNullException.ThrowIfNull(reader);
-        
+
         // Output is the byte string blob
         var blob = reader.ReadByteString();
-        
+
         return new CredBlobAssertionOutput { Blob = blob };
     }
 }

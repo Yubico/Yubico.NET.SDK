@@ -42,7 +42,7 @@ public sealed class PrfInput
     /// Salt is computed as: SHA-256("WebAuthn PRF" || 0x00 || first).
     /// </remarks>
     public ReadOnlyMemory<byte>? First { get; init; }
-    
+
     /// <summary>
     /// Gets or sets the second PRF input for evaluation (optional).
     /// </summary>
@@ -51,7 +51,7 @@ public sealed class PrfInput
     /// Salt is computed as: SHA-256("WebAuthn PRF" || 0x00 || second).
     /// </remarks>
     public ReadOnlyMemory<byte>? Second { get; init; }
-    
+
     /// <summary>
     /// Gets or sets per-credential PRF inputs.
     /// </summary>
@@ -60,7 +60,7 @@ public sealed class PrfInput
     /// Used when different credentials should use different PRF inputs.
     /// </remarks>
     public IReadOnlyDictionary<string, PrfInputValues>? EvalByCredential { get; init; }
-    
+
     /// <summary>
     /// Computes the salt for hmac-secret from a PRF input.
     /// </summary>
@@ -90,7 +90,7 @@ public sealed class PrfInputValues
     /// Gets or sets the first PRF input.
     /// </summary>
     public required ReadOnlyMemory<byte> First { get; init; }
-    
+
     /// <summary>
     /// Gets or sets the second PRF input (optional).
     /// </summary>
@@ -112,7 +112,7 @@ public sealed class PrfOutput
     /// During makeCredential registration, this indicates PRF capability.
     /// </remarks>
     public bool Enabled { get; init; }
-    
+
     /// <summary>
     /// Gets the first derived output.
     /// </summary>
@@ -120,7 +120,7 @@ public sealed class PrfOutput
     /// 32-byte secret derived from the first PRF input.
     /// </remarks>
     public ReadOnlyMemory<byte>? First { get; init; }
-    
+
     /// <summary>
     /// Gets the second derived output.
     /// </summary>
@@ -128,7 +128,7 @@ public sealed class PrfOutput
     /// 32-byte secret derived from the second PRF input (if provided).
     /// </remarks>
     public ReadOnlyMemory<byte>? Second { get; init; }
-    
+
     /// <summary>
     /// Decodes PRF output from decrypted hmac-secret outputs.
     /// </summary>
@@ -136,28 +136,78 @@ public sealed class PrfOutput
     /// <param name="hasTwoOutputs">Whether two outputs were requested.</param>
     /// <returns>The decoded PRF output.</returns>
     public static PrfOutput FromHmacSecretOutput(
-        ReadOnlySpan<byte> decryptedOutput, 
+        ReadOnlySpan<byte> decryptedOutput,
         bool hasTwoOutputs = false)
     {
         if (decryptedOutput.Length < 32)
         {
             throw new ArgumentException(
-                "Decrypted output must be at least 32 bytes.", 
+                "Decrypted output must be at least 32 bytes.",
                 nameof(decryptedOutput));
         }
-        
+
         var first = decryptedOutput[..32].ToArray();
         byte[]? second = null;
-        
+
         if (hasTwoOutputs && decryptedOutput.Length >= 64)
         {
             second = decryptedOutput[32..64].ToArray();
         }
-        
+
         return new PrfOutput
         {
             Enabled = true,
             First = first,
+            Second = second
+        };
+    }
+
+    /// <summary>
+    /// Decodes PRF output from a CBOR reader (authentication response).
+    /// </summary>
+    /// <param name="reader">The CBOR reader positioned at the PRF output map.</param>
+    /// <returns>The decoded PRF output, or null if the output is malformed.</returns>
+    public static PrfOutput? Decode(CborReader reader)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+
+        var mapLength = reader.ReadStartMap();
+        if (mapLength is null or 0)
+        {
+            return null;
+        }
+
+        ReadOnlyMemory<byte>? first = null;
+        ReadOnlyMemory<byte>? second = null;
+
+        for (var i = 0; i < mapLength; i++)
+        {
+            var key = reader.ReadTextString();
+            if (key == "first")
+            {
+                first = reader.ReadByteString();
+            }
+            else if (key == "second")
+            {
+                second = reader.ReadByteString();
+            }
+            else
+            {
+                reader.SkipValue();
+            }
+        }
+
+        reader.ReadEndMap();
+
+        if (!first.HasValue)
+        {
+            return null;
+        }
+
+        return new PrfOutput
+        {
+            Enabled = true,
+            First = first.Value,
             Second = second
         };
     }

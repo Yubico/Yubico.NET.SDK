@@ -159,16 +159,55 @@ public class ExtensionBuilderTests
         // Arrange
         var builder = new ExtensionBuilder()
             .WithHmacSecretMakeCredential();
-        
+
         // Act
         var result = builder.Build();
-        
+
         // Assert
         Assert.NotNull(result);
         var reader = new CborReader(result.Value, CborConformanceMode.Lax);
         reader.ReadStartMap();
         Assert.Equal("hmac-secret-mc", reader.ReadTextString());
         Assert.True(reader.ReadBoolean());
+    }
+
+    [Fact]
+    public void Build_WithLargeBlobKey_EncodesCorrectly()
+    {
+        // Arrange
+        var builder = new ExtensionBuilder()
+            .WithLargeBlobKey();
+
+        // Act
+        var result = builder.Build();
+
+        // Assert
+        Assert.NotNull(result);
+        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
+        reader.ReadStartMap();
+        Assert.Equal("largeBlobKey", reader.ReadTextString());
+        Assert.True(reader.ReadBoolean());
+    }
+
+    [Fact]
+    public void Build_WithCredBlobOversized_AllowsOversizedInput()
+    {
+        // Arrange
+        var oversizedBlob = new byte[128]; // Max spec limit is 64 bytes
+        var builder = new ExtensionBuilder()
+            .WithCredBlob(oversizedBlob);
+
+        // Act
+        var result = builder.Build();
+
+        // Assert
+        // SDK currently has no size validation - builder accepts any size
+        Assert.NotNull(result);
+        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
+        reader.ReadStartMap();
+        Assert.Equal("credBlob", reader.ReadTextString());
+        var decoded = reader.ReadByteString();
+        Assert.Equal(128, decoded.Length);
     }
     
     

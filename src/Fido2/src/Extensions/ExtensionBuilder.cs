@@ -50,6 +50,8 @@ public sealed class ExtensionBuilder
     private bool _largeBlobKey;
     private bool _prf;
     private PrfInput? _prfInput;
+    private PreviewSignRegistrationInput? _previewSignRegistration;
+    private PreviewSignAuthenticationInput? _previewSignAuthentication;
     
     /// <summary>
     /// Adds the credProtect extension with the specified policy.
@@ -248,7 +250,31 @@ public sealed class ExtensionBuilder
         _prfInput = input;
         return this;
     }
-    
+
+    /// <summary>
+    /// Adds previewSign extension with key generation parameters for makeCredential.
+    /// </summary>
+    /// <param name="input">The previewSign registration input.</param>
+    /// <returns>This builder for chaining.</returns>
+    public ExtensionBuilder WithPreviewSign(PreviewSignRegistrationInput input)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+        _previewSignRegistration = input;
+        return this;
+    }
+
+    /// <summary>
+    /// Adds previewSign extension with signing parameters for getAssertion.
+    /// </summary>
+    /// <param name="input">The previewSign authentication input.</param>
+    /// <returns>This builder for chaining.</returns>
+    public ExtensionBuilder WithPreviewSign(PreviewSignAuthenticationInput input)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+        _previewSignAuthentication = input;
+        return this;
+    }
+
     /// <summary>
     /// Builds the CBOR-encoded extensions map.
     /// </summary>
@@ -272,12 +298,12 @@ public sealed class ExtensionBuilder
     public void Encode(CborWriter writer)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        
+
         var count = CountExtensions();
         writer.WriteStartMap(count);
-        
+
         // Extensions must be sorted by key for canonical CBOR
-        // Sort order: "credBlob" < "credProtect" < "hmac-secret" < "hmac-secret-mc" < "largeBlob" < "minPinLength" < "prf"
+        // Sort order: "credBlob" < "credProtect" < "hmac-secret" < "hmac-secret-mc" < "largeBlob" < "minPinLength" < "previewSign" < "prf"
         
         if (_credBlob.HasValue)
         {
@@ -327,7 +353,18 @@ public sealed class ExtensionBuilder
             writer.WriteTextString(ExtensionIdentifiers.MinPinLength);
             writer.WriteBoolean(true);
         }
-        
+
+        if (_previewSignRegistration is not null)
+        {
+            writer.WriteTextString(ExtensionIdentifiers.PreviewSign);
+            EncodePreviewSignRegistrationInput(writer, _previewSignRegistration);
+        }
+        else if (_previewSignAuthentication is not null)
+        {
+            writer.WriteTextString(ExtensionIdentifiers.PreviewSign);
+            EncodePreviewSignAuthenticationInput(writer, _previewSignAuthentication);
+        }
+
         if (_prf)
         {
             writer.WriteTextString(ExtensionIdentifiers.Prf);
@@ -342,7 +379,7 @@ public sealed class ExtensionBuilder
                 writer.WriteEndMap();
             }
         }
-        
+
         writer.WriteEndMap();
     }
     
@@ -350,26 +387,107 @@ public sealed class ExtensionBuilder
     {
         writer.WriteStartMap(1);
         writer.WriteTextString("eval");
-        
+
         var evalCount = 1;
         if (input.Second.HasValue) evalCount++;
-        
+
         writer.WriteStartMap(evalCount);
-        
+
         if (input.First.HasValue)
         {
             writer.WriteTextString("first");
             writer.WriteByteString(input.First.Value.Span);
         }
-        
+
         if (input.Second.HasValue)
         {
             writer.WriteTextString("second");
             writer.WriteByteString(input.Second.Value.Span);
         }
-        
+
         writer.WriteEndMap();
         writer.WriteEndMap();
+    }
+
+    private static void EncodePreviewSignRegistrationInput(CborWriter writer, PreviewSignRegistrationInput input)
+    {
+        var encodedBytes = PreviewSignCbor.EncodeRegistrationInput(input);
+        var reader = new CborReader(encodedBytes, CborConformanceMode.Ctap2Canonical);
+
+        // Copy the CBOR map directly
+        CopyCborValue(reader, writer);
+    }
+
+    private static void EncodePreviewSignAuthenticationInput(CborWriter writer, PreviewSignAuthenticationInput input)
+    {
+        // Extract the single credential's signing params (validated by the encoder)
+        var firstEntry = input.SignByCredential.First();
+        var signingParams = firstEntry.Value;
+
+        var encodedBytes = PreviewSignCbor.EncodeAuthenticationInput(signingParams);
+        var reader = new CborReader(encodedBytes, CborConformanceMode.Ctap2Canonical);
+
+        // Copy the CBOR map directly
+        CopyCborValue(reader, writer);
+    }
+
+    private static void CopyCborValue(CborReader reader, CborWriter writer)
+    {
+        var state = reader.PeekState();
+
+        switch (state)
+        {
+            case CborReaderState.StartMap:
+                int? mapSize = reader.ReadStartMap();
+                writer.WriteStartMap(mapSize);
+                for (int i = 0; i < mapSize; i++)
+                {
+                    CopyCborValue(reader, writer);
+                    CopyCborValue(reader, writer);
+                }
+                reader.ReadEndMap();
+                writer.WriteEndMap();
+                break;
+
+            case CborReaderState.StartArray:
+                int? arraySize = reader.ReadStartArray();
+                writer.WriteStartArray(arraySize);
+                for (int i = 0; i < arraySize; i++)
+                {
+                    CopyCborValue(reader, writer);
+                }
+                reader.ReadEndArray();
+                writer.WriteEndArray();
+                break;
+
+            case CborReaderState.UnsignedInteger:
+                writer.WriteUInt64(reader.ReadUInt64());
+                break;
+
+            case CborReaderState.NegativeInteger:
+                writer.WriteInt64(reader.ReadInt64());
+                break;
+
+            case CborReaderState.ByteString:
+                writer.WriteByteString(reader.ReadByteString());
+                break;
+
+            case CborReaderState.TextString:
+                writer.WriteTextString(reader.ReadTextString());
+                break;
+
+            case CborReaderState.Boolean:
+                writer.WriteBoolean(reader.ReadBoolean());
+                break;
+
+            case CborReaderState.Null:
+                reader.ReadNull();
+                writer.WriteNull();
+                break;
+
+            default:
+                throw new InvalidOperationException($"Unsupported CBOR state: {state}");
+        }
     }
     
     private bool HasExtensions()
@@ -382,7 +500,9 @@ public sealed class ExtensionBuilder
                _hmacSecret is not null ||
                _hmacSecretMc ||
                _minPinLength ||
-               _prf;
+               _prf ||
+               _previewSignRegistration is not null ||
+               _previewSignAuthentication is not null;
     }
     
     private int CountExtensions()
@@ -396,6 +516,7 @@ public sealed class ExtensionBuilder
         if (_hmacSecretMc) count++;
         if (_minPinLength) count++;
         if (_prf) count++;
+        if (_previewSignRegistration is not null || _previewSignAuthentication is not null) count++;
         return count;
     }
 }

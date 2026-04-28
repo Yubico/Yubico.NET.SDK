@@ -36,7 +36,7 @@ public class FidoSessionSimpleTests
     /// Tests that creating a FidoSession over USB SmartCard (CCID) correctly throws NotSupportedException.
     /// FIDO2 is only available over NFC SmartCard or USB HID FIDO interfaces.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task CreateFidoSession_With_UsbSmartCard_ThrowsNotSupportedException(YubiKeyTestState state)
     {

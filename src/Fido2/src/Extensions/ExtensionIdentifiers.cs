@@ -96,4 +96,15 @@ public static class ExtensionIdentifiers
     /// from arbitrary inputs.
     /// </remarks>
     public const string Prf = "prf";
+
+    /// <summary>
+    /// The previewSign extension identifier (CTAP v4).
+    /// </summary>
+    /// <remarks>
+    /// Allows a FIDO2 credential to sign arbitrary data using a separate
+    /// signing key bound to the same authenticator. Registration generates
+    /// a new signing key pair; authentication signs data without clientDataJSON
+    /// or authenticator data wrapping.
+    /// </remarks>
+    public const string PreviewSign = "previewSign";
 }

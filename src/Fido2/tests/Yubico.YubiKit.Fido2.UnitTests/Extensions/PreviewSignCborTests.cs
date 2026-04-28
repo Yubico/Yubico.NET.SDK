@@ -73,12 +73,14 @@ public class PreviewSignCborTests
         byte[] tbs = new byte[32];
         Array.Fill(tbs, (byte)0xBB);
 
-        // Build minimal ARKG COSE_Sign_Args: {3: -9, -1: kh, -2: ctx}
-        // This mimics Rust hid-test's encode_arkg_sign_args output (opaque bytes from caller's perspective)
+        // Build minimal ARKG COSE_Sign_Args: {3: -65539, -1: kh, -2: ctx}
+        // This mimics Rust hid-test's encode_arkg_sign_args output (opaque bytes from caller's perspective).
+        // alg = -65539 (Esp256SplitArkgPlaceholder / "ARKG-P256-ESP256") — NOT -9 (Esp256, the
+        // output signature alg). YK 5.8.0-beta firmware rejects everything but -65539 here.
         var argWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
         argWriter.WriteStartMap(3);
-        argWriter.WriteInt32(3);  // alg
-        argWriter.WriteInt32(-9); // ESP256_ARKG
+        argWriter.WriteInt32(3);       // alg
+        argWriter.WriteInt32(-65539);  // ARKG-P256-ESP256 placeholder (request alg on wire)
         argWriter.WriteInt32(-1); // arkg_kh
         argWriter.WriteByteString([0xAA, 0xBB, 0xCC, 0xDD]);
         argWriter.WriteInt32(-2); // ctx

@@ -62,9 +62,12 @@ public class FidoPreviewSignTests
     /// - The response includes unsignedExtensionOutputs["previewSign"] with attestation data
     /// </para>
     /// <para>
-    /// YubiKey 5.8.0-beta firmware accepts only Esp256 (COSE algorithm -9, ARKG) for previewSign.
-    /// Non-ARKG algorithms like Es256 (-7) and EdDsa (-8) fail with CtapException "Unsupported algorithm".
-    /// This limitation is documented in Plans/yes-we-have-started-composed-horizon.md Phase 9.3.
+    /// YubiKey 5.8.0-beta firmware accepts only Esp256SplitArkgPlaceholder
+    /// (COSE algorithm -65539, "ARKG-P256-ESP256") as the request alg for previewSign.
+    /// Esp256 (-9) describes the *output signature* algorithm internally — it must NEVER appear
+    /// on the wire as the request alg. Sending -9 yields an "Unsupported algorithm" rejection
+    /// at firmware protocol-decode time. Verified across python-fido2, cnh-authenticator-rs,
+    /// and the Yubico.NET.SDK-Legacy preview-sign branch (commit fe82b007).
     /// </para>
     /// </remarks>
     [SkippableTheory]
@@ -111,10 +114,12 @@ public class FidoPreviewSignTests
                     clientPin.Protocol, pinToken, challenge);
 
                 // Build previewSign extension input via ExtensionBuilder
-                // Using Esp256 (-9, ARKG) - only algorithm YubiKey 5.8.0-beta accepts for previewSign
+                // Using Esp256SplitArkgPlaceholder (-65539) — the only request alg YubiKey
+                // 5.8.0-beta accepts for previewSign+ARKG. Sending -9 (Esp256) here yields
+                // an "Unsupported algorithm" rejection at protocol-decode time.
                 var previewSignInput = new Extensions.PreviewSignRegistrationInput(
-                    algorithms: [-9], // Esp256 (ARKG)
-                    flags: 0x01);     // RequireUserPresence
+                    algorithms: [-65539], // Esp256SplitArkgPlaceholder (ARKG-P256-ESP256)
+                    flags: 0x01);         // RequireUserPresence
 
                 var extensions = new Extensions.ExtensionBuilder()
                     .WithPreviewSign(previewSignInput)
@@ -161,9 +166,11 @@ public class FidoPreviewSignTests
                     if (key == "previewSign")
                     {
                         foundPreviewSign = true;
-                        // Decode the previewSign output to verify algorithm
+                        // Decode the previewSign output to verify algorithm.
+                        // YK 5.8.0-beta echoes back the negotiated request alg (-65539,
+                        // Esp256SplitArkgPlaceholder), NOT the internal output sig alg (-9, Esp256).
                         var algorithm = DecodePreviewSignAlgorithm(extensionsReader);
-                        Assert.Equal(-9, algorithm); // Esp256
+                        Assert.Equal(-65539, algorithm); // Esp256SplitArkgPlaceholder (ARKG-P256-ESP256)
                     }
                     else
                     {

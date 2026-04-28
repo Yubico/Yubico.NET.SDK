@@ -90,9 +90,12 @@ public class PreviewSignTests
         //                  see PreviewSignCborEncodingTests for deterministic byte-level assertions
         //   - Hardware registration with non-ARKG algorithms (Es256, EdDsa): ❌ YubiKey 5.8.0-beta firmware
         //                  rejects with CtapException "Unsupported algorithm" (verified 2026-04-23)
-        //   - Hardware registration with ARKG algorithm (Esp256, -9): ✅ works, but authentication then
-        //                  requires additional_args (COSE_Sign_Args map: {3: alg, -1: arkg_kh, -2: ctx})
-        //                  which our adapter does not yet build
+        //   - Hardware registration with ARKG (Esp256SplitArkgPlaceholder, -65539): ✅ works.
+        //                  NOTE: -65539 is the correct request alg, NOT -9 (Esp256). -9 names the
+        //                  *output* signature alg only and is rejected at protocol-decode time if
+        //                  sent on the wire. Verified against Yubico.NET.SDK-Legacy commit fe82b007.
+        //                  Authentication then requires additional_args (COSE_Sign_Args map:
+        //                  {3: -65539, -1: arkg_kh, -2: ctx}) which our adapter does not yet build.
         //
         // → Hardware verification of the auth path requires ARKG support (Phase 10).
         //   See Plans/phase-10-previewsign-auth.md §3 for the ARKG additional_args first-class builder tracker.

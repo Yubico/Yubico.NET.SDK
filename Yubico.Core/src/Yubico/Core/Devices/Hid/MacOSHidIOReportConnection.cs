@@ -172,7 +172,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 // If there's already a report in the queue (i.e. the callback beat us to calling GetReport) return
                 // that one immediately.
-                _log.SensitiveLogInformation(
+                _log.SensitiveLogDebug(
                     "GetReport returned buffer: {Report}",
                     Hex.BytesToHex(report));
 
@@ -207,7 +207,7 @@ namespace Yubico.Core.Devices.Hid
             // and the PlatformApiException above would have been thrown.
             _ = _reportsQueue.TryDequeue(out report);
 
-            _log.SensitiveLogInformation(
+            _log.SensitiveLogDebug(
                 "GetReport returned buffer: {Report}",
                 Hex.BytesToHex(report));
 
@@ -249,7 +249,7 @@ namespace Yubico.Core.Devices.Hid
         {
             ILogger logger = Logging.Log.GetLogger(typeof(MacOSHidIOReportConnection).FullName!);
 
-            logger.LogInformation("MacOSHidIOReportConnection.ReportCallback has been called.");
+            logger.LogDebug("MacOSHidIOReportConnection.ReportCallback has been called.");
 
             if (result != 0 || type != IOKitHidConstants.kIOHidReportTypeInput || reportId != 0 || reportLength < 0)
             {
@@ -298,7 +298,7 @@ namespace Yubico.Core.Devices.Hid
                 throw new ArgumentNullException(nameof(report));
             }
 
-            _log.SensitiveLogInformation(
+            _log.SensitiveLogDebug(
                 "Calling SetReport with data: {Report}",
                 Hex.BytesToHex(report));
 

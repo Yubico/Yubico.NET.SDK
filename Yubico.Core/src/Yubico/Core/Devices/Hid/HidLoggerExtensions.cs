@@ -23,7 +23,7 @@ namespace Yubico.Core.Devices.Hid
         {
             if (result == kern_return_t.KERN_SUCCESS)
             {
-                logger.LogInformation("{APIName} called successfully.", apiName);
+                logger.LogDebug("{APIName} called successfully.", apiName);
             }
             else
             {

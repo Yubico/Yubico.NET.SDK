@@ -196,7 +196,7 @@ namespace Yubico.Core.Devices.SmartCard
         public void LogDeviceAccessTime()
         {
             LastAccessed = DateTime.Now;
-            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
+            _log.LogDebug("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
         }
 
     }

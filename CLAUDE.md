@@ -162,6 +162,14 @@ Integration tests use standardized YubiKey devices enumerated in `StandardTestDe
 - System.Formats.Cbor
 - Yubico.Core (project reference)
 
+### Yubico.NativeShims version management
+- The `<PackageReference>` in `Yubico.Core/src/Yubico.Core.csproj` uses a floating range (`Version="1.*-*"`), **not** a hard-pinned version. Don't hand-bump it.
+- The exact resolved version is captured in `Yubico.Core/src/packages.lock.json` (committed). Restore honors the lock; only `dotnet restore Yubico.Core/src/Yubico.Core.csproj --force-evaluate` re-floats.
+- To bump to a new prerelease/stable: run `--force-evaluate`, review the one-line lockfile diff, commit only `packages.lock.json`. The csproj does not change.
+- `<RestoreLockedMode>` is intentionally absent — lockfiles aren't OS-portable when implicit packages differ across the CI matrix (NU1004 on Windows when generated on macOS/Linux).
+- The `enforce-branch-policy` job in `.github/workflows/build.yml` greps the lockfile and **hard-fails on `main`** if a `-prerelease` Yubico.NativeShims is pinned. Before merging develop → main, re-pin to a stable version with `--force-evaluate` against an nuget.org-only environment.
+- `build.yml`'s `build-artifacts` job adds the internal Yubico GitHub Packages feed only on non-main branches; main builds restore from nuget.org only. Don't unify those steps.
+
 ## Important Notes
 
 - Strong-name signed assemblies using `Yubico.NET.SDK.snk`

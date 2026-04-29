@@ -712,9 +712,6 @@ public sealed class WebAuthnClient : IAsyncDisposable
         StatusChannel<IReadOnlyList<MatchedCredential>>? channel,
         CancellationToken cancellationToken)
     {
-        // TODO: Wire PreviewSignErrors.MapCtapError when GetAssertion backend integration is complete
-        // (Phase 9 - authentication ceremonies not yet fully implemented)
-
         // Validate options
         ValidateAuthenticationOptions(options);
 
@@ -786,6 +783,10 @@ public sealed class WebAuthnClient : IAsyncDisposable
             {
                 matches = await CredentialMatcher.MatchAsync(_backend, request, cancellationToken)
                     .ConfigureAwait(false);
+            }
+            catch (CtapException ex) when (options.Extensions?.PreviewSign is not null)
+            {
+                throw Extensions.PreviewSign.PreviewSignErrors.MapCtapError(ex);
             }
             catch (CtapException ex)
             {

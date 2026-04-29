@@ -59,6 +59,7 @@ User: "/Release"
 
 ## Hard Constraints
 
+- **Code-signing YubiKey must be unplugged during phases 1–4**: The operator's code-signing YubiKey must NOT be connected to the machine while any build or CI step runs. Integration tests that enumerate YubiKeys can accidentally run PIV/PGP resets against any connected key. The skill gates this: Phase 1 asks the operator to confirm the YubiKey is unplugged. Phase 5 is the ONLY phase where it should be plugged in — `signtool.exe` and `nuget sign` read the PIV certificate safely but cannot coexist with stray test runs. The skill must NEVER run integration tests itself.
 - **Windows-only sign step**: phase 5 refuses to run on non-Windows
 - **NativeShims ordering**: when rebuilt, NativeShims signs + publishes to NuGet.org *before* main `build.yml` dispatches
 - **Tag only after green CI**: `git tag` runs only after `build.yml` reports success — failed builds mean broken artifacts and a poisoned tag

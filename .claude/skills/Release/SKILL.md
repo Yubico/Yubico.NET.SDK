@@ -5,7 +5,7 @@ description: Drives the Yubico .NET SDK release end-to-end — version gating, r
 
 # Release
 
-Project-local skill for shipping a Yubico .NET SDK release. The skill is the operator — Dennis only invokes it, answers gating questions, and (on Windows) plugs in his code-sign YubiKey. Every other step (branch creation, CI dispatch, artifact download, signing, publishing, tagging, GitHub release, Slack draft) is automated or surfaces an explicit decision gate.
+Project-local skill for shipping a Yubico .NET SDK release. The operator invokes the skill, answers gating questions, and (on Windows) plugs in the code-sign YubiKey. Every other step (branch creation, CI dispatch, artifact download, signing, publishing, tagging, GitHub release, Slack draft) is automated or surfaces an explicit decision gate.
 
 The skill works in two modes:
 - **`/Release`** — full flow from phase 1 (pre-flight) onward

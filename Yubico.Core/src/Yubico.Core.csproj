@@ -55,6 +55,18 @@ limitations under the License. -->
     <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
 
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);ENABLE_SENSITIVE_LOG</DefineConstants>
+
+    <!-- NuGet lockfile: pins floating PackageReference versions for reproducible restores. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!--
+      NOTE: <RestoreLockedMode> is intentionally NOT enabled. Lockfiles are not OS-portable when
+      implicit packages differ across platforms (e.g. Microsoft.NETFramework.ReferenceAssemblies is
+      added implicitly when building net472 on non-Windows but not on Windows). Enabling locked mode
+      with a lockfile generated on one OS causes NU1004 on the others. To re-introduce locked mode,
+      either generate the lockfile on every CI OS in the matrix and commit per-OS lockfiles, or add
+      explicit <PackageReference> entries for every implicit/transitive root so all OSes resolve
+      identically.
+    -->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
@@ -129,7 +141,7 @@ limitations under the License. -->
     </PackageReference>
     <PackageReference Include="System.Memory" Version="4.6.3" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
-    <PackageReference Include="Yubico.NativeShims" Version="1.16.1-prerelease.20260428.1" />
+    <PackageReference Include="Yubico.NativeShims" Version="1.*-*" />
   </ItemGroup>
 
   <ItemGroup Label="Expose internal test hooks to Unit Test projects">

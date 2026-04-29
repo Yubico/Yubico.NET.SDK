@@ -52,8 +52,41 @@ permissions:
   contents: read
 
 jobs:
+  enforce-branch-policy:
+    name: Enforce branch policy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      # main branch is release-only — no prerelease Yubico packages allowed in the lockfile.
+      # Re-pin via `dotnet restore Yubico.Core/src/Yubico.Core.csproj --force-evaluate` against
+      # an "nuget.org-only" environment before merging develop -> main.
+      - name: Disallow prerelease Yubico.NativeShims on main
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          LOCK=Yubico.Core/src/packages.lock.json
+          # The package name and its "resolved" field live on separate lines, so use -A3 to
+          # bring the resolved line into the match window before checking for -prerelease.
+          if grep -A3 '"Yubico\.NativeShims"' "$LOCK" | grep -E '"resolved":.*-prerelease' >/dev/null; then
+            echo "::error file=$LOCK::main builds disallow prerelease Yubico.NativeShims. Re-pin the lockfile to a stable version (dotnet restore --force-evaluate against nuget.org) before merging."
+            grep -A3 '"Yubico\.NativeShims"' "$LOCK" | head -20
+            exit 1
+          fi
+          echo "Lockfile policy OK: no prerelease Yubico.NativeShims pinned."
+
   run-tests:
     name: Run tests
+    needs: enforce-branch-policy
     # Requires write permissions to publish test results
     permissions:
       checks: write         # Required to create check runs for test results
@@ -89,12 +122,25 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7  # v5.2.0
+
+      # Non-main builds (develop, workflow_dispatch, schedule) get the internal Yubico GitHub Packages
+      # feed in addition to nuget.org so prerelease Yubico.NativeShims can resolve.
+      - name: Setup .NET (non-main, with internal Yubico feed)
+        if: github.ref != 'refs/heads/main'
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7  # v5.2.0
         with:
           global-json-file: "./global.json"
           source-url: https://nuget.pkg.github.com/Yubico/index.json
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # main builds restore from nuget.org only — no internal Yubico feed, so any prerelease
+      # Yubico.NativeShims pinned in the lockfile would fail restore even without the policy guard.
+      - name: Setup .NET (main, nuget.org only)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7  # v5.2.0
+        with:
+          global-json-file: "./global.json"
 
       - name: Set build version
         if: ${{ github.event.inputs.version }}
@@ -220,7 +266,7 @@ jobs:
   build-summary:
     name: Build summary
     runs-on: ubuntu-latest
-    needs: [run-tests, build-artifacts, publish-internal, upload-docs]
+    needs: [enforce-branch-policy, run-tests, build-artifacts, publish-internal, upload-docs]
     if: always()
     steps:
       - name: Harden the runner (Audit all outbound calls)

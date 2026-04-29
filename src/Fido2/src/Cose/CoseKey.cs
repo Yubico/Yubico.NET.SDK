@@ -56,6 +56,7 @@ public abstract record CoseKey
             {
                 CborReaderState.ByteString => reader.ReadByteString(),
                 CborReaderState.UnsignedInteger or CborReaderState.NegativeInteger => reader.ReadInt32(),
+                CborReaderState.StartMap => reader.ReadEncodedValue().ToArray(), // nested COSE_Key as raw CBOR
                 _ => throw new InvalidOperationException($"Unsupported CBOR type for COSE key parameter {key}")
             };
             parameters[key] = value;
@@ -70,6 +71,15 @@ public abstract record CoseKey
             throw new InvalidOperationException("Missing required alg parameter");
 
         CoseAlgorithm algorithm = new(alg);
+
+        // Dispatch on alg FIRST for placeholder algorithms. ARKG seed keys use a sentinel
+        // kty (e.g. -65537 from YK 5.8.0-beta firmware) that is not in the standard COSE
+        // kty registry, so the regular kty switch cannot route them. python-fido2 follows
+        // the same alg-first pattern (see cose.py CoseKey.parse → for_alg).
+        if (alg == -65700)
+        {
+            return CoseArkgP256SeedKey.Decode(parameters, algorithm);
+        }
 
         return kty switch
         {

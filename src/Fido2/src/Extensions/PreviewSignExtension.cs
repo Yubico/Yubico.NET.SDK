@@ -208,6 +208,50 @@ public sealed class PreviewSignRegistrationOutput
         Algorithm = algorithm;
         AttestationObject = attestationObject;
     }
+
+    /// <summary>
+    /// Attempts to extract a typed <see cref="PreviewSignGeneratedKey"/> from the
+    /// registration output.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This method decodes the <see cref="PublicKey"/> CBOR and returns a
+    /// <see cref="PreviewSignGeneratedKey"/> if the key is an ARKG-P256 seed-key
+    /// (COSE_Key with alg -65700). Returns <c>null</c> if the public key is not
+    /// an ARKG seed-key variant.
+    /// </para>
+    /// <para>
+    /// This is a backwards-compatible accessor: the raw <see cref="PublicKey"/>
+    /// field remains available for direct CBOR processing.
+    /// </para>
+    /// </remarks>
+    /// <returns>
+    /// A <see cref="PreviewSignGeneratedKey"/> if the public key is an ARKG-P256 seed-key;
+    /// otherwise, <c>null</c>.
+    /// </returns>
+    public PreviewSignGeneratedKey? TryGetGeneratedKey()
+    {
+        try
+        {
+            var coseKey = Cose.CoseKey.Decode(PublicKey);
+
+            if (coseKey is Cose.CoseArkgP256SeedKey arkgKey)
+            {
+                return new PreviewSignGeneratedKey(
+                    KeyHandle,
+                    arkgKey.BlPublicKey,
+                    arkgKey.KemPublicKey,
+                    arkgKey.Algorithm);
+            }
+
+            return null;
+        }
+        catch
+        {
+            // CBOR decode failure or invalid shape - return null
+            return null;
+        }
+    }
 }
 
 /// <summary>
@@ -645,5 +689,81 @@ public static class PreviewSignCbor
         }
 
         return signature.Value;
+    }
+
+    /// <summary>
+    /// Attempts to extract a typed <see cref="PreviewSignGeneratedKey"/> from a
+    /// MakeCredential response that includes the previewSign extension.
+    /// </summary>
+    /// <param name="response">The MakeCredential response.</param>
+    /// <param name="generatedKey">
+    /// When this method returns <c>true</c>, contains the extracted generated key;
+    /// otherwise, <c>null</c>.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> if the response contains a valid previewSign ARKG-P256 seed key;
+    /// otherwise, <c>false</c>.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// This method:
+    /// 1. Checks for unsignedExtensionOutputs["previewSign"]
+    /// 2. Decodes the CTAP-shaped inner attestation object
+    /// 3. Parses the authData to extract AttestedCredentialData (credential ID + COSE public key)
+    /// 4. Decodes the COSE public key and validates it's a CoseArkgP256SeedKey
+    /// 5. Constructs a PreviewSignGeneratedKey from the extracted components
+    /// </para>
+    /// <para>
+    /// Returns <c>false</c> if:
+    /// - The response lacks unsignedExtensionOutputs["previewSign"]
+    /// - The inner attestation object is malformed
+    /// - The authData lacks AttestedCredentialData
+    /// - The COSE public key is not a CoseArkgP256SeedKey variant
+    /// </para>
+    /// </remarks>
+    public static bool TryExtractGeneratedKey(
+        Credentials.MakeCredentialResponse response,
+        out PreviewSignGeneratedKey? generatedKey)
+    {
+        generatedKey = null;
+
+        try
+        {
+            if (response.UnsignedExtensionOutputs?.ContainsKey("previewSign") != true)
+            {
+                return false;
+            }
+
+            var previewSignCbor = response.UnsignedExtensionOutputs["previewSign"];
+            var innerAttestation = DecodeUnsignedRegistrationOutput(previewSignCbor);
+            var authData = Credentials.AuthenticatorData.Parse(innerAttestation.AuthData);
+
+            if (authData.AttestedCredentialData is null)
+            {
+                return false;
+            }
+
+            var coseKey = Cose.CoseKey.Decode(authData.AttestedCredentialData.CredentialPublicKey);
+            if (coseKey is not Cose.CoseArkgP256SeedKey arkgSeedKey)
+            {
+                return false;
+            }
+
+            generatedKey = new PreviewSignGeneratedKey(
+                authData.AttestedCredentialData.CredentialId,
+                arkgSeedKey.BlPublicKey,
+                arkgSeedKey.KemPublicKey,
+                arkgSeedKey.DerivedKeyAlgorithm);  // -9 (Esp256), NOT -65700 (seed-key alg)
+
+            return true;
+        }
+        catch (System.Formats.Cbor.CborContentException)
+        {
+            return false;
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
     }
 }

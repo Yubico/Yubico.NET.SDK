@@ -84,38 +84,34 @@ public class PreviewSignTests
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task FullCeremony_RegisterWithPreviewSign_ThenSign_ReturnsSignature(YubiKeyTestState state)
     {
-        // SKIPPED for automated CI: this test exercises the full ARKG-P256 previewSign
-        // authentication ceremony end-to-end. It requires:
+        // Full ARKG-P256 previewSign authentication ceremony end-to-end:
+        //   - Register with previewSign ARKG-P256 key generation (touch #1)
+        //   - Offline derive public key using real ARKG primitives (Phase B/C)
+        //   - Sign arbitrary message via GetAssertion (touch #2)
+        //   - Offline verify signature against derived public key
+        //
+        // Requires:
         //   - Physical YubiKey 5.8.0-beta over USB HID
-        //   - User touch (presence) at the GetAssertion call
-        //   - A real ARKG (arkg_kh, ctx) pair derived from the registration's COSE seed key.
+        //   - User touch (presence) at both MakeCredential and GetAssertion
+        //   - Real ARKG (kh, ctx) pair derived from registration COSE seed key
         //
-        // Phase 10 §3 (this PRD) ships the typed CoseSignArgs builder so the body below can be
-        // written. ARKG seed-key derivation (which produces arkg_kh and ctx) lives in a separate
-        // Phase 10 follow-up (Yubico.Core port of ArkgPrimitivesOpenSsl.cs) — until that lands,
-        // the placeholder bytes below will not survive firmware verification, so the test stays
-        // skipped in CI. Dennis runs this manually against hardware once a real (kh, ctx) pair
-        // is available.
-        //
-        // Verified Phase 10 §3 builder invariants (covered by unit tests):
-        //   ✅ Wire alg = -65539 (CoseAlgorithm.ArkgP256), NOT -9 (output sig alg)
-        //   ✅ KH must be exactly 81 bytes (16-byte HMAC tag || 65-byte SEC1 P-256 point)
-        //   ✅ CTX must be ≤64 bytes (HKDF length-byte prefix bound)
-        //   ✅ COSE_Sign_Args map = {3: -65539, -1: kh, -2: ctx}, CTAP2-canonical order
-        //   ✅ Wrapped as bstr at outer authentication input key 7
-        //
-        // Engineer-implemented (Phase 10 §3 typed CoseSignArgs builder),
-        // awaiting Dennis hardware verification once ARKG seed-key derivation lands.
-        Skip.If(true,
-            "previewSign FullCeremony requires hardware (USB HID + user touch) AND a real " +
-            "ARKG (kh, ctx) pair. Engineer-implemented (Phase 10 §3 typed CoseSignArgs builder), " +
-            "awaiting Dennis hardware verification.");
+        // Phase D: unskipped after Phases B (Core ARKG primitives) and C (Fido2 typed keys) landed.
 
         // --- Phase 1: Registration with previewSign ARKG-P256 key generation ---
         await using var session1 = await state.Device.CreateFidoSessionAsync();
 
         Skip.IfNot(await SupportsPreviewSignAsync(session1),
             "YubiKey does not advertise previewSign extension");
+
+        // Phase D bring-up gap (2026-04-28): hardware verifies registration + ARKG seed-key
+        // extraction + offline derive on YK 5.8.0-beta. The remaining gap is at GetAssertion+
+        // previewSign+ARKG, which the YubiKey rejects with CtapException("Unspecified error",
+        // CTAP1_ERR_OTHER 0x7F) BEFORE user touch. COSE_Sign_Args inner bytes verified
+        // byte-for-byte vs python-fido2. Suspected cause: PIN-protocol interaction (Legacy
+        // SDK's passing FullCeremony test does not use pinUvAuthParam/Protocol). Needs
+        // deeper Legacy/python-fido2 source diff before unskip.
+        // See Plans/yes-devteam-ship-that-mossy-dewdrop.md "Phase D follow-up".
+        Skip.If(true, "GetAssertion+previewSign+ARKG hardware gap — see plan file");
 
         await NormalizePinAsync(session1);
 
@@ -151,12 +147,20 @@ public class PreviewSignTests
 
         Assert.True(keyHandle.Length > 0);
 
-        // TODO(Phase 10 follow-up): replace placeholder ARKG (kh, ctx) with a real pair derived
-        // from generatedKey.PublicKey via the (forthcoming) Yubico.Core ARKG port. Until then
-        // the firmware will reject this auth. The encoder shape itself is exercised by unit tests.
-        byte[] arkgKeyHandle = new byte[81];
-        arkgKeyHandle[16] = 0x04; // SEC1 leading byte
-        byte[] arkgContext = "ARKG-P256.test vectors"u8.ToArray();
+        // Extract ARKG seed key from WebAuthn layer's CoseKey wrapper
+        var arkgSeedKey = generatedKey.PublicKey as Fido2.Cose.CoseArkgP256SeedKey;
+        Assert.NotNull(arkgSeedKey);
+
+        // Offline derive public key using real ARKG primitives (Phase B/C)
+        byte[] ikm = RandomNumberGenerator.GetBytes(32);
+        byte[] ctx = Encoding.ASCII.GetBytes("integration-test-ctx");
+
+        // Convert WebAuthn GeneratedSigningKey to Fido2 PreviewSignGeneratedKey
+        var fido2GeneratedKey = ConvertToFido2GeneratedKey(keyHandle, arkgSeedKey);
+
+        var derivedKey = fido2GeneratedKey.DerivePublicKey(ikm, ctx);
+        Assert.Equal(65, derivedKey.PublicKey.Length); // SEC1 uncompressed
+        Assert.NotEmpty(derivedKey.ArkgKeyHandle.Span.ToArray());
 
         await regClient.DisposeAsync();
 
@@ -174,7 +178,9 @@ public class PreviewSignTests
             [credentialId] = new PreviewSignSigningParams(
                 keyHandle: keyHandle,
                 tbs: toBeSigned,
-                coseSignArgs: Fido2Extensions.CoseSignArgs.ArkgP256(arkgKeyHandle, arkgContext))
+                coseSignArgs: Fido2Extensions.CoseSignArgs.ArkgP256(
+                    derivedKey.ArkgKeyHandle,
+                    derivedKey.Context))
         };
 
         var authOptions = new AuthenticationOptions
@@ -204,5 +210,42 @@ public class PreviewSignTests
         Assert.NotNull(previewSignOutput);
         Assert.True(previewSignOutput.Signature.Length > 0,
             "previewSign signature over TBS data should not be empty");
+
+        // --- Phase 3: Offline verify signature ---
+        bool verified = derivedKey.VerifySignature(messageBytes, previewSignOutput.Signature.Span);
+        Assert.True(verified, "Signature verification should succeed for derived public key");
+    }
+
+    /// <summary>
+    /// Helper to convert WebAuthn GeneratedSigningKey to Fido2 PreviewSignGeneratedKey.
+    /// </summary>
+    /// <remarks>
+    /// This bridges the WebAuthn layer (which exposes CoseKey directly) to the Fido2 layer
+    /// (which has the DerivePublicKey method). Uses reflection because PreviewSignGeneratedKey's
+    /// constructor is internal to the Fido2 assembly.
+    /// </remarks>
+    private static Fido2.Extensions.PreviewSignGeneratedKey ConvertToFido2GeneratedKey(
+        ReadOnlyMemory<byte> keyHandle,
+        Fido2.Cose.CoseArkgP256SeedKey arkgSeedKey)
+    {
+        var generatedKeyType = typeof(Fido2.Extensions.PreviewSignGeneratedKey);
+        var constructor = generatedKeyType.GetConstructor(
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
+            null,
+            [typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(Fido2.Cose.CoseAlgorithm)],
+            null);
+
+        if (constructor is null)
+        {
+            throw new InvalidOperationException(
+                "PreviewSignGeneratedKey constructor not found. This indicates a breaking change in the Fido2 layer.");
+        }
+
+        return (Fido2.Extensions.PreviewSignGeneratedKey)constructor.Invoke([
+            keyHandle,
+            arkgSeedKey.BlPublicKey,
+            arkgSeedKey.KemPublicKey,
+            arkgSeedKey.Algorithm
+        ]);
     }
 }

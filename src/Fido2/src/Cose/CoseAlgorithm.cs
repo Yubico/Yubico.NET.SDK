@@ -81,11 +81,29 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     public static readonly CoseAlgorithm ArkgP256 = Esp256SplitArkgPlaceholder;
 
     /// <summary>
+    /// ARKG-P256 seed-key COSE algorithm identifier (value <c>-65700</c>).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is the seed-key COSE-key <c>alg</c> parameter (key 3) identifying an ARKG-P256
+    /// placeholder key structure, per python-fido2's <c>ARKG_P256_PLACEHOLDER.ALGORITHM</c>.
+    /// It marks a COSE_Key as containing KEM and blinding public keys (at parameters -1/-2)
+    /// instead of standard EC2 curve coordinates.
+    /// </para>
+    /// <para>
+    /// Do NOT confuse with the signing-operation algorithm <see cref="ArkgP256"/> (<c>-65539</c>),
+    /// which is written in <c>COSE_Sign_Args</c> key 3 during previewSign authentication requests.
+    /// The two constants live at different protocol layers and are NOT interchangeable.
+    /// </para>
+    /// </remarks>
+    public static readonly CoseAlgorithm ArkgP256SeedKey = new(-65700);
+
+    /// <summary>
     /// Gets a value indicating whether this is a known algorithm.
     /// </summary>
     public bool IsKnown => Value switch
     {
-        -7 or -8 or -9 or -35 or -257 or -65539 => true,
+        -7 or -8 or -9 or -35 or -257 or -65539 or -65700 => true,
         _ => false
     };
 
@@ -107,6 +125,7 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
         -35 => "ES384",
         -257 => "RS256",
         -65539 => "ESP256_SPLIT_ARKG_PLACEHOLDER",
+        -65700 => "ARKG_P256_SEED_KEY",
         _ => $"COSE({Value})"
     };
 }

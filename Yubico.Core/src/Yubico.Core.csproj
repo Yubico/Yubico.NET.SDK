@@ -55,6 +55,9 @@ limitations under the License. -->
     <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
 
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);ENABLE_SENSITIVE_LOG</DefineConstants>
+
+    <!-- NuGet lockfile: pins floating PackageReference versions for reproducible restores -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
@@ -129,7 +132,7 @@ limitations under the License. -->
     </PackageReference>
     <PackageReference Include="System.Memory" Version="4.6.3" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
-    <PackageReference Include="Yubico.NativeShims" Version="1.16.1-prerelease.20260428.1" />
+    <PackageReference Include="Yubico.NativeShims" Version="1.*-*" />
   </ItemGroup>
 
   <ItemGroup Label="Expose internal test hooks to Unit Test projects">

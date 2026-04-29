@@ -12,6 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Purpose
+// -------
+// Direct P/Invoke functional tests for the OpenSSL BIGNUM marshaling layer
+// exposed by Yubico.NativeShims (Native_BN_*). These wrappers move arbitrary-
+// precision integers across the C#/C boundary; subtle bugs in length handling,
+// padding, or leading-zero behavior surface as silent corruption in EC point
+// coordinates and ARKG primitives that build on top.
+//
+// What this validates
+// -------------------
+//   * bin -> BIGNUM -> bin round-trip preserves bytes for sizes 1, 16, 32, 256.
+//   * Native_BN_num_bytes returns the canonical length (leading zeros stripped,
+//     matching OpenSSL semantics).
+//   * Native_BN_bn2binpad left-pads to a fixed width without truncating.
+//   * Lifecycle: Native_BN_new, Native_BN_clear_free do not crash or leak under
+//     repeated allocate/free.
+//
+// References
+// ----------
+//   * OpenSSL BN(3) man page — https://docs.openssl.org/master/man3/BN_new/
+//     (authoritative for BN_new, BN_bin2bn, BN_bn2bin, BN_bn2binpad,
+//     BN_num_bytes, BN_clear_free behavior).
+//   * No formal standards-track spec exists for the BIGNUM API; round-trip
+//     and boundary tests are self-consistent against the OpenSSL contract.
+
 using System;
 using System.Linq;
 using Xunit;

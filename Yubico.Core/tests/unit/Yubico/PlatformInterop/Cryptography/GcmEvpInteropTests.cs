@@ -12,6 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Purpose
+// -------
+// Direct P/Invoke functional tests for the AES-256-GCM (Galois/Counter Mode)
+// EVP cipher wrappers exposed by Yubico.NativeShims (Native_EVP_*). GCM is an
+// authenticated cipher: tag verification is the only thing standing between a
+// caller and accepting tampered ciphertext, so these tests must validate not
+// just round-trips but also that tag mismatch causes Final_ex to return 0
+// (decryption rejected).
+//
+// What this validates
+// -------------------
+//   * Cipher context lifecycle: Native_EVP_CIPHER_CTX_new / _free.
+//   * Native_EVP_Aes256Gcm_Init for both encrypt and decrypt direction.
+//   * Native_EVP_Update for AAD (output=null) and plaintext / ciphertext.
+//   * Native_EVP_Final_ex computes / verifies the tag.
+//   * Native_EVP_CIPHER_CTX_ctrl with EVP_CTRL_AEAD_GET_TAG (16) /
+//     EVP_CTRL_AEAD_SET_TAG (17) — note: numeric values shared between C# and
+//     C without a header, so this test pins the contract.
+//   * NIST SP 800-38D Test Cases (256-bit key) — encrypt/decrypt against
+//     known answers.
+//   * AAD round-trip and tag tamper detection (single-bit flip causes
+//     Final_ex == 0 on decrypt).
+//
+// References
+// ----------
+//   * NIST SP 800-38D — Recommendation for Block Cipher Modes of Operation:
+//     Galois/Counter Mode (GCM) and GMAC, §7.1 (Authenticated Encryption),
+//     §7.2 (Authenticated Decryption).
+//     https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf
+//   * NIST GCM Test Vectors (CAVP) —
+//     https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program/cavp-testing-block-cipher-modes
+//   * FIPS 197 — Advanced Encryption Standard (AES).
+//     https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf
+//   * OpenSSL EVP_EncryptInit(3) — https://docs.openssl.org/master/man3/EVP_EncryptInit/
+
 using System;
 using System.Linq;
 using Xunit;

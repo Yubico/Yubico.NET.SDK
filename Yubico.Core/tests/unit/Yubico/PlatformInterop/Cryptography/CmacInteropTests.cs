@@ -12,6 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Purpose
+// -------
+// Direct P/Invoke functional tests for the AES-128-CMAC (Cipher-based MAC)
+// EVP MAC wrappers exposed by Yubico.NativeShims (Native_CMAC_EVP_MAC_*).
+// CMAC is consumed by SCP03 / PIV / OATH session authentication paths; an
+// off-by-one in update chunking or a wrong subkey derivation results in
+// silent authentication failures against real YubiKeys.
+//
+// What this validates
+// -------------------
+//   * MAC context lifecycle: Native_CMAC_EVP_MAC_CTX_new / Native_EVP_MAC_CTX_free.
+//   * Native_CMAC_EVP_MAC_init binds the AES-128 key.
+//   * Native_CMAC_EVP_MAC_update accepts variable-length chunks.
+//   * Native_CMAC_EVP_MAC_final emits the 16-byte tag.
+//   * RFC 4493 §4 published test vectors (AES-128) for messages of length
+//     0, 16, 40, and 64 bytes — pins the wire-level contract.
+//   * Multi-update equivalence: update(A) followed by update(B) produces the
+//     same tag as update(A || B). Catches buffer-management regressions in
+//     the C side.
+//
+// References
+// ----------
+//   * RFC 4493 — The AES-CMAC Algorithm, §2 (Specification), §4 (Test Vectors).
+//     https://datatracker.ietf.org/doc/html/rfc4493
+//   * NIST SP 800-38B — Recommendation for Block Cipher Modes of Operation:
+//     The CMAC Mode for Authentication.
+//     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38B.pdf
+//   * FIPS 197 — Advanced Encryption Standard (AES).
+//     https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf
+//   * OpenSSL EVP_MAC(3) — https://docs.openssl.org/master/man3/EVP_MAC/
+
 using System;
 using System.Linq;
 using Xunit;

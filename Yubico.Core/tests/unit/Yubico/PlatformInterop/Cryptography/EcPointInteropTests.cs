@@ -12,6 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Purpose
+// -------
+// Direct P/Invoke functional tests for the OpenSSL EC group / EC point
+// marshaling layer exposed by Yubico.NativeShims (Native_EC_GROUP_*,
+// Native_EC_POINT_*). These wrappers underpin every ECC operation in the SDK
+// (ECDH, ARKG-P256 on-curve validation, FIDO2 key handling); marshaling
+// regressions cascade silently into wrong shared secrets or accepted
+// invalid-curve points.
+//
+// What this validates
+// -------------------
+//   * Group/point lifecycle on NIST P-256 (curve NID 415).
+//   * Native_EC_POINT_set_affine_coordinates + get_affine_coordinates
+//     round-trips the SEC2 P-256 generator G unchanged.
+//   * Native_EC_POINT_mul: G·1 = G; G·n (n = group order) = point at infinity
+//     (get_affine subsequently fails as expected).
+//   * Native_EC_POINT_is_on_curve: returns 1 for the valid generator,
+//     0 for a Y-bit-flipped off-curve candidate. Required for SEC 1 §3.2.2
+//     public-key validation in ARKG-P256.
+//
+// References
+// ----------
+//   * SEC 2: Recommended Elliptic Curve Domain Parameters, v2.0 §2.4.2
+//     (secp256r1 / NIST P-256 generator and group order)
+//     https://www.secg.org/sec2-v2.pdf
+//   * SEC 1: Elliptic Curve Cryptography, v2.0 §3.2.2 (Public Key Validation)
+//     https://www.secg.org/sec1-v2.pdf
+//   * NIST SP 800-186 §3.2.1.3 (Curve P-256) — current authoritative source
+//     for NIST P-256 domain parameters (the FIPS 186-5 revision moved curve
+//     definitions out of FIPS 186 into SP 800-186).
+//     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-186.pdf
+//   * OpenSSL EC_POINT(3) man page —
+//     https://docs.openssl.org/master/man3/EC_POINT_new/
+
 using System;
 using Xunit;
 using Yubico.PlatformInterop;

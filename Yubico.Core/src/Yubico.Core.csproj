@@ -58,6 +58,8 @@ limitations under the License. -->
 
     <!-- NuGet lockfile: pins floating PackageReference versions for reproducible restores -->
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- On CI, fail the restore if the lockfile is out of sync with the csproj instead of silently re-floating. -->
+    <RestoreLockedMode Condition="'$(GITHUB_ACTIONS)' == 'true'">true</RestoreLockedMode>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">

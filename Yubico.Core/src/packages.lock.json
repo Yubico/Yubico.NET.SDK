@@ -86,15 +86,6 @@
           "Microsoft.Extensions.Primitives": "10.0.7"
         }
       },
-      "Microsoft.NETFramework.ReferenceAssemblies": {
-        "type": "Direct",
-        "requested": "[1.0.3, )",
-        "resolved": "1.0.3",
-        "contentHash": "vUc9Npcs14QsyOD01tnv/m8sQUnGTGOw1BCmKcv77LBJY7OxhJ+zJF7UD/sCL3lYNFuqmQEVlkfS4Quif6FyYg==",
-        "dependencies": {
-          "Microsoft.NETFramework.ReferenceAssemblies.net472": "1.0.3"
-        }
-      },
       "Microsoft.SourceLink.GitHub": {
         "type": "Direct",
         "requested": "[10.0.203, )",
@@ -132,8 +123,8 @@
       "Yubico.NativeShims": {
         "type": "Direct",
         "requested": "[1.*-*, )",
-        "resolved": "1.16.1-prerelease.20260428.1",
-        "contentHash": "6zw5SNFpwfYS4hmqNyIb06oPBmipwcz5KZRYhS8AvZkOWRASUKpcePMYuhNyPSVZLWIr+KQOEiUUPWDPBpLYgw=="
+        "resolved": "1.16.1",
+        "contentHash": "odGky7RVjFwP+UfHIpk/XpREauuNhp3JjYbDXnDBg4ufnYE8CL+PLuN40IBhUwPCoxB1lhyxx0rt/CDuI3w4OA=="
       },
       "Microsoft.Build.Tasks.Git": {
         "type": "Transitive",
@@ -270,11 +261,6 @@
           "System.Memory": "4.6.3",
           "System.Runtime.CompilerServices.Unsafe": "6.1.2"
         }
-      },
-      "Microsoft.NETFramework.ReferenceAssemblies.net472": {
-        "type": "Transitive",
-        "resolved": "1.0.3",
-        "contentHash": "0E7evZXHXaDYYiLRfpyXvCh+yzM2rNTyuZDI+ZO7UUqSc6GfjePiXTdqJGtgIKUwdI81tzQKmaWprnUiPj9hAw=="
       },
       "Microsoft.SourceLink.Common": {
         "type": "Transitive",
@@ -494,8 +480,8 @@
       "Yubico.NativeShims": {
         "type": "Direct",
         "requested": "[1.*-*, )",
-        "resolved": "1.16.1-prerelease.20260428.1",
-        "contentHash": "6zw5SNFpwfYS4hmqNyIb06oPBmipwcz5KZRYhS8AvZkOWRASUKpcePMYuhNyPSVZLWIr+KQOEiUUPWDPBpLYgw=="
+        "resolved": "1.16.1",
+        "contentHash": "odGky7RVjFwP+UfHIpk/XpREauuNhp3JjYbDXnDBg4ufnYE8CL+PLuN40IBhUwPCoxB1lhyxx0rt/CDuI3w4OA=="
       },
       "Microsoft.Build.Tasks.Git": {
         "type": "Transitive",
@@ -836,8 +822,8 @@
       "Yubico.NativeShims": {
         "type": "Direct",
         "requested": "[1.*-*, )",
-        "resolved": "1.16.1-prerelease.20260428.1",
-        "contentHash": "6zw5SNFpwfYS4hmqNyIb06oPBmipwcz5KZRYhS8AvZkOWRASUKpcePMYuhNyPSVZLWIr+KQOEiUUPWDPBpLYgw=="
+        "resolved": "1.16.1",
+        "contentHash": "odGky7RVjFwP+UfHIpk/XpREauuNhp3JjYbDXnDBg4ufnYE8CL+PLuN40IBhUwPCoxB1lhyxx0rt/CDuI3w4OA=="
       },
       "Microsoft.Build.Tasks.Git": {
         "type": "Transitive",

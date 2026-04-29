@@ -56,10 +56,17 @@ limitations under the License. -->
 
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);ENABLE_SENSITIVE_LOG</DefineConstants>
 
-    <!-- NuGet lockfile: pins floating PackageReference versions for reproducible restores -->
+    <!-- NuGet lockfile: pins floating PackageReference versions for reproducible restores. -->
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <!-- On CI, fail the restore if the lockfile is out of sync with the csproj instead of silently re-floating. -->
-    <RestoreLockedMode Condition="'$(GITHUB_ACTIONS)' == 'true'">true</RestoreLockedMode>
+    <!--
+      NOTE: <RestoreLockedMode> is intentionally NOT enabled. Lockfiles are not OS-portable when
+      implicit packages differ across platforms (e.g. Microsoft.NETFramework.ReferenceAssemblies is
+      added implicitly when building net472 on non-Windows but not on Windows). Enabling locked mode
+      with a lockfile generated on one OS causes NU1004 on the others. To re-introduce locked mode,
+      either generate the lockfile on every CI OS in the matrix and commit per-OS lockfiles, or add
+      explicit <PackageReference> entries for every implicit/transitive root so all OSes resolve
+      identically.
+    -->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">

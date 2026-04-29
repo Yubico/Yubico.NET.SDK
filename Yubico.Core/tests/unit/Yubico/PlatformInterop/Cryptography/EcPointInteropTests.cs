@@ -69,9 +69,44 @@ namespace Yubico.PlatformInterop.Cryptography
             Assert.False(point.IsInvalid);
         }
 
-        // Note: EcPointIsOnCurve managed wrapper is added on the webauthn previewSign
-        // branch alongside its consumer; on-curve coverage lives in the test suite
-        // there to keep this PR free of production-code dependencies.
+        [Fact]
+        public void EcPointIsOnCurve_P256Generator_ReturnsTrue()
+        {
+            // SEC2 §2.4.2 P-256 generator G is on the curve
+            using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(NidP256);
+            using SafeEcPoint point = NativeMethods.EcPointNew(group);
+            using SafeBigNum x = NativeMethods.BnBinaryToBigNum(P256GeneratorX);
+            using SafeBigNum y = NativeMethods.BnBinaryToBigNum(P256GeneratorY);
+
+            int setResult = NativeMethods.EcPointSetAffineCoordinates(group, point, x, y);
+            Assert.Equal(1, setResult);
+
+            int isOnCurve = NativeMethods.EcPointIsOnCurve(group, point);
+            Assert.Equal(1, isOnCurve);
+        }
+
+        [Fact]
+        public void EcPointIsOnCurve_OffCurvePoint_ReturnsFalse()
+        {
+            // Flip the lowest bit of Y to create a point not on the curve
+            byte[] offCurveY = (byte[])P256GeneratorY.Clone();
+            offCurveY[31] ^= 0x01;
+
+            using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(NidP256);
+            using SafeEcPoint point = NativeMethods.EcPointNew(group);
+            using SafeBigNum x = NativeMethods.BnBinaryToBigNum(P256GeneratorX);
+            using SafeBigNum y = NativeMethods.BnBinaryToBigNum(offCurveY);
+
+            // set_affine_coordinates might fail for invalid points, but if it succeeds,
+            // is_on_curve must return 0
+            int setResult = NativeMethods.EcPointSetAffineCoordinates(group, point, x, y);
+            if (setResult == 1)
+            {
+                int isOnCurve = NativeMethods.EcPointIsOnCurve(group, point);
+                Assert.Equal(0, isOnCurve);
+            }
+            // If set fails, the point is invalid - that's also acceptable behavior
+        }
 
         [Fact]
         public void EcPointGetAffineCoordinates_RoundTrip_MatchesOriginal()

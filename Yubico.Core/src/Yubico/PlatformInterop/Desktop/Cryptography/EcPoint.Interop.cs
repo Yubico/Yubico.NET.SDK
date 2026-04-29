@@ -84,5 +84,13 @@ namespace Yubico.PlatformInterop
                 q,
                 m,
                 IntPtr.Zero);
+
+        // int EC_POINT_is_on_curve(const EC_GROUP* group, const EC_POINT* point, BN_CTX* ctx);
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_is_on_curve", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        private static extern int EcPointIsOnCurve(IntPtr group, IntPtr point, IntPtr ctx);
+
+        public static int EcPointIsOnCurve(SafeEcGroup group, SafeEcPoint point) =>
+            EcPointIsOnCurve(group.DangerousGetHandle(), point.DangerousGetHandle(), IntPtr.Zero);
     }
 }

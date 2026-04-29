@@ -36,12 +36,12 @@ User: "/Release"
 
 **Example 2: Cross-machine release (start macOS, finish Windows)**
 ```
-User (on macOS): "/Release"
+Operator (on macOS): "/Release"
 → Phases 1-4 complete (release branch, PR, merge, tag)
 → Phase 5 detects darwin → STOPS, prints handoff with build.yml run ID and instruction to run `/Release resume 1.16.1` on Windows
 → State cached to ~/Releases/1.16.1/.state.json (run IDs, version, NativeShims flag)
 
-User (on Windows): "/Release resume 1.16.1"
+Operator (on Windows): "/Release resume 1.16.1"
 → Loads cached state, skips phases 1-4
 → Phase 5: downloads artifacts (NativeShims first if rebuilt), runs sign.ps1, publishes
 → Phases 6-7 complete normally

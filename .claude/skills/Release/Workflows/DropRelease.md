@@ -1,6 +1,6 @@
 # DropRelease Workflow
 
-End-to-end Yubico .NET SDK release wizard. Drives 7 phases with explicit gates. Dennis answers AskUserQuestion prompts; everything else is automated.
+End-to-end Yubico .NET SDK release wizard. Drives 7 phases with explicit gates. the operator answers AskUserQuestion prompts; everything else is automated.
 
 ## State file
 
@@ -14,12 +14,17 @@ Location: `~/Releases/<version>/.state.json`. Created in phase 1, updated at eve
   "nativeShimsRebuild": false,
   "nativeShimsVersion": null,
   "nativeShimsRunId": null,
+  "nativeShimsPublished": false,
   "buildRunId": null,
   "tagPushed": false,
   "currentPhase": 4,
-  "categorizedPRs": { "features": [], "bugfixes": [], "docs": [], "deps": [], "security": [] }
+  "categorizedPRs": { "features": [], "bugfixes": [], "docs": [], "deps": [], "security": [], "misc": [] }
 }
 ```
+
+**Date storage convention**: `releaseDate` is always stored as ISO `YYYY-MM-DD`. The Phase 1 prompt collects it in human form (`Month Dth, YYYY`), but the skill normalizes to ISO before writing state. Display formatting is reapplied at write time for `whats-new.md` (long form: `April 29th, 2026`) and the Slack draft (long form). Always derive the display string from the ISO field — never store both.
+
+**Categorization buckets**: All buckets above MUST be present in state (even empty). Phase 3 categorizes "everything else" into `misc`; Phase 7 includes `misc` in both the `whats-new.md` Miscellaneous section and the Slack draft (under a `Miscellaneous 🧰📌` heading) so PRs are never dropped.
 
 The state file is the single source of truth for resume. Update it before any operation that could fail.
 
@@ -76,27 +81,39 @@ git diff <previousTag>..origin/develop -- Yubico.NativeShims/ --stat
    - Get last release date: `gh release view <previousTag> --json publishedAt -q .publishedAt`
    - List merged PRs since: `gh pr list --base develop --state merged --search "merged:>=<lastReleaseISO>" --json number,title,labels,url --limit 100`
    - Categorize by PR title prefix and labels (heuristics):
-     - `feat:` / `feature/` / label `enhancement` → **Features**
-     - `fix:` / `bugfix/` / label `bug` → **Bug Fixes**
-     - `docs:` / `doc:` → **Documentation**
-     - `chore(deps):` / `build(deps):` / dependabot → **Dependencies / Maintenance**
-     - `security:` / `ci:` / `.github/workflows/` touched → **Security / CI**
-     - everything else → **Miscellaneous**
-   - Cache categorization in state for phase 7 Slack reuse
-4. **Insert into `docs/users-manual/getting-started/whats-new.md`**:
+     - `feat:` / `feature/` / label `enhancement` → **Features** (`features` bucket)
+     - `fix:` / `bugfix/` / label `bug` → **Bug Fixes** (`bugfixes` bucket)
+     - `docs:` / `doc:` → **Documentation** (`docs` bucket)
+     - `chore(deps):` / `build(deps):` / dependabot → **Dependencies / Maintenance** (`deps` bucket)
+     - `security:` / `ci:` / `.github/workflows/` touched → **Security / CI** (`security` bucket)
+     - everything else → **Miscellaneous** (`misc` bucket — never dropped)
+   - Cache full categorization (all 6 buckets including `misc`) into `state.categorizedPRs` for phase 7 Slack reuse
+5. **Insert into `docs/users-manual/getting-started/whats-new.md`**:
    - Read current file
    - Insert new `### <version>` block under the appropriate `## 1.16.x Releases` heading (create the heading if needed)
-   - Match the existing format exactly (Release date, Features, Bug Fixes, Documentation, Misc, Dependencies subsections)
+   - Match the existing format exactly (Release date, Features, Bug Fixes, Documentation, Misc, Dependencies subsections — emit Misc subsection whenever `misc` bucket is non-empty)
    - Show diff via `git diff docs/users-manual/getting-started/whats-new.md`
-5. `AskUserQuestion`: "Release notes look correct?" Options: "Yes, commit" / "Let me edit first" / "Regenerate from PRs"
-6. On approval: `git add docs/users-manual/getting-started/whats-new.md && git commit -m "docs: release notes for <version>"`
-7. `git push -u origin release/<version>`
-8. `gh pr create --base main --head release/<version> --title "Release <version>" --body-file <notes-snippet>` — capture PR number to state
-9. Print PR URL, instruct Dennis to get reviewers
+6. `AskUserQuestion`: "Release notes look correct?" Options: "Yes, commit" / "Let me edit first" / "Regenerate from PRs"
+7. On approval: `git add docs/users-manual/getting-started/whats-new.md && git commit -m "docs: release notes for <version>"`
+8. `git push -u origin release/<version>`
+9. **Build the PR-body file** for `gh pr create` — extract just the new `### <version>` block from `whats-new.md` (between the new heading and the next `### ` heading) into a real temp file, then pass it:
+   ```bash
+   notes_file=$(mktemp -t release-notes-<version>.XXXXXX.md)
+   awk -v v="### <version>" '
+     $0 == v {flag=1; print; next}
+     flag && /^### / {exit}
+     flag {print}
+   ' docs/users-manual/getting-started/whats-new.md > "$notes_file"
+   gh pr create --base main --head release/<version> \
+     --title "Release <version>" \
+     --body-file "$notes_file"
+   ```
+   Capture the returned PR number into `state.releasePrNumber`. Keep the temp file path in state too so phase 6 can reuse it.
+10. Print PR URL, instruct the operator to get reviewers
 
 ## Phase 4 — Merge + CI dispatch (cross-platform)
 
-1. **Wait for merge** — poll `gh pr view <prNumber> --json state,mergedAt` every 60s until `state=MERGED`. Print poll updates. If Dennis wants to abort polling and resume later, the state file already has the PR number — `/Release resume <version>` continues from here.
+1. **Wait for merge** — poll `gh pr view <prNumber> --json state,mergedAt` every 60s until `state=MERGED`. Print poll updates. If the operator wants to abort polling and resume later, the state file already has the PR number — `/Release resume <version>` continues from here.
 2. After merge: `git checkout main && git pull origin main`
 3. **Ordering check** — if `nativeShimsRebuild: true` in state AND NativeShims hasn't been signed+published yet (no NuGet 200 on `https://www.nuget.org/packages/Yubico.NativeShims/<nsVersion>`):
    - Print: "⚠ NativeShims must publish to NuGet.org before main build dispatches"
@@ -122,22 +139,37 @@ esac
 
 ### If PLATFORM != windows
 
-STOP. Print handoff:
+STOP. Phase 5 can be reached via two entry paths — render the handoff text from actual state, not assumptions:
+
+- **Entry path A — NativeShims-only** (from Phase 4 step 3 ordering check; `state.buildRunId == null` and `state.tagPushed == false`): main `build.yml` has NOT been dispatched yet. The operator must sign+publish NativeShims first, then resume returns flow to Phase 4 step 4.
+- **Entry path B — full release** (`state.buildRunId != null` and `state.tagPushed == true`): main build is green and tag is pushed; only sign+publish + GitHub release remain.
+
+Pseudocode for the handoff message (skill builds the strings from state):
+
 ```
 ═══ HANDOFF TO WINDOWS ═══
-Release <version> is past CI green and tagged. Sign + publish requires Windows + your code-sign YubiKey.
+Release <version> needs sign+publish on Windows with your code-sign YubiKey.
+
+Current state (from ~/Releases/<version>/.state.json):
+- Entry path: <"NativeShims-only" if buildRunId == null else "full release">
+- NativeShims rebuild: <nativeShimsRebuild>
+- NativeShims run: <nativeShimsRunId or "n/a">
+- NativeShims published: <nativeShimsPublished>
+- Main build run: <buildRunId or "not yet dispatched">
+- Tag pushed: <tagPushed>
+
+What's left after sign+publish:
+<if buildRunId == null:
+   - Resume returns to Phase 4 step 4 (dispatch build.yml against main)
+   - Then re-enter Phase 5 entry path B for the main packages
+ else:
+   - Phase 6 (GitHub release with signed assets)
+   - Phase 7 (merge main back to develop, Slack draft)>
 
 On your Windows machine:
 1. Plug in your code-sign YubiKey
 2. cd <this repo>
 3. Invoke: /Release resume <version>
-
-The skill will resume from this exact point using ~/Releases/<version>/.state.json.
-
-Cached state:
-- build.yml run: <buildRunId>
-- NativeShims run: <nativeShimsRunId or "none">
-- Tag pushed: <tagPushed>
 
 Do not proceed past this point on macOS/Linux.
 ═══
@@ -174,50 +206,93 @@ Release <version> — Sign & Publish
 ```
 (Skip NativeShims rows if `nativeShimsRebuild: false`.)
 
+**Pre-flight for publish (one-time per session)**: `Invoke-NuGetPackagePush` resolves the API key from `-ApiKey` parameter or falls back to `$env:NUGET_API_KEY`. Before phase 5d/5e push steps, assert:
+```powershell
+if ([string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)) {
+  # AskUserQuestion: paste API key (will be set in $env:NUGET_API_KEY for this session only)
+}
+```
+Never echo the API key. Never persist it to the state file.
+
 **5d. NativeShims half** (only if `nativeShimsRebuild: true`):
-1. `gh run download <nativeShimsRunId> --dir $staging\nativeshims` — confirms artifact zip lands
+1. `gh run download <nativeShimsRunId> --dir "$staging\nativeshims"` — confirms artifact zip lands
 2. Identify the zip name (look for `*nativeshims*.zip`)
-3. Invoke sign:
+3. Sign:
    ```powershell
    . ./build/sign.ps1
    Invoke-NuGetPackageSigning `
      -Thumbprint $env:YUBICO_SIGNING_THUMBPRINT `
      -WorkingDirectory "$staging\nativeshims" `
-     -NativeShimsZip <zipname>
+     -NativeShimsZip "<zipname>"
    ```
-   YubiKey PIN prompt will surface; tell Dennis to enter it
-4. Verify: `Get-ChildItem "$staging\nativeshims\signed\packages\*.nupkg"` non-empty
-5. Publish: `Invoke-NuGetPackagePush -WorkingDirectory "$staging\nativeshims"` (function call signature per `build/sign.ps1` — read script before invoking to confirm exact param names)
-6. Verify live: poll `https://www.nuget.org/packages/Yubico.NativeShims/<nsVersion>` until 200 (NuGet indexing latency: 1-5 min). Update status board.
-7. **Loop back to phase 4 step 4** to dispatch `build.yml` if not yet done
+   YubiKey PIN prompt will surface; tell the operator to enter it.
+4. Verify: `Get-ChildItem "$staging\nativeshims\signed\packages\*.nupkg"` non-empty.
+5. Publish (per `build/sign.ps1` — `Invoke-NuGetPackagePush` requires `-PackagePath`, optional `-ApiKey`/`$env:NUGET_API_KEY`, optional `-Source`/`-SkipDuplicate`):
+   ```powershell
+   Invoke-NuGetPackagePush `
+     -PackagePath "$staging\nativeshims\signed\packages" `
+     -SkipDuplicate
+   ```
+   `-SkipDuplicate` is defensive against re-runs; the source defaults to `https://api.nuget.org/v3/index.json`.
+6. Verify live: poll `https://www.nuget.org/packages/Yubico.NativeShims/<nsVersion>` until 200 (NuGet indexing latency: 1–5 min). Update status board. Set `state.nativeShimsPublished: true`.
+7. **Loop back to phase 4 step 4** to dispatch `build.yml` if not yet done.
 
 **5e. Main half**:
-1. `gh run download <buildRunId> --dir $staging\core`
-2. Identify zips (`*Nuget*.zip`, `*Symbols*.zip` — confirm by listing artifacts: `gh run view <buildRunId> --json artifacts`)
-3. Invoke sign:
+1. `gh run download <buildRunId> --dir "$staging\core"`
+2. Identify zips by listing artifacts: `gh run view <buildRunId> --json artifacts -q '.artifacts[].name'` — typically `Nuget Packages` and `Symbols Packages` (confirm exact names per CI run; spaces in artifact names are quoted by `gh`).
+3. Sign:
    ```powershell
    Invoke-NuGetPackageSigning `
      -Thumbprint $env:YUBICO_SIGNING_THUMBPRINT `
      -WorkingDirectory "$staging\core" `
-     -NuGetPackagesZip <name> `
-     -SymbolsPackagesZip <name>
+     -NuGetPackagesZip "<nuget-zip-name>" `
+     -SymbolsPackagesZip "<symbols-zip-name>"
    ```
-4. Verify signed packages exist
-5. Publish: `Invoke-NuGetPackagePush ...`
-6. Verify live: poll `https://www.nuget.org/packages/Yubico.YubiKey/<version>` AND `https://www.nuget.org/packages/Yubico.Core/<version>` until both 200
-7. Update final status board rows
+4. Verify: `Get-ChildItem "$staging\core\signed\packages\*.nupkg","$staging\core\signed\packages\*.snupkg"` non-empty.
+5. Publish:
+   ```powershell
+   Invoke-NuGetPackagePush `
+     -PackagePath "$staging\core\signed\packages" `
+     -SkipDuplicate
+   ```
+6. Verify live: poll `https://www.nuget.org/packages/Yubico.YubiKey/<version>` AND `https://www.nuget.org/packages/Yubico.Core/<version>` until both 200.
+7. Update final status board rows.
 
 ## Phase 6 — GitHub release (cross-platform; can run on Windows continuation or back on dev machine)
 
-1. **Create draft release**:
+1. **Create draft release** — extract the new `### <version>` section from `whats-new.md` to a real temp file (no bash process substitution; works on Windows PowerShell, macOS, and Linux). Reuse the temp file already produced in Phase 3 step 9 if its path is still in `state.notesFile` and the file exists; otherwise regenerate:
+
+   **bash / zsh**:
    ```bash
+   notes_file="${state_notes_file:-$(mktemp -t release-notes-<version>.XXXXXX.md)}"
+   if [ ! -s "$notes_file" ]; then
+     awk -v v="### <version>" '
+       $0 == v {flag=1; print; next}
+       flag && /^### / {exit}
+       flag {print}
+     ' docs/users-manual/getting-started/whats-new.md > "$notes_file"
+   fi
    gh release create <version> \
      --draft \
      --title "<version>" \
-     --notes-file <(extract <version> section from whats-new.md) \
+     --notes-file "$notes_file" \
      --generate-notes
    ```
-   `--generate-notes` adds the auto "what's new" + full changelog appendix
+
+   **PowerShell** (when phase 6 runs on Windows after sign+publish):
+   ```powershell
+   $notesFile = if ($state.notesFile -and (Test-Path $state.notesFile)) { $state.notesFile } else { New-TemporaryFile }
+   if ((Get-Item $notesFile).Length -eq 0) {
+     $whatsNew = Get-Content docs/users-manual/getting-started/whats-new.md
+     $start = ($whatsNew | Select-String -Pattern "^### <version>$" | Select-Object -First 1).LineNumber
+     $end = ($whatsNew[$start..($whatsNew.Length - 1)] | Select-String -Pattern "^### " | Select-Object -First 1).LineNumber
+     $section = if ($end) { $whatsNew[($start - 1)..($start + $end - 2)] } else { $whatsNew[($start - 1)..($whatsNew.Length - 1)] }
+     $section | Set-Content $notesFile
+   }
+   gh release create <version> --draft --title "<version>" --notes-file $notesFile --generate-notes
+   ```
+
+   `--generate-notes` adds the auto "what's new" + full changelog appendix on top of the section pulled from `whats-new.md`.
 2. **Upload signed assets**: for each signed `.nupkg` and `.snupkg` in `~/Releases/<version>/{nativeshims,core}/signed/packages/`:
    ```bash
    gh release upload <version> <file>
@@ -247,7 +322,7 @@ NuGet:
 GitHub: https://github.com/Yubico/Yubico.NET.SDK/releases/tag/<version> 🐙
 Latest release: https://github.com/Yubico/Yubico.NET.SDK/releases/latest ✨
 ---
-<for each non-empty category, in order Features → Bug Fixes → Documentation → Dependencies / Maintenance → Security / CI:>
+<for each non-empty category, in this fixed order: Features → Bug Fixes → Documentation → Dependencies / Maintenance → Security / CI → Miscellaneous:>
 <Category Name> <category emoji>
 - <PR title> (#<num>)
   https://github.com/Yubico/Yubico.NET.SDK/pull/<num>
@@ -257,12 +332,13 @@ https://github.com/Yubico/Yubico.NET.SDK/compare/<previousTag>...<version>
 Track the progress: https://nugettrends.com/packages?months=36&ids=Yubico.YubiKey 📈🔥
 ```
 
-Category emojis (match prior 1.15.1 announcement exactly):
+Category emojis (Features → Security/CI match prior 1.15.1 announcement exactly; Miscellaneous added so `misc` PRs are never dropped):
 - Features: ✨🎁
 - Bug Fixes: 🛠️✅
 - Documentation: 📚✍️
 - Dependencies / Maintenance: 🔧🧼
 - Security / CI: 🔒🤖
+- Miscellaneous: 🧰📌
 
 4. **Print closing checklist** (manual — skill cannot automate):
    - [ ] Post drafted message in Slack #ask-tla

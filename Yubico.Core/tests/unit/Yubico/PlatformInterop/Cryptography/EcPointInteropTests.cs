@@ -1,0 +1,182 @@
+// Copyright 2025 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
+using Xunit;
+using Yubico.PlatformInterop;
+
+namespace Yubico.PlatformInterop.Cryptography
+{
+    public class EcPointInteropTests
+    {
+        // P-256 curve NID (OpenSSL constant for X9.62 prime256v1)
+        private const int NidP256 = 415;
+
+        // P-256 generator G (SEC1 uncompressed: 0x04 || Gx || Gy).
+        // Reference: SEC2 v2 §2.4.2.
+        private static readonly byte[] P256GeneratorX =
+        {
+            0x6B, 0x17, 0xD1, 0xF2, 0xE1, 0x2C, 0x42, 0x47,
+            0xF8, 0xBC, 0xE6, 0xE5, 0x63, 0xA4, 0x40, 0xF2,
+            0x77, 0x03, 0x7D, 0x81, 0x2D, 0xEB, 0x33, 0xA0,
+            0xF4, 0xA1, 0x39, 0x45, 0xD8, 0x98, 0xC2, 0x96,
+        };
+
+        private static readonly byte[] P256GeneratorY =
+        {
+            0x4F, 0xE3, 0x42, 0xE2, 0xFE, 0x1A, 0x7F, 0x9B,
+            0x8E, 0xE7, 0xEB, 0x4A, 0x7C, 0x0F, 0x9E, 0x16,
+            0x2B, 0xCE, 0x33, 0x57, 0x6B, 0x31, 0x5E, 0xCE,
+            0xCB, 0xB6, 0x40, 0x68, 0x37, 0xBF, 0x51, 0xF5,
+        };
+
+        // P-256 group order (SEC2 v2 §2.4.2)
+        private static readonly byte[] P256Order =
+        {
+            0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xBC, 0xE6, 0xFA, 0xAD, 0xA7, 0x17, 0x9E, 0x84,
+            0xF3, 0xB9, 0xCA, 0xC2, 0xFC, 0x63, 0x25, 0x51,
+        };
+
+        [Fact]
+        public void EcGroupNewByCurveName_P256_CreatesValidGroup()
+        {
+            using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(NidP256);
+
+            Assert.NotNull(group);
+            Assert.False(group.IsInvalid);
+        }
+
+        [Fact]
+        public void EcPointNew_ValidGroup_CreatesValidPoint()
+        {
+            using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(NidP256);
+            using SafeEcPoint point = NativeMethods.EcPointNew(group);
+
+            Assert.NotNull(point);
+            Assert.False(point.IsInvalid);
+        }
+
+        // Note: EcPointIsOnCurve managed wrapper is added on the webauthn previewSign
+        // branch alongside its consumer; on-curve coverage lives in the test suite
+        // there to keep this PR free of production-code dependencies.
+
+        [Fact]
+        public void EcPointGetAffineCoordinates_RoundTrip_MatchesOriginal()
+        {
+            // G·1 round-trips back to G via set/get affine coordinates
+            using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(NidP256);
+            using SafeEcPoint point = NativeMethods.EcPointNew(group);
+            using SafeBigNum xIn = NativeMethods.BnBinaryToBigNum(P256GeneratorX);
+            using SafeBigNum yIn = NativeMethods.BnBinaryToBigNum(P256GeneratorY);
+
+            int setResult = NativeMethods.EcPointSetAffineCoordinates(group, point, xIn, yIn);
+            Assert.Equal(1, setResult);
+
+            using SafeBigNum xOut = NativeMethods.BnNew();
+            using SafeBigNum yOut = NativeMethods.BnNew();
+
+            int getResult = NativeMethods.EcPointGetAffineCoordinates(group, point, xOut, yOut);
+            Assert.Equal(1, getResult);
+
+            byte[] xBytes = new byte[32];
+            byte[] yBytes = new byte[32];
+            int xLen = NativeMethods.BnBigNumToBinaryWithPadding(xOut, xBytes);
+            int yLen = NativeMethods.BnBigNumToBinaryWithPadding(yOut, yBytes);
+
+            Assert.Equal(32, xLen);
+            Assert.Equal(32, yLen);
+            Assert.Equal(P256GeneratorX, xBytes);
+            Assert.Equal(P256GeneratorY, yBytes);
+        }
+
+        [Fact]
+        public void EcPointMul_GeneratorTimesOne_ReturnsGenerator()
+        {
+            // G·1 = G
+            byte[] scalarOne = new byte[32];
+            scalarOne[31] = 1;
+
+            using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(NidP256);
+            using SafeEcPoint generatorPoint = NativeMethods.EcPointNew(group);
+            using SafeBigNum xGen = NativeMethods.BnBinaryToBigNum(P256GeneratorX);
+            using SafeBigNum yGen = NativeMethods.BnBinaryToBigNum(P256GeneratorY);
+
+            int setResult = NativeMethods.EcPointSetAffineCoordinates(group, generatorPoint, xGen, yGen);
+            Assert.Equal(1, setResult);
+
+            using SafeBigNum scalarBn = NativeMethods.BnBinaryToBigNum(scalarOne);
+            using SafeEcPoint result = NativeMethods.EcPointNew(group);
+
+            // EC_POINT_mul(group, r, n, q, m, ctx) computes r = n·G + m·q
+            // To compute q·scalar, pass n=0, q=generatorPoint, m=scalar
+            int mulResult = NativeMethods.EcPointMul(
+                group,
+                result,
+                IntPtr.Zero, // n = NULL (don't add generator multiple)
+                generatorPoint.DangerousGetHandle(), // q
+                scalarBn.DangerousGetHandle()); // m
+
+            Assert.Equal(1, mulResult);
+
+            using SafeBigNum xResult = NativeMethods.BnNew();
+            using SafeBigNum yResult = NativeMethods.BnNew();
+
+            int getResult = NativeMethods.EcPointGetAffineCoordinates(group, result, xResult, yResult);
+            Assert.Equal(1, getResult);
+
+            byte[] xBytes = new byte[32];
+            byte[] yBytes = new byte[32];
+            NativeMethods.BnBigNumToBinaryWithPadding(xResult, xBytes);
+            NativeMethods.BnBigNumToBinaryWithPadding(yResult, yBytes);
+
+            Assert.Equal(P256GeneratorX, xBytes);
+            Assert.Equal(P256GeneratorY, yBytes);
+        }
+
+        [Fact]
+        public void EcPointMul_GeneratorTimesOrder_ReturnsPointAtInfinity()
+        {
+            // G·n where n = P-256 group order → point at infinity
+            // Point at infinity cannot have affine coordinates extracted
+            using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(NidP256);
+            using SafeEcPoint generatorPoint = NativeMethods.EcPointNew(group);
+            using SafeBigNum xGen = NativeMethods.BnBinaryToBigNum(P256GeneratorX);
+            using SafeBigNum yGen = NativeMethods.BnBinaryToBigNum(P256GeneratorY);
+
+            int setResult = NativeMethods.EcPointSetAffineCoordinates(group, generatorPoint, xGen, yGen);
+            Assert.Equal(1, setResult);
+
+            using SafeBigNum orderBn = NativeMethods.BnBinaryToBigNum(P256Order);
+            using SafeEcPoint result = NativeMethods.EcPointNew(group);
+
+            int mulResult = NativeMethods.EcPointMul(
+                group,
+                result,
+                IntPtr.Zero,
+                generatorPoint.DangerousGetHandle(),
+                orderBn.DangerousGetHandle());
+
+            Assert.Equal(1, mulResult);
+
+            using SafeBigNum xResult = NativeMethods.BnNew();
+            using SafeBigNum yResult = NativeMethods.BnNew();
+
+            // Attempting to get affine coordinates of point at infinity should fail
+            int getResult = NativeMethods.EcPointGetAffineCoordinates(group, result, xResult, yResult);
+            Assert.Equal(0, getResult);
+        }
+    }
+}

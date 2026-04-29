@@ -14,6 +14,7 @@
 
 using System;
 using Xunit;
+using Yubico.PlatformInterop;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.TestUtilities;
 
@@ -62,6 +63,10 @@ public class FidoSessionIntegrationTestBase : IDisposable
 
     protected FidoSessionIntegrationTestBase()
     {
+        Skip.If(
+            SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows && !SdkPlatformInfo.IsElevated,
+            "FIDO2 tests require administrator privileges on Windows. Run the test host (IDE or terminal) as Administrator.");
+
         // Clean up any existing credentials for a fresh start
         try
         {

@@ -60,7 +60,7 @@ namespace Yubico.Core.Devices.Hid
         // exactly 64 bytes long.
         public void SetReport(byte[] report)
         {
-            _log.SensitiveLogInformation("Sending IO report> {report}, Length = {length}", Hex.BytesToHex(report), report.Length);
+            _log.SensitiveLogDebug("Sending IO report> {report}, Length = {length}", Hex.BytesToHex(report), report.Length);
             if (report.Length != YubiKeyIOReportSize)
             {
                 throw new InvalidOperationException(
@@ -105,7 +105,7 @@ namespace Yubico.Core.Devices.Hid
 
             if (bytesRead >= 0)
             {
-                _log.SensitiveLogInformation("Receiving IO report< {report}", Hex.BytesToHex(outputBuffer));
+                _log.SensitiveLogDebug("Receiving IO report< {report}", Hex.BytesToHex(outputBuffer));
                 return outputBuffer;
             }
 

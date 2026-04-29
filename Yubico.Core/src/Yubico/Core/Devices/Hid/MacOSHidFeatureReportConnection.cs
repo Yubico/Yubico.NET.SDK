@@ -147,7 +147,7 @@ namespace Yubico.Core.Devices.Hid
                     ExceptionMessages.IOKitOperationFailed);
             }
 
-            _log.SensitiveLogInformation(
+            _log.SensitiveLogDebug(
                 "GetReport returned buffer: {Report}",
                 Hex.BytesToHex(buffer));
 
@@ -165,7 +165,7 @@ namespace Yubico.Core.Devices.Hid
         /// </exception>
         public void SetReport(byte[] report)
         {
-            _log.SensitiveLogInformation(
+            _log.SensitiveLogDebug(
                 "Calling SetReport with data: {Report}",
                 Hex.BytesToHex(report));
 

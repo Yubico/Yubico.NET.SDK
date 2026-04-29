@@ -51,12 +51,22 @@ credential as follows:
 ```C#
 using (OtpSession otp = new OtpSession(yKey))
 {
-  // privateId and aesKey are Memory<byte> references.
-  otp.ConfigureYubicoOtp(Slot.ShortPress)
-    .UseSerialNumberAsPublicId()
-    .UsePrivateId(privateId)
-    .UseKey(aesKey)
-    .Execute();
+  try
+  {
+    // privateId and aesKey are Memory<byte> references.
+    otp.ConfigureYubicoOtp(Slot.ShortPress)
+      .UseSerialNumberAsPublicId()
+      .UsePrivateId(privateId)
+      .UseKey(aesKey)
+      .Execute();
+
+    // Do whatever is needed with privateId and aesKey before clearing them from memory.
+  }
+  finally
+  {
+    CryptographicOperations.ZeroMemory(privateId.Span);
+    CryptographicOperations.ZeroMemory(aesKey.Span);
+  }
 }
 ```
 
@@ -71,13 +81,21 @@ using (OtpSession otp = new OtpSession(yKey))
   Memory<byte> privateId = new byte[ConfigureYubicoOtp.PrivateIdentifierSize];
   Memory<byte> aesKey = new byte[ConfigureYubicoOtp.KeySize];
 
-  otp.ConfigureYubicoOtp(Slot.ShortPress)
-    .UseSerialNumberAsPublicId()
-    .GeneratePrivateId(privateId)
-    .GenerateKey(aesKey)
-    .Execute();
+  try
+  {
+    otp.ConfigureYubicoOtp(Slot.ShortPress)
+      .UseSerialNumberAsPublicId()
+      .GeneratePrivateId(privateId)
+      .GenerateKey(aesKey)
+      .Execute();
 
-  // Do whatever is needed with privateId and aesKey, and clear them.
+    // Do whatever is needed with privateId and aesKey before clearing them from memory.
+  }
+  finally
+  {
+    CryptographicOperations.ZeroMemory(privateId.Span);
+    CryptographicOperations.ZeroMemory(aesKey.Span);
+  }
 }
 ```
 

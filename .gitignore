@@ -54,6 +54,10 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+# Exception: project-local Claude skill at .claude/skills/Release/ collides with
+# the [Rr]elease/ pattern above (intended for .NET bin/Release output). Re-include it.
+!.claude/skills/Release/
+!.claude/skills/Release/**
 x64/
 x86/
 [Aa][Rr][Mm]/
@@ -555,3 +559,7 @@ cython_debug/
 # Coverage / Test Results 
 coveragereport/
 TestResults/
+
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+Yubico.Core/fuzz/

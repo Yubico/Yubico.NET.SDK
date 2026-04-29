@@ -282,6 +282,8 @@ In the SmartCard.NET API, here is how you load the MSROOTS data onto the YubiKey
 ```csharp
     // Note that there is a limit of 3058 bytes for the data.
     byte[] msRootsData = CollectMsRootsData();
+    // Note: The old API uses string for PINs. The SDK uses byte[] and the
+    // KeyCollector pattern for secure PIN handling.
     string pin = CollectPin();
 
     var memoryStream = new MemoryStream(msRootsData);

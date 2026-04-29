@@ -89,20 +89,17 @@ see the .NET documentation.
 
 ### Public key
 
-When you generate a key pair on the YubiKey, a `PivPublicKey` is returned. The
+When you generate a key pair on the YubiKey, an `IPublicKey` is returned. The
 `CertificateRequest` class needs that public key as an instance of the `RSA` class.
 
-The `PivSampleCode.KeyConverter` class demonstrates how to get an `RSA` object from a
-`PivPublicKey`. Your code might look something like this.
+The `PivSampleCode.KeyConverter` class demonstrates how to get an `RSA` object from an
+`IPublicKey`. Your code might look something like this.
 
 ```csharp
-    PivRsaPublicKey rsaPublic = pivSession.GenerateKeyPair(...);
+    var rsaPublic = (RSAPublicKey)pivSession.GenerateKeyPair(
+        PivSlot.Authentication, KeyType.RSA2048);
 
-    var rsaParams = new RSAParameters();
-    rsaParams.Modulus = rsaPublic.Modulus.ToArray();
-    rsaParams.Exponent = rsaPublic.PublicExponent.ToArray();
-
-    RSA rsaPublicKeyObject = RSA.Create(rsaParams);
+    RSA rsaPublicKeyObject = RSA.Create(rsaPublic.Parameters);
 ```
 
 An `RSA` object can contain a public key only or both public and private keys. Later on,

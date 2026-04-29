@@ -84,11 +84,11 @@ var publicKey = session.GenerateEcKey(keyRef);
 
 ```csharp
 // Import existing private key
-var privateKey = new ECPrivateKeyParameters(ecdsa);
+var privateKey = ECPrivateKey.CreateFromParameters(ecdsa.ExportParameters(true));
 session.PutKey(keyRef, privateKey);
 
 // Import public key
-var publicKey = new ECPublicKeyParameters(ecdsaPublic);
+var publicKey = ECPublicKey.CreateFromParameters(ecdsaPublic.ExportParameters(false));
 session.PutKey(keyRef, publicKey);
 ```
 

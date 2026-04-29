@@ -51,7 +51,7 @@ Or you can check the "setMinPINLength" option.
 
 ```csharp
     // Get the "setMinPINLength" option to know if it is possible to set the minimum PIN length.
-    OptionValue setMinPinLenValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.setMinPINLength);
+    OptionValue setMinPinLenValue = fido2Session.AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.setMinPINLength);
 
     // If the option is True, then it is supported, it is possible to set the min PIN length.
     if (setMinPinLenValue == OptionValue.True)
@@ -116,7 +116,7 @@ its state before toggling.
     }
     // If this option is False, then it is supported and the YubiKey is not currently set
     // to always require UV. If you want it set to be always require UV, then toggle.
-    if (alwaysIvValue == OptionValue.False)
+    if (alwaysUvValue == OptionValue.False)
     {
         return fido2Session.TryToggleAlwaysUv();
     }
@@ -171,7 +171,7 @@ KeyCollector. If you don't want to build a
 authenticatorConfig methods. For example:
 
 ```csharp
-    bool isVerified = fido2Session.TryVerifyPin(PinUvAuthTokenPemissions.AuthenticatorConfiguration);
+    bool isVerified = fido2Session.TryVerifyPin(PinUvAuthTokenPermissions.AuthenticatorConfiguration);
 ```
 
 ## Enable enterprise attestation

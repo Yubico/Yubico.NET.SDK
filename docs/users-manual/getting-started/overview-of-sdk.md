@@ -209,7 +209,7 @@ public static class Program
             // Generate a public-private keypair
             var publicKey = piv.GenerateKeyPair(
                 PivSlot.CardAuthentication,
-                PivAlgorithm.Rsa2048);
+                KeyType.RSA2048);
         }
     }
 }

@@ -75,8 +75,8 @@ To see the serial number as a decimal string, use `ToString()`. For example,
 
 ```C#
   int serialNumber = serialResponse.GetData();
-  string decimalSerial = serialNumber.GetString();
-  string hexSerial = serialNumber.GetString("X");
+  string decimalSerial = serialNumber.ToString();
+  string hexSerial = serialNumber.ToString("X");
 
   // Print out the decimalSerial to get something like "11409355"
   // Print out the hexSerial to get something like "00AE17CB"

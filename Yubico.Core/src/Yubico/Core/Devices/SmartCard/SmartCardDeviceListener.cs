@@ -50,7 +50,18 @@ namespace Yubico.Core.Devices.SmartCard
         /// <summary>
         /// A status that indicates the state of the device listener.
         /// </summary>
-        public DeviceListenerStatus Status { get; set; }
+        /// <remarks>
+        /// Backed by a <c>volatile int</c> to ensure cross-thread visibility. The listener
+        /// thread writes this value during recovery transitions, while consumer code may read
+        /// it from the main thread.
+        /// </remarks>
+        public DeviceListenerStatus Status
+        {
+            get => (DeviceListenerStatus)_status;
+            set => _status = (int)value;
+        }
+
+        private volatile int _status;
 
         /// <summary>
         /// Creates an instance of a <see cref="SmartCardDeviceListener"/>.

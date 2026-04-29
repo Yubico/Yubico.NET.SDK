@@ -18,6 +18,40 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.16.x Releases
 
+### 1.16.1
+
+Release date: April 29th, 2026
+
+Bug Fixes:
+
+- Fixed an issue where HID and SmartCard transport events were logged at Info level, causing excessive noise in application logs. These events have been downgraded to Debug level. ([#473](https://github.com/Yubico/Yubico.NET.SDK/pull/473))
+
+- Fixed an issue where high idle CPU usage occurred in RDS/Terminal Server environments due to `SCARD_E_INVALID_HANDLE` errors in the smart card listener loop. ([#445](https://github.com/Yubico/Yubico.NET.SDK/pull/445))
+
+- Several bugs discovered through fuzz testing have been fixed, including issues in TLV parsing and CBOR decoding. A SharpFuzz fuzzing harness and CodeQL scheduled analysis have also been added. ([#458](https://github.com/Yubico/Yubico.NET.SDK/pull/458))
+
+Documentation:
+
+- The documentation on `EncIdentifier` has been corrected with updated details and relevant links. ([#456](https://github.com/Yubico/Yubico.NET.SDK/pull/456))
+
+- Important FIDO2 SCP support information has been added to the user's manual. ([#442](https://github.com/Yubico/Yubico.NET.SDK/pull/442))
+
+- Inconsistencies and obsolete class references in the documentation have been addressed. ([#441](https://github.com/Yubico/Yubico.NET.SDK/pull/441))
+
+Miscellaneous:
+
+- The Yubico.NativeShims dependency has been switched to a floating version with `packages.lock.json` for safer dependency management. ([#474](https://github.com/Yubico/Yubico.NET.SDK/pull/474))
+
+- NativeShims export sanity checks and interop known-answer tests have been added, and Hkdf tests have been relocated. ([#472](https://github.com/Yubico/Yubico.NET.SDK/pull/472))
+
+- An SCP03 command chaining regression test has been added. ([#452](https://github.com/Yubico/Yubico.NET.SDK/pull/452))
+
+Dependencies:
+
+- Several dependencies across the Yubico.Core, Yubico.YubiKey, and GitHub Actions workflows have been updated to newer versions. ([#449](https://github.com/Yubico/Yubico.NET.SDK/pull/449), [#453](https://github.com/Yubico/Yubico.NET.SDK/pull/453), [#454](https://github.com/Yubico/Yubico.NET.SDK/pull/454), [#461](https://github.com/Yubico/Yubico.NET.SDK/pull/461), [#462](https://github.com/Yubico/Yubico.NET.SDK/pull/462), [#463](https://github.com/Yubico/Yubico.NET.SDK/pull/463), [#464](https://github.com/Yubico/Yubico.NET.SDK/pull/464), [#470](https://github.com/Yubico/Yubico.NET.SDK/pull/470), [#471](https://github.com/Yubico/Yubico.NET.SDK/pull/471))
+
+_________
+
 ### 1.16.0
 
 Release date: March 31st, 2026

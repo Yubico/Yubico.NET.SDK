@@ -18,7 +18,7 @@ using System.Security.Cryptography;
 using Xunit;
 using Yubico.Core.Cryptography;
 
-namespace Yubico.YubiKey.Cryptography;
+namespace Yubico.Core.Cryptography;
 public class HkdfUtilitiesTests
 {
     [Fact]

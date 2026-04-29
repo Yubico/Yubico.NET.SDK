@@ -67,22 +67,21 @@ jobs:
         with:
           persist-credentials: false
 
-      # main branch is release-only — no prerelease Yubico packages allowed in the lockfile.
-      # Re-pin via `dotnet restore Yubico.Core/src/Yubico.Core.csproj --force-evaluate` against
-      # an "nuget.org-only" environment before merging develop -> main.
-      - name: Disallow prerelease Yubico.NativeShims on main
+      # main branch lockfile policy: warn if a prerelease Yubico.NativeShims is pinned.
+      # The build-artifacts job auto-resolves via --force-evaluate, so this is advisory
+      # rather than a hard gate. A warning here signals the lockfile should be repinned
+      # on the release branch for cleanliness, but won't block the build.
+      - name: Check NativeShims lockfile pin (main)
         if: github.ref == 'refs/heads/main'
         shell: bash
         run: |
           LOCK=Yubico.Core/src/packages.lock.json
-          # The package name and its "resolved" field live on separate lines, so use -A3 to
-          # bring the resolved line into the match window before checking for -prerelease.
           if grep -A3 '"Yubico\.NativeShims"' "$LOCK" | grep -E '"resolved":.*-prerelease' >/dev/null; then
-            echo "::error file=$LOCK::main builds disallow prerelease Yubico.NativeShims. Re-pin the lockfile to a stable version (dotnet restore --force-evaluate against nuget.org) before merging."
+            echo "::warning file=$LOCK::Lockfile pins a prerelease Yubico.NativeShims. The build will auto-resolve to stable via --force-evaluate, but consider repinning on the release branch."
             grep -A3 '"Yubico\.NativeShims"' "$LOCK" | head -20
-            exit 1
+          else
+            echo "Lockfile policy OK: no prerelease Yubico.NativeShims pinned."
           fi
-          echo "Lockfile policy OK: no prerelease Yubico.NativeShims pinned."
 
   run-tests:
     name: Run tests
@@ -149,6 +148,14 @@ jobs:
           $versionProp = [xml](gc $file.FullName)
           $versionProp.Project.PropertyGroup.CommonVersion = "${{ github.event.inputs.version }}"
           $versionProp.Save($file.FullName)
+
+      # On main, force-evaluate the lockfile so the build resolves the latest stable
+      # Yubico.NativeShims from nuget.org, regardless of what version is pinned in the
+      # committed packages.lock.json. This eliminates the need to manually repin the
+      # lockfile before merging a release branch.
+      - name: Force-evaluate NativeShims lockfile (main only)
+        if: github.ref == 'refs/heads/main'
+        run: dotnet restore Yubico.NET.SDK.sln --force-evaluate --verbosity minimal
 
       # Build the project
       - name: Build Yubico.NET.SDK.sln

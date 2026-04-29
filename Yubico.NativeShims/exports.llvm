@@ -8,6 +8,7 @@ _Native_EC_GROUP_free
 _Native_EC_GROUP_new_by_curve_name
 _Native_EC_POINT_free
 _Native_EC_POINT_get_affine_coordinates
+_Native_EC_POINT_is_on_curve
 _Native_EC_POINT_mul
 _Native_EC_POINT_new
 _Native_EC_POINT_set_affine_coordinates

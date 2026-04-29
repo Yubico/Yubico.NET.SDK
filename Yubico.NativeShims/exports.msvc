@@ -9,6 +9,7 @@ EXPORTS
         Native_EC_GROUP_new_by_curve_name
         Native_EC_POINT_free
         Native_EC_POINT_get_affine_coordinates
+        Native_EC_POINT_is_on_curve
         Native_EC_POINT_mul
         Native_EC_POINT_new
         Native_EC_POINT_set_affine_coordinates

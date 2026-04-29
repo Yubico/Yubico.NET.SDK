@@ -78,6 +78,20 @@ jobs:
           if %FAILED%==1 exit /b 1
           echo All Windows builds verified: no VC++ Redistributable required
           exit /b 0
+      - name: Verify export tables match canonical symbol list
+        shell: pwsh
+        run: |
+          # Set up VC++ environment so dumpbin is on PATH for arm64 inspection
+          & "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64
+          $script = "$PWD\Yubico.NativeShims\tests\check_exports.ps1"
+          $failed = $false
+          foreach ($arch in @('win-x64', 'win-x86', 'win-arm64')) {
+              Write-Host "=== Checking $arch\Yubico.NativeShims.dll ==="
+              & $script "$PWD\Yubico.NativeShims\$arch\Yubico.NativeShims.dll"
+              if ($LASTEXITCODE -ne 0) { $failed = $true }
+          }
+          if ($failed) { exit 1 }
+          Write-Host "All Windows export tables match canonical symbol list."
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: win-x64
@@ -253,6 +267,10 @@ jobs:
               readelf -V *.so | grep GLIBC_2 | sort -u
               echo "✅ Binary compatible with Debian 10 (glibc 2.28)"
             '
+      - name: Verify export table matches canonical symbol list
+        working-directory: Yubico.NativeShims
+        run: |
+          bash tests/check_exports.sh linux-x64/libYubico.NativeShims.so
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: linux-x64
@@ -414,6 +432,11 @@ jobs:
               readelf -V *.so | grep GLIBC_2 | sort -u
               echo "✅ ARM64 binary compatible with Debian 10 (glibc 2.28)"
             '
+      - name: Verify export table matches canonical symbol list
+        working-directory: Yubico.NativeShims
+        run: |
+          # nm reads ELF metadata regardless of target arch — works on x86_64 host inspecting aarch64 .so
+          bash tests/check_exports.sh linux-arm64/libYubico.NativeShims.so
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: linux-arm64
@@ -440,6 +463,14 @@ jobs:
           else
             sh ./build-macOS.sh
           fi
+      - name: Verify export tables match canonical symbol list
+        working-directory: Yubico.NativeShims
+        run: |
+          set -e
+          for arch in osx-x64 osx-arm64; do
+              echo "=== Checking $arch/libYubico.NativeShims.dylib ==="
+              bash tests/check_exports.sh "$arch/libYubico.NativeShims.dylib"
+          done
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: osx-x64

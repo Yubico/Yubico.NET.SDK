@@ -1,0 +1,58 @@
+# Canonical list of symbols Yubico.NativeShims must export.
+# Source of truth — when adding/removing a Native_* function, update this list
+# AND the per-platform export files (exports.gnu, exports.llvm, exports.msvc).
+#
+# Format: one symbol name per line (no underscore prefix). Lines starting with
+# '#' and blank lines are ignored.
+#
+# Consumed by tests/check_exports.sh (POSIX) and tests/check_exports.ps1
+# (Windows) to validate that every built shared library exports exactly this
+# set — no missing entries, no extras.
+
+# --- BIGNUM (ssl.bignum.c) ---
+Native_BN_new
+Native_BN_bin2bn
+Native_BN_bn2bin
+Native_BN_bn2binpad
+Native_BN_clear_free
+Native_BN_num_bytes
+
+# --- EC group (ssl.ecgroup.c) ---
+Native_EC_GROUP_free
+Native_EC_GROUP_new_by_curve_name
+
+# --- EC point (ssl.ecpoint.c) ---
+Native_EC_POINT_free
+Native_EC_POINT_get_affine_coordinates
+Native_EC_POINT_is_on_curve
+Native_EC_POINT_mul
+Native_EC_POINT_new
+Native_EC_POINT_set_affine_coordinates
+
+# --- AES-256-GCM via EVP (ssl.gcmevp.c) ---
+Native_EVP_CIPHER_CTX_new
+Native_EVP_CIPHER_CTX_free
+Native_EVP_Aes256Gcm_Init
+Native_EVP_Update
+Native_EVP_Final_ex
+Native_EVP_CIPHER_CTX_ctrl
+
+# --- CMAC via EVP MAC (ssl.cmac.c) ---
+Native_CMAC_EVP_MAC_CTX_new
+Native_EVP_MAC_CTX_free
+Native_CMAC_EVP_MAC_init
+Native_CMAC_EVP_MAC_update
+Native_CMAC_EVP_MAC_final
+
+# --- PC/SC smart card (pcsc.c) ---
+Native_SCardBeginTransaction
+Native_SCardCancel
+Native_SCardConnect
+Native_SCardDisconnect
+Native_SCardEndTransaction
+Native_SCardEstablishContext
+Native_SCardGetStatusChange
+Native_SCardListReaders
+Native_SCardReconnect
+Native_SCardReleaseContext
+Native_SCardTransmit

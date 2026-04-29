@@ -18,6 +18,7 @@ using System.Formats.Cbor;
 using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
+using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;

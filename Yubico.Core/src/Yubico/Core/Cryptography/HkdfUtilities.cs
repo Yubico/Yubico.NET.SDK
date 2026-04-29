@@ -13,10 +13,11 @@
 // limitations under the License.
 
 using System;
+using System.Security.Cryptography;
 
-namespace Yubico.YubiKey.Cryptography;
+namespace Yubico.Core.Cryptography;
 
-internal static class HkdfUtilities
+public static class HkdfUtilities
 {
     private const int Sha256HashByteLength = 32; // SHA-256 hash length in bytes
 
@@ -24,6 +25,12 @@ internal static class HkdfUtilities
     /// Derives a key using the HKDF (HMAC-based Key Derivation Function)
     /// as specified in RFC 5869 using SHA-256.
     /// </summary>
+    /// <remarks>
+    /// Uses BCL HMACSHA256 directly. The .ToArray() calls on Span inputs are
+    /// required by the BCL HMAC.Key setter and ComputeHash API — they only
+    /// accept byte[], not Span. The intermediate pseudo-random key (PRK) is
+    /// zeroed via CryptographicOperations.ZeroMemory after use.
+    /// </remarks>
     /// <param name="inputKeyMaterial">The input key material (IKM).</param>
     /// <param name="salt">Optional salt value. If not provided, a zero-length
     ///     salt will be used.</param>
@@ -47,19 +54,27 @@ internal static class HkdfUtilities
             throw new ArgumentOutOfRangeException(nameof(length), "Length exceeds maximum output size.");
         }
 
-        var pseudoRandomKey = HkdfExtract(inputKeyMaterial, salt);
-        return HkdfExpand(pseudoRandomKey, contextInfo, length);
+        byte[] pseudoRandomKey = HkdfExtract(inputKeyMaterial, salt);
+        try
+        {
+            return HkdfExpand(pseudoRandomKey, contextInfo, length);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(pseudoRandomKey);
+        }
     }
 
-    private static ReadOnlyMemory<byte> HkdfExtract(ReadOnlySpan<byte> inputKeyMaterial, ReadOnlySpan<byte> salt)
+    private static byte[] HkdfExtract(ReadOnlySpan<byte> inputKeyMaterial, ReadOnlySpan<byte> salt)
     {
-        using var hmac = CryptographyProviders.HmacCreator("HMACSHA256");
-        hmac.Key = salt.IsEmpty ? new byte[Sha256HashByteLength] : salt.ToArray();
+        // BCL HMACSHA256 requires byte[] for key — .ToArray() is unavoidable here
+        byte[] saltBytes = salt.IsEmpty ? new byte[Sha256HashByteLength] : salt.ToArray();
+        using var hmac = new HMACSHA256(saltBytes);
         return hmac.ComputeHash(inputKeyMaterial.ToArray());
     }
 
     private static Memory<byte> HkdfExpand(
-        ReadOnlyMemory<byte> pseudoRandomKey,
+        ReadOnlySpan<byte> pseudoRandomKey,
         ReadOnlySpan<byte> contextInfo,
         int length)
     {
@@ -67,10 +82,9 @@ internal static class HkdfUtilities
         byte[] outputKeyMaterial = new byte[length];
         Span<byte> previousBlock = Array.Empty<byte>();
 
-        using var hmac = CryptographyProviders.HmacCreator("HMACSHA256");
+        // BCL HMACSHA256 requires byte[] for key — .ToArray() is unavoidable here
+        using var hmac = new HMACSHA256(pseudoRandomKey.ToArray());
 
-        hmac.Key = pseudoRandomKey.ToArray();
-        
         for (byte index = 1; index <= numberOfBlocks; index++)
         {
             hmac.Initialize();
@@ -94,7 +108,7 @@ internal static class HkdfUtilities
             currentBlock
                 .AsSpan(0, bytesToCopy)
                 .CopyTo(outputKeyMaterial.AsSpan(blockOffset));
-            
+
             previousBlock = currentBlock;
         }
 

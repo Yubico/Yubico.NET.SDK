@@ -13,7 +13,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 NS_DIR="$REPO_ROOT/Yubico.NativeShims"
 
 # Currently consumed NuGet version (kept in sync with Yubico.Core.csproj).
-VERSION="$(grep -Eo 'Yubico\.NativeShims" Version="[0-9.]+' "$REPO_ROOT/Yubico.Core/src/Yubico.Core.csproj" | head -1 | sed 's/.*Version="//')"
+VERSION="$(sed -En 's/.*Yubico\.NativeShims" Version="([^"]+)".*/\1/p' "$REPO_ROOT/Yubico.Core/src/Yubico.Core.csproj" | head -1)"
 if [ -z "$VERSION" ]; then
   echo "ERROR: could not detect consumed NativeShims version from Yubico.Core.csproj" >&2
   exit 1

@@ -389,6 +389,28 @@ namespace Yubico.YubiKey.Fido2
             return (CredProtectPolicy)encodedValue.Span[0];
         }
 
+        /// <summary>
+        /// Gets the previewSign signature from the extension outputs.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The previewSign extension returns a DER-encoded ECDSA signature in the
+        /// signed extension outputs. This method extracts that signature if present.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// The signature bytes if the extension was used and returned data; otherwise, <c>null</c>.
+        /// </returns>
+        public byte[]? GetPreviewSignSignature()
+        {
+            if (!TryGetExtensionData(Fido2.Extensions.PreviewSign, out Memory<byte> encodedValue))
+            {
+                return null;
+            }
+
+            return PreviewSignExtension.DecodeSignature(encodedValue);
+        }
+
         private bool TryGetExtensionData(string extensionKey, out Memory<byte> encodedValue)
         {
             Guard.IsNotNullOrEmpty(extensionKey, nameof(extensionKey));

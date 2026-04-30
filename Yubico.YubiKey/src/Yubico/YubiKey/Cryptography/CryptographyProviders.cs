@@ -424,6 +424,20 @@ namespace Yubico.YubiKey.Cryptography
 
         /// <summary>
         /// This property is a delegate (function pointer). This method will return
+        /// an instance of <see cref="IArkgPrimitives"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// When the SDK derives an ARKG-P256 public key for the previewSign
+        /// WebAuthn extension, it calls this delegate for the underlying
+        /// elliptic-curve primitives. The default implementation routes through
+        /// <c>Yubico.NativeShims</c> (OpenSSL).
+        /// </para>
+        /// </remarks>
+        public static Func<IArkgPrimitives> ArkgPrimitivesCreator { get; set; } = ArkgPrimitives.Create;
+
+        /// <summary>
+        /// This property is a delegate (function pointer). This method will return
         /// an instance of <see cref="ICmacPrimitives"/>, built to use the
         /// specified algorithm.
         /// </summary>

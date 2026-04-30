@@ -57,9 +57,32 @@ namespace Yubico.YubiKey.Fido2.Cose
         EdDSA = -8,
 
         /// <summary>
+        /// ECDSA with SHA-256 using NIST P-256 (ESP256). Identifies the resulting
+        /// signature algorithm produced by previewSign — the YubiKey emits a
+        /// standard ECDSA-P256 signature.
+        /// </summary>
+        /// <remarks>
+        /// Do NOT pass this value as the <c>alg</c> field of the previewSign
+        /// COSE_Sign_Args map; that field requests an ARKG-derived signing
+        /// operation and must be <see cref="ArkgP256Esp256"/> (-65539).
+        /// </remarks>
+        Esp256 = -9,
+
+        /// <summary>
         /// RSASSA-PKCS1-v1_5 with SHA-256
         /// Currently, not supported by any YubiKey
         /// </summary>
         RS256 = -257,
+
+        /// <summary>
+        /// ESP256-split with ARKG-P256 (-65539). Used in two places for the
+        /// previewSign extension: (1) the algorithms array passed to
+        /// <see cref="MakeCredentialParameters.AddPreviewSignGenerateKeyExtension"/>
+        /// to request ARKG-P256 key generation, and (2) the <c>alg</c> field of
+        /// the COSE_Sign_Args map sent during a sign-by-credential request to
+        /// identify the operation as ARKG-derived. The resulting signature
+        /// itself is plain ECDSA-P256 (<see cref="Esp256"/>).
+        /// </summary>
+        ArkgP256Esp256 = -65539,
     }
 }

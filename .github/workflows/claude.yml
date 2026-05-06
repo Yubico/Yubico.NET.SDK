@@ -30,7 +30,7 @@ jobs:
       actions: read         # Required for Claude to read CI results on PRs
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
         with:
           egress-policy: audit
 
@@ -42,7 +42,7 @@ jobs:
 
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@ef50f123a3a9be95b60040d042717517407c7256  # v1.0.110
+        uses: anthropics/claude-code-action@7d7d3055f1fdc9a97a040c69ead9ba392fa6326a  # v1.0.113
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 

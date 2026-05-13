@@ -52,8 +52,40 @@ permissions:
   contents: read
 
 jobs:
+  enforce-branch-policy:
+    name: Enforce branch policy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      # main branch lockfile policy: warn if a prerelease Yubico.NativeShims is pinned.
+      # The build-artifacts job auto-resolves via --force-evaluate, so this is advisory
+      # rather than a hard gate. A warning here signals the lockfile should be repinned
+      # on the release branch for cleanliness, but won't block the build.
+      - name: Check NativeShims lockfile pin (main)
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          LOCK=Yubico.Core/src/packages.lock.json
+          if grep -A3 '"Yubico\.NativeShims"' "$LOCK" | grep -E '"resolved":.*-prerelease' >/dev/null; then
+            echo "::warning file=$LOCK::Lockfile pins a prerelease Yubico.NativeShims. The build will auto-resolve to stable via --force-evaluate, but consider repinning on the release branch."
+            grep -A3 '"Yubico\.NativeShims"' "$LOCK" | head -20
+          else
+            echo "Lockfile policy OK: no prerelease Yubico.NativeShims pinned."
+          fi
+
   run-tests:
     name: Run tests
+    needs: enforce-branch-policy
     # Requires write permissions to publish test results
     permissions:
       checks: write         # Required to create check runs for test results
@@ -89,12 +121,25 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7  # v5.2.0
+
+      # Non-main builds (develop, workflow_dispatch, schedule) get the internal Yubico GitHub Packages
+      # feed in addition to nuget.org so prerelease Yubico.NativeShims can resolve.
+      - name: Setup .NET (non-main, with internal Yubico feed)
+        if: github.ref != 'refs/heads/main'
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7  # v5.2.0
         with:
           global-json-file: "./global.json"
           source-url: https://nuget.pkg.github.com/Yubico/index.json
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # main builds restore from nuget.org only — no internal Yubico feed, so any prerelease
+      # Yubico.NativeShims pinned in the lockfile would fail restore even without the policy guard.
+      - name: Setup .NET (main, nuget.org only)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7  # v5.2.0
+        with:
+          global-json-file: "./global.json"
 
       - name: Set build version
         if: ${{ github.event.inputs.version }}
@@ -103,6 +148,14 @@ jobs:
           $versionProp = [xml](gc $file.FullName)
           $versionProp.Project.PropertyGroup.CommonVersion = "${{ github.event.inputs.version }}"
           $versionProp.Save($file.FullName)
+
+      # On main, force-evaluate the lockfile so the build resolves the latest stable
+      # Yubico.NativeShims from nuget.org, regardless of what version is pinned in the
+      # committed packages.lock.json. This eliminates the need to manually repin the
+      # lockfile before merging a release branch.
+      - name: Force-evaluate NativeShims lockfile (main only)
+        if: github.ref == 'refs/heads/main'
+        run: dotnet restore Yubico.NET.SDK.sln --force-evaluate --verbosity minimal
 
       # Build the project
       - name: Build Yubico.NET.SDK.sln
@@ -220,7 +273,7 @@ jobs:
   build-summary:
     name: Build summary
     runs-on: ubuntu-latest
-    needs: [run-tests, build-artifacts, publish-internal, upload-docs]
+    needs: [enforce-branch-policy, run-tests, build-artifacts, publish-internal, upload-docs]
     if: always()
     steps:
       - name: Harden the runner (Audit all outbound calls)

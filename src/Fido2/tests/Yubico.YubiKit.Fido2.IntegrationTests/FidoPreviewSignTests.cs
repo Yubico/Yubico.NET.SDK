@@ -247,14 +247,6 @@ public class FidoPreviewSignTests
                 return;
             }
 
-            // Phase D forensic finding (2026-04-29): CBOR encoding and ARKG derivation are
-            // byte-identical to python-fido2 (cross-verified). python-fido2 succeeds on the
-            // same YK 5.8.0-beta. Root cause narrowed to the macOS HID transport / CTAPHID
-            // session lifecycle layer — needs targeted deep-dive of FidoHidProtocol vs
-            // python-fido2's CtapHidDevice to find the wire-level divergence.
-            Skip.If(true, "GetAssertion+previewSign+ARKG — HID transport layer gap, see plan file");
-            return;
-
             byte[]? credentialId = null;
 
             try
@@ -285,17 +277,18 @@ public class FidoPreviewSignTests
                     clientPin.Protocol, pinToken, challenge);
 
                 // Step A: Register with previewSign extension (touch #1)
+                // flags: 0 matches python-fido2 reference (silent assertion at GetAssertion time)
                 var previewSignInput = new Extensions.PreviewSignRegistrationInput(
                     algorithms: [-65539], // Esp256SplitArkgPlaceholder (ARKG-P256-ESP256)
-                    flags: 0x01);         // RequireUserPresence
+                    flags: 0);            // No UP requirement on derived signing key
 
                 var extensions = new Extensions.ExtensionBuilder()
                     .WithPreviewSign(previewSignInput)
                     .Build();
 
+                // Phase D: mirror python-fido2 reference — non-resident credential, no rk option
                 var options = new MakeCredentialOptions
                 {
-                    ResidentKey = true,
                     PinUvAuthParam = pinUvAuthParam,
                     PinUvAuthProtocol = clientPin.Protocol.Version,
                     Extensions = extensions
@@ -332,22 +325,10 @@ public class FidoPreviewSignTests
                 byte[] messageRaw = System.Text.Encoding.ASCII.GetBytes("hello-previewsign-integration-test");
                 byte[] message = System.Security.Cryptography.SHA256.HashData(messageRaw);
 
-                // Get new PIN token for GetAssertion
-                byte[] assertionPinToken;
-                if (supportsPermissions)
-                {
-                    assertionPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.PinUtf8,
-                        PinUvAuthTokenPermissions.GetAssertion,
-                        FidoTestData.RpId);
-                }
-                else
-                {
-                    assertionPinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
-                }
-
-                var assertionPinUvAuthParam = FidoTestHelpers.ComputeGetAssertionAuthParam(
-                    clientPin.Protocol, assertionPinToken, challenge);
+                // Phase D: skip second PIN token acquisition (python-fido2 doesn't do this).
+                // The previewSign extension carries its own auth via the inner args field;
+                // re-running ClientPin protocol after MakeCredential resets ECDH state and
+                // appears to invalidate the firmware's previewSign verification context.
 
                 var comparer = new MemoryByteEqualityComparer();
                 var signByCredential = new Dictionary<ReadOnlyMemory<byte>, Extensions.PreviewSignSigningParams>(comparer)
@@ -365,11 +346,14 @@ public class FidoPreviewSignTests
                     .WithPreviewSign(authInput)
                     .Build();
 
+                // Phase D root-cause fix: mirror python-fido2 reference exactly.
+                // - previewSign extension carries its own auth via inner args field
+                // - omit CTAP-level pinUvAuthParam/Protocol (firmware returns 0x7F otherwise)
+                // - options={up:false} for silent assertion (matches flags=0 registration)
                 var assertionOptions = new GetAssertionOptions
                 {
                     AllowList = [new PublicKeyCredentialDescriptor(credentialId)],
-                    PinUvAuthParam = assertionPinUvAuthParam,
-                    PinUvAuthProtocol = clientPin.Protocol.Version,
+                    UserPresence = false,
                     Extensions = authExtensions
                 };
 
@@ -418,12 +402,14 @@ public class FidoPreviewSignTests
                 Assert.NotEmpty(signature);
 
                 // Step D: Offline verify signature
-                bool verified = derivedKey.VerifySignature(message, signature);
+                // Pass RAW message — VerifySignature uses ECDsa.VerifyData which hashes internally.
+                // tbs sent to firmware is SHA256(messageRaw); firmware signs tbs as-is (treats as digest).
+                // Verifier must hash messageRaw once → SHA256(messageRaw) → matches what firmware signed.
+                bool verified = derivedKey.VerifySignature(messageRaw, signature);
                 Assert.True(verified);
 
                 // Cleanup PIN tokens
                 System.Security.Cryptography.CryptographicOperations.ZeroMemory(pinToken);
-                System.Security.Cryptography.CryptographicOperations.ZeroMemory(assertionPinToken);
             }
             finally
             {

@@ -27,11 +27,12 @@ namespace Yubico.YubiKit.Fido2.Cose;
 /// SEC1 byte strings).
 /// </para>
 /// <para>
-/// Wire format (per draft-bradleylundberg-cfrg-arkg-10 and python-fido2 ARKG_P256_PLACEHOLDER):
+/// Wire format (per draft-bradleylundberg-cfrg-arkg-10, python-fido2 ARKG_P256_PLACEHOLDER
+/// at fido2/cose.py:428-433, and the legacy SDK's PreviewSignExtension.cs:317-323):
 /// - kty (1) = 2 (EC2 family)
 /// - alg (3) = -65700 (ARKG-P256 seed-key marker)
-/// - -1 = pkKem as NESTED COSE_Key map (CoseEc2Key with P-256 coordinates)
-/// - -2 = pkBl as NESTED COSE_Key map (CoseEc2Key with P-256 coordinates)
+/// - -1 = pkBl  as NESTED COSE_Key map (CoseEc2Key with P-256 coordinates)
+/// - -2 = pkKem as NESTED COSE_Key map (CoseEc2Key with P-256 coordinates)
 /// - -3 = derived-key algorithm (e.g., -9 for Esp256)
 /// </para>
 /// <para>
@@ -73,14 +74,14 @@ public sealed record CoseArkgP256SeedKey(
     /// </exception>
     internal static CoseArkgP256SeedKey Decode(Dictionary<int, object?> parameters, CoseAlgorithm seedKeyAlgorithm)
     {
-        // -1 and -2 are nested COSE_Key MAPS (raw CBOR bytes after CoseKey.cs fix)
-        byte[] kemKeyCbor = parameters.TryGetValue(-1, out var v1) && v1 is byte[] b1
+        // -1 = pkBl, -2 = pkKem (per draft-bradleylundberg-cfrg-arkg-10 and python-fido2)
+        byte[] blKeyCbor = parameters.TryGetValue(-1, out var v1) && v1 is byte[] b1
             ? b1
-            : throw new InvalidOperationException("ARKG seed key missing -1 (KEM public key COSE map)");
+            : throw new InvalidOperationException("ARKG seed key missing -1 (BL public key COSE map)");
 
-        byte[] blKeyCbor = parameters.TryGetValue(-2, out var v2) && v2 is byte[] b2
+        byte[] kemKeyCbor = parameters.TryGetValue(-2, out var v2) && v2 is byte[] b2
             ? b2
-            : throw new InvalidOperationException("ARKG seed key missing -2 (BL public key COSE map)");
+            : throw new InvalidOperationException("ARKG seed key missing -2 (KEM public key COSE map)");
 
         // -3 is the derived-key alg (e.g. -9 = Esp256)
         int derivedAlgInt = parameters.TryGetValue(-3, out var v3) && v3 is int a
@@ -139,8 +140,8 @@ public sealed record CoseArkgP256SeedKey(
     /// </summary>
     /// <returns>CBOR-encoded COSE_Key with nested EC2 keys.</returns>
     /// <remarks>
-    /// Wire format: {1: 2, 3: -65700, -3: derivedAlg, -2: blKeyMap, -1: kemKeyMap}
-    /// Each nested key is a full COSE_Key EC2 map.
+    /// Wire format: {1: 2, 3: -65700, -3: derivedAlg, -2: kemKeyMap, -1: blKeyMap}
+    /// Each nested key is a full COSE_Key EC2 map. Per spec: -1 = pkBl, -2 = pkKem.
     /// </remarks>
     public override byte[] Encode()
     {
@@ -156,10 +157,10 @@ public sealed record CoseArkgP256SeedKey(
         writer.WriteInt32(DerivedKeyAlgorithm.Value);
 
         writer.WriteInt32(-2);
-        writer.WriteByteString(blKey.Encode());
+        writer.WriteByteString(kemKey.Encode());
 
         writer.WriteInt32(-1);
-        writer.WriteByteString(kemKey.Encode());
+        writer.WriteByteString(blKey.Encode());
 
         writer.WriteInt32(1);
         writer.WriteInt32(KeyType);

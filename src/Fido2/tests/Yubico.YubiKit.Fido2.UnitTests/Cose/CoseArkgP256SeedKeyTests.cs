@@ -67,7 +67,7 @@ public class CoseArkgP256SeedKeyTests
     public void Decode_WithValidArkgSeedKey_ReturnsCorrectVariant()
     {
         // Arrange: construct CBOR map with NESTED COSE_Key maps
-        // {1:2, 3:-65700, -3:-9, -2:<BL nested map>, -1:<KEM nested map>}
+        // Wire layout per spec: {1:2, 3:-65700, -3:-9, -2:<KEM nested map>, -1:<BL nested map>}
         var kemNested = BuildNestedEc2Key(TestKemX, TestKemY);
         var blNested = BuildNestedEc2Key(TestBlX, TestBlY);
 
@@ -77,9 +77,9 @@ public class CoseArkgP256SeedKeyTests
         writer.WriteInt32(-3);
         writer.WriteInt32(-9); // Derived key alg (Esp256)
         writer.WriteInt32(-2);
-        writer.WriteByteString(blNested);
+        writer.WriteByteString(kemNested); // -2 = pkKem (per spec)
         writer.WriteInt32(-1);
-        writer.WriteByteString(kemNested);
+        writer.WriteByteString(blNested);  // -1 = pkBl  (per spec)
         writer.WriteInt32(1);  // kty = 2
         writer.WriteInt32(2);
         writer.WriteInt32(3);  // alg = -65700
@@ -141,6 +141,65 @@ public class CoseArkgP256SeedKeyTests
         Assert.Equal(original.DerivedKeyAlgorithm, roundtripped.DerivedKeyAlgorithm);
         Assert.Equal(original.KemPublicKey.ToArray(), roundtripped.KemPublicKey.ToArray());
         Assert.Equal(original.BlPublicKey.ToArray(), roundtripped.BlPublicKey.ToArray());
+    }
+
+    /// <summary>
+    /// Spec contract: per draft-bradleylundberg-cfrg-arkg-10, python-fido2 (cose.py:428-433),
+    /// and the legacy SDK (Yubico.NET.SDK-Legacy/Yubico.YubiKey/src/Yubico/YubiKey/Fido2/PreviewSignExtension.cs:317-323),
+    /// the ARKG-P256 seed-key nested-COSE_Key wire format is:
+    ///   -1 = pkBl  (blinding public key)
+    ///   -2 = pkKem (KEM public key)
+    /// This test builds a seed-key with two visually distinguishable nested EC2 keys
+    /// — one with all-0xAA coordinates at <c>-1</c>, one with all-0xBB at <c>-2</c> —
+    /// and asserts that the decoder routes them to <c>BlPublicKey</c> and <c>KemPublicKey</c>
+    /// respectively. Regression guard for the modern-vs-legacy/python wire-mapping divergence
+    /// that caused FullCeremony GetAssertion to return CTAP2_ERR_OTHER (0x7F) on YubiKey
+    /// 5.8.0-beta — see Plans/snoopy-strolling-star.md (2026-04-29).
+    /// </summary>
+    [Fact]
+    public void Decode_pkBlAtMinus1_pkKemAtMinus2_PerSpec()
+    {
+        // Arrange: nested EC2 keys with distinguishable coordinates
+        byte[] blX = new byte[32];
+        byte[] blY = new byte[32];
+        byte[] kemX = new byte[32];
+        byte[] kemY = new byte[32];
+        for (int i = 0; i < 32; i++)
+        {
+            blX[i] = 0xAA;  // BL = 0xAA pattern
+            blY[i] = 0xAB;
+            kemX[i] = 0xBB; // KEM = 0xBB pattern
+            kemY[i] = 0xBC;
+        }
+
+        var blNested = BuildNestedEc2Key(blX, blY);
+        var kemNested = BuildNestedEc2Key(kemX, kemY);
+
+        // Wire layout per spec: -1 = pkBl, -2 = pkKem
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(5);
+        writer.WriteInt32(-3);
+        writer.WriteInt32(-9); // derived alg
+        writer.WriteInt32(-2);
+        writer.WriteByteString(kemNested); // -2 = KEM (per spec)
+        writer.WriteInt32(-1);
+        writer.WriteByteString(blNested);  // -1 = BL  (per spec)
+        writer.WriteInt32(1);
+        writer.WriteInt32(2);   // kty
+        writer.WriteInt32(3);
+        writer.WriteInt32(-65700); // alg = ARKG-P256 seed-key
+        writer.WriteEndMap();
+
+        // Act
+        var decoded = (CoseArkgP256SeedKey)CoseKey.Decode(writer.Encode());
+
+        // Assert — modern routes -1 to BlPublicKey and -2 to KemPublicKey
+        Assert.Equal(0xAA, decoded.BlPublicKey.Span[1]);    // BL X starts with 0xAA
+        Assert.Equal(0xBB, decoded.KemPublicKey.Span[1]);   // KEM X starts with 0xBB
+        Assert.Equal(blX, decoded.BlPublicKey.Slice(1, 32).ToArray());
+        Assert.Equal(blY, decoded.BlPublicKey.Slice(33, 32).ToArray());
+        Assert.Equal(kemX, decoded.KemPublicKey.Slice(1, 32).ToArray());
+        Assert.Equal(kemY, decoded.KemPublicKey.Slice(33, 32).ToArray());
     }
 
     [Fact]

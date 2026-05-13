@@ -70,8 +70,8 @@ namespace Yubico.YubiKey.Fido2
                 Session.AuthenticatorInfo,
                 new[] { CoseAlgorithmIdentifier.ArkgP256Esp256 });
 
-            var credData = Session.MakeCredential(MakeCredentialParameters);
-            var generatedKey = credData.GetPreviewSignGeneratedKey();
+            var mcData = Session.MakeCredential(MakeCredentialParameters);
+            var generatedKey = mcData.GetPreviewSignGeneratedKey();
             Assert.NotNull(generatedKey);
 
             // Step B: Offline derive public key
@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Fido2
             // previewSign requires an allowList so the YubiKey knows which credential to use;
             // the firmware rejects the GetAssertion at protocol level with "option or extension
             // invalid" if it is missing. Pass the FIDO2 credential ID returned from MakeCredential.
-            byte[] credentialId = credData.AuthenticatorData.CredentialId!.Id.ToArray();
+            byte[] credentialId = mcData.AuthenticatorData.CredentialId!.Id.ToArray();
             GetAssertionParameters.AllowCredential(new CredentialId { Id = credentialId });
 
             GetAssertionParameters.AddPreviewSignExtension(

@@ -748,7 +748,7 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="PreviewSignGeneratedKey.DerivePublicKey"/> to derive public
         /// keys offline. The YubiKey can sign with any derived key when provided
         /// the corresponding ARKG key handle and context via
-        /// <see cref="GetAssertionParameters.AddPreviewSignByCredentialExtension"/>.
+        /// <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.
         /// </para>
         /// </remarks>
         /// <param name="authenticatorInfo">
@@ -758,8 +758,10 @@ namespace Yubico.YubiKey.Fido2
         /// The algorithms to use for key generation, ordered by preference. For
         /// ARKG-P256, include <see cref="Cose.CoseAlgorithmIdentifier.ArkgP256Esp256"/>.
         /// </param>
-        /// <param name="requireUv">
-        /// If <c>true</c>, requires user verification; otherwise, only user presence is required.
+        /// <param name="flags">
+        /// The flags value to encode in the extension input. Use
+        /// <see cref="PreviewSignOptions.RequireUserPresence"/> (default) or
+        /// <see cref="PreviewSignOptions.RequireUserVerification"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <paramref name="authenticatorInfo"/> or <paramref name="algorithms"/> is null.
@@ -770,7 +772,7 @@ namespace Yubico.YubiKey.Fido2
         public void AddPreviewSignGenerateKeyExtension(
             AuthenticatorInfo authenticatorInfo,
             Cose.CoseAlgorithmIdentifier[] algorithms,
-            bool requireUv = false)
+            PreviewSignOptions flags = PreviewSignOptions.RequireUserPresence)
         {
             Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
             Guard.IsNotNull(algorithms, nameof(algorithms));
@@ -780,7 +782,7 @@ namespace Yubico.YubiKey.Fido2
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
 
-            byte[] encoded = PreviewSignExtension.EncodeGenerateKeyInput(algorithms, requireUv);
+            byte[] encoded = PreviewSignExtension.EncodeGenerateKeyInput(algorithms, flags);
             AddExtension(Fido2.Extensions.PreviewSign, encoded);
         }
 

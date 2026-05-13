@@ -99,7 +99,7 @@ namespace Yubico.YubiKey.Fido2
         /// <para>
         /// To use the derived key for signing, pass the returned
         /// <see cref="PreviewSignDerivedKey"/> to
-        /// <see cref="GetAssertionParameters.AddPreviewSignByCredentialExtension"/>.
+        /// <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.
         /// The YubiKey will produce a signature that can be verified using
         /// <see cref="PreviewSignDerivedKey.VerifySignature"/>.
         /// </para>

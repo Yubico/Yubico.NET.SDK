@@ -408,16 +408,14 @@ namespace Yubico.YubiKey.Fido2
         /// generated key returned during credential creation.
         /// </para>
         /// <para>
-        /// The caller supplies the <see cref="AuthenticatorInfo"/> for the YubiKey,
-        /// obtained by calling the <see cref="Commands.GetInfoCommand"/> or
-        /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
-        /// This method will verify that the YubiKey supports the previewSign extension.
-        /// </para>
-        /// <para>
         /// The <paramref name="derivedKey"/> should be obtained by calling
         /// <see cref="PreviewSignGeneratedKey.DerivePublicKey"/> on the generated
-        /// key material from the original credential creation. The message is
-        /// hashed (SHA-256) internally before being sent to the YubiKey for signing.
+        /// key material from the original credential creation.
+        /// </para>
+        /// <para>
+        /// The caller is responsible for hashing the message (SHA-256) before passing it as
+        /// <paramref name="tbs"/> (to-be-signed), and for encoding the ARKG sign args using
+        /// <see cref="PreviewSignExtension.EncodeArkgSignArgs"/>.
         /// </para>
         /// <para>
         /// After the assertion succeeds, retrieve the signature using
@@ -425,84 +423,46 @@ namespace Yubico.YubiKey.Fido2
         /// with <see cref="PreviewSignDerivedKey.VerifySignature"/>.
         /// </para>
         /// </remarks>
-        /// <param name="authenticatorInfo">
-        /// The FIDO2 <see cref="AuthenticatorInfo"/> for the YubiKey being used.
-        /// </param>
         /// <param name="derivedKey">
         /// The derived key containing the ARKG key handle and context, obtained
         /// from <see cref="PreviewSignGeneratedKey.DerivePublicKey"/>.
         /// </param>
-        /// <param name="message">
-        /// The message to be signed. This will be hashed with SHA-256 before
-        /// being sent to the YubiKey.
+        /// <param name="tbs">
+        /// The pre-hashed message to be signed (SHA-256 hash of the original message).
+        /// </param>
+        /// <param name="additionalArgs">
+        /// The CBOR-encoded ARKG sign args, obtained from
+        /// <see cref="PreviewSignExtension.EncodeArkgSignArgs"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// The <paramref name="authenticatorInfo"/>, <paramref name="derivedKey"/>, or
-        /// <paramref name="message"/> is null.
-        /// </exception>
-        /// <exception cref="NotSupportedException">
-        /// The YubiKey does not support the previewSign extension.
+        /// The <paramref name="derivedKey"/>, <paramref name="tbs"/>, or
+        /// <paramref name="additionalArgs"/> is null.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// The allow-list is null or empty. The previewSign extension requires at least one credential
         /// in the allow-list.
         /// </exception>
-        public void AddPreviewSignByCredentialExtension(
-            AuthenticatorInfo authenticatorInfo,
+        public void AddPreviewSignExtension(
             PreviewSignDerivedKey derivedKey,
-            byte[] message)
+            byte[] tbs,
+            byte[] additionalArgs)
         {
-            Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
             Guard.IsNotNull(derivedKey, nameof(derivedKey));
-            Guard.IsNotNull(message, nameof(message));
-
-            if (!authenticatorInfo.IsExtensionSupported(Fido2.Extensions.PreviewSign))
-            {
-                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
-            }
+            Guard.IsNotNull(tbs, nameof(tbs));
+            Guard.IsNotNull(additionalArgs, nameof(additionalArgs));
 
             if (AllowList is null || AllowList.Count == 0)
             {
                 throw new InvalidOperationException(
                     "The previewSign extension's sign-by-credential mode requires at least one credential in the allow-list. " +
-                    "Call AllowCredential() with the credential ID returned from MakeCredential before invoking AddPreviewSignByCredentialExtension().");
+                    "Call AllowCredential() with the credential ID returned from MakeCredential before invoking AddPreviewSignExtension().");
             }
-
-            byte[] tbs;
-            using (SHA256 sha = CryptographyProviders.Sha256Creator())
-            {
-                tbs = sha.ComputeHash(message);
-            }
-
-            byte[] additionalArgs = EncodeArkgSignArgs(derivedKey);
 
             byte[] encoded = PreviewSignExtension.EncodeSignByCredentialInput(
                 derivedKey.DeviceKeyHandle,
                 tbs,
                 additionalArgs);
             AddExtension(Fido2.Extensions.PreviewSign, encoded);
-        }
-
-        private static byte[] EncodeArkgSignArgs(PreviewSignDerivedKey derivedKey)
-        {
-            // COSE_Sign_Args map {3: alg, -1: arkg_kh, -2: ctx}. The alg field
-            // identifies the SIGN-ARGS request as ARKG-derived (-65539), not the
-            // raw signing algorithm. Rust hid-test, python-fido2, and the JS
-            // test page all pass -65539 here; firmware rejects other values.
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(3);
-
-            cbor.WriteInt32(3);
-            cbor.WriteInt32((int)Cose.CoseAlgorithmIdentifier.ArkgP256Esp256);
-
-            cbor.WriteInt32(-1);
-            cbor.WriteByteString(derivedKey.ArkgKeyHandle.Span);
-
-            cbor.WriteInt32(-2);
-            cbor.WriteByteString(derivedKey.Context.Span);
-
-            cbor.WriteEndMap();
-            return cbor.Encode();
         }
 
         /// <inheritdoc/>

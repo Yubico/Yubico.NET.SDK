@@ -86,6 +86,18 @@ namespace Yubico.YubiKey.Fido2
             // Step C: Sign with derived credential (requires user presence - touch #2)
             byte[] message = System.Text.Encoding.ASCII.GetBytes("hello-previewsign-integration-test");
 
+            // Hash the message before signing
+            byte[] tbs;
+            using (var sha = System.Security.Cryptography.SHA256.Create())
+            {
+                tbs = sha.ComputeHash(message);
+            }
+
+            // Encode ARKG sign args
+            byte[] additionalArgs = PreviewSignExtension.EncodeArkgSignArgs(
+                derived.ArkgKeyHandle,
+                derived.Context);
+
             // sign-by-credential requires an allowList so the YubiKey knows
             // which credential to use; the firmware rejects the GetAssertion
             // at protocol level with "option or extension invalid" if it is
@@ -94,10 +106,10 @@ namespace Yubico.YubiKey.Fido2
             byte[] credentialId = credData.AuthenticatorData.CredentialId!.Id.ToArray();
             GetAssertionParameters.AllowCredential(new CredentialId { Id = credentialId });
 
-            GetAssertionParameters.AddPreviewSignByCredentialExtension(
-                Session.AuthenticatorInfo,
+            GetAssertionParameters.AddPreviewSignExtension(
                 derived,
-                message);
+                tbs,
+                additionalArgs);
 
             var assertions = Session.GetAssertions(GetAssertionParameters);
             var signature = assertions[0].AuthenticatorData.GetPreviewSignSignature();

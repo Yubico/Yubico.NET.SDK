@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.Fido2
     /// </para>
     /// <para>
     /// To request a signature from the YubiKey using this derived key, pass this
-    /// object to <see cref="GetAssertionParameters.AddPreviewSignByCredentialExtension"/>.
+    /// object to <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.
     /// </para>
     /// </remarks>
     public sealed class PreviewSignDerivedKey

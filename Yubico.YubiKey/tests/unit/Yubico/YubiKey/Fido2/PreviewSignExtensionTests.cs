@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] actual = PreviewSignExtension.EncodeGenerateKeyInput(
                 new[] { CoseAlgorithmIdentifier.Esp256 },
-                requireUv: false);
+                flags: PreviewSignOptions.RequireUserPresence);
 
             Assert.Equal(expected, actual);
         }
@@ -123,22 +123,22 @@ namespace Yubico.YubiKey.Fido2
         // ------------------------------------------------------------------
 
         [Fact]
-        public void Flags_DerivedFromRequireUv_TrueProduces0b101()
+        public void Flags_UserVerification_Produces0b101()
         {
             byte[] encoded = PreviewSignExtension.EncodeGenerateKeyInput(
                 new[] { CoseAlgorithmIdentifier.Esp256 },
-                requireUv: true);
+                flags: PreviewSignOptions.RequireUserVerification);
 
             int flags = ReadFlagsFromGenerateKeyInput(encoded);
             Assert.Equal(0b101, flags);
         }
 
         [Fact]
-        public void Flags_DerivedFromRequireUv_FalseProduces0b001()
+        public void Flags_UserPresence_Produces0b001()
         {
             byte[] encoded = PreviewSignExtension.EncodeGenerateKeyInput(
                 new[] { CoseAlgorithmIdentifier.Esp256 },
-                requireUv: false);
+                flags: PreviewSignOptions.RequireUserPresence);
 
             int flags = ReadFlagsFromGenerateKeyInput(encoded);
             Assert.Equal(0b001, flags);
@@ -163,37 +163,23 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void AddPreviewSignByCredential_ThrowsWhenExtensionUnsupported()
+        public void AddPreviewSignExtension_ThrowsWhenAllowListEmpty()
         {
-            var info = BuildAuthenticatorInfoWithoutPreviewSign();
             var parameters = new GetAssertionParameters(
                 new RelyingParty("rp.example"),
                 new byte[32]);
 
             PreviewSignDerivedKey derivedKey = BuildDerivedKeyFixture();
-
-            _ = Assert.Throws<NotSupportedException>(
-                () => parameters.AddPreviewSignByCredentialExtension(
-                    info,
-                    derivedKey,
-                    new byte[] { 0xAA }));
-        }
-
-        [Fact]
-        public void AddPreviewSignByCredential_ThrowsWhenAllowListEmpty()
-        {
-            var info = BuildAuthenticatorInfoWithPreviewSign();
-            var parameters = new GetAssertionParameters(
-                new RelyingParty("rp.example"),
-                new byte[32]);
-
-            PreviewSignDerivedKey derivedKey = BuildDerivedKeyFixture();
+            byte[] tbs = new byte[32];
+            byte[] additionalArgs = PreviewSignExtension.EncodeArkgSignArgs(
+                derivedKey.ArkgKeyHandle,
+                derivedKey.Context);
 
             var ex = Assert.Throws<InvalidOperationException>(
-                () => parameters.AddPreviewSignByCredentialExtension(
-                    info,
+                () => parameters.AddPreviewSignExtension(
                     derivedKey,
-                    new byte[] { 0xAA }));
+                    tbs,
+                    additionalArgs));
 
             Assert.Contains("AllowCredential", ex.Message);
         }

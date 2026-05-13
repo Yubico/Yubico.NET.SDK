@@ -21,6 +21,19 @@ using Yubico.YubiKey.Fido2.Cose;
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
+    /// Flag bits encoded in the MakeCredential previewSign extension input (key 4).
+    /// </summary>
+    [Flags]
+    public enum PreviewSignOptions
+    {
+        /// <summary>Require user presence for signing operations.</summary>
+        RequireUserPresence = 0b001,
+
+        /// <summary>Require user verification (PIN/biometric) for signing operations.</summary>
+        RequireUserVerification = 0b101,
+    }
+
+    /// <summary>
     /// CBOR encoder/decoder for the "previewSign" WebAuthn extension.
     /// </summary>
     /// <remarks>
@@ -34,10 +47,6 @@ namespace Yubico.YubiKey.Fido2
     {
         /// <summary>CTAP key on the MakeCredential RESPONSE map carrying unsigned extension outputs.</summary>
         internal const int CtapUnsignedExtensionOutputsKey = 6;
-
-        /// <summary>Flag bits encoded in the MakeCredential previewSign input (key 4).</summary>
-        internal const int FlagsRequireUserPresence = 0b001;
-        internal const int FlagsRequireUserVerification = 0b101;
 
         /// <summary>Map keys used by the MakeCredential previewSign input AND signed output.</summary>
         internal enum MakeCredentialKey
@@ -58,12 +67,13 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// Encode the MakeCredential extension input map: {3:[algs], 4:flags}.
         /// </summary>
+        /// <param name="algorithms">The algorithms to include in the input map.</param>
+        /// <param name="flags">The flags value to encode (e.g., <see cref="PreviewSignOptions.RequireUserPresence"/> or <see cref="PreviewSignOptions.RequireUserVerification"/>).</param>
+        /// <returns>The CBOR-encoded extension input.</returns>
         public static byte[] EncodeGenerateKeyInput(
             ReadOnlySpan<CoseAlgorithmIdentifier> algorithms,
-            bool requireUv)
+            PreviewSignOptions flags)
         {
-            int flags = requireUv ? FlagsRequireUserVerification : FlagsRequireUserPresence;
-
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(2);
 
@@ -77,7 +87,38 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteEndArray();
 
             cbor.WriteInt32((int)MakeCredentialKey.Flags);
-            cbor.WriteInt32(flags);
+            cbor.WriteInt32((int)flags);
+
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        /// <summary>
+        /// Encode ARKG sign args for the previewSign extension.
+        /// </summary>
+        /// <param name="arkgKeyHandle">The ARKG key handle.</param>
+        /// <param name="context">The context string used during key derivation.</param>
+        /// <returns>CBOR-encoded COSE_Sign_Args map {3: alg, -1: arkg_kh, -2: ctx}.</returns>
+        /// <remarks>
+        /// The alg field identifies the SIGN-ARGS request as ARKG-derived (-65539), not the
+        /// raw signing algorithm. Rust hid-test, python-fido2, and the JS test page all pass
+        /// -65539 here; firmware rejects other values.
+        /// </remarks>
+        public static byte[] EncodeArkgSignArgs(
+            ReadOnlyMemory<byte> arkgKeyHandle,
+            ReadOnlyMemory<byte> context)
+        {
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(3);
+
+            cbor.WriteInt32(3);
+            cbor.WriteInt32((int)Cose.CoseAlgorithmIdentifier.ArkgP256Esp256);
+
+            cbor.WriteInt32(-1);
+            cbor.WriteByteString(arkgKeyHandle.Span);
+
+            cbor.WriteInt32(-2);
+            cbor.WriteByteString(context.Span);
 
             cbor.WriteEndMap();
             return cbor.Encode();

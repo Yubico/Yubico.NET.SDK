@@ -408,14 +408,15 @@ namespace Yubico.YubiKey.Fido2
         /// generated key returned during credential creation.
         /// </para>
         /// <para>
-        /// The <paramref name="derivedKey"/> should be obtained by calling
+        /// The <paramref name="deviceKeyHandle"/>, <paramref name="arkgKeyHandle"/>,
+        /// and <paramref name="context"/> should be obtained by calling
         /// <see cref="PreviewSignGeneratedKey.DerivePublicKey"/> on the generated
         /// key material from the original credential creation.
         /// </para>
         /// <para>
         /// The caller is responsible for hashing the message (SHA-256) before passing it as
-        /// <paramref name="tbs"/> (to-be-signed), and for encoding the ARKG sign args using
-        /// <see cref="PreviewSignExtension.EncodeArkgSignArgs"/>.
+        /// <paramref name="tbs"/> (to-be-signed). This method internally encodes the ARKG
+        /// sign args from the provided <paramref name="arkgKeyHandle"/> and <paramref name="context"/>.
         /// </para>
         /// <para>
         /// After the assertion succeeds, retrieve the signature using
@@ -423,33 +424,32 @@ namespace Yubico.YubiKey.Fido2
         /// with <see cref="PreviewSignDerivedKey.VerifySignature"/>.
         /// </para>
         /// </remarks>
-        /// <param name="derivedKey">
-        /// The derived key containing the ARKG key handle and context, obtained
-        /// from <see cref="PreviewSignGeneratedKey.DerivePublicKey"/>.
+        /// <param name="deviceKeyHandle">
+        /// The device key handle from the original registration (credential ID).
+        /// </param>
+        /// <param name="arkgKeyHandle">
+        /// The ARKG key handle obtained from <see cref="PreviewSignGeneratedKey.DerivePublicKey"/>.
+        /// </param>
+        /// <param name="context">
+        /// The context string used during key derivation.
         /// </param>
         /// <param name="tbs">
         /// The pre-hashed message to be signed (SHA-256 hash of the original message).
         /// </param>
-        /// <param name="additionalArgs">
-        /// The CBOR-encoded ARKG sign args, obtained from
-        /// <see cref="PreviewSignExtension.EncodeArkgSignArgs"/>.
-        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// The <paramref name="derivedKey"/>, <paramref name="tbs"/>, or
-        /// <paramref name="additionalArgs"/> is null.
+        /// The <paramref name="tbs"/> is null.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// The allow-list is null or empty. The previewSign extension requires at least one credential
         /// in the allow-list.
         /// </exception>
         public void AddPreviewSignExtension(
-            PreviewSignDerivedKey derivedKey,
-            byte[] tbs,
-            byte[] additionalArgs)
+            ReadOnlyMemory<byte> deviceKeyHandle,
+            ReadOnlyMemory<byte> arkgKeyHandle,
+            ReadOnlyMemory<byte> context,
+            byte[] tbs)
         {
-            Guard.IsNotNull(derivedKey, nameof(derivedKey));
             Guard.IsNotNull(tbs, nameof(tbs));
-            Guard.IsNotNull(additionalArgs, nameof(additionalArgs));
 
             if (AllowList is null || AllowList.Count == 0)
             {
@@ -458,8 +458,9 @@ namespace Yubico.YubiKey.Fido2
                     "Call AllowCredential() with the credential ID returned from MakeCredential before invoking AddPreviewSignExtension().");
             }
 
+            byte[] additionalArgs = PreviewSignExtension.EncodeArkgSignArgs(arkgKeyHandle, context);
             byte[] encoded = PreviewSignExtension.EncodeSignByCredentialInput(
-                derivedKey.DeviceKeyHandle,
+                deviceKeyHandle,
                 tbs,
                 additionalArgs);
             AddExtension(Fido2.Extensions.PreviewSign, encoded);

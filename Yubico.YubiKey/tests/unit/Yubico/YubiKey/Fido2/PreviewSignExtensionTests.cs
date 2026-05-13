@@ -171,15 +171,13 @@ namespace Yubico.YubiKey.Fido2
 
             PreviewSignDerivedKey derivedKey = BuildDerivedKeyFixture();
             byte[] tbs = new byte[32];
-            byte[] additionalArgs = PreviewSignExtension.EncodeArkgSignArgs(
-                derivedKey.ArkgKeyHandle,
-                derivedKey.Context);
 
             var ex = Assert.Throws<InvalidOperationException>(
                 () => parameters.AddPreviewSignExtension(
-                    derivedKey,
-                    tbs,
-                    additionalArgs));
+                    derivedKey.DeviceKeyHandle,
+                    derivedKey.ArkgKeyHandle,
+                    derivedKey.Context,
+                    tbs));
 
             Assert.Contains("AllowCredential", ex.Message);
         }

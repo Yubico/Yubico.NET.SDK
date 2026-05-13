@@ -112,6 +112,24 @@ namespace Yubico.YubiKey.Fido2
         public CoseKey? CredentialPublicKey { get; private set; }
 
         /// <summary>
+        /// The raw CBOR-encoded credential public key bytes from the authenticator data.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This property is always populated when attested credential data is present,
+        /// regardless of whether the key was parsed into a <see cref="CoseKey"/> via
+        /// <see cref="CredentialPublicKey"/>. Use this property when the credential
+        /// public key uses a non-standard format (such as ARKG composite keys) that
+        /// cannot be represented as a <see cref="CoseKey"/>.
+        /// </para>
+        /// <para>
+        /// For standard FIDO2 credential public keys, prefer <see cref="CredentialPublicKey"/>
+        /// which provides typed access to key parameters.
+        /// </para>
+        /// </remarks>
+        public ReadOnlyMemory<byte>? EncodedCredentialPublicKey { get; private set; }
+
+        /// <summary>
         /// The list of extensions. This is an optional value and can be null.
         /// </summary>
         /// <remarks>
@@ -151,11 +169,17 @@ namespace Yubico.YubiKey.Fido2
         /// The authenticator data, encoded following the definition in the W3C
         /// standard.
         /// </param>
+        /// <param name="parseCredentialPublicKey">
+        /// If true (default), parses the credential public key into a <see cref="CoseKey"/> object.
+        /// If false, skips CoseKey parsing but still populates <see cref="EncodedCredentialPublicKey"/>
+        /// with the raw CBOR bytes. Use false when the COSE key may not conform to standard
+        /// CoseKey validation rules (e.g., ARKG keys without an alg field).
+        /// </param>
         /// <exception cref="ArgumentException">
         /// The <c>encodedData</c> is not a correct encoding for FIDO2
         /// authenticator data.
         /// </exception>
-        public AuthenticatorData(ReadOnlyMemory<byte> encodedData)
+        public AuthenticatorData(ReadOnlyMemory<byte> encodedData, bool parseCredentialPublicKey = true)
         {
             EncodedAuthenticatorData = encodedData.ToArray();
 
@@ -180,7 +204,19 @@ namespace Yubico.YubiKey.Fido2
                 offset += CredentialIdLengthLength;
                 CredentialId = new CredentialId() { Id = EncodedAuthenticatorData.Slice(offset, credentialIdLength) };
                 offset += credentialIdLength;
-                CredentialPublicKey = CoseKey.Create(EncodedAuthenticatorData[offset..], out int bytesRead);
+
+                // Always read the COSE key bytes to determine their length and store them
+                var coseKeyReader = new CborReader(EncodedAuthenticatorData[offset..], CborConformanceMode.Ctap2Canonical);
+                ReadOnlyMemory<byte> coseKeyBytes = coseKeyReader.ReadEncodedValue();
+                int bytesRead = coseKeyBytes.Length;
+                EncodedCredentialPublicKey = coseKeyBytes.ToArray();
+
+                // Only parse into CoseKey if requested
+                if (parseCredentialPublicKey)
+                {
+                    CredentialPublicKey = CoseKey.Create(coseKeyBytes, out _);
+                }
+
                 offset += bytesRead;
             }
             // For some versions of the YubiKey, it is possible there is no

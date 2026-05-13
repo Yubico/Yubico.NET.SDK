@@ -42,6 +42,12 @@ namespace Yubico.YubiKey.Fido2
         private const int KeyUnsignedExtensionOutputs = 6;
 
         /// <summary>
+        /// The parsed attestation object containing the format, authenticator data,
+        /// and attestation statement.
+        /// </summary>
+        public AttestationObject AttestationObject { get; }
+
+        /// <summary>
         /// The attestation statement format identifier.
         /// See <see cref="AttestationFormats"/> for standard format identifiers.
         /// </summary>
@@ -193,22 +199,22 @@ namespace Yubico.YubiKey.Fido2
             try
             {
                 // Parse attestation object with full validation
-                var attestationObject = new AttestationObject(RawData, parseAttestationStatement: true);
+                AttestationObject = new AttestationObject(RawData, parseFullDetails: true);
 
                 // Validate EC2 key type requirement
-                if (attestationObject.AuthenticatorData.CredentialPublicKey is not CoseEcPublicKey
-                    || attestationObject.AuthenticatorData.CredentialPublicKey.Type != CoseKeyType.Ec2)
+                if (AttestationObject.AuthenticatorData.CredentialPublicKey is not CoseEcPublicKey
+                    || AttestationObject.AuthenticatorData.CredentialPublicKey.Type != CoseKeyType.Ec2)
                 {
                     throw new Ctap2DataException(ExceptionMessages.Ctap2UnknownAttestationFormat);
                 }
 
                 // Backward compatibility: expose properties from AttestationObject
-                Format = attestationObject.Format;
-                AuthenticatorData = attestationObject.AuthenticatorData;
-                AttestationAlgorithm = attestationObject.AttestationAlgorithm ?? CoseAlgorithmIdentifier.ES256;
-                AttestationStatement = attestationObject.AttestationStatement ?? ReadOnlyMemory<byte>.Empty;
-                EncodedAttestationStatement = attestationObject.EncodedAttestationStatement;
-                AttestationCertificates = attestationObject.AttestationCertificates;
+                Format = AttestationObject.Format;
+                AuthenticatorData = AttestationObject.AuthenticatorData;
+                AttestationAlgorithm = AttestationObject.AttestationAlgorithm ?? CoseAlgorithmIdentifier.ES256;
+                AttestationStatement = AttestationObject.AttestationStatement ?? ReadOnlyMemory<byte>.Empty;
+                EncodedAttestationStatement = AttestationObject.EncodedAttestationStatement;
+                AttestationCertificates = AttestationObject.AttestationCertificates;
 
                 if (map.Contains(KeyEnterpriseAttestation))
                 {

@@ -65,10 +65,8 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// Gets the attestation object returned by the authenticator during MakeCredential.
-        /// The attestation object is CBOR-encoded and follows the standard FIDO2
-        /// AttestationObject format.
         /// </summary>
-        public ReadOnlyMemory<byte> AttestationObject { get; init; }
+        public AttestationObject AttestationObject { get; init; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PreviewSignGeneratedKey"/> class.
@@ -83,7 +81,7 @@ namespace Yubico.YubiKey.Fido2
             ReadOnlyMemory<byte> blindingPublicKey,
             ReadOnlyMemory<byte> kemPublicKey,
             CoseAlgorithmIdentifier derivedKeyAlgorithm,
-            ReadOnlyMemory<byte> attestationObject)
+            AttestationObject attestationObject)
         {
             KeyHandle = keyHandle;
             BlindingPublicKey = blindingPublicKey;

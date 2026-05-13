@@ -129,7 +129,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         // ------------------------------------------------------------------
-        // Structure-only parse (parseAttestationStatement = false)
+        // Structure-only parse (parseFullDetails = false)
         // ------------------------------------------------------------------
 
         [Fact]
@@ -137,7 +137,7 @@ namespace Yubico.YubiKey.Fido2
         {
             ReadOnlyMemory<byte> encoding = GetSampleEncoding();
 
-            var obj = new AttestationObject(encoding, parseAttestationStatement: false);
+            var obj = new AttestationObject(encoding, parseFullDetails: false);
 
             Assert.Null(obj.AttestationAlgorithm);
             Assert.Null(obj.AttestationStatement);
@@ -150,10 +150,46 @@ namespace Yubico.YubiKey.Fido2
             ReadOnlyMemory<byte> encoding = GetSampleEncoding();
 
             // The SDK guarantee: EncodedAttestationStatement is always available
-            // regardless of the parseAttestationStatement flag.
-            var obj = new AttestationObject(encoding, parseAttestationStatement: false);
+            // regardless of the parseFullDetails flag.
+            var obj = new AttestationObject(encoding, parseFullDetails: false);
 
             Assert.False(obj.EncodedAttestationStatement.IsEmpty);
+        }
+
+        [Fact]
+        public void Parse_StructureOnly_CredentialPublicKey_IsNull()
+        {
+            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
+
+            var obj = new AttestationObject(encoding, parseFullDetails: false);
+
+            // When parseFullDetails is false, CoseKey parsing is skipped
+            Assert.Null(obj.AuthenticatorData.CredentialPublicKey);
+        }
+
+        [Fact]
+        public void Parse_StructureOnly_EncodedCredentialPublicKey_IsNotNull()
+        {
+            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
+
+            var obj = new AttestationObject(encoding, parseFullDetails: false);
+
+            // Raw bytes are always captured regardless of parseFullDetails flag
+            Assert.NotNull(obj.AuthenticatorData.EncodedCredentialPublicKey);
+            Assert.False(obj.AuthenticatorData.EncodedCredentialPublicKey!.Value.IsEmpty);
+        }
+
+        [Fact]
+        public void Parse_FullDetails_BothCredentialPublicKeyFields_ArePopulated()
+        {
+            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
+
+            var obj = new AttestationObject(encoding, parseFullDetails: true);
+
+            // When parseFullDetails is true (default), both typed and raw forms are available
+            Assert.NotNull(obj.AuthenticatorData.CredentialPublicKey);
+            Assert.NotNull(obj.AuthenticatorData.EncodedCredentialPublicKey);
+            Assert.False(obj.AuthenticatorData.EncodedCredentialPublicKey!.Value.IsEmpty);
         }
 
         // ------------------------------------------------------------------
@@ -186,9 +222,39 @@ namespace Yubico.YubiKey.Fido2
         {
             ReadOnlyMemory<byte> encoding = GetSampleEncoding();
 
-            _ = new AttestationObject(encoding, out int bytesRead, parseAttestationStatement: true);
+            _ = new AttestationObject(encoding, out int bytesRead, parseFullDetails: true);
 
             Assert.Equal(encoding.Length, bytesRead);
+        }
+
+        [Fact]
+        public void Parse_WithTrailingData_BytesRead_ReflectsActualConsumedBytes()
+        {
+            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
+            // Append trailing garbage that should NOT be consumed
+            var withTrailing = new byte[encoding.Length + 10];
+            encoding.CopyTo(withTrailing);
+            Array.Fill<byte>(withTrailing, 0xFF, encoding.Length, 10);
+
+            _ = new AttestationObject(withTrailing, out int bytesRead, parseFullDetails: true);
+
+            // bytesRead should be the actual attestation object length, NOT the input buffer length
+            Assert.Equal(encoding.Length, bytesRead);
+        }
+
+        [Fact]
+        public void Parse_WithTrailingData_Encoded_DoesNotIncludeTrailingBytes()
+        {
+            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
+            var withTrailing = new byte[encoding.Length + 10];
+            encoding.CopyTo(withTrailing);
+            Array.Fill<byte>(withTrailing, 0xFF, encoding.Length, 10);
+
+            var obj = new AttestationObject(withTrailing, out _, parseFullDetails: true);
+
+            // Encoded should be sliced to actual consumed bytes, not the full input
+            Assert.Equal(encoding.Length, obj.Encoded.Length);
+            Assert.True(encoding.Span.SequenceEqual(obj.Encoded.Span));
         }
 
         // ------------------------------------------------------------------

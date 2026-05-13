@@ -233,21 +233,19 @@ namespace Yubico.YubiKey.Fido2
                 return null;
             }
 
-            // Parse attestation object structure to extract raw authenticator data bytes.
-            // We cannot use new AttestationObject() here because it would try to parse
-            // the AuthenticatorData which includes COSE key validation. PreviewSign test
-            // data contains ARKG-specific COSE keys that don't have standard COSE fields.
-            byte[] authDataBytes = ExtractRawAuthDataFromAttestationObject(attestationObject);
+            var attestationObj = new AttestationObject(attestationObject, parseFullDetails: false);
+            if (attestationObj.AuthenticatorData.CredentialId is null ||
+                attestationObj.AuthenticatorData.EncodedCredentialPublicKey is null)
+            {
+                return null;
+            }
 
-            // Extract ARKG seed from raw authenticator data bytes
-            (byte[] keyHandle, byte[] pkBl, byte[] pkKem) = ParseAuthDataForArkgSeed(authDataBytes);
+            byte[] keyHandle = attestationObj.AuthenticatorData.CredentialId.Id.ToArray();
 
-            return new PreviewSignGeneratedKey(
-                keyHandle,
-                pkBl,
-                pkKem,
-                alg,
-                attestationObject);
+            (byte[] pkBl, byte[] pkKem) = ParseArkgCoseKey(
+                attestationObj.AuthenticatorData.EncodedCredentialPublicKey.Value.ToArray());
+
+            return new PreviewSignGeneratedKey(keyHandle, pkBl, pkKem, alg, attestationObj);
         }
 
         /// <summary>
@@ -289,102 +287,6 @@ namespace Yubico.YubiKey.Fido2
 
             reader.ReadEndMap();
             return signature;
-        }
-
-        /// <summary>
-        /// Extracts raw authenticator data bytes from an attestation object without full parsing.
-        /// </summary>
-        /// <remarks>
-        /// This method is used instead of <see cref="AttestationObject"/> constructor to avoid COSE key validation,
-        /// which would fail for ARKG-specific COSE keys that don't have standard fields.
-        /// </remarks>
-        private static byte[] ExtractRawAuthDataFromAttestationObject(byte[] attestationObject)
-        {
-            var reader = new CborReader(attestationObject, CborConformanceMode.Ctap2Canonical);
-            int? entries = reader.ReadStartMap();
-            int count = entries ?? int.MaxValue;
-
-            byte[]? authData = null;
-
-            for (int i = 0; i < count; i++)
-            {
-                if (reader.PeekState() == CborReaderState.EndMap)
-                {
-                    break;
-                }
-
-                int key = (int)reader.ReadInt64();
-                if (key == 2) // Authenticator data is at key 2
-                {
-                    authData = reader.ReadByteString();
-                }
-                else
-                {
-                    reader.SkipValue();
-                }
-            }
-
-            reader.ReadEndMap();
-
-            if (authData is null)
-            {
-                throw new System.Security.Cryptography.CryptographicException(
-                    "previewSign attestation object missing authData (key 2).");
-            }
-
-            return authData;
-        }
-
-        /// <summary>
-        /// Parse a CTAP authenticator-data buffer and return (credentialId,
-        /// pkBl, pkKem) extracted from the attested credential data + COSE key.
-        /// </summary>
-        private static (byte[] keyHandle, byte[] pkBl, byte[] pkKem) ParseAuthDataForArkgSeed(byte[] authData)
-        {
-            // CTAP authenticator-data layout:
-            //   [0..32)   rpIdHash
-            //   [32]      flags
-            //   [33..37)  signCount (big-endian uint32)
-            //   [37..53)  AAGUID (only present when AT flag is set)
-            //   [53..55)  credentialIdLength (big-endian uint16)
-            //   [55..55+L) credentialId
-            //   [55+L..)  credentialPublicKey (CBOR)
-            //   ...
-            const int FixedHeaderLength = 37;
-            const int AaguidLength = 16;
-            const byte AttestedCredentialDataFlag = 0x40;
-
-            if (authData.Length < FixedHeaderLength + AaguidLength + 2)
-            {
-                throw new System.Security.Cryptography.CryptographicException(
-                    "previewSign authData too short for attested credential data.");
-            }
-
-            byte flags = authData[32];
-            if ((flags & AttestedCredentialDataFlag) == 0)
-            {
-                throw new System.Security.Cryptography.CryptographicException(
-                    "previewSign authData missing AT flag.");
-            }
-
-            int credIdLengthOffset = FixedHeaderLength + AaguidLength;
-            int credIdLength = (authData[credIdLengthOffset] << 8) | authData[credIdLengthOffset + 1];
-            int credIdOffset = credIdLengthOffset + 2;
-            if (authData.Length < credIdOffset + credIdLength)
-            {
-                throw new System.Security.Cryptography.CryptographicException(
-                    "previewSign authData truncated in credentialId.");
-            }
-
-            byte[] credentialId = new byte[credIdLength];
-            Buffer.BlockCopy(authData, credIdOffset, credentialId, 0, credIdLength);
-
-            int coseOffset = credIdOffset + credIdLength;
-            byte[] coseSlice = new byte[authData.Length - coseOffset];
-            Buffer.BlockCopy(authData, coseOffset, coseSlice, 0, coseSlice.Length);
-
-            (byte[] pkBl, byte[] pkKem) = ParseArkgCoseKey(coseSlice);
-            return (credentialId, pkBl, pkKem);
         }
 
         /// <summary>

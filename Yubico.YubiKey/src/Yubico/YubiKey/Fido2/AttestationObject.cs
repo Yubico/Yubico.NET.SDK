@@ -105,8 +105,18 @@ namespace Yubico.YubiKey.Fido2
         /// Constructs an empty instance of <see cref="AttestationObject"/>.
         /// </summary>
         /// <remarks>
-        /// Use this constructor to build an attestation object programmatically
-        /// by setting individual properties.
+        /// <para>
+        /// This constructor is primarily for internal use or testing.
+        /// </para>
+        /// <para>
+        /// WARNING: The properties will be uninitialized. Before calling <see cref="CborEncode"/>,
+        /// you must set Format, AuthenticatorData, and EncodedAttestationStatement.
+        /// Calling CborEncode() on an uninitialized instance will throw <see cref="InvalidOperationException"/>.
+        /// </para>
+        /// <para>
+        /// Developers should typically use the decoding constructor
+        /// <see cref="AttestationObject(ReadOnlyMemory{byte}, out int, bool)"/> instead.
+        /// </para>
         /// </remarks>
         public AttestationObject()
         {
@@ -238,11 +248,12 @@ namespace Yubico.YubiKey.Fido2
         /// <inheritdoc/>
         public byte[] CborEncode()
         {
-            if (EncodedAttestationStatement.IsEmpty)
+            if (string.IsNullOrEmpty(Format) || AuthenticatorData == null || EncodedAttestationStatement.IsEmpty)
             {
                 throw new InvalidOperationException(
-                    "AttestationObject must have an attestation statement to encode. " +
-                    "The EncodedAttestationStatement property cannot be empty.");
+                    "AttestationObject must have Format, AuthenticatorData, and EncodedAttestationStatement set before encoding. " +
+                    "Use the decoding constructor to parse a CBOR-encoded attestation object, " +
+                    "or set all required properties if building programmatically.");
             }
 
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);

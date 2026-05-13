@@ -111,12 +111,12 @@ namespace Yubico.YubiKey.Fido2
         /// </remarks>
         /// <param name="cborEncoding">The CBOR encoding of the attestation object.</param>
         /// <param name="parseAttestationStatement">
-        /// If true (default), performs full parsing with format-specific validation.
-        /// If false, performs structure-only parsing and stores raw bytes.
+        /// If true (default), parses typed attestation statement fields for "packed" format.
+        /// Unknown formats are always handled gracefully — typed properties remain null and
+        /// raw bytes are available via <see cref="EncodedAttestationStatement"/>.
         /// </param>
         /// <exception cref="Ctap2DataException">
-        /// The cborEncoding is not a valid attestation object, or parseAttestationStatement
-        /// is true and the attestation format is unknown or invalid.
+        /// The cborEncoding is not a valid attestation object.
         /// </exception>
         public AttestationObject(ReadOnlyMemory<byte> cborEncoding, bool parseAttestationStatement = true)
             : this(cborEncoding, out _, parseAttestationStatement) { }
@@ -130,25 +130,12 @@ namespace Yubico.YubiKey.Fido2
         /// the CTAP 2.1 specification (section 6.1.2).
         /// </para>
         /// <para>
-        /// The parseAttestationStatement parameter controls the level of parsing:
+        /// For "packed" attestation format, the typed properties
+        /// (<see cref="AttestationAlgorithm"/>, <see cref="AttestationStatement"/>,
+        /// <see cref="AttestationCertificates"/>) are populated. For all other formats,
+        /// those properties remain null and the raw bytes are available via
+        /// <see cref="EncodedAttestationStatement"/>.
         /// </para>
-        /// <list type="bullet">
-        /// <item>
-        /// <description>
-        /// true (default): Performs full parsing with format-specific validation.
-        /// Currently supports the "packed" format. For "packed" format, this extracts
-        /// the algorithm, signature, and optional x5c certificates. Unknown formats
-        /// will cause an exception.
-        /// </description>
-        /// </item>
-        /// <item>
-        /// <description>
-        /// false: Performs structure-only parsing without format-specific validation.
-        /// This is useful for custom or unknown attestation formats where you only need
-        /// access to the raw attestation statement bytes and authenticator data.
-        /// </description>
-        /// </item>
-        /// </list>
         /// </remarks>
         /// <param name="cborEncoding">
         /// The CBOR encoding of the attestation object.
@@ -157,36 +144,71 @@ namespace Yubico.YubiKey.Fido2
         /// Returns the number of bytes read from the encoding.
         /// </param>
         /// <param name="parseAttestationStatement">
-        /// If true, performs full parsing with format-specific validation.
-        /// If false, performs structure-only parsing and stores raw bytes.
-        /// Default is true.
+        /// If true (default), parses typed attestation statement fields for "packed" format.
+        /// Unknown formats are always handled gracefully — typed properties remain null and
+        /// raw bytes are available via <see cref="EncodedAttestationStatement"/>.
         /// </param>
         /// <exception cref="Ctap2DataException">
-        /// The cborEncoding is not a valid attestation object, or parseAttestationStatement
-        /// is true and the attestation format is unknown or invalid.
+        /// The cborEncoding is not a valid attestation object.
         /// </exception>
         public AttestationObject(ReadOnlyMemory<byte> cborEncoding, out int bytesRead, bool parseAttestationStatement = true)
         {
             try
             {
                 Encoded = cborEncoding;
-                var map = new CborMap<int>(cborEncoding);
-                bytesRead = map.BytesRead;
 
-                Format = map.ReadTextString(KeyFormat);
-                AuthenticatorData = new AuthenticatorData(map.ReadByteString(KeyAuthData));
+                // Use raw CborReader so we can lazily extract each value — CborMap<int>
+                // eagerly parses all nested maps and throws on empty attStmt maps ("none" format).
+                var reader = new CborReader(cborEncoding, CborConformanceMode.Ctap2Canonical);
+                int? count = reader.ReadStartMap();
+                int remaining = count ?? int.MaxValue;
 
-                if (map.Contains(KeyAttestationStatement))
+                string? format = null;
+                byte[]? authDataBytes = null;
+                var encodedAttStmt = ReadOnlyMemory<byte>.Empty;
+
+                for (int i = 0; i < remaining; i++)
                 {
-                    var attestCborMap = map.ReadMap<string>(KeyAttestationStatement);
-                    EncodedAttestationStatement = attestCborMap.Encoded;
-
-                    if (parseAttestationStatement)
+                    if (reader.PeekState() == CborReaderState.EndMap)
                     {
-                        if (!ParsePackedAttestationStatement(attestCborMap))
-                        {
-                            throw new Ctap2DataException(ExceptionMessages.Ctap2UnknownAttestationFormat);
-                        }
+                        break;
+                    }
+
+                    int key = (int)reader.ReadInt64();
+                    if (key == KeyFormat)
+                    {
+                        format = reader.ReadTextString();
+                    }
+                    else if (key == KeyAuthData)
+                    {
+                        authDataBytes = reader.ReadByteString();
+                    }
+                    else if (key == KeyAttestationStatement)
+                    {
+                        encodedAttStmt = reader.ReadEncodedValue().ToArray();
+                    }
+                    else
+                    {
+                        reader.SkipValue();
+                    }
+                }
+
+                reader.ReadEndMap();
+                bytesRead = cborEncoding.Length;
+
+                Format = format ?? throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
+                AuthenticatorData = new AuthenticatorData(
+                    authDataBytes ?? throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info));
+
+                if (!encodedAttStmt.IsEmpty)
+                {
+                    EncodedAttestationStatement = encodedAttStmt;
+
+                    if (parseAttestationStatement &&
+                        Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal))
+                    {
+                        var attestCborMap = new CborMap<string>(EncodedAttestationStatement);
+                        _ = ParsePackedAttestationStatement(attestCborMap);
                     }
                 }
             }
@@ -196,23 +218,6 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        /// <summary>
-        /// Parses the "packed" attestation statement format.
-        /// </summary>
-        /// <remarks>
-        /// The "packed" format is defined in the WebAuthn specification and contains:
-        /// <list type="bullet">
-        /// <item><description>alg: The COSE algorithm identifier</description></item>
-        /// <item><description>sig: The signature bytes</description></item>
-        /// <item><description>x5c: Optional array of X.509 certificates</description></item>
-        /// </list>
-        /// </remarks>
-        /// <param name="attestCborMap">
-        /// The CBOR map containing the attestation statement.
-        /// </param>
-        /// <returns>
-        /// True if the attestation statement was successfully parsed, false otherwise.
-        /// </returns>
         private bool ParsePackedAttestationStatement(CborMap<string> attestCborMap)
         {
             // The attestation statement must be in the "packed" format and contain the expected keys.

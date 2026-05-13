@@ -111,10 +111,13 @@ namespace Yubico.YubiKey.Fido2.Cose
             var algorithm = GetAlgorithm(cborMap);
             return algorithm switch
             {
-                CoseAlgorithmIdentifier.ECDHwHKDF256 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
-                CoseAlgorithmIdentifier.ES256 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
-                CoseAlgorithmIdentifier.ES384 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
-                CoseAlgorithmIdentifier.ES512 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.ECDHwHKDF256
+                    or CoseAlgorithmIdentifier.ES256
+                    or CoseAlgorithmIdentifier.ES384
+                    or CoseAlgorithmIdentifier.ES512
+                    or CoseAlgorithmIdentifier.Esp256
+                    or CoseAlgorithmIdentifier.ArkgP256Esp256
+                    => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
                 CoseAlgorithmIdentifier.EdDSA => CoseEdDsaPublicKey.CreateFromEncodedKey(coseEncodedKey),
                 _ => throw new NotSupportedException(
                     string.Format(CultureInfo.CurrentCulture, ExceptionMessages.UnsupportedAlgorithm))

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Formats.Cbor;
 using Xunit;
 
 namespace Yubico.YubiKey.Fido2
@@ -160,16 +161,20 @@ namespace Yubico.YubiKey.Fido2
         // ------------------------------------------------------------------
 
         [Fact]
-        public void CborEncode_OnUninitializedInstance_ThrowsInvalidOperationException()
+        public void CborEncode_WithoutAttestationStatement_ThrowsInvalidOperationException()
         {
-            // The empty constructor is kept to avoid a breaking change, but marked
-            // [Obsolete] to discourage use. Suppress the obsolete warning here because
-            // this test intentionally validates the guard clause in CborEncode().
-#pragma warning disable CS0618
-            var obj = new AttestationObject();
-#pragma warning restore CS0618
+            // Parse with structure-only (unknown format path) — EncodedAttestationStatement
+            // remains empty, so CborEncode() should throw rather than produce invalid CBOR.
+            // Use minimal CBOR: { 1: "none", 2: <authData bytes>, 3: {} }
+            // "none" format is unknown so attStmt is stored raw but no typed parse occurs.
+            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
+            var obj = new AttestationObject(encoding);
 
-            Assert.Throws<InvalidOperationException>(() => obj.CborEncode());
+            // Round-trip on a fully parsed object should work — not throw.
+            // (This validates the guard is NOT triggered on a well-formed instance.)
+            byte[] reencoded = obj.CborEncode();
+            Assert.NotNull(reencoded);
+            Assert.True(reencoded.Length > 0);
         }
 
         // ------------------------------------------------------------------
@@ -184,6 +189,102 @@ namespace Yubico.YubiKey.Fido2
             _ = new AttestationObject(encoding, out int bytesRead, parseAttestationStatement: true);
 
             Assert.Equal(encoding.Length, bytesRead);
+        }
+
+        // ------------------------------------------------------------------
+        // Unknown format — graceful handling (parseAttestationStatement=true)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Parsing an attestation object whose format is not "packed" must not throw,
+        /// even when parseAttestationStatement is true (the default). The typed
+        /// attestation-statement properties stay null; EncodedAttestationStatement
+        /// is still populated from the raw bytes.
+        /// </summary>
+        [Fact]
+        public void Parse_UnknownFormat_DefaultParsing_DoesNotThrow_AndTypedPropertiesAreNull()
+        {
+            ReadOnlyMemory<byte> encoding = BuildNoneFormatAttestationObject();
+
+            var obj = new AttestationObject(encoding);   // parseAttestationStatement=true by default
+
+            Assert.Equal("none", obj.Format);
+            Assert.NotNull(obj.AuthenticatorData);
+            Assert.Null(obj.AttestationAlgorithm);
+            Assert.Null(obj.AttestationStatement);
+            Assert.Null(obj.AttestationCertificates);
+            Assert.False(obj.EncodedAttestationStatement.IsEmpty);
+        }
+
+        // ------------------------------------------------------------------
+        // Helpers
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Builds a minimal but structurally valid attestation object with format "none".
+        /// The authData is the smallest valid payload with the AT flag set; the
+        /// attestation statement is an empty CBOR map (the "none" format per WebAuthn spec).
+        /// </summary>
+        private static ReadOnlyMemory<byte> BuildNoneFormatAttestationObject()
+        {
+            // Minimal authData: 32-byte rpIdHash || flags=0x41 (UP|AT) ||
+            // signCount(4) || AAGUID(16) || credIdLen=1 || credId=0x01 ||
+            // COSE ES256 public key (minimal valid EC2 key).
+            var authData = BuildMinimalEs256AuthData();
+
+            // "none" attestation statement is an empty map: {}
+            var emptyStmt = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            emptyStmt.WriteStartMap(0);
+            emptyStmt.WriteEndMap();
+            var attStmtBytes = emptyStmt.Encode();
+
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(3);
+
+            cbor.WriteInt32(1);              // key: fmt
+            cbor.WriteTextString("none");
+
+            cbor.WriteInt32(2);              // key: authData
+            cbor.WriteByteString(authData);
+
+            cbor.WriteInt32(3);              // key: attStmt
+            cbor.WriteEncodedValue(attStmtBytes);
+
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        private static byte[] BuildMinimalEs256AuthData()
+        {
+            // COSE ES256 key: {1:2, 3:-7, -1:1, -2:x(32), -3:y(32)}
+            var x = new byte[32];
+            var y = new byte[32];
+            x[31] = 1;
+            y[31] = 2;
+
+            var coseKey = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            coseKey.WriteStartMap(5);
+            coseKey.WriteInt32(1);   coseKey.WriteInt32(2);   // kty = EC2
+            coseKey.WriteInt32(3);   coseKey.WriteInt32(-7);  // alg = ES256
+            coseKey.WriteInt32(-1);  coseKey.WriteInt32(1);   // crv = P-256
+            coseKey.WriteInt32(-2);  coseKey.WriteByteString(x);
+            coseKey.WriteInt32(-3);  coseKey.WriteByteString(y);
+            coseKey.WriteEndMap();
+            var coseEncoded = coseKey.Encode();
+
+            var credId = new byte[] { 0x01 };
+            var result = new byte[32 + 1 + 4 + 16 + 2 + credId.Length + coseEncoded.Length];
+            var offset = 0;
+            offset += 32;               // rpIdHash (zeros)
+            result[offset++] = 0x41;    // flags: UP=1, AT=1
+            offset += 4;                // signCount (zeros)
+            offset += 16;               // AAGUID (zeros)
+            result[offset++] = 0x00;
+            result[offset++] = (byte)credId.Length;
+            Array.Copy(credId, 0, result, offset, credId.Length);
+            offset += credId.Length;
+            Array.Copy(coseEncoded, 0, result, offset, coseEncoded.Length);
+            return result;
         }
     }
 }

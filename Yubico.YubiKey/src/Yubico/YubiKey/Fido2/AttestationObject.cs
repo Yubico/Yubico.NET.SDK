@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Formats.Cbor;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.Fido2.Cbor;
@@ -101,31 +100,6 @@ namespace Yubico.YubiKey.Fido2
         /// This is available when constructed from encoded bytes.
         /// </summary>
         public ReadOnlyMemory<byte> Encoded { get; private set; }
-
-        /// <summary>
-        /// Constructs an empty instance of <see cref="AttestationObject"/>.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// This constructor is primarily for internal use or testing.
-        /// </para>
-        /// <para>
-        /// WARNING: The properties will be uninitialized. Before calling <see cref="CborEncode"/>,
-        /// you must set Format, AuthenticatorData, and EncodedAttestationStatement.
-        /// Calling CborEncode() on an uninitialized instance will throw <see cref="InvalidOperationException"/>.
-        /// </para>
-        /// <para>
-        /// Developers should typically use the decoding constructor
-        /// <see cref="AttestationObject(ReadOnlyMemory{byte}, out int, bool)"/> instead.
-        /// </para>
-        /// </remarks>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use the decoding constructor AttestationObject(ReadOnlyMemory<byte>, out int, bool) instead. " +
-                  "Instances created with this constructor cannot be encoded until Format, AuthenticatorData, " +
-                  "and EncodedAttestationStatement are set manually.")]
-        public AttestationObject()
-        {
-        }
 
         /// <summary>
         /// Constructs a new instance of <see cref="AttestationObject"/> from CBOR-encoded bytes.

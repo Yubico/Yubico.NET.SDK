@@ -63,7 +63,8 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public CoseAlgorithmIdentifier DerivedKeyAlgorithm { get; init; }
 
-        /// <summary> Gets the attestation object returned by the authenticator during MakeCredential.
+        /// <summary>
+        /// Gets the attestation object returned by the authenticator during MakeCredential.
         /// The attestation object is CBOR-encoded and follows the standard FIDO2
         /// AttestationObject format.
         /// </summary>

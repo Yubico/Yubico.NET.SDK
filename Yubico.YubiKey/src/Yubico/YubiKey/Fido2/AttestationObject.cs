@@ -72,26 +72,26 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// The algorithm used to create the attestation statement.
-        /// This is null when parseFullDetails is false or the format is unknown.
+        /// This is null when the attestation object was parsed without full details or the format is unknown.
         /// </summary>
         public CoseAlgorithmIdentifier? AttestationAlgorithm { get; private set; }
 
         /// <summary>
         /// The attestation signature bytes.
-        /// This is null when parseFullDetails is false or the format is unknown.
+        /// This is null when the attestation object was parsed without full details or the format is unknown.
         /// </summary>
         public ReadOnlyMemory<byte>? AttestationStatement { get; private set; }
 
         /// <summary>
         /// The list of X.509 certificates from the attestation statement's x5c field.
-        /// This is null when certificates are not present or when parseFullDetails is false.
+        /// This is null when certificates are not present or the attestation object was parsed without full details.
         /// The first certificate contains the public key that verifies the attestation signature.
         /// </summary>
         public IReadOnlyList<X509Certificate2>? AttestationCertificates { get; private set; }
 
         /// <summary>
         /// The raw CBOR encoding of the attestation statement (key 3 in the attestation object).
-        /// This is always available regardless of the parseAttestationStatement flag.
+        /// This is always available regardless of the parsing mode.
         /// </summary>
         public ReadOnlyMemory<byte> EncodedAttestationStatement { get; private set; }
 
@@ -196,7 +196,7 @@ namespace Yubico.YubiKey.Fido2
 
                 reader.ReadEndMap();
 
-                // Fix H1: bytesRead must reflect actual consumed bytes, not input length
+                // bytesRead must reflect actual consumed bytes, not input length
                 bytesRead = cborEncoding.Length - reader.BytesRemaining;
                 Encoded = cborEncoding[..bytesRead];
 

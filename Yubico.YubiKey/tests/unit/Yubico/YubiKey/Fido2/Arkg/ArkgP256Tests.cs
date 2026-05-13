@@ -20,10 +20,8 @@ namespace Yubico.YubiKey.Fido2.Arkg
 {
     /// <summary>
     /// KAT (Known Answer Tests) for ARKG-P256 derivation.
-    /// Vectors generated from the Rust reference implementation in
-    /// cnh-authenticator-rs-extension/native/crates/hid-test/src/arkg.rs
-    /// (see /tmp/gen_kat for the generator program). Vector A also matches the
-    /// embedded `arkg.rs::tests::test_arkg_derive_key` expected output.
+    /// Vectors generated from the Rust reference implementation conforming to
+    /// draft-bradleylundberg-cfrg-arkg-09.
     /// </summary>
     public class ArkgP256Tests
     {

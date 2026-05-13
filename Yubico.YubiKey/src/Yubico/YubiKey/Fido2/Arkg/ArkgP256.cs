@@ -25,9 +25,7 @@ namespace Yubico.YubiKey.Fido2.Arkg
     /// <see cref="IArkgPrimitives"/>. The full algorithm body lives in
     /// <c>Yubico.Core.Cryptography.ArkgPrimitivesOpenSsl.Derive</c> because
     /// it needs Yubico.Core's internal OpenSSL P/Invoke surface, which is not
-    /// visible from Yubico.YubiKey. Conforms to draft-bradleylundberg-cfrg-arkg-09;
-    /// reference implementation in
-    /// cnh-authenticator-rs-extension/native/crates/hid-test/src/arkg.rs.
+    /// visible from Yubico.YubiKey. Conforms to draft-bradleylundberg-cfrg-arkg-09.
     /// </remarks>
     internal static class ArkgP256
     {

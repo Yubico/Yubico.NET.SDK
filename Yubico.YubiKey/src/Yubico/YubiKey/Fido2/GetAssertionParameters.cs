@@ -14,10 +14,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Formats.Cbor;
-using System.Security.Cryptography;
 using CommunityToolkit.Diagnostics;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.PinProtocols;
 

@@ -202,8 +202,8 @@ namespace Yubico.YubiKey.Fido2
                 AttestationObject = new AttestationObject(RawData, parseFullDetails: true);
 
                 // Validate EC2 key type requirement
-                if (AttestationObject.AuthenticatorData.CredentialPublicKey is not CoseEcPublicKey
-                    || AttestationObject.AuthenticatorData.CredentialPublicKey.Type != CoseKeyType.Ec2)
+                if (AttestationObject.AuthenticatorData.CredentialPublicKey is not CoseEcPublicKey || 
+                    AttestationObject.AuthenticatorData.CredentialPublicKey.Type != CoseKeyType.Ec2)
                 {
                     throw new Ctap2DataException(ExceptionMessages.Ctap2UnknownAttestationFormat);
                 }

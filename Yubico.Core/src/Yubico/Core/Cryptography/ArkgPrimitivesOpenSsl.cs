@@ -30,7 +30,7 @@ namespace Yubico.Core.Cryptography
     /// algorithm: on-curve point validation, ECDH shared-secret computation,
     /// and the full draft-bradleylundberg-cfrg-arkg-09 derivation. Point math
     /// goes through Yubico.NativeShims (OpenSSL); scalar reduction uses
-    /// <see cref="System.Numerics.BigInteger"/>.
+    /// <see cref="BigInteger"/>.
     /// </remarks>
     internal sealed class ArkgPrimitivesOpenSsl : IArkgPrimitives
     {

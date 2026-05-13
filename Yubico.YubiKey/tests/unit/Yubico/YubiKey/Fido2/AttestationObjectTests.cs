@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Fido2
             };
 
         // ------------------------------------------------------------------
-        // Full parse (parseAttestationStatement = true, the default)
+        // Full parse (parseFullDetails = true, the default)
         // ------------------------------------------------------------------
 
         [Fact]
@@ -258,12 +258,12 @@ namespace Yubico.YubiKey.Fido2
         }
 
         // ------------------------------------------------------------------
-        // Unknown format — graceful handling (parseAttestationStatement=true)
+        // Unknown format — graceful handling (parseFullDetails=true)
         // ------------------------------------------------------------------
 
         /// <summary>
         /// Parsing an attestation object whose format is not "packed" must not throw,
-        /// even when parseAttestationStatement is true (the default). The typed
+        /// even when parseFullDetails is true (the default). The typed
         /// attestation-statement properties stay null; EncodedAttestationStatement
         /// is still populated from the raw bytes.
         /// </summary>
@@ -272,7 +272,7 @@ namespace Yubico.YubiKey.Fido2
         {
             ReadOnlyMemory<byte> encoding = BuildNoneFormatAttestationObject();
 
-            var obj = new AttestationObject(encoding);   // parseAttestationStatement=true by default
+            var obj = new AttestationObject(encoding);   // parseFullDetails=true by default
 
             Assert.Equal("none", obj.Format);
             Assert.NotNull(obj.AuthenticatorData);

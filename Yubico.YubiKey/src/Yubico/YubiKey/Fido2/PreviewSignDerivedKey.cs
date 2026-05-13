@@ -33,8 +33,10 @@ namespace Yubico.YubiKey.Fido2
     /// Use <see cref="VerifySignature"/> to validate signatures against this key.
     /// </para>
     /// <para>
-    /// To request a signature from the YubiKey using this derived key, pass this
-    /// object to <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.
+    /// To request a signature from the YubiKey using this derived key, pass the
+    /// <see cref="DeviceKeyHandle"/>, <see cref="ArkgKeyHandle"/>, and
+    /// <see cref="Context"/> properties to
+    /// <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.
     /// </para>
     /// </remarks>
     public sealed class PreviewSignDerivedKey
@@ -89,8 +91,9 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// <para>
         /// The signature must be in DER-encoded ECDSA format, as returned by the
-        /// YubiKey's previewSign extension. The message is the raw data that was
-        /// signed, not a hash.
+        /// YubiKey's previewSign extension. The message should be the original raw
+        /// data, not a pre-hashed value. This method computes the SHA-256 hash
+        /// internally before verifying.
         /// </para>
         /// </remarks>
         /// <param name="message">

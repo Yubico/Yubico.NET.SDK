@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Formats.Cbor;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.Fido2.Cbor;
@@ -118,6 +119,10 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="AttestationObject(ReadOnlyMemory{byte}, out int, bool)"/> instead.
         /// </para>
         /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use the decoding constructor AttestationObject(ReadOnlyMemory<byte>, out int, bool) instead. " +
+                  "Instances created with this constructor cannot be encoded until Format, AuthenticatorData, " +
+                  "and EncodedAttestationStatement are set manually.")]
         public AttestationObject()
         {
         }

@@ -290,7 +290,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void ExcludeCredential(CredentialId credentialId) =>
             _excludeList =
-                ParameterHelpers.AddToList<CredentialId>(credentialId, _excludeList);
+                ParameterHelpers.AddToList(credentialId, _excludeList);
 
         /// <summary>
         /// Specify that the credential being created should be designated for third-party payment authentication.
@@ -557,7 +557,7 @@ namespace Yubico.YubiKey.Fido2
         /// Encode the "hmac-secret" extension. This should be called before issuing the
         /// <see cref="Commands.MakeCredentialCommand"/>. The call will be valid only if
         /// the <see cref="AddHmacSecretMcExtension"/> has been called, and the
-        /// <see cref="PinProtocols.PinUvAuthProtocolBase.Encapsulate"/> method
+        /// <see cref="PinUvAuthProtocolBase.Encapsulate"/> method
         /// has been successfully called. 
         /// &gt; [!NOTE]
         /// &gt; If you use <see cref="Fido2Session.MakeCredential"/> you do not need to call this method.
@@ -756,7 +756,7 @@ namespace Yubico.YubiKey.Fido2
         /// </param>
         /// <param name="algorithms">
         /// The algorithms to use for key generation, ordered by preference. For
-        /// ARKG-P256, include <see cref="Cose.CoseAlgorithmIdentifier.ArkgP256Esp256"/>.
+        /// ARKG-P256, include <see cref="CoseAlgorithmIdentifier.ArkgP256Esp256"/>.
         /// </param>
         /// <param name="flags">
         /// The flags value to encode in the extension input. Use
@@ -771,7 +771,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void AddPreviewSignGenerateKeyExtension(
             AuthenticatorInfo authenticatorInfo,
-            Cose.CoseAlgorithmIdentifier[] algorithms,
+            CoseAlgorithmIdentifier[] algorithms,
             PreviewSignOptions flags = PreviewSignOptions.RequireUserPresence)
         {
             Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));

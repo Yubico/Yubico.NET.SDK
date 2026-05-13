@@ -233,7 +233,15 @@ namespace Yubico.YubiKey.Fido2
                 return null;
             }
 
-            (byte[] keyHandle, byte[] pkBl, byte[] pkKem) = ParseInnerAttestationObject(attestationObject);
+            // Parse attestation object structure to extract raw authenticator data bytes.
+            // We cannot use new AttestationObject() here because it would try to parse
+            // the AuthenticatorData which includes COSE key validation. PreviewSign test
+            // data contains ARKG-specific COSE keys that don't have standard COSE fields.
+            byte[] authDataBytes = ExtractRawAuthDataFromAttestationObject(attestationObject);
+
+            // Extract ARKG seed from raw authenticator data bytes
+            (byte[] keyHandle, byte[] pkBl, byte[] pkKem) = ParseAuthDataForArkgSeed(authDataBytes);
+
             return new PreviewSignGeneratedKey(
                 keyHandle,
                 pkBl,
@@ -284,17 +292,20 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Inner attestation object decoder. Extracts the credential ID
-        /// (key handle) from authData and the ARKG public seed (pkBl, pkKem)
-        /// from the credentialPublicKey COSE map.
+        /// Extracts raw authenticator data bytes from an attestation object without full parsing.
         /// </summary>
-        private static (byte[] keyHandle, byte[] pkBl, byte[] pkKem) ParseInnerAttestationObject(byte[] encoded)
+        /// <remarks>
+        /// This method is used instead of <see cref="AttestationObject"/> constructor to avoid COSE key validation,
+        /// which would fail for ARKG-specific COSE keys that don't have standard fields.
+        /// </remarks>
+        private static byte[] ExtractRawAuthDataFromAttestationObject(byte[] attestationObject)
         {
-            var reader = new CborReader(encoded, CborConformanceMode.Ctap2Canonical);
+            var reader = new CborReader(attestationObject, CborConformanceMode.Ctap2Canonical);
             int? entries = reader.ReadStartMap();
             int count = entries ?? int.MaxValue;
 
             byte[]? authData = null;
+
             for (int i = 0; i < count; i++)
             {
                 if (reader.PeekState() == CborReaderState.EndMap)
@@ -303,7 +314,7 @@ namespace Yubico.YubiKey.Fido2
                 }
 
                 int key = (int)reader.ReadInt64();
-                if (key == 2)
+                if (key == 2) // Authenticator data is at key 2
                 {
                     authData = reader.ReadByteString();
                 }
@@ -321,7 +332,7 @@ namespace Yubico.YubiKey.Fido2
                     "previewSign attestation object missing authData (key 2).");
             }
 
-            return ParseAuthDataForArkgSeed(authData);
+            return authData;
         }
 
         /// <summary>

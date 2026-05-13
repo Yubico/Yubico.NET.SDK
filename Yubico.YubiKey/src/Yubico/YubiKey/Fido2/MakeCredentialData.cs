@@ -33,6 +33,7 @@ namespace Yubico.YubiKey.Fido2
     /// </remarks>
     public class MakeCredentialData
     {
+        // CBOR map keys defined in CTAP 2.1 section 6.1.2 (authenticatorMakeCredential response)
         private const int KeyFormat = 1;
         private const int KeyAuthData = 2;
         private const int KeyAttestationStatement = 3;
@@ -40,14 +41,9 @@ namespace Yubico.YubiKey.Fido2
         private const int KeyLargeBlob = 5;
         private const int KeyUnsignedExtensionOutputs = 6;
 
-        private const int MaxAttestationMapCount = 3;
-
-        private const string AlgString = "alg";
-        private const string SigString = "sig";
-        private const string X5cString = "x5c";
-
         /// <summary>
         /// The attestation statement format identifier.
+        /// See <see cref="AttestationFormats"/> for standard format identifiers.
         /// </summary>
         public string Format { get; }
 
@@ -64,6 +60,7 @@ namespace Yubico.YubiKey.Fido2
         
         /// <summary>
         /// The algorithm used to create the attestation statement.
+        /// Defaults to <see cref="CoseAlgorithmIdentifier.ES256"/> if not specified in the attestation object.
         /// </summary>
         public CoseAlgorithmIdentifier AttestationAlgorithm { get; private set; }
 
@@ -192,24 +189,32 @@ namespace Yubico.YubiKey.Fido2
         {
             RawData = cborEncoding;
             var map = new CborMap<int>(RawData);
-            
+
             try
             {
-                Format = map.ReadTextString(KeyFormat);
-                AuthenticatorData = new AuthenticatorData(map.ReadByteString(KeyAuthData));
-                if (AuthenticatorData.CredentialPublicKey is not CoseEcPublicKey
-                    || AuthenticatorData.CredentialPublicKey.Type != CoseKeyType.Ec2
-                    || !map.Contains(KeyAttestationStatement)
-                    || !ReadAttestation(map))
+                // Parse attestation object with full validation
+                var attestationObject = new AttestationObject(RawData, out _, parseAttestationStatement: true);
+
+                // Validate EC2 key type requirement
+                if (attestationObject.AuthenticatorData.CredentialPublicKey is not CoseEcPublicKey
+                    || attestationObject.AuthenticatorData.CredentialPublicKey.Type != CoseKeyType.Ec2)
                 {
                     throw new Ctap2DataException(ExceptionMessages.Ctap2UnknownAttestationFormat);
                 }
-                
+
+                // Backward compatibility: expose properties from AttestationObject
+                Format = attestationObject.Format;
+                AuthenticatorData = attestationObject.AuthenticatorData;
+                AttestationAlgorithm = attestationObject.AttestationAlgorithm ?? CoseAlgorithmIdentifier.ES256;
+                AttestationStatement = attestationObject.AttestationStatement ?? ReadOnlyMemory<byte>.Empty;
+                EncodedAttestationStatement = attestationObject.EncodedAttestationStatement;
+                AttestationCertificates = attestationObject.AttestationCertificates;
+
                 if (map.Contains(KeyEnterpriseAttestation))
                 {
                     EnterpriseAttestation = map.ReadBoolean(KeyEnterpriseAttestation);
                 }
-                
+
                 if (map.Contains(KeyLargeBlob))
                 {
                     LargeBlobKey = map.ReadByteString(KeyLargeBlob);
@@ -229,49 +234,6 @@ namespace Yubico.YubiKey.Fido2
                         ExceptionMessages.InvalidFido2Info),
                     cborException);
             }
-        }
-
-        // We're expecting a Format of "packed", which means the data in the
-        // key/value pair for KeyAttestationStatement is a map with 2 or 3
-        // elements:
-        //    "alg"/-7
-        //    "sig"/byte array
-        //       and possibly
-        //    "x5c"/array of certs.
-        // The byte array is the DER encoding of the ECDSA signature.
-        // If everything works, return true. Otherwise, return false.
-        private bool ReadAttestation(CborMap<int> map)
-        {
-            var attestCborMap = map.ReadMap<string>(KeyAttestationStatement);
-            EncodedAttestationStatement = attestCborMap.Encoded;
-
-            // The attestation statement must be in the expected format and contain the expected keys. If not, return false.
-            if (!Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal) || 
-                !attestCborMap.Contains(AlgString) ||
-                !attestCborMap.Contains(SigString) ||
-                attestCborMap.Count > MaxAttestationMapCount ||
-                (attestCborMap.Count == MaxAttestationMapCount && !attestCborMap.Contains(X5cString)))
-            {
-                return false;
-            }
-
-            AttestationAlgorithm = (CoseAlgorithmIdentifier)attestCborMap.ReadInt32(AlgString);
-            AttestationStatement = attestCborMap.ReadByteString(SigString);
-
-            if (attestCborMap.Contains(X5cString))
-            {
-                var certList = attestCborMap.ReadArray<byte[]>(X5cString);
-                var attestationCertificates = new List<X509Certificate2>(certList.Count);
-
-                for (int index = 0; index < certList.Count; index++)
-                {
-                    attestationCertificates.Add(new X509Certificate2(certList[index]));
-                }
-
-                AttestationCertificates = attestationCertificates;
-            }
-
-            return true;
         }
 
         /// <summary>

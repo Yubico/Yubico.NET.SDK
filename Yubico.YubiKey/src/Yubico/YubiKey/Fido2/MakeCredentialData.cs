@@ -100,7 +100,7 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// <para>
         /// For example: the WebAuthn MakeCredential operation expects an "attestation
-        /// object" be returned. This is a CBOR map containing the "format", "attStmt",
+        /// object" be returned. This is a CBOR map containing the "fmt", "attStmt",
         /// and "authData" - the keys given in string form. The "authData" is the CBOR
         /// encoded <see cref="AuthenticatorData"/> further encoded in Base64URL. The
         /// "attStmt" is the CBOR map that contains the <see cref="AttestationAlgorithm"/>,
@@ -244,7 +244,10 @@ namespace Yubico.YubiKey.Fido2
         {
             var attestCborMap = map.ReadMap<string>(KeyAttestationStatement);
             EncodedAttestationStatement = attestCborMap.Encoded;
-            if (!Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal) || !attestCborMap.Contains(AlgString) ||
+
+            // The attestation statement must be in the expected format and contain the expected keys. If not, return false.
+            if (!Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal) || 
+                !attestCborMap.Contains(AlgString) ||
                 !attestCborMap.Contains(SigString) ||
                 attestCborMap.Count > MaxAttestationMapCount ||
                 (attestCborMap.Count == MaxAttestationMapCount && !attestCborMap.Contains(X5cString)))
@@ -288,8 +291,9 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public PreviewSignGeneratedKey? GetPreviewSignGeneratedKey()
         {
-            if (UnsignedExtensionOutputs is null
-                || !UnsignedExtensionOutputs.TryGetValue(Extensions.PreviewSign, out ReadOnlyMemory<byte> value))
+            if (UnsignedExtensionOutputs is null ||
+                !UnsignedExtensionOutputs.TryGetValue(Extensions.PreviewSign, out var value)
+            )
             {
                 return null;
             }

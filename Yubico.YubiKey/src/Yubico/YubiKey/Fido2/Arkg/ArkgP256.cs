@@ -46,9 +46,6 @@ namespace Yubico.YubiKey.Fido2.Arkg
             byte[] pkBl,
             byte[] pkKem,
             byte[] ikm,
-            byte[] ctx)
-        {
-            return CryptographyProviders.ArkgPrimitivesCreator().Derive(pkBl, pkKem, ikm, ctx);
-        }
+            byte[] ctx) => CryptographyProviders.ArkgPrimitivesCreator().Derive(pkBl, pkKem, ikm, ctx);
     }
 }

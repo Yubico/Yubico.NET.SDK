@@ -201,7 +201,7 @@ namespace Yubico.YubiKey.Fido2
             int? entries = reader.ReadStartMap();
             int count = entries ?? int.MaxValue;
 
-            CoseAlgorithmIdentifier alg = CoseAlgorithmIdentifier.None;
+            var alg = CoseAlgorithmIdentifier.None;
             byte[]? attestationObject = null;
 
             for (int i = 0; i < count; i++)
@@ -238,7 +238,8 @@ namespace Yubico.YubiKey.Fido2
                 keyHandle,
                 pkBl,
                 pkKem,
-                alg);
+                alg,
+                attestationObject);
         }
 
         /// <summary>

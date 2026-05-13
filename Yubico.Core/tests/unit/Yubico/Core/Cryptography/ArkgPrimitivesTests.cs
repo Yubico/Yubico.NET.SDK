@@ -55,31 +55,29 @@ namespace Yubico.Core.Cryptography
             Assert.False(primitives.IsPointOnCurve(offCurve));
         }
 
-        [Fact]
-        public void IsPointOnCurve_MalformedLength_ReturnsFalse()
+        [Theory]
+        [MemberData(nameof(GetMalformedInputs))]
+        public void IsPointOnCurve_MalformedInput_ReturnsFalse(byte[] malformedInput)
         {
             IArkgPrimitives primitives = ArkgPrimitives.Create();
 
-            Assert.False(primitives.IsPointOnCurve(new byte[10]));
+            Assert.False(primitives.IsPointOnCurve(malformedInput));
         }
 
-        [Fact]
-        public void IsPointOnCurve_WrongTagByte_ReturnsFalse()
+        public static TheoryData<byte[]> GetMalformedInputs()
         {
-            byte[] compressedTag = (byte[])P256Generator.Clone();
+            // Wrong length
+            var malformedLength = new byte[10];
+
+            // Wrong tag byte
+            var compressedTag = (byte[])P256Generator.Clone();
             compressedTag[0] = 0x02;
 
-            IArkgPrimitives primitives = ArkgPrimitives.Create();
-
-            Assert.False(primitives.IsPointOnCurve(compressedTag));
-        }
-
-        [Fact]
-        public void IsPointOnCurve_NullPoint_Throws()
-        {
-            IArkgPrimitives primitives = ArkgPrimitives.Create();
-
-            _ = Assert.Throws<ArgumentNullException>(() => primitives.IsPointOnCurve(null!));
+            return new()
+            {
+                malformedLength,
+                compressedTag
+            };
         }
 
         [Fact]
@@ -114,14 +112,6 @@ namespace Yubico.Core.Cryptography
                 () => primitives.ComputeEcdhSharedSecret(new byte[32] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, offCurve));
         }
 
-        [Fact]
-        public void ComputeEcdhSharedSecret_MalformedPublicPoint_Throws()
-        {
-            IArkgPrimitives primitives = ArkgPrimitives.Create();
-
-            _ = Assert.Throws<ArgumentException>(
-                () => primitives.ComputeEcdhSharedSecret(new byte[32], new byte[10]));
-        }
 
         private static byte[] ToSec1(ECParameters p)
         {

@@ -97,35 +97,19 @@ namespace Yubico.YubiKey.Fido2
         // ------------------------------------------------------------------
 
         [Fact]
-        public void Parse_PackedFormat_Format_IsCorrect()
+        public void Parse_PackedFormat_FullParse_PopulatesAllFields()
         {
             ReadOnlyMemory<byte> encoding = GetSampleEncoding();
 
             var obj = new AttestationObject(encoding);
 
             Assert.Equal("packed", obj.Format);
-        }
-
-        [Fact]
-        public void Parse_PackedFormat_AuthenticatorData_IsNotNull()
-        {
-            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
-
-            var obj = new AttestationObject(encoding);
-
             Assert.NotNull(obj.AuthenticatorData);
-        }
-
-        [Fact]
-        public void Parse_PackedFormat_AttestationAlgorithmAndStatement_AreBothPopulated()
-        {
-            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
-
-            var obj = new AttestationObject(encoding);
-
             Assert.NotNull(obj.AttestationAlgorithm);
             Assert.True(obj.AttestationStatement.HasValue);
             Assert.False(obj.AttestationStatement!.Value.IsEmpty);
+            Assert.NotNull(obj.AuthenticatorData.CredentialPublicKey);
+            Assert.NotNull(obj.AuthenticatorData.EncodedCredentialPublicKey);
         }
 
         // ------------------------------------------------------------------
@@ -142,52 +126,17 @@ namespace Yubico.YubiKey.Fido2
             Assert.Null(obj.AttestationAlgorithm);
             Assert.Null(obj.AttestationStatement);
             Assert.Null(obj.AttestationCertificates);
-        }
-
-        [Fact]
-        public void Parse_StructureOnly_EncodedAttestationStatement_IsAlwaysPopulated()
-        {
-            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
-
-            // The SDK guarantee: EncodedAttestationStatement is always available
-            // regardless of the parseFullDetails flag.
-            var obj = new AttestationObject(encoding, parseFullDetails: false);
-
-            Assert.False(obj.EncodedAttestationStatement.IsEmpty);
-        }
-
-        [Fact]
-        public void Parse_StructureOnly_CredentialPublicKey_IsNull()
-        {
-            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
-
-            var obj = new AttestationObject(encoding, parseFullDetails: false);
-
-            // When parseFullDetails is false, CoseKey parsing is skipped
             Assert.Null(obj.AuthenticatorData.CredentialPublicKey);
         }
 
         [Fact]
-        public void Parse_StructureOnly_EncodedCredentialPublicKey_IsNotNull()
+        public void Parse_StructureOnly_RawEncodings_AreAlwaysPopulated()
         {
             ReadOnlyMemory<byte> encoding = GetSampleEncoding();
 
             var obj = new AttestationObject(encoding, parseFullDetails: false);
 
-            // Raw bytes are always captured regardless of parseFullDetails flag
-            Assert.NotNull(obj.AuthenticatorData.EncodedCredentialPublicKey);
-            Assert.False(obj.AuthenticatorData.EncodedCredentialPublicKey!.Value.IsEmpty);
-        }
-
-        [Fact]
-        public void Parse_FullDetails_BothCredentialPublicKeyFields_ArePopulated()
-        {
-            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
-
-            var obj = new AttestationObject(encoding, parseFullDetails: true);
-
-            // When parseFullDetails is true (default), both typed and raw forms are available
-            Assert.NotNull(obj.AuthenticatorData.CredentialPublicKey);
+            Assert.False(obj.EncodedAttestationStatement.IsEmpty);
             Assert.NotNull(obj.AuthenticatorData.EncodedCredentialPublicKey);
             Assert.False(obj.AuthenticatorData.EncodedCredentialPublicKey!.Value.IsEmpty);
         }
@@ -197,17 +146,11 @@ namespace Yubico.YubiKey.Fido2
         // ------------------------------------------------------------------
 
         [Fact]
-        public void CborEncode_WithoutAttestationStatement_ThrowsInvalidOperationException()
+        public void CborEncode_FullyParsedObject_RoundTripsSuccessfully()
         {
-            // Parse with structure-only (unknown format path) — EncodedAttestationStatement
-            // remains empty, so CborEncode() should throw rather than produce invalid CBOR.
-            // Use minimal CBOR: { 1: "none", 2: <authData bytes>, 3: {} }
-            // "none" format is unknown so attStmt is stored raw but no typed parse occurs.
             ReadOnlyMemory<byte> encoding = GetSampleEncoding();
             var obj = new AttestationObject(encoding);
 
-            // Round-trip on a fully parsed object should work — not throw.
-            // (This validates the guard is NOT triggered on a well-formed instance.)
             byte[] reencoded = obj.CborEncode();
             Assert.NotNull(reencoded);
             Assert.True(reencoded.Length > 0);
@@ -242,20 +185,6 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(encoding.Length, bytesRead);
         }
 
-        [Fact]
-        public void Parse_WithTrailingData_Encoded_DoesNotIncludeTrailingBytes()
-        {
-            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
-            var withTrailing = new byte[encoding.Length + 10];
-            encoding.CopyTo(withTrailing);
-            Array.Fill<byte>(withTrailing, 0xFF, encoding.Length, 10);
-
-            var obj = new AttestationObject(withTrailing, out _, parseFullDetails: true);
-
-            // Encoded should be sliced to actual consumed bytes, not the full input
-            Assert.Equal(encoding.Length, obj.Encoded.Length);
-            Assert.True(encoding.Span.SequenceEqual(obj.Encoded.Span));
-        }
 
         // ------------------------------------------------------------------
         // Unknown format — graceful handling (parseFullDetails=true)

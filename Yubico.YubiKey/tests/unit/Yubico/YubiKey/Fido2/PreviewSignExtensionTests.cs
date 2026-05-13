@@ -122,26 +122,17 @@ namespace Yubico.YubiKey.Fido2
         // Flags rule
         // ------------------------------------------------------------------
 
-        [Fact]
-        public void Flags_UserVerification_Produces0b101()
+        [Theory]
+        [InlineData(PreviewSignOptions.RequireUserVerification, 0b101)]
+        [InlineData(PreviewSignOptions.RequireUserPresence, 0b001)]
+        public void EncodeFlags_ProducesExpectedBits(PreviewSignOptions options, int expectedBits)
         {
             byte[] encoded = PreviewSignExtension.EncodeGenerateKeyInput(
                 new[] { CoseAlgorithmIdentifier.Esp256 },
-                flags: PreviewSignOptions.RequireUserVerification);
+                flags: options);
 
             int flags = ReadFlagsFromGenerateKeyInput(encoded);
-            Assert.Equal(0b101, flags);
-        }
-
-        [Fact]
-        public void Flags_UserPresence_Produces0b001()
-        {
-            byte[] encoded = PreviewSignExtension.EncodeGenerateKeyInput(
-                new[] { CoseAlgorithmIdentifier.Esp256 },
-                flags: PreviewSignOptions.RequireUserPresence);
-
-            int flags = ReadFlagsFromGenerateKeyInput(encoded);
-            Assert.Equal(0b001, flags);
+            Assert.Equal(expectedBits, flags);
         }
 
         // ------------------------------------------------------------------
@@ -397,31 +388,6 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteInt32(2);
             cbor.WriteStartArray(1);
             cbor.WriteTextString("credBlob"); // anything BUT previewSign
-            cbor.WriteEndArray();
-
-            cbor.WriteInt32(3);
-            cbor.WriteByteString(aaguid);
-
-            cbor.WriteEndMap();
-            return new AuthenticatorInfo(cbor.Encode());
-        }
-
-        // Builds a synthetic AuthenticatorInfo WITH previewSign in its
-        // Extensions list.
-        private static AuthenticatorInfo BuildAuthenticatorInfoWithPreviewSign()
-        {
-            byte[] aaguid = new byte[16];
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(3);
-
-            cbor.WriteInt32(1);
-            cbor.WriteStartArray(1);
-            cbor.WriteTextString("FIDO_2_1");
-            cbor.WriteEndArray();
-
-            cbor.WriteInt32(2);
-            cbor.WriteStartArray(1);
-            cbor.WriteTextString(Extensions.PreviewSign);
             cbor.WriteEndArray();
 
             cbor.WriteInt32(3);

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Fido2.Arkg;
 using Yubico.YubiKey.Fido2.Cose;
 
@@ -43,6 +44,9 @@ namespace Yubico.YubiKey.Fido2
     /// </remarks>
     public sealed class PreviewSignGeneratedKey
     {
+        private readonly byte[] _blindingPublicKey;
+        private readonly byte[] _kemPublicKey;
+
         /// <summary>
         /// Gets the key handle for the generated credential.
         /// </summary>
@@ -51,12 +55,12 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// Gets the blinding public key component.
         /// </summary>
-        public ReadOnlyMemory<byte> BlindingPublicKey { get; init; }
+        public ReadOnlyMemory<byte> BlindingPublicKey => _blindingPublicKey;
 
         /// <summary>
         /// Gets the KEM (Key Encapsulation Mechanism) public key component.
         /// </summary>
-        public ReadOnlyMemory<byte> KemPublicKey { get; init; }
+        public ReadOnlyMemory<byte> KemPublicKey => _kemPublicKey;
 
         /// <summary>
         /// Gets the algorithm identifier for the derived key.
@@ -84,8 +88,8 @@ namespace Yubico.YubiKey.Fido2
             AttestationObject attestationObject)
         {
             KeyHandle = keyHandle;
-            BlindingPublicKey = blindingPublicKey;
-            KemPublicKey = kemPublicKey;
+            _blindingPublicKey = blindingPublicKey.ToArray();
+            _kemPublicKey = kemPublicKey.ToArray();
             DerivedKeyAlgorithm = derivedKeyAlgorithm;
             AttestationObject = attestationObject;
         }
@@ -129,19 +133,12 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public PreviewSignDerivedKey DerivePublicKey(byte[] ikm, byte[] ctx)
         {
-            if (ikm is null)
-            {
-                throw new ArgumentNullException(nameof(ikm));
-            }
-
-            if (ctx is null)
-            {
-                throw new ArgumentNullException(nameof(ctx));
-            }
+            Guard.IsNotNull(ikm, nameof(ikm));
+            Guard.IsNotNull(ctx, nameof(ctx));
 
             (byte[] derivedPk, byte[] arkgKeyHandle) = ArkgP256.DerivePublicKey(
-                BlindingPublicKey.ToArray(),
-                KemPublicKey.ToArray(),
+                _blindingPublicKey,
+                _kemPublicKey,
                 ikm,
                 ctx);
 

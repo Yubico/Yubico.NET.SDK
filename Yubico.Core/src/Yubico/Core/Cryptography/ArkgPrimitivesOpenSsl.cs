@@ -18,6 +18,7 @@ using System.Numerics;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
+using CommunityToolkit.Diagnostics;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Cryptography
@@ -57,20 +58,17 @@ namespace Yubico.Core.Cryptography
         /// <inheritdoc />
         public bool IsPointOnCurve(byte[] point)
         {
-            if (point is null)
-            {
-                throw new ArgumentNullException(nameof(point));
-            }
+            Guard.IsNotNull(point, nameof(point));
 
             if (point.Length != Sec1UncompressedLength || point[0] != Sec1UncompressedTag)
             {
                 return false;
             }
 
-            byte[] xBytes = new byte[P256CoordinateLength];
-            byte[] yBytes = new byte[P256CoordinateLength];
-            Buffer.BlockCopy(point, 1, xBytes, 0, P256CoordinateLength);
-            Buffer.BlockCopy(point, 1 + P256CoordinateLength, yBytes, 0, P256CoordinateLength);
+            // Extract coordinates using span slicing, then convert to array for P/Invoke
+            ReadOnlySpan<byte> pointSpan = point;
+            byte[] xBytes = pointSpan.Slice(1, P256CoordinateLength).ToArray();
+            byte[] yBytes = pointSpan.Slice(1 + P256CoordinateLength, P256CoordinateLength).ToArray();
 
             using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(
                 ECCurve.NamedCurves.nistP256.ToSslCurveId());
@@ -94,15 +92,8 @@ namespace Yubico.Core.Cryptography
         /// <inheritdoc />
         public byte[] ComputeEcdhSharedSecret(byte[] privateScalar, byte[] publicPoint)
         {
-            if (privateScalar is null)
-            {
-                throw new ArgumentNullException(nameof(privateScalar));
-            }
-
-            if (publicPoint is null)
-            {
-                throw new ArgumentNullException(nameof(publicPoint));
-            }
+            Guard.IsNotNull(privateScalar, nameof(privateScalar));
+            Guard.IsNotNull(publicPoint, nameof(publicPoint));
 
             if (publicPoint.Length != Sec1UncompressedLength || publicPoint[0] != Sec1UncompressedTag)
             {
@@ -111,10 +102,10 @@ namespace Yubico.Core.Cryptography
                     nameof(publicPoint));
             }
 
-            byte[] x = new byte[P256CoordinateLength];
-            byte[] y = new byte[P256CoordinateLength];
-            Buffer.BlockCopy(publicPoint, 1, x, 0, P256CoordinateLength);
-            Buffer.BlockCopy(publicPoint, 1 + P256CoordinateLength, y, 0, P256CoordinateLength);
+            // Extract coordinates using span slicing
+            ReadOnlySpan<byte> pointSpan = publicPoint;
+            byte[] x = pointSpan.Slice(1, P256CoordinateLength).ToArray();
+            byte[] y = pointSpan.Slice(1 + P256CoordinateLength, P256CoordinateLength).ToArray();
 
             var publicKey = new ECParameters
             {
@@ -140,25 +131,10 @@ namespace Yubico.Core.Cryptography
             byte[] ikm,
             byte[] ctx)
         {
-            if (pkBl is null)
-            {
-                throw new ArgumentNullException(nameof(pkBl));
-            }
-
-            if (pkKem is null)
-            {
-                throw new ArgumentNullException(nameof(pkKem));
-            }
-
-            if (ikm is null)
-            {
-                throw new ArgumentNullException(nameof(ikm));
-            }
-
-            if (ctx is null)
-            {
-                throw new ArgumentNullException(nameof(ctx));
-            }
+            Guard.IsNotNull(pkBl, nameof(pkBl));
+            Guard.IsNotNull(pkKem, nameof(pkKem));
+            Guard.IsNotNull(ikm, nameof(ikm));
+            Guard.IsNotNull(ctx, nameof(ctx));
 
             if (ctx.Length > 64)
             {
@@ -177,7 +153,7 @@ namespace Yubico.Core.Cryptography
 
             byte[] ctxPrime = new byte[1 + ctx.Length];
             ctxPrime[0] = (byte)ctx.Length;
-            Buffer.BlockCopy(ctx, 0, ctxPrime, 1, ctx.Length);
+            ctx.CopyTo(ctxPrime.AsSpan(1));
 
             byte[] ctxKem = Concat(Encoding.ASCII.GetBytes("ARKG-Derive-Key-KEM."), ctxPrime);
             byte[] ctxBl = Concat(Encoding.ASCII.GetBytes("ARKG-Derive-Key-BL."), ctxPrime);
@@ -201,16 +177,16 @@ namespace Yubico.Core.Cryptography
         // ARKG-BL: blinding-key arithmetic
         // ---------------------------------------------------------------------
 
-        private static BigInteger BlPrf(byte[] ikmTau, byte[] ctx)
+        private static BigInteger BlPrf(ReadOnlySpan<byte> ikmTau, ReadOnlySpan<byte> ctx)
         {
             byte[] dst = Concat(
                 Encoding.ASCII.GetBytes("ARKG-BL-EC."),
                 Encoding.ASCII.GetBytes(DstExt),
-                ctx);
+                ctx.ToArray());
             return HashToScalar(ikmTau, dst);
         }
 
-        private static byte[] BlBlindPublicKey(byte[] pkBl, BigInteger tau)
+        private static byte[] BlBlindPublicKey(ReadOnlySpan<byte> pkBl, BigInteger tau)
         {
             byte[] tauBytes = ScalarToBytes(tau);
             try
@@ -220,7 +196,7 @@ namespace Yubico.Core.Cryptography
                 using SafeEcPoint pkBlPoint = SecToPoint(group, pkBl);
                 using SafeEcPoint result = NativeMethods.EcPointNew(group);
                 using SafeBigNum tauBn = NativeMethods.BnBinaryToBigNum(tauBytes);
-                using SafeBigNum oneBn = NativeMethods.BnBinaryToBigNum(new byte[] { 0x01 });
+                using SafeBigNum oneBn = NativeMethods.BnBinaryToBigNum([0x01]);
 
                 // r = tau*G + 1*pkBl  =>  r = pkBl + tau*G.
                 int rc = NativeMethods.EcPointMul(
@@ -275,8 +251,7 @@ namespace Yubico.Core.Cryptography
             {
                 using HMACSHA256 hmac = new HMACSHA256(mk);
                 byte[] full = hmac.ComputeHash(ephPk);
-                tag = new byte[16];
-                Buffer.BlockCopy(full, 0, tag, 0, 16);
+                tag = full.AsSpan(0, 16).ToArray();
                 CryptographicOperations.ZeroMemory(full);
             }
             finally
@@ -293,13 +268,14 @@ namespace Yubico.Core.Cryptography
 
             // Ciphertext = MAC tag || ephemeral public key.
             byte[] ciphertext = new byte[tag.Length + ephPk.Length];
-            Buffer.BlockCopy(tag, 0, ciphertext, 0, tag.Length);
-            Buffer.BlockCopy(ephPk, 0, ciphertext, tag.Length, ephPk.Length);
+            Span<byte> ciphertextSpan = ciphertext;
+            tag.CopyTo(ciphertextSpan);
+            ephPk.CopyTo(ciphertextSpan.Slice(tag.Length));
 
             return (shared, ciphertext);
         }
 
-        private static (byte[] pk, BigInteger sk) KemDeriveKeypair(byte[] ikm)
+        private static (byte[] pk, BigInteger sk) KemDeriveKeypair(ReadOnlySpan<byte> ikm)
         {
             byte[] dst = Concat(
                 Encoding.ASCII.GetBytes("ARKG-KEM-ECDH-KG.ARKG-ECDH."),
@@ -342,7 +318,7 @@ namespace Yubico.Core.Cryptography
         // RFC 9380 hash-to-curve helpers (scalar variant only)
         // ---------------------------------------------------------------------
 
-        private static BigInteger HashToScalar(byte[] msg, byte[] dst)
+        private static BigInteger HashToScalar(ReadOnlySpan<byte> msg, ReadOnlySpan<byte> dst)
         {
             // P256_L = 48 = ceil((ceil(log2(p)) + k) / 8) with k=128.
             const int L = 48;
@@ -350,12 +326,12 @@ namespace Yubico.Core.Cryptography
 
             // Wide reduction: split into high(16) || low(32), each interpreted big-endian,
             // then result = high * (2^256 mod N) + low (mod N).
-            BigInteger high = BytesToBigIntBE(uniform, 0, 16);
-            BigInteger low = BytesToBigIntBE(uniform, 16, 32);
+            BigInteger high = BytesToBigIntBE(uniform.AsSpan(0, 16));
+            BigInteger low = BytesToBigIntBE(uniform.AsSpan(16, 32));
             return Mod((high * TwoPow256ModN) + low, N);
         }
 
-        private static byte[] ExpandMessageXmd(byte[] msg, byte[] dst, int lenInBytes)
+        private static byte[] ExpandMessageXmd(ReadOnlySpan<byte> msg, ReadOnlySpan<byte> dst, int lenInBytes)
         {
             const int BInBytes = 32;
             const int SInBytes = 64;
@@ -367,13 +343,13 @@ namespace Yubico.Core.Cryptography
             }
 
             byte[] dstPrime = new byte[dst.Length + 1];
-            Buffer.BlockCopy(dst, 0, dstPrime, 0, dst.Length);
+            dst.CopyTo(dstPrime);
             dstPrime[dst.Length] = (byte)dst.Length;
 
             byte[] zPad = new byte[SInBytes];
-            byte[] lIBStr = { (byte)((lenInBytes >> 8) & 0xFF), (byte)(lenInBytes & 0xFF) };
+            byte[] lIBStr = [(byte)((lenInBytes >> 8) & 0xFF), (byte)(lenInBytes & 0xFF)];
 
-            byte[] msgPrime = Concat(zPad, msg, lIBStr, new byte[] { 0x00 }, dstPrime);
+            byte[] msgPrime = Concat(zPad, msg.ToArray(), lIBStr, [0x00], dstPrime);
 
             byte[][] bVals = new byte[ell + 1][];
             using (SHA256 sha = SHA256.Create())
@@ -383,29 +359,30 @@ namespace Yubico.Core.Cryptography
 
             using (SHA256 sha = SHA256.Create())
             {
-                byte[] input = Concat(bVals[0], new byte[] { 0x01 }, dstPrime);
+                byte[] input = Concat(bVals[0], [0x01], dstPrime);
                 bVals[1] = sha.ComputeHash(input);
             }
 
+            Span<byte> xored = stackalloc byte[BInBytes];
             for (int i = 2; i <= ell; i++)
             {
-                byte[] xored = new byte[BInBytes];
                 for (int j = 0; j < BInBytes; j++)
                 {
                     xored[j] = (byte)(bVals[0][j] ^ bVals[i - 1][j]);
                 }
 
                 using SHA256 sha = SHA256.Create();
-                byte[] input = Concat(xored, new byte[] { (byte)i }, dstPrime);
+                byte[] input = Concat(xored.ToArray(), [(byte)i], dstPrime);
                 bVals[i] = sha.ComputeHash(input);
             }
 
             byte[] result = new byte[lenInBytes];
+            Span<byte> resultSpan = result;
             int offset = 0;
             for (int i = 1; i <= ell && offset < lenInBytes; i++)
             {
                 int copy = Math.Min(BInBytes, lenInBytes - offset);
-                Buffer.BlockCopy(bVals[i], 0, result, offset, copy);
+                bVals[i].AsSpan(0, copy).CopyTo(resultSpan.Slice(offset));
                 offset += copy;
             }
 
@@ -438,15 +415,15 @@ namespace Yubico.Core.Cryptography
             return be;
         }
 
-        private static BigInteger BytesToBigIntBE(byte[] bytes, int offset, int length)
+        private static BigInteger BytesToBigIntBE(ReadOnlySpan<byte> bytes)
         {
-            byte[] padded = new byte[length + 1];
-            for (int i = 0; i < length; i++)
+            byte[] padded = new byte[bytes.Length + 1];
+            for (int i = 0; i < bytes.Length; i++)
             {
-                padded[length - 1 - i] = bytes[offset + i];
+                padded[bytes.Length - 1 - i] = bytes[i];
             }
 
-            // padded[length] = 0 by default — explicit positive sign.
+            // padded[bytes.Length] = 0 by default — explicit positive sign.
             return new BigInteger(padded);
         }
 
@@ -461,12 +438,10 @@ namespace Yubico.Core.Cryptography
             return r;
         }
 
-        private static SafeEcPoint SecToPoint(SafeEcGroup group, byte[] sec1)
+        private static SafeEcPoint SecToPoint(SafeEcGroup group, ReadOnlySpan<byte> sec1)
         {
-            byte[] x = new byte[P256CoordinateLength];
-            byte[] y = new byte[P256CoordinateLength];
-            Buffer.BlockCopy(sec1, 1, x, 0, P256CoordinateLength);
-            Buffer.BlockCopy(sec1, 1 + P256CoordinateLength, y, 0, P256CoordinateLength);
+            byte[] x = sec1.Slice(1, P256CoordinateLength).ToArray();
+            byte[] y = sec1.Slice(1 + P256CoordinateLength, P256CoordinateLength).ToArray();
 
             using SafeBigNum xBn = NativeMethods.BnBinaryToBigNum(x);
             using SafeBigNum yBn = NativeMethods.BnBinaryToBigNum(y);
@@ -497,9 +472,10 @@ namespace Yubico.Core.Cryptography
             _ = NativeMethods.BnBigNumToBinaryWithPadding(yBn, yBytes);
 
             byte[] sec1 = new byte[Sec1UncompressedLength];
+            Span<byte> sec1Span = sec1;
             sec1[0] = Sec1UncompressedTag;
-            Buffer.BlockCopy(xBytes, 0, sec1, 1, P256CoordinateLength);
-            Buffer.BlockCopy(yBytes, 0, sec1, 1 + P256CoordinateLength, P256CoordinateLength);
+            xBytes.CopyTo(sec1Span.Slice(1));
+            yBytes.CopyTo(sec1Span.Slice(1 + P256CoordinateLength));
             return sec1;
         }
 

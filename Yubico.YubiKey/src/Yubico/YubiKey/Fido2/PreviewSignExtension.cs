@@ -128,7 +128,7 @@ namespace Yubico.YubiKey.Fido2
         /// Encode the GetAssertion extension input as a flat map.
         /// {2:keyHandle, 6:tbs, 7:additionalArgs?}.
         /// </summary>
-        public static byte[] EncodeSignByCredentialInput(
+        public static byte[] EncodeSignInput(
             ReadOnlyMemory<byte> keyHandle,
             ReadOnlyMemory<byte> toBeSigned,
             ReadOnlyMemory<byte>? additionalArgs)

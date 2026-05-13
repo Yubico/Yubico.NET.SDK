@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void EncodeSignByCredentialInput_NoArgs_WritesFlatMap()
+        public void EncodeSignInput_NoArgs_WritesFlatMap()
         {
             byte[] keyHandle = { 0xAA, 0xBB };
             byte[] tbs = { 0x11, 0x22, 0x33 };
@@ -56,19 +56,19 @@ namespace Yubico.YubiKey.Fido2
                 0x06, 0x43, 0x11, 0x22, 0x33,
             };
 
-            byte[] actual = PreviewSignExtension.EncodeSignByCredentialInput(keyHandle, tbs, additionalArgs: null);
+            byte[] actual = PreviewSignExtension.EncodeSignInput(keyHandle, tbs, additionalArgs: null);
 
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void EncodeSignByCredentialInput_WithAdditionalArgs_IncludesKey7()
+        public void EncodeSignInput_WithAdditionalArgs_IncludesKey7()
         {
             byte[] keyHandle = { 0xAA };
             byte[] tbs = { 0x11 };
             byte[] additionalArgs = { 0xCC, 0xDD };
 
-            byte[] actual = PreviewSignExtension.EncodeSignByCredentialInput(keyHandle, tbs, additionalArgs);
+            byte[] actual = PreviewSignExtension.EncodeSignInput(keyHandle, tbs, additionalArgs);
 
             // Re-decode and assert structure rather than hand-crafting the
             // canonical bytes — the encoder ordering plus map header tag is

@@ -93,13 +93,11 @@ namespace Yubico.YubiKey.Fido2
                 tbs = sha.ComputeHash(message);
             }
 
-            // sign-by-credential requires an allowList so the YubiKey knows
-            // which credential to use; the firmware rejects the GetAssertion
-            // at protocol level with "option or extension invalid" if it is
-            // missing. Mirror what the upstream demo does: pass the FIDO2
-            // credential ID returned from MakeCredential.
-            byte[] credentialId = credData.AuthenticatorData.CredentialId!.Id.ToArray(); // TODO remove? We are not doing sign by credential
-            GetAssertionParameters.AllowCredential(new CredentialId { Id = credentialId }); // TODO remove? We are not doing sign by credential
+            // previewSign requires an allowList so the YubiKey knows which credential to use;
+            // the firmware rejects the GetAssertion at protocol level with "option or extension
+            // invalid" if it is missing. Pass the FIDO2 credential ID returned from MakeCredential.
+            byte[] credentialId = credData.AuthenticatorData.CredentialId!.Id.ToArray();
+            GetAssertionParameters.AllowCredential(new CredentialId { Id = credentialId });
 
             GetAssertionParameters.AddPreviewSignExtension(
                 derived.DeviceKeyHandle,

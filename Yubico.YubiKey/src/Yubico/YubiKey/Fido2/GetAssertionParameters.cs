@@ -454,12 +454,12 @@ namespace Yubico.YubiKey.Fido2
             if (AllowList is null || AllowList.Count == 0)
             {
                 throw new InvalidOperationException(
-                    "The previewSign extension's sign-by-credential mode requires at least one credential in the allow-list. " +
+                    "The previewSign extension requires at least one credential in the allow-list. " +
                     "Call AllowCredential() with the credential ID returned from MakeCredential before invoking AddPreviewSignExtension().");
             }
 
             byte[] additionalArgs = PreviewSignExtension.EncodeArkgSignArgs(arkgKeyHandle, context);
-            byte[] encoded = PreviewSignExtension.EncodeSignByCredentialInput(
+            byte[] encoded = PreviewSignExtension.EncodeSignInput(
                 deviceKeyHandle,
                 tbs,
                 additionalArgs);

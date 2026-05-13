@@ -193,7 +193,7 @@ namespace Yubico.YubiKey.Fido2
             try
             {
                 // Parse attestation object with full validation
-                var attestationObject = new AttestationObject(RawData, out _, parseAttestationStatement: true);
+                var attestationObject = new AttestationObject(RawData, parseAttestationStatement: true);
 
                 // Validate EC2 key type requirement
                 if (attestationObject.AuthenticatorData.CredentialPublicKey is not CoseEcPublicKey

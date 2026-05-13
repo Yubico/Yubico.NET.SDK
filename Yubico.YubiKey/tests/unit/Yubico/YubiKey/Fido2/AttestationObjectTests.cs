@@ -100,7 +100,7 @@ namespace Yubico.YubiKey.Fido2
         {
             ReadOnlyMemory<byte> encoding = GetSampleEncoding();
 
-            var obj = new AttestationObject(encoding, out _, parseAttestationStatement: true);
+            var obj = new AttestationObject(encoding);
 
             Assert.Equal("packed", obj.Format);
         }
@@ -110,7 +110,7 @@ namespace Yubico.YubiKey.Fido2
         {
             ReadOnlyMemory<byte> encoding = GetSampleEncoding();
 
-            var obj = new AttestationObject(encoding, out _, parseAttestationStatement: true);
+            var obj = new AttestationObject(encoding);
 
             Assert.NotNull(obj.AuthenticatorData);
         }
@@ -120,7 +120,7 @@ namespace Yubico.YubiKey.Fido2
         {
             ReadOnlyMemory<byte> encoding = GetSampleEncoding();
 
-            var obj = new AttestationObject(encoding, out _, parseAttestationStatement: true);
+            var obj = new AttestationObject(encoding);
 
             Assert.NotNull(obj.AttestationAlgorithm);
             Assert.True(obj.AttestationStatement.HasValue);
@@ -136,7 +136,7 @@ namespace Yubico.YubiKey.Fido2
         {
             ReadOnlyMemory<byte> encoding = GetSampleEncoding();
 
-            var obj = new AttestationObject(encoding, out _, parseAttestationStatement: false);
+            var obj = new AttestationObject(encoding, parseAttestationStatement: false);
 
             Assert.Null(obj.AttestationAlgorithm);
             Assert.Null(obj.AttestationStatement);
@@ -150,7 +150,7 @@ namespace Yubico.YubiKey.Fido2
 
             // The SDK guarantee: EncodedAttestationStatement is always available
             // regardless of the parseAttestationStatement flag.
-            var obj = new AttestationObject(encoding, out _, parseAttestationStatement: false);
+            var obj = new AttestationObject(encoding, parseAttestationStatement: false);
 
             Assert.False(obj.EncodedAttestationStatement.IsEmpty);
         }

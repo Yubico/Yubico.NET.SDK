@@ -105,6 +105,26 @@ namespace Yubico.YubiKey.Fido2
         /// Constructs a new instance of <see cref="AttestationObject"/> from CBOR-encoded bytes.
         /// </summary>
         /// <remarks>
+        /// Use this overload when you do not need to know how many bytes were consumed.
+        /// For sequential parsing of multiple CBOR objects from a shared buffer, use the overload
+        /// with <c>out int bytesRead</c>.
+        /// </remarks>
+        /// <param name="cborEncoding">The CBOR encoding of the attestation object.</param>
+        /// <param name="parseAttestationStatement">
+        /// If true (default), performs full parsing with format-specific validation.
+        /// If false, performs structure-only parsing and stores raw bytes.
+        /// </param>
+        /// <exception cref="Ctap2DataException">
+        /// The cborEncoding is not a valid attestation object, or parseAttestationStatement
+        /// is true and the attestation format is unknown or invalid.
+        /// </exception>
+        public AttestationObject(ReadOnlyMemory<byte> cborEncoding, bool parseAttestationStatement = true)
+            : this(cborEncoding, out _, parseAttestationStatement) { }
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="AttestationObject"/> from CBOR-encoded bytes.
+        /// </summary>
+        /// <remarks>
         /// <para>
         /// This constructor decodes an attestation object from CBOR encoding following
         /// the CTAP 2.1 specification (section 6.1.2).

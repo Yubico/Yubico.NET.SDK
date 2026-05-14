@@ -30,13 +30,14 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void EncodeGenerateKeyInput_WritesAlgorithmsAndFlags_AsCanonicalCbor()
         {
-            // Expected CBOR map: {3:[-9], 4:1}.
+            // Expected CBOR map: {3:[-65539], 4:1}.
             // Definite-length 2-entry map = 0xA2; key 3 = 0x03; array(1) = 0x81;
-            // -9 = 0x28; key 4 = 0x04; value 1 = 0x01.
-            byte[] expected = { 0xA2, 0x03, 0x81, 0x28, 0x04, 0x01 };
+            // -65539 (CBOR negative int encoding: 0x3A 0x00 0x01 0x00 0x02);
+            // key 4 = 0x04; value 1 = 0x01.
+            byte[] expected = { 0xA2, 0x03, 0x81, 0x3A, 0x00, 0x01, 0x00, 0x02, 0x04, 0x01 };
 
             byte[] actual = PreviewSignExtension.EncodeGenerateKeyInput(
-                new[] { CoseAlgorithmIdentifier.Esp256 },
+                new[] { CoseAlgorithmIdentifier.ArkgP256Esp256 },
                 flags: PreviewSignOptions.RequireUserPresence);
 
             Assert.Equal(expected, actual);
@@ -128,7 +129,7 @@ namespace Yubico.YubiKey.Fido2
         public void EncodeFlags_ProducesExpectedBits(PreviewSignOptions options, int expectedBits)
         {
             byte[] encoded = PreviewSignExtension.EncodeGenerateKeyInput(
-                new[] { CoseAlgorithmIdentifier.Esp256 },
+                new[] { CoseAlgorithmIdentifier.ArkgP256Esp256 },
                 flags: options);
 
             int flags = ReadFlagsFromGenerateKeyInput(encoded);
@@ -150,7 +151,7 @@ namespace Yubico.YubiKey.Fido2
             _ = Assert.Throws<NotSupportedException>(
                 () => parameters.AddPreviewSignGenerateKeyExtension(
                     info,
-                    new[] { CoseAlgorithmIdentifier.Esp256 }));
+                    new[] { CoseAlgorithmIdentifier.ArkgP256Esp256 }));
         }
 
         [Fact]

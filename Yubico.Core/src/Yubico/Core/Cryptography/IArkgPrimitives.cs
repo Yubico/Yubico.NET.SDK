@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.Core.Cryptography
 {
     /// <summary>
@@ -28,7 +30,7 @@ namespace Yubico.Core.Cryptography
         /// </summary>
         /// <param name="point">The point to verify, in uncompressed SEC1 format.</param>
         /// <returns><c>true</c> if the point is on the curve; otherwise, <c>false</c>.</returns>
-        bool IsPointOnCurve(byte[] point);
+        bool IsPointOnCurve(ReadOnlySpan<byte> point);
 
         /// <summary>
         /// Computes an ECDH shared secret using a private scalar and public point.
@@ -36,7 +38,7 @@ namespace Yubico.Core.Cryptography
         /// <param name="privateScalar">The private scalar value.</param>
         /// <param name="publicPoint">The public point in uncompressed SEC1 format.</param>
         /// <returns>The computed shared secret.</returns>
-        byte[] ComputeEcdhSharedSecret(byte[] privateScalar, byte[] publicPoint);
+        byte[] ComputeEcdhSharedSecret(ReadOnlySpan<byte> privateScalar, ReadOnlySpan<byte> publicPoint);
 
         /// <summary>
         /// Derives a public key and ARKG key handle using the ARKG-P256 algorithm.
@@ -69,9 +71,9 @@ namespace Yubico.Core.Cryptography
         /// and the ARKG key handle (to be passed to the YubiKey during signing).
         /// </returns>
         (byte[] derivedPk, byte[] arkgKeyHandle) Derive(
-            byte[] pkBl,
-            byte[] pkKem,
-            byte[] ikm,
-            byte[] ctx);
+            ReadOnlySpan<byte> pkBl,
+            ReadOnlySpan<byte> pkKem,
+            ReadOnlySpan<byte> ikm,
+            ReadOnlySpan<byte> ctx);
     }
 }

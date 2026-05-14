@@ -407,7 +407,7 @@ namespace Yubico.YubiKey.Fido2
         /// <para>
         /// The <paramref name="deviceKeyHandle"/>, <paramref name="arkgKeyHandle"/>,
         /// and <paramref name="context"/> should be obtained by calling
-        /// <see cref="PreviewSignGeneratedKey.DerivePublicKey"/> on the generated
+        /// <see cref="PreviewSignGeneratedKey.DerivePublicKey(byte[], byte[])"/> on the generated
         /// key material from the original credential creation.
         /// </para>
         /// <para>
@@ -418,14 +418,14 @@ namespace Yubico.YubiKey.Fido2
         /// <para>
         /// After the assertion succeeds, retrieve the signature using
         /// <see cref="AuthenticatorData.GetPreviewSignSignature"/> and verify it
-        /// with <see cref="PreviewSignDerivedKey.VerifySignature"/>.
+        /// with <see cref="PreviewSignDerivedKey.VerifySignature(byte[], byte[])"/>.
         /// </para>
         /// </remarks>
         /// <param name="deviceKeyHandle">
         /// The device key handle from the original registration (credential ID).
         /// </param>
         /// <param name="arkgKeyHandle">
-        /// The ARKG key handle obtained from <see cref="PreviewSignGeneratedKey.DerivePublicKey"/>.
+        /// The ARKG key handle obtained from <see cref="PreviewSignGeneratedKey.DerivePublicKey(byte[], byte[])"/>.
         /// </param>
         /// <param name="context">
         /// The context string used during key derivation.

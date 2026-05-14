@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Fido2
     /// <para>
     /// This class contains the key handle and public key components needed to
     /// perform offline ARKG (Asynchronous Remote Key Generation) key derivation
-    /// via <see cref="DerivePublicKey"/>.
+    /// via <see cref="DerivePublicKey(byte[], byte[])"/>.
     /// </para>
     /// <para>
     /// Instances of this class are obtained by calling
@@ -113,7 +113,7 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="PreviewSignDerivedKey"/> to
         /// <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.
         /// The YubiKey will produce a signature that can be verified using
-        /// <see cref="PreviewSignDerivedKey.VerifySignature"/>.
+        /// <see cref="PreviewSignDerivedKey.VerifySignature(byte[], byte[])"/>.
         /// </para>
         /// </remarks>
         /// <param name="ikm">
@@ -136,6 +136,45 @@ namespace Yubico.YubiKey.Fido2
             Guard.IsNotNull(ikm, nameof(ikm));
             Guard.IsNotNull(ctx, nameof(ctx));
 
+            return DerivePublicKey((ReadOnlySpan<byte>)ikm, (ReadOnlySpan<byte>)ctx);
+        }
+
+        /// <summary>
+        /// Derives a public key using the ARKG-P256 algorithm.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method performs offline key derivation using the ARKG-P256 algorithm.
+        /// The derived public key can be used to verify signatures created by the
+        /// YubiKey when provided with the corresponding ARKG key handle and context.
+        /// </para>
+        /// <para>
+        /// Multiple independent public keys can be derived from the same generated
+        /// key by using different context strings. Each context produces a unique
+        /// derived key pair.
+        /// </para>
+        /// <para>
+        /// To use the derived key for signing, pass the returned
+        /// <see cref="PreviewSignDerivedKey"/> to
+        /// <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.
+        /// The YubiKey will produce a signature that can be verified using
+        /// <see cref="PreviewSignDerivedKey.VerifySignature(byte[], byte[])"/>.
+        /// </para>
+        /// </remarks>
+        /// <param name="ikm">
+        /// Input keying material for HKDF derivation. This should be random data
+        /// unique to the derivation context.
+        /// </param>
+        /// <param name="ctx">
+        /// Context string for domain separation. Different contexts produce
+        /// different derived keys from the same input keying material.
+        /// </param>
+        /// <returns>
+        /// A <see cref="PreviewSignDerivedKey"/> containing the derived public key,
+        /// ARKG key handle, device key handle, and context.
+        /// </returns>
+        public PreviewSignDerivedKey DerivePublicKey(ReadOnlySpan<byte> ikm, ReadOnlySpan<byte> ctx)
+        {
             (byte[] derivedPk, byte[] arkgKeyHandle) = ArkgP256.DerivePublicKey(
                 _blindingPublicKey,
                 _kemPublicKey,
@@ -146,7 +185,7 @@ namespace Yubico.YubiKey.Fido2
                 derivedPk,
                 arkgKeyHandle,
                 KeyHandle,
-                ctx);
+                ctx.ToArray());
         }
     }
 }

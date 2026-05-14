@@ -74,6 +74,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </summary>
         RS256 = -257,
 
+        // Cross-ref: python-fido2 cose.py:391 (ESP256_SPLIT_ARKG_PLACEHOLDER), draft-bradleylundberg-cfrg-arkg-10 §8.3
         /// <summary>
         /// ARKG-P256 key derivation with ESP256 signing. Used in two places for the
         /// previewSign extension: (1) the algorithms array passed to

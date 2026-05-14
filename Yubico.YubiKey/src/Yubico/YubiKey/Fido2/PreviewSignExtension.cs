@@ -45,9 +45,11 @@ namespace Yubico.YubiKey.Fido2
     /// </remarks>
     internal static class PreviewSignExtension
     {
+        // Cross-ref: yubikit-swift, python-fido2, Rust, JS.
         /// <summary>CTAP key on the MakeCredential RESPONSE map carrying unsigned extension outputs.</summary>
         internal const int CtapUnsignedExtensionOutputsKey = 6;
 
+        // Cross-ref: yubikit-swift release/1.3.0 PreviewSign.swift, python-fido2 extensions.py:670-810
         /// <summary>Map keys used by the MakeCredential previewSign input AND signed output.</summary>
         internal enum MakeCredentialKey
         {
@@ -111,6 +113,7 @@ namespace Yubico.YubiKey.Fido2
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(3);
 
+            // Cross-ref: python-fido2 cose.py:391 (-65539), Rust hid-test main.rs:28, JS test-page index.html:555
             cbor.WriteInt32(3);
             cbor.WriteInt32((int)Cose.CoseAlgorithmIdentifier.ArkgP256Esp256);
 

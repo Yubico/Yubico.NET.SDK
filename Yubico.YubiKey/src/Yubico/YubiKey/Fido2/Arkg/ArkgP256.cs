@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
@@ -41,9 +42,9 @@ namespace Yubico.YubiKey.Fido2.Arkg
         /// (65 bytes) and the ARKG key handle to send to the authenticator.
         /// </returns>
         public static (byte[] derivedPk, byte[] arkgKeyHandle) DerivePublicKey(
-            byte[] pkBl,
-            byte[] pkKem,
-            byte[] ikm,
-            byte[] ctx) => CryptographyProviders.ArkgPrimitivesCreator().Derive(pkBl, pkKem, ikm, ctx);
+            ReadOnlySpan<byte> pkBl,
+            ReadOnlySpan<byte> pkKem,
+            ReadOnlySpan<byte> ikm,
+            ReadOnlySpan<byte> ctx) => CryptographyProviders.ArkgPrimitivesCreator().Derive(pkBl, pkKem, ikm, ctx);
     }
 }

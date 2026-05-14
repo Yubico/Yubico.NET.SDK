@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Fido2
@@ -24,13 +25,13 @@ namespace Yubico.YubiKey.Fido2
     /// <para>
     /// This class contains the derived public key and handles needed for
     /// authentication via the previewSign extension. Instances are obtained
-    /// by calling <see cref="PreviewSignGeneratedKey.DerivePublicKey"/> with
+    /// by calling <see cref="PreviewSignGeneratedKey.DerivePublicKey(byte[], byte[])"/> with
     /// application-provided input keying material and a context string.
     /// </para>
     /// <para>
     /// The derived public key can be used to verify signatures produced by the
     /// YubiKey when signing with the corresponding ARKG key handle and context.
-    /// Use <see cref="VerifySignature"/> to validate signatures against this key.
+    /// Use <see cref="VerifySignature(byte[], byte[])"/> to validate signatures against this key.
     /// </para>
     /// <para>
     /// To request a signature from the YubiKey using this derived key, pass the
@@ -113,24 +114,50 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public bool VerifySignature(byte[] message, byte[] signature)
         {
-            if (message is null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
+            Guard.IsNotNull(message, nameof(message));
+            Guard.IsNotNull(signature, nameof(signature));
 
-            if (signature is null)
-            {
-                throw new ArgumentNullException(nameof(signature));
-            }
+            return VerifySignature((ReadOnlySpan<byte>)message, (ReadOnlySpan<byte>)signature);
+        }
 
+        /// <summary>
+        /// Verifies a signature against the derived public key.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method verifies that a signature produced by the YubiKey (obtained via
+        /// <see cref="AuthenticatorData.GetPreviewSignSignature"/>) is valid for the
+        /// given message using the derived public key from ARKG-P256 derivation.
+        /// </para>
+        /// <para>
+        /// The signature must be in DER-encoded ECDSA format, as returned by the
+        /// YubiKey's previewSign extension. The message should be the original raw
+        /// data, not a pre-hashed value. This method computes the SHA-256 hash
+        /// internally before verifying.
+        /// </para>
+        /// </remarks>
+        /// <param name="message">
+        /// The message that was signed. This method will hash the message internally
+        /// before verifying the signature.
+        /// </param>
+        /// <param name="signature">
+        /// The DER-encoded ECDSA signature to verify, as returned by
+        /// <see cref="AuthenticatorData.GetPreviewSignSignature"/>.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the signature is valid for the message using the derived
+        /// public key; otherwise, <c>false</c>.
+        /// </returns>
+        public bool VerifySignature(ReadOnlySpan<byte> message, ReadOnlySpan<byte> signature)
+        {
             // PublicKey is SEC1 uncompressed: 0x04 || X(32) || Y(32).
             if (PublicKey.Length != 65 || PublicKey.Span[0] != 0x04)
             {
                 return false;
             }
 
-            var verifier = new EcdsaVerify(PublicKey);
-            return verifier.VerifyData(message, signature, isStandardSignature: true);
+            using var verifier = new EcdsaVerify(PublicKey);
+            return verifier.VerifyData(message.ToArray(), signature.ToArray(), isStandardSignature: true);
         }
     }
 }

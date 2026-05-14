@@ -39,6 +39,7 @@ namespace Yubico.Core.Cryptography
         private const int Sec1UncompressedLength = 1 + (2 * P256CoordinateLength);
         private const byte Sec1UncompressedTag = 0x04;
 
+        // Cross-ref: python-fido2 arkg.py:248,289,360,371; draft-bradleylundberg-cfrg-arkg-09 §5
         private const string DstExt = "ARKG-P256";
 
         // P-256 group order N (SEC2 v2 §2.4.2). Used for scalar reduction mod N.
@@ -56,19 +57,16 @@ namespace Yubico.Core.Cryptography
             CultureInfo.InvariantCulture);
 
         /// <inheritdoc />
-        public bool IsPointOnCurve(byte[] point)
+        public bool IsPointOnCurve(ReadOnlySpan<byte> point)
         {
-            Guard.IsNotNull(point, nameof(point));
-
             if (point.Length != Sec1UncompressedLength || point[0] != Sec1UncompressedTag)
             {
                 return false;
             }
 
             // Extract coordinates using span slicing, then convert to array for P/Invoke
-            ReadOnlySpan<byte> pointSpan = point;
-            byte[] xBytes = pointSpan.Slice(1, P256CoordinateLength).ToArray();
-            byte[] yBytes = pointSpan.Slice(1 + P256CoordinateLength, P256CoordinateLength).ToArray();
+            byte[] xBytes = point.Slice(1, P256CoordinateLength).ToArray();
+            byte[] yBytes = point.Slice(1 + P256CoordinateLength, P256CoordinateLength).ToArray();
 
             using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(
                 ECCurve.NamedCurves.nistP256.ToSslCurveId());
@@ -90,10 +88,10 @@ namespace Yubico.Core.Cryptography
         }
 
         /// <inheritdoc />
-        public byte[] ComputeEcdhSharedSecret(byte[] privateScalar, byte[] publicPoint)
+        public byte[] ComputeEcdhSharedSecret(ReadOnlySpan<byte> privateScalar, ReadOnlySpan<byte> publicPoint)
         {
-            Guard.IsNotNull(privateScalar, nameof(privateScalar));
-            Guard.IsNotNull(publicPoint, nameof(publicPoint));
+            Guard.HasSizeGreaterThan(privateScalar, 0, nameof(privateScalar));
+            Guard.HasSizeGreaterThan(publicPoint, 0, nameof(publicPoint));
 
             if (publicPoint.Length != Sec1UncompressedLength || publicPoint[0] != Sec1UncompressedTag)
             {
@@ -103,9 +101,8 @@ namespace Yubico.Core.Cryptography
             }
 
             // Extract coordinates using span slicing
-            ReadOnlySpan<byte> pointSpan = publicPoint;
-            byte[] x = pointSpan.Slice(1, P256CoordinateLength).ToArray();
-            byte[] y = pointSpan.Slice(1 + P256CoordinateLength, P256CoordinateLength).ToArray();
+            byte[] x = publicPoint.Slice(1, P256CoordinateLength).ToArray();
+            byte[] y = publicPoint.Slice(1 + P256CoordinateLength, P256CoordinateLength).ToArray();
 
             var publicKey = new ECParameters
             {
@@ -121,20 +118,20 @@ namespace Yubico.Core.Cryptography
                 throw new SecurityException("Public point is not on the P-256 curve.");
             }
 
-            return EcdhPrimitives.Create().ComputeSharedSecret(publicKey, privateScalar);
+            return EcdhPrimitives.Create().ComputeSharedSecret(publicKey, privateScalar.ToArray());
         }
 
         /// <inheritdoc />
         public (byte[] derivedPk, byte[] arkgKeyHandle) Derive(
-            byte[] pkBl,
-            byte[] pkKem,
-            byte[] ikm,
-            byte[] ctx)
+            ReadOnlySpan<byte> pkBl,
+            ReadOnlySpan<byte> pkKem,
+            ReadOnlySpan<byte> ikm,
+            ReadOnlySpan<byte> ctx)
         {
-            Guard.IsNotNull(pkBl, nameof(pkBl));
-            Guard.IsNotNull(pkKem, nameof(pkKem));
-            Guard.IsNotNull(ikm, nameof(ikm));
-            Guard.IsNotNull(ctx, nameof(ctx));
+            Guard.HasSizeGreaterThan(pkBl, 0, nameof(pkBl));
+            Guard.HasSizeGreaterThan(pkKem, 0, nameof(pkKem));
+            Guard.HasSizeGreaterThan(ikm, 0, nameof(ikm));
+            Guard.HasSizeGreaterThan(ctx, 0, nameof(ctx));
 
             if (ctx.Length > 64)
             {
@@ -222,7 +219,7 @@ namespace Yubico.Core.Cryptography
         // ARKG-KEM: ECDH-KEM with HMAC wrapper
         // ---------------------------------------------------------------------
 
-        private (byte[] shared, byte[] ciphertext) HmacKemEncaps(byte[] pkKem, byte[] ikm, byte[] ctx)
+        private (byte[] shared, byte[] ciphertext) HmacKemEncaps(ReadOnlySpan<byte> pkKem, ReadOnlySpan<byte> ikm, ReadOnlySpan<byte> ctx)
         {
             byte[] dstAug = Encoding.ASCII.GetBytes("ARKG-ECDH.ARKG-P256");
 
@@ -243,7 +240,7 @@ namespace Yubico.Core.Cryptography
             byte[] macInfo = Concat(
                 Encoding.ASCII.GetBytes("ARKG-KEM-HMAC-mac."),
                 dstAug,
-                ctx);
+                ctx.ToArray());
             byte[] mk = HkdfUtilities.DeriveKey(kPrime, salt: ReadOnlySpan<byte>.Empty, contextInfo: macInfo, length: 32).ToArray();
 
             byte[] tag;
@@ -262,7 +259,7 @@ namespace Yubico.Core.Cryptography
             byte[] sharedInfo = Concat(
                 Encoding.ASCII.GetBytes("ARKG-KEM-HMAC-shared."),
                 dstAug,
-                ctx);
+                ctx.ToArray());
             byte[] shared = HkdfUtilities.DeriveKey(kPrime, salt: ReadOnlySpan<byte>.Empty, contextInfo: sharedInfo, length: kPrime.Length).ToArray();
             CryptographicOperations.ZeroMemory(kPrime);
 
@@ -318,6 +315,7 @@ namespace Yubico.Core.Cryptography
         // RFC 9380 hash-to-curve helpers (scalar variant only)
         // ---------------------------------------------------------------------
 
+        // RFC 9380 §5.4 hash_to_field (scalar variant)
         private static BigInteger HashToScalar(ReadOnlySpan<byte> msg, ReadOnlySpan<byte> dst)
         {
             // P256_L = 48 = ceil((ceil(log2(p)) + k) / 8) with k=128.

@@ -745,7 +745,7 @@ namespace Yubico.YubiKey.Fido2
         /// <para>
         /// After credential creation, retrieve the generated key material using
         /// <see cref="MakeCredentialData.GetPreviewSignGeneratedKey"/>, then use
-        /// <see cref="PreviewSignGeneratedKey.DerivePublicKey"/> to derive public
+        /// <see cref="PreviewSignGeneratedKey.DerivePublicKey(byte[], byte[])"/> to derive public
         /// keys offline. The YubiKey can sign with any derived key when provided
         /// the corresponding ARKG key handle and context via
         /// <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.

@@ -267,7 +267,7 @@ namespace Yubico.Core.Cryptography
             byte[] ciphertext = new byte[tag.Length + ephPk.Length];
             Span<byte> ciphertextSpan = ciphertext;
             tag.CopyTo(ciphertextSpan);
-            ephPk.CopyTo(ciphertextSpan.Slice(tag.Length));
+            ephPk.CopyTo(ciphertextSpan[tag.Length..]);
 
             return (shared, ciphertext);
         }
@@ -380,7 +380,7 @@ namespace Yubico.Core.Cryptography
             for (int i = 1; i <= ell && offset < lenInBytes; i++)
             {
                 int copy = Math.Min(BInBytes, lenInBytes - offset);
-                bVals[i].AsSpan(0, copy).CopyTo(resultSpan.Slice(offset));
+                bVals[i].AsSpan(0, copy).CopyTo(resultSpan[offset..]);
                 offset += copy;
             }
 
@@ -472,8 +472,8 @@ namespace Yubico.Core.Cryptography
             byte[] sec1 = new byte[Sec1UncompressedLength];
             Span<byte> sec1Span = sec1;
             sec1[0] = Sec1UncompressedTag;
-            xBytes.CopyTo(sec1Span.Slice(1));
-            yBytes.CopyTo(sec1Span.Slice(1 + P256CoordinateLength));
+            xBytes.CopyTo(sec1Span[1..]);
+            yBytes.CopyTo(sec1Span[(1 + P256CoordinateLength)..]);
             return sec1;
         }
 

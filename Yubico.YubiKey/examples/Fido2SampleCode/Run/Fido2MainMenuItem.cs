@@ -45,6 +45,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         Reset = 26,
 
-        Exit = 27,
+        AuthenticatorSelection = 28,
+
+        Exit = 29,
     }
 }

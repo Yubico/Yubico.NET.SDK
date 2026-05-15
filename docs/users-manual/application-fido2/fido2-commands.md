@@ -40,6 +40,7 @@ what information is needed from the caller for that command.
 * [Enumerate RPs Get Next RP](#enumerate-rps-get-next-rp)
 * [Get Large Blob](#get-large-blob)
 * [Set Large Blob](#set-large-blob)
+* [Authenticator selection](#authenticator-selection)
 * [Reset](#reset)
 
 ___
@@ -611,6 +612,37 @@ None
 ### APDU
 
 [Technical APDU Details](apdu/set-large-blob.md)
+___
+
+## Authenticator selection
+
+Request user presence (UP) so the user can indicate _which_ authenticator to use, for example when more than one YubiKey is connected.
+
+### Available
+
+All YubiKey with the FIDO2 application having CTAP version `2.2` or greater.
+
+### SDK classes
+
+[Fido2Session.TryAuthenticatorSelection](xref:Yubico.YubiKey.Fido2.Fido2Session.TryAuthenticatorSelection%2a)
+
+[AuthenticatorSelectionCommand](xref:Yubico.YubiKey.Fido2.Commands.AuthenticatorSelectionCommand)
+
+[AuthenticatorSelectionResponse](xref:Yubico.YubiKey.Fido2.Commands.AuthenticatorSelectionResponse)
+
+For a minimal sample (one or several keys, touch to select), see `Fido2AuthenticatorSelection` in the SDK’s **Fido2SampleCode** example project (`YubiKeyOperations/Fido2AuthenticatorSelection.cs`).
+
+### Input
+
+None.
+
+### Output
+
+None on success.
+
+### APDU
+
+[Technical APDU Details](apdu/authenticator-selection.md)
 ___
 
 ## Reset

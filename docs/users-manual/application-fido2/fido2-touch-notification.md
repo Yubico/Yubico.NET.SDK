@@ -23,8 +23,9 @@ verify their fingerprint on the YubiKey's fingerprint reader (this applies to th
 Bio series only).
 
 In addition, some operations, such as
-[MakeCredential](xref:Yubico.YubiKey.Fido2.Fido2Session.MakeCredential%2a) or
-[GetAssertion](xref:Yubico.YubiKey.Fido2.Fido2Session.GetAssertions%2a), will not complete
+[MakeCredential](xref:Yubico.YubiKey.Fido2.Fido2Session.MakeCredential%2a),
+[GetAssertion](xref:Yubico.YubiKey.Fido2.Fido2Session.GetAssertions%2a), or
+[TryAuthenticatorSelection](xref:Yubico.YubiKey.Fido2.Fido2Session.TryAuthenticatorSelection%2a), will not complete
 until the user touches the contact. For example, a YubiKey will begin an operation, but at
 some point will stop processing until the contact has been touched. Once touched, it will
 finish the operation.

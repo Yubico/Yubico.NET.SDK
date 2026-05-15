@@ -71,6 +71,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 Fido2MainMenuItem.ToggleAlwaysUv => RunToggleAlwaysUv(),
                 Fido2MainMenuItem.SetPinConfig => RunSetPinConfig(),
                 Fido2MainMenuItem.Reset => RunReset(),
+                Fido2MainMenuItem.AuthenticatorSelection => RunAuthenticatorSelection(),
                 _ => RunUnimplementedOperation(),
             };
         }
@@ -84,6 +85,17 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         public static bool RunUnimplementedOperation()
         {
             SampleMenu.WriteMessage(MessageType.Special, 0, "Unimplemented operation");
+            return true;
+        }
+
+        public bool RunAuthenticatorSelection()
+        {
+            _keyCollector.Operation = Fido2KeyCollectorOperation.AuthenticatorSelection;
+
+            _ = Fido2AuthenticatorSelection.Run(
+                _keyCollector.Fido2SampleKeyCollectorDelegate,
+                ref _yubiKeyChosen);
+
             return true;
         }
 

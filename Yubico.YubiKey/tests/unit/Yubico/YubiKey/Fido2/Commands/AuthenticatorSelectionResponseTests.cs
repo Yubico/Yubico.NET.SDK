@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         public void Constructor_GivenInvalidCommand_SetsCtapStatus()
         {
             // CTAP error encoding: SW1=0x6F, SW2=CTAP status byte (see CtapToApduResponse.GetSwForCtapError).
-            short sw = unchecked((short)((0x6F << 8) | (byte)CtapStatus.InvalidCommand)); // InvalidCommand / CTAP1_ERR_INVALID_COMMAND
+            short sw = unchecked((short)((SW1Constants.NoPreciseDiagnosis << 8) | (byte)CtapStatus.InvalidCommand)); // InvalidCommand / CTAP1_ERR_INVALID_COMMAND
             var responseApdu = new ResponseApdu(System.Array.Empty<byte>(), sw);
             var response = new AuthenticatorSelectionResponse(responseApdu);
 
@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         public void Constructor_GivenOperationDenied_UsesSelectionDeniedMessage()
         {
             // Same SW packing as InvalidCommand test; OperationDenied when user presence is refused for selection.
-            short sw = unchecked((short)((0x6F << 8) | (byte)CtapStatus.OperationDenied)); // CTAP2_ERR_OPERATION_DENIED
+            short sw = unchecked((short)((SW1Constants.NoPreciseDiagnosis << 8) | (byte)CtapStatus.OperationDenied)); // CTAP2_ERR_OPERATION_DENIED
             var responseApdu = new ResponseApdu(System.Array.Empty<byte>(), sw);
             var response = new AuthenticatorSelectionResponse(responseApdu);
 

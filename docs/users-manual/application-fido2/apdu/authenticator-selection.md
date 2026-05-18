@@ -47,7 +47,7 @@ If the user does not complete User Presence (UP) in time, the authenticator retu
 
 #### User Presence (UP) denied
 
-CTAP version `2.2` §6.9 states that ifUser Presence (UP) is **explicitly denied**, the authenticator returns `CTAP2_ERR_OPERATION_DENIED` (`0x27`). That is distinct from waiting until a timer expires (see below).
+CTAP version `2.2` §6.9 states that if User Presence (UP) is **explicitly denied**, the authenticator returns `CTAP2_ERR_OPERATION_DENIED` (`0x27`). That is distinct from waiting until a timer expires (see below).
 
 > [!NOTE]
 > On the YubiKey, the only user affordance is **touch to approve** or **no touch** until the operation times out. There is **no separate “deny” or “cancel” control on the security key itself**, so when the user does not complete UP you will usually see **`CTAP2_ERR_USER_ACTION_TIMEOUT`**, not an explicit denial. **`CTAP2_ERR_OPERATION_DENIED`** may be returned if the user engages a platform dialog to cancel the request.

@@ -47,6 +47,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
             SampleMenu.WriteMessage(MessageType.Title, 0, "\nTouch a YubiKey when it blinks.\n");
 
+            bool anyUnsupported = false;
             foreach (IYubiKeyDevice device in keys)
             {
                 try
@@ -59,15 +60,11 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                         return true;
                     }
 
-                    // CTAP INVALID_COMMAND: firmware does not support CTAP 2.2.
+                    // CTAP INVALID_COMMAND: this firmware does not support CTAP 2.2; try the next key.
                     if (response.CtapStatus == CtapStatus.InvalidCommand)
                     {
-                        SampleMenu.WriteMessage(
-                            MessageType.Title,
-                            0,
-                            "\nOne or more YubiKeys does not support CTAP 2.2.\n");
-                        PauseBeforeMainMenu();
-                        return true;
+                        anyUnsupported = true;
+                        continue;
                     }
                 }
                 catch (TimeoutException)
@@ -86,6 +83,16 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                     // Other FIDO2 errors: show and continue to the next YubiKey, if any.
                     SampleMenu.WriteMessage(MessageType.Title, 0, ex.Message + "\n");
                 }
+            }
+
+            if (anyUnsupported)
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title,
+                    0,
+                    "\nOne or more YubiKeys does not support CTAP 2.2.\n");
+                PauseBeforeMainMenu();
+                return true;
             }
 
             SampleMenu.WriteMessage(MessageType.Title, 0, "\nSelection did not complete.\n");

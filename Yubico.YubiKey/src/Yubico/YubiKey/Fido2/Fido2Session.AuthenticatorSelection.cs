@@ -18,7 +18,7 @@ using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
 {
-    // CTAP 2.2 authenticatorSelection (0x0B): User Presence (UP) for single or  multi-YubiKey selection.
+    // CTAP 2.2 authenticatorSelection (0x0B): User Presence (UP) for single or multi-YubiKey selection.
     public sealed partial class Fido2Session
     {
         /// <summary>

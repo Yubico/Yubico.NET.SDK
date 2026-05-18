@@ -620,7 +620,7 @@ Request user presence (UP) so the user can indicate _which_ authenticator to use
 
 ### Available
 
-All YubiKey with the FIDO2 application having CTAP version `2.2` or greater.
+All YubiKeys with the FIDO2 application having CTAP version `2.2` or greater.
 
 ### SDK classes
 

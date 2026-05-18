@@ -24,30 +24,62 @@ limitations under the License. -->
 |:---:|:---:|:--:|:--:|:--:|:----:|:--------:|
 | 00  | 10  | 00 | 00 | 01 |  0B  | (absent) |
 
-The `Ins` byte is `10` (CTAPHID_CBOR). The data is the CTAP command byte `0B` (*authenticatorSelection*) only; there are no CBOR parameters (CTAP version `2.2` §6.9).
+The Ins byte (instruction) is 10, which is the byte for CTAPHID_CBOR.
+That means the command information is in the Data.
+
+The data consists of the CTAP Command Byte. In this case, the CTAP
+Command Byte is `0B`, which is the command "`authenticatorSelection`".
+There are no command parameters.
 
 ### Response APDU info
 
-#### Success
+#### Response APDU for a successful selection
 
-Total Length: 2 (or success with empty CBOR payload after status, depending on transport framing)  
+Total Length: 2\
 Data Length: 0
 
 |   Data    | SW1 | SW2 |
 |:---------:|:---:|:---:|
 | (no data) | 90  | 00  |
 
-#### Command not supported
+#### Response APDU when the command is not supported
 
-If the authenticator does not implement *authenticatorSelection*, it may return `CTAP1_ERR_INVALID_COMMAND` (`0x01`), which the SDK surfaces with SW2 = `01` and SW1 = `6F` (no precise diagnosis), consistent with other CTAP error mappings.
+If the authenticator does not implement `authenticatorSelection`, it
+may return `CTAP1_ERR_INVALID_COMMAND` (`0x01`).
 
-#### User action timeout
+Total Length: 2\
+Data Length: 0
 
-If the user does not complete User Presence (UP) in time, the authenticator returns `CTAP2_ERR_USER_ACTION_TIMEOUT` (`0x2F`).
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 6F  | 01  |
 
-#### User Presence (UP) denied
+#### Response APDU when the YubiKey times out
 
-CTAP version `2.2` §6.9 states that if User Presence (UP) is **explicitly denied**, the authenticator returns `CTAP2_ERR_OPERATION_DENIED` (`0x27`). That is distinct from waiting until a timer expires (see below).
+This happens when the user does not touch the contact within the timeout
+period.
+
+Total Length: 2\
+Data Length: 0
+
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 6F  | 2F  |
+
+#### Response APDU when user presence is denied
+
+This happens when user presence (UP) is explicitly denied.
+
+Total Length: 2\
+Data Length: 0
+
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 6F  | 27  |
 
 > [!NOTE]
-> On the YubiKey, the only user affordance is **touch to approve** or **no touch** until the operation times out. There is **no separate “deny” or “cancel” control on the security key itself**, so when the user does not complete UP you will usually see **`CTAP2_ERR_USER_ACTION_TIMEOUT`**, not an explicit denial. **`CTAP2_ERR_OPERATION_DENIED`** may be returned if the user engages a platform dialog to cancel the request.
+> On the YubiKey, the only user affordance is touch to approve, or no touch until the
+> operation times out. There is no separate deny or cancel control on the security key
+> itself, so when the user does not complete UP you will usually see
+> `CTAP2_ERR_USER_ACTION_TIMEOUT`, not an explicit denial. `CTAP2_ERR_OPERATION_DENIED`
+> may be returned if the user engages a platform dialog to cancel the request.

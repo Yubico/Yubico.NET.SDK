@@ -381,6 +381,8 @@
                   href: application-fido2/apdu/enum-rps-begin.md
                 - name: Enumerate RPs next
                   href: application-fido2/apdu/enum-rps-next.md
+                - name: Authenticator selection
+                  href: application-fido2/apdu/authenticator-selection.md
                 - name: Reset
                   href: application-fido2/apdu/reset.md
 

@@ -259,14 +259,26 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public PreviewSignGeneratedKey? GetPreviewSignGeneratedKey()
         {
-            if (UnsignedExtensionOutputs is null ||
-                !UnsignedExtensionOutputs.TryGetValue(Extensions.PreviewSign, out var value)
-            )
+            CoseAlgorithmIdentifier? signedAlgorithm = null;
+            byte[]? signedValue = null;
+            if (AuthenticatorData.Extensions is not null &&
+                AuthenticatorData.Extensions.TryGetValue(Extensions.PreviewSign, out signedValue))
             {
-                return null;
+                signedAlgorithm = PreviewSignExtension.DecodeGeneratedKeyAlgorithm(signedValue);
             }
 
-            return PreviewSignExtension.DecodeGeneratedKey(value);
+            if (UnsignedExtensionOutputs is not null &&
+                UnsignedExtensionOutputs.TryGetValue(Extensions.PreviewSign, out var unsignedValue))
+            {
+                return PreviewSignExtension.DecodeGeneratedKey(unsignedValue, signedAlgorithm);
+            }
+
+            if (signedValue is not null)
+            {
+                return PreviewSignExtension.DecodeGeneratedKey(signedValue);
+            }
+
+            return null;
         }
 
         /// <summary>

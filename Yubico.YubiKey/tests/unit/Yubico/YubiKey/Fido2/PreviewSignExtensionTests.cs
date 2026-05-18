@@ -110,6 +110,39 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
+        public void ParseGenerateKeyFromAuthenticatorDataExtensions()
+        {
+            byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload();
+            byte[] response = BuildMakeCredentialResponseWithSignedExtension(previewSignPayload);
+
+            var data = new MakeCredentialData(response);
+
+            PreviewSignGeneratedKey? generated = data.GetPreviewSignGeneratedKey();
+
+            Assert.NotNull(generated);
+            Assert.Equal(CoseAlgorithmIdentifier.ArkgP256Esp256, generated!.DerivedKeyAlgorithm);
+            Assert.Equal(65, generated.BlindingPublicKey.Length);
+            Assert.Equal(65, generated.KemPublicKey.Length);
+        }
+
+        [Fact]
+        public void ParseGenerateKeyFromSplitUnsignedAndAuthenticatorDataExtensions()
+        {
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload(algorithm: null);
+            byte[] signedPayload = BuildGeneratedKeyAlgorithmPayload();
+            byte[] response = BuildMakeCredentialResponseWithSplitPreviewSignOutput(unsignedPayload, signedPayload);
+
+            var data = new MakeCredentialData(response);
+
+            PreviewSignGeneratedKey? generated = data.GetPreviewSignGeneratedKey();
+
+            Assert.NotNull(generated);
+            Assert.Equal(CoseAlgorithmIdentifier.ArkgP256Esp256, generated!.DerivedKeyAlgorithm);
+            Assert.Equal(65, generated.BlindingPublicKey.Length);
+            Assert.Equal(65, generated.KemPublicKey.Length);
+        }
+
+        [Fact]
         public void ParseGenerateKey_ReturnsNull_WhenAlgorithmMissing()
         {
             byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(algorithm: null);
@@ -135,6 +168,23 @@ namespace Yubico.YubiKey.Fido2
             byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(
                 CoseAlgorithmIdentifier.ArkgP256Esp256,
                 includeArkgCoseKeyMetadata: false);
+
+            PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
+
+            Assert.NotNull(generated);
+            Assert.Equal(65, generated!.BlindingPublicKey.Length);
+            Assert.Equal(65, generated.KemPublicKey.Length);
+        }
+
+        [Fact]
+        public void ParseGenerateKey_AcceptsHardwareArkgCoseMetadata()
+        {
+            byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(
+                CoseAlgorithmIdentifier.ArkgP256Esp256,
+                arkgKeyType: -65537,
+                arkgAlgorithm: (CoseAlgorithmIdentifier)(-65700),
+                blindingAlgorithm: (int)CoseAlgorithmIdentifier.ES256,
+                kemAlgorithm: -25);
 
             PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
 
@@ -454,14 +504,32 @@ namespace Yubico.YubiKey.Fido2
             return cbor.Encode();
         }
 
+        private static byte[] BuildGeneratedKeyAlgorithmPayload()
+        {
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(1);
+            cbor.WriteInt32(3);
+            cbor.WriteInt32((int)CoseAlgorithmIdentifier.ArkgP256Esp256);
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
         // Builds a minimal-but-valid previewSign generated-key payload:
         //   { 3: ArkgP256Esp256, 7: <inner attestation object> }
         private static byte[] BuildSyntheticGeneratedKeyPayload(
             CoseAlgorithmIdentifier? algorithm = CoseAlgorithmIdentifier.ArkgP256Esp256,
             bool includeArkgCoseKeyMetadata = true,
-            CoseAlgorithmIdentifier arkgAlgorithm = CoseAlgorithmIdentifier.ArkgP256Esp256)
+            int arkgKeyType = (int)CoseKeyType.Ec2,
+            CoseAlgorithmIdentifier arkgAlgorithm = CoseAlgorithmIdentifier.ArkgP256Esp256,
+            int blindingAlgorithm = (int)CoseAlgorithmIdentifier.Esp256,
+            int kemAlgorithm = (int)CoseAlgorithmIdentifier.Esp256)
         {
-            byte[] innerAttestation = BuildInnerAttestationObject(includeArkgCoseKeyMetadata, arkgAlgorithm);
+            byte[] innerAttestation = BuildInnerAttestationObject(
+                includeArkgCoseKeyMetadata,
+                arkgKeyType,
+                arkgAlgorithm,
+                blindingAlgorithm,
+                kemAlgorithm);
 
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(algorithm.HasValue ? 2 : 1);
@@ -479,9 +547,17 @@ namespace Yubico.YubiKey.Fido2
 
         private static byte[] BuildInnerAttestationObject(
             bool includeArkgCoseKeyMetadata = true,
-            CoseAlgorithmIdentifier arkgAlgorithm = CoseAlgorithmIdentifier.ArkgP256Esp256)
+            int arkgKeyType = (int)CoseKeyType.Ec2,
+            CoseAlgorithmIdentifier arkgAlgorithm = CoseAlgorithmIdentifier.ArkgP256Esp256,
+            int blindingAlgorithm = (int)CoseAlgorithmIdentifier.Esp256,
+            int kemAlgorithm = (int)CoseAlgorithmIdentifier.Esp256)
         {
-            byte[] authData = BuildSyntheticAuthDataWithArkgCoseKey(includeArkgCoseKeyMetadata, arkgAlgorithm);
+            byte[] authData = BuildSyntheticAuthDataWithArkgCoseKey(
+                includeArkgCoseKeyMetadata,
+                arkgKeyType,
+                arkgAlgorithm,
+                blindingAlgorithm,
+                kemAlgorithm);
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(2);
             cbor.WriteInt32(1);
@@ -496,14 +572,22 @@ namespace Yubico.YubiKey.Fido2
         // || AAGUID(16) || credIdLen(2) || credId(L) || COSE-encoded ARKG seed.
         private static byte[] BuildSyntheticAuthDataWithArkgCoseKey(
             bool includeArkgCoseKeyMetadata = true,
-            CoseAlgorithmIdentifier arkgAlgorithm = CoseAlgorithmIdentifier.ArkgP256Esp256)
+            int arkgKeyType = (int)CoseKeyType.Ec2,
+            CoseAlgorithmIdentifier arkgAlgorithm = CoseAlgorithmIdentifier.ArkgP256Esp256,
+            int blindingAlgorithm = (int)CoseAlgorithmIdentifier.Esp256,
+            int kemAlgorithm = (int)CoseAlgorithmIdentifier.Esp256)
         {
             byte[] rpIdHash = new byte[32];
             byte flags = 0x40; // AT bit
             byte[] signCount = { 0, 0, 0, 0 };
             byte[] aaguid = new byte[16];
             byte[] credId = { 0xDE, 0xAD, 0xBE, 0xEF };
-            byte[] cose = BuildArkgCoseKey(includeArkgCoseKeyMetadata, arkgAlgorithm);
+            byte[] cose = BuildArkgCoseKey(
+                includeArkgCoseKeyMetadata,
+                arkgKeyType,
+                arkgAlgorithm,
+                blindingAlgorithm,
+                kemAlgorithm);
 
             int credIdLen = credId.Length;
             byte[] result = new byte[32 + 1 + 4 + 16 + 2 + credIdLen + cose.Length];
@@ -526,7 +610,10 @@ namespace Yubico.YubiKey.Fido2
         // ARKG-P256 COSE key: { 1: EC2, 3: ARKG-P256, -1: pkBl_ec2, -2: pkKem_ec2 }
         private static byte[] BuildArkgCoseKey(
             bool includeMetadata = true,
-            CoseAlgorithmIdentifier arkgAlgorithm = CoseAlgorithmIdentifier.ArkgP256Esp256)
+            int arkgKeyType = (int)CoseKeyType.Ec2,
+            CoseAlgorithmIdentifier arkgAlgorithm = CoseAlgorithmIdentifier.ArkgP256Esp256,
+            int blindingAlgorithm = (int)CoseAlgorithmIdentifier.Esp256,
+            int kemAlgorithm = (int)CoseAlgorithmIdentifier.Esp256)
         {
             byte[] x = Enumerable.Repeat((byte)0xAB, 32).ToArray();
             byte[] y = Enumerable.Repeat((byte)0xCD, 32).ToArray();
@@ -536,22 +623,27 @@ namespace Yubico.YubiKey.Fido2
             if (includeMetadata)
             {
                 cbor.WriteInt32(1);
-                cbor.WriteInt32((int)CoseKeyType.Ec2);
+                cbor.WriteInt32(arkgKeyType);
                 cbor.WriteInt32(3);
                 cbor.WriteInt32((int)arkgAlgorithm);
             }
 
             cbor.WriteInt32(-1);
-            WriteEc2Submap(cbor, x, y, includeMetadata);
+            WriteEc2Submap(cbor, x, y, includeMetadata, blindingAlgorithm);
 
             cbor.WriteInt32(-2);
-            WriteEc2Submap(cbor, x, y, includeMetadata);
+            WriteEc2Submap(cbor, x, y, includeMetadata, kemAlgorithm);
 
             cbor.WriteEndMap();
             return cbor.Encode();
         }
 
-        private static void WriteEc2Submap(CborWriter cbor, byte[] x, byte[] y, bool includeMetadata = true)
+        private static void WriteEc2Submap(
+            CborWriter cbor,
+            byte[] x,
+            byte[] y,
+            bool includeMetadata = true,
+            int algorithm = (int)CoseAlgorithmIdentifier.Esp256)
         {
             cbor.WriteStartMap(includeMetadata ? 5 : 2);
             if (includeMetadata)
@@ -559,7 +651,7 @@ namespace Yubico.YubiKey.Fido2
                 cbor.WriteInt32(1);
                 cbor.WriteInt32((int)CoseKeyType.Ec2);
                 cbor.WriteInt32(3);
-                cbor.WriteInt32((int)CoseAlgorithmIdentifier.Esp256);
+                cbor.WriteInt32(algorithm);
                 cbor.WriteInt32(-1);
                 cbor.WriteInt32((int)CoseEcCurve.P256);
             }
@@ -577,8 +669,34 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] hostAuthData = BuildAuthDataWithEs256CredentialPublicKey();
 
+            return BuildMakeCredentialResponse(hostAuthData, includeUnsignedExtensions: true, previewSignPayload);
+        }
+
+        // Build a synthetic MakeCredential response containing authenticator-data
+        // extension outputs with the previewSign payload.
+        private static byte[] BuildMakeCredentialResponseWithSignedExtension(byte[] previewSignPayload)
+        {
+            byte[] hostAuthData = BuildAuthDataWithEs256CredentialPublicKey(previewSignPayload);
+
+            return BuildMakeCredentialResponse(hostAuthData, includeUnsignedExtensions: false, previewSignPayload);
+        }
+
+        private static byte[] BuildMakeCredentialResponseWithSplitPreviewSignOutput(
+            byte[] unsignedPayload,
+            byte[] signedPayload)
+        {
+            byte[] hostAuthData = BuildAuthDataWithEs256CredentialPublicKey(signedPayload);
+
+            return BuildMakeCredentialResponse(hostAuthData, includeUnsignedExtensions: true, unsignedPayload);
+        }
+
+        private static byte[] BuildMakeCredentialResponse(
+            byte[] hostAuthData,
+            bool includeUnsignedExtensions,
+            byte[] previewSignPayload)
+        {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(4);
+            cbor.WriteStartMap(includeUnsignedExtensions ? 4 : 3);
 
             cbor.WriteInt32(1);
             cbor.WriteTextString("packed");
@@ -594,11 +712,14 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteByteString(new byte[] { 0x01 });
             cbor.WriteEndMap();
 
-            cbor.WriteInt32(6);
-            cbor.WriteStartMap(1);
-            cbor.WriteTextString(Extensions.PreviewSign);
-            cbor.WriteEncodedValue(previewSignPayload);
-            cbor.WriteEndMap();
+            if (includeUnsignedExtensions)
+            {
+                cbor.WriteInt32(6);
+                cbor.WriteStartMap(1);
+                cbor.WriteTextString(Extensions.PreviewSign);
+                cbor.WriteEncodedValue(previewSignPayload);
+                cbor.WriteEndMap();
+            }
 
             cbor.WriteEndMap();
             return cbor.Encode();
@@ -606,7 +727,7 @@ namespace Yubico.YubiKey.Fido2
 
         // The host AuthenticatorData ctor requires an Ec2 COSE credential public
         // key (any key works — we just need MakeCredentialData to construct).
-        private static byte[] BuildAuthDataWithEs256CredentialPublicKey()
+        private static byte[] BuildAuthDataWithEs256CredentialPublicKey(byte[]? previewSignPayload = null)
         {
             byte[] x = Enumerable.Repeat((byte)0x11, 32).ToArray();
             byte[] y = Enumerable.Repeat((byte)0x22, 32).ToArray();
@@ -626,11 +747,22 @@ namespace Yubico.YubiKey.Fido2
             coseKey.WriteEndMap();
             byte[] coseEncoded = coseKey.Encode();
 
+            byte[] extensionBytes = Array.Empty<byte>();
+            if (previewSignPayload is not null)
+            {
+                var extensions = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+                extensions.WriteStartMap(1);
+                extensions.WriteTextString(Extensions.PreviewSign);
+                extensions.WriteEncodedValue(previewSignPayload);
+                extensions.WriteEndMap();
+                extensionBytes = extensions.Encode();
+            }
+
             byte[] credId = { 0xCA, 0xFE };
-            byte[] result = new byte[32 + 1 + 4 + 16 + 2 + credId.Length + coseEncoded.Length];
+            byte[] result = new byte[32 + 1 + 4 + 16 + 2 + credId.Length + coseEncoded.Length + extensionBytes.Length];
             int offset = 0;
             offset += 32; // rpIdHash zeros
-            result[offset++] = 0x40; // AT flag
+            result[offset++] = previewSignPayload is null ? (byte)0x40 : (byte)0xC0; // AT flag, optionally ED flag
             offset += 4; // signCount zeros
             offset += 16; // AAGUID zeros
             result[offset++] = 0x00;
@@ -638,6 +770,8 @@ namespace Yubico.YubiKey.Fido2
             Array.Copy(credId, 0, result, offset, credId.Length);
             offset += credId.Length;
             Array.Copy(coseEncoded, 0, result, offset, coseEncoded.Length);
+            offset += coseEncoded.Length;
+            Array.Copy(extensionBytes, 0, result, offset, extensionBytes.Length);
             return result;
         }
 

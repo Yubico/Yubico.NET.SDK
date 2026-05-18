@@ -49,6 +49,8 @@ namespace Yubico.YubiKey.Fido2
         // Cross-ref: yubikit-swift, python-fido2, Rust, JS.
         /// <summary>CTAP key on the MakeCredential RESPONSE map carrying unsigned extension outputs.</summary>
         internal const int CtapUnsignedExtensionOutputsKey = 6;
+        private const int CoseKeyTypeArkgP256 = -65537;
+        private const int CoseAlgorithmArkgP256 = -65700;
 
         // Cross-ref: yubikit-swift release/1.3.0 PreviewSign.swift, python-fido2 extensions.py:670-810
         /// <summary>Map keys used by the MakeCredential previewSign input AND signed output.</summary>
@@ -194,7 +196,42 @@ namespace Yubico.YubiKey.Fido2
         /// inner authData, and the COSE-encoded blinding/KEM public keys from
         /// the inner authData's credentialPublicKey field.
         /// </summary>
-        public static PreviewSignGeneratedKey? DecodeGeneratedKey(ReadOnlyMemory<byte> previewSignValue)
+        public static PreviewSignGeneratedKey? DecodeGeneratedKey(ReadOnlyMemory<byte> previewSignValue) =>
+            DecodeGeneratedKey(previewSignValue, fallbackAlgorithm: null);
+
+        public static CoseAlgorithmIdentifier? DecodeGeneratedKeyAlgorithm(ReadOnlyMemory<byte> previewSignValue)
+        {
+            var reader = new CborReader(previewSignValue, CborConformanceMode.Ctap2Canonical);
+            if (reader.PeekState() != CborReaderState.StartMap)
+            {
+                return null;
+            }
+
+            int? entries = reader.ReadStartMap();
+            int count = entries ?? int.MaxValue;
+            for (int i = 0; i < count; i++)
+            {
+                if (reader.PeekState() == CborReaderState.EndMap)
+                {
+                    break;
+                }
+
+                int key = (int)reader.ReadInt64();
+                if (key == (int)MakeCredentialKey.Algorithm)
+                {
+                    return (CoseAlgorithmIdentifier)reader.ReadInt32();
+                }
+
+                reader.SkipValue();
+            }
+
+            reader.ReadEndMap();
+            return null;
+        }
+
+        public static PreviewSignGeneratedKey? DecodeGeneratedKey(
+            ReadOnlyMemory<byte> previewSignValue,
+            CoseAlgorithmIdentifier? fallbackAlgorithm)
         {
             var reader = new CborReader(previewSignValue, CborConformanceMode.Ctap2Canonical);
             if (reader.PeekState() != CborReaderState.StartMap)
@@ -231,6 +268,11 @@ namespace Yubico.YubiKey.Fido2
             }
 
             reader.ReadEndMap();
+
+            if (alg == CoseAlgorithmIdentifier.None && fallbackAlgorithm.HasValue)
+            {
+                alg = fallbackAlgorithm.Value;
+            }
 
             if (attestationObject is null)
             {
@@ -301,7 +343,8 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// Parse the ARKG-P256 COSE key:
         ///   { 1: kty, 3: alg, -1: pkBl_cose_ec2, -2: pkKem_cose_ec2 }
-        /// where each EC2 sub-map is {1:2, 3:-9, -1:1, -2:x, -3:y}.
+        /// where each EC2 sub-map is {1:2, -1:1, -2:x, -3:y} and can include
+        /// an algorithm identifier chosen by the authenticator.
         /// </summary>
         private static (byte[] pkBl, byte[] pkKem) ParseArkgCoseKey(byte[] coseEncoded)
         {
@@ -324,11 +367,15 @@ namespace Yubico.YubiKey.Fido2
                 long key = reader.ReadInt64();
                 if (key == 1)
                 {
-                    isEc2Key = reader.ReadInt32() == (int)CoseKeyType.Ec2;
+                    int keyType = reader.ReadInt32();
+                    isEc2Key = keyType == (int)CoseKeyType.Ec2 || keyType == CoseKeyTypeArkgP256;
                 }
                 else if (key == 3)
                 {
-                    isArkgP256Key = reader.ReadInt32() == (int)CoseAlgorithmIdentifier.ArkgP256Esp256;
+                    int algorithm = reader.ReadInt32();
+                    isArkgP256Key =
+                        algorithm == (int)CoseAlgorithmIdentifier.ArkgP256Esp256 ||
+                        algorithm == CoseAlgorithmArkgP256;
                 }
                 else if (key == -1)
                 {
@@ -367,7 +414,6 @@ namespace Yubico.YubiKey.Fido2
             int subCount = subEntries ?? int.MaxValue;
 
             bool? isEc2Key = null;
-            bool? isEsp256Key = null;
             bool? isP256Curve = null;
             byte[]? x = null;
             byte[]? y = null;
@@ -385,7 +431,7 @@ namespace Yubico.YubiKey.Fido2
                 }
                 else if (subKey == 3)
                 {
-                    isEsp256Key = reader.ReadInt32() == (int)CoseAlgorithmIdentifier.Esp256;
+                    reader.SkipValue();
                 }
                 else if (subKey == -1)
                 {
@@ -407,10 +453,10 @@ namespace Yubico.YubiKey.Fido2
 
             reader.ReadEndMap();
 
-            if (isEc2Key == false || isEsp256Key == false || isP256Curve == false)
+            if (isEc2Key == false || isP256Curve == false)
             {
                 throw new CryptographicException(
-                    "previewSign ARKG public-key components must be EC2 P-256 ESP256 keys.");
+                    "previewSign ARKG public-key components must be EC2 P-256 keys.");
             }
 
             if (x is null || y is null || x.Length != 32 || y.Length != 32)

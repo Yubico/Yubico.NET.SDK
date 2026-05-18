@@ -449,6 +449,11 @@ namespace Yubico.YubiKey.Fido2
         {
             Guard.IsNotNull(tbs, nameof(tbs));
 
+            if (tbs.Length != 32)
+            {
+                throw new ArgumentException("previewSign requires a 32-byte SHA-256 digest.", nameof(tbs));
+            }
+
             if (AllowList is null || AllowList.Count == 0)
             {
                 throw new InvalidOperationException(

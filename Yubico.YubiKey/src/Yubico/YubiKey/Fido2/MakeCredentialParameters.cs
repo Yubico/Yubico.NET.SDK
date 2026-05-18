@@ -777,6 +777,17 @@ namespace Yubico.YubiKey.Fido2
             Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
             Guard.IsNotNull(algorithms, nameof(algorithms));
 
+            if (algorithms.Length == 0)
+            {
+                throw new ArgumentException("At least one previewSign algorithm is required.", nameof(algorithms));
+            }
+
+            if (flags != PreviewSignOptions.RequireUserPresence &&
+                flags != PreviewSignOptions.RequireUserVerification)
+            {
+                throw new ArgumentOutOfRangeException(nameof(flags));
+            }
+
             if (!authenticatorInfo.IsExtensionSupported(Fido2.Extensions.PreviewSign))
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);

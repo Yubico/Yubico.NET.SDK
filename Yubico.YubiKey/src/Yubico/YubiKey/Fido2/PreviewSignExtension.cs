@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
+using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 
@@ -236,6 +237,11 @@ namespace Yubico.YubiKey.Fido2
                 return null;
             }
 
+            if (alg != CoseAlgorithmIdentifier.ArkgP256Esp256)
+            {
+                return null;
+            }
+
             var attestationObj = new AttestationObject(attestationObject, parseFullDetails: false);
             if (attestationObj.AuthenticatorData.CredentialId is null ||
                 attestationObj.AuthenticatorData.EncodedCredentialPublicKey is null)
@@ -303,6 +309,8 @@ namespace Yubico.YubiKey.Fido2
             int? entries = reader.ReadStartMap();
             int count = entries ?? int.MaxValue;
 
+            bool? isEc2Key = null;
+            bool? isArkgP256Key = null;
             byte[]? pkBl = null;
             byte[]? pkKem = null;
 
@@ -314,7 +322,15 @@ namespace Yubico.YubiKey.Fido2
                 }
 
                 long key = reader.ReadInt64();
-                if (key == -1)
+                if (key == 1)
+                {
+                    isEc2Key = reader.ReadInt32() == (int)CoseKeyType.Ec2;
+                }
+                else if (key == 3)
+                {
+                    isArkgP256Key = reader.ReadInt32() == (int)CoseAlgorithmIdentifier.ArkgP256Esp256;
+                }
+                else if (key == -1)
                 {
                     pkBl = ReadEc2PointAsSec1(reader);
                 }
@@ -330,9 +346,15 @@ namespace Yubico.YubiKey.Fido2
 
             reader.ReadEndMap();
 
+            if (isEc2Key == false || isArkgP256Key == false)
+            {
+                throw new CryptographicException(
+                    "previewSign COSE key must be an EC2 ARKG-P256 key.");
+            }
+
             if (pkBl is null || pkKem is null)
             {
-                throw new System.Security.Cryptography.CryptographicException(
+                throw new CryptographicException(
                     "previewSign COSE key missing pkBl (-1) or pkKem (-2).");
             }
 
@@ -344,6 +366,9 @@ namespace Yubico.YubiKey.Fido2
             int? subEntries = reader.ReadStartMap();
             int subCount = subEntries ?? int.MaxValue;
 
+            bool? isEc2Key = null;
+            bool? isEsp256Key = null;
+            bool? isP256Curve = null;
             byte[]? x = null;
             byte[]? y = null;
             for (int j = 0; j < subCount; j++)
@@ -354,7 +379,19 @@ namespace Yubico.YubiKey.Fido2
                 }
 
                 long subKey = reader.ReadInt64();
-                if (subKey == -2)
+                if (subKey == 1)
+                {
+                    isEc2Key = reader.ReadInt32() == (int)CoseKeyType.Ec2;
+                }
+                else if (subKey == 3)
+                {
+                    isEsp256Key = reader.ReadInt32() == (int)CoseAlgorithmIdentifier.Esp256;
+                }
+                else if (subKey == -1)
+                {
+                    isP256Curve = reader.ReadInt32() == (int)CoseEcCurve.P256;
+                }
+                else if (subKey == -2)
                 {
                     x = reader.ReadByteString();
                 }
@@ -370,9 +407,15 @@ namespace Yubico.YubiKey.Fido2
 
             reader.ReadEndMap();
 
+            if (isEc2Key == false || isEsp256Key == false || isP256Curve == false)
+            {
+                throw new CryptographicException(
+                    "previewSign ARKG public-key components must be EC2 P-256 ESP256 keys.");
+            }
+
             if (x is null || y is null || x.Length != 32 || y.Length != 32)
             {
-                throw new System.Security.Cryptography.CryptographicException(
+                throw new CryptographicException(
                     "previewSign EC2 point coordinates must be 32 bytes each.");
             }
 

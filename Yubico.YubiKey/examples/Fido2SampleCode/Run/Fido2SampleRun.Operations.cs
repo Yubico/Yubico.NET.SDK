@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         public bool RunMenuItem(Fido2MainMenuItem menuItem)
         {
             if (menuItem >= Fido2MainMenuItem.MakeCredential
-                && menuItem < Fido2MainMenuItem.Reset)
+                && menuItem < Fido2MainMenuItem.AuthenticatorSelection)
             {
                 SampleMenu.WriteMessage(
                     MessageType.Title, 0,

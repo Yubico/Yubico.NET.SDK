@@ -40,7 +40,7 @@ what information is needed from the caller for that command.
 * [Enumerate RPs Get Next RP](#enumerate-rps-get-next-rp)
 * [Get Large Blob](#get-large-blob)
 * [Set Large Blob](#set-large-blob)
-* [Authenticator selection](#authenticator-selection)
+* [Authenticator Selection](#authenticator-selection)
 * [Reset](#reset)
 
 ___
@@ -630,15 +630,13 @@ All YubiKeys with the FIDO2 application having CTAP version `2.2` or greater.
 
 [AuthenticatorSelectionResponse](xref:Yubico.YubiKey.Fido2.Commands.AuthenticatorSelectionResponse)
 
-For a minimal sample (one or several keys, touch to select), see `Fido2AuthenticatorSelection` in the SDK’s **Fido2SampleCode** example project (`YubiKeyOperations/Fido2AuthenticatorSelection.cs`).
-
 ### Input
 
-None.
+None
 
 ### Output
 
-None on success.
+None
 
 ### APDU
 

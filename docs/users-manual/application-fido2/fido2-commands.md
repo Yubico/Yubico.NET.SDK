@@ -620,7 +620,7 @@ Request user presence (UP) so the user can indicate _which_ authenticator to use
 
 ### Available
 
-All YubiKeys with the FIDO2 application having CTAP version `2.2` or greater.
+YubiKeys with FIDO2 firmware `5.5.1` or later. The underlying command, `authenticatorSelection` (0x0B), is specified in [CTAP 2.1 §6.9](https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html).
 
 ### SDK classes
 

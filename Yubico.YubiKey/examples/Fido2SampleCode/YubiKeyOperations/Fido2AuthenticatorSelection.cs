@@ -21,7 +21,7 @@ using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {
-    // This file demonstrates CTAP 2.2 authenticatorSelection (0x0B) via
+    // This file demonstrates CTAP 2.1 §6.9 authenticatorSelection (0x0B) via
     // Fido2Session.TryAuthenticatorSelection over USB (HID FIDO). The YubiKey
     // prompts for user presence (touch) by blinking; on success the host can 
     // treat that YubiKey as the chosen authenticator for subsequent commands.
@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                         return true;
                     }
 
-                    // CTAP INVALID_COMMAND: this firmware does not support CTAP 2.2; try the next key.
+                    // CTAP INVALID_COMMAND: this firmware does not support authenticatorSelection (requires 5.5.1+); try the next key.
                     if (response.CtapStatus == CtapStatus.InvalidCommand)
                     {
                         anyUnsupported = true;
@@ -90,7 +90,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 SampleMenu.WriteMessage(
                     MessageType.Title,
                     0,
-                    "\nOne or more YubiKeys does not support CTAP 2.2.\n");
+                    "\nOne or more YubiKeys does not support authenticatorSelection (requires firmware 5.5.1 or later).\n");
                 PauseBeforeMainMenu();
                 return true;
             }

@@ -18,12 +18,12 @@ using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
 {
-    // CTAP 2.2 authenticatorSelection (0x0B): User Presence (UP) for single or multi-YubiKey selection.
+    // CTAP 2.1 §6.9 authenticatorSelection (0x0B): User Presence (UP) for single or multi-YubiKey selection. YubiKey firmware 5.5.1+.
     public sealed partial class Fido2Session
     {
         /// <summary>
-        /// Requests User Presence (UP) on this YubiKey so the user can select it for intended use (CTAP 2.2
-        /// <c>authenticatorSelection</c>).
+        /// Requests User Presence (UP) on this YubiKey so the user can select it for intended use
+        /// (CTAP 2.1 §6.9 <c>authenticatorSelection</c>, command byte 0x0B). Requires YubiKey firmware 5.5.1 or later.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Fido2
         /// <para>
         /// Returns <c>false</c> if the YubiKey returns <see cref="Yubico.YubiKey.Fido2.CtapStatus.InvalidCommand"/> (command
         /// not implemented) or <see cref="Yubico.YubiKey.Fido2.CtapStatus.OperationDenied"/> (user declined). There is no SDK
-        /// firmware gate; behavior depends on the YubiKey's support for CTAP 2.2.
+        /// firmware gate; behavior depends on the YubiKey's firmware version (5.5.1+).
         /// </para>
         /// </remarks>
         /// <param name="response">The response from the YubiKey, including the CTAP status (see <see cref="Commands.Fido2Response.CtapStatus"/>).</param>

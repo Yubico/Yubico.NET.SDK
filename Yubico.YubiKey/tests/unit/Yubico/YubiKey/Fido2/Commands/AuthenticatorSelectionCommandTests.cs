@@ -18,7 +18,7 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    // Unit tests for AuthenticatorSelectionCommand (CTAP 2.2 authenticatorSelection, command byte 0x0B).
+    // Unit tests for AuthenticatorSelectionCommand (CTAP 2.1 §6.9 authenticatorSelection, command byte 0x0B).
     public class AuthenticatorSelectionCommandTests
     {
         [Fact]
@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             var command = new AuthenticatorSelectionCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
-            // Payload is the CTAP command byte only; no CBOR parameters (CTAP 2.2 authenticatorSelection).
+            // Payload is the CTAP command byte only; no CBOR parameters (CTAP 2.1 §6.9 authenticatorSelection).
             byte[] expectedData = new byte[]
             {
                 0x0B, // authenticatorSelection

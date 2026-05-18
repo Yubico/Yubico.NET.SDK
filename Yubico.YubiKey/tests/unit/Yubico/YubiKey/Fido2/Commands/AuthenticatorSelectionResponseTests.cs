@@ -19,7 +19,7 @@ using Yubico.YubiKey.Fido2;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    // Unit tests for AuthenticatorSelectionResponse (CTAP 2.2 authenticatorSelection; partner to AuthenticatorSelectionCommand).
+    // Unit tests for AuthenticatorSelectionResponse (CTAP 2.1 §6.9 authenticatorSelection; partner to AuthenticatorSelectionCommand).
     public class AuthenticatorSelectionResponseTests
     {
         [Fact]

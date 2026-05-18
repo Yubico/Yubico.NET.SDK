@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// </summary>
     /// <remarks>
     /// The partner response class is <see cref="AuthenticatorSelectionResponse"/>.
-    /// Specified in CTAP 2.2 as <c>authenticatorSelection</c> (command byte 0x0B).
+    /// Specified in CTAP 2.1 §6.9 as <c>authenticatorSelection</c> (command byte 0x0B). Supported by YubiKey firmware 5.5.1 and later.
     /// There are no command parameters. Whether the authenticator implements this command
     /// is firmware-specific; unsupported devices typically return <see cref="Yubico.YubiKey.Fido2.CtapStatus.InvalidCommand"/>.
     /// </remarks>

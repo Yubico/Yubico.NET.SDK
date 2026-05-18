@@ -22,7 +22,7 @@ namespace Yubico.Core.Cryptography
     /// cryptographic primitives implementation. The default implementation
     /// uses OpenSSL via P/Invoke through the Yubico.NativeShims library.
     /// </remarks>
-    public static class ArkgPrimitives
+    internal static class ArkgPrimitives
     {
         /// <summary>
         /// Creates the OpenSSL-backed ARKG primitives instance.
@@ -35,11 +35,6 @@ namespace Yubico.Core.Cryptography
         /// <para>
         /// This method returns a new instance on each call. The implementation
         /// is stateless and thread-safe.
-        /// </para>
-        /// <para>
-        /// For testing or custom implementations, applications can replace the
-        /// default factory by setting the <c>ArkgPrimitivesCreator</c> property
-        /// in <c>Yubico.YubiKey.Cryptography.CryptographyProviders</c>.
         /// </para>
         /// </remarks>
         public static IArkgPrimitives Create() => new ArkgPrimitivesOpenSsl();

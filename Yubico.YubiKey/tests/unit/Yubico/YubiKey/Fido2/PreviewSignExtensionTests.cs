@@ -18,6 +18,7 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 using Yubico.YubiKey.Fido2.Cose;
+using Yubico.YubiKey.TestUtilities.Fido2;
 
 namespace Yubico.YubiKey.Fido2
 {

@@ -16,7 +16,7 @@ using System;
 using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.TestUtilities.Fido2
 {
     /// <summary>
     /// Represents a derived public key produced by ARKG-P256 derivation.

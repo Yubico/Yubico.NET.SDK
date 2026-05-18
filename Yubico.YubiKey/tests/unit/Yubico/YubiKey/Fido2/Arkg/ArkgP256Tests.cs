@@ -14,9 +14,10 @@
 
 using System;
 using System.Text;
+using Yubico.Core.Cryptography;
 using Xunit;
 
-namespace Yubico.YubiKey.Fido2.Arkg
+namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
     /// KAT (Known Answer Tests) for ARKG-P256 derivation.
@@ -63,7 +64,7 @@ namespace Yubico.YubiKey.Fido2.Arkg
         [Fact]
         public void DerivePublicKey_AgainstRustKAT_ProducesExpectedPublicKey()
         {
-            (byte[] derivedPk, byte[] arkgKeyHandle) = ArkgP256.DerivePublicKey(PkBl, PkKem, IkmA, CtxA);
+            (byte[] derivedPk, byte[] arkgKeyHandle) = ArkgPrimitives.Create().Derive(PkBl, PkKem, IkmA, CtxA);
 
             Assert.Equal(ExpectedDerivedA, derivedPk);
             Assert.Equal(ExpectedHandleA, arkgKeyHandle);
@@ -72,8 +73,8 @@ namespace Yubico.YubiKey.Fido2.Arkg
         [Fact]
         public void DerivePublicKey_DifferentIkm_ProducesDifferentKeys()
         {
-            (byte[] derivedA, _) = ArkgP256.DerivePublicKey(PkBl, PkKem, IkmA, CtxA);
-            (byte[] derivedB, _) = ArkgP256.DerivePublicKey(PkBl, PkKem, IkmB, CtxA);
+            (byte[] derivedA, _) = ArkgPrimitives.Create().Derive(PkBl, PkKem, IkmA, CtxA);
+            (byte[] derivedB, _) = ArkgPrimitives.Create().Derive(PkBl, PkKem, IkmB, CtxA);
 
             Assert.NotEqual(derivedA, derivedB);
             Assert.Equal(ExpectedDerivedA, derivedA);
@@ -83,8 +84,8 @@ namespace Yubico.YubiKey.Fido2.Arkg
         [Fact]
         public void DerivePublicKey_DifferentCtx_ProducesDifferentKeys()
         {
-            (byte[] derivedA, _) = ArkgP256.DerivePublicKey(PkBl, PkKem, IkmA, CtxA);
-            (byte[] derivedC, _) = ArkgP256.DerivePublicKey(PkBl, PkKem, IkmA, CtxC);
+            (byte[] derivedA, _) = ArkgPrimitives.Create().Derive(PkBl, PkKem, IkmA, CtxA);
+            (byte[] derivedC, _) = ArkgPrimitives.Create().Derive(PkBl, PkKem, IkmA, CtxC);
 
             Assert.NotEqual(derivedA, derivedC);
             Assert.Equal(ExpectedDerivedC, derivedC);

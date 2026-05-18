@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System;
-using CommunityToolkit.Diagnostics;
-using Yubico.YubiKey.Fido2.Arkg;
 using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2
@@ -26,8 +24,9 @@ namespace Yubico.YubiKey.Fido2
     /// <remarks>
     /// <para>
     /// This class contains the key handle and public key components needed to
-    /// perform offline ARKG (Asynchronous Remote Key Generation) key derivation
-    /// via <see cref="DerivePublicKey(byte[], byte[])"/>.
+    /// perform offline ARKG (Asynchronous Remote Key Generation) key derivation.
+    /// Relying-party-side derivation and verification are the consuming
+    /// application's responsibility and are not exposed by this SDK.
     /// </para>
     /// <para>
     /// Instances of this class are obtained by calling
@@ -92,100 +91,6 @@ namespace Yubico.YubiKey.Fido2
             _kemPublicKey = kemPublicKey.ToArray();
             DerivedKeyAlgorithm = derivedKeyAlgorithm;
             AttestationObject = attestationObject;
-        }
-
-        /// <summary>
-        /// Derives a public key using the ARKG-P256 algorithm.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// This method performs offline key derivation using the ARKG-P256 algorithm.
-        /// The derived public key can be used to verify signatures created by the
-        /// YubiKey when provided with the corresponding ARKG key handle and context.
-        /// </para>
-        /// <para>
-        /// Multiple independent public keys can be derived from the same generated
-        /// key by using different context strings. Each context produces a unique
-        /// derived key pair.
-        /// </para>
-        /// <para>
-        /// To use the derived key for signing, pass the returned
-        /// <see cref="PreviewSignDerivedKey"/> to
-        /// <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.
-        /// The YubiKey will produce a signature that can be verified using
-        /// <see cref="PreviewSignDerivedKey.VerifySignature(byte[], byte[])"/>.
-        /// </para>
-        /// </remarks>
-        /// <param name="ikm">
-        /// Input keying material for HKDF derivation. This should be random data
-        /// unique to the derivation context.
-        /// </param>
-        /// <param name="ctx">
-        /// Context string for domain separation. Different contexts produce
-        /// different derived keys from the same input keying material.
-        /// </param>
-        /// <returns>
-        /// A <see cref="PreviewSignDerivedKey"/> containing the derived public key,
-        /// ARKG key handle, device key handle, and context.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// The <paramref name="ikm"/> or <paramref name="ctx"/> is null.
-        /// </exception>
-        public PreviewSignDerivedKey DerivePublicKey(byte[] ikm, byte[] ctx)
-        {
-            Guard.IsNotNull(ikm, nameof(ikm));
-            Guard.IsNotNull(ctx, nameof(ctx));
-
-            return DerivePublicKey((ReadOnlySpan<byte>)ikm, (ReadOnlySpan<byte>)ctx);
-        }
-
-        /// <summary>
-        /// Derives a public key using the ARKG-P256 algorithm.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// This method performs offline key derivation using the ARKG-P256 algorithm.
-        /// The derived public key can be used to verify signatures created by the
-        /// YubiKey when provided with the corresponding ARKG key handle and context.
-        /// </para>
-        /// <para>
-        /// Multiple independent public keys can be derived from the same generated
-        /// key by using different context strings. Each context produces a unique
-        /// derived key pair.
-        /// </para>
-        /// <para>
-        /// To use the derived key for signing, pass the returned
-        /// <see cref="PreviewSignDerivedKey"/> to
-        /// <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.
-        /// The YubiKey will produce a signature that can be verified using
-        /// <see cref="PreviewSignDerivedKey.VerifySignature(byte[], byte[])"/>.
-        /// </para>
-        /// </remarks>
-        /// <param name="ikm">
-        /// Input keying material for HKDF derivation. This should be random data
-        /// unique to the derivation context.
-        /// </param>
-        /// <param name="ctx">
-        /// Context string for domain separation. Different contexts produce
-        /// different derived keys from the same input keying material.
-        /// </param>
-        /// <returns>
-        /// A <see cref="PreviewSignDerivedKey"/> containing the derived public key,
-        /// ARKG key handle, device key handle, and context.
-        /// </returns>
-        public PreviewSignDerivedKey DerivePublicKey(ReadOnlySpan<byte> ikm, ReadOnlySpan<byte> ctx)
-        {
-            (byte[] derivedPk, byte[] arkgKeyHandle) = ArkgP256.DerivePublicKey(
-                _blindingPublicKey,
-                _kemPublicKey,
-                ikm,
-                ctx);
-
-            return new PreviewSignDerivedKey(
-                derivedPk,
-                arkgKeyHandle,
-                KeyHandle,
-                ctx.ToArray());
         }
     }
 }

@@ -358,6 +358,36 @@ namespace Yubico.YubiKey.Fido2.Cbor
             throw new InvalidCastException();
         }
 
+        /// <summary>
+        /// Returns the raw CBOR-encoded bytes of the value for the given key,
+        /// preserving byte-identity from the original encoding. Useful when the value
+        /// must be re-emitted verbatim (e.g., signed attestation statements).
+        /// </summary>
+        /// <param name="key">The key whose encoded value should be retrieved.</param>
+        /// <returns>The byte-identical CBOR encoding of the value.</returns>
+        /// <exception cref="KeyNotFoundException">The key does not exist in the map.</exception>
+        public ReadOnlyMemory<byte> ReadEncodedValue(TKey key)
+        {
+            if (!_dict.ContainsKey(key))
+            {
+                throw new KeyNotFoundException();
+            }
+
+            var reader = new CborReader(Encoded, CborConformanceMode.Ctap2Canonical);
+            _ = reader.ReadStartMap();
+            while (reader.PeekState() != CborReaderState.EndMap)
+            {
+                TKey currentKey = ReadKey<TKey>(reader);
+                if (EqualityComparer<TKey>.Default.Equals(currentKey, key))
+                {
+                    return reader.ReadEncodedValue().ToArray();
+                }
+                reader.SkipValue();
+            }
+
+            throw new KeyNotFoundException();
+        }
+
         private static TReadKey ReadKey<TReadKey>(CborReader cbor)
         {
             if (typeof(TReadKey) == typeof(int))

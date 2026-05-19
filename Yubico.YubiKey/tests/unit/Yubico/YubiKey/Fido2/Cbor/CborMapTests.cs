@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 using Xunit;
 
@@ -177,6 +178,74 @@ namespace Yubico.YubiKey.Fido2.Cbor
             cbor.ReadEndArray();
 
             return isValidOne && isValidTwo;
+        }
+
+        [Fact]
+        public void ReadEncodedValue_ReturnsByteIdenticalSlice()
+        {
+            // Build a CBOR map with key 3 = a nested map
+            var writer = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            writer.WriteStartMap(3);
+
+            // Key 1
+            writer.WriteInt32(1);
+            writer.WriteTextString("test");
+
+            // Key 2
+            writer.WriteInt32(2);
+            writer.WriteByteString(new byte[] { 0x11, 0x22 });
+
+            // Key 3: nested map
+            writer.WriteInt32(3);
+            writer.WriteStartMap(2);
+            writer.WriteTextString("alg");
+            writer.WriteInt32(-7);
+            writer.WriteTextString("sig");
+            writer.WriteByteString(new byte[] { 0xAA, 0xBB, 0xCC });
+            writer.WriteEndMap();
+
+            writer.WriteEndMap();
+            byte[] encoded = writer.Encode();
+
+            // Extract the original key 3 value bytes using CborReader
+            var reader = new CborReader(encoded, CborConformanceMode.Ctap2Canonical);
+            _ = reader.ReadStartMap();
+            ReadOnlyMemory<byte> originalKey3Slice = ReadOnlyMemory<byte>.Empty;
+            while (reader.PeekState() != CborReaderState.EndMap)
+            {
+                int key = reader.ReadInt32();
+                if (key == 3)
+                {
+                    originalKey3Slice = reader.ReadEncodedValue().ToArray();
+                }
+                else
+                {
+                    reader.SkipValue();
+                }
+            }
+
+            // Now use CborMap and verify ReadEncodedValue returns the same bytes
+            var map = new CborMap<int>(encoded);
+            ReadOnlyMemory<byte> retrievedSlice = map.ReadEncodedValue(3);
+
+            Assert.True(retrievedSlice.Span.SequenceEqual(originalKey3Slice.Span),
+                "ReadEncodedValue must return byte-identical slice of the original value");
+        }
+
+        [Fact]
+        public void ReadEncodedValue_MissingKey_ThrowsKeyNotFound()
+        {
+            // Build a simple CBOR map with only key 1
+            var writer = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            writer.WriteStartMap(1);
+            writer.WriteInt32(1);
+            writer.WriteTextString("test");
+            writer.WriteEndMap();
+
+            byte[] encoded = writer.Encode();
+            var map = new CborMap<int>(encoded);
+
+            Assert.Throws<KeyNotFoundException>(() => map.ReadEncodedValue(999));
         }
     }
 }

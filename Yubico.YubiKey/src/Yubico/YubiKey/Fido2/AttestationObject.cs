@@ -213,13 +213,24 @@ namespace Yubico.YubiKey.Fido2
                         Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal))
                     {
                         var attestCborMap = new CborMap<string>(EncodedAttestationStatement);
-                        _ = ParsePackedAttestationStatement(attestCborMap);
+                        if (!ParsePackedAttestationStatement(attestCborMap))
+                        {
+                            throw new Ctap2DataException(ExceptionMessages.Ctap2UnknownAttestationFormat);
+                        }
                     }
                 }
             }
             catch (CborContentException cborException)
             {
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, cborException);
+            }
+            catch (InvalidOperationException invalidOp)
+            {
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, invalidOp);
+            }
+            catch (FormatException formatEx)
+            {
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, formatEx);
             }
         }
 

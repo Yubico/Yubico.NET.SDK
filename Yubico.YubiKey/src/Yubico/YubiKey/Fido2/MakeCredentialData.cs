@@ -198,8 +198,13 @@ namespace Yubico.YubiKey.Fido2
 
             try
             {
+                // Build AttestationObject from a re-encoded CBOR subset containing only keys {1,2,3}.
+                // The full CTAP response may contain additional keys (4-6), but AttestationObject
+                // should only encode the core attestation data per WebAuthn spec.
+                byte[] attestationSubset = BuildAttestationObjectSubset(map);
+
                 // Parse attestation object with full validation
-                AttestationObject = new AttestationObject(RawData, parseFullDetails: true);
+                AttestationObject = new AttestationObject(attestationSubset, parseFullDetails: true);
 
                 // Validate EC2 key type requirement
                 if (AttestationObject.AuthenticatorData.CredentialPublicKey is not CoseEcPublicKey || 
@@ -279,6 +284,43 @@ namespace Yubico.YubiKey.Fido2
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Builds a re-encoded CBOR subset containing only keys {1: fmt, 2: authData, 3: attStmt}
+        /// from the full CTAP MakeCredential response map. This ensures AttestationObject only
+        /// contains the core attestation data per WebAuthn spec, excluding optional keys like
+        /// enterpriseAttestation (4), largeBlobKey (5), and unsignedExtensionOutputs (6).
+        /// </summary>
+        private static byte[] BuildAttestationObjectSubset(CborMap<int> fullResponse)
+        {
+            // Validate all required keys are present
+            foreach (int requiredKey in new[] { KeyFormat, KeyAuthData, KeyAttestationStatement })
+            {
+                if (!fullResponse.Contains(requiredKey))
+                {
+                    throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);
+                }
+            }
+
+            // Build the subset with canonical encoding
+            var writer = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            writer.WriteStartMap(3);
+
+            // Key 1: fmt
+            writer.WriteInt32(KeyFormat);
+            writer.WriteTextString(fullResponse.ReadTextString(KeyFormat));
+
+            // Key 2: authData
+            writer.WriteInt32(KeyAuthData);
+            writer.WriteByteString(fullResponse.ReadByteString(KeyAuthData).Span);
+
+            // Key 3: attStmt - use the preserved encoded value
+            writer.WriteInt32(KeyAttestationStatement);
+            writer.WriteEncodedValue(fullResponse.ReadEncodedValue(KeyAttestationStatement).Span);
+
+            writer.WriteEndMap();
+            return writer.Encode();
         }
 
         /// <summary>

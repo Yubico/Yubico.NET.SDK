@@ -1,0 +1,425 @@
+// Copyright 2025 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
+using System.Formats.Cbor;
+using System.Linq;
+using Xunit;
+
+namespace Yubico.YubiKey.Fido2
+{
+    public class MakeCredentialDataTests
+    {
+        /// <summary>
+        /// ISC-1: AttestationObject.CborEncode() round-trips to the re-encoded {1,2,3} subset bytes,
+        /// NOT to RawData. This test uses a CTAP response that includes key 6 (unsignedExtensionOutputs)
+        /// to verify that the AttestationObject only contains keys 1, 2, and 3.
+        /// </summary>
+        [Fact]
+        public void AttestationObject_CborEncode_OnlyContainsKeys123_NotFullRawData()
+        {
+            byte[] ctapResponse = BuildMakeCredentialResponseWithKey6();
+
+            var data = new MakeCredentialData(ctapResponse);
+
+            // Re-encode the AttestationObject
+            byte[] attestationEncoded = data.AttestationObject.CborEncode();
+
+            // Parse the re-encoded bytes and verify it ONLY has keys 1, 2, 3
+            var reader = new CborReader(attestationEncoded, CborConformanceMode.Ctap2Canonical);
+            int? count = reader.ReadStartMap();
+            Assert.Equal(3, count);
+
+            var keysFound = new System.Collections.Generic.HashSet<int>();
+            for (int i = 0; i < 3; i++)
+            {
+                int key = reader.ReadInt32();
+                keysFound.Add(key);
+                reader.SkipValue();
+            }
+            reader.ReadEndMap();
+
+            Assert.Contains(1, keysFound);  // fmt
+            Assert.Contains(2, keysFound);  // authData
+            Assert.Contains(3, keysFound);  // attStmt
+            Assert.Equal(3, keysFound.Count);
+
+            // Verify the encoded bytes are NOT equal to the original RawData
+            // (because RawData has key 6, but AttestationObject should only have 1,2,3)
+            Assert.NotEqual(ctapResponse, attestationEncoded);
+
+            // Verify byte-identity invariant: AttestationObject.EncodedAttestationStatement
+            // must be byte-identical to the bytes embedded under key 3 of RawData
+            var rawReader = new CborReader(ctapResponse, CborConformanceMode.Ctap2Canonical);
+            _ = rawReader.ReadStartMap();
+            ReadOnlyMemory<byte> originalAttStmt = ReadOnlyMemory<byte>.Empty;
+            while (rawReader.PeekState() != CborReaderState.EndMap)
+            {
+                int key = rawReader.ReadInt32();
+                if (key == 3)  // attStmt
+                {
+                    originalAttStmt = rawReader.ReadEncodedValue().ToArray();
+                }
+                else
+                {
+                    rawReader.SkipValue();
+                }
+            }
+
+            Assert.True(data.AttestationObject.EncodedAttestationStatement.Span.SequenceEqual(originalAttStmt.Span),
+                "EncodedAttestationStatement must be byte-identical to original key 3 value from RawData");
+        }
+
+        /// <summary>
+        /// ISC-2: Constructing MakeCredentialData from a CTAP response whose attStmt has
+        /// format=="packed" but is missing the required 'sig' field throws Ctap2DataException.
+        /// </summary>
+        [Fact]
+        public void MakeCredentialData_PackedAttestationMissingSig_ThrowsCtap2DataException()
+        {
+            byte[] ctapResponse = BuildMakeCredentialResponseWithMalformedPackedAttestation(missingSig: true);
+
+            var ex = Assert.Throws<Ctap2DataException>(() => new MakeCredentialData(ctapResponse));
+
+            // Verify the exception message is appropriate
+            Assert.NotNull(ex.Message);
+        }
+
+        /// <summary>
+        /// ISC-2: Constructing MakeCredentialData from a CTAP response whose attStmt has
+        /// format=="packed" but has an unexpected extra key throws Ctap2DataException.
+        /// </summary>
+        [Fact]
+        public void MakeCredentialData_PackedAttestationWithExtraKey_ThrowsCtap2DataException()
+        {
+            byte[] ctapResponse = BuildMakeCredentialResponseWithMalformedPackedAttestation(extraKey: true);
+
+            var ex = Assert.Throws<Ctap2DataException>(() => new MakeCredentialData(ctapResponse));
+
+            Assert.NotNull(ex.Message);
+        }
+
+        /// <summary>
+        /// ISC-8 anti-regression: Well-formed packed attestation responses still populate
+        /// AttestationCertificates and AttestationAlgorithm correctly.
+        /// </summary>
+        [Fact]
+        public void MakeCredentialData_WellFormedPackedAttestation_PopulatesFieldsCorrectly()
+        {
+            byte[] ctapResponse = BuildMakeCredentialResponseWithValidPackedAttestation();
+
+            var data = new MakeCredentialData(ctapResponse);
+
+            Assert.Equal("packed", data.Format);
+            Assert.False(data.AttestationStatement.IsEmpty);
+            // AttestationAlgorithm should be populated from the packed statement, not the ES256 fallback
+            Assert.Equal(Cose.CoseAlgorithmIdentifier.ES256, data.AttestationAlgorithm);
+            // Certificates may be null in self-attestation, so we don't assert on that
+        }
+
+        /// <summary>
+        /// Test for Finding #1/#4: Response missing key 3 (attStmt) throws Ctap2DataException.
+        /// </summary>
+        [Fact]
+        public void MakeCredentialData_ResponseMissingAttStmt_ThrowsCtap2DataException()
+        {
+            byte[] ctapResponse = BuildMakeCredentialResponseMissingKey(missingKey: 3);
+
+            var ex = Assert.Throws<Ctap2DataException>(() => new MakeCredentialData(ctapResponse));
+            Assert.NotNull(ex.Message);
+        }
+
+        /// <summary>
+        /// Test for Finding #4: Response missing key 1 (fmt) throws Ctap2DataException.
+        /// </summary>
+        [Fact]
+        public void MakeCredentialData_ResponseMissingFmt_ThrowsCtap2DataException()
+        {
+            byte[] ctapResponse = BuildMakeCredentialResponseMissingKey(missingKey: 1);
+
+            var ex = Assert.Throws<Ctap2DataException>(() => new MakeCredentialData(ctapResponse));
+            Assert.NotNull(ex.Message);
+        }
+
+        /// <summary>
+        /// Test for Finding #4: Response missing key 2 (authData) throws Ctap2DataException.
+        /// </summary>
+        [Fact]
+        public void MakeCredentialData_ResponseMissingAuthData_ThrowsCtap2DataException()
+        {
+            byte[] ctapResponse = BuildMakeCredentialResponseMissingKey(missingKey: 2);
+
+            var ex = Assert.Throws<Ctap2DataException>(() => new MakeCredentialData(ctapResponse));
+            Assert.NotNull(ex.Message);
+        }
+
+        /// <summary>
+        /// Test for Finding #2: AttestationObject with packed attStmt where 'alg' is
+        /// a text string instead of int throws Ctap2DataException (wrapping InvalidOperationException).
+        /// </summary>
+        [Fact]
+        public void AttestationObject_PackedAttStmtAlgWrongCborType_ThrowsCtap2DataException()
+        {
+            byte[] ctapResponse = BuildMakeCredentialResponseWithWrongAlgType();
+
+            var ex = Assert.Throws<Ctap2DataException>(() => new MakeCredentialData(ctapResponse));
+            Assert.NotNull(ex.Message);
+        }
+
+        // ------------------------------------------------------------------
+        // Helper methods for building test CTAP responses
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Builds a CTAP MakeCredential response with key 6 (unsignedExtensionOutputs)
+        /// to test that AttestationObject only encodes keys 1, 2, 3.
+        /// </summary>
+        private static byte[] BuildMakeCredentialResponseWithKey6()
+        {
+            byte[] authData = BuildMinimalAuthDataWithEs256Key();
+
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(4);  // 4 keys: fmt, authData, attStmt, unsignedExtensionOutputs
+
+            // Key 1: fmt
+            cbor.WriteInt32(1);
+            cbor.WriteTextString("packed");
+
+            // Key 2: authData
+            cbor.WriteInt32(2);
+            cbor.WriteByteString(authData);
+
+            // Key 3: attStmt (minimal valid packed statement)
+            cbor.WriteInt32(3);
+            cbor.WriteStartMap(2);
+            cbor.WriteTextString("alg");
+            cbor.WriteInt32(-7);  // ES256
+            cbor.WriteTextString("sig");
+            cbor.WriteByteString(new byte[64]);  // Dummy signature
+            cbor.WriteEndMap();
+
+            // Key 6: unsignedExtensionOutputs
+            cbor.WriteInt32(6);
+            cbor.WriteStartMap(1);
+            cbor.WriteTextString("example");
+            cbor.WriteByteString(new byte[] { 0x01, 0x02 });
+            cbor.WriteEndMap();
+
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        /// <summary>
+        /// Builds a CTAP response with packed format but malformed attestation statement.
+        /// </summary>
+        private static byte[] BuildMakeCredentialResponseWithMalformedPackedAttestation(
+            bool missingSig = false,
+            bool extraKey = false)
+        {
+            byte[] authData = BuildMinimalAuthDataWithEs256Key();
+
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(3);
+
+            cbor.WriteInt32(1);
+            cbor.WriteTextString("packed");
+
+            cbor.WriteInt32(2);
+            cbor.WriteByteString(authData);
+
+            cbor.WriteInt32(3);
+            if (missingSig)
+            {
+                // Only 'alg', missing 'sig'
+                cbor.WriteStartMap(1);
+                cbor.WriteTextString("alg");
+                cbor.WriteInt32(-7);
+                cbor.WriteEndMap();
+            }
+            else if (extraKey)
+            {
+                // Has alg, sig, x5c, plus an unexpected fourth key
+                cbor.WriteStartMap(4);
+                cbor.WriteTextString("alg");
+                cbor.WriteInt32(-7);
+                cbor.WriteTextString("sig");
+                cbor.WriteByteString(new byte[64]);
+                cbor.WriteTextString("x5c");
+                cbor.WriteStartArray(0);
+                cbor.WriteEndArray();
+                cbor.WriteTextString("unexpected");
+                cbor.WriteInt32(42);
+                cbor.WriteEndMap();
+            }
+            else
+            {
+                // Well-formed
+                cbor.WriteStartMap(2);
+                cbor.WriteTextString("alg");
+                cbor.WriteInt32(-7);
+                cbor.WriteTextString("sig");
+                cbor.WriteByteString(new byte[64]);
+                cbor.WriteEndMap();
+            }
+
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        /// <summary>
+        /// Builds a well-formed CTAP response with valid packed attestation.
+        /// </summary>
+        private static byte[] BuildMakeCredentialResponseWithValidPackedAttestation()
+        {
+            byte[] authData = BuildMinimalAuthDataWithEs256Key();
+
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(3);
+
+            cbor.WriteInt32(1);
+            cbor.WriteTextString("packed");
+
+            cbor.WriteInt32(2);
+            cbor.WriteByteString(authData);
+
+            cbor.WriteInt32(3);
+            cbor.WriteStartMap(2);
+            cbor.WriteTextString("alg");
+            cbor.WriteInt32(-7);
+            cbor.WriteTextString("sig");
+            cbor.WriteByteString(new byte[64]);
+            cbor.WriteEndMap();
+
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        /// <summary>
+        /// Builds a CTAP MakeCredential response missing one of the required keys (1, 2, or 3).
+        /// </summary>
+        private static byte[] BuildMakeCredentialResponseMissingKey(int missingKey)
+        {
+            byte[] authData = BuildMinimalAuthDataWithEs256Key();
+
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(2);  // Only 2 keys instead of 3
+
+            if (missingKey != 1)
+            {
+                cbor.WriteInt32(1);
+                cbor.WriteTextString("packed");
+            }
+
+            if (missingKey != 2)
+            {
+                cbor.WriteInt32(2);
+                cbor.WriteByteString(authData);
+            }
+
+            if (missingKey != 3)
+            {
+                cbor.WriteInt32(3);
+                cbor.WriteStartMap(2);
+                cbor.WriteTextString("alg");
+                cbor.WriteInt32(-7);
+                cbor.WriteTextString("sig");
+                cbor.WriteByteString(new byte[64]);
+                cbor.WriteEndMap();
+            }
+
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        /// <summary>
+        /// Builds a CTAP response with packed attestation where 'alg' is a text string instead of int.
+        /// This triggers InvalidOperationException when CborMap tries to read it as int.
+        /// </summary>
+        private static byte[] BuildMakeCredentialResponseWithWrongAlgType()
+        {
+            byte[] authData = BuildMinimalAuthDataWithEs256Key();
+
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(3);
+
+            cbor.WriteInt32(1);
+            cbor.WriteTextString("packed");
+
+            cbor.WriteInt32(2);
+            cbor.WriteByteString(authData);
+
+            cbor.WriteInt32(3);
+            cbor.WriteStartMap(2);
+            cbor.WriteTextString("alg");
+            cbor.WriteTextString("ES256");  // WRONG: text string instead of int -7
+            cbor.WriteTextString("sig");
+            cbor.WriteByteString(new byte[64]);
+            cbor.WriteEndMap();
+
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        /// <summary>
+        /// Builds minimal authenticator data with an ES256 credential public key.
+        /// </summary>
+        private static byte[] BuildMinimalAuthDataWithEs256Key()
+        {
+            // Build a minimal COSE ES256 key
+            byte[] x = Enumerable.Repeat((byte)0x11, 32).ToArray();
+            byte[] y = Enumerable.Repeat((byte)0x22, 32).ToArray();
+
+            var coseKey = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            coseKey.WriteStartMap(5);
+            coseKey.WriteInt32(1);   coseKey.WriteInt32(2);   // kty = EC2
+            coseKey.WriteInt32(3);   coseKey.WriteInt32(-7);  // alg = ES256
+            coseKey.WriteInt32(-1);  coseKey.WriteInt32(1);   // crv = P-256
+            coseKey.WriteInt32(-2);  coseKey.WriteByteString(x);
+            coseKey.WriteInt32(-3);  coseKey.WriteByteString(y);
+            coseKey.WriteEndMap();
+            byte[] coseEncoded = coseKey.Encode();
+
+            byte[] credId = { 0x01, 0x02, 0x03, 0x04 };
+
+            // authData: rpIdHash(32) || flags(1) || signCount(4) || aaguid(16) || credIdLen(2) || credId || pubKey
+            var result = new byte[32 + 1 + 4 + 16 + 2 + credId.Length + coseEncoded.Length];
+            int offset = 0;
+
+            // rpIdHash (zeros)
+            offset += 32;
+
+            // flags: UP=1, AT=1
+            result[offset++] = 0x41;
+
+            // signCount (zeros)
+            offset += 4;
+
+            // AAGUID (zeros)
+            offset += 16;
+
+            // credIdLen (big-endian)
+            result[offset++] = (byte)((credId.Length >> 8) & 0xFF);
+            result[offset++] = (byte)(credId.Length & 0xFF);
+
+            // credId
+            Array.Copy(credId, 0, result, offset, credId.Length);
+            offset += credId.Length;
+
+            // COSE public key
+            Array.Copy(coseEncoded, 0, result, offset, coseEncoded.Length);
+
+            return result;
+        }
+    }
+}

@@ -24,7 +24,6 @@ namespace Yubico.YubiKey.Fido2
     /// <summary>
     /// Flag bits encoded in the MakeCredential previewSign extension input (key 4).
     /// </summary>
-    [Flags]
     public enum PreviewSignOptions
     {
         /// <summary>Require user presence for signing operations.</summary>

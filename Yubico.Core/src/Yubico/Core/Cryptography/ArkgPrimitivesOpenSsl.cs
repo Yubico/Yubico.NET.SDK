@@ -131,12 +131,7 @@ namespace Yubico.Core.Cryptography
             Guard.HasSizeGreaterThan(pkBl, 0, nameof(pkBl));
             Guard.HasSizeGreaterThan(pkKem, 0, nameof(pkKem));
             Guard.HasSizeGreaterThan(ikm, 0, nameof(ikm));
-            Guard.HasSizeGreaterThan(ctx, 0, nameof(ctx));
-
-            if (ctx.Length > 64)
-            {
-                throw new ArgumentOutOfRangeException(nameof(ctx), "ctx must be <= 64 bytes.");
-            }
+            Guard.HasSizeLessThanOrEqualTo(ctx, 64, nameof(ctx));
 
             if (!IsPointOnCurve(pkBl))
             {

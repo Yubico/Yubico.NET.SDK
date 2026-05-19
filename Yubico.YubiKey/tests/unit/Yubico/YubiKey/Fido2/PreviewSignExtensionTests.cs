@@ -271,6 +271,24 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(expectedBits, flags);
         }
 
+        [Fact]
+        public void PreviewSignOptions_NotFlagsEnum_DoesNotSupportBitwiseOr()
+        {
+            // ISC-3: PreviewSignOptions represents mutually exclusive modes (UP=1, UV=5),
+            // not orthogonal [Flags]. Verify [Flags] attribute is absent.
+            Type enumType = typeof(PreviewSignOptions);
+            bool hasFlagsAttribute = enumType.IsDefined(typeof(FlagsAttribute), inherit: false);
+            Assert.False(hasFlagsAttribute);
+
+            // Verify wire-format values are the fixed protocol values (not orthogonal flags).
+            // UV=5 would incorrectly overlap with UP=1 if treated as [Flags] (1|4=5),
+            // proving these are mutually exclusive modes, not composable flags.
+            int upValue = (int)PreviewSignOptions.RequireUserPresence;
+            int uvValue = (int)PreviewSignOptions.RequireUserVerification;
+            Assert.Equal(1, upValue);
+            Assert.Equal(5, uvValue);
+        }
+
         // ------------------------------------------------------------------
         // IsExtensionSupported gates (regressions)
         // ------------------------------------------------------------------

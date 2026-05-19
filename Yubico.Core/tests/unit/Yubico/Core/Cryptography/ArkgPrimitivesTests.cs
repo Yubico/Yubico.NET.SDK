@@ -112,6 +112,25 @@ namespace Yubico.Core.Cryptography
                 () => primitives.ComputeEcdhSharedSecret(new byte[32] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, offCurve));
         }
 
+        [Fact]
+        public void Derive_EmptyContext_Succeeds()
+        {
+            // ISC-4: Derive() must accept empty ctx (length 0). The encoder at lines 151-153
+            // handles this correctly: ctxPrime[0]=0x00, produces single-byte [0x00].
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+            byte[] ikm = new byte[32];
+            RandomNumberGenerator.Fill(ikm);
+
+            (byte[] derivedPk, byte[] arkgKeyHandle) = primitives.Derive(
+                P256Generator,
+                P256Generator,
+                ikm,
+                ReadOnlySpan<byte>.Empty);
+
+            Assert.Equal(65, derivedPk.Length);
+            Assert.NotEmpty(arkgKeyHandle);
+        }
+
 
         private static byte[] ToSec1(ECParameters p)
         {

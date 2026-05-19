@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// <para>
     /// This class contains the derived public key and handles needed for
     /// authentication via the previewSign extension. Instances are obtained
-    /// by calling <see cref="PreviewSignGeneratedKey.DerivePublicKey(byte[], byte[])"/> with
+    /// by calling <see cref="PreviewSignGeneratedKeyExtensions.DerivePublicKey(PreviewSignGeneratedKey, byte[], byte[])"/> with
     /// application-provided input keying material and a context string.
     /// </para>
     /// <para>

@@ -14,6 +14,7 @@
 
 using System;
 using System.Linq;
+using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.TestUtilities;
@@ -77,7 +78,7 @@ namespace Yubico.YubiKey.Fido2
 
             // Step B: Offline derive public key
             byte[] ikm = new byte[32];
-            new Random(42).NextBytes(ikm);
+            RandomNumberGenerator.Fill(ikm);
             byte[] ctx = System.Text.Encoding.ASCII.GetBytes("integration-test-ctx");
 
             var derived = generatedKey.DerivePublicKey(ikm, ctx);

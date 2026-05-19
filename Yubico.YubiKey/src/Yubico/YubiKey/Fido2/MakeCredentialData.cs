@@ -39,7 +39,6 @@ namespace Yubico.YubiKey.Fido2
         private const int KeyAttestationStatement = 3;
         private const int KeyEnterpriseAttestation = 4;
         private const int KeyLargeBlob = 5;
-        private const int KeyUnsignedExtensionOutputs = 6;
 
         /// <summary>
         /// The parsed attestation object containing the format, authenticator data,
@@ -231,9 +230,9 @@ namespace Yubico.YubiKey.Fido2
                     LargeBlobKey = map.ReadByteString(KeyLargeBlob);
                 }
 
-                if (map.Contains(KeyUnsignedExtensionOutputs))
+                if (map.Contains(PreviewSignExtension.CtapUnsignedExtensionOutputsKey))
                 {
-                    var unsignedMap = map.ReadMap<string>(KeyUnsignedExtensionOutputs);
+                    var unsignedMap = map.ReadMap<string>(PreviewSignExtension.CtapUnsignedExtensionOutputsKey);
                     UnsignedExtensionOutputs = PreviewSignExtension.ParseUnsignedExtensionOutputs(unsignedMap.Encoded);
                 }
             }

@@ -133,13 +133,9 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         {
             Guard.IsNotNull(generatedKey, nameof(generatedKey));
 
-            // Access internal fields via public properties
-            byte[] blindingPublicKey = generatedKey.BlindingPublicKey.ToArray();
-            byte[] kemPublicKey = generatedKey.KemPublicKey.ToArray();
-
             (byte[] derivedPk, byte[] arkgKeyHandle) = ArkgPrimitives.Create().Derive(
-                blindingPublicKey,
-                kemPublicKey,
+                generatedKey.BlindingPublicKey.Span,
+                generatedKey.KemPublicKey.Span,
                 ikm,
                 ctx);
 

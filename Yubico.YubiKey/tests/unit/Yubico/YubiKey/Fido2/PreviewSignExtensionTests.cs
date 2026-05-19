@@ -16,7 +16,6 @@ using System;
 using System.Formats.Cbor;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.TestUtilities.Fido2;
@@ -143,23 +142,21 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void ParseGenerateKey_ReturnsNull_WhenAlgorithmMissing()
+        public void ParseGenerateKey_Throws_WhenAlgorithmMissing()
         {
             byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(algorithm: null);
 
-            PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
-
-            Assert.Null(generated);
+            _ = Assert.Throws<Ctap2DataException>(
+                () => PreviewSignExtension.DecodeGeneratedKey(previewSignPayload));
         }
 
         [Fact]
-        public void ParseGenerateKey_ReturnsNull_WhenAlgorithmUnsupported()
+        public void ParseGenerateKey_Throws_WhenAlgorithmUnsupported()
         {
             byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(CoseAlgorithmIdentifier.ES256);
 
-            PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
-
-            Assert.Null(generated);
+            _ = Assert.Throws<Ctap2DataException>(
+                () => PreviewSignExtension.DecodeGeneratedKey(previewSignPayload));
         }
 
         [Fact]
@@ -200,7 +197,7 @@ namespace Yubico.YubiKey.Fido2
                 CoseAlgorithmIdentifier.ArkgP256Esp256,
                 arkgAlgorithm: CoseAlgorithmIdentifier.ES256);
 
-            _ = Assert.Throws<CryptographicException>(
+            _ = Assert.Throws<Ctap2DataException>(
                 () => PreviewSignExtension.DecodeGeneratedKey(previewSignPayload));
         }
 

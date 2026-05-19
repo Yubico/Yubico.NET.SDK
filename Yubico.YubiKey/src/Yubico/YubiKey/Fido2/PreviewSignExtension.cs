@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
-using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 
@@ -195,9 +194,27 @@ namespace Yubico.YubiKey.Fido2
         /// inner authData, and the COSE-encoded blinding/KEM public keys from
         /// the inner authData's credentialPublicKey field.
         /// </summary>
+        /// <param name="previewSignValue">The CBOR-encoded previewSign generated-key payload.</param>
+        /// <returns>
+        /// A <see cref="PreviewSignGeneratedKey"/> if the payload contains ARKG-P256
+        /// generated key material; otherwise, <c>null</c>.
+        /// </returns>
+        /// <exception cref="Ctap2DataException">
+        /// The payload declares an unsupported generated-key algorithm, or contains
+        /// malformed ARKG-P256 COSE key material.
+        /// </exception>
         public static PreviewSignGeneratedKey? DecodeGeneratedKey(ReadOnlyMemory<byte> previewSignValue) =>
             DecodeGeneratedKey(previewSignValue, fallbackAlgorithm: null);
 
+        /// <summary>
+        /// Decode the generated-key algorithm from a previewSign output value.
+        /// </summary>
+        /// <param name="previewSignValue">The CBOR-encoded previewSign output value.</param>
+        /// <returns>
+        /// The decoded <see cref="CoseAlgorithmIdentifier"/> if the input is a map
+        /// containing key <see cref="MakeCredentialKey.Algorithm"/>; otherwise,
+        /// <c>null</c> when the input is not a map or the algorithm key is absent.
+        /// </returns>
         public static CoseAlgorithmIdentifier? DecodeGeneratedKeyAlgorithm(ReadOnlyMemory<byte> previewSignValue)
         {
             var reader = new CborReader(previewSignValue, CborConformanceMode.Ctap2Canonical);
@@ -228,6 +245,23 @@ namespace Yubico.YubiKey.Fido2
             return null;
         }
 
+        /// <summary>
+        /// Decode the previewSign generated-key payload using a fallback algorithm
+        /// when the payload omits the algorithm key.
+        /// </summary>
+        /// <param name="previewSignValue">The CBOR-encoded previewSign generated-key payload.</param>
+        /// <param name="fallbackAlgorithm">
+        /// The algorithm to use when <paramref name="previewSignValue"/> omits key
+        /// <see cref="MakeCredentialKey.Algorithm"/>; otherwise, <c>null</c>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="PreviewSignGeneratedKey"/> if the payload contains ARKG-P256
+        /// generated key material; otherwise, <c>null</c>.
+        /// </returns>
+        /// <exception cref="Ctap2DataException">
+        /// The payload declares an unsupported generated-key algorithm, or contains
+        /// malformed ARKG-P256 COSE key material.
+        /// </exception>
         public static PreviewSignGeneratedKey? DecodeGeneratedKey(
             ReadOnlyMemory<byte> previewSignValue,
             CoseAlgorithmIdentifier? fallbackAlgorithm)
@@ -280,7 +314,8 @@ namespace Yubico.YubiKey.Fido2
 
             if (alg != CoseAlgorithmIdentifier.ArkgP256Esp256)
             {
-                return null;
+                throw new Ctap2DataException(
+                    "previewSign generated key uses an unsupported algorithm.");
             }
 
             var attestationObj = new AttestationObject(attestationObject, parseFullDetails: false);
@@ -394,13 +429,13 @@ namespace Yubico.YubiKey.Fido2
 
             if (isEc2Key == false || isArkgP256Key == false)
             {
-                throw new CryptographicException(
+                throw new Ctap2DataException(
                     "previewSign COSE key must be an EC2 ARKG-P256 key.");
             }
 
             if (pkBl is null || pkKem is null)
             {
-                throw new CryptographicException(
+                throw new Ctap2DataException(
                     "previewSign COSE key missing pkBl (-1) or pkKem (-2).");
             }
 
@@ -454,13 +489,13 @@ namespace Yubico.YubiKey.Fido2
 
             if (isEc2Key == false || isP256Curve == false)
             {
-                throw new CryptographicException(
+                throw new Ctap2DataException(
                     "previewSign ARKG public-key components must be EC2 P-256 keys.");
             }
 
             if (x is null || y is null || x.Length != 32 || y.Length != 32)
             {
-                throw new CryptographicException(
+                throw new Ctap2DataException(
                     "previewSign EC2 point coordinates must be 32 bytes each.");
             }
 

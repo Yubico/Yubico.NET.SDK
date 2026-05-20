@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
-using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2
@@ -327,10 +326,15 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] keyHandle = attestationObj.AuthenticatorData.CredentialId.Id.ToArray();
 
-            (byte[] pkBl, byte[] pkKem) = ParseArkgCoseKey(
-                attestationObj.AuthenticatorData.EncodedCredentialPublicKey.Value.ToArray());
+            // Validate ARKG-P256 COSE structure before exposing the key.
+            // We discard the parsed halves; the public PublicKey is the raw CBOR blob.
+            _ = ParseArkgCoseKey(attestationObj.AuthenticatorData.EncodedCredentialPublicKey.Value.ToArray());
 
-            return new PreviewSignGeneratedKey(keyHandle, pkBl, pkKem, alg, attestationObj);
+            return new PreviewSignGeneratedKey(
+                keyHandle,
+                attestationObj.AuthenticatorData.EncodedCredentialPublicKey.Value,
+                alg,
+                attestationObj);
         }
 
         /// <summary>
@@ -380,7 +384,7 @@ namespace Yubico.YubiKey.Fido2
         /// where each EC2 sub-map is {1:2, -1:1, -2:x, -3:y} and can include
         /// an algorithm identifier chosen by the authenticator.
         /// </summary>
-        private static (byte[] pkBl, byte[] pkKem) ParseArkgCoseKey(byte[] coseEncoded)
+        internal static (byte[] pkBl, byte[] pkKem) ParseArkgCoseKey(byte[] coseEncoded)
         {
             var reader = new CborReader(coseEncoded, CborConformanceMode.Ctap2Canonical);
             int? entries = reader.ReadStartMap();

@@ -133,9 +133,10 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         {
             Guard.IsNotNull(generatedKey, nameof(generatedKey));
 
+            (byte[] pkBl, byte[] pkKem) = PreviewSignExtension.ParseArkgCoseKey(generatedKey.PublicKey.ToArray());
             (byte[] derivedPk, byte[] arkgKeyHandle) = ArkgPrimitives.Create().Derive(
-                generatedKey.BlindingPublicKey.Span,
-                generatedKey.KemPublicKey.Span,
+                pkBl,
+                pkKem,
                 ikm,
                 ctx);
 

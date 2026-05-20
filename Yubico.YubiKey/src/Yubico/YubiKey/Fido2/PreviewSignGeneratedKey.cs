@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Fido2
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This class contains the key handle and public key components needed to
+    /// This class contains the key handle and CBOR-encoded public key needed to
     /// perform offline ARKG (Asynchronous Remote Key Generation) key derivation.
     /// Relying-party-side derivation and verification are the consuming
     /// application's responsibility and are not exposed by this SDK.
@@ -43,8 +43,7 @@ namespace Yubico.YubiKey.Fido2
     /// </remarks>
     public sealed class PreviewSignGeneratedKey
     {
-        private readonly byte[] _blindingPublicKey;
-        private readonly byte[] _kemPublicKey;
+        private readonly byte[] _publicKey;
 
         /// <summary>
         /// Gets the key handle for the generated credential.
@@ -52,19 +51,15 @@ namespace Yubico.YubiKey.Fido2
         public ReadOnlyMemory<byte> KeyHandle { get; init; }
 
         /// <summary>
-        /// Gets the blinding public key component.
+        /// Gets the CBOR-encoded COSE public key returned by the authenticator.
+        /// Relying parties decode this to obtain the credential's public key material.
         /// </summary>
-        public ReadOnlyMemory<byte> BlindingPublicKey => _blindingPublicKey;
+        public ReadOnlyMemory<byte> PublicKey => _publicKey;
 
         /// <summary>
-        /// Gets the KEM (Key Encapsulation Mechanism) public key component.
+        /// Gets the algorithm identifier for the generated key.
         /// </summary>
-        public ReadOnlyMemory<byte> KemPublicKey => _kemPublicKey;
-
-        /// <summary>
-        /// Gets the algorithm identifier for the derived key.
-        /// </summary>
-        public CoseAlgorithmIdentifier DerivedKeyAlgorithm { get; init; }
+        public CoseAlgorithmIdentifier Algorithm { get; init; }
 
         /// <summary>
         /// Gets the attestation object returned by the authenticator during MakeCredential.
@@ -75,21 +70,18 @@ namespace Yubico.YubiKey.Fido2
         /// Initializes a new instance of the <see cref="PreviewSignGeneratedKey"/> class.
         /// </summary>
         /// <param name="keyHandle">The key handle.</param>
-        /// <param name="blindingPublicKey">The blinding public key.</param>
-        /// <param name="kemPublicKey">The KEM public key.</param>
-        /// <param name="derivedKeyAlgorithm">The derived key algorithm.</param>
+        /// <param name="publicKey">The CBOR-encoded COSE public key.</param>
+        /// <param name="algorithm">The algorithm identifier for the generated key.</param>
         /// <param name="attestationObject">The attestation object returned by the authenticator during MakeCredential.</param>
         internal PreviewSignGeneratedKey(
             ReadOnlyMemory<byte> keyHandle,
-            ReadOnlyMemory<byte> blindingPublicKey,
-            ReadOnlyMemory<byte> kemPublicKey,
-            CoseAlgorithmIdentifier derivedKeyAlgorithm,
+            ReadOnlyMemory<byte> publicKey,
+            CoseAlgorithmIdentifier algorithm,
             AttestationObject attestationObject)
         {
             KeyHandle = keyHandle;
-            _blindingPublicKey = blindingPublicKey.ToArray();
-            _kemPublicKey = kemPublicKey.ToArray();
-            DerivedKeyAlgorithm = derivedKeyAlgorithm;
+            _publicKey = publicKey.ToArray();
+            Algorithm = algorithm;
             AttestationObject = attestationObject;
         }
     }

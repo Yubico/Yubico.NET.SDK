@@ -103,9 +103,8 @@ namespace Yubico.YubiKey.Fido2
 
             PreviewSignGeneratedKey? generated = data.GetPreviewSignGeneratedKey();
             Assert.NotNull(generated);
-            Assert.Equal(CoseAlgorithmIdentifier.ArkgP256Esp256, generated!.DerivedKeyAlgorithm);
-            Assert.Equal(65, generated.BlindingPublicKey.Length);
-            Assert.Equal(65, generated.KemPublicKey.Length);
+            Assert.Equal(CoseAlgorithmIdentifier.ArkgP256Esp256, generated!.Algorithm);
+            Assert.NotEmpty(generated.PublicKey.Span.ToArray());
         }
 
         [Fact]
@@ -119,9 +118,8 @@ namespace Yubico.YubiKey.Fido2
             PreviewSignGeneratedKey? generated = data.GetPreviewSignGeneratedKey();
 
             Assert.NotNull(generated);
-            Assert.Equal(CoseAlgorithmIdentifier.ArkgP256Esp256, generated!.DerivedKeyAlgorithm);
-            Assert.Equal(65, generated.BlindingPublicKey.Length);
-            Assert.Equal(65, generated.KemPublicKey.Length);
+            Assert.Equal(CoseAlgorithmIdentifier.ArkgP256Esp256, generated!.Algorithm);
+            Assert.NotEmpty(generated.PublicKey.Span.ToArray());
         }
 
         [Fact]
@@ -136,9 +134,8 @@ namespace Yubico.YubiKey.Fido2
             PreviewSignGeneratedKey? generated = data.GetPreviewSignGeneratedKey();
 
             Assert.NotNull(generated);
-            Assert.Equal(CoseAlgorithmIdentifier.ArkgP256Esp256, generated!.DerivedKeyAlgorithm);
-            Assert.Equal(65, generated.BlindingPublicKey.Length);
-            Assert.Equal(65, generated.KemPublicKey.Length);
+            Assert.Equal(CoseAlgorithmIdentifier.ArkgP256Esp256, generated!.Algorithm);
+            Assert.NotEmpty(generated.PublicKey.Span.ToArray());
         }
 
         [Fact]
@@ -169,8 +166,7 @@ namespace Yubico.YubiKey.Fido2
             PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
 
             Assert.NotNull(generated);
-            Assert.Equal(65, generated!.BlindingPublicKey.Length);
-            Assert.Equal(65, generated.KemPublicKey.Length);
+            Assert.NotEmpty(generated!.PublicKey.Span.ToArray());
         }
 
         [Fact]
@@ -186,8 +182,7 @@ namespace Yubico.YubiKey.Fido2
             PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
 
             Assert.NotNull(generated);
-            Assert.Equal(65, generated!.BlindingPublicKey.Length);
-            Assert.Equal(65, generated.KemPublicKey.Length);
+            Assert.NotEmpty(generated!.PublicKey.Span.ToArray());
         }
 
         [Fact]

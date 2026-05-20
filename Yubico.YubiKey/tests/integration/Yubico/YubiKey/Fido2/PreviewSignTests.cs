@@ -54,10 +54,8 @@ namespace Yubico.YubiKey.Fido2
             var generatedKey = credData.GetPreviewSignGeneratedKey();
             Assert.NotNull(generatedKey);
             Assert.NotEmpty(generatedKey.KeyHandle.Span.ToArray());
-            Assert.Equal(65, generatedKey.BlindingPublicKey.Length);
-            Assert.Equal(0x04, generatedKey.BlindingPublicKey.Span[0]);
-            Assert.Equal(65, generatedKey.KemPublicKey.Length);
-            Assert.Equal(0x04, generatedKey.KemPublicKey.Span[0]);
+            byte[] credentialPk = credData.AuthenticatorData.EncodedCredentialPublicKey!.Value.ToArray();
+            Assert.Equal(credentialPk, generatedKey.PublicKey.ToArray());
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]

@@ -60,11 +60,11 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// </para>
         /// </remarks>
         /// <param name="generatedKey">The generated key from which to derive.</param>
-        /// <param name="ikm">
+        /// <param name="inputKeyingMaterial">
         /// Input keying material for HKDF derivation. This should be random data
         /// unique to the derivation context.
         /// </param>
-        /// <param name="ctx">
+        /// <param name="context">
         /// Context string for domain separation. Different contexts produce
         /// different derived keys from the same input keying material.
         /// </param>
@@ -73,19 +73,19 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// ARKG key handle, device key handle, and context.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// The <paramref name="generatedKey"/>, <paramref name="ikm"/>,
-        /// or <paramref name="ctx"/> is null.
+        /// The <paramref name="generatedKey"/>, <paramref name="inputKeyingMaterial"/>,
+        /// or <paramref name="context"/> is null.
         /// </exception>
         public static PreviewSignDerivedKey DerivePublicKey(
             this PreviewSignGeneratedKey generatedKey,
-            byte[] ikm,
-            byte[] ctx)
+            byte[] inputKeyingMaterial,
+            byte[] context)
         {
             Guard.IsNotNull(generatedKey, nameof(generatedKey));
-            Guard.IsNotNull(ikm, nameof(ikm));
-            Guard.IsNotNull(ctx, nameof(ctx));
+            Guard.IsNotNull(inputKeyingMaterial, nameof(inputKeyingMaterial));
+            Guard.IsNotNull(context, nameof(context));
 
-            return DerivePublicKey(generatedKey, (ReadOnlySpan<byte>)ikm, (ReadOnlySpan<byte>)ctx);
+            return DerivePublicKey(generatedKey, (ReadOnlySpan<byte>)inputKeyingMaterial, (ReadOnlySpan<byte>)context);
         }
 
         /// <summary>
@@ -111,11 +111,11 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// </para>
         /// </remarks>
         /// <param name="generatedKey">The generated key from which to derive.</param>
-        /// <param name="ikm">
+        /// <param name="inputKeyingMaterial">
         /// Input keying material for HKDF derivation. This should be random data
         /// unique to the derivation context.
         /// </param>
-        /// <param name="ctx">
+        /// <param name="context">
         /// Context string for domain separation. Different contexts produce
         /// different derived keys from the same input keying material.
         /// </param>
@@ -128,23 +128,23 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// </exception>
         public static PreviewSignDerivedKey DerivePublicKey(
             this PreviewSignGeneratedKey generatedKey,
-            ReadOnlySpan<byte> ikm,
-            ReadOnlySpan<byte> ctx)
+            ReadOnlySpan<byte> inputKeyingMaterial,
+            ReadOnlySpan<byte> context)
         {
             Guard.IsNotNull(generatedKey, nameof(generatedKey));
 
-            (byte[] pkBl, byte[] pkKem) = PreviewSignExtension.ParseArkgCoseKey(generatedKey.PublicKey.ToArray());
-            (byte[] derivedPk, byte[] arkgKeyHandle) = ArkgPrimitives.Create().Derive(
-                pkBl,
-                pkKem,
-                ikm,
-                ctx);
+            var (blindingPublicKey, kemPublicKey) = PreviewSignExtension.ParseArkgCoseKey(generatedKey.PublicKey.ToArray());
+            var (derivedPublicKey, arkgKeyHandle) = ArkgPrimitives.Create().Derive(
+                blindingPublicKey,
+                kemPublicKey,
+                inputKeyingMaterial,
+                context);
 
             return new PreviewSignDerivedKey(
-                derivedPk,
+                derivedPublicKey,
                 arkgKeyHandle,
                 generatedKey.KeyHandle,
-                ctx.ToArray());
+                context.ToArray());
         }
     }
 }

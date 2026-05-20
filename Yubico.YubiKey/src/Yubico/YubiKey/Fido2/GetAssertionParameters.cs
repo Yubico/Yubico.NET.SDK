@@ -413,7 +413,7 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// <para>
         /// The caller is responsible for hashing the message (SHA-256) before passing it as
-        /// <paramref name="tbs"/> (to-be-signed). This method internally encodes the ARKG
+        /// <paramref name="messageDigest"/>. This method internally encodes the ARKG
         /// sign args from the provided <paramref name="arkgKeyHandle"/> and <paramref name="context"/>.
         /// </para>
         /// <para>
@@ -431,11 +431,11 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="context">
         /// The context string used during key derivation.
         /// </param>
-        /// <param name="tbs">
+        /// <param name="messageDigest">
         /// The pre-hashed message to be signed (SHA-256 hash of the original message).
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// The <paramref name="tbs"/> is null.
+        /// The <paramref name="messageDigest"/> is null.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// The allow-list is null or empty. The previewSign extension requires at least one credential
@@ -445,13 +445,13 @@ namespace Yubico.YubiKey.Fido2
             ReadOnlyMemory<byte> deviceKeyHandle,
             ReadOnlyMemory<byte> arkgKeyHandle,
             ReadOnlyMemory<byte> context,
-            byte[] tbs)
+            byte[] messageDigest)
         {
-            Guard.IsNotNull(tbs, nameof(tbs));
+            Guard.IsNotNull(messageDigest, nameof(messageDigest));
 
-            if (tbs.Length != 32)
+            if (messageDigest.Length != 32)
             {
-                throw new ArgumentException("previewSign requires a 32-byte SHA-256 digest.", nameof(tbs));
+                throw new ArgumentException("previewSign requires a 32-byte SHA-256 digest.", nameof(messageDigest));
             }
 
             if (AllowList is null || AllowList.Count == 0)
@@ -464,7 +464,7 @@ namespace Yubico.YubiKey.Fido2
             byte[] additionalArgs = PreviewSignExtension.EncodeArkgSignArgs(arkgKeyHandle, context);
             byte[] encoded = PreviewSignExtension.EncodeSignInput(
                 deviceKeyHandle,
-                tbs,
+                messageDigest,
                 additionalArgs);
             AddExtension(Fido2.Extensions.PreviewSign, encoded);
         }

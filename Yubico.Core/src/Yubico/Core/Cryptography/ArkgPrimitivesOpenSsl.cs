@@ -122,47 +122,47 @@ namespace Yubico.Core.Cryptography
         }
 
         /// <inheritdoc />
-        public (byte[] derivedPk, byte[] arkgKeyHandle) Derive(
-            ReadOnlySpan<byte> pkBl,
-            ReadOnlySpan<byte> pkKem,
-            ReadOnlySpan<byte> ikm,
-            ReadOnlySpan<byte> ctx)
+        public (byte[] derivedPublicKey, byte[] arkgKeyHandle) Derive(
+            ReadOnlySpan<byte> blindingPublicKey,
+            ReadOnlySpan<byte> kemPublicKey,
+            ReadOnlySpan<byte> inputKeyingMaterial,
+            ReadOnlySpan<byte> context)
         {
-            Guard.HasSizeGreaterThan(pkBl, 0, nameof(pkBl));
-            Guard.HasSizeGreaterThan(pkKem, 0, nameof(pkKem));
-            Guard.HasSizeGreaterThan(ikm, 0, nameof(ikm));
-            Guard.HasSizeLessThanOrEqualTo(ctx, 64, nameof(ctx));
+            Guard.HasSizeGreaterThan(blindingPublicKey, 0, nameof(blindingPublicKey));
+            Guard.HasSizeGreaterThan(kemPublicKey, 0, nameof(kemPublicKey));
+            Guard.HasSizeGreaterThan(inputKeyingMaterial, 0, nameof(inputKeyingMaterial));
+            Guard.HasSizeLessThanOrEqualTo(context, 64, nameof(context));
 
-            if (!IsPointOnCurve(pkBl))
+            if (!IsPointOnCurve(blindingPublicKey))
             {
-                throw new ArgumentException("pkBl is not on the P-256 curve.", nameof(pkBl));
+                throw new ArgumentException("blindingPublicKey is not on the P-256 curve.", nameof(blindingPublicKey));
             }
 
-            if (!IsPointOnCurve(pkKem))
+            if (!IsPointOnCurve(kemPublicKey))
             {
-                throw new ArgumentException("pkKem is not on the P-256 curve.", nameof(pkKem));
+                throw new ArgumentException("kemPublicKey is not on the P-256 curve.", nameof(kemPublicKey));
             }
 
-            byte[] ctxPrime = new byte[1 + ctx.Length];
-            ctxPrime[0] = (byte)ctx.Length;
-            ctx.CopyTo(ctxPrime.AsSpan(1));
+            byte[] contextPrime = new byte[1 + context.Length];
+            contextPrime[0] = (byte)context.Length;
+            context.CopyTo(contextPrime.AsSpan(1));
 
-            byte[] ctxKem = Concat(Encoding.ASCII.GetBytes("ARKG-Derive-Key-KEM."), ctxPrime);
-            byte[] ctxBl = Concat(Encoding.ASCII.GetBytes("ARKG-Derive-Key-BL."), ctxPrime);
+            byte[] contextKem = Concat(Encoding.ASCII.GetBytes("ARKG-Derive-Key-KEM."), contextPrime);
+            byte[] contextBl = Concat(Encoding.ASCII.GetBytes("ARKG-Derive-Key-BL."), contextPrime);
 
-            (byte[] ikmTau, byte[] cipher) = HmacKemEncaps(pkKem, ikm, ctxKem);
+            (byte[] ikmTau, byte[] cipher) = HmacKemEncaps(kemPublicKey, inputKeyingMaterial, contextKem);
             BigInteger tau;
             try
             {
-                tau = BlPrf(ikmTau, ctxBl);
+                tau = BlPrf(ikmTau, contextBl);
             }
             finally
             {
                 CryptographicOperations.ZeroMemory(ikmTau);
             }
 
-            byte[] derivedPk = BlBlindPublicKey(pkBl, tau);
-            return (derivedPk, cipher);
+            byte[] derivedPublicKey = BlBlindPublicKey(blindingPublicKey, tau);
+            return (derivedPublicKey, cipher);
         }
 
         // ---------------------------------------------------------------------

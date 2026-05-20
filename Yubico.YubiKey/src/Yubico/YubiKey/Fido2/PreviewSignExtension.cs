@@ -274,7 +274,7 @@ namespace Yubico.YubiKey.Fido2
             int? entries = reader.ReadStartMap();
             int count = entries ?? int.MaxValue;
 
-            var alg = CoseAlgorithmIdentifier.None;
+            var algorithm = CoseAlgorithmIdentifier.None;
             byte[]? attestationObject = null;
 
             for (int i = 0; i < count; i++)
@@ -287,7 +287,7 @@ namespace Yubico.YubiKey.Fido2
                 int key = (int)reader.ReadInt64();
                 if (key == (int)MakeCredentialKey.Algorithm)
                 {
-                    alg = (CoseAlgorithmIdentifier)reader.ReadInt32();
+                    algorithm = (CoseAlgorithmIdentifier)reader.ReadInt32();
                 }
                 else if (key == (int)MakeCredentialKey.AttestationObject)
                 {
@@ -301,9 +301,9 @@ namespace Yubico.YubiKey.Fido2
 
             reader.ReadEndMap();
 
-            if (alg == CoseAlgorithmIdentifier.None && fallbackAlgorithm.HasValue)
+            if (algorithm == CoseAlgorithmIdentifier.None && fallbackAlgorithm.HasValue)
             {
-                alg = fallbackAlgorithm.Value;
+                algorithm = fallbackAlgorithm.Value;
             }
 
             if (attestationObject is null)
@@ -311,7 +311,7 @@ namespace Yubico.YubiKey.Fido2
                 return null;
             }
 
-            if (alg != CoseAlgorithmIdentifier.ArkgP256Esp256)
+            if (algorithm != CoseAlgorithmIdentifier.ArkgP256Esp256)
             {
                 throw new Ctap2DataException(
                     "previewSign generated key uses an unsupported algorithm.");
@@ -333,7 +333,7 @@ namespace Yubico.YubiKey.Fido2
             return new PreviewSignGeneratedKey(
                 keyHandle,
                 attestationObj.AuthenticatorData.EncodedCredentialPublicKey.Value,
-                alg,
+                algorithm,
                 attestationObj);
         }
 
@@ -380,11 +380,11 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// Parse the ARKG-P256 COSE key:
-        ///   { 1: kty, 3: alg, -1: pkBl_cose_ec2, -2: pkKem_cose_ec2 }
+        ///   { 1: kty, 3: alg, -1: blindingPublicKey_cose_ec2, -2: kemPublicKey_cose_ec2 }
         /// where each EC2 sub-map is {1:2, -1:1, -2:x, -3:y} and can include
         /// an algorithm identifier chosen by the authenticator.
         /// </summary>
-        internal static (byte[] pkBl, byte[] pkKem) ParseArkgCoseKey(byte[] coseEncoded)
+        internal static (byte[] blindingPublicKey, byte[] kemPublicKey) ParseArkgCoseKey(byte[] coseEncoded)
         {
             var reader = new CborReader(coseEncoded, CborConformanceMode.Ctap2Canonical);
             int? entries = reader.ReadStartMap();
@@ -392,8 +392,8 @@ namespace Yubico.YubiKey.Fido2
 
             bool? isEc2Key = null;
             bool? isArkgP256Key = null;
-            byte[]? pkBl = null;
-            byte[]? pkKem = null;
+            byte[]? blindingPublicKey = null;
+            byte[]? kemPublicKey = null;
 
             for (int i = 0; i < count; i++)
             {
@@ -417,11 +417,11 @@ namespace Yubico.YubiKey.Fido2
                 }
                 else if (key == -1)
                 {
-                    pkBl = ReadEc2PointAsSec1(reader);
+                    blindingPublicKey = ReadEc2PointAsSec1(reader);
                 }
                 else if (key == -2)
                 {
-                    pkKem = ReadEc2PointAsSec1(reader);
+                    kemPublicKey = ReadEc2PointAsSec1(reader);
                 }
                 else
                 {
@@ -437,13 +437,13 @@ namespace Yubico.YubiKey.Fido2
                     "previewSign COSE key must be an EC2 ARKG-P256 key.");
             }
 
-            if (pkBl is null || pkKem is null)
+            if (blindingPublicKey is null || kemPublicKey is null)
             {
                 throw new Ctap2DataException(
-                    "previewSign COSE key missing pkBl (-1) or pkKem (-2).");
+                    "previewSign COSE key missing blindingPublicKey (-1) or kemPublicKey (-2).");
             }
 
-            return (pkBl, pkKem);
+            return (blindingPublicKey, kemPublicKey);
         }
 
         private static byte[] ReadEc2PointAsSec1(CborReader reader)

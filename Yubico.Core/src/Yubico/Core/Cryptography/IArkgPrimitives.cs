@@ -62,18 +62,18 @@ namespace Yubico.Core.Cryptography
         /// unique derived key pair.
         /// </para>
         /// </remarks>
-        /// <param name="pkBl">The blinding public key in uncompressed SEC1 format.</param>
-        /// <param name="pkKem">The KEM public key in uncompressed SEC1 format.</param>
-        /// <param name="ikm">Input keying material for HKDF derivation.</param>
-        /// <param name="ctx">Context string for domain separation.</param>
+        /// <param name="blindingPublicKey">The blinding public key in uncompressed SEC1 format.</param>
+        /// <param name="kemPublicKey">The KEM public key in uncompressed SEC1 format.</param>
+        /// <param name="inputKeyingMaterial">Input keying material for HKDF derivation.</param>
+        /// <param name="context">Context string for domain separation.</param>
         /// <returns>
         /// A tuple containing the derived public key (in uncompressed SEC1 format)
         /// and the ARKG key handle (to be passed to the YubiKey during signing).
         /// </returns>
-        (byte[] derivedPk, byte[] arkgKeyHandle) Derive(
-            ReadOnlySpan<byte> pkBl,
-            ReadOnlySpan<byte> pkKem,
-            ReadOnlySpan<byte> ikm,
-            ReadOnlySpan<byte> ctx);
+        (byte[] derivedPublicKey, byte[] arkgKeyHandle) Derive(
+            ReadOnlySpan<byte> blindingPublicKey,
+            ReadOnlySpan<byte> kemPublicKey,
+            ReadOnlySpan<byte> inputKeyingMaterial,
+            ReadOnlySpan<byte> context);
     }
 }

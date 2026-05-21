@@ -13,9 +13,11 @@
 // limitations under the License.
 
 using System;
+using System.Formats.Cbor;
 using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
+using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.TestUtilities.Fido2;
@@ -59,6 +61,26 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(
                 generatedKey.AttestationObject.AuthenticatorData.EncodedCredentialPublicKey!.Value.ToArray(),
                 generatedKey.PublicKey.ToArray());
+
+            var innerAuthData = generatedKey.AttestationObject.AuthenticatorData;
+            Assert.Equal(0, innerAuthData.SignatureCounter);
+            Assert.NotNull(credData.AuthenticatorData.Aaguid);
+            Assert.NotNull(innerAuthData.Aaguid);
+            Assert.Equal(
+                credData.AuthenticatorData.Aaguid!.Value.ToArray(),
+                innerAuthData.Aaguid!.Value.ToArray());
+
+            Assert.NotNull(credData.AuthenticatorData.CredentialId);
+            Assert.NotNull(innerAuthData.CredentialId);
+            Assert.NotEqual(
+                credData.AuthenticatorData.CredentialId!.Id.ToArray(),
+                innerAuthData.CredentialId!.Id.ToArray());
+
+            Assert.NotNull(innerAuthData.Extensions);
+            Assert.True(innerAuthData.Extensions!.TryGetValue(
+                PreviewSignParametersExtensions.ExtensionName,
+                out byte[]? innerPreviewSignOutput));
+            Assert.True(TryReadPreviewSignFlags(innerPreviewSignOutput, out _));
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
@@ -118,21 +140,53 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
-        public void MakeCredentialWithUnsupportedAlgorithm_Fails()
+        public void MakeCredentialWithUnsupportedAlgorithm_FailsWithUnsupportedAlgorithmStatus()
         {
             Skip.IfNot(
                 Session.AuthenticatorInfo.IsExtensionSupported(PreviewSignParametersExtensions.ExtensionName),
                 "YubiKey does not advertise previewSign extension");
 
-            // Request previewSign with ES256 (not Esp256)
-            // Hardware should reject this as unsupported for previewSign
             MakeCredentialParameters.AddPreviewSignGenerateKeyExtension(
                 Session.AuthenticatorInfo,
-                new[] { CoseAlgorithmIdentifier.ES256 });
+                new[] { (CoseAlgorithmIdentifier)(-18) });
 
-            // YubiKey 5.8.0-beta rejects unsupported algorithms via
-            // Fido2Exception (wrapping the underlying CTAP error code).
-            Assert.Throws<Fido2Exception>(() => Session.MakeCredential(MakeCredentialParameters));
+            var response = Connection.SendCommand(new MakeCredentialCommand(MakeCredentialParameters));
+
+            Assert.Equal(CtapStatus.UnsupportedAlgorithm, response.CtapStatus);
+        }
+
+        private static bool TryReadPreviewSignFlags(byte[] encodedPreviewSignOutput, out int flags)
+        {
+            flags = 0;
+            var reader = new CborReader(encodedPreviewSignOutput, CborConformanceMode.Ctap2Canonical);
+            if (reader.PeekState() != CborReaderState.StartMap)
+            {
+                return false;
+            }
+
+            int? entries = reader.ReadStartMap();
+            int count = entries ?? int.MaxValue;
+            bool found = false;
+            for (int i = 0; i < count; i++)
+            {
+                if (reader.PeekState() == CborReaderState.EndMap)
+                {
+                    break;
+                }
+
+                int key = reader.ReadInt32();
+                if (key == 4)
+                {
+                    flags = reader.ReadInt32();
+                    found = true;
+                    continue;
+                }
+
+                reader.SkipValue();
+            }
+
+            reader.ReadEndMap();
+            return found;
         }
     }
 }

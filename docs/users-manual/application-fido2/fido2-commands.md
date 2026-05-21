@@ -616,11 +616,11 @@ ___
 
 ## Authenticator selection
 
-Request user presence (UP) so the user can indicate _which_ authenticator to use, for example when more than one YubiKey is connected.
+Request user presence (UP) so the user can indicate _which_ authenticator to use for a subsequent operation. This can be useful in situations where more than one YubiKey is connected.
 
 ### Available
 
-YubiKeys with FIDO2 firmware `5.5.1` or later. The underlying command, `authenticatorSelection` (0x0B), is specified in [CTAP 2.1 §6.9](https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html).
+YubiKeys with FIDO2 firmware `5.5.1` or later. The underlying command, `authenticatorSelection` (0x0B), is specified in [CTAP 2.1 §6.9](https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html#authenticatorSelection).
 
 ### SDK classes
 

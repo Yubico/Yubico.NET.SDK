@@ -17,7 +17,7 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Ask the authenticator for User Presence (UP) so the user can select this YubiKey.
+    /// Requests User Presence (UP) on the connected YubiKey so the user may indicate their intention to use the YubiKey by touching it. This method can be useful in situations where a user has more than one YubiKey and the application needs to determine which key to use for a subsequent FIDO2 operation.
     /// </summary>
     /// <remarks>
     /// The partner response class is <see cref="AuthenticatorSelectionResponse"/>.

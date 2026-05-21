@@ -78,8 +78,8 @@ Data Length: 0
 | (no data) | 6F  | 27  |
 
 > [!NOTE]
-> On the YubiKey, the only user affordance is touch to approve, or no touch until the
-> operation times out. There is no separate deny or cancel control on the security key
-> itself, so when the user does not complete UP you will usually see
-> `CTAP2_ERR_USER_ACTION_TIMEOUT`, not an explicit denial. `CTAP2_ERR_OPERATION_DENIED`
+> On the YubiKey, the user can either touch the key to select it or wait for the
+> operation to time out—there is no separate deny or cancel control on the security key
+> itself. When the user does not complete UP you will usually see
+> `CTAP2_ERR_USER_ACTION_TIMEOUT`. However, `CTAP2_ERR_OPERATION_DENIED`
 > may be returned if the user engages a platform dialog to cancel the request.

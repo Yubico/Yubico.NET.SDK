@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Fido2
     public sealed partial class Fido2Session
     {
         /// <summary>
-        /// Requests User Presence (UP) on this YubiKey so the user can select it for intended use
+        /// Requests User Presence (UP) on the connected YubiKey so the user may indicate their intention to use the YubiKey by touching it. This method can be useful in situations where a user has more than one YubiKey and the application needs to determine which key to use for a subsequent FIDO2 operation.
         /// (CTAP 2.1 §6.9 <c>authenticatorSelection</c>, command byte 0x0B). Requires YubiKey firmware 5.5.1 or later.
         /// </summary>
         /// <remarks>

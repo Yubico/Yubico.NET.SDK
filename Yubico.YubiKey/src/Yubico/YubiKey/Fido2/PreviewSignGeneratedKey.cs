@@ -30,13 +30,13 @@ namespace Yubico.YubiKey.Fido2
         private readonly byte[] _publicKey;
 
         /// <summary>
-        /// Gets the key handle for the generated credential.
+        /// Gets the key handle for the generated signing key.
         /// </summary>
         public ReadOnlyMemory<byte> KeyHandle { get; init; }
 
         /// <summary>
         /// Gets the CBOR-encoded COSE public key returned by the authenticator.
-        /// Relying parties decode this to obtain the credential's public key material.
+        /// Relying parties decode this to obtain the generated signing key's public key material.
         /// </summary>
         public ReadOnlyMemory<byte> PublicKey => _publicKey;
 

@@ -180,6 +180,12 @@ namespace Yubico.YubiKey.Fido2
             if (UnsignedExtensionOutputs is not null &&
                 UnsignedExtensionOutputs.TryGetValue(Extensions.PreviewSign, out var unsignedValue))
             {
+                if (signedAlgorithm is null)
+                {
+                    throw new Ctap2DataException(
+                        "previewSign generated key is missing signed algorithm output.");
+                }
+
                 return PreviewSignExtension.DecodeGeneratedKey(unsignedValue, signedAlgorithm);
             }
 

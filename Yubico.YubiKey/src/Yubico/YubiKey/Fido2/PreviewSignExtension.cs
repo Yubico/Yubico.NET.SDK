@@ -20,14 +20,17 @@ using Yubico.YubiKey.Fido2.Cose;
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
-    /// Flag bits encoded in the MakeCredential previewSign extension input.
+    /// Supported flag combinations encoded in the MakeCredential previewSign extension input.
     /// </summary>
     public enum PreviewSignOptions
     {
+        /// <summary>Do not require user presence or user verification for signing operations.</summary>
+        Unattended = 0b000,
+
         /// <summary>Require user presence for signing operations.</summary>
         RequireUserPresence = 0b001,
 
-        /// <summary>Require user verification for signing operations.</summary>
+        /// <summary>Require user presence and user verification for signing operations.</summary>
         RequireUserVerification = 0b101,
     }
 
@@ -35,11 +38,8 @@ namespace Yubico.YubiKey.Fido2
     /// CBOR encoder/decoder for the "previewSign" WebAuthn extension.
     /// </summary>
     /// <remarks>
-    /// Wire format follows yubikit-swift release/1.3.0. The same integer key
-    /// can mean different things depending on whether it appears in a
-    /// MakeCredential extension input or a GetAssertion extension input —
-    /// per-context enums (<see cref="MakeCredentialKey"/>,
-    /// <see cref="GetAssertionKey"/>) keep the call sites readable.
+    /// Wire format follows the previewSign extension specification:
+    /// https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension.
     /// </remarks>
     public static class PreviewSignExtension
     {
@@ -47,8 +47,7 @@ namespace Yubico.YubiKey.Fido2
         internal const int CtapUnsignedExtensionOutputsKey = 6;
         internal const string ExtensionName = "previewSign";
 
-        // Cross-ref: yubikit-swift release/1.3.0 PreviewSign.swift, python-fido2 extensions.py:670-810
-        /// <summary>Map keys used by the MakeCredential previewSign input AND signed output.</summary>
+        /// <summary>Map keys used by previewSign generated-key input and output.</summary>
         internal enum MakeCredentialKey
         {
             Algorithm = 3,
@@ -68,7 +67,7 @@ namespace Yubico.YubiKey.Fido2
         /// Encode the MakeCredential extension input map: {3:[algs], 4:flags}.
         /// </summary>
         /// <param name="algorithms">The algorithms to include in the input map.</param>
-        /// <param name="flags">The flags value to encode.</param>
+        /// <param name="flags">The supported flag combination to encode.</param>
         /// <returns>The CBOR-encoded extension input.</returns>
         public static byte[] EncodeGenerateKeyInput(
             ReadOnlySpan<CoseAlgorithmIdentifier> algorithms,
@@ -155,14 +154,14 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <param name="previewSignValue">The CBOR-encoded previewSign generated-key payload.</param>
         /// <returns>
-        /// A generated key container if the payload contains generated key material;
+        /// A generated key container if the payload contains well formed generated key material;
         /// otherwise, <c>null</c>.
         /// </returns>
         /// <exception cref="Ctap2DataException">
         /// The payload contains malformed generated-key material.
         /// </exception>
         public static PreviewSignGeneratedKey? DecodeGeneratedKey(ReadOnlyMemory<byte> previewSignValue) =>
-            DecodeGeneratedKey(previewSignValue, fallbackAlgorithm: null);
+            DecodeGeneratedKey(previewSignValue, signedOutputAlgorithm: null);
 
         /// <summary>
         /// Decode the generated-key algorithm from a previewSign output value.
@@ -204,16 +203,15 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Decode the previewSign generated-key payload using a fallback algorithm
-        /// when the payload omits the algorithm key.
+        /// Decode the previewSign generated-key payload using the signed output
+        /// algorithm when the key material was carried in unsigned CTAP output.
         /// </summary>
         /// <param name="previewSignValue">The CBOR-encoded previewSign generated-key payload.</param>
-        /// <param name="fallbackAlgorithm">
-        /// The algorithm to use when <paramref name="previewSignValue"/> omits the
-        /// algorithm key; otherwise, <c>null</c>.
+        /// <param name="signedOutputAlgorithm">
+        /// The algorithm from the signed previewSign output when available; otherwise, <c>null</c>.
         /// </param>
         /// <returns>
-        /// A generated key container if the payload contains generated key material;
+        /// A generated key container if the payload contains well formed generated key material;
         /// otherwise, <c>null</c>.
         /// </returns>
         /// <exception cref="Ctap2DataException">
@@ -221,7 +219,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         internal static PreviewSignGeneratedKey? DecodeGeneratedKey(
             ReadOnlyMemory<byte> previewSignValue,
-            CoseAlgorithmIdentifier? fallbackAlgorithm)
+            CoseAlgorithmIdentifier? signedOutputAlgorithm)
         {
             var reader = new CborReader(previewSignValue, CborConformanceMode.Ctap2Canonical);
             if (reader.PeekState() != CborReaderState.StartMap)
@@ -259,9 +257,9 @@ namespace Yubico.YubiKey.Fido2
 
             reader.ReadEndMap();
 
-            if (algorithm == CoseAlgorithmIdentifier.None && fallbackAlgorithm.HasValue)
+            if (algorithm == CoseAlgorithmIdentifier.None && signedOutputAlgorithm.HasValue)
             {
-                algorithm = fallbackAlgorithm.Value;
+                algorithm = signedOutputAlgorithm.Value;
             }
 
             if (algorithm == CoseAlgorithmIdentifier.None)
@@ -272,14 +270,16 @@ namespace Yubico.YubiKey.Fido2
 
             if (attestationObject is null)
             {
-                return null;
+                throw new Ctap2DataException(
+                    "previewSign generated key is missing an attestation object.");
             }
 
             var attestationObj = new AttestationObject(attestationObject, parseFullDetails: false);
             if (attestationObj.AuthenticatorData.CredentialId is null ||
                 attestationObj.AuthenticatorData.EncodedCredentialPublicKey is null)
             {
-                return null;
+                throw new Ctap2DataException(
+                    "previewSign generated key attestation is missing credential data.");
             }
 
             byte[] keyHandle = attestationObj.AuthenticatorData.CredentialId.Id.ToArray();
@@ -294,9 +294,8 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// Parse the signed previewSign extension output produced by the
         /// authenticator after a GetAssertion (key 6 inside
-        /// authData.extensions["previewSign"]). The value is a CBOR map
-        /// containing a single byte-string entry whose value is the DER-encoded
-        /// ECDSA signature.
+        /// authData.extensions["previewSign"]). The value is a CBOR map whose
+        /// key 6 entry is the signature byte string.
         /// </summary>
         public static byte[]? DecodeSignature(ReadOnlyMemory<byte> previewSignAuthDataValue)
         {

@@ -478,7 +478,6 @@ namespace Yubico.YubiKey.Cryptography
                 CoseAlgorithmIdentifier.ES256 => Oids.ECP256,
                 CoseAlgorithmIdentifier.ECDHwHKDF256 => Oids.ECP256,
                 CoseAlgorithmIdentifier.Esp256 => Oids.ECP256,
-                CoseAlgorithmIdentifier.Esp256Split => Oids.ECP256,
                 CoseAlgorithmIdentifier.ES384 => Oids.ECP384,
                 CoseAlgorithmIdentifier.ES512 => Oids.ECP521,
                 _ => throw new NotSupportedException(ExceptionMessages.UnsupportedAlgorithm)

@@ -727,7 +727,8 @@ namespace Yubico.YubiKey.Fido2
             AddCredProtectExtension(credProtectPolicy, true, authenticatorInfo);
 
         /// <summary>
-        /// Adds the previewSign extension for generating a signing key.
+        /// Adds the previewSign extension for generating a key that can be used
+        /// to sign arbitrary data.
         /// </summary>
         /// <remarks>
         /// The caller supplies the <see cref="AuthenticatorInfo"/> for the YubiKey,
@@ -742,7 +743,7 @@ namespace Yubico.YubiKey.Fido2
         /// The algorithms to use for key generation, ordered by preference.
         /// </param>
         /// <param name="flags">
-        /// The flags value to encode in the extension input.
+        /// The supported flag combination to encode in the extension input.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <paramref name="authenticatorInfo"/> or <paramref name="algorithms"/> is null.
@@ -763,7 +764,8 @@ namespace Yubico.YubiKey.Fido2
                 throw new ArgumentException("At least one previewSign algorithm is required.", nameof(algorithms));
             }
 
-            if (flags != PreviewSignOptions.RequireUserPresence &&
+            if (flags != PreviewSignOptions.Unattended &&
+                flags != PreviewSignOptions.RequireUserPresence &&
                 flags != PreviewSignOptions.RequireUserVerification)
             {
                 throw new ArgumentOutOfRangeException(nameof(flags));

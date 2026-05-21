@@ -396,7 +396,8 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Adds the previewSign extension for signing data with a generated key.
+        /// Adds the previewSign extension for signing arbitrary data with a dedicated
+        /// signing key distinct from the parent credential key.
         /// </summary>
         /// <param name="keyHandle">
         /// The key handle for the generated signing key.

@@ -115,17 +115,9 @@ namespace Yubico.YubiKey.Fido2
         /// The raw CBOR-encoded credential public key bytes from the authenticator data.
         /// </summary>
         /// <remarks>
-        /// <para>
         /// This property is always populated when attested credential data is present,
         /// regardless of whether the key was parsed into a <see cref="CoseKey"/> via
-        /// <see cref="CredentialPublicKey"/>. Use this property when the credential
-        /// public key uses a non-standard format (such as ARKG composite keys) that
-        /// cannot be represented as a <see cref="CoseKey"/>.
-        /// </para>
-        /// <para>
-        /// For standard FIDO2 credential public keys, prefer <see cref="CredentialPublicKey"/>
-        /// which provides typed access to key parameters.
-        /// </para>
+        /// <see cref="CredentialPublicKey"/>.
         /// </remarks>
         public ReadOnlyMemory<byte>? EncodedCredentialPublicKey { get; private set; }
 
@@ -172,8 +164,7 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="parseCredentialPublicKey">
         /// If true (default), parses the credential public key into a <see cref="CoseKey"/> object.
         /// If false, skips CoseKey parsing but still populates <see cref="EncodedCredentialPublicKey"/>
-        /// with the raw CBOR bytes. Use false when the COSE key may not conform to standard
-        /// CoseKey validation rules (e.g., ARKG keys without an alg field).
+        /// with the raw CBOR bytes.
         /// </param>
         /// <exception cref="ArgumentException">
         /// The <c>encodedData</c> is not a correct encoding for FIDO2
@@ -428,12 +419,6 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// Gets the previewSign signature from the extension outputs.
         /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The previewSign extension returns a DER-encoded ECDSA signature in the
-        /// signed extension outputs. This method extracts that signature if present.
-        /// </para>
-        /// </remarks>
         /// <returns>
         /// The signature bytes if the extension was used and returned data; otherwise, <c>null</c>.
         /// </returns>

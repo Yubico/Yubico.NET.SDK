@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.Fido2.Cose
                     or CoseAlgorithmIdentifier.ES384
                     or CoseAlgorithmIdentifier.ES512
                     or CoseAlgorithmIdentifier.Esp256
-                    or CoseAlgorithmIdentifier.ArkgP256Esp256
+                    or CoseAlgorithmIdentifier.Esp256Split
                     => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
                 CoseAlgorithmIdentifier.EdDSA => CoseEdDsaPublicKey.CreateFromEncodedKey(coseEncodedKey),
                 _ => throw new NotSupportedException(

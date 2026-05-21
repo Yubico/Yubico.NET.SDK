@@ -13,9 +13,11 @@
 // limitations under the License.
 
 using System;
+using System.Formats.Cbor;
 using CommunityToolkit.Diagnostics;
 using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Fido2;
+using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.TestUtilities.Fido2
 {
@@ -37,6 +39,9 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// </remarks>
     public static class PreviewSignGeneratedKeyExtensions
     {
+        private const int CoseKeyTypeArkgP256 = -65537;
+        private const int CoseAlgorithmArkgP256 = -65700;
+
         /// <summary>
         /// Derives a public key using the ARKG-P256 algorithm.
         /// </summary>
@@ -133,7 +138,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         {
             Guard.IsNotNull(generatedKey, nameof(generatedKey));
 
-            var (blindingPublicKey, kemPublicKey) = PreviewSignExtension.ParseArkgCoseKey(generatedKey.PublicKey.ToArray());
+            var (blindingPublicKey, kemPublicKey) = ParseArkgCoseKey(generatedKey.PublicKey.ToArray());
             var (derivedPublicKey, arkgKeyHandle) = ArkgPrimitives.Create().Derive(
                 blindingPublicKey,
                 kemPublicKey,
@@ -145,6 +150,132 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
                 arkgKeyHandle,
                 generatedKey.KeyHandle,
                 context.ToArray());
+        }
+
+        private static (byte[] blindingPublicKey, byte[] kemPublicKey) ParseArkgCoseKey(byte[] coseEncoded)
+        {
+            var reader = new CborReader(coseEncoded, CborConformanceMode.Ctap2Canonical);
+            int? entries = reader.ReadStartMap();
+            int count = entries ?? int.MaxValue;
+
+            bool? isEc2Key = null;
+            bool? isArkgP256Key = null;
+            byte[]? blindingPublicKey = null;
+            byte[]? kemPublicKey = null;
+
+            for (int i = 0; i < count; i++)
+            {
+                if (reader.PeekState() == CborReaderState.EndMap)
+                {
+                    break;
+                }
+
+                long key = reader.ReadInt64();
+                if (key == 1)
+                {
+                    int keyType = reader.ReadInt32();
+                    isEc2Key = keyType == (int)CoseKeyType.Ec2 || keyType == CoseKeyTypeArkgP256;
+                }
+                else if (key == 3)
+                {
+                    int algorithm = reader.ReadInt32();
+                    isArkgP256Key =
+                        algorithm == (int)PreviewSignParametersExtensions.ArkgP256Esp256 ||
+                        algorithm == CoseAlgorithmArkgP256;
+                }
+                else if (key == -1)
+                {
+                    blindingPublicKey = ReadEc2PointAsSec1(reader);
+                }
+                else if (key == -2)
+                {
+                    kemPublicKey = ReadEc2PointAsSec1(reader);
+                }
+                else
+                {
+                    reader.SkipValue();
+                }
+            }
+
+            reader.ReadEndMap();
+
+            if (isEc2Key == false || isArkgP256Key == false)
+            {
+                throw new Ctap2DataException(
+                    "previewSign COSE key must be an EC2 ARKG-P256 key.");
+            }
+
+            if (blindingPublicKey is null || kemPublicKey is null)
+            {
+                throw new Ctap2DataException(
+                    "previewSign COSE key missing blindingPublicKey (-1) or kemPublicKey (-2).");
+            }
+
+            return (blindingPublicKey, kemPublicKey);
+        }
+
+        private static byte[] ReadEc2PointAsSec1(CborReader reader)
+        {
+            int? subEntries = reader.ReadStartMap();
+            int subCount = subEntries ?? int.MaxValue;
+
+            bool? isEc2Key = null;
+            bool? isP256Curve = null;
+            byte[]? x = null;
+            byte[]? y = null;
+            for (int j = 0; j < subCount; j++)
+            {
+                if (reader.PeekState() == CborReaderState.EndMap)
+                {
+                    break;
+                }
+
+                long subKey = reader.ReadInt64();
+                if (subKey == 1)
+                {
+                    isEc2Key = reader.ReadInt32() == (int)CoseKeyType.Ec2;
+                }
+                else if (subKey == 3)
+                {
+                    reader.SkipValue();
+                }
+                else if (subKey == -1)
+                {
+                    isP256Curve = reader.ReadInt32() == (int)CoseEcCurve.P256;
+                }
+                else if (subKey == -2)
+                {
+                    x = reader.ReadByteString();
+                }
+                else if (subKey == -3)
+                {
+                    y = reader.ReadByteString();
+                }
+                else
+                {
+                    reader.SkipValue();
+                }
+            }
+
+            reader.ReadEndMap();
+
+            if (isEc2Key == false || isP256Curve == false)
+            {
+                throw new Ctap2DataException(
+                    "previewSign ARKG public-key components must be EC2 P-256 keys.");
+            }
+
+            if (x is null || y is null || x.Length != 32 || y.Length != 32)
+            {
+                throw new Ctap2DataException(
+                    "previewSign EC2 point coordinates must be 32 bytes each.");
+            }
+
+            byte[] sec1 = new byte[65];
+            sec1[0] = 0x04;
+            Buffer.BlockCopy(x, 0, sec1, 1, 32);
+            Buffer.BlockCopy(y, 0, sec1, 33, 32);
+            return sec1;
         }
     }
 }

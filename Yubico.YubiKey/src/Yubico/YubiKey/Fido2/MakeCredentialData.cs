@@ -156,10 +156,40 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <remarks>
         /// This dictionary contains extension outputs that are not included in the
-        /// signed authenticator data. The previewSign extension uses this to return
-        /// generated key material.
+        /// signed authenticator data.
         /// </remarks>
         public IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? UnsignedExtensionOutputs { get; private set; }
+
+        /// <summary>
+        /// Retrieves the previewSign generated key from the extension outputs.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="PreviewSignGeneratedKey"/> if the extension was used and returned
+        /// data; otherwise, <c>null</c>.
+        /// </returns>
+        public PreviewSignGeneratedKey? GetPreviewSignGeneratedKey()
+        {
+            CoseAlgorithmIdentifier? signedAlgorithm = null;
+            byte[]? signedValue = null;
+            if (AuthenticatorData.Extensions is not null &&
+                AuthenticatorData.Extensions.TryGetValue(Extensions.PreviewSign, out signedValue))
+            {
+                signedAlgorithm = PreviewSignExtension.DecodeGeneratedKeyAlgorithm(signedValue);
+            }
+
+            if (UnsignedExtensionOutputs is not null &&
+                UnsignedExtensionOutputs.TryGetValue(Extensions.PreviewSign, out var unsignedValue))
+            {
+                return PreviewSignExtension.DecodeGeneratedKey(unsignedValue, signedAlgorithm);
+            }
+
+            if (signedValue is not null)
+            {
+                return PreviewSignExtension.DecodeGeneratedKey(signedValue);
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// This returns the raw CBOR encoded credential data from the YubiKey, as returned by the MakeCredential operation.
@@ -244,45 +274,6 @@ namespace Yubico.YubiKey.Fido2
                         ExceptionMessages.InvalidFido2Info),
                     cborException);
             }
-        }
-
-        /// <summary>
-        /// Retrieves the previewSign generated key from the unsigned extension outputs.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The previewSign extension returns generated key material in the unsigned
-        /// extension outputs (CTAP response key 0x06). This method parses that data
-        /// and returns a <see cref="PreviewSignGeneratedKey"/> instance containing
-        /// the key handle and public key components.
-        /// </para>
-        /// </remarks>
-        /// <returns>
-        /// A <see cref="PreviewSignGeneratedKey"/> if the extension was used and returned
-        /// data; otherwise, <c>null</c>.
-        /// </returns>
-        public PreviewSignGeneratedKey? GetPreviewSignGeneratedKey()
-        {
-            CoseAlgorithmIdentifier? signedAlgorithm = null;
-            byte[]? signedValue = null;
-            if (AuthenticatorData.Extensions is not null &&
-                AuthenticatorData.Extensions.TryGetValue(Extensions.PreviewSign, out signedValue))
-            {
-                signedAlgorithm = PreviewSignExtension.DecodeGeneratedKeyAlgorithm(signedValue);
-            }
-
-            if (UnsignedExtensionOutputs is not null &&
-                UnsignedExtensionOutputs.TryGetValue(Extensions.PreviewSign, out var unsignedValue))
-            {
-                return PreviewSignExtension.DecodeGeneratedKey(unsignedValue, signedAlgorithm);
-            }
-
-            if (signedValue is not null)
-            {
-                return PreviewSignExtension.DecodeGeneratedKey(signedValue);
-            }
-
-            return null;
         }
 
         /// <summary>

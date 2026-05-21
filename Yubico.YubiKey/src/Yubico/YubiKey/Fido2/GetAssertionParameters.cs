@@ -396,64 +396,26 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Adds the previewSign extension for signing with a derived credential.
+        /// Adds the previewSign extension for signing data with a generated key.
         /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The previewSign extension enables signing operations using a public key
-        /// derived offline via ARKG (Asynchronous Remote Key Generation) from a
-        /// generated key returned during credential creation.
-        /// </para>
-        /// <para>
-        /// The <paramref name="deviceKeyHandle"/>, <paramref name="arkgKeyHandle"/>,
-        /// and <paramref name="context"/> should be obtained from the relying-party's
-        /// ARKG derivation step applied to the generated key material from the original
-        /// credential creation. RP-side ARKG derivation is the consuming application's
-        /// responsibility and is not exposed by this SDK.
-        /// </para>
-        /// <para>
-        /// The caller is responsible for hashing the message (SHA-256) before passing it as
-        /// <paramref name="messageDigest"/>. This method internally encodes the ARKG
-        /// sign args from the provided <paramref name="arkgKeyHandle"/> and <paramref name="context"/>.
-        /// </para>
-        /// <para>
-        /// After the assertion succeeds, retrieve the signature using
-        /// <see cref="AuthenticatorData.GetPreviewSignSignature"/> and verify it using
-        /// the relying party's ARKG-derived public key and a P-256 ECDSA verifier.
-        /// </para>
-        /// </remarks>
-        /// <param name="deviceKeyHandle">
-        /// The device key handle from the original registration (credential ID).
+        /// <param name="keyHandle">
+        /// The key handle for the generated signing key.
         /// </param>
-        /// <param name="arkgKeyHandle">
-        /// The ARKG key handle obtained from the relying party's ARKG derivation step.
+        /// <param name="toBeSigned">
+        /// The data to be signed.
         /// </param>
-        /// <param name="context">
-        /// The context string used during key derivation.
+        /// <param name="additionalArgs">
+        /// Optional CBOR-encoded additional arguments for the signing operation.
         /// </param>
-        /// <param name="messageDigest">
-        /// The pre-hashed message to be signed (SHA-256 hash of the original message).
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// The <paramref name="messageDigest"/> is null.
-        /// </exception>
         /// <exception cref="InvalidOperationException">
         /// The allow-list is null or empty. The previewSign extension requires at least one credential
         /// in the allow-list.
         /// </exception>
         public void AddPreviewSignExtension(
-            ReadOnlyMemory<byte> deviceKeyHandle,
-            ReadOnlyMemory<byte> arkgKeyHandle,
-            ReadOnlyMemory<byte> context,
-            byte[] messageDigest)
+            ReadOnlyMemory<byte> keyHandle,
+            ReadOnlyMemory<byte> toBeSigned,
+            ReadOnlyMemory<byte>? additionalArgs = null)
         {
-            Guard.IsNotNull(messageDigest, nameof(messageDigest));
-
-            if (messageDigest.Length != 32)
-            {
-                throw new ArgumentException("previewSign requires a 32-byte SHA-256 digest.", nameof(messageDigest));
-            }
-
             if (AllowList is null || AllowList.Count == 0)
             {
                 throw new InvalidOperationException(
@@ -461,10 +423,9 @@ namespace Yubico.YubiKey.Fido2
                     "Call AllowCredential() with the credential ID returned from MakeCredential before invoking AddPreviewSignExtension().");
             }
 
-            byte[] additionalArgs = PreviewSignExtension.EncodeArkgSignArgs(arkgKeyHandle, context);
             byte[] encoded = PreviewSignExtension.EncodeSignInput(
-                deviceKeyHandle,
-                messageDigest,
+                keyHandle,
+                toBeSigned,
                 additionalArgs);
             AddExtension(Fido2.Extensions.PreviewSign, encoded);
         }

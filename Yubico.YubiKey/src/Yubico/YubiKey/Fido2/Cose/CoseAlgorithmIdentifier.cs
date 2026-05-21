@@ -57,16 +57,14 @@ namespace Yubico.YubiKey.Fido2.Cose
         EdDSA = -8,
 
         /// <summary>
-        /// Identifies the resulting ECDSA-P256 signature algorithm used by the
-        /// previewSign extension. The YubiKey emits a standard ECDSA-P256 signature.
-        /// This is not a standard IANA-registered COSE algorithm identifier.
+        /// Identifies an ECDSA-P256 signature algorithm used by preview firmware.
         /// </summary>
-        /// <remarks>
-        /// Do NOT pass this value as the <c>alg</c> field of the previewSign
-        /// COSE_Sign_Args map; that field requests an ARKG-derived signing
-        /// operation and must be <see cref="ArkgP256Esp256"/> (-65539).
-        /// </remarks>
         Esp256 = -9,
+
+        /// <summary>
+        /// Identifies an ECDSA-P256 split signing algorithm used by preview firmware.
+        /// </summary>
+        Esp256Split = -65539,
 
         /// <summary>
         /// RSASSA-PKCS1-v1_5 with SHA-256
@@ -74,16 +72,5 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </summary>
         RS256 = -257,
 
-        // Cross-ref: python-fido2 cose.py:391 (ESP256_SPLIT_ARKG_PLACEHOLDER), draft-bradleylundberg-cfrg-arkg-10 §8.3
-        /// <summary>
-        /// ARKG-P256 key derivation with ESP256 signing. Used in two places for the
-        /// previewSign extension: (1) the algorithms array passed to
-        /// <see cref="MakeCredentialParameters.AddPreviewSignGenerateKeyExtension"/>
-        /// to request ARKG-P256 key generation, and (2) the <c>alg</c> field of
-        /// the COSE_Sign_Args map sent during a sign-by-credential request to
-        /// identify the operation as ARKG-derived. The resulting signature
-        /// itself is plain ECDSA-P256 (<see cref="Esp256"/>).
-        /// </summary>
-        ArkgP256Esp256 = -65539,
     }
 }

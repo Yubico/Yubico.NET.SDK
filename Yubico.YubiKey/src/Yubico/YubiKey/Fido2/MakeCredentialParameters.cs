@@ -727,41 +727,22 @@ namespace Yubico.YubiKey.Fido2
             AddCredProtectExtension(credProtectPolicy, true, authenticatorInfo);
 
         /// <summary>
-        /// Adds the previewSign extension for generating a key that can be used
-        /// for offline public key derivation and signing.
+        /// Adds the previewSign extension for generating a signing key.
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// The previewSign extension enables ARKG (Asynchronous Remote Key Generation)
-        /// functionality, allowing offline derivation of public keys from a generated
-        /// key material returned by the YubiKey.
-        /// </para>
-        /// <para>
         /// The caller supplies the <see cref="AuthenticatorInfo"/> for the YubiKey,
         /// obtained by calling the <see cref="Commands.GetInfoCommand"/> or
         /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
-        /// This method will verify that the YubiKey supports the previewSign extension.
-        /// </para>
-        /// <para>
-        /// After credential creation, retrieve the generated key material using
-        /// <see cref="MakeCredentialData.GetPreviewSignGeneratedKey"/>. Relying-party-side
-        /// ARKG derivation from that generated key material is the consuming application's
-        /// responsibility and is not exposed by this SDK. The YubiKey can sign with any
-        /// RP-derived key when provided the corresponding ARKG key handle and context via
-        /// <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.
-        /// </para>
+        /// This method verifies that the YubiKey supports the previewSign extension.
         /// </remarks>
         /// <param name="authenticatorInfo">
         /// The FIDO2 <see cref="AuthenticatorInfo"/> for the YubiKey being used.
         /// </param>
         /// <param name="algorithms">
-        /// The algorithms to use for key generation, ordered by preference. For
-        /// ARKG-P256, include <see cref="CoseAlgorithmIdentifier.ArkgP256Esp256"/>.
+        /// The algorithms to use for key generation, ordered by preference.
         /// </param>
         /// <param name="flags">
-        /// The flags value to encode in the extension input. Use
-        /// <see cref="PreviewSignOptions.RequireUserPresence"/> (default) or
-        /// <see cref="PreviewSignOptions.RequireUserVerification"/>.
+        /// The flags value to encode in the extension input.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <paramref name="authenticatorInfo"/> or <paramref name="algorithms"/> is null.

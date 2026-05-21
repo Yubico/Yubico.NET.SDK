@@ -40,12 +40,12 @@ namespace Yubico.YubiKey.Fido2
         public void MakeCredentialWithPreviewSign_ReturnsGeneratedKey()
         {
             Skip.IfNot(
-                Session.AuthenticatorInfo.IsExtensionSupported(Extensions.PreviewSign),
+                Session.AuthenticatorInfo.IsExtensionSupported(PreviewSignParametersExtensions.ExtensionName),
                 "YubiKey does not advertise previewSign extension");
 
             MakeCredentialParameters.AddPreviewSignGenerateKeyExtension(
                 Session.AuthenticatorInfo,
-                new[] { CoseAlgorithmIdentifier.ArkgP256Esp256 });
+                new[] { PreviewSignParametersExtensions.ArkgP256Esp256 });
 
             var credData = Session.MakeCredential(MakeCredentialParameters);
             var isValid = credData.VerifyAttestation(MakeCredentialParameters.ClientDataHash);
@@ -54,21 +54,24 @@ namespace Yubico.YubiKey.Fido2
             var generatedKey = credData.GetPreviewSignGeneratedKey();
             Assert.NotNull(generatedKey);
             Assert.NotEmpty(generatedKey.KeyHandle.Span.ToArray());
-            byte[] credentialPk = credData.AuthenticatorData.EncodedCredentialPublicKey!.Value.ToArray();
-            Assert.Equal(credentialPk, generatedKey.PublicKey.ToArray());
+            Assert.NotEmpty(generatedKey.PublicKey.Span.ToArray());
+            Assert.NotNull(generatedKey.AttestationObject.AuthenticatorData.EncodedCredentialPublicKey);
+            Assert.Equal(
+                generatedKey.AttestationObject.AuthenticatorData.EncodedCredentialPublicKey!.Value.ToArray(),
+                generatedKey.PublicKey.ToArray());
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void FullCeremony_RegisterDeriveSignVerify_RoundTrip()
         {
             Skip.IfNot(
-                Session.AuthenticatorInfo.IsExtensionSupported(Extensions.PreviewSign),
+                Session.AuthenticatorInfo.IsExtensionSupported(PreviewSignParametersExtensions.ExtensionName),
                 "YubiKey does not advertise previewSign extension");
 
             // Step A: Register with previewSign (requires user presence - touch #1)
             MakeCredentialParameters.AddPreviewSignGenerateKeyExtension(
                 Session.AuthenticatorInfo,
-                new[] { CoseAlgorithmIdentifier.ArkgP256Esp256 });
+                new[] { PreviewSignParametersExtensions.ArkgP256Esp256 });
 
             var mcData = Session.MakeCredential(MakeCredentialParameters);
             var generatedKey = mcData.GetPreviewSignGeneratedKey();
@@ -118,7 +121,7 @@ namespace Yubico.YubiKey.Fido2
         public void MakeCredentialWithUnsupportedAlgorithm_Fails()
         {
             Skip.IfNot(
-                Session.AuthenticatorInfo.IsExtensionSupported(Extensions.PreviewSign),
+                Session.AuthenticatorInfo.IsExtensionSupported(PreviewSignParametersExtensions.ExtensionName),
                 "YubiKey does not advertise previewSign extension");
 
             // Request previewSign with ES256 (not Esp256)

@@ -22,24 +22,8 @@ namespace Yubico.YubiKey.Fido2
     /// previewSign extension registration.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// This class contains the key handle and CBOR-encoded public key needed to
-    /// perform offline ARKG (Asynchronous Remote Key Generation) key derivation.
-    /// Relying-party-side derivation and verification are the consuming
-    /// application's responsibility and are not exposed by this SDK.
-    /// </para>
-    /// <para>
-    /// Instances of this class are obtained by calling
-    /// <see cref="MakeCredentialData.GetPreviewSignGeneratedKey"/> after creating
-    /// a credential with the previewSign extension enabled via
-    /// <see cref="MakeCredentialParameters.AddPreviewSignGenerateKeyExtension"/>.
-    /// </para>
-    /// <para>
-    /// The generated key material enables offline derivation of multiple public
-    /// keys from a single credential, each identified by a unique context string.
-    /// The YubiKey can sign with any derived key when provided the corresponding
-    /// ARKG key handle and context.
-    /// </para>
+    /// Instances of this class are obtained by decoding previewSign extension
+    /// output after creating a credential with previewSign enabled.
     /// </remarks>
     public sealed class PreviewSignGeneratedKey
     {

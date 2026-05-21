@@ -113,7 +113,7 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="parseFullDetails">
         /// If true (default), parses typed attestation statement fields for "packed" format
         /// and parses credential public key into a <see cref="CoseKey"/>. If false, stores
-        /// raw bytes only — useful for non-standard COSE key formats like ARKG.
+        /// raw bytes only.
         /// Unknown formats are always handled gracefully.
         /// </param>
         /// <exception cref="Ctap2DataException">
@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="parseFullDetails">
         /// If true (default), parses typed attestation statement fields for "packed" format
         /// and parses credential public key into a <see cref="CoseKey"/>. If false, stores
-        /// raw bytes only — useful for non-standard COSE key formats like ARKG.
+        /// raw bytes only.
         /// Unknown formats are always handled gracefully.
         /// </param>
         /// <exception cref="Ctap2DataException">

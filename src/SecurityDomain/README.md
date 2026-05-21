@@ -118,7 +118,7 @@ await session.StoreCaIssuerAsync(oceKeyRef, subjectKeyIdentifier, cancellationTo
 
 // Store serial number allowlist
 string[] allowedSerials = ["7F4971B0AD51F84C9DA9928B2D5FEF5E16B2920A"];
-await session.StoreAllowlistAsync(oceKeyRef, allowedSerials);
+await session.StoreAllowListAsync(oceKeyRef, allowedSerials);
 ```
 
 ### Factory Reset

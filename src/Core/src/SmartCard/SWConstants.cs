@@ -177,6 +177,18 @@ public static class SWConstants
     /// <summary>No precise diagnosis possible.</summary>
     public const short NoPreciseDiagnosis = 0x6F00;
 
+    /// <summary>
+    /// Extracts the remaining retry count from a 0x63Cx status word.
+    /// Returns null if the status word is not a retry-count response.
+    /// </summary>
+    public static int? ExtractRetryCount(short sw) =>
+        IsVerifyFailWithRetries(sw) ? sw & 0x0F : null;
+
+    /// <summary>
+    /// Returns true if the status word indicates a verification failure with retry count (0x63C0-0x63CF).
+    /// </summary>
+    public static bool IsVerifyFailWithRetries(short sw) =>
+        (sw & unchecked((short)0xFFF0)) == VerifyFail;
 
     /// <summary>
     ///     Gets a human-readable description for a status word.

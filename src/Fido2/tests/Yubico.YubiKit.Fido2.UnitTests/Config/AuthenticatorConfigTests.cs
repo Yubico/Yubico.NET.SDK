@@ -355,9 +355,10 @@ public class AuthenticatorConfigTests
         // Assert - check what message was authenticated via our test protocol
         var capturedMessage = _testProtocol.LastAuthenticateMessage;
         Assert.NotNull(capturedMessage);
-        Assert.Equal(2, capturedMessage.Length);
-        Assert.Equal(0xff, capturedMessage[0]); // Magic prefix
-        Assert.Equal(0x01, capturedMessage[1]); // EnableEnterpriseAttestation
+        Assert.Equal(34, capturedMessage.Length);
+        for (var i = 0; i < 32; i++) Assert.Equal(0xff, capturedMessage[i]);
+        Assert.Equal(0x0D, capturedMessage[32]); // CtapCommand.Config
+        Assert.Equal(0x01, capturedMessage[33]); // EnableEnterpriseAttestation
     }
     
     [Fact]
@@ -375,8 +376,9 @@ public class AuthenticatorConfigTests
         // Assert - check what message was authenticated via our test protocol
         var capturedMessage = _testProtocol.LastAuthenticateMessage;
         Assert.NotNull(capturedMessage);
-        Assert.Equal(2, capturedMessage.Length);
-        Assert.Equal(0xff, capturedMessage[0]); // Magic prefix
-        Assert.Equal(0x02, capturedMessage[1]); // ToggleAlwaysUv
+        Assert.Equal(34, capturedMessage.Length);
+        for (var i = 0; i < 32; i++) Assert.Equal(0xff, capturedMessage[i]);
+        Assert.Equal(0x0D, capturedMessage[32]); // CtapCommand.Config
+        Assert.Equal(0x02, capturedMessage[33]); // ToggleAlwaysUv
     }
 }

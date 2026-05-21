@@ -21,17 +21,17 @@ public class HsmAuthSessionTests
         new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds)).Token;
 
     // Default management key (all zeros after reset)
-    private static readonly byte[] DefaultManagementKey = new byte[16];
+    private static ReadOnlyMemory<byte> DefaultManagementKey => new byte[16];
 
     // A management key that passes complexity requirements on Enhanced PIN devices.
     // Note: alpha/beta firmware has non-standard complexity checks — this specific
     // value is known to pass on 5.8.0-alpha YubiKeys. On production firmware,
     // any 16-byte non-zero key should work.
-    private static readonly byte[] ComplexManagementKey =
-    [
+    private static ReadOnlyMemory<byte> ComplexManagementKey => new byte[]
+    {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-    ];
+    };
 
     private const string TestLabel = "test-credential";
     private const string TestPassword = "password";
@@ -126,7 +126,7 @@ public class HsmAuthSessionTests
             {
                 // Use ComplexManagementKey — random bytes may fail PIN complexity
                 // on Enhanced PIN devices that enforce entropy requirements.
-                var newKey = (byte[])ComplexManagementKey.Clone();
+                var newKey = ComplexManagementKey.ToArray();
                 try
                 {
                     // Change from default to new key

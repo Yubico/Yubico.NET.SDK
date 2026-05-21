@@ -29,7 +29,7 @@ public class FidoEnhancedPinTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task EnhancedPin_CompliantPin_Succeeds(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -95,7 +95,7 @@ public class FidoEnhancedPinTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task ClientPin_RetrievesPinRetries(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

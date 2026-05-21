@@ -32,7 +32,7 @@ public class FidoMinPinLengthTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_WithMinPinLength_ReturnsMinPinLength(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

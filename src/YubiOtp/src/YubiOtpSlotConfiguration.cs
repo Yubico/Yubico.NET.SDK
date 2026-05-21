@@ -45,30 +45,6 @@ public sealed class YubiOtpSlotConfiguration : KeyboardSlotConfiguration
         ReadOnlySpan<byte> privateId,
         ReadOnlySpan<byte> aesKey)
     {
-        if (publicId.Length > YubiOtpConstants.FixedSize)
-        {
-            throw new ArgumentException(
-                $"Public ID must be at most {YubiOtpConstants.FixedSize} bytes.",
-                nameof(publicId));
-        }
-
-        if (privateId.Length != YubiOtpConstants.UidSize)
-        {
-            throw new ArgumentException(
-                $"Private ID must be exactly {YubiOtpConstants.UidSize} bytes.",
-                nameof(privateId));
-        }
-
-        if (aesKey.Length != YubiOtpConstants.KeySize)
-        {
-            throw new ArgumentException(
-                $"AES key must be exactly {YubiOtpConstants.KeySize} bytes.",
-                nameof(aesKey));
-        }
-
-        publicId.CopyTo(_fixed);
-        privateId.CopyTo(_uid);
-        aesKey.CopyTo(_key);
-        _fixedSize = (byte)publicId.Length;
+        InitializeKeys(publicId, privateId, aesKey);
     }
 }

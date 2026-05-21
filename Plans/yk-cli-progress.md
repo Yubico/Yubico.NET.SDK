@@ -13,7 +13,7 @@
 - [x] `YkCommandInterceptor` wired into `CommandApp`
 - [x] Error taxonomy (`ExitCode`) defined and referenced in base command
 - [x] `yk --help` renders all 7 applet branches with descriptions (verify runtime)
-- [x] `dotnet build.cs build` — zero warnings, zero errors (Build succeeded)
+- [x] `dotnet toolchain.cs build` — zero warnings, zero errors (Build succeeded)
 
 ---
 

@@ -31,12 +31,8 @@ public sealed partial class PivSession
     public async Task<PivBioMetadata> GetBioMetadataAsync(CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
-        
+        EnsureProtocol();
+
         Logger.LogDebug("PIV: Getting biometric metadata");
         
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x96, ReadOnlyMemory<byte>.Empty);
@@ -60,9 +56,14 @@ public sealed partial class PivSession
         }
         
         var data = response.Data.Span;
-        
-        // Parse metadata TLV structure
-        // Simplified parsing - actual format depends on YubiKey Bio implementation
+
+        // TODO: This parses response bytes by raw position, which is fragile.
+        // The YubiKey Bio metadata response likely uses a TLV structure (similar to
+        // other metadata responses), but the exact tags are not documented in the
+        // public PIV specification. Once the Bio metadata TLV tags are confirmed
+        // (e.g., from the YubiKey Bio technical reference), this should be converted
+        // to proper TLV parsing using TlvHelper.DecodeDictionary() for robustness
+        // against field reordering or optional fields.
         var isConfigured = data.Length > 0 && data[0] != 0;
         var retriesRemaining = data.Length > 1 ? data[1] : 0;
         var temporaryPinEnabled = data.Length > 2 && data[2] == 1;
@@ -82,12 +83,8 @@ public sealed partial class PivSession
     public async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(bool requestTemporaryPin = false, bool checkOnly = false, CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
-        
+        EnsureProtocol();
+
         Logger.LogDebug("PIV: Verifying user via biometric (checkOnly={CheckOnly})", checkOnly);
         
         // Build command data
@@ -112,10 +109,8 @@ public sealed partial class PivSession
             throw new NotSupportedException("Biometrics are not supported or not configured on this YubiKey");
         }
         
-        // SW 0x63Cx means biometric verification failed (x = retries remaining)
-        if ((response.SW & 0xFFF0) == 0x63C0)
+        if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
         {
-            var retriesRemaining = response.SW & 0x0F;
             throw new InvalidOperationException($"Biometric verification failed. {retriesRemaining} retries remaining.");
         }
         
@@ -154,12 +149,8 @@ public sealed partial class PivSession
     public async Task VerifyTemporaryPinAsync(ReadOnlyMemory<byte> temporaryPin, CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
-        
+        EnsureProtocol();
+
         if (temporaryPin.IsEmpty)
         {
             throw new ArgumentException("Temporary PIN cannot be empty", nameof(temporaryPin));
@@ -178,10 +169,8 @@ public sealed partial class PivSession
             var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData.AsMemory(0, 2 + temporaryPin.Length));
             var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
             
-            // SW 0x63Cx means verification failed (x = retries remaining)
-            if ((response.SW & 0xFFF0) == 0x63C0)
+            if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
             {
-                var retriesRemaining = response.SW & 0x0F;
                 throw new InvalidPinException(
                     retriesRemaining,
                     $"Temporary PIN verification failed. {retriesRemaining} retries remaining.");

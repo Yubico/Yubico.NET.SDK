@@ -190,7 +190,7 @@ public static class FidoSessionExtensions
 **Step 4: Verify build compiles**
 
 ```bash
-dotnet build.cs build --project Yubico.YubiKit.Fido2.IntegrationTests
+dotnet toolchain.cs build --project Yubico.YubiKit.Fido2.IntegrationTests
 ```
 
 Expected: Build succeeds (infrastructure code compiles)
@@ -359,7 +359,7 @@ public class FidoMakeCredentialTests
 **Step 2: Verify RED**
 
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~FidoMakeCredentialTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~FidoMakeCredentialTests"
 ```
 
 Expected: Tests should compile but may fail if device not present, or pass if device available.
@@ -374,7 +374,7 @@ Adjust test code based on actual API signatures discovered in the codebase. Refe
 **Step 4: Verify GREEN**
 
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~FidoMakeCredentialTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~FidoMakeCredentialTests"
 ```
 
 **Step 5: Commit**
@@ -537,7 +537,7 @@ public class FidoGetAssertionTests
 **Step 2: Verify RED**
 
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~FidoGetAssertionTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~FidoGetAssertionTests"
 ```
 
 **Step 3: Adjust based on actual API**
@@ -547,7 +547,7 @@ Reference existing test patterns and FidoSession API.
 **Step 4: Verify GREEN**
 
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~FidoGetAssertionTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~FidoGetAssertionTests"
 ```
 
 **Step 5: Commit**
@@ -684,7 +684,7 @@ public class FidoCredentialManagementTests
 **Step 2-5:** Verify RED → Implement → Verify GREEN → Commit
 
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~FidoCredentialManagementTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~FidoCredentialManagementTests"
 git add Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/FidoCredentialManagementTests.cs
 git commit -m "test(fido2): add credential management integration tests"
 ```
@@ -790,7 +790,7 @@ public class FidoAlgorithmSupportTests
 **Step 2-5:** Verify RED → Implement → Verify GREEN → Commit
 
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~FidoAlgorithmSupportTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~FidoAlgorithmSupportTests"
 git add Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/FidoAlgorithmSupportTests.cs
 git commit -m "test(fido2): add algorithm support integration tests"
 ```
@@ -894,7 +894,7 @@ public class FidoGetInfoTests
 **Step 2-5:** Verify RED → Implement → Verify GREEN → Commit
 
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~FidoGetInfoTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~FidoGetInfoTests"
 git add Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/FidoGetInfoTests.cs
 git commit -m "test(fido2): add GetInfo validation tests"
 ```
@@ -955,7 +955,7 @@ public class FidoFipsComplianceTests
 **Step 2-5:** Verify RED → Implement → Verify GREEN → Commit
 
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~FidoFipsComplianceTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~FidoFipsComplianceTests"
 git add Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/FidoFipsComplianceTests.cs
 git commit -m "test(fido2): add FIPS compliance integration tests"
 ```
@@ -1017,7 +1017,7 @@ public class FidoEnhancedPinTests
 **Step 2-5:** Verify RED → Implement → Verify GREEN → Commit
 
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~FidoEnhancedPinTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~FidoEnhancedPinTests"
 git add Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/FidoEnhancedPinTests.cs
 git commit -m "test(fido2): add enhanced PIN integration tests"
 ```
@@ -1047,7 +1047,7 @@ grep -rE "(Log|Console|Output).*Pin" Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.F
 # Should return nothing or only non-sensitive references
 
 # Verify all tests compile and have cleanup
-dotnet build.cs build --project Yubico.YubiKit.Fido2.IntegrationTests
+dotnet toolchain.cs build --project Yubico.YubiKit.Fido2.IntegrationTests
 ```
 
 **Commit security verification:**
@@ -1065,19 +1065,19 @@ git commit -m "chore(fido2-tests): security review complete"
 
 1. **Build:** 
    ```bash
-   dotnet build.cs build
+   dotnet toolchain.cs build
    ```
    Must exit 0
 
 2. **All new tests pass:**
    ```bash
-   dotnet build.cs test --filter "Namespace~Yubico.YubiKey.Fido2.IntegrationTests"
+   dotnet toolchain.cs test --filter "Namespace~Yubico.YubiKey.Fido2.IntegrationTests"
    ```
    All tests must pass (or skip appropriately if no device)
 
 3. **No regressions:**
    ```bash
-   dotnet build.cs test
+   dotnet toolchain.cs test
    ```
    Existing tests still pass
 

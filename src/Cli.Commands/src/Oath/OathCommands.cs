@@ -332,7 +332,7 @@ public sealed class OathAccountsAddCommand : YkCommandBase<OathAccountsAddSettin
             _ => throw new ArgumentException($"Invalid algorithm: '{settings.AlgorithmStr}'.")
         };
 
-        var credentialData = new CredentialData
+        using var credentialData = new CredentialData
         {
             Name = settings.Name,
             OathType = oathType,
@@ -522,26 +522,29 @@ public sealed class OathAccountsUriCommand : YkCommandBase<OathAccountsUriSettin
             return ExitCode.GenericError;
         }
 
-        var displayName = FormatCredentialName(credentialData.Issuer, credentialData.Name);
-
-        if (!settings.Force)
+        using (credentialData)
         {
-            if (!ConfirmationPrompts.ConfirmDangerous($"add credential {displayName} ({credentialData.OathType})"))
+            var displayName = FormatCredentialName(credentialData.Issuer, credentialData.Name);
+
+            if (!settings.Force)
             {
-                OutputHelpers.WriteInfo("Add cancelled.");
-                return ExitCode.UserCancelled;
+                if (!ConfirmationPrompts.ConfirmDangerous($"add credential {displayName} ({credentialData.OathType})"))
+                {
+                    OutputHelpers.WriteInfo("Add cancelled.");
+                    return ExitCode.UserCancelled;
+                }
             }
+
+            await using var session = await deviceContext.Device.CreateOathSessionAsync();
+
+            if (!await UnlockIfNeededAsync(session, settings.Password))
+            {
+                return ExitCode.AuthenticationFailed;
+            }
+
+            await session.PutCredentialAsync(credentialData, settings.Touch);
+            OutputHelpers.WriteSuccess($"Credential added: {displayName}");
+            return ExitCode.Success;
         }
-
-        await using var session = await deviceContext.Device.CreateOathSessionAsync();
-
-        if (!await UnlockIfNeededAsync(session, settings.Password))
-        {
-            return ExitCode.AuthenticationFailed;
-        }
-
-        await session.PutCredentialAsync(credentialData, settings.Touch);
-        OutputHelpers.WriteSuccess($"Credential added: {displayName}");
-        return ExitCode.Success;
     }
 }

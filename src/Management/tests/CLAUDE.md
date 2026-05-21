@@ -4,7 +4,7 @@ This file provides guidance for the Management module test infrastructure.
 
 ## Required Reading
 
-**CRITICAL:** Read [`docs/TESTING.md`](../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet build.cs test` - NEVER use `dotnet test` directly.**
+**CRITICAL:** Read [`docs/TESTING.md`](../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
 
 For Management-specific test patterns, device filtering, and test state utilities, see the **Test Infrastructure** section in [`../CLAUDE.md`](../CLAUDE.md#test-infrastructure---advanced-device-filtering).
 
@@ -64,15 +64,15 @@ See [`../CLAUDE.md`](../CLAUDE.md#critical-warnings-for-configuration-tests) for
 
 ```bash
 # Run all Management tests
-dotnet build.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Management"
+dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Management"
 
 # Run unit tests only
-dotnet build.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Management.UnitTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Management.UnitTests"
 
 # Run integration tests only (requires YubiKey)
-dotnet build.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Management.IntegrationTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Management.IntegrationTests"
 
 # Run specific test class
-dotnet build.cs test --filter "FullyQualifiedName~ManagementIntegrationTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~ManagementIntegrationTests"
 ```
 

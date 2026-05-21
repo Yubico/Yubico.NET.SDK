@@ -146,7 +146,7 @@ The `ResetAsync()` method (`OpenPgpSession.Reset.cs`) performs: block PINs -> TE
 
 1. **Run the test in isolation on FW 5.4.3:**
    ```bash
-   dotnet build.cs -- test --integration --project OpenPgp --filter "GetFingerprints_DefaultState_AllZero"
+   dotnet toolchain.cs -- test --integration --project OpenPgp --filter "GetFingerprints_DefaultState_AllZero"
    ```
 
 2. **If it passes in isolation but fails in suite:** The issue is test ordering / shared device state. xUnit does not guarantee test ordering within a class, but tests share the device. A prior test that crashes mid-operation (perhaps due to Bug 1 in another test like `GetAlgorithmInformation`) could leave the device in a bad state where RESET doesn't work properly.
@@ -242,11 +242,11 @@ This is a one-line swap. No other changes needed.
    - Fix `Tlv.cs:221` to reject 0x80
    - Add try-catch fallback in `OpenPgpSession.Config.cs`
    - Add unit tests in `TlvTests.cs`
-   - Run: `dotnet build.cs test` (all unit tests must pass)
+   - Run: `dotnet toolchain.cs test` (all unit tests must pass)
 
 2. **Bug 3 (HsmAuth TLV order swap)** -- simple, independent
    - Swap lines in `HsmAuthSession.cs:782-783`
-   - Run: `dotnet build.cs test` (all unit tests must pass)
+   - Run: `dotnet toolchain.cs test` (all unit tests must pass)
 
 3. **Bug 2 (Fingerprint test)** -- investigate after Bug 1 fix
    - Run OpenPGP integration tests on FW 5.4.3
@@ -257,7 +257,7 @@ This is a one-line swap. No other changes needed.
 
 ### Unit Tests (no hardware needed)
 ```bash
-dotnet build.cs test
+dotnet toolchain.cs test
 ```
 All 9 unit test projects must pass with 0 failures. Specifically:
 - `Yubico.YubiKit.Core.UnitTests` -- new TLV tests for 0x80 rejection and 128-byte round-trip
@@ -266,25 +266,25 @@ All 9 unit test projects must pass with 0 failures. Specifically:
 ### Integration Tests (requires YubiKey 5.4.3)
 ```bash
 # OpenPGP suite -- should go from 25/28 to 28/28
-dotnet build.cs -- test --integration --project OpenPgp
+dotnet toolchain.cs -- test --integration --project OpenPgp
 
 # Specifically test the fixed methods
-dotnet build.cs -- test --integration --project OpenPgp --filter "GetAlgorithmInformation"
-dotnet build.cs -- test --integration --project OpenPgp --filter "GetFingerprints"
+dotnet toolchain.cs -- test --integration --project OpenPgp --filter "GetAlgorithmInformation"
+dotnet toolchain.cs -- test --integration --project OpenPgp --filter "GetFingerprints"
 
 # HsmAuth -- cannot verify on alpha 5.8.0 (FW doesn't support INS 0x0B)
 # Will need production 5.8.0 firmware to verify Bug 3
-dotnet build.cs -- test --integration --project YubiHsm
+dotnet toolchain.cs -- test --integration --project YubiHsm
 ```
 
 ### Regression Check
 ```bash
 # Full unit test run
-dotnet build.cs test
+dotnet toolchain.cs test
 
 # PIV and OATH integration (should remain unaffected)
-dotnet build.cs -- test --integration --project Piv
-dotnet build.cs -- test --integration --project Oath
+dotnet toolchain.cs -- test --integration --project Piv
+dotnet toolchain.cs -- test --integration --project Oath
 ```
 
 ---

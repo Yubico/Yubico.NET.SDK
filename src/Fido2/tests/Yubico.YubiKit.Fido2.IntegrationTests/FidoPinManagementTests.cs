@@ -31,9 +31,8 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Category", "Integration")]
 public class FidoPinManagementTests
 {
-    private const string OriginalPin = "Abc12345";
+    private static readonly byte[] OriginalPinUtf8 = FidoTestStateExtensions.KnownTestPin;
     private const string ChangedPin = "Xyz98765";
-    private static readonly byte[] OriginalPinUtf8 = Encoding.UTF8.GetBytes(OriginalPin);
     private static readonly byte[] ChangedPinUtf8 = Encoding.UTF8.GetBytes(ChangedPin);
 
     /// <summary>
@@ -43,21 +42,26 @@ public class FidoPinManagementTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task ChangePin_WithValidCurrentPin_AllowsAuthWithNewPin(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
+            var info = await session.GetInfoAsync();
+            var protocolVersion = info.PinUvAuthProtocols.Contains(2) ? 2 : 1;
+
             try
             {
-                // Ensure PIN is set to our known value
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, OriginalPinUtf8);
+                // NormalizePinAsync already set the PIN to KnownTestPin.
+                // Create a ClientPin to change it.
+                IPinUvAuthProtocol protocol = protocolVersion == 2
+                    ? new PinUvAuthProtocolV2()
+                    : new PinUvAuthProtocolV1();
+                using var clientPin = new ClientPin(session, protocol);
 
-                // Change the PIN
+                // Change the PIN from known test PIN to a different value
                 await clientPin.ChangePinAsync(OriginalPinUtf8, ChangedPinUtf8);
 
                 // Verify the new PIN works by getting a PIN token
-                var info = await session.GetInfoAsync();
                 var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
                                            info.Versions.Contains("FIDO_2_1_PRE");
 
@@ -86,16 +90,13 @@ public class FidoPinManagementTests
             }
             finally
             {
-                // Restore original PIN for other tests
+                // Restore known test PIN for other tests
                 try
                 {
-                    var info = await session.GetInfoAsync();
-                    var protocolVersion = info.PinUvAuthProtocols.Contains(2) ? 2 : 1;
-                    IPinUvAuthProtocol protocol = protocolVersion == 2
-                        ? new PinUvAuthProtocolV2()
+                    var restoreProtocol = protocolVersion == 2
+                        ? (IPinUvAuthProtocol)new PinUvAuthProtocolV2()
                         : new PinUvAuthProtocolV1();
-
-                    using var restorePin = new ClientPin(session, protocol);
+                    using var restorePin = new ClientPin(session, restoreProtocol);
                     await restorePin.ChangePinAsync(ChangedPinUtf8, OriginalPinUtf8);
                 }
                 catch
@@ -113,7 +114,7 @@ public class FidoPinManagementTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_WithUvDiscouraged_CreatesCredentialSuccessfully(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

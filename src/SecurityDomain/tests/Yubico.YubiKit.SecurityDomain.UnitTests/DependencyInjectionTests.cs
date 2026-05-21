@@ -101,13 +101,14 @@ public class DependencyInjectionTests
         Assert.Equal(typeof(Task<SecurityDomainSession>), method.ReturnType);
         
         var parameters = method.GetParameters();
-        Assert.Equal(4, parameters.Length);
+        Assert.Equal(5, parameters.Length);
 
         // TODO: Avoid asserting parameter names (brittle); assert only types/count.
         Assert.Equal("conn", parameters[0].Name);
         Assert.Equal("cfg", parameters[1].Name);
         Assert.Equal("scp", parameters[2].Name);
-        Assert.Equal("ct", parameters[3].Name);
+        Assert.Equal("fw", parameters[3].Name);
+        Assert.Equal("ct", parameters[4].Name);
     }
 
     [Fact]

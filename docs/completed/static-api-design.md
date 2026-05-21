@@ -226,7 +226,7 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
 | `DeviceSelector.cs` (ManagementTool) | Updated for new API with named parameters |
 | `docs/TESTING.md` | Added test traits documentation |
 | `.claude/skills/domain-test/SKILL.md` | Added trait filter patterns |
-| `build.cs` | Added trait filter documentation |
+| `toolchain.cs` | Added trait filter documentation |
 | `experiments/DeviceMonitor/Program.cs` | Fixed async patterns, adapted to new API |
 
 ### Deleted
@@ -361,10 +361,10 @@ public async Task MyDeviceInsertionTest() { }
 
 ```bash
 # Skip user presence tests (for CI/agents)
-dotnet build.cs test --filter "Category!=RequiresUserPresence"
+dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"
 
 # Run only fast unit tests
-dotnet build.cs test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
+dotnet toolchain.cs test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
 ```
 
 ### Categories

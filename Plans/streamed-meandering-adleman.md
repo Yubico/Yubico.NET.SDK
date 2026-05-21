@@ -124,8 +124,8 @@ cd /Users/Dennis.Dyall/Code/y/agate-{applet} && agate auto --agent claude
 When each agate completes:
 ```bash
 cd /Users/Dennis.Dyall/Code/y/agate-{applet}
-dotnet build.cs build     # Zero warnings
-dotnet build.cs test --filter "Category!=RequiresUserPresence"  # All pass
+dotnet toolchain.cs build     # Zero warnings
+dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"  # All pass
 dotnet format --verify-no-changes
 ```
 
@@ -144,7 +144,7 @@ Every applet GOAL.md must emphasize:
 
 ## Testing Constraints (from docs/TESTING.md)
 
-- **Always use `dotnet build.cs test`** — never `dotnet test` directly (xUnit v2/v3 differences)
+- **Always use `dotnet toolchain.cs test`** — never `dotnet test` directly (xUnit v2/v3 differences)
 - **`[WithYubiKey]` + `[InlineData]` is incompatible** — use separate test methods per parameter
 - **User-presence tests will fail** — any test requiring touch/insertion must use `[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]` and agents must skip them: `--filter "Category!=RequiresUserPresence"`
 - **Touch policy tests** — set appropriate touch policies to avoid requiring user presence

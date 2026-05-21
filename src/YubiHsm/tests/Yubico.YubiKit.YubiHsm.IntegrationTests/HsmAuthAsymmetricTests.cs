@@ -19,7 +19,7 @@ public class HsmAuthAsymmetricTests
     private static CancellationToken NewToken(int timeoutSeconds = 30) =>
         new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds)).Token;
 
-    private static readonly byte[] DefaultManagementKey = new byte[16];
+    private static ReadOnlyMemory<byte> DefaultManagementKey => new byte[16];
     private const string TestLabel = "test-asymmetric";
     private const string TestPassword = "password";
 

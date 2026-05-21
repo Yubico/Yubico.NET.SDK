@@ -626,19 +626,19 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     }
     
     /// <inheritdoc />
-    public new async ValueTask DisposeAsync()
+    public new ValueTask DisposeAsync()
     {
         if (_disposed)
-            return;
-        
+            return default;
+
         _backend?.Dispose();
         _backend = null;
         _disposed = true;
-        
+
         // Dispose base class synchronously (it doesn't have async dispose)
         base.Dispose(true);
         GC.SuppressFinalize(this);
-        
-        await Task.CompletedTask.ConfigureAwait(false);
+
+        return default;
     }
 }

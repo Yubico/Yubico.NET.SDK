@@ -221,6 +221,12 @@ public sealed class ClientPinTests : IDisposable
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var tokenResponse = CreatePinTokenResponse(new byte[32]);
 
+        var authenticatorInfo = new AuthenticatorInfo
+        {
+            Options = new Dictionary<string, bool> { { "pinUvAuthToken", true } }
+        };
+        _mockSession.GetInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(authenticatorInfo));
         _mockSession.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
 
         var token = await clientPin.GetPinUvAuthTokenUsingPinAsync(Encoding.UTF8.GetBytes("1234"), PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion, "example.com", TestContext.Current.CancellationToken);

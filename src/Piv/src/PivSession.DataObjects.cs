@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
@@ -32,37 +33,10 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Getting data object 0x{ObjectId:X6}", objectId);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
-
-        // Build command data: TAG 0x5C [ object ID bytes ]
-        var idBytes = new List<byte>();
-        idBytes.Add(0x5C);
-        
-        if (objectId <= 0xFF)
-        {
-            idBytes.Add(0x01);
-            idBytes.Add((byte)objectId);
-        }
-        else if (objectId <= 0xFFFF)
-        {
-            idBytes.Add(0x02);
-            idBytes.Add((byte)(objectId >> 8));
-            idBytes.Add((byte)(objectId & 0xFF));
-        }
-        else
-        {
-            idBytes.Add(0x03);
-            idBytes.Add((byte)(objectId >> 16));
-            idBytes.Add((byte)((objectId >> 8) & 0xFF));
-            idBytes.Add((byte)(objectId & 0xFF));
-        }
+        EnsureProtocol();
 
         // INS 0xCB (GET DATA)
-        var command = new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, idBytes.ToArray());
+        var command = new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, EncodeObjectId(objectId));
         var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (response.SW == 0x6A82) // File not found
@@ -98,9 +72,9 @@ public sealed partial class PivSession
             return data;
         }
 
-        // Use Tlv to parse the wrapper
-        var wrapper = Tlv.Create(span);
-        return wrapper.Value;
+        // Use Tlv to parse the wrapper, copy value before disposing
+        using var wrapper = Tlv.Create(span);
+        return wrapper.Value.ToArray();
     }
 
     /// <summary>
@@ -115,11 +89,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Putting data object 0x{ObjectId:X6}", objectId);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {
@@ -127,60 +97,57 @@ public sealed partial class PivSession
         }
 
         // Build command data: TAG 0x5C [ object ID ] + TAG 0x53 [ data ]
-        var cmdData = new List<byte>();
-        
-        // TAG 0x5C (Object ID)
-        cmdData.Add(0x5C);
-        if (objectId <= 0xFF)
-        {
-            cmdData.Add(0x01);
-            cmdData.Add((byte)objectId);
-        }
-        else if (objectId <= 0xFFFF)
-        {
-            cmdData.Add(0x02);
-            cmdData.Add((byte)(objectId >> 8));
-            cmdData.Add((byte)(objectId & 0xFF));
-        }
-        else
-        {
-            cmdData.Add(0x03);
-            cmdData.Add((byte)(objectId >> 16));
-            cmdData.Add((byte)((objectId >> 8) & 0xFF));
-            cmdData.Add((byte)(objectId & 0xFF));
-        }
+        var objectIdBytes = EncodeObjectId(objectId);
+        int dataLen = data.HasValue && !data.Value.IsEmpty ? data.Value.Length : 0;
+        int dataLenSize = dataLen > 0 ? BerLength.EncodingSize(dataLen) : 1; // 1 byte for 0x00 (empty)
+        int estimatedSize = objectIdBytes.Length + 1 + dataLenSize + dataLen;
+        var writer = new ArrayBufferWriter<byte>(estimatedSize);
+
+        writer.Write(objectIdBytes);
 
         // TAG 0x53 (Data) - always required, even if empty for delete
-        cmdData.Add(0x53);
+        ReadOnlySpan<byte> dataTag = [0x53];
+        writer.Write(dataTag);
         if (data.HasValue && !data.Value.IsEmpty)
         {
-            var dataSpan = data.Value.Span;
-            if (dataSpan.Length > 127)
-            {
-                cmdData.Add(0x82);
-                cmdData.Add((byte)(dataSpan.Length >> 8));
-                cmdData.Add((byte)(dataSpan.Length & 0xFF));
-            }
-            else
-            {
-                cmdData.Add((byte)dataSpan.Length);
-            }
-            cmdData.AddRange(dataSpan.ToArray());
+            var lenSpan = writer.GetSpan(dataLenSize);
+            BerLength.Write(lenSpan, dataLen);
+            writer.Advance(dataLenSize);
+            writer.Write(data.Value.Span);
         }
         else
         {
             // Empty data for delete operations
-            cmdData.Add(0x00);
+            ReadOnlySpan<byte> emptyLen = [0x00];
+            writer.Write(emptyLen);
         }
 
         // INS 0xDB (PUT DATA)
-        var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, cmdData.ToArray());
+        var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, writer.WrittenMemory);
         var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
-            throw ApduException.FromStatusWord(response.SW, 
+            throw ApduException.FromStatusWord(response.SW,
                 $"Failed to write data object 0x{objectId:X6}");
         }
+    }
+
+    /// <summary>
+    /// Encodes an object ID as a TLV with tag 0x5C.
+    /// </summary>
+    private static byte[] EncodeObjectId(int objectId)
+    {
+        if (objectId <= 0xFF)
+        {
+            return [0x5C, 0x01, (byte)objectId];
+        }
+
+        if (objectId <= 0xFFFF)
+        {
+            return [0x5C, 0x02, (byte)(objectId >> 8), (byte)(objectId & 0xFF)];
+        }
+
+        return [0x5C, 0x03, (byte)(objectId >> 16), (byte)((objectId >> 8) & 0xFF), (byte)(objectId & 0xFF)];
     }
 }

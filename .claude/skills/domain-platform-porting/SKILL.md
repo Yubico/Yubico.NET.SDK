@@ -76,8 +76,8 @@ See `docs/COMMIT_GUIDELINES.md`.
 - ❌ No `.ToArray()` unless data must escape scope
 
 **Build/Test:**
-- `dotnet build.cs build`
-- `dotnet build.cs test`
+- `dotnet toolchain.cs build`
+- `dotnet toolchain.cs test`
 
 **Git:**
 - Only commit YOUR files explicitly
@@ -165,24 +165,24 @@ if (OperatingSystem.Is{Platform}())
 
 ```bash
 # Build
-dotnet build.cs build
+dotnet toolchain.cs build
 
 # Test all
-dotnet build.cs test
+dotnet toolchain.cs test
 
 # Test specific project
-dotnet build.cs test --project {Feature}
+dotnet toolchain.cs test --project {Feature}
 
 # Test with filter
-dotnet build.cs test --filter "FullyQualifiedName~{Platform}"
+dotnet toolchain.cs test --filter "FullyQualifiedName~{Platform}"
 ```
 
 ---
 
 ## Verification Checklist
 
-- [ ] `dotnet build.cs build` exits with code 0
-- [ ] `dotnet build.cs test` shows all tests passing
+- [ ] `dotnet toolchain.cs build` exits with code 0
+- [ ] `dotnet toolchain.cs test` shows all tests passing
 - [ ] New code has `[SupportedOSPlatform("{platform}")]` attribute
 - [ ] No `#region` blocks
 - [ ] Uses `is null` / `is not null`

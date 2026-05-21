@@ -1888,7 +1888,7 @@ public class HidDeviceListenerDisposalTests
 
 ```bash
 # Run disposal tests specifically
-dotnet build.cs test -- --filter "FullyQualifiedName~DisposalTests"
+dotnet toolchain.cs test -- --filter "FullyQualifiedName~DisposalTests"
 
 # Expected: All tests pass within timeout
 # If any test hangs: the cancellation/disposal logic needs debugging

@@ -108,7 +108,7 @@ Located in `tests/Yubico.YubiKit.YubiHsm.UnitTests/`. Test pure logic that doesn
 - `HsmAuthCredentialTests` — Record equality and sorting
 - `Pbkdf2DerivationTests` — Known-answer PBKDF2 derivation
 
-**Run tests:** `dotnet build.cs test` (never `dotnet test` directly)
+**Run tests:** `dotnet toolchain.cs test` (never `dotnet test` directly)
 
 ### Integration Tests
 Located in `tests/Yubico.YubiKit.YubiHsm.IntegrationTests/`. Require a physical YubiKey with firmware 5.4.3+.

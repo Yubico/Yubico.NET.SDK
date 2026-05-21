@@ -78,4 +78,4 @@ Parsing regex: `^((\d+)/)?(([^:]+):)?(.+)$`
 
 - Unit tests: `tests/Yubico.YubiKit.Oath.UnitTests/`
 - Integration tests: `tests/Yubico.YubiKit.Oath.IntegrationTests/`
-- **ALWAYS use `dotnet build.cs test`** — never `dotnet test` directly
+- **ALWAYS use `dotnet toolchain.cs test`** — never `dotnet test` directly

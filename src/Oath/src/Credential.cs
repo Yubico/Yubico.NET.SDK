@@ -15,7 +15,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-using System.Security.Cryptography;
 namespace Yubico.YubiKit.Oath;
 
 /// <summary>
@@ -32,9 +31,10 @@ namespace Yubico.YubiKit.Oath;
 ///         matching the canonical Python implementation's ordering.
 ///     </para>
 /// </remarks>
-public sealed class Credential : IEquatable<Credential>, IComparable<Credential>
+public sealed partial class Credential : IEquatable<Credential>, IComparable<Credential>
 {
-    private static readonly Regex TotpIdPattern = new(@"^((\d+)/)?(([^:]+):)?(.+)$", RegexOptions.Compiled);
+    [GeneratedRegex(@"^((\d+)/)?(([^:]+):)?(.+)$")]
+    private static partial Regex TotpIdPattern();
 
     /// <summary>
     ///     Gets the device identifier that this credential belongs to.
@@ -44,7 +44,7 @@ public sealed class Credential : IEquatable<Credential>, IComparable<Credential>
     /// <summary>
     ///     Gets the raw credential ID bytes in wire format.
     /// </summary>
-    public byte[] Id { get; }
+    public ReadOnlyMemory<byte> Id { get; }
 
     /// <summary>
     ///     Gets the credential issuer, if present.
@@ -77,7 +77,7 @@ public sealed class Credential : IEquatable<Credential>, IComparable<Credential>
     /// </summary>
     public Credential(
         string deviceId,
-        byte[] id,
+        ReadOnlyMemory<byte> id,
         string? issuer,
         string name,
         OathType oathType,
@@ -85,7 +85,7 @@ public sealed class Credential : IEquatable<Credential>, IComparable<Credential>
         bool? touchRequired)
     {
         DeviceId = deviceId;
-        Id = id;
+        Id = id.ToArray(); // Defensive copy to prevent external mutation
         Issuer = issuer;
         Name = name;
         OathType = oathType;
@@ -140,13 +140,15 @@ public sealed class Credential : IEquatable<Credential>, IComparable<Credential>
 
         if (oathType == OathType.Totp)
         {
-            var match = TotpIdPattern.Match(data);
+            var match = TotpIdPattern().Match(data);
             if (match.Success)
             {
                 string? periodStr = match.Groups[2].Success ? match.Groups[2].Value : null;
                 string? issuer = match.Groups[4].Success ? match.Groups[4].Value : null;
                 string name = match.Groups[5].Value;
-                int period = periodStr is not null ? int.Parse(periodStr) : OathConstants.DefaultPeriod;
+                int period = periodStr is not null
+                    ? int.Parse(periodStr, System.Globalization.CultureInfo.InvariantCulture)
+                    : OathConstants.DefaultPeriod;
 
                 return (issuer, name, period);
             }
@@ -155,7 +157,7 @@ public sealed class Credential : IEquatable<Credential>, IComparable<Credential>
         }
 
         // HOTP: simple "issuer:name" or just "name"
-        if (data.Contains(':') && data[0] != ':')
+        if (data.Contains(':', StringComparison.Ordinal) && data[0] != ':')
         {
             int colonIndex = data.IndexOf(':');
             return (data[..colonIndex], data[(colonIndex + 1)..], 0);
@@ -172,7 +174,7 @@ public sealed class Credential : IEquatable<Credential>, IComparable<Credential>
             return false;
         }
 
-        return DeviceId == other.DeviceId && CryptographicOperations.FixedTimeEquals(Id.AsSpan(), other.Id);
+        return DeviceId == other.DeviceId && Id.Span.SequenceEqual(other.Id.Span);
     }
 
     /// <inheritdoc />
@@ -183,7 +185,7 @@ public sealed class Credential : IEquatable<Credential>, IComparable<Credential>
     {
         var hash = new HashCode();
         hash.Add(DeviceId);
-        foreach (byte b in Id)
+        foreach (byte b in Id.Span)
         {
             hash.Add(b);
         }
@@ -199,16 +201,13 @@ public sealed class Credential : IEquatable<Credential>, IComparable<Credential>
             return 1;
         }
 
-        string selfSortKey = (Issuer ?? Name).ToLowerInvariant();
-        string otherSortKey = (other.Issuer ?? other.Name).ToLowerInvariant();
-
-        int cmp = string.Compare(selfSortKey, otherSortKey, StringComparison.Ordinal);
+        int cmp = string.Compare(Issuer ?? Name, other.Issuer ?? other.Name, StringComparison.OrdinalIgnoreCase);
         if (cmp != 0)
         {
             return cmp;
         }
 
-        return string.Compare(Name.ToLowerInvariant(), other.Name.ToLowerInvariant(), StringComparison.Ordinal);
+        return string.Compare(Name, other.Name, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

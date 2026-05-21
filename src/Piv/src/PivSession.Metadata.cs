@@ -31,11 +31,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Getting slot metadata for 0x{Slot:X2}", (byte)slot);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // INS 0xF7 (GET METADATA), P2 = slot
         var command = new ApduCommand(0x00, 0xF7, 0x00, (byte)slot, ReadOnlyMemory<byte>.Empty);
@@ -97,11 +93,7 @@ public sealed partial class PivSession
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Setting management key, type {KeyType}", keyType);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {
@@ -162,11 +154,7 @@ public sealed partial class PivSession
     public async Task<PivPukMetadata> GetPukMetadataAsync(CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Getting PUK metadata");
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // INS 0xF7 (GET METADATA), P2 = 0x81 (PUK slot)
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x81, ReadOnlyMemory<byte>.Empty);
@@ -204,11 +192,7 @@ public sealed partial class PivSession
     public async Task<PivManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Getting management key metadata");
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // INS 0xF7 (GET METADATA), P2 = 0x9B (SLOT_CARD_MANAGEMENT)
         const byte InsGetMetadata = 0xF7;
@@ -261,11 +245,7 @@ public sealed partial class PivSession
     public async Task ChangePukAsync(ReadOnlyMemory<byte> oldPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Changing PUK");
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // Build data: [8-byte old PUK padded with 0xFF] [8-byte new PUK padded with 0xFF]
         byte[] pukPair = PivPinUtilities.EncodePinPairBytes(oldPuk.Span, newPuk.Span);
@@ -297,11 +277,7 @@ public sealed partial class PivSession
     public async Task UnblockPinAsync(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Unblocking PIN with PUK");
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // Build data: [8-byte PUK padded with 0xFF] [8-byte new PIN padded with 0xFF]
         byte[] pukPinPair = PivPinUtilities.EncodePinPairBytes(puk.Span, newPin.Span);
@@ -342,11 +318,7 @@ public sealed partial class PivSession
     public async Task SetPinAttemptsAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Setting PIN attempts to {PinAttempts}, PUK attempts to {PukAttempts}", pinAttempts, pukAttempts);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (!_isAuthenticated)
         {

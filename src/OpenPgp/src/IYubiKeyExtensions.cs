@@ -39,12 +39,20 @@ public static class IYubiKeyExtensions
         {
             var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
                 .ConfigureAwait(false);
-            return await OpenPgpSession.CreateAsync(
-                    connection,
-                    configuration,
-                    scpKeyParams,
-                    cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                return await OpenPgpSession.CreateAsync(
+                        connection,
+                        configuration,
+                        scpKeyParams,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch
+            {
+                await connection.DisposeAsync().ConfigureAwait(false);
+                throw;
+            }
         }
 
         /// <summary>

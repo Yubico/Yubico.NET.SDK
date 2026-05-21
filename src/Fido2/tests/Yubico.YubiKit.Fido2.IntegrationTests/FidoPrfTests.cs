@@ -35,7 +35,7 @@ public class FidoPrfTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task Prf_MakeCredential_IndicatesSupport(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -123,7 +123,7 @@ public class FidoPrfTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task Prf_DeterministicOutputs_SameSaltProducesSameResult(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

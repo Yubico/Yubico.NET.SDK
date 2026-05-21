@@ -35,7 +35,7 @@ public class FidoCredentialManagementExtendedTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task UpdateUserInformation_ChangesDisplayName(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -125,7 +125,7 @@ public class FidoCredentialManagementExtendedTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task EnumerateCredentials_MultipleUsersPerRp_ReturnsAll(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

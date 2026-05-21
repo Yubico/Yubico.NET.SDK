@@ -82,7 +82,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
     // PBKDF2 derivation constants
     internal const int Pbkdf2Iterations = 10_000;
-    internal static readonly byte[] Pbkdf2Salt = "Yubico"u8.ToArray();
+    internal static ReadOnlySpan<byte> Pbkdf2Salt => "Yubico"u8;
     internal const int Pbkdf2DerivedKeyLength = 32;
 
     private readonly ISmartCardConnection _connection;
@@ -214,10 +214,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ArgumentException.ThrowIfNullOrEmpty(label);
 
         var encoded = Encoding.UTF8.GetBytes(label);
-        if (encoded.Length < MinLabelLength)
-            throw new ArgumentException(
-                $"Label must be at least {MinLabelLength} UTF-8 byte(s).",
-                nameof(label));
 
         if (encoded.Length > MaxLabelLength)
             throw new ArgumentException(
@@ -232,14 +228,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// </summary>
     /// <param name="sw">The status word from an APDU response.</param>
     /// <returns>The number of remaining retries, or <c>null</c> if the SW is not a retry indicator.</returns>
-    internal static int? ExtractRetries(short sw)
-    {
-        // 0x63Cx where x = remaining retries
-        if ((sw & 0xFFF0) == 0x63C0)
-            return sw & 0x000F;
-
-        return null;
-    }
+    internal static int? ExtractRetries(short sw) =>
+        SWConstants.ExtractRetryCount(sw);
 
     // ─── IHsmAuthSession implementations ─────────────────────────────────────
 
@@ -314,25 +304,18 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             credPwBytes = ParseCredentialPassword(credentialPassword);
 
-            var data = TlvHelper.EncodeList(
-            [
+            var data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagAlgorithm, [(byte)HsmAuthAlgorithm.Aes128YubicoAuthentication]),
                 new Tlv(TagKeyEnc, keyEnc.Span),
                 new Tlv(TagKeyMac, keyMac.Span),
                 new Tlv(TagCredentialPassword, credPwBytes),
-                new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00])
-            ]);
+                new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00]));
 
             var command = new ApduCommand { Ins = InsPut, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnManagementKeyFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "PUT credential failed");
+            await TransmitWithRetryCheckAsync(
+                command, ThrowOnManagementKeyFailure, "PUT credential", cancellationToken);
         }
         finally
         {
@@ -385,20 +368,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ValidateManagementKey(managementKey.Span);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        var data = TlvHelper.EncodeList(
-        [
+        var data = TlvHelper.EncodeAndDisposeList(
             new Tlv(TagManagementKey, managementKey.Span),
-            new Tlv(TagLabel, labelBytes)
-        ]);
+            new Tlv(TagLabel, labelBytes));
 
         var command = new ApduCommand { Ins = InsDelete, Data = data };
-        var response = await _protocol!.TransmitAndReceiveAsync(
-                command, throwOnError: false, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        ThrowOnManagementKeyFailure(response, command);
-        if (!response.IsOK())
-            throw ApduException.FromResponse(response, command, "DELETE credential failed");
+        await TransmitWithRetryCheckAsync(
+            command, ThrowOnManagementKeyFailure, "DELETE credential", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -428,16 +404,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
             tlvs.Add(new Tlv(TagCredentialPassword, credPwBytes));
 
-            var data = TlvHelper.EncodeList([.. tlvs]);
+            var data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
 
             var command = new ApduCommand { Ins = InsCalculate, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnCredentialPasswordFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "CALCULATE symmetric session keys failed");
+            var response = await TransmitWithRetryCheckAsync(
+                command, ThrowOnCredentialPasswordFailure, "CALCULATE symmetric session keys", cancellationToken);
 
             return SessionKeys.Parse(response.Data.Span);
         }
@@ -477,20 +448,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ValidateManagementKey(currentManagementKey.Span);
         ValidateManagementKey(newManagementKey.Span);
 
-        var data = TlvHelper.EncodeList(
-        [
+        var data = TlvHelper.EncodeAndDisposeList(
             new Tlv(TagManagementKey, currentManagementKey.Span),
-            new Tlv(TagManagementKey, newManagementKey.Span)
-        ]);
+            new Tlv(TagManagementKey, newManagementKey.Span));
 
         var command = new ApduCommand { Ins = InsPutManagementKey, Data = data };
-        var response = await _protocol!.TransmitAndReceiveAsync(
-                command, throwOnError: false, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        ThrowOnManagementKeyFailure(response, command);
-        if (!response.IsOK())
-            throw ApduException.FromResponse(response, command, "PUT management key failed");
+        await TransmitWithRetryCheckAsync(
+            command, ThrowOnManagementKeyFailure, "PUT management key", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -535,23 +499,16 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
             // APDU payload order matches Python canonical SDK:
             // TAG_LABEL, TAG_CONTEXT, TAG_PUBLIC_KEY, TAG_RESPONSE, TAG_CREDENTIAL_PASSWORD
-            var data = TlvHelper.EncodeList(
-            [
+            var data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagContext, context.Span),
                 new Tlv(TagPublicKey, publicKey.Span),
                 new Tlv(TagResponse, cardCryptogram.Span),
-                new Tlv(TagCredentialPassword, credPwBytes)
-            ]);
+                new Tlv(TagCredentialPassword, credPwBytes));
 
             var command = new ApduCommand { Ins = InsCalculate, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnCredentialPasswordFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "CALCULATE asymmetric session keys failed");
+            var response = await TransmitWithRetryCheckAsync(
+                command, ThrowOnCredentialPasswordFailure, "CALCULATE asymmetric session keys", cancellationToken);
 
             return SessionKeys.Parse(response.Data.Span);
         }
@@ -591,7 +548,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                     nameof(credentialPassword));
             }
 
-            var data = TlvHelper.EncodeList([.. tlvs]);
+            var data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
 
             var command = new ApduCommand { Ins = InsGetChallenge, Data = data };
             var response = await _protocol!.TransmitAndReceiveAsync(
@@ -632,24 +589,17 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             credPwBytes = ParseCredentialPassword(credentialPassword);
 
-            data = TlvHelper.EncodeList(
-            [
+            data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagAlgorithm, [(byte)HsmAuthAlgorithm.EcP256YubicoAuthentication]),
                 new Tlv(TagPrivateKey, privateKey.Span),
                 new Tlv(TagCredentialPassword, credPwBytes),
-                new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00])
-            ]);
+                new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00]));
 
             var command = new ApduCommand { Ins = InsPut, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnManagementKeyFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "PUT asymmetric credential failed");
+            await TransmitWithRetryCheckAsync(
+                command, ThrowOnManagementKeyFailure, "PUT asymmetric credential", cancellationToken);
         }
         finally
         {
@@ -680,25 +630,17 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
             // TAG_PRIVATE_KEY with empty value signals on-device key generation.
             // Python canonical: _put_credential(management_key, label, b"", EC_P256, credential_password)
-            // TODO: Dispose of all Tlv instances created here.
-            var data = TlvHelper.EncodeList(
-            [
+            var data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagAlgorithm, [(byte)HsmAuthAlgorithm.EcP256YubicoAuthentication]),
                 new Tlv(TagPrivateKey, ReadOnlySpan<byte>.Empty),
                 new Tlv(TagCredentialPassword, credPwBytes),
-                new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00])
-            ]);
+                new Tlv(TagTouch, [touchRequired ? (byte)0x01 : (byte)0x00]));
 
             var command = new ApduCommand { Ins = InsPut, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnManagementKeyFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "GENERATE asymmetric credential failed");
+            await TransmitWithRetryCheckAsync(
+                command, ThrowOnManagementKeyFailure, "GENERATE asymmetric credential", cancellationToken);
         }
         finally
         {
@@ -716,14 +658,19 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         EnsureSupports(FeatureAsymmetric);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        var data = TlvHelper.EncodeList([new Tlv(TagLabel, labelBytes)]);
+        var data = TlvHelper.EncodeAndDisposeList(new Tlv(TagLabel, labelBytes));
 
         var command = new ApduCommand { Ins = InsGetPublicKey, Data = data };
         var response = await _protocol!.TransmitAndReceiveAsync(
                 command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        return response.Data;
+        var publicKey = response.Data;
+        if (publicKey.Length != EcP256PublicKeyLength)
+            throw new InvalidOperationException(
+                $"Expected {EcP256PublicKeyLength}-byte public key, got {publicKey.Length}");
+
+        return publicKey;
     }
 
     /// <inheritdoc />
@@ -744,21 +691,14 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             currentPwBytes = ParseCredentialPassword(currentPassword);
             newPwBytes = ParseCredentialPassword(newPassword);
 
-            var data = TlvHelper.EncodeList(
-            [
+            var data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagCredentialPassword, currentPwBytes),
-                new Tlv(TagCredentialPassword, newPwBytes)
-            ]);
+                new Tlv(TagCredentialPassword, newPwBytes));
 
             var command = new ApduCommand { Ins = InsChangeCredentialPassword, P1 = 0x00, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnManagementKeyFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "CHANGE credential password failed");
+            await TransmitWithRetryCheckAsync(
+                command, ThrowOnCredentialPasswordFailure, "CHANGE credential password", cancellationToken);
         }
         finally
         {
@@ -786,21 +726,14 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             newPwBytes = ParseCredentialPassword(newPassword);
 
-            var data = TlvHelper.EncodeList(
-            [
+            var data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagManagementKey, managementKey.Span),
-                new Tlv(TagCredentialPassword, newPwBytes)
-            ]);
+                new Tlv(TagCredentialPassword, newPwBytes));
 
             var command = new ApduCommand { Ins = InsChangeCredentialPassword, P1 = 0x01, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
-                    command, throwOnError: false, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            ThrowOnManagementKeyFailure(response, command);
-            if (!response.IsOK())
-                throw ApduException.FromResponse(response, command, "CHANGE credential password (admin) failed");
+            await TransmitWithRetryCheckAsync(
+                command, ThrowOnManagementKeyFailure, "CHANGE credential password (admin)", cancellationToken);
         }
         finally
         {
@@ -832,6 +765,28 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
     }
 
+    /// <summary>
+    ///     Transmits an APDU command with <c>throwOnError: false</c>, checks for retry failures
+    ///     using the specified checker, and throws <see cref="ApduException" /> if the response
+    ///     does not indicate success.
+    /// </summary>
+    private async Task<ApduResponse> TransmitWithRetryCheckAsync(
+        ApduCommand command,
+        Action<ApduResponse, ApduCommand> retryChecker,
+        string operationName,
+        CancellationToken cancellationToken)
+    {
+        var response = await _protocol!.TransmitAndReceiveAsync(
+                command, throwOnError: false, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        retryChecker(response, command);
+        if (!response.IsOK())
+            throw ApduException.FromResponse(response, command, $"{operationName} failed");
+
+        return response;
+    }
+
     private static void ValidateManagementKey(ReadOnlySpan<byte> managementKey)
     {
         if (managementKey.Length != ManagementKeyLength)
@@ -841,17 +796,17 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     }
 
     /// <summary>
-    ///     Checks an APDU response for the 0x63Cx management key verification failure pattern.
-    ///     Throws <see cref="ApduException" /> with retry information if detected.
+    ///     Checks an APDU response for the 0x63Cx retry failure pattern and throws
+    ///     <see cref="ApduException" /> with retry information if detected.
     /// </summary>
-    private static void ThrowOnManagementKeyFailure(ApduResponse response, ApduCommand command)
+    private static void ThrowOnRetryFailure(ApduResponse response, ApduCommand command, string errorContext)
     {
         var retries = ExtractRetries(response.SW);
         if (retries is null)
             return;
 
         throw new ApduException(
-            $"Management key verification failed, {retries} attempt(s) remaining (SW=0x{response.SW:X4})")
+            $"{errorContext}, {retries} attempt(s) remaining (SW=0x{response.SW:X4})")
         {
             SW = response.SW,
             Cla = command.Cla,
@@ -862,24 +817,17 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     }
 
     /// <summary>
+    ///     Checks an APDU response for the 0x63Cx management key verification failure pattern.
+    ///     Throws <see cref="ApduException" /> with retry information if detected.
+    /// </summary>
+    private static void ThrowOnManagementKeyFailure(ApduResponse response, ApduCommand command) =>
+        ThrowOnRetryFailure(response, command, "Management key verification failed");
+
+    /// <summary>
     ///     Checks an APDU response for the 0x63Cx credential password verification failure pattern.
     ///     Throws <see cref="ApduException" /> with retry information if detected.
     ///     Matches the Python SDK behavior in <c>_calculate_session_keys</c>.
     /// </summary>
-    private static void ThrowOnCredentialPasswordFailure(ApduResponse response, ApduCommand command)
-    {
-        var retries = ExtractRetries(response.SW);
-        if (retries is null)
-            return;
-
-        throw new ApduException(
-            $"Invalid credential password, {retries} attempt(s) remaining (SW=0x{response.SW:X4})")
-        {
-            SW = response.SW,
-            Cla = command.Cla,
-            Ins = command.Ins,
-            P1 = command.P1,
-            P2 = command.P2
-        };
-    }
+    private static void ThrowOnCredentialPasswordFailure(ApduResponse response, ApduCommand command) =>
+        ThrowOnRetryFailure(response, command, "Invalid credential password");
 }

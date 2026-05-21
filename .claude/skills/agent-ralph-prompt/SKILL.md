@@ -56,8 +56,8 @@ The prompt may contain completion promises as instructions (e.g., "output `<prom
 - Example (good):
   ```markdown
   ## Verification Requirements (MUST PASS BEFORE COMPLETION)
-  1. Build: `dotnet build.cs build` (must exit 0)
-  2. Test: `dotnet build.cs test` (all tests must pass)
+  1. Build: `dotnet toolchain.cs build` (must exit 0)
+  2. Test: `dotnet toolchain.cs test` (all tests must pass)
   3. No regressions: existing tests pass, new code covered
   Only after ALL pass, output <promise>DONE</promise>.
   If any fail, fix and re-verify.
@@ -108,9 +108,9 @@ git commit -m "refactor(piv): replace manual TLV parsing with Tlv/TlvHelper
 - Example:
   | Action | Command |
   |--------|---------|
-  | Build | `dotnet build.cs build` |
-  | Test | `dotnet build.cs test` |
-  | Coverage | `dotnet build.cs coverage` |
+  | Build | `dotnet toolchain.cs build` |
+  | Test | `dotnet toolchain.cs test` |
+  | Coverage | `dotnet toolchain.cs coverage` |
 
 ### 3a. Using Directives First (Before Refactoring)
 
@@ -227,19 +227,19 @@ If a test requires:
   ```markdown
   ## Phase 1: Create interfaces
   Files: IFoo.cs, IBar.cs
-  Verify: `dotnet build.cs build`
+  Verify: `dotnet toolchain.cs build`
   Commit: "feat(core): add IFoo and IBar interfaces"
   → Output <promise>PHASE_1_DONE</promise>
 
   ## Phase 2: Implement classes
   Files: Foo.cs, Bar.cs
-  Verify: `dotnet build.cs build`
+  Verify: `dotnet toolchain.cs build`
   Commit: "feat(core): implement Foo and Bar"
   → Output <promise>PHASE_2_DONE</promise>
 
   ## Phase 3: Add tests
   Files: FooTests.cs, BarTests.cs
-  Verify: `dotnet build.cs test`
+  Verify: `dotnet toolchain.cs test`
   Commit: "test(core): add Foo and Bar tests"
   → Output <promise>ALL_DONE</promise>
   ```
@@ -267,14 +267,14 @@ If a test requires:
 - Include complete test code (no placeholders)
 
 **Step 2: Run test to confirm failure**
-Run: `dotnet build.cs test --filter "FullyQualifiedName~TestName"`
+Run: `dotnet toolchain.cs test --filter "FullyQualifiedName~TestName"`
 Expected: FAIL (describe expected failure)
 
 **Step 3: Minimal implementation**
 - Include complete implementation code
 
 **Step 4: Re-run test to confirm pass**
-Run: `dotnet build.cs test --filter "FullyQualifiedName~TestName"`
+Run: `dotnet toolchain.cs test --filter "FullyQualifiedName~TestName"`
 Expected: PASS
 
 **Step 5: Commit**
@@ -287,8 +287,8 @@ git commit -m "feat: <message>"
 
 ## Verification Requirements (MUST PASS BEFORE COMPLETION)
 
-1. Build: `dotnet build.cs build` (must exit 0)
-2. Test: `dotnet build.cs test` (all tests must pass)
+1. Build: `dotnet toolchain.cs build` (must exit 0)
+2. Test: `dotnet toolchain.cs test` (all tests must pass)
 3. No regressions: existing tests pass, new code covered
 
 Only after ALL pass, output <promise>{COMPLETION_PROMISE}</promise>.
@@ -463,7 +463,7 @@ The final phase must include explicit verification steps:
 Before delivering completion promise:
 
 1. **Build Verification**
-   Run: `dotnet build.cs build`
+   Run: `dotnet toolchain.cs build`
    Must: Exit 0 with no errors
 
 2. **Coverage Check** (for documentation tasks)
@@ -490,12 +490,12 @@ Before starting work, capture baseline build errors to distinguish pre-existing 
 
 Run BEFORE making any changes:
 ```bash
-dotnet build.cs build 2>&1 | grep -E "error (CS|MSB)" | sort > /tmp/baseline-errors.txt || true
+dotnet toolchain.cs build 2>&1 | grep -E "error (CS|MSB)" | sort > /tmp/baseline-errors.txt || true
 ```
 
 After each phase, compare:
 ```bash
-dotnet build.cs build 2>&1 | grep -E "error (CS|MSB)" | sort > /tmp/current-errors.txt || true
+dotnet toolchain.cs build 2>&1 | grep -E "error (CS|MSB)" | sort > /tmp/current-errors.txt || true
 NEW_ERRORS=$(comm -13 /tmp/baseline-errors.txt /tmp/current-errors.txt)
 if [ -n "$NEW_ERRORS" ]; then
     echo "⚠️ NEW BUILD ERRORS (fix before proceeding):"
@@ -657,7 +657,7 @@ For each API signature change:
 
 3. **Build after each batch:**
    ```bash
-   dotnet build.cs build
+   dotnet toolchain.cs build
    ```
 
 4. **Verify no remaining references:**
@@ -747,10 +747,10 @@ Each phase MUST end with explicit verification commands—not just "verify build
 Run these commands and verify expected results:
 ```bash
 # Build must succeed
-dotnet build.cs build   # Must exit 0
+dotnet toolchain.cs build   # Must exit 0
 
 # Run unit tests (hardware tests may fail - document expected failures)
-dotnet build.cs test -- --filter "Category!=Integration"  # Unit tests must pass
+dotnet toolchain.cs test -- --filter "Category!=Integration"  # Unit tests must pass
 
 # Verify expected file changes
 grep -rn "NewClass" src/  # Should find 3 files
@@ -799,13 +799,13 @@ For complex refactors (3+ phases), use this proven structure:
 
 - [ ] N.X-2: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [ ] N.X-1: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Module"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Module"
   ```
   All tests must pass.
 
@@ -824,7 +824,7 @@ For complex refactors (3+ phases), use this proven structure:
 ## Anti-Patterns to Avoid
 - Vague completion criteria ("when finished")
 - Missing test requirement ("when code compiles")
-- Wrong commands (`dotnet test` instead of `dotnet build.cs test`)
+- Wrong commands (`dotnet test` instead of `dotnet toolchain.cs test`)
 - No failure guidance
 - Using `git add .` or `git add -A` blindly
 - **Cramming multiple phases into one iteration** (causes context rot)

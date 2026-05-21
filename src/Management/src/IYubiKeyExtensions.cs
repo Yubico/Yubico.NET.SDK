@@ -103,12 +103,20 @@ public static class IYubiKeyExtensions
             CancellationToken cancellationToken = default)
         {
             var connection = await yubiKey.ConnectAsync(cancellationToken);
-            return await ManagementSession.CreateAsync(
-                    connection,
-                    configuration,
-                    scpKeyParams,
-                    cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                return await ManagementSession.CreateAsync(
+                        connection,
+                        configuration,
+                        scpKeyParams,
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch
+            {
+                await connection.DisposeAsync().ConfigureAwait(false);
+                throw;
+            }
         }
     }
 }

@@ -61,13 +61,13 @@ finally
 3. Build - identify compilation errors
 4. Fix all string-to-ReadOnlyMemory API mismatches in CLI and test code
 5. Build again - verify clean
-6. Run unit tests: `dotnet build.cs test`
+6. Run unit tests: `dotnet toolchain.cs test`
 7. Commit the merge
 
 ## Verification
 
 - [ ] `dotnet build Yubico.YubiKit.sln` compiles clean
-- [ ] `dotnet build.cs test` passes
+- [ ] `dotnet toolchain.cs test` passes
 - [ ] ChainedApduTransmitter has correct range: `data[offset..(offset + ShortApduMaxChunk)]`
 - [ ] ScpProcessor implements IDisposable
 - [ ] ScpState implements IDisposable with key zeroing

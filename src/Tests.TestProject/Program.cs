@@ -11,7 +11,9 @@ AddJsonOptions(builder);
 builder.Services.AddYubiKeyManager();
 
 // Register controllers for the DiTestController
+#pragma warning disable IL2026 // MVC does not support trimming; this project is not AOT-deployed
 builder.Services.AddControllers();
+#pragma warning restore IL2026
 
 var app = builder.Build();
 

@@ -81,11 +81,7 @@ public sealed partial class PivSession
     public async Task AuthenticateAsync(ReadOnlyMemory<byte> managementKey, CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Starting management key authentication with {KeyType}", ManagementKeyType);
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // Validate key length based on management key type
         int expectedKeyLength = ManagementKeyType switch
@@ -132,7 +128,7 @@ public sealed partial class PivSession
             }
 
             // Parse witness response: 7C [len] 80 [len] [witness data]
-            var witnessBytes = ParseWitnessResponse(witnessResponse.Data.Span, challengeLength);
+            var witnessBytes = ParseAuthResponse(witnessResponse.Data.Span, TagAuthWitness, challengeLength);
 
             // Step 2: Decrypt witness with our key
             byte[]? decryptedWitness = null;
@@ -151,8 +147,8 @@ public sealed partial class PivSession
 
                 // Step 4: Build and send response with decrypted witness and our challenge
                 // Send: 7C [len] 80 [len] [decrypted witness] 81 [len] [challenge]
-                // Max size: 2 (header) + 2 + challengeLength + 2 + challengeLength = 6 + 2*challengeLength
-                int responseSize = 6 + (2 * challengeLength);
+                // Max size: 1 (tag) + 3 (BER len) + 1 (tag) + 3 (BER len) + challengeLength + 1 (tag) + 3 (BER len) + challengeLength
+                int responseSize = 12 + (2 * challengeLength);
                 responseBuffer = ArrayPool<byte>.Shared.Rent(responseSize);
                 int bytesWritten = BuildAuthResponse(decryptedWitness.AsSpan(0, challengeLength), challenge.AsSpan(0, challengeLength), responseBuffer.AsSpan(0, responseSize));
                 var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseBuffer.AsMemory(0, bytesWritten));
@@ -165,7 +161,7 @@ public sealed partial class PivSession
 
                 // Step 5: Verify device's response (encrypted challenge)
                 // Response: 7C [len] 82 [len] [encrypted challenge]
-                var encryptedChallenge = ParseChallengeResponse(challengeResponse.Data.Span, challengeLength);
+                var encryptedChallenge = ParseAuthResponse(challengeResponse.Data.Span, 0x82, challengeLength);
 
                 // Encrypt our challenge and compare
                 expectedResponse = ArrayPool<byte>.Shared.Rent(challengeLength);
@@ -194,7 +190,7 @@ public sealed partial class PivSession
                 }
                 if (responseBuffer is not null)
                 {
-                    int responseSize = 6 + (2 * challengeLength);
+                    int responseSize = 12 + (2 * challengeLength);
                     CryptographicOperations.ZeroMemory(responseBuffer.AsSpan(0, responseSize));
                     ArrayPool<byte>.Shared.Return(responseBuffer);
                 }
@@ -214,53 +210,29 @@ public sealed partial class PivSession
     }
 
     /// <summary>
-    /// Parses the witness response TLV: 7C [len] 80 [len] [witness data]
+    /// Parses an authentication response TLV: 7C [len] [expectedInnerTag] [len] [data].
+    /// Used for both witness (tag 0x80) and challenge (tag 0x82) responses.
     /// </summary>
-    private static ReadOnlySpan<byte> ParseWitnessResponse(ReadOnlySpan<byte> response, int expectedLength)
+    private static byte[] ParseAuthResponse(ReadOnlySpan<byte> response, byte expectedInnerTag, int expectedLength)
     {
-        var outer = Tlv.Create(response);
+        using var outer = Tlv.Create(response);
         if (outer.Tag != 0x7C)
         {
-            throw new ApduException($"Invalid witness response - expected TAG 0x7C, got 0x{outer.Tag:X2}");
+            throw new ApduException($"Invalid auth response - expected TAG 0x7C, got 0x{outer.Tag:X2}");
         }
 
-        var inner = Tlv.Create(outer.Value.Span);
-        if (inner.Tag != 0x80)
+        using var inner = Tlv.Create(outer.Value.Span);
+        if (inner.Tag != expectedInnerTag)
         {
-            throw new ApduException($"Invalid witness response - expected TAG 0x80, got 0x{inner.Tag:X2}");
+            throw new ApduException($"Invalid auth response - expected TAG 0x{expectedInnerTag:X2}, got 0x{inner.Tag:X2}");
         }
 
         if (inner.Length != expectedLength)
         {
-            throw new ApduException($"Invalid witness length - expected {expectedLength}, got {inner.Length}");
+            throw new ApduException($"Invalid auth response length - expected {expectedLength}, got {inner.Length}");
         }
 
-        return inner.Value.Span;
-    }
-
-    /// <summary>
-    /// Parses the challenge response TLV: 7C [len] 82 [len] [encrypted data]
-    /// </summary>
-    private static ReadOnlySpan<byte> ParseChallengeResponse(ReadOnlySpan<byte> response, int expectedLength)
-    {
-        var outer = Tlv.Create(response);
-        if (outer.Tag != 0x7C)
-        {
-            throw new ApduException($"Invalid challenge response - expected TAG 0x7C, got 0x{outer.Tag:X2}");
-        }
-
-        var inner = Tlv.Create(outer.Value.Span);
-        if (inner.Tag != 0x82)
-        {
-            throw new ApduException($"Invalid challenge response - expected TAG 0x82, got 0x{inner.Tag:X2}");
-        }
-
-        if (inner.Length != expectedLength)
-        {
-            throw new ApduException($"Invalid challenge response length - expected {expectedLength}, got {inner.Length}");
-        }
-
-        return inner.Value.Span;
+        return inner.Value.Span.ToArray();
     }
 
     /// <summary>
@@ -274,108 +246,69 @@ public sealed partial class PivSession
     {
         int witnessLen = decryptedWitness.Length;
         int challengeLen = challenge.Length;
-        
+
         // Inner: 80 [len] [witness] 81 [len] [challenge]
-        int innerLen = 2 + witnessLen + 2 + challengeLen;
-        int totalLen = 2 + innerLen;
-        
+        int witnessLenSize = BerLength.EncodingSize(witnessLen);
+        int challengeLenSize = BerLength.EncodingSize(challengeLen);
+        int innerLen = 1 + witnessLenSize + witnessLen + 1 + challengeLenSize + challengeLen;
+        int outerLenSize = BerLength.EncodingSize(innerLen);
+        int totalLen = 1 + outerLenSize + innerLen;
+
         // Outer: 7C [len] [inner]
         int offset = 0;
-        
+
         destination[offset++] = 0x7C;
-        destination[offset++] = (byte)innerLen;
+        offset += BerLength.Write(destination[offset..], innerLen);
         destination[offset++] = 0x80;
-        destination[offset++] = (byte)witnessLen;
+        offset += BerLength.Write(destination[offset..], witnessLen);
         decryptedWitness.CopyTo(destination[offset..]);
         offset += witnessLen;
         destination[offset++] = 0x81;
-        destination[offset++] = (byte)challengeLen;
+        offset += BerLength.Write(destination[offset..], challengeLen);
         challenge.CopyTo(destination[offset..]);
-        
+
         return totalLen;
-    }
-
-    /// <summary>
-    /// Decrypts a single block using ECB mode with the specified key type.
-    /// </summary>
-    private static void DecryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, PivManagementKeyType keyType)
-    {
-        byte[]? keyBuffer = null;
-        byte[]? inputBuffer = null;
-        byte[]? decryptedBuffer = null;
-        try
-        {
-            keyBuffer = ArrayPool<byte>.Shared.Rent(key.Length);
-            inputBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
-            decryptedBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
-            
-            key.CopyTo(keyBuffer);
-            input.CopyTo(inputBuffer);
-            
-            if (keyType == PivManagementKeyType.TripleDes)
-            {
-                TripleDesDecryptManual(keyBuffer.AsSpan(0, key.Length), inputBuffer.AsSpan(0, input.Length), decryptedBuffer.AsSpan(0, input.Length));
-            }
-            else
-            {
-                byte[]? aesKeyArray = null;
-                try
-                {
-                    using var aes = Aes.Create();
-                    aesKeyArray = keyBuffer.AsSpan(0, key.Length).ToArray();
-                    aes.Key = aesKeyArray;
-                    aes.Mode = CipherMode.ECB;
-                    aes.Padding = PaddingMode.None;
-                    using var decryptor = aes.CreateDecryptor();
-                    decryptor.TransformBlock(inputBuffer, 0, input.Length, decryptedBuffer, 0);
-                }
-                finally
-                {
-                    if (aesKeyArray is not null) CryptographicOperations.ZeroMemory(aesKeyArray);
-                }
-            }
-
-            decryptedBuffer.AsSpan(0, input.Length).CopyTo(output);
-        }
-        finally
-        {
-            if (keyBuffer is not null)
-            {
-                CryptographicOperations.ZeroMemory(keyBuffer.AsSpan(0, key.Length));
-                ArrayPool<byte>.Shared.Return(keyBuffer);
-            }
-            if (inputBuffer is not null)
-            {
-                ArrayPool<byte>.Shared.Return(inputBuffer);
-            }
-            if (decryptedBuffer is not null)
-            {
-                CryptographicOperations.ZeroMemory(decryptedBuffer.AsSpan(0, input.Length));
-                ArrayPool<byte>.Shared.Return(decryptedBuffer);
-            }
-        }
     }
 
     /// <summary>
     /// Encrypts a single block using ECB mode with the specified key type.
     /// </summary>
-    private static void EncryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, PivManagementKeyType keyType)
+    private static void EncryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext, Span<byte> ciphertext, PivManagementKeyType keyType) =>
+        CryptoBlockCore(key, plaintext, ciphertext, keyType, encrypt: true);
+
+    /// <summary>
+    /// Decrypts a single block using ECB mode with the specified key type.
+    /// </summary>
+    private static void DecryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext, Span<byte> plaintext, PivManagementKeyType keyType) =>
+        CryptoBlockCore(key, ciphertext, plaintext, keyType, encrypt: false);
+
+    /// <summary>
+    /// Shared implementation for single-block ECB encrypt/decrypt with buffer management.
+    /// </summary>
+    private static void CryptoBlockCore(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, PivManagementKeyType keyType, bool encrypt)
     {
         byte[]? keyBuffer = null;
         byte[]? inputBuffer = null;
-        byte[]? encryptedBuffer = null;
+        byte[]? outputBuffer = null;
         try
         {
             keyBuffer = ArrayPool<byte>.Shared.Rent(key.Length);
             inputBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
-            encryptedBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
-            
+            outputBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
+
             key.CopyTo(keyBuffer);
             input.CopyTo(inputBuffer);
-            
+
             if (keyType == PivManagementKeyType.TripleDes)
             {
-                TripleDesEncryptManual(keyBuffer.AsSpan(0, key.Length), inputBuffer.AsSpan(0, input.Length), encryptedBuffer.AsSpan(0, input.Length));
+                if (encrypt)
+                {
+                    TripleDesEncryptManual(keyBuffer.AsSpan(0, key.Length), inputBuffer.AsSpan(0, input.Length), outputBuffer.AsSpan(0, input.Length));
+                }
+                else
+                {
+                    TripleDesDecryptManual(keyBuffer.AsSpan(0, key.Length), inputBuffer.AsSpan(0, input.Length), outputBuffer.AsSpan(0, input.Length));
+                }
             }
             else
             {
@@ -387,8 +320,8 @@ public sealed partial class PivSession
                     aes.Key = aesKeyArray;
                     aes.Mode = CipherMode.ECB;
                     aes.Padding = PaddingMode.None;
-                    using var encryptor = aes.CreateEncryptor();
-                    encryptor.TransformBlock(inputBuffer, 0, input.Length, encryptedBuffer, 0);
+                    using var transform = encrypt ? aes.CreateEncryptor() : aes.CreateDecryptor();
+                    transform.TransformBlock(inputBuffer, 0, input.Length, outputBuffer, 0);
                 }
                 finally
                 {
@@ -396,7 +329,7 @@ public sealed partial class PivSession
                 }
             }
 
-            encryptedBuffer.AsSpan(0, input.Length).CopyTo(output);
+            outputBuffer.AsSpan(0, input.Length).CopyTo(output);
         }
         finally
         {
@@ -407,12 +340,13 @@ public sealed partial class PivSession
             }
             if (inputBuffer is not null)
             {
+                CryptographicOperations.ZeroMemory(inputBuffer.AsSpan(0, input.Length));
                 ArrayPool<byte>.Shared.Return(inputBuffer);
             }
-            if (encryptedBuffer is not null)
+            if (outputBuffer is not null)
             {
-                CryptographicOperations.ZeroMemory(encryptedBuffer.AsSpan(0, input.Length));
-                ArrayPool<byte>.Shared.Return(encryptedBuffer);
+                CryptographicOperations.ZeroMemory(outputBuffer.AsSpan(0, input.Length));
+                ArrayPool<byte>.Shared.Return(outputBuffer);
             }
         }
     }
@@ -487,6 +421,7 @@ public sealed partial class PivSession
         finally
         {
             CryptographicOperations.ZeroMemory(keyArr);
+            CryptographicOperations.ZeroMemory(inputArr);
             CryptographicOperations.ZeroMemory(outputArr);
         }
     }
@@ -514,11 +449,7 @@ public sealed partial class PivSession
     public async Task VerifyPinAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Verifying PIN");
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (pin.Length is < 6 or > 8)
         {
@@ -541,10 +472,8 @@ public sealed partial class PivSession
                 return;
             }
 
-            // Parse retry count from status word (0x63Cx where x is attempts remaining)
-            if ((response.SW & 0xFFF0) == SWConstants.VerifyFail)
+            if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
             {
-                var retriesRemaining = (int)(response.SW & 0x0F);
                 throw new InvalidPinException(retriesRemaining);
             }
 
@@ -574,11 +503,7 @@ public sealed partial class PivSession
     public async Task<int> GetPinAttemptsAsync(CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Getting PIN attempt count");
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         // Try metadata approach first if supported
         if (IsSupported(PivFeatures.Metadata))
@@ -598,10 +523,9 @@ public sealed partial class PivSession
         var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
         var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
-        // Parse retry count from status word (0x63Cx where x is attempts remaining)
-        if ((response.SW & 0xFFF0) == SWConstants.VerifyFail)
+        if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
         {
-            return (int)(response.SW & 0x0F);
+            return retriesRemaining;
         }
 
         // PIN is blocked
@@ -628,11 +552,7 @@ public sealed partial class PivSession
     public async Task ChangePinAsync(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Changing PIN");
-
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
+        EnsureProtocol();
 
         if (currentPin.Length is < 6 or > 8)
         {
@@ -663,10 +583,8 @@ public sealed partial class PivSession
                 return;
             }
 
-            // Parse retry count from status word (0x63Cx where x is attempts remaining)
-            if ((response.SW & 0xFFF0) == SWConstants.VerifyFail)
+            if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
             {
-                var retriesRemaining = (int)(response.SW & 0x0F);
                 throw new InvalidPinException(retriesRemaining, "PIN change failed - current PIN incorrect");
             }
 

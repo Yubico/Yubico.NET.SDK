@@ -44,13 +44,13 @@ public static class Crt
     private static byte[] BuildCrt(int tag)
     {
         using var tlv = new Tlv(tag, ReadOnlySpan<byte>.Empty);
-        return tlv.AsMemory().ToArray();
+        return tlv.AsSpan().ToArray();
     }
 
     private static byte[] BuildAttCrt()
     {
         using var inner = new Tlv(0x84, [0x81]);
         using var outer = new Tlv(0xB6, inner.Value.Span);
-        return outer.AsMemory().ToArray();
+        return outer.AsSpan().ToArray();
     }
 }

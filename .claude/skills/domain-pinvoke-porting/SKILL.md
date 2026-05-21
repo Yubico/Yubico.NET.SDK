@@ -159,7 +159,7 @@ public sealed class LinuxHidDevice : IHidDevice
 3. **Preserve safety patterns** - Keep GCHandle, delegates, timeouts
 4. **Apply modernization** - File-scoped namespace, `is null`, switch expressions
 5. **Add platform attributes** - `[SupportedOSPlatform(...)]`
-6. **Verify build** - `dotnet build.cs build` must pass
+6. **Verify build** - `dotnet toolchain.cs build` must pass
 7. **Commit carefully** - Only YOUR modified files
 
 ### Verification
@@ -168,10 +168,10 @@ After porting:
 
 ```bash
 # Build to catch compilation errors
-dotnet build.cs build
+dotnet toolchain.cs build
 
 # Check for warnings
-dotnet build.cs build 2>&1 | grep -i warning
+dotnet toolchain.cs build 2>&1 | grep -i warning
 ```
 
 ## Example: Porting MacOSHidDevice

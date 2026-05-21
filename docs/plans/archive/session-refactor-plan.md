@@ -550,13 +550,13 @@ Phase 6 (Documentation) - After all code changes
 
 ### Build Verification
 ```bash
-dotnet build.cs build
+dotnet toolchain.cs build
 ```
 
 ### Test Verification
 ```bash
 # Unit tests
-dotnet build.cs test
+dotnet toolchain.cs test
 
 # Integration tests (requires YubiKey)
 dotnet test Yubico.YubiKit.Management/tests/Yubico.YubiKit.Management.IntegrationTests/

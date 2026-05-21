@@ -10,7 +10,7 @@ This project uses a .NET 10 C# script for build automation with Bullseye task ru
 
 Run targets with:
 ```bash
-dotnet build.cs [target] [options]
+dotnet toolchain.cs [target] [options]
 ```
 
 ### When to Use `--` Separator
@@ -19,16 +19,16 @@ The `--` separator tells `dotnet run` to pass arguments to the script instead of
 
 ```bash
 # These work WITHOUT -- (target names and most options)
-dotnet build.cs build
-dotnet build.cs test --project Piv
-dotnet build.cs build --clean
+dotnet toolchain.cs build
+dotnet toolchain.cs test --project Piv
+dotnet toolchain.cs build --clean
 
 # These REQUIRE -- (options that dotnet run might intercept)
-dotnet build.cs -- --help          # --help conflicts with dotnet's help
-dotnet build.cs -- -h              # Same issue
+dotnet toolchain.cs -- --help          # --help conflicts with dotnet's help
+dotnet toolchain.cs -- -h              # Same issue
 
 # When in doubt, use -- before any options
-dotnet build.cs -- build --project Piv --clean
+dotnet toolchain.cs -- build --project Piv --clean
 ```
 
 **Rule of thumb:** If your command isn't working as expected, try adding `--` before the arguments.
@@ -57,46 +57,46 @@ dotnet build.cs -- build --project Piv --clean
 - `--project <name>` - Build/test specific project only (partial match, e.g., `Piv`)
 - `--integration` - Include integration tests (requires `--project`)
 - `--smoke` - Smoke test mode: skip `Slow` and `RequiresUserPresence` tests (fast integration runs)
-- `-h, --help` - Show help message (use `dotnet build.cs -- --help`)
+- `-h, --help` - Show help message (use `dotnet toolchain.cs -- --help`)
 
 ### Examples
 
 ```bash
 # Show help (requires -- to avoid dotnet intercepting --help)
-dotnet build.cs -- --help
+dotnet toolchain.cs -- --help
 
 # Clean artifacts
-dotnet build.cs clean
+dotnet toolchain.cs clean
 
 # Build the solution
-dotnet build.cs build
+dotnet toolchain.cs build
 
 # Build specific project (partial match)
-dotnet build.cs build --project Piv
+dotnet toolchain.cs build --project Piv
 
 # Run tests
-dotnet build.cs test
+dotnet toolchain.cs test
 
 # Run tests for specific project with filter
-dotnet build.cs test --project Piv --filter "Method~Sign"
+dotnet toolchain.cs test --project Piv --filter "Method~Sign"
 
 # Run tests with code coverage (xUnit v2 unit test projects only)
-dotnet build.cs coverage
+dotnet toolchain.cs coverage
 
 # Run integration tests for a specific module
-dotnet build.cs test --integration --project Piv
+dotnet toolchain.cs test --integration --project Piv
 
 # Quick smoke test (skips slow RSA keygen and user-presence tests)
-dotnet build.cs -- test --integration --project Piv --smoke
+dotnet toolchain.cs -- test --integration --project Piv --smoke
 
 # Create and publish packages with custom version
-dotnet build.cs publish --package-version 1.0.0-preview.2
+dotnet toolchain.cs publish --package-version 1.0.0-preview.2
 
 # Dry run to see what would be published
-dotnet build.cs publish --dry-run
+dotnet toolchain.cs publish --dry-run
 
 # Full clean build (delete artifacts, then build)
-dotnet build.cs clean build
+dotnet toolchain.cs clean build
 ```
 
 ## Target Dependencies
@@ -132,7 +132,7 @@ The build script automatically discovers projects using glob patterns:
 - **Packable projects**: All `Yubico.YubiKit.*/src/*.csproj` files
 - **Test projects**: All `Yubico.YubiKit.*.UnitTests/*.csproj` files under `tests/` directories
 
-This means you don't need to manually update the build script when adding new projects that follow the standard structure. Run `dotnet build.cs -- --help` to see the current list of discovered projects.
+This means you don't need to manually update the build script when adding new projects that follow the standard structure. Run `dotnet toolchain.cs -- --help` to see the current list of discovered projects.
 
 ## Code Coverage
 
@@ -140,7 +140,7 @@ The `coverage` target collects coverage via `dotnet test` with the `coverlet` co
 
 ## xUnit v2 vs v3 Test Runner Detection
 
-**IMPORTANT: Always use `dotnet build.cs test` instead of invoking `dotnet test` directly.**
+**IMPORTANT: Always use `dotnet toolchain.cs test` instead of invoking `dotnet test` directly.**
 
 This codebase uses a mix of xUnit v2 and xUnit v3 test projects, which require different command-line invocation:
 
@@ -157,9 +157,9 @@ If you invoke `dotnet test` on an xUnit v3 project, or use the wrong filter synt
 
 ```bash
 # ✅ CORRECT - Let the build script handle runner detection
-dotnet build.cs test
-dotnet build.cs test --project Core
-dotnet build.cs test --filter "FullyQualifiedName~MyTest"
+dotnet toolchain.cs test
+dotnet toolchain.cs test --project Core
+dotnet toolchain.cs test --filter "FullyQualifiedName~MyTest"
 
 # ❌ WRONG - May fail if project uses xUnit v3
 dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Yubico.YubiKit.Fido2.UnitTests.csproj
@@ -169,7 +169,7 @@ dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Yubico.Yub
 
 When writing scripts or automation that runs tests:
 
-1. **Always use `dotnet build.cs test`** - it handles the complexity for you
+1. **Always use `dotnet toolchain.cs test`** - it handles the complexity for you
 2. **Never assume** `dotnet test` will work for all projects
-3. **Use `--project`** to filter to specific projects: `dotnet build.cs test --project Fido2`
-4. **Use `--filter`** for test filtering: `dotnet build.cs test --filter "Method~Sign"`
+3. **Use `--project`** to filter to specific projects: `dotnet toolchain.cs test --project Fido2`
+4. **Use `--filter`** for test filtering: `dotnet toolchain.cs test --filter "Method~Sign"`

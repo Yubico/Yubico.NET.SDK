@@ -170,7 +170,7 @@ fixed[16] + uid[6] + key[16] + accCode[6] + fixedSize[1] + extFlags[1] + tktFlag
 - Skip touch-triggered tests: `[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]`
 
 **Testing rules:**
-- ALWAYS use `dotnet build.cs test` (NEVER `dotnet test`)
+- ALWAYS use `dotnet toolchain.cs test` (NEVER `dotnet test`)
 - `[WithYubiKey]` + `[InlineData]` is INCOMPATIBLE - use separate test methods
 - Skip user-presence tests: `--filter "Category!=RequiresUserPresence"`
 
@@ -238,7 +238,7 @@ Every file MUST:
 - `#region` (split large classes instead)
 - `.ToArray()` in hot paths
 - Injected `ILogger` (use static `LoggingFactory`)
-- `dotnet test` (use `dotnet build.cs test`)
+- `dotnet test` (use `dotnet toolchain.cs test`)
 - `git add .` or `git add -A`
 - Old switch statements
 - Exceptions for control flow
@@ -253,9 +253,9 @@ Every file MUST:
 ## Build & Test
 
 ```bash
-dotnet build.cs build    # Must succeed with zero warnings
-dotnet build.cs test     # Must pass all unit tests
-dotnet build.cs test --filter "Category!=RequiresUserPresence"  # For integration tests
+dotnet toolchain.cs build    # Must succeed with zero warnings
+dotnet toolchain.cs test     # Must pass all unit tests
+dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"  # For integration tests
 dotnet format            # Must produce no changes
 ```
 
@@ -263,8 +263,8 @@ dotnet format            # Must produce no changes
 
 1. All source files follow patterns from Management/SecurityDomain exactly
 2. Backend pattern matches Management's IManagementBackend/SmartCardBackend/OtpBackend
-3. `dotnet build.cs build` succeeds with zero warnings
-4. `dotnet build.cs test` passes all unit tests
+3. `dotnet toolchain.cs build` succeeds with zero warnings
+4. `dotnet toolchain.cs test` passes all unit tests
 5. Integration tests pass with physical YubiKey (skip user-presence tests)
 6. CLI tool runs and demonstrates all YubiOTP operations with command-line parameters
 7. `Yubico.YubiKit.YubiOtp/CLAUDE.md` exists with comprehensive module documentation

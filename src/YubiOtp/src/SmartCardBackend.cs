@@ -28,6 +28,9 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
     private static readonly ILogger Logger =
         YubiKitLogging.LoggerFactory.CreateLogger<SmartCardBackend>();
 
+    private static readonly FirmwareVersion Firmware500 = new(5, 0, 0);
+    private static readonly FirmwareVersion Firmware550 = new(5, 5, 0);
+
     private readonly ISmartCardProtocol _protocol;
     private readonly FirmwareVersion _firmwareVersion;
 
@@ -136,8 +139,8 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
         var newProgSeq = statusBytes[3];
 
         // Firmware 5.0.0 through 5.4.3 do not reliably update prog_seq
-        if (_firmwareVersion >= new FirmwareVersion(5, 0, 0)
-            && _firmwareVersion < new FirmwareVersion(5, 5, 0))
+        if (_firmwareVersion >= Firmware500
+            && _firmwareVersion < Firmware550)
         {
             _lastProgSeq = newProgSeq;
             return;

@@ -235,20 +235,12 @@ public sealed class ExtensionOutput
     }
     
     /// <summary>
-    /// Decodes extension output from CBOR bytes.
+    /// Decodes extension output from CBOR bytes, preserving raw data for each extension.
     /// </summary>
     /// <param name="data">The CBOR-encoded extensions map.</param>
-    /// <returns>The decoded extension output.</returns>
-    public static ExtensionOutput Decode(ReadOnlyMemory<byte> data)
-    {
-        if (data.IsEmpty)
-        {
-            return new ExtensionOutput(new Dictionary<string, ReadOnlyMemory<byte>>());
-        }
-        
-        var reader = new CborReader(data, CborConformanceMode.Lax);
-        return Decode(reader);
-    }
+    /// <returns>The decoded extension output with raw data preserved.</returns>
+    public static ExtensionOutput Decode(ReadOnlyMemory<byte> data) =>
+        DecodeWithRawData(data);
     
     /// <summary>
     /// Decodes extension output from a CBOR reader.

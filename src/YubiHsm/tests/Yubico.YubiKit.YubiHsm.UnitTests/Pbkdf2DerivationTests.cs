@@ -76,6 +76,6 @@ public class Pbkdf2DerivationTests
     {
         Assert.Equal(10_000, HsmAuthSession.Pbkdf2Iterations);
         Assert.Equal(32, HsmAuthSession.Pbkdf2DerivedKeyLength);
-        Assert.Equal("Yubico"u8.ToArray(), HsmAuthSession.Pbkdf2Salt);
+        Assert.True(HsmAuthSession.Pbkdf2Salt.SequenceEqual("Yubico"u8));
     }
 }

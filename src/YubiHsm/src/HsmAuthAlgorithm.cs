@@ -55,7 +55,7 @@ public static class HsmAuthAlgorithmExtensions
         public int? PublicKeyLength => algorithm switch
         {
             HsmAuthAlgorithm.Aes128YubicoAuthentication => null,
-            HsmAuthAlgorithm.EcP256YubicoAuthentication => 64,
+            HsmAuthAlgorithm.EcP256YubicoAuthentication => 65, // 0x04 + X[32] + Y[32]
             _ => throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, "Unknown algorithm.")
         };
     }

@@ -248,7 +248,7 @@ feature: Test
     const result = formatProgressContext(state);
 
     expect(result).toContain("All tasks complete!");
-    expect(result).toContain("dotnet build.cs build");
+    expect(result).toContain("dotnet toolchain.cs build");
   });
 
   test("shows remaining tasks in phase", () => {

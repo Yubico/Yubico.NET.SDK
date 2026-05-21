@@ -58,7 +58,7 @@ The test `GetFingerprints_DefaultState_AllZero` already uses `resetBeforeUse: tr
 **Hypothesis:** Bug 1 may cause a cascading failure. If a prior test in the suite calls `GetAlgorithmInformationAsync` and crashes, it could leave the session or device in a bad state, causing subsequent tests (including the fingerprint test) to fail.
 
 **Investigation steps after Fix 1:**
-1. Run OpenPGP integration suite on 5.4.3: `dotnet build.cs -- test --integration --project OpenPgp`
+1. Run OpenPGP integration suite on 5.4.3: `dotnet toolchain.cs -- test --integration --project OpenPgp`
 2. If fingerprint test passes → Bug 1 was the root cause (done)
 3. If still fails → check:
    - Does `ResetAsync()` actually clear DO 0xC5 (fingerprint composite) on 5.4.3?
@@ -98,9 +98,9 @@ All other HsmAuth methods verified correct — only this one outlier.
 ## Verification
 
 1. `dotnet build Yubico.YubiKit.sln` — 0 errors, 0 warnings
-2. `dotnet build.cs test` — 9/9 unit test projects passing
-3. Integration (5.4.3): `dotnet build.cs -- test --integration --project OpenPgp` — verify TLV parse fix + fingerprint
-4. Integration (5.4.3): `dotnet build.cs -- test --integration --project YubiHsm` — if available
+2. `dotnet toolchain.cs test` — 9/9 unit test projects passing
+3. Integration (5.4.3): `dotnet toolchain.cs -- test --integration --project OpenPgp` — verify TLV parse fix + fingerprint
+4. Integration (5.4.3): `dotnet toolchain.cs -- test --integration --project YubiHsm` — if available
 5. HsmAuth TLV ordering can only be fully verified on production FW 5.8.0 (not currently available)
 
 ## Files Modified

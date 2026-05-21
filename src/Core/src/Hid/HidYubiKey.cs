@@ -34,7 +34,7 @@ internal class HidYubiKey(
     : IYubiKey
 {
     public string DeviceId { get; } =
-        $"hid:{hidDevice.DescriptorInfo.VendorId:X4}:{hidDevice.DescriptorInfo.ProductId:X4}:{hidDevice.DescriptorInfo.Usage:X4}";
+        $"hid:{hidDevice.ReaderName}:{hidDevice.DescriptorInfo.Usage:X4}";
 
     /// <summary>
     /// The connection type this YubiKey interface supports.

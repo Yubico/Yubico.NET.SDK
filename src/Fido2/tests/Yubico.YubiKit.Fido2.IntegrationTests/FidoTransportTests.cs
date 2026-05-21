@@ -42,7 +42,7 @@ public class FidoTransportTests
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireNfc = true)]
     [Trait("RequiresNfc", "true")]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_OverNfcSmartCard_CreatesCredentialSuccessfully(YubiKeyTestState state)
     {
         // The RequireNfc filter checks if the device supports NFC, not if it's
@@ -131,7 +131,7 @@ public class FidoTransportTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task NonDiscoverableCredential_WithAllowList_AssertionSucceeds(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

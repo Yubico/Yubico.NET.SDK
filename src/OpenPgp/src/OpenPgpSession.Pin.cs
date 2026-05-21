@@ -170,6 +170,9 @@ public sealed partial class OpenPgpSession
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(userAttempts);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(resetAttempts);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(adminAttempts);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(userAttempts, 255);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(resetAttempts, 255);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(adminAttempts, 255);
 
         _logger.LogDebug(
             "Setting PIN attempts (user={User}, reset={Reset}, admin={Admin})",
@@ -218,9 +221,7 @@ public sealed partial class OpenPgpSession
             if (!response.IsOK())
             {
                 // Standard wrong-PIN SW: 0x63Cx where x = remaining retries
-                var remaining = (response.SW & 0xFF00) == 0x63C0
-                    ? response.SW & 0x0F
-                    : -1;
+                var remaining = SWConstants.ExtractRetryCount(response.SW) ?? -1;
 
                 // Some firmware (including 5.8.0-alpha) returns 0x6982 (Security Status
                 // Not Satisfied) for wrong PIN instead of 0x63Cx. Per Python canonical:
@@ -230,9 +231,9 @@ public sealed partial class OpenPgpSession
                     try
                     {
                         var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
-                        remaining = (Pw)pw == Pw.User
+                        remaining = pw == Pw.User
                             ? status.AttemptsUser
-                            : (Pw)pw == Pw.Admin
+                            : pw == Pw.Admin
                                 ? status.AttemptsAdmin
                                 : status.AttemptsReset;
                     }

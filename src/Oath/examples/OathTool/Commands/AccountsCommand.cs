@@ -73,7 +73,7 @@ public static class AccountsCommand
             return 1;
         }
 
-        var credentialData = new CredentialData
+        using var credentialData = new CredentialData
         {
             Name = name,
             OathType = oathType,
@@ -288,38 +288,41 @@ public static class AccountsCommand
             return 1;
         }
 
-        var displayName = OutputHelpers.FormatCredentialName(credentialData.Issuer, credentialData.Name);
-
-        if (!force)
+        using (credentialData)
         {
-            Console.Error.Write($"Add credential {displayName} ({credentialData.OathType})? [y/N] ");
-            var response = Console.ReadLine();
-            if (!string.Equals(response, "y", StringComparison.OrdinalIgnoreCase))
+            var displayName = OutputHelpers.FormatCredentialName(credentialData.Issuer, credentialData.Name);
+
+            if (!force)
             {
-                OutputHelpers.WriteInfo("Add cancelled.");
+                Console.Error.Write($"Add credential {displayName} ({credentialData.OathType})? [y/N] ");
+                var response = Console.ReadLine();
+                if (!string.Equals(response, "y", StringComparison.OrdinalIgnoreCase))
+                {
+                    OutputHelpers.WriteInfo("Add cancelled.");
+                    return 1;
+                }
+            }
+
+            var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
+            if (result is null)
+            {
                 return 1;
             }
-        }
 
-        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
-        if (result is null)
-        {
-            return 1;
-        }
-
-        var (_, session) = result.Value;
-        await using (session)
-        {
-            try
+            var (_, session) = result.Value;
+            await using (session)
             {
-                await session.PutCredentialAsync(credentialData, touch, cancellationToken);
-                OutputHelpers.WriteSuccess($"Credential added: {displayName}");
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                OutputHelpers.WriteError($"Failed to add credential: {ex.Message}");
-                return 1;
+                try
+                {
+                    await session.PutCredentialAsync(credentialData, touch, cancellationToken);
+                    OutputHelpers.WriteSuccess($"Credential added: {displayName}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    OutputHelpers.WriteError($"Failed to add credential: {ex.Message}");
+                    return 1;
+                }
             }
         }
     }

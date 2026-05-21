@@ -121,7 +121,7 @@
     │ write-ralph-prompt│  │    build-project  │  │   test-project    │
     │                   │  │                   │  │                   │
     │ Guidance for      │  │ MANDATORY         │  │ MANDATORY         │
-    │ ad-hoc prompts    │  │ dotnet build.cs   │  │ dotnet build.cs   │
+    │ ad-hoc prompts    │  │ dotnet toolchain.cs   │  │ dotnet toolchain.cs   │
     │ (when no progress │  │ build             │  │ test              │
     │ file needed)      │  │                   │  │                   │
     └───────────────────┘  └───────────────────┘  └───────────────────┘

@@ -35,7 +35,7 @@ public class FidoLargeBlobTests
 {
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task LargeBlob_StoreAndRetrieve_RoundTripsData(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -138,7 +138,7 @@ public class FidoLargeBlobTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task LargeBlob_DeleteBlob_RemovesData(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

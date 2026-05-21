@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -197,6 +198,12 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
     private static FirmwareVersion ParseVersionResponse(ReadOnlySpan<byte> response)
     {
         // Expected format: [major, minor, patch, 0x90, 0x00]
+        if (response.Length < 3)
+        {
+            throw new InvalidOperationException(
+                $"Invalid version response: expected at least 3 bytes, got {response.Length}");
+        }
+
         return new FirmwareVersion(response[0], response[1], response[2]);
     }
 
@@ -206,12 +213,8 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
     {
         EnsureInitialized();
         EnsureSupports(PivFeatures.Serial);
-        
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
-        
+        EnsureProtocol();
+
         Logger.LogDebug("PIV: Getting YubiKey serial number");
         
         var command = new ApduCommand(0x00, 0xF8, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
@@ -245,12 +248,8 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
-        
+        EnsureProtocol();
+
         Logger.LogDebug("PIV: Resetting PIV application");
         
         // TODO: Check bio not configured (Phase 7)
@@ -297,6 +296,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
     /// </summary>
     private async Task BlockPinAsync(CancellationToken cancellationToken)
     {
+        EnsureProtocol();
         Logger.LogDebug("PIV: Blocking PIN");
         
         // Get initial retry count
@@ -319,7 +319,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
             while (retriesRemaining > 0)
             {
                 var pinCommand = new ApduCommand(0x00, InsVerify, 0x00, P2Pin, emptyPin);
-                var response = await _protocol!.TransmitAndReceiveAsync(pinCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+                var response = await _protocol.TransmitAndReceiveAsync(pinCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
             
                 retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
                 if (retriesRemaining < 0)
@@ -342,6 +342,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
     /// </summary>
     private async Task BlockPukAsync(CancellationToken cancellationToken)
     {
+        EnsureProtocol();
         Logger.LogDebug("PIV: Blocking PUK");
         
         // PUK blocking uses INS_RESET_RETRY (0x2C) with P2=0x80 (PIN_P2, not PUK_P2!)
@@ -353,7 +354,7 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
             while (retriesRemaining > 0)
             {
                 var pukCommand = new ApduCommand(0x00, InsResetRetry, 0x00, P2Pin, emptyPukPin);
-                var response = await _protocol!.TransmitAndReceiveAsync(pukCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+                var response = await _protocol.TransmitAndReceiveAsync(pukCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
             
                 retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
                 if (retriesRemaining < 0)
@@ -387,12 +388,8 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
     public async Task<PivPinMetadata> GetPinMetadataAsync(CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        
-        if (_protocol is null)
-        {
-            throw new InvalidOperationException("Session not initialized");
-        }
-        
+        EnsureProtocol();
+
         Logger.LogDebug("PIV: Getting PIN metadata");
         
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
@@ -520,6 +517,15 @@ public sealed partial class PivSession : ApplicationSession, IPivSession
     {
         if (!IsInitialized)
             throw new InvalidOperationException("Session is not initialized. Use PivSession.CreateAsync() to create a session.");
+    }
+
+    [MemberNotNull(nameof(_protocol))]
+    private void EnsureProtocol()
+    {
+        if (_protocol is null)
+        {
+            throw new InvalidOperationException("PIV session is not initialized. Call InitializeAsync first.");
+        }
     }
 
 }

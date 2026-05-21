@@ -13,6 +13,9 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using Yubico.YubiKit.Fido2.Cbor;
+
+using static Yubico.YubiKit.Fido2.Cbor.CoseKeyWriter;
 
 namespace Yubico.YubiKit.Fido2.Extensions;
 
@@ -121,30 +124,6 @@ public sealed class HmacSecretInput
         return writer.Encode();
     }
     
-    private static void WriteCoseKey(CborWriter writer, IReadOnlyDictionary<int, object?> key)
-    {
-        writer.WriteStartMap(key.Count);
-        foreach (var kvp in key.OrderBy(k => k.Key))
-        {
-            writer.WriteInt32(kvp.Key);
-            switch (kvp.Value)
-            {
-                case int i:
-                    writer.WriteInt32(i);
-                    break;
-                case byte[] bytes:
-                    writer.WriteByteString(bytes);
-                    break;
-                case null:
-                    writer.WriteNull();
-                    break;
-                default:
-                    throw new InvalidOperationException(
-                        $"Unsupported COSE key value type: {kvp.Value?.GetType().Name}");
-            }
-        }
-        writer.WriteEndMap();
-    }
 }
 
 /// <summary>

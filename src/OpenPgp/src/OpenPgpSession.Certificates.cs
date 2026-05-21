@@ -119,7 +119,7 @@ public sealed partial class OpenPgpSession
         // Build SELECT_DATA payload: TLV(0x60, TLV(0x5C, [0x7F, 0x21]))
         using var innerTlv = new Tlv(0x5C, [(byte)0x7F, (byte)0x21]);
         using var outerTlv = new Tlv(0x60, innerTlv.AsSpan());
-        var tlvBytes = outerTlv.AsMemory().ToArray();
+        var tlvBytes = outerTlv.AsSpan().ToArray();
 
         // Firmware 5.2.0–5.4.3: prepend non-standard length byte before TLV
         byte[] selectDataPayload = IsSupported(FeatureSelectDataFix)

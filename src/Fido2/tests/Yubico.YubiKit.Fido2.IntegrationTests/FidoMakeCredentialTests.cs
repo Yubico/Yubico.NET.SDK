@@ -42,7 +42,7 @@ public class FidoMakeCredentialTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_NonResidentKey_ReturnsValidAttestation(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -101,7 +101,7 @@ public class FidoMakeCredentialTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_ResidentKey_ReturnsCredentialId(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
@@ -168,7 +168,7 @@ public class FidoMakeCredentialTests
     /// </summary>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_WithExcludeList_ThrowsCredentialExcluded(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

@@ -54,7 +54,7 @@ public class FidoExcludeListStressTests
     /// </remarks>
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait("RequiresUserPresence", "true")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_WithLargeExcludeList_RejectsExcludedCredential(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {

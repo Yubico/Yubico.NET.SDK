@@ -4,6 +4,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.Piv;
 
@@ -160,17 +161,12 @@ internal static class PivPinUtilities
     public static int GetRetriesFromStatusWord(int statusWord)
     {
         // 0x6983 = Authentication method blocked
-        if (statusWord == 0x6983)
+        if (statusWord == SWConstants.AuthenticationMethodBlocked)
         {
             return 0;
         }
 
-        // 0x63CX = X retries remaining
-        if (statusWord >= 0x63C0 && statusWord <= 0x63CF)
-        {
-            return statusWord & 0x0F;
-        }
-
-        return -1;
+        // 0x63CX = X retries remaining - delegate to centralized extraction
+        return SWConstants.ExtractRetryCount((short)statusWord) ?? -1;
     }
 }

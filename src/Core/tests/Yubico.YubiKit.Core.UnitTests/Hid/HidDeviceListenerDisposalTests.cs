@@ -291,7 +291,7 @@ public class HidDeviceListenerDisposalTests
     /// If this test hangs, the cancellation logic is broken.
     /// </summary>
     [Fact]
-    public void Dispose_AfterStart_CompletesWithinTimeout()
+    public async Task Dispose_AfterStart_CompletesWithinTimeout()
     {
         // Arrange
         HidDeviceListener? listener = null;
@@ -311,7 +311,7 @@ public class HidDeviceListenerDisposalTests
 
         // Act & Assert - must complete within 10 seconds
         var disposeTask = Task.Run(() => listener.Dispose(), TestContext.Current.CancellationToken);
-        bool completed = disposeTask.Wait(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+        var completed = await Task.WhenAny(disposeTask, Task.Delay(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken)) == disposeTask;
 
         Assert.True(completed, "Dispose should complete within 10 seconds");
     }
@@ -320,7 +320,7 @@ public class HidDeviceListenerDisposalTests
     /// Verifies that Dispose completes quickly when listener was never started.
     /// </summary>
     [Fact]
-    public void Dispose_NeverStarted_CompletesImmediately()
+    public async Task Dispose_NeverStarted_CompletesImmediately()
     {
         // Arrange
         HidDeviceListener? listener = null;
@@ -340,7 +340,7 @@ public class HidDeviceListenerDisposalTests
 
         // Act & Assert - should complete very quickly
         var disposeTask = Task.Run(() => listener.Dispose(), TestContext.Current.CancellationToken);
-        bool completed = disposeTask.Wait(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
+        var completed = await Task.WhenAny(disposeTask, Task.Delay(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken)) == disposeTask;
 
         Assert.True(completed, "Dispose should complete within 1 second when not started");
     }

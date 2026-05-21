@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.SecurityDomain;
 
@@ -25,13 +26,15 @@ namespace Yubico.YubiKit.SecurityDomain;
 /// <param name="connection">The SmartCard connection to use.</param>
 /// <param name="configuration">Optional protocol configuration.</param>
 /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
+/// <param name="firmwareVersion">Optional firmware version for feature gating.</param>
 /// <param name="cancellationToken">Cancellation token.</param>
 /// <returns>A configured SecurityDomainSession.</returns>
 public delegate Task<SecurityDomainSession> SecurityDomainSessionFactory(
     ISmartCardConnection connection,
-    ProtocolConfiguration? configuration,
-    ScpKeyParameters? scpKeyParams,
-    CancellationToken cancellationToken);
+    ProtocolConfiguration? configuration = null,
+    ScpKeyParameters? scpKeyParams = null,
+    FirmwareVersion? firmwareVersion = null,
+    CancellationToken cancellationToken = default);
 
 public static class DependencyInjection
 {
@@ -54,7 +57,7 @@ public static class DependencyInjection
         public IServiceCollection AddYubiKeySecurityDomain()
         {
             services.TryAddSingleton<SecurityDomainSessionFactory>(
-                (conn, cfg, scp, ct) => SecurityDomainSession.CreateAsync(conn, cfg, scp, cancellationToken: ct));
+                (conn, cfg, scp, fw, ct) => SecurityDomainSession.CreateAsync(conn, cfg, scp, fw, ct));
 
             return services;
         }

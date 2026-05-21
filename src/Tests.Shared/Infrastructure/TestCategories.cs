@@ -22,16 +22,16 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 /// <para><strong>Filter Examples:</strong></para>
 /// <code>
 /// # Skip tests requiring user interaction (for CI/agents)
-/// dotnet build.cs test --filter "Category!=RequiresUserPresence"
+/// dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"
 /// 
 /// # Skip slow tests
-/// dotnet build.cs test --filter "Category!=Slow"
+/// dotnet toolchain.cs test --filter "Category!=Slow"
 /// 
 /// # Skip hardware tests
-/// dotnet build.cs test --filter "Category!=RequiresHardware"
+/// dotnet toolchain.cs test --filter "Category!=RequiresHardware"
 /// 
 /// # Run only unit tests (no hardware, no user presence, not slow)
-/// dotnet build.cs test --filter "Category!=RequiresHardware&amp;Category!=RequiresUserPresence&amp;Category!=Slow"
+/// dotnet toolchain.cs test --filter "Category!=RequiresHardware&amp;Category!=RequiresUserPresence&amp;Category!=Slow"
 /// </code>
 /// </remarks>
 public static class TestCategories
@@ -81,4 +81,11 @@ public static class TestCategories
     /// Test requires specific firmware version features.
     /// </summary>
     public const string RequiresFirmware = "RequiresFirmware";
+
+    /// <summary>
+    /// Test makes permanent device state changes that survive across test runs.
+    /// Only a factory reset (physical reinsertion within 10s) can undo them.
+    /// Examples: increasing minPinLength, enabling enterprise attestation.
+    /// </summary>
+    public const string PermanentDeviceState = "PermanentDeviceState";
 }

@@ -572,37 +572,3 @@ public sealed class FingerprintBioEnrollment
         return writer.Encode();
     }
 }
-
-/// <summary>
-/// Represents an internal TemplateInfo that can be modified during parsing.
-/// </summary>
-file sealed class MutableTemplateInfo
-{
-    public ReadOnlyMemory<byte> TemplateId { get; set; }
-    public string? FriendlyName { get; set; }
-    public int? SampleCount { get; set; }
-    
-    public TemplateInfo ToImmutable() => new()
-    {
-        TemplateId = TemplateId,
-        FriendlyName = FriendlyName,
-        SampleCount = SampleCount
-    };
-}
-
-// Extension to support internal init for TemplateInfo
-file static class TemplateInfoExtensions
-{
-    public static TemplateInfo Create(
-        ReadOnlyMemory<byte> templateId,
-        string? friendlyName = null,
-        int? sampleCount = null)
-    {
-        return new TemplateInfo
-        {
-            TemplateId = templateId,
-            FriendlyName = friendlyName,
-            SampleCount = sampleCount
-        };
-    }
-}

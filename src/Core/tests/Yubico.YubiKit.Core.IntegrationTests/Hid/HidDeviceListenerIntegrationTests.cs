@@ -148,7 +148,7 @@ public class HidDeviceListenerIntegrationTests
     }
 
     [Fact]
-    public void Dispose_CompletesCleanly()
+    public async Task Dispose_CompletesCleanly()
     {
         // Arrange
         HidDeviceListener? listener = null;
@@ -169,10 +169,10 @@ public class HidDeviceListenerIntegrationTests
 
         // Act
         var disposeTask = Task.Run(() => listener.Dispose());
-        var completed = disposeTask.Wait(TimeSpan.FromSeconds(5));
+        var completedTask = await Task.WhenAny(disposeTask, Task.Delay(TimeSpan.FromSeconds(5)));
 
         // Assert
-        Assert.True(completed, "Dispose should complete within 5 seconds");
+        Assert.True(completedTask == disposeTask, "Dispose should complete within 5 seconds");
         Assert.Equal(DeviceListenerStatus.Stopped, listener.Status);
         _output.WriteLine("Dispose completed cleanly within timeout");
     }

@@ -90,7 +90,7 @@ public sealed class KdfNone : Kdf
     public override byte[] ToBytes()
     {
         using var tlv = new Tlv(0x81, [(byte)Algorithm]);
-        return tlv.AsMemory().ToArray();
+        return tlv.AsSpan().ToArray();
     }
 }
 
@@ -308,6 +308,7 @@ public sealed class KdfIterSaltedS2k : Kdf
         if (_initialHashUser is not null) CryptographicOperations.ZeroMemory(_initialHashUser);
         if (_initialHashAdmin is not null) CryptographicOperations.ZeroMemory(_initialHashAdmin);
         GC.SuppressFinalize(this);
+        base.Dispose();
     }
 
     internal static KdfIterSaltedS2k ParseData(IDictionary<int, ReadOnlyMemory<byte>> data) =>

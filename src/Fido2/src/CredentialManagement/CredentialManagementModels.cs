@@ -253,10 +253,10 @@ public sealed class StoredCredentialInfo
             switch (key)
             {
                 case 6: // user
-                    user = DecodePublicKeyCredentialUserEntity(reader);
+                    user = PublicKeyCredentialUserEntity.Parse(reader);
                     break;
                 case 7: // credentialID (PublicKeyCredentialDescriptor)
-                    credentialId = DecodeCredentialDescriptor(reader);
+                    credentialId = PublicKeyCredentialDescriptor.Parse(reader);
                     break;
                 case 8: // publicKey (COSE_Key)
                     publicKey = reader.ReadEncodedValue().ToArray();
@@ -300,62 +300,4 @@ public sealed class StoredCredentialInfo
             thirdPartyPayment);
     }
     
-    private static PublicKeyCredentialUserEntity DecodePublicKeyCredentialUserEntity(CborReader reader)
-    {
-        byte[]? id = null;
-        string? name = null;
-        string? displayName = null;
-        
-        var mapLen = reader.ReadStartMap();
-        for (var i = 0; i < mapLen; i++)
-        {
-            var fieldKey = reader.ReadTextString();
-            switch (fieldKey)
-            {
-                case "id":
-                    id = reader.ReadByteString();
-                    break;
-                case "name":
-                    name = reader.ReadTextString();
-                    break;
-                case "displayName":
-                    displayName = reader.ReadTextString();
-                    break;
-                default:
-                    reader.SkipValue();
-                    break;
-            }
-        }
-        reader.ReadEndMap();
-        
-        // Name and displayName might be empty in credential management responses
-        return new PublicKeyCredentialUserEntity(id ?? [], name ?? string.Empty, displayName ?? string.Empty);
-    }
-    
-    private static PublicKeyCredentialDescriptor DecodeCredentialDescriptor(CborReader reader)
-    {
-        string? type = null;
-        byte[]? id = null;
-        
-        var mapLen = reader.ReadStartMap();
-        for (var i = 0; i < mapLen; i++)
-        {
-            var fieldKey = reader.ReadTextString();
-            switch (fieldKey)
-            {
-                case "type":
-                    type = reader.ReadTextString();
-                    break;
-                case "id":
-                    id = reader.ReadByteString();
-                    break;
-                default:
-                    reader.SkipValue();
-                    break;
-            }
-        }
-        reader.ReadEndMap();
-        
-        return new PublicKeyCredentialDescriptor(id ?? [], type ?? "public-key");
-    }
 }

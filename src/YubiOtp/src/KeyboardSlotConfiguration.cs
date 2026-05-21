@@ -116,4 +116,47 @@ public abstract class KeyboardSlotConfiguration : SlotConfiguration
         SetExtFlag(ExtendedFlag.UseNumericKeypad, enable);
         return this;
     }
+
+    /// <summary>
+    /// Validates and copies Yubico OTP / static ticket key material into the wire format fields.
+    /// </summary>
+    /// <param name="publicId">The public identity prefix (up to 16 bytes).</param>
+    /// <param name="privateId">The 6-byte private identity.</param>
+    /// <param name="aesKey">The 16-byte AES-128 secret key.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="publicId"/> exceeds 16 bytes,
+    /// <paramref name="privateId"/> is not 6 bytes, or
+    /// <paramref name="aesKey"/> is not 16 bytes.
+    /// </exception>
+    protected void InitializeKeys(
+        ReadOnlySpan<byte> publicId,
+        ReadOnlySpan<byte> privateId,
+        ReadOnlySpan<byte> aesKey)
+    {
+        if (publicId.Length > YubiOtpConstants.FixedSize)
+        {
+            throw new ArgumentException(
+                $"Public ID must be at most {YubiOtpConstants.FixedSize} bytes.",
+                nameof(publicId));
+        }
+
+        if (privateId.Length != YubiOtpConstants.UidSize)
+        {
+            throw new ArgumentException(
+                $"Private ID must be exactly {YubiOtpConstants.UidSize} bytes.",
+                nameof(privateId));
+        }
+
+        if (aesKey.Length != YubiOtpConstants.KeySize)
+        {
+            throw new ArgumentException(
+                $"AES key must be exactly {YubiOtpConstants.KeySize} bytes.",
+                nameof(aesKey));
+        }
+
+        publicId.CopyTo(_fixed);
+        privateId.CopyTo(_uid);
+        aesKey.CopyTo(_key);
+        _fixedSize = (byte)publicId.Length;
+    }
 }

@@ -49,35 +49,16 @@ namespace Yubico.Core.Cryptography
             NumberStyles.HexNumber,
             CultureInfo.InvariantCulture);
 
+        private enum PointValidationResult
+        {
+            Valid,
+            Malformed,
+            OffCurve,
+        }
+
         /// <inheritdoc />
         public bool IsPointOnCurve(ReadOnlySpan<byte> point)
-        {
-            if (point.Length != Sec1UncompressedLength || point[0] != Sec1UncompressedTag)
-            {
-                return false;
-            }
-
-            byte[] xBytes = point.Slice(1, P256CoordinateLength).ToArray();
-            byte[] yBytes = point.Slice(1 + P256CoordinateLength, P256CoordinateLength).ToArray();
-
-            using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(
-                ECCurve.NamedCurves.nistP256.ToSslCurveId());
-            using SafeEcPoint sslPoint = NativeMethods.EcPointNew(group);
-            using SafeBigNum xBn = NativeMethods.BnBinaryToBigNum(xBytes);
-            using SafeBigNum yBn = NativeMethods.BnBinaryToBigNum(yBytes);
-
-            // EC_POINT_set_affine_coordinates returns 0 for an off-curve point on
-            // most modern OpenSSL builds; fall through to the explicit on-curve
-            // check so the answer is unambiguous regardless of OpenSSL version.
-            int setResult = NativeMethods.EcPointSetAffineCoordinates(group, sslPoint, xBn, yBn);
-            if (setResult != 1)
-            {
-                return false;
-            }
-
-            int onCurve = NativeMethods.EcPointIsOnCurve(group, sslPoint);
-            return onCurve == 1;
-        }
+            => ValidatePoint(point) == PointValidationResult.Valid;
 
         /// <inheritdoc />
         public byte[] ComputeEcdhSharedSecret(ReadOnlySpan<byte> privateScalar, ReadOnlySpan<byte> publicPoint)
@@ -85,16 +66,18 @@ namespace Yubico.Core.Cryptography
             Guard.HasSizeGreaterThan(privateScalar, 0, nameof(privateScalar));
             Guard.HasSizeGreaterThan(publicPoint, 0, nameof(publicPoint));
 
-            if (publicPoint.Length != Sec1UncompressedLength || publicPoint[0] != Sec1UncompressedTag)
+            switch (ValidatePoint(publicPoint))
             {
-                throw new ArgumentException(
-                    "Public point must be a 65-byte SEC1 uncompressed P-256 point.",
-                    nameof(publicPoint));
-            }
+                case PointValidationResult.Valid:
+                    break;
 
-            if (!IsPointOnCurve(publicPoint))
-            {
-                throw new SecurityException("Public point is not on the P-256 curve.");
+                case PointValidationResult.Malformed:
+                    throw new ArgumentException(
+                        "Public point must be a 65-byte SEC1 uncompressed P-256 point.",
+                        nameof(publicPoint));
+
+                default:
+                    throw new SecurityException("Public point is not on the P-256 curve.");
             }
 
             byte[] x = publicPoint.Slice(1, P256CoordinateLength).ToArray();
@@ -115,6 +98,37 @@ namespace Yubico.Core.Cryptography
             {
                 CryptographicOperations.ZeroMemory(privateScalarBytes);
             }
+        }
+
+        private static PointValidationResult ValidatePoint(ReadOnlySpan<byte> point)
+        {
+            if (point.Length != Sec1UncompressedLength || point[0] != Sec1UncompressedTag)
+            {
+                return PointValidationResult.Malformed;
+            }
+
+            byte[] xBytes = point.Slice(1, P256CoordinateLength).ToArray();
+            byte[] yBytes = point.Slice(1 + P256CoordinateLength, P256CoordinateLength).ToArray();
+
+            using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(
+                ECCurve.NamedCurves.nistP256.ToSslCurveId());
+            using SafeEcPoint sslPoint = NativeMethods.EcPointNew(group);
+            using SafeBigNum xBn = NativeMethods.BnBinaryToBigNum(xBytes);
+            using SafeBigNum yBn = NativeMethods.BnBinaryToBigNum(yBytes);
+
+            // EC_POINT_set_affine_coordinates returns 0 for an off-curve point on
+            // most modern OpenSSL builds; fall through to the explicit on-curve
+            // check so the answer is unambiguous regardless of OpenSSL version.
+            int setResult = NativeMethods.EcPointSetAffineCoordinates(group, sslPoint, xBn, yBn);
+            if (setResult != 1)
+            {
+                return PointValidationResult.OffCurve;
+            }
+
+            int onCurve = NativeMethods.EcPointIsOnCurve(group, sslPoint);
+            return onCurve == 1
+                ? PointValidationResult.Valid
+                : PointValidationResult.OffCurve;
         }
 
         /// <inheritdoc />

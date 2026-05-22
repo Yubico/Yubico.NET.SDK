@@ -19,10 +19,6 @@ namespace Yubico.Core.Cryptography
     /// <summary>
     /// Defines cryptographic primitives required for ARKG-P256 operations.
     /// </summary>
-    /// <remarks>
-    /// This interface abstracts platform-specific implementations of
-    /// elliptic curve operations needed for Asynchronous Remote Key Generation.
-    /// </remarks>
     internal interface IArkgPrimitives
     {
         /// <summary>
@@ -41,36 +37,17 @@ namespace Yubico.Core.Cryptography
         byte[] ComputeEcdhSharedSecret(ReadOnlySpan<byte> privateScalar, ReadOnlySpan<byte> publicPoint);
 
         /// <summary>
-        /// Derives a public key and ARKG key handle using the ARKG-P256 algorithm.
+        /// Derives a public key and ARKG key handle from ARKG-P256 seed public keys.
         /// </summary>
-        /// <remarks>
-        /// <para>
-        /// This method implements the ARKG-P256 key derivation algorithm as specified
-        /// in the previewSign WebAuthn extension. Given the blinding and KEM public
-        /// keys from the YubiKey, along with application-provided input keying material
-        /// and context, it derives a new public key.
-        /// </para>
-        /// <para>
-        /// The derived public key can be used to verify signatures produced by the
-        /// YubiKey when called with the corresponding ARKG key handle and context.
-        /// The ARKG key handle returned by this method must be provided to the
-        /// YubiKey during signing operations.
-        /// </para>
-        /// <para>
-        /// The context string allows multiple independent public keys to be derived
-        /// from the same generated key material. Each unique context produces a
-        /// unique derived key pair.
-        /// </para>
-        /// </remarks>
         /// <param name="blindingPublicKey">The blinding public key in uncompressed SEC1 format.</param>
         /// <param name="kemPublicKey">The KEM public key in uncompressed SEC1 format.</param>
-        /// <param name="inputKeyingMaterial">Input keying material for HKDF derivation.</param>
-        /// <param name="context">Context string for domain separation.</param>
+        /// <param name="inputKeyingMaterial">Input keying material for key derivation.</param>
+        /// <param name="context">Context bytes for key derivation.</param>
         /// <returns>
-        /// A tuple containing the derived public key (in uncompressed SEC1 format)
-        /// and the ARKG key handle (to be passed to the YubiKey during signing).
+        /// A tuple containing the derived public key in uncompressed SEC1 format
+        /// and the ARKG key handle.
         /// </returns>
-        (byte[] derivedPublicKey, byte[] arkgKeyHandle) Derive(
+        (byte[] derivedPublicKey, byte[] arkgKeyHandle) DerivePublicKey(
             ReadOnlySpan<byte> blindingPublicKey,
             ReadOnlySpan<byte> kemPublicKey,
             ReadOnlySpan<byte> inputKeyingMaterial,

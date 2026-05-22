@@ -112,16 +112,25 @@ namespace Yubico.Core.Cryptography
                 () => primitives.ComputeEcdhSharedSecret(new byte[32] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, offCurve));
         }
 
-        [Fact]
-        public void Derive_EmptyContext_Succeeds()
+        [Theory]
+        [MemberData(nameof(GetMalformedInputs))]
+        public void ComputeEcdhSharedSecret_MalformedPublicPoint_ThrowsArgumentException(byte[] malformedInput)
         {
-            // ISC-4: Derive() must accept empty ctx (length 0). The encoder at lines 151-153
-            // handles this correctly: ctxPrime[0]=0x00, produces single-byte [0x00].
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+
+            var ex = Assert.Throws<ArgumentException>(
+                () => primitives.ComputeEcdhSharedSecret(new byte[32], malformedInput));
+            Assert.Equal("publicPoint", ex.ParamName);
+        }
+
+        [Fact]
+        public void DerivePublicKey_EmptyContext_Succeeds()
+        {
             IArkgPrimitives primitives = ArkgPrimitives.Create();
             byte[] ikm = new byte[32];
             RandomNumberGenerator.Fill(ikm);
 
-            (byte[] derivedPk, byte[] arkgKeyHandle) = primitives.Derive(
+            (byte[] derivedPk, byte[] arkgKeyHandle) = primitives.DerivePublicKey(
                 P256Generator,
                 P256Generator,
                 ikm,

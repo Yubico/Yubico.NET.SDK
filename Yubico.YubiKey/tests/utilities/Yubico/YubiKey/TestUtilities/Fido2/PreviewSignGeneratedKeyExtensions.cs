@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// </remarks>
     public static class PreviewSignGeneratedKeyExtensions
     {
-        private const int CoseKeyTypeArkgP256 = -65537;
+        private const int CoseKeyTypeArkgPub = -65537;
         private const int CoseAlgorithmArkgP256 = -65700;
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
             Guard.IsNotNull(generatedKey, nameof(generatedKey));
 
             var (blindingPublicKey, kemPublicKey) = ParseArkgCoseKey(generatedKey.PublicKey.ToArray());
-            var (derivedPublicKey, arkgKeyHandle) = ArkgPrimitives.Create().Derive(
+            var (derivedPublicKey, arkgKeyHandle) = ArkgPrimitives.Create().DerivePublicKey(
                 blindingPublicKey,
                 kemPublicKey,
                 inputKeyingMaterial,
@@ -158,7 +158,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
             int? entries = reader.ReadStartMap();
             int count = entries ?? int.MaxValue;
 
-            bool? isEc2Key = null;
+            bool? isArkgPubKey = null;
             bool? isArkgP256Key = null;
             byte[]? blindingPublicKey = null;
             byte[]? kemPublicKey = null;
@@ -174,14 +174,12 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
                 if (key == 1)
                 {
                     int keyType = reader.ReadInt32();
-                    isEc2Key = keyType == (int)CoseKeyType.Ec2 || keyType == CoseKeyTypeArkgP256;
+                    isArkgPubKey = keyType == CoseKeyTypeArkgPub;
                 }
                 else if (key == 3)
                 {
                     int algorithm = reader.ReadInt32();
-                    isArkgP256Key =
-                        algorithm == (int)PreviewSignParametersExtensions.ArkgP256Esp256 ||
-                        algorithm == CoseAlgorithmArkgP256;
+                    isArkgP256Key = algorithm == CoseAlgorithmArkgP256;
                 }
                 else if (key == -1)
                 {
@@ -199,10 +197,10 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
 
             reader.ReadEndMap();
 
-            if (isEc2Key == false || isArkgP256Key == false)
+            if (isArkgPubKey != true || isArkgP256Key != true)
             {
                 throw new Ctap2DataException(
-                    "previewSign COSE key must be an EC2 ARKG-P256 key.");
+                    "previewSign COSE key must be an ARKG-pub ARKG-P256 key.");
             }
 
             if (blindingPublicKey is null || kemPublicKey is null)
@@ -259,7 +257,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
 
             reader.ReadEndMap();
 
-            if (isEc2Key == false || isP256Curve == false)
+            if (isEc2Key != true || isP256Curve != true)
             {
                 throw new Ctap2DataException(
                     "previewSign ARKG public-key components must be EC2 P-256 keys.");

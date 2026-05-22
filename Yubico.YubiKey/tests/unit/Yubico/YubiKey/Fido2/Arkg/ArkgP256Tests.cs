@@ -21,13 +21,10 @@ namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
     /// KAT (Known Answer Tests) for ARKG-P256 derivation.
-    /// Vectors generated from the Rust reference implementation conforming to
-    /// draft-bradleylundberg-cfrg-arkg-09.
     /// </summary>
     public class ArkgP256Tests
     {
-        // Both vectors share these seeds, derived from ikm_bl=0x00..1F and
-        // ikm_kem=0x20..3F via the Rust reference's BL/KEM key-generation paths.
+        // Both vectors share these generated seed public keys.
         private static readonly byte[] PkBl = HexToBytes(
             "046d3bdf31d0db48988f16d47048fdd24123cd286e42d0512daa9f726b4ecf18df" +
             "65ed42169c69675f936ff7de5f9bd93adbc8ea73036b16e8d90adbfabdaddba7");
@@ -36,7 +33,7 @@ namespace Yubico.YubiKey.Fido2
             "04c38bbdd7286196733fa177e43b73cfd3d6d72cd11cc0bb2c9236cf85a42dcff5" +
             "dfa339c1e07dfcdfda8d7be2a5a3c7382991f387dfe332b1dd8da6e0622cfb35");
 
-        // Vector A — matches arkg.rs::tests::test_arkg_derive_key.
+        // Vector A.
         private static readonly byte[] IkmA = HexToBytes(
             "404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f");
         private static readonly byte[] CtxA = Encoding.ASCII.GetBytes("ARKG-P256.test vectors");
@@ -55,7 +52,7 @@ namespace Yubico.YubiKey.Fido2
             "04aed80c70cc9e2fa6b2d22db62285e6e3af7dc7426ce9846a500723d82aa60cd0" +
             "98168e98c4f437fc5d45986afaed5d5ce6e39de46fe4f61ae88541cb37687f8d");
 
-        // Additional python-fido2 KAT: different IKM, same ctx as A.
+        // Interop KAT: different IKM, same ctx as A.
         private static readonly byte[] IkmPythonB = HexToBytes(
             "a0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebf");
         private static readonly byte[] ExpectedDerivedPythonB = HexToBytes(
@@ -68,13 +65,13 @@ namespace Yubico.YubiKey.Fido2
             "04ccfc29c2d0f438642dae5153ccb4eda6be6ec8a0e654a009f2953ab4b52dc1eb" +
             "3ffbbf91b3e46e8e68a3c38c7268b2ca42f6d19c44dd5ee15fa0d30e0c9eb326");
 
-        // Additional python-fido2 KAT: same IKM as A, different ctx.
+        // Interop KAT: same IKM as A, different ctx.
         private static readonly byte[] CtxPythonC = Encoding.ASCII.GetBytes("ARKG-P256.test vectors.0");
         private static readonly byte[] ExpectedDerivedPythonC = HexToBytes(
             "04b79b65d6bbb419ff97006a1bd52e3f4ad53042173992423e06e52987a037cb61" +
             "dd82b126b162e4e7e8dc5c9fd86e82769d402a1968c7c547ef53ae4f96e10b0e");
 
-        public static TheoryData<byte[], byte[], byte[]> PythonFido2Vectors => new()
+        public static TheoryData<byte[], byte[], byte[]> InteropVectors => new()
         {
             { IkmA, CtxA, ExpectedDerivedA },
             { IkmPythonB, CtxA, ExpectedDerivedPythonB },
@@ -82,9 +79,9 @@ namespace Yubico.YubiKey.Fido2
         };
 
         [Fact]
-        public void DerivePublicKey_AgainstRustKAT_ProducesExpectedPublicKey()
+        public void DerivePublicKey_AgainstRegressionKAT_ProducesExpectedPublicKey()
         {
-            (byte[] derivedPk, byte[] arkgKeyHandle) = ArkgPrimitives.Create().Derive(PkBl, PkKem, IkmA, CtxA);
+            (byte[] derivedPk, byte[] arkgKeyHandle) = ArkgPrimitives.Create().DerivePublicKey(PkBl, PkKem, IkmA, CtxA);
 
             Assert.Equal(ExpectedDerivedA, derivedPk);
             Assert.Equal(ExpectedHandleA, arkgKeyHandle);
@@ -93,8 +90,8 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void DerivePublicKey_DifferentIkm_ProducesDifferentKeys()
         {
-            (byte[] derivedA, _) = ArkgPrimitives.Create().Derive(PkBl, PkKem, IkmA, CtxA);
-            (byte[] derivedB, _) = ArkgPrimitives.Create().Derive(PkBl, PkKem, IkmB, CtxA);
+            (byte[] derivedA, _) = ArkgPrimitives.Create().DerivePublicKey(PkBl, PkKem, IkmA, CtxA);
+            (byte[] derivedB, _) = ArkgPrimitives.Create().DerivePublicKey(PkBl, PkKem, IkmB, CtxA);
 
             Assert.NotEqual(derivedA, derivedB);
             Assert.Equal(ExpectedDerivedA, derivedA);
@@ -104,21 +101,21 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void DerivePublicKey_DifferentCtx_ProducesDifferentKeys()
         {
-            (byte[] derivedA, _) = ArkgPrimitives.Create().Derive(PkBl, PkKem, IkmA, CtxA);
-            (byte[] derivedC, _) = ArkgPrimitives.Create().Derive(PkBl, PkKem, IkmA, CtxC);
+            (byte[] derivedA, _) = ArkgPrimitives.Create().DerivePublicKey(PkBl, PkKem, IkmA, CtxA);
+            (byte[] derivedC, _) = ArkgPrimitives.Create().DerivePublicKey(PkBl, PkKem, IkmA, CtxC);
 
             Assert.NotEqual(derivedA, derivedC);
             Assert.Equal(ExpectedDerivedC, derivedC);
         }
 
         [Theory]
-        [MemberData(nameof(PythonFido2Vectors))]
-        public void DerivePublicKey_AgainstPythonFido2KAT_ProducesExpectedPublicKey(
+        [MemberData(nameof(InteropVectors))]
+        public void DerivePublicKey_AgainstInteropKAT_ProducesExpectedPublicKey(
             byte[] inputKeyingMaterial,
             byte[] context,
             byte[] expectedDerivedPublicKey)
         {
-            (byte[] derivedPublicKey, _) = ArkgPrimitives.Create().Derive(
+            (byte[] derivedPublicKey, _) = ArkgPrimitives.Create().DerivePublicKey(
                 PkBl,
                 PkKem,
                 inputKeyingMaterial,

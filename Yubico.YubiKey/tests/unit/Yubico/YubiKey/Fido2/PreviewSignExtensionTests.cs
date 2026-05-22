@@ -186,6 +186,38 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
+        public void DecodeGeneratedKeyAlgorithm_Throws_WhenAlgorithmMissing()
+        {
+            byte[] previewSignPayload = BuildGeneratedKeyPayloadWithoutAlgorithm();
+
+            _ = Assert.Throws<Ctap2DataException>(
+                () => PreviewSignExtension.DecodeGeneratedKeyAlgorithm(previewSignPayload));
+        }
+
+        [Fact]
+        public void DecodeGeneratedKeyAlgorithm_ReturnsAlgorithm_WhenPresent()
+        {
+            byte[] previewSignPayload = BuildGeneratedKeyAlgorithmPayload();
+
+            CoseAlgorithmIdentifier algorithm = PreviewSignExtension.DecodeGeneratedKeyAlgorithm(previewSignPayload);
+
+            Assert.Equal(PreviewSignParametersExtensions.ArkgP256Esp256, algorithm);
+        }
+
+        [Fact]
+        public void DecodeGeneratedKeyAlgorithm_Throws_WhenAlgorithmValueIsMalformed()
+        {
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(1);
+            cbor.WriteInt32(3);
+            cbor.WriteTextString("not-an-algorithm");
+            cbor.WriteEndMap();
+
+            _ = Assert.Throws<Ctap2DataException>(
+                () => PreviewSignExtension.DecodeGeneratedKeyAlgorithm(cbor.Encode()));
+        }
+
+        [Fact]
         public void ParseGenerateKey_Throws_WhenOutputIsNotMap()
         {
             byte[] previewSignPayload = BuildByteString(new byte[] { 0x01 });
@@ -266,9 +298,8 @@ namespace Yubico.YubiKey.Fido2
             byte[] sigBytes = { 0x30, 0x06, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02 };
             byte[] previewSignAuthDataValue = BuildSignatureMap(sigBytes);
 
-            byte[]? recovered = PreviewSignExtension.DecodeSignature(previewSignAuthDataValue);
+            byte[] recovered = PreviewSignExtension.DecodeSignature(previewSignAuthDataValue);
 
-            Assert.NotNull(recovered);
             Assert.Equal(sigBytes, recovered);
         }
 
@@ -600,6 +631,16 @@ namespace Yubico.YubiKey.Fido2
             return cbor.Encode();
         }
 
+        private static byte[] BuildGeneratedKeyPayloadWithoutAlgorithm()
+        {
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(1);
+            cbor.WriteInt32(4);
+            cbor.WriteInt32((int)PreviewSignOptions.RequireUserPresence);
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
         // Builds a previewSign generated-key payload. The signed extension output
         // carries algorithm (3); the unsigned output carries attestation object (7).
         private static byte[] BuildSyntheticGeneratedKeyPayload(
@@ -712,7 +753,7 @@ namespace Yubico.YubiKey.Fido2
             CborWriter cbor,
             byte[] x,
             byte[] y,
-            int? algorithm = (int)CoseAlgorithmIdentifier.Esp256)
+            int? algorithm = null)
         {
             int metadataEntries = algorithm.HasValue ? 3 : 2;
             cbor.WriteStartMap(metadataEntries + 2);

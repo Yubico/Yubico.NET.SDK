@@ -167,10 +167,12 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <param name="previewSignValue">The CBOR-encoded previewSign output value.</param>
         /// <returns>
-        /// The decoded <see cref="CoseAlgorithmIdentifier"/> if the input contains
-        /// the algorithm key; otherwise, <c>null</c> when the algorithm key is absent.
+        /// The decoded <see cref="CoseAlgorithmIdentifier"/>.
         /// </returns>
-        public static CoseAlgorithmIdentifier? DecodeGeneratedKeyAlgorithm(ReadOnlyMemory<byte> previewSignValue)
+        /// <exception cref="Ctap2DataException">
+        /// The payload is malformed or missing the required algorithm key.
+        /// </exception>
+        public static CoseAlgorithmIdentifier DecodeGeneratedKeyAlgorithm(ReadOnlyMemory<byte> previewSignValue)
         {
             try
             {
@@ -200,7 +202,8 @@ namespace Yubico.YubiKey.Fido2
                 }
 
                 reader.ReadEndMap();
-                return null;
+                throw new Ctap2DataException(
+                    "previewSign generated key algorithm output is missing an algorithm.");
             }
             catch (CborContentException cborException)
             {
@@ -318,7 +321,10 @@ namespace Yubico.YubiKey.Fido2
         /// authData.extensions["previewSign"]). The value is a CBOR map whose
         /// key 6 entry is the signature byte string.
         /// </summary>
-        public static byte[]? DecodeSignature(ReadOnlyMemory<byte> previewSignAuthDataValue)
+        /// <exception cref="Ctap2DataException">
+        /// The payload is malformed or missing the required signature.
+        /// </exception>
+        public static byte[] DecodeSignature(ReadOnlyMemory<byte> previewSignAuthDataValue)
         {
             try
             {

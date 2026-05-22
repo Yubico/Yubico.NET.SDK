@@ -17,6 +17,20 @@ using System.Text;
 
 namespace Yubico.YubiKey.TestUtilities.Fido2
 {
+    /// <summary>
+    /// ARKG-P256 expected-output vectors used by the SDK's derivation regression tests.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Purpose: detect unintended regressions in ARKG-P256 key derivation across
+    /// refactors. The vectors cover three scenarios:
+    /// <list type="bullet">
+    ///   <item><description>A: baseline derivation with canonical IKM and context.</description></item>
+    ///   <item><description>B: distinct IKM (same context) to verify input isolation.</description></item>
+    ///   <item><description>C: distinct context (same IKM) to verify context separation.</description></item>
+    /// </list>
+    /// </para>
+    /// </remarks>
     public static class ArkgP256RegressionVectors
     {
         public static byte[] BlindingPublicKey => HexToBytes(

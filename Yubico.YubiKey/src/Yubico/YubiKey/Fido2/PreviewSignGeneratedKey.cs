@@ -35,9 +35,16 @@ namespace Yubico.YubiKey.Fido2
         public ReadOnlyMemory<byte> KeyHandle { get; init; }
 
         /// <summary>
-        /// Gets the CBOR-encoded COSE public key returned by the authenticator.
-        /// Relying parties decode this to obtain the generated signing key's public key material.
+        /// Gets the CBOR-encoded COSE public key for the generated signing key.
         /// </summary>
+        /// <remarks>
+        /// This is the <c>pubKey</c> field from the authenticator's
+        /// <c>AuthenticationExtensionsSignGeneratedKey</c> output, as defined in the
+        /// <see href="https://yubicolabs.github.io/webauthn-sign-extension/4/#dictdef-authenticationextensionssigngeneratedkey">
+        /// previewSign extension specification</see>.
+        /// Relying parties should decode this COSE_Key to obtain the public key material
+        /// used to verify signatures produced via the previewSign assertion flow.
+        /// </remarks>
         public ReadOnlyMemory<byte> PublicKey => _publicKey;
 
         /// <summary>

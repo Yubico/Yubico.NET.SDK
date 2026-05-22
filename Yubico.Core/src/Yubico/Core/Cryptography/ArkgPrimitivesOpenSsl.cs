@@ -43,7 +43,7 @@ namespace Yubico.Core.Cryptography
         // https://www.ietf.org/archive/id/draft-bradleylundberg-cfrg-arkg-10.html#name-arkg-p256
         private const string DstExt = "ARKG-P256";
 
-        // P-256 group order N (SEC2 v2 §2.4.2). Used for scalar reduction mod N.
+        // P-256 group order N (SEC 2 v2, section 2.4.2). Used for scalar reduction mod N.
         private static readonly BigInteger N = BigInteger.Parse(
             "00FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551",
             NumberStyles.HexNumber,
@@ -313,8 +313,8 @@ namespace Yubico.Core.Cryptography
             const int L = 48;
             byte[] uniform = ExpandMessageXmdSha256(msg, dst, L);
 
-            // ARKG-P256 applies RFC 9380 hash-to-field style expansion with
-            // the P-256 group order N as the modulus, yielding a scalar.
+            // ARKG-P256 applies RFC 9380 hash_to_field with the P-256 group
+            // order N as the modulus, yielding a scalar.
             return Os2Ip(uniform) % N;
         }
 

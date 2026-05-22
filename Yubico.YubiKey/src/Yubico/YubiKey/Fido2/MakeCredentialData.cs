@@ -189,12 +189,10 @@ namespace Yubico.YubiKey.Fido2
                 return PreviewSignExtension.DecodeGeneratedKey(unsignedValue, signedAlgorithm);
             }
 
-            if (signedValue is not null)
-            {
-                return PreviewSignExtension.DecodeGeneratedKey(signedValue);
-            }
-
-            return null;
+            return signedValue is null
+                ? null
+                : throw new Ctap2DataException(
+                    "previewSign generated key is missing unsigned extension output.");
         }
 
         /// <summary>

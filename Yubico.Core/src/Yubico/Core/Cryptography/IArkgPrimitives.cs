@@ -31,7 +31,7 @@ namespace Yubico.Core.Cryptography
         /// <summary>
         /// Computes an ECDH shared secret using a private scalar and public point.
         /// </summary>
-        /// <param name="privateScalar">The private scalar value.</param>
+        /// <param name="privateScalar">The private scalar value, encoded as unsigned big-endian bytes.</param>
         /// <param name="publicPoint">The public point in uncompressed SEC1 format.</param>
         /// <returns>The computed shared secret.</returns>
         byte[] ComputeEcdhSharedSecret(ReadOnlySpan<byte> privateScalar, ReadOnlySpan<byte> publicPoint);

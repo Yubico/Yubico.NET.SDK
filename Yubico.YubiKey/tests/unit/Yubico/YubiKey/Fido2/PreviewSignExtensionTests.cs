@@ -112,18 +112,15 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void ParseGenerateKeyFromAuthenticatorDataExtensions()
+        public void ParseGenerateKeyFromAuthenticatorDataExtensions_Throws_WhenUnsignedOutputMissing()
         {
             byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload();
             byte[] response = BuildMakeCredentialResponseWithSignedExtension(previewSignPayload);
 
             var data = new MakeCredentialData(response);
 
-            PreviewSignGeneratedKey? generated = data.GetPreviewSignGeneratedKey();
-
-            Assert.NotNull(generated);
-            Assert.Equal(PreviewSignParametersExtensions.ArkgP256Esp256, generated!.Algorithm);
-            Assert.NotEmpty(generated.PublicKey.Span.ToArray());
+            _ = Assert.Throws<Ctap2DataException>(
+                () => data.GetPreviewSignGeneratedKey());
         }
 
         [Fact]

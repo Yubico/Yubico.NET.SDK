@@ -57,13 +57,6 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public AttestationObject AttestationObject { get; init; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PreviewSignGeneratedKey"/> class.
-        /// </summary>
-        /// <param name="keyHandle">The key handle.</param>
-        /// <param name="publicKey">The CBOR-encoded COSE public key.</param>
-        /// <param name="algorithm">The algorithm identifier for the generated key.</param>
-        /// <param name="attestationObject">The attestation object returned by the authenticator during MakeCredential.</param>
         internal PreviewSignGeneratedKey(
             ReadOnlyMemory<byte> keyHandle,
             ReadOnlyMemory<byte> publicKey,

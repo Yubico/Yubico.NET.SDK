@@ -22,9 +22,10 @@ namespace Yubico.YubiKey.Fido2
     public class MakeCredentialDataTests
     {
         /// <summary>
-        /// ISC-1: AttestationObject.CborEncode() round-trips to the re-encoded {1,2,3} subset bytes,
-        /// NOT to RawData. This test uses a CTAP response that includes key 6 (unsignedExtensionOutputs)
-        /// to verify that the AttestationObject only contains keys 1, 2, and 3.
+        /// AttestationObject.CborEncode() round-trips to the re-encoded {1,2,3}
+        /// subset bytes, not to the full CTAP response. The response includes key
+        /// 6 (unsignedExtensionOutputs) to verify that the AttestationObject only
+        /// contains keys 1, 2, and 3.
         /// </summary>
         [Fact]
         public void AttestationObject_CborEncode_OnlyContainsKeys123_NotFullRawData()
@@ -82,7 +83,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// ISC-2: Constructing MakeCredentialData from a CTAP response whose attStmt has
+        /// Constructing MakeCredentialData from a CTAP response whose attStmt has
         /// format=="packed" but is missing the required 'sig' field throws Ctap2DataException.
         /// </summary>
         [Fact]
@@ -97,7 +98,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// ISC-2: Constructing MakeCredentialData from a CTAP response whose attStmt has
+        /// Constructing MakeCredentialData from a CTAP response whose attStmt has
         /// format=="packed" but has an unexpected extra key throws Ctap2DataException.
         /// </summary>
         [Fact]
@@ -111,25 +112,25 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// ISC-8 anti-regression: Well-formed packed attestation responses still populate
+        /// Complete packed attestation responses still populate
         /// AttestationCertificates and AttestationAlgorithm correctly.
         /// </summary>
         [Fact]
         public void MakeCredentialData_WellFormedPackedAttestation_PopulatesFieldsCorrectly()
         {
-            byte[] ctapResponse = BuildMakeCredentialResponseWithValidPackedAttestation();
+            byte[] ctapResponse = BuildMakeCredentialResponseWithCompletePackedAttestation();
 
             var data = new MakeCredentialData(ctapResponse);
 
             Assert.Equal("packed", data.Format);
             Assert.False(data.AttestationStatement.IsEmpty);
-            // AttestationAlgorithm should be populated from the packed statement, not the ES256 fallback
+            // The helper encodes ES256 in the packed attestation statement.
             Assert.Equal(Cose.CoseAlgorithmIdentifier.ES256, data.AttestationAlgorithm);
             // Certificates may be null in self-attestation, so we don't assert on that
         }
 
         /// <summary>
-        /// Test for Finding #1/#4: Response missing key 3 (attStmt) throws Ctap2DataException.
+        /// Response missing key 3 (attStmt) throws Ctap2DataException.
         /// </summary>
         [Fact]
         public void MakeCredentialData_ResponseMissingAttStmt_ThrowsCtap2DataException()
@@ -141,7 +142,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Test for Finding #4: Response missing key 1 (fmt) throws Ctap2DataException.
+        /// Response missing key 1 (fmt) throws Ctap2DataException.
         /// </summary>
         [Fact]
         public void MakeCredentialData_ResponseMissingFmt_ThrowsCtap2DataException()
@@ -153,7 +154,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Test for Finding #4: Response missing key 2 (authData) throws Ctap2DataException.
+        /// Response missing key 2 (authData) throws Ctap2DataException.
         /// </summary>
         [Fact]
         public void MakeCredentialData_ResponseMissingAuthData_ThrowsCtap2DataException()
@@ -165,7 +166,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Test for Finding #2: AttestationObject with packed attStmt where 'alg' is
+        /// AttestationObject with packed attStmt where 'alg' is
         /// a text string instead of int throws Ctap2DataException (wrapping InvalidOperationException).
         /// </summary>
         [Fact]
@@ -278,9 +279,9 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Builds a well-formed CTAP response with valid packed attestation.
+        /// Builds a structurally complete CTAP response with packed attestation.
         /// </summary>
-        private static byte[] BuildMakeCredentialResponseWithValidPackedAttestation()
+        private static byte[] BuildMakeCredentialResponseWithCompletePackedAttestation()
         {
             byte[] authData = BuildMinimalAuthDataWithEs256Key();
 

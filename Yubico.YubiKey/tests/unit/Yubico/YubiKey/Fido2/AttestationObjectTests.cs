@@ -20,8 +20,9 @@ namespace Yubico.YubiKey.Fido2
 {
     public class AttestationObjectTests
     {
-        // CBOR blob from CredentialDataTests.GetSampleEncoding() — a packed attestation
-        // object produced by a real YubiKey. Copied here to keep tests self-contained.
+        // CBOR blob from CredentialDataTests.GetSampleEncoding(): a CTAP
+        // authenticatorMakeCredential response produced by a real YubiKey.
+        // Copied here to keep tests self-contained.
         private static ReadOnlyMemory<byte> GetSampleEncoding() =>
             new byte[]
             {
@@ -227,12 +228,6 @@ namespace Yubico.YubiKey.Fido2
             // COSE ES256 public key (minimal valid EC2 key).
             var authData = BuildMinimalEs256AuthData();
 
-            // "none" attestation statement is an empty map: {}
-            var emptyStmt = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            emptyStmt.WriteStartMap(0);
-            emptyStmt.WriteEndMap();
-            var attStmtBytes = emptyStmt.Encode();
-
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(3);
 
@@ -243,7 +238,9 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteByteString(authData);
 
             cbor.WriteInt32(3);              // key: attStmt
-            cbor.WriteEncodedValue(attStmtBytes);
+            // "none" attestation statement is an empty map: {}
+            cbor.WriteStartMap(0);
+            cbor.WriteEndMap();
 
             cbor.WriteEndMap();
             return cbor.Encode();

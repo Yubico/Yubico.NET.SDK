@@ -23,12 +23,12 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
 {
     /// <summary>
     /// Extension methods for <see cref="PreviewSignGeneratedKey"/> that provide
-    /// RP-side verification functionality.
+    /// RP-side verification functionality for the ESP256-split-ARKG test path.
     /// </summary>
     /// <remarks>
     /// <para>
     /// These methods enable Relying Party (RP) side public key derivation and
-    /// signature verification for the previewSign WebAuthn extension. These are
+    /// signature verification for generated ARKG-P256 previewSign keys. These are
     /// test/verification utilities and not part of the authenticator-side SDK surface.
     /// </para>
     /// <para>
@@ -57,8 +57,8 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// derived key pair.
         /// </para>
         /// <para>
-        /// To use the derived key for signing, pass the returned
-        /// <see cref="PreviewSignDerivedKey"/> to
+        /// To request an ESP256-split-ARKG signature with this test helper, pass
+        /// the returned <see cref="PreviewSignDerivedKey"/> to
         /// <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.
         /// The YubiKey will produce a signature that can be verified using
         /// <see cref="PreviewSignDerivedKey.VerifySignature(byte[], byte[])"/>.
@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// </remarks>
         /// <param name="generatedKey">The generated key from which to derive.</param>
         /// <param name="inputKeyingMaterial">
-        /// Input keying material for HKDF derivation. This should be random data
+        /// Input keying material for ARKG-P256 derivation. This should be random data
         /// unique to the derivation context.
         /// </param>
         /// <param name="context">
@@ -108,8 +108,8 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// derived key pair.
         /// </para>
         /// <para>
-        /// To use the derived key for signing, pass the returned
-        /// <see cref="PreviewSignDerivedKey"/> to
+        /// To request an ESP256-split-ARKG signature with this test helper, pass
+        /// the returned <see cref="PreviewSignDerivedKey"/> to
         /// <see cref="GetAssertionParameters.AddPreviewSignExtension"/>.
         /// The YubiKey will produce a signature that can be verified using
         /// <see cref="PreviewSignDerivedKey.VerifySignature(byte[], byte[])"/>.
@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// </remarks>
         /// <param name="generatedKey">The generated key from which to derive.</param>
         /// <param name="inputKeyingMaterial">
-        /// Input keying material for HKDF derivation. This should be random data
+        /// Input keying material for ARKG-P256 derivation. This should be random data
         /// unique to the derivation context.
         /// </param>
         /// <param name="context">
@@ -200,13 +200,13 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
             if (isArkgPubKey != true || isArkgP256Key != true)
             {
                 throw new Ctap2DataException(
-                    "previewSign COSE key must be an ARKG-pub ARKG-P256 key.");
+                    "ESP256-split-ARKG test helper requires an ARKG-pub ARKG-P256 COSE key.");
             }
 
             if (blindingPublicKey is null || kemPublicKey is null)
             {
                 throw new Ctap2DataException(
-                    "previewSign COSE key missing blindingPublicKey (-1) or kemPublicKey (-2).");
+                    "ESP256-split-ARKG test helper COSE key missing blindingPublicKey (-1) or kemPublicKey (-2).");
             }
 
             return (blindingPublicKey, kemPublicKey);
@@ -260,7 +260,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
             if (isEc2Key != true || isP256Curve != true)
             {
                 throw new Ctap2DataException(
-                    "previewSign ARKG public-key components must be EC2 P-256 keys.");
+                    "ESP256-split-ARKG test helper public-key components must be EC2 P-256 keys.");
             }
 
             if (x is null || y is null || x.Length != 32 || y.Length != 32)

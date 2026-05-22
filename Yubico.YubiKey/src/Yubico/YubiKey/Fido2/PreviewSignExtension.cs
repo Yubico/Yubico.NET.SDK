@@ -154,8 +154,7 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <param name="previewSignValue">The CBOR-encoded previewSign generated-key payload.</param>
         /// <returns>
-        /// A generated key container if the payload contains well formed generated key material;
-        /// otherwise, <c>null</c>.
+        /// A generated key container if the payload contains well formed generated key material.
         /// </returns>
         /// <exception cref="Ctap2DataException">
         /// The payload contains malformed generated-key material.
@@ -168,38 +167,49 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <param name="previewSignValue">The CBOR-encoded previewSign output value.</param>
         /// <returns>
-        /// The decoded <see cref="CoseAlgorithmIdentifier"/> if the input is a map
-        /// containing the algorithm key; otherwise,
-        /// <c>null</c> when the input is not a map or the algorithm key is absent.
+        /// The decoded <see cref="CoseAlgorithmIdentifier"/> if the input contains
+        /// the algorithm key; otherwise, <c>null</c> when the algorithm key is absent.
         /// </returns>
         public static CoseAlgorithmIdentifier? DecodeGeneratedKeyAlgorithm(ReadOnlyMemory<byte> previewSignValue)
         {
-            var reader = new CborReader(previewSignValue, CborConformanceMode.Ctap2Canonical);
-            if (reader.PeekState() != CborReaderState.StartMap)
+            try
             {
+                var reader = new CborReader(previewSignValue, CborConformanceMode.Ctap2Canonical);
+                if (reader.PeekState() != CborReaderState.StartMap)
+                {
+                    throw new Ctap2DataException(
+                        "previewSign generated key algorithm output is not a map.");
+                }
+
+                int? entries = reader.ReadStartMap();
+                int count = entries ?? int.MaxValue;
+                for (int i = 0; i < count; i++)
+                {
+                    if (reader.PeekState() == CborReaderState.EndMap)
+                    {
+                        break;
+                    }
+
+                    int key = (int)reader.ReadInt64();
+                    if (key == (int)MakeCredentialKey.Algorithm)
+                    {
+                        return (CoseAlgorithmIdentifier)reader.ReadInt32();
+                    }
+
+                    reader.SkipValue();
+                }
+
+                reader.ReadEndMap();
                 return null;
             }
-
-            int? entries = reader.ReadStartMap();
-            int count = entries ?? int.MaxValue;
-            for (int i = 0; i < count; i++)
+            catch (CborContentException cborException)
             {
-                if (reader.PeekState() == CborReaderState.EndMap)
-                {
-                    break;
-                }
-
-                int key = (int)reader.ReadInt64();
-                if (key == (int)MakeCredentialKey.Algorithm)
-                {
-                    return (CoseAlgorithmIdentifier)reader.ReadInt32();
-                }
-
-                reader.SkipValue();
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, cborException);
             }
-
-            reader.ReadEndMap();
-            return null;
+            catch (InvalidOperationException invalidOp)
+            {
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, invalidOp);
+            }
         }
 
         /// <summary>
@@ -211,8 +221,7 @@ namespace Yubico.YubiKey.Fido2
         /// The algorithm from the signed previewSign output when available; otherwise, <c>null</c>.
         /// </param>
         /// <returns>
-        /// A generated key container if the payload contains well formed generated key material;
-        /// otherwise, <c>null</c>.
+        /// A generated key container if the payload contains well formed generated key material.
         /// </returns>
         /// <exception cref="Ctap2DataException">
         /// The payload contains malformed generated-key material.
@@ -221,74 +230,86 @@ namespace Yubico.YubiKey.Fido2
             ReadOnlyMemory<byte> previewSignValue,
             CoseAlgorithmIdentifier? signedOutputAlgorithm)
         {
-            var reader = new CborReader(previewSignValue, CborConformanceMode.Ctap2Canonical);
-            if (reader.PeekState() != CborReaderState.StartMap)
+            try
             {
-                return null;
-            }
-
-            int? entries = reader.ReadStartMap();
-            int count = entries ?? int.MaxValue;
-
-            var algorithm = CoseAlgorithmIdentifier.None;
-            byte[]? attestationObject = null;
-
-            for (int i = 0; i < count; i++)
-            {
-                if (reader.PeekState() == CborReaderState.EndMap)
+                var reader = new CborReader(previewSignValue, CborConformanceMode.Ctap2Canonical);
+                if (reader.PeekState() != CborReaderState.StartMap)
                 {
-                    break;
+                    throw new Ctap2DataException(
+                        "previewSign generated key output is not a map.");
                 }
 
-                int key = (int)reader.ReadInt64();
-                if (key == (int)MakeCredentialKey.Algorithm)
+                int? entries = reader.ReadStartMap();
+                int count = entries ?? int.MaxValue;
+
+                var algorithm = CoseAlgorithmIdentifier.None;
+                byte[]? attestationObject = null;
+
+                for (int i = 0; i < count; i++)
                 {
-                    algorithm = (CoseAlgorithmIdentifier)reader.ReadInt32();
+                    if (reader.PeekState() == CborReaderState.EndMap)
+                    {
+                        break;
+                    }
+
+                    int key = (int)reader.ReadInt64();
+                    if (key == (int)MakeCredentialKey.Algorithm)
+                    {
+                        algorithm = (CoseAlgorithmIdentifier)reader.ReadInt32();
+                    }
+                    else if (key == (int)MakeCredentialKey.AttestationObject)
+                    {
+                        attestationObject = reader.ReadByteString();
+                    }
+                    else
+                    {
+                        reader.SkipValue();
+                    }
                 }
-                else if (key == (int)MakeCredentialKey.AttestationObject)
+
+                reader.ReadEndMap();
+
+                if (algorithm == CoseAlgorithmIdentifier.None && signedOutputAlgorithm.HasValue)
                 {
-                    attestationObject = reader.ReadByteString();
+                    algorithm = signedOutputAlgorithm.Value;
                 }
-                else
+
+                if (algorithm == CoseAlgorithmIdentifier.None)
                 {
-                    reader.SkipValue();
+                    throw new Ctap2DataException(
+                        "previewSign generated key is missing an algorithm.");
                 }
+
+                if (attestationObject is null)
+                {
+                    throw new Ctap2DataException(
+                        "previewSign generated key is missing an attestation object.");
+                }
+
+                var attestationObj = new AttestationObject(attestationObject, parseFullDetails: false);
+                if (attestationObj.AuthenticatorData.CredentialId is null ||
+                    attestationObj.AuthenticatorData.EncodedCredentialPublicKey is null)
+                {
+                    throw new Ctap2DataException(
+                        "previewSign generated key attestation is missing credential data.");
+                }
+
+                byte[] keyHandle = attestationObj.AuthenticatorData.CredentialId.Id.ToArray();
+
+                return new PreviewSignGeneratedKey(
+                    keyHandle,
+                    attestationObj.AuthenticatorData.EncodedCredentialPublicKey.Value,
+                    algorithm,
+                    attestationObj);
             }
-
-            reader.ReadEndMap();
-
-            if (algorithm == CoseAlgorithmIdentifier.None && signedOutputAlgorithm.HasValue)
+            catch (CborContentException cborException)
             {
-                algorithm = signedOutputAlgorithm.Value;
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, cborException);
             }
-
-            if (algorithm == CoseAlgorithmIdentifier.None)
+            catch (InvalidOperationException invalidOp)
             {
-                throw new Ctap2DataException(
-                    "previewSign generated key is missing an algorithm.");
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, invalidOp);
             }
-
-            if (attestationObject is null)
-            {
-                throw new Ctap2DataException(
-                    "previewSign generated key is missing an attestation object.");
-            }
-
-            var attestationObj = new AttestationObject(attestationObject, parseFullDetails: false);
-            if (attestationObj.AuthenticatorData.CredentialId is null ||
-                attestationObj.AuthenticatorData.EncodedCredentialPublicKey is null)
-            {
-                throw new Ctap2DataException(
-                    "previewSign generated key attestation is missing credential data.");
-            }
-
-            byte[] keyHandle = attestationObj.AuthenticatorData.CredentialId.Id.ToArray();
-
-            return new PreviewSignGeneratedKey(
-                keyHandle,
-                attestationObj.AuthenticatorData.EncodedCredentialPublicKey.Value,
-                algorithm,
-                attestationObj);
         }
 
         /// <summary>
@@ -299,36 +320,50 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public static byte[]? DecodeSignature(ReadOnlyMemory<byte> previewSignAuthDataValue)
         {
-            var reader = new CborReader(previewSignAuthDataValue, CborConformanceMode.Ctap2Canonical);
-            if (reader.PeekState() != CborReaderState.StartMap)
+            try
             {
-                return null;
+                var reader = new CborReader(previewSignAuthDataValue, CborConformanceMode.Ctap2Canonical);
+                if (reader.PeekState() != CborReaderState.StartMap)
+                {
+                    throw new Ctap2DataException(
+                        "previewSign signature output is not a map.");
+                }
+
+                int? entries = reader.ReadStartMap();
+                int count = entries ?? int.MaxValue;
+
+                byte[]? signature = null;
+                for (int i = 0; i < count; i++)
+                {
+                    if (reader.PeekState() == CborReaderState.EndMap)
+                    {
+                        break;
+                    }
+
+                    int key = (int)reader.ReadInt64();
+                    if (key == (int)GetAssertionKey.TbsOrSignature)
+                    {
+                        signature = reader.ReadByteString();
+                    }
+                    else
+                    {
+                        reader.SkipValue();
+                    }
+                }
+
+                reader.ReadEndMap();
+                return signature ??
+                    throw new Ctap2DataException(
+                        "previewSign signature output is missing a signature.");
             }
-
-            int? entries = reader.ReadStartMap();
-            int count = entries ?? int.MaxValue;
-
-            byte[]? signature = null;
-            for (int i = 0; i < count; i++)
+            catch (CborContentException cborException)
             {
-                if (reader.PeekState() == CborReaderState.EndMap)
-                {
-                    break;
-                }
-
-                int key = (int)reader.ReadInt64();
-                if (key == (int)GetAssertionKey.TbsOrSignature)
-                {
-                    signature = reader.ReadByteString();
-                }
-                else
-                {
-                    reader.SkipValue();
-                }
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, cborException);
             }
-
-            reader.ReadEndMap();
-            return signature;
+            catch (InvalidOperationException invalidOp)
+            {
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, invalidOp);
+            }
         }
     }
 }

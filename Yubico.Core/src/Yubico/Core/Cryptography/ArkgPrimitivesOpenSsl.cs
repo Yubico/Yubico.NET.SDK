@@ -112,7 +112,15 @@ namespace Yubico.Core.Cryptography
                 Q = new ECPoint { X = x, Y = y }
             };
 
-            return EcdhPrimitives.Create().ComputeSharedSecret(publicKey, privateScalar.ToArray());
+            byte[] privateScalarBytes = privateScalar.ToArray();
+            try
+            {
+                return EcdhPrimitives.Create().ComputeSharedSecret(publicKey, privateScalarBytes);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(privateScalarBytes);
+            }
         }
 
         /// <inheritdoc />
@@ -383,20 +391,27 @@ namespace Yubico.Core.Cryptography
             // when the high bit would otherwise read as negative — strip it,
             // then left-pad to 32 bytes big-endian.
             byte[] le = scalar.ToByteArray();
-            int len = le.Length;
-            if (len > 1 && le[len - 1] == 0)
+            try
             {
-                len--;
-            }
+                int len = le.Length;
+                if (len > 1 && le[len - 1] == 0)
+                {
+                    len--;
+                }
 
-            byte[] be = new byte[P256CoordinateLength];
-            int copy = Math.Min(len, P256CoordinateLength);
-            for (int i = 0; i < copy; i++)
+                byte[] be = new byte[P256CoordinateLength];
+                int copy = Math.Min(len, P256CoordinateLength);
+                for (int i = 0; i < copy; i++)
+                {
+                    be[P256CoordinateLength - 1 - i] = le[i];
+                }
+
+                return be;
+            }
+            finally
             {
-                be[P256CoordinateLength - 1 - i] = le[i];
+                CryptographicOperations.ZeroMemory(le);
             }
-
-            return be;
         }
 
         private static BigInteger BytesToBigIntBE(ReadOnlySpan<byte> bytes)

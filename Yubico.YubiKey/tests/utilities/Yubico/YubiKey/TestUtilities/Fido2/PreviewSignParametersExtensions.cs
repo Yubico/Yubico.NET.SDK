@@ -27,6 +27,16 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
 
         public const string ExtensionName = Extensions.PreviewSign;
 
+        /// <summary>
+        /// Adds previewSign sign input for the ESP256-split-ARKG test-helper path.
+        /// </summary>
+        /// <param name="parameters">The GetAssertion parameters to update.</param>
+        /// <param name="deviceKeyHandle">The generated device key handle.</param>
+        /// <param name="arkgKeyHandle">The ARKG key handle for the derived key.</param>
+        /// <param name="context">The ARKG derivation context.</param>
+        /// <param name="messageDigest">
+        /// A 32-byte SHA-256 digest required by the ESP256 split signing algorithm.
+        /// </param>
         public static void AddPreviewSignExtension(
             this GetAssertionParameters parameters,
             ReadOnlyMemory<byte> deviceKeyHandle,
@@ -39,7 +49,9 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
 
             if (messageDigest.Length != 32)
             {
-                throw new ArgumentException("previewSign requires a 32-byte SHA-256 digest.", nameof(messageDigest));
+                throw new ArgumentException(
+                    "ESP256-split-ARKG signing requires a 32-byte SHA-256 digest.",
+                    nameof(messageDigest));
             }
 
             byte[] additionalArgs = EncodeArkgSignArgs(arkgKeyHandle, context);

@@ -127,6 +127,31 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
+        public void ParseGenerateKeyFromAuthenticatorDataExtensions_Throws_WhenOutputIsNotMap()
+        {
+            byte[] previewSignPayload = BuildByteString(new byte[] { 0x01 });
+            byte[] response = BuildMakeCredentialResponseWithSignedExtension(previewSignPayload);
+
+            var data = new MakeCredentialData(response);
+
+            _ = Assert.Throws<Ctap2DataException>(
+                () => data.GetPreviewSignGeneratedKey());
+        }
+
+        [Fact]
+        public void ParseGenerateKey_ReturnsNull_WhenExtensionAbsent()
+        {
+            byte[] response = BuildMakeCredentialResponse(
+                BuildAuthDataWithEs256CredentialPublicKey(),
+                includeUnsignedExtensions: false,
+                previewSignPayload: Array.Empty<byte>());
+
+            var data = new MakeCredentialData(response);
+
+            Assert.Null(data.GetPreviewSignGeneratedKey());
+        }
+
+        [Fact]
         public void ParseGenerateKeyFromUnsignedExtensions_Throws_WhenSignedAlgorithmMissing()
         {
             byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload(algorithm: null);
@@ -139,9 +164,31 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
+        public void ParseGenerateKeyFromUnsignedExtensions_Throws_WhenSignedAlgorithmOutputIsNotMap()
+        {
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload(algorithm: null);
+            byte[] signedPayload = BuildByteString(new byte[] { 0x01 });
+            byte[] response = BuildMakeCredentialResponseWithSplitPreviewSignOutput(unsignedPayload, signedPayload);
+
+            var data = new MakeCredentialData(response);
+
+            _ = Assert.Throws<Ctap2DataException>(
+                () => data.GetPreviewSignGeneratedKey());
+        }
+
+        [Fact]
         public void ParseGenerateKey_Throws_WhenAlgorithmMissing()
         {
             byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(algorithm: null);
+
+            _ = Assert.Throws<Ctap2DataException>(
+                () => PreviewSignExtension.DecodeGeneratedKey(previewSignPayload));
+        }
+
+        [Fact]
+        public void ParseGenerateKey_Throws_WhenOutputIsNotMap()
+        {
+            byte[] previewSignPayload = BuildByteString(new byte[] { 0x01 });
 
             _ = Assert.Throws<Ctap2DataException>(
                 () => PreviewSignExtension.DecodeGeneratedKey(previewSignPayload));
@@ -226,18 +273,16 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void ParseSignatureFromExtensionOutput_ReturnsNull_WhenValueIsNotMap()
+        public void ParseSignatureFromExtensionOutput_Throws_WhenValueIsNotMap()
         {
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteByteString(new byte[] { 0x30, 0x00 });
+            byte[] encodedSignatureOutput = BuildByteString(new byte[] { 0x30, 0x00 });
 
-            byte[]? recovered = PreviewSignExtension.DecodeSignature(cbor.Encode());
-
-            Assert.Null(recovered);
+            _ = Assert.Throws<Ctap2DataException>(
+                () => PreviewSignExtension.DecodeSignature(encodedSignatureOutput));
         }
 
         [Fact]
-        public void ParseSignatureFromExtensionOutput_ReturnsNull_WhenSignatureMissing()
+        public void ParseSignatureFromExtensionOutput_Throws_WhenSignatureMissing()
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(1);
@@ -245,9 +290,8 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteByteString(new byte[] { 0x01 });
             cbor.WriteEndMap();
 
-            byte[]? recovered = PreviewSignExtension.DecodeSignature(cbor.Encode());
-
-            Assert.Null(recovered);
+            _ = Assert.Throws<Ctap2DataException>(
+                () => PreviewSignExtension.DecodeSignature(cbor.Encode()));
         }
 
         [Fact]
@@ -259,8 +303,16 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteTextString("not-a-signature");
             cbor.WriteEndMap();
 
-            _ = Assert.Throws<InvalidOperationException>(
+            _ = Assert.Throws<Ctap2DataException>(
                 () => PreviewSignExtension.DecodeSignature(cbor.Encode()));
+        }
+
+        [Fact]
+        public void GetPreviewSignSignature_ReturnsNull_WhenExtensionAbsent()
+        {
+            var data = new AuthenticatorData(new byte[37]);
+
+            Assert.Null(data.GetPreviewSignSignature());
         }
 
         // ------------------------------------------------------------------
@@ -368,7 +420,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void AddPreviewSignExtension_ThrowsWhenAllowListEmpty()
+        public void AddArkgPreviewSignHelper_ThrowsWhenAllowListEmpty()
         {
             var parameters = new GetAssertionParameters(
                 new RelyingParty("rp.example"),
@@ -388,7 +440,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void AddPreviewSignExtension_ThrowsWhenTbsIsNotSha256Digest()
+        public void AddArkgPreviewSignHelper_ThrowsWhenDigestIsNotSha256Length()
         {
             var parameters = new GetAssertionParameters(
                 new RelyingParty("rp.example"),
@@ -405,7 +457,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void GetAssertionCborEncode_EmbedsPreviewSignSignExtension()
+        public void GetAssertionCborEncode_EmbedsArkgPreviewSignHelperArgs()
         {
             var parameters = new GetAssertionParameters(
                 new RelyingParty("rp.example"),
@@ -528,6 +580,13 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteInt32(6);
             cbor.WriteByteString(sig);
             cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        private static byte[] BuildByteString(byte[] value)
+        {
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteByteString(value);
             return cbor.Encode();
         }
 

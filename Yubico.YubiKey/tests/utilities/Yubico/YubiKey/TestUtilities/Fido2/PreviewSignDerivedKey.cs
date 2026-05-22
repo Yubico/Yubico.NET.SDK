@@ -23,14 +23,14 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This class contains the derived public key and handles needed for
-    /// authentication via the previewSign extension. Instances are obtained
+    /// This class contains the derived public key and handles needed for the
+    /// ESP256-split-ARKG previewSign test-helper path. Instances are obtained
     /// by calling <see cref="PreviewSignGeneratedKeyExtensions.DerivePublicKey(PreviewSignGeneratedKey, byte[], byte[])"/> with
     /// application-provided input keying material and a context string.
     /// </para>
     /// <para>
     /// The derived public key can be used to verify signatures produced by the
-    /// YubiKey when signing with the corresponding ARKG key handle and context.
+    /// YubiKey when using the corresponding ARKG key handle and context.
     /// Use <see cref="VerifySignature(byte[], byte[])"/> to validate signatures against this key.
     /// </para>
     /// <para>
@@ -86,15 +86,15 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// </summary>
         /// <remarks>
         /// <para>
-        /// This method verifies that a signature produced by the YubiKey (obtained via
-        /// <see cref="AuthenticatorData.GetPreviewSignSignature"/>) is valid for the
-        /// given message using the derived public key from ARKG-P256 derivation.
+        /// This method verifies that a signature produced by the ESP256-split-ARKG
+        /// previewSign path (obtained via <see cref="AuthenticatorData.GetPreviewSignSignature"/>)
+        /// is valid for the given message using the derived public key from ARKG-P256
+        /// derivation.
         /// </para>
         /// <para>
-        /// The signature must be in DER-encoded ECDSA format, as returned by the
-        /// YubiKey's previewSign extension. The message should be the original raw
-        /// data, not a pre-hashed value. This method computes the SHA-256 hash
-        /// internally before verifying.
+        /// For this helper path, the signature is the standard ECDSA signature
+        /// format verified by <see cref="EcdsaVerify"/>. The message should be the
+        /// original raw data, not a pre-hashed value.
         /// </para>
         /// </remarks>
         /// <param name="message">
@@ -102,8 +102,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// before verifying the signature.
         /// </param>
         /// <param name="signature">
-        /// The DER-encoded ECDSA signature to verify, as returned by
-        /// <see cref="AuthenticatorData.GetPreviewSignSignature"/>.
+        /// The ESP256-split-ARKG previewSign signature to verify.
         /// </param>
         /// <returns>
         /// <c>true</c> if the signature is valid for the message using the derived
@@ -125,15 +124,15 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// </summary>
         /// <remarks>
         /// <para>
-        /// This method verifies that a signature produced by the YubiKey (obtained via
-        /// <see cref="AuthenticatorData.GetPreviewSignSignature"/>) is valid for the
-        /// given message using the derived public key from ARKG-P256 derivation.
+        /// This method verifies that a signature produced by the ESP256-split-ARKG
+        /// previewSign path (obtained via <see cref="AuthenticatorData.GetPreviewSignSignature"/>)
+        /// is valid for the given message using the derived public key from ARKG-P256
+        /// derivation.
         /// </para>
         /// <para>
-        /// The signature must be in DER-encoded ECDSA format, as returned by the
-        /// YubiKey's previewSign extension. The message should be the original raw
-        /// data, not a pre-hashed value. This method computes the SHA-256 hash
-        /// internally before verifying.
+        /// For this helper path, the signature is the standard ECDSA signature
+        /// format verified by <see cref="EcdsaVerify"/>. The message should be the
+        /// original raw data, not a pre-hashed value.
         /// </para>
         /// </remarks>
         /// <param name="message">
@@ -141,8 +140,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// before verifying the signature.
         /// </param>
         /// <param name="signature">
-        /// The DER-encoded ECDSA signature to verify, as returned by
-        /// <see cref="AuthenticatorData.GetPreviewSignSignature"/>.
+        /// The ESP256-split-ARKG previewSign signature to verify.
         /// </param>
         /// <returns>
         /// <c>true</c> if the signature is valid for the message using the derived

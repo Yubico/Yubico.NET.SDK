@@ -143,18 +143,18 @@ namespace Yubico.YubiKey.Fido2
         }
 
         // ------------------------------------------------------------------
-        // Empty constructor — guard clause
+        // CborEncode
         // ------------------------------------------------------------------
 
         [Fact]
-        public void CborEncode_FullyParsedObject_RoundTripsSuccessfully()
+        public void CborEncode_FullyParsedPackedObject_MatchesKeys123Encoding()
         {
-            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
+            byte[] encoding = BuildPackedAttestationObject();
             var obj = new AttestationObject(encoding);
 
             byte[] reencoded = obj.CborEncode();
-            Assert.NotNull(reencoded);
-            Assert.True(reencoded.Length > 0);
+
+            Assert.Equal(encoding, reencoded);
         }
 
         // ------------------------------------------------------------------
@@ -240,6 +240,29 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteInt32(3);              // key: attStmt
             // "none" attestation statement is an empty map: {}
             cbor.WriteStartMap(0);
+            cbor.WriteEndMap();
+
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        private static byte[] BuildPackedAttestationObject()
+        {
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(3);
+
+            cbor.WriteInt32(1);
+            cbor.WriteTextString("packed");
+
+            cbor.WriteInt32(2);
+            cbor.WriteByteString(BuildMinimalEs256AuthData());
+
+            cbor.WriteInt32(3);
+            cbor.WriteStartMap(2);
+            cbor.WriteTextString("alg");
+            cbor.WriteInt32(-7);
+            cbor.WriteTextString("sig");
+            cbor.WriteByteString(new byte[] { 0x01, 0x02, 0x03 });
             cbor.WriteEndMap();
 
             cbor.WriteEndMap();

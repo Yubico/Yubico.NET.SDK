@@ -183,52 +183,22 @@ namespace Yubico.YubiKey.Fido2.Cbor
         [Fact]
         public void ReadEncodedValue_ReturnsByteIdenticalSlice()
         {
-            // Build a CBOR map with key 3 = a nested map
-            var writer = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            writer.WriteStartMap(3);
-
-            // Key 1
-            writer.WriteInt32(1);
-            writer.WriteTextString("test");
-
-            // Key 2
-            writer.WriteInt32(2);
-            writer.WriteByteString(new byte[] { 0x11, 0x22 });
-
-            // Key 3: nested map
-            writer.WriteInt32(3);
-            writer.WriteStartMap(2);
-            writer.WriteTextString("alg");
-            writer.WriteInt32(-7);
-            writer.WriteTextString("sig");
-            writer.WriteByteString(new byte[] { 0xAA, 0xBB, 0xCC });
-            writer.WriteEndMap();
-
-            writer.WriteEndMap();
-            byte[] encoded = writer.Encode();
-
-            // Extract the original key 3 value bytes using CborReader
-            var reader = new CborReader(encoded, CborConformanceMode.Ctap2Canonical);
-            _ = reader.ReadStartMap();
-            ReadOnlyMemory<byte> originalKey3Slice = ReadOnlyMemory<byte>.Empty;
-            while (reader.PeekState() != CborReaderState.EndMap)
+            byte[] encoded = new byte[]
             {
-                int key = reader.ReadInt32();
-                if (key == 3)
-                {
-                    originalKey3Slice = reader.ReadEncodedValue().ToArray();
-                }
-                else
-                {
-                    reader.SkipValue();
-                }
-            }
+                0xA3,
+                0x01, 0x64, 0x74, 0x65, 0x73, 0x74,
+                0x02, 0x42, 0x11, 0x22,
+                0x03, 0xA2, 0x63, 0x61, 0x6C, 0x67, 0x26, 0x63, 0x73, 0x69, 0x67, 0x43, 0xAA, 0xBB, 0xCC
+            };
+            byte[] expectedKey3Value = new byte[]
+            {
+                0xA2, 0x63, 0x61, 0x6C, 0x67, 0x26, 0x63, 0x73, 0x69, 0x67, 0x43, 0xAA, 0xBB, 0xCC
+            };
 
-            // Now use CborMap and verify ReadEncodedValue returns the same bytes
             var map = new CborMap<int>(encoded);
             ReadOnlyMemory<byte> retrievedSlice = map.ReadEncodedValue(3);
 
-            Assert.True(retrievedSlice.Span.SequenceEqual(originalKey3Slice.Span),
+            Assert.True(retrievedSlice.Span.SequenceEqual(expectedKey3Value),
                 "ReadEncodedValue must return byte-identical slice of the original value");
         }
 

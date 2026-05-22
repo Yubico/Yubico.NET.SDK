@@ -17,6 +17,7 @@ using System.Formats.Cbor;
 using System.Linq;
 using System.Reflection;
 using Xunit;
+using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.TestUtilities.Fido2;
 
@@ -78,15 +79,11 @@ namespace Yubico.YubiKey.Fido2
             // Re-decode and assert structure rather than hand-crafting the
             // canonical bytes — the encoder ordering plus map header tag is
             // already covered by the no-args case.
-            var reader = new CborReader(actual, CborConformanceMode.Ctap2Canonical);
-            Assert.Equal(3, reader.ReadStartMap());
-            Assert.Equal(2, reader.ReadInt32());
-            Assert.Equal(keyHandle, reader.ReadByteString());
-            Assert.Equal(6, reader.ReadInt32());
-            Assert.Equal(tbs, reader.ReadByteString());
-            Assert.Equal(7, reader.ReadInt32());
-            Assert.Equal(additionalArgs, reader.ReadByteString());
-            reader.ReadEndMap();
+            var map = new CborMap<int>(actual);
+            Assert.Equal(3, map.Count);
+            Assert.Equal(keyHandle, map.ReadByteString(2).ToArray());
+            Assert.Equal(tbs, map.ReadByteString(6).ToArray());
+            Assert.Equal(additionalArgs, map.ReadByteString(7).ToArray());
         }
 
         // ------------------------------------------------------------------
@@ -109,6 +106,24 @@ namespace Yubico.YubiKey.Fido2
             Assert.NotNull(generated);
             Assert.Equal(PreviewSignParametersExtensions.ArkgP256Esp256, generated!.Algorithm);
             Assert.NotEmpty(generated.PublicKey.Span.ToArray());
+        }
+
+        [Fact]
+        public void ParseUnsignedExtensionOutputs_PreservesOpaqueUnknownExtensionValue()
+        {
+            byte[] opaqueValue = { 0xA0 };
+
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(1);
+            cbor.WriteTextString("unknownExtension");
+            cbor.WriteStartMap(0);
+            cbor.WriteEndMap();
+            cbor.WriteEndMap();
+
+            var outputs = PreviewSignExtension.ParseUnsignedExtensionOutputs(cbor.Encode());
+
+            Assert.True(outputs.TryGetValue("unknownExtension", out ReadOnlyMemory<byte> value));
+            Assert.Equal(opaqueValue, value.ToArray());
         }
 
         [Fact]
@@ -202,6 +217,16 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
+        public void DecodeGeneratedKeyAlgorithm_IgnoresUnknownOpaqueValues()
+        {
+            byte[] previewSignPayload = BuildGeneratedKeyAlgorithmPayload(includeUnknownOpaqueValue: true);
+
+            CoseAlgorithmIdentifier algorithm = PreviewSignExtension.DecodeGeneratedKeyAlgorithm(previewSignPayload);
+
+            Assert.Equal(PreviewSignParametersExtensions.ArkgP256Esp256, algorithm);
+        }
+
+        [Fact]
         public void DecodeGeneratedKeyAlgorithm_Throws_WhenAlgorithmValueIsMalformed()
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
@@ -232,6 +257,18 @@ namespace Yubico.YubiKey.Fido2
 
             Assert.NotNull(generated);
             Assert.Equal(CoseAlgorithmIdentifier.ES256, generated!.Algorithm);
+        }
+
+        [Fact]
+        public void DecodeGeneratedKey_IgnoresUnknownOpaqueValues()
+        {
+            byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(includeUnknownOpaqueValue: true);
+
+            PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
+
+            Assert.NotNull(generated);
+            Assert.Equal(PreviewSignParametersExtensions.ArkgP256Esp256, generated!.Algorithm);
+            Assert.NotEmpty(generated.PublicKey.Span.ToArray());
         }
 
         [Fact]
@@ -294,6 +331,17 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] sigBytes = { 0x30, 0x06, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02 };
             byte[] previewSignAuthDataValue = BuildSignatureMap(sigBytes);
+
+            byte[] recovered = PreviewSignExtension.DecodeSignature(previewSignAuthDataValue);
+
+            Assert.Equal(sigBytes, recovered);
+        }
+
+        [Fact]
+        public void DecodeSignature_IgnoresUnknownOpaqueValues()
+        {
+            byte[] sigBytes = { 0x30, 0x06, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02 };
+            byte[] previewSignAuthDataValue = BuildSignatureMap(sigBytes, includeUnknownOpaqueValue: true);
 
             byte[] recovered = PreviewSignExtension.DecodeSignature(previewSignAuthDataValue);
 
@@ -503,24 +551,16 @@ namespace Yubico.YubiKey.Fido2
             byte[] encoded = parameters.CborEncode();
             byte[] previewSignValue = ReadTextExtensionValue(encoded, parameterExtensionsKey: 4, PreviewSignParametersExtensions.ExtensionName);
 
-            var reader = new CborReader(previewSignValue, CborConformanceMode.Ctap2Canonical);
-            Assert.Equal(3, reader.ReadStartMap());
-            Assert.Equal(2, reader.ReadInt32());
-            Assert.Equal(derivedKey.DeviceKeyHandle.ToArray(), reader.ReadByteString());
-            Assert.Equal(6, reader.ReadInt32());
-            Assert.Equal(tbs, reader.ReadByteString());
-            Assert.Equal(7, reader.ReadInt32());
+            var previewSignMap = new CborMap<int>(previewSignValue);
+            Assert.Equal(3, previewSignMap.Count);
+            Assert.Equal(derivedKey.DeviceKeyHandle.ToArray(), previewSignMap.ReadByteString(2).ToArray());
+            Assert.Equal(tbs, previewSignMap.ReadByteString(6).ToArray());
 
-            var argsReader = new CborReader(reader.ReadByteString(), CborConformanceMode.Ctap2Canonical);
-            Assert.Equal(3, argsReader.ReadStartMap());
-            Assert.Equal(3, argsReader.ReadInt32());
-            Assert.Equal((int)PreviewSignParametersExtensions.ArkgP256Esp256, argsReader.ReadInt32());
-            Assert.Equal(-1, argsReader.ReadInt32());
-            Assert.Equal(derivedKey.ArkgKeyHandle.ToArray(), argsReader.ReadByteString());
-            Assert.Equal(-2, argsReader.ReadInt32());
-            Assert.Equal(derivedKey.Context.ToArray(), argsReader.ReadByteString());
-            argsReader.ReadEndMap();
-            reader.ReadEndMap();
+            var argsMap = new CborMap<int>(previewSignMap.ReadByteString(7));
+            Assert.Equal(3, argsMap.Count);
+            Assert.Equal((int)PreviewSignParametersExtensions.ArkgP256Esp256, argsMap.ReadInt32(3));
+            Assert.Equal(derivedKey.ArkgKeyHandle.ToArray(), argsMap.ReadByteString(-1).ToArray());
+            Assert.Equal(derivedKey.Context.ToArray(), argsMap.ReadByteString(-2).ToArray());
         }
 
         // ==================================================================
@@ -529,30 +569,8 @@ namespace Yubico.YubiKey.Fido2
 
         private static int ReadFlagsFromGenerateKeyInput(byte[] encoded)
         {
-            var reader = new CborReader(encoded, CborConformanceMode.Ctap2Canonical);
-            int? entries = reader.ReadStartMap();
-            int count = entries ?? int.MaxValue;
-            int flags = -1;
-            for (int i = 0; i < count; i++)
-            {
-                if (reader.PeekState() == CborReaderState.EndMap)
-                {
-                    break;
-                }
-
-                int key = reader.ReadInt32();
-                if (key == 4)
-                {
-                    flags = reader.ReadInt32();
-                }
-                else
-                {
-                    reader.SkipValue();
-                }
-            }
-
-            reader.ReadEndMap();
-            return flags;
+            var map = new CborMap<int>(encoded);
+            return map.ReadInt32(4);
         }
 
         private static byte[] ReadTextExtensionValue(
@@ -560,53 +578,34 @@ namespace Yubico.YubiKey.Fido2
             int parameterExtensionsKey,
             string extensionName)
         {
-            var reader = new CborReader(encodedParameters, CborConformanceMode.Ctap2Canonical);
-            int? entries = reader.ReadStartMap();
-            int count = entries ?? int.MaxValue;
-            for (int i = 0; i < count; i++)
+            var map = new CborMap<int>(encodedParameters);
+            if (!map.Contains(parameterExtensionsKey))
             {
-                if (reader.PeekState() == CborReaderState.EndMap)
-                {
-                    break;
-                }
-
-                int key = reader.ReadInt32();
-                if (key != parameterExtensionsKey)
-                {
-                    reader.SkipValue();
-                    continue;
-                }
-
-                int? extensionEntries = reader.ReadStartMap();
-                int extensionCount = extensionEntries ?? int.MaxValue;
-                for (int j = 0; j < extensionCount; j++)
-                {
-                    if (reader.PeekState() == CborReaderState.EndMap)
-                    {
-                        break;
-                    }
-
-                    string currentName = reader.ReadTextString();
-                    if (currentName == extensionName)
-                    {
-                        return reader.ReadEncodedValue().ToArray();
-                    }
-
-                    reader.SkipValue();
-                }
-
-                reader.ReadEndMap();
+                throw new InvalidOperationException("Extension not found.");
             }
 
-            throw new InvalidOperationException("Extension not found.");
+            var extensions = map.ReadMap<string>(parameterExtensionsKey);
+            if (!extensions.Contains(extensionName))
+            {
+                throw new InvalidOperationException("Extension not found.");
+            }
+
+            return extensions.ReadEncodedValue(extensionName).ToArray();
         }
 
-        private static byte[] BuildSignatureMap(byte[] sig)
+        private static byte[] BuildSignatureMap(
+            byte[] sig,
+            bool includeUnknownOpaqueValue = false)
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(1);
+            cbor.WriteStartMap(includeUnknownOpaqueValue ? 2 : 1);
             cbor.WriteInt32(6);
             cbor.WriteByteString(sig);
+            if (includeUnknownOpaqueValue)
+            {
+                WriteUnknownOpaqueEntry(cbor);
+            }
+
             cbor.WriteEndMap();
             return cbor.Encode();
         }
@@ -618,12 +617,17 @@ namespace Yubico.YubiKey.Fido2
             return cbor.Encode();
         }
 
-        private static byte[] BuildGeneratedKeyAlgorithmPayload()
+        private static byte[] BuildGeneratedKeyAlgorithmPayload(bool includeUnknownOpaqueValue = false)
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(1);
+            cbor.WriteStartMap(includeUnknownOpaqueValue ? 2 : 1);
             cbor.WriteInt32(3);
             cbor.WriteInt32((int)PreviewSignParametersExtensions.ArkgP256Esp256);
+            if (includeUnknownOpaqueValue)
+            {
+                WriteUnknownOpaqueEntry(cbor);
+            }
+
             cbor.WriteEndMap();
             return cbor.Encode();
         }
@@ -646,7 +650,8 @@ namespace Yubico.YubiKey.Fido2
             int arkgAlgorithm = CoseAlgorithmArkgP256,
             int blindingAlgorithm = (int)CoseAlgorithmIdentifier.Esp256,
             int? kemAlgorithm = null,
-            byte[]? credentialPublicKeyCose = null)
+            byte[]? credentialPublicKeyCose = null,
+            bool includeUnknownOpaqueValue = false)
         {
             byte[] innerAttestation = BuildInnerAttestationObject(
                 arkgKeyType,
@@ -656,7 +661,7 @@ namespace Yubico.YubiKey.Fido2
                 credentialPublicKeyCose);
 
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(algorithm.HasValue ? 2 : 1);
+            cbor.WriteStartMap((algorithm.HasValue ? 2 : 1) + (includeUnknownOpaqueValue ? 1 : 0));
             if (algorithm.HasValue)
             {
                 cbor.WriteInt32(3);
@@ -665,8 +670,20 @@ namespace Yubico.YubiKey.Fido2
 
             cbor.WriteInt32(7);
             cbor.WriteByteString(innerAttestation);
+            if (includeUnknownOpaqueValue)
+            {
+                WriteUnknownOpaqueEntry(cbor);
+            }
+
             cbor.WriteEndMap();
             return cbor.Encode();
+        }
+
+        private static void WriteUnknownOpaqueEntry(CborWriter cbor)
+        {
+            cbor.WriteInt32(99);
+            cbor.WriteStartMap(0);
+            cbor.WriteEndMap();
         }
 
         private static byte[] BuildInnerAttestationObject(

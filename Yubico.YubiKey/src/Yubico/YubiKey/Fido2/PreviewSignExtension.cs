@@ -129,24 +129,31 @@ namespace Yubico.YubiKey.Fido2
         public static IReadOnlyDictionary<string, ReadOnlyMemory<byte>> ParseUnsignedExtensionOutputs(
             ReadOnlyMemory<byte> encodedMap)
         {
-            var result = new Dictionary<string, ReadOnlyMemory<byte>>(StringComparer.Ordinal);
-            var reader = new CborReader(encodedMap, CborConformanceMode.Ctap2Canonical);
-            int? entries = reader.ReadStartMap();
-            int count = entries ?? int.MaxValue;
-            for (int i = 0; i < count; i++)
+            try
             {
-                if (reader.PeekState() == CborReaderState.EndMap)
+                var result = new Dictionary<string, ReadOnlyMemory<byte>>(StringComparer.Ordinal);
+                var reader = new CborReader(encodedMap, CborConformanceMode.Ctap2Canonical);
+                int? entries = reader.ReadStartMap();
+                int count = entries ?? int.MaxValue;
+                for (int i = 0; i < count; i++)
                 {
-                    break;
+                    if (reader.PeekState() == CborReaderState.EndMap)
+                    {
+                        break;
+                    }
+
+                    string name = reader.ReadTextString();
+                    byte[] value = reader.ReadEncodedValue().ToArray();
+                    result[name] = value;
                 }
 
-                string name = reader.ReadTextString();
-                byte[] value = reader.ReadEncodedValue().ToArray();
-                result[name] = value;
+                reader.ReadEndMap();
+                return result;
             }
-
-            reader.ReadEndMap();
-            return result;
+            catch (Exception exception) when (IsCborParseException(exception))
+            {
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, exception);
+            }
         }
 
         /// <summary>
@@ -205,13 +212,9 @@ namespace Yubico.YubiKey.Fido2
                 throw new Ctap2DataException(
                     "previewSign generated key algorithm output is missing an algorithm.");
             }
-            catch (CborContentException cborException)
+            catch (Exception exception) when (IsCborParseException(exception))
             {
-                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, cborException);
-            }
-            catch (InvalidOperationException invalidOp)
-            {
-                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, invalidOp);
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, exception);
             }
         }
 
@@ -305,13 +308,9 @@ namespace Yubico.YubiKey.Fido2
                     algorithm,
                     attestationObj);
             }
-            catch (CborContentException cborException)
+            catch (Exception exception) when (IsCborParseException(exception))
             {
-                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, cborException);
-            }
-            catch (InvalidOperationException invalidOp)
-            {
-                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, invalidOp);
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, exception);
             }
         }
 
@@ -362,14 +361,18 @@ namespace Yubico.YubiKey.Fido2
                     throw new Ctap2DataException(
                         "previewSign signature output is missing a signature.");
             }
-            catch (CborContentException cborException)
+            catch (Exception exception) when (IsCborParseException(exception))
             {
-                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, cborException);
-            }
-            catch (InvalidOperationException invalidOp)
-            {
-                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, invalidOp);
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, exception);
             }
         }
+
+        private static bool IsCborParseException(Exception exception) =>
+            exception is CborContentException
+                or InvalidCastException
+                or InvalidOperationException
+                or ArgumentException
+                or FormatException
+                or NotSupportedException;
     }
 }

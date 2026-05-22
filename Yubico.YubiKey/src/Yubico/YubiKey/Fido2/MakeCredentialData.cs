@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Fido2
     /// </remarks>
     public class MakeCredentialData
     {
-        // CBOR map keys defined in CTAP 2.1 section 6.1.2 (authenticatorMakeCredential response)
+        // CBOR map keys defined in the CTAP authenticatorMakeCredential response structure.
         private const int KeyFormat = 1;
         private const int KeyAuthData = 2;
         private const int KeyAttestationStatement = 3;
@@ -212,12 +212,11 @@ namespace Yubico.YubiKey.Fido2
         /// given CBOR encoding.
         /// </summary>
         /// <remarks>
-        /// The encoding must follow the definition of
-        /// <c>authenticatorMakeCredential response structure</c> in section
-        /// 6.1.2 of the CTAP 2.1 standard.
+        /// The encoding must follow the CTAP
+        /// <see href="https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#authenticatormakecredential-response-structure">authenticatorMakeCredential response structure</see>.
         /// </remarks>
         /// <param name="cborEncoding">
-        /// The credential data, encoded following the CTAP 2.1 and CBOR (RFC
+        /// The credential data, encoded following the CTAP and CBOR (RFC
         /// 8949) standards.
         /// </param>
         /// <exception cref="Ctap2DataException">

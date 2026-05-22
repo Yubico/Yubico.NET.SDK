@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void MakeCredentialData_PackedAttestationMissingSig_ThrowsCtap2DataException()
         {
-            byte[] ctapResponse = BuildMakeCredentialResponseWithMalformedPackedAttestation(missingSig: true);
+            byte[] ctapResponse = BuildMakeCredentialResponseWithMalformedPackedAttestation(missingSig: true, extraKey: false);
 
             var ex = Assert.Throws<Ctap2DataException>(() => new MakeCredentialData(ctapResponse));
 
@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void MakeCredentialData_PackedAttestationWithExtraKey_ThrowsCtap2DataException()
         {
-            byte[] ctapResponse = BuildMakeCredentialResponseWithMalformedPackedAttestation(extraKey: true);
+            byte[] ctapResponse = BuildMakeCredentialResponseWithMalformedPackedAttestation(missingSig: false, extraKey: true);
 
             var ex = Assert.Throws<Ctap2DataException>(() => new MakeCredentialData(ctapResponse));
 
@@ -225,9 +225,14 @@ namespace Yubico.YubiKey.Fido2
         /// Builds a CTAP response with packed format but malformed attestation statement.
         /// </summary>
         private static byte[] BuildMakeCredentialResponseWithMalformedPackedAttestation(
-            bool missingSig = false,
-            bool extraKey = false)
+            bool missingSig,
+            bool extraKey)
         {
+            if (missingSig == extraKey)
+            {
+                throw new ArgumentException("Specify exactly one malformed packed attestation shape.");
+            }
+
             byte[] authData = BuildMinimalAuthDataWithEs256Key();
 
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
@@ -248,7 +253,7 @@ namespace Yubico.YubiKey.Fido2
                 cbor.WriteInt32(-7);
                 cbor.WriteEndMap();
             }
-            else if (extraKey)
+            else
             {
                 // Has alg, sig, x5c, plus an unexpected fourth key
                 cbor.WriteStartMap(4);
@@ -263,17 +268,6 @@ namespace Yubico.YubiKey.Fido2
                 cbor.WriteInt32(42);
                 cbor.WriteEndMap();
             }
-            else
-            {
-                // Well-formed
-                cbor.WriteStartMap(2);
-                cbor.WriteTextString("alg");
-                cbor.WriteInt32(-7);
-                cbor.WriteTextString("sig");
-                cbor.WriteByteString(new byte[64]);
-                cbor.WriteEndMap();
-            }
-
             cbor.WriteEndMap();
             return cbor.Encode();
         }
@@ -311,6 +305,11 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         private static byte[] BuildMakeCredentialResponseMissingKey(int missingKey)
         {
+            if (missingKey < 1 || missingKey > 3)
+            {
+                throw new ArgumentOutOfRangeException(nameof(missingKey), "missingKey must be 1, 2, or 3.");
+            }
+
             byte[] authData = BuildMinimalAuthDataWithEs256Key();
 
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);

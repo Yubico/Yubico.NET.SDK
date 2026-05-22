@@ -49,12 +49,6 @@ namespace Yubico.Core.Cryptography
             NumberStyles.HexNumber,
             CultureInfo.InvariantCulture);
 
-        // 2^256 mod N, used by the wide reduction in HashToScalar.
-        private static readonly BigInteger TwoPow256ModN = BigInteger.Parse(
-            "0000000000FFFFFFFF00000000000000004319055258E8617B0C46353D039CDAAF",
-            NumberStyles.HexNumber,
-            CultureInfo.InvariantCulture);
-
         /// <inheritdoc />
         public bool IsPointOnCurve(ReadOnlySpan<byte> point)
         {
@@ -171,33 +165,33 @@ namespace Yubico.Core.Cryptography
         // ARKG-BL: blinding-key arithmetic
         // ---------------------------------------------------------------------
 
-        private static BigInteger BlPrf(ReadOnlySpan<byte> ikmTau, ReadOnlySpan<byte> ctx)
+        private static BigInteger BlPrf(ReadOnlySpan<byte> inputKeyingMaterialTau, ReadOnlySpan<byte> context)
         {
             byte[] dst = Concat(
                 Encoding.ASCII.GetBytes("ARKG-BL-EC."),
                 Encoding.ASCII.GetBytes(DstExt),
-                ctx.ToArray());
-            return HashToScalar(ikmTau, dst);
+                context.ToArray());
+            return HashToScalar(inputKeyingMaterialTau, dst);
         }
 
-        private static byte[] BlBlindPublicKey(ReadOnlySpan<byte> pkBl, BigInteger tau)
+        private static byte[] BlBlindPublicKey(ReadOnlySpan<byte> blindingPublicKey, BigInteger tau)
         {
-            byte[] tauBytes = ScalarToBytes(tau);
+            byte[] tauBytes = ScalarToP256FixedWidthBytes(tau);
             try
             {
                 using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(
                     ECCurve.NamedCurves.nistP256.ToSslCurveId());
-                using SafeEcPoint pkBlPoint = Sec1ToPoint(group, pkBl);
+                using SafeEcPoint blindingPublicKeyPoint = Sec1ToPoint(group, blindingPublicKey);
                 using SafeEcPoint result = NativeMethods.EcPointNew(group);
                 using SafeBigNum tauBn = NativeMethods.BnBinaryToBigNum(tauBytes);
                 using SafeBigNum oneBn = NativeMethods.BnBinaryToBigNum([0x01]);
 
-                // r = tau*G + 1*pkBl  =>  r = pkBl + tau*G.
+                // r = tau*G + 1*blindingPublicKey.
                 int rc = NativeMethods.EcPointMul(
                     group,
                     result,
                     tauBn.DangerousGetHandle(),
-                    pkBlPoint.DangerousGetHandle(),
+                    blindingPublicKeyPoint.DangerousGetHandle(),
                     oneBn.DangerousGetHandle());
                 if (rc != 1)
                 {
@@ -216,34 +210,37 @@ namespace Yubico.Core.Cryptography
         // ECDH with HMAC wrapper
         // ---------------------------------------------------------------------
 
-        private (byte[] shared, byte[] ciphertext) HmacKemEncaps(ReadOnlySpan<byte> pkKem, ReadOnlySpan<byte> ikm, ReadOnlySpan<byte> ctx)
+        private (byte[] shared, byte[] ciphertext) HmacKemEncaps(
+            ReadOnlySpan<byte> kemPublicKey,
+            ReadOnlySpan<byte> inputKeyingMaterial,
+            ReadOnlySpan<byte> context)
         {
             byte[] dstAug = Encoding.ASCII.GetBytes("ARKG-ECDH.ARKG-P256");
 
-            (byte[] ephPk, BigInteger ephSk) = KemDeriveKeypair(ikm);
+            (byte[] ephemeralPublicKey, BigInteger ephemeralSecretScalar) = KemDeriveKeypair(inputKeyingMaterial);
 
-            byte[] ephSkBytes = ScalarToBytes(ephSk);
+            byte[] ephemeralSecretScalarBytes = ScalarToP256FixedWidthBytes(ephemeralSecretScalar);
             byte[] kPrime;
             try
             {
-                kPrime = ComputeEcdhSharedSecret(ephSkBytes, pkKem);
+                kPrime = ComputeEcdhSharedSecret(ephemeralSecretScalarBytes, kemPublicKey);
             }
             finally
             {
-                CryptographicOperations.ZeroMemory(ephSkBytes);
+                CryptographicOperations.ZeroMemory(ephemeralSecretScalarBytes);
             }
 
             byte[] macInfo = Concat(
                 Encoding.ASCII.GetBytes("ARKG-KEM-HMAC-mac."),
                 dstAug,
-                ctx.ToArray());
+                context.ToArray());
             byte[] mk = HkdfUtilities.DeriveKey(kPrime, salt: ReadOnlySpan<byte>.Empty, contextInfo: macInfo, length: 32).ToArray();
 
             byte[] tag;
             try
             {
                 using HMACSHA256 hmac = new HMACSHA256(mk);
-                byte[] full = hmac.ComputeHash(ephPk);
+                byte[] full = hmac.ComputeHash(ephemeralPublicKey);
                 tag = full.AsSpan(0, 16).ToArray();
                 CryptographicOperations.ZeroMemory(full);
             }
@@ -255,43 +252,43 @@ namespace Yubico.Core.Cryptography
             byte[] sharedInfo = Concat(
                 Encoding.ASCII.GetBytes("ARKG-KEM-HMAC-shared."),
                 dstAug,
-                ctx.ToArray());
+                context.ToArray());
             byte[] shared = HkdfUtilities.DeriveKey(kPrime, salt: ReadOnlySpan<byte>.Empty, contextInfo: sharedInfo, length: kPrime.Length).ToArray();
             CryptographicOperations.ZeroMemory(kPrime);
 
             // Ciphertext = MAC tag || ephemeral public key.
-            byte[] ciphertext = new byte[tag.Length + ephPk.Length];
+            byte[] ciphertext = new byte[tag.Length + ephemeralPublicKey.Length];
             Span<byte> ciphertextSpan = ciphertext;
             tag.CopyTo(ciphertextSpan);
-            ephPk.CopyTo(ciphertextSpan[tag.Length..]);
+            ephemeralPublicKey.CopyTo(ciphertextSpan[tag.Length..]);
 
             return (shared, ciphertext);
         }
 
-        private static (byte[] pk, BigInteger sk) KemDeriveKeypair(ReadOnlySpan<byte> ikm)
+        private static (byte[] publicKey, BigInteger secretScalar) KemDeriveKeypair(ReadOnlySpan<byte> inputKeyingMaterial)
         {
             byte[] dst = Concat(
                 Encoding.ASCII.GetBytes("ARKG-KEM-ECDH-KG.ARKG-ECDH."),
                 Encoding.ASCII.GetBytes(DstExt));
-            BigInteger sk = HashToScalar(ikm, dst);
-            byte[] pk = ScalarMulGenerator(sk);
-            return (pk, sk);
+            BigInteger secretScalar = HashToScalar(inputKeyingMaterial, dst);
+            byte[] publicKey = ScalarMulGenerator(secretScalar);
+            return (publicKey, secretScalar);
         }
 
-        private static byte[] ScalarMulGenerator(BigInteger sk)
+        private static byte[] ScalarMulGenerator(BigInteger scalar)
         {
-            byte[] skBytes = ScalarToBytes(sk);
+            byte[] scalarBytes = ScalarToP256FixedWidthBytes(scalar);
             try
             {
                 using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(
                     ECCurve.NamedCurves.nistP256.ToSslCurveId());
-                using SafeEcPoint pkPoint = NativeMethods.EcPointNew(group);
-                using SafeBigNum skBn = NativeMethods.BnBinaryToBigNum(skBytes);
+                using SafeEcPoint publicKeyPoint = NativeMethods.EcPointNew(group);
+                using SafeBigNum scalarBn = NativeMethods.BnBinaryToBigNum(scalarBytes);
 
                 int rc = NativeMethods.EcPointMul(
                     group,
-                    pkPoint,
-                    skBn.DangerousGetHandle(),
+                    publicKeyPoint,
+                    scalarBn.DangerousGetHandle(),
                     IntPtr.Zero,
                     IntPtr.Zero);
                 if (rc != 1)
@@ -299,11 +296,11 @@ namespace Yubico.Core.Cryptography
                     throw new CryptographicException("EC_POINT_mul failed in ScalarMulGenerator.");
                 }
 
-                return PointToSec1(group, pkPoint);
+                return PointToSec1(group, publicKeyPoint);
             }
             finally
             {
-                CryptographicOperations.ZeroMemory(skBytes);
+                CryptographicOperations.ZeroMemory(scalarBytes);
             }
         }
 
@@ -314,20 +311,21 @@ namespace Yubico.Core.Cryptography
         private static BigInteger HashToScalar(ReadOnlySpan<byte> msg, ReadOnlySpan<byte> dst)
         {
             const int L = 48;
-            byte[] uniform = ExpandMessageXmd(msg, dst, L);
+            byte[] uniform = ExpandMessageXmdSha256(msg, dst, L);
 
-            // Wide reduction: split into high(16) || low(32), each interpreted big-endian,
-            // then result = high * (2^256 mod N) + low (mod N).
-            BigInteger high = BytesToBigIntBE(uniform.AsSpan(0, 16));
-            BigInteger low = BytesToBigIntBE(uniform.AsSpan(16, 32));
-            return Mod((high * TwoPow256ModN) + low, N);
+            // ARKG-P256 applies RFC 9380 hash-to-field style expansion with
+            // the P-256 group order N as the modulus, yielding a scalar.
+            return Os2Ip(uniform) % N;
         }
 
-        private static byte[] ExpandMessageXmd(ReadOnlySpan<byte> msg, ReadOnlySpan<byte> dst, int lenInBytes)
+        // RFC 9380 expand_message_xmd instantiated with SHA-256 (b_in_bytes=32,
+        // s_in_bytes=64), as used by the P256_XMD:SHA-256 suites.
+        private static byte[] ExpandMessageXmdSha256(ReadOnlySpan<byte> msg, ReadOnlySpan<byte> dst, int lenInBytes)
         {
             const int BInBytes = 32;
             const int SInBytes = 64;
 
+            // Equivalent to ceil(len_in_bytes / b_in_bytes) from RFC 9380.
             int ell = (lenInBytes + BInBytes - 1) / BInBytes;
             if (ell > 255 || lenInBytes > 65535 || dst.Length > 255)
             {
@@ -339,21 +337,15 @@ namespace Yubico.Core.Cryptography
             dstPrime[dst.Length] = (byte)dst.Length;
 
             byte[] zPad = new byte[SInBytes];
+            // RFC 9380 uses I2OSP(len_in_bytes, 2); the range check above
+            // keeps the value representable in exactly two octets.
             byte[] lIBStr = [(byte)((lenInBytes >> 8) & 0xFF), (byte)(lenInBytes & 0xFF)];
 
             byte[] msgPrime = Concat(zPad, msg.ToArray(), lIBStr, [0x00], dstPrime);
 
             byte[][] bVals = new byte[ell + 1][];
-            using (SHA256 sha = SHA256.Create())
-            {
-                bVals[0] = sha.ComputeHash(msgPrime);
-            }
-
-            using (SHA256 sha = SHA256.Create())
-            {
-                byte[] input = Concat(bVals[0], [0x01], dstPrime);
-                bVals[1] = sha.ComputeHash(input);
-            }
+            bVals[0] = Sha256(msgPrime);
+            bVals[1] = Sha256(Concat(bVals[0], [0x01], dstPrime));
 
             Span<byte> xored = stackalloc byte[BInBytes];
             for (int i = 2; i <= ell; i++)
@@ -363,9 +355,8 @@ namespace Yubico.Core.Cryptography
                     xored[j] = (byte)(bVals[0][j] ^ bVals[i - 1][j]);
                 }
 
-                using SHA256 sha = SHA256.Create();
                 byte[] input = Concat(xored.ToArray(), [(byte)i], dstPrime);
-                bVals[i] = sha.ComputeHash(input);
+                bVals[i] = Sha256(input);
             }
 
             byte[] result = new byte[lenInBytes];
@@ -385,11 +376,10 @@ namespace Yubico.Core.Cryptography
         // Conversion helpers
         // ---------------------------------------------------------------------
 
-        private static byte[] ScalarToBytes(BigInteger scalar)
+        private static byte[] ScalarToP256FixedWidthBytes(BigInteger scalar)
         {
-            // BigInteger.ToByteArray is little-endian and includes a sign byte
-            // when the high bit would otherwise read as negative — strip it,
-            // then left-pad to 32 bytes big-endian.
+            // Local fixed-width P-256 scalar encoding: BigInteger is signed
+            // little-endian, while OpenSSL BN input expects unsigned big-endian.
             byte[] le = scalar.ToByteArray();
             try
             {
@@ -414,7 +404,8 @@ namespace Yubico.Core.Cryptography
             }
         }
 
-        private static BigInteger BytesToBigIntBE(ReadOnlySpan<byte> bytes)
+        // RFC 8017 OS2IP: interpret an octet string as a non-negative integer.
+        private static BigInteger Os2Ip(ReadOnlySpan<byte> bytes)
         {
             byte[] padded = new byte[bytes.Length + 1];
             for (int i = 0; i < bytes.Length; i++)
@@ -426,15 +417,10 @@ namespace Yubico.Core.Cryptography
             return new BigInteger(padded);
         }
 
-        private static BigInteger Mod(BigInteger value, BigInteger modulus)
+        private static byte[] Sha256(byte[] input)
         {
-            BigInteger r = value % modulus;
-            if (r.Sign < 0)
-            {
-                r += modulus;
-            }
-
-            return r;
+            using SHA256 sha = SHA256.Create();
+            return sha.ComputeHash(input);
         }
 
         private static SafeEcPoint Sec1ToPoint(SafeEcGroup group, ReadOnlySpan<byte> sec1)

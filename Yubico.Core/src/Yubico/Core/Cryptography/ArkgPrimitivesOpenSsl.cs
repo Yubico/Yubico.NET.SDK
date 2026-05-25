@@ -433,7 +433,7 @@ namespace Yubico.Core.Cryptography
 
         private static byte[] Sha256(byte[] input)
         {
-            using SHA256 sha = SHA256.Create();
+            using var sha = CryptographyProviders.Sha256Creator();
             return sha.ComputeHash(input);
         }
 

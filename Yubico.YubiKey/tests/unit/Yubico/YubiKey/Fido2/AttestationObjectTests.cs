@@ -14,7 +14,9 @@
 
 using System;
 using System.Formats.Cbor;
+using System.Linq;
 using Xunit;
+using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -212,6 +214,18 @@ namespace Yubico.YubiKey.Fido2
             Assert.False(obj.EncodedAttestationStatement.IsEmpty);
         }
 
+        [Fact]
+        public void Parse_UnsupportedCredentialPublicKey_PreservesRawKey()
+        {
+            byte[] coseKey = BuildFutureCoseKey();
+            byte[] encoding = BuildPackedAttestationObject(coseKey);
+
+            var obj = new AttestationObject(encoding);
+
+            Assert.Null(obj.AuthenticatorData.CredentialPublicKey);
+            Assert.Equal(coseKey, obj.AuthenticatorData.EncodedCredentialPublicKey!.Value.ToArray());
+        }
+
         // ------------------------------------------------------------------
         // Helpers
         // ------------------------------------------------------------------
@@ -226,7 +240,7 @@ namespace Yubico.YubiKey.Fido2
             // Minimal authData: 32-byte rpIdHash || flags=0x41 (UP|AT) ||
             // signCount(4) || AAGUID(16) || credIdLen=1 || credId=0x01 ||
             // COSE ES256 public key (minimal valid EC2 key).
-            var authData = BuildMinimalEs256AuthData();
+            var authData = BuildMinimalAuthData(BuildEs256CoseKey());
 
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(3);
@@ -246,7 +260,7 @@ namespace Yubico.YubiKey.Fido2
             return cbor.Encode();
         }
 
-        private static byte[] BuildPackedAttestationObject()
+        private static byte[] BuildPackedAttestationObject(byte[]? credentialPublicKeyCose = null)
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(3);
@@ -255,7 +269,7 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteTextString("packed");
 
             cbor.WriteInt32(2);
-            cbor.WriteByteString(BuildMinimalEs256AuthData());
+            cbor.WriteByteString(BuildMinimalAuthData(credentialPublicKeyCose ?? BuildEs256CoseKey()));
 
             cbor.WriteInt32(3);
             cbor.WriteStartMap(2);
@@ -269,24 +283,8 @@ namespace Yubico.YubiKey.Fido2
             return cbor.Encode();
         }
 
-        private static byte[] BuildMinimalEs256AuthData()
+        private static byte[] BuildMinimalAuthData(byte[] coseEncoded)
         {
-            // COSE ES256 key: {1:2, 3:-7, -1:1, -2:x(32), -3:y(32)}
-            var x = new byte[32];
-            var y = new byte[32];
-            x[31] = 1;
-            y[31] = 2;
-
-            var coseKey = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            coseKey.WriteStartMap(5);
-            coseKey.WriteInt32(1);   coseKey.WriteInt32(2);   // kty = EC2
-            coseKey.WriteInt32(3);   coseKey.WriteInt32(-7);  // alg = ES256
-            coseKey.WriteInt32(-1);  coseKey.WriteInt32(1);   // crv = P-256
-            coseKey.WriteInt32(-2);  coseKey.WriteByteString(x);
-            coseKey.WriteInt32(-3);  coseKey.WriteByteString(y);
-            coseKey.WriteEndMap();
-            var coseEncoded = coseKey.Encode();
-
             var credId = new byte[] { 0x01 };
             var result = new byte[32 + 1 + 4 + 16 + 2 + credId.Length + coseEncoded.Length];
             var offset = 0;
@@ -300,6 +298,41 @@ namespace Yubico.YubiKey.Fido2
             offset += credId.Length;
             Array.Copy(coseEncoded, 0, result, offset, coseEncoded.Length);
             return result;
+        }
+
+        private static byte[] BuildEs256CoseKey()
+        {
+            // COSE ES256 key: {1:2, 3:-7, -1:1, -2:x(32), -3:y(32)}
+            var x = new byte[32];
+            var y = new byte[32];
+            x[31] = 1;
+            y[31] = 2;
+
+            var coseKey = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            coseKey.WriteStartMap(5);
+            coseKey.WriteInt32(1);   coseKey.WriteInt32((int)CoseKeyType.Ec2);
+            coseKey.WriteInt32(3);   coseKey.WriteInt32((int)CoseAlgorithmIdentifier.ES256);
+            coseKey.WriteInt32(-1);  coseKey.WriteInt32((int)CoseEcCurve.P256);
+            coseKey.WriteInt32(-2);  coseKey.WriteByteString(x);
+            coseKey.WriteInt32(-3);  coseKey.WriteByteString(y);
+            coseKey.WriteEndMap();
+            return coseKey.Encode();
+        }
+
+        private static byte[] BuildFutureCoseKey()
+        {
+            byte[] x = Enumerable.Repeat((byte)0x55, 32).ToArray();
+            byte[] y = Enumerable.Repeat((byte)0x66, 32).ToArray();
+
+            var coseKey = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            coseKey.WriteStartMap(5);
+            coseKey.WriteInt32(1);   coseKey.WriteInt32((int)CoseKeyType.Ec2);
+            coseKey.WriteInt32(3);   coseKey.WriteInt32(-70000);
+            coseKey.WriteInt32(-1);  coseKey.WriteInt32((int)CoseEcCurve.P256);
+            coseKey.WriteInt32(-2);  coseKey.WriteByteString(x);
+            coseKey.WriteInt32(-3);  coseKey.WriteByteString(y);
+            coseKey.WriteEndMap();
+            return coseKey.Encode();
         }
     }
 }

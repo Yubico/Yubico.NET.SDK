@@ -33,6 +33,14 @@ namespace Yubico.YubiKey.Fido2.Cbor
         public int Count => _dict.Count;
 
         /// <summary>
+        /// Gets the keys present in this map.
+        /// </summary>
+        /// <remarks>
+        /// The enumeration order is unspecified.
+        /// </remarks>
+        public IEnumerable<TKey> Keys => _dict.Keys;
+
+        /// <summary>
         /// The number of bytes in the encoding that were read.
         /// </summary>
         public int BytesRead { get; private set; }
@@ -128,6 +136,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 return nestedMap;
             }
 
+            if (value is RawCborValue rawValue)
+            {
+                return ConvertRawMap<TNestedKey>(rawValue);
+            }
+
             throw new InvalidCastException();
         }
 
@@ -187,6 +200,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 TypeCode.UInt32 => ReadUInt32(value),
                 TypeCode.Int64 => ReadInt64(value),
                 TypeCode.UInt64 => ReadUInt64(value),
+                _ when value is RawCborValue rawValue => ConvertRawValue<T>(rawValue),
                 _ when value is T typedValue => typedValue,
                 _ => throw new InvalidCastException($"Cannot convert value to type {typeof(T)}")
             };
@@ -359,9 +373,10 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Returns the raw CBOR-encoded bytes of the value for the given key,
-        /// preserving byte-identity from the original encoding. Useful when the value
-        /// must be re-emitted verbatim (e.g., signed attestation statements).
+        /// Returns a copy of the raw CBOR-encoded bytes of the value for the
+        /// given key, preserving byte-identity from the original encoding.
+        /// Useful when the value must be re-emitted verbatim (e.g., signed
+        /// attestation statements).
         /// </summary>
         /// <param name="key">The key whose encoded value should be retrieved.</param>
         /// <returns>The byte-identical CBOR encoding of the value.</returns>
@@ -419,8 +434,54 @@ namespace Yubico.YubiKey.Fido2.Cbor
             CborReaderState.DoublePrecisionFloat => cbor.ReadDouble(),
             CborReaderState.Null => ProcessNull(cbor),
             CborReaderState.Boolean => cbor.ReadBoolean(),
-            _ => throw new NotSupportedException()
+            _ => ProcessRawValue(cbor)
         };
+
+        private sealed class RawCborValue
+        {
+            public RawCborValue(ReadOnlyMemory<byte> encoded)
+            {
+                Encoded = encoded;
+            }
+
+            public ReadOnlyMemory<byte> Encoded { get; }
+        }
+
+        private static object ConvertRawValue<T>(RawCborValue rawValue)
+        {
+            Type targetType = typeof(T);
+
+            if (targetType == typeof(CborMap<int>))
+            {
+                return ConvertRawMap<int>(rawValue);
+            }
+
+            if (targetType == typeof(CborMap<string>))
+            {
+                return ConvertRawMap<string>(rawValue);
+            }
+
+            throw new InvalidCastException($"Cannot convert value to type {targetType}");
+        }
+
+        private static CborMap<TNestedKey> ConvertRawMap<TNestedKey>(RawCborValue rawValue)
+        {
+            try
+            {
+                return new CborMap<TNestedKey>(rawValue.Encoded);
+            }
+            catch (Exception exception) when (
+                exception is Ctap2DataException ||
+                exception is CborContentException ||
+                exception is InvalidOperationException ||
+                exception is NotSupportedException)
+            {
+                throw new InvalidCastException($"Cannot convert value to type {typeof(CborMap<TNestedKey>)}", exception);
+            }
+        }
+
+        private static RawCborValue ProcessRawValue(CborReader cbor) =>
+            new RawCborValue(cbor.ReadEncodedValue().ToArray());
 
         private static object? ProcessNull(CborReader cbor)
         {
@@ -460,7 +521,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 case CborReaderState.TextString:
                     return new CborMap<string>(encodedMapBytes);
                 default:
-                    throw new InvalidOperationException(ExceptionMessages.TypeNotSupported);
+                    return new RawCborValue(encodedMapBytes);
             }
         }
     }

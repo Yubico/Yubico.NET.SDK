@@ -22,8 +22,9 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Purpose: detect unintended regressions in ARKG-P256 key derivation across
-    /// refactors. The vectors cover three scenarios:
+    /// These are internal SDK regression fixtures, not published ARKG draft
+    /// vectors. They detect unintended regressions in ARKG-P256 key derivation
+    /// across refactors and cover three scenarios:
     /// <list type="bullet">
     ///   <item><description>A: baseline derivation with canonical IKM and context.</description></item>
     ///   <item><description>B: distinct IKM (same context) to verify input isolation.</description></item>

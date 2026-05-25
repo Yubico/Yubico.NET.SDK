@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
+using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2
@@ -131,23 +132,15 @@ namespace Yubico.YubiKey.Fido2
         {
             try
             {
+                var map = ReadPreviewSignMap<string>(
+                    encodedMap,
+                    "previewSign unsigned extension outputs are not a map.");
                 var result = new Dictionary<string, ReadOnlyMemory<byte>>(StringComparer.Ordinal);
-                var reader = new CborReader(encodedMap, CborConformanceMode.Ctap2Canonical);
-                int? entries = reader.ReadStartMap();
-                int count = entries ?? int.MaxValue;
-                for (int i = 0; i < count; i++)
+                foreach (string name in map.Keys)
                 {
-                    if (reader.PeekState() == CborReaderState.EndMap)
-                    {
-                        break;
-                    }
-
-                    string name = reader.ReadTextString();
-                    byte[] value = reader.ReadEncodedValue().ToArray();
-                    result[name] = value;
+                    result[name] = map.ReadEncodedValue(name);
                 }
 
-                reader.ReadEndMap();
                 return result;
             }
             catch (Exception exception) when (IsCborParseException(exception))
@@ -183,32 +176,14 @@ namespace Yubico.YubiKey.Fido2
         {
             try
             {
-                var reader = new CborReader(previewSignValue, CborConformanceMode.Ctap2Canonical);
-                if (reader.PeekState() != CborReaderState.StartMap)
+                var map = ReadPreviewSignMap<int>(
+                    previewSignValue,
+                    "previewSign generated key algorithm output is not a map.");
+                if (map.Contains((int)MakeCredentialKey.Algorithm))
                 {
-                    throw new Ctap2DataException(
-                        "previewSign generated key algorithm output is not a map.");
+                    return (CoseAlgorithmIdentifier)map.ReadInt32((int)MakeCredentialKey.Algorithm);
                 }
 
-                int? entries = reader.ReadStartMap();
-                int count = entries ?? int.MaxValue;
-                for (int i = 0; i < count; i++)
-                {
-                    if (reader.PeekState() == CborReaderState.EndMap)
-                    {
-                        break;
-                    }
-
-                    int key = (int)reader.ReadInt64();
-                    if (key == (int)MakeCredentialKey.Algorithm)
-                    {
-                        return (CoseAlgorithmIdentifier)reader.ReadInt32();
-                    }
-
-                    reader.SkipValue();
-                }
-
-                reader.ReadEndMap();
                 throw new Ctap2DataException(
                     "previewSign generated key algorithm output is missing an algorithm.");
             }
@@ -238,42 +213,14 @@ namespace Yubico.YubiKey.Fido2
         {
             try
             {
-                var reader = new CborReader(previewSignValue, CborConformanceMode.Ctap2Canonical);
-                if (reader.PeekState() != CborReaderState.StartMap)
-                {
-                    throw new Ctap2DataException(
-                        "previewSign generated key output is not a map.");
-                }
-
-                int? entries = reader.ReadStartMap();
-                int count = entries ?? int.MaxValue;
-
+                var map = ReadPreviewSignMap<int>(
+                    previewSignValue,
+                    "previewSign generated key output is not a map.");
                 var algorithm = CoseAlgorithmIdentifier.None;
-                byte[]? attestationObject = null;
-
-                for (int i = 0; i < count; i++)
+                if (map.Contains((int)MakeCredentialKey.Algorithm))
                 {
-                    if (reader.PeekState() == CborReaderState.EndMap)
-                    {
-                        break;
-                    }
-
-                    int key = (int)reader.ReadInt64();
-                    if (key == (int)MakeCredentialKey.Algorithm)
-                    {
-                        algorithm = (CoseAlgorithmIdentifier)reader.ReadInt32();
-                    }
-                    else if (key == (int)MakeCredentialKey.AttestationObject)
-                    {
-                        attestationObject = reader.ReadByteString();
-                    }
-                    else
-                    {
-                        reader.SkipValue();
-                    }
+                    algorithm = (CoseAlgorithmIdentifier)map.ReadInt32((int)MakeCredentialKey.Algorithm);
                 }
-
-                reader.ReadEndMap();
 
                 if (algorithm == CoseAlgorithmIdentifier.None && signedOutputAlgorithm.HasValue)
                 {
@@ -286,12 +233,13 @@ namespace Yubico.YubiKey.Fido2
                         "previewSign generated key is missing an algorithm.");
                 }
 
-                if (attestationObject is null)
+                if (!map.Contains((int)MakeCredentialKey.AttestationObject))
                 {
                     throw new Ctap2DataException(
                         "previewSign generated key is missing an attestation object.");
                 }
 
+                ReadOnlyMemory<byte> attestationObject = map.ReadByteString((int)MakeCredentialKey.AttestationObject);
                 var attestationObj = new AttestationObject(attestationObject, parseFullDetails: false);
                 if (attestationObj.AuthenticatorData.CredentialId is null ||
                     attestationObj.AuthenticatorData.EncodedCredentialPublicKey is null)
@@ -316,9 +264,8 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// Parse the signed previewSign extension output produced by the
-        /// authenticator after a GetAssertion (key 6 inside
-        /// authData.extensions["previewSign"]). The value is a CBOR map whose
-        /// key 6 entry is the signature byte string.
+        /// authenticator after a GetAssertion. The previewSign extension output
+        /// is a CBOR map; its key 6 entry is the signature byte string.
         /// </summary>
         /// <exception cref="Ctap2DataException">
         /// The payload is malformed or missing the required signature.
@@ -327,44 +274,34 @@ namespace Yubico.YubiKey.Fido2
         {
             try
             {
-                var reader = new CborReader(previewSignAuthDataValue, CborConformanceMode.Ctap2Canonical);
-                if (reader.PeekState() != CborReaderState.StartMap)
+                var map = ReadPreviewSignMap<int>(
+                    previewSignAuthDataValue,
+                    "previewSign signature output is not a map.");
+                if (map.Contains((int)GetAssertionKey.TbsOrSignature))
                 {
-                    throw new Ctap2DataException(
-                        "previewSign signature output is not a map.");
+                    return map.ReadByteString((int)GetAssertionKey.TbsOrSignature).ToArray();
                 }
 
-                int? entries = reader.ReadStartMap();
-                int count = entries ?? int.MaxValue;
-
-                byte[]? signature = null;
-                for (int i = 0; i < count; i++)
-                {
-                    if (reader.PeekState() == CborReaderState.EndMap)
-                    {
-                        break;
-                    }
-
-                    int key = (int)reader.ReadInt64();
-                    if (key == (int)GetAssertionKey.TbsOrSignature)
-                    {
-                        signature = reader.ReadByteString();
-                    }
-                    else
-                    {
-                        reader.SkipValue();
-                    }
-                }
-
-                reader.ReadEndMap();
-                return signature ??
-                    throw new Ctap2DataException(
-                        "previewSign signature output is missing a signature.");
+                throw new Ctap2DataException(
+                    "previewSign signature output is missing a signature.");
             }
             catch (Exception exception) when (IsCborParseException(exception))
             {
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, exception);
             }
+        }
+
+        private static CborMap<TKey> ReadPreviewSignMap<TKey>(
+            ReadOnlyMemory<byte> encodedMap,
+            string notMapMessage)
+        {
+            var reader = new CborReader(encodedMap, CborConformanceMode.Ctap2Canonical);
+            if (reader.PeekState() != CborReaderState.StartMap)
+            {
+                throw new Ctap2DataException(notMapMessage);
+            }
+
+            return new CborMap<TKey>(encodedMap);
         }
 
         private static bool IsCborParseException(Exception exception) =>

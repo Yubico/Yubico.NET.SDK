@@ -204,7 +204,14 @@ namespace Yubico.YubiKey.Fido2
 
                 if (parseCredentialPublicKey)
                 {
-                    CredentialPublicKey = CoseKey.Create(coseKeyBytes, out _);
+                    try
+                    {
+                        CredentialPublicKey = CoseKey.Create(coseKeyBytes, out _);
+                    }
+                    catch (NotSupportedException)
+                    {
+                        CredentialPublicKey = null;
+                    }
                 }
 
                 offset += bytesRead;

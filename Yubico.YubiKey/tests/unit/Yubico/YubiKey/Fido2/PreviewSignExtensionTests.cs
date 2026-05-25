@@ -109,21 +109,31 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void ParseUnsignedExtensionOutputs_PreservesOpaqueUnknownExtensionValue()
+        public void UnsignedExtensionOutputs_PreservesOpaqueUnknownExtensionValue()
         {
             byte[] opaqueValue = { 0xA0 };
+            byte[] response = BuildMakeCredentialResponseWithCustomUnsignedExtension(
+                "unknownExtension", WriteCborEmptyMap);
 
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(1);
-            cbor.WriteTextString("unknownExtension");
-            cbor.WriteStartMap(0);
-            cbor.WriteEndMap();
-            cbor.WriteEndMap();
+            var data = new MakeCredentialData(response);
 
-            var outputs = PreviewSignExtension.ParseUnsignedExtensionOutputs(cbor.Encode());
-
-            Assert.True(outputs.TryGetValue("unknownExtension", out ReadOnlyMemory<byte> value));
+            Assert.NotNull(data.UnsignedExtensionOutputs);
+            Assert.True(data.UnsignedExtensionOutputs!.TryGetValue("unknownExtension", out ReadOnlyMemory<byte> value));
             Assert.Equal(opaqueValue, value.ToArray());
+        }
+
+        [Fact]
+        public void UnsignedExtensionOutputs_PreservesArrayExtensionValue()
+        {
+            byte[] arrayValue = { 0x82, 0x01, 0xA0 };
+            byte[] response = BuildMakeCredentialResponseWithCustomUnsignedExtension(
+                "futureExtension", WriteCborArrayWithMapElement);
+
+            var data = new MakeCredentialData(response);
+
+            Assert.NotNull(data.UnsignedExtensionOutputs);
+            Assert.True(data.UnsignedExtensionOutputs!.TryGetValue("futureExtension", out ReadOnlyMemory<byte> value));
+            Assert.Equal(arrayValue, value.ToArray());
         }
 
         [Fact]
@@ -814,6 +824,54 @@ namespace Yubico.YubiKey.Fido2
             byte[] hostAuthData = BuildAuthDataWithEs256CredentialPublicKey(signedPayload);
 
             return BuildMakeCredentialResponse(hostAuthData, includeUnsignedExtensions: true, unsignedPayload);
+        }
+
+        private static byte[] BuildMakeCredentialResponseWithCustomUnsignedExtension(
+            string extensionName,
+            Action<CborWriter> writeExtensionValue)
+        {
+            byte[] hostAuthData = BuildAuthDataWithEs256CredentialPublicKey();
+
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(4);
+
+            cbor.WriteInt32(1);
+            cbor.WriteTextString("packed");
+
+            cbor.WriteInt32(2);
+            cbor.WriteByteString(hostAuthData);
+
+            cbor.WriteInt32(3);
+            cbor.WriteStartMap(2);
+            cbor.WriteTextString("alg");
+            cbor.WriteInt32(-7);
+            cbor.WriteTextString("sig");
+            cbor.WriteByteString(new byte[] { 0x01 });
+            cbor.WriteEndMap();
+
+            cbor.WriteInt32(6);
+            cbor.WriteStartMap(1);
+            cbor.WriteTextString(extensionName);
+            writeExtensionValue(cbor);
+            cbor.WriteEndMap();
+
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        private static void WriteCborEmptyMap(CborWriter cbor)
+        {
+            cbor.WriteStartMap(0);
+            cbor.WriteEndMap();
+        }
+
+        private static void WriteCborArrayWithMapElement(CborWriter cbor)
+        {
+            cbor.WriteStartArray(2);
+            cbor.WriteInt32(1);
+            cbor.WriteStartMap(0);
+            cbor.WriteEndMap();
+            cbor.WriteEndArray();
         }
 
         private static byte[] BuildMakeCredentialResponse(

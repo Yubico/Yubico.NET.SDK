@@ -15,7 +15,10 @@
 using System;
 using System.Formats.Cbor;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Xunit;
+using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -176,6 +179,87 @@ namespace Yubico.YubiKey.Fido2
 
             var ex = Assert.Throws<Ctap2DataException>(() => new MakeCredentialData(ctapResponse));
             Assert.NotNull(ex.Message);
+        }
+
+        [Fact]
+        public void MakeCredentialData_PackedAttestationMissingAlg_ThrowsCtap2DataException()
+        {
+            byte[] ctapResponse = BuildMakeCredentialResponse(
+                BuildMinimalAuthDataWithEs256Key(),
+                cbor => WritePackedAttestationStatement(cbor, includeAlgorithm: false));
+
+            var ex = Assert.Throws<Ctap2DataException>(() => new MakeCredentialData(ctapResponse));
+            Assert.NotNull(ex.Message);
+        }
+
+        [Fact]
+        public void MakeCredentialData_OkpEdDsaCredentialPublicKey_PopulatesRichKey()
+        {
+            byte[] coseKey = BuildOkpEdDsaCoseKey();
+            byte[] ctapResponse = BuildMakeCredentialResponse(
+                BuildMinimalAuthDataWithCredentialPublicKey(coseKey),
+                cbor => WritePackedAttestationStatement(cbor));
+
+            var data = new MakeCredentialData(ctapResponse);
+
+            var publicKey = Assert.IsType<CoseEdDsaPublicKey>(data.AuthenticatorData.CredentialPublicKey);
+            Assert.Equal(CoseKeyType.Okp, publicKey.Type);
+            Assert.Equal(CoseAlgorithmIdentifier.EdDSA, publicKey.Algorithm);
+            Assert.Equal(coseKey, data.AuthenticatorData.EncodedCredentialPublicKey!.Value.ToArray());
+        }
+
+        [Fact]
+        public void MakeCredentialData_UnsupportedCredentialPublicKey_PreservesRawKey()
+        {
+            byte[] coseKey = BuildFutureCoseKey();
+            byte[] ctapResponse = BuildMakeCredentialResponse(
+                BuildMinimalAuthDataWithCredentialPublicKey(coseKey),
+                cbor => WritePackedAttestationStatement(cbor));
+
+            var data = new MakeCredentialData(ctapResponse);
+
+            Assert.Null(data.AuthenticatorData.CredentialPublicKey);
+            Assert.Equal(coseKey, data.AuthenticatorData.EncodedCredentialPublicKey!.Value.ToArray());
+        }
+
+        [Fact]
+        public void MakeCredentialData_SupportedAlgorithmKeyTypeMismatch_ThrowsCtap2DataException()
+        {
+            byte[] ctapResponse = BuildMakeCredentialResponse(
+                BuildMinimalAuthDataWithCredentialPublicKey(BuildMismatchedEs256OkpCoseKey()),
+                cbor => WritePackedAttestationStatement(cbor));
+
+            var ex = Assert.Throws<Ctap2DataException>(() => new MakeCredentialData(ctapResponse));
+            Assert.NotNull(ex.Message);
+        }
+
+        [Fact]
+        public void VerifyAttestation_UnsupportedAlgorithm_ThrowsNotSupportedException()
+        {
+            byte[] ctapResponse = BuildMakeCredentialResponse(
+                BuildMinimalAuthDataWithEs256Key(),
+                cbor => WritePackedAttestationStatement(
+                    cbor,
+                    algorithm: (int)CoseAlgorithmIdentifier.EdDSA));
+            var data = new MakeCredentialData(ctapResponse);
+
+            var ex = Assert.Throws<NotSupportedException>(() => data.VerifyAttestation(new byte[32]));
+
+            Assert.Contains("ES256", ex.Message, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void VerifyAttestation_NonEcdsaCertificate_ThrowsNotSupportedException()
+        {
+            byte[] rsaCertificate = BuildRsaCertificate();
+            byte[] ctapResponse = BuildMakeCredentialResponse(
+                BuildMinimalAuthDataWithEs256Key(),
+                cbor => WritePackedAttestationStatement(cbor, certificate: rsaCertificate));
+            var data = new MakeCredentialData(ctapResponse);
+
+            var ex = Assert.Throws<NotSupportedException>(() => data.VerifyAttestation(new byte[32]));
+
+            Assert.Contains("ECDSA", ex.Message, StringComparison.Ordinal);
         }
 
         // ------------------------------------------------------------------
@@ -371,25 +455,64 @@ namespace Yubico.YubiKey.Fido2
             return cbor.Encode();
         }
 
+        private static byte[] BuildMakeCredentialResponse(
+            byte[] authData,
+            Action<CborWriter> writeAttestationStatement)
+        {
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(3);
+
+            cbor.WriteInt32(1);
+            cbor.WriteTextString("packed");
+
+            cbor.WriteInt32(2);
+            cbor.WriteByteString(authData);
+
+            cbor.WriteInt32(3);
+            writeAttestationStatement(cbor);
+
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        private static void WritePackedAttestationStatement(
+            CborWriter cbor,
+            int algorithm = (int)CoseAlgorithmIdentifier.ES256,
+            bool includeAlgorithm = true,
+            byte[]? certificate = null)
+        {
+            int entryCount = 1 + (includeAlgorithm ? 1 : 0) + (certificate is null ? 0 : 1);
+            cbor.WriteStartMap(entryCount);
+            if (includeAlgorithm)
+            {
+                cbor.WriteTextString("alg");
+                cbor.WriteInt32(algorithm);
+            }
+
+            cbor.WriteTextString("sig");
+            cbor.WriteByteString(new byte[64]);
+
+            if (certificate is not null)
+            {
+                cbor.WriteTextString("x5c");
+                cbor.WriteStartArray(1);
+                cbor.WriteByteString(certificate);
+                cbor.WriteEndArray();
+            }
+
+            cbor.WriteEndMap();
+        }
+
         /// <summary>
         /// Builds minimal authenticator data with an ES256 credential public key.
         /// </summary>
         private static byte[] BuildMinimalAuthDataWithEs256Key()
         {
-            // Build a minimal COSE ES256 key
-            byte[] x = Enumerable.Repeat((byte)0x11, 32).ToArray();
-            byte[] y = Enumerable.Repeat((byte)0x22, 32).ToArray();
+            return BuildMinimalAuthDataWithCredentialPublicKey(BuildEs256CoseKey());
+        }
 
-            var coseKey = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            coseKey.WriteStartMap(5);
-            coseKey.WriteInt32(1);   coseKey.WriteInt32(2);   // kty = EC2
-            coseKey.WriteInt32(3);   coseKey.WriteInt32(-7);  // alg = ES256
-            coseKey.WriteInt32(-1);  coseKey.WriteInt32(1);   // crv = P-256
-            coseKey.WriteInt32(-2);  coseKey.WriteByteString(x);
-            coseKey.WriteInt32(-3);  coseKey.WriteByteString(y);
-            coseKey.WriteEndMap();
-            byte[] coseEncoded = coseKey.Encode();
-
+        private static byte[] BuildMinimalAuthDataWithCredentialPublicKey(byte[] coseEncoded)
+        {
             byte[] credId = { 0x01, 0x02, 0x03, 0x04 };
 
             // authData: rpIdHash(32) || flags(1) || signCount(4) || aaguid(16) || credIdLen(2) || credId || pubKey
@@ -420,6 +543,82 @@ namespace Yubico.YubiKey.Fido2
             Array.Copy(coseEncoded, 0, result, offset, coseEncoded.Length);
 
             return result;
+        }
+
+        private static byte[] BuildEs256CoseKey()
+        {
+            byte[] x = Enumerable.Repeat((byte)0x11, 32).ToArray();
+            byte[] y = Enumerable.Repeat((byte)0x22, 32).ToArray();
+
+            var coseKey = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            coseKey.WriteStartMap(5);
+            coseKey.WriteInt32(1);   coseKey.WriteInt32(2);   // kty = EC2
+            coseKey.WriteInt32(3);   coseKey.WriteInt32(-7);  // alg = ES256
+            coseKey.WriteInt32(-1);  coseKey.WriteInt32(1);   // crv = P-256
+            coseKey.WriteInt32(-2);  coseKey.WriteByteString(x);
+            coseKey.WriteInt32(-3);  coseKey.WriteByteString(y);
+            coseKey.WriteEndMap();
+            return coseKey.Encode();
+        }
+
+        private static byte[] BuildOkpEdDsaCoseKey()
+        {
+            var publicKey = Enumerable.Repeat((byte)0x33, 32).ToArray();
+
+            var coseKey = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            coseKey.WriteStartMap(4);
+            coseKey.WriteInt32(1);   coseKey.WriteInt32((int)CoseKeyType.Okp);
+            coseKey.WriteInt32(3);   coseKey.WriteInt32((int)CoseAlgorithmIdentifier.EdDSA);
+            coseKey.WriteInt32(-1);  coseKey.WriteInt32((int)CoseEcCurve.Ed25519);
+            coseKey.WriteInt32(-2);  coseKey.WriteByteString(publicKey);
+            coseKey.WriteEndMap();
+            return coseKey.Encode();
+        }
+
+        private static byte[] BuildMismatchedEs256OkpCoseKey()
+        {
+            var publicKey = Enumerable.Repeat((byte)0x44, 32).ToArray();
+
+            var coseKey = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            coseKey.WriteStartMap(4);
+            coseKey.WriteInt32(1);   coseKey.WriteInt32((int)CoseKeyType.Okp);
+            coseKey.WriteInt32(3);   coseKey.WriteInt32((int)CoseAlgorithmIdentifier.ES256);
+            coseKey.WriteInt32(-1);  coseKey.WriteInt32((int)CoseEcCurve.Ed25519);
+            coseKey.WriteInt32(-2);  coseKey.WriteByteString(publicKey);
+            coseKey.WriteEndMap();
+            return coseKey.Encode();
+        }
+
+        private static byte[] BuildFutureCoseKey()
+        {
+            byte[] x = Enumerable.Repeat((byte)0x55, 32).ToArray();
+            byte[] y = Enumerable.Repeat((byte)0x66, 32).ToArray();
+
+            var coseKey = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            coseKey.WriteStartMap(5);
+            coseKey.WriteInt32(1);   coseKey.WriteInt32((int)CoseKeyType.Ec2);
+            coseKey.WriteInt32(3);   coseKey.WriteInt32(-70000);
+            coseKey.WriteInt32(-1);  coseKey.WriteInt32((int)CoseEcCurve.P256);
+            coseKey.WriteInt32(-2);  coseKey.WriteByteString(x);
+            coseKey.WriteInt32(-3);  coseKey.WriteByteString(y);
+            coseKey.WriteEndMap();
+            return coseKey.Encode();
+        }
+
+        private static byte[] BuildRsaCertificate()
+        {
+            using var rsa = RSA.Create(2048);
+            var request = new CertificateRequest(
+                "CN=Test RSA Attestation",
+                rsa,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+
+            using var certificate = request.CreateSelfSigned(
+                DateTimeOffset.UtcNow.AddDays(-1),
+                DateTimeOffset.UtcNow.AddDays(1));
+
+            return certificate.RawData;
         }
     }
 }

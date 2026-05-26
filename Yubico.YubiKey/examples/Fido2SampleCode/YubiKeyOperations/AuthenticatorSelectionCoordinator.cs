@@ -57,23 +57,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 return;
             }
 
-            bool cancelNow = false;
-            lock (_lockObject)
-            {
-                if (_selectedDevice is null)
-                {
-                    if (!HasCancelRegistration(device))
-                    {
-                        _cancelRegistrations.Add((device, signalUserCancel));
-                    }
-                }
-                else if (!ReferenceEquals(device, _selectedDevice))
-                {
-                    cancelNow = true;
-                }
-            }
-
-            if (cancelNow)
+            if (ShouldCancelImmediately(device, signalUserCancel))
             {
                 signalUserCancel();
             }
@@ -81,36 +65,15 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         public bool TrySelectWinner(IYubiKeyDevice device)
         {
-            SignalUserCancel[] loserCancels;
-            lock (_lockObject)
-            {
-                if (_selectedDevice is not null)
-                {
-                    return false;
-                }
-
-                _selectedDevice = device;
-                loserCancels = TakeLoserCancels();
-            }
-
+            bool selected = TrySetSelectedDevice(device, out SignalUserCancel[] loserCancels);
             InvokeCancels(loserCancels);
-            return true;
+
+            return selected;
         }
 
         public void CancelLosers()
         {
-            SignalUserCancel[] loserCancels;
-            lock (_lockObject)
-            {
-                if (_selectedDevice is null)
-                {
-                    return;
-                }
-
-                loserCancels = TakeLoserCancels();
-            }
-
-            InvokeCancels(loserCancels);
+            InvokeCancels(TakeLoserCancelsIfSelected());
         }
 
         public bool IsExpectedLoserCancellation(IYubiKeyDevice device)
@@ -118,6 +81,54 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             lock (_lockObject)
             {
                 return _selectedDevice is not null && !ReferenceEquals(device, _selectedDevice);
+            }
+        }
+
+        private bool ShouldCancelImmediately(IYubiKeyDevice device, SignalUserCancel signalUserCancel)
+        {
+            lock (_lockObject)
+            {
+                if (_selectedDevice is not null)
+                {
+                    return !ReferenceEquals(device, _selectedDevice);
+                }
+
+                RegisterCancel(device, signalUserCancel);
+                return false;
+            }
+        }
+
+        private bool TrySetSelectedDevice(IYubiKeyDevice device, out SignalUserCancel[] loserCancels)
+        {
+            lock (_lockObject)
+            {
+                if (_selectedDevice is not null)
+                {
+                    loserCancels = Array.Empty<SignalUserCancel>();
+                    return false;
+                }
+
+                _selectedDevice = device;
+                loserCancels = TakeLoserCancels();
+                return true;
+            }
+        }
+
+        private SignalUserCancel[] TakeLoserCancelsIfSelected()
+        {
+            lock (_lockObject)
+            {
+                return _selectedDevice is null
+                    ? Array.Empty<SignalUserCancel>()
+                    : TakeLoserCancels();
+            }
+        }
+
+        private void RegisterCancel(IYubiKeyDevice device, SignalUserCancel signalUserCancel)
+        {
+            if (!HasCancelRegistration(device))
+            {
+                _cancelRegistrations.Add((device, signalUserCancel));
             }
         }
 
@@ -140,11 +151,13 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             for (int index = _cancelRegistrations.Count - 1; index >= 0; index--)
             {
                 (IYubiKeyDevice currentDevice, SignalUserCancel currentCancel) = _cancelRegistrations[index];
-                if (!ReferenceEquals(currentDevice, _selectedDevice))
+                if (ReferenceEquals(currentDevice, _selectedDevice))
                 {
-                    loserCancels.Add(currentCancel);
-                    _cancelRegistrations.RemoveAt(index);
+                    continue;
                 }
+
+                loserCancels.Add(currentCancel);
+                _cancelRegistrations.RemoveAt(index);
             }
 
             return loserCancels.ToArray();

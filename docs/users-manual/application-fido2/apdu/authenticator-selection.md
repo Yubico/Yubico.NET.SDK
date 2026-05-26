@@ -83,3 +83,8 @@ Data Length: 0
 > itself. When the user does not complete UP you will usually see
 > `CTAP2_ERR_USER_ACTION_TIMEOUT`. However, `CTAP2_ERR_OPERATION_DENIED`
 > may be returned if the user engages a platform dialog to cancel the request.
+
+When selecting among multiple authenticators, cancel the non-selected SDK sessions by
+calling the `SignalUserCancel` delegate from each session's touch callback. The SDK sends
+CTAPHID_CANCEL (`0x11`) on that session during keepalive processing; applications should
+not add a cancel payload to this APDU.

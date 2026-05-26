@@ -638,6 +638,16 @@ None
 
 None
 
+### Multi-device selection
+
+To select among several connected HID FIDO authenticators, run one
+`Fido2Session.TryAuthenticatorSelection` call per device concurrently. Each session's
+`KeyCollector` receives a `TouchRequest`; capture its `SignalUserCancel` delegate. After
+the first session succeeds, call the captured delegates for the other sessions and wait
+for them to finish. The SDK converts those cancellation signals into CTAPHID_CANCEL
+(`0x11`) during keepalive handling, so applications do not need to build raw HID cancel
+packets.
+
 ### APDU
 
 [Technical APDU Details](apdu/authenticator-selection.md)

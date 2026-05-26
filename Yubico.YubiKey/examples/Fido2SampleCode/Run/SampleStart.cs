@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.IO;
 // ReSharper disable once RedundantUsingDirective Used on line 44
 using Yubico.YubiKey.Sample.SharedCode;
 
@@ -28,6 +29,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         // Note that the GUI version is available only on Windows platforms.
         static void Main(string[] args)
         {
+            ConfigureSampleLogging();
+
             bool useGui = false;
 
             if (args.Length != 0)
@@ -43,7 +46,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 #else
                 SampleMenu.WriteMessage(
                     MessageType.Title, 0,
-                    "\n---The GUI version of this sample is not available on this plaform---\n");
+                    "\n---The GUI version of this sample is not available on this platform---\n");
 #endif
             }
             else
@@ -54,6 +57,14 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 #else
                 fido2SampleRun.RunSample(false);
 #endif
+            }
+        }
+
+        private static void ConfigureSampleLogging()
+        {
+            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "appsettings.json")))
+            {
+                Directory.SetCurrentDirectory(AppContext.BaseDirectory);
             }
         }
     }

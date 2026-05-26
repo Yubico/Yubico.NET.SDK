@@ -29,6 +29,18 @@ namespace Yubico.YubiKey.Fido2
         /// <para>
         /// Per the CTAP specification, after a successful selection the platform should send cancel
         /// to other authenticators. This SDK does not manage multiple devices; callers orchestrate that.
+        /// For multi-device selection, enumerate the HID FIDO devices, start one <see cref="Fido2Session"/>
+        /// per device, and run this method concurrently on each session. In each session's
+        /// <see cref="KeyCollector"/>, capture <see cref="KeyEntryData.SignalUserCancel"/> from the
+        /// <see cref="KeyEntryRequest.TouchRequest"/> callback. When the first session returns success,
+        /// call the captured delegates for the non-selected sessions and wait for those sessions to
+        /// complete cancellation.
+        /// </para>
+        /// <para>
+        /// Applications should not construct CTAPHID_CANCEL packets directly. Calling
+        /// <see cref="KeyEntryData.SignalUserCancel"/> sets the SDK cancellation state for the pending
+        /// touch operation. The HID FIDO pipeline observes that state during keepalive processing and
+        /// sends CTAPHID_CANCEL (<c>0x11</c>) on the session's connection.
         /// </para>
         /// <para>
         /// This method calls the <see cref="KeyCollector"/> with <see cref="KeyEntryRequest.TouchRequest"/>

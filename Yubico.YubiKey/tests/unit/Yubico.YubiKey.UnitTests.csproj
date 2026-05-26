@@ -33,6 +33,7 @@ limitations under the License. -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
     <ProjectReference Include="..\utilities\Yubico.YubiKey.TestUtilities.csproj" />
+    <Compile Include="..\..\examples\Fido2SampleCode\YubiKeyOperations\AuthenticatorSelectionCoordinator.cs" Link="Yubico\YubiKey\Fido2\AuthenticatorSelectionCoordinator.cs" />
     <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.2" />
     <PackageReference Include="coverlet.collector" Version="10.0.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
     <PackageReference Include="xunit" Version="2.9.3" />

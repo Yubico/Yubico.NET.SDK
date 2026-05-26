@@ -39,6 +39,7 @@ namespace Yubico.YubiKey.Fido2
         private const int KeyAttestationStatement = 3;
         private const int KeyEnterpriseAttestation = 4;
         private const int KeyLargeBlob = 5;
+        private const int KeyUnsignedExtensionOutputs = 6;
 
         /// <summary>
         /// The parsed attestation object containing the format, authenticator data,
@@ -62,7 +63,7 @@ namespace Yubico.YubiKey.Fido2
         /// returned by calling <c>GetAssertion</c>.
         /// </remarks>
         public AuthenticatorData AuthenticatorData { get; }
-        
+
         /// <summary>
         /// The algorithm used to create the attestation statement.
         /// </summary>
@@ -160,41 +161,6 @@ namespace Yubico.YubiKey.Fido2
         public IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? UnsignedExtensionOutputs { get; private set; }
 
         /// <summary>
-        /// Retrieves the previewSign generated key from the extension outputs.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="PreviewSignGeneratedKey"/> if the extension was used and returned
-        /// data; otherwise, <c>null</c>.
-        /// </returns>
-        public PreviewSignGeneratedKey? GetPreviewSignGeneratedKey()
-        {
-            CoseAlgorithmIdentifier? signedAlgorithm = null;
-            byte[]? signedValue = null;
-            if (AuthenticatorData.Extensions is not null &&
-                AuthenticatorData.Extensions.TryGetValue(Extensions.PreviewSign, out signedValue))
-            {
-                signedAlgorithm = PreviewSignExtension.DecodeGeneratedKeyAlgorithm(signedValue);
-            }
-
-            if (UnsignedExtensionOutputs is not null &&
-                UnsignedExtensionOutputs.TryGetValue(Extensions.PreviewSign, out var unsignedValue))
-            {
-                if (signedAlgorithm is null)
-                {
-                    throw new Ctap2DataException(
-                        "previewSign generated key is missing signed algorithm output.");
-                }
-
-                return PreviewSignExtension.DecodeGeneratedKey(unsignedValue, signedAlgorithm);
-            }
-
-            return signedValue is null
-                ? null
-                : throw new Ctap2DataException(
-                    "previewSign generated key is missing unsigned extension output.");
-        }
-
-        /// <summary>
         /// This returns the raw CBOR encoded credential data from the YubiKey, as returned by the MakeCredential operation.
         /// </summary>
         public ReadOnlyMemory<byte> RawData { get; }
@@ -256,10 +222,10 @@ namespace Yubico.YubiKey.Fido2
                     LargeBlobKey = map.ReadByteString(KeyLargeBlob);
                 }
 
-                if (map.Contains(PreviewSignExtension.CtapUnsignedExtensionOutputsKey))
+                if (map.Contains(KeyUnsignedExtensionOutputs))
                 {
-                    var unsignedMap = map.ReadMap<string>(PreviewSignExtension.CtapUnsignedExtensionOutputsKey);
-                    UnsignedExtensionOutputs = PreviewSignExtension.ParseUnsignedExtensionOutputs(unsignedMap.Encoded);
+                    UnsignedExtensionOutputs = ParseUnsignedExtensionOutputs(
+                        map.ReadEncodedValue(KeyUnsignedExtensionOutputs));
                 }
             }
             catch (CborContentException cborException)
@@ -270,6 +236,24 @@ namespace Yubico.YubiKey.Fido2
                         ExceptionMessages.InvalidFido2Info),
                     cborException);
             }
+        }
+
+        private static IReadOnlyDictionary<string, ReadOnlyMemory<byte>> ParseUnsignedExtensionOutputs(
+            ReadOnlyMemory<byte> encodedMap)
+        {
+            var cbor = new CborReader(encodedMap, CborConformanceMode.Ctap2Canonical);
+            int? entries = cbor.ReadStartMap();
+            int count = entries ?? 0;
+            var result = new Dictionary<string, ReadOnlyMemory<byte>>(count, StringComparer.Ordinal);
+            while (count > 0)
+            {
+                string extensionKey = cbor.ReadTextString();
+                result[extensionKey] = cbor.ReadEncodedValue().ToArray();
+                count--;
+            }
+
+            cbor.ReadEndMap();
+            return result;
         }
 
         /// <summary>

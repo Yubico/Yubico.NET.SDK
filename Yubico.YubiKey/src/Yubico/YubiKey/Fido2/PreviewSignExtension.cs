@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Formats.Cbor;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
@@ -44,8 +43,6 @@ namespace Yubico.YubiKey.Fido2
     /// </remarks>
     public static class PreviewSignExtension
     {
-        /// <summary>CTAP key on the MakeCredential RESPONSE map carrying unsigned extension outputs.</summary>
-        internal const int CtapUnsignedExtensionOutputsKey = 6;
         internal const string ExtensionName = "previewSign";
 
         /// <summary>Map keys used by previewSign generated-key input and output.</summary>
@@ -121,32 +118,6 @@ namespace Yubico.YubiKey.Fido2
 
             cbor.WriteEndMap();
             return cbor.Encode();
-        }
-
-        /// <summary>
-        /// Parse the unsigned extension outputs map from the MakeCredential
-        /// response (CTAP key 6). Returns name → encoded-value pairs.
-        /// </summary>
-        public static IReadOnlyDictionary<string, ReadOnlyMemory<byte>> ParseUnsignedExtensionOutputs(
-            ReadOnlyMemory<byte> encodedMap)
-        {
-            try
-            {
-                var map = ReadPreviewSignMap<string>(
-                    encodedMap,
-                    "previewSign unsigned extension outputs are not a map.");
-                var result = new Dictionary<string, ReadOnlyMemory<byte>>(StringComparer.Ordinal);
-                foreach (string name in map.Keys)
-                {
-                    result[name] = map.ReadEncodedValue(name);
-                }
-
-                return result;
-            }
-            catch (Exception exception) when (IsCborParseException(exception))
-            {
-                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, exception);
-            }
         }
 
         /// <summary>

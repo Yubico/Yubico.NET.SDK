@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Yubico.YubiKey;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
@@ -24,10 +23,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
     internal sealed class AuthenticatorSelectionCoordinator
     {
         private readonly object _lockObject = new object();
-        private readonly Dictionary<IYubiKeyDevice, SignalUserCancel> _cancelDelegates =
-            new Dictionary<IYubiKeyDevice, SignalUserCancel>(DeviceReferenceComparer.Instance);
-        private readonly HashSet<IYubiKeyDevice> _cancelSignaled =
-            new HashSet<IYubiKeyDevice>(DeviceReferenceComparer.Instance);
+        private readonly List<(IYubiKeyDevice Device, SignalUserCancel Cancel)> _cancelRegistrations =
+            new List<(IYubiKeyDevice Device, SignalUserCancel Cancel)>();
 
         private IYubiKeyDevice? _selectedDevice;
 
@@ -53,9 +50,9 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             }
         }
 
-        public void CaptureCancel(IYubiKeyDevice device, SignalUserCancel signalUserCancel)
+        public void CaptureCancel(IYubiKeyDevice device, SignalUserCancel? signalUserCancel)
         {
-            if (device is null || signalUserCancel is null)
+            if (signalUserCancel is null)
             {
                 return;
             }
@@ -65,12 +62,12 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             {
                 if (_selectedDevice is null)
                 {
-                    if (!_cancelDelegates.ContainsKey(device))
+                    if (!HasCancelRegistration(device))
                     {
-                        _cancelDelegates.Add(device, signalUserCancel);
+                        _cancelRegistrations.Add((device, signalUserCancel));
                     }
                 }
-                else if (!ReferenceEquals(device, _selectedDevice) && _cancelSignaled.Add(device))
+                else if (!ReferenceEquals(device, _selectedDevice))
                 {
                     cancelNow = true;
                 }
@@ -84,7 +81,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         public bool TrySelectWinner(IYubiKeyDevice device)
         {
-            List<SignalUserCancel> loserCancels = new List<SignalUserCancel>();
+            SignalUserCancel[] loserCancels;
             lock (_lockObject)
             {
                 if (_selectedDevice is not null)
@@ -93,7 +90,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 }
 
                 _selectedDevice = device;
-                AddLoserCancels(loserCancels);
+                loserCancels = TakeLoserCancels();
             }
 
             InvokeCancels(loserCancels);
@@ -102,7 +99,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         public void CancelLosers()
         {
-            List<SignalUserCancel> loserCancels = new List<SignalUserCancel>();
+            SignalUserCancel[] loserCancels;
             lock (_lockObject)
             {
                 if (_selectedDevice is null)
@@ -110,7 +107,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                     return;
                 }
 
-                AddLoserCancels(loserCancels);
+                loserCancels = TakeLoserCancels();
             }
 
             InvokeCancels(loserCancels);
@@ -124,32 +121,41 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             }
         }
 
-        private void AddLoserCancels(List<SignalUserCancel> loserCancels)
+        private bool HasCancelRegistration(IYubiKeyDevice device)
         {
-            foreach (KeyValuePair<IYubiKeyDevice, SignalUserCancel> current in _cancelDelegates)
+            foreach ((IYubiKeyDevice currentDevice, _) in _cancelRegistrations)
             {
-                if (!ReferenceEquals(current.Key, _selectedDevice) && _cancelSignaled.Add(current.Key))
+                if (ReferenceEquals(currentDevice, device))
                 {
-                    loserCancels.Add(current.Value);
+                    return true;
                 }
             }
+
+            return false;
         }
 
-        private static void InvokeCancels(List<SignalUserCancel> loserCancels)
+        private SignalUserCancel[] TakeLoserCancels()
+        {
+            var loserCancels = new List<SignalUserCancel>();
+            for (int index = _cancelRegistrations.Count - 1; index >= 0; index--)
+            {
+                (IYubiKeyDevice currentDevice, SignalUserCancel currentCancel) = _cancelRegistrations[index];
+                if (!ReferenceEquals(currentDevice, _selectedDevice))
+                {
+                    loserCancels.Add(currentCancel);
+                    _cancelRegistrations.RemoveAt(index);
+                }
+            }
+
+            return loserCancels.ToArray();
+        }
+
+        private static void InvokeCancels(SignalUserCancel[] loserCancels)
         {
             foreach (SignalUserCancel current in loserCancels)
             {
                 current();
             }
-        }
-
-        private sealed class DeviceReferenceComparer : IEqualityComparer<IYubiKeyDevice>
-        {
-            internal static readonly DeviceReferenceComparer Instance = new DeviceReferenceComparer();
-
-            public bool Equals(IYubiKeyDevice? x, IYubiKeyDevice? y) => ReferenceEquals(x, y);
-
-            public int GetHashCode(IYubiKeyDevice obj) => RuntimeHelpers.GetHashCode(obj);
         }
     }
 }

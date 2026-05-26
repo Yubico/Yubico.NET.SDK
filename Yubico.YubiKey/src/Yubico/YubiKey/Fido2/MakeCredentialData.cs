@@ -195,15 +195,9 @@ namespace Yubico.YubiKey.Fido2
 
             try
             {
-                // Build AttestationObject from a re-encoded CBOR subset containing only keys {1,2,3}.
-                // The full CTAP response may contain additional keys (4-6), but AttestationObject
-                // should only encode the core attestation data per WebAuthn spec.
                 byte[] attestationSubset = BuildAttestationObjectSubset(map);
-
-                // Parse attestation object with full validation
                 AttestationObject = new AttestationObject(attestationSubset, parseFullDetails: true);
 
-                // Backward compatibility: expose properties from AttestationObject
                 Format = AttestationObject.Format;
                 AuthenticatorData = AttestationObject.AuthenticatorData;
                 AttestationAlgorithm = AttestationObject.AttestationAlgorithm ??

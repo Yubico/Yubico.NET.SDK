@@ -14,6 +14,9 @@
 
 using System;
 using System.IO;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Yubico.Core.Logging;
 // ReSharper disable once RedundantUsingDirective Used on line 44
 using Yubico.YubiKey.Sample.SharedCode;
 
@@ -62,10 +65,20 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         private static void ConfigureSampleLogging()
         {
-            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "appsettings.json")))
+            string settingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+            if (!File.Exists(settingsPath))
             {
-                Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+                return;
             }
+
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
+
+            Log.ConfigureLoggerFactory(builder => builder
+                .AddConfiguration(configuration.GetSection("Logging"))
+                .AddConsole());
         }
     }
 }

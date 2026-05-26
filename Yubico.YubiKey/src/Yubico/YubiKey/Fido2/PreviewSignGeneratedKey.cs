@@ -22,39 +22,57 @@ namespace Yubico.YubiKey.Fido2
     /// previewSign extension registration.
     /// </summary>
     /// <remarks>
-    /// Instances of this class are obtained by decoding previewSign extension
-    /// output after creating a credential with previewSign enabled.
+    /// This corresponds to the <c>AuthenticationExtensionsSignGeneratedKey</c>
+    /// output defined by the
+    /// <see href="https://yubicolabs.github.io/webauthn-sign-extension/4/#dictdef-authenticationextensionssigngeneratedkey">
+    /// previewSign extension specification</see>. The generated signing key is
+    /// represented by an embedded attestation object whose attested credential
+    /// data contains the signing key handle and public key.
     /// </remarks>
     public sealed class PreviewSignGeneratedKey
     {
         private readonly byte[] _publicKey;
 
         /// <summary>
-        /// Gets the key handle for the generated signing key.
+        /// Gets the key handle used to request signatures from this generated
+        /// signing key.
         /// </summary>
+        /// <remarks>
+        /// This is auxiliary information the authenticator may need to look up
+        /// or derive the signing private key. It is copied from the credential
+        /// ID in the embedded attestation object's attested credential data and
+        /// can be empty.
+        /// </remarks>
         public ReadOnlyMemory<byte> KeyHandle { get; init; }
 
         /// <summary>
         /// Gets the CBOR-encoded COSE public key for the generated signing key.
         /// </summary>
         /// <remarks>
-        /// This is the <c>pubKey</c> field from the authenticator's
-        /// <c>AuthenticationExtensionsSignGeneratedKey</c> output, as defined in the
-        /// <see href="https://yubicolabs.github.io/webauthn-sign-extension/4/#dictdef-authenticationextensionssigngeneratedkey">
-        /// previewSign extension specification</see>.
-        /// Relying parties should decode this COSE_Key to obtain the public key material
-        /// used to verify signatures produced via the previewSign assertion flow.
+        /// This is the generated signing public key in COSE_Key format, copied
+        /// from the embedded attestation object's attested credential data.
         /// </remarks>
         public ReadOnlyMemory<byte> PublicKey => _publicKey;
 
         /// <summary>
-        /// Gets the algorithm identifier for the generated key.
+        /// Gets the signature algorithm chosen for the generated signing key.
         /// </summary>
+        /// <remarks>
+        /// This is the algorithm chosen from the requested algorithm list. It
+        /// can differ from the COSE_Key <c>alg</c> attribute for split signing
+        /// algorithms.
+        /// </remarks>
         public CoseAlgorithmIdentifier Algorithm { get; init; }
 
         /// <summary>
-        /// Gets the attestation object returned by the authenticator during MakeCredential.
+        /// Gets the attestation object for the generated signing key pair.
         /// </summary>
+        /// <remarks>
+        /// The previewSign specification carries this object in the unsigned
+        /// extension output during registration. It has the same structure as
+        /// the top-level attestation object, but attests the generated signing
+        /// public key.
+        /// </remarks>
         public AttestationObject AttestationObject { get; init; }
 
         internal PreviewSignGeneratedKey(

@@ -23,12 +23,6 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2
 {
-    internal enum CredentialPublicKeyParsingMode
-    {
-        ParseSupportedKeys,
-        PreserveRawOnly,
-    }
-
     /// <summary>
     /// Contains information about the credential, assertion, or the
     /// authenticator itself after making a credential or getting an assertion.
@@ -48,6 +42,7 @@ namespace Yubico.YubiKey.Fido2
         private const int SignCountLength = 4;
         private const int CredentialIdLengthLength = 2;
         private const int AaguidLength = 16;
+        private const int CoseKeyTypeTag = 1;
         private const byte UserPresenceBit = 0x01;
         private const byte UserVerificationBit = 0x04;
         private const byte AttestedBit = 0x40;
@@ -172,13 +167,6 @@ namespace Yubico.YubiKey.Fido2
         /// authenticator data.
         /// </exception>
         public AuthenticatorData(ReadOnlyMemory<byte> encodedData)
-            : this(encodedData, CredentialPublicKeyParsingMode.ParseSupportedKeys)
-        {
-        }
-
-        internal AuthenticatorData(
-            ReadOnlyMemory<byte> encodedData,
-            CredentialPublicKeyParsingMode credentialPublicKeyParsingMode)
         {
             EncodedAuthenticatorData = encodedData.ToArray();
 
@@ -210,16 +198,17 @@ namespace Yubico.YubiKey.Fido2
                 int bytesRead = coseKeyBytes.Length;
                 EncodedCredentialPublicKey = coseKeyBytes.ToArray();
 
-                if (credentialPublicKeyParsingMode == CredentialPublicKeyParsingMode.ParseSupportedKeys)
+                try
                 {
-                    try
-                    {
-                        CredentialPublicKey = CoseKey.Create(coseKeyBytes, out _);
-                    }
-                    catch (NotSupportedException)
-                    {
-                        CredentialPublicKey = null;
-                    }
+                    CredentialPublicKey = CoseKey.Create(coseKeyBytes, out _);
+                }
+                catch (NotSupportedException)
+                {
+                    CredentialPublicKey = null;
+                }
+                catch (Ctap2DataException) when (HasUnsupportedCoseKeyType(coseKeyBytes))
+                {
+                    CredentialPublicKey = null;
                 }
 
                 offset += bytesRead;
@@ -248,6 +237,18 @@ namespace Yubico.YubiKey.Fido2
             cbor.ReadEndMap();
 
             Extensions = extensionList;
+        }
+
+        private static bool HasUnsupportedCoseKeyType(ReadOnlyMemory<byte> encodedCoseKey)
+        {
+            var cborMap = new CborMap<int>(encodedCoseKey);
+            if (!cborMap.Contains(CoseKeyTypeTag))
+            {
+                return false;
+            }
+
+            var keyType = (CoseKeyType)cborMap.ReadInt32(CoseKeyTypeTag);
+            return keyType != CoseKeyType.Ec2 && keyType != CoseKeyType.Okp;
         }
 
         /// <summary>

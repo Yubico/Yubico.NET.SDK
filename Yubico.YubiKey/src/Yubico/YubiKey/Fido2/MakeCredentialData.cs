@@ -27,13 +27,12 @@ namespace Yubico.YubiKey.Fido2
     /// Contains the data returned by the YubiKey after making a credential.
     /// </summary>
     /// <remarks>
-    /// When a new credential is made, the YubiKey returns data about that
-    /// credential, including attestation information. There are several elements
-    /// in this data and this structure contains those elements.
+    /// This includes the WebAuthn attestation object and CTAP-specific optional
+    /// response fields such as enterprise attestation, large blob key, and
+    /// unsigned extension outputs.
     /// </remarks>
     public class MakeCredentialData
     {
-        // CBOR map keys defined in the CTAP authenticatorMakeCredential response structure.
         private const int KeyFormat = 1;
         private const int KeyAuthData = 2;
         private const int KeyAttestationStatement = 3;
@@ -92,26 +91,9 @@ namespace Yubico.YubiKey.Fido2
         /// The encoded CBOR map that describes the attestation statement.
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// The other members of this class make it easy to access the individual
-        /// elements of the attestation statement and supporting structures. This
-        /// property returns the raw, CBOR encoded attestation statement returned
-        /// by the YubiKey. This is useful if you are implementing or interoperating
-        /// with the WebAuthn data types. It is often easier to copy this field
-        /// over in its encoded form rather than using the parsed properties.
-        /// </para>
-        /// <para>
-        /// For example: the WebAuthn MakeCredential operation expects an "attestation
-        /// object" be returned. This is a CBOR map containing the "fmt", "attStmt",
-        /// and "authData" - the keys given in string form. The "authData" is the CBOR
-        /// encoded <see cref="AuthenticatorData"/> further encoded in Base64URL. The
-        /// "attStmt" is the CBOR map that contains the <see cref="AttestationAlgorithm"/>,
-        /// <see cref="AttestationStatement"/>, and <see cref="AttestationCertificates" />.
-        /// </para>
-        /// <para>
-        /// Rather than reconstructing the CBOR map, we provide it here for you, already
-        /// in encoded form.
-        /// </para>
+        /// Use this with <see cref="Format"/> and <see cref="AuthenticatorData"/>
+        /// when interoperating with WebAuthn data types that require the
+        /// original attestation object fields.
         /// </remarks>
         public ReadOnlyMemory<byte> EncodedAttestationStatement { get; private set; }
 
@@ -131,17 +113,11 @@ namespace Yubico.YubiKey.Fido2
         public IReadOnlyList<X509Certificate2>? AttestationCertificates { get; private set; }
 
         /// <summary>
-        /// Indicates whether an enterprise attestation was returned. This is an
-        /// optional value, so if the YubiKey did not return this element, the
-        /// property will be null.
+        /// Indicates whether an enterprise attestation was returned.
         /// </summary>
         /// <remarks>
-        /// If there is no enterprise attestation entry in the response (this
-        /// property is null), or if there was (this property is not null) and it
-        /// is <c>false</c>, then there was no enterprise attestation statement
-        /// returned. If there was an entry (this property is not null) and the
-        /// value is <c>true</c>, then there was an enterprise attestation
-        /// statement returned.
+        /// This property is null when the response does not include the
+        /// enterprise attestation field.
         /// </remarks>
         public bool? EnterpriseAttestation { get; private set; }
 
@@ -161,12 +137,10 @@ namespace Yubico.YubiKey.Fido2
         public IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? UnsignedExtensionOutputs { get; private set; }
 
         /// <summary>
-        /// This returns the raw CBOR encoded credential data from the YubiKey, as returned by the MakeCredential operation.
+        /// The raw CBOR-encoded MakeCredential response from the YubiKey.
         /// </summary>
         public ReadOnlyMemory<byte> RawData { get; }
 
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
         private MakeCredentialData()
         {
             throw new NotImplementedException();
@@ -196,7 +170,7 @@ namespace Yubico.YubiKey.Fido2
             try
             {
                 byte[] attestationSubset = BuildAttestationObjectSubset(map);
-                AttestationObject = new AttestationObject(attestationSubset, parseFullDetails: true);
+                AttestationObject = new AttestationObject(attestationSubset);
 
                 Format = AttestationObject.Format;
                 AuthenticatorData = AttestationObject.AuthenticatorData;
@@ -251,14 +225,10 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Builds a re-encoded CBOR subset containing only keys {1: fmt, 2: authData, 3: attStmt}
-        /// from the full CTAP MakeCredential response map. This ensures AttestationObject only
-        /// contains the core attestation data per WebAuthn spec, excluding optional keys like
-        /// enterpriseAttestation (4), largeBlobKey (5), and unsignedExtensionOutputs (6).
+        /// Builds the WebAuthn attestation object from the CTAP MakeCredential response.
         /// </summary>
         private static byte[] BuildAttestationObjectSubset(CborMap<int> fullResponse)
         {
-            // Validate all required keys are present
             foreach (int requiredKey in new[] { KeyFormat, KeyAuthData, KeyAttestationStatement })
             {
                 if (!fullResponse.Contains(requiredKey))
@@ -267,19 +237,15 @@ namespace Yubico.YubiKey.Fido2
                 }
             }
 
-            // Build the subset with canonical encoding
             var writer = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             writer.WriteStartMap(3);
 
-            // Key 1: fmt
             writer.WriteInt32(KeyFormat);
             writer.WriteTextString(fullResponse.ReadTextString(KeyFormat));
 
-            // Key 2: authData
             writer.WriteInt32(KeyAuthData);
             writer.WriteByteString(fullResponse.ReadByteString(KeyAuthData).Span);
 
-            // Key 3: attStmt - use the preserved encoded value
             writer.WriteInt32(KeyAttestationStatement);
             writer.WriteEncodedValue(fullResponse.ReadEncodedValue(KeyAttestationStatement).Span);
 

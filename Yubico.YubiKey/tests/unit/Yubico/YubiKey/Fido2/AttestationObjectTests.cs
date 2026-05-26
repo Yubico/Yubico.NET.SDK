@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Fido2
             };
 
         // ------------------------------------------------------------------
-        // Full parse (parseFullDetails = true, the default)
+        // Default parse
         // ------------------------------------------------------------------
 
         [Fact]
@@ -113,35 +113,6 @@ namespace Yubico.YubiKey.Fido2
             Assert.False(obj.AttestationStatement!.Value.IsEmpty);
             Assert.NotNull(obj.AuthenticatorData.CredentialPublicKey);
             Assert.NotNull(obj.AuthenticatorData.EncodedCredentialPublicKey);
-        }
-
-        // ------------------------------------------------------------------
-        // Structure-only parse (parseFullDetails = false)
-        // ------------------------------------------------------------------
-
-        [Fact]
-        public void Parse_StructureOnly_ParsedStatementFields_AreNull()
-        {
-            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
-
-            var obj = new AttestationObject(encoding, parseFullDetails: false);
-
-            Assert.Null(obj.AttestationAlgorithm);
-            Assert.Null(obj.AttestationStatement);
-            Assert.Null(obj.AttestationCertificates);
-            Assert.Null(obj.AuthenticatorData.CredentialPublicKey);
-        }
-
-        [Fact]
-        public void Parse_StructureOnly_RawEncodings_AreAlwaysPopulated()
-        {
-            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
-
-            var obj = new AttestationObject(encoding, parseFullDetails: false);
-
-            Assert.False(obj.EncodedAttestationStatement.IsEmpty);
-            Assert.NotNull(obj.AuthenticatorData.EncodedCredentialPublicKey);
-            Assert.False(obj.AuthenticatorData.EncodedCredentialPublicKey!.Value.IsEmpty);
         }
 
         // ------------------------------------------------------------------
@@ -168,7 +139,7 @@ namespace Yubico.YubiKey.Fido2
         {
             ReadOnlyMemory<byte> encoding = GetSampleEncoding();
 
-            _ = new AttestationObject(encoding, out int bytesRead, parseFullDetails: true);
+            _ = new AttestationObject(encoding, out int bytesRead);
 
             Assert.Equal(encoding.Length, bytesRead);
         }
@@ -177,34 +148,30 @@ namespace Yubico.YubiKey.Fido2
         public void Parse_WithTrailingData_BytesRead_ReflectsActualConsumedBytes()
         {
             ReadOnlyMemory<byte> encoding = GetSampleEncoding();
-            // Append trailing garbage that should NOT be consumed
             var withTrailing = new byte[encoding.Length + 10];
             encoding.CopyTo(withTrailing);
             Array.Fill<byte>(withTrailing, 0xFF, encoding.Length, 10);
 
-            _ = new AttestationObject(withTrailing, out int bytesRead, parseFullDetails: true);
+            _ = new AttestationObject(withTrailing, out int bytesRead);
 
-            // bytesRead should be the actual attestation object length, NOT the input buffer length
             Assert.Equal(encoding.Length, bytesRead);
         }
 
 
         // ------------------------------------------------------------------
-        // Unknown format — graceful handling (parseFullDetails=true)
+        // Unknown format - graceful handling
         // ------------------------------------------------------------------
 
         /// <summary>
         /// Parsing an attestation object whose format is not "packed" must not throw,
-        /// even when parseFullDetails is true (the default). The typed
-        /// attestation-statement properties stay null; EncodedAttestationStatement
-        /// is still populated from the raw bytes.
+        /// and typed attestation-statement properties stay null.
         /// </summary>
         [Fact]
         public void Parse_UnknownFormat_DefaultParsing_DoesNotThrow_AndTypedPropertiesAreNull()
         {
             ReadOnlyMemory<byte> encoding = BuildNoneFormatAttestationObject();
 
-            var obj = new AttestationObject(encoding);   // parseFullDetails=true by default
+            var obj = new AttestationObject(encoding);
 
             Assert.Equal("none", obj.Format);
             Assert.NotNull(obj.AuthenticatorData);
@@ -224,6 +191,50 @@ namespace Yubico.YubiKey.Fido2
 
             Assert.Null(obj.AuthenticatorData.CredentialPublicKey);
             Assert.Equal(coseKey, obj.AuthenticatorData.EncodedCredentialPublicKey!.Value.ToArray());
+        }
+
+        [Fact]
+        public void Parse_MalformedPackedAttestation_PreservesRawStatement_AndLeavesTypedFieldsNull()
+        {
+            byte[] encoding = BuildPackedAttestationObject(
+                writeAttestationStatement: cbor =>
+                {
+                    cbor.WriteStartMap(1);
+                    cbor.WriteTextString("alg");
+                    cbor.WriteTextString("not-an-int");
+                    cbor.WriteEndMap();
+                });
+
+            var obj = new AttestationObject(encoding);
+
+            Assert.Equal("packed", obj.Format);
+            Assert.False(obj.EncodedAttestationStatement.IsEmpty);
+            Assert.Null(obj.AttestationAlgorithm);
+            Assert.Null(obj.AttestationStatement);
+            Assert.Null(obj.AttestationCertificates);
+        }
+
+        [Fact]
+        public void Parse_PackedAttestationWithMalformedSignature_PreservesRawStatement_AndLeavesTypedFieldsNull()
+        {
+            byte[] encoding = BuildPackedAttestationObject(
+                writeAttestationStatement: cbor =>
+                {
+                    cbor.WriteStartMap(2);
+                    cbor.WriteTextString("alg");
+                    cbor.WriteInt32(-7);
+                    cbor.WriteTextString("sig");
+                    cbor.WriteTextString("not-bytes");
+                    cbor.WriteEndMap();
+                });
+
+            var obj = new AttestationObject(encoding);
+
+            Assert.Equal("packed", obj.Format);
+            Assert.False(obj.EncodedAttestationStatement.IsEmpty);
+            Assert.Null(obj.AttestationAlgorithm);
+            Assert.Null(obj.AttestationStatement);
+            Assert.Null(obj.AttestationCertificates);
         }
 
         // ------------------------------------------------------------------
@@ -260,7 +271,9 @@ namespace Yubico.YubiKey.Fido2
             return cbor.Encode();
         }
 
-        private static byte[] BuildPackedAttestationObject(byte[]? credentialPublicKeyCose = null)
+        private static byte[] BuildPackedAttestationObject(
+            byte[]? credentialPublicKeyCose = null,
+            Action<CborWriter>? writeAttestationStatement = null)
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(3);
@@ -272,12 +285,19 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteByteString(BuildMinimalAuthData(credentialPublicKeyCose ?? BuildEs256CoseKey()));
 
             cbor.WriteInt32(3);
-            cbor.WriteStartMap(2);
-            cbor.WriteTextString("alg");
-            cbor.WriteInt32(-7);
-            cbor.WriteTextString("sig");
-            cbor.WriteByteString(new byte[] { 0x01, 0x02, 0x03 });
-            cbor.WriteEndMap();
+            if (writeAttestationStatement is null)
+            {
+                cbor.WriteStartMap(2);
+                cbor.WriteTextString("alg");
+                cbor.WriteInt32(-7);
+                cbor.WriteTextString("sig");
+                cbor.WriteByteString(new byte[] { 0x01, 0x02, 0x03 });
+                cbor.WriteEndMap();
+            }
+            else
+            {
+                writeAttestationStatement(cbor);
+            }
 
             cbor.WriteEndMap();
             return cbor.Encode();

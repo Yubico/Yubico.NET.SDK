@@ -42,10 +42,6 @@ namespace Yubico.YubiKey.Fido2
     ///    }
     /// </code>
     /// </para>
-    /// <para>
-    /// This class supports both full parsing with format-specific validation (for known
-    /// formats like "packed") and structure-only parsing (for custom or unknown formats).
-    /// </para>
     /// </remarks>
     public class AttestationObject : ICborEncode
     {
@@ -72,19 +68,20 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// The algorithm used to create the attestation statement.
-        /// This is null when the attestation object was parsed without full details or the format is unknown.
+        /// This is null for attestation statement formats not parsed by this SDK.
         /// </summary>
         public CoseAlgorithmIdentifier? AttestationAlgorithm { get; private set; }
 
         /// <summary>
         /// The attestation signature bytes.
-        /// This is null when the attestation object was parsed without full details or the format is unknown.
+        /// This is null for attestation statement formats not parsed by this SDK.
         /// </summary>
         public ReadOnlyMemory<byte>? AttestationStatement { get; private set; }
 
         /// <summary>
         /// The list of X.509 certificates from the attestation statement's x5c field.
-        /// This is null when certificates are not present or the attestation object was parsed without full details.
+        /// This is null when certificates are not present or the attestation
+        /// statement format is not parsed by this SDK.
         /// The first certificate contains the public key that verifies the attestation signature.
         /// </summary>
         public IReadOnlyList<X509Certificate2>? AttestationCertificates { get; private set; }
@@ -110,17 +107,11 @@ namespace Yubico.YubiKey.Fido2
         /// with <c>out int bytesRead</c>.
         /// </remarks>
         /// <param name="cborEncoding">The CBOR encoding of the attestation object.</param>
-        /// <param name="parseFullDetails">
-        /// If true (default), parses typed attestation statement fields for "packed" format
-        /// and parses credential public key into a <see cref="CoseKey"/>. If false, stores
-        /// raw bytes only.
-        /// Unknown formats are always handled gracefully.
-        /// </param>
         /// <exception cref="Ctap2DataException">
         /// The cborEncoding is not a valid attestation object.
         /// </exception>
-        public AttestationObject(ReadOnlyMemory<byte> cborEncoding, bool parseFullDetails = true)
-            : this(cborEncoding, out _, parseFullDetails) { }
+        public AttestationObject(ReadOnlyMemory<byte> cborEncoding)
+            : this(cborEncoding, out _) { }
 
         /// <summary>
         /// Constructs a new instance of <see cref="AttestationObject"/> from CBOR-encoded bytes.
@@ -144,82 +135,28 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="bytesRead">
         /// Returns the number of bytes read from the encoding.
         /// </param>
-        /// <param name="parseFullDetails">
-        /// If true (default), parses typed attestation statement fields for "packed" format
-        /// and parses credential public key into a <see cref="CoseKey"/>. If false, stores
-        /// raw bytes only.
-        /// Unknown formats are always handled gracefully.
-        /// </param>
         /// <exception cref="Ctap2DataException">
         /// The cborEncoding is not a valid attestation object.
         /// </exception>
-        public AttestationObject(ReadOnlyMemory<byte> cborEncoding, out int bytesRead, bool parseFullDetails = true)
+        public AttestationObject(ReadOnlyMemory<byte> cborEncoding, out int bytesRead)
         {
             try
             {
-
-                // Use raw CborReader so we can lazily extract each value — CborMap<int>
-                // eagerly parses all nested maps and throws on empty attStmt maps ("none" format).
-                var reader = new CborReader(cborEncoding, CborConformanceMode.Ctap2Canonical);
-                int? count = reader.ReadStartMap();
-                int remaining = count ?? int.MaxValue;
-
-                string? format = null;
-                byte[]? authDataBytes = null;
-                var encodedAttStmt = ReadOnlyMemory<byte>.Empty;
-
-                for (int i = 0; i < remaining; i++)
-                {
-                    if (reader.PeekState() == CborReaderState.EndMap)
-                    {
-                        break;
-                    }
-
-                    int key = (int)reader.ReadInt64();
-                    if (key == KeyFormat)
-                    {
-                        format = reader.ReadTextString();
-                    }
-                    else if (key == KeyAuthData)
-                    {
-                        authDataBytes = reader.ReadByteString();
-                    }
-                    else if (key == KeyAttestationStatement)
-                    {
-                        encodedAttStmt = reader.ReadEncodedValue().ToArray();
-                    }
-                    else
-                    {
-                        reader.SkipValue();
-                    }
-                }
-
-                reader.ReadEndMap();
-
-                // bytesRead must reflect actual consumed bytes, not input length
-                bytesRead = cborEncoding.Length - reader.BytesRemaining;
+                (string format, byte[] authDataBytes, ReadOnlyMemory<byte> encodedAttStmt) =
+                    DecodeRequiredFields(cborEncoding, out bytesRead);
                 Encoded = cborEncoding[..bytesRead];
 
-                Format = format ?? throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
-                var credentialPublicKeyParsingMode = parseFullDetails
-                    ? CredentialPublicKeyParsingMode.ParseSupportedKeys
-                    : CredentialPublicKeyParsingMode.PreserveRawOnly;
-                AuthenticatorData = new AuthenticatorData(
-                    authDataBytes ?? throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info),
-                    credentialPublicKeyParsingMode);
+                Format = format;
+                AuthenticatorData = new AuthenticatorData(authDataBytes);
 
                 if (!encodedAttStmt.IsEmpty)
                 {
                     EncodedAttestationStatement = encodedAttStmt;
 
-                    if (parseFullDetails &&
-                        Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal))
+                    if (Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal))
                     {
                         var attestCborMap = new CborMap<string>(EncodedAttestationStatement);
-                        if (!ParsePackedAttestationStatement(attestCborMap))
-                        {
-                            throw new Ctap2DataException(ExceptionMessages.Ctap2UnknownAttestationFormat);
-                        }
+                        _ = TryParsePackedAttestationStatement(attestCborMap);
                     }
                 }
             }
@@ -237,35 +174,100 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        private bool ParsePackedAttestationStatement(CborMap<string> attestCborMap)
+        private static (string format, byte[] authDataBytes, ReadOnlyMemory<byte> encodedAttStmt) DecodeRequiredFields(
+            ReadOnlyMemory<byte> cborEncoding,
+            out int bytesRead)
         {
-            // The attestation statement must be in the "packed" format and contain the expected keys.
-            if (!Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal) ||
-                !attestCborMap.Contains(AlgString) ||
-                !attestCborMap.Contains(SigString) ||
-                attestCborMap.Count > MaxAttestationMapCount ||
-                (attestCborMap.Count == MaxAttestationMapCount && !attestCborMap.Contains(X5cString)))
+            var reader = new CborReader(cborEncoding, CborConformanceMode.Ctap2Canonical);
+            int? count = reader.ReadStartMap();
+            int remaining = count ?? int.MaxValue;
+
+            string? format = null;
+            byte[]? authDataBytes = null;
+            var encodedAttStmt = ReadOnlyMemory<byte>.Empty;
+
+            for (int i = 0; i < remaining; i++)
             {
-                return false;
-            }
-
-            AttestationAlgorithm = (CoseAlgorithmIdentifier)attestCborMap.ReadInt32(AlgString);
-            AttestationStatement = attestCborMap.ReadByteString(SigString);
-
-            if (attestCborMap.Contains(X5cString))
-            {
-                var certList = attestCborMap.ReadArray<byte[]>(X5cString);
-                var attestationCertificates = new List<X509Certificate2>(certList.Count);
-
-                for (int index = 0; index < certList.Count; index++)
+                if (reader.PeekState() == CborReaderState.EndMap)
                 {
-                    attestationCertificates.Add(new X509Certificate2(certList[index]));
+                    break;
                 }
 
-                AttestationCertificates = attestationCertificates;
+                int key = (int)reader.ReadInt64();
+                if (key == KeyFormat)
+                {
+                    format = reader.ReadTextString();
+                }
+                else if (key == KeyAuthData)
+                {
+                    authDataBytes = reader.ReadByteString();
+                }
+                else if (key == KeyAttestationStatement)
+                {
+                    encodedAttStmt = reader.ReadEncodedValue().ToArray();
+                }
+                else
+                {
+                    reader.SkipValue();
+                }
             }
 
-            return true;
+            reader.ReadEndMap();
+            bytesRead = cborEncoding.Length - reader.BytesRemaining;
+
+            return (
+                format ?? throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info),
+                authDataBytes ?? throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info),
+                encodedAttStmt);
+        }
+
+        private bool TryParsePackedAttestationStatement(CborMap<string> attestCborMap)
+        {
+            try
+            {
+                if (!attestCborMap.Contains(AlgString) ||
+                    !attestCborMap.Contains(SigString) ||
+                    attestCborMap.Count > MaxAttestationMapCount ||
+                    (attestCborMap.Count == MaxAttestationMapCount && !attestCborMap.Contains(X5cString)))
+                {
+                    return false;
+                }
+
+                CoseAlgorithmIdentifier attestationAlgorithm =
+                    (CoseAlgorithmIdentifier)attestCborMap.ReadInt32(AlgString);
+                ReadOnlyMemory<byte> attestationStatement = attestCborMap.ReadByteString(SigString);
+                IReadOnlyList<X509Certificate2>? attestationCertificates = null;
+
+                if (attestCborMap.Contains(X5cString))
+                {
+                    var certList = attestCborMap.ReadArray<byte[]>(X5cString);
+                    var certificateList = new List<X509Certificate2>(certList.Count);
+
+                    for (int index = 0; index < certList.Count; index++)
+                    {
+                        certificateList.Add(new X509Certificate2(certList[index]));
+                    }
+
+                    attestationCertificates = certificateList;
+                }
+
+                AttestationAlgorithm = attestationAlgorithm;
+                AttestationStatement = attestationStatement;
+                AttestationCertificates = attestationCertificates;
+                return true;
+            }
+            catch (Exception exception) when (
+                exception is CborContentException ||
+                exception is InvalidCastException ||
+                exception is InvalidOperationException ||
+                exception is FormatException ||
+                exception is System.Security.Cryptography.CryptographicException)
+            {
+                AttestationAlgorithm = null;
+                AttestationStatement = null;
+                AttestationCertificates = null;
+                return false;
+            }
         }
 
         /// <inheritdoc/>

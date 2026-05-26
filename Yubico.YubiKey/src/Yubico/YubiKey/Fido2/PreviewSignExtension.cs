@@ -211,7 +211,7 @@ namespace Yubico.YubiKey.Fido2
                 }
 
                 ReadOnlyMemory<byte> attestationObject = map.ReadByteString((int)MakeCredentialKey.AttestationObject);
-                var attestationObj = new AttestationObject(attestationObject, parseFullDetails: false);
+                var attestationObj = new AttestationObject(attestationObject);
                 if (attestationObj.AuthenticatorData.CredentialId is null ||
                     attestationObj.AuthenticatorData.EncodedCredentialPublicKey is null)
                 {

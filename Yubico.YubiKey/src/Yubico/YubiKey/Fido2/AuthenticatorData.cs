@@ -23,6 +23,12 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2
 {
+    internal enum CredentialPublicKeyParsingMode
+    {
+        ParseSupportedKeys,
+        PreserveRawOnly,
+    }
+
     /// <summary>
     /// Contains information about the credential, assertion, or the
     /// authenticator itself after making a credential or getting an assertion.
@@ -161,16 +167,18 @@ namespace Yubico.YubiKey.Fido2
         /// The authenticator data, encoded following the definition in the W3C
         /// standard.
         /// </param>
-        /// <param name="parseCredentialPublicKey">
-        /// If true (default), parses the credential public key into a <see cref="CoseKey"/> object.
-        /// If false, skips CoseKey parsing but still populates <see cref="EncodedCredentialPublicKey"/>
-        /// with the raw CBOR bytes.
-        /// </param>
         /// <exception cref="ArgumentException">
         /// The <c>encodedData</c> is not a correct encoding for FIDO2
         /// authenticator data.
         /// </exception>
-        public AuthenticatorData(ReadOnlyMemory<byte> encodedData, bool parseCredentialPublicKey = true)
+        public AuthenticatorData(ReadOnlyMemory<byte> encodedData)
+            : this(encodedData, CredentialPublicKeyParsingMode.ParseSupportedKeys)
+        {
+        }
+
+        internal AuthenticatorData(
+            ReadOnlyMemory<byte> encodedData,
+            CredentialPublicKeyParsingMode credentialPublicKeyParsingMode)
         {
             EncodedAuthenticatorData = encodedData.ToArray();
 
@@ -202,7 +210,7 @@ namespace Yubico.YubiKey.Fido2
                 int bytesRead = coseKeyBytes.Length;
                 EncodedCredentialPublicKey = coseKeyBytes.ToArray();
 
-                if (parseCredentialPublicKey)
+                if (credentialPublicKeyParsingMode == CredentialPublicKeyParsingMode.ParseSupportedKeys)
                 {
                     try
                     {

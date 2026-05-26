@@ -201,9 +201,12 @@ namespace Yubico.YubiKey.Fido2
                 Encoded = cborEncoding[..bytesRead];
 
                 Format = format ?? throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
+                var credentialPublicKeyParsingMode = parseFullDetails
+                    ? CredentialPublicKeyParsingMode.ParseSupportedKeys
+                    : CredentialPublicKeyParsingMode.PreserveRawOnly;
                 AuthenticatorData = new AuthenticatorData(
                     authDataBytes ?? throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info),
-                    parseCredentialPublicKey: parseFullDetails);
+                    credentialPublicKeyParsingMode);
 
                 if (!encodedAttStmt.IsEmpty)
                 {

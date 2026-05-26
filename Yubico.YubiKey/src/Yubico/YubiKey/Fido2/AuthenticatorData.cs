@@ -241,14 +241,26 @@ namespace Yubico.YubiKey.Fido2
 
         private static bool HasUnsupportedCoseKeyType(ReadOnlyMemory<byte> encodedCoseKey)
         {
-            var cborMap = new CborMap<int>(encodedCoseKey);
-            if (!cborMap.Contains(CoseKeyTypeTag))
+            try
+            {
+                var cborMap = new CborMap<int>(encodedCoseKey);
+                if (!cborMap.Contains(CoseKeyTypeTag))
+                {
+                    return false;
+                }
+
+                var keyType = (CoseKeyType)cborMap.ReadInt32(CoseKeyTypeTag);
+                return keyType != CoseKeyType.Ec2 && keyType != CoseKeyType.Okp;
+            }
+            catch (Exception exception) when (
+                exception is CborContentException ||
+                exception is InvalidCastException ||
+                exception is InvalidOperationException ||
+                exception is FormatException ||
+                exception is ArgumentException)
             {
                 return false;
             }
-
-            var keyType = (CoseKeyType)cborMap.ReadInt32(CoseKeyTypeTag);
-            return keyType != CoseKeyType.Ec2 && keyType != CoseKeyType.Okp;
         }
 
         /// <summary>

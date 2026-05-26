@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// The raw CBOR encoding of the attestation statement (key 3 in the attestation object).
-        /// This is always available regardless of the parsing mode.
+        /// This is always available after decoding an attestation object.
         /// </summary>
         public ReadOnlyMemory<byte> EncodedAttestationStatement { get; private set; }
 

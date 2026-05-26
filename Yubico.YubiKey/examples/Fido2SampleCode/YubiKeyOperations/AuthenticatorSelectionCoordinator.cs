@@ -20,6 +20,21 @@ using Yubico.YubiKey;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {
+    /// <summary>
+    /// Coordinates concurrent authenticator selection workers for the FIDO2 sample.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The sample orchestration is:
+    /// </para>
+    /// <list type="bullet">
+    /// <item><description>Start one <see cref="Fido2.Fido2Session"/> worker per HID FIDO YubiKey.</description></item>
+    /// <item><description>Each worker captures its <see cref="KeyEntryData.SignalUserCancel"/> delegate when touch is requested.</description></item>
+    /// <item><description>The first worker to complete successfully records its device as the selected authenticator.</description></item>
+    /// <item><description>Captured delegates for non-selected workers are invoked once, allowing the SDK to send CTAPHID_CANCEL (0x11).</description></item>
+    /// <item><description>Late-arriving non-selected workers are canceled immediately after a winner exists.</description></item>
+    /// </list>
+    /// </remarks>
     internal sealed class AuthenticatorSelectionCoordinator
     {
         private readonly object _lockObject = new object();

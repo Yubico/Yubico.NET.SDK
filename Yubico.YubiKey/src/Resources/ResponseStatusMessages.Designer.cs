@@ -466,6 +466,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User presence was denied for authenticator selection..
+        /// </summary>
+        internal static string Fido2AuthenticatorSelectionDenied {
+            get {
+                return ResourceManager.GetString("Fido2AuthenticatorSelectionDenied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The credential was rejected because it is on the relying party&apos;s exclude list..
         /// </summary>
         internal static string Fido2CredentialExcluded {

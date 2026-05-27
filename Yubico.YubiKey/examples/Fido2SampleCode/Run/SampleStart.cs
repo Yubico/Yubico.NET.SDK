@@ -13,6 +13,10 @@
 // limitations under the License.
 
 using System;
+using System.IO;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Yubico.Core.Logging;
 // ReSharper disable once RedundantUsingDirective Used on line 44
 using Yubico.YubiKey.Sample.SharedCode;
 
@@ -28,6 +32,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         // Note that the GUI version is available only on Windows platforms.
         static void Main(string[] args)
         {
+            ConfigureSampleLogging();
+
             bool useGui = false;
 
             if (args.Length != 0)
@@ -43,7 +49,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 #else
                 SampleMenu.WriteMessage(
                     MessageType.Title, 0,
-                    "\n---The GUI version of this sample is not available on this plaform---\n");
+                    "\n---The GUI version of this sample is not available on this platform---\n");
 #endif
             }
             else
@@ -55,6 +61,24 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 fido2SampleRun.RunSample(false);
 #endif
             }
+        }
+
+        private static void ConfigureSampleLogging()
+        {
+            string settingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+            if (!File.Exists(settingsPath))
+            {
+                return;
+            }
+
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
+
+            Log.ConfigureLoggerFactory(builder => builder
+                .AddConfiguration(configuration.GetSection("Logging"))
+                .AddConsole());
         }
     }
 }

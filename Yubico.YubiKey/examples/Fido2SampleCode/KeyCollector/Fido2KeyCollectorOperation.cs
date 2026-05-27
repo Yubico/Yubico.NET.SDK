@@ -21,5 +21,6 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         GetAssertion = 2,
         Reset = 3,
         Verify = 4,
+        AuthenticatorSelection = 5,
     }
 }

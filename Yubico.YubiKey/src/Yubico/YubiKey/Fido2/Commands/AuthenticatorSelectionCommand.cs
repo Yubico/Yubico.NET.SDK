@@ -1,0 +1,55 @@
+// Copyright 2026 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Yubico.Core.Iso7816;
+
+namespace Yubico.YubiKey.Fido2.Commands
+{
+    /// <summary>
+    /// Requests User Presence (UP) on the connected YubiKey so the user may indicate their intention to use the YubiKey by touching it. This method can be useful in situations where a user has more than one YubiKey and the application needs to determine which key to use for a subsequent FIDO2 operation.
+    /// </summary>
+    /// <remarks>
+    /// The partner response class is <see cref="AuthenticatorSelectionResponse"/>.
+    /// Specified in CTAP 2.1 §6.9 as <c>authenticatorSelection</c> (command byte 0x0B). Supported by YubiKey firmware 5.5.1 and later.
+    /// There are no command parameters. Whether the authenticator implements this command
+    /// is firmware-specific; unsupported devices typically return <see cref="Yubico.YubiKey.Fido2.CtapStatus.InvalidCommand"/>.
+    /// </remarks>
+    public sealed class AuthenticatorSelectionCommand : IYubiKeyCommand<AuthenticatorSelectionResponse>
+    {
+        /// <inheritdoc />
+        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
+
+        /// <summary>
+        /// Constructs an instance of the <see cref="AuthenticatorSelectionCommand"/> class.
+        /// </summary>
+        public AuthenticatorSelectionCommand()
+        {
+        }
+
+        /// <inheritdoc />
+        public CommandApdu CreateCommandApdu()
+        {
+            byte[] payload = new byte[] { CtapConstants.CtapAuthenticatorSelectionCmd };
+            return new CommandApdu()
+            {
+                Ins = CtapConstants.CtapHidCbor,
+                Data = payload
+            };
+        }
+
+        /// <inheritdoc />
+        public AuthenticatorSelectionResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new AuthenticatorSelectionResponse(responseApdu);
+    }
+}

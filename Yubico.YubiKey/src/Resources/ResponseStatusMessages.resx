@@ -312,6 +312,9 @@
   <data name="Fido2AuthInvalid" xml:space="preserve">
     <value>The authentication was invalid for the requested FIDO2 operation.</value>
   </data>
+  <data name="Fido2AuthenticatorSelectionDenied" xml:space="preserve">
+    <value>User presence was denied for authenticator selection.</value>
+  </data>
   <data name="Fido2OperationCanceled" xml:space="preserve">
     <value>The operation was canceled by the caller or user.</value>
   </data>

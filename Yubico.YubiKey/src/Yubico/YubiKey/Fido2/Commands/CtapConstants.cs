@@ -27,5 +27,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         public const byte CtapMakeCredentialCmd = 0x01;
         public const byte CtapGetAssertionCmd = 0x02;
         public const byte CtapClientPinCmd = 0x06;
+        public const byte CtapAuthenticatorSelectionCmd = 0x0B;
     }
 }

@@ -63,26 +63,10 @@ namespace Yubico.YubiKey.Fido2
             // (because RawData has key 6, but AttestationObject should only have 1,2,3)
             Assert.NotEqual(ctapResponse, attestationEncoded);
 
-            // Verify byte-identity invariant: AttestationObject.EncodedAttestationStatement
-            // must be byte-identical to the bytes embedded under key 3 of RawData
-            var rawReader = new CborReader(ctapResponse, CborConformanceMode.Ctap2Canonical);
-            _ = rawReader.ReadStartMap();
-            ReadOnlyMemory<byte> originalAttStmt = ReadOnlyMemory<byte>.Empty;
-            while (rawReader.PeekState() != CborReaderState.EndMap)
-            {
-                int key = rawReader.ReadInt32();
-                if (key == 3)  // attStmt
-                {
-                    originalAttStmt = rawReader.ReadEncodedValue().ToArray();
-                }
-                else
-                {
-                    rawReader.SkipValue();
-                }
-            }
+            ReadOnlyMemory<byte> encodedAttStmt = ReadEncodedMapValue(attestationEncoded, 3);
 
-            Assert.True(data.AttestationObject.EncodedAttestationStatement.Span.SequenceEqual(originalAttStmt.Span),
-                "EncodedAttestationStatement must be byte-identical to original key 3 value from RawData");
+            Assert.True(data.AttestationObject.EncodedAttestationStatement.Span.SequenceEqual(encodedAttStmt.Span),
+                "EncodedAttestationStatement must be byte-identical to key 3 value from AttestationObject.CborEncode().");
         }
 
         /// <summary>
@@ -96,7 +80,6 @@ namespace Yubico.YubiKey.Fido2
 
             var ex = Assert.Throws<Ctap2DataException>(() => new MakeCredentialData(ctapResponse));
 
-            // Verify the exception message is appropriate
             Assert.NotNull(ex.Message);
         }
 
@@ -115,11 +98,11 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Complete packed attestation responses still populate
-        /// AttestationCertificates and AttestationAlgorithm correctly.
+        /// Complete packed self-attestation responses still populate
+        /// AttestationAlgorithm and leave AttestationCertificates unset.
         /// </summary>
         [Fact]
-        public void MakeCredentialData_WellFormedPackedAttestation_PopulatesFieldsCorrectly()
+        public void MakeCredentialData_WellFormedPackedSelfAttestation_PopulatesFieldsCorrectly()
         {
             byte[] ctapResponse = BuildMakeCredentialResponseWithCompletePackedAttestation();
 
@@ -127,9 +110,8 @@ namespace Yubico.YubiKey.Fido2
 
             Assert.Equal("packed", data.Format);
             Assert.False(data.AttestationStatement.IsEmpty);
-            // The helper encodes ES256 in the packed attestation statement.
             Assert.Equal(Cose.CoseAlgorithmIdentifier.ES256, data.AttestationAlgorithm);
-            // Certificates may be null in self-attestation, so we don't assert on that
+            Assert.Null(data.AttestationCertificates);
         }
 
         /// <summary>
@@ -285,13 +267,13 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteInt32(2);
             cbor.WriteByteString(authData);
 
-            // Key 3: attStmt (minimal valid packed statement)
+            // Key 3: attStmt (structurally complete packed statement)
             cbor.WriteInt32(3);
             cbor.WriteStartMap(2);
             cbor.WriteTextString("alg");
             cbor.WriteInt32(-7);  // ES256
             cbor.WriteTextString("sig");
-            cbor.WriteByteString(new byte[64]);  // Dummy signature
+            cbor.WriteByteString(SampleDerEncodedEs256Signature());
             cbor.WriteEndMap();
 
             // Key 6: unsignedExtensionOutputs
@@ -344,7 +326,7 @@ namespace Yubico.YubiKey.Fido2
                 cbor.WriteTextString("alg");
                 cbor.WriteInt32(-7);
                 cbor.WriteTextString("sig");
-                cbor.WriteByteString(new byte[64]);
+                cbor.WriteByteString(SampleDerEncodedEs256Signature());
                 cbor.WriteTextString("x5c");
                 cbor.WriteStartArray(0);
                 cbor.WriteEndArray();
@@ -377,7 +359,7 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteTextString("alg");
             cbor.WriteInt32(-7);
             cbor.WriteTextString("sig");
-            cbor.WriteByteString(new byte[64]);
+            cbor.WriteByteString(SampleDerEncodedEs256Signature());
             cbor.WriteEndMap();
 
             cbor.WriteEndMap();
@@ -418,7 +400,7 @@ namespace Yubico.YubiKey.Fido2
                 cbor.WriteTextString("alg");
                 cbor.WriteInt32(-7);
                 cbor.WriteTextString("sig");
-                cbor.WriteByteString(new byte[64]);
+                cbor.WriteByteString(SampleDerEncodedEs256Signature());
                 cbor.WriteEndMap();
             }
 
@@ -448,7 +430,7 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteTextString("alg");
             cbor.WriteTextString("ES256");  // WRONG: text string instead of int -7
             cbor.WriteTextString("sig");
-            cbor.WriteByteString(new byte[64]);
+            cbor.WriteByteString(SampleDerEncodedEs256Signature());
             cbor.WriteEndMap();
 
             cbor.WriteEndMap();
@@ -490,7 +472,7 @@ namespace Yubico.YubiKey.Fido2
             }
 
             cbor.WriteTextString("sig");
-            cbor.WriteByteString(new byte[64]);
+            cbor.WriteByteString(SampleDerEncodedEs256Signature());
 
             if (certificate is not null)
             {
@@ -501,6 +483,39 @@ namespace Yubico.YubiKey.Fido2
             }
 
             cbor.WriteEndMap();
+        }
+
+        private static ReadOnlyMemory<byte> ReadEncodedMapValue(byte[] encodedMap, int keyToFind)
+        {
+            var reader = new CborReader(encodedMap, CborConformanceMode.Ctap2Canonical);
+            _ = reader.ReadStartMap();
+            while (reader.PeekState() != CborReaderState.EndMap)
+            {
+                int key = reader.ReadInt32();
+                if (key == keyToFind)
+                {
+                    return reader.ReadEncodedValue().ToArray();
+                }
+
+                reader.SkipValue();
+            }
+
+            throw new InvalidOperationException($"CBOR map did not contain key {keyToFind}.");
+        }
+
+        private static byte[] SampleDerEncodedEs256Signature()
+        {
+            byte[] signature = new byte[70];
+            signature[0] = 0x30;
+            signature[1] = 0x44;
+            signature[2] = 0x02;
+            signature[3] = 0x20;
+            Array.Fill(signature, (byte)0x11, 4, 32);
+            signature[36] = 0x02;
+            signature[37] = 0x20;
+            Array.Fill(signature, (byte)0x22, 38, 32);
+
+            return signature;
         }
 
         /// <summary>

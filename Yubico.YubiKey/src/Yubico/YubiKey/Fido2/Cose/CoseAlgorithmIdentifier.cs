@@ -31,8 +31,13 @@ namespace Yubico.YubiKey.Fido2.Cose
         None = 0,
 
         /// <summary>
-        /// ECDSA with SHA-256 using the NIST P-256 curve.
+        /// ECDSA with SHA-256, usually using the NIST P-256 curve.
         /// </summary>
+        /// <remarks>
+        /// COSE generally constrains the hash function, while WebAuthn/FIDO2
+        /// constrains this identifier to NIST P-256.
+        /// See https://www.w3.org/TR/2026/CR-webauthn-3-20260526/#sctn-alg-identifier.
+        /// </remarks>
         ES256 = -7,
 
         /// <summary>
@@ -41,13 +46,23 @@ namespace Yubico.YubiKey.Fido2.Cose
         ECDHwHKDF256 = -25,
 
         /// <summary>
-        /// ECDSA with SHA-384 using the NIST P-384 curve.
+        /// ECDSA with SHA-384, usually using the NIST P-384 curve.
         /// </summary>
+        /// <remarks>
+        /// COSE generally constrains the hash function, while WebAuthn/FIDO2
+        /// constrains this identifier to NIST P-384.
+        /// See https://www.w3.org/TR/2026/CR-webauthn-3-20260526/#sctn-alg-identifier.
+        /// </remarks>
         ES384 = -35,
 
         /// <summary>
-        /// ECDSA with SHA-512 using the NIST P-521 curve.
+        /// ECDSA with SHA-512, usually using the NIST P-521 curve.
         /// </summary>
+        /// <remarks>
+        /// COSE generally constrains the hash function, while WebAuthn/FIDO2
+        /// constrains this identifier to NIST P-521.
+        /// See https://www.w3.org/TR/2026/CR-webauthn-3-20260526/#sctn-alg-identifier.
+        /// </remarks>
         ES512 = -36,
 
         /// <summary>

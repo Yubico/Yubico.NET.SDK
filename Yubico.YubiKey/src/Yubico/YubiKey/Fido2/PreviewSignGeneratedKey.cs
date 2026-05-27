@@ -49,18 +49,22 @@ namespace Yubico.YubiKey.Fido2
         /// Gets the CBOR-encoded COSE public key for the generated signing key.
         /// </summary>
         /// <remarks>
-        /// This is the generated signing public key in COSE_Key format, copied
-        /// from the embedded attestation object's attested credential data.
+        /// This is the
+        /// <see href="https://yubicolabs.github.io/webauthn-sign-extension/4/#dom-authenticationextensionssigngeneratedkey-publickey"><c>publicKey</c></see>
+        /// field of the <c>AuthenticationExtensionsSignGeneratedKey</c> client
+        /// extension output.
         /// </remarks>
         public ReadOnlyMemory<byte> PublicKey => _publicKey;
 
         /// <summary>
-        /// Gets the signature algorithm chosen for the generated signing key.
+        /// Gets the signing algorithm chosen from the <c>algorithms</c>
+        /// extension input.
         /// </summary>
         /// <remarks>
-        /// This is the algorithm chosen from the requested algorithm list. It
-        /// can differ from the COSE_Key <c>alg</c> attribute for split signing
-        /// algorithms.
+        /// This expresses how to communicate inputs to the authenticator during
+        /// signing, and may be different from the <c>3 (alg)</c> attribute of
+        /// the <see cref="PublicKey"/>, which expresses how third party
+        /// consumers can use the public key.
         /// </remarks>
         public CoseAlgorithmIdentifier Algorithm { get; init; }
 

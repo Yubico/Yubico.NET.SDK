@@ -136,7 +136,7 @@ namespace Yubico.YubiKey.Fido2
         /// Returns the number of bytes read from the encoding.
         /// </param>
         /// <exception cref="Ctap2DataException">
-        /// The cborEncoding is not a valid attestation object.
+        /// The cborEncoding is not a well-formed attestation object.
         /// </exception>
         public AttestationObject(ReadOnlyMemory<byte> cborEncoding, out int bytesRead)
         {

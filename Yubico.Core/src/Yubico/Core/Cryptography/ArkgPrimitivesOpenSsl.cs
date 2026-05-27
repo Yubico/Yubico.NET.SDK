@@ -143,15 +143,8 @@ namespace Yubico.Core.Cryptography
             byte[] contextBl = Concat(Encoding.ASCII.GetBytes("ARKG-Derive-Key-BL."), contextPrime);
 
             (byte[] ikmTau, byte[] cipher) = HmacKemEncaps(kemPublicKey, inputKeyingMaterial, contextKem);
-            BigInteger tau;
-            try
-            {
-                tau = BlPrf(ikmTau, contextBl);
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(ikmTau);
-            }
+
+            var tau = BlPrf(ikmTau, contextBl);
 
             byte[] derivedPublicKey = BlBlindPublicKey(blindingPublicKey, tau);
             return (derivedPublicKey, cipher);
@@ -217,25 +210,15 @@ namespace Yubico.Core.Cryptography
                 context.ToArray());
             byte[] mk = HkdfUtilities.DeriveKey(kPrime, salt: ReadOnlySpan<byte>.Empty, contextInfo: macInfo, length: 32).ToArray();
 
-            byte[] tag;
-            try
-            {
-                using HMACSHA256 hmac = new HMACSHA256(mk);
-                byte[] full = hmac.ComputeHash(ephemeralPublicKey);
-                tag = full.AsSpan(0, 16).ToArray();
-                CryptographicOperations.ZeroMemory(full);
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(mk);
-            }
+            using HMACSHA256 hmac = new HMACSHA256(mk);
+            byte[] full = hmac.ComputeHash(ephemeralPublicKey);
+            byte[] tag = full.AsSpan(0, 16).ToArray();
 
             byte[] sharedInfo = Concat(
                 Encoding.ASCII.GetBytes("ARKG-KEM-HMAC-shared."),
                 dstAug,
                 context.ToArray());
             byte[] shared = HkdfUtilities.DeriveKey(kPrime, salt: ReadOnlySpan<byte>.Empty, contextInfo: sharedInfo, length: kPrime.Length).ToArray();
-            CryptographicOperations.ZeroMemory(kPrime);
 
             // Ciphertext = MAC tag || ephemeral public key.
             byte[] ciphertext = new byte[tag.Length + ephemeralPublicKey.Length];

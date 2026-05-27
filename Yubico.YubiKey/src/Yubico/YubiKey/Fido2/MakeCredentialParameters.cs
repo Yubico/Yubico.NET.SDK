@@ -740,10 +740,10 @@ namespace Yubico.YubiKey.Fido2
         /// The FIDO2 <see cref="AuthenticatorInfo"/> for the YubiKey being used.
         /// </param>
         /// <param name="algorithms">
-        /// The algorithms to use for key generation, ordered by preference.
+        /// A list of acceptable signature algorithms, ordered from most preferred to least preferred.
         /// </param>
         /// <param name="flags">
-        /// The supported flag combination to encode in the extension input.
+        /// The user presence (UP) and user verification (UV) policy for this signing key pair.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <paramref name="authenticatorInfo"/> or <paramref name="algorithms"/> is null.

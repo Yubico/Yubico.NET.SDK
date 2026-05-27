@@ -95,10 +95,6 @@ namespace Yubico.YubiKey.Fido2
                 0x55, 0x66, 0x77, 0x88,
             };
 
-        // ------------------------------------------------------------------
-        // Default parse
-        // ------------------------------------------------------------------
-
         [Fact]
         public void Parse_PackedFormat_FullParse_PopulatesAllFields()
         {

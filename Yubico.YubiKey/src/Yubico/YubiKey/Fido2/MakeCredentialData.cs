@@ -88,13 +88,8 @@ namespace Yubico.YubiKey.Fido2
         public ReadOnlyMemory<byte> AttestationStatement { get; private set; }
 
         /// <summary>
-        /// The encoded CBOR map that describes the attestation statement.
+        /// The encoded CBOR map that contains the attestation statement.
         /// </summary>
-        /// <remarks>
-        /// Use this with <see cref="Format"/> and <see cref="AuthenticatorData"/>
-        /// when interoperating with WebAuthn data types that require the
-        /// original attestation object fields.
-        /// </remarks>
         public ReadOnlyMemory<byte> EncodedAttestationStatement { get; private set; }
 
         /// <summary>
@@ -260,16 +255,19 @@ namespace Yubico.YubiKey.Fido2
         /// that is the <see cref="AttestationStatement"/>.
         /// </summary>
         /// <remarks>
-        /// If the signature verifies, this method will return <c>true</c>, and
-        /// if it does not verify, it will return <c>false</c>. If there are no
-        /// certificates in the list, this method will throw an exception.
+        /// This verifies only the correctness of the attestation signature. It
+        /// does not establish whether the attestation certificate is trusted.
+        /// Trust validation requires application-provided trust roots and
+        /// certificate path validation, which this method does not perform.
+        /// If there are no certificates in the list, this method will throw an
+        /// exception.
         /// </remarks>
         /// <param name="clientDataHash">
         /// The client data hash sent to the YubiKey to make the credential.
         /// </param>
         /// <returns>
-        /// A boolean, <c>true</c> if the attestation statement (the signature)
-        /// verifies, <c>false</c> otherwise.
+        /// A boolean, <c>true</c> if the attestation statement signature is
+        /// correct, <c>false</c> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// There is no cert in the attestation certificate list.

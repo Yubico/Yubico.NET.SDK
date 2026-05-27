@@ -64,8 +64,8 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// Encode the MakeCredential extension input map: {3:[algs], 4:flags}.
         /// </summary>
-        /// <param name="algorithms">The algorithms to include in the input map.</param>
-        /// <param name="flags">The supported flag combination to encode.</param>
+        /// <param name="algorithms">A list of acceptable signature algorithms, ordered from most preferred to least preferred.</param>
+        /// <param name="flags">The user presence (UP) and user verification (UV) policy for this signing key pair.</param>
         /// <returns>The CBOR-encoded extension input.</returns>
         public static byte[] EncodeGenerateKeyInput(
             ReadOnlySpan<CoseAlgorithmIdentifier> algorithms,

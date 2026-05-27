@@ -28,9 +28,9 @@ namespace Yubico.YubiKey.Fido2
     /// <remarks>
     /// <para>
     /// An attestation object is returned by the authenticator during credential creation
-    /// (MakeCredential). It contains the attestation format identifier, authenticator data,
-    /// and an attestation statement that can be used to verify the authenticity of the
-    /// credential creation process.
+    /// (MakeCredential). It contains the attestation format identifier,
+    /// authenticator data, and the attestation statement for checking the
+    /// attestation signature over the credential creation data.
     /// </para>
     /// <para>
     /// The CBOR structure is defined in CTAP 2.1 section 6.1.2 as:

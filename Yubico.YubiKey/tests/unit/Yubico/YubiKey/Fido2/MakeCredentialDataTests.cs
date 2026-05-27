@@ -97,21 +97,28 @@ namespace Yubico.YubiKey.Fido2
             Assert.NotNull(ex.Message);
         }
 
-        /// <summary>
-        /// Complete packed self-attestation responses still populate
-        /// AttestationAlgorithm and leave AttestationCertificates unset.
-        /// </summary>
         [Fact]
-        public void MakeCredentialData_WellFormedPackedSelfAttestation_PopulatesFieldsCorrectly()
+        public void MakeCredentialData_CapturedCertificateBackedPackedAttestation_PopulatesFieldsCorrectly()
         {
-            byte[] ctapResponse = BuildMakeCredentialResponseWithCompletePackedAttestation();
+            byte[] ctapResponse = CredentialDataTests.GetSampleEncoding();
 
             var data = new MakeCredentialData(ctapResponse);
 
             Assert.Equal("packed", data.Format);
-            Assert.False(data.AttestationStatement.IsEmpty);
             Assert.Equal(Cose.CoseAlgorithmIdentifier.ES256, data.AttestationAlgorithm);
-            Assert.Null(data.AttestationCertificates);
+            Assert.False(data.AttestationStatement.IsEmpty);
+            Assert.False(data.EncodedAttestationStatement.IsEmpty);
+            Assert.Equal(3, CountEncodedMapEntries(data.EncodedAttestationStatement));
+            Assert.NotNull(data.AttestationCertificates);
+            X509Certificate2 certificate = Assert.Single(data.AttestationCertificates!);
+            Assert.Contains("Yubico", certificate.Subject, StringComparison.Ordinal);
+            Assert.Equal(180, data.AuthenticatorData.EncodedAuthenticatorData.Length);
+            Assert.True(data.AuthenticatorData.UserPresence);
+            Assert.True(data.AuthenticatorData.UserVerification);
+            Assert.NotNull(data.AuthenticatorData.CredentialId);
+            Assert.Equal(48, data.AuthenticatorData.CredentialId!.Id.Length);
+            Assert.NotNull(data.AuthenticatorData.CredentialPublicKey);
+            Assert.NotNull(data.AuthenticatorData.EncodedCredentialPublicKey);
         }
 
         /// <summary>
@@ -288,7 +295,9 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Builds a CTAP response with packed format but malformed attestation statement.
+        /// Builds a synthetic CTAP response with packed format but a malformed
+        /// attestation statement. This is a structural parser fixture, not a
+        /// valid attestation.
         /// </summary>
         private static byte[] BuildMakeCredentialResponseWithMalformedPackedAttestation(
             bool missingSig,
@@ -313,7 +322,7 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteInt32(3);
             if (missingSig)
             {
-                // Only 'alg', missing 'sig'
+                // Malformed packed statement: only 'alg', missing 'sig'.
                 cbor.WriteStartMap(1);
                 cbor.WriteTextString("alg");
                 cbor.WriteInt32(-7);
@@ -321,7 +330,7 @@ namespace Yubico.YubiKey.Fido2
             }
             else
             {
-                // Has alg, sig, x5c, plus an unexpected fourth key
+                // Malformed packed statement: alg, sig, x5c, plus an unexpected fourth key.
                 cbor.WriteStartMap(4);
                 cbor.WriteTextString("alg");
                 cbor.WriteInt32(-7);
@@ -334,34 +343,6 @@ namespace Yubico.YubiKey.Fido2
                 cbor.WriteInt32(42);
                 cbor.WriteEndMap();
             }
-            cbor.WriteEndMap();
-            return cbor.Encode();
-        }
-
-        /// <summary>
-        /// Builds a structurally complete CTAP response with packed attestation.
-        /// </summary>
-        private static byte[] BuildMakeCredentialResponseWithCompletePackedAttestation()
-        {
-            byte[] authData = BuildMinimalAuthDataWithEs256Key();
-
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(3);
-
-            cbor.WriteInt32(1);
-            cbor.WriteTextString("packed");
-
-            cbor.WriteInt32(2);
-            cbor.WriteByteString(authData);
-
-            cbor.WriteInt32(3);
-            cbor.WriteStartMap(2);
-            cbor.WriteTextString("alg");
-            cbor.WriteInt32(-7);
-            cbor.WriteTextString("sig");
-            cbor.WriteByteString(SampleDerEncodedEs256Signature());
-            cbor.WriteEndMap();
-
             cbor.WriteEndMap();
             return cbor.Encode();
         }
@@ -409,8 +390,8 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Builds a CTAP response with packed attestation where 'alg' is a text string instead of int.
-        /// This triggers InvalidOperationException when CborMap tries to read it as int.
+        /// Builds a synthetic malformed packed parser fixture where 'alg' is a
+        /// text string instead of an int.
         /// </summary>
         private static byte[] BuildMakeCredentialResponseWithWrongAlgType()
         {
@@ -428,7 +409,7 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteInt32(3);
             cbor.WriteStartMap(2);
             cbor.WriteTextString("alg");
-            cbor.WriteTextString("ES256");  // WRONG: text string instead of int -7
+            cbor.WriteTextString("ES256");
             cbor.WriteTextString("sig");
             cbor.WriteByteString(SampleDerEncodedEs256Signature());
             cbor.WriteEndMap();
@@ -501,6 +482,21 @@ namespace Yubico.YubiKey.Fido2
             }
 
             throw new InvalidOperationException($"CBOR map did not contain key {keyToFind}.");
+        }
+
+        private static int CountEncodedMapEntries(ReadOnlyMemory<byte> encodedMap)
+        {
+            var reader = new CborReader(encodedMap, CborConformanceMode.Ctap2Canonical);
+            int? count = reader.ReadStartMap();
+            while (reader.PeekState() != CborReaderState.EndMap)
+            {
+                reader.SkipValue();
+                reader.SkipValue();
+            }
+
+            reader.ReadEndMap();
+
+            return count ?? throw new InvalidOperationException("Expected definite-length CBOR map.");
         }
 
         private static byte[] SampleDerEncodedEs256Signature()

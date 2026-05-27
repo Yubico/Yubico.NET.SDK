@@ -204,18 +204,13 @@ namespace Yubico.YubiKey.Fido2
         private static IReadOnlyDictionary<string, ReadOnlyMemory<byte>> ParseUnsignedExtensionOutputs(
             ReadOnlyMemory<byte> encodedMap)
         {
-            var cbor = new CborReader(encodedMap, CborConformanceMode.Ctap2Canonical);
-            int? entries = cbor.ReadStartMap();
-            int count = entries ?? 0;
-            var result = new Dictionary<string, ReadOnlyMemory<byte>>(count, StringComparer.Ordinal);
-            while (count > 0)
+            var cborMap = new CborMap<string>(encodedMap);
+            var result = new Dictionary<string, ReadOnlyMemory<byte>>(cborMap.Count, StringComparer.Ordinal);
+            foreach (string extensionKey in cborMap.Keys)
             {
-                string extensionKey = cbor.ReadTextString();
-                result[extensionKey] = cbor.ReadEncodedValue().ToArray();
-                count--;
+                result[extensionKey] = cborMap.ReadEncodedValue(extensionKey);
             }
 
-            cbor.ReadEndMap();
             return result;
         }
 

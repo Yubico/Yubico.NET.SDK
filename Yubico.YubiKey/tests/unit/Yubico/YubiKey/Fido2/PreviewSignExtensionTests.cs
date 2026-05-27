@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void ParseGenerateKeyFromUnsignedExtensions_KeyAt6()
         {
-            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload(algorithm: null);
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload();
             byte[] signedPayload = BuildGeneratedKeyAlgorithmPayload();
             byte[] response = BuildMakeCredentialResponseWithSplitPreviewSignOutput(unsignedPayload, signedPayload);
 
@@ -137,22 +137,22 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void ParseGenerateKeyFromAuthenticatorDataExtensions_Throws_WhenUnsignedOutputMissing()
+        public void ParseGenerateKeyFromAuthenticatorDataExtensions_ReturnsNull_WhenUnsignedOutputMissing()
         {
-            byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload();
+            byte[] previewSignPayload = BuildGeneratedKeyAlgorithmPayload();
             byte[] response = BuildMakeCredentialResponseWithSignedExtension(previewSignPayload);
 
             var data = new MakeCredentialData(response);
 
-            _ = Assert.Throws<Ctap2DataException>(
-                () => data.GetPreviewSignGeneratedKey());
+            Assert.Null(data.GetPreviewSignGeneratedKey());
         }
 
         [Fact]
         public void ParseGenerateKeyFromAuthenticatorDataExtensions_Throws_WhenOutputIsNotMap()
         {
-            byte[] previewSignPayload = BuildByteString(new byte[] { 0x01 });
-            byte[] response = BuildMakeCredentialResponseWithSignedExtension(previewSignPayload);
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload();
+            byte[] signedPayload = BuildByteString(new byte[] { 0x01 });
+            byte[] response = BuildMakeCredentialResponseWithSplitPreviewSignOutput(unsignedPayload, signedPayload);
 
             var data = new MakeCredentialData(response);
 
@@ -174,21 +174,20 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void ParseGenerateKeyFromUnsignedExtensions_Throws_WhenSignedAlgorithmMissing()
+        public void ParseGenerateKeyFromUnsignedExtensions_ReturnsNull_WhenSignedOutputMissing()
         {
-            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload(algorithm: null);
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload();
             byte[] response = BuildMakeCredentialResponseWithUnsignedExtensions(unsignedPayload);
 
             var data = new MakeCredentialData(response);
 
-            _ = Assert.Throws<Ctap2DataException>(
-                () => data.GetPreviewSignGeneratedKey());
+            Assert.Null(data.GetPreviewSignGeneratedKey());
         }
 
         [Fact]
         public void ParseGenerateKeyFromUnsignedExtensions_Throws_WhenSignedAlgorithmOutputIsNotMap()
         {
-            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload(algorithm: null);
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload();
             byte[] signedPayload = BuildByteString(new byte[] { 0x01 });
             byte[] response = BuildMakeCredentialResponseWithSplitPreviewSignOutput(unsignedPayload, signedPayload);
 
@@ -201,69 +200,44 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void ParseGenerateKey_Throws_WhenAlgorithmMissing()
         {
-            byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(algorithm: null);
+            byte[] signedPayload = BuildGeneratedKeyPayloadWithoutAlgorithm();
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload();
 
             _ = Assert.Throws<Ctap2DataException>(
-                () => PreviewSignExtension.DecodeGeneratedKey(previewSignPayload));
+                () => PreviewSignExtension.DecodeGeneratedKey(signedPayload, unsignedPayload));
         }
 
         [Fact]
-        public void DecodeGeneratedKeyAlgorithm_Throws_WhenAlgorithmMissing()
-        {
-            byte[] previewSignPayload = BuildGeneratedKeyPayloadWithoutAlgorithm();
-
-            _ = Assert.Throws<Ctap2DataException>(
-                () => PreviewSignExtension.DecodeGeneratedKeyAlgorithm(previewSignPayload));
-        }
-
-        [Fact]
-        public void DecodeGeneratedKeyAlgorithm_ReturnsAlgorithm_WhenPresent()
-        {
-            byte[] previewSignPayload = BuildGeneratedKeyAlgorithmPayload();
-
-            CoseAlgorithmIdentifier algorithm = PreviewSignExtension.DecodeGeneratedKeyAlgorithm(previewSignPayload);
-
-            Assert.Equal(PreviewSignParametersExtensions.ArkgP256Esp256, algorithm);
-        }
-
-        [Fact]
-        public void DecodeGeneratedKeyAlgorithm_IgnoresUnknownOpaqueValues()
-        {
-            byte[] previewSignPayload = BuildGeneratedKeyAlgorithmPayload(includeUnknownOpaqueValue: true);
-
-            CoseAlgorithmIdentifier algorithm = PreviewSignExtension.DecodeGeneratedKeyAlgorithm(previewSignPayload);
-
-            Assert.Equal(PreviewSignParametersExtensions.ArkgP256Esp256, algorithm);
-        }
-
-        [Fact]
-        public void DecodeGeneratedKeyAlgorithm_Throws_WhenAlgorithmValueIsMalformed()
+        public void DecodeGeneratedKey_Throws_WhenAlgorithmValueIsMalformed()
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(1);
             cbor.WriteInt32(3);
             cbor.WriteTextString("not-an-algorithm");
             cbor.WriteEndMap();
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload();
 
             _ = Assert.Throws<Ctap2DataException>(
-                () => PreviewSignExtension.DecodeGeneratedKeyAlgorithm(cbor.Encode()));
+                () => PreviewSignExtension.DecodeGeneratedKey(cbor.Encode(), unsignedPayload));
         }
 
         [Fact]
         public void ParseGenerateKey_Throws_WhenOutputIsNotMap()
         {
-            byte[] previewSignPayload = BuildByteString(new byte[] { 0x01 });
+            byte[] signedPayload = BuildGeneratedKeyAlgorithmPayload();
+            byte[] unsignedPayload = BuildByteString(new byte[] { 0x01 });
 
             _ = Assert.Throws<Ctap2DataException>(
-                () => PreviewSignExtension.DecodeGeneratedKey(previewSignPayload));
+                () => PreviewSignExtension.DecodeGeneratedKey(signedPayload, unsignedPayload));
         }
 
         [Fact]
         public void ParseGenerateKey_PreservesAlgorithmValue()
         {
-            byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(CoseAlgorithmIdentifier.ES256);
+            byte[] signedPayload = BuildGeneratedKeyAlgorithmPayload(CoseAlgorithmIdentifier.ES256);
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload();
 
-            PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
+            PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(signedPayload, unsignedPayload);
 
             Assert.NotNull(generated);
             Assert.Equal(CoseAlgorithmIdentifier.ES256, generated!.Algorithm);
@@ -272,9 +246,10 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void DecodeGeneratedKey_IgnoresUnknownOpaqueValues()
         {
-            byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(includeUnknownOpaqueValue: true);
+            byte[] signedPayload = BuildGeneratedKeyAlgorithmPayload(includeUnknownOpaqueValue: true);
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload(includeUnknownOpaqueValue: true);
 
-            PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
+            PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(signedPayload, unsignedPayload);
 
             Assert.NotNull(generated);
             Assert.Equal(PreviewSignParametersExtensions.ArkgP256Esp256, generated!.Algorithm);
@@ -287,10 +262,11 @@ namespace Yubico.YubiKey.Fido2
             byte[] expectedCoseKey = BuildArkgCoseKey();
             _ = Assert.Throws<NotSupportedException>(
                 () => CoseKey.Create(expectedCoseKey, out _));
-            byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(
+            byte[] signedPayload = BuildGeneratedKeyAlgorithmPayload();
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload(
                 credentialPublicKeyCose: expectedCoseKey);
 
-            var generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
+            var generated = PreviewSignExtension.DecodeGeneratedKey(signedPayload, unsignedPayload);
 
             Assert.NotNull(generated);
             Assert.Equal(expectedCoseKey, generated!.PublicKey.ToArray());
@@ -299,14 +275,14 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void ParseGenerateKey_AcceptsHardwareArkgCoseMetadata()
         {
-            byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(
-                PreviewSignParametersExtensions.ArkgP256Esp256,
+            byte[] signedPayload = BuildGeneratedKeyAlgorithmPayload();
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload(
                 arkgKeyType: -65537,
                 arkgAlgorithm: -65700,
                 blindingAlgorithm: (int)CoseAlgorithmIdentifier.ES256,
                 kemAlgorithm: -25);
 
-            var generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
+            var generated = PreviewSignExtension.DecodeGeneratedKey(signedPayload, unsignedPayload);
 
             Assert.NotNull(generated);
             Assert.NotEmpty(generated!.PublicKey.Span.ToArray());
@@ -315,10 +291,10 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void DerivePublicKey_Throws_WhenArkgCoseKeyMetadataConflicts()
         {
-            byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(
-                PreviewSignParametersExtensions.ArkgP256Esp256,
-                arkgAlgorithm: (int)CoseAlgorithmIdentifier.ES256);
-            PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
+            byte[] signedPayload = BuildGeneratedKeyAlgorithmPayload();
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload(
+                arkgAlgorithm: CoseAlgorithmArkgP256 - 1);
+            PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(signedPayload, unsignedPayload);
 
             _ = Assert.Throws<Ctap2DataException>(
                 () => generated!.DerivePublicKey(new byte[32], new byte[] { 0x01 }));
@@ -327,10 +303,10 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void DerivePublicKey_Throws_WhenArkgCoseKeyTypeConflicts()
         {
-            byte[] previewSignPayload = BuildSyntheticGeneratedKeyPayload(
-                PreviewSignParametersExtensions.ArkgP256Esp256,
+            byte[] signedPayload = BuildGeneratedKeyAlgorithmPayload();
+            byte[] unsignedPayload = BuildSyntheticGeneratedKeyPayload(
                 arkgKeyType: (int)CoseKeyType.Ec2);
-            PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(previewSignPayload);
+            PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(signedPayload, unsignedPayload);
 
             _ = Assert.Throws<Ctap2DataException>(
                 () => generated!.DerivePublicKey(new byte[32], new byte[] { 0x01 }));
@@ -627,12 +603,14 @@ namespace Yubico.YubiKey.Fido2
             return cbor.Encode();
         }
 
-        private static byte[] BuildGeneratedKeyAlgorithmPayload(bool includeUnknownOpaqueValue = false)
+        private static byte[] BuildGeneratedKeyAlgorithmPayload(
+            CoseAlgorithmIdentifier algorithm = PreviewSignParametersExtensions.ArkgP256Esp256,
+            bool includeUnknownOpaqueValue = false)
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(includeUnknownOpaqueValue ? 2 : 1);
             cbor.WriteInt32(3);
-            cbor.WriteInt32((int)PreviewSignParametersExtensions.ArkgP256Esp256);
+            cbor.WriteInt32((int)algorithm);
             if (includeUnknownOpaqueValue)
             {
                 WriteUnknownOpaqueEntry(cbor);
@@ -652,10 +630,9 @@ namespace Yubico.YubiKey.Fido2
             return cbor.Encode();
         }
 
-        // Builds a previewSign generated-key payload. The signed extension output
-        // carries algorithm (3); the unsigned output carries attestation object (7).
+        // Builds the unsigned previewSign generated-key payload, which carries
+        // only the attestation object (7).
         private static byte[] BuildSyntheticGeneratedKeyPayload(
-            CoseAlgorithmIdentifier? algorithm = PreviewSignParametersExtensions.ArkgP256Esp256,
             int arkgKeyType = CoseKeyTypeArkgPub,
             int arkgAlgorithm = CoseAlgorithmArkgP256,
             int blindingAlgorithm = (int)CoseAlgorithmIdentifier.Esp256,
@@ -671,13 +648,7 @@ namespace Yubico.YubiKey.Fido2
                 credentialPublicKeyCose);
 
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap((algorithm.HasValue ? 2 : 1) + (includeUnknownOpaqueValue ? 1 : 0));
-            if (algorithm.HasValue)
-            {
-                cbor.WriteInt32(3);
-                cbor.WriteInt32((int)algorithm.Value);
-            }
-
+            cbor.WriteStartMap(1 + (includeUnknownOpaqueValue ? 1 : 0));
             cbor.WriteInt32(7);
             cbor.WriteByteString(innerAttestation);
             if (includeUnknownOpaqueValue)

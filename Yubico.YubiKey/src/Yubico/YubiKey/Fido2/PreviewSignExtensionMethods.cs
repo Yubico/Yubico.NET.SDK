@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using Yubico.YubiKey.Fido2.Cose;
-
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
@@ -36,30 +33,19 @@ namespace Yubico.YubiKey.Fido2
         public static PreviewSignGeneratedKey? GetPreviewSignGeneratedKey(
             this MakeCredentialData data)
         {
-            CoseAlgorithmIdentifier? signedAlgorithm = null;
-            byte[]? signedValue = null;
-            if (data.AuthenticatorData.Extensions is not null &&
-                data.AuthenticatorData.Extensions.TryGetValue(Extensions.PreviewSign, out signedValue))
+            if (data.AuthenticatorData.Extensions is null ||
+                !data.AuthenticatorData.Extensions.TryGetValue(Extensions.PreviewSign, out byte[]? signedValue))
             {
-                signedAlgorithm = PreviewSignExtension.DecodeGeneratedKeyAlgorithm(signedValue);
+                return null;
             }
 
-            if (data.UnsignedExtensionOutputs is not null &&
-                data.UnsignedExtensionOutputs.TryGetValue(Extensions.PreviewSign, out var unsignedValue))
+            if (data.UnsignedExtensionOutputs is null ||
+                !data.UnsignedExtensionOutputs.TryGetValue(Extensions.PreviewSign, out var unsignedValue))
             {
-                if (signedAlgorithm is null)
-                {
-                    throw new Ctap2DataException(
-                        "previewSign generated key is missing signed algorithm output.");
-                }
-
-                return PreviewSignExtension.DecodeGeneratedKey(unsignedValue, signedAlgorithm);
+                return null;
             }
 
-            return signedValue is null
-                ? null
-                : throw new Ctap2DataException(
-                    "previewSign generated key is missing unsigned extension output.");
+            return PreviewSignExtension.DecodeGeneratedKey(signedValue, unsignedValue);
         }
     }
 }

@@ -198,7 +198,14 @@ namespace Yubico.YubiKey.Fido2
                 int bytesRead = coseKeyBytes.Length;
                 EncodedCredentialPublicKey = coseKeyBytes.ToArray();
 
-                CredentialPublicKey = CoseKey.Create(coseKeyBytes, out _);
+                try
+                {
+                    CredentialPublicKey = CoseKey.Create(coseKeyBytes, out _);
+                }
+                catch (NotSupportedException)
+                {
+                    CredentialPublicKey = null;
+                }
 
                 offset += bytesRead;
             }

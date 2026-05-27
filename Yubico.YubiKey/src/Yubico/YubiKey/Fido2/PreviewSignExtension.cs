@@ -121,96 +121,45 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Decode the previewSign generated-key payload from an extension output value.
+        /// Decode the previewSign generated-key payload from the paired signed
+        /// and unsigned extension output values.
         /// </summary>
-        /// <param name="previewSignValue">The CBOR-encoded previewSign generated-key payload.</param>
+        /// <param name="signedOutputs">The CBOR-encoded signed previewSign output containing the algorithm.</param>
+        /// <param name="unsignedOutputs">The CBOR-encoded unsigned previewSign output containing the attestation object.</param>
         /// <returns>
         /// A generated key container if the payload contains well formed generated key material.
         /// </returns>
         /// <exception cref="Ctap2DataException">
         /// The payload contains malformed generated-key material.
         /// </exception>
-        public static PreviewSignGeneratedKey? DecodeGeneratedKey(ReadOnlyMemory<byte> previewSignValue) =>
-            DecodeGeneratedKey(previewSignValue, signedOutputAlgorithm: null);
-
-        /// <summary>
-        /// Decode the generated-key algorithm from a previewSign output value.
-        /// </summary>
-        /// <param name="previewSignValue">The CBOR-encoded previewSign output value.</param>
-        /// <returns>
-        /// The decoded <see cref="CoseAlgorithmIdentifier"/>.
-        /// </returns>
-        /// <exception cref="Ctap2DataException">
-        /// The payload is malformed or missing the required algorithm key.
-        /// </exception>
-        public static CoseAlgorithmIdentifier DecodeGeneratedKeyAlgorithm(ReadOnlyMemory<byte> previewSignValue)
+        public static PreviewSignGeneratedKey? DecodeGeneratedKey(
+            ReadOnlyMemory<byte> signedOutputs,
+            ReadOnlyMemory<byte> unsignedOutputs)
         {
             try
             {
-                var map = ReadPreviewSignMap<int>(
-                    previewSignValue,
-                    "previewSign generated key algorithm output is not a map.");
-                if (map.Contains((int)MakeCredentialKey.Algorithm))
-                {
-                    return (CoseAlgorithmIdentifier)map.ReadInt32((int)MakeCredentialKey.Algorithm);
-                }
-
-                throw new Ctap2DataException(
-                    "previewSign generated key algorithm output is missing an algorithm.");
-            }
-            catch (Exception exception) when (IsCborParseException(exception))
-            {
-                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, exception);
-            }
-        }
-
-        /// <summary>
-        /// Decode the previewSign generated-key payload using the signed output
-        /// algorithm when the key material was carried in unsigned CTAP output.
-        /// </summary>
-        /// <param name="previewSignValue">The CBOR-encoded previewSign generated-key payload.</param>
-        /// <param name="signedOutputAlgorithm">
-        /// The algorithm from the signed previewSign output when available; otherwise, <c>null</c>.
-        /// </param>
-        /// <returns>
-        /// A generated key container if the payload contains well formed generated key material.
-        /// </returns>
-        /// <exception cref="Ctap2DataException">
-        /// The payload contains malformed generated-key material.
-        /// </exception>
-        internal static PreviewSignGeneratedKey? DecodeGeneratedKey(
-            ReadOnlyMemory<byte> previewSignValue,
-            CoseAlgorithmIdentifier? signedOutputAlgorithm)
-        {
-            try
-            {
-                var map = ReadPreviewSignMap<int>(
-                    previewSignValue,
-                    "previewSign generated key output is not a map.");
-                var algorithm = CoseAlgorithmIdentifier.None;
-                if (map.Contains((int)MakeCredentialKey.Algorithm))
-                {
-                    algorithm = (CoseAlgorithmIdentifier)map.ReadInt32((int)MakeCredentialKey.Algorithm);
-                }
-
-                if (algorithm == CoseAlgorithmIdentifier.None && signedOutputAlgorithm.HasValue)
-                {
-                    algorithm = signedOutputAlgorithm.Value;
-                }
-
-                if (algorithm == CoseAlgorithmIdentifier.None)
+                var signedMap = ReadPreviewSignMap<int>(
+                    signedOutputs,
+                    "previewSign generated key signed output is not a map.");
+                if (!signedMap.Contains((int)MakeCredentialKey.Algorithm))
                 {
                     throw new Ctap2DataException(
                         "previewSign generated key is missing an algorithm.");
                 }
 
-                if (!map.Contains((int)MakeCredentialKey.AttestationObject))
+                var algorithm = (CoseAlgorithmIdentifier)signedMap.ReadInt32((int)MakeCredentialKey.Algorithm);
+
+                var unsignedMap = ReadPreviewSignMap<int>(
+                    unsignedOutputs,
+                    "previewSign generated key unsigned output is not a map.");
+                if (!unsignedMap.Contains((int)MakeCredentialKey.AttestationObject))
                 {
                     throw new Ctap2DataException(
                         "previewSign generated key is missing an attestation object.");
                 }
 
-                ReadOnlyMemory<byte> attestationObject = map.ReadByteString((int)MakeCredentialKey.AttestationObject);
+                ReadOnlyMemory<byte> attestationObject =
+                    unsignedMap.ReadByteString((int)MakeCredentialKey.AttestationObject);
                 var attestationObj = new AttestationObject(attestationObject);
                 if (attestationObj.AuthenticatorData.CredentialId is null ||
                     attestationObj.AuthenticatorData.EncodedCredentialPublicKey is null)

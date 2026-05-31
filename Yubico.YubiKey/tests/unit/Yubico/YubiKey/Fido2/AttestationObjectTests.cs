@@ -15,6 +15,8 @@
 using System;
 using System.Formats.Cbor;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.YubiKey.Fido2.Cose;
 
@@ -22,166 +24,136 @@ namespace Yubico.YubiKey.Fido2
 {
     public class AttestationObjectTests
     {
-        // CBOR blob from CredentialDataTests.GetSampleEncoding(): a CTAP
-        // authenticatorMakeCredential response produced by a real YubiKey.
-        // Copied here to keep tests self-contained.
-        private static ReadOnlyMemory<byte> GetSampleEncoding() =>
-            new byte[]
-            {
-                0xa5, 0x01, 0x66, 0x70, 0x61, 0x63, 0x6b, 0x65, 0x64, 0x02, 0x58, 0xb4, 0xb1, 0xe7, 0x70, 0xb1,
-                0xb4, 0x50, 0xcb, 0x14, 0x73, 0x86, 0xc4, 0xd3, 0x4a, 0x04, 0x5d, 0x43, 0x57, 0x68, 0xdf, 0xf1,
-                0x38, 0x34, 0x94, 0xe3, 0x74, 0xb7, 0x86, 0x8d, 0x3c, 0xdb, 0x0c, 0x95, 0x45, 0x00, 0x00, 0x00,
-                0x01, 0x2f, 0xc0, 0x57, 0x9f, 0x81, 0x13, 0x47, 0xea, 0xb1, 0x16, 0xbb, 0x5a, 0x8d, 0xb9, 0x20,
-                0x2a, 0x00, 0x30, 0x7b, 0xb5, 0xf0, 0x95, 0xe7, 0xb6, 0xe4, 0xe4, 0xcf, 0xf0, 0xc1, 0x15, 0x48,
-                0x1c, 0xbf, 0x17, 0xd8, 0x03, 0xf2, 0xb0, 0xf7, 0x7e, 0x64, 0xc2, 0xba, 0x55, 0xb0, 0x3d, 0x93,
-                0x97, 0x84, 0xf5, 0x57, 0xb4, 0x64, 0xbf, 0x37, 0xce, 0x9a, 0x18, 0xe3, 0xdc, 0x34, 0x45, 0x77,
-                0x88, 0xad, 0xf1, 0xa5, 0x01, 0x02, 0x03, 0x26, 0x20, 0x01, 0x21, 0x58, 0x20, 0x7b, 0xb5, 0xf0,
-                0x95, 0xe7, 0xb6, 0xe4, 0xe4, 0xcf, 0xf0, 0xc1, 0x15, 0x48, 0x4c, 0xe6, 0xbe, 0x68, 0x1b, 0xc7,
-                0x6d, 0x3f, 0xfb, 0xed, 0xe7, 0x92, 0xa1, 0xd5, 0xa0, 0x8b, 0xa3, 0x8e, 0x50, 0x22, 0x58, 0x20,
-                0x6b, 0x55, 0xc8, 0xde, 0xd8, 0x95, 0x63, 0x18, 0x3e, 0x9f, 0x6f, 0x0e, 0x45, 0xa4, 0x2c, 0xf6,
-                0x36, 0x54, 0xda, 0x60, 0xce, 0x28, 0x0d, 0xed, 0xad, 0x1a, 0xc7, 0x5e, 0x6a, 0x57, 0x6b, 0xfd,
-                0x03, 0xa3, 0x63, 0x61, 0x6c, 0x67, 0x26, 0x63, 0x73, 0x69, 0x67, 0x58, 0x46, 0x30, 0x44, 0x02,
-                0x20, 0x76, 0xe1, 0x3c, 0x84, 0xfd, 0xd5, 0xc1, 0x44, 0x1b, 0x6f, 0x45, 0xbc, 0xc9, 0x49, 0xbe,
-                0x36, 0xd8, 0xa3, 0x7e, 0x26, 0x54, 0x49, 0xcc, 0x15, 0xf4, 0x1a, 0xee, 0xd2, 0x17, 0x2d, 0x43,
-                0x68, 0x02, 0x20, 0x44, 0xa2, 0x4f, 0x37, 0x25, 0x0c, 0x56, 0xb8, 0x06, 0x30, 0xce, 0xfa, 0x77,
-                0x1a, 0xe6, 0x98, 0x3f, 0x57, 0xe7, 0x63, 0x47, 0x93, 0x61, 0x35, 0xb9, 0x07, 0x23, 0x0a, 0xde,
-                0x0e, 0xa8, 0x04, 0x63, 0x78, 0x35, 0x63, 0x81, 0x59, 0x02, 0xdd, 0x30, 0x82, 0x02, 0xd9, 0x30,
-                0x82, 0x01, 0xc1, 0xa0, 0x03, 0x02, 0x01, 0x02, 0x02, 0x09, 0x00, 0xf0, 0xea, 0xbb, 0x7d, 0x68,
-                0x04, 0x4c, 0x8a, 0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x0b,
-                0x05, 0x00, 0x30, 0x2e, 0x31, 0x2c, 0x30, 0x2a, 0x06, 0x03, 0x55, 0x04, 0x03, 0x13, 0x23, 0x59,
-                0x75, 0x62, 0x69, 0x63, 0x6f, 0x20, 0x55, 0x32, 0x46, 0x20, 0x52, 0x6f, 0x6f, 0x74, 0x20, 0x43,
-                0x41, 0x20, 0x53, 0x65, 0x72, 0x69, 0x61, 0x6c, 0x20, 0x34, 0x35, 0x37, 0x32, 0x30, 0x30, 0x36,
-                0x33, 0x31, 0x30, 0x20, 0x17, 0x0d, 0x31, 0x34, 0x30, 0x38, 0x30, 0x31, 0x30, 0x30, 0x30, 0x30,
-                0x30, 0x30, 0x5a, 0x18, 0x0f, 0x32, 0x30, 0x35, 0x30, 0x30, 0x39, 0x30, 0x34, 0x30, 0x30, 0x30,
-                0x30, 0x30, 0x30, 0x5a, 0x30, 0x6f, 0x31, 0x0b, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x06, 0x13,
-                0x02, 0x53, 0x45, 0x31, 0x12, 0x30, 0x10, 0x06, 0x03, 0x55, 0x04, 0x0a, 0x0c, 0x09, 0x59, 0x75,
-                0x62, 0x69, 0x63, 0x6f, 0x20, 0x41, 0x42, 0x31, 0x22, 0x30, 0x20, 0x06, 0x03, 0x55, 0x04, 0x0b,
-                0x0c, 0x19, 0x41, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x6f, 0x72, 0x20,
-                0x41, 0x74, 0x74, 0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x31, 0x28, 0x30, 0x26, 0x06,
-                0x03, 0x55, 0x04, 0x03, 0x0c, 0x1f, 0x59, 0x75, 0x62, 0x69, 0x63, 0x6f, 0x20, 0x55, 0x32, 0x46,
-                0x20, 0x45, 0x45, 0x20, 0x53, 0x65, 0x72, 0x69, 0x61, 0x6c, 0x20, 0x32, 0x31, 0x30, 0x39, 0x34,
-                0x36, 0x37, 0x33, 0x37, 0x36, 0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d,
-                0x02, 0x01, 0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00, 0x04,
-                0xe6, 0x67, 0xd3, 0x3b, 0xba, 0x9c, 0x45, 0x9b, 0x80, 0x9e, 0xfc, 0xcb, 0x6a, 0x0b, 0xae, 0x2c,
-                0x5c, 0xfc, 0x4b, 0xd7, 0x81, 0xd5, 0x73, 0x48, 0x3d, 0x96, 0xfd, 0xe9, 0x25, 0x1f, 0x64, 0x2c,
-                0xcd, 0xe6, 0xc2, 0x06, 0x55, 0x14, 0xf3, 0x33, 0x82, 0x46, 0xac, 0x99, 0x52, 0x80, 0x00, 0x2a,
-                0xd2, 0x38, 0xaf, 0xbc, 0x03, 0x71, 0xb6, 0xd7, 0xfa, 0xc3, 0xbf, 0xcb, 0x9e, 0x79, 0xd2, 0x30,
-                0xa3, 0x81, 0x81, 0x30, 0x7f, 0x30, 0x13, 0x06, 0x0a, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x82, 0xc4,
-                0x0a, 0x0d, 0x01, 0x04, 0x05, 0x04, 0x03, 0x05, 0x04, 0x03, 0x30, 0x22, 0x06, 0x09, 0x2b, 0x06,
-                0x01, 0x04, 0x01, 0x82, 0xc4, 0x0a, 0x02, 0x04, 0x15, 0x31, 0x2e, 0x33, 0x2e, 0x36, 0x2e, 0x31,
-                0x2e, 0x34, 0x2e, 0x31, 0x2e, 0x34, 0x31, 0x34, 0x38, 0x32, 0x2e, 0x31, 0x2e, 0x37, 0x30, 0x13,
-                0x06, 0x0b, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x82, 0xe5, 0x1c, 0x02, 0x01, 0x01, 0x04, 0x04, 0x03,
-                0x02, 0x04, 0x30, 0x30, 0x21, 0x06, 0x0b, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x82, 0xe5, 0x1c, 0x01,
-                0x01, 0x04, 0x04, 0x12, 0x04, 0x10, 0x2f, 0xc0, 0x57, 0x9f, 0x81, 0x13, 0x47, 0xea, 0xb1, 0x16,
-                0xbb, 0x5a, 0x8d, 0xb9, 0x20, 0x2a, 0x30, 0x0c, 0x06, 0x03, 0x55, 0x1d, 0x13, 0x01, 0x01, 0xff,
-                0x04, 0x02, 0x30, 0x00, 0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01,
-                0x0b, 0x05, 0x00, 0x03, 0x82, 0x01, 0x01, 0x00, 0xb6, 0x31, 0xa8, 0x28, 0xd7, 0x93, 0x38, 0xad,
-                0x29, 0x00, 0x8a, 0x0d, 0x7f, 0x79, 0xa3, 0xa0, 0x3d, 0xcf, 0x2e, 0x0c, 0x9b, 0x1f, 0x62, 0xfa,
-                0xcf, 0xb4, 0x8a, 0x9e, 0x55, 0x95, 0x77, 0xa7, 0x51, 0x6c, 0x95, 0x9b, 0x64, 0x2b, 0x18, 0xf0,
-                0x0c, 0x4c, 0x77, 0x22, 0x8d, 0x19, 0xf9, 0xd4, 0x42, 0x22, 0x5c, 0x12, 0x68, 0xbd, 0x23, 0x18,
-                0xa0, 0x8c, 0x6a, 0x17, 0x73, 0x06, 0x4f, 0x02, 0x99, 0xc9, 0x9b, 0xb2, 0x43, 0x8a, 0x47, 0xbb,
-                0x67, 0xb1, 0xd0, 0xdb, 0x25, 0x2b, 0x94, 0x96, 0x7e, 0x12, 0x01, 0x5a, 0x9a, 0x2b, 0xe9, 0xe4,
-                0x2d, 0xd4, 0x54, 0x26, 0x88, 0x90, 0x61, 0xfe, 0x1f, 0x22, 0x56, 0xfe, 0xf8, 0x76, 0xdd, 0x73,
-                0x99, 0x32, 0x46, 0x83, 0x71, 0x1a, 0xb0, 0x6d, 0xea, 0xbc, 0x6f, 0x45, 0x68, 0x6a, 0xf9, 0xee,
-                0xe1, 0x81, 0x79, 0x6c, 0x23, 0x3b, 0x3e, 0xd9, 0xec, 0x3d, 0xc0, 0xac, 0xbd, 0xf2, 0xf9, 0x0d,
-                0xa8, 0x4f, 0x19, 0x27, 0xe9, 0x73, 0xd6, 0x32, 0x00, 0xd1, 0xb8, 0xf4, 0xe4, 0x01, 0x39, 0x9a,
-                0x25, 0x34, 0x5d, 0xcc, 0x04, 0xa2, 0xab, 0xb2, 0x93, 0x80, 0x23, 0xb4, 0x5f, 0x5b, 0x42, 0x52,
-                0x41, 0x8d, 0x0d, 0x52, 0x75, 0x85, 0x63, 0x1f, 0x61, 0xc4, 0x56, 0xcd, 0xb9, 0x8b, 0x0a, 0x14,
-                0xde, 0x0d, 0x6e, 0x52, 0x7f, 0x67, 0x3f, 0x6d, 0x32, 0x4d, 0x58, 0x61, 0x29, 0x13, 0x27, 0xa5,
-                0x5f, 0xc4, 0x74, 0xe8, 0xe6, 0xd7, 0xc8, 0x71, 0xa2, 0xdf, 0x67, 0x57, 0x48, 0xac, 0xc7, 0x98,
-                0xd7, 0x6f, 0x96, 0x7a, 0xf8, 0xcc, 0xb9, 0xf1, 0x56, 0xfe, 0xa0, 0x78, 0x12, 0xb6, 0x39, 0x1a,
-                0x37, 0xed, 0xdd, 0xc6, 0xe2, 0x64, 0x11, 0x0b, 0x99, 0xb4, 0x3d, 0x40, 0xb5, 0x32, 0x2d, 0x7e,
-                0xfc, 0x94, 0x78, 0x8b, 0x0b, 0xda, 0x49, 0x22, 0x04, 0xf4, 0x05, 0x48, 0x11, 0x22, 0x33, 0x44,
-                0x55, 0x66, 0x77, 0x88,
-            };
+        private const int KeyFormat = 1;
+        private const int KeyAuthenticatorData = 2;
+        private const int KeyAttestationStatement = 3;
+
+        private static readonly byte[] PackedSignature = { 0x01, 0x02, 0x03 };
 
         [Fact]
-        public void Parse_PackedFormat_FullParse_PopulatesAllFields()
+        public void Parse_PackedFormat_PopulatesPackedAttestationFields()
         {
-            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
+            byte[] certificate = BuildSelfSignedCertificate();
+            byte[] authenticatorData = BuildMinimalAuthData(BuildEs256CoseKey());
+            byte[] attestationStatement = BuildPackedAttestationStatement(PackedSignature, certificate);
+            byte[] encoding = BuildAttestationObject(
+                AttestationFormats.Packed,
+                authenticatorData,
+                attestationStatement);
 
             var obj = new AttestationObject(encoding);
 
-            Assert.Equal("packed", obj.Format);
-            Assert.NotNull(obj.AuthenticatorData);
-            Assert.NotNull(obj.AttestationAlgorithm);
-            Assert.True(obj.AttestationStatement.HasValue);
-            Assert.False(obj.AttestationStatement!.Value.IsEmpty);
+            Assert.Equal(AttestationFormats.Packed, obj.Format);
+            Assert.Equal(CoseAlgorithmIdentifier.ES256, obj.AttestationAlgorithm!.Value);
+            Assert.True(obj.AttestationSignature.HasValue);
+            Assert.Equal(PackedSignature, obj.AttestationSignature.Value.ToArray());
+            Assert.Equal(attestationStatement, obj.EncodedAttestationStatement.ToArray());
+            Assert.Equal(authenticatorData, obj.AuthenticatorData.EncodedAuthenticatorData.ToArray());
             Assert.NotNull(obj.AuthenticatorData.CredentialPublicKey);
             Assert.NotNull(obj.AuthenticatorData.EncodedCredentialPublicKey);
+
+            X509Certificate2 parsedCertificate = Assert.Single(obj.AttestationCertificates!);
+            Assert.Contains("Test Attestation", parsedCertificate.Subject, StringComparison.Ordinal);
         }
 
-        // ------------------------------------------------------------------
-        // CborEncode
-        // ------------------------------------------------------------------
-
         [Fact]
-        public void CborEncode_FullyParsedPackedObject_MatchesKeys123Encoding()
+        public void PublicBytesConstructor_CborEncode_EmitsStandaloneThreeKeyObject()
         {
-            byte[] encoding = BuildPackedAttestationObject();
+            byte[] authenticatorData = BuildMinimalAuthData(BuildEs256CoseKey());
+            byte[] attestationStatement = BuildPackedAttestationStatement(PackedSignature);
+            byte[] encoding = BuildAttestationObject(
+                AttestationFormats.Packed,
+                authenticatorData,
+                attestationStatement);
             var obj = new AttestationObject(encoding);
 
-            byte[] reencoded = obj.CborEncode();
+            byte[] encoded = obj.CborEncode();
 
-            Assert.Equal(encoding, reencoded);
+            AssertStandaloneAttestationObjectEncoding(
+                encoded,
+                AttestationFormats.Packed,
+                authenticatorData,
+                attestationStatement);
         }
 
-        // ------------------------------------------------------------------
-        // BONUS: bytesRead reflects entire input
-        // ------------------------------------------------------------------
+        [Fact]
+        public void FieldConstructor_CborEncode_EmitsStandaloneThreeKeyObject()
+        {
+            byte[] authenticatorData = BuildMinimalAuthData(BuildEs256CoseKey());
+            byte[] attestationStatement = BuildPackedAttestationStatement(PackedSignature);
+
+            var obj = new AttestationObject(
+                AttestationFormats.Packed,
+                authenticatorData,
+                attestationStatement);
+
+            Assert.Equal(AttestationFormats.Packed, obj.Format);
+            Assert.Equal(CoseAlgorithmIdentifier.ES256, obj.AttestationAlgorithm!.Value);
+            Assert.Equal(PackedSignature, obj.AttestationSignature!.Value.ToArray());
+            AssertStandaloneAttestationObjectEncoding(
+                obj.Encoded.ToArray(),
+                AttestationFormats.Packed,
+                authenticatorData,
+                attestationStatement);
+        }
 
         [Fact]
-        public void Parse_PackedFormat_BytesRead_EqualsInputLength()
+        public void PublicBytesConstructor_WithBytesRead_EqualsInputLength()
         {
-            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
+            byte[] encoding = BuildAttestationObject(
+                AttestationFormats.Packed,
+                BuildMinimalAuthData(BuildEs256CoseKey()),
+                BuildPackedAttestationStatement(PackedSignature));
 
-            _ = new AttestationObject(encoding, out int bytesRead);
+            var obj = new AttestationObject(encoding, out int bytesRead);
 
             Assert.Equal(encoding.Length, bytesRead);
+            Assert.Equal(encoding, obj.Encoded.ToArray());
         }
 
         [Fact]
-        public void Parse_WithTrailingData_BytesRead_ReflectsActualConsumedBytes()
+        public void PublicBytesConstructor_WithTrailingData_BytesReadAndEncodedExcludeTrailingData()
         {
-            ReadOnlyMemory<byte> encoding = GetSampleEncoding();
-            var withTrailing = new byte[encoding.Length + 10];
-            encoding.CopyTo(withTrailing);
-            Array.Fill<byte>(withTrailing, 0xFF, encoding.Length, 10);
+            byte[] encoding = BuildAttestationObject(
+                AttestationFormats.Packed,
+                BuildMinimalAuthData(BuildEs256CoseKey()),
+                BuildPackedAttestationStatement(PackedSignature));
+            byte[] withTrailing = AppendTrailingBytes(encoding, 0xFF, 10);
 
-            _ = new AttestationObject(withTrailing, out int bytesRead);
+            var obj = new AttestationObject(withTrailing, out int bytesRead);
 
             Assert.Equal(encoding.Length, bytesRead);
+            Assert.Equal(encoding, obj.Encoded.ToArray());
         }
 
-
-        // ------------------------------------------------------------------
-        // Unknown format - graceful handling
-        // ------------------------------------------------------------------
-
-        /// <summary>
-        /// Parsing an attestation object whose format is not "packed" must not throw,
-        /// and typed attestation-statement properties stay null.
-        /// </summary>
         [Fact]
-        public void Parse_UnknownFormat_DefaultParsing_DoesNotThrow_AndTypedPropertiesAreNull()
+        public void Parse_UnknownFormat_DoesNotPopulatePackedProperties()
         {
-            ReadOnlyMemory<byte> encoding = BuildNoneFormatAttestationObject();
+            byte[] authenticatorData = BuildMinimalAuthData(BuildEs256CoseKey());
+            byte[] attestationStatement = BuildEmptyMap();
+            byte[] encoding = BuildAttestationObject(
+                "none",
+                authenticatorData,
+                attestationStatement);
 
             var obj = new AttestationObject(encoding);
 
             Assert.Equal("none", obj.Format);
-            Assert.NotNull(obj.AuthenticatorData);
+            Assert.Equal(authenticatorData, obj.AuthenticatorData.EncodedAuthenticatorData.ToArray());
             Assert.Null(obj.AttestationAlgorithm);
-            Assert.Null(obj.AttestationStatement);
+            Assert.Null(obj.AttestationSignature);
             Assert.Null(obj.AttestationCertificates);
-            Assert.False(obj.EncodedAttestationStatement.IsEmpty);
+            Assert.Equal(attestationStatement, obj.EncodedAttestationStatement.ToArray());
         }
 
         [Fact]
         public void Parse_UnsupportedCredentialPublicKey_PreservesRawKey()
         {
             byte[] coseKey = BuildFutureCoseKey();
-            byte[] encoding = BuildPackedAttestationObject(coseKey);
+            byte[] encoding = BuildAttestationObject(
+                AttestationFormats.Packed,
+                BuildMinimalAuthData(coseKey),
+                BuildPackedAttestationStatement(PackedSignature));
 
             var obj = new AttestationObject(encoding);
 
@@ -192,111 +164,138 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Parse_MalformedPackedAttestation_PreservesRawStatement_AndLeavesTypedFieldsNull()
         {
-            byte[] encoding = BuildPackedAttestationObject(
-                writeAttestationStatement: cbor =>
-                {
-                    cbor.WriteStartMap(1);
-                    cbor.WriteTextString("alg");
-                    cbor.WriteTextString("not-an-int");
-                    cbor.WriteEndMap();
-                });
+            byte[] attestationStatement = BuildMalformedPackedStatementWithTextAlgorithm();
+            byte[] encoding = BuildAttestationObject(
+                AttestationFormats.Packed,
+                BuildMinimalAuthData(BuildEs256CoseKey()),
+                attestationStatement);
 
             var obj = new AttestationObject(encoding);
 
-            Assert.Equal("packed", obj.Format);
-            Assert.False(obj.EncodedAttestationStatement.IsEmpty);
+            Assert.Equal(AttestationFormats.Packed, obj.Format);
+            Assert.Equal(attestationStatement, obj.EncodedAttestationStatement.ToArray());
             Assert.Null(obj.AttestationAlgorithm);
-            Assert.Null(obj.AttestationStatement);
+            Assert.Null(obj.AttestationSignature);
             Assert.Null(obj.AttestationCertificates);
         }
 
         [Fact]
         public void Parse_PackedAttestationWithMalformedSignature_PreservesRawStatement_AndLeavesTypedFieldsNull()
         {
-            byte[] encoding = BuildPackedAttestationObject(
-                writeAttestationStatement: cbor =>
-                {
-                    cbor.WriteStartMap(2);
-                    cbor.WriteTextString("alg");
-                    cbor.WriteInt32(-7);
-                    cbor.WriteTextString("sig");
-                    cbor.WriteTextString("not-bytes");
-                    cbor.WriteEndMap();
-                });
+            byte[] attestationStatement = BuildMalformedPackedStatementWithTextSignature();
+            byte[] encoding = BuildAttestationObject(
+                AttestationFormats.Packed,
+                BuildMinimalAuthData(BuildEs256CoseKey()),
+                attestationStatement);
 
             var obj = new AttestationObject(encoding);
 
-            Assert.Equal("packed", obj.Format);
-            Assert.False(obj.EncodedAttestationStatement.IsEmpty);
+            Assert.Equal(AttestationFormats.Packed, obj.Format);
+            Assert.Equal(attestationStatement, obj.EncodedAttestationStatement.ToArray());
             Assert.Null(obj.AttestationAlgorithm);
-            Assert.Null(obj.AttestationStatement);
+            Assert.Null(obj.AttestationSignature);
             Assert.Null(obj.AttestationCertificates);
         }
 
-        // ------------------------------------------------------------------
-        // Helpers
-        // ------------------------------------------------------------------
-
-        /// <summary>
-        /// Builds a minimal but structurally valid attestation object with format "none".
-        /// The authData is the smallest valid payload with the AT flag set; the
-        /// attestation statement is an empty CBOR map (the "none" format per WebAuthn spec).
-        /// </summary>
-        private static ReadOnlyMemory<byte> BuildNoneFormatAttestationObject()
+        private static byte[] BuildAttestationObject(
+            string format,
+            byte[] authenticatorData,
+            byte[] encodedAttestationStatement)
         {
-            // Minimal authData: 32-byte rpIdHash || flags=0x41 (UP|AT) ||
-            // signCount(4) || AAGUID(16) || credIdLen=1 || credId=0x01 ||
-            // COSE ES256 public key (minimal valid EC2 key).
-            var authData = BuildMinimalAuthData(BuildEs256CoseKey());
-
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(3);
-
-            cbor.WriteInt32(1);              // key: fmt
-            cbor.WriteTextString("none");
-
-            cbor.WriteInt32(2);              // key: authData
-            cbor.WriteByteString(authData);
-
-            cbor.WriteInt32(3);              // key: attStmt
-            // "none" attestation statement is an empty map: {}
-            cbor.WriteStartMap(0);
+            cbor.WriteInt32(KeyFormat);
+            cbor.WriteTextString(format);
+            cbor.WriteInt32(KeyAuthenticatorData);
+            cbor.WriteByteString(authenticatorData);
+            cbor.WriteInt32(KeyAttestationStatement);
+            cbor.WriteEncodedValue(encodedAttestationStatement);
             cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        private static void AssertStandaloneAttestationObjectEncoding(
+            byte[] encoding,
+            string expectedFormat,
+            byte[] expectedAuthenticatorData,
+            byte[] expectedAttestationStatement)
+        {
+            var reader = new CborReader(encoding, CborConformanceMode.Ctap2Canonical);
+            Assert.Equal(3, reader.ReadStartMap());
+
+            Assert.Equal(KeyFormat, reader.ReadInt32());
+            Assert.Equal(expectedFormat, reader.ReadTextString());
+
+            Assert.Equal(KeyAuthenticatorData, reader.ReadInt32());
+            Assert.Equal(expectedAuthenticatorData, reader.ReadByteString());
+
+            Assert.Equal(KeyAttestationStatement, reader.ReadInt32());
+            Assert.Equal(expectedAttestationStatement, reader.ReadEncodedValue().ToArray());
+
+            reader.ReadEndMap();
+            Assert.Equal(0, reader.BytesRemaining);
+        }
+
+        private static byte[] BuildPackedAttestationStatement(
+            byte[] signature,
+            byte[]? certificate = null)
+        {
+            int entryCount = certificate is null ? 2 : 3;
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(entryCount);
+            cbor.WriteTextString("alg");
+            cbor.WriteInt32((int)CoseAlgorithmIdentifier.ES256);
+            cbor.WriteTextString("sig");
+            cbor.WriteByteString(signature);
+
+            if (certificate is not null)
+            {
+                cbor.WriteTextString("x5c");
+                cbor.WriteStartArray(1);
+                cbor.WriteByteString(certificate);
+                cbor.WriteEndArray();
+            }
 
             cbor.WriteEndMap();
             return cbor.Encode();
         }
 
-        private static byte[] BuildPackedAttestationObject(
-            byte[]? credentialPublicKeyCose = null,
-            Action<CborWriter>? writeAttestationStatement = null)
+        private static byte[] BuildMalformedPackedStatementWithTextAlgorithm()
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(3);
-
-            cbor.WriteInt32(1);
-            cbor.WriteTextString("packed");
-
-            cbor.WriteInt32(2);
-            cbor.WriteByteString(BuildMinimalAuthData(credentialPublicKeyCose ?? BuildEs256CoseKey()));
-
-            cbor.WriteInt32(3);
-            if (writeAttestationStatement is null)
-            {
-                cbor.WriteStartMap(2);
-                cbor.WriteTextString("alg");
-                cbor.WriteInt32(-7);
-                cbor.WriteTextString("sig");
-                cbor.WriteByteString(new byte[] { 0x01, 0x02, 0x03 });
-                cbor.WriteEndMap();
-            }
-            else
-            {
-                writeAttestationStatement(cbor);
-            }
-
+            cbor.WriteStartMap(1);
+            cbor.WriteTextString("alg");
+            cbor.WriteTextString("not-an-int");
             cbor.WriteEndMap();
             return cbor.Encode();
+        }
+
+        private static byte[] BuildMalformedPackedStatementWithTextSignature()
+        {
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(2);
+            cbor.WriteTextString("alg");
+            cbor.WriteInt32((int)CoseAlgorithmIdentifier.ES256);
+            cbor.WriteTextString("sig");
+            cbor.WriteTextString("not-bytes");
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        private static byte[] BuildEmptyMap()
+        {
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(0);
+            cbor.WriteEndMap();
+            return cbor.Encode();
+        }
+
+        private static byte[] AppendTrailingBytes(byte[] encoding, byte value, int count)
+        {
+            var result = new byte[encoding.Length + count];
+            Array.Copy(encoding, result, encoding.Length);
+            Array.Fill(result, value, encoding.Length, count);
+            return result;
         }
 
         private static byte[] BuildMinimalAuthData(byte[] coseEncoded)
@@ -304,10 +303,10 @@ namespace Yubico.YubiKey.Fido2
             var credId = new byte[] { 0x01 };
             var result = new byte[32 + 1 + 4 + 16 + 2 + credId.Length + coseEncoded.Length];
             var offset = 0;
-            offset += 32;               // rpIdHash (zeros)
-            result[offset++] = 0x41;    // flags: UP=1, AT=1
-            offset += 4;                // signCount (zeros)
-            offset += 16;               // AAGUID (zeros)
+            offset += 32;
+            result[offset++] = 0x41;
+            offset += 4;
+            offset += 16;
             result[offset++] = 0x00;
             result[offset++] = (byte)credId.Length;
             Array.Copy(credId, 0, result, offset, credId.Length);
@@ -318,7 +317,6 @@ namespace Yubico.YubiKey.Fido2
 
         private static byte[] BuildEs256CoseKey()
         {
-            // COSE ES256 key: {1:2, 3:-7, -1:1, -2:x(32), -3:y(32)}
             var x = new byte[32];
             var y = new byte[32];
             x[31] = 1;
@@ -326,11 +324,16 @@ namespace Yubico.YubiKey.Fido2
 
             var coseKey = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             coseKey.WriteStartMap(5);
-            coseKey.WriteInt32(1);   coseKey.WriteInt32((int)CoseKeyType.Ec2);
-            coseKey.WriteInt32(3);   coseKey.WriteInt32((int)CoseAlgorithmIdentifier.ES256);
-            coseKey.WriteInt32(-1);  coseKey.WriteInt32((int)CoseEcCurve.P256);
-            coseKey.WriteInt32(-2);  coseKey.WriteByteString(x);
-            coseKey.WriteInt32(-3);  coseKey.WriteByteString(y);
+            coseKey.WriteInt32(1);
+            coseKey.WriteInt32((int)CoseKeyType.Ec2);
+            coseKey.WriteInt32(3);
+            coseKey.WriteInt32((int)CoseAlgorithmIdentifier.ES256);
+            coseKey.WriteInt32(-1);
+            coseKey.WriteInt32((int)CoseEcCurve.P256);
+            coseKey.WriteInt32(-2);
+            coseKey.WriteByteString(x);
+            coseKey.WriteInt32(-3);
+            coseKey.WriteByteString(y);
             coseKey.WriteEndMap();
             return coseKey.Encode();
         }
@@ -342,13 +345,33 @@ namespace Yubico.YubiKey.Fido2
 
             var coseKey = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             coseKey.WriteStartMap(5);
-            coseKey.WriteInt32(1);   coseKey.WriteInt32((int)CoseKeyType.Ec2);
-            coseKey.WriteInt32(3);   coseKey.WriteInt32(-70000);
-            coseKey.WriteInt32(-1);  coseKey.WriteInt32((int)CoseEcCurve.P256);
-            coseKey.WriteInt32(-2);  coseKey.WriteByteString(x);
-            coseKey.WriteInt32(-3);  coseKey.WriteByteString(y);
+            coseKey.WriteInt32(1);
+            coseKey.WriteInt32((int)CoseKeyType.Ec2);
+            coseKey.WriteInt32(3);
+            coseKey.WriteInt32(-70000);
+            coseKey.WriteInt32(-1);
+            coseKey.WriteInt32((int)CoseEcCurve.P256);
+            coseKey.WriteInt32(-2);
+            coseKey.WriteByteString(x);
+            coseKey.WriteInt32(-3);
+            coseKey.WriteByteString(y);
             coseKey.WriteEndMap();
             return coseKey.Encode();
+        }
+
+        private static byte[] BuildSelfSignedCertificate()
+        {
+            using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            var request = new CertificateRequest(
+                "CN=Test Attestation",
+                ecdsa,
+                HashAlgorithmName.SHA256);
+
+            using X509Certificate2 certificate = request.CreateSelfSigned(
+                DateTimeOffset.UtcNow.AddDays(-1),
+                DateTimeOffset.UtcNow.AddDays(1));
+
+            return certificate.RawData;
         }
     }
 }

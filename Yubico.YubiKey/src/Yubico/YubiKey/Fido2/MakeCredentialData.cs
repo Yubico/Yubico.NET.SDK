@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Fido2
     /// Contains the data returned by the YubiKey after making a credential.
     /// </summary>
     /// <remarks>
-    /// This includes the WebAuthn attestation object and CTAP-specific optional
+    /// This includes the CTAP attestation object and CTAP-specific optional
     /// response fields such as enterprise attestation, large blob key, and
     /// unsigned extension outputs.
     /// </remarks>
@@ -69,8 +69,8 @@ namespace Yubico.YubiKey.Fido2
         public CoseAlgorithmIdentifier AttestationAlgorithm { get; private set; }
 
         /// <summary>
-        /// The attestation statement signature bytes. This is an optional
-        /// element, so it can be empty.
+        /// The attestation signature bytes from the parsed attestation statement.
+        /// This is an optional element, so it can be empty.
         /// </summary>
         /// <remarks>
         /// Use the public key in the first element of
@@ -78,9 +78,9 @@ namespace Yubico.YubiKey.Fido2
         /// attestation certificate is provided. Trust validation requires a
         /// caller-provided trust source and certificate path validation.
         /// <para>
-        /// The data to verify is the <see cref="AuthenticatorData"/>
-        /// concatenated with the client data hash (from the
-        /// <see cref="MakeCredentialParameters"/>).
+        /// For packed attestation statements, the data to verify is the
+        /// <see cref="AuthenticatorData"/> concatenated with the client data
+        /// hash (from the <see cref="MakeCredentialParameters"/>).
         /// </para>
         /// </remarks>
         public ReadOnlyMemory<byte> AttestationStatement { get; private set; }
@@ -97,9 +97,9 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// The first cert in this list (<c>AttestationCertificates[0]</c>) will
         /// be the certificate that contains the public key used to verify the
-        /// <see cref="AttestationStatement"/> signature. The data to verify is the
-        /// <see cref="AuthenticatorData"/> concatenated with the client data
-        /// hash (from the <see cref="MakeCredentialParameters"/>).
+        /// <see cref="AttestationStatement"/>. For packed attestation statements,
+        /// the data to verify is the <see cref="AuthenticatorData"/> concatenated
+        /// with the client data hash (from the <see cref="MakeCredentialParameters"/>).
         /// </remarks>
         public IReadOnlyList<X509Certificate2>? AttestationCertificates { get; private set; }
 
@@ -107,8 +107,10 @@ namespace Yubico.YubiKey.Fido2
         /// Indicates whether an enterprise attestation was returned.
         /// </summary>
         /// <remarks>
-        /// This property is null when the response does not include the
-        /// enterprise attestation field.
+        /// A value of <c>true</c> means enterprise attestation was returned.
+        /// A value of <c>false</c> or <c>null</c> means enterprise attestation
+        /// was not returned. The value is <c>null</c> when the response omits
+        /// the optional enterprise attestation field.
         /// </remarks>
         public bool? EnterpriseAttestation { get; private set; }
 
@@ -160,14 +162,13 @@ namespace Yubico.YubiKey.Fido2
 
             try
             {
-                byte[] attestationSubset = BuildAttestationObjectSubset(map);
-                AttestationObject = new AttestationObject(attestationSubset);
+                AttestationObject = ReadAttestationObject(map);
 
                 Format = AttestationObject.Format;
                 AuthenticatorData = AttestationObject.AuthenticatorData;
                 AttestationAlgorithm = AttestationObject.AttestationAlgorithm ??
                     throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);
-                AttestationStatement = AttestationObject.AttestationStatement ?? ReadOnlyMemory<byte>.Empty;
+                AttestationStatement = AttestationObject.AttestationSignature ?? ReadOnlyMemory<byte>.Empty;
                 EncodedAttestationStatement = AttestationObject.EncodedAttestationStatement;
                 AttestationCertificates = AttestationObject.AttestationCertificates;
 
@@ -210,10 +211,7 @@ namespace Yubico.YubiKey.Fido2
             return result;
         }
 
-        /// <summary>
-        /// Builds the WebAuthn attestation object from the CTAP MakeCredential response.
-        /// </summary>
-        private static byte[] BuildAttestationObjectSubset(CborMap<int> fullResponse)
+        private static AttestationObject ReadAttestationObject(CborMap<int> fullResponse)
         {
             foreach (int requiredKey in new[] { KeyFormat, KeyAuthData, KeyAttestationStatement })
             {
@@ -223,33 +221,25 @@ namespace Yubico.YubiKey.Fido2
                 }
             }
 
-            var writer = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            writer.WriteStartMap(3);
-
-            writer.WriteInt32(KeyFormat);
-            writer.WriteTextString(fullResponse.ReadTextString(KeyFormat));
-
-            writer.WriteInt32(KeyAuthData);
-            writer.WriteByteString(fullResponse.ReadByteString(KeyAuthData).Span);
-
-            writer.WriteInt32(KeyAttestationStatement);
-            writer.WriteEncodedValue(fullResponse.ReadEncodedValue(KeyAttestationStatement).Span);
-
-            writer.WriteEndMap();
-            return writer.Encode();
+            return new AttestationObject(
+                fullResponse.ReadTextString(KeyFormat),
+                fullResponse.ReadByteString(KeyAuthData),
+                fullResponse.ReadEncodedValue(KeyAttestationStatement));
         }
 
         /// <summary>
         /// Use the zero'th public key in the
         /// <see cref="AttestationCertificates"/> list to verify the
-        /// <c>AuthenticatorData</c> and client data hash using the signature
-        /// that is the <see cref="AttestationStatement"/>.
+        /// packed attestation statement signature over the
+        /// <c>AuthenticatorData</c> and client data hash.
         /// </summary>
         /// <remarks>
         /// This verifies only the correctness of the attestation signature. It
         /// does not establish whether the attestation certificate is trusted.
         /// Trust validation requires application-provided trust roots and
         /// certificate path validation, which this method does not perform.
+        /// Applications should perform certificate path validation of
+        /// <see cref="AttestationCertificates"/> externally.
         /// If there are no certificates in the list, this method will throw an
         /// exception.
         /// </remarks>

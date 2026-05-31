@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Fido2
         /// The attestation signature bytes.
         /// This is null for attestation statement formats not parsed by this SDK.
         /// </summary>
-        public ReadOnlyMemory<byte>? AttestationStatement { get; private set; }
+        public ReadOnlyMemory<byte>? AttestationSignature { get; private set; }
 
         /// <summary>
         /// The list of X.509 certificates from the attestation statement's x5c field.
@@ -94,7 +94,6 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// The raw CBOR encoding of the entire attestation object.
-        /// This is available when constructed from encoded bytes.
         /// </summary>
         public ReadOnlyMemory<byte> Encoded { get; private set; }
 
@@ -123,7 +122,7 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// <para>
         /// For "packed" attestation format, the typed properties
-        /// (<see cref="AttestationAlgorithm"/>, <see cref="AttestationStatement"/>,
+        /// (<see cref="AttestationAlgorithm"/>, <see cref="AttestationSignature"/>,
         /// <see cref="AttestationCertificates"/>) are populated. For all other formats,
         /// those properties remain null and the raw bytes are available via
         /// <see cref="EncodedAttestationStatement"/>.
@@ -142,27 +141,19 @@ namespace Yubico.YubiKey.Fido2
         {
             try
             {
-                (string format, byte[] authDataBytes, ReadOnlyMemory<byte> encodedAttStmt) =
+                (string format, ReadOnlyMemory<byte> authenticatorData, ReadOnlyMemory<byte> encodedAttStmt) =
                     DecodeRequiredFields(cborEncoding, out bytesRead);
+
+                Initialize(format, authenticatorData, encodedAttStmt);
                 Encoded = cborEncoding[..bytesRead];
-
-                Format = format;
-                AuthenticatorData = new AuthenticatorData(authDataBytes);
-
-                if (!encodedAttStmt.IsEmpty)
-                {
-                    EncodedAttestationStatement = encodedAttStmt;
-
-                    if (Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal))
-                    {
-                        var attestCborMap = new CborMap<string>(EncodedAttestationStatement);
-                        _ = TryParsePackedAttestationStatement(attestCborMap);
-                    }
-                }
             }
             catch (CborContentException cborException)
             {
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, cborException);
+            }
+            catch (InvalidCastException invalidCast)
+            {
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, invalidCast);
             }
             catch (InvalidOperationException invalidOp)
             {
@@ -174,51 +165,69 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        private static (string format, byte[] authDataBytes, ReadOnlyMemory<byte> encodedAttStmt) DecodeRequiredFields(
+        internal AttestationObject(
+            string format,
+            ReadOnlyMemory<byte> authenticatorData,
+            ReadOnlyMemory<byte> encodedAttestationStatement)
+        {
+            try
+            {
+                Initialize(format, authenticatorData, encodedAttestationStatement);
+                Encoded = CborEncode();
+            }
+            catch (CborContentException cborException)
+            {
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, cborException);
+            }
+            catch (InvalidCastException invalidCast)
+            {
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, invalidCast);
+            }
+            catch (InvalidOperationException invalidOp)
+            {
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, invalidOp);
+            }
+            catch (FormatException formatEx)
+            {
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, formatEx);
+            }
+        }
+
+        private static (string format, ReadOnlyMemory<byte> authenticatorData, ReadOnlyMemory<byte> encodedAttStmt) DecodeRequiredFields(
             ReadOnlyMemory<byte> cborEncoding,
             out int bytesRead)
         {
-            var reader = new CborReader(cborEncoding, CborConformanceMode.Ctap2Canonical);
-            int? count = reader.ReadStartMap();
-            int remaining = count ?? int.MaxValue;
-
-            string? format = null;
-            byte[]? authDataBytes = null;
-            var encodedAttStmt = ReadOnlyMemory<byte>.Empty;
-
-            for (int i = 0; i < remaining; i++)
-            {
-                if (reader.PeekState() == CborReaderState.EndMap)
-                {
-                    break;
-                }
-
-                int key = (int)reader.ReadInt64();
-                if (key == KeyFormat)
-                {
-                    format = reader.ReadTextString();
-                }
-                else if (key == KeyAuthData)
-                {
-                    authDataBytes = reader.ReadByteString();
-                }
-                else if (key == KeyAttestationStatement)
-                {
-                    encodedAttStmt = reader.ReadEncodedValue().ToArray();
-                }
-                else
-                {
-                    reader.SkipValue();
-                }
-            }
-
-            reader.ReadEndMap();
-            bytesRead = cborEncoding.Length - reader.BytesRemaining;
+            var map = new CborMap<int>(cborEncoding);
+            bytesRead = map.BytesRead;
 
             return (
-                format ?? throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info),
-                authDataBytes ?? throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info),
-                encodedAttStmt);
+                map.Contains(KeyFormat)
+                    ? map.ReadTextString(KeyFormat)
+                    : throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info),
+                map.Contains(KeyAuthData)
+                    ? map.ReadByteString(KeyAuthData)
+                    : throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info),
+                map.Contains(KeyAttestationStatement)
+                    ? map.ReadEncodedValue(KeyAttestationStatement)
+                    : ReadOnlyMemory<byte>.Empty
+            );
+        }
+
+        private void Initialize(
+            string format,
+            ReadOnlyMemory<byte> authenticatorData,
+            ReadOnlyMemory<byte> encodedAttestationStatement)
+        {
+            Format = format;
+            AuthenticatorData = new AuthenticatorData(authenticatorData);
+            EncodedAttestationStatement = encodedAttestationStatement;
+
+            if (!EncodedAttestationStatement.IsEmpty &&
+                Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal))
+            {
+                var attestCborMap = new CborMap<string>(EncodedAttestationStatement);
+                _ = TryParsePackedAttestationStatement(attestCborMap);
+            }
         }
 
         private bool TryParsePackedAttestationStatement(CborMap<string> attestCborMap)
@@ -235,7 +244,7 @@ namespace Yubico.YubiKey.Fido2
 
                 CoseAlgorithmIdentifier attestationAlgorithm =
                     (CoseAlgorithmIdentifier)attestCborMap.ReadInt32(AlgString);
-                ReadOnlyMemory<byte> attestationStatement = attestCborMap.ReadByteString(SigString);
+                ReadOnlyMemory<byte> attestationSignature = attestCborMap.ReadByteString(SigString);
                 IReadOnlyList<X509Certificate2>? attestationCertificates = null;
 
                 if (attestCborMap.Contains(X5cString))
@@ -252,7 +261,7 @@ namespace Yubico.YubiKey.Fido2
                 }
 
                 AttestationAlgorithm = attestationAlgorithm;
-                AttestationStatement = attestationStatement;
+                AttestationSignature = attestationSignature;
                 AttestationCertificates = attestationCertificates;
                 return true;
             }
@@ -264,7 +273,7 @@ namespace Yubico.YubiKey.Fido2
                 exception is System.Security.Cryptography.CryptographicException)
             {
                 AttestationAlgorithm = null;
-                AttestationStatement = null;
+                AttestationSignature = null;
                 AttestationCertificates = null;
                 return false;
             }

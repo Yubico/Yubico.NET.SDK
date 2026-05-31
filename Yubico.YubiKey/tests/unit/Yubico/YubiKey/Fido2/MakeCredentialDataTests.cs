@@ -25,15 +25,15 @@ namespace Yubico.YubiKey.Fido2
     public class MakeCredentialDataTests
     {
         /// <summary>
-        /// AttestationObject.CborEncode() round-trips to the re-encoded {1,2,3}
-        /// subset bytes, not to the full CTAP response. The response includes key
-        /// 6 (unsignedExtensionOutputs) to verify that the AttestationObject only
-        /// contains keys 1, 2, and 3.
+        /// AttestationObject.CborEncode() emits the standalone {1,2,3}
+        /// attestation object bytes, not the full CTAP response. The response
+        /// includes optional keys 4, 5, and 6 to verify that the AttestationObject
+        /// only contains keys 1, 2, and 3.
         /// </summary>
         [Fact]
         public void AttestationObject_CborEncode_OnlyContainsKeys123_NotFullRawData()
         {
-            byte[] ctapResponse = BuildMakeCredentialResponseWithKey6();
+            byte[] ctapResponse = BuildMakeCredentialResponseWithOptionalKeys();
 
             var data = new MakeCredentialData(ctapResponse);
 
@@ -60,11 +60,22 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(3, keysFound.Count);
 
             // Verify the encoded bytes are NOT equal to the original RawData
-            // (because RawData has key 6, but AttestationObject should only have 1,2,3)
+            // (because RawData has optional keys, but AttestationObject should only
+            // have 1, 2, and 3)
             Assert.NotEqual(ctapResponse, attestationEncoded);
+            Assert.Equal(attestationEncoded, data.AttestationObject.Encoded.ToArray());
 
+            Assert.True(data.EnterpriseAttestation.HasValue);
+            Assert.True(data.EnterpriseAttestation.Value);
+            Assert.True(data.LargeBlobKey.HasValue);
+            Assert.Equal(new byte[] { 0x0A, 0x0B, 0x0C }, data.LargeBlobKey.Value.ToArray());
+            Assert.NotNull(data.UnsignedExtensionOutputs);
+
+            ReadOnlyMemory<byte> originalEncodedAttStmt = ReadEncodedMapValue(ctapResponse, 3);
             ReadOnlyMemory<byte> encodedAttStmt = ReadEncodedMapValue(attestationEncoded, 3);
 
+            Assert.True(data.AttestationObject.EncodedAttestationStatement.Span.SequenceEqual(originalEncodedAttStmt.Span),
+                "EncodedAttestationStatement must be byte-identical to key 3 value from the CTAP response.");
             Assert.True(data.AttestationObject.EncodedAttestationStatement.Span.SequenceEqual(encodedAttStmt.Span),
                 "EncodedAttestationStatement must be byte-identical to key 3 value from AttestationObject.CborEncode().");
         }
@@ -256,15 +267,15 @@ namespace Yubico.YubiKey.Fido2
         // ------------------------------------------------------------------
 
         /// <summary>
-        /// Builds a CTAP MakeCredential response with key 6 (unsignedExtensionOutputs)
-        /// to test that AttestationObject only encodes keys 1, 2, 3.
+        /// Builds a CTAP MakeCredential response with optional keys 4, 5, and
+        /// 6 to test that AttestationObject only encodes keys 1, 2, 3.
         /// </summary>
-        private static byte[] BuildMakeCredentialResponseWithKey6()
+        private static byte[] BuildMakeCredentialResponseWithOptionalKeys()
         {
             byte[] authData = BuildMinimalAuthDataWithEs256Key();
 
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(4);  // 4 keys: fmt, authData, attStmt, unsignedExtensionOutputs
+            cbor.WriteStartMap(6);
 
             // Key 1: fmt
             cbor.WriteInt32(1);
@@ -282,6 +293,14 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteTextString("sig");
             cbor.WriteByteString(SampleDerEncodedEs256Signature());
             cbor.WriteEndMap();
+
+            // Key 4: enterpriseAttestation
+            cbor.WriteInt32(4);
+            cbor.WriteBoolean(true);
+
+            // Key 5: largeBlobKey
+            cbor.WriteInt32(5);
+            cbor.WriteByteString(new byte[] { 0x0A, 0x0B, 0x0C });
 
             // Key 6: unsignedExtensionOutputs
             cbor.WriteInt32(6);

@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.Fido2.Cose
                     or CoseAlgorithmIdentifier.ES256
                     or CoseAlgorithmIdentifier.ES384
                     or CoseAlgorithmIdentifier.ES512
-                    or CoseAlgorithmIdentifier.Esp256
+                    or CoseAlgorithmIdentifier.ESP256
                     when IsKeyType(cborMap, CoseKeyType.Ec2)
                     => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
                 CoseAlgorithmIdentifier.EdDSA
@@ -125,7 +125,7 @@ namespace Yubico.YubiKey.Fido2.Cose
                     or CoseAlgorithmIdentifier.ES256
                     or CoseAlgorithmIdentifier.ES384
                     or CoseAlgorithmIdentifier.ES512
-                    or CoseAlgorithmIdentifier.Esp256
+                    or CoseAlgorithmIdentifier.ESP256
                     or CoseAlgorithmIdentifier.EdDSA
                     => throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info),
                 _ => throw new NotSupportedException(

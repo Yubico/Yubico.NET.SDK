@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// See Section 2.1 of RFC 9864:
         /// https://www.rfc-editor.org/rfc/rfc9864.html#name-elliptic-curve-digital-sign
         /// </summary>
-        Esp256 = -9,
+        ESP256 = -9,
 
         /// <summary>
         /// RSASSA-PKCS1-v1_5 with SHA-256

@@ -100,20 +100,17 @@ namespace Yubico.YubiKey.Fido2
     public sealed class PackedAttestationStatement : AttestationStatement
     {
         private const string AlgorithmKey = "alg";
-        private const string EcdaaKeyIdKey = "ecdaaKeyId";
 
         private PackedAttestationStatement(
             ReadOnlyMemory<byte> encoded,
             CoseAlgorithmIdentifier algorithm,
             ReadOnlyMemory<byte> signature,
-            IReadOnlyList<X509Certificate2>? certificates,
-            ReadOnlyMemory<byte> ecdaaKeyId)
+            IReadOnlyList<X509Certificate2>? certificates)
             : base(AttestationFormats.Packed, encoded)
         {
             Algorithm = algorithm;
             Signature = signature;
             Certificates = certificates;
-            EcdaaKeyId = ecdaaKeyId;
         }
 
         /// <summary>
@@ -131,18 +128,12 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public IReadOnlyList<X509Certificate2>? Certificates { get; }
 
-        /// <summary>
-        /// The ECDAA key identifier from the attestation statement's
-        /// <c>ecdaaKeyId</c> field, or empty when absent.
-        /// </summary>
-        public ReadOnlyMemory<byte> EcdaaKeyId { get; }
-
         internal static PackedAttestationStatement FromCbor(ReadOnlyMemory<byte> encoded)
         {
             var statementMap = new CborMap<string>(encoded);
             if (!statementMap.Contains(AlgorithmKey) ||
                 !statementMap.Contains(SignatureKey) ||
-                !statementMap.ContainsOnlyKeys(AlgorithmKey, SignatureKey, CertificatesKey, EcdaaKeyIdKey))
+                !statementMap.ContainsOnlyKeys(AlgorithmKey, SignatureKey, CertificatesKey))
             {
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
             }
@@ -150,16 +141,12 @@ namespace Yubico.YubiKey.Fido2
             var algorithm = (CoseAlgorithmIdentifier)statementMap.ReadInt32(AlgorithmKey);
             ReadOnlyMemory<byte> signature = statementMap.ReadByteString(SignatureKey);
             IReadOnlyList<X509Certificate2>? certificates = ReadCertificates(statementMap);
-            ReadOnlyMemory<byte> ecdaaKeyId = statementMap.Contains(EcdaaKeyIdKey)
-                ? statementMap.ReadByteString(EcdaaKeyIdKey)
-                : ReadOnlyMemory<byte>.Empty;
 
             return new PackedAttestationStatement(
                 encoded,
                 algorithm,
                 signature,
-                certificates,
-                ecdaaKeyId);
+                certificates);
         }
     }
 
@@ -191,9 +178,7 @@ namespace Yubico.YubiKey.Fido2
         internal static FidoU2fAttestationStatement FromCbor(ReadOnlyMemory<byte> encoded)
         {
             var statementMap = new CborMap<string>(encoded);
-            if (!statementMap.Contains(SignatureKey) ||
-                !statementMap.Contains(CertificatesKey) ||
-                !statementMap.ContainsOnlyKeys(SignatureKey, CertificatesKey))
+            if (!statementMap.ContainsExactKeys(SignatureKey, CertificatesKey))
             {
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
             }
@@ -226,8 +211,7 @@ namespace Yubico.YubiKey.Fido2
         internal static AppleAttestationStatement FromCbor(ReadOnlyMemory<byte> encoded)
         {
             var statementMap = new CborMap<string>(encoded);
-            if (!statementMap.Contains(CertificatesKey) ||
-                !statementMap.ContainsOnlyKeys(CertificatesKey))
+            if (!statementMap.ContainsExactKeys(CertificatesKey))
             {
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
             }
@@ -249,7 +233,7 @@ namespace Yubico.YubiKey.Fido2
         internal static NoneAttestationStatement FromCbor(ReadOnlyMemory<byte> encoded)
         {
             var statementMap = new CborMap<string>(encoded);
-            if (statementMap.Count != 0)
+            if (!statementMap.ContainsExactKeys())
             {
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
             }

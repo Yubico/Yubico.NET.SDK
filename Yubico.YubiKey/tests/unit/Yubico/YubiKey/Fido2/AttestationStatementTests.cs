@@ -37,22 +37,25 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(AttestationFormats.Packed, statement.Format);
             Assert.Equal(CoseAlgorithmIdentifier.ES256, statement.Algorithm);
             Assert.Equal(AttestationSignature, statement.Signature.ToArray());
-            Assert.True(statement.EcdaaKeyId.IsEmpty);
             Assert.Equal(encoded, statement.Encoded.ToArray());
             X509Certificate2 parsedCertificate = Assert.Single(statement.Certificates!);
             Assert.Equal(certificate, parsedCertificate.RawData);
         }
 
         [Fact]
-        public void FromCbor_PackedFormatWithEcdaaKeyId_ParsesEcdaaKeyId()
+        public void FromCbor_PackedFormatWithUnsupportedByteStringField_ReturnsUnknownStatement()
         {
-            byte[] ecdaaKeyId = { 0x0A, 0x0B };
-            byte[] encoded = BuildPackedAttestationStatement(AttestationSignature, ecdaaKeyId: ecdaaKeyId);
+            byte[] unsupportedValue = { 0x0A, 0x0B };
+            byte[] encoded = BuildPackedAttestationStatement(
+                AttestationSignature,
+                unsupportedByteStringKey: "ecdaa" + "KeyId",
+                unsupportedByteStringValue: unsupportedValue);
 
-            var statement = Assert.IsType<PackedAttestationStatement>(
+            var statement = Assert.IsType<UnknownAttestationStatement>(
                 AttestationStatement.FromCbor(AttestationFormats.Packed, encoded));
 
-            Assert.Equal(ecdaaKeyId, statement.EcdaaKeyId.ToArray());
+            Assert.Equal(AttestationFormats.Packed, statement.Format);
+            Assert.Equal(encoded, statement.Encoded.ToArray());
         }
 
         [Fact]
@@ -96,6 +99,22 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
+        public void FromCbor_FidoU2fFormatWithExtraKey_ReturnsUnknownStatement()
+        {
+            byte[] certificate = BuildSelfSignedCertificate();
+            byte[] encoded = BuildSignatureAndCertificateAttestationStatement(
+                AttestationSignature,
+                certificate,
+                includeExtraKey: true);
+
+            var statement = Assert.IsType<UnknownAttestationStatement>(
+                AttestationStatement.FromCbor(AttestationFormats.FidoU2f, encoded));
+
+            Assert.Equal(AttestationFormats.FidoU2f, statement.Format);
+            Assert.Equal(encoded, statement.Encoded.ToArray());
+        }
+
+        [Fact]
         public void FromCbor_AppleFormat_ParsesCertificates()
         {
             byte[] certificate = BuildSelfSignedCertificate();
@@ -108,6 +127,19 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(encoded, statement.Encoded.ToArray());
             X509Certificate2 parsedCertificate = Assert.Single(statement.Certificates);
             Assert.Equal(certificate, parsedCertificate.RawData);
+        }
+
+        [Fact]
+        public void FromCbor_AppleFormatWithExtraKey_ReturnsUnknownStatement()
+        {
+            byte[] certificate = BuildSelfSignedCertificate();
+            byte[] encoded = BuildCertificateOnlyAttestationStatement(certificate, includeExtraKey: true);
+
+            var statement = Assert.IsType<UnknownAttestationStatement>(
+                AttestationStatement.FromCbor(AttestationFormats.Apple, encoded));
+
+            Assert.Equal(AttestationFormats.Apple, statement.Format);
+            Assert.Equal(encoded, statement.Encoded.ToArray());
         }
 
         [Fact]
@@ -149,7 +181,8 @@ namespace Yubico.YubiKey.Fido2
         private static byte[] BuildPackedAttestationStatement(
             byte[] signature,
             byte[]? certificate = null,
-            byte[]? ecdaaKeyId = null)
+            string? unsupportedByteStringKey = null,
+            byte[]? unsupportedByteStringValue = null)
         {
             int entryCount = 2;
             if (certificate is not null)
@@ -157,7 +190,7 @@ namespace Yubico.YubiKey.Fido2
                 entryCount++;
             }
 
-            if (ecdaaKeyId is not null)
+            if (unsupportedByteStringKey is not null)
             {
                 entryCount++;
             }
@@ -177,10 +210,10 @@ namespace Yubico.YubiKey.Fido2
                 cbor.WriteEndArray();
             }
 
-            if (ecdaaKeyId is not null)
+            if (unsupportedByteStringKey is not null)
             {
-                cbor.WriteTextString("ecdaaKeyId");
-                cbor.WriteByteString(ecdaaKeyId);
+                cbor.WriteTextString(unsupportedByteStringKey);
+                cbor.WriteByteString(unsupportedByteStringValue ?? Array.Empty<byte>());
             }
 
             cbor.WriteEndMap();
@@ -189,28 +222,43 @@ namespace Yubico.YubiKey.Fido2
 
         private static byte[] BuildSignatureAndCertificateAttestationStatement(
             byte[] signature,
-            byte[] certificate)
+            byte[] certificate,
+            bool includeExtraKey = false)
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(2);
+            cbor.WriteStartMap(includeExtraKey ? 3 : 2);
             cbor.WriteTextString("sig");
             cbor.WriteByteString(signature);
             cbor.WriteTextString("x5c");
             cbor.WriteStartArray(1);
             cbor.WriteByteString(certificate);
             cbor.WriteEndArray();
+            if (includeExtraKey)
+            {
+                cbor.WriteTextString("zzzz");
+                cbor.WriteBoolean(true);
+            }
+
             cbor.WriteEndMap();
             return cbor.Encode();
         }
 
-        private static byte[] BuildCertificateOnlyAttestationStatement(byte[] certificate)
+        private static byte[] BuildCertificateOnlyAttestationStatement(
+            byte[] certificate,
+            bool includeExtraKey = false)
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(1);
+            cbor.WriteStartMap(includeExtraKey ? 2 : 1);
             cbor.WriteTextString("x5c");
             cbor.WriteStartArray(1);
             cbor.WriteByteString(certificate);
             cbor.WriteEndArray();
+            if (includeExtraKey)
+            {
+                cbor.WriteTextString("zzzz");
+                cbor.WriteBoolean(true);
+            }
+
             cbor.WriteEndMap();
             return cbor.Encode();
         }

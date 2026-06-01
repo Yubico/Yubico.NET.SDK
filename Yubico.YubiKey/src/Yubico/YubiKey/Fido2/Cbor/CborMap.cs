@@ -97,6 +97,12 @@ namespace Yubico.YubiKey.Fido2.Cbor
         public bool ContainsOnlyKeys(params TKey[] allowedKeys) => Keys.All(allowedKeys.Contains);
 
         /// <summary>
+        /// Checks to see whether this map contains exactly the specified keys.
+        /// </summary>
+        public bool ContainsExactKeys(params TKey[] expectedKeys) =>
+            Count == expectedKeys.Length && ContainsOnlyKeys(expectedKeys);
+
+        /// <summary>
         /// Returns this map as an IDictionary of key/value pairs where the keys
         /// are all of type TKey and the values are all of the type TValue. If
         /// one or more of the map's values is not of the specified type, this

@@ -235,6 +235,25 @@ namespace Yubico.YubiKey.Fido2.Cbor
             Assert.Equal(2, map.Count);
         }
 
+        [Theory]
+        [InlineData(new[] { 1, 2 }, true)]
+        [InlineData(new[] { 1 }, false)]
+        [InlineData(new[] { 1, 2, 3 }, false)]
+        [InlineData(new[] { 1, 3 }, false)]
+        public void ContainsExactKeys_ReturnsWhetherMapHasExactKeySet(int[] expectedKeys, bool expected)
+        {
+            byte[] encoded = new byte[]
+            {
+                0xA2,
+                0x01, 0x01,
+                0x02, 0x02,
+            };
+
+            var map = new CborMap<int>(encoded);
+
+            Assert.Equal(expected, map.ContainsExactKeys(expectedKeys));
+        }
+
         [Fact]
         public void Constructor_AllowsEmptyNestedMap_ForRawValueRead()
         {

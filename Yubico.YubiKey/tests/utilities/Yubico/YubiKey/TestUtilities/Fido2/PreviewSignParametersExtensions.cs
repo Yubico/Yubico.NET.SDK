@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
 {
     public static class PreviewSignParametersExtensions
     {
-        public const CoseAlgorithmIdentifier ArkgP256Esp256 =
+        public const CoseAlgorithmIdentifier ArkgP256ESP256 =
             (CoseAlgorithmIdentifier)(-65539);
 
         public const string ExtensionName = Extensions.PreviewSign;
@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
             cbor.WriteStartMap(3);
 
             cbor.WriteInt32(3);
-            cbor.WriteInt32((int)ArkgP256Esp256);
+            cbor.WriteInt32((int)ArkgP256ESP256);
 
             cbor.WriteInt32(-1);
             cbor.WriteByteString(arkgKeyHandle.Span);

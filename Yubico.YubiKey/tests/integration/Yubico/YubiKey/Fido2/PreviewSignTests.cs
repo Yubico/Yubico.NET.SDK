@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Fido2
 
             MakeCredentialParameters.AddPreviewSignGenerateKeyExtension(
                 Session.AuthenticatorInfo,
-                new[] { PreviewSignParametersExtensions.ArkgP256Esp256 });
+                new[] { PreviewSignParametersExtensions.ArkgP256ESP256 });
 
             var credData = Session.MakeCredential(MakeCredentialParameters);
             var isValid = credData.VerifyAttestation(MakeCredentialParameters.ClientDataHash);
@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Fido2
             // Step A: Register with previewSign (requires user presence - touch #1)
             MakeCredentialParameters.AddPreviewSignGenerateKeyExtension(
                 Session.AuthenticatorInfo,
-                new[] { PreviewSignParametersExtensions.ArkgP256Esp256 });
+                new[] { PreviewSignParametersExtensions.ArkgP256ESP256 });
 
             var mcData = Session.MakeCredential(MakeCredentialParameters);
             var generatedKey = mcData.GetPreviewSignGeneratedKey();

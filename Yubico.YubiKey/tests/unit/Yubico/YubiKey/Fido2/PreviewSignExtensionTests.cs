@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.Fido2
             byte[] expected = { 0xA2, 0x03, 0x81, 0x3A, 0x00, 0x01, 0x00, 0x02, 0x04, 0x01 };
 
             byte[] actual = PreviewSignExtension.EncodeGenerateKeyInput(
-                new[] { PreviewSignParametersExtensions.ArkgP256Esp256 },
+                new[] { PreviewSignParametersExtensions.ArkgP256ESP256 },
                 flags: PreviewSignOptions.RequireUserPresence);
 
             Assert.Equal(expected, actual);
@@ -108,7 +108,7 @@ namespace Yubico.YubiKey.Fido2
 
             PreviewSignGeneratedKey? generated = data.GetPreviewSignGeneratedKey();
             Assert.NotNull(generated);
-            Assert.Equal(PreviewSignParametersExtensions.ArkgP256Esp256, generated!.Algorithm);
+            Assert.Equal(PreviewSignParametersExtensions.ArkgP256ESP256, generated!.Algorithm);
             Assert.NotEmpty(generated.PublicKey.Span.ToArray());
         }
 
@@ -256,7 +256,7 @@ namespace Yubico.YubiKey.Fido2
             PreviewSignGeneratedKey? generated = PreviewSignExtension.DecodeGeneratedKey(signedPayload, unsignedPayload);
 
             Assert.NotNull(generated);
-            Assert.Equal(PreviewSignParametersExtensions.ArkgP256Esp256, generated!.Algorithm);
+            Assert.Equal(PreviewSignParametersExtensions.ArkgP256ESP256, generated!.Algorithm);
             Assert.NotEmpty(generated.PublicKey.Span.ToArray());
         }
 
@@ -392,7 +392,7 @@ namespace Yubico.YubiKey.Fido2
         public void EncodeFlags_ProducesExpectedBits(PreviewSignOptions options, int expectedBits)
         {
             byte[] encoded = PreviewSignExtension.EncodeGenerateKeyInput(
-                new[] { PreviewSignParametersExtensions.ArkgP256Esp256 },
+                new[] { PreviewSignParametersExtensions.ArkgP256ESP256 },
                 flags: options);
 
             int flags = ReadFlagsFromGenerateKeyInput(encoded);
@@ -429,7 +429,7 @@ namespace Yubico.YubiKey.Fido2
             _ = Assert.Throws<NotSupportedException>(
                 () => parameters.AddPreviewSignGenerateKeyExtension(
                     info,
-                    new[] { PreviewSignParametersExtensions.ArkgP256Esp256 }));
+                    new[] { PreviewSignParametersExtensions.ArkgP256ESP256 }));
         }
 
         [Fact]
@@ -441,7 +441,7 @@ namespace Yubico.YubiKey.Fido2
                 new UserEntity(new byte[] { 0x01 }) { Name = "u" });
             parameters.AddPreviewSignGenerateKeyExtension(
                 info,
-                new[] { PreviewSignParametersExtensions.ArkgP256Esp256 },
+                new[] { PreviewSignParametersExtensions.ArkgP256ESP256 },
                 PreviewSignOptions.RequireUserVerification);
 
             byte[] encoded = parameters.CborEncode();
@@ -481,7 +481,7 @@ namespace Yubico.YubiKey.Fido2
             _ = Assert.Throws<ArgumentOutOfRangeException>(
                 () => parameters.AddPreviewSignGenerateKeyExtension(
                     info,
-                    new[] { PreviewSignParametersExtensions.ArkgP256Esp256 },
+                    new[] { PreviewSignParametersExtensions.ArkgP256ESP256 },
                     flags));
         }
 
@@ -548,7 +548,7 @@ namespace Yubico.YubiKey.Fido2
 
             var argsMap = new CborMap<int>(previewSignMap.ReadByteString(7));
             Assert.Equal(3, argsMap.Count);
-            Assert.Equal((int)PreviewSignParametersExtensions.ArkgP256Esp256, argsMap.ReadInt32(3));
+            Assert.Equal((int)PreviewSignParametersExtensions.ArkgP256ESP256, argsMap.ReadInt32(3));
             Assert.Equal(derivedKey.ArkgKeyHandle.ToArray(), argsMap.ReadByteString(-1).ToArray());
             Assert.Equal(derivedKey.Context.ToArray(), argsMap.ReadByteString(-2).ToArray());
         }
@@ -608,7 +608,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         private static byte[] BuildGeneratedKeyAlgorithmPayload(
-            CoseAlgorithmIdentifier algorithm = PreviewSignParametersExtensions.ArkgP256Esp256,
+            CoseAlgorithmIdentifier algorithm = PreviewSignParametersExtensions.ArkgP256ESP256,
             bool includeUnknownOpaqueValue = false)
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
@@ -640,7 +640,7 @@ namespace Yubico.YubiKey.Fido2
         private static byte[] BuildGeneratedKeyUnsignedPayloadWithNoneAttestation(
             int arkgKeyType = CoseKeyTypeArkgPub,
             int arkgAlgorithm = CoseAlgorithmArkgP256,
-            int blindingAlgorithm = (int)CoseAlgorithmIdentifier.Esp256,
+            int blindingAlgorithm = (int)CoseAlgorithmIdentifier.ESP256,
             int? kemAlgorithm = null,
             byte[]? credentialPublicKeyCose = null,
             bool includeUnknownOpaqueValue = false)
@@ -675,7 +675,7 @@ namespace Yubico.YubiKey.Fido2
         private static byte[] BuildGeneratedKeyNoneAttestationObject(
             int arkgKeyType = CoseKeyTypeArkgPub,
             int arkgAlgorithm = CoseAlgorithmArkgP256,
-            int blindingAlgorithm = (int)CoseAlgorithmIdentifier.Esp256,
+            int blindingAlgorithm = (int)CoseAlgorithmIdentifier.ESP256,
             int? kemAlgorithm = null,
             byte[]? credentialPublicKeyCose = null)
         {
@@ -703,7 +703,7 @@ namespace Yubico.YubiKey.Fido2
         private static byte[] BuildSyntheticAuthDataWithArkgCoseKey(
             int arkgKeyType = CoseKeyTypeArkgPub,
             int arkgAlgorithm = CoseAlgorithmArkgP256,
-            int blindingAlgorithm = (int)CoseAlgorithmIdentifier.Esp256,
+            int blindingAlgorithm = (int)CoseAlgorithmIdentifier.ESP256,
             int? kemAlgorithm = null,
             byte[]? credentialPublicKeyCose = null)
         {
@@ -726,7 +726,7 @@ namespace Yubico.YubiKey.Fido2
         private static byte[] BuildArkgCoseKey(
             int arkgKeyType = CoseKeyTypeArkgPub,
             int arkgAlgorithm = CoseAlgorithmArkgP256,
-            int blindingAlgorithm = (int)CoseAlgorithmIdentifier.Esp256,
+            int blindingAlgorithm = (int)CoseAlgorithmIdentifier.ESP256,
             int? kemAlgorithm = null)
         {
             byte[] x = Enumerable.Repeat((byte)0xAB, 32).ToArray();

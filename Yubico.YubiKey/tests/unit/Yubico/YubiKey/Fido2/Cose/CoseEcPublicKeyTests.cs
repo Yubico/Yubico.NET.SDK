@@ -64,7 +64,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         }
 
         [Fact]
-        public void Create_WithEsp256Key_ReturnsEcPublicKey()
+        public void Create_WithESP256Key_ReturnsEcPublicKey()
         {
             byte[] encodedKey = HexToBytes(
                 "a5010203282001215820a5fd5ce1b1c458c530a54fa61b31bf6b04be8b97afde54dd8cbb69275a8a1be1" +
@@ -74,12 +74,12 @@ namespace Yubico.YubiKey.Fido2.Cose
 
             var ecPublicKey = Assert.IsType<CoseEcPublicKey>(coseKey);
             Assert.Equal(encodedKey.Length, bytesRead);
-            Assert.Equal(CoseAlgorithmIdentifier.Esp256, ecPublicKey.Algorithm);
+            Assert.Equal(CoseAlgorithmIdentifier.ESP256, ecPublicKey.Algorithm);
             Assert.Equal(CoseEcCurve.P256, ecPublicKey.Curve);
         }
 
         [Fact]
-        public void Esp256Key_VerifiesPythonFido2Fixture()
+        public void ESP256Key_VerifiesPythonFido2Fixture()
         {
             byte[] encodedKey = HexToBytes(
                 "a5010203282001215820a5fd5ce1b1c458c530a54fa61b31bf6b04be8b97afde54dd8cbb69275a8a1be1" +

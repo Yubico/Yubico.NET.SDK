@@ -99,8 +99,14 @@ namespace Yubico.YubiKey.Fido2
         public ReadOnlyMemory<byte> AttestationStatement => AttestationSignature;
 
         /// <summary>
-        /// The encoded CBOR map that contains the attestation statement.
+        /// The raw CBOR-encoded full attestation statement map from the
+        /// <c>attStmt</c> field.
         /// </summary>
+        /// <remarks>
+        /// This contains the complete format-specific attestation statement, not
+        /// only the <c>sig</c> field. Use <see cref="AttestationSignature"/> when
+        /// only the signature bytes are needed.
+        /// </remarks>
         public ReadOnlyMemory<byte> EncodedAttestationStatement { get; private set; }
 
         /// <summary>

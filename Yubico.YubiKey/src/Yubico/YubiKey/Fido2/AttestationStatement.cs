@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.Fido2
         public string Format { get; }
 
         /// <summary>
-        /// The raw CBOR encoding of the attestation statement map.
+        /// The raw CBOR encoding of the full attestation statement map.
         /// </summary>
         public ReadOnlyMemory<byte> Encoded { get; }
 

@@ -69,21 +69,34 @@ namespace Yubico.YubiKey.Fido2
         public CoseAlgorithmIdentifier AttestationAlgorithm { get; private set; }
 
         /// <summary>
-        /// The attestation signature bytes from the parsed attestation statement.
-        /// This is an optional element, so it can be empty.
+        /// The attestation signature bytes from the parsed attestation statement's
+        /// <c>sig</c> field.
         /// </summary>
         /// <remarks>
-        /// Use the public key in the first element of
-        /// <see cref="AttestationCertificates"/> to check this signature when an
-        /// attestation certificate is provided. Trust validation requires a
-        /// caller-provided trust source and certificate path validation.
+        /// This property is populated for attestation statement formats parsed by
+        /// this SDK. Use <see cref="EncodedAttestationStatement"/> when you need
+        /// the full CBOR-encoded attestation statement map.
         /// <para>
         /// For packed attestation statements, the data to verify is the
         /// <see cref="AuthenticatorData"/> concatenated with the client data
         /// hash (from the <see cref="MakeCredentialParameters"/>).
         /// </para>
         /// </remarks>
-        public ReadOnlyMemory<byte> AttestationStatement { get; private set; }
+        public ReadOnlyMemory<byte> AttestationSignature { get; private set; }
+
+        /// <summary>
+        /// The attestation signature bytes from the parsed attestation statement's
+        /// <c>sig</c> field.
+        /// </summary>
+        /// <remarks>
+        /// This property is retained for source compatibility. Despite its name,
+        /// it does not contain the full attestation statement. Use
+        /// <see cref="AttestationSignature"/> for the signature bytes, or
+        /// <see cref="EncodedAttestationStatement"/> for the full CBOR-encoded
+        /// attestation statement map.
+        /// </remarks>
+        [Obsolete("Use AttestationSignature for the signature bytes, or EncodedAttestationStatement for the full attestation statement.", false)]
+        public ReadOnlyMemory<byte> AttestationStatement => AttestationSignature;
 
         /// <summary>
         /// The encoded CBOR map that contains the attestation statement.
@@ -97,7 +110,7 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// The first cert in this list (<c>AttestationCertificates[0]</c>) will
         /// be the certificate that contains the public key used to verify the
-        /// <see cref="AttestationStatement"/>. For packed attestation statements,
+        /// <see cref="AttestationSignature"/>. For packed attestation statements,
         /// the data to verify is the <see cref="AuthenticatorData"/> concatenated
         /// with the client data hash (from the <see cref="MakeCredentialParameters"/>).
         /// </remarks>
@@ -166,11 +179,12 @@ namespace Yubico.YubiKey.Fido2
 
                 Format = AttestationObject.Format;
                 AuthenticatorData = AttestationObject.AuthenticatorData;
-                AttestationAlgorithm = AttestationObject.AttestationAlgorithm ??
+                var packedStatement = AttestationObject.Statement as PackedAttestationStatement ??
                     throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);
-                AttestationStatement = AttestationObject.AttestationSignature;
+                AttestationAlgorithm = packedStatement.Algorithm;
+                AttestationSignature = packedStatement.Signature;
                 EncodedAttestationStatement = AttestationObject.EncodedAttestationStatement;
-                AttestationCertificates = AttestationObject.AttestationCertificates;
+                AttestationCertificates = packedStatement.Certificates;
 
                 if (map.Contains(KeyEnterpriseAttestation))
                 {
@@ -281,7 +295,7 @@ namespace Yubico.YubiKey.Fido2
                     "Only ECDSA attestation certificates are supported.");
 
             using var ecdsaVfy = new EcdsaVerify(attestationPublicKey);
-            return ecdsaVfy.VerifyDigestedData(digester.Hash, AttestationStatement.ToArray());
+            return ecdsaVfy.VerifyDigestedData(digester.Hash, AttestationSignature.ToArray());
         }
     }
 }

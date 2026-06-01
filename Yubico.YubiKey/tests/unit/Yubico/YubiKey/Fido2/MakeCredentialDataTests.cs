@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.Fido2
 
             Assert.Equal("packed", data.Format);
             Assert.Equal(Cose.CoseAlgorithmIdentifier.ES256, data.AttestationAlgorithm);
-            Assert.False(data.AttestationStatement.IsEmpty);
+            Assert.False(data.AttestationSignature.IsEmpty);
             Assert.False(data.EncodedAttestationStatement.IsEmpty);
             Assert.Equal(3, CountEncodedMapEntries(data.EncodedAttestationStatement));
             Assert.NotNull(data.AttestationCertificates);

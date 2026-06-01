@@ -13,11 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Formats.Cbor;
-using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.Fido2.Cbor;
-using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -29,8 +26,7 @@ namespace Yubico.YubiKey.Fido2
     /// <para>
     /// An attestation object is returned by the authenticator during credential creation
     /// (MakeCredential). It contains the attestation format identifier,
-    /// authenticator data, and the attestation statement for checking the
-    /// attestation signature over the credential creation data.
+    /// authenticator data, and a typed attestation statement.
     /// </para>
     /// <para>
     /// The CBOR structure is defined in CTAP 2.1 section 6.1.2 as:
@@ -49,11 +45,6 @@ namespace Yubico.YubiKey.Fido2
         private const int KeyAuthData = 2;
         private const int KeyAttestationStatement = 3;
 
-        private const int MaxAttestationMapCount = 3;
-        private const string AlgString = "alg";
-        private const string SigString = "sig";
-        private const string X5cString = "x5c";
-
         /// <summary>
         /// The attestation statement format identifier (e.g., "packed", "tpm", "android-key").
         /// See <see cref="AttestationFormats"/> for standard format identifiers.
@@ -67,30 +58,16 @@ namespace Yubico.YubiKey.Fido2
         public AuthenticatorData AuthenticatorData { get; private set; } = null!;
 
         /// <summary>
-        /// The algorithm used to create the attestation statement.
-        /// This is null for attestation statement formats not parsed by this SDK.
+        /// The format-specific attestation statement.
         /// </summary>
-        public CoseAlgorithmIdentifier? AttestationAlgorithm { get; private set; }
+        public AttestationStatement Statement { get; private set; } = null!;
 
         /// <summary>
-        /// The attestation signature bytes.
-        /// This is empty for attestation statement formats not parsed by this SDK.
-        /// </summary>
-        public ReadOnlyMemory<byte> AttestationSignature { get; private set; }
-
-        /// <summary>
-        /// The list of X.509 certificates from the attestation statement's x5c field.
-        /// This is null when certificates are not present or the attestation
-        /// statement format is not parsed by this SDK.
-        /// The first certificate contains the public key that verifies the attestation signature.
-        /// </summary>
-        public IReadOnlyList<X509Certificate2>? AttestationCertificates { get; private set; }
-
-        /// <summary>
-        /// The raw CBOR encoding of the attestation statement (key 3 in the attestation object).
+        /// The raw CBOR encoding of the full attestation statement map
+        /// (key 3 in the attestation object).
         /// This is always available after decoding an attestation object.
         /// </summary>
-        public ReadOnlyMemory<byte> EncodedAttestationStatement { get; private set; }
+        public ReadOnlyMemory<byte> EncodedAttestationStatement => Statement.Encoded;
 
         /// <summary>
         /// The raw CBOR encoding of the entire attestation object.
@@ -121,11 +98,10 @@ namespace Yubico.YubiKey.Fido2
         /// the CTAP 2.1 specification (section 6.1.2).
         /// </para>
         /// <para>
-        /// For "packed" attestation format, the typed properties
-        /// (<see cref="AttestationAlgorithm"/>, <see cref="AttestationSignature"/>,
-        /// <see cref="AttestationCertificates"/>) are populated. For all other formats,
-        /// those properties remain empty or null and the raw bytes are available via
-        /// <see cref="EncodedAttestationStatement"/>.
+        /// The <see cref="Statement"/> property is populated with a format-specific
+        /// statement type for statement formats parsed by this SDK. Unknown or
+        /// malformed formats are represented by <see cref="UnknownAttestationStatement"/>,
+        /// preserving the raw bytes via <see cref="EncodedAttestationStatement"/>.
         /// </para>
         /// </remarks>
         /// <param name="cborEncoding">
@@ -220,63 +196,7 @@ namespace Yubico.YubiKey.Fido2
         {
             Format = format;
             AuthenticatorData = new AuthenticatorData(authenticatorData);
-            EncodedAttestationStatement = encodedAttestationStatement;
-
-            if (!EncodedAttestationStatement.IsEmpty &&
-                Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal))
-            {
-                var attestCborMap = new CborMap<string>(EncodedAttestationStatement);
-                _ = TryParsePackedAttestationStatement(attestCborMap);
-            }
-        }
-
-        private bool TryParsePackedAttestationStatement(CborMap<string> attestCborMap)
-        {
-            try
-            {
-                if (!attestCborMap.Contains(AlgString) ||
-                    !attestCborMap.Contains(SigString) ||
-                    attestCborMap.Count > MaxAttestationMapCount ||
-                    (attestCborMap.Count == MaxAttestationMapCount && !attestCborMap.Contains(X5cString)))
-                {
-                    return false;
-                }
-
-                CoseAlgorithmIdentifier attestationAlgorithm =
-                    (CoseAlgorithmIdentifier)attestCborMap.ReadInt32(AlgString);
-                ReadOnlyMemory<byte> attestationSignature = attestCborMap.ReadByteString(SigString);
-                IReadOnlyList<X509Certificate2>? attestationCertificates = null;
-
-                if (attestCborMap.Contains(X5cString))
-                {
-                    var certList = attestCborMap.ReadArray<byte[]>(X5cString);
-                    var certificateList = new List<X509Certificate2>(certList.Count);
-
-                    for (int index = 0; index < certList.Count; index++)
-                    {
-                        certificateList.Add(new X509Certificate2(certList[index]));
-                    }
-
-                    attestationCertificates = certificateList;
-                }
-
-                AttestationAlgorithm = attestationAlgorithm;
-                AttestationSignature = attestationSignature;
-                AttestationCertificates = attestationCertificates;
-                return true;
-            }
-            catch (Exception exception) when (
-                exception is CborContentException ||
-                exception is InvalidCastException ||
-                exception is InvalidOperationException ||
-                exception is FormatException ||
-                exception is System.Security.Cryptography.CryptographicException)
-            {
-                AttestationAlgorithm = null;
-                AttestationSignature = ReadOnlyMemory<byte>.Empty;
-                AttestationCertificates = null;
-                return false;
-            }
+            Statement = AttestationStatement.FromCbor(format, encodedAttestationStatement);
         }
 
         /// <inheritdoc/>

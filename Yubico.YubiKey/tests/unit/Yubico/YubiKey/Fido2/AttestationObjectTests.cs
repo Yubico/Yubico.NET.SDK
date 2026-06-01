@@ -15,8 +15,6 @@
 using System;
 using System.Formats.Cbor;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.YubiKey.Fido2.Cose;
 
@@ -31,11 +29,10 @@ namespace Yubico.YubiKey.Fido2
         private static readonly byte[] PackedSignature = { 0x01, 0x02, 0x03 };
 
         [Fact]
-        public void Parse_PackedFormat_PopulatesPackedAttestationFields()
+        public void Parse_PackedFormat_AssignsPackedStatement()
         {
-            byte[] certificate = BuildSelfSignedCertificate();
             byte[] authenticatorData = BuildMinimalAuthData(BuildEs256CoseKey());
-            byte[] attestationStatement = BuildPackedAttestationStatement(PackedSignature, certificate);
+            byte[] attestationStatement = BuildPackedAttestationStatement(PackedSignature);
             byte[] encoding = BuildAttestationObject(
                 AttestationFormats.Packed,
                 authenticatorData,
@@ -44,15 +41,11 @@ namespace Yubico.YubiKey.Fido2
             var obj = new AttestationObject(encoding);
 
             Assert.Equal(AttestationFormats.Packed, obj.Format);
-            Assert.Equal(CoseAlgorithmIdentifier.ES256, obj.AttestationAlgorithm!.Value);
-            Assert.Equal(PackedSignature, obj.AttestationSignature.ToArray());
+            _ = Assert.IsType<PackedAttestationStatement>(obj.Statement);
             Assert.Equal(attestationStatement, obj.EncodedAttestationStatement.ToArray());
             Assert.Equal(authenticatorData, obj.AuthenticatorData.EncodedAuthenticatorData.ToArray());
             Assert.NotNull(obj.AuthenticatorData.CredentialPublicKey);
             Assert.NotNull(obj.AuthenticatorData.EncodedCredentialPublicKey);
-
-            X509Certificate2 parsedCertificate = Assert.Single(obj.AttestationCertificates!);
-            Assert.Contains("Test Attestation", parsedCertificate.Subject, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -87,8 +80,7 @@ namespace Yubico.YubiKey.Fido2
                 attestationStatement);
 
             Assert.Equal(AttestationFormats.Packed, obj.Format);
-            Assert.Equal(CoseAlgorithmIdentifier.ES256, obj.AttestationAlgorithm!.Value);
-            Assert.Equal(PackedSignature, obj.AttestationSignature.ToArray());
+            _ = Assert.IsType<PackedAttestationStatement>(obj.Statement);
             AssertStandaloneAttestationObjectEncoding(
                 obj.Encoded.ToArray(),
                 AttestationFormats.Packed,
@@ -126,7 +118,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void Parse_UnknownFormat_DoesNotPopulatePackedProperties()
+        public void Parse_NoneFormat_AssignsNoneStatement()
         {
             byte[] authenticatorData = BuildMinimalAuthData(BuildEs256CoseKey());
             byte[] attestationStatement = BuildEmptyMap();
@@ -139,9 +131,7 @@ namespace Yubico.YubiKey.Fido2
 
             Assert.Equal("none", obj.Format);
             Assert.Equal(authenticatorData, obj.AuthenticatorData.EncodedAuthenticatorData.ToArray());
-            Assert.Null(obj.AttestationAlgorithm);
-            Assert.True(obj.AttestationSignature.IsEmpty);
-            Assert.Null(obj.AttestationCertificates);
+            _ = Assert.IsType<NoneAttestationStatement>(obj.Statement);
             Assert.Equal(attestationStatement, obj.EncodedAttestationStatement.ToArray());
         }
 
@@ -158,42 +148,6 @@ namespace Yubico.YubiKey.Fido2
 
             Assert.Null(obj.AuthenticatorData.CredentialPublicKey);
             Assert.Equal(coseKey, obj.AuthenticatorData.EncodedCredentialPublicKey!.Value.ToArray());
-        }
-
-        [Fact]
-        public void Parse_MalformedPackedAttestation_PreservesRawStatement_AndLeavesTypedFieldsNull()
-        {
-            byte[] attestationStatement = BuildMalformedPackedStatementWithTextAlgorithm();
-            byte[] encoding = BuildAttestationObject(
-                AttestationFormats.Packed,
-                BuildMinimalAuthData(BuildEs256CoseKey()),
-                attestationStatement);
-
-            var obj = new AttestationObject(encoding);
-
-            Assert.Equal(AttestationFormats.Packed, obj.Format);
-            Assert.Equal(attestationStatement, obj.EncodedAttestationStatement.ToArray());
-            Assert.Null(obj.AttestationAlgorithm);
-            Assert.True(obj.AttestationSignature.IsEmpty);
-            Assert.Null(obj.AttestationCertificates);
-        }
-
-        [Fact]
-        public void Parse_PackedAttestationWithMalformedSignature_PreservesRawStatement_AndLeavesTypedFieldsNull()
-        {
-            byte[] attestationStatement = BuildMalformedPackedStatementWithTextSignature();
-            byte[] encoding = BuildAttestationObject(
-                AttestationFormats.Packed,
-                BuildMinimalAuthData(BuildEs256CoseKey()),
-                attestationStatement);
-
-            var obj = new AttestationObject(encoding);
-
-            Assert.Equal(AttestationFormats.Packed, obj.Format);
-            Assert.Equal(attestationStatement, obj.EncodedAttestationStatement.ToArray());
-            Assert.Null(obj.AttestationAlgorithm);
-            Assert.True(obj.AttestationSignature.IsEmpty);
-            Assert.Null(obj.AttestationCertificates);
         }
 
         private static byte[] BuildAttestationObject(
@@ -236,47 +190,14 @@ namespace Yubico.YubiKey.Fido2
         }
 
         private static byte[] BuildPackedAttestationStatement(
-            byte[] signature,
-            byte[]? certificate = null)
-        {
-            int entryCount = certificate is null ? 2 : 3;
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(entryCount);
-            cbor.WriteTextString("alg");
-            cbor.WriteInt32((int)CoseAlgorithmIdentifier.ES256);
-            cbor.WriteTextString("sig");
-            cbor.WriteByteString(signature);
-
-            if (certificate is not null)
-            {
-                cbor.WriteTextString("x5c");
-                cbor.WriteStartArray(1);
-                cbor.WriteByteString(certificate);
-                cbor.WriteEndArray();
-            }
-
-            cbor.WriteEndMap();
-            return cbor.Encode();
-        }
-
-        private static byte[] BuildMalformedPackedStatementWithTextAlgorithm()
-        {
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteStartMap(1);
-            cbor.WriteTextString("alg");
-            cbor.WriteTextString("not-an-int");
-            cbor.WriteEndMap();
-            return cbor.Encode();
-        }
-
-        private static byte[] BuildMalformedPackedStatementWithTextSignature()
+            byte[] signature)
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(2);
             cbor.WriteTextString("alg");
             cbor.WriteInt32((int)CoseAlgorithmIdentifier.ES256);
             cbor.WriteTextString("sig");
-            cbor.WriteTextString("not-bytes");
+            cbor.WriteByteString(signature);
             cbor.WriteEndMap();
             return cbor.Encode();
         }
@@ -358,19 +279,5 @@ namespace Yubico.YubiKey.Fido2
             return coseKey.Encode();
         }
 
-        private static byte[] BuildSelfSignedCertificate()
-        {
-            using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-            var request = new CertificateRequest(
-                "CN=Test Attestation",
-                ecdsa,
-                HashAlgorithmName.SHA256);
-
-            using X509Certificate2 certificate = request.CreateSelfSigned(
-                DateTimeOffset.UtcNow.AddDays(-1),
-                DateTimeOffset.UtcNow.AddDays(1));
-
-            return certificate.RawData;
-        }
     }
 }

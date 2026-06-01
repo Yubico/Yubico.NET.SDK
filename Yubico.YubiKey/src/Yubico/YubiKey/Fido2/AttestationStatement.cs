@@ -27,6 +27,9 @@ namespace Yubico.YubiKey.Fido2
     /// </summary>
     public abstract class AttestationStatement
     {
+        private protected const string SignatureKey = "sig";
+        private protected const string CertificatesKey = "x5c";
+
         private protected AttestationStatement(string format, ReadOnlyMemory<byte> encoded)
         {
             Format = format;
@@ -74,12 +77,12 @@ namespace Yubico.YubiKey.Fido2
         private protected static IReadOnlyList<X509Certificate2>? ReadCertificates(
             CborMap<string> statementMap)
         {
-            if (!statementMap.Contains("x5c"))
+            if (!statementMap.Contains(CertificatesKey))
             {
                 return null;
             }
 
-            var certList = statementMap.ReadArray<byte[]>("x5c");
+            var certList = statementMap.ReadArray<byte[]>(CertificatesKey);
             var certificates = new List<X509Certificate2>(certList.Count);
 
             for (int index = 0; index < certList.Count; index++)
@@ -97,8 +100,6 @@ namespace Yubico.YubiKey.Fido2
     public sealed class PackedAttestationStatement : AttestationStatement
     {
         private const string AlgorithmKey = "alg";
-        private const string SignatureKey = "sig";
-        private const string CertificatesKey = "x5c";
         private const string EcdaaKeyIdKey = "ecdaaKeyId";
 
         private PackedAttestationStatement(
@@ -167,9 +168,6 @@ namespace Yubico.YubiKey.Fido2
     /// </summary>
     public sealed class FidoU2fAttestationStatement : AttestationStatement
     {
-        private const string SignatureKey = "sig";
-        private const string CertificatesKey = "x5c";
-
         private FidoU2fAttestationStatement(
             ReadOnlyMemory<byte> encoded,
             ReadOnlyMemory<byte> signature,
@@ -212,8 +210,6 @@ namespace Yubico.YubiKey.Fido2
     /// </summary>
     public sealed class AppleAttestationStatement : AttestationStatement
     {
-        private const string CertificatesKey = "x5c";
-
         private AppleAttestationStatement(
             ReadOnlyMemory<byte> encoded,
             IReadOnlyList<X509Certificate2> certificates)

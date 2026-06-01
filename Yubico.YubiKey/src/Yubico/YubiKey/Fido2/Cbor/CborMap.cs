@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
+using System.Linq;
 
 namespace Yubico.YubiKey.Fido2.Cbor
 {
@@ -89,6 +90,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// Checks to see whether a given key is present in the map, without throwing an exception.
         /// </summary>
         public bool Contains(TKey key) => _dict.ContainsKey(key);
+
+        /// <summary>
+        /// Checks to see whether this map contains only the specified keys.
+        /// </summary>
+        public bool ContainsOnlyKeys(params TKey[] allowedKeys) => Keys.All(allowedKeys.Contains);
 
         /// <summary>
         /// Returns this map as an IDictionary of key/value pairs where the keys

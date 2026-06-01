@@ -89,31 +89,6 @@ namespace Yubico.YubiKey.Fido2
 
             return certificates;
         }
-
-        private protected static bool ContainsOnlyKnownKeys(
-            CborMap<string> statementMap,
-            params string[] knownKeys)
-        {
-            foreach (string key in statementMap.Keys)
-            {
-                bool known = false;
-                for (int index = 0; index < knownKeys.Length; index++)
-                {
-                    if (string.Equals(key, knownKeys[index], StringComparison.Ordinal))
-                    {
-                        known = true;
-                        break;
-                    }
-                }
-
-                if (!known)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
     }
 
     /// <summary>
@@ -166,7 +141,7 @@ namespace Yubico.YubiKey.Fido2
             var statementMap = new CborMap<string>(encoded);
             if (!statementMap.Contains(AlgorithmKey) ||
                 !statementMap.Contains(SignatureKey) ||
-                !ContainsOnlyKnownKeys(statementMap, AlgorithmKey, SignatureKey, CertificatesKey, EcdaaKeyIdKey))
+                !statementMap.ContainsOnlyKeys(AlgorithmKey, SignatureKey, CertificatesKey, EcdaaKeyIdKey))
             {
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
             }
@@ -220,7 +195,7 @@ namespace Yubico.YubiKey.Fido2
             var statementMap = new CborMap<string>(encoded);
             if (!statementMap.Contains(SignatureKey) ||
                 !statementMap.Contains(CertificatesKey) ||
-                !ContainsOnlyKnownKeys(statementMap, SignatureKey, CertificatesKey))
+                !statementMap.ContainsOnlyKeys(SignatureKey, CertificatesKey))
             {
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
             }
@@ -256,7 +231,7 @@ namespace Yubico.YubiKey.Fido2
         {
             var statementMap = new CborMap<string>(encoded);
             if (!statementMap.Contains(CertificatesKey) ||
-                !ContainsOnlyKnownKeys(statementMap, CertificatesKey))
+                !statementMap.ContainsOnlyKeys(CertificatesKey))
             {
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
             }

@@ -45,8 +45,7 @@ namespace Yubico.YubiKey.Fido2
 
             Assert.Equal(AttestationFormats.Packed, obj.Format);
             Assert.Equal(CoseAlgorithmIdentifier.ES256, obj.AttestationAlgorithm!.Value);
-            Assert.True(obj.AttestationSignature.HasValue);
-            Assert.Equal(PackedSignature, obj.AttestationSignature.Value.ToArray());
+            Assert.Equal(PackedSignature, obj.AttestationSignature.ToArray());
             Assert.Equal(attestationStatement, obj.EncodedAttestationStatement.ToArray());
             Assert.Equal(authenticatorData, obj.AuthenticatorData.EncodedAuthenticatorData.ToArray());
             Assert.NotNull(obj.AuthenticatorData.CredentialPublicKey);
@@ -89,7 +88,7 @@ namespace Yubico.YubiKey.Fido2
 
             Assert.Equal(AttestationFormats.Packed, obj.Format);
             Assert.Equal(CoseAlgorithmIdentifier.ES256, obj.AttestationAlgorithm!.Value);
-            Assert.Equal(PackedSignature, obj.AttestationSignature!.Value.ToArray());
+            Assert.Equal(PackedSignature, obj.AttestationSignature.ToArray());
             AssertStandaloneAttestationObjectEncoding(
                 obj.Encoded.ToArray(),
                 AttestationFormats.Packed,
@@ -141,7 +140,7 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal("none", obj.Format);
             Assert.Equal(authenticatorData, obj.AuthenticatorData.EncodedAuthenticatorData.ToArray());
             Assert.Null(obj.AttestationAlgorithm);
-            Assert.Null(obj.AttestationSignature);
+            Assert.True(obj.AttestationSignature.IsEmpty);
             Assert.Null(obj.AttestationCertificates);
             Assert.Equal(attestationStatement, obj.EncodedAttestationStatement.ToArray());
         }
@@ -175,7 +174,7 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(AttestationFormats.Packed, obj.Format);
             Assert.Equal(attestationStatement, obj.EncodedAttestationStatement.ToArray());
             Assert.Null(obj.AttestationAlgorithm);
-            Assert.Null(obj.AttestationSignature);
+            Assert.True(obj.AttestationSignature.IsEmpty);
             Assert.Null(obj.AttestationCertificates);
         }
 
@@ -193,7 +192,7 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(AttestationFormats.Packed, obj.Format);
             Assert.Equal(attestationStatement, obj.EncodedAttestationStatement.ToArray());
             Assert.Null(obj.AttestationAlgorithm);
-            Assert.Null(obj.AttestationSignature);
+            Assert.True(obj.AttestationSignature.IsEmpty);
             Assert.Null(obj.AttestationCertificates);
         }
 

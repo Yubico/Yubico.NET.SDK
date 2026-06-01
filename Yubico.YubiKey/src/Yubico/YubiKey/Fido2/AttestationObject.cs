@@ -74,9 +74,9 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// The attestation signature bytes.
-        /// This is null for attestation statement formats not parsed by this SDK.
+        /// This is empty for attestation statement formats not parsed by this SDK.
         /// </summary>
-        public ReadOnlyMemory<byte>? AttestationSignature { get; private set; }
+        public ReadOnlyMemory<byte> AttestationSignature { get; private set; }
 
         /// <summary>
         /// The list of X.509 certificates from the attestation statement's x5c field.
@@ -124,7 +124,7 @@ namespace Yubico.YubiKey.Fido2
         /// For "packed" attestation format, the typed properties
         /// (<see cref="AttestationAlgorithm"/>, <see cref="AttestationSignature"/>,
         /// <see cref="AttestationCertificates"/>) are populated. For all other formats,
-        /// those properties remain null and the raw bytes are available via
+        /// those properties remain empty or null and the raw bytes are available via
         /// <see cref="EncodedAttestationStatement"/>.
         /// </para>
         /// </remarks>
@@ -273,7 +273,7 @@ namespace Yubico.YubiKey.Fido2
                 exception is System.Security.Cryptography.CryptographicException)
             {
                 AttestationAlgorithm = null;
-                AttestationSignature = null;
+                AttestationSignature = ReadOnlyMemory<byte>.Empty;
                 AttestationCertificates = null;
                 return false;
             }

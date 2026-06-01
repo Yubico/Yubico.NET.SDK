@@ -168,7 +168,7 @@ namespace Yubico.YubiKey.Fido2
                 AuthenticatorData = AttestationObject.AuthenticatorData;
                 AttestationAlgorithm = AttestationObject.AttestationAlgorithm ??
                     throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);
-                AttestationStatement = AttestationObject.AttestationSignature ?? ReadOnlyMemory<byte>.Empty;
+                AttestationStatement = AttestationObject.AttestationSignature;
                 EncodedAttestationStatement = AttestationObject.EncodedAttestationStatement;
                 AttestationCertificates = AttestationObject.AttestationCertificates;
 

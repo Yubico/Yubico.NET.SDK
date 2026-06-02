@@ -94,6 +94,14 @@ namespace Yubico.YubiKey.Fido2
         /// Encode the GetAssertion extension input as a flat map.
         /// {2:keyHandle, 6:tbs, 7:additionalArgs?}.
         /// </summary>
+        /// <remarks>
+        /// The map corresponds to the <c>keyHandle</c>, <c>tbs</c>, and
+        /// optional <c>additionalArgs</c> fields of the
+        /// <see href="https://yubicolabs.github.io/webauthn-sign-extension/4/#dictdef-authenticationextensionssignsigninputs">
+        /// <c>AuthenticationExtensionsSignSignInputs</c></see> dictionary.
+        /// The <paramref name="toBeSigned"/> and <paramref name="additionalArgs"/>
+        /// values are algorithm-specific signing inputs and are encoded unchanged.
+        /// </remarks>
         public static byte[] EncodeSignInput(
             ReadOnlyMemory<byte> keyHandle,
             ReadOnlyMemory<byte> toBeSigned,

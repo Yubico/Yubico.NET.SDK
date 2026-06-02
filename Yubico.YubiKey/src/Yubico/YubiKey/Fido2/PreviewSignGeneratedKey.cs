@@ -62,9 +62,10 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <remarks>
         /// This expresses how to communicate inputs to the authenticator during
-        /// signing, and may be different from the <c>3 (alg)</c> attribute of
-        /// the <see cref="PublicKey"/>, which expresses how third party
-        /// consumers can use the public key.
+        /// signing. Callers use the selected algorithm to decide how to prepare
+        /// later signing input. This may be different from the <c>3 (alg)</c>
+        /// attribute of the <see cref="PublicKey"/>, which expresses how third
+        /// party consumers can use the public key.
         /// </remarks>
         public CoseAlgorithmIdentifier Algorithm { get; init; }
 

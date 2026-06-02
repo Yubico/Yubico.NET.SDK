@@ -1,0 +1,143 @@
+// Copyright 2025 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
+using System.Security;
+using Xunit;
+
+namespace Yubico.Core.Cryptography
+{
+    public class ArkgPrimitivesTests
+    {
+        // P-256 generator G from SEC 2 v2 section 2.4.2, encoded as an
+        // uncompressed SEC 1 point.
+        private static readonly byte[] P256Generator =
+        {
+            0x04,
+            0x6B, 0x17, 0xD1, 0xF2, 0xE1, 0x2C, 0x42, 0x47,
+            0xF8, 0xBC, 0xE6, 0xE5, 0x63, 0xA4, 0x40, 0xF2,
+            0x77, 0x03, 0x7D, 0x81, 0x2D, 0xEB, 0x33, 0xA0,
+            0xF4, 0xA1, 0x39, 0x45, 0xD8, 0x98, 0xC2, 0x96,
+            0x4F, 0xE3, 0x42, 0xE2, 0xFE, 0x1A, 0x7F, 0x9B,
+            0x8E, 0xE7, 0xEB, 0x4A, 0x7C, 0x0F, 0x9E, 0x16,
+            0x2B, 0xCE, 0x33, 0x57, 0x6B, 0x31, 0x5E, 0xCE,
+            0xCB, 0xB6, 0x40, 0x68, 0x37, 0xBF, 0x51, 0xF5,
+        };
+
+        private static readonly byte[] ScalarOne =
+        {
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+        };
+
+        private static readonly byte[] InputKeyingMaterial =
+        {
+            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+            0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+            0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+            0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
+        };
+
+        [Fact]
+        public void IsPointOnCurve_ValidP256Generator_ReturnsTrue()
+        {
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+
+            Assert.True(primitives.IsPointOnCurve(P256Generator));
+        }
+
+        [Fact]
+        public void IsPointOnCurve_OffCurvePoint_ReturnsFalse()
+        {
+            byte[] offCurve = (byte[])P256Generator.Clone();
+            offCurve[64] ^= 0x01;
+
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+
+            Assert.False(primitives.IsPointOnCurve(offCurve));
+        }
+
+        [Theory]
+        [MemberData(nameof(GetMalformedInputs))]
+        public void IsPointOnCurve_MalformedInput_ReturnsFalse(byte[] malformedInput)
+        {
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+
+            Assert.False(primitives.IsPointOnCurve(malformedInput));
+        }
+
+        public static TheoryData<byte[]> GetMalformedInputs()
+        {
+            var malformedLength = new byte[10];
+
+            var compressedTag = (byte[])P256Generator.Clone();
+            compressedTag[0] = 0x02;
+
+            return new()
+            {
+                malformedLength,
+                compressedTag
+            };
+        }
+
+        [Fact]
+        public void ComputeEcdhSharedSecret_GeneratorWithScalarOne_ReturnsGeneratorX()
+        {
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+            byte[] secret = primitives.ComputeEcdhSharedSecret(ScalarOne, P256Generator);
+
+            Assert.Equal(P256Generator.AsSpan(1, 32).ToArray(), secret);
+        }
+
+        [Fact]
+        public void ComputeEcdhSharedSecret_OffCurvePublicPoint_Throws()
+        {
+            byte[] offCurve = (byte[])P256Generator.Clone();
+            offCurve[64] ^= 0x01;
+
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+
+            _ = Assert.Throws<SecurityException>(
+                () => primitives.ComputeEcdhSharedSecret(ScalarOne, offCurve));
+        }
+
+        [Theory]
+        [MemberData(nameof(GetMalformedInputs))]
+        public void ComputeEcdhSharedSecret_MalformedPublicPoint_ThrowsArgumentException(byte[] malformedInput)
+        {
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+
+            var ex = Assert.Throws<ArgumentException>(
+                () => primitives.ComputeEcdhSharedSecret(new byte[32], malformedInput));
+            Assert.Equal("publicPoint", ex.ParamName);
+        }
+
+        [Fact]
+        public void DerivePublicKey_EmptyContext_Succeeds()
+        {
+            IArkgPrimitives primitives = ArkgPrimitives.Create();
+
+            (byte[] derivedPk, byte[] arkgKeyHandle) = primitives.DerivePublicKey(
+                P256Generator,
+                P256Generator,
+                InputKeyingMaterial,
+                ReadOnlySpan<byte>.Empty);
+
+            Assert.Equal(65, derivedPk.Length);
+            Assert.NotEmpty(arkgKeyHandle);
+        }
+    }
+}

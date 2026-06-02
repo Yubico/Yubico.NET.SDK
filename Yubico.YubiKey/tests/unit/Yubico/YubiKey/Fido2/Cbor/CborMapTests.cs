@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 using Xunit;
 
@@ -177,6 +178,157 @@ namespace Yubico.YubiKey.Fido2.Cbor
             cbor.ReadEndArray();
 
             return isValidOne && isValidTwo;
+        }
+
+        [Fact]
+        public void ReadEncodedValue_ReturnsByteIdenticalValue()
+        {
+            byte[] encoded = new byte[]
+            {
+                0xA3,
+                0x01, 0x64, 0x74, 0x65, 0x73, 0x74,
+                0x02, 0x42, 0x11, 0x22,
+                0x03, 0xA2, 0x63, 0x61, 0x6C, 0x67, 0x26, 0x63, 0x73, 0x69, 0x67, 0x43, 0xAA, 0xBB, 0xCC
+            };
+            byte[] expectedKey3Value = new byte[]
+            {
+                0xA2, 0x63, 0x61, 0x6C, 0x67, 0x26, 0x63, 0x73, 0x69, 0x67, 0x43, 0xAA, 0xBB, 0xCC
+            };
+
+            var map = new CborMap<int>(encoded);
+            ReadOnlyMemory<byte> retrievedSlice = map.ReadEncodedValue(3);
+
+            Assert.True(retrievedSlice.Span.SequenceEqual(expectedKey3Value),
+                "ReadEncodedValue must return byte-identical bytes of the original value");
+        }
+
+        [Fact]
+        public void ReadEncodedValue_MissingKey_ThrowsKeyNotFound()
+        {
+            // Build a simple CBOR map with only key 1
+            var writer = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            writer.WriteStartMap(1);
+            writer.WriteInt32(1);
+            writer.WriteTextString("test");
+            writer.WriteEndMap();
+
+            byte[] encoded = writer.Encode();
+            var map = new CborMap<int>(encoded);
+
+            Assert.Throws<KeyNotFoundException>(() => map.ReadEncodedValue(999));
+        }
+
+        [Fact]
+        public void Keys_ReturnsMapKeys()
+        {
+            byte[] encoded = new byte[]
+            {
+                0xA2,
+                0x01, 0x01,
+                0x02, 0x02,
+            };
+
+            var map = new CborMap<int>(encoded);
+
+            Assert.Contains(1, map.Keys);
+            Assert.Contains(2, map.Keys);
+            Assert.Equal(2, map.Count);
+        }
+
+        [Theory]
+        [InlineData(new[] { 1, 2 }, true)]
+        [InlineData(new[] { 1 }, false)]
+        [InlineData(new[] { 1, 2, 3 }, false)]
+        [InlineData(new[] { 1, 3 }, false)]
+        public void ContainsExactKeys_ReturnsWhetherMapHasExactKeySet(int[] expectedKeys, bool expected)
+        {
+            byte[] encoded = new byte[]
+            {
+                0xA2,
+                0x01, 0x01,
+                0x02, 0x02,
+            };
+
+            var map = new CborMap<int>(encoded);
+
+            Assert.Equal(expected, map.ContainsExactKeys(expectedKeys));
+        }
+
+        [Fact]
+        public void Constructor_AllowsEmptyNestedMap_ForRawValueRead()
+        {
+            byte[] encoded = new byte[]
+            {
+                0xA1,
+                0x01, 0xA0,
+            };
+
+            var map = new CborMap<int>(encoded);
+
+            Assert.Equal(new byte[] { 0xA0 }, map.ReadEncodedValue(1).ToArray());
+            Assert.Equal(0, map.ReadMap<int>(1).Count);
+        }
+
+        [Fact]
+        public void Constructor_AllowsOpaqueNestedMap_ForRawValueRead()
+        {
+            byte[] encoded = new byte[]
+            {
+                0xA2,
+                0x01, 0xA1, 0x41, 0x01, 0x41, 0x02,
+                0x02, 0x64, 0x64, 0x6F, 0x6E, 0x65,
+            };
+            byte[] expectedOpaqueMap = new byte[]
+            {
+                0xA1, 0x41, 0x01, 0x41, 0x02,
+            };
+
+            var map = new CborMap<int>(encoded);
+
+            Assert.Equal(expectedOpaqueMap, map.ReadEncodedValue(1).ToArray());
+            Assert.Equal("done", map.ReadTextString(2));
+            Assert.Throws<InvalidCastException>(() => map.ReadMap<int>(1));
+            Assert.Throws<InvalidCastException>(() => map.ReadMap<byte[]>(1));
+        }
+
+        [Fact]
+        public void Constructor_AllowsArraysWithOpaqueValues_ForRawValueRead()
+        {
+            byte[] encoded = new byte[]
+            {
+                0xA1,
+                0x01, 0x83,
+                0xA0,
+                0xA1, 0x41, 0x01, 0x41, 0x02,
+                0x01,
+            };
+            byte[] expectedArray = new byte[]
+            {
+                0x83,
+                0xA0,
+                0xA1, 0x41, 0x01, 0x41, 0x02,
+                0x01,
+            };
+
+            var map = new CborMap<int>(encoded);
+
+            Assert.Equal(expectedArray, map.ReadEncodedValue(1).ToArray());
+            Assert.Throws<InvalidCastException>(() => map.ReadArray<int>(1));
+        }
+
+        [Fact]
+        public void Constructor_AllowsFutureCborValue_ForRawValueRead()
+        {
+            byte[] encoded = new byte[]
+            {
+                0xA1,
+                0x01, 0xF9, 0x3C, 0x00,
+            };
+
+            var map = new CborMap<int>(encoded);
+
+            Assert.Equal(new byte[] { 0xF9, 0x3C, 0x00 }, map.ReadEncodedValue(1).ToArray());
+            Assert.Throws<InvalidCastException>(() => map.ReadInt32(1));
         }
     }
 }

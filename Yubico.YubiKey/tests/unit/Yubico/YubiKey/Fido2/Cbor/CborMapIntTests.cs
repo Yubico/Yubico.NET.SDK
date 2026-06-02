@@ -86,6 +86,20 @@ namespace Yubico.YubiKey.Fido2.Cbor
             } while (index > 0);
         }
 
+        [Fact]
+        public void ReadInteger_WrongValueType_Throws()
+        {
+            var cborWriter = new CborWriter();
+            cborWriter.WriteStartMap(1);
+            cborWriter.WriteInt32(1);
+            cborWriter.WriteTextString("not-an-integer");
+            cborWriter.WriteEndMap();
+
+            var cborMap = new CborMap<int>(cborWriter.Encode());
+
+            Assert.Throws<FormatException>(() => cborMap.ReadInt32(1));
+        }
+
         bool TestInt32(byte[] encoding, int flags)
         {
             var cborMap = new CborMap<int>(encoding);

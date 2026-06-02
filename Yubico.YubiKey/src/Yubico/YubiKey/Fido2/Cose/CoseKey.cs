@@ -111,11 +111,23 @@ namespace Yubico.YubiKey.Fido2.Cose
             var algorithm = GetAlgorithm(cborMap);
             return algorithm switch
             {
-                CoseAlgorithmIdentifier.ECDHwHKDF256 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
-                CoseAlgorithmIdentifier.ES256 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
-                CoseAlgorithmIdentifier.ES384 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
-                CoseAlgorithmIdentifier.ES512 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
-                CoseAlgorithmIdentifier.EdDSA => CoseEdDsaPublicKey.CreateFromEncodedKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.ECDHwHKDF256
+                    or CoseAlgorithmIdentifier.ES256
+                    or CoseAlgorithmIdentifier.ES384
+                    or CoseAlgorithmIdentifier.ES512
+                    or CoseAlgorithmIdentifier.ESP256
+                    when IsKeyType(cborMap, CoseKeyType.Ec2)
+                    => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.EdDSA
+                    when IsKeyType(cborMap, CoseKeyType.Okp)
+                    => CoseEdDsaPublicKey.CreateFromEncodedKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.ECDHwHKDF256
+                    or CoseAlgorithmIdentifier.ES256
+                    or CoseAlgorithmIdentifier.ES384
+                    or CoseAlgorithmIdentifier.ES512
+                    or CoseAlgorithmIdentifier.ESP256
+                    or CoseAlgorithmIdentifier.EdDSA
+                    => throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info),
                 _ => throw new NotSupportedException(
                     string.Format(CultureInfo.CurrentCulture, ExceptionMessages.UnsupportedAlgorithm))
             };
@@ -133,6 +145,19 @@ namespace Yubico.YubiKey.Fido2.Cose
 
             var algorithm = (CoseAlgorithmIdentifier)map.ReadInt32(TagAlgorithm);
             return algorithm;
+        }
+
+        private static bool IsKeyType(CborMap<int> map, CoseKeyType expectedKeyType)
+        {
+            if (!map.Contains(TagKeyType))
+            {
+                throw new Ctap2DataException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.Ctap2MissingRequiredField));
+            }
+
+            return (CoseKeyType)map.ReadInt32(TagKeyType) == expectedKeyType;
         }
     }
 }

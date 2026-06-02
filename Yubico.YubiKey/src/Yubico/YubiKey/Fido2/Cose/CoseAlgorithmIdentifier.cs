@@ -31,8 +31,13 @@ namespace Yubico.YubiKey.Fido2.Cose
         None = 0,
 
         /// <summary>
-        /// ECDSA with SHA-256 using the NIST P-256 curve.
+        /// ECDSA with SHA-256, usually using the NIST P-256 curve.
         /// </summary>
+        /// <remarks>
+        /// COSE generally constrains the hash function, while WebAuthn/FIDO2
+        /// constrains this identifier to NIST P-256.
+        /// See https://www.w3.org/TR/2026/CR-webauthn-3-20260526/#sctn-alg-identifier.
+        /// </remarks>
         ES256 = -7,
 
         /// <summary>
@@ -41,13 +46,23 @@ namespace Yubico.YubiKey.Fido2.Cose
         ECDHwHKDF256 = -25,
 
         /// <summary>
-        /// ECDSA with SHA-384 using the NIST P-384 curve.
+        /// ECDSA with SHA-384, usually using the NIST P-384 curve.
         /// </summary>
+        /// <remarks>
+        /// COSE generally constrains the hash function, while WebAuthn/FIDO2
+        /// constrains this identifier to NIST P-384.
+        /// See https://www.w3.org/TR/2026/CR-webauthn-3-20260526/#sctn-alg-identifier.
+        /// </remarks>
         ES384 = -35,
 
         /// <summary>
-        /// ECDSA with SHA-512 using the NIST P-521 curve.
+        /// ECDSA with SHA-512, usually using the NIST P-521 curve.
         /// </summary>
+        /// <remarks>
+        /// COSE generally constrains the hash function, while WebAuthn/FIDO2
+        /// constrains this identifier to NIST P-521.
+        /// See https://www.w3.org/TR/2026/CR-webauthn-3-20260526/#sctn-alg-identifier.
+        /// </remarks>
         ES512 = -36,
 
         /// <summary>
@@ -57,9 +72,17 @@ namespace Yubico.YubiKey.Fido2.Cose
         EdDSA = -8,
 
         /// <summary>
+        /// ECDSA using the NIST P-256 curve and SHA-256.
+        /// See Section 2.1 of RFC 9864:
+        /// https://www.rfc-editor.org/rfc/rfc9864.html#name-elliptic-curve-digital-sign
+        /// </summary>
+        ESP256 = -9,
+
+        /// <summary>
         /// RSASSA-PKCS1-v1_5 with SHA-256
         /// Currently, not supported by any YubiKey
         /// </summary>
         RS256 = -257,
+
     }
 }

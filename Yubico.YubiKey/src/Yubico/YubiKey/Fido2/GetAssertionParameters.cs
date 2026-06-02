@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
@@ -392,6 +393,51 @@ namespace Yubico.YubiKey.Fido2
 
             _hmacSecretEncoding = HmacSecretExtension.Encode(authProtocol, _salt1.Value, _salt2);
             AddExtension(Fido2.Extensions.HmacSecret, _hmacSecretEncoding);
+        }
+
+        /// <summary>
+        /// Adds the previewSign extension for signing arbitrary data with a dedicated
+        /// signing key distinct from the parent credential key.
+        /// </summary>
+        /// <remarks>
+        /// The parameters are encoded as the <c>keyHandle</c>, <c>tbs</c>, and
+        /// optional <c>additionalArgs</c> fields of the
+        /// <see href="https://yubicolabs.github.io/webauthn-sign-extension/4/#dictdef-authenticationextensionssignsigninputs">
+        /// <c>AuthenticationExtensionsSignSignInputs</c></see> dictionary.
+        /// The <paramref name="toBeSigned"/> and <paramref name="additionalArgs"/>
+        /// values are algorithm-specific signing inputs and are passed through
+        /// unchanged.
+        /// </remarks>
+        /// <param name="keyHandle">
+        /// The <c>keyHandle</c> value for the generated signing key.
+        /// </param>
+        /// <param name="toBeSigned">
+        /// The algorithm-specific <c>tbs</c> value.
+        /// </param>
+        /// <param name="additionalArgs">
+        /// Optional algorithm-specific <c>additionalArgs</c> value.
+        /// </param>
+        /// <exception cref="InvalidOperationException">
+        /// The allow-list is null or empty. The previewSign extension requires at least one credential
+        /// in the allow-list.
+        /// </exception>
+        public void AddPreviewSignExtension(
+            ReadOnlyMemory<byte> keyHandle,
+            ReadOnlyMemory<byte> toBeSigned,
+            ReadOnlyMemory<byte>? additionalArgs = null)
+        {
+            if (AllowList is null || AllowList.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "The previewSign extension requires at least one credential in the allow-list. " +
+                    "Call AllowCredential() with the credential ID returned from MakeCredential before invoking AddPreviewSignExtension().");
+            }
+
+            byte[] encoded = PreviewSignExtension.EncodeSignInput(
+                keyHandle,
+                toBeSigned,
+                additionalArgs);
+            AddExtension(Fido2.Extensions.PreviewSign, encoded);
         }
 
         /// <inheritdoc/>

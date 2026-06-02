@@ -42,6 +42,7 @@ namespace Yubico.YubiKey.Fido2
         private const int SignCountLength = 4;
         private const int CredentialIdLengthLength = 2;
         private const int AaguidLength = 16;
+        private const int CoseKeyTypeTag = 1;
         private const byte UserPresenceBit = 0x01;
         private const byte UserVerificationBit = 0x04;
         private const byte AttestedBit = 0x40;
@@ -112,6 +113,16 @@ namespace Yubico.YubiKey.Fido2
         public CoseKey? CredentialPublicKey { get; private set; }
 
         /// <summary>
+        /// The raw CBOR-encoded credential public key bytes from the authenticator data.
+        /// </summary>
+        /// <remarks>
+        /// This property is always populated when attested credential data is present,
+        /// regardless of whether the key was parsed into a <see cref="CoseKey"/> via
+        /// <see cref="CredentialPublicKey"/>.
+        /// </remarks>
+        public ReadOnlyMemory<byte>? EncodedCredentialPublicKey { get; private set; }
+
+        /// <summary>
         /// The list of extensions. This is an optional value and can be null.
         /// </summary>
         /// <remarks>
@@ -180,7 +191,22 @@ namespace Yubico.YubiKey.Fido2
                 offset += CredentialIdLengthLength;
                 CredentialId = new CredentialId() { Id = EncodedAuthenticatorData.Slice(offset, credentialIdLength) };
                 offset += credentialIdLength;
-                CredentialPublicKey = CoseKey.Create(EncodedAuthenticatorData[offset..], out int bytesRead);
+
+                // Always read the COSE key bytes to determine their length and store them
+                var coseKeyReader = new CborReader(EncodedAuthenticatorData[offset..], CborConformanceMode.Ctap2Canonical);
+                ReadOnlyMemory<byte> coseKeyBytes = coseKeyReader.ReadEncodedValue();
+                int bytesRead = coseKeyBytes.Length;
+                EncodedCredentialPublicKey = coseKeyBytes.ToArray();
+
+                try
+                {
+                    CredentialPublicKey = CoseKey.Create(coseKeyBytes, out _);
+                }
+                catch (NotSupportedException)
+                {
+                    CredentialPublicKey = null;
+                }
+
                 offset += bytesRead;
             }
             // For some versions of the YubiKey, it is possible there is no
@@ -387,6 +413,22 @@ namespace Yubico.YubiKey.Fido2
             }
 
             return (CredProtectPolicy)encodedValue.Span[0];
+        }
+
+        /// <summary>
+        /// Gets the previewSign signature from the extension outputs.
+        /// </summary>
+        /// <returns>
+        /// The signature bytes if the extension was used and returned data; otherwise, <c>null</c>.
+        /// </returns>
+        public byte[]? GetPreviewSignSignature()
+        {
+            if (!TryGetExtensionData(Fido2.Extensions.PreviewSign, out Memory<byte> encodedValue))
+            {
+                return null;
+            }
+
+            return PreviewSignExtension.DecodeSignature(encodedValue);
         }
 
         private bool TryGetExtensionData(string extensionKey, out Memory<byte> encodedValue)

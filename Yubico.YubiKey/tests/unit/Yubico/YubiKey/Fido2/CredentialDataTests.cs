@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Fido2
             };
         }
 
-        private byte[] GetSampleEncoding()
+        internal static byte[] GetSampleEncoding()
         {
             return new byte[] {
                 0xa5, 0x01, 0x66, 0x70, 0x61, 0x63, 0x6b, 0x65, 0x64, 0x02, 0x58, 0xb4, 0xb1, 0xe7, 0x70, 0xb1,

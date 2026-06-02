@@ -43,8 +43,10 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         ToggleAlwaysUv = 24,
         SetPinConfig = 25,
 
-        Reset = 26,
+        AuthenticatorSelection = 26,
 
-        Exit = 27,
+        Reset = 27,
+
+        Exit = 29,
     }
 }

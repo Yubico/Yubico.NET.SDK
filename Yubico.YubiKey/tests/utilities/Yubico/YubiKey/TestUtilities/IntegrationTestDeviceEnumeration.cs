@@ -29,7 +29,10 @@ namespace Yubico.YubiKey.TestUtilities
     ///
     /// The user needs to add their Yubikeys serial numbers to the allow-list file which is located at
     /// %LOCALAPPDATA%\Yubico\YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt for Windows users
-    /// and /Users/&lt;username&gt;/.local/share/Yubico/YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt for macOS users.
+    /// and ~/Library/Application Support/Yubico/YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt for macOS users
+    /// (~/.local/share/Yubico/... for Linux users). The path resolves from
+    /// <see cref="Environment.SpecialFolder.LocalApplicationData"/>, which on .NET 8 macOS
+    /// maps to ~/Library/Application Support — not the older XDG default.
     /// The SDK attempts to create the file if it doesn't already exist.
     ///
     /// The allow-list file contains the serial numbers of YubiKeys to be allowed to run integration tests.

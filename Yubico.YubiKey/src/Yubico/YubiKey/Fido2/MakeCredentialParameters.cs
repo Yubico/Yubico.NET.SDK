@@ -290,7 +290,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void ExcludeCredential(CredentialId credentialId) =>
             _excludeList =
-                ParameterHelpers.AddToList<CredentialId>(credentialId, _excludeList);
+                ParameterHelpers.AddToList(credentialId, _excludeList);
 
         /// <summary>
         /// Specify that the credential being created should be designated for third-party payment authentication.
@@ -557,7 +557,7 @@ namespace Yubico.YubiKey.Fido2
         /// Encode the "hmac-secret" extension. This should be called before issuing the
         /// <see cref="Commands.MakeCredentialCommand"/>. The call will be valid only if
         /// the <see cref="AddHmacSecretMcExtension"/> has been called, and the
-        /// <see cref="PinProtocols.PinUvAuthProtocolBase.Encapsulate"/> method
+        /// <see cref="PinUvAuthProtocolBase.Encapsulate"/> method
         /// has been successfully called. 
         /// &gt; [!NOTE]
         /// &gt; If you use <see cref="Fido2Session.MakeCredential"/> you do not need to call this method.
@@ -725,6 +725,60 @@ namespace Yubico.YubiKey.Fido2
             CredProtectPolicy credProtectPolicy,
             AuthenticatorInfo authenticatorInfo) =>
             AddCredProtectExtension(credProtectPolicy, true, authenticatorInfo);
+
+        /// <summary>
+        /// Adds the previewSign extension for generating a key that can be used
+        /// to sign arbitrary data.
+        /// </summary>
+        /// <remarks>
+        /// The caller supplies the <see cref="AuthenticatorInfo"/> for the YubiKey,
+        /// obtained by calling the <see cref="Commands.GetInfoCommand"/> or
+        /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
+        /// This method verifies that the YubiKey supports the previewSign extension.
+        /// </remarks>
+        /// <param name="authenticatorInfo">
+        /// The FIDO2 <see cref="AuthenticatorInfo"/> for the YubiKey being used.
+        /// </param>
+        /// <param name="algorithms">
+        /// A list of acceptable signature algorithms, ordered from most preferred to least preferred.
+        /// </param>
+        /// <param name="flags">
+        /// The user presence (UP) and user verification (UV) policy for this signing key pair.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <paramref name="authenticatorInfo"/> or <paramref name="algorithms"/> is null.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// The YubiKey does not support the previewSign extension.
+        /// </exception>
+        public void AddPreviewSignGenerateKeyExtension(
+            AuthenticatorInfo authenticatorInfo,
+            CoseAlgorithmIdentifier[] algorithms,
+            PreviewSignOptions flags = PreviewSignOptions.RequireUserPresence)
+        {
+            Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
+            Guard.IsNotNull(algorithms, nameof(algorithms));
+
+            if (algorithms.Length == 0)
+            {
+                throw new ArgumentException("At least one previewSign algorithm is required.", nameof(algorithms));
+            }
+
+            if (flags != PreviewSignOptions.Unattended &&
+                flags != PreviewSignOptions.RequireUserPresence &&
+                flags != PreviewSignOptions.RequireUserVerification)
+            {
+                throw new ArgumentOutOfRangeException(nameof(flags));
+            }
+
+            if (!authenticatorInfo.IsExtensionSupported(Fido2.Extensions.PreviewSign))
+            {
+                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+            }
+
+            byte[] encoded = PreviewSignExtension.EncodeGenerateKeyInput(algorithms, flags);
+            AddExtension(Fido2.Extensions.PreviewSign, encoded);
+        }
 
         /// <inheritdoc/>
         public override byte[] CborEncode() =>

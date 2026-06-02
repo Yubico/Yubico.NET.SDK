@@ -33,16 +33,17 @@ limitations under the License. -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
     <ProjectReference Include="..\utilities\Yubico.YubiKey.TestUtilities.csproj" />
+    <Compile Include="..\..\examples\Fido2SampleCode\YubiKeyOperations\AuthenticatorSelectionCoordinator.cs" Link="Yubico\YubiKey\Fido2\AuthenticatorSelectionCoordinator.cs" />
     <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.2" />
-    <PackageReference Include="coverlet.collector" Version="10.0.0" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="coverlet.collector" Version="10.0.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.6.0" />
     <PackageReference Include="NSubstitute" Version="5.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.Cryptography" Version="10.0.7" />
+    <PackageReference Include="Microsoft.Bcl.Cryptography" Version="10.0.8" />
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

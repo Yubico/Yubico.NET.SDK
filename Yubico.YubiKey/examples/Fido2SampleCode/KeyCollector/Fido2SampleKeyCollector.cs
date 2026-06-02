@@ -165,6 +165,11 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                     SampleMenu.WriteMessage(MessageType.Title, 0,
                         "\nThe YubiKey is trying to reset the FIDO2 application,");
                     break;
+
+                case Fido2KeyCollectorOperation.AuthenticatorSelection:
+                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                        "\nThe YubiKey is waiting for authenticatorSelection (user presence),");
+                    break;
             }
         }
 

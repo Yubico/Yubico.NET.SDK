@@ -106,6 +106,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             {
                 case Fido2MainMenuItem.ListYubiKeys:
                 case Fido2MainMenuItem.ChooseYubiKey:
+                case Fido2MainMenuItem.AuthenticatorSelection:
                 case Fido2MainMenuItem.Exit:
                     return true;
 

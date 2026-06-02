@@ -40,6 +40,7 @@ what information is needed from the caller for that command.
 * [Enumerate RPs Get Next RP](#enumerate-rps-get-next-rp)
 * [Get Large Blob](#get-large-blob)
 * [Set Large Blob](#set-large-blob)
+* [Authenticator Selection](#authenticator-selection)
 * [Reset](#reset)
 
 ___
@@ -611,6 +612,45 @@ None
 ### APDU
 
 [Technical APDU Details](apdu/set-large-blob.md)
+___
+
+## Authenticator selection
+
+Request user presence (UP) so the user can indicate _which_ authenticator to use for a subsequent operation. This can be useful in situations where more than one YubiKey is connected.
+
+### Available
+
+YubiKeys with FIDO2 firmware `5.5.1` or later. The underlying command, `authenticatorSelection` (0x0B), is specified in [CTAP 2.1 §6.9](https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html#authenticatorSelection).
+
+### SDK classes
+
+[Fido2Session.TryAuthenticatorSelection](xref:Yubico.YubiKey.Fido2.Fido2Session.TryAuthenticatorSelection%2a)
+
+[AuthenticatorSelectionCommand](xref:Yubico.YubiKey.Fido2.Commands.AuthenticatorSelectionCommand)
+
+[AuthenticatorSelectionResponse](xref:Yubico.YubiKey.Fido2.Commands.AuthenticatorSelectionResponse)
+
+### Input
+
+None
+
+### Output
+
+None
+
+### Multi-device selection
+
+To select among several connected HID FIDO authenticators, run one
+`Fido2Session.TryAuthenticatorSelection` call per device concurrently. Each session's
+`KeyCollector` receives a `TouchRequest`; capture its `SignalUserCancel` delegate. After
+the first session succeeds, call the captured delegates for the other sessions and wait
+for them to finish. The SDK converts those cancellation signals into CTAPHID_CANCEL
+(`0x11`) during keepalive handling, so applications do not need to build raw HID cancel
+packets.
+
+### APDU
+
+[Technical APDU Details](apdu/authenticator-selection.md)
 ___
 
 ## Reset

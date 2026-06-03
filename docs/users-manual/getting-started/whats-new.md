@@ -16,6 +16,24 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.17.x Releases
+
+### 1.17.0
+
+Release date: June 2nd, 2026
+
+Features:
+
+- The FIDO2 application now supports the WebAuthn `previewSign` extension for YubiKeys with firmware version 5.8 and above. ([#468](https://github.com/Yubico/Yubico.NET.SDK/pull/468))
+
+- The FIDO2 application now supports the CTAP 2.2 `authenticatorSelection` command, including SDK APIs, sample application support, documentation, and tests. ([#480](https://github.com/Yubico/Yubico.NET.SDK/pull/480))
+
+Dependencies:
+
+- Several dependencies across the Yubico.Core project, GitHub Actions workflows, and Docker-based documentation image have been updated to newer versions. ([#478](https://github.com/Yubico/Yubico.NET.SDK/pull/478), [#481](https://github.com/Yubico/Yubico.NET.SDK/pull/481), [#482](https://github.com/Yubico/Yubico.NET.SDK/pull/482), [#483](https://github.com/Yubico/Yubico.NET.SDK/pull/483), [#484](https://github.com/Yubico/Yubico.NET.SDK/pull/484), [#485](https://github.com/Yubico/Yubico.NET.SDK/pull/485))
+
+_________
+
 ## 1.16.x Releases
 
 ### 1.16.1

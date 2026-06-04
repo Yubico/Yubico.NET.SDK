@@ -21,8 +21,12 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// ARKG-P256 expected-output vectors used by the SDK's derivation regression tests.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// These are internal SDK regression fixtures, not published ARKG draft
+        /// <para>
+        /// <b>WARNING -- EXPERIMENTAL -- test only:</b> These ARKG fixtures are not ready for production use and
+        /// must not be treated as production cryptographic guidance.
+        /// </para>
+        /// <para>
+        /// These are internal SDK regression fixtures, not published ARKG draft
     /// vectors. They detect unintended regressions in ARKG-P256 key derivation
     /// across refactors and cover three scenarios:
     /// <list type="bullet">

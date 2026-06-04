@@ -21,9 +21,13 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// <summary>
     /// Represents a derived public key produced by ARKG-P256 derivation.
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// This class contains the derived public key and handles needed for the
+        /// <remarks>
+        /// <para>
+        /// <b>WARNING -- EXPERIMENTAL -- test only:</b> This ARKG previewSign helper is not ready for production
+        /// use and must not be treated as production cryptographic guidance.
+        /// </para>
+        /// <para>
+        /// This class contains the derived public key and handles needed for the
     /// ESP256-split-ARKG previewSign test-helper path. Instances are obtained
     /// by calling <see cref="PreviewSignGeneratedKeyExtensions.DerivePublicKey(PreviewSignGeneratedKey, byte[], byte[])"/> with
     /// application-provided input keying material and a context string.
@@ -86,6 +90,10 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// </summary>
         /// <remarks>
         /// <para>
+        /// <b>WARNING -- EXPERIMENTAL -- test only:</b> This ARKG signature-verification helper is not ready for
+        /// production use and must not be treated as production cryptographic guidance.
+        /// </para>
+        /// <para>
         /// This method verifies that a signature produced by the ESP256-split-ARKG
         /// previewSign path (obtained via <see cref="AuthenticatorData.GetPreviewSignSignature"/>)
         /// is valid for the given message using the derived public key from ARKG-P256
@@ -123,6 +131,10 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// Verifies a signature against the derived public key.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// <b>WARNING -- EXPERIMENTAL -- test only:</b> This ARKG signature-verification helper is not ready for
+        /// production use and must not be treated as production cryptographic guidance.
+        /// </para>
         /// <para>
         /// This method verifies that a signature produced by the ESP256-split-ARKG
         /// previewSign path (obtained via <see cref="AuthenticatorData.GetPreviewSignSignature"/>)

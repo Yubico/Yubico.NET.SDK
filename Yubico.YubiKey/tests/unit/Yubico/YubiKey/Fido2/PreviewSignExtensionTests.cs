@@ -25,6 +25,8 @@ namespace Yubico.YubiKey.Fido2
 {
     public class PreviewSignExtensionTests
     {
+        // WARNING -- EXPERIMENTAL -- test only: ARKG previewSign constants and helper fixtures in this class are
+        // not ready for production use and must not be treated as production cryptographic guidance.
         private const int CoseKeyTypeArkgPub = -65537;
         private const int CoseAlgorithmArkgP256 = -65700;
 
@@ -525,6 +527,8 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void GetAssertionCborEncode_EmbedsArkgPreviewSignHelperArgs()
         {
+            // WARNING -- EXPERIMENTAL -- test only: this encodes ARKG previewSign helper args for regression
+            // coverage, not as production cryptographic guidance.
             var parameters = new GetAssertionParameters(
                 new RelyingParty("rp.example"),
                 new byte[32]);

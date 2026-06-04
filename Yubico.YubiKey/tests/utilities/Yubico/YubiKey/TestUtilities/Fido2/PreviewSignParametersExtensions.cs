@@ -22,6 +22,12 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
 {
     public static class PreviewSignParametersExtensions
     {
+        /// <summary>
+        /// Experimental/test-only ARKG previewSign request algorithm identifier.
+        /// </summary>
+        /// <remarks>
+        /// Not ready for production use; do not use as production cryptographic guidance.
+        /// </remarks>
         public const CoseAlgorithmIdentifier ArkgP256ESP256 =
             (CoseAlgorithmIdentifier)(-65539);
 
@@ -30,6 +36,10 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// <summary>
         /// Adds previewSign sign input for the ESP256-split-ARKG test-helper path.
         /// </summary>
+        /// <remarks>
+        /// WARNING -- EXPERIMENTAL -- test only: this ARKG previewSign helper is not ready for production use
+        /// and must not be treated as production cryptographic guidance.
+        /// </remarks>
         /// <param name="parameters">The GetAssertion parameters to update.</param>
         /// <param name="deviceKeyHandle">The generated device key handle.</param>
         /// <param name="arkgKeyHandle">The ARKG key handle for the derived key.</param>

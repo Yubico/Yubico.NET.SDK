@@ -24,7 +24,7 @@ Release date: June 2nd, 2026
 
 Features:
 
-- The FIDO2 application now supports the WebAuthn `previewSign` extension for YubiKeys with firmware version 5.8 and above. ([#468](https://github.com/Yubico/Yubico.NET.SDK/pull/468))
+- The FIDO2 application now supports the WebAuthn `previewSign` extension for YubiKeys with firmware version 5.8 and above. **WARNING -- EXPERIMENTAL --** ARKG-related previewSign pieces are not ready for production use and must not be treated as production cryptographic guidance. ([#468](https://github.com/Yubico/Yubico.NET.SDK/pull/468))
 
 - The FIDO2 application now supports the CTAP 2.1 `authenticatorSelection` command, including SDK APIs, sample application support, documentation, and tests. ([#480](https://github.com/Yubico/Yubico.NET.SDK/pull/480))
 

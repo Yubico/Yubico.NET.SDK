@@ -23,8 +23,8 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// </summary>
         /// <remarks>
         /// <para>
-        /// <b>WARNING -- EXPERIMENTAL -- test only:</b> This ARKG previewSign helper is not ready for production
-        /// use and must not be treated as production cryptographic guidance.
+        /// WARNING: This code is for testing purposes only and is not intended to be a
+        /// secure or complete implementation of ARKG.
         /// </para>
         /// <para>
         /// This class contains the derived public key and handles needed for the
@@ -90,8 +90,8 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// </summary>
         /// <remarks>
         /// <para>
-        /// <b>WARNING -- EXPERIMENTAL -- test only:</b> This ARKG signature-verification helper is not ready for
-        /// production use and must not be treated as production cryptographic guidance.
+        /// WARNING: This code is for testing purposes only and is not intended to be a
+        /// secure or complete implementation of ARKG.
         /// </para>
         /// <para>
         /// This method verifies that a signature produced by the ESP256-split-ARKG
@@ -132,8 +132,8 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// </summary>
         /// <remarks>
         /// <para>
-        /// <b>WARNING -- EXPERIMENTAL -- test only:</b> This ARKG signature-verification helper is not ready for
-        /// production use and must not be treated as production cryptographic guidance.
+        /// WARNING: This code is for testing purposes only and is not intended to be a
+        /// secure or complete implementation of ARKG.
         /// </para>
         /// <para>
         /// This method verifies that a signature produced by the ESP256-split-ARKG

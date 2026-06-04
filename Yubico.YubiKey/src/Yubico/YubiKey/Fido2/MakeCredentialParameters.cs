@@ -731,8 +731,8 @@ namespace Yubico.YubiKey.Fido2
         /// to sign arbitrary data.
         /// </summary>
         /// <remarks>
-        /// <b>WARNING -- EXPERIMENTAL --</b> ARKG-related previewSign algorithms are not ready for production use and
-        /// must not be treated as production cryptographic guidance.
+        /// WARNING: This code is for testing purposes only and is not intended to be a
+        /// secure or complete implementation of ARKG.
         /// <para>
         /// The caller supplies the <see cref="AuthenticatorInfo"/> for the YubiKey,
         /// obtained by calling the <see cref="Commands.GetInfoCommand"/> or

@@ -22,8 +22,8 @@ namespace Yubico.YubiKey.Fido2
     /// Regression tests for ARKG-P256 derivation.
     /// </summary>
     /// <remarks>
-    /// WARNING -- EXPERIMENTAL -- test only: ARKG vectors and derivation tests are not ready for production use
-    /// and must not be treated as production cryptographic guidance.
+    /// WARNING: This code is for testing purposes only and is not intended to be a
+    /// secure or complete implementation of ARKG.
     /// </remarks>
     public class ArkgP256Tests
     {

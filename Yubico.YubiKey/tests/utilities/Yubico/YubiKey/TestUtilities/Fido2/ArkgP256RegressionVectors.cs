@@ -22,8 +22,8 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// </summary>
     /// <remarks>
         /// <para>
-        /// <b>WARNING -- EXPERIMENTAL -- test only:</b> These ARKG fixtures are not ready for production use and
-        /// must not be treated as production cryptographic guidance.
+        /// WARNING: This code is for testing purposes only and is not intended to be a
+        /// secure or complete implementation of ARKG.
         /// </para>
         /// <para>
         /// These are internal SDK regression fixtures, not published ARKG draft

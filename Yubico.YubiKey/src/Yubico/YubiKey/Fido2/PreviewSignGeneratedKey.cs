@@ -23,8 +23,8 @@ namespace Yubico.YubiKey.Fido2
     /// </summary>
     /// <remarks>
     /// <para>
-    /// <b>WARNING -- EXPERIMENTAL --</b> ARKG-related previewSign use is not ready for production use
-    /// and must not be treated as production cryptographic guidance.
+    /// WARNING: This code is for testing purposes only and is not intended to be a
+    /// secure or complete implementation of ARKG.
     /// </para>
     /// <para>
     /// This corresponds to the <c>AuthenticationExtensionsSignGeneratedKey</c>

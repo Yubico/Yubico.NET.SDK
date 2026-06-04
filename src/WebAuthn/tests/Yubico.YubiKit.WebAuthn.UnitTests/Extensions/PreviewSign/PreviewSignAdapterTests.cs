@@ -200,7 +200,7 @@ public class PreviewSignAdapterTests
     public void PreviewSign_Authentication_OutputSignaturePopulated()
     {
         // Arrange - mock authenticator data with previewSign extension containing signature
-        var signatureBytes = RandomNumberGenerator.GetBytes(64);  // Mock ES256 signature (r||s)
+        var signatureBytes = RandomNumberGenerator.GetBytes(64);  // Mock algorithm-specific signature bytes
 
         // Build previewSign extension output (authentication form: key 6 = signature)
         var extensionWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -271,6 +271,48 @@ public class PreviewSignAdapterTests
         Assert.Equal(6, reader.ReadInt32());
         var tbs = reader.ReadByteString();
         Assert.Equal(paramsA.Tbs.ToArray(), tbs);
+
+        reader.ReadEndMap();
+    }
+
+    [Fact(Timeout = 5000)]
+    public void PreviewSign_Authentication_AdditionalArgsPassThroughUnchanged()
+    {
+        var credA = new ReadOnlyMemory<byte>([0x01, 0x02, 0x03]);
+        byte[] additionalArgs = [0xA3, 0x03, 0x3A, 0x00, 0x01, 0x00, 0x02];
+
+        var paramsA = new WebAuthnPreviewSign.PreviewSignSigningParams(
+            keyHandle: new byte[] { 0xAA, 0xBB },
+            tbs: new byte[] { 0xCC, 0xDD, 0xEE },
+            additionalArgs: additionalArgs);
+
+        var input = new WebAuthnPreviewSign.PreviewSignAuthenticationInput(
+            new Dictionary<ReadOnlyMemory<byte>, WebAuthnPreviewSign.PreviewSignSigningParams>(WebAuthnPreviewSign.ByteArrayKeyComparer.Instance)
+            {
+                [credA] = paramsA
+            });
+
+        var allowCredentials = new List<PublicKeyCredentialDescriptor>
+        {
+            new(credA)
+        };
+
+        var builder = new ExtensionBuilder();
+        PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials);
+        var extensionsMap = builder.Build();
+
+        Assert.NotNull(extensionsMap);
+        var reader = new CborReader(extensionsMap.Value, CborConformanceMode.Ctap2Canonical);
+        reader.ReadStartMap();
+        Assert.Equal("previewSign", reader.ReadTextString());
+
+        Assert.Equal(3, reader.ReadStartMap());
+        Assert.Equal(2, reader.ReadInt32());
+        Assert.Equal(paramsA.KeyHandle.ToArray(), reader.ReadByteString());
+        Assert.Equal(6, reader.ReadInt32());
+        Assert.Equal(paramsA.Tbs.ToArray(), reader.ReadByteString());
+        Assert.Equal(7, reader.ReadInt32());
+        Assert.Equal(additionalArgs, reader.ReadByteString());
 
         reader.ReadEndMap();
     }

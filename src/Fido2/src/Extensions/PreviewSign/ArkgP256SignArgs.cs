@@ -17,7 +17,7 @@ using Yubico.YubiKit.Fido2.Cose;
 namespace Yubico.YubiKit.Fido2.Extensions;
 
 /// <summary>
-/// <c>COSE_Sign_Args</c> for ARKG-P256-ESP256 (alg = <c>-65539</c>). Wire shape:
+/// Experimental <c>COSE_Sign_Args</c> helper for ARKG-P256-ESP256 (alg = <c>-65539</c>). Wire shape:
 /// <c>{3: -65539, -1: kh, -2: ctx}</c>.
 /// </summary>
 /// <remarks>

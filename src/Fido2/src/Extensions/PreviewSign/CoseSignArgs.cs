@@ -15,20 +15,24 @@
 namespace Yubico.YubiKit.Fido2.Extensions;
 
 /// <summary>
-/// Typed <c>COSE_Sign_Args</c> map (CTAP v4 draft) — the value carried under
-/// <c>previewSign</c> authentication input key 7.
+/// Experimental typed helper for building a <c>COSE_Sign_Args</c> map (CTAP v4 draft).
 /// </summary>
 /// <remarks>
 /// <para>
 /// <c>COSE_Sign_Args</c> is a CBOR map whose key 3 carries the request algorithm identifier; the
-/// remaining keys are algorithm-specific. Today the only inhabitant supported by the YubiKey is
-/// <see cref="ArkgP256SignArgs"/> (alg = <c>-65539</c>). New algorithms slot in by adding a
-/// new sealed subtype.
+/// remaining keys are algorithm-specific. Today the only typed helper in this SDK is
+/// <see cref="ArkgP256SignArgs"/> (alg = <c>-65539</c>).
 /// </para>
 /// <para>
-/// This is a closed union: the constructor is <c>private protected</c>, so external assemblies
-/// cannot extend the hierarchy. <see cref="PreviewSignCbor.EncodeCoseSignArgs"/> exhaustively
-/// pattern-matches the known subtypes and throws on any unknown runtime type.
+/// This helper is not the generic previewSign contract. Generic previewSign signing accepts raw
+/// <see cref="PreviewSignSigningParams.AdditionalArgs"/> bytes. Use
+/// <see cref="PreviewSignCbor.EncodeAdditionalArgs"/> to convert this experimental typed helper
+/// to those raw bytes when testing ARKG flows in v2.
+/// </para>
+/// <para>
+/// This is a closed helper hierarchy: the constructor is <c>private protected</c>, so external
+/// assemblies cannot extend it. <see cref="PreviewSignCbor.EncodeCoseSignArgs"/> exhaustively
+/// pattern-matches the known subtypes and throws on unknown runtime types.
 /// </para>
 /// </remarks>
 public abstract record class CoseSignArgs
@@ -45,7 +49,7 @@ public abstract record class CoseSignArgs
     public abstract int Algorithm { get; }
 
     /// <summary>
-    /// Convenience factory: constructs an <see cref="ArkgP256SignArgs"/> without naming the leaf type.
+    /// Experimental convenience factory: constructs an <see cref="ArkgP256SignArgs"/> without naming the leaf type.
     /// </summary>
     /// <param name="keyHandle">The 81-byte ARKG key handle (16-byte HMAC tag concatenated with
     /// 65-byte SEC1 uncompressed P-256 ephemeral public key).</param>

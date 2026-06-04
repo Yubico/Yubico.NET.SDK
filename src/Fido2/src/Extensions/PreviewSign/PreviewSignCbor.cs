@@ -79,8 +79,8 @@ public static class PreviewSignCbor
 
     /// <summary>
     /// Encodes a typed <see cref="CoseSignArgs"/> as CTAP2-canonical CBOR. The returned bytes
-    /// are the inner payload that <see cref="EncodeAuthenticationInput"/> wraps as a CBOR
-    /// byte-string under authentication input key 7.
+    /// are suitable for <see cref="PreviewSignSigningParams.AdditionalArgs"/> and are wrapped
+    /// unchanged as a CBOR byte-string under authentication input key 7.
     /// </summary>
     /// <param name="args">The typed <c>COSE_Sign_Args</c> value to encode.</param>
     /// <returns>CTAP2-canonical CBOR bytes for the <c>COSE_Sign_Args</c> map.</returns>
@@ -102,6 +102,18 @@ public static class PreviewSignCbor
                 $"COSE_Sign_Args subtype '{args.GetType().FullName}' is not supported by this SDK build."),
         };
     }
+
+    /// <summary>
+    /// Encodes a typed <see cref="CoseSignArgs"/> helper into raw previewSign <c>additionalArgs</c> bytes.
+    /// </summary>
+    /// <remarks>
+    /// This is an experimental v2 convenience bridge for ARKG and other typed helpers. The generic
+    /// previewSign signing API accepts raw <c>additionalArgs</c> bytes and does not require callers
+    /// to use typed ARKG helpers.
+    /// </remarks>
+    /// <param name="args">The typed algorithm-specific signing arguments to encode.</param>
+    /// <returns>Raw bytes suitable for <see cref="PreviewSignSigningParams.AdditionalArgs"/>.</returns>
+    public static byte[] EncodeAdditionalArgs(CoseSignArgs args) => EncodeCoseSignArgs(args);
 
     /// <summary>
     /// Encodes an <see cref="ArkgP256SignArgs"/> as the 3-key CBOR map
@@ -179,7 +191,7 @@ public static class PreviewSignCbor
 
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
-        int paramCount = signingParams.CoseSignArgs is not null ? 3 : 2;
+        int paramCount = signingParams.AdditionalArgs.HasValue ? 3 : 2;
         writer.WriteStartMap(paramCount);
 
         // Key 2: keyHandle
@@ -190,11 +202,11 @@ public static class PreviewSignCbor
         writer.WriteInt32(AuthenticationInputKeys.ToBeSigned);
         writer.WriteByteString(signingParams.Tbs.Span);
 
-        // Key 7: typed COSE_Sign_Args (optional, wrapped as bstr)
-        if (signingParams.CoseSignArgs is not null)
+        // Key 7: algorithm-specific additionalArgs (optional, wrapped as bstr)
+        if (signingParams.AdditionalArgs.HasValue)
         {
             writer.WriteInt32(AuthenticationInputKeys.AdditionalArgs);
-            writer.WriteByteString(EncodeCoseSignArgs(signingParams.CoseSignArgs));
+            writer.WriteByteString(signingParams.AdditionalArgs.Value.Span);
         }
 
         writer.WriteEndMap();

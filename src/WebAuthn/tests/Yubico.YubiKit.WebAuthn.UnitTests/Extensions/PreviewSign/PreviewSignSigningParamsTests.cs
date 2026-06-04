@@ -13,58 +13,52 @@
 // limitations under the License.
 
 using Xunit;
-using Fido2Extensions = Yubico.YubiKit.Fido2.Extensions;
 using WebAuthnPreviewSign = Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
 
 /// <summary>
-/// Tests for the WebAuthn-layer <c>PreviewSignSigningParams</c> typed-CoseSignArgs surface.
+/// Tests for the WebAuthn-layer <c>PreviewSignSigningParams</c> raw additionalArgs surface.
 /// </summary>
 /// <remarks>
-/// Validates that the WebAuthn layer re-exports the Fido2 <c>CoseSignArgs</c> type unchanged
-/// (no clone, no parallel CBOR encoder), per the no-duplication invariant
-/// (<c>src/WebAuthn/CLAUDE.md</c> + repo <c>MEMORY.md</c>: "WebAuthn must duplicate zero
-/// Fido2 behavior").
+/// Validates that WebAuthn keeps the generic previewSign API algorithm-agile: <c>additionalArgs</c>
+/// is caller-provided algorithm-specific data and is exposed unchanged.
 /// </remarks>
 public class PreviewSignSigningParamsTests
 {
     [Fact]
-    public void Constructor_AcceptsTypedCoseSignArgs_AndExposesIt()
+    public void Constructor_AcceptsAdditionalArgs_AndExposesIt()
     {
         var kh = new byte[] { 0x01, 0x02, 0x03, 0x04 };
         var tbs = new byte[32];
-        var arkg = new Fido2Extensions.ArkgP256SignArgs(
-            keyHandle: BuildArkgKeyHandle(),
-            context: "ARKG-P256.test vectors"u8.ToArray());
+        var additionalArgs = new byte[] { 0xA3, 0x03, 0x01 };
 
-        var sut = new WebAuthnPreviewSign.PreviewSignSigningParams(kh, tbs, arkg);
+        var sut = new WebAuthnPreviewSign.PreviewSignSigningParams(kh, tbs, additionalArgs);
 
-        // Reference equality (passthrough — no clone): exposes the same instance the caller passed.
-        Assert.Same(arkg, sut.CoseSignArgs);
         Assert.Equal(kh, sut.KeyHandle.ToArray());
         Assert.Equal(tbs, sut.Tbs.ToArray());
+        Assert.Equal(additionalArgs, sut.AdditionalArgs!.Value.ToArray());
     }
 
     [Fact]
-    public void Constructor_AcceptsNullCoseSignArgs()
+    public void Constructor_AcceptsNullAdditionalArgs()
     {
         var sut = new WebAuthnPreviewSign.PreviewSignSigningParams(
             keyHandle: new byte[] { 0xAA },
             tbs: new byte[32],
-            coseSignArgs: null);
+            additionalArgs: null);
 
-        Assert.Null(sut.CoseSignArgs);
+        Assert.Null(sut.AdditionalArgs);
     }
 
     [Fact]
-    public void Constructor_DefaultsCoseSignArgsToNull()
+    public void Constructor_DefaultsAdditionalArgsToNull()
     {
         var sut = new WebAuthnPreviewSign.PreviewSignSigningParams(
             keyHandle: new byte[] { 0xAA },
             tbs: new byte[32]);
 
-        Assert.Null(sut.CoseSignArgs);
+        Assert.Null(sut.AdditionalArgs);
     }
 
     [Fact]
@@ -87,38 +81,4 @@ public class PreviewSignSigningParamsTests
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
     }
 
-    [Fact]
-    public void Constructor_AcceptsCoseSignArgsViaStaticFactory()
-    {
-        var kh = BuildArkgKeyHandle();
-        var ctx = "ARKG-P256.test vectors"u8.ToArray();
-
-        // Caller-friendly factory entry point on the abstract base — this is the recommended
-        // construction pattern for everyday WebAuthn callers.
-        Fido2Extensions.CoseSignArgs typed = Fido2Extensions.CoseSignArgs.ArkgP256(kh, ctx);
-        var sut = new WebAuthnPreviewSign.PreviewSignSigningParams(kh, new byte[32], typed);
-
-        var arkg = Assert.IsType<Fido2Extensions.ArkgP256SignArgs>(sut.CoseSignArgs);
-        Assert.Equal(-65539, arkg.Algorithm);
-        Assert.Equal(kh, arkg.KeyHandle.ToArray());
-        Assert.Equal(ctx, arkg.Context.ToArray());
-    }
-
-    /// <summary>
-    /// 81-byte ARKG-P256 KH fixture: 16-byte tag (0xA5) || 65-byte SEC1 point (0x04 || 64×0x5A).
-    /// </summary>
-    private static byte[] BuildArkgKeyHandle()
-    {
-        byte[] kh = new byte[81];
-        for (int i = 0; i < 16; i++)
-        {
-            kh[i] = 0xA5;
-        }
-        kh[16] = 0x04;
-        for (int i = 17; i < 81; i++)
-        {
-            kh[i] = 0x5A;
-        }
-        return kh;
-    }
 }

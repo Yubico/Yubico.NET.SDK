@@ -336,9 +336,10 @@ public class FidoPreviewSignTests
                     [credentialId] = new Extensions.PreviewSignSigningParams(
                         keyHandle: derivedKey.DeviceKeyHandle,
                         tbs: message,
-                        coseSignArgs: Extensions.CoseSignArgs.ArkgP256(
-                            derivedKey.ArkgKeyHandle,
-                            derivedKey.Context))
+                        additionalArgs: Extensions.PreviewSignCbor.EncodeAdditionalArgs(
+                            Extensions.CoseSignArgs.ArkgP256(
+                                derivedKey.ArkgKeyHandle,
+                                derivedKey.Context)))
                 };
 
                 var authInput = new Extensions.PreviewSignAuthenticationInput(signByCredential);
@@ -650,17 +651,17 @@ public class FidoPreviewSignTests
         });
 
     /// <summary>
-    /// Tests that GetAssertion with missing CoseSignArgs for ARKG credential rejects the request.
+    /// Tests that GetAssertion with missing additionalArgs for an ARKG credential rejects the request.
     /// </summary>
     /// <remarks>
     /// <para>
     /// Mirrors python-fido2 test_assert_missing_args (test_sign_extension_v4.py:578-596).
     /// When a credential is created with an ARKG algorithm (Esp256SplitArkgPlaceholder),
-    /// subsequent GetAssertion requests MUST include CoseSignArgs with the ARKG key handle
+    /// subsequent GetAssertion requests MUST include additionalArgs with the ARKG key handle
     /// and context in the previewSign extension input.
     /// </para>
     /// <para>
-    /// Omitting CoseSignArgs when it's required yields CTAP2_ERR_MISSING_PARAMETER.
+    /// Omitting additionalArgs when it's required yields CTAP2_ERR_MISSING_PARAMETER.
     /// </para>
     /// </remarks>
     [SkippableTheory]
@@ -750,7 +751,7 @@ public class FidoPreviewSignTests
 
                 System.Security.Cryptography.CryptographicOperations.ZeroMemory(pinToken);
 
-                // Step 2: Attempt GetAssertion WITHOUT CoseSignArgs (should fail)
+                // Step 2: Attempt GetAssertion WITHOUT additionalArgs (should fail for ARKG)
                 byte[] assertionPinToken;
                 if (supportsPermissions)
                 {
@@ -771,15 +772,15 @@ public class FidoPreviewSignTests
 
                 byte[] message = System.Text.Encoding.ASCII.GetBytes("test-message");
 
-                // Build previewSign authentication input WITHOUT CoseSignArgs
-                // (coseSignArgs parameter is null)
+                // Build previewSign authentication input WITHOUT additionalArgs.
+                // ARKG requires algorithm-specific bytes under key 7.
                 var comparer = new MemoryByteEqualityComparer();
                 var signByCredential = new Dictionary<ReadOnlyMemory<byte>, Extensions.PreviewSignSigningParams>(comparer)
                 {
                     [credentialId] = new Extensions.PreviewSignSigningParams(
                         keyHandle: derivedKey.DeviceKeyHandle,
                         tbs: message,
-                        coseSignArgs: null)  // MISSING — required for ARKG
+                        additionalArgs: null)  // MISSING — required for ARKG
                 };
 
                 var authInput = new Extensions.PreviewSignAuthenticationInput(signByCredential);

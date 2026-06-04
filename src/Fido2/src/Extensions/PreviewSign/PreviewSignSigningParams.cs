@@ -23,10 +23,14 @@ namespace Yubico.YubiKit.Fido2.Extensions;
 /// for a single signing operation.
 /// </para>
 /// <para>
-/// Per CTAP v4 draft specification:
-/// - KeyHandle identifies which signing key to use (from prior registration)
-/// - Tbs (to-be-signed) is the raw data to sign
-/// - CoseSignArgs is the typed, optional COSE_Sign_Args for two-party signing algorithms (e.g. ARKG)
+/// The parameters correspond to the <c>keyHandle</c>, <c>tbs</c>, and optional
+/// <c>additionalArgs</c> fields of the previewSign signing input dictionary.
+/// The <see cref="Tbs"/> and <see cref="AdditionalArgs"/> values are algorithm-specific
+/// signing inputs and are encoded unchanged.
+/// Pass <c>null</c> to omit key 7. Passing an empty memory value emits key 7 with an empty
+/// byte string, matching the caller-supplied algorithm-specific value.
+/// Experimental typed helpers such as <see cref="CoseSignArgs"/> can be converted to raw
+/// <c>additionalArgs</c> bytes with <see cref="PreviewSignCbor.EncodeAdditionalArgs"/>.
 /// </para>
 /// </remarks>
 public sealed class PreviewSignSigningParams
@@ -42,22 +46,22 @@ public sealed class PreviewSignSigningParams
     public ReadOnlyMemory<byte> Tbs { get; init; }
 
     /// <summary>
-    /// Gets the optional typed <c>COSE_Sign_Args</c> for algorithms requiring additional parameters
-    /// (e.g. ARKG). When present, the encoder emits canonical CBOR under authentication input
-    /// key 7 (wrapped as bstr).
+    /// Gets the optional algorithm-specific <c>additionalArgs</c> value.
+    /// When present, including when empty, the encoder emits these bytes unchanged under
+    /// authentication input key 7. A <c>null</c> value omits key 7.
     /// </summary>
-    public CoseSignArgs? CoseSignArgs { get; init; }
+    public ReadOnlyMemory<byte>? AdditionalArgs { get; init; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="PreviewSignSigningParams"/>.
     /// </summary>
     /// <param name="keyHandle">The key handle for the signing key.</param>
     /// <param name="tbs">Data to be signed.</param>
-    /// <param name="coseSignArgs">Optional typed <c>COSE_Sign_Args</c> (required for ARKG algorithms).</param>
+    /// <param name="additionalArgs">Optional algorithm-specific <c>additionalArgs</c> value.</param>
     public PreviewSignSigningParams(
         ReadOnlyMemory<byte> keyHandle,
         ReadOnlyMemory<byte> tbs,
-        CoseSignArgs? coseSignArgs = null)
+        ReadOnlyMemory<byte>? additionalArgs = null)
     {
         if (keyHandle.Length == 0)
         {
@@ -71,6 +75,6 @@ public sealed class PreviewSignSigningParams
 
         KeyHandle = keyHandle;
         Tbs = tbs;
-        CoseSignArgs = coseSignArgs;
+        AdditionalArgs = additionalArgs;
     }
 }

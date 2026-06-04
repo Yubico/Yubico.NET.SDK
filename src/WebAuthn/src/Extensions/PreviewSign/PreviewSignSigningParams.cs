@@ -23,12 +23,14 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// for a single signing operation.
 /// </para>
 /// <para>
-/// Per CTAP v4 draft specification §3.2:
-/// - KeyHandle identifies which signing key to use (from prior registration)
-/// - Tbs (to-be-signed) is the raw data to sign, unaltered by the authenticator
-/// - CoseSignArgs is the typed, optional <c>COSE_Sign_Args</c> for two-party signing algorithms
-///   (e.g. ARKG). The WebAuthn layer re-exports the Fido2 <see cref="Fido2.Extensions.CoseSignArgs"/>
-///   type rather than wrapping it: there is exactly one canonical encoder and it lives in Fido2.
+/// The parameters correspond to the <c>keyHandle</c>, <c>tbs</c>, and optional
+/// <c>additionalArgs</c> fields of the
+/// <c>AuthenticationExtensionsSignSignInputs</c> dictionary. The <see cref="Tbs"/> and
+/// <see cref="AdditionalArgs"/> values are algorithm-specific signing inputs and are passed
+/// through unchanged.
+/// Pass <c>null</c> to omit <c>additionalArgs</c>. Passing an empty memory value emits an empty
+/// byte string under key 7. Experimental Fido2 typed helpers can be converted to raw bytes with
+/// <see cref="Fido2.Extensions.PreviewSignCbor.EncodeAdditionalArgs"/> before constructing this type.
 /// </para>
 /// </remarks>
 public sealed record class PreviewSignSigningParams
@@ -47,20 +49,17 @@ public sealed record class PreviewSignSigningParams
     public ReadOnlyMemory<byte> Tbs { get; }
 
     /// <summary>
-    /// Gets the optional typed <c>COSE_Sign_Args</c> for algorithms requiring additional
-    /// parameters (e.g. ARKG-P256). Construct with
-    /// <see cref="Fido2.Extensions.CoseSignArgs.ArkgP256(ReadOnlyMemory{byte}, ReadOnlyMemory{byte})"/>.
-    /// The Fido2 layer owns the canonical CBOR encoder; WebAuthn passes this value through
-    /// unchanged.
+    /// Gets the optional algorithm-specific <c>additionalArgs</c> value.
+    /// WebAuthn passes these bytes through unchanged.
     /// </summary>
-    public Fido2.Extensions.CoseSignArgs? CoseSignArgs { get; }
+    public ReadOnlyMemory<byte>? AdditionalArgs { get; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="PreviewSignSigningParams"/>.
     /// </summary>
     /// <param name="keyHandle">The key handle for the signing key.</param>
     /// <param name="tbs">Data to be signed.</param>
-    /// <param name="coseSignArgs">Optional typed <c>COSE_Sign_Args</c> (required for ARKG algorithms).</param>
+    /// <param name="additionalArgs">Optional algorithm-specific <c>additionalArgs</c> value.</param>
     /// <exception cref="WebAuthnClientError">
     /// Thrown when:
     /// - KeyHandle is empty (InvalidRequest)
@@ -69,7 +68,7 @@ public sealed record class PreviewSignSigningParams
     public PreviewSignSigningParams(
         ReadOnlyMemory<byte> keyHandle,
         ReadOnlyMemory<byte> tbs,
-        Fido2.Extensions.CoseSignArgs? coseSignArgs = null)
+        ReadOnlyMemory<byte>? additionalArgs = null)
     {
         if (keyHandle.Length == 0)
         {
@@ -87,6 +86,6 @@ public sealed record class PreviewSignSigningParams
 
         KeyHandle = keyHandle;
         Tbs = tbs;
-        CoseSignArgs = coseSignArgs;
+        AdditionalArgs = additionalArgs;
     }
 }

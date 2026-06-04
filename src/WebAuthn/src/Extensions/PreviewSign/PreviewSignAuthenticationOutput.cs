@@ -20,18 +20,14 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// <remarks>
 /// <para>
 /// Contains the raw signature over the to-be-signed data. Unlike standard WebAuthn assertions,
-/// this signature does NOT include clientDataJSON or authenticator data wrapping.
+/// this signature does not include clientDataJSON or authenticator data wrapping.
 /// </para>
 /// <para>
-/// Per CTAP v4 draft specification §6.2:
-/// - Signature is raw bytes in COSE signature format
-/// - No clientDataJSON wrapping
-/// - No authenticator data in what's signed
-/// - Signature format depends on the algorithm used during registration
+/// The signature format is algorithm-specific and is returned unchanged from the
+/// previewSign authentication extension output.
 /// </para>
 /// </remarks>
 /// <param name="Signature">
-/// Raw signature bytes over the to-be-signed data. Format depends on the COSE algorithm
-/// (e.g., ECDSA produces r||s concatenation, EdDSA produces 64-byte signature).
+/// Raw algorithm-specific signature bytes over the to-be-signed data.
 /// </param>
 public sealed record class PreviewSignAuthenticationOutput(ReadOnlyMemory<byte> Signature);

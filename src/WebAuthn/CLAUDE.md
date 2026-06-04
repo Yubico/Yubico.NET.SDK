@@ -35,9 +35,9 @@ src/
 │   ├── WebAuthnAttestationObject.cs
 │   └── WebAuthnAuthenticatorData.cs
 ├── Extensions/                   # CTAP v4 extension framework
+│   ├── Adapters/
+│   │   └── PreviewSignAdapter.cs  # WebAuthn-level adapter (translates to Fido2)
 │   ├── PreviewSign/              # CTAP v4 previewSign extension
-│   │   ├── PreviewSignAdapter.cs
-│   │   ├── PreviewSignCbor.cs
 │   │   ├── PreviewSignAuthenticationInput.cs
 │   │   ├── PreviewSignRegistrationInput.cs
 │   │   └── PreviewSignErrors.cs
@@ -139,18 +139,22 @@ public interface IExtensionAdapter<in TInput, out TOutput>
 
 **previewSign Example:**
 ```csharp
-// Registration
-var adapter = new PreviewSignAdapter();
-var input = new PreviewSignRegistrationInput { Algorithms = [-7, -257] };
-var extensionsDict = new Dictionary<string, object>();
-adapter.EncodeInput(input, extensionsDict);
+// Registration: request a generated signing key.
+var registrationExtensions = new RegistrationExtensionInputs(
+    PreviewSign: PreviewSignRegistrationInput.GenerateKey(CoseAlgorithm.Es256));
 
-// Send to FIDO2
-var fidoOptions = new MakeCredentialOptions { Extensions = extensionsDict };
+// Authentication: provide keyHandle, algorithm-specific tbs, and optional raw additionalArgs.
+var signingParams = new PreviewSignSigningParams(
+    keyHandle: generatedKey.KeyHandle,
+    tbs: toBeSigned,
+    additionalArgs: algorithmSpecificAdditionalArgs);
 
-// Decode output
-var output = adapter.DecodeOutput(response.UnsignedExtensionOutputs);
-// output.GeneratedKey contains keyHandle, publicKey, algorithm, attestationObject
+var authenticationExtensions = new AuthenticationExtensionInputs(
+    PreviewSign: PreviewSignAuthenticationInput.CreateSignByCredential(
+        new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
+        {
+            [credentialId] = signingParams
+        }));
 ```
 
 ## CTAP v4 previewSign Extension
@@ -163,12 +167,14 @@ var output = adapter.DecodeOutput(response.UnsignedExtensionOutputs);
 
 **Key Features:**
 - **Registration:** Generates a new signing key pair, returns public key + keyHandle
-- **Authentication:** Signs arbitrary `tbs` (to-be-signed) bytes using keyHandle (NOT YET VALIDATED ON HARDWARE — see Phase 9.2 parity check)
+- **Authentication:** Signs algorithm-specific `tbs` (to-be-signed) bytes using keyHandle and optional raw `additionalArgs`
 - **Multi-credential probe:** CTAP v4 §10.2.1 step 7 iteration over `allowCredentials` (deferred to Phase 9.2)
+- **Algorithm agility:** `tbs` and `additionalArgs` are algorithm-specific values and are passed through unchanged
 
-**Current Status (as of Phase 9.1):**
+**Current Status:**
 - Registration path: ✅ **WORKING** on YubiKey 5.8.0-beta
-- Authentication path: ⚠️ **DEFERRED** — throws `NotSupported` if `signByCredential.Count != 1` (awaiting Swift parity confirmation in Phase 9.2)
+- Authentication path: ⚠️ single-credential scope only — throws `NotSupported` if `signByCredential.Count != 1` (multi-credential probe-selection deferred)
+- ARKG helpers: public v2 experimental conveniences; not the generic previewSign API contract
 
 **Key Files:**
 - `src/Extensions/PreviewSign/PreviewSignAdapter.cs` — WebAuthn-level adapter (translates to Fido2)
@@ -176,14 +182,14 @@ var output = adapter.DecodeOutput(response.UnsignedExtensionOutputs);
 - `src/Extensions/PreviewSign/PreviewSignAuthenticationInput.cs:58` — Auth defer point
 - `Plans/previewSign_Implementation_Requirements.md` — Full spec
 
-**Architectural Note:** The CBOR encoding logic lives in the Fido2 layer (`Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor`), ensuring a single canonical encoder shared by both Fido2 and WebAuthn. The WebAuthn adapter translates WebAuthn-level types to Fido2 types and delegates encoding to the Fido2 layer.
+**Architectural Note:** The CBOR encoding logic lives in the Fido2 layer (`Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor`), ensuring a single canonical encoder shared by both Fido2 and WebAuthn. The WebAuthn adapter translates WebAuthn-level types to Fido2 types and delegates encoding to the Fido2 layer. Generic signing params carry raw `additionalArgs`; ARKG-specific helpers can be converted to raw bytes with `PreviewSignCbor.EncodeAdditionalArgs(...)` before being passed to WebAuthn.
 
 ## Security Boundary
 
 **Sensitive Data Handling:**
 - **PINs:** Never logged, zeroed via `CryptographicOperations.ZeroMemory` after use
 - **Private keys:** Never exposed in public API; signing operations use FIDO2 CTAP commands internally
-- **`tbs` payloads (previewSign auth):** Raw bytes signed by hardware; NOT logged; caller is responsible for semantic validation
+- **`tbs` and `additionalArgs` payloads (previewSign auth):** Algorithm-specific bytes; NOT logged; caller is responsible for semantic validation
 - **Credential IDs:** Public identifiers — safe to log
 
 **Memory Management:**
@@ -252,12 +258,12 @@ dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
 
 ## Known Gotchas
 
-1. **previewSign auth not hardware-validated yet** — Phase 9.2 will confirm Swift parity before shipping multi-credential probe
+1. **previewSign auth is single-credential only for now** — multi-credential probe-selection is deferred
 2. **Extension passthrough bug (fixed in commit `95abc0c5`)** — Extensions were silently dropped at backend; now wired correctly
 3. **`flags` optional in previewSign registration output** — Matches Swift `PreviewSign.swift:132-176`; YubiKey 5.8.0-beta returns only key 3 (algorithm)
 4. **No LoggingFactory** — Use `YubiKitLogging.CreateLogger<T>()` from Core
 5. **Status stream must be consumed** — `IAsyncEnumerable` won't advance unless caller enumerates
-6. **CBOR key constants split** — `PreviewSignCbor.Signature` and `PreviewSignCbor.ToBeSigned` were both `6` in the same scope; fixed in Phase 9.1 with nested static classes
+6. **CBOR key constants are context-specific** — key `7` means authentication `additionalArgs` in GetAssertion input and attestation object in MakeCredential unsigned output; keep parsing paths context-specific
 
 ## Future Work (Post-Phase 9)
 

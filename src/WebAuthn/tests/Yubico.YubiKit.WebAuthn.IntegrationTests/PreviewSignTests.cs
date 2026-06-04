@@ -25,8 +25,8 @@ using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 using Yubico.YubiKit.WebAuthn.Preferences;
-using Fido2Extensions = Yubico.YubiKit.Fido2.Extensions;
 using static Yubico.YubiKit.WebAuthn.IntegrationTests.WebAuthnTestHelpers;
+using Fido2Extensions = Yubico.YubiKit.Fido2.Extensions;
 
 namespace Yubico.YubiKit.WebAuthn.IntegrationTests;
 
@@ -128,7 +128,7 @@ public class PreviewSignTests
             UserVerification = UserVerificationPreference.Discouraged,
             // ARKG-P256 (-65539) is the only algorithm YK 5.8.0-beta accepts for the auth path.
             // -9 (Esp256) is the OUTPUT signature alg, not the request alg — sending -9 here
-            // is the bug class the typed CoseSignArgs builder makes unrepresentable.
+            // is the bug class the ARKG additionalArgs bridge makes explicit.
             Extensions = new RegistrationExtensionInputs(
                 PreviewSign: PreviewSignRegistrationInput.GenerateKey(
                     CoseAlgorithm.ArkgP256))
@@ -164,7 +164,7 @@ public class PreviewSignTests
 
         await regClient.DisposeAsync();
 
-        // --- Phase 2: Authentication with typed CoseSignArgs (Phase 10 §3 builder) ---
+        // --- Phase 2: Authentication with ARKG additionalArgs bridge (Phase 10 §3 builder) ---
         await using var session2 = await state.Device.CreateFidoSessionAsync();
 
         await using var authClient = CreateClient(session2);
@@ -178,9 +178,10 @@ public class PreviewSignTests
             [credentialId] = new PreviewSignSigningParams(
                 keyHandle: keyHandle,
                 tbs: toBeSigned,
-                coseSignArgs: Fido2Extensions.CoseSignArgs.ArkgP256(
-                    derivedKey.ArkgKeyHandle,
-                    derivedKey.Context))
+                additionalArgs: Fido2Extensions.PreviewSignCbor.EncodeAdditionalArgs(
+                    Fido2Extensions.CoseSignArgs.ArkgP256(
+                        derivedKey.ArkgKeyHandle,
+                        derivedKey.Context)))
         };
 
         var authOptions = new AuthenticationOptions

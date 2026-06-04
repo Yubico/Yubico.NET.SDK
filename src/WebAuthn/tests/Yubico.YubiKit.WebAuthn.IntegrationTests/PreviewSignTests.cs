@@ -85,6 +85,8 @@ public class PreviewSignTests
     public async Task FullCeremony_RegisterWithPreviewSign_ThenSign_ReturnsSignature(YubiKeyTestState state)
     {
         // Full ARKG-P256 previewSign authentication ceremony end-to-end:
+        // WARNING -- EXPERIMENTAL -- test only: ARKG previewSign is not ready for production use and must not be
+        // treated as production cryptographic guidance.
         //   - Register with previewSign ARKG-P256 key generation (touch #1)
         //   - Offline derive public key using ARKG primitives
         //   - Sign arbitrary message via GetAssertion (touch #2)
@@ -117,7 +119,7 @@ public class PreviewSignTests
             PubKeyCredParams = [CoseAlgorithm.Es256],
             ResidentKey = ResidentKeyPreference.Required,
             UserVerification = UserVerificationPreference.Discouraged,
-            // ARKG-P256 (-65539) is the request signing algorithm for this ARKG path.
+            // WARNING -- EXPERIMENTAL -- test only: ARKG-P256 (-65539) is the request signing algorithm for this ARKG path.
             // -9 (Esp256) is the OUTPUT signature alg, not the request alg — sending -9 here
             // is the bug class the ARKG additionalArgs bridge makes explicit.
             Extensions = new RegistrationExtensionInputs(
@@ -212,9 +214,13 @@ public class PreviewSignTests
     /// Helper to convert WebAuthn GeneratedSigningKey to Fido2 PreviewSignGeneratedKey.
     /// </summary>
     /// <remarks>
+    /// WARNING -- EXPERIMENTAL -- test only: this ARKG bridge exists for integration-test coverage and must not be
+    /// treated as production cryptographic guidance.
+    /// <para>
     /// This bridges the WebAuthn layer (which exposes CoseKey directly) to the Fido2 layer
     /// (which has the DerivePublicKey method). Uses reflection because PreviewSignGeneratedKey's
     /// constructor is internal to the Fido2 assembly.
+    /// </para>
     /// </remarks>
     private static Fido2.Extensions.PreviewSignGeneratedKey ConvertToFido2GeneratedKey(
         ReadOnlyMemory<byte> keyHandle,

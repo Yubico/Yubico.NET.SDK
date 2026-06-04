@@ -21,9 +21,13 @@ namespace Yubico.YubiKit.Fido2.Extensions;
 /// Represents the generated key material returned by the YubiKey during
 /// previewSign extension registration.
 /// </summary>
-/// <remarks>
-/// <para>
-/// This class contains the key handle and public key components needed to
+    /// <remarks>
+    /// <para>
+    /// <b>WARNING -- EXPERIMENTAL --</b> ARKG previewSign derivation helpers are not ready for production use and
+    /// must not be treated as production cryptographic guidance.
+    /// </para>
+    /// <para>
+    /// This class contains the key handle and public key components needed to
 /// perform RP-side ARKG-P256 public key derivation via <see cref="DerivePublicKey"/>.
 /// </para>
 /// <para>
@@ -83,6 +87,10 @@ public sealed class PreviewSignGeneratedKey
     /// Derives a public key using the ARKG-P256 algorithm.
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// <b>WARNING -- EXPERIMENTAL --</b> This ARKG derivation helper is not ready for production use and must not
+    /// be treated as production cryptographic guidance.
+    /// </para>
     /// <para>
     /// This method performs offline key derivation using the ARKG-P256 algorithm.
     /// The derived public key can be used to verify signatures created by the

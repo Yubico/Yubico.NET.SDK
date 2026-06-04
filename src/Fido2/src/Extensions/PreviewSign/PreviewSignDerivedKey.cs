@@ -20,9 +20,13 @@ namespace Yubico.YubiKit.Fido2.Extensions;
 /// <summary>
 /// Represents a derived public key produced by ARKG-P256 derivation.
 /// </summary>
-/// <remarks>
-/// <para>
-/// This class contains the derived public key and handles needed for the
+    /// <remarks>
+    /// <para>
+    /// <b>WARNING -- EXPERIMENTAL --</b> ARKG previewSign derived-key helpers are not ready for production use and
+    /// must not be treated as production cryptographic guidance.
+    /// </para>
+    /// <para>
+    /// This class contains the derived public key and handles needed for the
 /// ESP256-split-ARKG previewSign helper path. Instances are obtained
 /// by calling <see cref="PreviewSignGeneratedKey.DerivePublicKey"/> with
 /// application-provided input keying material and a context string.
@@ -83,6 +87,10 @@ public sealed class PreviewSignDerivedKey
     /// Verifies a signature against the derived public key.
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// <b>WARNING -- EXPERIMENTAL --</b> This ARKG signature-verification helper is not ready for production use
+    /// and must not be treated as production cryptographic guidance.
+    /// </para>
     /// <para>
     /// This method verifies that a signature produced by the ESP256-split-ARKG
     /// previewSign path is valid for the given message using the derived public key

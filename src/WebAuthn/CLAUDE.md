@@ -173,7 +173,7 @@ var authenticationExtensions = new AuthenticationExtensionInputs(
 - Registration path: working on previewSign-capable YubiKeys
 - Authentication path: working for single-credential scope; throws `NotSupported` if `signByCredential.Count != 1`
 - Full ceremony: `FullCeremony_RegisterWithPreviewSign_ThenSign_ReturnsSignature` verifies registration, ARKG derivation, signing, and offline signature verification with user presence
-- ARKG helpers: public experimental conveniences; not the generic previewSign API contract
+- ARKG helpers: **WARNING -- EXPERIMENTAL --** public experimental conveniences; not the generic previewSign API contract; not ready for production use and must not be treated as production cryptographic guidance
 
 **Key Files:**
 - `src/Extensions/Adapters/PreviewSignAdapter.cs` — WebAuthn-level adapter (translates to Fido2)
@@ -181,7 +181,7 @@ var authenticationExtensions = new AuthenticationExtensionInputs(
 - `src/Extensions/PreviewSign/PreviewSignAuthenticationInput.cs` — WebAuthn authentication input
 - `Plans/previewSign_Implementation_Requirements.md` — Full spec
 
-**Architectural Note:** The CBOR encoding logic lives in the Fido2 layer (`Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor`), ensuring a single canonical encoder shared by both Fido2 and WebAuthn. The WebAuthn adapter translates WebAuthn-level types to Fido2 types and delegates encoding to the Fido2 layer. Generic signing params carry raw `additionalArgs`; ARKG-specific helpers can be converted to raw bytes with `PreviewSignCbor.EncodeAdditionalArgs(...)` before being passed to WebAuthn.
+**Architectural Note:** The CBOR encoding logic lives in the Fido2 layer (`Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor`), ensuring a single canonical encoder shared by both Fido2 and WebAuthn. The WebAuthn adapter translates WebAuthn-level types to Fido2 types and delegates encoding to the Fido2 layer. Generic signing params carry raw `additionalArgs`; ARKG-specific helpers can be converted to raw bytes with `PreviewSignCbor.EncodeAdditionalArgs(...)` before being passed to WebAuthn. **WARNING -- EXPERIMENTAL --** Those ARKG helpers are not ready for production use and must not be treated as production cryptographic guidance.
 
 ## Security Boundary
 

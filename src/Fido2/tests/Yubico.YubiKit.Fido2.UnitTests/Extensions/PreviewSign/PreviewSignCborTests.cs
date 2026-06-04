@@ -23,6 +23,9 @@ namespace Yubico.YubiKit.Fido2.UnitTests.Extensions;
 /// and the python-fido2 ARKG test vectors.
 /// </summary>
 /// <remarks>
+/// <b>WARNING -- EXPERIMENTAL -- test only:</b> ARKG previewSign vectors and helper shapes are not ready for
+/// production use and must not be treated as production cryptographic guidance.
+///
 /// References:
 /// - cnh-authenticator-rs-extension @ get_assertion.rs:290-323 (serde_cbor encoder)
 /// - python-fido2/tests/test_arkg.py:36-73 (deterministic ARKG vectors — used for KH/CTX shapes)
@@ -74,7 +77,8 @@ public class PreviewSignCborTests
     [Fact]
     public void EncodeAuthenticationInput_WithAdditionalArgs_MatchesLegacyThreeKeyStructure()
     {
-        // Arrange: ARKG case — exercise the typed builder end-to-end through EncodeAuthenticationInput.
+        // Arrange: WARNING -- EXPERIMENTAL -- ARKG case, not production cryptographic guidance.
+        // Exercise the typed builder end-to-end through EncodeAuthenticationInput.
         // alg = -65539 (Esp256SplitArkgPlaceholder / "ARKG-P256-ESP256") — NOT -9 (Esp256, the
         // output signature alg). YK 5.8.0-beta firmware rejects everything but -65539 here.
         byte[] keyHandle = [0x01, 0x02, 0x03, 0x04];

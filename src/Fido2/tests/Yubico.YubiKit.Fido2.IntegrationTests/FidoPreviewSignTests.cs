@@ -61,6 +61,10 @@ public class FidoPreviewSignTests
     /// - The response includes unsignedExtensionOutputs["previewSign"] with attestation data
     /// </para>
     /// <para>
+    /// <b>WARNING -- EXPERIMENTAL -- test only:</b> The ARKG previewSign pieces exercised here are not ready for
+    /// production use and must not be treated as production cryptographic guidance.
+    /// </para>
+    /// <para>
     /// YubiKey 5.8.0-beta firmware accepts only Esp256SplitArkgPlaceholder
     /// (COSE algorithm -65539, "ARKG-P256-ESP256") as the request alg for previewSign.
     /// Esp256 (-9) describes the *output signature* algorithm internally — it must NEVER appear
@@ -222,6 +226,10 @@ public class FidoPreviewSignTests
     /// </summary>
     /// <remarks>
     /// <para>
+    /// <b>WARNING -- EXPERIMENTAL -- test only:</b> This ARKG ceremony is an integration test fixture, not
+    /// production cryptographic guidance, and must not be copied into production code as-is.
+    /// </para>
+    /// <para>
     /// This test exercises the complete previewSign ARKG-P256 ceremony:
     /// 1. Register credential with previewSign (touch #1)
     /// 2. Extract generated seed key
@@ -277,6 +285,7 @@ public class FidoPreviewSignTests
                     clientPin.Protocol, pinToken, challenge);
 
                 // Step A: Register with previewSign extension (touch #1)
+                // WARNING -- EXPERIMENTAL -- test only: ARKG previewSign is not production cryptographic guidance.
                 // flags: 0 matches python-fido2 reference (silent assertion at GetAssertion time)
                 var previewSignInput = new Extensions.PreviewSignRegistrationInput(
                     algorithms: [-65539], // Esp256SplitArkgPlaceholder (ARKG-P256-ESP256)

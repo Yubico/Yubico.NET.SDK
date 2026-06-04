@@ -51,7 +51,7 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     public static readonly CoseAlgorithm Rs256 = new(-257);
 
     /// <summary>
-    /// ESP256 split-key ARKG placeholder (CTAP v4 draft previewSign extension).
+    /// ESP256 split-key ARKG placeholder for the previewSign extension.
     /// </summary>
     /// <remarks>
     /// This is the wire-level COSE algorithm identifier for the ARKG-P256-ESP256 signing operation,

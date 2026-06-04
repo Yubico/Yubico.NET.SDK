@@ -345,8 +345,7 @@ public class PreviewSignAdapterTests
 
         Assert.Equal(WebAuthnClientErrorCode.NotSupported, ex.Code);
         Assert.Contains("single-credential scope", ex.Message);
-        Assert.Contains("Phase 10", ex.Message);
-        Assert.Contains("phase-10-previewsign-auth.md", ex.Message);
+        Assert.Contains("multi-credential probe-selection is not implemented", ex.Message);
     }
 
     [Fact(Timeout = 5000)]

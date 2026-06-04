@@ -24,8 +24,7 @@ namespace Yubico.YubiKit.Fido2.Extensions;
 /// <remarks>
 /// <para>
 /// This class contains the key handle and public key components needed to
-/// perform offline ARKG (Asynchronous Remote Key Generation) key derivation
-/// via <see cref="DerivePublicKey"/>.
+/// perform RP-side ARKG-P256 public key derivation via <see cref="DerivePublicKey"/>.
 /// </para>
 /// <para>
 /// Instances of this class are obtained by calling
@@ -42,17 +41,17 @@ namespace Yubico.YubiKit.Fido2.Extensions;
 public sealed class PreviewSignGeneratedKey
 {
     /// <summary>
-    /// Gets the key handle for the generated credential.
+    /// Gets the key handle used to request signatures from this generated signing key.
     /// </summary>
     public ReadOnlyMemory<byte> KeyHandle { get; init; }
 
     /// <summary>
-    /// Gets the blinding public key component (65-byte SEC1 uncompressed point).
+    /// Gets the blinding public key component.
     /// </summary>
     public ReadOnlyMemory<byte> BlindingPublicKey { get; init; }
 
     /// <summary>
-    /// Gets the KEM (Key Encapsulation Mechanism) public key component (65-byte SEC1 uncompressed point).
+    /// Gets the KEM public key component.
     /// </summary>
     public ReadOnlyMemory<byte> KemPublicKey { get; init; }
 
@@ -65,8 +64,8 @@ public sealed class PreviewSignGeneratedKey
     /// Initializes a new instance of the <see cref="PreviewSignGeneratedKey"/> class.
     /// </summary>
     /// <param name="keyHandle">The key handle.</param>
-    /// <param name="blindingPublicKey">The blinding public key (65-byte SEC1 uncompressed point).</param>
-    /// <param name="kemPublicKey">The KEM public key (65-byte SEC1 uncompressed point).</param>
+    /// <param name="blindingPublicKey">The blinding public key.</param>
+    /// <param name="kemPublicKey">The KEM public key.</param>
     /// <param name="derivedKeyAlgorithm">The derived key algorithm.</param>
     internal PreviewSignGeneratedKey(
         ReadOnlyMemory<byte> keyHandle,
@@ -95,9 +94,11 @@ public sealed class PreviewSignGeneratedKey
     /// derived key pair.
     /// </para>
     /// <para>
-    /// To use the derived key for signing, include the returned
-    /// <see cref="PreviewSignDerivedKey"/> in the previewSign authentication extension
-    /// input. The YubiKey will produce a signature that can be verified using
+    /// To request an ESP256-split-ARKG signature with this helper, pass the returned
+    /// <see cref="PreviewSignDerivedKey.DeviceKeyHandle"/>,
+    /// <see cref="PreviewSignDerivedKey.ArkgKeyHandle"/>, and
+    /// <see cref="PreviewSignDerivedKey.Context"/> to the previewSign authentication extension input.
+    /// The YubiKey will produce a signature that can be verified using
     /// <see cref="PreviewSignDerivedKey.VerifySignature"/>.
     /// </para>
     /// </remarks>

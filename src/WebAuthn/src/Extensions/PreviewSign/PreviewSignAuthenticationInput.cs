@@ -15,33 +15,21 @@
 namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 /// <summary>
-/// Input parameters for previewSign authentication (signing arbitrary data).
+/// Input for the previewSign extension authentication.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Maps credential IDs to their corresponding signing parameters. Each entry specifies
-/// the key handle, data to sign, and optional algorithm-specific arguments for one credential.
-/// </para>
-/// <para>
-/// Per CTAP v4 draft specification §5.2:
-/// - The dictionary must contain at least one entry
-/// - Each credential ID in allowCredentials must have a corresponding entry
-/// - The size of this dictionary must equal the size of allowCredentials
+/// Maps credential IDs to their corresponding signing parameters. Each entry specifies the key
+/// handle, to-be-signed value, and optional algorithm-specific arguments for one credential.
 /// </para>
 /// </remarks>
 public sealed record class PreviewSignAuthenticationInput
 {
     /// <summary>
     /// Gets the dictionary mapping credential IDs to signing parameters.
-    /// Keys are the raw credential ID bytes.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// Phase 8.5 limitation: Currently only single-credential authentication is supported.
-    /// The dictionary MUST contain exactly one entry matching the single allowed credential.
-    /// Multi-credential probe-selection (CTAP up=false probe per spec §10.2.1 step 7) will be
-    /// implemented in Phase 9.
-    /// </para>
+    /// Keys are the raw credential ID bytes.
     /// </remarks>
     public IReadOnlyDictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams> SignByCredential { get; }
 
@@ -99,10 +87,8 @@ public sealed record class PreviewSignAuthenticationInput
     /// <param name="signByCredential">Dictionary mapping credential IDs to signing parameters.</param>
     /// <returns>A <see cref="PreviewSignAuthenticationInput"/> instance.</returns>
     /// <remarks>
-    /// This factory method provides parity with Swift's
-    /// <c>PreviewSign.Authentication.Input.signByCredential(_:)</c>.
-    /// Use <see cref="ByteArrayKeyComparer.Instance"/> when constructing the dictionary
-    /// to ensure correct equality semantics for byte array keys.
+    /// Use <see cref="ByteArrayKeyComparer.Instance"/> when constructing the dictionary to ensure
+    /// correct equality semantics for byte array keys.
     /// </remarks>
     public static PreviewSignAuthenticationInput CreateSignByCredential(
         IReadOnlyDictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams> signByCredential) =>

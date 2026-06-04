@@ -17,48 +17,38 @@ using Yubico.YubiKit.Fido2.Cose;
 namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 /// <summary>
-/// Input parameters for previewSign registration (key generation).
+/// Input for the previewSign extension registration (key generation).
 /// </summary>
 /// <remarks>
 /// <para>
-/// Specifies the acceptable signing algorithms and user verification policy for a new signing key pair.
-/// The authenticator will choose the first supported algorithm from the list.
-/// </para>
-/// <para>
-/// Per CTAP v4 draft specification §3.1:
-/// - Algorithms list must contain at least one entry
-/// - Flags default to RequireUserPresence (0b001) if not specified
-/// - Invalid flag values will cause registration to fail
+/// The previewSign extension generates a separate signing key bound to the same authenticator.
+/// This input specifies the acceptable signing algorithms for registration (key generation).
 /// </para>
 /// </remarks>
 public sealed record class PreviewSignRegistrationInput
 {
     /// <summary>
-    /// Gets the ordered list of acceptable COSE algorithms, from most to least preferred.
-    /// The authenticator will select the first algorithm it supports.
+    /// Gets the ordered list of acceptable signature algorithms, from most preferred to least preferred.
     /// </summary>
     public IReadOnlyList<CoseAlgorithm> Algorithms { get; }
 
     /// <summary>
-    /// Gets the user presence and verification policy for signing operations.
+    /// Gets the user presence (UP) and user verification (UV) policy for signing operations.
     /// </summary>
     /// <remarks>
-    /// NOTE: Per WebAuthn previewSign spec §10.2.1 step 4, flags are derived from
-    /// RegistrationOptions.UserVerification and SHOULD NOT be user-controllable at the
-    /// WebAuthn client layer. This field is internal and set by the adapter based on UV preference.
+    /// The WebAuthn adapter derives this value from the registration options.
     /// </remarks>
     internal PreviewSignFlags Flags { get; init; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="PreviewSignRegistrationInput"/>.
     /// </summary>
-    /// <param name="algorithms">Ordered list of acceptable COSE algorithms.</param>
+    /// <param name="algorithms">A list of acceptable signature algorithms, ordered from most preferred to least preferred.</param>
     /// <exception cref="WebAuthnClientError">
     /// Thrown when algorithms list is empty (InvalidRequest).
     /// </exception>
     /// <remarks>
-    /// Flags are derived from RegistrationOptions.UserVerification per spec and are not
-    /// user-controllable at this layer.
+    /// Flags are derived from registration options and are not user-controllable at this layer.
     /// </remarks>
     public PreviewSignRegistrationInput(IReadOnlyList<CoseAlgorithm> algorithms)
     {
@@ -76,10 +66,10 @@ public sealed record class PreviewSignRegistrationInput
     /// <summary>
     /// Creates a registration input for generating a new signing key.
     /// </summary>
-    /// <param name="algorithms">Ordered list of acceptable algorithms.</param>
+    /// <param name="algorithms">A list of acceptable signature algorithms, ordered from most preferred to least preferred.</param>
     /// <returns>A <see cref="PreviewSignRegistrationInput"/> with default flags (RequireUserPresence).</returns>
     /// <remarks>
-    /// This factory method provides parity with Swift's <c>PreviewSign.Registration.Input.generateKey(algorithms:)</c>.
+    /// This factory method mirrors the WebAuthn previewSign generate-key input shape.
     /// </remarks>
     public static PreviewSignRegistrationInput GenerateKey(params CoseAlgorithm[] algorithms) =>
         new(algorithms);

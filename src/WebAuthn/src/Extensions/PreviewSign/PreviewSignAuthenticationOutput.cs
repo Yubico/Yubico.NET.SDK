@@ -15,19 +15,16 @@
 namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 /// <summary>
-/// Output from previewSign authentication ceremony.
+/// Output from the previewSign extension authentication.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Contains the raw signature over the to-be-signed data. Unlike standard WebAuthn assertions,
-/// this signature does not include clientDataJSON or authenticator data wrapping.
-/// </para>
-/// <para>
-/// The signature format is algorithm-specific and is returned unchanged from the
-/// previewSign authentication extension output.
+/// Contains the raw signature over the to-be-signed data. The signature format is
+/// algorithm-specific and is returned unchanged from the previewSign authentication
+/// extension output.
 /// </para>
 /// </remarks>
 /// <param name="Signature">
-/// Raw algorithm-specific signature bytes over the to-be-signed data.
+/// Algorithm-specific signature bytes.
 /// </param>
 public sealed record class PreviewSignAuthenticationOutput(ReadOnlyMemory<byte> Signature);

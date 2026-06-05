@@ -17,47 +17,6 @@ using Yubico.YubiKit.Fido2.Cose;
 namespace Yubico.YubiKit.Fido2.Extensions;
 
 /// <summary>
-/// Typed <c>COSE_Sign_Args</c> map (CTAP v4 draft) — the value carried under
-/// <c>previewSign</c> authentication input key 7.
-/// </summary>
-/// <remarks>
-/// <para>
-/// <c>COSE_Sign_Args</c> is a CBOR map whose key 3 carries the request algorithm identifier; the
-/// remaining keys are algorithm-specific. Today the only inhabitant supported by the YubiKey is
-/// <see cref="ArkgP256SignArgs"/> (alg = <c>-65539</c>). New algorithms slot in by adding a
-/// new sealed subtype.
-/// </para>
-/// <para>
-/// This is a closed union: the constructor is <c>private protected</c>, so external assemblies
-/// cannot extend the hierarchy. <see cref="PreviewSignCbor.EncodeCoseSignArgs"/> exhaustively
-/// pattern-matches the known subtypes and throws on any unknown runtime type.
-/// </para>
-/// </remarks>
-public abstract record class CoseSignArgs
-{
-    /// <summary>
-    /// Initializes a new instance of <see cref="CoseSignArgs"/>. <c>private protected</c>:
-    /// only subtypes declared in this assembly may extend the hierarchy.
-    /// </summary>
-    private protected CoseSignArgs()
-    {
-    }
-
-    /// <summary>The COSE algorithm identifier written under key 3 of the <c>COSE_Sign_Args</c> map.</summary>
-    public abstract int Algorithm { get; }
-
-    /// <summary>
-    /// Convenience factory: constructs an <see cref="ArkgP256SignArgs"/> without naming the leaf type.
-    /// </summary>
-    /// <param name="keyHandle">The 81-byte ARKG key handle (16-byte HMAC tag concatenated with
-    /// 65-byte SEC1 uncompressed P-256 ephemeral public key).</param>
-    /// <param name="context">The ARKG context (≤64 bytes) bound to the derivation.</param>
-    /// <returns>A typed <see cref="ArkgP256SignArgs"/>.</returns>
-    public static CoseSignArgs ArkgP256(ReadOnlyMemory<byte> keyHandle, ReadOnlyMemory<byte> context)
-        => new ArkgP256SignArgs(keyHandle, context);
-}
-
-/// <summary>
 /// <c>COSE_Sign_Args</c> for ARKG-P256-ESP256 (alg = <c>-65539</c>). Wire shape:
 /// <c>{3: -65539, -1: kh, -2: ctx}</c>.
 /// </summary>

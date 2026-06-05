@@ -41,7 +41,7 @@ public sealed class MinPinLengthInput
     /// Set to true to request the minPinLength value from the authenticator.
     /// </remarks>
     public bool Requested { get; init; } = true;
-    
+
     /// <summary>
     /// Encodes this minPinLength input as CBOR.
     /// </summary>
@@ -49,11 +49,11 @@ public sealed class MinPinLengthInput
     public void Encode(CborWriter writer)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        
+
         // minPinLength input is a boolean true
         writer.WriteBoolean(Requested);
     }
-    
+
     /// <summary>
     /// Encodes this minPinLength input as a CBOR byte array.
     /// </summary>
@@ -63,38 +63,5 @@ public sealed class MinPinLengthInput
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         Encode(writer);
         return writer.Encode();
-    }
-}
-
-/// <summary>
-/// Output from the minPinLength extension.
-/// </summary>
-/// <remarks>
-/// Contains the minimum PIN length required by the authenticator.
-/// </remarks>
-public sealed class MinPinLengthOutput
-{
-    /// <summary>
-    /// Gets the minimum PIN length in Unicode code points.
-    /// </summary>
-    /// <remarks>
-    /// The minimum number of Unicode code points required for a PIN.
-    /// Default minimum is 4, maximum is 63.
-    /// </remarks>
-    public int MinPinLength { get; init; }
-    
-    /// <summary>
-    /// Decodes minPinLength output from a CBOR reader.
-    /// </summary>
-    /// <param name="reader">The CBOR reader.</param>
-    /// <returns>The decoded output.</returns>
-    public static MinPinLengthOutput Decode(CborReader reader)
-    {
-        ArgumentNullException.ThrowIfNull(reader);
-        
-        // Output is an unsigned integer
-        var minLength = reader.ReadInt32();
-        
-        return new MinPinLengthOutput { MinPinLength = minLength };
     }
 }

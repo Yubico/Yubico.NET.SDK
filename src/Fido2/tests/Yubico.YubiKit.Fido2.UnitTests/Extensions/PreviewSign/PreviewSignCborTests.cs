@@ -14,7 +14,6 @@
 
 using System.Formats.Cbor;
 using Xunit;
-using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Extensions;
 
 namespace Yubico.YubiKit.Fido2.UnitTests.Extensions;
@@ -187,92 +186,6 @@ public class PreviewSignCborTests
     public void EncodeCoseSignArgs_NullArgs_ThrowsArgumentNullException()
         => Assert.Throws<ArgumentNullException>(
             () => PreviewSignCbor.EncodeCoseSignArgs(null!));
-
-    [Fact]
-    public void ArkgP256SignArgs_AlgorithmIsMinus65539()
-    {
-        // The single most important invariant of this PRD: the wire alg must be -65539,
-        // not -9. -9 is the OUTPUT signature alg (Esp256), the firmware rejects it as a
-        // request alg. See Legacy commit fe82b007.
-        var args = new ArkgP256SignArgs(
-            new byte[81],
-            ReadOnlyMemory<byte>.Empty);
-
-        Assert.Equal(-65539, args.Algorithm);
-        Assert.Equal(CoseAlgorithm.ArkgP256.Value, args.Algorithm);
-        Assert.Equal(CoseAlgorithm.Esp256SplitArkgPlaceholder.Value, args.Algorithm);
-    }
-
-    [Theory]
-    [InlineData(0)]    // empty
-    [InlineData(80)]   // off-by-one short
-    [InlineData(82)]   // off-by-one long
-    [InlineData(160)]  // double — caller may have hex-decoded twice
-    public void ArkgP256SignArgs_RejectsWrongKeyHandleLength(int len)
-    {
-        var ex = Assert.Throws<ArgumentException>(
-            () => new ArkgP256SignArgs(new byte[len], ReadOnlyMemory<byte>.Empty));
-        Assert.Contains("81 bytes", ex.Message);
-        Assert.Equal("keyHandle", ex.ParamName);
-    }
-
-    [Theory]
-    [InlineData(65)]   // off-by-one long
-    [InlineData(128)]
-    public void ArkgP256SignArgs_RejectsContextOver64Bytes(int len)
-    {
-        var ex = Assert.Throws<ArgumentException>(
-            () => new ArkgP256SignArgs(new byte[81], new byte[len]));
-        Assert.Contains("64 bytes", ex.Message);
-        Assert.Equal("context", ex.ParamName);
-    }
-
-    [Fact]
-    public void ArkgP256SignArgs_AcceptsEmptyContext()
-    {
-        // Empty context is valid (HKDF allows zero-length info). Encoder must produce
-        // a zero-length bstr at key -2.
-        var args = new ArkgP256SignArgs(new byte[81], ReadOnlyMemory<byte>.Empty);
-        byte[] cbor = PreviewSignCbor.EncodeCoseSignArgs(args);
-
-        // Trailing bytes should be: ... 0x21 0x40   (key -2, bstr len 0)
-        Assert.Equal(0x21, cbor[^2]);
-        Assert.Equal(0x40, cbor[^1]);
-    }
-
-    [Fact]
-    public void ArkgP256SignArgs_AcceptsExactly64ByteContext()
-    {
-        // Boundary value — must succeed.
-        var args = new ArkgP256SignArgs(new byte[81], new byte[64]);
-        byte[] cbor = PreviewSignCbor.EncodeCoseSignArgs(args);
-
-        // CBOR encodes a 64-byte bstr as: 0x58 0x40 <64 bytes> at key -2.
-        // Verify the length prefix appears correctly.
-        var reader = new CborReader(cbor, CborConformanceMode.Ctap2Canonical);
-        reader.ReadStartMap();
-        reader.ReadInt32(); reader.ReadInt32();         // alg
-        reader.ReadInt32(); _ = reader.ReadByteString(); // kh
-        reader.ReadInt32();
-        byte[] ctxOut = reader.ReadByteString();
-        Assert.Equal(64, ctxOut.Length);
-    }
-
-    [Fact]
-    public void CoseSignArgs_StaticFactory_ArkgP256_ProducesEquivalentInstance()
-    {
-        // Convenience factory parity with direct construction.
-        byte[] kh = BuildArkgKeyHandleFixture(tagPattern: 0x11, pubKeyPattern: 0x22);
-        byte[] ctx = "ARKG-P256.test vectors"u8.ToArray();
-
-        CoseSignArgs viaFactory = CoseSignArgs.ArkgP256(kh, ctx);
-        var viaCtor = new ArkgP256SignArgs(kh, ctx);
-
-        var fromFactory = Assert.IsType<ArkgP256SignArgs>(viaFactory);
-        Assert.Equal(viaCtor.Algorithm, fromFactory.Algorithm);
-        Assert.Equal(viaCtor.KeyHandle.ToArray(), fromFactory.KeyHandle.ToArray());
-        Assert.Equal(viaCtor.Context.ToArray(), fromFactory.Context.ToArray());
-    }
 
     [Fact]
     public void EncodeAuthenticationInput_ProducesCanonicalCborByteString()

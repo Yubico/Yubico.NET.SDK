@@ -172,7 +172,7 @@ var output = adapter.DecodeOutput(response.UnsignedExtensionOutputs);
 
 **Key Files:**
 - `src/Extensions/PreviewSign/PreviewSignAdapter.cs` — WebAuthn-level adapter (translates to Fido2)
-- `../../Fido2/src/Extensions/PreviewSignExtension.cs` — Canonical Fido2 types and encoder
+- `../../Fido2/src/Extensions/PreviewSign/` — Canonical Fido2 types and encoder
 - `src/Extensions/PreviewSign/PreviewSignAuthenticationInput.cs:58` — Auth defer point
 - `Plans/previewSign_Implementation_Requirements.md` — Full spec
 

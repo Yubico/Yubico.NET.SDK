@@ -27,7 +27,7 @@ internal class PcscProtocol : ISmartCardProtocol
 
     private readonly ISmartCardConnection _connection;
     private readonly ILogger<PcscProtocol> _logger;
-    internal readonly byte InsSendRemaining;
+    internal byte InsSendRemaining { get; private set; }
     private IApduProcessor _processor;
 
     public PcscProtocol(
@@ -73,12 +73,12 @@ internal class PcscProtocol : ISmartCardProtocol
         _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
 
         var response = await _processor.TransmitAsync(command, false, cancellationToken).ConfigureAwait(false);
-        
+
         if (throwOnError && !response.IsOK())
         {
             throw ApduException.FromResponse(response, command, "APDU command failed");
         }
-        
+
         return response;
     }
 
@@ -98,6 +98,8 @@ internal class PcscProtocol : ISmartCardProtocol
     public void Configure(FirmwareVersion firmwareVersion, ProtocolConfiguration? configuration = null)
     {
         FirmwareVersion = firmwareVersion;
+        var insSendRemainingChanged = ConfigureInsSendRemaining(configuration);
+
         // Major == 0 is a sentinel for alpha/beta firmware reporting a placeholder version.
         // Treat as modern (>= 5.x) to enable extended APDUs and proper APDU sizes.
         if (FirmwareVersion.Major == 0)
@@ -107,8 +109,14 @@ internal class PcscProtocol : ISmartCardProtocol
             ReconfigureProcessor();
             return;
         }
+
         if (!FirmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))
+        {
+            if (insSendRemainingChanged)
+                ReconfigureProcessor();
+
             return;
+        }
 
         var forceShortApdu = configuration is { ForceShortApdus: true };
         UseExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu; // TODO always true for UsbPcsc... 
@@ -117,6 +125,15 @@ internal class PcscProtocol : ISmartCardProtocol
             : SmartCardMaxApduSizes.Yk4;
 
         ReconfigureProcessor();
+    }
+
+    private bool ConfigureInsSendRemaining(ProtocolConfiguration? configuration)
+    {
+        if (configuration is not { InsSendRemaining: byte insSendRemaining } || InsSendRemaining == insSendRemaining)
+            return false;
+
+        InsSendRemaining = insSendRemaining;
+        return true;
     }
 
 }

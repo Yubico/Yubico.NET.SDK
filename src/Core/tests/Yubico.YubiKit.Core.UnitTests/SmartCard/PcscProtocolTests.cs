@@ -150,6 +150,30 @@ public class PcscProtocolTests
         Assert.Equal((byte)0xC0, protocol.InsSendRemaining);
     }
 
+    [Fact]
+    public async Task TransmitAndReceiveAsync_ChainedResponseWithConfiguredInsSendRemaining_UsesConfiguredCommand()
+    {
+        // Arrange
+        _fakeConnection.SupportsExtendedApduValue = false;
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var firmware = new FirmwareVersion(5, 7, 2);
+        var config = new ProtocolConfiguration { InsSendRemaining = 0xA5 };
+        protocol.Configure(firmware, config);
+
+        _fakeConnection.EnqueueResponse(new byte[] { 0x01, 0x61, 0x01 });
+        _fakeConnection.EnqueueResponse(new byte[] { 0x02, 0x90, 0x00 });
+
+        var command = new ApduCommand(0x00, 0xA1, 0x00, 0x00);
+
+        // Act
+        var result = await protocol.TransmitAndReceiveAsync(command, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Equal(new byte[] { 0x01, 0x02 }, result.Data.ToArray());
+        Assert.Equal(2, _fakeConnection.TransmittedCommands.Count);
+        Assert.Equal((byte)0xA5, _fakeConnection.TransmittedCommands[1].Span[1]);
+    }
+
 
 
     [Fact]

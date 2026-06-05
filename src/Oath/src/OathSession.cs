@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Buffers;
+using Microsoft.Extensions.Logging;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
@@ -73,9 +72,12 @@ public sealed class OathSession : ApplicationSession, IOathSession
         CancellationToken cancellationToken = default)
     {
         var session = new OathSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+        await session.InitializeAsync(CreateOathProtocolConfiguration(configuration), cancellationToken).ConfigureAwait(false);
         return session;
     }
+
+    private static ProtocolConfiguration CreateOathProtocolConfiguration(ProtocolConfiguration? configuration) =>
+        (configuration ?? default) with { InsSendRemaining = OathConstants.InsSendRemaining };
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
@@ -159,7 +161,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        var responseData = await CollectResponseData(response, cancellationToken).ConfigureAwait(false);
+        var responseData = response.Data;
 
         if (responseData.Length == 0)
             return [];
@@ -313,7 +315,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         using var oldNameTlv = new Tlv(OathConstants.TagName, oldId);
         using var newNameTlv = new Tlv(OathConstants.TagName, newId);
-        byte[] data = [..oldNameTlv.AsSpan(), ..newNameTlv.AsSpan()];
+        byte[] data = [.. oldNameTlv.AsSpan(), .. newNameTlv.AsSpan()];
 
         try
         {
@@ -328,7 +330,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 newName,
                 credential.OathType,
                 credential.Period,
-                credential.TouchRequired);   
+                credential.TouchRequired);
         }
         finally
         {
@@ -348,7 +350,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
 
-        byte[] data = [..nameTlv.AsSpan(), ..challengeTlv.AsSpan()];
+        byte[] data = [.. nameTlv.AsSpan(), .. challengeTlv.AsSpan()];
         try
         {
             var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x00, data);
@@ -396,7 +398,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
 
-        byte[] data = [..nameTlv.AsSpan(), ..challengeTlv.AsSpan()];
+        byte[] data = [.. nameTlv.AsSpan(), .. challengeTlv.AsSpan()];
         try
         {
             // P2=0x01 requests truncated response
@@ -439,7 +441,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        var responseData = await CollectResponseData(response, cancellationToken).ConfigureAwait(false);
+        var responseData = response.Data;
 
         var result = new Dictionary<Credential, Code?>();
 
@@ -537,7 +539,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             using var responseTlv = new Tlv(OathConstants.TagResponse, clientResponse);
             using var challengeTlv = new Tlv(OathConstants.TagChallenge, clientChallenge);
 
-            byte[] data = [..responseTlv.AsSpan(), ..challengeTlv.AsSpan()];
+            byte[] data = [.. responseTlv.AsSpan(), .. challengeTlv.AsSpan()];
             try
             {
                 var command = new ApduCommand(0x00, OathConstants.InsValidate, 0x00, 0x00, data);
@@ -616,7 +618,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             using var challengeTlv = new Tlv(OathConstants.TagChallenge, clientChallenge);
             using var responseTlv = new Tlv(OathConstants.TagResponse, clientResponse);
 
-            byte[] data = [..keyTlv.AsSpan(), ..challengeTlv.AsSpan(), ..responseTlv.AsSpan()];
+            byte[] data = [.. keyTlv.AsSpan(), .. challengeTlv.AsSpan(), .. responseTlv.AsSpan()];
             try
             {
                 var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, data);
@@ -661,31 +663,4 @@ public sealed class OathSession : ApplicationSession, IOathSession
         base.Dispose(disposing);
     }
 
-    private async Task<ReadOnlyMemory<byte>> CollectResponseData(
-        ApduResponse response,
-        CancellationToken cancellationToken)
-    {
-        if (response.Data.Length == 0 && response.IsOK())
-            return ReadOnlyMemory<byte>.Empty;
-
-        // Check for chained response (SW1=0x61)
-        if (response.SW1 != 0x61)
-            return response.Data;
-
-        // Collect all chained data using ArrayBufferWriter to avoid the double allocation from MemoryStream.ToArray()
-        var buffer = new ArrayBufferWriter<byte>();
-        buffer.Write(response.Data.Span);
-
-        var currentResponse = response;
-        while (currentResponse.SW1 == 0x61)
-        {
-            var sendRemaining = new ApduCommand(0x00, OathConstants.InsSendRemaining, 0x00, 0x00);
-            currentResponse = await _protocol
-                .TransmitAndReceiveAsync(sendRemaining, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-            buffer.Write(currentResponse.Data.Span);
-        }
-
-        return buffer.WrittenMemory;
-    }
 }

@@ -134,8 +134,11 @@ Each phase requires review focused on:
 - test value
 - cross-module reuse opportunities
 - AI slop risk
+- architectural elegance: whether a simpler, more zen-like refactor exists that preserves behavior with less machinery, fewer names, flatter flow, or clearer ownership
 
 Use cross-vendor review where available, including `gpt-5.5` and `opus 4.8` roles/settings when the tooling supports it.
+
+Cato audits must evaluate more than correctness. They must also ask whether the completed refactor is the most elegant shape available within the approved scope: could the same ideal state be reached with fewer abstractions, less cleverness, clearer protocol flow, or a more natural Core/module boundary? If Cato sees a materially simpler or more graceful design, record it as a finding even when the current implementation is correct.
 
 If cross-vendor review cannot run, the waiver must be approved by the human and recorded in the phase learning note with:
 

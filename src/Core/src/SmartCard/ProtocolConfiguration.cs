@@ -17,4 +17,6 @@ namespace Yubico.YubiKit.Core.SmartCard;
 public readonly record struct ProtocolConfiguration
 {
     public bool ForceShortApdus { get; init; }
+
+    public byte? InsSendRemaining { get; init; }
 }

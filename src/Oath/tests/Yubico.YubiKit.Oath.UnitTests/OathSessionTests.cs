@@ -14,6 +14,9 @@
 
 using System.Security.Cryptography;
 using System.Text;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Oath.UnitTests;
 
@@ -162,5 +165,105 @@ public class OathSessionTests
             outputLength: 16);
 
         Assert.NotEqual(key1, key2);
+    }
+
+    [Fact]
+    public async Task ListCredentialsAsync_ChainedResponse_UsesOathSendRemainingInstruction()
+    {
+        var credentialId = Encoding.UTF8.GetBytes("issuer:alice");
+        byte[] credentialTlv = [0x72, (byte)(credentialId.Length + 1), (byte)OathType.Totp, .. credentialId];
+        byte[] firstChunk = [.. credentialTlv[..4], 0x61, 0x01];
+        byte[] finalChunk = [.. credentialTlv[4..], 0x90, 0x00];
+        var connection = new RecordingSmartCardConnection(SelectResponse(), firstChunk, finalChunk);
+
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var credentials = await session.ListCredentialsAsync(TestContext.Current.CancellationToken);
+
+        Assert.Single(credentials);
+        Assert.Equal("alice", credentials[0].Name);
+        Assert.Equal("issuer", credentials[0].Issuer);
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == OathConstants.InsSendRemaining);
+        Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0xC0);
+    }
+
+    [Fact]
+    public async Task CalculateAllAsync_ChainedResponse_UsesOathSendRemainingInstruction()
+    {
+        var credentialId = Encoding.UTF8.GetBytes("issuer:bob");
+        byte[] responseTlvs = [
+            0x71, (byte)credentialId.Length, ..credentialId,
+            0x76, 0x05, 0x06, 0x00, 0x00, 0x00, 0x01
+        ];
+        byte[] firstChunk = [.. responseTlvs[..5], 0x61, 0x01];
+        byte[] finalChunk = [.. responseTlvs[5..], 0x90, 0x00];
+        var connection = new RecordingSmartCardConnection(SelectResponse(), firstChunk, finalChunk);
+
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var codes = await session.CalculateAllAsync(1704067200, TestContext.Current.CancellationToken);
+
+        var entry = Assert.Single(codes);
+        Assert.Equal("bob", entry.Key.Name);
+        Assert.Equal("issuer", entry.Key.Issuer);
+        Assert.NotNull(entry.Value);
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == OathConstants.InsSendRemaining);
+        Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0xC0);
+    }
+
+    private static byte[] SelectResponse() =>
+    [
+        0x79, 0x03, 0x05, 0x07, 0x00,
+        0x71, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x90, 0x00
+    ];
+
+    private sealed class RecordingSmartCardConnection(params byte[][] responses) : ISmartCardConnection
+    {
+        private readonly Queue<byte[]> _responses = new(responses);
+
+        public List<byte[]> TransmittedCommands { get; } = [];
+
+        public Transport Transport { get; } = Transport.Usb;
+
+        public ConnectionType Type { get; } = ConnectionType.SmartCard;
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+            ReadOnlyMemory<byte> command,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            TransmittedCommands.Add(command.ToArray());
+
+            if (_responses.Count == 0)
+            {
+                throw new InvalidOperationException("No response enqueued for transmission.");
+            }
+
+            return Task.FromResult((ReadOnlyMemory<byte>)_responses.Dequeue());
+        }
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) => NullDisposable.Instance;
+
+        public bool SupportsExtendedApdu() => false;
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => default;
+    }
+
+    private sealed class NullDisposable : IDisposable
+    {
+        public static NullDisposable Instance { get; } = new();
+
+        public void Dispose()
+        {
+        }
     }
 }

@@ -133,7 +133,9 @@ await session.ResetAsync(cancellationToken);
 ```
 Yubico.YubiKit.SecurityDomain/
 ├── src/
-│   ├── SecurityDomainSession.cs     # Main session class
+│   ├── SecurityDomainSession.cs     # Public facade and visible APDU flows
+│   ├── SecurityDomainKeyMaterial.cs # Pure SCP key/KCV helpers
+│   ├── SecurityDomainTlvEncoding.cs # Pure TLV payload helpers
 │   └── Yubico.YubiKit.SecurityDomain.csproj
 └── tests/
     ├── Yubico.YubiKit.SecurityDomain.IntegrationTests/

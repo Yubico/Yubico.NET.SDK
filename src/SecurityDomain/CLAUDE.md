@@ -15,7 +15,9 @@ This file provides Claude-specific guidance for working with the Security Domain
 The Security Domain module manages YubiKey's root security application, which controls secure channel establishment using SCP (Secure Channel Protocol). This is a **low-level security module** that requires careful handling of cryptographic keys and secure sessions.
 
 **Key Files:**
-- [`SecurityDomainSession.cs`](src/SecurityDomainSession.cs) - Main session class (~984 lines, single file implementation)
+- [`SecurityDomainSession.cs`](src/SecurityDomainSession.cs) - Public facade, lifecycle/state owner, and visible GlobalPlatform APDU flows
+- [`SecurityDomainKeyMaterial.cs`](src/SecurityDomainKeyMaterial.cs) - Pure SCP key component, KCV, and checksum helpers
+- [`SecurityDomainTlvEncoding.cs`](src/SecurityDomainTlvEncoding.cs) - Pure TLV encoding helpers for delete filters and related payloads
 - Test infrastructure in `tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/`
 
 ## Critical Security Requirements
@@ -54,7 +56,7 @@ _logger.LogDebug($"Key value: {keyHex}"); // ❌ NEVER
 
 ### Key Component Handling
 
-The `EncodeKeyComponent()` method pattern (lines 869-905) demonstrates correct key handling:
+The `SecurityDomainKeyMaterial.EncodeKeyComponent()` pattern demonstrates correct key handling:
 1. Rent buffer from `ArrayPool`
 2. Copy sensitive data to rented buffer
 3. Perform encryption
@@ -69,16 +71,16 @@ The `EncodeKeyComponent()` method pattern (lines 869-905) demonstrates correct k
 
 #### How It Works
 
-Tests use the `WithSecurityDomainSessionAsync` extension method in [`SecurityDomainTestStateExtensions.cs`](tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/SecurityDomainTestStateExtensions.cs):
+Tests use the `WithSecurityDomainSessionAsync` extension method in [`TestStateExtensions.cs`](tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs):
 
 ```csharp
 extension(YubiKeyTestState state)
 {
     public Task WithSecurityDomainSessionAsync(
+        bool resetBeforeUse,
         Func<SecurityDomainSession, Task> action,
         ProtocolConfiguration? configuration = null,
         ScpKeyParameters? scpKeyParams = null,
-        bool resetBeforeUse = true,  // ← Defaults to TRUE
         CancellationToken cancellationToken = default)
 }
 ```
@@ -91,12 +93,12 @@ extension(YubiKeyTestState state)
 
 #### The ResetAsync Method
 
-Located at [line 685](src/SecurityDomainSession.cs#L685), the reset process:
+Located in [`SecurityDomainSession.cs`](src/SecurityDomainSession.cs), the reset process:
 
 1. **Enumerates keys** via `GetKeyInfoAsync()`
 2. **For each key type**, determines the appropriate blocking instruction:
    - SCP03 (KID=0x01): `INITIALIZE UPDATE`
-   - SCP11a/c (KID=0x10/0x15): `EXTERNAL AUTHENTICATE`
+   - SCP11a/c (KID=0x11/0x15): `EXTERNAL AUTHENTICATE`
    - SCP11b (KID=0x13): `INTERNAL AUTHENTICATE`
    - Others: `PERFORM SECURITY OPERATION`
 3. **Sends up to 65 failed attempts** with bogus payload (`ResetAttemptPayload`)
@@ -156,6 +158,22 @@ await state.WithSecurityDomainSessionAsync(
 ```
 
 ## Common Patterns
+
+### Session Facade With Shallow Pure Helpers
+
+SecurityDomain does **not** use `SecurityDomainSession` partial classes. Keep `SecurityDomainSession` as the single public facade that owns lifecycle, protocol state, reset orchestration, and public `ISecurityDomainSession` methods.
+
+Allowed helper extraction is intentionally narrow:
+
+```text
+SecurityDomainSession public method
+  -> validate/session-state check
+  -> build visible GlobalPlatform APDU/TLV payload
+  -> transmit through Core protocol or raw reset connection
+  -> call pure encode/parse/KCV helper only where it clarifies local code
+```
+
+Do not introduce operation-specific command classes such as `PutKeyCommand`, `GetDataCommand`, `DeleteKeyCommand`, or `ResetCommand`. Do not hide the reset raw connection bypass behind a helper.
 
 ### SCP Parameter Types
 

@@ -16,7 +16,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.SecurityDomain.IntegrationTests.Helpers;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;

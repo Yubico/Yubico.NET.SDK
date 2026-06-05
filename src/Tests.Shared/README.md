@@ -112,6 +112,11 @@ AllowList (verifies device authorization)
 - `WithManagementAsync()` - Automatic session creation/disposal
 - Future: `WithPivAsync()`, `WithOathAsync()`, etc.
 
+**SharedSmartCardConnection**
+- Non-owning wrapper for sharing one `ISmartCardConnection` across multiple sessions in one integration helper
+- For reset-then-test flows where the reset session must not dispose the physical connection before the test session starts
+- Forwards SmartCard operations and leaves disposal to the original `WithConnectionAsync` owner
+
 ## Writing Integration Tests
 
 ### Basic Test (All Devices)

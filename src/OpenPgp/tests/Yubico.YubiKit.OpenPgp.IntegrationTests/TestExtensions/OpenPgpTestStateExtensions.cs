@@ -14,7 +14,6 @@
 
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.OpenPgp.IntegrationTests.Helpers;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.OpenPgp.IntegrationTests.TestExtensions;

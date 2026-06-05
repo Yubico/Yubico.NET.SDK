@@ -1,4 +1,4 @@
-// Copyright 2025 Yubico AB
+// Copyright 2026 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -16,15 +16,20 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 
-namespace Yubico.YubiKit.OpenPgp.IntegrationTests.Helpers;
+namespace Yubico.YubiKit.Tests.Shared;
 
 /// <summary>
-///     A wrapper around an <see cref="ISmartCardConnection" /> that ignores disposal.
-///     Allows sharing a connection between a reset session and a test session.
+///     Wraps an <see cref="ISmartCardConnection" /> while leaving disposal to the original owner.
 /// </summary>
-internal sealed class SharedSmartCardConnection(ISmartCardConnection connection) : ISmartCardConnection
+/// <remarks>
+///     Use this when multiple sessions must share one physical connection, such as a reset session
+///     followed by the session under test. All operations are forwarded except disposal.
+/// </remarks>
+public sealed class SharedSmartCardConnection(ISmartCardConnection connection) : ISmartCardConnection
 {
     public Transport Transport => connection.Transport;
+
+    public ConnectionType Type => connection.Type;
 
     public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         ReadOnlyMemory<byte> command,
@@ -38,10 +43,8 @@ internal sealed class SharedSmartCardConnection(ISmartCardConnection connection)
 
     public void Dispose()
     {
-        // Do nothing - connection lifecycle is managed by the owner
+        // The owner passed to WithConnectionAsync controls the physical connection lifetime.
     }
 
     public ValueTask DisposeAsync() => default;
-
-    public ConnectionType Type { get; } = ConnectionType.SmartCard;
 }

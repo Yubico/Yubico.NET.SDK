@@ -20,12 +20,15 @@ This file provides Claude-specific guidance for working with the PIV module. **R
 - 🚧 **Modern Implementation**: Being migrated to `Yubico.YubiKit.Piv/`
 - ✅ **Test Infrastructure**: PlaceholderTests in place, integration tests to be migrated
 
-**Key Legacy Files (Reference):**
-- `legacy-develop/Yubico.YubiKey/src/Yubico/YubiKey/Piv/PivSession.cs` - Main session class
-- `PivSession.KeyPairs.cs` - Key generation, import, certificate management
-- `PivSession.Crypto.cs` - Sign, decrypt, key agreement operations
-- `PivSession.Pin.cs` - PIN, PUK, and management key operations
-- `PivSession.ManagementKey.cs` - Management key authentication
+**Current Structure:**
+- `PivSession.cs` - single public facade implementing `IPivSession`, session lifecycle, state, and one-hop delegation
+- `Authentication/` - internal authentication and PIN protocol helpers
+- `Metadata/` - internal metadata and retry-management protocol helpers
+- `DataObjects/` - internal GET DATA / PUT DATA helpers
+- `Certificates/` - internal certificate object helpers
+- `Keys/` - internal key generation, import, move, delete, and attestation helpers
+- `Cryptography/` - internal sign/decrypt/key-agreement helpers
+- `Bio/` - internal biometric and temporary-PIN helpers
 
 ## Critical Security Requirements
 
@@ -234,45 +237,30 @@ public void GenerateKeyAndSign_WithPinPolicy_RequiresPinEachTime(YubiKeyTestStat
 
 ## Common Patterns
 
-### Partial Classes
+### Single Facade With Shallow Feature Namespaces
 
-PIV session uses **partial classes** to organize functionality:
+PIV does **not** use `PivSession` partial classes. Keep `PivSession` as the single public facade that owns lifecycle, `_protocol`, authentication state, management-key type, touch notification, and public `IPivSession` methods.
 
-```csharp
-// PivSession.cs - Main class, session management
-public sealed partial class PivSession : IDisposable
-{
-    // Connection, disposal, etc.
-}
+Feature-specific implementation belongs in shallow internal namespaces:
 
-// PivSession.KeyPairs.cs - Key and certificate operations
-public sealed partial class PivSession : IDisposable
-{
-    public PivPublicKey GenerateKeyPair(...) { }
-    public void ImportPrivateKey(...) { }
-    public void ImportCertificate(...) { }
-    public X509Certificate2 GetCertificate(...) { }
-}
-
-// PivSession.Crypto.cs - Cryptographic operations
-public sealed partial class PivSession : IDisposable
-{
-    public byte[] Sign(...) { }
-    public byte[] Decrypt(...) { }
-    public byte[] KeyAgree(...) { }
-}
-
-// PivSession.Pin.cs - PIN/PUK/management key
-public sealed partial class PivSession : IDisposable
-{
-    public bool TryVerifyPin(...) { }
-    public void ChangePin(...) { }
-    public void ResetPin(...) { }
-    public bool TryAuthenticateManagementKey(...) { }
-}
+```text
+PivSession public method
+  -> validate/session-state check
+  -> one internal feature helper
+  -> APDU/TLV construction remains inspectable in that helper
 ```
 
-**Pattern:** Group related operations in separate partial class files for maintainability.
+Allowed examples:
+
+- `Authentication/PivAuthenticationProtocol.cs`
+- `Metadata/PivMetadataProtocol.cs`
+- `DataObjects/PivDataObjectProtocol.cs`
+- `Certificates/PivCertificateProtocol.cs`
+- `Keys/PivKeyProtocol.cs`
+- `Cryptography/PivCryptographicOperations.cs`
+- `Bio/PivBioProtocol.cs`
+
+Do not reintroduce `partial class PivSession`. Do not introduce operation-specific command classes such as `GenerateKeyCommand`, `VerifyPinCommand`, or `GetDataCommand`.
 
 ### Authentication State Tracking
 
@@ -290,12 +278,12 @@ private void RefreshManagementKeyAuthentication()
     AuthenticateManagementKey(); // Calls KeyCollector if needed
 }
 
-public PivPublicKey GenerateKeyPair(byte slotNumber, PivAlgorithm algorithm, ...)
+public async Task<PivPublicKey> GenerateKeyPairAsync(byte slotNumber, PivAlgorithm algorithm, ...)
 {
     RefreshManagementKeyAuthentication(); // Ensure authenticated
     
-    var command = new GenerateKeyPairCommand(slotNumber, algorithm, ...);
-    var response = Connection.SendCommand(command);
+    var command = new ApduCommand(0x00, 0x47, 0x00, slotNumber, data);
+    var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken);
     
     return response.GetData();
 }
@@ -453,11 +441,11 @@ if (yubiKey.FirmwareVersion >= FirmwareVersion.V5_7_0)
 
 When migrating code from legacy to modern structure:
 
-1. **Preserve Partial Class Organization**: Keep the logical separation (KeyPairs, Crypto, Pin, etc.)
-2. **Update to Modern Patterns**: Use `async`/`await`, `Memory<T>`, `Span<T>` where appropriate
-3. **Maintain KeyCollector Pattern**: This is fundamental to PIV and should remain unchanged
-4. **Test Coverage**: Migrate existing tests from `legacy-develop/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Piv/`
-5. **Keep Command/Response Pattern**: Low-level APDU commands are well-tested; preserve this architecture
+1. **Preserve Feature Locality**: Keep logical separation through shallow feature namespaces (Keys, Cryptography, Metadata, etc.), not `PivSession` partial classes.
+2. **Update to Modern Patterns**: Use `async`/`await`, `Memory<T>`, `Span<T>` where appropriate.
+3. **Maintain KeyCollector Pattern**: This is fundamental to PIV and should remain unchanged.
+4. **Test Coverage**: Migrate existing tests from `legacy-develop/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Piv/`.
+5. **Keep Command/Response Pattern**: Low-level APDU commands are well-tested; preserve visible `ApduCommand` construction without operation-specific command classes.
 
 ## Related Modules
 

@@ -18,9 +18,11 @@ using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 
-namespace Yubico.YubiKit.Piv;
+namespace Yubico.YubiKit.Piv.Bio;
 
-public sealed partial class PivSession
+#pragma warning disable CS1573 // Public XML docs live on PivSession/IPivSession; these are internal protocol helpers.
+
+internal static class PivBioProtocol
 {
     /// <summary>
     /// Gets metadata about the PIV biometric configuration.
@@ -28,15 +30,15 @@ public sealed partial class PivSession
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>Biometric metadata including number of configured fingerprints.</returns>
     /// <exception cref="NotSupportedException">Thrown if the YubiKey does not support biometrics or biometrics are not configured.</exception>
-    public async Task<PivBioMetadata> GetBioMetadataAsync(CancellationToken cancellationToken = default)
+    internal static async Task<PivBioMetadata> GetBioMetadataAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        CancellationToken cancellationToken = default)
     {
-        EnsureInitialized();
-        EnsureProtocol();
-
-        Logger.LogDebug("PIV: Getting biometric metadata");
+        logger.LogDebug("PIV: Getting biometric metadata");
         
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x96, ReadOnlyMemory<byte>.Empty);
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
         
         // SW 0x6A82 means object/feature not found (not configured)
         // SW 0x6D00 means instruction not supported (non-Bio key)
@@ -80,12 +82,14 @@ public sealed partial class PivSession
     /// <returns>Temporary PIN if requestTemporaryPin is true, otherwise null. WARNING: Caller MUST zero this immediately after use!</returns>
     /// <exception cref="NotSupportedException">Thrown if biometrics are not supported or configured.</exception>
     /// <exception cref="InvalidOperationException">Thrown if biometric verification fails.</exception>
-    public async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(bool requestTemporaryPin = false, bool checkOnly = false, CancellationToken cancellationToken = default)
+    internal static async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        bool requestTemporaryPin = false,
+        bool checkOnly = false,
+        CancellationToken cancellationToken = default)
     {
-        EnsureInitialized();
-        EnsureProtocol();
-
-        Logger.LogDebug("PIV: Verifying user via biometric (checkOnly={CheckOnly})", checkOnly);
+        logger.LogDebug("PIV: Verifying user via biometric (checkOnly={CheckOnly})", checkOnly);
         
         // Build command data
         byte[] commandData;
@@ -101,7 +105,7 @@ public sealed partial class PivSession
         }
         
         var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData);
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
         
         // SW 0x6A82 or 0x6D00 means biometrics not supported/configured
         if (response.SW == 0x6A82 || response.SW == 0x6D00)
@@ -121,7 +125,7 @@ public sealed partial class PivSession
         
         if (checkOnly || !requestTemporaryPin)
         {
-            Logger.LogDebug("PIV: Biometric verification succeeded (check only)");
+            logger.LogDebug("PIV: Biometric verification succeeded (check only)");
             return null;
         }
         
@@ -134,8 +138,8 @@ public sealed partial class PivSession
         var tempPin = new byte[response.Data.Length];
         response.Data.CopyTo(tempPin);
         
-        Logger.LogDebug("PIV: Biometric verification succeeded, temporary PIN retrieved (length={Length})", tempPin.Length);
-        Logger.LogWarning("PIV: Caller MUST zero temporary PIN immediately after use!");
+        logger.LogDebug("PIV: Biometric verification succeeded, temporary PIN retrieved (length={Length})", tempPin.Length);
+        logger.LogWarning("PIV: Caller MUST zero temporary PIN immediately after use!");
         
         return tempPin;
     }
@@ -146,17 +150,18 @@ public sealed partial class PivSession
     /// <param name="temporaryPin">The temporary PIN returned from VerifyUvAsync. WILL BE ZEROED after use.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <exception cref="InvalidPinException">Thrown if the temporary PIN is invalid.</exception>
-    public async Task VerifyTemporaryPinAsync(ReadOnlyMemory<byte> temporaryPin, CancellationToken cancellationToken = default)
+    internal static async Task VerifyTemporaryPinAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        ReadOnlyMemory<byte> temporaryPin,
+        CancellationToken cancellationToken = default)
     {
-        EnsureInitialized();
-        EnsureProtocol();
-
         if (temporaryPin.IsEmpty)
         {
             throw new ArgumentException("Temporary PIN cannot be empty", nameof(temporaryPin));
         }
         
-        Logger.LogDebug("PIV: Verifying temporary PIN");
+        logger.LogDebug("PIV: Verifying temporary PIN");
         
         // Build command with TAG 0x01 for temporary PIN
         var commandData = ArrayPool<byte>.Shared.Rent(2 + temporaryPin.Length);
@@ -167,7 +172,7 @@ public sealed partial class PivSession
             temporaryPin.Span.CopyTo(commandData.AsSpan(2));
             
             var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData.AsMemory(0, 2 + temporaryPin.Length));
-            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
             
             if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
             {
@@ -181,7 +186,7 @@ public sealed partial class PivSession
                 throw ApduException.FromStatusWord(response.SW, "Failed to verify temporary PIN");
             }
             
-            Logger.LogDebug("PIV: Temporary PIN verified successfully");
+            logger.LogDebug("PIV: Temporary PIN verified successfully");
         }
         finally
         {

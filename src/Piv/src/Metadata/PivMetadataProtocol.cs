@@ -19,23 +19,91 @@ using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 
-namespace Yubico.YubiKit.Piv;
+namespace Yubico.YubiKit.Piv.Metadata;
 
-public sealed partial class PivSession
+#pragma warning disable CS1573 // Public XML docs live on PivSession/IPivSession; these are internal protocol helpers.
+
+internal static class PivMetadataProtocol
 {
+    internal static async Task<PivPinMetadata> GetPinMetadataAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogDebug("PIV: Getting PIN metadata");
+
+        var command = new ApduCommand(0x00, 0xF7, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+        // Check for "instruction not supported" which indicates firmware < 5.3
+        if (response.SW == 0x6D00)
+        {
+            throw new NotSupportedException("PIN metadata requires firmware 5.3.0 or later");
+        }
+
+        if (!response.IsOK())
+        {
+            throw ApduException.FromStatusWord(response.SW, "Failed to get PIN metadata");
+        }
+
+        if (response.Data.IsEmpty)
+        {
+            throw new ApduException("Empty PIN metadata response");
+        }
+
+        // Parse TLV structure
+        // TAG 0x05 = isDefault, TAG 0x06 = retries [total, remaining]
+        var span = response.Data.Span;
+        bool isDefault = false;
+        int totalRetries = 0;
+        int retriesRemaining = 0;
+
+        int offset = 0;
+        while (offset < span.Length)
+        {
+            byte tag = span[offset++];
+            if (offset >= span.Length) break;
+
+            int length = span[offset++];
+            if (offset + length > span.Length) break;
+
+            switch (tag)
+            {
+                case 0x05: // IsDefault
+                    if (length > 0)
+                    {
+                        isDefault = span[offset] != 0;
+                    }
+                    break;
+                case 0x06: // Retries [total, remaining]
+                    if (length >= 2)
+                    {
+                        totalRetries = span[offset];
+                        retriesRemaining = span[offset + 1];
+                    }
+                    break;
+            }
+
+            offset += length;
+        }
+
+        return new PivPinMetadata(isDefault, totalRetries, retriesRemaining);
+    }
+
     /// <summary>
     /// Gets metadata about a key slot (requires firmware 5.3+).
     /// </summary>
-    public async Task<PivSlotMetadata?> GetSlotMetadataAsync(
+    internal static async Task<PivSlotMetadata?> GetSlotMetadataAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
         PivSlot slot,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Getting slot metadata for 0x{Slot:X2}", (byte)slot);
-        EnsureProtocol();
+        logger.LogDebug("PIV: Getting slot metadata for 0x{Slot:X2}", (byte)slot);
 
         // INS 0xF7 (GET METADATA), P2 = slot
         var command = new ApduCommand(0x00, 0xF7, 0x00, (byte)slot, ReadOnlyMemory<byte>.Empty);
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
         if (response.SW == 0x6D00)
@@ -86,16 +154,18 @@ public sealed partial class PivSession
     /// <summary>
     /// Sets the management key (requires authentication with old key).
     /// </summary>
-    public async Task SetManagementKeyAsync(
+    internal static async Task<PivManagementKeyType> SetManagementKeyAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        bool isAuthenticated,
         PivManagementKeyType keyType,
         ReadOnlyMemory<byte> newKey,
         bool requireTouch = false,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Setting management key, type {KeyType}", keyType);
-        EnsureProtocol();
+        logger.LogDebug("PIV: Setting management key, type {KeyType}", keyType);
 
-        if (!_isAuthenticated)
+        if (!isAuthenticated)
         {
             throw new InvalidOperationException("Current management key authentication required");
         }
@@ -132,7 +202,7 @@ public sealed partial class PivSession
             // P2 = touch policy: 0xFF (no touch), 0xFE (touch required), 0xFD (cached touch)
             byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
             var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, data);
-            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -144,21 +214,22 @@ public sealed partial class PivSession
             CryptographicOperations.ZeroMemory(data);
         }
 
-        // Update cached key type
-        ManagementKeyType = keyType;
+        return keyType;
     }
 
     /// <summary>
     /// Gets metadata about the PIV PUK.
     /// </summary>
-    public async Task<PivPukMetadata> GetPukMetadataAsync(CancellationToken cancellationToken = default)
+    internal static async Task<PivPukMetadata> GetPukMetadataAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Getting PUK metadata");
-        EnsureProtocol();
+        logger.LogDebug("PIV: Getting PUK metadata");
 
         // INS 0xF7 (GET METADATA), P2 = 0x81 (PUK slot)
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x81, ReadOnlyMemory<byte>.Empty);
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
         if (response.SW == 0x6D00)
@@ -189,17 +260,19 @@ public sealed partial class PivSession
         return new PivPukMetadata(isDefault, totalRetries, retriesRemaining);
     }
 
-    public async Task<PivManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default)
+    internal static async Task<PivManagementKeyMetadata> GetManagementKeyMetadataAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Getting management key metadata");
-        EnsureProtocol();
+        logger.LogDebug("PIV: Getting management key metadata");
 
         // INS 0xF7 (GET METADATA), P2 = 0x9B (SLOT_CARD_MANAGEMENT)
         const byte InsGetMetadata = 0xF7;
         const byte SlotCardManagement = 0x9B;
 
         var command = new ApduCommand(0x00, InsGetMetadata, 0x00, SlotCardManagement, ReadOnlyMemory<byte>.Empty);
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
         if (response.SW == 0x6D00)
@@ -229,7 +302,7 @@ public sealed partial class PivSession
         var isDefault = tlvDict.TryGetValue(0x05, out var def) && def.Length > 0
             && def.Span[0] != 0;
 
-        Logger.LogDebug("PIV: Management key metadata: type={KeyType}, isDefault={IsDefault}, touchPolicy={TouchPolicy}",
+        logger.LogDebug("PIV: Management key metadata: type={KeyType}, isDefault={IsDefault}, touchPolicy={TouchPolicy}",
             keyType, isDefault, touchPolicy);
 
         return new PivManagementKeyMetadata(
@@ -242,10 +315,14 @@ public sealed partial class PivSession
     /// <summary>
     /// Changes the PUK from old PUK to new PUK.
     /// </summary>
-    public async Task ChangePukAsync(ReadOnlyMemory<byte> oldPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default)
+    internal static async Task ChangePukAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        ReadOnlyMemory<byte> oldPuk,
+        ReadOnlyMemory<byte> newPuk,
+        CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Changing PUK");
-        EnsureProtocol();
+        logger.LogDebug("PIV: Changing PUK");
 
         // Build data: [8-byte old PUK padded with 0xFF] [8-byte new PUK padded with 0xFF]
         byte[] pukPair = PivPinUtilities.EncodePinPairBytes(oldPuk.Span, newPuk.Span);
@@ -253,7 +330,7 @@ public sealed partial class PivSession
         {
             // INS 0x24 (CHANGE REFERENCE DATA), P2=0x81 (PUK reference)
             var command = new ApduCommand(0x00, 0x24, 0x00, 0x81, pukPair);
-            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -274,10 +351,14 @@ public sealed partial class PivSession
     /// <summary>
     /// Unblocks the PIN using the PUK and sets a new PIN.
     /// </summary>
-    public async Task UnblockPinAsync(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
+    internal static async Task UnblockPinAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        ReadOnlyMemory<byte> puk,
+        ReadOnlyMemory<byte> newPin,
+        CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Unblocking PIN with PUK");
-        EnsureProtocol();
+        logger.LogDebug("PIV: Unblocking PIN with PUK");
 
         // Build data: [8-byte PUK padded with 0xFF] [8-byte new PIN padded with 0xFF]
         byte[] pukPinPair = PivPinUtilities.EncodePinPairBytes(puk.Span, newPin.Span);
@@ -285,7 +366,7 @@ public sealed partial class PivSession
         {
             // INS 0x2C (RESET RETRY COUNTER), P2=0x80 (PIN reference)
             var command = new ApduCommand(0x00, 0x2C, 0x00, 0x80, pukPinPair);
-            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -315,12 +396,17 @@ public sealed partial class PivSession
     /// <remarks>
     /// Requires management key authentication. This command also resets PIN and PUK to defaults.
     /// </remarks>
-    public async Task SetPinAttemptsAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default)
+    internal static async Task SetPinAttemptsAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        bool isAuthenticated,
+        int pinAttempts,
+        int pukAttempts,
+        CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Setting PIN attempts to {PinAttempts}, PUK attempts to {PukAttempts}", pinAttempts, pukAttempts);
-        EnsureProtocol();
+        logger.LogDebug("PIV: Setting PIN attempts to {PinAttempts}, PUK attempts to {PukAttempts}", pinAttempts, pukAttempts);
 
-        if (!_isAuthenticated)
+        if (!isAuthenticated)
         {
             throw new InvalidOperationException("Management key authentication required");
         }
@@ -337,7 +423,7 @@ public sealed partial class PivSession
 
         // INS 0xFA (SET PIN RETRIES), P1=PIN retries, P2=PUK retries, no data
         var command = new ApduCommand(0x00, 0xFA, (byte)pinAttempts, (byte)pukAttempts);
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {

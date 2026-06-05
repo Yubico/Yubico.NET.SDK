@@ -20,9 +20,11 @@ using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.Utils;
 
-namespace Yubico.YubiKit.Piv;
+namespace Yubico.YubiKit.Piv.Cryptography;
 
-public sealed partial class PivSession
+#pragma warning disable CS1573 // Public XML docs live on PivSession/IPivSession; these are internal protocol helpers.
+
+internal static class PivCryptographicOperations
 {
     /// <summary>
     /// Signs or decrypts data using the private key in the specified slot.
@@ -42,76 +44,24 @@ public sealed partial class PivSession
     /// PIN verification may be required before this operation depending on the key's PIN policy.
     /// </para>
     /// </remarks>
-    public Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
+    internal static Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
         PivSlot slot,
         PivAlgorithm algorithm,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default) =>
-        SignOrDecryptCoreAsync(slot, algorithm, data, cancellationToken);
+        SignOrDecryptCoreAsync(protocol, logger, slot, algorithm, data, cancellationToken);
 
-    /// <summary>
-    /// Signs or decrypts data using the private key in the specified slot, auto-detecting the algorithm.
-    /// </summary>
-    /// <param name="slot">The slot containing the private key.</param>
-    /// <param name="data">The data to sign or decrypt.</param>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>The signature or decrypted data.</returns>
-    /// <remarks>
-    /// <para>
-    /// <b>Requires YubiKey firmware 5.3+.</b> This overload queries slot metadata to determine
-    /// the key algorithm automatically, eliminating the need to track algorithms separately.
-    /// </para>
-    /// <para>
-    /// For YubiKeys with firmware older than 5.3, use the overload that accepts an explicit
-    /// algorithm parameter.
-    /// </para>
-    /// <para>
-    /// PIN verification may be required before this operation depending on the key's PIN policy.
-    /// </para>
-    /// </remarks>
-    /// <exception cref="NotSupportedException">YubiKey firmware is older than 5.3 and does not support metadata retrieval.</exception>
-    /// <exception cref="InvalidOperationException">Slot is empty (no key present).</exception>
-    public async Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
-        PivSlot slot,
-        ReadOnlyMemory<byte> data,
-        CancellationToken cancellationToken = default)
-    {
-        Logger.LogDebug("PIV: SignOrDecryptAsync auto-detecting algorithm for slot 0x{Slot:X2}", (byte)slot);
-
-        // Check firmware version supports metadata
-        if (!IsSupported(PivFeatures.Metadata))
-        {
-            throw new NotSupportedException(
-                $"Auto-detecting algorithm requires YubiKey firmware 5.3 or later. " +
-                $"Current firmware: {FirmwareVersion}. Use the overload that accepts an explicit algorithm parameter.");
-        }
-
-        // Query slot metadata to get the algorithm
-        var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
-
-        if (metadata is null)
-        {
-            throw new InvalidOperationException(
-                $"Slot 0x{(byte)slot:X2} is empty. Generate or import a key before signing/decrypting.");
-        }
-
-        var slotMetadata = metadata.Value;
-        Logger.LogDebug("PIV: Auto-detected algorithm {Algorithm} for slot 0x{Slot:X2}", slotMetadata.Algorithm, (byte)slot);
-
-        return await SignOrDecryptCoreAsync(slot, slotMetadata.Algorithm, data, cancellationToken).ConfigureAwait(false);
-    }
-
-    private async Task<ReadOnlyMemory<byte>> SignOrDecryptCoreAsync(
+    private static async Task<ReadOnlyMemory<byte>> SignOrDecryptCoreAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
         PivSlot slot,
         PivAlgorithm algorithm,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken)
     {
-        Logger.LogDebug("PIV: Signing/decrypting with slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
-        EnsureProtocol();
-
-        // Notify user if touch may be required
-        await NotifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
+        logger.LogDebug("PIV: Signing/decrypting with slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
 
         // Prepare data according to algorithm key size
         var preparedData = PrepareDataForCrypto(algorithm, data);
@@ -150,7 +100,7 @@ public sealed partial class PivSession
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
             var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, commandData);
-            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -176,16 +126,20 @@ public sealed partial class PivSession
     }
 
     /// <inheritdoc/>
-    public async Task<ReadOnlyMemory<byte>> DecryptAsync(
+    internal static async Task<ReadOnlyMemory<byte>> DecryptAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        Func<PivSlot, CancellationToken, Task<PivSlotMetadata?>> getSlotMetadataAsync,
+        Func<PivSlot, CancellationToken, Task> notifyTouchIfRequiredAsync,
         PivSlot slot,
         ReadOnlyMemory<byte> cipherText,
         RSAEncryptionPadding padding,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(padding);
-        Logger.LogDebug("PIV: DecryptAsync slot 0x{Slot:X2}", (byte)slot);
+        logger.LogDebug("PIV: DecryptAsync slot 0x{Slot:X2}", (byte)slot);
 
-        var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
+        var metadata = await getSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
         if (metadata is null || !metadata.Value.Algorithm.IsRsa())
         {
             throw new ArgumentException(
@@ -210,7 +164,8 @@ public sealed partial class PivSession
         }
 
         // Perform the raw RSA private key operation on the YubiKey
-        var rawDecrypted = await SignOrDecryptCoreAsync(slot, algorithm, cipherText, cancellationToken).ConfigureAwait(false);
+        await notifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
+        var rawDecrypted = await SignOrDecryptCoreAsync(protocol, logger, slot, algorithm, cipherText, cancellationToken).ConfigureAwait(false);
 
         // Strip padding using a dummy RSA key — same technique as Python yubikey-manager's _unpad_message.
         // We generate a temporary RSA key of the same size, use textbook RSA (encrypt with public key)
@@ -298,16 +253,14 @@ public sealed partial class PivSession
     /// <param name="peerPublicKey">The peer's public key.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The shared secret (x-coordinate for NIST curves, point for Curve25519).</returns>
-    public async Task<ReadOnlyMemory<byte>> CalculateSecretAsync(
+    internal static async Task<ReadOnlyMemory<byte>> CalculateSecretAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
         PivSlot slot,
         IPublicKey peerPublicKey,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Calculating shared secret with slot 0x{Slot:X2}", (byte)slot);
-        EnsureProtocol();
-
-        // Notify user if touch may be required
-        await NotifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
+        logger.LogDebug("PIV: Calculating shared secret with slot 0x{Slot:X2}", (byte)slot);
 
         // Determine algorithm from public key
         var algorithm = peerPublicKey switch
@@ -355,7 +308,7 @@ public sealed partial class PivSession
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
             var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, data);
-            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -378,7 +331,7 @@ public sealed partial class PivSession
         }
     }
 
-    private byte[] PrepareDataForCrypto(PivAlgorithm algorithm, ReadOnlyMemory<byte> data)
+    private static byte[] PrepareDataForCrypto(PivAlgorithm algorithm, ReadOnlyMemory<byte> data)
     {
         int expectedLength = algorithm switch
         {
@@ -434,7 +387,7 @@ public sealed partial class PivSession
         }
     }
 
-    private ReadOnlyMemory<byte> ParseCryptoResponse(ReadOnlyMemory<byte> data)
+    private static ReadOnlyMemory<byte> ParseCryptoResponse(ReadOnlyMemory<byte> data)
     {
         // Parse outer TLV (0x7C - Dynamic Auth Template)
         using var outer = Tlv.Create(data.Span);
@@ -454,7 +407,7 @@ public sealed partial class PivSession
         return inner.Value.ToArray();
     }
 
-    private byte[] EncodePeerPublicKey(IPublicKey publicKey)
+    private static byte[] EncodePeerPublicKey(IPublicKey publicKey)
     {
         return publicKey switch
         {

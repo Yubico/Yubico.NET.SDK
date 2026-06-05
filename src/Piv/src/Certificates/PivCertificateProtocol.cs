@@ -17,12 +17,15 @@ using System.IO.Compression;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.Utils;
+using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Piv.DataObjects;
 
-namespace Yubico.YubiKit.Piv;
+namespace Yubico.YubiKit.Piv.Certificates;
 
-public sealed partial class PivSession
+#pragma warning disable CS1573 // Public XML docs live on PivSession/IPivSession; these are internal protocol helpers.
+
+internal static class PivCertificateProtocol
 {
     /// <summary>
     /// Gets the certificate stored in the specified slot.
@@ -30,18 +33,19 @@ public sealed partial class PivSession
     /// <param name="slot">The slot to read from.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The certificate, or null if the slot is empty.</returns>
-    public async Task<X509Certificate2?> GetCertificateAsync(
+    internal static async Task<X509Certificate2?> GetCertificateAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
         PivSlot slot,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Getting certificate from slot 0x{Slot:X2}", (byte)slot);
-        EnsureProtocol();
+        logger.LogDebug("PIV: Getting certificate from slot 0x{Slot:X2}", (byte)slot);
 
         // Get the object ID for this slot
         int objectId = GetCertificateObjectId(slot);
 
         // Read the data object
-        var certData = await GetObjectAsync(objectId, cancellationToken).ConfigureAwait(false);
+        var certData = await PivDataObjectProtocol.GetObjectAsync(protocol, objectId, cancellationToken).ConfigureAwait(false);
         
         if (certData.IsEmpty)
         {
@@ -87,16 +91,18 @@ public sealed partial class PivSession
     /// <param name="certificate">The certificate to store.</param>
     /// <param name="compress">Whether to compress the certificate (default: auto-compress if > 1856 bytes).</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
-    public async Task StoreCertificateAsync(
+    internal static async Task StoreCertificateAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        bool isAuthenticated,
         PivSlot slot,
         X509Certificate2 certificate,
         bool compress = false,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Storing certificate in slot 0x{Slot:X2}", (byte)slot);
-        EnsureProtocol();
+        logger.LogDebug("PIV: Storing certificate in slot 0x{Slot:X2}", (byte)slot);
 
-        if (!_isAuthenticated)
+        if (!isAuthenticated)
         {
             throw new InvalidOperationException("Management key authentication required to store certificates");
         }
@@ -138,29 +144,31 @@ public sealed partial class PivSession
 
         // Write to object
         int objectId = GetCertificateObjectId(slot);
-        await PutObjectAsync(objectId, writer.WrittenMemory, cancellationToken).ConfigureAwait(false);
+        await PivDataObjectProtocol.PutObjectAsync(protocol, isAuthenticated, objectId, writer.WrittenMemory, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
     /// Deletes the certificate from the specified slot.
     /// </summary>
-    public async Task DeleteCertificateAsync(
+    internal static async Task DeleteCertificateAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        bool isAuthenticated,
         PivSlot slot,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Deleting certificate from slot 0x{Slot:X2}", (byte)slot);
-        EnsureProtocol();
+        logger.LogDebug("PIV: Deleting certificate from slot 0x{Slot:X2}", (byte)slot);
 
-        if (!_isAuthenticated)
+        if (!isAuthenticated)
         {
             throw new InvalidOperationException("Management key authentication required to delete certificates");
         }
 
         int objectId = GetCertificateObjectId(slot);
-        await PutObjectAsync(objectId, null, cancellationToken).ConfigureAwait(false);
+        await PivDataObjectProtocol.PutObjectAsync(protocol, isAuthenticated, objectId, null, cancellationToken).ConfigureAwait(false);
     }
 
-    private int GetCertificateObjectId(PivSlot slot)
+    private static int GetCertificateObjectId(PivSlot slot)
     {
         return slot switch
         {

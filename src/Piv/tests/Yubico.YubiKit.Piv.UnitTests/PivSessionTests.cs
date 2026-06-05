@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Reflection;
 using NSubstitute;
+using System.Reflection;
+using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Interfaces;
@@ -29,17 +30,17 @@ public class PivSessionTests
     {
         var mockConnection = Substitute.For<ISmartCardConnection>();
         mockConnection.Transport.Returns(Transport.Usb);
-        
+
         // This will likely fail during actual PIV selection since it's a mock,
         // but it tests that the CreateAsync method exists and accepts the right parameters
-        var exception = await Record.ExceptionAsync(() => 
+        var exception = await Record.ExceptionAsync(() =>
             PivSession.CreateAsync(mockConnection, cancellationToken: TestContext.Current.CancellationToken));
-        
+
         // We expect this to fail with an ApduException since the mock doesn't implement real protocol
         Assert.NotNull(exception);
     }
 
-    [Fact] 
+    [Fact]
     public async Task CreateAsync_WithNullConnection_ThrowsArgumentNullException()
     {
         await Assert.ThrowsAsync<ArgumentNullException>(
@@ -51,9 +52,9 @@ public class PivSessionTests
     {
         var mockConnection = Substitute.For<ISmartCardConnection>();
         mockConnection.Transport.Returns(Transport.Usb);
-        
+
         var session = new PivSession(mockConnection, null);
-        
+
         Assert.NotNull(session);
         // Before initialization, session should not be initialized
         Assert.False(session.IsInitialized);
@@ -64,9 +65,9 @@ public class PivSessionTests
     {
         var mockConnection = Substitute.For<ISmartCardConnection>();
         mockConnection.Transport.Returns(Transport.Usb);
-        
+
         var session = new PivSession(mockConnection, null);
-        
+
         // Default management key type should be 3DES
         Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
     }
@@ -76,11 +77,11 @@ public class PivSessionTests
     {
         var mockConnection = Substitute.For<ISmartCardConnection>();
         mockConnection.Transport.Returns(Transport.Usb);
-        
+
         var session = new PivSession(mockConnection, null);
-        
+
         var exception = Record.Exception(() => session.Dispose());
-        
+
         Assert.Null(exception);
     }
 
@@ -122,5 +123,166 @@ public class PivSessionTests
 
         Assert.Contains("5.3", exception.Message);
         Assert.Contains("firmware", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task CreateAsync_TransmitsSelectVersionAndManagementMetadata()
+    {
+        var connection = new RecordingSmartCardConnection(
+            OkResponse(),
+            VersionResponse(),
+            ManagementKeyMetadataResponse());
+
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+        Assert.True(connection.TransmittedCommands.Count >= 3);
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xA4); // SELECT
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xFD); // GET VERSION
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xF7 && command[3] == 0x9B); // Management metadata
+    }
+
+    [Fact]
+    public async Task GetPinMetadataAsync_TransmitsGetMetadataForPinSlot()
+    {
+        var connection = CreateInitializedConnection(PinMetadataResponse());
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        var metadata = await session.GetPinMetadataAsync(TestContext.Current.CancellationToken);
+
+        Assert.True(metadata.IsDefault);
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xF7 && command[3] == 0x80);
+    }
+
+    [Fact]
+    public async Task GetManagementKeyMetadataAsync_TransmitsGetMetadataForManagementKeySlot()
+    {
+        var connection = CreateInitializedConnection(ManagementKeyMetadataResponse());
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        var metadata = await session.GetManagementKeyMetadataAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(PivManagementKeyType.TripleDes, metadata.KeyType);
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xF7 && command[3] == 0x9B);
+    }
+
+    [Fact]
+    public async Task GetSlotMetadataAsync_TransmitsGetMetadataForRequestedSlot()
+    {
+        var connection = CreateInitializedConnection([0x6A, 0x82]);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication, TestContext.Current.CancellationToken);
+
+        Assert.Null(metadata);
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xF7 && command[3] == (byte)PivSlot.Authentication);
+    }
+
+    [Fact]
+    public async Task GetObjectAsync_TransmitsGetDataWithObjectIdTlv()
+    {
+        var connection = CreateInitializedConnection([0x53, 0x01, 0xAA, 0x90, 0x00]);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        var data = await session.GetObjectAsync(0x5FC105, TestContext.Current.CancellationToken);
+
+        Assert.Equal([0xAA], data.ToArray());
+        Assert.Contains(connection.TransmittedCommands, command =>
+            command[1] == 0xCB &&
+            command[2] == 0x3F &&
+            command[3] == 0xFF &&
+            command.AsSpan().IndexOf((byte)0x5C) >= 0);
+    }
+
+    [Fact]
+    public async Task DecryptAsync_WithTouchPolicyAlways_NotifiesBeforePrivateKeyOperation()
+    {
+        var connection = CreateInitializedConnection(
+            Rsa1024TouchAlwaysMetadataResponse(),
+            Rsa1024TouchAlwaysMetadataResponse(),
+            [0x7C, 0x02, 0x82, 0x00, 0x90, 0x00]);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        var callbackCount = 0;
+        session.OnTouchRequired = () => callbackCount++;
+
+        var exception = await Record.ExceptionAsync(() => session.DecryptAsync(
+            PivSlot.Authentication,
+            new byte[128],
+            RSAEncryptionPadding.Pkcs1,
+            TestContext.Current.CancellationToken));
+
+        Assert.NotNull(exception);
+        Assert.Equal(1, callbackCount);
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == 0x87);
+    }
+
+    private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
+        new([OkResponse(), VersionResponse(), ManagementKeyMetadataResponse(), .. trailingResponses]);
+
+    private static byte[] OkResponse() => [0x90, 0x00];
+
+    private static byte[] VersionResponse() => [0x00, 0x00, 0x01, 0x90, 0x00];
+
+    private static byte[] ManagementKeyMetadataResponse() =>
+    [
+        0x01, 0x01, (byte)PivManagementKeyType.TripleDes,
+        0x02, 0x02, 0x00, (byte)PivTouchPolicy.Default,
+        0x05, 0x01, 0x01,
+        0x90, 0x00
+    ];
+
+    private static byte[] PinMetadataResponse() => [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x03, 0x90, 0x00];
+
+    private static byte[] Rsa1024TouchAlwaysMetadataResponse() =>
+    [
+        0x01, 0x01, (byte)PivAlgorithm.Rsa1024,
+        0x02, 0x02, (byte)PivPinPolicy.Default, (byte)PivTouchPolicy.Always,
+        0x03, 0x01, 0x01,
+        0x90, 0x00
+    ];
+
+    private sealed class RecordingSmartCardConnection(params byte[][] responses) : ISmartCardConnection
+    {
+        private readonly Queue<byte[]> _responses = new(responses);
+
+        public List<byte[]> TransmittedCommands { get; } = [];
+
+        public Transport Transport { get; } = Transport.Usb;
+
+        public ConnectionType Type { get; } = ConnectionType.SmartCard;
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+            ReadOnlyMemory<byte> command,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            TransmittedCommands.Add(command.ToArray());
+
+            if (_responses.Count == 0)
+            {
+                throw new InvalidOperationException("No response enqueued for transmission.");
+            }
+
+            return Task.FromResult((ReadOnlyMemory<byte>)_responses.Dequeue());
+        }
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) => NullDisposable.Instance;
+
+        public bool SupportsExtendedApdu() => false;
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => default;
+    }
+
+    private sealed class NullDisposable : IDisposable
+    {
+        public static NullDisposable Instance { get; } = new();
+
+        public void Dispose()
+        {
+        }
     }
 }

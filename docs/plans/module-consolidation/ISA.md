@@ -52,6 +52,8 @@ Run consolidation on the dedicated `yubikit-consolidation` branch as a sequence 
 - `ISC-11`: Every completed or aborted phase produces and commits a learning note before the next phase begins.
 - `ISC-12`: Every phase produces a compact summary before the next phase begins.
 - `ISC-13`: Every successful phase sends `/Ping` after the phase commit and compact summary are complete.
+- `ISC-14`: Every phase records deferred future improvement candidates separately from phase-scope work, so possible end-of-program refinements are preserved without interrupting sequential module consolidation.
+- `ISC-15`: Remaining module refactor phases capture pre-refactor and post-refactor integration-test baselines, excluding tests that require User Presence, UV, physical touch, insert/remove coordination, or human-only hardware interaction.
 - `Anti-1`: A phase proceeds to the next phase without a learning note and commit.
 - `Anti-1.1`: Refactor implementation, verification, or delegation occurs on any branch other than `yubikit-consolidation`.
 - `Anti-2`: A refactor makes protocol flow harder to inspect in pursuit of DRY.
@@ -154,6 +156,36 @@ A single-vendor phase is not considered fully reviewed unless the human explicit
 
 If two consecutive phases require cross-vendor review waivers for the same tooling reason, stop before the next implementation phase and ask for a program-level decision: fix routing, accept a temporary single-vendor program mode, or pause consolidation.
 
+### 4.1 Deferred Future Improvements
+
+Each phase may discover improvements that are real but not appropriate for the approved phase scope. These are not failures and should not cause local scope creep.
+
+Record deferred improvement candidates when review, verification, Cato, DevTeam, or implementation reveals:
+
+- a more elegant Core/module boundary that would require a broader phase
+- a possible shared abstraction that needs more module evidence
+- a latent protocol or SCP concern outside the current applet scope
+- a naming/API polish opportunity that is not worth churn during the phase
+- a useful hardware or integration test that requires human-coordinated state
+
+Deferred candidates must be captured in the phase learning note with:
+
+- title
+- source phase
+- rationale
+- why it is deferred
+- likely owning area (`Core`, `Tests.Shared`, `Cli.Shared`, module, docs, or tooling)
+- suggested timing, usually "after all module refactors" unless urgent
+- whether it needs human approval, hardware coordination, or Cato review
+
+If a deferred candidate is substantial enough to guide future work, save a follow-up plan under:
+
+```text
+docs/plans/module-consolidation/follow-up-<slug>.md
+```
+
+These candidates are worked through after all planned module refactor phases complete, unless the human explicitly promotes one into an earlier approved phase.
+
 ### 5. Verification
 
 Each phase runs focused verification only:
@@ -161,12 +193,15 @@ Each phase runs focused verification only:
 - branch check before verification
 - focused build for affected project(s)
 - focused unit tests
+- pre-refactor and post-refactor integration baselines for remaining module phases, excluding User Presence / UV / touch / insert-remove tests
 - scoped read-only integration tests when feasible
 - no broad full-suite runs unless phase scope requires it
 
 Use repository toolchain commands. Never use raw `dotnet build` or raw `dotnet test`.
 
 Each phase ISA must name the exact focused command shapes before implementation starts. Record command text, project/filter arguments, exit result, and any output path in the phase learning note.
+
+For remaining module refactor phases, integration baseline comparison is required unless the module has no integration project or the available tests require User Presence, UV, touch, insert/remove coordination, or human-only hardware interaction. When integration baseline is skipped or filtered, the phase learning note must record the excluded test classes or categories and the rationale.
 
 Default command shapes:
 
@@ -262,6 +297,7 @@ After each committed phase, produce a compact continuation payload:
 - Tests passed:
 - Integration lifecycle:
 - Shared/Core candidates:
+- Deferred future improvements:
 - House-style update needed:
 - Next phase recommendation:
 - Learning note path:
@@ -344,9 +380,11 @@ A phase is not complete until:
 - [ ] Cross-vendor review complete or human-approved waiver recorded.
 - [ ] Focused build passes.
 - [ ] Focused unit tests pass.
+- [ ] Pre-refactor and post-refactor integration baselines match or improve, excluding approved User Presence / UV / touch / insert-remove tests.
 - [ ] Scoped integration tests pass, or skip rationale approved.
 - [ ] Verification command text, filters, and results are recorded.
 - [ ] Promotion candidates are accepted, rejected, or deferred with rationale.
+- [ ] Deferred future improvement candidates are recorded in the learning note or explicitly marked none.
 - [ ] Learning document updated.
 - [ ] Compact summary produced.
 - [ ] Commit created.
@@ -485,7 +523,7 @@ Targets:
 - fake APDU tests
 - reset/auth test helper opportunities
 
-Preserve partial-session readability.
+Preserve one public `PivSession` facade while moving protocol-heavy areas into shallow feature namespaces.
 
 ### Phase 5: SecurityDomain Locality Cleanup
 
@@ -530,6 +568,20 @@ Targets:
 - accumulated phase learning notes that no longer match final source reality
 
 Only run after source patterns settle.
+
+### Final Follow-Up Improvement Pass
+
+Run after all planned module refactor phases complete, unless the human explicitly promotes a deferred candidate earlier.
+
+Targets:
+
+- review all deferred future improvement candidates from phase learning notes
+- review all `docs/plans/module-consolidation/follow-up-*.md` plans
+- classify each candidate as implement now, merge into docs, defer to a new program, or reject
+- prioritize high-leverage Core/SCP, shared test harness, CLI, naming/API, and documentation cleanups
+- run Cato or equivalent review on any broad architectural follow-up before source changes
+
+This pass exists to preserve zen/elegance opportunities without letting them expand the scope of individual module phases.
 
 ## Next Phase Input Rule
 

@@ -13,14 +13,15 @@
 // limitations under the License.
 
 using System.Buffers;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.Utils;
 
-namespace Yubico.YubiKit.Piv;
+namespace Yubico.YubiKit.Piv.DataObjects;
 
-public sealed partial class PivSession
+#pragma warning disable CS1573 // Public XML docs live on PivSession/IPivSession; these are internal protocol helpers.
+
+internal static class PivDataObjectProtocol
 {
     /// <summary>
     /// Reads a PIV data object.
@@ -28,16 +29,14 @@ public sealed partial class PivSession
     /// <param name="objectId">The object ID (e.g., from <see cref="PivDataObject"/>).</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The object data, or empty if the object doesn't exist.</returns>
-    public async Task<ReadOnlyMemory<byte>> GetObjectAsync(
+    internal static async Task<ReadOnlyMemory<byte>> GetObjectAsync(
+        ISmartCardProtocol protocol,
         int objectId,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Getting data object 0x{ObjectId:X6}", objectId);
-        EnsureProtocol();
-
         // INS 0xCB (GET DATA)
         var command = new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, EncodeObjectId(objectId));
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (response.SW == 0x6A82) // File not found
         {
@@ -83,15 +82,14 @@ public sealed partial class PivSession
     /// <param name="objectId">The object ID.</param>
     /// <param name="data">The data to write, or null to delete the object.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
-    public async Task PutObjectAsync(
+    internal static async Task PutObjectAsync(
+        ISmartCardProtocol protocol,
+        bool isAuthenticated,
         int objectId,
         ReadOnlyMemory<byte>? data,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Putting data object 0x{ObjectId:X6}", objectId);
-        EnsureProtocol();
-
-        if (!_isAuthenticated)
+        if (!isAuthenticated)
         {
             throw new InvalidOperationException("Management key authentication required to write data objects");
         }
@@ -124,7 +122,7 @@ public sealed partial class PivSession
 
         // INS 0xDB (PUT DATA)
         var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, writer.WrittenMemory);
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {

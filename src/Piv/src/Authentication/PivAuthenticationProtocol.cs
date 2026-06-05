@@ -21,9 +21,11 @@ using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.Utils;
 
-namespace Yubico.YubiKit.Piv;
+namespace Yubico.YubiKit.Piv.Authentication;
 
-public sealed partial class PivSession
+#pragma warning disable CS1573 // Public XML docs live on PivSession/IPivSession; these are internal protocol helpers.
+
+internal static class PivAuthenticationProtocol
 {
     /// <summary>
     /// Gets the factory default PIV management key (3DES).
@@ -47,20 +49,12 @@ public sealed partial class PivSession
     /// await session.ChangeManagementKeyAsync(newKey);
     /// </code>
     /// </example>
-    public static ReadOnlySpan<byte> DefaultManagementKey =>
+    internal static ReadOnlySpan<byte> DefaultManagementKey =>
     [
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     ];
-
-    private bool _isAuthenticated;
-
-    /// <summary>
-    /// Gets whether the session has been authenticated with the management key.
-    /// </summary>
-    // TODO Disambiguate with IsAuthenticated
-    public new bool IsAuthenticated => _isAuthenticated;
 
     /// <summary>
     /// Authenticates the session using the PIV management key.
@@ -78,33 +72,37 @@ public sealed partial class PivSession
     /// Default management key (3DES): 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08
     /// </para>
     /// </remarks>
-    public async Task AuthenticateAsync(ReadOnlyMemory<byte> managementKey, CancellationToken cancellationToken = default)
+    internal static async Task AuthenticateAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        PivManagementKeyType managementKeyType,
+        ReadOnlyMemory<byte> managementKey,
+        CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Starting management key authentication with {KeyType}", ManagementKeyType);
-        EnsureProtocol();
+        logger.LogDebug("PIV: Starting management key authentication with {KeyType}", managementKeyType);
 
         // Validate key length based on management key type
-        int expectedKeyLength = ManagementKeyType switch
+        int expectedKeyLength = managementKeyType switch
         {
             PivManagementKeyType.TripleDes => 24,
             PivManagementKeyType.Aes128 => 16,
             PivManagementKeyType.Aes192 => 24,
             PivManagementKeyType.Aes256 => 32,
-            _ => throw new ArgumentException($"Unsupported management key type: {ManagementKeyType}")
+            _ => throw new ArgumentException($"Unsupported management key type: {managementKeyType}")
         };
 
         if (managementKey.Length != expectedKeyLength)
         {
             throw new ArgumentException(
-                $"Invalid management key length: {managementKey.Length}. Expected {expectedKeyLength} bytes for {ManagementKeyType}.",
+                $"Invalid management key length: {managementKey.Length}. Expected {expectedKeyLength} bytes for {managementKeyType}.",
                 nameof(managementKey));
         }
 
         // Challenge length: 8 bytes for 3DES, 16 bytes for AES
-        int challengeLength = ManagementKeyType == PivManagementKeyType.TripleDes ? 8 : 16;
+        int challengeLength = managementKeyType == PivManagementKeyType.TripleDes ? 8 : 16;
         
         // Algorithm code for P1
-        byte algorithmCode = (byte)ManagementKeyType;
+        byte algorithmCode = (byte)managementKeyType;
         
         const byte InsAuthenticate = 0x87;
         const byte SlotCardManagement = 0x9B;
@@ -120,7 +118,7 @@ public sealed partial class PivSession
             // Send: 7C 02 80 00 (empty witness request)
             byte[] witnessRequest = [TagDynAuth, 0x02, TagAuthWitness, 0x00];
             var witnessCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, witnessRequest);
-            var witnessResponse = await _protocol.TransmitAndReceiveAsync(witnessCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var witnessResponse = await protocol.TransmitAndReceiveAsync(witnessCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
             
             if (!witnessResponse.IsOK())
             {
@@ -139,7 +137,7 @@ public sealed partial class PivSession
             try
             {
                 decryptedWitness = ArrayPool<byte>.Shared.Rent(challengeLength);
-                DecryptBlock(keyBytes.AsSpan(0, expectedKeyLength), witnessBytes, decryptedWitness.AsSpan(0, challengeLength), ManagementKeyType);
+                DecryptBlock(keyBytes.AsSpan(0, expectedKeyLength), witnessBytes, decryptedWitness.AsSpan(0, challengeLength), managementKeyType);
 
                 // Step 3: Generate our challenge
                 challenge = ArrayPool<byte>.Shared.Rent(challengeLength);
@@ -152,7 +150,7 @@ public sealed partial class PivSession
                 responseBuffer = ArrayPool<byte>.Shared.Rent(responseSize);
                 int bytesWritten = BuildAuthResponse(decryptedWitness.AsSpan(0, challengeLength), challenge.AsSpan(0, challengeLength), responseBuffer.AsSpan(0, responseSize));
                 var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseBuffer.AsMemory(0, bytesWritten));
-                var challengeResponse = await _protocol.TransmitAndReceiveAsync(challengeCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+                var challengeResponse = await protocol.TransmitAndReceiveAsync(challengeCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
             
                 if (!challengeResponse.IsOK())
                 {
@@ -165,15 +163,14 @@ public sealed partial class PivSession
 
                 // Encrypt our challenge and compare
                 expectedResponse = ArrayPool<byte>.Shared.Rent(challengeLength);
-                EncryptBlock(keyBytes.AsSpan(0, expectedKeyLength), challenge.AsSpan(0, challengeLength), expectedResponse.AsSpan(0, challengeLength), ManagementKeyType);
+                EncryptBlock(keyBytes.AsSpan(0, expectedKeyLength), challenge.AsSpan(0, challengeLength), expectedResponse.AsSpan(0, challengeLength), managementKeyType);
 
                 if (!CryptographicOperations.FixedTimeEquals(encryptedChallenge, expectedResponse.AsSpan(0, challengeLength)))
                 {
                     throw new ApduException("Management key authentication failed - device response mismatch");
                 }
 
-                _isAuthenticated = true;
-                Logger.LogDebug("PIV: Management key authentication succeeded");
+                logger.LogDebug("PIV: Management key authentication succeeded");
             }
             finally
             {
@@ -446,10 +443,13 @@ public sealed partial class PivSession
     /// Default PIN: 123456
     /// </para>
     /// </remarks>
-    public async Task VerifyPinAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default)
+    internal static async Task VerifyPinAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        ReadOnlyMemory<byte> pin,
+        CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Verifying PIN");
-        EnsureProtocol();
+        logger.LogDebug("PIV: Verifying PIN");
 
         if (pin.Length is < 6 or > 8)
         {
@@ -464,11 +464,11 @@ public sealed partial class PivSession
             Array.Fill(paddedPin, (byte)0xFF, pin.Length, 8 - pin.Length);
 
             var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, paddedPin.AsMemory(0, 8));
-            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (response.IsOK())
             {
-                Logger.LogDebug("PIV: PIN verification succeeded");
+                logger.LogDebug("PIV: PIN verification succeeded");
                 return;
             }
 
@@ -500,28 +500,32 @@ public sealed partial class PivSession
     /// <remarks>
     /// This method performs an empty PIN verify as fallback for older firmware.
     /// </remarks>
-    public async Task<int> GetPinAttemptsAsync(CancellationToken cancellationToken = default)
+    internal static async Task<int> GetPinAttemptsAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        bool metadataSupported,
+        Func<CancellationToken, Task<PivPinMetadata>> getPinMetadataAsync,
+        CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Getting PIN attempt count");
-        EnsureProtocol();
+        logger.LogDebug("PIV: Getting PIN attempt count");
 
         // Try metadata approach first if supported
-        if (IsSupported(PivFeatures.Metadata))
+        if (metadataSupported)
         {
             try
             {
-                var metadata = await GetPinMetadataAsync(cancellationToken).ConfigureAwait(false);
+                var metadata = await getPinMetadataAsync(cancellationToken).ConfigureAwait(false);
                 return metadata.RetriesRemaining;
             }
             catch (Exception ex)
             {
-                Logger.LogDebug(ex, "PIV: Metadata approach failed, falling back to empty verify");
+                logger.LogDebug(ex, "PIV: Metadata approach failed, falling back to empty verify");
             }
         }
 
         // Fallback: empty PIN verify to get retry count
         var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
         {
@@ -549,10 +553,14 @@ public sealed partial class PivSession
     /// <remarks>
     /// Both PINs are automatically zeroed after use for security.
     /// </remarks>
-    public async Task ChangePinAsync(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
+    internal static async Task ChangePinAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        ReadOnlyMemory<byte> currentPin,
+        ReadOnlyMemory<byte> newPin,
+        CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Changing PIN");
-        EnsureProtocol();
+        logger.LogDebug("PIV: Changing PIN");
 
         if (currentPin.Length is < 6 or > 8)
         {
@@ -575,11 +583,11 @@ public sealed partial class PivSession
             Array.Fill(pinData, (byte)0xFF, 8 + newPin.Length, 8 - newPin.Length);
 
             var command = new ApduCommand(0x00, 0x24, 0x00, 0x80, pinData.AsMemory(0, 16));
-            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (response.IsOK())
             {
-                Logger.LogDebug("PIV: PIN change succeeded");
+                logger.LogDebug("PIV: PIN change succeeded");
                 return;
             }
 

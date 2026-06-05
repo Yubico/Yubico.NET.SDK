@@ -22,9 +22,11 @@ using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 
-namespace Yubico.YubiKit.Piv;
+namespace Yubico.YubiKit.Piv.Keys;
 
-public sealed partial class PivSession
+#pragma warning disable CS1573 // Public XML docs live on PivSession/IPivSession; these are internal protocol helpers.
+
+internal static class PivKeyProtocol
 {
     /// <summary>
     /// Generates a new key pair in the specified slot.
@@ -37,17 +39,19 @@ public sealed partial class PivSession
     /// <returns>The generated public key.</returns>
     /// <exception cref="InvalidOperationException">If session is not authenticated.</exception>
     /// <exception cref="NotSupportedException">If the algorithm is not supported on this firmware version.</exception>
-    public async Task<IPublicKey> GenerateKeyAsync(
+    internal static async Task<IPublicKey> GenerateKeyAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        bool isAuthenticated,
         PivSlot slot,
         PivAlgorithm algorithm,
         PivPinPolicy pinPolicy = PivPinPolicy.Default,
         PivTouchPolicy touchPolicy = PivTouchPolicy.Default,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Generating key in slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
-        EnsureProtocol();
+        logger.LogDebug("PIV: Generating key in slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
 
-        if (!_isAuthenticated)
+        if (!isAuthenticated)
         {
             throw new InvalidOperationException("Management key authentication required to generate keys");
         }
@@ -97,7 +101,7 @@ public sealed partial class PivSession
             }
 
             var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, data);
-            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -124,7 +128,10 @@ public sealed partial class PivSession
     /// <returns>The algorithm of the imported key.</returns>
     /// <exception cref="InvalidOperationException">If session is not authenticated.</exception>
     /// <exception cref="NotSupportedException">If the key type is not supported.</exception>
-    public async Task<PivAlgorithm> ImportKeyAsync(
+    internal static async Task<PivAlgorithm> ImportKeyAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        bool isAuthenticated,
         PivSlot slot,
         IPrivateKey privateKey,
         PivPinPolicy pinPolicy = PivPinPolicy.Default,
@@ -133,10 +140,9 @@ public sealed partial class PivSession
     {
         ArgumentNullException.ThrowIfNull(privateKey);
 
-        Logger.LogDebug("PIV: Importing key into slot 0x{Slot:X2}, key type {KeyType}", (byte)slot, privateKey.KeyType);
-        EnsureProtocol();
+        logger.LogDebug("PIV: Importing key into slot 0x{Slot:X2}, key type {KeyType}", (byte)slot, privateKey.KeyType);
 
-        if (!_isAuthenticated)
+        if (!isAuthenticated)
         {
             throw new InvalidOperationException("Management key authentication required to import keys");
         }
@@ -183,14 +189,14 @@ public sealed partial class PivSession
 
             // Send IMPORT KEY command: INS 0xFE, P1 = algorithm, P2 = slot
             var command = new ApduCommand(0x00, 0xFE, (byte)algorithm, (byte)slot, keyData);
-            var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
                 throw ApduException.FromStatusWord(response.SW, $"Key import failed for slot 0x{(byte)slot:X2}");
             }
 
-            Logger.LogDebug("PIV: Key imported successfully into slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
+            logger.LogDebug("PIV: Key imported successfully into slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
             return algorithm;
         }
         finally
@@ -301,16 +307,18 @@ public sealed partial class PivSession
     /// <param name="destinationSlot">The slot where the key should be moved.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <exception cref="NotSupportedException">If firmware version is less than 5.7.0.</exception>
-    public async Task MoveKeyAsync(
+    internal static async Task MoveKeyAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        bool isAuthenticated,
         PivSlot sourceSlot,
         PivSlot destinationSlot,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Moving key from slot 0x{Source:X2} to slot 0x{Dest:X2}",
+        logger.LogDebug("PIV: Moving key from slot 0x{Source:X2} to slot 0x{Dest:X2}",
             (byte)sourceSlot, (byte)destinationSlot);
-        EnsureProtocol();
 
-        if (!_isAuthenticated)
+        if (!isAuthenticated)
         {
             throw new InvalidOperationException("Management key authentication required to move keys");
         }
@@ -325,7 +333,7 @@ public sealed partial class PivSession
 
         // INS 0xF6, P1 = destination slot, P2 = source slot, NO DATA
         var command = new ApduCommand(0x00, 0xF6, (byte)destinationSlot, (byte)sourceSlot);
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -337,14 +345,16 @@ public sealed partial class PivSession
     /// <summary>
     /// Deletes a key from the specified slot.
     /// </summary>
-    public async Task DeleteKeyAsync(
+    internal static async Task DeleteKeyAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
+        bool isAuthenticated,
         PivSlot slot,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Deleting key from slot 0x{Slot:X2}", (byte)slot);
-        EnsureProtocol();
+        logger.LogDebug("PIV: Deleting key from slot 0x{Slot:X2}", (byte)slot);
 
-        if (!_isAuthenticated)
+        if (!isAuthenticated)
         {
             throw new InvalidOperationException("Management key authentication required to delete keys");
         }
@@ -354,7 +364,7 @@ public sealed partial class PivSession
 
         // INS 0xF6, P1 = 0xFF (delete), P2 = slot to delete, NO DATA
         var command = new ApduCommand(0x00, 0xF6, 0xFF, (byte)slot);
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -366,12 +376,13 @@ public sealed partial class PivSession
     /// <summary>
     /// Generates an attestation certificate for a key in the specified slot.
     /// </summary>
-    public async Task<X509Certificate2> AttestKeyAsync(
+    internal static async Task<X509Certificate2> AttestKeyAsync(
+        ISmartCardProtocol protocol,
+        ILogger logger,
         PivSlot slot,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Attesting key in slot 0x{Slot:X2}", (byte)slot);
-        EnsureProtocol();
+        logger.LogDebug("PIV: Attesting key in slot 0x{Slot:X2}", (byte)slot);
 
         // Key attestation is supported on firmware 4.3.0+. Rather than check version (which uses PIV app
         // version, not firmware version), we try the command and let it fail with appropriate SW.
@@ -379,7 +390,7 @@ public sealed partial class PivSession
         // INS 0xF9 (ATTEST), P1 = slot, P2 = 0, NO DATA, no explicit Le
         // The formatter adds a trailing 00 byte for Case 1 commands (no data, no Le)
         var command = new ApduCommand(0x00, 0xF9, (byte)slot, 0x00);
-        var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -393,7 +404,7 @@ public sealed partial class PivSession
 #pragma warning restore SYSLIB0057
     }
 
-    private IPublicKey ParsePublicKey(ReadOnlyMemory<byte> data, PivAlgorithm algorithm)
+    private static IPublicKey ParsePublicKey(ReadOnlyMemory<byte> data, PivAlgorithm algorithm)
     {
         // Parse 0x7F49 (Public key template) - Tlv handles 2-byte tags
         using var template = Tlv.Create(data.Span);
@@ -415,7 +426,7 @@ public sealed partial class PivSession
         };
     }
 
-    private IPublicKey ParseEccPublicKey(ReadOnlySpan<byte> data, PivAlgorithm algorithm)
+    private static IPublicKey ParseEccPublicKey(ReadOnlySpan<byte> data, PivAlgorithm algorithm)
     {
         // ECC public key format: TAG 0x86 (EC point)
         if (data.Length < 2 || data[0] != 0x86)
@@ -447,7 +458,7 @@ public sealed partial class PivSession
         return ECPublicKey.CreateFromParameters(parameters);
     }
 
-    private IPublicKey ParseCurve25519PublicKey(ReadOnlySpan<byte> data, PivAlgorithm algorithm)
+    private static IPublicKey ParseCurve25519PublicKey(ReadOnlySpan<byte> data, PivAlgorithm algorithm)
     {
         // Curve25519 public key format: TAG 0x86 (point)
         if (data.Length < 2 || data[0] != 0x86)
@@ -465,7 +476,7 @@ public sealed partial class PivSession
         return Curve25519PublicKey.CreateFromValue(point.ToArray(), keyType);
     }
 
-    private IPublicKey ParseRsaPublicKey(ReadOnlySpan<byte> data)
+    private static IPublicKey ParseRsaPublicKey(ReadOnlySpan<byte> data)
     {
         // RSA public key format: TAG 0x81 (modulus) + TAG 0x82 (public exponent)
         var tlvDict = TlvHelper.DecodeDictionary(data);

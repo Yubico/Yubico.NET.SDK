@@ -2,6 +2,8 @@
 
 **CRITICAL: Read this before running any tests.**
 
+Canonical platform findings and simplification direction: [Testing Platform Findings](TESTING_PLATFORM_FINDINGS.md).
+
 ## The #1 Rule
 
 **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**

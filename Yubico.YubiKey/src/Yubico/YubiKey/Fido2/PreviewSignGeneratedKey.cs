@@ -22,18 +22,12 @@ namespace Yubico.YubiKey.Fido2
     /// previewSign extension registration.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// WARNING: This code is for testing purposes only and is not intended to be a
-    /// secure or complete implementation of ARKG.
-    /// </para>
-    /// <para>
     /// This corresponds to the <c>AuthenticationExtensionsSignGeneratedKey</c>
     /// output defined by the
     /// <see href="https://yubicolabs.github.io/webauthn-sign-extension/4/#dictdef-authenticationextensionssigngeneratedkey">
     /// previewSign extension specification</see>. The generated signing key is
     /// represented by an embedded attestation object whose attested credential
     /// data contains the signing key handle and public key.
-    /// </para>
     /// </remarks>
     public sealed class PreviewSignGeneratedKey
     {

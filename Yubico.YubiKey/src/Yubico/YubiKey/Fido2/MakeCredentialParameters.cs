@@ -731,14 +731,10 @@ namespace Yubico.YubiKey.Fido2
         /// to sign arbitrary data.
         /// </summary>
         /// <remarks>
-        /// WARNING: This code is for testing purposes only and is not intended to be a
-        /// secure or complete implementation of ARKG.
-        /// <para>
         /// The caller supplies the <see cref="AuthenticatorInfo"/> for the YubiKey,
         /// obtained by calling the <see cref="Commands.GetInfoCommand"/> or
         /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
         /// This method verifies that the YubiKey supports the previewSign extension.
-        /// </para>
         /// </remarks>
         /// <param name="authenticatorInfo">
         /// The FIDO2 <see cref="AuthenticatorInfo"/> for the YubiKey being used.

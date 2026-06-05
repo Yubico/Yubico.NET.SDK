@@ -21,13 +21,13 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// <summary>
     /// Represents a derived public key produced by ARKG-P256 derivation.
     /// </summary>
-        /// <remarks>
-        /// <para>
-        /// WARNING: This code is for testing purposes only and is not intended to be a
-        /// secure or complete implementation of ARKG.
-        /// </para>
-        /// <para>
-        /// This class contains the derived public key and handles needed for the
+    /// <remarks>
+    /// <para>
+    /// WARNING: This code is for testing purposes only and is not intended to be a
+    /// secure or complete implementation of ARKG.
+    /// </para>
+    /// <para>
+    /// This class contains the derived public key and handles needed for the
     /// ESP256-split-ARKG previewSign test-helper path. Instances are obtained
     /// by calling <see cref="PreviewSignGeneratedKeyExtensions.DerivePublicKey(PreviewSignGeneratedKey, byte[], byte[])"/> with
     /// application-provided input keying material and a context string.

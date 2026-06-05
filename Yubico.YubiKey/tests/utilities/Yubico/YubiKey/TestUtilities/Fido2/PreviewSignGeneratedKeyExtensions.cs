@@ -26,12 +26,12 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// RP-side verification functionality for the ESP256-split-ARKG test path.
     /// </summary>
     /// <remarks>
-        /// <para>
-        /// WARNING: This code is for testing purposes only and is not intended to be a
-        /// secure or complete implementation of ARKG.
-        /// </para>
-        /// <para>
-        /// These methods enable Relying Party (RP) side public key derivation and
+    /// <para>
+    /// WARNING: This code is for testing purposes only and is not intended to be a
+    /// secure or complete implementation of ARKG.
+    /// </para>
+    /// <para>
+    /// These methods enable Relying Party (RP) side public key derivation and
     /// signature verification for generated ARKG-P256 previewSign keys. These are
     /// test/verification utilities and not part of the authenticator-side SDK surface.
     /// </para>

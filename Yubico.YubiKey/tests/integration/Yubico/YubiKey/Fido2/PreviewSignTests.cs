@@ -27,12 +27,12 @@ namespace Yubico.YubiKey.Fido2
     /// <summary>
     /// Integration tests for the previewSign extension.
     /// </summary>
-        /// <remarks>
-        /// These tests require a physical YubiKey with previewSign support (5.8.0-beta or newer).
-        /// They will be skipped if no suitable device is found.
-        /// WARNING: This code is for testing purposes only and is not intended to be a
-        /// secure or complete implementation of ARKG.
-        /// </remarks>
+    /// <remarks>
+    /// These tests require a physical YubiKey with previewSign support (5.8.0-beta or newer).
+    /// They will be skipped if no suitable device is found.
+    /// WARNING: This code is for testing purposes only and is not intended to be a
+    /// secure or complete implementation of ARKG.
+    /// </remarks>
     public class PreviewSignTests : FidoSessionIntegrationTestBase
     {
         // Defeat the macOS YubiKeyDeviceListener startup race before the

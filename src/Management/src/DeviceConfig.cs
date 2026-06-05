@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Collections.ObjectModel;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Utils;
 
@@ -100,15 +101,23 @@ public sealed record DeviceConfig
             values.Add(TagNfcRestricted, [NfcRestricted.Value ? (byte)0x01 : (byte)0x00]);
 
         var tlvData = TlvHelper.EncodeDictionary(values);
-        if (tlvData.Length > 0xFF)
-            throw new InvalidOperationException("DeviceConfig exceeds maximum size (255 bytes)");
+        try
+        {
+            if (tlvData.Length > 0xFF)
+                throw new InvalidOperationException("DeviceConfig exceeds maximum size (255 bytes)");
 
-        // Prepend length byte
-        Memory<byte> result = new byte[tlvData.Length + 1];
-        result.Span[0] = (byte)tlvData.Length;
-        tlvData.Span.CopyTo(result.Span[1..]);
+            // Prepend length byte
+            Memory<byte> result = new byte[tlvData.Length + 1];
+            result.Span[0] = (byte)tlvData.Length;
+            tlvData.Span.CopyTo(result.Span[1..]);
 
-        return result;
+            return result;
+        }
+        finally
+        {
+            if (!tlvData.IsEmpty)
+                CryptographicOperations.ZeroMemory(tlvData.Span);
+        }
     }
 
 

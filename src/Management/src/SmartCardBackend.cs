@@ -44,10 +44,8 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
         return response.Data.ToArray();
     }
 
-    public async ValueTask WriteConfigAsync(byte[] config, CancellationToken cancellationToken)
+    public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(config);
-
         var apdu = new ApduCommand
         {
             Cla = 0,

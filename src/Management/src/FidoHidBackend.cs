@@ -37,10 +37,8 @@ internal sealed class FidoHidBackend(IFidoHidProtocol hidProtocol) : IManagement
         return response.ToArray();
     }
 
-    public async ValueTask WriteConfigAsync(byte[] config, CancellationToken cancellationToken)
+    public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(config);
-
         await _hidProtocol.SendVendorCommandAsync(CtapWriteConfig, config, cancellationToken)
             .ConfigureAwait(false);
     }

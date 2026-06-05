@@ -33,7 +33,7 @@ internal interface IManagementBackend : IDisposable
     /// </summary>
     /// <param name="config">TLV-encoded configuration data.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    ValueTask WriteConfigAsync(byte[] config, CancellationToken cancellationToken);
+    ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken);
 
     /// <summary>
     /// Set device mode (legacy operation for older YubiKeys).

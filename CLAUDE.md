@@ -133,6 +133,8 @@ dotnet toolchain.cs pack --include-docs
 
 ## Architecture
 
+**House style:** `docs/SDK-HOUSE-STYLE.md` is the v2 architectural style guide. Load it before module consolidation, refactoring, or protocol-flow work. It defines flat protocol flow, minimal helper depth, plain `ApduCommand`/DTO usage, and the rule against operation-specific command classes like `AuthenticateCommand`, `PutKeyCommand`, and `GetDataCommand`.
+
 `codemapper .` generates the full surface map. The non-obvious patterns:
 
 - **Device discovery** — `IDeviceRepository` + `DeviceMonitorService` (hosted) + `DeviceListenerService` (background). Events flow as `IObservable<DeviceEvent>` via System.Reactive.

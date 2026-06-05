@@ -32,8 +32,8 @@ internal sealed class OtpBackend(IOtpHidProtocol otpProtocol) : IManagementBacke
         // For page > 0, send single byte with page number
         var pagePayload = page == 0 ? ReadOnlyMemory<byte>.Empty : new byte[] { (byte)page };
         var response = await _otpProtocol.SendAndReceiveAsync(
-                OtpConstants.CmdYk4Capabilities, 
-                pagePayload, 
+                OtpConstants.CmdYk4Capabilities,
+                pagePayload,
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -56,13 +56,11 @@ internal sealed class OtpBackend(IOtpHidProtocol otpProtocol) : IManagementBacke
         return response[..(response.Span[0] + 1)].ToArray();
     }
 
-    public async ValueTask WriteConfigAsync(byte[] config, CancellationToken cancellationToken)
+    public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(config);
-
         await _otpProtocol.SendAndReceiveAsync(
-                OtpConstants.CmdYk4SetDeviceInfo, 
-                config, 
+                OtpConstants.CmdYk4SetDeviceInfo,
+                config,
                 cancellationToken)
             .ConfigureAwait(false);
     }
@@ -72,8 +70,8 @@ internal sealed class OtpBackend(IOtpHidProtocol otpProtocol) : IManagementBacke
         ArgumentNullException.ThrowIfNull(data);
 
         await _otpProtocol.SendAndReceiveAsync(
-                OtpConstants.CmdDeviceConfig, 
-                data, 
+                OtpConstants.CmdDeviceConfig,
+                data,
                 cancellationToken)
             .ConfigureAwait(false);
     }

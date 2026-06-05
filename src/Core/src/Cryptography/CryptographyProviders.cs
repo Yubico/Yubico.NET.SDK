@@ -315,6 +315,33 @@ namespace Yubico.YubiKit.Core.Cryptography
         // /// </remarks>
         // public static Func<IAesGcmPrimitives> AesGcmPrimitivesCreator { get; set; } = AesGcmPrimitives.Create;
 
+        /// <summary>
+        /// This property is a delegate (function pointer). The method loaded
+        /// will return an instance of ARKG-P256 cryptographic primitives.
+        /// </summary>
+        /// <remarks>
+        /// When an SDK operation needs to perform ARKG-P256 cryptographic primitives
+        /// (point validation, ECDH, key derivation), it will do so using the
+        /// internal IArkgPrimitives interface. However, when it needs an instance,
+        /// it will ask this delegate to build an object, rather than build it itself.
+        /// <para>
+        /// The method loaded will return an object. This class is initialized
+        /// with a method that will build and return an instance of the default
+        /// OpenSSL-backed implementation.
+        /// </para>
+        /// <para>
+        /// If you want to replace the implementation, you will likely do
+        /// something like this in your application.
+        /// <code language="csharp">
+        ///     CryptographyProviders.ArkgPrimitivesCreator = () =>
+        ///     {
+        ///         return ArkgImpl.GetArkgObject();
+        ///     };
+        /// </code>
+        /// </para>
+        /// </remarks>
+        internal static Func<IArkgPrimitives> ArkgPrimitivesCreator { get; set; } = ArkgPrimitives.Create;
+
         // /// <summary>
         // /// This property is a delegate (function pointer). This method will return
         // /// an instance of <see cref="IEcdhPrimitives"/>.

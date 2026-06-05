@@ -242,3 +242,50 @@ YubiKit logging is designed to be safe:
 - ✅ Operation types and durations are logged at Info level
 
 If you have strict compliance requirements, use `LogLevel.Warning` or higher to minimize information disclosure.
+
+---
+
+## Logging Conventions for Contributors
+
+> READ WHEN adding logging to a session class, choosing log level for a new operation, deciding what to log about credentials/keys.
+
+### Use Static `YubiKitLogging` — NEVER inject `ILogger`
+
+```csharp
+// ✅ CORRECT: Static logger from YubiKitLogging
+public class FidoSession
+{
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<FidoSession>();
+}
+
+// ❌ WRONG: Injected logger (breaks consistency)
+public class FidoSession(ILogger<FidoSession> logger) { }
+```
+
+Canonical logger factory: `YubiKitLogging.CreateLogger<T>()` at `src/Core/src/YubiKitLogging.cs:20`.
+
+### Log Levels (when contributing new log calls)
+
+| Level | Use for |
+|---|---|
+| `Trace` | Raw APDU/CBOR bytes, detailed protocol steps |
+| `Debug` | Protocol-level operations, state transitions |
+| `Info` | Session creation, major operations (enroll, authenticate) |
+| `Warning` | Recoverable errors, fallback behavior |
+| `Error` | Operation failures, exceptions |
+
+### Logging Sensitive Data
+
+- ❌ NEVER log PINs, keys, or credentials
+- ✅ Log credential IDs as hex (public identifier)
+- ✅ Log lengths, not contents, of sensitive buffers
+
+```csharp
+// ❌ NEVER
+_logger.LogDebug("PIN: {Pin}", pin);
+_logger.LogDebug("Key: {Key}", Convert.ToBase64String(privateKey));
+
+// ✅ YES — metadata only
+_logger.LogDebug("PIN verification for slot {Slot}", slotNumber);
+_logger.LogDebug("Key operation completed, length: {Length}", privateKey.Length);
+```

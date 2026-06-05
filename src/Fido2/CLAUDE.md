@@ -58,16 +58,15 @@ Yubico.YubiKit.Fido2/
 │   │   ├── CtapCommand.cs
 │   │   ├── CtapStatus.cs
 │   │   └── CtapException.cs
-│   ├── Extensions/                 # WebAuthn extensions
-│   │   ├── ExtensionIdentifiers.cs
-│   │   ├── ExtensionBuilder.cs     # Fluent extension builder
-│   │   ├── ExtensionOutput.cs
-│   │   ├── CredProtectPolicy.cs
-│   │   ├── HmacSecretInput.cs
-│   │   ├── CredBlobExtension.cs
-│   │   ├── LargeBlobExtension.cs
-│   │   ├── MinPinLengthExtension.cs
-│   │   └── PrfExtension.cs
+│   ├── Extensions/                 # WebAuthn/CTAP extension types
+│   │   ├── Shared/                 # ExtensionBuilder, identifiers, output parser
+│   │   ├── CredProtect/            # credProtect policy
+│   │   ├── CredBlob/               # credBlob inputs and outputs
+│   │   ├── HmacSecret/             # hmac-secret inputs and outputs
+│   │   ├── LargeBlob/              # largeBlob inputs, support enum, outputs
+│   │   ├── MinPinLength/           # minPinLength inputs and outputs
+│   │   ├── Prf/                    # PRF inputs and outputs
+│   │   └── PreviewSign/            # previewSign types and canonical CBOR encoder
 │   ├── BioEnrollment/              # Fingerprint enrollment (FW 5.2+)
 │   │   ├── BioEnrollmentSubCommand.cs
 │   │   ├── BioEnrollmentModels.cs
@@ -146,17 +145,20 @@ The SDK uses the **ExtensionBuilder** fluent pattern for all WebAuthn/CTAP exten
 |-----------|---------------|-------------|------------|
 | credProtect | `.WithCredProtect()` | Credential protection level | 5.2+ |
 | hmac-secret | `.WithHmacSecret()` | CTAP2 symmetric secret derivation | 5.2+ |
-| hmac-secret-mc | `.WithHmacSecretMc()` | hmac-secret during MakeCredential | 5.4+ |
-| credBlob | `.WithCredBlob()` | Per-credential blob storage (32-64 bytes) | 5.5+ |
+| hmac-secret-mc | `.WithHmacSecretMakeCredential()` | hmac-secret during MakeCredential | 5.4+ |
+| credBlob | `.WithCredBlob()` | Per-credential blob storage | 5.5+ |
 | largeBlob | `.WithLargeBlobKey()` | Large blob storage key | 5.5+ |
 | minPinLength | `.WithMinPinLength()` | Require minimum PIN length | 5.4+ |
+| previewSign | `.WithPreviewSign(...)` | Delegated signing of arbitrary bytes (CTAP v4) | YubiKey FW with previewSign support |
 | prf | `.WithPrf()` | WebAuthn PRF extension (wraps hmac-secret) | 5.2+ |
+
+> **Note:** The `previewSign` extension is a first-class Fido2 extension via `WithPreviewSign(PreviewSignRegistrationInput)` and `WithPreviewSign(PreviewSignAuthenticationInput)`. WebAuthn provides a high-level adapter (`Yubico.YubiKit.WebAuthn.Extensions.PreviewSign`) for Client API consumers; both layers share the canonical encoder in Fido2.
 
 #### Example Usage
 
 ```csharp
 // Build extensions for MakeCredential
-var extensions = ExtensionBuilder.Create()
+var extensions = new ExtensionBuilder()
     .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
     .WithCredBlob(blobData)
     .Build();
@@ -168,8 +170,8 @@ var options = new MakeCredentialOptions
 };
 
 // For GetAssertion with PRF
-var prfExtensions = ExtensionBuilder.Create()
-    .WithPrf(salt1, salt2)  // WebAuthn PRF extension
+var prfExtensions = new ExtensionBuilder()
+    .WithPrf(new PrfInput { First = salt1, Second = salt2 })
     .Build();
 ```
 
@@ -190,13 +192,13 @@ These extensions serve similar purposes but operate at different protocol levels
 
 ```csharp
 // CTAP2 hmac-secret (direct)
-var hmacExtensions = ExtensionBuilder.Create()
-    .WithHmacSecret(salt1, salt2)
+var hmacExtensions = new ExtensionBuilder()
+    .WithHmacSecret(hmacSecretInput)
     .Build();
 
 // WebAuthn PRF (browser-compatible)
-var prfExtensions = ExtensionBuilder.Create()
-    .WithPrf(salt1, salt2)
+var prfExtensions = new ExtensionBuilder()
+    .WithPrf(new PrfInput { First = salt1, Second = salt2 })
     .Build();
 ```
 

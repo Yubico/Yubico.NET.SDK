@@ -1,158 +1,167 @@
-# Handoff — yubikey-codeaudit
+# Handoff — previewSign 0x7F root cause FIXED; signature-verify mismatch is the next thread
 
-**Date:** 2026-04-16
-**Branch:** `yubikey-codeaudit` (base: `yubikit-applets`)
-**Last commit:** `16c0c270` fix(fido2): ChangePin test uses KnownTestPin instead of hardcoded PIN
-**PR:** Yubico/Yubico.NET.SDK#455
+**Date:** 2026-04-29 (afternoon session, second pass — supersedes the earlier `args[-1]-value-suspect` handoff)
+**Branch (main repo):** `webauthn/phase-9.2-rust-port` at tip `43a466b4` (uncommitted edits in working tree)
+**Branch (worktree B):** `worktree-agent-aa7ba443d8eec3e9e` at tip `6988dc1d` — **locked, uncommitted edits**
+**HEAD ↔ origin:** main repo is **2 commits ahead** of origin — `425386bd` + `43a466b4` not pushed
+**PR:** [Yubico/Yubico.NET.SDK#466](https://github.com/Yubico/Yubico.NET.SDK/pull/466) — OPEN, target `yubikit-applets`
+**Strategy frame:** [`Plans/yes-we-have-started-composed-horizon.md`](yes-we-have-started-composed-horizon.md)
+**Current focused plan:** [`Plans/snoopy-strolling-star.md`](snoopy-strolling-star.md) — *previewSign root-cause fix* (was: wire-chatter cleanup, parked)
 
 ---
 
-## Session Summary
+## Headline finding
 
-Fixed FIDO2 AuthenticatorConfig integration test design to produce valuable, non-cascading signal. Three problems addressed: (1) SetMinPinLength test accumulated state across runs (incrementing min PIN length each time until it exceeded the test PIN), (2) ForceChangePin test only asserted a flag was set without testing the full lifecycle, risking cascade failures, (3) NormalizePinAsync couldn't recover from leftover forcePinChange state. Referenced python-fido2's `test_force_pin_change` pattern for the full-cycle test design. Discovered that Enhanced PIN keys (5.8.0-beta) reject same-PIN changes with PinPolicyViolation, requiring reversed-PIN pattern for recovery.
+🎯 **Root cause #1 found and fixed.** `CoseArkgP256SeedKey.Decode` had `pkBl` and `pkKem` **swapped** at CBOR keys `-1` and `-2`. Spec contract per draft-bradleylundberg-cfrg-arkg-10, python-fido2 (`cose.py:428-433`), and the legacy SDK (`PreviewSignExtension.cs:317-323`):
 
-**32 commits total, 110+ files changed. 4 fix commits from prior session + uncommitted AuthenticatorConfig test fixes this session.**
+| CBOR key | What lives there |
+|---|---|
+| **-1** | `pkBl` (blinding public key) |
+| **-2** | `pkKem` (KEM public key) |
+
+Modern had it inverted (`-1=KEM, -2=BL`). The morning's "byte-identical wire" check missed it because the wire IS identical — only the *interpretation* of the two nested COSE keys was flipped, so modern computed the offline ARKG handle against the wrong KEM, and the firmware couldn't decapsulate → CTAP2_ERR_OTHER (0x7F).
+
+**Hardware result after the fix:** firmware accepts the GetAssertion request and returns a signature. **0x7F is gone.** ✅
+
+**New issue surfaced (much smaller scope):** the offline `derivedKey.VerifySignature(message, signature)` returns `false` at line 417. Likely cause is one of:
+1. **Test code semantics** — modern test passes the *already-hashed* `message` (line 337: `message = SHA256.HashData(messageRaw)`) to `VerifySignature`, which then hashes again internally via `ECDsa.VerifyData(..., SHA256)` → double-hash. Legacy test passes the **raw** message to its `VerifySignature`. Single-line test fix candidate: pass `messageRaw` instead of `message` to `derivedKey.VerifySignature`.
+2. **ARKG derived-public-key calculation** divergence somewhere in `ArkgPrimitivesOpenSsl.BlBlindPublicKey` despite the swap fix. Less likely given firmware accepted the keyHandle (KEM half is correct end-to-end).
+3. Signature DER ↔ IEEE conversion edge case in `PreviewSignDerivedKey.ConvertDerToIeee`.
+
+---
+
+## Critical next steps (read first)
+
+1. **Confirm the test-vs-SDK hashing semantic:** read `src/Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/FidoPreviewSignTests.cs:336-337` and compare with `src/Fido2/src/Extensions/PreviewSignDerivedKey.cs:108-141` (which uses `VerifyData`, not `VerifyHash`). Likely test just needs `messageRaw` passed instead of `message`.
+2. **If that fix doesn't resolve it:** spot-check ARKG primitive output. Build a unit test that runs modern `ArkgP256.DerivePublicKey` against the **same fixed inputs** as python-fido2's `derive_public_key` (same ikm, same ctx, same pkBl/pkKem) and assert byte-equal output. If they differ, the ARKG primitive itself has a second bug.
+3. **Push** `425386bd` + `43a466b4` + the new fix commit(s) to PR #466 once FullCeremony is green.
+
+---
+
+## What was done this session (afternoon, second pass)
+
+### Diagnostic chain
+1. Resumed from morning handoff (`args[-1] value suspect`)
+2. Dennis flagged: legacy SDK has working FullCeremony tests + NativeShims 1.16 ships new EC_POINT_* exports (`/Users/Dennis.Dyall/Code/y/Yubico.NET.SDK-Legacy/...`)
+3. Ruled out NativeShims gap — modern `ArkgPrimitivesOpenSsl.cs:572-633` already P/Invokes all 6 EC_POINT_* shims
+4. Read both legacy and modern `CoseArkgP256SeedKey` / `PreviewSignExtension` parsers side-by-side
+5. Cross-checked python-fido2 `cose.py:428-433`
+6. Confirmed: legacy + python both say `-1 = pkBl, -2 = pkKem`. Modern says `-1 = KEM, -2 = BL`. Inverted.
+
+### TDD fix
+1. Added new spec-contract regression test `Decode_pkBlAtMinus1_pkKemAtMinus2_PerSpec` to `CoseArkgP256SeedKeyTests.cs` — uses distinguishable byte patterns (BL=0xAA, KEM=0xBB) at CBOR keys `-1`/`-2` and asserts decoder routes them to `BlPublicKey`/`KemPublicKey`
+2. Confirmed RED: `Expected: 170 (0xAA), Actual: 187 (0xBB)` — bug empirically proved
+3. Applied fix in `src/Fido2/src/Cose/CoseArkgP256SeedKey.cs`:
+   - `Decode` (lines 77-83): swap which CBOR key feeds `blKeyCbor` vs `kemKeyCbor`
+   - `Encode` (lines 158-162): swap which key writes BL vs KEM
+   - Docstring (lines 31-35): correct the wire-format description
+4. Updated existing test `Decode_WithValidArkgSeedKey_ReturnsCorrectVariant` which had the inverted contract baked into the producer — flipped `kemNested`/`blNested` to match the spec-correct wire layout
+5. Result: 4/4 `CoseArkgP256SeedKeyTests` green, full Fido2 + WebAuthn unit suites green
+
+### Hardware verification
+1. Synced fix into worktree B (`cp` of corrected `CoseArkgP256SeedKey.cs`)
+2. Lifted the `Skip.If(true, "previewSign GA returns 0x7F...")` guard at `FidoPreviewSignTests.cs:259`
+3. Built worktree B clean (0 errors)
+4. Ran FullCeremony with hardware touches:
+   - Step A (MakeCredential + previewSign): ✅ succeeded
+   - Step B (offline derive): ✅ produced derivedKey with 65-byte SEC1 publicKey + non-empty arkgKeyHandle
+   - Step C (GetAssertion + previewSign signing): ✅ **firmware accepted; signature returned (no 0x7F!)**
+   - Step D (offline VerifySignature): ❌ returned `false` at line 417
+
+### Did not achieve
+- A green FullCeremony test end-to-end. **One step remains** (verify-signature mismatch). Root cause likely test-code hashing semantic; investigation deferred to the next agent or next session.
+
+---
 
 ## Current State
 
-### Committed Work (32 commits)
+### Uncommitted changes — main checkout
+- `src/Fido2/src/Cose/CoseArkgP256SeedKey.cs` — **the fix** (swap -1/-2)
+- `src/Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Cose/CoseArkgP256SeedKeyTests.cs` — new spec-contract test + corrected existing test
+- `Plans/handoff.md` — this file
+- `Plans/snoopy-strolling-star.md` — focused fix plan (parked wire-chatter plan was overwritten)
 
-**Prior audit (28 commits):** See previous handoff for stages 1-6 detail.
+### Uncommitted changes — worktree B
+- `src/Fido2/src/Cose/CoseArkgP256SeedKey.cs` — **the fix** (synced from main)
+- `src/Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/FidoPreviewSignTests.cs` — Skip lifted at line 259
 
-**Integration test session (4 committed):**
-- `24db19cb` fix(piv): clone ModPow result before zeroing BigInteger allocation
-- `01e4b999` test(fido2): standardize RequiresUserPresence trait to TestCategories format
-- `c4c591be` fix(core,fido2): HID DeviceId collision and CTAP2.0 PIN token fallback
-- `16c0c270` fix(fido2): ChangePin test uses KnownTestPin instead of hardcoded PIN
+### Build & test status
 
-### Uncommitted Changes
-
-Modified (ready to commit):
-- `src/Tests.Shared/Infrastructure/TestCategories.cs` — Added `PermanentDeviceState` trait constant
-- `src/Fido2/tests/.../TestExtensions/FidoTestStateExtensions.cs` — NormalizePinAsync forcePinChange recovery (reversed-PIN pattern)
-- `src/Fido2/tests/.../FidoAuthenticatorConfigTests.cs` — Rewritten SetMinPinLength (idempotent) + ForceChangePin (full-cycle)
-- `Plans/handoff.md` — This file
-
-Untracked:
-- `docs/plans/2026-04-15-integrationtest-plan.md` — Integration test execution plan
-- `docs/plans/2026-04-15-integrationtest-report.md` — Integration test results report
-
-### Build & Test Status
-
-- **Build:** 0 errors, 0 warnings
-- **Unit tests:** 8/9 pass (Fido2 2 pre-existing assertion failures in AuthenticatorConfigTests)
-- **Integration tests (non-FIDO):** All 8 modules PASS (251 tests, 7 pre-existing failures, 12 skipped)
-- **Integration tests (FIDO2 no-touch):** 25/29 pass (4 NFC tests fail — no NFC reader)
-- **Integration tests (FIDO2 touch):** 35/35 core operations pass; AuthenticatorConfig 3/3 pass
-- **AuthenticatorConfig tests:** All 3 pass (ToggleAlwaysUv, SetMinPinLength, ForceChangePin_FullCycle)
-
-### Worktree / Parallel Agent State
-
-One external worktree at `/home/dyallo/Code/y/Yubico.NET.SDK-zig-glibc` on `develop` branch — unrelated.
+| Check | Status | Where |
+|---|---|---|
+| `dotnet toolchain.cs build` | **0 errors** | Main + worktree B |
+| Fido2 unit tests | **377/377 PASS** | Main checkout |
+| WebAuthn unit tests | **100/100 PASS** | Main checkout |
+| New `Decode_pkBlAtMinus1_pkKemAtMinus2_PerSpec` | **PASS** (after fix) | Main checkout |
+| `FullCeremony_RegisterDeriveSignVerify_RoundTrip` | ⚠️ **Reaches Step D, fails on `VerifySignature`** | Worktree B (was: 0x7F at Step C) |
+| Negative-path tests (3) | ✅ All pass | (unchanged from morning) |
 
 ---
 
 ## Readiness Assessment
 
-**Target:** .NET developers integrating YubiKey hardware security into their applications, who need a reliable, secure, and well-structured SDK.
-
 | Need | Status | Notes |
 |---|---|---|
-| Correct APDU/TLV encoding | ✅ Working | TLV, DER, BER bugs fixed; verified by 251 integration tests |
-| Sensitive data zeroed after use | ✅ Working | Comprehensive audit; ModPow zero-after-return bug found and fixed |
-| No resource leaks | ✅ Working | Connection leak fixed in all 8 modules |
-| PIV crypto operations | ✅ Working | RSA sign + decrypt (PKCS1/OAEP-SHA1/OAEP-SHA256), ECC, Ed25519 — 66/66 pass |
-| SCP03/SCP11 secure channels | ✅ Working | 25/25 tests pass (SCP03, SCP11a/b/c, key lifecycle) |
-| OATH TOTP/HOTP | ✅ Working | 15/15 pass (CRUD, hash algorithms, password management) |
-| OpenPGP operations | ✅ Working | 46/46 pass (keygen, sign, decrypt, PIN, KDF, certificates) |
-| YubiHSM Auth | ✅ Working | 11/11 pass (symmetric, asymmetric, password change) |
-| FIDO2 core (GetInfo, session) | ✅ Working | 25 non-touch tests pass |
-| FIDO2 credential operations | ✅ Working | 35/35 core touch operations pass |
-| FIDO2 authenticator config | ✅ Working | 3/3 pass (alwaysUv toggle, minPinLength, forcePinChange full cycle) |
-| Multi-key HID discovery | ✅ Working | Fixed DeviceId collision; 6 devices discovered |
-| CTAP2.0 compatibility | ✅ Working | getPinToken fallback for devices without pinUvAuthToken |
-| Enhanced PIN complexity support | ✅ Working | Reversed-PIN pattern handles Enhanced PIN policy |
-| Test harness self-healing | ✅ Working | NormalizePinAsync recovers from leftover forcePinChange state |
+| WebAuthn data model + ClientData/AttestationObject/AuthenticatorData | ✅ Working | Phases 1-2 |
+| `WebAuthnClient.MakeCredentialAsync` + `GetAssertionAsync` (standard FIDO2) | ✅ Working | Hardware-verified |
+| Extension framework | ✅ Working | All inputs/outputs in Fido2 |
+| `previewSign` registration + seed key extraction | ✅ Working | Hardware-verified |
+| ARKG-P256 cryptographic primitives | ✅ Working | 3 KAT + cross-verified |
+| **CoseArkgP256SeedKey CBOR mapping (-1=Bl, -2=Kem)** | ✅ **FIXED THIS SESSION** | Spec parity test added |
+| `previewSign` GetAssertion accepted by firmware | ✅ **FIXED THIS SESSION** | No more 0x7F |
+| **Offline VerifySignature on derived-key signature** | ⚠️ **OPEN — likely test hashing semantic** | See "Critical next steps" |
+| Negative-path tests | ✅ Working | 3/3 PASS |
 
-**Overall:** 🟢 Production — all SDK code quality goals met, integration tests pass across all 9 modules. FIDO2 fully verified including AuthenticatorConfig.
-
-**Critical next step:** Commit the AuthenticatorConfig test fixes and push to PR #455.
-
----
-
-## What's Next (Prioritized)
-
-1. **Commit AuthenticatorConfig test fixes** — 3 modified files ready to commit
-2. **Push commits and update PR #455** — 5 new commits since last push
-3. **Multi-key test iteration** — Current infra picks first matching device. Should iterate over ALL compatible devices per test
-4. **Work through TODO backlog** — see `Plans/todo-backlog-workplan.md` (19 Jira issues, prioritized)
-
-## Blockers & Known Issues
-
-- **FIDO2 NFC tests:** Require NFC reader (not available in current USB setup)
-- **Core device listeners:** 2 pre-existing Linux HID/SmartCard listener status tests fail (start as Stopped)
-- **Fido2 unit tests:** 2 pre-existing assertion failures in AuthenticatorConfigTests (Expected: 2, Actual: 34)
-- **EnterpriseAttestation test:** Needs key with EA enabled
-- **ExcludeListStress test:** Needs 17 touches, timed out
-- **BioEnrollment test:** Needs bio key
-
-## Key Findings This Session
-
-### Enhanced PIN rejects same-PIN changes
-On 5.8.0-beta Enhanced PIN keys, `ChangePinAsync(pin, pin)` throws `PinPolicyViolation`. The fix is to use a reversed-PIN pattern: change to reversed value, then change back. This applies to both NormalizePinAsync recovery and ForceChangePin test cleanup.
-
-### python-fido2 ForceChangePin pattern
-python-fido2 (`tests/device/test_config.py:74-89`) tests the full lifecycle: set flag → verify tokens blocked → change PIN → verify restored. Our test now matches this pattern, giving signal about the protocol behavior rather than just "did a flag change."
-
-### setMinPINLength is one-way
-CTAP spec: min PIN length can only increase, never decrease. Only factory reset reverts it. Our test now uses a fixed target (6) instead of incrementing, making it idempotent across runs.
-
-## Key File References
-
-| File | Purpose |
-|------|---------|
-| `src/Tests.Shared/Infrastructure/TestCategories.cs` | New `PermanentDeviceState` trait constant |
-| `src/Fido2/tests/.../TestExtensions/FidoTestStateExtensions.cs:94-111` | NormalizePinAsync forcePinChange recovery |
-| `src/Fido2/tests/.../FidoAuthenticatorConfigTests.cs:110-181` | Idempotent SetMinPinLength test |
-| `src/Fido2/tests/.../FidoAuthenticatorConfigTests.cs:183-280` | Full-cycle ForceChangePin test |
-| `../python-fido2/tests/device/test_config.py:74-89` | Reference: python-fido2 force_pin_change test |
-| `Plans/todo-backlog-workplan.md` | Prioritized TODO backlog (19 Jira issues) |
+**Overall:** 🟡 **Beta** — One step from end-to-end green. Single-line test fix is the most likely remaining work.
 
 ---
 
 ## Quick Start for New Agent
 
 ```bash
-# Current state
-git checkout yubikey-codeaudit
-git log --oneline yubikit-applets..HEAD  # 32 commits
+# 1. Confirm state
+cd /Users/Dennis.Dyall/Code/y/Yubico.NET.SDK
+git status --short  # expect: 4 modified/new files (handoff, plan, fix, tests)
+git log -1 --oneline  # expect: 43a466b4 fix(webauthn): wire PreviewSignErrors.MapCtapError...
 
-# Build
-dotnet toolchain.cs build  # 0 errors, 0 warnings
+# 2. Read the fix and the test
+cat src/Fido2/src/Cose/CoseArkgP256SeedKey.cs | sed -n '74,90p'
+cat src/Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Cose/CoseArkgP256SeedKeyTests.cs | sed -n '113,170p'
 
-# Unit tests
-dotnet toolchain.cs test  # 8/9 pass (Fido2 pre-existing)
+# 3. Confirm green
+dotnet toolchain.cs -- test --project Fido2     # 377/377
+dotnet toolchain.cs -- test --project WebAuthn  # 100/100
 
-# Integration tests (non-touch, one module at a time)
-dotnet toolchain.cs -- test --integration --project Management
-dotnet toolchain.cs -- test --integration --project Piv --smoke
-dotnet toolchain.cs -- test --integration --project Fido2 --filter "Category!=RequiresUserPresence"
+# 4. Investigate the verify-signature mismatch
+#    Most likely fix is in worktree B's test code — pass `messageRaw` instead of `message`
+#    to derivedKey.VerifySignature at FidoPreviewSignTests.cs:416
+#    (modern's VerifySignature uses ECDsa.VerifyData, which hashes internally)
 
-# FIDO2 AuthenticatorConfig tests (requires touch)
-dotnet test src/Fido2/tests/Yubico.YubiKit.Fido2.IntegrationTests/*.csproj \
-  -c Release --filter "Feature=AuthenticatorConfig"
-
-# Skip permanent device state tests
+# 5. Hardware verify (worktree B)
+cd .claude/worktrees/agent-aa7ba443d8eec3e9e
+# Apply the test fix here
 dotnet toolchain.cs -- test --integration --project Fido2 \
-  --filter "Category!=PermanentDeviceState&Category!=RequiresUserPresence"
-
-# PIN state (ykman)
-ykman list
-ykman fido info
-
-# PR
-gh pr view 455
-
-# Resume
-/resume-handoff
+  --filter "FullyQualifiedName~FullCeremony_RegisterDeriveSignVerify"
+# Touch when prompted (~2 touches)
 ```
+
+---
+
+## Files Touched This Session
+
+| File | Change |
+|---|---|
+| `src/Fido2/src/Cose/CoseArkgP256SeedKey.cs` | **The fix** — swap CBOR -1/-2 in Decode + Encode + docstring |
+| `src/Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Cose/CoseArkgP256SeedKeyTests.cs` | New spec-contract test + corrected existing test contract |
+| `.claude/worktrees/.../src/Fido2/src/Cose/CoseArkgP256SeedKey.cs` | Synced fix into worktree B |
+| `.claude/worktrees/.../src/Fido2/tests/.../FidoPreviewSignTests.cs:259` | Skip lifted |
+| `Plans/snoopy-strolling-star.md` | New focused plan (wire-chatter plan parked, overwritten) |
+| `Plans/handoff.md` | This file |
+
+## Lessons captured this session
+
+1. **"Byte-identical wire" can mask interpretation bugs.** The morning hard-converged the wire format to match python's, but never proved that python's *parser* extracted the same labeled values from those bytes. The CBOR was right; the names attached to the two nested keys were swapped. Future cross-checks should compare *labeled* outputs, not just raw bytes.
+2. **Existing test that bakes in the bug as a contract is invisible to CI.** The original `Decode_WithValidArkgSeedKey_ReturnsCorrectVariant` wrote `kemNested` at -1 and asserted `KemPublicKey == kemNested`. Both producer and consumer were wrong consistently; CI green proved nothing. **Add spec-contract tests** (with distinguishable byte patterns and a third-party oracle) when porting from a reference implementation, not round-trip tests.
+3. **TDD with a red-failing test is fast for diagnostic confirmation.** A 30-line spec-contract test took ~10 minutes to write and produced an unambiguous Expected/Actual diff that pinpointed the swap. Far better than reading code in isolation.
+4. **One bug at a time.** Fixing the seed-key swap unblocked the firmware reject; the verify-signature mismatch became visible only because the firmware now responds. If we'd tried to "fix everything in one go," we'd have conflated the two issues.
+5. **Worktree B remains a useful staging area.** Synced fixes via `cp`, ran hardware tests there, kept main checkout clean of the HID instrumentation. Pattern works.

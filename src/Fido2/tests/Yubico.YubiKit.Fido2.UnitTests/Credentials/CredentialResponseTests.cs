@@ -27,28 +27,42 @@ public class CredentialResponseTests
     /// <summary>
     /// Creates a minimal MakeCredential CBOR response for testing.
     /// </summary>
-    private static byte[] CreateMakeCredentialResponse(string format = "packed")
+    private static byte[] CreateMakeCredentialResponse(string format = "none")
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        
+
         writer.WriteStartMap(3);
-        
+
         // 0x01: fmt
         writer.WriteInt32(1);
         writer.WriteTextString(format);
-        
+
         // 0x02: authData (minimal: 37 bytes with AT flag)
         writer.WriteInt32(2);
         var authData = CreateAuthDataWithAttestedCredentialData();
         writer.WriteByteString(authData);
-        
-        // 0x03: attStmt (empty for "none" format)
+
+        // 0x03: attStmt — shape depends on format
         writer.WriteInt32(3);
-        writer.WriteStartMap(0);
+        if (format == "packed")
+        {
+            // Packed attestation requires alg + sig per CTAP 2.1 §8.2.
+            writer.WriteStartMap(2);
+            writer.WriteTextString("alg");
+            writer.WriteInt32(-7); // ES256
+            writer.WriteTextString("sig");
+            writer.WriteByteString(new byte[] { 0x30, 0x44 }); // minimal signature placeholder
+            writer.WriteEndMap();
+        }
+        else
+        {
+            // "none" format has empty attStmt per CTAP 2.1 §8.7.
+            writer.WriteStartMap(0);
+            writer.WriteEndMap();
+        }
+
         writer.WriteEndMap();
-        
-        writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
     
@@ -228,18 +242,14 @@ public class CredentialResponseTests
     {
         // Create response with "none" format and empty attStmt
         var cbor = CreateMakeCredentialResponse("none");
-        
+
         var response = MakeCredentialResponse.Decode(cbor);
-        
+
         // "none" format has empty attStmt (no sig, no x5c)
         Assert.Equal("none", response.Format);
-        
-        // Debug: check actual values
-        var attStmt = response.AttestationStatement;
-        Assert.Null(attStmt.Signature);
-        Assert.Null(attStmt.X5c);
-        Assert.True(attStmt.IsNone, 
-            $"Expected IsNone=true, but got: Signature={attStmt.Signature}, X5c={attStmt.X5c}");
+
+        // Verify the attestation statement is NoneAttestationStatement type
+        Assert.IsType<NoneAttestationStatement>(response.AttestationStatement);
     }
     
     [Fact]

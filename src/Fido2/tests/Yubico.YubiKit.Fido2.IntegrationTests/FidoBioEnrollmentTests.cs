@@ -31,7 +31,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Feature", "BioEnrollment")]
 public class FidoBioEnrollmentTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetFingerprintSensorInfo_ReturnsSensorCapabilities(YubiKeyTestState state) =>

@@ -14,6 +14,7 @@
 
 using System.Buffers.Binary;
 using System.Formats.Cbor;
+using Yubico.YubiKit.Fido2.Cbor;
 
 namespace Yubico.YubiKit.Fido2.Credentials;
 
@@ -38,22 +39,22 @@ public sealed class AttestedCredentialData
     /// Minimum size of attested credential data (AAGUID + length field).
     /// </summary>
     private const int MinimumLength = 18;
-    
+
     /// <summary>
     /// Gets the Authenticator Attestation GUID identifying the authenticator model.
     /// </summary>
     public Guid Aaguid { get; }
-    
+
     /// <summary>
     /// Gets the credential ID.
     /// </summary>
     public ReadOnlyMemory<byte> CredentialId { get; }
-    
+
     /// <summary>
     /// Gets the COSE-encoded public key.
     /// </summary>
     public ReadOnlyMemory<byte> CredentialPublicKey { get; }
-    
+
     private AttestedCredentialData(
         Guid aaguid,
         ReadOnlyMemory<byte> credentialId,
@@ -63,7 +64,7 @@ public sealed class AttestedCredentialData
         CredentialId = credentialId;
         CredentialPublicKey = credentialPublicKey;
     }
-    
+
     /// <summary>
     /// Parses attested credential data from raw bytes.
     /// </summary>
@@ -79,64 +80,45 @@ public sealed class AttestedCredentialData
                 $"Attested credential data must be at least {MinimumLength} bytes, got {data.Length}.",
                 nameof(data));
         }
-        
+
         int offset = 0;
-        
+
         // Parse AAGUID (16 bytes, big-endian UUID format)
         var aaguidBytes = data.Slice(offset, 16);
         var aaguid = ParseAaguid(aaguidBytes);
         offset += 16;
-        
+
         // Parse credential ID length (2 bytes, big-endian)
         var credentialIdLength = BinaryPrimitives.ReadUInt16BigEndian(data.Slice(offset, 2));
         offset += 2;
-        
+
         if (data.Length < offset + credentialIdLength)
         {
             throw new ArgumentException(
                 $"Attested credential data too short for credential ID length {credentialIdLength}.",
                 nameof(data));
         }
-        
+
         // Parse credential ID
         var credentialId = data.Slice(offset, credentialIdLength).ToArray();
         offset += credentialIdLength;
-        
+
         // Parse COSE public key (CBOR-encoded, need to determine length)
         var coseKeyBytes = data[offset..];
         var coseKeyLength = GetCborLength(coseKeyBytes);
         var credentialPublicKey = coseKeyBytes[..coseKeyLength].ToArray();
         offset += coseKeyLength;
-        
+
         bytesRead = offset;
-        
+
         return new AttestedCredentialData(aaguid, credentialId, credentialPublicKey);
     }
-    
+
     private static Guid ParseAaguid(ReadOnlySpan<byte> bytes)
     {
-        // AAGUID is stored in big-endian (network byte order) format
-        // .NET Guid constructor expects specific byte ordering
-        Span<byte> guidBytes = stackalloc byte[16];
-        bytes.CopyTo(guidBytes);
-        
-        // Convert from big-endian to little-endian for first 3 components
-        if (BitConverter.IsLittleEndian)
-        {
-            // Reverse bytes for Data1 (4 bytes)
-            (guidBytes[0], guidBytes[1], guidBytes[2], guidBytes[3]) = 
-                (guidBytes[3], guidBytes[2], guidBytes[1], guidBytes[0]);
-            
-            // Reverse bytes for Data2 (2 bytes)
-            (guidBytes[4], guidBytes[5]) = (guidBytes[5], guidBytes[4]);
-            
-            // Reverse bytes for Data3 (2 bytes)
-            (guidBytes[6], guidBytes[7]) = (guidBytes[7], guidBytes[6]);
-        }
-        
-        return new Guid(guidBytes);
+        return AaguidConverter.FromBigEndianBytes(bytes);
     }
-    
+
     private static int GetCborLength(ReadOnlySpan<byte> data)
     {
         // Use CborReader to determine the length of the CBOR value

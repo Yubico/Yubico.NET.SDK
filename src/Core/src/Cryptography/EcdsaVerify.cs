@@ -11,11 +11,11 @@
 // // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // // See the License for the specific language governing permissions and
 // // limitations under the License.
-//
+// //
 // using System.Security.Cryptography;
 // using System.Security.Cryptography.X509Certificates;
 // using Yubico.YubiKit.Core.Cryptography.Cose;
-//
+// //
 // namespace Yubico.YubiKit.Core.Cryptography
 // {
 //     /// <summary>
@@ -100,9 +100,9 @@
 //         private const byte EncodedPointTag = 0x04;
 //         private const int SequenceTag = 0x30;
 //         private const int IntegerTag = 0x02;
-//
+// //
 //         private bool _disposed;
-//
+// //
 //         /// <summary>
 //         /// The object built that will perform the verification operation.
 //         /// </summary>
@@ -110,14 +110,14 @@
 //         /// This must be P-256, P-384 or P-521, and contain valid coordinates.
 //         /// </remarks>
 //         public ECDsa ECDsa { get; private set; }
-//
+// //
 //         // The default constructor explicitly defined. We don't want it to be
 //         // used.
 //         private EcdsaVerify()
 //         {
 //             throw new NotImplementedException();
 //         }
-//
+// //
 //         /// <summary>
 //         /// Create an instance of the <see cref="EcdsaVerify"/> class using the
 //         /// ECDsa object that contains the public key.
@@ -138,10 +138,10 @@
 //             {
 //                 throw new ArgumentNullException(nameof(ecdsa));
 //             }
-//
+// //
 //             ECDsa = CheckECDsa(ecdsa);
 //         }
-//
+// //
 //     
 //         public EcdsaVerify(ECPublicKey publicKey)
 //         {
@@ -149,15 +149,15 @@
 //             {
 //                 throw new ArgumentNullException(nameof(publicKey));
 //             }
-//
+// //
 //             if (!publicKey.KeyType.IsECDsa())
 //             {
 //                 throw new ArgumentException("Invalid key type", nameof(publicKey));
 //             }
-//
+// //
 //             ECDsa = ConvertPublicKey(publicKey.PublicPoint);
 //         }
-//
+// //
 //         /// <summary>
 //         /// Create an instance of the <see cref="EcdsaVerify"/> class using the
 //         /// COSE EC public key.
@@ -177,9 +177,9 @@
 //             {
 //                 throw new ArgumentNullException(nameof(coseKey));
 //             }
-//
+// //
 //             string oid = GetOidByAlgorithm(coseKey.Algorithm);
-//
+// //
 //             byte[] xCoordinate = [];
 //             byte[] yCoordinate = [];
 //             if (coseKey is CoseEcPublicKey ecKey)
@@ -187,10 +187,10 @@
 //                 xCoordinate = ecKey.XCoordinate.ToArray();
 //                 yCoordinate = ecKey.YCoordinate.ToArray();
 //             }
-//
+// //
 //             ECDsa = ConvertPublicKey(oid, xCoordinate, yCoordinate);
 //         }
-//
+// //
 //         /// <summary>
 //         /// Create an instance of the <see cref="EcdsaVerify"/> class using the
 //         /// encoded point.
@@ -214,7 +214,7 @@
 //         {
 //             ECDsa = ConvertPublicKey(encodedEccPoint);
 //         }
-//
+// //
 //         /// <summary>
 //         /// Create an instance of the <see cref="EcdsaVerify"/> class using the
 //         /// given certificate.
@@ -232,7 +232,7 @@
 //         {
 //             ECDsa = CheckECDsa(certificate.GetECDsaPublicKey());
 //         }
-//
+// //
 //         /// <summary>
 //         /// Verify the <c>signature</c> using the  <c>dataToVerify</c>. This
 //         /// method will digest the <c>dataToVerify</c> using SHA-256, SHA-384 or SHA-512,
@@ -273,13 +273,13 @@
 //                 256 => CryptographyProviders.Sha256Creator(),
 //                 384 => CryptographyProviders.Sha384Creator(),
 //                 521 => CryptographyProviders.Sha512Creator(),
-//                 _ => throw new ArgumentException("ExceptionMessages.UnsupportedAlgorithm),");
+//                 _ => throw new ArgumentException("Unsupported algorithm")
 //             };
-//
+// //
 //             byte[] digestToVerify = digester.ComputeHash(dataToVerify);
 //             return VerifyDigestedData(digestToVerify, signature, isStandardSignature);
 //         }
-//
+// //
 //         /// <summary>
 //         /// Verify the <c>signature</c> using the <c>digestToVerify</c>.
 //         /// </summary>
@@ -314,7 +314,7 @@
 //             byte[] sig = isStandardSignature ? ConvertSignature(signature, ECDsa.KeySize) : signature;
 //             return ECDsa.VerifyHash(digestToVerify, sig);
 //         }
-//
+// //
 //         private static ECDsa ConvertPublicKey(ReadOnlyMemory<byte> encodedEccPoint)
 //         {
 //             // This is the minimum length for an encoded point on P-256 (0x04 || x || y)
@@ -323,15 +323,15 @@
 //             {
 //                 throw new ArgumentException("ExceptionMessages.UnsupportedAlgorithm);");
 //             }
-//
+// //
 //             int coordLength = (encodedEccPoint.Length - 1) / 2;
 //             byte[] xCoordinate = encodedEccPoint.Slice(1, coordLength).ToArray();
 //             byte[] yCoordinate = encodedEccPoint.Slice(1 + coordLength, coordLength).ToArray();
-//
+// //
 //             string oid = GetOidByLength(encodedEccPoint.Length);
 //             return ConvertPublicKey(oid, xCoordinate, yCoordinate);
 //         }
-//
+// //
 //         private static string GetOidByLength(int encodedPointLength)
 //         {
 //             if (encodedPointLength == (KeyDefinitions.P256.LengthInBytes * 2) + 1)
@@ -346,36 +346,36 @@
 //             {
 //                 return Oids.ECP521;
 //             }
-//
+// //
 //             throw new ArgumentException("ExceptionMessages.UnsupportedAlgorithm);");
 //         }
-//
+// //
 //         private static ECDsa ConvertPublicKey(string oid, byte[] xCoordinate, byte[] yCoordinate)
 //         {
 //             if (string.IsNullOrEmpty(oid))
 //             {
 //                 throw new ArgumentException("ExceptionMessages.UnsupportedAlgorithm);");
 //             }
-//
+// //
 //             var eccCurve = ECCurve.CreateFromValue(oid);
 //             var eccParams = new ECParameters
 //             {
 //                 Curve = eccCurve
 //             };
-//
+// //
 //             eccParams.Q.X = xCoordinate;
 //             eccParams.Q.Y = yCoordinate;
-//
+// //
 //             var ecdsa = ECDsa.Create(eccParams);
 //             return CheckECDsa(ecdsa);
 //         }
-//
+// //
 //         private static ECDsa CheckECDsa(ECDsa toCheck)
 //         {
 //             var ecParameters = toCheck.ExportParameters(false);
 //             var keyDefinition = KeyDefinitions.GetByOid(ecParameters.Curve.Oid.Value);
 //             int coordinateLength = keyDefinition.LengthInBytes;
-//
+// //
 //             if (ecParameters.Q.X.Length == 0 ||
 //                 ecParameters.Q.X.Length > coordinateLength ||
 //                 ecParameters.Q.Y.Length == 0 ||
@@ -383,15 +383,15 @@
 //             {
 //                 throw new ArgumentException("ExceptionMessages.UnsupportedAlgorithm);");
 //             }
-//
+// //
 //             return toCheck;
 //         }
-//
+// //
 //         private static byte[] ConvertSignature(byte[] signature, int publicKeyBitSize)
 //         {
 //             int bytesNeededForCurve = (publicKeyBitSize + 7) / 8; // Round up to nearest byte
 //             Memory<byte> convertedSignatureBuffer = new byte[2 * bytesNeededForCurve];
-//
+// //
 //             var tlvReader = new TlvReader(signature);
 //             if (!tlvReader.TryReadNestedTlv(out tlvReader, SequenceTag) ||
 //                 !TryCopyNextInteger(tlvReader, convertedSignatureBuffer, bytesNeededForCurve) ||
@@ -399,10 +399,10 @@
 //             {
 //                 throw new ArgumentException("ExceptionMessages.UnsupportedAlgorithm);");
 //             }
-//
+// //
 //             return convertedSignatureBuffer.ToArray();
 //         }
-//
+// //
 //         // Decode the next value in tlvReader, then copy the result into
 //         // signatureValue.
 //         // Copy exactly coordinateLength bytes.
@@ -425,11 +425,11 @@
 //                     {
 //                         break;
 //                     }
-//
+// //
 //                     index++;
 //                     length--;
 //                 }
-//
+// //
 //                 // If we still have data and it is not too long, copy
 //                 if (length > 0 && length <= coordinateLength)
 //                 {
@@ -437,10 +437,10 @@
 //                     return true;
 //                 }
 //             }
-//
+// //
 //             return false;
 //         }
-//
+// //
 //         private static string GetOidByAlgorithm(CoseAlgorithmIdentifier algorithm)
 //         {
 //             return algorithm switch
@@ -449,10 +449,10 @@
 //                 CoseAlgorithmIdentifier.ECDHwHKDF256 => Oids.ECP256,
 //                 CoseAlgorithmIdentifier.ES384 => Oids.ECP384,
 //                 CoseAlgorithmIdentifier.ES512 => Oids.ECP521,
-//                 _ => throw new NotSupportedException("ExceptionMessages.UnsupportedAlgorithm)");
+//                 _ => throw new NotSupportedException("Unsupported algorithm")
 //             };
 //         }
-//
+// //
 //         /// <summary>
 //         /// Clean up
 //         /// </summary>
@@ -467,11 +467,11 @@
 //                 {
 //                     ECDsa.Dispose();
 //                 }
-//
+// //
 //                 _disposed = true;
 //             }
 //         }
-//
+// //
 //         /// <summary>
 //         /// Clean up.
 //         /// </summary>

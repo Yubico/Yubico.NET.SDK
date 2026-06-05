@@ -26,6 +26,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Yubico.YubiKit" />
     <InternalsVisibleTo Include="Yubico.YubiKit.Core.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Fido2" />
   </ItemGroup>
 
 </Project>

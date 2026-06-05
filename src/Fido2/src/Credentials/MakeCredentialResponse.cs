@@ -31,6 +31,7 @@ namespace Yubico.YubiKit.Fido2.Credentials;
 /// - 0x03: attStmt (map) - attestation statement
 /// - 0x04: epAtt (bool, optional) - enterprise attestation used
 /// - 0x05: largeBlobKey (byte string, optional) - large blob key
+/// - 0x06: unsignedExtensionOutputs (map, optional) - unsigned extension outputs (CTAP 2.2 / WebAuthn L3)
 /// </para>
 /// </remarks>
 public sealed class MakeCredentialResponse
@@ -73,6 +74,17 @@ public sealed class MakeCredentialResponse
     /// Gets the CBOR-encoded extension outputs, if any.
     /// </summary>
     public ReadOnlyMemory<byte>? ExtensionOutputs { get; }
+
+    /// <summary>
+    /// Gets the unsigned extension outputs map (CTAP 2.2 / WebAuthn L3 key 6).
+    /// </summary>
+    /// <remarks>
+    /// Per CTAP 2.2 / WebAuthn L3, unsigned extension outputs is a map keyed by extension
+    /// identifier (text string) with values as raw CBOR bytes. Used by extensions
+    /// like previewSign to deliver attestation objects via top-level response.
+    /// Aligned with yubikit-swift, yubikit-android, yubikit-python.
+    /// </remarks>
+    public IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? UnsignedExtensionOutputs { get; }
     
     private MakeCredentialResponse(
         string format,
@@ -81,7 +93,8 @@ public sealed class MakeCredentialResponse
         AttestationStatement attestationStatement,
         bool? enterpriseAttestation,
         ReadOnlyMemory<byte>? largeBlobKey,
-        ReadOnlyMemory<byte>? extensionOutputs)
+        ReadOnlyMemory<byte>? extensionOutputs,
+        IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs)
     {
         Format = format;
         AuthenticatorData = authenticatorData;
@@ -90,6 +103,7 @@ public sealed class MakeCredentialResponse
         EnterpriseAttestation = enterpriseAttestation;
         LargeBlobKey = largeBlobKey;
         ExtensionOutputs = extensionOutputs;
+        UnsignedExtensionOutputs = unsignedExtensionOutputs;
     }
     
     /// <summary>
@@ -100,7 +114,7 @@ public sealed class MakeCredentialResponse
     public static MakeCredentialResponse Decode(ReadOnlyMemory<byte> data)
     {
         var reader = new CborReader(data, CborConformanceMode.Lax);
-        return Decode(reader);
+        return DecodeInternal(reader, data);
     }
     
     /// <summary>
@@ -108,10 +122,18 @@ public sealed class MakeCredentialResponse
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The parsed response.</returns>
-    public static MakeCredentialResponse Decode(CborReader reader)
+    public static MakeCredentialResponse Decode(CborReader reader) =>
+        DecodeInternal(reader, fullCbor: null);
+
+    /// <summary>
+    /// Internal decoder that optionally captures raw CBOR for attestation statement.
+    /// </summary>
+    private static MakeCredentialResponse DecodeInternal(
+        CborReader reader,
+        ReadOnlyMemory<byte>? fullCbor)
     {
         var mapLength = reader.ReadStartMap();
-        
+
         string? format = null;
         byte[]? authDataRaw = null;
         AuthenticatorData? authData = null;
@@ -119,7 +141,12 @@ public sealed class MakeCredentialResponse
         bool? epAtt = null;
         byte[]? largeBlobKey = null;
         ReadOnlyMemory<byte>? extensionOutputs = null;
-        
+        Dictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs = null;
+
+        // Track offset for raw CBOR capture
+        int attStmtOffset = -1;
+        int attStmtLength = -1;
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadInt32();
@@ -137,7 +164,18 @@ public sealed class MakeCredentialResponse
                     }
                     break;
                 case 3: // attStmt
-                    attStmt = AttestationStatement.Decode(reader);
+                    // Calculate offset before reading
+                    var attStmtBytesBefore = reader.BytesRemaining;
+
+                    // Skip the CBOR value to calculate its length
+                    reader.SkipValue();
+
+                    // Calculate how many bytes were consumed
+                    var attStmtBytesConsumed = attStmtBytesBefore - reader.BytesRemaining;
+                    attStmtLength = attStmtBytesConsumed;
+                    attStmtOffset = fullCbor.HasValue
+                        ? fullCbor.Value.Length - attStmtBytesBefore
+                        : -1;
                     break;
                 case 4: // epAtt
                     epAtt = reader.ReadBoolean();
@@ -145,19 +183,52 @@ public sealed class MakeCredentialResponse
                 case 5: // largeBlobKey
                     largeBlobKey = reader.ReadByteString();
                     break;
+                case 6: // unsignedExtensionOutputs (CTAP 2.2 / WebAuthn L3, aligned with sister SDKs)
+                    unsignedExtensionOutputs = new Dictionary<string, ReadOnlyMemory<byte>>();
+                    int? extMapSize = reader.ReadStartMap();
+                    for (int j = 0; j < extMapSize; j++)
+                    {
+                        string extId = reader.ReadTextString();
+
+                        // Capture the raw CBOR value bytes
+                        int bytesRemainingBefore = reader.BytesRemaining;
+                        reader.SkipValue();
+                        int bytesConsumed = bytesRemainingBefore - reader.BytesRemaining;
+
+                        // Extract the value from fullCbor if available
+                        if (fullCbor.HasValue)
+                        {
+                            int valueOffset = fullCbor.Value.Length - bytesRemainingBefore;
+                            unsignedExtensionOutputs[extId] = fullCbor.Value.Slice(valueOffset, bytesConsumed);
+                        }
+                    }
+                    reader.ReadEndMap();
+                    break;
                 default:
                     reader.SkipValue();
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
-        
-        if (format is null || authData is null || authDataRaw is null || attStmt is null)
+
+        if (format is null || authData is null || authDataRaw is null)
         {
             throw new InvalidOperationException("MakeCredential response missing required fields.");
         }
-        
+
+        // Decode attestation statement using the format-aware typed decoder
+        if (fullCbor.HasValue && attStmtOffset >= 0 && attStmtLength > 0)
+        {
+            var rawAttStmt = fullCbor.Value.Slice(attStmtOffset, attStmtLength);
+            var attestationFormat = ParseAttestationFormat(format);
+            attStmt = AttestationStatement.Decode(attestationFormat, rawAttStmt);
+        }
+        else
+        {
+            throw new InvalidOperationException("AttestationStatement decoding requires fullCbor parameter.");
+        }
+
         return new MakeCredentialResponse(
             format,
             authData,
@@ -165,9 +236,25 @@ public sealed class MakeCredentialResponse
             attStmt,
             epAtt,
             largeBlobKey,
-            extensionOutputs);
+            extensionOutputs,
+            unsignedExtensionOutputs);
     }
-    
+
+    /// <summary>
+    /// Parses the attestation format string into the AttestationFormat type.
+    /// </summary>
+    private static AttestationFormat ParseAttestationFormat(string format) => format switch
+    {
+        "packed" => AttestationFormat.Packed,
+        "fido-u2f" => AttestationFormat.FidoU2F,
+        "apple" => AttestationFormat.Apple,
+        "none" => AttestationFormat.None,
+        "android-key" => AttestationFormat.AndroidKey,
+        "android-safetynet" => AttestationFormat.AndroidSafetynet,
+        "tpm" => AttestationFormat.Tpm,
+        _ => AttestationFormat.Other(format)
+    };
+
     /// <summary>
     /// Gets the credential ID from the attested credential data.
     /// </summary>
@@ -188,115 +275,4 @@ public sealed class MakeCredentialResponse
     /// <returns>The AAGUID, or <see cref="Guid.Empty"/> if not present.</returns>
     public Guid GetAaguid() =>
         AuthenticatorData.AttestedCredentialData?.Aaguid ?? Guid.Empty;
-}
-
-/// <summary>
-/// Represents an attestation statement from a makeCredential response.
-/// </summary>
-public sealed class AttestationStatement
-{
-    /// <summary>
-    /// Gets the attestation signature.
-    /// </summary>
-    public ReadOnlyMemory<byte>? Signature { get; }
-    
-    /// <summary>
-    /// Gets the attestation certificate chain.
-    /// </summary>
-    public IReadOnlyList<ReadOnlyMemory<byte>>? X5c { get; }
-    
-    /// <summary>
-    /// Gets the ECDAA key ID (for ECDAA attestation).
-    /// </summary>
-    public ReadOnlyMemory<byte>? EcdaaKeyId { get; }
-    
-    /// <summary>
-    /// Gets the algorithm used for the signature.
-    /// </summary>
-    public int? Algorithm { get; }
-    
-    /// <summary>
-    /// Gets the raw CBOR representation of the attestation statement.
-    /// </summary>
-    public ReadOnlyMemory<byte> RawData { get; }
-    
-    /// <summary>
-    /// Gets a value indicating whether this is a "none" attestation (self-attestation).
-    /// </summary>
-    public bool IsNone => Signature is null && X5c is null;
-    
-    private AttestationStatement(
-        ReadOnlyMemory<byte>? signature,
-        IReadOnlyList<ReadOnlyMemory<byte>>? x5c,
-        ReadOnlyMemory<byte>? ecdaaKeyId,
-        int? algorithm,
-        ReadOnlyMemory<byte> rawData)
-    {
-        Signature = signature;
-        X5c = x5c;
-        EcdaaKeyId = ecdaaKeyId;
-        Algorithm = algorithm;
-        RawData = rawData;
-    }
-    
-    /// <summary>
-    /// Decodes an attestation statement from CBOR.
-    /// </summary>
-    /// <param name="reader">The CBOR reader.</param>
-    /// <returns>The parsed attestation statement.</returns>
-    public static AttestationStatement Decode(CborReader reader)
-    {
-        // Capture raw data by encoding what we read
-        var startPosition = reader.BytesRemaining;
-        
-        var mapLength = reader.ReadStartMap();
-        
-        byte[]? sig = null;
-        List<ReadOnlyMemory<byte>>? x5c = null;
-        byte[]? ecdaaKeyId = null;
-        int? alg = null;
-        
-        for (var i = 0; i < mapLength; i++)
-        {
-            var key = reader.ReadTextString();
-            switch (key)
-            {
-                case "sig":
-                    sig = reader.ReadByteString();
-                    break;
-                case "x5c":
-                    x5c = [];
-                    var certCount = reader.ReadStartArray();
-                    for (var j = 0; j < certCount; j++)
-                    {
-                        x5c.Add(reader.ReadByteString());
-                    }
-                    reader.ReadEndArray();
-                    break;
-                case "ecdaaKeyId":
-                    ecdaaKeyId = reader.ReadByteString();
-                    break;
-                case "alg":
-                    alg = reader.ReadInt32();
-                    break;
-                default:
-                    reader.SkipValue();
-                    break;
-            }
-        }
-        
-        reader.ReadEndMap();
-        
-        var bytesConsumed = startPosition - reader.BytesRemaining;
-        // Note: We don't have easy access to the raw bytes from CborReader,
-        // so RawData will be empty for now. In practice, callers should use
-        // the full response raw data if needed.
-        var rawData = ReadOnlyMemory<byte>.Empty;
-        
-        // Explicitly convert null byte arrays to null ReadOnlyMemory<byte>?
-        ReadOnlyMemory<byte>? sigMemory = sig is not null ? (ReadOnlyMemory<byte>?)new ReadOnlyMemory<byte>(sig) : (ReadOnlyMemory<byte>?)null;
-        ReadOnlyMemory<byte>? ecdaaKeyIdMemory = ecdaaKeyId is not null ? (ReadOnlyMemory<byte>?)new ReadOnlyMemory<byte>(ecdaaKeyId) : (ReadOnlyMemory<byte>?)null;
-        
-        return new AttestationStatement(sigMemory, x5c, ecdaaKeyIdMemory, alg, rawData);
-    }
 }

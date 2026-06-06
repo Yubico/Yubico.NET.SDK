@@ -19,8 +19,8 @@ Use this note as the handoff record for Phase 10 of module consolidation.
 - Builds run: none
 - Integration tests run: none
 - Result: passed docs-only verification; Cato returned `pass` with info-level follow-up guardrails
-- Commit: pending
-- `/Ping` sent after successful phase: pending
+- Commit: `2e5c3537 docs: add module consolidation follow-up plan`
+- `/Ping` sent after successful phase: pending closeout summary
 
 ## What Worked
 
@@ -144,5 +144,5 @@ Use this note as the handoff record for Phase 10 of module consolidation.
 - House-style update needed: consider documenting layered support ownership after Phase 13
 - Next phase recommendation: Phase 11 Core SCP chained-response phase ISA
 - Learning note path: `docs/plans/module-consolidation/phase-10-follow-up-program-learnings.md`
-- Commit: pending
-- `/Ping` status: pending
+- Commit: `2e5c3537 docs: add module consolidation follow-up plan`
+- `/Ping` status: pending closeout summary

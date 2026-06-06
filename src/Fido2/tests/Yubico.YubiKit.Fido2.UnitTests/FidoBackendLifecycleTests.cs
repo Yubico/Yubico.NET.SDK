@@ -14,25 +14,25 @@ public class FidoBackendLifecycleTests
     }
 
     [Fact]
-    public void SmartCardFidoBackend_DoesNotAdvertiseResourceOwnership()
+    public void SmartCardBackend_DoesNotAdvertiseResourceOwnership()
     {
-        Assert.False(typeof(IDisposable).IsAssignableFrom(typeof(SmartCardFidoBackend)));
+        Assert.False(typeof(IDisposable).IsAssignableFrom(typeof(SmartCardBackend)));
     }
 
     [Fact]
-    public void FidoHidBackend_DoesNotAdvertiseResourceOwnership()
+    public void HidBackend_DoesNotAdvertiseResourceOwnership()
     {
-        Assert.False(typeof(IDisposable).IsAssignableFrom(typeof(FidoHidBackend)));
+        Assert.False(typeof(IDisposable).IsAssignableFrom(typeof(HidBackend)));
     }
 
     [Fact]
-    public async Task SmartCardFidoBackend_SendCborAsync_UsesBorrowedProtocol()
+    public async Task SmartCardBackend_SendCborAsync_UsesBorrowedProtocol()
     {
         // Arrange
         var protocol = Substitute.For<ISmartCardProtocol>();
         protocol.TransmitAndReceiveAsync(Arg.Any<ApduCommand>(), cancellationToken: TestContext.Current.CancellationToken)
             .Returns(new ApduResponse(new byte[] { 0x00, 0x90, 0x00 }));
-        var backend = new SmartCardFidoBackend(protocol);
+        var backend = new SmartCardBackend(protocol);
 
         // Act
         var response = await backend.SendCborAsync(new byte[] { 0x04 }, TestContext.Current.CancellationToken);
@@ -46,13 +46,13 @@ public class FidoBackendLifecycleTests
     }
 
     [Fact]
-    public async Task FidoHidBackend_SendCborAsync_UsesBorrowedProtocol()
+    public async Task HidBackend_SendCborAsync_UsesBorrowedProtocol()
     {
         // Arrange
         var protocol = Substitute.For<IFidoHidProtocol>();
         protocol.SendVendorCommandAsync(Arg.Any<byte>(), Arg.Any<ReadOnlyMemory<byte>>(), TestContext.Current.CancellationToken)
             .Returns(new byte[] { 0x00 });
-        var backend = new FidoHidBackend(protocol);
+        var backend = new HidBackend(protocol);
 
         // Act
         var response = await backend.SendCborAsync(new byte[] { 0x04 }, TestContext.Current.CancellationToken);

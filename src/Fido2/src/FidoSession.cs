@@ -125,7 +125,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         {
             ISmartCardConnection sc => await CreateSmartCardBackendAsync(sc, cancellationToken)
                 .ConfigureAwait(false),
-            IFidoHidConnection fido => CreateFidoHidBackend(fido),
+            IFidoHidConnection fido => CreateHidBackend(fido),
             _ => throw new NotSupportedException(
                 $"Connection type {_connection.GetType().Name} is not supported. " +
                 "Use ISmartCardConnection or IFidoHidConnection.")
@@ -154,7 +154,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         // If SCP was established, recreate backend with wrapped protocol
         if (IsAuthenticated && Protocol is ISmartCardProtocol scpProtocol)
         {
-            _backend = new SmartCardFidoBackend(scpProtocol);
+            _backend = new SmartCardBackend(scpProtocol);
         }
 
         _logger.LogDebug(
@@ -387,18 +387,18 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
                 ex);
         }
 
-        var backend = new SmartCardFidoBackend(smartCardProtocol);
+        var backend = new SmartCardBackend(smartCardProtocol);
         return (backend, protocol);
     }
 
-    private static (IFidoBackend backend, IProtocol protocol) CreateFidoHidBackend(
+    private static (IFidoBackend backend, IProtocol protocol) CreateHidBackend(
         IFidoHidConnection connection)
     {
         var protocol = FidoProtocolFactory
             .Create()
             .Create(connection);
 
-        var backend = new FidoHidBackend(protocol);
+        var backend = new HidBackend(protocol);
         return (backend, protocol);
     }
 

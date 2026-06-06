@@ -22,18 +22,18 @@ namespace Yubico.YubiKit.Fido2.Backend;
 /// <summary>
 /// FIDO backend that communicates over FIDO HID (CTAPHID_CBOR command).
 /// </summary>
-internal sealed class FidoHidBackend : IFidoBackend
+internal sealed class HidBackend : IFidoBackend
 {
     private const byte CtapHidCbor = 0x10;  // CTAPHID_CBOR command
 
     private readonly IFidoHidProtocol _protocol;
     private readonly ILogger _logger;
 
-    public FidoHidBackend(IFidoHidProtocol protocol)
+    public HidBackend(IFidoHidProtocol protocol)
     {
         ArgumentNullException.ThrowIfNull(protocol);
         _protocol = protocol;
-        _logger = YubiKitLogging.LoggerFactory.CreateLogger(nameof(FidoHidBackend));
+        _logger = YubiKitLogging.LoggerFactory.CreateLogger(nameof(HidBackend));
     }
 
     public async Task<ReadOnlyMemory<byte>> SendCborAsync(

@@ -33,7 +33,7 @@ public class FidoTransportTests
     /// <summary>
     /// Tests that a FIDO2 session created over SmartCard (CCID) transport
     /// can successfully create and verify a credential end-to-end.
-    /// This validates the full SmartCardFidoBackend path for credential operations.
+    /// This validates the full SmartCardBackend path for credential operations.
     /// </summary>
     /// <remarks>
     /// FIDO2 over SmartCard is supported when the connected authenticator exposes the FIDO2 AID.

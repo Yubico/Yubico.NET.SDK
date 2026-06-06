@@ -23,18 +23,18 @@ namespace Yubico.YubiKit.Fido2.Backend;
 /// <summary>
 /// FIDO backend that communicates over SmartCard (CCID) transport using ISO 7816-4 APDUs.
 /// </summary>
-internal sealed class SmartCardFidoBackend : IFidoBackend
+internal sealed class SmartCardBackend : IFidoBackend
 {
     private const byte CtapHidCbor = 0x10;  // Used as APDU INS
 
     private readonly ISmartCardProtocol _protocol;
     private readonly ILogger _logger;
 
-    public SmartCardFidoBackend(ISmartCardProtocol protocol)
+    public SmartCardBackend(ISmartCardProtocol protocol)
     {
         ArgumentNullException.ThrowIfNull(protocol);
         _protocol = protocol;
-        _logger = YubiKitLogging.LoggerFactory.CreateLogger(nameof(SmartCardFidoBackend));
+        _logger = YubiKitLogging.LoggerFactory.CreateLogger(nameof(SmartCardBackend));
     }
 
     /// <summary>

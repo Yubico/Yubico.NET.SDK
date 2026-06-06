@@ -39,8 +39,8 @@ Yubico.YubiKit.Fido2/
 │   ├── IYubiKeyExtensions.cs       # Extension methods for IYubiKey
 │   ├── Backend/                    # Transport backends
 │   │   ├── IFidoBackend.cs
-│   │   ├── FidoHidBackend.cs       # HID transport
-│   │   └── SmartCardFidoBackend.cs # SmartCard/CCID transport
+│   │   ├── HidBackend.cs           # HID transport
+│   │   └── SmartCardBackend.cs     # SmartCard/CCID transport
 │   ├── Cbor/                       # CBOR serialization
 │   │   ├── CtapRequestBuilder.cs   # Fluent CBOR request builder
 │   │   └── CtapResponseParser.cs   # CBOR response parsing utilities

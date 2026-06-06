@@ -28,12 +28,12 @@ FIDO2 tests must be aware of transport differences:
 - Use `ISmartCardConnection` (CCID interface)
 - Limited NFC-specific test scenarios
 - Some features may not be available
-- Current PC/SC SmartCard connections may not report `Transport.Nfc`, so SmartCard tests should not claim NFC-specific coverage unless they require NFC explicitly
+- NFC-specific coverage requires a current PC/SC connection that reports `Transport.Nfc`; this is transport evidence, not YubiKey NFC capability metadata
 
 **USB SmartCard Tests:**
 - Use `ISmartCardConnection` only on firmware 5.8.0+ when the FIDO2 AID is exposed
 - Prefer HID FIDO for USB FIDO2 coverage unless the test specifically validates the SmartCard APDU path
-- FIDO GetInfo can report a `0.x` sentinel version even when Management reports the real firmware; treat `Major == 0` as modern for firmware gates
+- FIDO GetInfo can report a `0.x` sentinel version even when Management reports the real firmware; firmware gates use `Feature.IsSupportedByFirmware(...)` so sentinel versions are treated as modern
 - FIDO2 SmartCard session creation selects the FIDO2 AID before the firmware gate because firmware comes from CTAP GetInfo over the selected application
 
 ### User Interaction

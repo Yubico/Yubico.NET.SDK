@@ -43,10 +43,14 @@ public class FidoSessionTests
         FidoSession.EnsureSmartCardTransportSupported(Transport.Usb, new FirmwareVersion(5, 8, 0));
     }
 
-    [Fact]
-    public void EnsureSmartCardTransportSupported_UsbSentinelFirmware_Succeeds()
+    [Theory]
+    [InlineData(0, 0, 0)]
+    [InlineData(0, 0, 1)]
+    [InlineData(0, 1, 0)]
+    [InlineData(0, 255, 255)]
+    public void EnsureSmartCardTransportSupported_UsbSentinelFirmware_Succeeds(int major, int minor, int patch)
     {
-        FidoSession.EnsureSmartCardTransportSupported(Transport.Usb, new FirmwareVersion(0, 0, 1));
+        FidoSession.EnsureSmartCardTransportSupported(Transport.Usb, new FirmwareVersion(major, minor, patch));
     }
 
     [Fact]

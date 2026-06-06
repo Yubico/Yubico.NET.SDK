@@ -286,7 +286,13 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
         }
     }
 
-    public Transport Transport => Transport.Usb; // TODO determine transport, currently only supports USB
+    public Transport Transport => smartCardDevice.Kind switch
+    {
+        PscsConnectionKind.Nfc => Transport.Nfc,
+        PscsConnectionKind.Usb => Transport.Usb,
+        PscsConnectionKind.Unknown or PscsConnectionKind.Any => Transport.Usb,
+        _ => Transport.Usb
+    };
 
     public bool SupportsExtendedApdu() =>
         true; // TODO determine who supports extended APDUs https://yubico.atlassian.net/browse/YESDK-1499

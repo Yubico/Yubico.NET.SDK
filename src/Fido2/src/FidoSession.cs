@@ -76,6 +76,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     /// </summary>
     public static readonly Feature FeatureEncIdentifier = new("Encrypted Identifier", 5, 7, 0);
 
+    private static readonly Feature FeatureFido2UsbSmartCard = new("FIDO2 over USB SmartCard", 5, 8, 0);
+
     private readonly IConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
     private readonly ILogger _logger;
@@ -406,12 +408,12 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         Transport transport,
         FirmwareVersion firmwareVersion)
     {
-        // FIDO GetInfo may report a 0.x sentinel version (for example 0.0.1)
-        // when Management reports the real firmware. Match ApplicationSession's
-        // feature-gate behavior and treat Major == 0 as modern.
-        // NFC remains allowed when the connection reports it explicitly; current
-        // PC/SC SmartCard connections may not distinguish NFC from USB.
-        if (transport == Transport.Nfc || firmwareVersion.Major == 0 || firmwareVersion.IsAtLeast(FirmwareVersion.V5_8_0))
+        if (transport == Transport.Nfc)
+        {
+            return;
+        }
+
+        if (FeatureFido2UsbSmartCard.IsSupportedByFirmware(firmwareVersion))
         {
             return;
         }

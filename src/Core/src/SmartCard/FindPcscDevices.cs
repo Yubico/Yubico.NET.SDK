@@ -57,10 +57,13 @@ public class FindPcscDevices(ILogger<FindPcscDevices> logger) : IFindPcscDevices
             [
                 .. from reader in readerStates
                 where (reader.GetEventState() & SCARD_STATE.PRESENT) != 0
-                where ProductAtrs.AllYubiKeys.Contains(reader.GetAtr())
+                let atr = reader.GetAtr()
+                where ProductAtrs.AllYubiKeys.Contains(atr)
                 select new PcscDevice
                 {
-                    ReaderName = reader.GetReaderName(), Atr = reader.GetAtr(), Kind = PscsConnectionKind.Usb
+                    ReaderName = reader.GetReaderName(),
+                    Atr = atr,
+                    Kind = PcscConnectionKindDetector.Detect(atr)
                 }
             ];
         }

@@ -295,7 +295,7 @@ Different features require specific firmware versions:
 | Transport | Connection Type | Use Case |
 |-----------|----------------|----------|
 | USB HID | `IFidoHidConnection` | Primary FIDO2 interface |
-| SmartCard | `ISmartCardConnection` | NFC and USB FIDO2 APDU path when the FIDO2 AID is exposed; prefer HID for ordinary USB FIDO2 coverage |
+| SmartCard | `ISmartCardConnection` | FIDO2 APDU path when the FIDO2 AID is exposed; NFC is allowed when the current PC/SC connection reports `Transport.Nfc`, while USB SmartCard requires firmware 5.8.0+; prefer HID for ordinary USB FIDO2 coverage |
 
 ## Common Patterns
 

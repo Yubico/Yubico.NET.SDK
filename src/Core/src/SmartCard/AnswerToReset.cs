@@ -19,6 +19,8 @@ public class AnswerToReset
 {
     private readonly byte[] _bytes;
 
+    internal ReadOnlySpan<byte> Bytes => _bytes;
+
     public AnswerToReset(ReadOnlySpan<byte> bytes)
     {
         _bytes = bytes.ToArray();

@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Security.Cryptography;
-using System.Text;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Oath;
 
@@ -10,31 +9,41 @@ namespace Yubico.YubiKit.Cli.Commands.Oath;
 
 public static class OathHelpers
 {
+    internal const string ArgvPasswordWarning =
+        "Warning: Passing passwords on the command line is inherently insecure and intended only for testing or demos. Prefer the interactive prompt, for example: yk oath accounts list";
+
     public static string FormatCredentialName(string? issuer, string name) =>
         issuer is not null ? $"{issuer}:{name}" : name;
 
-    public static async Task<bool> UnlockIfNeededAsync(IOathSession session, string? password)
+    public static Task<bool> UnlockIfNeededAsync(IOathSession session, string? password) =>
+        UnlockIfNeededAsync(session, password, () => PinPrompt.PromptForCredential("OATH password"));
+
+    internal static async Task<bool> UnlockIfNeededAsync(
+        IOathSession session,
+        string? password,
+        Func<SecureCredential> promptCredentialFactory)
     {
         if (!session.IsLocked)
         {
             return true;
         }
 
-        if (string.IsNullOrEmpty(password))
-        {
-            password = PinPrompt.PromptForPin("OATH password");
-        }
-
-        if (string.IsNullOrEmpty(password))
-        {
-            OutputHelpers.WriteError("OATH application is password-protected. Provide --password.");
-            return false;
-        }
-
+        var hasArgvPassword = !string.IsNullOrEmpty(password);
+        SecureCredential? passwordBytes = null;
         byte[]? key = null;
         try
         {
-            key = session.DeriveKey(Encoding.UTF8.GetBytes(password));
+            if (hasArgvPassword)
+            {
+                Console.Error.WriteLine(ArgvPasswordWarning);
+                passwordBytes = SecureCredential.FromUtf8String(password!);
+            }
+            else
+            {
+                passwordBytes = promptCredentialFactory();
+            }
+
+            key = session.DeriveKey(passwordBytes.Memory);
             await session.ValidateAsync(key);
             return true;
         }
@@ -49,6 +58,8 @@ public static class OathHelpers
             {
                 CryptographicOperations.ZeroMemory(key);
             }
+
+            passwordBytes?.Dispose();
         }
     }
 

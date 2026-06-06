@@ -29,7 +29,10 @@ FIDO2 tests must be aware of transport differences:
 - Limited NFC-specific test scenarios
 - Some features may not be available
 
-⚠️ **USB CCID is NOT supported for FIDO2** - tests using USB SmartCard connections will fail
+**USB SmartCard Tests:**
+- Use `ISmartCardConnection` only on firmware 5.8.0+ when the FIDO2 AID is exposed
+- Prefer HID FIDO for USB FIDO2 coverage unless the test specifically validates the SmartCard APDU path
+- FIDO GetInfo can report a `0.x` sentinel version even when Management reports the real firmware; treat `Major == 0` as modern for firmware gates
 
 ### User Interaction
 
@@ -137,4 +140,3 @@ Assert.True(response.Extensions.CredProtect.HasValue);
 - **User interaction required**: Tests involving touch/PIN need manual intervention or test automation
 - **Firmware version gates**: Some tests only work on specific firmware versions (check AuthenticatorInfo)
 - **Resident key limits**: YubiKeys have limited storage (~25-32 credentials)
-

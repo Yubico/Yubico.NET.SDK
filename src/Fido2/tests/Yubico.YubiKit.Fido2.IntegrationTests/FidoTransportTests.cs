@@ -31,29 +31,23 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 public class FidoTransportTests
 {
     /// <summary>
-    /// Tests that a FIDO2 session created over NFC SmartCard (CCID) transport
+    /// Tests that a FIDO2 session created over SmartCard (CCID) transport
     /// can successfully create and verify a credential end-to-end.
     /// This validates the full SmartCardFidoBackend path for credential operations.
     /// </summary>
     /// <remarks>
-    /// FIDO2 over SmartCard is only supported via NFC - USB CCID is intentionally
-    /// blocked because YubiKey exposes FIDO2 via USB HID FIDO interface, not USB CCID.
+    /// FIDO2 over SmartCard is supported when the connected authenticator exposes the FIDO2 AID.
     /// </remarks>
     [SkippableTheory]
-    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireNfc = true)]
-    [Trait("RequiresNfc", "true")]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_OverNfcSmartCard_CreatesCredentialSuccessfully(YubiKeyTestState state)
     {
-        // The RequireNfc filter checks if the device supports NFC, not if it's
-        // currently connected via NFC. A USB-connected YubiKey 5 NFC will pass
-        // the filter but fail when attempting SmartCard transport over USB.
-        // Skip at runtime when the actual connection type is USB (not NFC SmartCard).
         if (state.ConnectionType is not ConnectionType.SmartCard)
         {
             Skip.If(true,
-                "This test requires an NFC SmartCard connection, but the device is connected via " +
-                $"{state.ConnectionType}. Connect the YubiKey via NFC to run this test.");
+                "This test requires a SmartCard connection, but the device is connected via " +
+                $"{state.ConnectionType}.");
             return;
         }
 
@@ -63,64 +57,60 @@ public class FidoTransportTests
             {
                 try
                 {
-                using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
+                    using var clientPin = await FidoTestHelpers.SetOrVerifyPinAsync(session, FidoTestData.PinUtf8);
 
-                var rp = FidoTestData.CreateRelyingParty();
-                var user = FidoTestData.CreateUser();
-                var challenge = FidoTestData.GenerateChallenge();
+                    var rp = FidoTestData.CreateRelyingParty();
+                    var user = FidoTestData.CreateUser();
+                    var challenge = FidoTestData.GenerateChallenge();
 
-                var info = await session.GetInfoAsync();
-                var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
-                                           info.Versions.Contains("FIDO_2_1_PRE");
+                    var info = await session.GetInfoAsync();
+                    var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
+                                               info.Versions.Contains("FIDO_2_1_PRE");
 
-                byte[] pinToken;
-                if (supportsPermissions)
-                {
-                    pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        FidoTestData.PinUtf8,
-                        PinUvAuthTokenPermissions.MakeCredential,
-                        FidoTestData.RpId);
-                }
-                else
-                {
-                    pinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
-                }
-
-                var pinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
-                    clientPin.Protocol, pinToken, challenge);
-
-                var result = await session.MakeCredentialAsync(
-                    clientDataHash: challenge,
-                    rp: rp,
-                    user: user,
-                    pubKeyCredParams: FidoTestData.ES256Params,
-                    options: new MakeCredentialOptions
+                    byte[] pinToken;
+                    if (supportsPermissions)
                     {
-                        ResidentKey = true,
-                        PinUvAuthParam = pinUvAuthParam,
-                        PinUvAuthProtocol = clientPin.Protocol.Version
-                    });
+                        pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+                            FidoTestData.PinUtf8,
+                            PinUvAuthTokenPermissions.MakeCredential,
+                            FidoTestData.RpId);
+                    }
+                    else
+                    {
+                        pinToken = await clientPin.GetPinTokenAsync(FidoTestData.PinUtf8);
+                    }
 
-                Assert.NotNull(result);
-                Assert.NotNull(result.AuthenticatorData);
-                Assert.True(result.GetCredentialId().Length > 0,
-                    "Credential ID should not be empty for NFC credential");
-            }
-            finally
-            {
-                await FidoTestHelpers.DeleteAllCredentialsForRpAsync(
-                    session, FidoTestData.RpId, FidoTestData.PinUtf8);
-            }
+                    var pinUvAuthParam = FidoTestHelpers.ComputeMakeCredentialAuthParam(
+                        clientPin.Protocol, pinToken, challenge);
+
+                    var result = await session.MakeCredentialAsync(
+                        clientDataHash: challenge,
+                        rp: rp,
+                        user: user,
+                        pubKeyCredParams: FidoTestData.ES256Params,
+                        options: new MakeCredentialOptions
+                        {
+                            ResidentKey = true,
+                            PinUvAuthParam = pinUvAuthParam,
+                            PinUvAuthProtocol = clientPin.Protocol.Version
+                        });
+
+                    Assert.NotNull(result);
+                    Assert.NotNull(result.AuthenticatorData);
+                    Assert.True(result.GetCredentialId().Length > 0,
+                        "Credential ID should not be empty for SmartCard credential");
+                }
+                finally
+                {
+                    await FidoTestHelpers.DeleteAllCredentialsForRpAsync(
+                        session, FidoTestData.RpId, FidoTestData.PinUtf8);
+                }
             });
         }
         catch (NotSupportedException)
         {
-            // FIDO2 over USB CCID is intentionally not supported. If the device
-            // is connected via USB and matched as SmartCard, the session creation
-            // throws NotSupportedException. Skip gracefully.
             Skip.If(true,
-                "FIDO2 SmartCard session failed — likely USB CCID, which is not supported for FIDO2. " +
-                "Connect the YubiKey via NFC to run this test.");
+                "FIDO2 SmartCard session failed because the connected authenticator did not expose the FIDO2 AID or does not support USB SmartCard FIDO2 on this firmware.");
         }
     }
 

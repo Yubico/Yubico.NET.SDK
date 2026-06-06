@@ -15,11 +15,13 @@ The FIDO2 module implements CTAP 2.1/2.3 (Client to Authenticator Protocol) for 
 
 **Transports Supported:**
 - FIDO HID protocol over USB (primary transport)
-- SmartCard (CCID) via NFC only (USB CCID is NOT supported for FIDO2)
+- SmartCard (CCID) via NFC, plus USB SmartCard on firmware 5.8.0+ when the FIDO2 AID is exposed
 
 > **Important:** FIDO2 over USB uses the HID FIDO interface, NOT the CCID/SmartCard interface. 
-> The SmartCard transport only works over NFC. Attempting to create a FidoSession with a USB CCID 
-> connection will throw `NotSupportedException`.
+> USB SmartCard FIDO2 is only allowed on firmware 5.8.0+; older USB-connected YubiKeys must use
+> `IFidoHidConnection`.
+> FIDO GetInfo can report a `0.x` sentinel firmware (for example `0.0.1`) on devices whose real
+> firmware is available through Management; match `ApplicationSession.IsSupported` and treat `Major == 0` as modern.
 
 ## Architecture Overview
 

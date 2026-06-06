@@ -22,11 +22,11 @@ namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Prompts;
 
 /// <summary>
 /// Handles YubiKey device discovery and selection for FIDO2 operations.
-/// Supports FIDO HID (USB) and SmartCard (NFC) transports.
+/// Supports FIDO HID and SmartCard transports.
 /// </summary>
 /// <remarks>
-/// FIDO2 is NOT available over OTP HID. USB uses the FIDO HID interface;
-/// SmartCard transport is supported only over NFC.
+/// FIDO2 is NOT available over OTP HID. USB should prefer the FIDO HID interface;
+/// SmartCard transport is available over NFC and USB on firmware 5.8.0+ when the FIDO2 AID is exposed.
 /// </remarks>
 public static class DeviceSelector
 {
@@ -98,7 +98,7 @@ public static class DeviceSelector
             }
 
             AnsiConsole.MarkupLine("[red]No YubiKey detected. Please insert a YubiKey and try again.[/]");
-            AnsiConsole.MarkupLine("[grey]FIDO2 supports: FIDO HID (USB), SmartCard (NFC)[/]");
+            AnsiConsole.MarkupLine("[grey]FIDO2 supports: FIDO HID, SmartCard (USB requires firmware 5.8+)[/]");
 
             if (!AnsiConsole.Confirm("Retry?", defaultValue: true))
             {

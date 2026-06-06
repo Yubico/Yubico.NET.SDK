@@ -22,33 +22,26 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Fido2.IntegrationTests;
 
 /// <summary>
-/// Integration tests for FIDO2 over NFC SmartCard (CCID) transport.
+/// Integration tests for FIDO2 over SmartCard (CCID) transport.
 /// </summary>
 /// <remarks>
-/// These tests require a physical NFC reader connected to the system.
-/// FIDO2 over SmartCard is only supported via NFC - USB CCID is intentionally blocked
-/// because YubiKey exposes FIDO2 via USB HID FIDO interface, not USB CCID.
+/// These tests exercise the SmartCard FIDO2 APDU path when the connected authenticator exposes the FIDO2 AID.
 /// </remarks>
 [Trait("Category", "Integration")]
-[Trait("RequiresNfc", "true")]
 public class FidoNfcTests
 {
     /// <summary>
-    /// Tests that creating a FidoSession over NFC SmartCard succeeds and returns valid info.
+    /// Tests that creating a FidoSession over SmartCard succeeds and returns valid info.
     /// </summary>
     [SkippableTheory]
-    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireNfc = true)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task CreateFidoSession_With_NfcSmartCard_SucceedsAndReturnsInfo(YubiKeyTestState state)
     {
-        // The RequireNfc filter checks if the device supports NFC, not if it's
-        // currently connected via NFC. A USB-connected YubiKey 5 NFC will pass
-        // the filter but fail when attempting SmartCard transport over USB.
-        // Skip at runtime when the actual connection type is USB (not NFC SmartCard).
         if (state.ConnectionType is not ConnectionType.SmartCard)
         {
             Skip.If(true,
-                "This test requires an NFC SmartCard connection, but the device is connected via " +
-                $"{state.ConnectionType}. Connect the YubiKey via NFC to run this test.");
+                "This test requires a SmartCard connection, but the device is connected via " +
+                $"{state.ConnectionType}.");
             return;
         }
 
@@ -65,29 +58,22 @@ public class FidoNfcTests
         }
         catch (NotSupportedException)
         {
-            // FIDO2 over USB CCID is intentionally not supported. If the device
-            // is connected via USB and matched as SmartCard, the session creation
-            // throws here. Skip the test in that case.
-            Skip.If(true, "FIDO2 over USB CCID is not supported; this test requires NFC.");
+            Skip.If(true, "FIDO2 SmartCard session failed because the connected authenticator did not expose the FIDO2 AID or does not support USB SmartCard FIDO2 on this firmware.");
         }
     }
 
     /// <summary>
-    /// Tests that GetInfo over NFC SmartCard returns valid FIDO2 versions.
+    /// Tests that GetInfo over SmartCard returns valid FIDO2 versions.
     /// </summary>
     [SkippableTheory]
-    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireNfc = true)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetInfo_Over_NfcSmartCard_ReturnsValidFido2Version(YubiKeyTestState state)
     {
-        // The RequireNfc filter checks if the device supports NFC, not if it's
-        // currently connected via NFC. A USB-connected YubiKey 5 NFC will pass
-        // the filter but fail when attempting SmartCard transport over USB.
-        // Skip at runtime when the actual connection type is USB (not NFC SmartCard).
         if (state.ConnectionType is not ConnectionType.SmartCard)
         {
             Skip.If(true,
-                "This test requires an NFC SmartCard connection, but the device is connected via " +
-                $"{state.ConnectionType}. Connect the YubiKey via NFC to run this test.");
+                "This test requires a SmartCard connection, but the device is connected via " +
+                $"{state.ConnectionType}.");
             return;
         }
 
@@ -108,29 +94,22 @@ public class FidoNfcTests
         }
         catch (NotSupportedException)
         {
-            // FIDO2 over USB CCID is intentionally not supported. If the device
-            // is connected via USB and matched as SmartCard, the session creation
-            // throws here. Skip the test in that case.
-            Skip.If(true, "FIDO2 over USB CCID is not supported; this test requires NFC.");
+            Skip.If(true, "FIDO2 SmartCard session failed because the connected authenticator did not expose the FIDO2 AID or does not support USB SmartCard FIDO2 on this firmware.");
         }
     }
 
     /// <summary>
-    /// Tests that GetInfo over NFC returns supported algorithms including ES256.
+    /// Tests that GetInfo over SmartCard returns supported algorithms including ES256.
     /// </summary>
     [SkippableTheory]
-    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireNfc = true)]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetInfo_Over_NfcSmartCard_ReturnsSupportedAlgorithms(YubiKeyTestState state)
     {
-        // The RequireNfc filter checks if the device supports NFC, not if it's
-        // currently connected via NFC. A USB-connected YubiKey 5 NFC will pass
-        // the filter but fail when attempting SmartCard transport over USB.
-        // Skip at runtime when the actual connection type is USB (not NFC SmartCard).
         if (state.ConnectionType is not ConnectionType.SmartCard)
         {
             Skip.If(true,
-                "This test requires an NFC SmartCard connection, but the device is connected via " +
-                $"{state.ConnectionType}. Connect the YubiKey via NFC to run this test.");
+                "This test requires a SmartCard connection, but the device is connected via " +
+                $"{state.ConnectionType}.");
             return;
         }
 
@@ -150,10 +129,7 @@ public class FidoNfcTests
         }
         catch (NotSupportedException)
         {
-            // FIDO2 over USB CCID is intentionally not supported. If the device
-            // is connected via USB and matched as SmartCard, the session creation
-            // throws here. Skip the test in that case.
-            Skip.If(true, "FIDO2 over USB CCID is not supported; this test requires NFC.");
+            Skip.If(true, "FIDO2 SmartCard session failed because the connected authenticator did not expose the FIDO2 AID or does not support USB SmartCard FIDO2 on this firmware.");
         }
     }
 }

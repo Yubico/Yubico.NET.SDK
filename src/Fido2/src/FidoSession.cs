@@ -137,6 +137,11 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
         var firmwareVersion = info.FirmwareVersion ?? new FirmwareVersion();
 
+        if (_connection is ISmartCardConnection smartCardConnection)
+        {
+            EnsureSmartCardTransportSupported(smartCardConnection.Transport, firmwareVersion);
+        }
+
         // Initialize base class
         await InitializeCoreAsync(
                 protocol,
@@ -363,17 +368,6 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         ISmartCardConnection connection,
         CancellationToken cancellationToken)
     {
-        // FIDO2 over SmartCard (CCID) is only supported via NFC transport.
-        // Over USB, the YubiKey exposes FIDO2 via the HID FIDO interface, not CCID.
-        // Attempting to SELECT the FIDO2 AID over USB CCID will fail with SW=0x6A82.
-        if (connection.Transport != Transport.Nfc)
-        {
-            throw new NotSupportedException(
-                "FIDO2 over SmartCard is only supported via NFC transport. " +
-                "For USB connections, use IFidoHidConnection instead. " +
-                "The YubiKey exposes FIDO2 via the HID FIDO interface over USB, not CCID.");
-        }
-
         var protocol = PcscProtocolFactory<ISmartCardConnection>
             .Create()
             .Create(connection);
@@ -381,9 +375,18 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         var smartCardProtocol = protocol as ISmartCardProtocol
             ?? throw new InvalidOperationException("Failed to create SmartCard protocol.");
 
-        // Select the FIDO2 application
-        await smartCardProtocol.SelectAsync(ApplicationIds.Fido2, cancellationToken)
-            .ConfigureAwait(false);
+        try
+        {
+            // Select the FIDO2 application
+            await smartCardProtocol.SelectAsync(ApplicationIds.Fido2, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (ApduException ex)
+        {
+            throw new NotSupportedException(
+                "FIDO2 over SmartCard is not supported because the authenticator did not expose the FIDO2 AID.",
+                ex);
+        }
 
         var backend = new SmartCardFidoBackend(smartCardProtocol);
         return (backend, protocol);
@@ -398,6 +401,23 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
         var backend = new FidoHidBackend(protocol);
         return (backend, protocol);
+    }
+
+    internal static void EnsureSmartCardTransportSupported(
+        Transport transport,
+        FirmwareVersion firmwareVersion)
+    {
+        // FIDO GetInfo may report a 0.x sentinel version (for example 0.0.1)
+        // when Management reports the real firmware. Match ApplicationSession's
+        // feature-gate behavior and treat Major == 0 as modern.
+        if (transport == Transport.Nfc || firmwareVersion.Major == 0 || firmwareVersion.IsAtLeast(FirmwareVersion.V5_8_0))
+        {
+            return;
+        }
+
+        throw new NotSupportedException(
+            "FIDO2 over USB SmartCard requires firmware 5.8.0 or later. " +
+            "For older USB-connected YubiKeys, use IFidoHidConnection instead.");
     }
 
     /// <inheritdoc />

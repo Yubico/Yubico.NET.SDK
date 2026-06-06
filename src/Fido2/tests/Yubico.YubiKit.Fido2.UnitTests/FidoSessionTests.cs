@@ -50,7 +50,7 @@ public class FidoSessionTests
     }
 
     [Fact]
-    public void EnsureSmartCardTransportSupported_NfcBefore58_Succeeds()
+    public void EnsureSmartCardTransportSupported_ReportedNfcBefore58_Succeeds()
     {
         FidoSession.EnsureSmartCardTransportSupported(Transport.Nfc, new FirmwareVersion(5, 0, 0));
     }

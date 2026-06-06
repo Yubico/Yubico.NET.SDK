@@ -28,14 +28,14 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 /// These tests exercise the SmartCard FIDO2 APDU path when the connected authenticator exposes the FIDO2 AID.
 /// </remarks>
 [Trait("Category", "Integration")]
-public class FidoNfcTests
+public class FidoSmartCardTests
 {
     /// <summary>
     /// Tests that creating a FidoSession over SmartCard succeeds and returns valid info.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task CreateFidoSession_With_NfcSmartCard_SucceedsAndReturnsInfo(YubiKeyTestState state)
+    public async Task CreateFidoSession_With_SmartCard_SucceedsAndReturnsInfo(YubiKeyTestState state)
     {
         if (state.ConnectionType is not ConnectionType.SmartCard)
         {
@@ -67,7 +67,7 @@ public class FidoNfcTests
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task GetInfo_Over_NfcSmartCard_ReturnsValidFido2Version(YubiKeyTestState state)
+    public async Task GetInfo_Over_SmartCard_ReturnsValidFido2Version(YubiKeyTestState state)
     {
         if (state.ConnectionType is not ConnectionType.SmartCard)
         {
@@ -103,7 +103,7 @@ public class FidoNfcTests
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task GetInfo_Over_NfcSmartCard_ReturnsSupportedAlgorithms(YubiKeyTestState state)
+    public async Task GetInfo_Over_SmartCard_ReturnsSupportedAlgorithms(YubiKeyTestState state)
     {
         if (state.ConnectionType is not ConnectionType.SmartCard)
         {

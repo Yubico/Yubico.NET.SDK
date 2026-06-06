@@ -90,9 +90,9 @@ await using var clientFromDevice = await yubiKey.CreateWebAuthnClientAsync(
 var createOptions = new RegistrationOptions
 {
     Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
-    User = new PublicKeyCredentialUserEntity { Id = userId, Name = "user@example.com" },
+    User = new PublicKeyCredentialUserEntity(userId, "user@example.com", "User"),
     Challenge = challenge,
-    PubKeyCredParams = [new PublicKeyCredentialParameters { Alg = -7, Type = "public-key" }],
+    PubKeyCredParams = [CoseAlgorithm.Es256],
     Extensions = extensionInputs
 };
 

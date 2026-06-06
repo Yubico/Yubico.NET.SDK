@@ -41,7 +41,7 @@ public class FidoTransportTests
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
-    public async Task MakeCredential_OverNfcSmartCard_CreatesCredentialSuccessfully(YubiKeyTestState state)
+    public async Task MakeCredential_OverSmartCard_CreatesCredentialSuccessfully(YubiKeyTestState state)
     {
         if (state.ConnectionType is not ConnectionType.SmartCard)
         {

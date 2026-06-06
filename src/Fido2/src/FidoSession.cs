@@ -410,6 +410,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         // FIDO GetInfo may report a 0.x sentinel version (for example 0.0.1)
         // when Management reports the real firmware. Match ApplicationSession's
         // feature-gate behavior and treat Major == 0 as modern.
+        // NFC remains allowed when the connection reports it explicitly; current
+        // PC/SC SmartCard connections may not distinguish NFC from USB.
         if (transport == Transport.Nfc || firmwareVersion.Major == 0 || firmwareVersion.IsAtLeast(FirmwareVersion.V5_8_0))
         {
             return;

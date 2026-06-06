@@ -17,7 +17,7 @@ Use this note as the handoff record for Phase 7 of module consolidation.
 - Files changed: `src/WebAuthn/src/Client/PublicSuffixChecker.cs`, `src/WebAuthn/src/Client/WebAuthnClient.cs`, `src/WebAuthn/src/IYubiKeyExtensions.cs`, `src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientConstructionTests.cs`, `src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnClientFactoryTests.cs`, `src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnTestHelpers.cs`, `src/WebAuthn/CLAUDE.md`, this learning note
 - Tests run: scoped format verification, WebAuthn build, WebAuthn unit tests
 - Integration tests run: WebAuthn SmartCard factory smoke; human-coordinated WebAuthn SmartCard MakeCredential user-presence check from this phase
-- Result: passed; Cato cross-vendor audit unavailable due Vertex auth failure
+- Result: passed after follow-up Cato findings were fixed; original Cato attempt failed due Vertex auth and was superseded by successful cross-vendor audit
 - Commit: this Phase 7 commit
 - `/Ping` sent after successful phase: no, pending commit and compact summary
 
@@ -120,21 +120,34 @@ Use this note as the handoff record for Phase 7 of module consolidation.
 - Cross-module verification plan, if shared infrastructure changed: not applicable; no shared infrastructure changed
 - Results: all final build/unit/read-only integration verification passed after scoped formatting; no whitespace errors from `dotnet format --verify-no-changes --include ...`
 - Manual review notes: final diff limited to intended Phase 7 WebAuthn files and this learning note; unrelated Core YubiKey note files remained unstaged
-- Reviewer concerns resolved: Cato could not execute because Vertex returned `invalid_grant` / `invalid_rapt`; fallback self-review found no blocking concern
+- Reviewer concerns resolved: Cato follow-up found stale non-compiling usage docs and direct-constructor validation ordering; both fixed in the cross-vendor audit follow-up commit
 
 ## Review Summary
 
 - DevTeam engineer result: not run; single-author implementation within approved narrow scope
 - DevTeam reviewer result: not run; final self-review/diff inspection completed for narrow approved scope
-- Cross-vendor review result: skipped due tooling/auth failure
-- Cross-vendor review waiver, if any: documented skip for this Phase 7 commit only
-- Waiver approved by: not separately approved; used because exact required Cato route was unavailable at execution time
-- Waiver reason and scope: Vertex Opus Cato execution failed; scope limited to final cross-vendor audit, not build/test verification
-- Waiver tooling failure/unavailability evidence: `/tmp/opencode/cato-phase7-webauthn-audit.jsonl` contains `invalid_grant` / `invalid_rapt`; router had selected `google-vertex-anthropic/claude-opus-4-8@default`
-- Fallback review performed: yes, manual final diff review plus targeted build/unit/integration verification
-- Findings fixed: formatting/EOL issues fixed by scoped `dotnet format`; no blocking code findings remained
+- Cross-vendor review result: completed after retry; verdict `concerns`, criticality `low`, auditor `google-vertex-anthropic/claude-opus-4-8@default`
+- Cross-vendor review waiver, if any: none after retry; earlier Vertex `invalid_grant` / `invalid_rapt` skip was superseded
+- Waiver approved by: not applicable
+- Waiver reason and scope: not applicable
+- Waiver tooling failure/unavailability evidence: prior failed output at `/tmp/opencode/cato-phase7-webauthn-audit.jsonl`; successful retry output at `/tmp/opencode/cato-phase7-webauthn-current-audit.jsonl`
+- Fallback review performed: yes, manual final diff review plus targeted build/unit/integration verification; cross-vendor review later completed successfully
+- Findings fixed: stale `CLAUDE.md` example updated to use `PublicKeyCredentialUserEntity(...)` and `[CoseAlgorithm.Es256]`; public constructor now validates arguments before adopting the FIDO session; formatting/EOL issues fixed by scoped `dotnet format`
 - Findings deferred: bundled PSL verifier; full server/RP API
 - Human decisions: approved Phase 7 implementation and offered final user-presence touch assistance
+
+## Follow-Up Cato Findings
+
+| Severity | Finding | Disposition |
+| --- | --- | --- |
+| warning | `src/WebAuthn/CLAUDE.md` usage example did not compile because it used `PublicKeyCredentialUserEntity` object initialization and `PublicKeyCredentialParameters` where the real API requires a constructor and `CoseAlgorithm` values. | Fixed the example to use `new PublicKeyCredentialUserEntity(userId, "user@example.com", "User")` and `PubKeyCredParams = [CoseAlgorithm.Es256]`. |
+| info | `WebAuthnClient(IFidoSession, ...)` constructed `FidoSessionWebAuthnBackend` before null-checking `origin` and `isPublicSuffix`, so a direct invalid call could adopt the FIDO session before throwing. | Moved argument validation before backend construction and added unit tests proving invalid constructor calls do not dispose/adopt the caller's session. |
+
+Follow-up verification:
+- `dotnet format --verify-no-changes --include ...`: passed
+- `dotnet toolchain.cs -- build --project WebAuthn`: passed, 0 warnings, 0 errors
+- `dotnet toolchain.cs -- test --project WebAuthn`: passed, 106/106
+- `dotnet toolchain.cs -- test --integration --project WebAuthn.IntegrationTests --smoke --filter "FullyQualifiedName~WebAuthnClientFactoryTests"`: passed, 1/1
 
 ## Abort / Split Assessment
 
@@ -167,7 +180,7 @@ Use this note as the handoff record for Phase 7 of module consolidation.
 - Files changed: additive WebAuthn client constructor/factory, constructor/integration tests, helper migration, module guidance, learning note
 - Final pattern: production constructor wraps `IFidoSession`; backend seam remains for tests; named `PublicSuffixChecker` preserves validation clarity
 - Rejected approaches: Android-style `effectiveDomain` primary API; bundled PSL in this phase; full server API
-- Tests passed: format verification, WebAuthn build, 104 WebAuthn unit tests, 1 read-only SmartCard smoke integration, earlier human-coordinated SmartCard UP ceremony
+- Tests passed: format verification, WebAuthn build, 104 WebAuthn unit tests before Cato follow-up; follow-up WebAuthn verification passed 106/106 after adding constructor-adoption tests
 - Integration lifecycle: Management preflight passed; read-only smoke passed; human-coordinated UP test passed; destructive/reset tests skipped
 - Shared/Core candidates: bundled PSL verifier deferred
 - House-style update needed: possible note about named WebAuthn security policy delegates

@@ -80,6 +80,34 @@ public class WebAuthnClientConstructionTests
     }
 
     [Fact]
+    public async Task Constructor_WithNullOrigin_DoesNotAdoptSession()
+    {
+        var fidoSession = Substitute.For<IFidoSession>();
+
+        Assert.Throws<ArgumentNullException>(
+            () => new WebAuthnClient(
+                fidoSession,
+                origin: null!,
+                isPublicSuffix: domain => domain == "com"));
+
+        await fidoSession.DidNotReceive().DisposeAsync();
+    }
+
+    [Fact]
+    public async Task Constructor_WithNullPublicSuffixChecker_DoesNotAdoptSession()
+    {
+        var fidoSession = Substitute.For<IFidoSession>();
+
+        Assert.Throws<ArgumentNullException>(
+            () => new WebAuthnClient(
+                fidoSession,
+                ParseOrigin("https://example.com"),
+                isPublicSuffix: null!));
+
+        await fidoSession.DidNotReceive().DisposeAsync();
+    }
+
+    [Fact]
     public async Task GetAssertion_WithFidoSessionConstructor_RejectsPublicSuffixRpId()
     {
         var fidoSession = Substitute.For<IFidoSession>();

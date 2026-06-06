@@ -62,9 +62,10 @@ public sealed class WebAuthnClient : IAsyncDisposable
         PublicSuffixChecker isPublicSuffix,
         IReadOnlySet<string>? enterpriseRpIds = null)
     {
-        _backend = new FidoSessionWebAuthnBackend(fidoSession);
+        ArgumentNullException.ThrowIfNull(fidoSession);
         _origin = origin ?? throw new ArgumentNullException(nameof(origin));
         ArgumentNullException.ThrowIfNull(isPublicSuffix);
+        _backend = new FidoSessionWebAuthnBackend(fidoSession);
         _isPublicSuffix = domain => isPublicSuffix(domain);
         _enterpriseRpIds = enterpriseRpIds ?? new HashSet<string>();
     }

@@ -29,4 +29,9 @@ public static class PinPrompt
         AnsiConsole.Prompt(
             new TextPrompt<string>($"{label}:")
                 .Secret());
+
+    /// <summary>
+    /// Prompts the user for a PIN interactively and returns owned UTF-8 bytes.
+    /// </summary>
+    public static SecureCredential PromptForCredential(string label = "PIN") => SecureCredential.Prompt(label);
 }

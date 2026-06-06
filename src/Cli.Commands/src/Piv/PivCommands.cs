@@ -5,9 +5,8 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Security.Cryptography;
-using System.Text;
-using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
+using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Piv;
 
@@ -233,6 +232,11 @@ public static class PivHelpers
             throw new ArgumentException($"Invalid hex format for {name}: {hex}");
         }
     }
+
+    public static SecureCredential GetCredential(string? provided, string promptLabel) =>
+        provided is null
+            ? PinPrompt.PromptForCredential(promptLabel)
+            : SecureCredential.FromUtf8String(provided);
 }
 
 // ── Commands ────────────────────────────────────────────────────────────────
@@ -345,16 +349,13 @@ public sealed class PivAccessChangePinCommand : YkCommandBase<PivPinSettings>
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, PivPinSettings settings, YkDeviceContext deviceContext)
     {
-        var pin = settings.Pin ?? PinPrompt.PromptForPin("Current PIN");
-        var newPin = settings.NewPin ?? PinPrompt.PromptForPin("New PIN");
-
-        var pinBytes = Encoding.UTF8.GetBytes(pin);
-        var newPinBytes = Encoding.UTF8.GetBytes(newPin);
+        using var pin = PivHelpers.GetCredential(settings.Pin, "Current PIN");
+        using var newPin = PivHelpers.GetCredential(settings.NewPin, "New PIN");
 
         try
         {
             await using var session = await deviceContext.Device.CreatePivSessionAsync();
-            await session.ChangePinAsync(pinBytes, newPinBytes);
+            await session.ChangePinAsync(pin.Memory, newPin.Memory);
 
             OutputHelpers.WriteSuccess("PIN changed successfully.");
             return ExitCode.Success;
@@ -363,11 +364,6 @@ public sealed class PivAccessChangePinCommand : YkCommandBase<PivPinSettings>
         {
             OutputHelpers.WriteError($"Invalid current PIN. {ex.RetriesRemaining} retries remaining.");
             return ExitCode.AuthenticationFailed;
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(pinBytes);
-            CryptographicOperations.ZeroMemory(newPinBytes);
         }
     }
 }
@@ -379,16 +375,13 @@ public sealed class PivAccessChangePukCommand : YkCommandBase<PivPukSettings>
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, PivPukSettings settings, YkDeviceContext deviceContext)
     {
-        var puk = settings.Puk ?? PinPrompt.PromptForPin("Current PUK");
-        var newPuk = settings.NewPuk ?? PinPrompt.PromptForPin("New PUK");
-
-        var pukBytes = Encoding.UTF8.GetBytes(puk);
-        var newPukBytes = Encoding.UTF8.GetBytes(newPuk);
+        using var puk = PivHelpers.GetCredential(settings.Puk, "Current PUK");
+        using var newPuk = PivHelpers.GetCredential(settings.NewPuk, "New PUK");
 
         try
         {
             await using var session = await deviceContext.Device.CreatePivSessionAsync();
-            await session.ChangePukAsync(pukBytes, newPukBytes);
+            await session.ChangePukAsync(puk.Memory, newPuk.Memory);
 
             OutputHelpers.WriteSuccess("PUK changed successfully.");
             return ExitCode.Success;
@@ -397,11 +390,6 @@ public sealed class PivAccessChangePukCommand : YkCommandBase<PivPukSettings>
         {
             OutputHelpers.WriteError($"Invalid current PUK. {ex.RetriesRemaining} retries remaining.");
             return ExitCode.AuthenticationFailed;
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(pukBytes);
-            CryptographicOperations.ZeroMemory(newPukBytes);
         }
     }
 }
@@ -413,16 +401,13 @@ public sealed class PivAccessUnblockPinCommand : YkCommandBase<PivUnblockPinSett
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, PivUnblockPinSettings settings, YkDeviceContext deviceContext)
     {
-        var puk = settings.Puk ?? PinPrompt.PromptForPin("PUK");
-        var newPin = settings.NewPin ?? PinPrompt.PromptForPin("New PIN");
-
-        var pukBytes = Encoding.UTF8.GetBytes(puk);
-        var newPinBytes = Encoding.UTF8.GetBytes(newPin);
+        using var puk = PivHelpers.GetCredential(settings.Puk, "PUK");
+        using var newPin = PivHelpers.GetCredential(settings.NewPin, "New PIN");
 
         try
         {
             await using var session = await deviceContext.Device.CreatePivSessionAsync();
-            await session.UnblockPinAsync(pukBytes, newPinBytes);
+            await session.UnblockPinAsync(puk.Memory, newPin.Memory);
 
             OutputHelpers.WriteSuccess("PIN unblocked and changed successfully.");
             return ExitCode.Success;
@@ -431,11 +416,6 @@ public sealed class PivAccessUnblockPinCommand : YkCommandBase<PivUnblockPinSett
         {
             OutputHelpers.WriteError($"Invalid PUK. {ex.RetriesRemaining} retries remaining.");
             return ExitCode.AuthenticationFailed;
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(pukBytes);
-            CryptographicOperations.ZeroMemory(newPinBytes);
         }
     }
 }

@@ -21,7 +21,7 @@ This module implements the CTAP 2.1/2.3 (Client to Authenticator Protocol) for Y
 - **Firmware**: 5.0+ (some features require 5.2+, 5.4+, 5.7+)
 - **Transports**:
   - USB: HID FIDO interface (primary)
-  - SmartCard/CCID: FIDO2 APDU path when the connected authenticator exposes the FIDO2 AID
+  - SmartCard/CCID: NFC and USB FIDO2 APDU paths when the connected authenticator exposes the FIDO2 AID
 
 ⚠️ **Important**: Prefer HID FIDO for ordinary USB FIDO2 coverage. SmartCard FIDO2 over USB requires firmware 5.8.0+ and a FIDO2 AID exposed over CCID; older USB-connected YubiKeys must use HID FIDO.
 
@@ -295,7 +295,7 @@ Different features require specific firmware versions:
 | Transport | Connection Type | Use Case |
 |-----------|----------------|----------|
 | USB HID | `IFidoHidConnection` | Primary FIDO2 interface |
-| SmartCard | `ISmartCardConnection` | FIDO2 APDU path when the FIDO2 AID is exposed; prefer HID for ordinary USB FIDO2 coverage |
+| SmartCard | `ISmartCardConnection` | NFC and USB FIDO2 APDU path when the FIDO2 AID is exposed; prefer HID for ordinary USB FIDO2 coverage |
 
 ## Common Patterns
 

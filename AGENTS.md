@@ -28,7 +28,7 @@
 - APDU flow is a decorator pipeline: command chaining, short/extended APDU formatting, `ISmartCardConnection.TransmitAsync()`, then chained response reassembly.
 - `ApplicationSession` centralizes firmware, initialization, authentication, and protocol ownership; prefer `IsSupported(...)` / `EnsureSupports(...)` over duplicating firmware gates.
 - Platform interop belongs under `src/Core/src/PlatformInterop/{Windows,MacOS,Linux,Desktop}` with safe handles and `SdkPlatformInfo` platform selection.
-- FIDO2 over USB uses HID FIDO, not CCID/SmartCard; SmartCard FIDO transport is NFC-only.
+- FIDO2 over USB primarily uses HID FIDO. SmartCard/CCID FIDO2 is supported over NFC and over USB when the FIDO2 AID is exposed; USB SmartCard FIDO2 requires firmware 5.8.0+.
 - `TlvBuilder` and `DisposableTlvList` must be disposed.
 
 ## Hardware And Integration Tests

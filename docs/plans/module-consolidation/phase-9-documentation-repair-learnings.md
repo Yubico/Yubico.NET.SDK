@@ -158,11 +158,11 @@ Use this note as the handoff record for Phase 9 of module consolidation.
 
 - Title: Reconcile AGENTS.md FIDO2 SmartCard gotcha with current source
 - Source phase: Phase 9 Documentation Repair Pass
-- Rationale: AGENTS.md still says SmartCard FIDO transport is NFC-only, while Fido2 module source and tests include a firmware 5.8+ USB SmartCard path.
-- Why it is deferred: AGENTS.md governance update is broader than active module doc repair and may need project-level approval.
+- Rationale: AGENTS.md previously said SmartCard FIDO transport was NFC-only, while Fido2 module source and tests include a firmware 5.8+ USB SmartCard path.
+- Follow-up disposition: resolved by updating AGENTS.md and FidoTool/FIDO2 module docs to match the SmartCard integration-test evidence.
 - Likely owning area: root agent guidance / Fido2 docs
-- Suggested timing: next documentation-governance cleanup
-- Needs human approval, hardware coordination, or Cato review: human approval and Cato review recommended
+- Suggested timing: complete
+- Needs human approval, hardware coordination, or Cato review: no further hardware needed; integration-test evidence already exists
 
 ## Abort / Split Assessment
 

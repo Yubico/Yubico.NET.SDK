@@ -93,6 +93,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
@@ -218,6 +219,9 @@ Target("test", () =>
     var failCount = results.Count(r => !r.Passed);
     if (failCount > 0)
         throw new InvalidOperationException($"{failCount} test project(s) failed");
+
+    if (results.Count > 0 && results.All(r => r.Skipped))
+        throw new InvalidOperationException("No tests matched the specified filter");
 });
 
 Target("coverage", () =>
@@ -233,7 +237,7 @@ Target("coverage", () =>
     if (projectsToCover is null)
         return;
 
-    var results = new List<(string Project, bool Passed, string? Error)>();
+    var results = new List<(string Project, bool Passed, string? Error, bool Skipped)>();
 
     foreach (var project in projectsToCover)
     {
@@ -243,12 +247,12 @@ Target("coverage", () =>
         try
         {
             Run("dotnet", $"test {project} -c {configuration} --settings coverlet.runsettings.xml --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}");
-            results.Add((projectName, true, null));
+            results.Add((projectName, true, null, false));
             PrintColored($"✓ {projectName} - Coverage collected", ConsoleColor.Green);
         }
         catch (Exception ex)
         {
-            results.Add((projectName, false, ex.Message));
+            results.Add((projectName, false, ex.Message, false));
             PrintColored($"✗ {projectName} - Coverage collection failed", ConsoleColor.Red);
         }
     }
@@ -468,10 +472,10 @@ List<(string ProjectPath, bool UsesTestingPlatformRunner)>? FilterToProject(
     return [..projectInfos.Where(p => matchedSet.Contains(p.ProjectPath))];
 }
 
-List<(string Project, bool Passed, string? Error)> RunTestProjects(
+List<(string Project, bool Passed, string? Error, bool Skipped)> RunTestProjects(
     IEnumerable<(string ProjectPath, bool UsesTestingPlatformRunner)> projects)
 {
-    var results = new List<(string Project, bool Passed, string? Error)>();
+    var results = new List<(string Project, bool Passed, string? Error, bool Skipped)>();
 
     foreach (var (projectPath, usesTestingPlatformRunner) in projects)
     {
@@ -488,11 +492,16 @@ List<(string Project, bool Passed, string? Error)> RunTestProjects(
                 command = $"run --project {projectPath} -c {configuration}";
                 if (!string.IsNullOrEmpty(testFilter))
                 {
-                    var (mtpFilter, hasPositiveFilters) = TranslateToMtpFilter(testFilter);
-                    // --minimum-expected-tests is incompatible with exclusion-only simple filters
-                    // (--filter-not-trait, etc.) in the MTP runner — only add for positive filters.
-                    var minTests = hasPositiveFilters ? "--minimum-expected-tests 0 " : "";
-                    command += $" -- {minTests}{mtpFilter}";
+                    var (mtpFilter, hasPositiveFilters, positiveMtpFilterArgs) = TranslateToMtpFilter(testFilter);
+                    // Preflight only the inclusion filter. Exclusions still apply to the real run.
+                    if (hasPositiveFilters && !MtpFilterHasMatches(projectPath, positiveMtpFilterArgs))
+                    {
+                        results.Add((projectName, true, "No matching tests", true));
+                        PrintColored($"○ {projectName} - No matching tests", ConsoleColor.Yellow);
+                        continue;
+                    }
+
+                    command += $" -- {mtpFilter}";
                 }
             }
             else
@@ -504,12 +513,12 @@ List<(string Project, bool Passed, string? Error)> RunTestProjects(
             }
 
             Run("dotnet", command);
-            results.Add((projectName, true, null));
+            results.Add((projectName, true, null, false));
             PrintColored($"✓ {projectName} - All tests passed", ConsoleColor.Green);
         }
         catch (Exception ex)
         {
-            results.Add((projectName, false, ex.Message));
+            results.Add((projectName, false, ex.Message, false));
             PrintColored($"✗ {projectName} - Tests failed", ConsoleColor.Red);
         }
     }
@@ -517,16 +526,20 @@ List<(string Project, bool Passed, string? Error)> RunTestProjects(
     return results;
 }
 
-void PrintTestSummary(List<(string Project, bool Passed, string? Error)> results, string label)
+void PrintTestSummary(List<(string Project, bool Passed, string? Error, bool Skipped)> results, string label)
 {
     var separator = new string('=', 60);
     Console.WriteLine($"\n{separator}");
     Console.WriteLine($"{label} SUMMARY");
     Console.WriteLine(separator);
 
-    foreach (var (project, passed, error) in results)
+    foreach (var (project, passed, error, skipped) in results)
     {
-        if (passed)
+        if (skipped)
+        {
+            PrintColored($"  ○ {project} (no matching tests)", ConsoleColor.Yellow);
+        }
+        else if (passed)
         {
             PrintColored($"  ✓ {project}", ConsoleColor.Green);
         }
@@ -538,7 +551,8 @@ void PrintTestSummary(List<(string Project, bool Passed, string? Error)> results
         }
     }
 
-    var passedCount = results.Count(r => r.Passed);
+    var skippedCount = results.Count(r => r.Skipped);
+    var passedCount = results.Count(r => r.Passed && !r.Skipped);
     var failedCount = results.Count(r => !r.Passed);
 
     Console.WriteLine(separator);
@@ -548,6 +562,10 @@ void PrintTestSummary(List<(string Project, bool Passed, string? Error)> results
     Console.Write(" | ");
     Console.ForegroundColor = failedCount > 0 ? ConsoleColor.Red : ConsoleColor.Gray;
     Console.Write($"Failed: {failedCount}");
+    Console.ResetColor();
+    Console.Write(" | ");
+    Console.ForegroundColor = skippedCount > 0 ? ConsoleColor.Yellow : ConsoleColor.Gray;
+    Console.Write($"Skipped: {skippedCount}");
     Console.ResetColor();
     Console.WriteLine($" | Total: {results.Count}");
     Console.WriteLine(separator);
@@ -637,11 +655,11 @@ static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPa
 // Translates a VSTest-style --filter expression to xUnit v3 MTP native filter arguments.
 // Supports: FullyQualifiedName~X, Method~X, Category!=X, Category=X, and '&' compounds.
 // Returns (filter args string, whether any positive/inclusion filters are present).
-// MTP runner does not allow --minimum-expected-tests alongside exclusion-only simple filters.
-static (string Args, bool HasPositiveFilters) TranslateToMtpFilter(string vstestFilter)
+static (string Args, bool HasPositiveFilters, string[] PositiveArgs) TranslateToMtpFilter(string vstestFilter)
 {
     var parts = vstestFilter.Split('&');
     var mtpArgs = new List<string>();
+    var positiveArgs = new List<string>();
     var hasPositiveFilters = false;
 
     foreach (var part in parts)
@@ -662,11 +680,16 @@ static (string Args, bool HasPositiveFilters) TranslateToMtpFilter(string vstest
             var property = segments[0].Trim();
             var value = segments[1].Trim();
 
-            mtpArgs.Add(property switch
+            var filterOption = property switch
             {
-                "ClassName" or "Namespace" => $"--filter-class \"*{value}*\"",
-                _ => $"--filter-method \"*{value}*\""
-            });
+                "ClassName" or "Namespace" => "--filter-class",
+                _ => "--filter-method"
+            };
+            var filterValue = $"*{value}*";
+
+            mtpArgs.Add($"{filterOption} \"{filterValue}\"");
+            positiveArgs.Add(filterOption);
+            positiveArgs.Add(filterValue);
         }
         // Category=Value → --filter-trait "Category=Value"
         else if (trimmed.Contains('='))
@@ -677,19 +700,76 @@ static (string Args, bool HasPositiveFilters) TranslateToMtpFilter(string vstest
             var value = segments[1].Trim();
 
             if (property is "FullyQualifiedName" or "Name" or "Method")
+            {
                 mtpArgs.Add($"--filter-method \"{value}\"");
+                positiveArgs.Add("--filter-method");
+                positiveArgs.Add(value);
+            }
             else
+            {
                 mtpArgs.Add($"--filter-trait \"{property}={value}\"");
+                positiveArgs.Add("--filter-trait");
+                positiveArgs.Add($"{property}={value}");
+            }
         }
         else
         {
             hasPositiveFilters = true;
             // Unrecognized pattern — pass as-is to --filter-method with wildcards
-            mtpArgs.Add($"--filter-method \"*{trimmed}*\"");
+            var filterValue = $"*{trimmed}*";
+            mtpArgs.Add($"--filter-method \"{filterValue}\"");
+            positiveArgs.Add("--filter-method");
+            positiveArgs.Add(filterValue);
         }
     }
 
-    return (string.Join(" ", mtpArgs), hasPositiveFilters);
+    return (string.Join(" ", mtpArgs), hasPositiveFilters, [..positiveArgs]);
+}
+
+bool MtpFilterHasMatches(string projectPath, string[] positiveMtpFilterArgs)
+{
+    var args = new List<string>
+    {
+        "run",
+        "--project",
+        projectPath,
+        "-c",
+        configuration,
+        "--",
+        "--list-tests"
+    };
+    args.AddRange(positiveMtpFilterArgs);
+
+    var (exitCode, output) = RunDotnetAndCapture(args);
+    // xUnit v3 MTP 3.0.0 reports zero discovery matches with this summary text.
+    if (output.Contains("found 0 test(s)", StringComparison.OrdinalIgnoreCase))
+        return false;
+
+    if (exitCode != 0)
+        throw new InvalidOperationException($"Failed to list tests for {projectPath}: {output}");
+
+    return true;
+}
+
+static (int ExitCode, string Output) RunDotnetAndCapture(IReadOnlyList<string> arguments)
+{
+    var startInfo = new ProcessStartInfo("dotnet")
+    {
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        UseShellExecute = false
+    };
+    foreach (var argument in arguments)
+    {
+        startInfo.ArgumentList.Add(argument);
+    }
+
+    using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start dotnet process");
+    var stdout = process.StandardOutput.ReadToEndAsync();
+    var stderr = process.StandardError.ReadToEndAsync();
+    process.WaitForExit();
+
+    return (process.ExitCode, stdout.GetAwaiter().GetResult() + stderr.GetAwaiter().GetResult());
 }
 
 string[] DiscoverProjects(string subdirectory, string nameFilter, string? additionalFilter = null) =>

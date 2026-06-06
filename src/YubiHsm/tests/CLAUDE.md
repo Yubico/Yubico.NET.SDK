@@ -4,9 +4,9 @@ This file provides guidance for the YubiHSM module test infrastructure.
 
 ## Required Reading
 
-**CRITICAL:** Read [`docs/TESTING.md`](../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
+**CRITICAL:** Read [`docs/TESTING.md`](../../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
 
 ## Test Projects
 
 - `Yubico.YubiKit.YubiHsm.UnitTests` - Unit tests for YubiHSM module
-- `Yubico.YubiKit.YubiHsm.IntegrationTests` - Integration tests requiring YubiHSM hardware
+- `Yubico.YubiKit.YubiHsm.IntegrationTests` - Integration tests requiring a YubiKey with the YubiHSM Auth applet and firmware 5.4.3+

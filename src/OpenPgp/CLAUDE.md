@@ -1,7 +1,7 @@
 # CLAUDE.md - OpenPGP Module
 
 This file provides module-specific guidance for working in **Yubico.YubiKit.OpenPgp**.
-For overall repo conventions, see the repository root [CLAUDE.md](../CLAUDE.md).
+For overall repo conventions, see the repository root [CLAUDE.md](../../CLAUDE.md).
 
 ## Module Context
 

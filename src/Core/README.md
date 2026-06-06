@@ -28,32 +28,16 @@ This package is automatically included when you install any application-specific
 
 ```csharp
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Devices;
-
-// Create device repository
-var deviceRepository = new DeviceRepository();
-
 // Get currently connected devices
-var devices = await deviceRepository.GetDevicesAsync();
+var devices = await YubiKeyManager.FindAllAsync();
 
 foreach (var device in devices)
 {
     Console.WriteLine($"Found YubiKey: {device.SerialNumber}");
-    Console.WriteLine($"  Transport: {device.AvailableTransports}");
 }
 
-// Monitor for device arrival/removal
-deviceRepository.DeviceArrived += (sender, e) =>
-{
-    Console.WriteLine($"YubiKey connected: {e.Device.SerialNumber}");
-};
-
-deviceRepository.DeviceRemoved += (sender, e) =>
-{
-    Console.WriteLine($"YubiKey disconnected: {e.Device.SerialNumber}");
-};
-
-await deviceRepository.StartMonitoringAsync();
+// Force a rescan when device topology may have changed
+var freshDevices = await YubiKeyManager.FindAllAsync(forceRescan: true);
 ```
 
 ### Opening a Connection
@@ -62,13 +46,13 @@ await deviceRepository.StartMonitoringAsync();
 using Yubico.YubiKit.Core.Connections;
 
 // Open SmartCard connection
-using var smartCardConnection = await device.OpenConnectionAsync<ISmartCardConnection>();
+await using var smartCardConnection = await device.ConnectAsync<ISmartCardConnection>();
 
 // Open HID FIDO connection
-using var fidoConnection = await device.OpenConnectionAsync<IFidoConnection>();
+await using var fidoConnection = await device.ConnectAsync<IFidoHidConnection>();
 
 // Open HID OTP connection  
-using var otpConnection = await device.OpenConnectionAsync<IOtpConnection>();
+await using var otpConnection = await device.ConnectAsync<IOtpHidConnection>();
 ```
 
 ### Protocol Communication
@@ -77,7 +61,7 @@ using var otpConnection = await device.OpenConnectionAsync<IOtpConnection>();
 using Yubico.YubiKit.Core.SmartCard;
 
 // Create protocol from connection
-var protocol = PcscProtocolFactory.Create(smartCardConnection);
+var protocol = PcscProtocolFactory<ISmartCardConnection>.Create().Create(smartCardConnection);
 
 // Select an application (e.g., PIV)
 await protocol.SelectAsync(ApplicationIds.Piv, cancellationToken);
@@ -154,8 +138,8 @@ IYubiKeyDevice
     ↓
 IConnection
     ├── ISmartCardConnection (PC/SC)
-    ├── IFidoConnection (HID FIDO)
-    └── IOtpConnection (HID OTP)
+    ├── IFidoHidConnection (HID FIDO)
+    └── IOtpHidConnection (HID OTP)
 ```
 
 ### APDU Processing Pipeline
@@ -187,11 +171,11 @@ Platform detection is automatic via `SdkPlatformInfo.OperatingSystem`.
 
 | Class | Purpose |
 |-------|---------|
-| `DeviceRepository` | Central registry for device discovery and monitoring |
-| `IYubiKeyDevice` | Represents a physical or virtual YubiKey device |
+| `YubiKeyManager` | Static entry point for YubiKey discovery and cache management |
+| `IYubiKey` | Represents a physical or virtual YubiKey device |
 | `ISmartCardConnection` | SmartCard (PC/SC) transport connection |
-| `IFidoConnection` | HID FIDO transport connection |
-| `IOtpConnection` | HID OTP transport connection |
+| `IFidoHidConnection` | HID FIDO transport connection |
+| `IOtpHidConnection` | HID OTP transport connection |
 | `PcscProtocol` | ISO 7816-4 APDU protocol implementation |
 | `ApduCommand` / `ApduResponse` | APDU command/response representations |
 | `ScpProtocol` | Secure Channel Protocol wrapper (SCP03, SCP11) |
@@ -217,7 +201,7 @@ With dependency injection:
 
 ```csharp
 services.AddLogging(builder => builder.AddConsole());
-services.AddYubiKey();  // Automatically configures YubiKitLogging
+services.AddYubiKeyManagerCore();  // Registers Core services and configures YubiKitLogging
 ```
 
 ## Firmware Version Considerations

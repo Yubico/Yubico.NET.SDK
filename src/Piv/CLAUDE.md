@@ -1,455 +1,164 @@
 # CLAUDE.md - PIV Module
 
-This file provides Claude-specific guidance for working with the PIV module. **Read [README.md](README.md) first** for general module documentation.
+This file provides Claude-specific guidance for working with the PIV module. **Read [README.md](README.md) first** for user-facing module documentation and the repository root [CLAUDE.md](../../CLAUDE.md) for project-wide rules.
 
 ## Documentation Maintenance
 
-> **Important:** This documentation is subject to change. When working on this module:
-> - **Notable changes** to APIs, patterns, or behavior should be documented in both CLAUDE.md and README.md
-> - **New features** (e.g., new slot operations, key algorithms) should include usage examples in README.md and implementation guidance in CLAUDE.md
-> - **Breaking changes** require updates to both files with migration guidance
-> - **Migration progress** from legacy codebase should be tracked in CLAUDE.md
-> - **Test infrastructure changes** should be reflected in the test pattern sections below
+When working on this module:
+
+- Update both `CLAUDE.md` and `README.md` for notable API, behavior, test, or security-pattern changes.
+- Keep examples async and source-backed.
+- Do not add examples that require User Presence, reset, PIN/PUK changes, or persistent-state mutation unless clearly marked as human-coordinated.
 
 ## Module Context
 
-**IMPORTANT:** This module is currently being migrated from the legacy codebase (`legacy-develop/Yubico.YubiKey/src/Yubico/YubiKey/Piv/`) to the new modern structure. The legacy code is **production-ready and extensively tested**, serving as the authoritative reference implementation.
+The PIV module implements YubiKey PIV smart-card operations through a single public `PivSession` facade and the `IPivSession` contract.
 
-**Current State:**
-- ✅ **Legacy Implementation**: Fully functional, located in `legacy-develop/`
-- 🚧 **Modern Implementation**: Being migrated to `Yubico.YubiKit.Piv/`
-- ✅ **Test Infrastructure**: PlaceholderTests in place, integration tests to be migrated
+Current structure:
 
-**Current Structure:**
-- `PivSession.cs` - single public facade implementing `IPivSession`, session lifecycle, state, and one-hop delegation
-- `Authentication/` - internal authentication and PIN protocol helpers
-- `Metadata/` - internal metadata and retry-management protocol helpers
-- `DataObjects/` - internal GET DATA / PUT DATA helpers
-- `Certificates/` - internal certificate object helpers
-- `Keys/` - internal key generation, import, move, delete, and attestation helpers
-- `Cryptography/` - internal sign/decrypt/key-agreement helpers
-- `Bio/` - internal biometric and temporary-PIN helpers
+- `PivSession.cs` - public facade, lifecycle, authentication state, touch notification, and one-hop delegation.
+- `IPivSession.cs` - public session contract.
+- `IYubiKeyExtensions.cs` - `IYubiKey.CreatePivSessionAsync(...)` convenience creation.
+- `Authentication/` - PIN, PUK, and management-key protocol helpers.
+- `Metadata/` - PIN/PUK/management-key metadata and retry-attempt helpers.
+- `DataObjects/` - PIV data-object GET/PUT helpers.
+- `Certificates/` - certificate storage and retrieval helpers.
+- `Keys/` - key generation, import, move, delete, and attestation helpers.
+- `Cryptography/` - sign/decrypt/key-agreement helpers.
+- `Bio/` - biometric and temporary-PIN helpers.
+
+## Session Shape
+
+Prefer the extension method when starting from an `IYubiKey`:
+
+```csharp
+await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+```
+
+Use direct creation only when a test or lower-level caller already owns the connection:
+
+```csharp
+await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
+await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+```
+
+Keep public session methods easy to trace:
+
+```text
+PivSession public method
+  -> validate arguments and session state
+  -> ensure feature support when firmware-gated
+  -> call one shallow internal protocol helper
+  -> helper builds visible APDU/TLV payload
+  -> transmit through Core SmartCard protocol
+  -> parse response
+  -> zero sensitive source/intermediate buffers in finally
+```
 
 ## Critical Security Requirements
 
-### Sensitive Data Handling
+PIV handles PINs, PUKs, management keys, private keys, and cryptographic operation payloads.
 
-PIV manages **highly sensitive material** including PINs, PUKs, and private keys. Apply strict security hygiene:
+- Zero PINs, PUKs, management keys, and encoded sensitive APDU payloads with `CryptographicOperations.ZeroMemory()`.
+- Use `ReadOnlyMemory<byte>` or `Memory<byte>` when sensitive data crosses async boundaries.
+- Prefer `Span<byte>`/`stackalloc` for small synchronous temporary buffers.
+- Use `ArrayPool<byte>.Shared.Rent()` with `try/finally` return for larger temporary buffers.
+- Never log PINs, PUKs, management keys, private keys, plaintexts, or signatures. Log metadata only.
+- Do not store privately cloned sensitive `byte[]` values in structs.
+
+Example lifecycle:
 
 ```csharp
-// ✅ ALWAYS zero PIN/PUK after use
-Span<byte> pin = stackalloc byte[8];
-try
-{
-    GetPinFromUser(pin);
-    session.VerifyPin(pin);
-}
-finally
-{
-    CryptographicOperations.ZeroMemory(pin);
-}
-
-// ✅ ALWAYS zero management keys
 byte[]? managementKey = ArrayPool<byte>.Shared.Rent(24);
 try
 {
-    GetManagementKeyFromStorage(managementKey.AsSpan(0, 24));
-    session.AuthenticateManagementKey(managementKey.AsMemory(0, 24));
+    FillManagementKey(managementKey.AsSpan(0, 24));
+    await session.AuthenticateAsync(managementKey.AsMemory(0, 24), cancellationToken);
 }
 finally
 {
     CryptographicOperations.ZeroMemory(managementKey.AsSpan(0, 24));
     ArrayPool<byte>.Shared.Return(managementKey, clearArray: true);
 }
-
-// ❌ NEVER log sensitive data
-_logger.LogDebug("PIN verified"); // ✅ OK
-_logger.LogDebug($"PIN value: {pin}"); // ❌ NEVER
-_logger.LogDebug($"Management key: {Convert.ToHexString(key)}"); // ❌ NEVER
 ```
 
-### KeyCollector Pattern
+## Flat-Flow Rules
 
-The KeyCollector delegate is the **primary mechanism** for obtaining secrets from users:
+- Do not introduce operation-specific command classes such as `GenerateKeyCommand`, `VerifyPinCommand`, `GetDataCommand`, or `SignCommand`.
+- Do not hide APDU construction behind broad executor/helper layers.
+- Internal helpers are appropriate when they are feature-local, shallow, and keep payload shape inspectable.
+- Keep `PivSession` as the public facade; do not split it into partial classes just to create architectural symmetry.
+- Prefer module-local helpers until reuse with another module is proven.
 
-```csharp
-private bool KeyCollector(KeyEntryData keyEntryData)
-{
-    // ALWAYS handle Release
-    if (keyEntryData.Request == KeyEntryRequest.Release)
-    {
-        // Zero any cached secrets, clean up UI
-        return true;
-    }
+Allowed helper pattern:
 
-    // Check for retry and inform user
-    if (keyEntryData.IsRetry)
-    {
-        ShowError($"Incorrect. {keyEntryData.RetriesRemaining} attempts remaining.");
-        
-        // Handle blocked state
-        if (keyEntryData.RetriesRemaining == 0)
-        {
-            ShowError("PIN/PUK blocked!");
-            return false; // Cancel
-        }
-    }
-
-    // Dispatch based on request type
-    return keyEntryData.Request switch
-    {
-        KeyEntryRequest.VerifyPivPin => HandlePinRequest(keyEntryData),
-        KeyEntryRequest.ChangePivPin => HandleChangePinRequest(keyEntryData),
-        KeyEntryRequest.ResetPivPinWithPuk => HandlePukRequest(keyEntryData),
-        KeyEntryRequest.AuthenticatePivManagementKey => HandleManagementKeyRequest(keyEntryData),
-        _ => false // Unknown request, cancel
-    };
-}
-
-private bool HandlePinRequest(KeyEntryData keyEntryData)
-{
-    byte[]? pin = GetPinFromUser(); // Your UI logic
-    if (pin is null)
-        return false; // User cancelled
-    
-    try
-    {
-        keyEntryData.SubmitValue(pin);
-        return true;
-    }
-    finally
-    {
-        CryptographicOperations.ZeroMemory(pin);
-    }
-}
+```text
+PivSession.GenerateKeyAsync
+  -> PivKeyProtocol.GenerateKeyAsync
+  -> builds key-generation TLV/APDU visibly
+  -> parses returned public key
 ```
+
+## Current Public Operations
+
+Common async operations include:
+
+- `VerifyPinAsync(...)`
+- `ChangePinAsync(...)`
+- `ChangePukAsync(...)`
+- `UnblockPinAsync(...)`
+- `AuthenticateAsync(...)`
+- `SetManagementKeyAsync(...)`
+- `GenerateKeyAsync(...)`
+- `ImportKeyAsync(...)`
+- `MoveKeyAsync(...)`
+- `DeleteKeyAsync(...)`
+- `GetCertificateAsync(...)`
+- `StoreCertificateAsync(...)`
+- `DeleteCertificateAsync(...)`
+- `SignOrDecryptAsync(...)`
+- `CalculateSecretAsync(...)`
+- `AttestKeyAsync(...)`
+- `ResetAsync(...)`
+- `SetPinAttemptsAsync(...)`
+
+Check `IPivSession.cs` before adding or documenting public surface.
 
 ## Test Infrastructure
 
-### PIV Reset Pattern
+Unit tests should use fake SmartCard protocol/connection seams where possible to assert APDU/TLV bytes and parser behavior without hardware.
 
-Unlike Security Domain (which has automatic reset), PIV tests must **manually reset** the application to factory defaults:
-
-```csharp
-[Theory]
-[WithYubiKey]
-public void MyPivTest(YubiKeyTestState state)
-{
-    using var session = new PivSession(state.YubiKey);
-    
-    // ALWAYS reset to factory defaults at start of test
-    session.ResetApplication();
-    
-    // Now you have clean state:
-    // PIN = "123456"
-    // PUK = "12345678"
-    // Management Key = default 3DES key
-    
-    // Your test logic
-    // ...
-}
-```
-
-### Test Helper Extension (To Be Created)
-
-When implementing test infrastructure, follow Security Domain's pattern:
-
-```csharp
-extension(YubiKeyTestState state)
-{
-    public void WithPivSession(
-        Action<PivSession> action,
-        bool resetBeforeUse = true,
-        Func<KeyEntryData, bool>? keyCollector = null)
-    {
-        using var session = new PivSession(state.YubiKey);
-        
-        if (resetBeforeUse)
-        {
-            session.ResetApplication();
-        }
-        
-        if (keyCollector is not null)
-        {
-            session.KeyCollector = keyCollector;
-        }
-        else
-        {
-            session.KeyCollector = DefaultTestKeyCollector;
-        }
-        
-        action(session);
-    }
-    
-    private bool DefaultTestKeyCollector(KeyEntryData keyEntryData)
-    {
-        if (keyEntryData.Request == KeyEntryRequest.Release)
-            return true;
-            
-        // Provide default test credentials
-        return keyEntryData.Request switch
-        {
-            KeyEntryRequest.VerifyPivPin => 
-                SubmitDefaultPin(keyEntryData),
-            KeyEntryRequest.AuthenticatePivManagementKey => 
-                SubmitDefaultManagementKey(keyEntryData),
-            _ => false
-        };
-    }
-}
-```
-
-### Multi-Step Test Pattern
-
-PIV tests often require multiple authentication steps:
+Integration tests must use `[Theory]` plus `[WithYubiKey]` from `Tests.Shared`:
 
 ```csharp
 [Theory]
-[WithYubiKey]
-public void GenerateKeyAndSign_WithPinPolicy_RequiresPinEachTime(YubiKeyTestState state)
+[WithYubiKey(Capability = DeviceCapabilities.Piv)]
+public async Task GetMetadata_ReadOnly_Succeeds(YubiKeyTestState state)
 {
-    state.WithPivSession(session =>
-    {
-        // Step 1: Authenticate management key (for key generation)
-        var mgmtKey = GetDefaultManagementKey();
-        Assert.True(session.TryAuthenticateManagementKey(mgmtKey));
-        
-        // Step 2: Generate key with PIN policy Always
-        var publicKey = session.GenerateKeyPair(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256,
-            PivPinPolicy.Always);
-        
-        // Step 3: Sign (KeyCollector will be called for PIN)
-        byte[] dataToSign = new byte[32];
-        RandomNumberGenerator.Fill(dataToSign);
-        
-        var signature = session.Sign(PivSlot.Authentication, dataToSign);
-        Assert.NotNull(signature);
-        
-        // Step 4: Sign again (PIN required again due to Always policy)
-        // KeyCollector should be called again
-        var signature2 = session.Sign(PivSlot.Authentication, dataToSign);
-        Assert.NotNull(signature2);
-    }, resetBeforeUse: true);
+    await using var session = await state.Device.CreatePivSessionAsync();
+    var metadata = await session.GetPinMetadataAsync();
+    Assert.NotNull(metadata);
 }
 ```
 
-## Common Patterns
+PIV reset, PIN/PUK changes, management-key changes, key generation/import/delete, certificate writes, and retry-counter manipulation mutate persistent applet state. Agents must not run those integration tests unless a human explicitly approves hardware coordination and reset expectations.
 
-### Single Facade With Shallow Feature Namespaces
+## Firmware And Feature Gates
 
-PIV does **not** use `PivSession` partial classes. Keep `PivSession` as the single public facade that owns lifecycle, `_protocol`, authentication state, management-key type, touch notification, and public `IPivSession` methods.
-
-Feature-specific implementation belongs in shallow internal namespaces:
-
-```text
-PivSession public method
-  -> validate/session-state check
-  -> one internal feature helper
-  -> APDU/TLV construction remains inspectable in that helper
-```
-
-Allowed examples:
-
-- `Authentication/PivAuthenticationProtocol.cs`
-- `Metadata/PivMetadataProtocol.cs`
-- `DataObjects/PivDataObjectProtocol.cs`
-- `Certificates/PivCertificateProtocol.cs`
-- `Keys/PivKeyProtocol.cs`
-- `Cryptography/PivCryptographicOperations.cs`
-- `Bio/PivBioProtocol.cs`
-
-Do not reintroduce `partial class PivSession`. Do not introduce operation-specific command classes such as `GenerateKeyCommand`, `VerifyPinCommand`, or `GetDataCommand`.
-
-### Authentication State Tracking
-
-PIV session tracks authentication state across operations:
-
-```csharp
-private bool _managementKeyAuthenticated;
-private bool _pinVerified;
-
-private void RefreshManagementKeyAuthentication()
-{
-    if (_managementKeyAuthenticated)
-        return;
-        
-    AuthenticateManagementKey(); // Calls KeyCollector if needed
-}
-
-public async Task<PivPublicKey> GenerateKeyPairAsync(byte slotNumber, PivAlgorithm algorithm, ...)
-{
-    RefreshManagementKeyAuthentication(); // Ensure authenticated
-    
-    var command = new ApduCommand(0x00, 0x47, 0x00, slotNumber, data);
-    var response = await _protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken);
-    
-    return response.GetData();
-}
-```
-
-**Pattern:** Operations that require authentication automatically call `RefreshAuthentication()` to ensure the session is properly authenticated before proceeding.
-
-### Response Status Handling
-
-```csharp
-var response = Connection.SendCommand(command);
-
-if (response.Status != ResponseStatus.Success)
-{
-    // Specific error handling based on status
-    if (response.Status == ResponseStatus.AuthenticationRequired)
-    {
-        // Re-authenticate and retry
-    }
-    else if (response.Status == ResponseStatus.Failed)
-    {
-        throw new InvalidOperationException(response.StatusMessage);
-    }
-}
-
-return response.GetData();
-```
-
-## PIV-Specific Patterns
-
-### Slot Number Validation
-
-```csharp
-private static void ValidateSlotNumber(byte slotNumber)
-{
-    bool isValid = slotNumber switch
-    {
-        0x9A => true, // Authentication
-        0x9C => true, // Signing
-        0x9D => true, // Key Management
-        0x9E => true, // Card Authentication
-        >= 0x82 and <= 0x95 => true, // Retired slots
-        _ => false
-    };
-    
-    if (!isValid)
-        throw new ArgumentException($"Invalid PIV slot: 0x{slotNumber:X2}");
-}
-```
-
-### Certificate Compression
-
-YubiKey supports gzip compression for certificates > 1856 bytes:
-
-```csharp
-public void ImportCertificate(byte slotNumber, X509Certificate2 certificate, bool compress = false)
-{
-    byte[] certData = certificate.RawData;
-    
-    if (compress || certData.Length > 1856)
-    {
-        certData = CompressCertificate(certData);
-    }
-    
-    // Store using PUT DATA command
-    // ...
-}
-
-private static byte[] CompressCertificate(byte[] data)
-{
-    using var output = new MemoryStream();
-    using (var gzip = new GZipStream(output, CompressionMode.Compress))
-    {
-        gzip.Write(data, 0, data.Length);
-    }
-    return output.ToArray();
-}
-```
-
-### PIN/PUK Blocking for Reset Tests
-
-```csharp
-private void BlockPinOrPuk(byte slotNumber)
-{
-    // Intentionally fail authentication until blocked
-    byte[] wrongValue = new byte[8];
-    RandomNumberGenerator.Fill(wrongValue);
-    
-    while (GetRetriesRemaining(slotNumber) > 0)
-    {
-        var command = new VerifyPinCommand(wrongValue);
-        Connection.SendCommand(command);
-    }
-}
-
-[Theory]
-[WithYubiKey]
-public void ResetPin_WithBlockedPin_Succeeds(YubiKeyTestState state)
-{
-    state.WithPivSession(session =>
-    {
-        // Block PIN
-        BlockPinOrPuk(PivSlot.Pin);
-        
-        // Verify it's blocked
-        Assert.Equal(0, session.GetPinRetriesRemaining());
-        
-        // Reset with PUK
-        session.ResetPin(defaultPuk, newPin);
-        
-        // Verify PIN works now
-        Assert.True(session.TryVerifyPin(newPin));
-    }, resetBeforeUse: true);
-}
-```
-
-## Firmware Version Considerations
-
-Different YubiKey firmware versions support different features:
-
-```csharp
-// YubiKey 4 and later
-if (yubiKey.FirmwareVersion >= FirmwareVersion.V4_0_0)
-{
-    // Can use RSA2048, RSA1024, EccP256, EccP384
-}
-
-// YubiKey 5.3 and later
-if (yubiKey.FirmwareVersion >= FirmwareVersion.V5_3_0)
-{
-    // Can retrieve public key from slot anytime
-    var publicKey = session.GetPublicKey(slotNumber);
-}
-
-// YubiKey 5.7 and later
-if (yubiKey.FirmwareVersion >= FirmwareVersion.V5_7_0)
-{
-    // AES management key support
-    session.SetManagementKey(aes128Key, PivAlgorithm.Aes128);
-}
-```
+Use `EnsureSupports(...)` / `IsSupported(...)` from the session base instead of duplicating version checks. Be careful to distinguish device firmware from applet-reported firmware when beta hardware reports sentinel applet versions.
 
 ## Known Gotchas
 
-1. **Management Key Required First**: Key generation/import requires management key authentication before any other operations
-2. **PIN Verification Persists**: Once verified, PIN stays verified for the session unless an operation fails or session is disposed
-3. **Touch Policy Timing**: `Cached` touch policy caches for 15 seconds after first touch
-4. **Certificate Size Limits**: Standard PIV limit is 1856 bytes; YubiKey extends to 3052 bytes
-5. **Default Credentials**: Many YubiKeys ship with default PIN/PUK/management key - **always change these**
-6. **Retry Counter**: After PIN/PUK blocked, only factory reset can recover (unless using PUK to unblock PIN)
-7. **Signing Slot**: Slot 0x9C (signing) typically requires PIN for each operation per PIV standard
-8. **Private Key Never Leaves Device**: Cannot export private keys - they're generated/imported and remain on device
-
-## Migration Notes
-
-When migrating code from legacy to modern structure:
-
-1. **Preserve Feature Locality**: Keep logical separation through shallow feature namespaces (Keys, Cryptography, Metadata, etc.), not `PivSession` partial classes.
-2. **Update to Modern Patterns**: Use `async`/`await`, `Memory<T>`, `Span<T>` where appropriate.
-3. **Maintain KeyCollector Pattern**: This is fundamental to PIV and should remain unchanged.
-4. **Test Coverage**: Migrate existing tests from `legacy-develop/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Piv/`.
-5. **Keep Command/Response Pattern**: Low-level APDU commands are well-tested; preserve visible `ApduCommand` construction without operation-specific command classes.
+1. **Management key first**: key generation/import and some metadata changes require management-key authentication.
+2. **PIN verification persists by session**: once verified, PIN state may remain until failure or disposal.
+3. **Touch policy timing**: cached touch policy caches for a short window after first touch.
+4. **Certificate size limits**: PIV certificates may need compression or careful object sizing.
+5. **Default credentials**: never assume defaults are acceptable outside explicit test/reset flows.
+6. **Retry counters**: PIN/PUK blocking is persistent and human-coordinated.
 
 ## Related Modules
 
-- **Core.SmartCard**: Base smart card protocol implementations
-- **Core.Cryptography**: ECPrivateKey, ECPublicKey, RSAPrivateKey, RSAPublicKey
-- **Tests.Shared**: YubiKeyTestState, test infrastructure
-- **Management**: YubiKey device management, firmware version detection
+- **Core.SmartCard**: APDU protocol, SCP, TLV utilities.
+- **Core.Cryptography**: key material and algorithm helpers.
+- **Tests.Shared**: YubiKey hardware filtering and integration helpers.
+- **Management**: device information and firmware source of truth.

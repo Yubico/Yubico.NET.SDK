@@ -1,6 +1,6 @@
 # CLAUDE.md - FIDO2 Module
 
-This file provides Claude-specific guidance for working with the FIDO2 module. **Read the root [CLAUDE.md](../CLAUDE.md) first** for general repository patterns.
+This file provides Claude-specific guidance for working with the FIDO2 module. **Read the root [CLAUDE.md](../../CLAUDE.md) first** for general repository patterns.
 
 ## Documentation Maintenance
 
@@ -353,7 +353,7 @@ public async Task MakeCredentialAsync_CreatesPasskey()
 
 Run tests excluding user presence:
 ```bash
-dotnet test --filter "RequiresUserPresence!=true"
+dotnet toolchain.cs -- test --project Fido2 --smoke --filter "RequiresUserPresence!=true"
 ```
 
 ## Feature Flags

@@ -198,7 +198,7 @@ public static async Task WithOathAsync(
     ScpKeyParameters? scpKeyParams = null,
     CancellationToken cancellationToken = default)
 {
-    await using var connection = await state.Device.OpenConnectionAsync<ISmartCardConnection>(cancellationToken);
+    await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>(cancellationToken);
 
     await using var session = await OathSession.CreateAsync(
         connection,

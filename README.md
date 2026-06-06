@@ -47,13 +47,11 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Management;
 
 // Discover connected YubiKeys
-var deviceRepository = new DeviceRepository();
-var devices = await deviceRepository.GetDevicesAsync();
+var devices = await YubiKeyManager.FindAllAsync();
 
 foreach (var device in devices)
 {
-    using var connection = await device.ConnectAsync();
-    var session = new ManagementSession(connection);
+    await using var session = await device.CreateManagementSessionAsync();
     var deviceInfo = await session.GetDeviceInfoAsync();
     
     Console.WriteLine($"YubiKey {deviceInfo.FirmwareVersion}");
@@ -66,12 +64,11 @@ foreach (var device in devices)
 ```csharp
 using Yubico.YubiKit.Piv;
 
-using var connection = await device.ConnectAsync();
-var pivSession = new PivSession(connection);
+await using var pivSession = await device.CreatePivSessionAsync();
 
 // Sign data with PIV slot
 byte[] dataToSign = Encoding.UTF8.GetBytes("Hello, YubiKey!");
-byte[] signature = await pivSession.SignAsync(PivSlot.Authentication, dataToSign);
+byte[] signature = await pivSession.SignOrDecryptAsync(PivSlot.Authentication, dataToSign);
 ```
 
 ### FIDO2 Registration
@@ -79,17 +76,11 @@ byte[] signature = await pivSession.SignAsync(PivSlot.Authentication, dataToSign
 ```csharp
 using Yubico.YubiKit.Fido2;
 
-using var connection = await device.ConnectAsync();
-var fido2Session = new Fido2Session(connection);
+await using var fidoSession = await device.CreateFidoSessionAsync();
 
-// Create a new FIDO2 credential
-var makeCredentialParams = new MakeCredentialParameters
-{
-    RelyingParty = new PublicKeyCredentialRpEntity { Id = "example.com", Name = "Example" },
-    User = new PublicKeyCredentialUserEntity { Id = userId, Name = "user@example.com" }
-};
-
-var credential = await fido2Session.MakeCredentialAsync(makeCredentialParams);
+// Query authenticator capabilities without requiring user presence
+var info = await fidoSession.GetInfoAsync();
+Console.WriteLine(string.Join(", ", info.Versions));
 ```
 
 ## Project Structure
@@ -102,14 +93,13 @@ var credential = await fido2Session.MakeCredentialAsync(makeCredentialParams);
 - **Yubico.YubiKit.YubiOtp** - Yubico OTP configuration
 - **Yubico.YubiKit.OpenPgp** - OpenPGP card implementation
 - **Yubico.YubiKit.SecurityDomain** - Secure channel (SCP03) and key management
-- **Yubico.YubiKit.YubiHsm** - YubiHSM 2 hardware security module
+- **Yubico.YubiKit.YubiHsm** - YubiHSM Auth applet operations on YubiKey
 
 ## Documentation
 
 - **[Developer Guide](docs/)** - Detailed documentation for each module
 - **[API Reference](https://docs.yubico.com/yesdk/)** - Complete API documentation
-- **[Examples](examples/)** - Sample applications and code snippets
-- **[Contributing](CONTRIBUTING.md)** - Guidelines for contributors
+- Module examples live under `src/<Module>/examples/`
 
 ## Building from Source
 

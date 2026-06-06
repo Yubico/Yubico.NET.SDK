@@ -1,7 +1,7 @@
 # CLAUDE.md - Core Module
 
 This file provides module-specific guidance for working in **Yubico.YubiKit.Core**.
-For overall repo conventions, see the repository root [CLAUDE.md](../CLAUDE.md).
+For overall repo conventions, see the repository root [CLAUDE.md](../../CLAUDE.md).
 
 ## Documentation Maintenance
 
@@ -241,7 +241,7 @@ public class MyTests : IntegrationTestBase
     public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state)
     {
         // state.YubiKey is available
-        using var connection = await state.YubiKey.OpenConnectionAsync<ISmartCardConnection>();
+        await using var connection = await state.YubiKey.ConnectAsync<ISmartCardConnection>();
         // Test logic
     }
 }

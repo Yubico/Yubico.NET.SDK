@@ -4,7 +4,7 @@ This file provides guidance for the FIDO2 module test infrastructure.
 
 ## Required Reading
 
-**CRITICAL:** Read [`docs/TESTING.md`](../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
+**CRITICAL:** Read [`docs/TESTING.md`](../../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
 
 For FIDO2-specific test patterns, CBOR encoding, and backend abstractions, see the **Key Patterns** and **Architecture Overview** sections in [`../CLAUDE.md`](../CLAUDE.md).
 
@@ -20,7 +20,7 @@ For FIDO2-specific test patterns, CBOR encoding, and backend abstractions, see t
 FIDO2 tests must be aware of transport differences:
 
 **USB Tests:**
-- Use `IFidoConnection` (HID FIDO interface)
+- Use `IFidoHidConnection` (HID FIDO interface)
 - Primary test transport
 - Supports all FIDO2 features
 
@@ -93,16 +93,16 @@ public async Task TestWithCleanState(YubiKeyTestState state)
 
 ```bash
 # Run all FIDO2 tests
-dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Fido2"
+dotnet toolchain.cs -- test --project Fido2 --filter "FullyQualifiedName~Yubico.YubiKit.Fido2"
 
 # Run unit tests only
-dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Fido2.UnitTests"
+dotnet toolchain.cs -- test --project Fido2 --filter "FullyQualifiedName~Yubico.YubiKit.Fido2.UnitTests"
 
 # Run integration tests only (requires YubiKey with FIDO2)
-dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Fido2.IntegrationTests"
+dotnet toolchain.cs -- test --integration --project Fido2 --smoke --filter "FullyQualifiedName~Yubico.YubiKit.Fido2.IntegrationTests"
 
 # Run specific test class
-dotnet toolchain.cs test --filter "FullyQualifiedName~FidoSessionTests"
+dotnet toolchain.cs -- test --project Fido2 --filter "FullyQualifiedName~FidoSessionTests"
 ```
 
 ## Common Test Patterns
@@ -126,8 +126,8 @@ var options = new MakeCredentialOptions
 {
     // ... standard options
     Extensions = new ExtensionBuilder()
-        .AddCredProtect(CredProtectPolicy.UserVerificationRequired)
-        .AddHmacSecret(enabled: true)
+        .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
+        .WithHmacSecret(hmacSecretInput)
         .Build()
 };
 

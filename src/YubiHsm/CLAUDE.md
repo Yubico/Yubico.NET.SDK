@@ -1,6 +1,6 @@
 # CLAUDE.md - YubiHSM Auth Module
 
-This file provides Claude-specific guidance for working with the YubiHSM Auth module. For overall repo conventions, see the repository root [CLAUDE.md](../CLAUDE.md).
+This file provides Claude-specific guidance for working with the YubiHSM Auth module. For overall repo conventions, see the repository root [CLAUDE.md](../../CLAUDE.md).
 
 ## Documentation Maintenance
 

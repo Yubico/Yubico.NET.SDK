@@ -13,13 +13,13 @@ This directory contains unit and integration tests for the Security Domain modul
 
 ```bash
 # Unit tests only (no hardware)
-dotnet test Yubico.YubiKit.SecurityDomain.UnitTests
+dotnet toolchain.cs -- test --project SecurityDomain --filter "FullyQualifiedName~Yubico.YubiKit.SecurityDomain.UnitTests"
 
 # Integration tests (requires YubiKey)
-dotnet test Yubico.YubiKit.SecurityDomain.IntegrationTests
+dotnet toolchain.cs -- test --integration --project SecurityDomain --smoke --filter "FullyQualifiedName~Yubico.YubiKit.SecurityDomain.IntegrationTests"
 
 # All Security Domain tests
-dotnet test Yubico.YubiKit.SecurityDomain/tests
+dotnet toolchain.cs test --project SecurityDomain
 ```
 
 ## Integration Test Setup

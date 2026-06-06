@@ -4,7 +4,7 @@ This file provides guidance for the Management module test infrastructure.
 
 ## Required Reading
 
-**CRITICAL:** Read [`docs/TESTING.md`](../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
+**CRITICAL:** Read [`docs/TESTING.md`](../../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
 
 For Management-specific test patterns, device filtering, and test state utilities, see the **Test Infrastructure** section in [`../CLAUDE.md`](../CLAUDE.md#test-infrastructure---advanced-device-filtering).
 
@@ -75,4 +75,3 @@ dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Management.
 # Run specific test class
 dotnet toolchain.cs test --filter "FullyQualifiedName~ManagementIntegrationTests"
 ```
-

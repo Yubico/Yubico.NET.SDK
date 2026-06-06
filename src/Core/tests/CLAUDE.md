@@ -4,7 +4,7 @@ This file provides guidance for the Core module test infrastructure.
 
 ## Required Reading
 
-**CRITICAL:** Read [`docs/TESTING.md`](../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
+**CRITICAL:** Read [`docs/TESTING.md`](../../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
 
 For Core-specific patterns and test utilities, see the **Test Infrastructure** section in [`../CLAUDE.md`](../CLAUDE.md#test-infrastructure).
 
@@ -64,7 +64,7 @@ public class MyIntegrationTests : IntegrationTestBase
     public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state)
     {
         // state.YubiKey is available
-        using var connection = await state.YubiKey.OpenConnectionAsync<ISmartCardConnection>();
+        await using var connection = await state.YubiKey.ConnectAsync<ISmartCardConnection>();
         // Test logic
     }
 }
@@ -85,4 +85,3 @@ dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Core.Integr
 # Run specific test class
 dotnet toolchain.cs test --filter "FullyQualifiedName~PcscProtocolTests"
 ```
-

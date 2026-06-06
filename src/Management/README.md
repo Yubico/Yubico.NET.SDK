@@ -136,7 +136,7 @@ using var mgmtSession = await ManagementSession.CreateAsync(
     cancellationToken: cancellationToken);
 
 // Or manually over HID (FIDO interface)
-using var connection = await yubiKey.ConnectAsync<IFidoConnection>();
+using var connection = await yubiKey.ConnectAsync<IFidoHidConnection>();
 using var mgmtSession = await ManagementSession.CreateAsync(
     connection,
     cancellationToken: cancellationToken);
@@ -186,7 +186,8 @@ await mgmtSession.SetDeviceConfigAsync(
 
 // After reboot, need to re-enumerate device
 await Task.Delay(3000); // Wait for reboot
-var updatedYubiKey = YubiKeyDevice.FindBySerialNumber(deviceInfo.SerialNumber.Value);
+var devices = await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken);
+var updatedYubiKey = devices.SingleOrDefault(device => device.SerialNumber == deviceInfo.SerialNumber);
 ```
 
 ### Configuration Locking

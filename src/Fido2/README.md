@@ -21,9 +21,9 @@ This module implements the CTAP 2.1/2.3 (Client to Authenticator Protocol) for Y
 - **Firmware**: 5.0+ (some features require 5.2+, 5.4+, 5.7+)
 - **Transports**:
   - USB: HID FIDO interface (primary)
-  - NFC: SmartCard/CCID interface only
+  - SmartCard/CCID: FIDO2 APDU path when the connected authenticator exposes the FIDO2 AID
 
-⚠️ **Important**: FIDO2 over USB uses HID FIDO, NOT CCID. USB CCID connections are NOT supported for FIDO2.
+⚠️ **Important**: Prefer HID FIDO for ordinary USB FIDO2 coverage. SmartCard FIDO2 over USB requires firmware 5.8.0+ and a FIDO2 AID exposed over CCID; older USB-connected YubiKeys must use HID FIDO.
 
 ## Installation
 
@@ -193,7 +193,7 @@ var credOptions = new MakeCredentialOptions
 {
     // ... rp, user, etc.
     Extensions = new ExtensionBuilder()
-        .AddCredProtect(CredProtectPolicy.UserVerificationRequired)
+        .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
         .Build()
 };
 
@@ -202,10 +202,7 @@ var assertionOptions = new GetAssertionOptions
 {
     // ... rpId, etc.
     Extensions = new ExtensionBuilder()
-        .AddHmacSecret(
-            salt1: saltBytes,
-            salt2: null,
-            pinUvAuthProtocol: fidoSession.PinUvAuthProtocol)
+        .WithHmacSecret(hmacSecretInput)
         .Build()
 };
 
@@ -297,9 +294,8 @@ Different features require specific firmware versions:
 
 | Transport | Connection Type | Use Case |
 |-----------|----------------|----------|
-| USB HID | `IFidoConnection` | Primary FIDO2 interface |
-| NFC SmartCard | `ISmartCardConnection` | Mobile NFC only |
-| USB CCID | ❌ NOT SUPPORTED | Use HID instead |
+| USB HID | `IFidoHidConnection` | Primary FIDO2 interface |
+| SmartCard | `ISmartCardConnection` | FIDO2 APDU path when the FIDO2 AID is exposed; prefer HID for ordinary USB FIDO2 coverage |
 
 ## Common Patterns
 

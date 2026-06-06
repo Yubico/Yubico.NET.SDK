@@ -6,7 +6,7 @@ A Spectre.Console CLI application that exposes the full FIDO2/CTAP2 API surface 
 
 ```bash
 # Build
-dotnet build
+dotnet toolchain.cs -- build --project Fido2
 
 # Interactive mode (menu-driven)
 dotnet run

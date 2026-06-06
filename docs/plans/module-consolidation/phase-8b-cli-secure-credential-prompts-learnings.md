@@ -18,8 +18,8 @@ Use this note as the handoff record for Phase 8B of module consolidation.
 - Tests run: RED/GREEN `Cli.Shared` unit test cycle, `Cli.Commands` unit tests, scoped format verification, focused CLI builds
 - Integration tests run: none
 - Result: passed with Cato concerns; concerns are accepted/deferred as documented below
-- Commit: pending
-- `/Ping` sent after successful phase: pending commit and compact summary
+- Commit: `fc79b80e feat(cli): add secure credential prompts`
+- `/Ping` sent after successful phase: yes, included after commit and compact summary
 
 ## Phase Scope Decision
 
@@ -217,5 +217,5 @@ Use this note as the handoff record for Phase 8B of module consolidation.
 - Cato: `concerns`/medium; argv string lifetime accepted, Memory-retention risk deferred, PIV APDU zeroing resolved by existing evidence
 - Deferred future improvements: remaining CLI prompt migrations, command-line secret policy, callback lifetime API, optional solution registration
 - Learning note path: `docs/plans/module-consolidation/phase-8b-cli-secure-credential-prompts-learnings.md`
-- Commit: pending
-- `/Ping` status: pending
+- Commit: `fc79b80e feat(cli): add secure credential prompts`
+- `/Ping` status: sent

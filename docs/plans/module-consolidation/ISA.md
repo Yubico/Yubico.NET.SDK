@@ -691,6 +691,7 @@ Targets:
 
 - review all deferred future improvement candidates from phase learning notes
 - review all `docs/plans/module-consolidation/follow-up-*.md` plans
+- investigate `src/Core/src/SmartCard/UsbSmartCardConnection.cs` `SupportsExtendedApdu()` against the `../yubikit-manager` SDK reference implementation
 - classify each candidate as implement now, merge into docs, defer to a new program, or reject
 - prioritize high-leverage Core/SCP, shared test harness, CLI, naming/API, and documentation cleanups
 - run Cato or equivalent review on any broad architectural follow-up before source changes

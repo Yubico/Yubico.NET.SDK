@@ -18,8 +18,8 @@ Use this note as the handoff record for Phase 8A of module consolidation.
 - Tests run: RED/GREEN CLI unit test cycle, scoped format verification, focused CLI builds
 - Integration tests run: none
 - Result: passed; Cato verdict `pass`, with info-level notes and one deferred pre-existing `ConnectionType` warning
-- Commit: pending
-- `/Ping` sent after successful phase: pending commit and compact summary
+- Commit: `5b65b92e feat(cli): honor global device targeting`
+- `/Ping` sent after successful phase: yes, included after commit and compact summary
 
 ## Phase Scope Decision
 
@@ -216,5 +216,5 @@ Use this note as the handoff record for Phase 8A of module consolidation.
 - House-style update needed: global CLI options should be honored or removed and covered by executable tests
 - Next phase recommendation: Phase 8B secure credential prompt ownership, or Phase 8B command parsing/session helper consolidation after human choice
 - Learning note path: `docs/plans/module-consolidation/phase-8a-cli-global-device-targeting-learnings.md`
-- Commit: pending
-- `/Ping` status: pending
+- Commit: `5b65b92e feat(cli): honor global device targeting`
+- `/Ping` status: sent

@@ -154,7 +154,6 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         // If SCP was established, recreate backend with wrapped protocol
         if (IsAuthenticated && Protocol is ISmartCardProtocol scpProtocol)
         {
-            _backend?.Dispose();
             _backend = new SmartCardFidoBackend(scpProtocol);
         }
 
@@ -430,7 +429,6 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
         if (disposing)
         {
-            _backend?.Dispose();
             _backend = null;
         }
 
@@ -444,7 +442,6 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         if (_disposed)
             return default;
 
-        _backend?.Dispose();
         _backend = null;
         _disposed = true;
 

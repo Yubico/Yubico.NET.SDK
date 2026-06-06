@@ -131,6 +131,77 @@ public class PcscProtocolScpTests
     }
 
     [Fact]
+    public void Dispose_DisposesScpProcessor()
+    {
+        // Arrange
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var scpProcessor = new DisposableApduProcessor();
+        var adapter = new PcscProtocolScp(baseProtocol, scpProcessor, null!);
+
+        // Act
+        adapter.Dispose();
+
+        // Assert
+        Assert.Equal(1, scpProcessor.DisposeCount);
+    }
+
+    [Fact]
+    public void Dispose_Twice_DisposesBaseProtocolAndScpProcessorOnce()
+    {
+        // Arrange
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var scpProcessor = new DisposableApduProcessor();
+        var adapter = new PcscProtocolScp(baseProtocol, scpProcessor, null!);
+
+        // Act
+        adapter.Dispose();
+        adapter.Dispose();
+
+        // Assert
+        Assert.Equal(1, _fakeConnection.DisposeCount);
+        Assert.Equal(1, scpProcessor.DisposeCount);
+    }
+
+    [Fact]
+    public async Task TransmitAndReceiveAsync_AfterDispose_ThrowsObjectDisposedException()
+    {
+        // Arrange
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var adapter = new PcscProtocolScp(baseProtocol, _fakeScpProcessor, null!);
+        adapter.Dispose();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+            adapter.TransmitAndReceiveAsync(new ApduCommand(), cancellationToken: TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task SelectAsync_AfterDispose_ThrowsObjectDisposedException()
+    {
+        // Arrange
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var adapter = new PcscProtocolScp(baseProtocol, _fakeScpProcessor, null!);
+        adapter.Dispose();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+            adapter.SelectAsync(ApplicationIds.Piv, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public void Configure_AfterDispose_ThrowsObjectDisposedException()
+    {
+        // Arrange
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var adapter = new PcscProtocolScp(baseProtocol, _fakeScpProcessor, null!);
+        adapter.Dispose();
+
+        // Act & Assert
+        Assert.Throws<ObjectDisposedException>(() =>
+            adapter.Configure(new FirmwareVersion(5, 7, 2)));
+    }
+
+    [Fact]
     public async Task TransmitAndReceiveAsync_NonSuccessResponse_ThrowsInvalidOperationException()
     {
         // Arrange
@@ -179,5 +250,19 @@ public class PcscProtocolScpTests
         Assert.Equal((byte)0xA5, rawProcessor.TransmittedCommands[1].Ins);
         Assert.True((rawProcessor.TransmittedCommands[1].Cla & 0x04) != 0);
         Assert.True(rawProcessor.TransmittedCommands[1].Data.Length >= 8);
+    }
+
+    private sealed class DisposableApduProcessor : IApduProcessor, IDisposable
+    {
+        public IApduFormatter Formatter { get; } = new FakeApduFormatter();
+        public int DisposeCount { get; private set; }
+
+        public Task<ApduResponse> TransmitAsync(
+            ApduCommand command,
+            bool useScp,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(new ApduResponse(new byte[] { 0x90, 0x00 }));
+
+        public void Dispose() => DisposeCount++;
     }
 }

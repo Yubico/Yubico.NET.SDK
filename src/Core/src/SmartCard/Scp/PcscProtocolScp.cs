@@ -25,6 +25,7 @@ public class PcscProtocolScp : ISmartCardProtocol
     private readonly ISmartCardProtocol _baseProtocol;
     private readonly DataEncryptor _dataEncryptor;
     private readonly IApduProcessor _scpProcessor;
+    private bool _disposed;
 
     /// <summary>
     ///     Creates a new SCP protocol adapter.
@@ -53,6 +54,8 @@ public class PcscProtocolScp : ISmartCardProtocol
         bool throwOnError = true,
         CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
         var response = await _scpProcessor.TransmitAsync(command, true, cancellationToken)
             .ConfigureAwait(false);
 
@@ -68,6 +71,8 @@ public class PcscProtocolScp : ISmartCardProtocol
         ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
         const byte INS_SELECT = 0xA4;
         const byte P1_SELECT = 0x04;
         const byte P2_SELECT = 0x00;
@@ -81,15 +86,23 @@ public class PcscProtocolScp : ISmartCardProtocol
             : throw ApduException.FromResponse(response, selectCommand, "SCP SELECT command failed");
     }
 
-    public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null) =>
+    public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
         // Delegate configuration to base protocol
         // SCP state is already established and doesn't need reconfiguration
         _baseProtocol.Configure(version, configuration);
+    }
 
     public void Dispose()
     {
+        if (_disposed)
+            return;
+
         (_scpProcessor as IDisposable)?.Dispose();
         _baseProtocol.Dispose();
+        _disposed = true;
     }
 
 }

@@ -21,7 +21,7 @@ namespace Yubico.YubiKit.Fido2.Backend;
 /// This allows FidoSession to be transport-agnostic while supporting both
 /// SmartCard (CCID) and FIDO HID (CTAPHID) communication.
 /// </remarks>
-internal interface IFidoBackend : IDisposable
+internal interface IFidoBackend
 {
     /// <summary>
     /// Sends a CTAP CBOR command and receives the response.

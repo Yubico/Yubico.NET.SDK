@@ -151,6 +151,56 @@ public class PcscProtocolTests
     }
 
     [Fact]
+    public void Dispose_Twice_DisposesConnectionOnce()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+
+        // Act
+        protocol.Dispose();
+        protocol.Dispose();
+
+        // Assert
+        Assert.Equal(1, _fakeConnection.DisposeCount);
+    }
+
+    [Fact]
+    public async Task TransmitAndReceiveAsync_AfterDispose_ThrowsObjectDisposedException()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        protocol.Dispose();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+            protocol.TransmitAndReceiveAsync(new ApduCommand(), cancellationToken: TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task SelectAsync_AfterDispose_ThrowsObjectDisposedException()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        protocol.Dispose();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+            protocol.SelectAsync(ApplicationIds.Piv, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public void Configure_AfterDispose_ThrowsObjectDisposedException()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        protocol.Dispose();
+
+        // Act & Assert
+        Assert.Throws<ObjectDisposedException>(() =>
+            protocol.Configure(new FirmwareVersion(5, 7, 2)));
+    }
+
+    [Fact]
     public async Task TransmitAndReceiveAsync_ChainedResponseWithConfiguredInsSendRemaining_UsesConfiguredCommand()
     {
         // Arrange

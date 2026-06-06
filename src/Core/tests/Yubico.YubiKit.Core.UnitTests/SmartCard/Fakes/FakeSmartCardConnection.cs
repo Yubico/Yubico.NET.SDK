@@ -26,6 +26,7 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
     private bool _disposed;
 
     public bool SupportsExtendedApduValue { get; set; } = true;
+    public int DisposeCount { get; private set; }
     public List<ReadOnlyMemory<byte>> TransmittedCommands { get; } = [];
     public ConnectionType Type { get; } = ConnectionType.SmartCard;
 
@@ -56,7 +57,11 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
         return await Task.FromResult(_responses.Dequeue());
     }
 
-    public void Dispose() => _disposed = true;
+    public void Dispose()
+    {
+        DisposeCount++;
+        _disposed = true;
+    }
 
     public async ValueTask DisposeAsync()
     {

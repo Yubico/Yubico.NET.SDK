@@ -29,6 +29,7 @@ internal class PcscProtocol : ISmartCardProtocol
     private readonly ILogger<PcscProtocol> _logger;
     internal byte InsSendRemaining { get; private set; }
     private IApduProcessor _processor;
+    private bool _disposed;
 
     public PcscProtocol(
         ISmartCardConnection connection,
@@ -68,13 +69,22 @@ internal class PcscProtocol : ISmartCardProtocol
     internal IApduProcessor GetBaseCommandProcessor() => BuildCommandProcessor();
 
 
-    public void Dispose() => _connection.Dispose();
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        _connection.Dispose();
+        _disposed = true;
+    }
 
     public async Task<ApduResponse> TransmitAndReceiveAsync(
         ApduCommand command,
         bool throwOnError = true,
         CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
         _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
 
         var response = await _processor.TransmitAsync(command, false, cancellationToken).ConfigureAwait(false);
@@ -91,6 +101,8 @@ internal class PcscProtocol : ISmartCardProtocol
         ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
         _logger.LogTrace("Selecting application ID: {ApplicationId}", Convert.ToHexString(applicationId.Span));
 
         var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };
@@ -102,6 +114,8 @@ internal class PcscProtocol : ISmartCardProtocol
 
     public void Configure(FirmwareVersion firmwareVersion, ProtocolConfiguration? configuration = null)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
         FirmwareVersion = firmwareVersion;
         var insSendRemainingChanged = ConfigureInsSendRemaining(configuration);
 

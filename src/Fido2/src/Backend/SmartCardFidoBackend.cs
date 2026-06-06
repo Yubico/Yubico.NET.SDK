@@ -26,44 +26,39 @@ namespace Yubico.YubiKit.Fido2.Backend;
 internal sealed class SmartCardFidoBackend : IFidoBackend
 {
     private const byte CtapHidCbor = 0x10;  // Used as APDU INS
-    
+
     private readonly ISmartCardProtocol _protocol;
     private readonly ILogger _logger;
-    private bool _disposed;
-    
+
     public SmartCardFidoBackend(ISmartCardProtocol protocol)
     {
         ArgumentNullException.ThrowIfNull(protocol);
         _protocol = protocol;
         _logger = YubiKitLogging.LoggerFactory.CreateLogger(nameof(SmartCardFidoBackend));
     }
-    
+
     /// <summary>
     /// Initializes the backend by selecting the FIDO2 application.
     /// </summary>
     public async Task SelectAsync(CancellationToken cancellationToken = default)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        
         _logger.LogDebug("Selecting FIDO2 application via SmartCard");
         await _protocol.SelectAsync(ApplicationIds.Fido2, cancellationToken).ConfigureAwait(false);
     }
-    
+
     public async Task<ReadOnlyMemory<byte>> SendCborAsync(
         ReadOnlyMemory<byte> request,
         CancellationToken cancellationToken = default)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        
         if (request.Length < 1)
         {
             throw new ArgumentException("Request must contain at least the command byte.", nameof(request));
         }
-        
+
         _logger.LogDebug(
             "Sending CTAP CBOR via SmartCard: command=0x{Command:X2}, payload={Length} bytes",
             request.Span[0], request.Length - 1);
-        
+
         // For SmartCard transport, the CTAP request is wrapped in an APDU:
         // CLA=0x80, INS=0x10, P1=0x00, P2=0x00, Data=CTAP request
         var apdu = new ApduCommand
@@ -75,7 +70,7 @@ internal sealed class SmartCardFidoBackend : IFidoBackend
             Data = request,
             Le = 0  // Maximum response length
         };
-        
+
         var apduResponse = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
         var responseData = apduResponse.Data;
 
@@ -93,12 +88,5 @@ internal sealed class SmartCardFidoBackend : IFidoBackend
 
         // Return the response data (without status byte)
         return responseData[1..];
-    }
-    
-    public void Dispose()
-    {
-        if (_disposed) return;
-        _protocol.Dispose();
-        _disposed = true;
     }
 }

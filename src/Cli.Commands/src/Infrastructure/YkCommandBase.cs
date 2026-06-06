@@ -35,8 +35,24 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
 
         try
         {
+            if (!TryParseTransport(settings.Transport, out var requestedTransport))
+            {
+                OutputHelpers.WriteError($"Unsupported transport '{settings.Transport}'. Use smartcard, fido, or otp.");
+                return ExitCode.GenericError;
+            }
+
             // 1. Device selection
-            var selector = new YkDeviceSelector(AppletTransports);
+            YkDeviceSelector selector;
+            try
+            {
+                selector = new YkDeviceSelector(AppletTransports, settings.Serial, requestedTransport);
+            }
+            catch (ArgumentException ex)
+            {
+                OutputHelpers.WriteError(ex.Message);
+                return ExitCode.FeatureUnsupported;
+            }
+
             var selection = await selector.SelectDeviceAsync(CancellationToken.None);
 
             if (selection is null)
@@ -96,4 +112,23 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
         CommandContext context,
         TSettings settings,
         YkDeviceContext deviceContext);
+
+    private static bool TryParseTransport(string? value, out ConnectionType? transport)
+    {
+        transport = null;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return true;
+        }
+
+        transport = value.Trim().ToLowerInvariant() switch
+        {
+            "smartcard" or "ccid" => ConnectionType.SmartCard,
+            "fido" or "hidfido" or "fido-hid" => ConnectionType.HidFido,
+            "otp" or "hidotp" or "otp-hid" => ConnectionType.HidOtp,
+            _ => null
+        };
+
+        return transport is not null;
+    }
 }

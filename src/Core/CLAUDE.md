@@ -180,6 +180,10 @@ var hidFactory = new HidConnectionFactory();
 using var connection = await hidFactory.CreateAsync(device, cancellationToken);
 ```
 
+### ConnectionType Semantics
+
+`ConnectionType` is a `[Flags]` enum with explicit values. `HidFido`, `HidOtp`, and `SmartCard` represent concrete discovered device interfaces. `Hid` is a group filter that includes both HID FIDO and HID OTP interfaces when used with discovery/cache filtering APIs. `Unknown` matches no devices.
+
 ## Session Base Class
 
 `ApplicationSession` centralizes shared session state:

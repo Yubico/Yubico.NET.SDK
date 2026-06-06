@@ -228,7 +228,7 @@ public static class YubiKeyManager
     /// <summary>
     /// Finds all connected YubiKey devices, with options for connection type and rescan behavior.
     /// </summary>
-    /// <param name="type">The connection type to filter by (SmartCard, HID, or All). Default is <see cref="ConnectionType.All"/>.</param>
+    /// <param name="type">The connection type to filter by. <see cref="ConnectionType.Hid"/> includes both HID FIDO and HID OTP devices. Default is <see cref="ConnectionType.All"/>.</param>
     /// <param name="forceRescan">
     /// If <c>true</c>, always performs a fresh device scan.
     /// If <c>false</c> (default), returns cached results unless cache is empty.

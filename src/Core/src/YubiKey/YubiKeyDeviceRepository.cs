@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Interfaces;
 
 namespace Yubico.YubiKit.Core.YubiKey;
@@ -49,9 +49,7 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
     {
         ThrowIfDisposed();
 
-        return type == ConnectionType.All
-            ? [.. _deviceCache.Values]
-            : [.. _deviceCache.Values.Where(d => d.ConnectionType == type)];
+        return [.. _deviceCache.Values.Where(d => type.MatchesDevice(d.ConnectionType))];
     }
 
     /// <inheritdoc/>

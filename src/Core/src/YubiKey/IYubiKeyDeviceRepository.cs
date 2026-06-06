@@ -39,7 +39,7 @@ internal interface IYubiKeyDeviceRepository : IDisposable
     /// <summary>
     /// Gets all cached devices, optionally filtered by connection type.
     /// </summary>
-    /// <param name="type">The connection type to filter by, or <see cref="ConnectionType.All"/> for all devices.</param>
+    /// <param name="type">The connection type to filter by, or <see cref="ConnectionType.All"/> for all devices. <see cref="ConnectionType.Hid"/> includes HID FIDO and HID OTP devices.</param>
     /// <returns>A read-only list of cached devices matching the filter.</returns>
     /// <remarks>
     /// This is a synchronous operation that returns only cached data.

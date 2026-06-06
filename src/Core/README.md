@@ -38,6 +38,10 @@ foreach (var device in devices)
 
 // Force a rescan when device topology may have changed
 var freshDevices = await YubiKeyManager.FindAllAsync(forceRescan: true);
+
+// Filter discovery. ConnectionType.Hid includes HID FIDO and HID OTP interfaces.
+var hidDevices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
+var fidoDevices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
 ```
 
 ### Opening a Connection

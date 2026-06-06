@@ -17,10 +17,10 @@ namespace Yubico.YubiKit.Core.YubiKey;
 [Flags]
 public enum ConnectionType
 {
-    Unknown,
-    Hid,
-    HidFido,
-    HidOtp,
-    SmartCard,
+    Unknown = 0,
+    Hid = 1,
+    HidFido = 2,
+    HidOtp = 4,
+    SmartCard = 8,
     All = Hid | HidFido | HidOtp | SmartCard
 }

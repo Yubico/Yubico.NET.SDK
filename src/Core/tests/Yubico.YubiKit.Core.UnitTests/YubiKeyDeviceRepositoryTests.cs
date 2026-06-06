@@ -197,6 +197,80 @@ public class YubiKeyDeviceRepositoryTests
     }
 
     [Fact]
+    public void GetAll_WithHid_ReturnsHidFidoAndHidOtpDevices()
+    {
+        // Arrange
+        using var repository = new YubiKeyDeviceRepository();
+        var device1 = new FakeYubiKey("device-1", ConnectionType.SmartCard);
+        var device2 = new FakeYubiKey("device-2", ConnectionType.HidFido);
+        var device3 = new FakeYubiKey("device-3", ConnectionType.HidOtp);
+        repository.UpdateCache([device1, device2, device3]);
+
+        // Act
+        var result = repository.GetAll(ConnectionType.Hid);
+
+        // Assert
+        Assert.Equal(2, result.Count);
+        Assert.Contains(result, d => d.DeviceId == "device-2");
+        Assert.Contains(result, d => d.DeviceId == "device-3");
+    }
+
+    [Fact]
+    public void GetAll_WithCombinedFilter_ReturnsMatchingDevices()
+    {
+        // Arrange
+        using var repository = new YubiKeyDeviceRepository();
+        repository.UpdateCache([
+            new FakeYubiKey("smartcard", ConnectionType.SmartCard),
+            new FakeYubiKey("fido", ConnectionType.HidFido),
+            new FakeYubiKey("otp", ConnectionType.HidOtp)
+        ]);
+
+        // Act
+        var result = repository.GetAll(ConnectionType.SmartCard | ConnectionType.HidFido);
+
+        // Assert
+        Assert.Equal(2, result.Count);
+        Assert.Contains(result, d => d.DeviceId == "smartcard");
+        Assert.Contains(result, d => d.DeviceId == "fido");
+    }
+
+    [Fact]
+    public void GetAll_WithSpecificHidFilter_DoesNotReturnGenericHidDevice()
+    {
+        // Arrange
+        using var repository = new YubiKeyDeviceRepository();
+        repository.UpdateCache([
+            new FakeYubiKey("generic-hid", ConnectionType.Hid),
+            new FakeYubiKey("fido", ConnectionType.HidFido)
+        ]);
+
+        // Act
+        var result = repository.GetAll(ConnectionType.HidFido);
+
+        // Assert
+        Assert.Single(result);
+        Assert.Equal("fido", result[0].DeviceId);
+    }
+
+    [Fact]
+    public void GetAll_WithUnknown_ReturnsEmptyList()
+    {
+        // Arrange
+        using var repository = new YubiKeyDeviceRepository();
+        repository.UpdateCache([
+            new FakeYubiKey("device-1", ConnectionType.SmartCard),
+            new FakeYubiKey("device-2", ConnectionType.HidFido)
+        ]);
+
+        // Act
+        var result = repository.GetAll(ConnectionType.Unknown);
+
+        // Assert
+        Assert.Empty(result);
+    }
+
+    [Fact]
     public void GetAll_EmptyCache_ReturnsEmptyList()
     {
         // Arrange

@@ -33,7 +33,7 @@ public static class ConnectionTypeMapper
             HidInterfaceType.Otp => ConnectionType.HidOtp,
             _ => ConnectionType.Hid
         };
-    
+
     /// <summary>
     /// Checks if a YubiKey HID interface type supports a specific connection type.
     /// </summary>
@@ -41,12 +41,7 @@ public static class ConnectionTypeMapper
     /// <param name="connectionType">The requested connection type.</param>
     /// <returns><c>true</c> if the interface supports the connection type; otherwise, <c>false</c>.</returns>
     public static bool SupportsConnectionType(
-        HidInterfaceType interfaceType, 
+        HidInterfaceType interfaceType,
         ConnectionType connectionType) =>
-        (interfaceType, connectionType) switch
-        {
-            (HidInterfaceType.Fido, ConnectionType.HidFido) => true,
-            (HidInterfaceType.Otp, ConnectionType.HidOtp) => true,
-            _ => false
-        };
+        interfaceType != HidInterfaceType.Unknown && connectionType.MatchesDevice(ToConnectionType(interfaceType));
 }

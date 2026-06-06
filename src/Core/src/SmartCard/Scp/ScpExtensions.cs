@@ -61,6 +61,8 @@ public static class ScpExtensions
 
             var (scpProcessor, encryptor) = await ScpInitializer.InitializeScpAsync(
                     pcscProtocol.GetBaseProcessor(),
+                    pcscProtocol.GetBaseCommandProcessor(),
+                    pcscProtocol.InsSendRemaining,
                     keyParams,
                     cancellationToken)
                 .ConfigureAwait(false);

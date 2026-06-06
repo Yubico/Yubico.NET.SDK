@@ -14,6 +14,7 @@
 
 using System.Text;
 using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Oath.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
@@ -74,6 +75,21 @@ public class OathSessionTests
     public async Task OathSession_Create_ReadsSelectMetadataWithoutReset(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreateOathSessionAsync(cancellationToken: NewToken());
+
+        Assert.Equal(103, state.SerialNumber);
+        Assert.NotEmpty(session.DeviceId);
+        Assert.True(session.Salt.Length > 0);
+        Assert.NotNull(session.FirmwareVersion);
+    }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.3", CustomFilter = typeof(BetaSerial103Filter))]
+    public async Task OathSession_CreateWithScp03_ReadsSelectMetadataWithoutReset(YubiKeyTestState state)
+    {
+        using var scpParams = Scp03KeyParameters.Default;
+        await using var session = await state.Device.CreateOathSessionAsync(
+            scpParams,
+            cancellationToken: NewToken());
 
         Assert.Equal(103, state.SerialNumber);
         Assert.NotEmpty(session.DeviceId);

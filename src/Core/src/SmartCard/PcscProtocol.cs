@@ -48,19 +48,24 @@ internal class PcscProtocol : ISmartCardProtocol
 
     public FirmwareVersion? FirmwareVersion { get; private set; }
 
-    private IApduProcessor BuildBaseProcessor()
+    private IApduProcessor BuildCommandProcessor()
     {
-        var processor = UseExtendedApdus
+        return UseExtendedApdus
             ? new ApduTransmitter(_connection, new ApduFormatterExtended(MaxApduSize))
             : new ChainedApduTransmitter(_connection, new ApduFormatterShort());
+    }
 
-        return new ChainedResponseReceiver(FirmwareVersion, processor, InsSendRemaining);
+    private IApduProcessor BuildBaseProcessor()
+    {
+        return new ChainedResponseReceiver(FirmwareVersion, BuildCommandProcessor(), InsSendRemaining);
     }
 
     private void ReconfigureProcessor() =>
         _processor = BuildBaseProcessor();
 
     internal IApduProcessor GetBaseProcessor() => BuildBaseProcessor();
+
+    internal IApduProcessor GetBaseCommandProcessor() => BuildCommandProcessor();
 
 
     public void Dispose() => _connection.Dispose();

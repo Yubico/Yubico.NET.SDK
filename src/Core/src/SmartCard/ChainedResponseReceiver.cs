@@ -20,12 +20,14 @@ namespace Yubico.YubiKit.Core.SmartCard;
 internal class ChainedResponseReceiver(
     FirmwareVersion? firmwareVersion,
     IApduProcessor apduTransmitter,
-    byte insSendRemaining) : IApduProcessor
+    byte insSendRemaining) : IApduProcessor, IDisposable
 {
     private const byte Sw1HasMoreData = 0x61;
     private readonly ApduCommand _getMoreDataApdu = new(0, insSendRemaining, 0, 0);
 
     public FirmwareVersion? FirmwareVersion { get; } = firmwareVersion;
+
+    public byte InsSendRemaining { get; } = insSendRemaining;
 
 
     public IApduFormatter Formatter => apduTransmitter.Formatter;
@@ -56,5 +58,7 @@ internal class ChainedResponseReceiver(
 
         return completeResponse;
     }
+
+    public void Dispose() => (apduTransmitter as IDisposable)?.Dispose();
 
 }

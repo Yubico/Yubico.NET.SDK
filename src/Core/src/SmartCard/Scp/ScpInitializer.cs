@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.SmartCard.Scp;
 
@@ -29,10 +30,15 @@ internal static class ScpInitializer
     private const byte
         SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC = 0x33; // Security level: C-MAC + C-DECRYPTION + R-MAC + R-ENCRYPTION
 
+    private static readonly Feature FeatureScp03 = new("SCP03", 5, 3, 0);
+    private static readonly Feature FeatureScp11 = new("SCP11", 5, 7, 2);
+
     /// <summary>
     ///     Initializes an SCP session and returns an SCP-wrapped processor with data encryptor.
     /// </summary>
-    /// <param name="baseProcessor">The base APDU processor (without SCP)</param>
+    /// <param name="initializationProcessor">The APDU processor used during SCP setup before secure messaging is established.</param>
+    /// <param name="commandProcessor">The raw APDU command processor wrapped by SCP after setup completes.</param>
+    /// <param name="insSendRemaining">The instruction byte for response-chaining follow-up commands.</param>
     /// <param name="keyParams">SCP key parameters (SCP03 or SCP11)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Tuple of (SCP-wrapped processor, data encryptor)</returns>
@@ -40,23 +46,37 @@ internal static class ScpInitializer
     /// <exception cref="NotSupportedException">Thrown when device doesn't support SCP</exception>
     /// <exception cref="ApduException">Thrown when SCP initialization fails</exception>
     public static async Task<(IApduProcessor scpProcessor, DataEncryptor dataEncryptor)> InitializeScpAsync(
-        IApduProcessor baseProcessor,
+        IApduProcessor initializationProcessor,
+        IApduProcessor commandProcessor,
+        byte insSendRemaining,
         ScpKeyParameters keyParams,
         CancellationToken cancellationToken = default)
     {
-        if (baseProcessor is not ChainedResponseReceiver { FirmwareVersion: not null } mainProcessor)
-            throw new ArgumentException("Base processor must be a ChainedResponseReceiver",
-                nameof(baseProcessor)); // TODO. Could also put FirmwareVersion on the IApduProcessor interface
+        if (initializationProcessor is not ChainedResponseReceiver { FirmwareVersion: not null } mainProcessor)
+            throw new ArgumentException("Initialization processor must be a ChainedResponseReceiver",
+                nameof(initializationProcessor)); // TODO. Could also put FirmwareVersion on the IApduProcessor interface
 
         try
         {
             return keyParams switch
             {
-                Scp03KeyParameters scp03Parameters => mainProcessor.FirmwareVersion.IsAtLeast(5, 3, 0)
-                    ? await InitScp03Async(mainProcessor, scp03Parameters, cancellationToken).ConfigureAwait(false)
+                Scp03KeyParameters scp03Parameters => Supports(mainProcessor.FirmwareVersion, FeatureScp03)
+                    ? await InitScp03Async(
+                            mainProcessor,
+                            commandProcessor,
+                            insSendRemaining,
+                            scp03Parameters,
+                            cancellationToken)
+                        .ConfigureAwait(false)
                     : throw new NotSupportedException("SCP03 only supported on YubiKey 5.3.0 and later"),
-                Scp11KeyParameters scp11Parameters => mainProcessor.FirmwareVersion.IsAtLeast(5, 7, 2)
-                    ? await InitScp11Async(mainProcessor, scp11Parameters, cancellationToken).ConfigureAwait(false)
+                Scp11KeyParameters scp11Parameters => Supports(mainProcessor.FirmwareVersion, FeatureScp11)
+                    ? await InitScp11Async(
+                            mainProcessor,
+                            commandProcessor,
+                            insSendRemaining,
+                            scp11Parameters,
+                            cancellationToken)
+                        .ConfigureAwait(false)
                     : throw new NotSupportedException("SCP11 only supported on YubiKey 5.7.2 and later"),
                 _ => throw new ArgumentException("Unsupported SCP key parameters type")
             };
@@ -67,25 +87,39 @@ internal static class ScpInitializer
         }
     }
 
+    private static bool Supports(FirmwareVersion firmwareVersion, Feature feature) =>
+        firmwareVersion.Major == 0 || firmwareVersion >= feature.Version;
+
+    internal static IApduProcessor CreateSecureProcessor(
+        IApduProcessor commandProcessor,
+        ScpState state,
+        FirmwareVersion? firmwareVersion,
+        byte insSendRemaining)
+    {
+        var scpProcessor = new ScpProcessor(commandProcessor, state);
+        return new ChainedResponseReceiver(firmwareVersion, scpProcessor, insSendRemaining);
+    }
+
     /// <summary>
     ///     Initializes an SCP03 session.
     /// </summary>
     private static async Task<(IApduProcessor, DataEncryptor)> InitScp03Async(
-        IApduProcessor baseProcessor,
+        ChainedResponseReceiver initializationProcessor,
+        IApduProcessor commandProcessor,
+        byte insSendRemaining,
         Scp03KeyParameters keyParams,
         CancellationToken cancellationToken)
     {
         // Initialize SCP03 session (sends INITIALIZE UPDATE)
         var (state, hostCryptogram) = await ScpState.Scp03InitAsync(
-                baseProcessor,
+                initializationProcessor,
                 keyParams,
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         try
         {
-            // Create SCP processor with base processor's formatter
-            var scpProcessor = new ScpProcessor(baseProcessor, state);
+            var scpProcessor = new ScpProcessor(commandProcessor, state);
 
             // Send EXTERNAL AUTHENTICATE with host cryptogram.
             // Dispose scpProcessor (and its ScpState session keys) on any failure —
@@ -111,7 +145,9 @@ internal static class ScpInitializer
             }
 
             var dataEncryptor = state.GetDataEncryptor();
-            return (scpProcessor, dataEncryptor);
+            return (
+                new ChainedResponseReceiver(initializationProcessor.FirmwareVersion, scpProcessor, insSendRemaining),
+                dataEncryptor);
         }
         finally
         {
@@ -125,19 +161,24 @@ internal static class ScpInitializer
     ///     Initializes an SCP11 session (supports variants a/b/c).
     /// </summary>
     private static async Task<(IApduProcessor, DataEncryptor)> InitScp11Async(
-        IApduProcessor baseProcessor,
+        ChainedResponseReceiver initializationProcessor,
+        IApduProcessor commandProcessor,
+        byte insSendRemaining,
         Scp11KeyParameters keyParams,
         CancellationToken cancellationToken)
     {
         // Initialize SCP11 session (performs ECDH key agreement)
         var state = await ScpState.Scp11InitAsync(
-                baseProcessor,
+                initializationProcessor,
                 keyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        // Wrap base processor with SCP
-        var scpProcessor = new ScpProcessor(baseProcessor, state);
+        var scpProcessor = CreateSecureProcessor(
+            commandProcessor,
+            state,
+            initializationProcessor.FirmwareVersion,
+            insSendRemaining);
 
         var dataEncryptor = state.GetDataEncryptor();
         return (scpProcessor, dataEncryptor);

@@ -145,4 +145,39 @@ public class PcscProtocolScpTests
             adapter.TransmitAndReceiveAsync(command, cancellationToken: TestContext.Current.CancellationToken));
         Assert.Contains("6982", ex.Message);
     }
+
+    [Fact]
+    public async Task CreateSecureProcessor_ChainedResponse_WrapsSendRemainingCommand()
+    {
+        // Arrange
+        var rawProcessor = new FakeApduProcessor();
+        rawProcessor.EnqueueResponse(0x61, 0x01);
+        rawProcessor.EnqueueResponse(0x90, 0x00);
+
+        using var state = new ScpState(
+            new SessionKeys(new byte[16], new byte[16], new byte[16]),
+            new byte[16]);
+
+        var secureProcessor = ScpInitializer.CreateSecureProcessor(
+            rawProcessor,
+            state,
+            new FirmwareVersion(5, 7, 2),
+            0xA5);
+
+        var command = new ApduCommand(0x00, 0x01, 0x00, 0x00);
+
+        // Act
+        var response = await secureProcessor.TransmitAsync(
+            command,
+            useScp: true,
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Equal(SWConstants.Success, response.SW);
+        Assert.Equal(2, rawProcessor.TransmittedCommands.Count);
+        Assert.Equal((byte)0x01, rawProcessor.TransmittedCommands[0].Ins);
+        Assert.Equal((byte)0xA5, rawProcessor.TransmittedCommands[1].Ins);
+        Assert.True((rawProcessor.TransmittedCommands[1].Cla & 0x04) != 0);
+        Assert.True(rawProcessor.TransmittedCommands[1].Data.Length >= 8);
+    }
 }

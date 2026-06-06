@@ -171,6 +171,23 @@ public class ScpExtensionsTests
     }
 
     [Fact]
+    public async Task WithScpAsync_Scp03_AlphaBetaFirmware_Proceeds()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        protocol.Configure(new FirmwareVersion(0, 0, 1));
+
+        using var staticKeys = StaticKeys.GetDefaultKeys();
+        var keyParams = new Scp03KeyParameters(new KeyReference(0x01, 0xFF), staticKeys);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
+            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
+
+        Assert.IsNotType<NotSupportedException>(ex);
+    }
+
+    [Fact]
     public async Task WithScpAsync_Scp11_UnknownFirmware_Proceeds()
     {
         // Arrange

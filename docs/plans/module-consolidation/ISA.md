@@ -569,9 +569,110 @@ Targets:
 
 Only run after source patterns settle.
 
+### Phase 10: Follow-Up Program Work Plan
+
+Status: in progress.
+
+Artifacts:
+
+- `docs/plans/module-consolidation/phase-10-follow-up-program-work-plan.md`
+- `docs/plans/module-consolidation/phase-10-follow-up-program-learnings.md`
+
+Purpose:
+
+- record what Phases 1-9 fixed
+- classify deferred concerns as fix now, defer, reject, or final-audit-only
+- define the follow-up phase order before source work resumes
+- preserve the final same-criteria reassessment as a separate read-only phase
+
+Phase 10 is documentation-only. It does not approve source-code changes for later phases.
+
+### Phase 11: Core SCP Chained Response
+
+Targets:
+
+- characterize plain and SCP response chaining at byte level
+- decide whether send-remaining APDUs are correctly wrapped or raw under SCP
+- preserve OATH `INS_SEND_REMAINING` (`0xA5`) behavior
+- avoid introducing a broad APDU framework or operation-specific command classes
+
+### Phase 12: Core `ConnectionType` Semantics
+
+Targets:
+
+- review and repair or explicitly constrain `[Flags]` semantics
+- address that `HidOtp = 3` is exactly equal to `Hid | HidFido`, and that `All` redundantly ORs the overlapping value
+- pin explicit numeric values before any enum-shape change so reordering cannot silently alter serialized or public values
+- add unit coverage for filtering semantics, exact values, and compatibility assumptions that could regress through `HasFlag`-style use
+- inspect `Transport` as a related `[Flags]` enum but do not change it unless Phase 12 explicitly expands scope or defers it with rationale
+
+### Phase 13: Core `FirmwareVersion` / `Feature` Firmware Gates
+
+Targets:
+
+- make `FirmwareVersion.IsAlphaOrBeta` the single source of truth for alpha/beta/test firmware sentinel handling
+- explicitly reconcile current source behavior: `ApplicationSession.IsSupported` already treats any `Major == 0` version as the sentinel, while `FirmwareVersion.IsAlphaOrBeta` currently only treats `0.0.0` that way
+- update existing `FirmwareVersionTests` that assert `0.0.1` / `0.1.0` are not alpha/beta, because Phase 13 intentionally broadens that semantic
+- check `FirmwareVersion` comparison and ordering consumers because broadening `IsAlphaOrBeta` affects `IsAtLeast(...)`, `IsLessThan(...)`, and `CompareTo(...)`
+- inventory all direct `Major == 0` sentinel consumers, including `ApplicationSession` and non-session protocol code such as `PcscProtocol`
+- ensure `Feature.IsSupportedByFirmware(...)` compares through `Feature.Version` consistently with the `FirmwareVersion` comparison semantics Phase 13 changes
+- add `Feature.IsSupportedByFirmware(FirmwareVersion firmwareVersion)` for firmware-only gates
+- make `ApplicationSession.IsSupported(Feature feature)` delegate to `Feature`
+- keep transport, hardware configuration, applet state, auth state, and runtime session facts out of `Feature`
+- replace duplicated direct `Major == 0` / `Major != 0` firmware-gate checks where applicable
+
+### Phase 14: FIDO2 SmartCard Transport Provenance
+
+Targets:
+
+- clarify USB/NFC SmartCard FIDO2 support boundaries
+- consume the Phase 13 firmware-gate primitive rather than inventing another local sentinel rule
+- if Phase 13 is split or deferred, preserve the current FIDO2-local firmware gate as an explicit temporary dependency fallback instead of creating a second abstraction
+- keep transport, FIDO2 AID exposure, and firmware evidence local to FIDO2 session logic
+
+### Phase 15: CLI Secret Policy + OATH Unlock Migration
+
+Targets:
+
+- decide command-line argv secret policy before migrating more command families
+- migrate exactly one named path: OATH password unlock
+- make the argv secret policy program-wide, even though this phase migrates only one command-family path
+- do not combine with broad parser/session helper consolidation
+
+### Phase 16: API And Package Compatibility Checkpoint
+
+Targets:
+
+- inspect public API and package/dependency risk after source-risk phases
+- catch compatibility drift before test/tooling infrastructure changes
+
+### Phase 17: Test Runner And Hardware Coordination
+
+Targets:
+
+- address xUnit v3 focused-filter/toolchain friction
+- define FIDO2/WebAuthn User Presence and User Verification manual coordination lanes
+- do not make UP/UV tests unattended gates
+
+### Phase 18: Docs QA Tooling
+
+Targets:
+
+- add bounded active-doc validation if feasible
+- validate or document active README/example snippet limits
+- exclude archived docs/plans cleanup unless separately approved
+
+### Phase 19: Final Reassessment Audit
+
+Targets:
+
+- perform a read-only reassessment using the same grading criteria as `docs/MODULE-CONSOLIDATION-ASSESSMENT.md`
+- create a new final reassessment artifact instead of rewriting the baseline
+- record grade deltas, evidence, remaining risks, and next recommended targets
+
 ### Final Follow-Up Improvement Pass
 
-Run after all planned module refactor phases complete, unless the human explicitly promotes a deferred candidate earlier.
+Run after all planned module refactor phases complete, unless the human explicitly promotes a deferred candidate earlier. The concrete follow-up program is tracked by `docs/plans/module-consolidation/phase-10-follow-up-program-work-plan.md`.
 
 Targets:
 

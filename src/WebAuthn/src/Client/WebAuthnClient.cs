@@ -52,6 +52,26 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// <summary>
     /// Initializes a new instance of <see cref="WebAuthnClient"/>.
     /// </summary>
+    /// <param name="fidoSession">The FIDO2 session that performs CTAP2 operations (ownership transferred).</param>
+    /// <param name="origin">The WebAuthn origin for this client.</param>
+    /// <param name="isPublicSuffix">Checker used to reject public-suffix RP IDs.</param>
+    /// <param name="enterpriseRpIds">Optional set of enterprise-allowed RP IDs.</param>
+    public WebAuthnClient(
+        IFidoSession fidoSession,
+        WebAuthnOrigin origin,
+        PublicSuffixChecker isPublicSuffix,
+        IReadOnlySet<string>? enterpriseRpIds = null)
+    {
+        _backend = new FidoSessionWebAuthnBackend(fidoSession);
+        _origin = origin ?? throw new ArgumentNullException(nameof(origin));
+        ArgumentNullException.ThrowIfNull(isPublicSuffix);
+        _isPublicSuffix = domain => isPublicSuffix(domain);
+        _enterpriseRpIds = enterpriseRpIds ?? new HashSet<string>();
+    }
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="WebAuthnClient"/>.
+    /// </summary>
     /// <param name="backend">The backend that performs CTAP2 operations (ownership transferred).</param>
     /// <param name="origin">The WebAuthn origin for this client.</param>
     /// <param name="isPublicSuffix">Predicate to determine if a domain is a public suffix.</param>

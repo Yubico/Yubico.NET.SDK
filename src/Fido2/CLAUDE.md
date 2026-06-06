@@ -241,6 +241,8 @@ Key rules:
 - Parameters are **integer keys** (not strings) for CTAP
 - Use **Ctap2Canonical** conformance mode (sorted integer keys)
 - Build request returns command byte + CBOR payload
+- Use `.WithValue(key, writer => ...)` for complex values or sensitive byte spans that should be written directly instead of copied through `.WithBytes(...)`
+- Keep operation-level request builders as pure encoding helpers; do not introduce operation-specific CTAP command classes
 
 ## Security Requirements
 

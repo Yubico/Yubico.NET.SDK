@@ -1,4 +1,5 @@
 using FluentAssertions;
+using System.Formats.Cbor;
 using Yubico.YubiKit.Fido2.Cbor;
 using Yubico.YubiKit.Fido2.Ctap;
 
@@ -11,12 +12,12 @@ public class CtapRequestBuilderTests
     {
         // Arrange & Act
         var result = CtapRequestBuilder.Create(CtapCommand.GetInfo).Build();
-        
+
         // Assert
         result.Should().HaveCount(1);
         result[0].Should().Be(CtapCommand.GetInfo);
     }
-    
+
     [Fact]
     public void WithInt_AddsIntegerParameter()
     {
@@ -24,12 +25,12 @@ public class CtapRequestBuilderTests
         var result = CtapRequestBuilder.Create(CtapCommand.ClientPin)
             .WithInt(1, 42)
             .Build();
-        
+
         // Assert - command byte + CBOR map {1: 42}
         result.Should().HaveCountGreaterThan(1);
         result[0].Should().Be(CtapCommand.ClientPin);
     }
-    
+
     [Fact]
     public void WithString_AddsStringParameter()
     {
@@ -37,28 +38,28 @@ public class CtapRequestBuilderTests
         var result = CtapRequestBuilder.Create(CtapCommand.MakeCredential)
             .WithString(1, "test")
             .Build();
-        
+
         // Assert
         result.Should().HaveCountGreaterThan(1);
         result[0].Should().Be(CtapCommand.MakeCredential);
     }
-    
+
     [Fact]
     public void WithBytes_AddsByteArrayParameter()
     {
         // Arrange
         byte[] testData = [0x01, 0x02, 0x03];
-        
+
         // Act
         var result = CtapRequestBuilder.Create(CtapCommand.GetAssertion)
             .WithBytes(1, testData)
             .Build();
-        
+
         // Assert
         result.Should().HaveCountGreaterThan(1);
         result[0].Should().Be(CtapCommand.GetAssertion);
     }
-    
+
     [Fact]
     public void WithBool_AddsBooleanParameter()
     {
@@ -66,12 +67,29 @@ public class CtapRequestBuilderTests
         var result = CtapRequestBuilder.Create(CtapCommand.Config)
             .WithBool(1, true)
             .Build();
-        
+
         // Assert
         result.Should().HaveCountGreaterThan(1);
         result[0].Should().Be(CtapCommand.Config);
     }
-    
+
+    [Fact]
+    public void WithValue_WritesParameterWithoutIntermediateCopy()
+    {
+        // Arrange & Act
+        var result = CtapRequestBuilder.Create(CtapCommand.MakeCredential)
+            .WithValue(1, writer => writer.WriteByteString([0xAA, 0xBB]))
+            .Build();
+
+        // Assert
+        result[0].Should().Be(CtapCommand.MakeCredential);
+        var reader = new CborReader(result.AsSpan(1).ToArray(), CborConformanceMode.Ctap2Canonical);
+        reader.ReadStartMap().Should().Be(1);
+        reader.ReadInt32().Should().Be(1);
+        reader.ReadByteString().Should().Equal([0xAA, 0xBB]);
+        reader.ReadEndMap();
+    }
+
     [Fact]
     public void MultipleParameters_SortedByKey()
     {
@@ -81,19 +99,19 @@ public class CtapRequestBuilderTests
             .WithInt(1, 100)
             .WithInt(2, 200)
             .Build();
-        
+
         // Assert - parameters should be sorted in canonical CBOR order
         result.Should().HaveCountGreaterThan(1);
         result[0].Should().Be(CtapCommand.MakeCredential);
         // CBOR map with 3 entries, keys 1, 2, 3 in sorted order
     }
-    
+
     [Fact]
     public void BuildAsMemory_ReturnsReadOnlyMemory()
     {
         // Arrange & Act
         var result = CtapRequestBuilder.Create(CtapCommand.GetInfo).BuildAsMemory();
-        
+
         // Assert
         result.Length.Should().Be(1);
         result.Span[0].Should().Be(CtapCommand.GetInfo);

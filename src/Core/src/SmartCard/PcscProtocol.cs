@@ -119,9 +119,7 @@ internal class PcscProtocol : ISmartCardProtocol
         FirmwareVersion = firmwareVersion;
         var insSendRemainingChanged = ConfigureInsSendRemaining(configuration);
 
-        // Major == 0 is a sentinel for alpha/beta firmware reporting a placeholder version.
-        // Treat as modern (>= 5.x) to enable extended APDUs and proper APDU sizes.
-        if (FirmwareVersion.Major == 0)
+        if (FirmwareVersion.IsAlphaOrBeta)
         {
             UseExtendedApdus = _connection.SupportsExtendedApdu();
             MaxApduSize = SmartCardMaxApduSizes.Yk43;

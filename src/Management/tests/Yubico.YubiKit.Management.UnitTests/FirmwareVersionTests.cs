@@ -28,22 +28,22 @@ public class FirmwareVersionTests
     [Fact]
     public void IsAlphaOrBeta_ReturnsTrue_ForZeroVersion()
     {
-        var alphaKey = new FirmwareVersion(0, 0, 0);
-        Assert.True(alphaKey.IsAlphaOrBeta);
+        Assert.True(new FirmwareVersion(0, 0, 0).IsAlphaOrBeta);
+        Assert.True(new FirmwareVersion(0, 0, 1).IsAlphaOrBeta);
+        Assert.True(new FirmwareVersion(0, 1, 0).IsAlphaOrBeta);
+        Assert.True(new FirmwareVersion(0, 255, 255).IsAlphaOrBeta);
     }
 
     [Fact]
     public void IsAlphaOrBeta_ReturnsFalse_ForNonZeroVersion()
     {
         Assert.False(new FirmwareVersion(5, 0, 0).IsAlphaOrBeta);
-        Assert.False(new FirmwareVersion(0, 1, 0).IsAlphaOrBeta);
-        Assert.False(new FirmwareVersion(0, 0, 1).IsAlphaOrBeta);
     }
 
     [Fact]
     public void AlphaOrBeta_IsAtLeast_AlwaysReturnsTrue()
     {
-        var alphaKey = new FirmwareVersion(0, 0, 0);
+        var alphaKey = new FirmwareVersion(0, 0, 1);
 
         // Alpha/beta should be "at least" any version
         Assert.True(alphaKey.IsAtLeast(1, 0, 0));
@@ -55,7 +55,7 @@ public class FirmwareVersionTests
     [Fact]
     public void AlphaOrBeta_IsAtLeast_WithFirmwareVersion_AlwaysReturnsTrue()
     {
-        var alphaKey = new FirmwareVersion(0, 0, 0);
+        var alphaKey = new FirmwareVersion(0, 1, 0);
 
         Assert.True(alphaKey.IsAtLeast(new FirmwareVersion(1, 0, 0)));
         Assert.True(alphaKey.IsAtLeast(new FirmwareVersion(5, 7, 2)));
@@ -65,7 +65,7 @@ public class FirmwareVersionTests
     [Fact]
     public void AlphaOrBeta_IsLessThan_AlwaysReturnsFalse()
     {
-        var alphaKey = new FirmwareVersion(0, 0, 0);
+        var alphaKey = new FirmwareVersion(0, 0, 1);
 
         // Alpha/beta should never be "less than" any version
         Assert.False(alphaKey.IsLessThan(1, 0, 0));
@@ -76,7 +76,7 @@ public class FirmwareVersionTests
     [Fact]
     public void AlphaOrBeta_IsLessThan_WithFirmwareVersion_AlwaysReturnsFalse()
     {
-        var alphaKey = new FirmwareVersion(0, 0, 0);
+        var alphaKey = new FirmwareVersion(0, 1, 0);
 
         Assert.False(alphaKey.IsLessThan(new FirmwareVersion(1, 0, 0)));
         Assert.False(alphaKey.IsLessThan(new FirmwareVersion(5, 7, 2)));
@@ -101,6 +101,18 @@ public class FirmwareVersionTests
         Assert.Equal(0, alphaKey1.CompareTo(alphaKey2));
         Assert.True(alphaKey1.Equals(alphaKey2));
         Assert.True(alphaKey1 == alphaKey2);
+    }
+
+    [Fact]
+    public void AlphaOrBeta_Equality_UsesExactVersionIdentity()
+    {
+        var defaultSentinel = new FirmwareVersion(0, 0, 0);
+        var placeholderSentinel = new FirmwareVersion(0, 0, 1);
+
+        Assert.Equal(0, defaultSentinel.CompareTo(placeholderSentinel));
+        Assert.False(defaultSentinel.Equals(placeholderSentinel));
+        Assert.False(defaultSentinel == placeholderSentinel);
+        Assert.True(defaultSentinel != placeholderSentinel);
     }
 
     [Fact]

@@ -584,7 +584,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 credPwBytes = ParseCredentialPassword(credentialPassword);
                 tlvs.Add(new Tlv(TagCredentialPassword, credPwBytes));
             }
-            else if (!IsSupported(FeatureGetChallengeNoPassword) && FirmwareVersion.Major != 0)
+            else if (!IsSupported(FeatureGetChallengeNoPassword) && !FirmwareVersion.IsAlphaOrBeta)
             {
                 throw new ArgumentException(
                     "Credential password is required for firmware versions before 5.7.1.",

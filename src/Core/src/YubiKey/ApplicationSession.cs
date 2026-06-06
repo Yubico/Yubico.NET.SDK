@@ -71,12 +71,8 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         IsInitialized = true;
     }
 
-    // Major version 0 is a sentinel for alpha/beta firmware whose applets report a
-    // placeholder version (e.g. 0.0.1) from their SELECT response. The true firmware
-    // version is only available via the Management session. Production firmware always
-    // has Major >= 4. On sentinel devices all features are assumed supported.
     public bool IsSupported(Feature feature) =>
-        FirmwareVersion.Major == 0 || FirmwareVersion >= feature.Version;
+        feature.IsSupportedByFirmware(FirmwareVersion);
 
     public void EnsureSupports(Feature feature)
     {
@@ -123,5 +119,3 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         return ValueTask.CompletedTask;
     }
 }
-
-

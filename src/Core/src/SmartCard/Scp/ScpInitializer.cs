@@ -88,7 +88,7 @@ internal static class ScpInitializer
     }
 
     private static bool Supports(FirmwareVersion firmwareVersion, Feature feature) =>
-        firmwareVersion.Major == 0 || firmwareVersion >= feature.Version;
+        feature.IsSupportedByFirmware(firmwareVersion);
 
     internal static IApduProcessor CreateSecureProcessor(
         IApduProcessor commandProcessor,

@@ -40,10 +40,10 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
 
     /// <summary>
     ///     Gets a value indicating whether this firmware version represents an alpha or beta YubiKey.
-    ///     Alpha/beta keys report firmware version 0.0.0 but should be treated as the latest version
+    ///     Alpha/beta keys report firmware versions with major version 0 but should be treated as the latest version
     ///     for feature compatibility checks.
     /// </summary>
-    public bool IsAlphaOrBeta => Major == 0 && Minor == 0 && Patch == 0;
+    public bool IsAlphaOrBeta => Major == 0;
 
     /// <summary>
     ///     A default firmware version (0.0.0), representing unknown or uninitialized version.
@@ -91,7 +91,7 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
         if (ReferenceEquals(this, other)) return 0;
         if (other is null) return 1;
 
-        // Alpha/beta keys (0.0.0) are treated as the latest version
+        // Alpha/beta keys (0.x.x) are treated as the latest version
         bool thisIsAlphaOrBeta = IsAlphaOrBeta;
         bool otherIsAlphaOrBeta = other.IsAlphaOrBeta;
 
@@ -104,7 +104,8 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
 
 
 
-    public bool Equals(FirmwareVersion? other) => CompareTo(other) == 0;
+    public bool Equals(FirmwareVersion? other) =>
+        other is not null && Major == other.Major && Minor == other.Minor && Patch == other.Patch;
 
 
     /// <summary>
@@ -195,7 +196,7 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
 
         if (left is null || right is null) return false;
 
-        return left.CompareTo(right) == 0;
+        return left.Equals(right);
     }
 
     public static bool operator !=(FirmwareVersion? left, FirmwareVersion? right) =>

@@ -26,10 +26,17 @@ public readonly record struct Feature
         VersionMinor = versionMinor;
         VersionRevision = versionRevision;
     }
-    
+
     public string Name { get; init; }
     public int VersionMajor { get; init; }
     public int VersionMinor { get; init; }
     public int VersionRevision { get; init; }
     public FirmwareVersion Version => new(VersionMajor, VersionMinor, VersionRevision);
+
+    public bool IsSupportedByFirmware(FirmwareVersion firmwareVersion)
+    {
+        ArgumentNullException.ThrowIfNull(firmwareVersion);
+
+        return firmwareVersion.IsAlphaOrBeta || firmwareVersion >= Version;
+    }
 }

@@ -2,11 +2,11 @@
 task: Phase 9 Documentation Repair Pass
 slug: phase-9-documentation-repair
 effort: E3
-phase: verify
+phase: complete
 progress: 32/32
 mode: algorithm
 started: 2026-06-06T00:00:00Z
-updated: 2026-06-06T00:04:00Z
+updated: 2026-06-06T00:05:00Z
 ---
 
 # Phase 9 ISA: Documentation Repair Pass
@@ -146,3 +146,7 @@ Repair the highest-confidence stale documentation discovered in Phase 9 inventor
 - ISC-30: Bash — `dotnet toolchain.cs -- build --project Core`, `Fido2`, `Management`, `SecurityDomain`, and `Piv` all passed with 0 warnings and 0 errors.
 - ISC-31: Read — `docs/plans/module-consolidation/phase-9-documentation-repair-learnings.md` records scope, verification, advisor/Cato review, and deferred items.
 - ISC-32: Bash — `git diff --name-only` lists documentation/plan artifacts only; `git diff --name-only -- "*.cs"` returned no files.
+
+## Changelog
+
+- 2026-06-06 — conjectured: a focused docs pass could repair high-confidence stale guidance without replacing whole module docs; refuted by: advisor/Cato showed PIV and Tests.Shared active docs were so stale that concise replacement was safer than piecemeal edits; learned: documentation repair should choose the smallest source-backed artifact shape, which can be replacement when stale content dominates; criterion now: active docs with dominant stale API guidance may be replaced if grep/build/Cato verify the new claims.

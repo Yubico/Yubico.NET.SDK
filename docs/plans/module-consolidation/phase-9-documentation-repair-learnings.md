@@ -19,8 +19,8 @@ Use this note as the handoff record for Phase 9 of module consolidation.
 - Builds run: Core, Fido2, Management, SecurityDomain, and Piv via `dotnet toolchain.cs -- build --project <Module>`
 - Integration tests run: none
 - Result: passed focused grep/build verification; Cato returned concerns and the concrete finding was fixed
-- Commit: pending
-- `/Ping` sent after successful phase: pending
+- Commit: `a20afb55 docs: repair module consolidation guidance`
+- `/Ping` sent after successful phase: pending closeout summary
 
 ## Hardware Target
 
@@ -203,5 +203,5 @@ Use this note as the handoff record for Phase 9 of module consolidation.
 - House-style update needed: document example-tool build guidance and source-backed snippet rule
 - Next phase recommendation: final follow-up improvement pass or docs QA tooling decision
 - Learning note path: `docs/plans/module-consolidation/phase-9-documentation-repair-learnings.md`
-- Commit: pending
+- Commit: `a20afb55 docs: repair module consolidation guidance`
 - `/Ping` status: pending

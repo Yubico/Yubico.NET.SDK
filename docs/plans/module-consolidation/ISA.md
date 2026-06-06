@@ -596,6 +596,19 @@ Targets:
 - preserve OATH `INS_SEND_REMAINING` (`0xA5`) behavior
 - avoid introducing a broad APDU framework or operation-specific command classes
 
+### Phase 11 Detour: Application Session Lifecycle Audit
+
+Artifact:
+
+- `docs/plans/module-consolidation/application-session-lifecycle-audit-plan.md`
+
+Outcome:
+
+- Lifecycle ownership fix committed as `2e167a3f fix(fido2): remove backend protocol ownership`.
+- Mechanical FIDO2 backend rename committed separately as `bf6ce564 refactor(fido2): rename transport backends`.
+- Current working model: sessions own protocols, `ApplicationSession.Protocol` owns final effective protocol disposal, SCP wrappers own SCP processor state, and FIDO2 backends borrow their protocols.
+- Deferred decision: revisit whether `ApplicationSession` should own connection lifecycle, whether direct callers should retain ownership, or whether ownership should be configurable through an explicit `leaveOpen` / `ownsConnection` option.
+
 ### Phase 12: Core `ConnectionType` Semantics
 
 Targets:

@@ -9,24 +9,41 @@ Read together with:
 - `docs/plans/module-consolidation/ISA.md`
 - `docs/plans/module-consolidation/phase-10-follow-up-program-work-plan.md`
 - `docs/plans/module-consolidation/phase-15-cli-secret-policy-oath-unlock-learnings.md`
+- `docs/plans/module-consolidation/phase-16-api-package-compatibility-learnings.md`
+- `docs/plans/module-consolidation/phase-17-test-runner-hardware-coordination-learnings.md`
+- `docs/plans/module-consolidation/phase-18-docs-qa-tooling-learnings.md`
 
 ## Scope And Governance
 
 Phase 19 is read-only against source. It creates this final reassessment artifact and records grade deltas, evidence, remaining risks, and next recommended targets.
 
-Branch evidence captured during this run showed `## yubikit-consolidation`. The worktree also contained one unrelated untracked scratch file, `src/Core/src/YubiKey/Weird stuff:.md`, which was left unstaged.
+Branch evidence captured during this run showed `## yubikit-consolidation`. An unrelated untracked scratch file, `src/Core/src/YubiKey/Weird stuff:.md`, was observed earlier in the consolidation work and was not part of Phase 19.
 
-Important caveat: Phase 16, Phase 17, and Phase 18 were listed in the follow-up program, but no phase-specific artifacts were found during this run. Their subjects are therefore recorded as remaining risks, not as completed phases:
+Initial caveat: the first Phase 19 pass occurred before corrective Phases 16, 17, and 18 were completed, so the initial reassessment recorded those subjects as remaining risks:
 
 - Phase 16 API and package compatibility checkpoint: not evidenced as completed.
 - Phase 17 test runner and hardware coordination: partially addressed by the committed toolchain focused-filter fix, but no full phase artifact was found.
 - Phase 18 docs QA tooling: not evidenced as completed.
 
+## Phase 19 Addendum: Post-Phase-18 Reconciliation
+
+After the initial Phase 19 pass, the missing governance/tooling phases were completed and committed:
+
+- Phase 16 commit `2cf6b2bc`: package/API compatibility checkpoint completed, package surface audited, and `toolchain.cs pack` filtered to actual packable SDK projects.
+- Phase 17 commit `ab8d9364`: FIDO2/WebAuthn User Presence and User Verification coordination lanes documented, active FIDO2 trait guidance corrected, and xUnit v3 focused-filter behavior verified.
+- Phase 18 commit `3b44f755`: standalone `docs-qa` target added, active-doc link/fence/stale-pattern validation documented, and active-doc link drift repaired.
+
+This addendum supersedes the initial caveat for completion status. The remaining risks are now narrower:
+
+- Phase 16 did not enable package/API compatibility enforcement because no approved baseline or policy exists yet.
+- Phase 17 did not run human-coordinated UP/UV hardware ceremonies; it defined the safe lanes and kept those checks out of unattended gates.
+- Phase 18 did not compile README snippets or add CI wiring; it added bounded active-doc structural validation.
+
 ## Executive Summary
 
 The consolidation branch materially improved the SDK's architectural rhythm. The biggest wins are visible protocol flow, explicit sensitive-buffer lifecycles, shared test-harness pieces, FIDO2/WebAuthn construction coherence, firmware/transport support gates, and CLI credential handling in one narrow OATH unlock slice.
 
-The branch did not finish every governance/tooling concern. API/package compatibility enforcement, docs QA automation, manual FIDO2/WebAuthn User Presence coordination lanes, Core DI documentation drift, extended APDU support detection, and remaining CLI string-secret paths are still amber.
+The branch did not finish every governance/tooling concern, but the missing Phase 16-18 checkpoint work has now been closed. API/package compatibility baseline enforcement, Core DI documentation drift, extended APDU support detection, remaining CLI string-secret paths, human-run UP/UV ceremony execution, and README snippet compilation/CI adoption remain amber.
 
 The net result is not a rewrite into more architecture. It is a better version of the intended v2 style: flatter where protocol behavior matters, more explicit where sensitive memory matters, and better tested where byte-level behavior could regress.
 
@@ -67,7 +84,7 @@ Remaining Core risks keep the grade at B+ rather than A-:
 - `UsbSmartCardConnection.SupportsExtendedApdu()` still returns unconditional true and remains a final follow-up investigation target.
 - `AddYubiKeyManagerCore()` is still referenced in active docs and module DI comments, while source implementation was not found in this run.
 - Duplicate CRC/checksum utilities remain in Core HID/OTP paths.
-- Phase 16 package/API compatibility enforcement was planned but not evidenced as completed.
+- Phase 16 completed a package/API compatibility checkpoint, but package/API baseline enforcement remains deferred until an approved baseline and policy exist.
 
 ### SmartCard Modules
 
@@ -131,29 +148,31 @@ Remaining CLI risks are still significant:
 - Active docs now correctly describe standard xUnit `[Theory]` plus `[WithYubiKey]` data attributes.
 - Hardware allow-list and category discipline are more explicit.
 
-Toolchain focused-filter friction improved outside a numbered phase:
+Toolchain focused-filter friction and hardware coordination improved in Phase 17:
 
 - The toolchain now preflights MTP positive filters and skips unmatched MTP projects instead of failing mixed-runner focused tests spuriously.
+- FIDO2/WebAuthn UP/UV tests are now classified into agent-runnable smoke, human-coordinated hardware, and explicit skip lanes.
 
 Remaining test/tooling risks:
 
-- Phase 17's full manual FIDO2/WebAuthn User Presence and User Verification coordination lane was planned but not evidenced as a completed phase.
+- Human-coordinated FIDO2/WebAuthn UP/UV ceremonies still need explicit scheduled execution when a phase actually requires them.
 - `Tests.TestProject` remains ambiguous and likely still has a route mismatch between the test expectation and controller route.
-- Phase 18's bounded docs QA tooling was planned but not evidenced as completed.
+- xUnit v2 no-match behavior is still less explicitly documented than xUnit v3 MTP preflight behavior.
 
 ### Documentation
 
-Active docs improved substantially in Phase 9.
+Active docs improved substantially in Phase 9 and gained bounded executable validation in Phase 18.
 
 - Root/module guidance now emphasizes flat protocol flow, no operation-specific protocol command classes, and current integration-test shape.
 - PIV and Tests.Shared docs were heavily repaired.
+- `dotnet toolchain.cs -- docs-qa` now validates bounded active docs for balanced fenced code blocks, local links outside fenced examples, and stale FIDO2 User Presence trait patterns.
 - The final reassessment intentionally leaves archived docs/plans cleanup out of scope.
 
 Remaining documentation risks:
 
 - Core DI docs still reference `AddYubiKeyManagerCore()` in active locations where source evidence was not found.
 - TestProject docs and root descriptions still appear stale relative to current package/test shape.
-- FIDO2 docs likely still contain examples that need source-backed validation.
+- README examples are not compiled by `docs-qa`; executable snippet validation remains a separate decision.
 
 ## Grade Delta Summary
 
@@ -165,15 +184,15 @@ Remaining documentation risks:
 | CLI | C/C+ to B- range | C+/B- range | Device targeting and one credential policy slice improved, but broad command/helper duplication remains. |
 | Tests.Shared | B | B+ | Shared connection wrapper and current docs improve integration-test consistency. |
 | Tests.TestProject | C | C | Purpose, route, and hardware-harness questions remain unresolved. |
-| Docs | mixed/stale | B active-doc posture | Active docs improved; archived docs and docs QA tooling remain out of scope. |
+| Docs | mixed/stale | B+ active-doc posture | Active docs improved and now have bounded executable QA; archived docs and snippet compilation remain out of scope. |
 
 ## Remaining Risks
 
 High leverage next targets:
 
-- Run the missing API/package compatibility checkpoint or explicitly remove it from the follow-up program.
-- Decide and document FIDO2/WebAuthn manual User Presence/User Verification coordination lanes.
-- Add bounded docs QA tooling or mark active documentation validation as manual with known limits.
+- Choose an API/package compatibility baseline and decide whether package validation should become an enforced release gate.
+- Use the documented FIDO2/WebAuthn manual User Presence/User Verification lanes when a future phase requires human-coordinated hardware ceremonies.
+- Decide whether `docs-qa` should be wired into CI and whether README snippet compilation deserves a separate approved phase.
 - Investigate `UsbSmartCardConnection.SupportsExtendedApdu()` against the YubiKey Manager reference implementation.
 - Repair Core DI documentation drift around `AddYubiKeyManagerCore()`.
 - Continue CLI secret migration with the Phase 15 policy, but only one command family at a time.

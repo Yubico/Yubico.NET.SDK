@@ -21,8 +21,10 @@ Use this note as the handoff record for Phase 19 of module consolidation.
 - Created a Phase 19 ISA that makes the read-only reassessment scope explicit.
 - Created a new final reassessment artifact instead of rewriting the baseline assessment.
 - Regraded every module from the original health matrix using the same seven criteria: Overall, Complexity, Maturity, DRY, Rolling Own, Maintainability, and Top Consolidation Target.
-- Recorded that Phase 16, Phase 17, and Phase 18 phase-specific artifacts were not found during this run.
-- Treated missing Phase 16-18 artifacts as remaining governance/tooling risks rather than completed phases.
+- Recorded that Phase 16, Phase 17, and Phase 18 phase-specific artifacts were not found during the initial Phase 19 pass.
+- Treated initially missing Phase 16-18 artifacts as remaining governance/tooling risks rather than completed phases until the corrective addendum work closed them.
+- Added a post-Phase-18 reconciliation addendum after Phases 16, 17, and 18 were completed and committed.
+- Narrowed the remaining risks from missing-phase status to baseline enforcement, human-run UP/UV ceremony execution, and docs-QA CI/snippet limits.
 - Recorded high-leverage next targets: API/package compatibility, FIDO2/WebAuthn UP/UV coordination, docs QA tooling, extended APDU support, Core DI documentation drift, remaining CLI secret migration, and Tests.TestProject purpose.
 
 ## Why This Shape
@@ -30,21 +32,22 @@ Use this note as the handoff record for Phase 19 of module consolidation.
 - The original baseline remains useful only if it stays immutable, so the final reassessment is a separate artifact.
 - Phase 19 is an audit, not a cleanup phase; source changes would blur implementation and assessment.
 - The grade matrix intentionally reports improvement and residual risk together. A final audit that only celebrates deltas would hide the governance gaps that remain after Phase 15.
-- Missing Phase 16-18 artifacts are not failures of Phase 19, but they are material context for the final grade and next-work recommendations.
+- The initially missing Phase 16-18 artifacts were not failures of Phase 19, but they were material context for the first final-grade and next-work recommendations.
 
 ## Verification Evidence
 
 - Branch check command: `git status --short --branch`
-- Branch check result: `## yubikit-consolidation`; unrelated untracked `src/Core/src/YubiKey/Weird stuff:.md` was present and left unstaged.
+- Branch check result: `## yubikit-consolidation`; unrelated scratch file `src/Core/src/YubiKey/Weird stuff:.md` was observed earlier and was never staged by Phase 19.
 - Baseline/source modification check command: `git diff --name-only`
 - Baseline/source modification result before staging: no tracked modifications, because Phase 19 files were new untracked docs only.
 - Whitespace command: `git diff --check`
 - Whitespace result: passed.
 - Final artifact readback: `docs/MODULE-CONSOLIDATION-FINAL-REASSESSMENT.md` read successfully and contains all baseline modules.
 - Phase ISA readback: `docs/plans/module-consolidation/phase-19-final-reassessment-ISA.md` read successfully.
-- Phase 16-18 artifact check: directory listing found no phase-specific Phase 16, Phase 17, or Phase 18 artifacts.
+- Initial Phase 16-18 artifact check: directory listing found no phase-specific Phase 16, Phase 17, or Phase 18 artifacts before the corrective addendum work.
 - Baseline criteria check: final matrix contains Overall, Complexity, Maturity, DRY, Rolling Own, Maintainability, and Top Consolidation Target.
 - Remaining-risk check: final artifact names API/package compatibility, manual FIDO2/WebAuthn UP/UV coordination, docs QA tooling, extended APDU support, Core DI documentation drift, and remaining CLI secret/string paths.
+- Addendum evidence: Phase 16 commit `2cf6b2bc`, Phase 17 commit `ab8d9364`, and Phase 18 commit `3b44f755` are recorded in the final reassessment addendum.
 
 ## Integration Lifecycle
 
@@ -70,12 +73,22 @@ Use this note as the handoff record for Phase 19 of module consolidation.
 - Cato warning resolution: this learning note now exists.
 - Cato info: Phase 17 was described as partially addressed by the toolchain filter fix while no full Phase 17 artifact exists. The final reassessment already says no full phase artifact was found, so no wording change was needed.
 - Cato info: prior-phase unit/integration coverage claims in the final reassessment are source-backed summaries, not claims that Phase 19 ran tests. The document consistently frames Phase 19 as read-only.
+- Final Cato addendum route: Vertex Opus 4.8 via `google-vertex-anthropic/claude-opus-4-8@default`.
+- Final Cato addendum output: `/tmp/opencode/cato-phase19-addendum.jsonl`
+- Final Cato addendum result: claims verified; finding was unchecked `ISC-16` and `ISC-17` boxes in the Phase 19 ISA.
+- Final Cato addendum finding resolution: `ISC-16` and `ISC-17` are now checked, and the ISA verification section records the addendum and Cato evidence.
+- Final Cato addendum rerun output: `/tmp/opencode/cato-phase19-addendum-rerun.jsonl`
+- Final Cato addendum rerun verdict: `pass`, artifact criticality `high`, with info-only wording suggestions about making the initial caveat tense explicit.
+- Final Cato addendum rerun resolution: tightened the ISA and learning note wording to say the Phase 16-18 artifacts were missing during the initial Phase 19 pass, not after the addendum.
+- Final exact-artifact Cato output: `/tmp/opencode/cato-phase19-addendum-final.jsonl`
+- Final exact-artifact Cato verdict: `pass`, artifact criticality `high`, with info-only notes.
+- Final exact-artifact Cato info resolution: scratch-file wording and criticality wording were tightened; the remaining uncommitted-addendum info is resolved by this commit.
 
 ## Deferred Future Improvements
 
-- Run or explicitly retire Phase 16 API/package compatibility checkpoint.
-- Run or explicitly retire Phase 17 manual FIDO2/WebAuthn UP/UV coordination phase.
-- Run or explicitly retire Phase 18 bounded docs QA tooling phase.
+- Choose whether Phase 16's package/API baseline work should become an enforced release gate.
+- Use Phase 17's documented UP/UV lanes for future human-coordinated ceremony runs.
+- Decide whether Phase 18's `docs-qa` target should be wired into CI and whether snippet compilation is worth a separate phase.
 - Investigate `UsbSmartCardConnection.SupportsExtendedApdu()` against the YubiKey Manager reference implementation during the final follow-up improvement pass.
 - Decide whether operation-named CLI command classes need a naming carveout separate from forbidden protocol command-object hierarchies.
 

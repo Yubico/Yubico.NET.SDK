@@ -239,6 +239,18 @@ var output = adapter.DecodeOutput(response.UnsignedExtensionOutputs);
 - `[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]` — Tests requiring touch
 - `[Trait(TestCategories.Category, TestCategories.Slow)]` — RSA 3072/4096 keygen or >5s tests (skipped by `--smoke`)
 
+**Coordination lanes:**
+
+| Lane | Examples | Agent-runnable? | Rule |
+|------|----------|-----------------|------|
+| Unit/fake-backend | WebAuthn client, origin, extension adapter, status-stream unit tests | Yes | Run through `dotnet toolchain.cs test --project WebAuthn` |
+| Integration smoke without UP | factory/session checks that do not ask for touch | Yes | Use `--smoke` or `Category!=RequiresUserPresence` |
+| User Presence | registration/authentication ceremonies, previewSign hardware checks | No by default | Mark with `Category=RequiresUserPresence`; run only with a human present |
+| User Verification / PIN | PIN normalization, UV-required/preferred flows | No by default | Requires explicit human approval and known PIN/device state |
+| Reset/destructive cleanup | reset or broad persistent credential deletion | No | Human-approved destructive run only |
+
+Agents must not run WebAuthn User Presence, UV/PIN, reset, insert/remove, or destructive hardware checks unless a human explicitly approves the exact command and is physically present for the interaction.
+
 **Key Pattern:**
 ```csharp
 [Theory]
@@ -266,10 +278,10 @@ dotnet toolchain.cs -- test --project WebAuthn
 # Integration tests (no UP)
 dotnet toolchain.cs -- test --integration --project WebAuthn --filter "Category!=RequiresUserPresence"
 
-# Integration tests (with UP, user present)
+# Integration tests (with UP, human-coordinated only)
 dotnet toolchain.cs -- test --integration --project WebAuthn --filter "Category=RequiresUserPresence"
 
-# Smoke tests only (skip Slow)
+# Smoke tests only (skip Slow and RequiresUserPresence)
 dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
 ```
 

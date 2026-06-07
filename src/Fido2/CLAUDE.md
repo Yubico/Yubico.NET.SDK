@@ -331,7 +331,7 @@ var reader = new CborReader(cborPayload, CborConformanceMode.Ctap2Canonical);
 
 ### Hardware Integration Tests
 
-Tests requiring user presence must be marked and excluded:
+Tests requiring user presence must be marked and excluded from unattended runs:
 
 ```csharp
 // Test that can run without user interaction
@@ -345,7 +345,7 @@ public async Task GetInfoAsync_Returns_AAGUID()
 
 // Test requiring user touch - MUST be excluded from automated runs
 [Fact]
-[Trait("RequiresUserPresence", "true")]
+[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
 public async Task MakeCredentialAsync_CreatesPasskey()
 {
     // This requires user touch
@@ -354,7 +354,7 @@ public async Task MakeCredentialAsync_CreatesPasskey()
 
 Run tests excluding user presence:
 ```bash
-dotnet toolchain.cs -- test --project Fido2 --smoke --filter "RequiresUserPresence!=true"
+dotnet toolchain.cs -- test --project Fido2 --smoke --filter "Category!=RequiresUserPresence"
 ```
 
 ## Feature Flags

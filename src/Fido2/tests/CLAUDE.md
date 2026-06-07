@@ -36,7 +36,7 @@ FIDO2 tests must be aware of transport differences:
 - FIDO GetInfo can report a `0.x` sentinel version even when Management reports the real firmware; firmware gates use `Feature.IsSupportedByFirmware(...)` so sentinel versions are treated as modern
 - FIDO2 SmartCard session creation selects the FIDO2 AID before the firmware gate because firmware comes from CTAP GetInfo over the selected application
 
-### User Interaction
+### User Interaction And Coordination Lanes
 
 FIDO2 operations require user presence (touch) and user verification (PIN/bio):
 
@@ -52,6 +52,18 @@ public async Task MakeCredential_TouchRequired_Succeeds(YubiKeyTestState state)
     var response = await session.MakeCredentialAsync(options);
 }
 ```
+
+Classify FIDO2 hardware tests before running them:
+
+| Lane | Examples | Agent-runnable? | Rule |
+|------|----------|-----------------|------|
+| Read-only smoke | `GetInfo`, session creation, transport discovery | Yes | Use `--smoke` for integration |
+| User Presence | `MakeCredential`, `GetAssertion`, `previewSign` ceremonies | No by default | Mark with `Category=RequiresUserPresence`; run only with a human present |
+| User Verification / PIN | PIN-token, UV-required/preferred, biometric checks | No by default | Requires explicit human approval and known PIN/device state |
+| Reset/destructive | `ResetAsync`, broad credential cleanup | No | Human-approved destructive run only |
+| Insert/remove/touch timing | reset power-cycle window, manual touch timing | No | Human-coordinated timing only |
+
+Agents must not run User Presence, UV, reset, insert/remove, or destructive FIDO2 tests unless a human explicitly approves the exact command and is physically present for the interaction.
 
 ### PIN Management in Tests
 
@@ -98,8 +110,11 @@ dotnet toolchain.cs -- test --project Fido2 --filter "FullyQualifiedName~Yubico.
 # Run unit tests only
 dotnet toolchain.cs -- test --project Fido2 --filter "FullyQualifiedName~Yubico.YubiKit.Fido2.UnitTests"
 
-# Run integration tests only (requires YubiKey with FIDO2)
+# Run integration smoke tests only; skips Slow and RequiresUserPresence
 dotnet toolchain.cs -- test --integration --project Fido2 --smoke --filter "FullyQualifiedName~Yubico.YubiKit.Fido2.IntegrationTests"
+
+# Human-coordinated only; requires touch/UP approval immediately before running
+dotnet toolchain.cs -- test --integration --project Fido2 --filter "Category=RequiresUserPresence"
 
 # Run specific test class
 dotnet toolchain.cs -- test --project Fido2 --filter "FullyQualifiedName~FidoSessionTests"

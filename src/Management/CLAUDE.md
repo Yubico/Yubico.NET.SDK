@@ -333,7 +333,7 @@ var info = await state.Device.GetDeviceInfoAsync();
 
 ### WithManagementAsync Pattern
 
-Located in [`ManagementTestState.cs`](../Yubico.YubiKit.Tests.Shared/ManagementTestState.cs) (shared test infrastructure):
+Located in [`YubiKeyTestStateExtensions.cs`](../Tests.Shared/YubiKeyTestStateExtensions.cs) (shared test infrastructure):
 
 ```csharp
 extension(YubiKeyTestState state)

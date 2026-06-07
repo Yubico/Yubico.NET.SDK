@@ -239,10 +239,10 @@ if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_7_2))
 
 ## Related Modules
 
-- **[Yubico.YubiKit.Management](../Yubico.YubiKit.Management/)** - Device information and capability queries
-- **[Yubico.YubiKit.Piv](../Yubico.YubiKit.Piv/)** - PIV smart card operations
-- **[Yubico.YubiKit.Fido2](../Yubico.YubiKit.Fido2/)** - FIDO2/WebAuthn authentication
-- **[Yubico.YubiKit.SecurityDomain](../Yubico.YubiKit.SecurityDomain/)** - SCP key management
+- **[Yubico.YubiKit.Management](../Management/)** - Device information and capability queries
+- **[Yubico.YubiKit.Piv](../Piv/)** - PIV smart card operations
+- **[Yubico.YubiKit.Fido2](../Fido2/)** - FIDO2/WebAuthn authentication
+- **[Yubico.YubiKit.SecurityDomain](../SecurityDomain/)** - SCP key management
 
 ## Developer Documentation
 

@@ -4,7 +4,7 @@ This file provides guidance for the FIDO2 module test infrastructure.
 
 ## Required Reading
 
-**CRITICAL:** Read [`docs/TESTING.md`](../../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
+**CRITICAL:** Read [`docs/TESTING.md`](../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
 
 For FIDO2-specific test patterns, CBOR encoding, and backend abstractions, see the **Key Patterns** and **Architecture Overview** sections in [`../CLAUDE.md`](../CLAUDE.md).
 

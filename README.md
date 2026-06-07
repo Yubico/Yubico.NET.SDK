@@ -114,7 +114,7 @@ dotnet toolchain.cs test
 dotnet toolchain.cs pack
 ```
 
-See [BUILD.md](BUILD.md) for detailed build instructions.
+See [TOOLCHAIN.md](TOOLCHAIN.md) for detailed build instructions.
 
 ## Test Runner Support in IDEs
 

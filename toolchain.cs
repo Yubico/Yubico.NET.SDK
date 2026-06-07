@@ -22,6 +22,7 @@
  *   restore        - Restore NuGet dependencies
  *   build          - Build the solution (restores only if needed)
  *   test           - Run unit tests with summary output
+ *   docs-qa        - Validate active documentation hygiene
  *   coverage       - Run tests with code coverage
  *   pack           - Create NuGet packages
  *   setup-feed     - Configure local NuGet feed
@@ -47,6 +48,7 @@
  *   dotnet toolchain.cs build
  *   dotnet toolchain.cs build --project Piv
  *   dotnet toolchain.cs test
+ *   dotnet toolchain.cs docs-qa
  *   dotnet toolchain.cs test --filter "FullyQualifiedName~MyTestClass"
  *   dotnet toolchain.cs test --project Piv --filter "Method~Sign"
  *   dotnet toolchain.cs -- test --integration --project Piv --smoke   (quick integration smoke test)
@@ -130,6 +132,7 @@ var packableProjects = buildableProjects
     .ToArray();
 var unitTestProjects = DiscoverProjects("tests", ".UnitTests", ProjectPrefix);
 var integrationTestProjects = DiscoverProjects("tests", ".IntegrationTests", ProjectPrefix);
+var activeDocumentationFiles = DiscoverActiveDocumentationFiles();
 
 var testProjects = includeIntegration
     ? [..unitTestProjects, ..integrationTestProjects]
@@ -276,6 +279,23 @@ Target("coverage", () =>
     var failCount = results.Count(r => !r.Passed);
     if (failCount > 0)
         throw new InvalidOperationException($"{failCount} test project(s) failed during coverage collection");
+});
+
+Target("docs-qa", () =>
+{
+    PrintHeader("Validating active documentation");
+
+    var failures = ValidateActiveDocumentation(activeDocumentationFiles);
+    if (failures.Count > 0)
+    {
+        PrintColored($"Found {failures.Count} documentation issue(s):", ConsoleColor.Red);
+        foreach (var failure in failures)
+            Console.WriteLine($"  - {failure}");
+
+        throw new InvalidOperationException($"{failures.Count} documentation issue(s) found");
+    }
+
+    PrintInfo($"Validated {activeDocumentationFiles.Length} active documentation file(s)");
 });
 
 Target("pack", DependsOn("build"), () =>
@@ -596,6 +616,7 @@ TARGETS:
   restore        - Restore NuGet dependencies
   build          - Build the solution (restores only if needed)
   test           - Run unit tests with summary output
+  docs-qa        - Validate active documentation hygiene
   coverage       - Run tests with code coverage
   pack           - Create NuGet packages
   setup-feed     - Configure local NuGet feed
@@ -622,6 +643,7 @@ EXAMPLES:
   dotnet toolchain.cs build
   dotnet toolchain.cs build --project Piv
   dotnet toolchain.cs test
+  dotnet toolchain.cs docs-qa
   dotnet toolchain.cs test --filter ""FullyQualifiedName~MyTestClass""
   dotnet toolchain.cs test --project Piv --filter ""Method~Sign""
   dotnet toolchain.cs -- test --integration --project Piv --smoke
@@ -794,6 +816,162 @@ bool IsPackableProject(string projectPath)
         @"<IsPackable(?:\s+[^>]*)?>\s*false\s*</IsPackable>",
         RegexOptions.IgnoreCase);
 }
+
+string[] DiscoverActiveDocumentationFiles()
+{
+    var rootDocs = Directory.GetFiles(repoRoot, "*.md", SearchOption.TopDirectoryOnly);
+    var docsRoot = Directory.Exists(Path.Combine(repoRoot, "docs"))
+        ? Directory.GetFiles(Path.Combine(repoRoot, "docs"), "*.md", SearchOption.TopDirectoryOnly)
+        : [];
+    var docsUsage = GetMarkdownFilesUnder("docs", "usage");
+    var docsTroubleshooting = GetMarkdownFilesUnder("docs", "troubleshooting");
+    var docsArchitecture = GetMarkdownFilesUnder("docs", "architecture");
+    var srcReadmes = Directory.GetFiles(Path.Combine(repoRoot, "src"), "README.md", SearchOption.AllDirectories);
+    var srcClaudeDocs = Directory.GetFiles(Path.Combine(repoRoot, "src"), "CLAUDE.md", SearchOption.AllDirectories);
+
+    return [..rootDocs
+        .Concat(docsRoot)
+        .Concat(docsUsage)
+        .Concat(docsTroubleshooting)
+        .Concat(docsArchitecture)
+        .Concat(srcReadmes)
+        .Concat(srcClaudeDocs)
+        .Select(p => Path.GetRelativePath(repoRoot, p))
+        .Where(p => !IsArchivedOrPlanningDoc(p))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)];
+}
+
+string[] GetMarkdownFilesUnder(params string[] pathParts)
+{
+    var path = Path.Combine([repoRoot, ..pathParts]);
+    return Directory.Exists(path)
+        ? Directory.GetFiles(path, "*.md", SearchOption.AllDirectories)
+        : [];
+}
+
+static bool IsArchivedOrPlanningDoc(string relativePath)
+{
+    var normalized = relativePath.Replace(Path.DirectorySeparatorChar, '/');
+    return normalized.StartsWith("docs/archive/", StringComparison.OrdinalIgnoreCase) ||
+           normalized.StartsWith("docs/completed/", StringComparison.OrdinalIgnoreCase) ||
+           normalized.StartsWith("docs/plans/", StringComparison.OrdinalIgnoreCase) ||
+           normalized.StartsWith("docs/research/", StringComparison.OrdinalIgnoreCase) ||
+           normalized.StartsWith("docs/reviews/", StringComparison.OrdinalIgnoreCase) ||
+           normalized.StartsWith("docs/specs/", StringComparison.OrdinalIgnoreCase) ||
+           normalized.StartsWith("docs/templates/", StringComparison.OrdinalIgnoreCase);
+}
+
+List<string> ValidateActiveDocumentation(string[] documentationFiles)
+{
+    var failures = new List<string>();
+
+    foreach (var relativePath in documentationFiles)
+    {
+        var fullPath = Path.Combine(repoRoot, relativePath);
+        var lines = File.ReadAllLines(fullPath);
+
+        ValidateCodeFences(relativePath, lines, failures);
+        ValidateKnownStaleDocPatterns(relativePath, lines, failures);
+        ValidateLocalMarkdownLinks(relativePath, fullPath, lines, failures);
+    }
+
+    return failures;
+}
+
+static void ValidateCodeFences(string relativePath, string[] lines, List<string> failures)
+{
+    var openFenceLine = 0;
+    for (var i = 0; i < lines.Length; i++)
+    {
+        if (!IsCodeFenceLine(lines[i]))
+            continue;
+
+        if (openFenceLine == 0)
+        {
+            openFenceLine = i + 1;
+        }
+        else
+        {
+            openFenceLine = 0;
+        }
+    }
+
+    if (openFenceLine != 0)
+        failures.Add($"{relativePath}:{openFenceLine}: unclosed fenced code block");
+}
+
+static void ValidateKnownStaleDocPatterns(string relativePath, string[] lines, List<string> failures)
+{
+    var stalePatterns = new[]
+    {
+        "RequiresUserPresence!=true",
+        "RequiresUserPresence=true",
+        "Trait(\"RequiresUserPresence\""
+    };
+
+    for (var i = 0; i < lines.Length; i++)
+    {
+        foreach (var pattern in stalePatterns)
+        {
+            if (lines[i].Contains(pattern, StringComparison.Ordinal))
+                failures.Add($"{relativePath}:{i + 1}: stale FIDO2 user-presence doc pattern '{pattern}'");
+        }
+    }
+}
+
+static void ValidateLocalMarkdownLinks(
+    string relativePath,
+    string fullPath,
+    string[] lines,
+    List<string> failures)
+{
+    var inCodeFence = false;
+    for (var i = 0; i < lines.Length; i++)
+    {
+        if (IsCodeFenceLine(lines[i]))
+        {
+            inCodeFence = !inCodeFence;
+            continue;
+        }
+
+        if (inCodeFence)
+            continue;
+
+        foreach (Match match in Regex.Matches(lines[i], @"(?<!!)\[[^\]]+\]\((?<target>[^)]+)\)"))
+        {
+            var target = match.Groups["target"].Value.Trim();
+            if (ShouldSkipMarkdownLink(target))
+                continue;
+
+            var pathOnly = target.Split('#', 2)[0];
+            var decodedPath = Uri.UnescapeDataString(pathOnly);
+            var containingDirectory = Path.GetDirectoryName(fullPath) ?? Directory.GetCurrentDirectory();
+            var resolvedPath = Path.GetFullPath(Path.Combine(containingDirectory, decodedPath));
+
+            if (!File.Exists(resolvedPath) && !Directory.Exists(resolvedPath))
+                failures.Add($"{relativePath}:{i + 1}: local markdown link target not found: {target}");
+        }
+    }
+}
+
+static bool ShouldSkipMarkdownLink(string target)
+{
+    if (string.IsNullOrWhiteSpace(target) || target.StartsWith('#'))
+        return true;
+
+    if (target.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+        target.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+        target.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase))
+        return true;
+
+    if (target.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
+        return true;
+
+    return false;
+}
+
+static bool IsCodeFenceLine(string line) => Regex.IsMatch(line, @"^\s*```");
 
 // Returns null when no projects matched and an error was already printed (caller should return early).
 List<string>? FilterProjectsByName(string[] projects, string? filter)

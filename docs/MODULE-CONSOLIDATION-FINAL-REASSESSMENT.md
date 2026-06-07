@@ -12,6 +12,7 @@ Read together with:
 - `docs/plans/module-consolidation/phase-16-api-package-compatibility-learnings.md`
 - `docs/plans/module-consolidation/phase-17-test-runner-hardware-coordination-learnings.md`
 - `docs/plans/module-consolidation/phase-18-docs-qa-tooling-learnings.md`
+- `docs/plans/module-consolidation/phase-20-quality-convergence-before-composite-yubikey-ISA.md`
 
 ## Scope And Governance
 
@@ -35,15 +36,24 @@ After the initial Phase 19 pass, the missing governance/tooling phases were comp
 
 This addendum supersedes the initial caveat for completion status. The remaining risks are now narrower:
 
-- Phase 16 did not enable package/API compatibility enforcement because no approved baseline or policy exists yet.
+- Phase 16 did not enable package validation because no approved baseline exists yet; Phase 20 reframes this as audit-only SDK-family public API alignment.
 - Phase 17 did not run human-coordinated UP/UV hardware ceremonies; it defined the safe lanes and kept those checks out of unattended gates.
 - Phase 18 did not compile README snippets or add CI wiring; it added bounded active-doc structural validation.
+
+## Post-Reassessment Follow-Up: Extended APDU Support
+
+After the Phase 19 addendum, Core extended APDU support detection was fixed in commit `90a41b26`:
+
+- `UsbSmartCardConnection.SupportsExtendedApdu()` no longer returns unconditional true; it now enables extended APDUs only for confirmed USB PC/SC YubiKeys.
+- NFC, unknown, and wildcard PC/SC connection kinds now fall back to short APDU command chaining.
+- The PC/SC receive buffer now allows a maximum extended APDU response body plus the 2-byte status word.
+- Unit tests cover USB, NFC, unknown, and wildcard connection-kind behavior.
 
 ## Executive Summary
 
 The consolidation branch materially improved the SDK's architectural rhythm. The biggest wins are visible protocol flow, explicit sensitive-buffer lifecycles, shared test-harness pieces, FIDO2/WebAuthn construction coherence, firmware/transport support gates, and CLI credential handling in one narrow OATH unlock slice.
 
-The branch did not finish every governance/tooling concern, but the missing Phase 16-18 checkpoint work has now been closed. API/package compatibility baseline enforcement, Core DI documentation drift, extended APDU support detection, remaining CLI string-secret paths, human-run UP/UV ceremony execution, and README snippet compilation/CI adoption remain amber.
+The branch did not finish every governance/tooling concern, but the missing Phase 16-18 checkpoint work and the Core extended APDU support detection follow-up have now been closed. SDK-family public API shape alignment, Core DI documentation drift, remaining CLI string-secret paths, human-run UP/UV ceremony execution, and README snippet compilation/CI adoption remain amber.
 
 The net result is not a rewrite into more architecture. It is a better version of the intended v2 style: flatter where protocol behavior matters, more explicit where sensitive memory matters, and better tested where byte-level behavior could regress.
 
@@ -51,7 +61,7 @@ The net result is not a rewrite into more architecture. It is a better version o
 
 | Module | Baseline Overall | Final Overall | Complexity | Maturity | DRY | Rolling Own | Maintainability | Delta | Top Consolidation Target Now |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| `Core` | B | B+ | B | B+ | B- | B | B+ | Up | Finish DI/package-facing doc alignment, API/package compatibility enforcement, extended APDU support investigation, and duplicate CRC cleanup. |
+| `Core` | B | B+ | B | B+ | B- | B | B+ | Up | Finish DI/package-facing doc alignment, SDK-family public API shape audit, and duplicate CRC cleanup. |
 | `Management` | B- | B | B | B | B | B+ | B | Up | Tighten backend payload ownership on read paths and keep config/version docs source-backed. |
 | `Piv` | B- | B | B- | B+ | B | B | B | Up | Expand fake APDU coverage for crypto/key-operation encodings and simplify reset/auth/default-credential integration choreography. |
 | `Fido2` | B- | B | B- | B+ | C+ | C+ | B | Up | Finish sensitive CTAP builder-copy lifecycle and apply the canonical request convention beyond MakeCredential/GetAssertion. |
@@ -78,13 +88,13 @@ Core moved from B to B+ because several cross-module primitives became less ambi
 - `FirmwareVersion.IsAlphaOrBeta` centralizes the `Major == 0` sentinel used by beta/test applet firmware reporting.
 - `Feature.IsSupportedByFirmware(...)` makes firmware-only support gates reusable while keeping transport, applet state, and auth facts local.
 - PC/SC SmartCard connection provenance now records USB/NFC/unknown kind from ATR evidence and feeds FIDO2 transport support decisions.
+- Extended APDU support detection now follows confirmed PC/SC transport kind: USB can use extended APDUs, while NFC/unknown/wildcard connections fall back to short APDU command chaining.
 
 Remaining Core risks keep the grade at B+ rather than A-:
 
-- `UsbSmartCardConnection.SupportsExtendedApdu()` still returns unconditional true and remains a final follow-up investigation target.
 - `AddYubiKeyManagerCore()` is still referenced in active docs and module DI comments, while source implementation was not found in this run.
 - Duplicate CRC/checksum utilities remain in Core HID/OTP paths.
-- Phase 16 completed a package/API compatibility checkpoint, but package/API baseline enforcement remains deferred until an approved baseline and policy exist.
+- Phase 16 completed a package/API compatibility checkpoint, but package validation remains audit-only until a real preview/release baseline exists and the owner chooses to protect it.
 
 ### SmartCard Modules
 
@@ -190,13 +200,12 @@ Remaining documentation risks:
 
 High leverage next targets:
 
-- Choose an API/package compatibility baseline and decide whether package validation should become an enforced release gate.
+- Audit public API shape against `yubikit-swift`, Python `yubikey-manager` / `yubikit`, and `yubikit-android`, while keeping package validation audit-only until a real preview/release baseline exists.
 - Use the documented FIDO2/WebAuthn manual User Presence/User Verification lanes when a future phase requires human-coordinated hardware ceremonies.
 - Decide whether `docs-qa` should be wired into CI and whether README snippet compilation deserves a separate approved phase.
-- Investigate `UsbSmartCardConnection.SupportsExtendedApdu()` against the YubiKey Manager reference implementation.
 - Repair Core DI documentation drift around `AddYubiKeyManagerCore()`.
 - Continue CLI secret migration with the Phase 15 policy, but only one command family at a time.
-- Resolve `Tests.TestProject` purpose before spending more test-cleanup effort there.
+- Exclude `Tests.TestProject` from the next quality-convergence program; it was a temporary DI test project, and DI was removed to avoid premature optimization.
 
 Secondary targets:
 

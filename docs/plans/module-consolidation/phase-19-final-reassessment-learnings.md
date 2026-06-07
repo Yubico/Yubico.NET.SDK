@@ -25,7 +25,7 @@ Use this note as the handoff record for Phase 19 of module consolidation.
 - Treated initially missing Phase 16-18 artifacts as remaining governance/tooling risks rather than completed phases until the corrective addendum work closed them.
 - Added a post-Phase-18 reconciliation addendum after Phases 16, 17, and 18 were completed and committed.
 - Narrowed the remaining risks from missing-phase status to baseline enforcement, human-run UP/UV ceremony execution, and docs-QA CI/snippet limits.
-- Recorded high-leverage next targets: API/package compatibility, FIDO2/WebAuthn UP/UV coordination, docs QA tooling, extended APDU support, Core DI documentation drift, remaining CLI secret migration, and Tests.TestProject purpose.
+- Recorded high-leverage next targets: public API shape alignment, FIDO2/WebAuthn UP/UV coordination, docs QA tooling, Core DI documentation drift, remaining CLI secret migration, and test-harness/module quality convergence.
 
 ## Why This Shape
 
@@ -46,7 +46,7 @@ Use this note as the handoff record for Phase 19 of module consolidation.
 - Phase ISA readback: `docs/plans/module-consolidation/phase-19-final-reassessment-ISA.md` read successfully.
 - Initial Phase 16-18 artifact check: directory listing found no phase-specific Phase 16, Phase 17, or Phase 18 artifacts before the corrective addendum work.
 - Baseline criteria check: final matrix contains Overall, Complexity, Maturity, DRY, Rolling Own, Maintainability, and Top Consolidation Target.
-- Remaining-risk check: final artifact names API/package compatibility, manual FIDO2/WebAuthn UP/UV coordination, docs QA tooling, extended APDU support, Core DI documentation drift, and remaining CLI secret/string paths.
+- Remaining-risk check: final artifact names API/package compatibility, manual FIDO2/WebAuthn UP/UV coordination, docs QA tooling, Core DI documentation drift, and remaining CLI secret/string paths; extended APDU support detection was later closed by commit `90a41b26`.
 - Addendum evidence: Phase 16 commit `2cf6b2bc`, Phase 17 commit `ab8d9364`, and Phase 18 commit `3b44f755` are recorded in the final reassessment addendum.
 
 ## Integration Lifecycle
@@ -86,18 +86,17 @@ Use this note as the handoff record for Phase 19 of module consolidation.
 
 ## Deferred Future Improvements
 
-- Choose whether Phase 16's package/API baseline work should become an enforced release gate.
+- Treat Phase 16's package/API baseline work as audit-only until there is a real preview/release baseline to protect.
 - Use Phase 17's documented UP/UV lanes for future human-coordinated ceremony runs.
 - Decide whether Phase 18's `docs-qa` target should be wired into CI and whether snippet compilation is worth a separate phase.
-- Investigate `UsbSmartCardConnection.SupportsExtendedApdu()` against the YubiKey Manager reference implementation during the final follow-up improvement pass.
 - Decide whether operation-named CLI command classes need a naming carveout separate from forbidden protocol command-object hierarchies.
 
 ## Cross-Module Implications
 
-- Core is now the highest-leverage next area because package/API compatibility, extended APDU support, DI docs, and duplicate CRC concerns all converge there.
+- Core is now the highest-leverage next area because SDK-family public API alignment, DI docs, and duplicate CRC concerns all converge there.
 - CLI remains the weakest active consolidation surface. Continue one command family at a time using the Phase 15 argv-secret policy.
 - Tests.Shared is improved enough that the next test-infrastructure decision should be explicit: shared fake recorder, manual UP/UV lanes, or no further consolidation.
-- Tests.TestProject should not receive more incidental fixes until its purpose is decided.
+- Tests.TestProject is excluded from the next quality-convergence program because it was a temporary DI test project.
 
 ## Generalization Check
 
@@ -113,8 +112,8 @@ Use this note as the handoff record for Phase 19 of module consolidation.
 - Rejected approaches: rewriting baseline, source cleanup, claiming missing Phase 16-18 work complete.
 - Tests passed: docs readback, `git diff --check`, Cato artifact audit with resolved finding.
 - Integration lifecycle: skipped; Phase 19 is documentation-only.
-- Shared/Core candidates: Core compatibility, extended APDU, and DI doc drift are next high-leverage targets.
-- Deferred future improvements: Phase 16-18 completion or retirement, CLI secret migration, Tests.TestProject purpose.
+- Shared/Core candidates: Core API alignment, DI doc drift, and duplicate CRC cleanup are next high-leverage targets.
+- Deferred future improvements: CLI secret migration and composite YubiKey design interviews after quality convergence.
 - House-style update needed: none now.
 - Next phase recommendation: final follow-up improvement pass only after reviewing deferred candidates.
 - Learning note path: `docs/plans/module-consolidation/phase-19-final-reassessment-learnings.md`

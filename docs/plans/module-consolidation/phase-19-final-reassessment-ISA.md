@@ -38,7 +38,7 @@ Create `docs/MODULE-CONSOLIDATION-FINAL-REASSESSMENT.md` as a read-only, source-
 - [x] ISC-5: Every module in the original matrix appears in the final reassessment matrix.
 - [x] ISC-6: Grade deltas distinguish source-backed improvements from unresolved governance/tooling gaps.
 - [x] ISC-7: The artifact records that Phase 16, Phase 17, and Phase 18 phase-specific artifacts were not found during the initial Phase 19 pass.
-- [x] ISC-8: Remaining risks include package/API compatibility, xUnit/manual UP coordination, docs QA limits, extended APDU support, Core DI doc drift, and remaining CLI secret/string paths.
+- [x] ISC-8: Remaining risks include package/API compatibility, xUnit/manual UP coordination, docs QA limits, extended APDU support, Core DI doc drift, and remaining CLI secret/string paths. Extended APDU support was later closed by commit `90a41b26`; see the post-Phase-19 note below.
 - [x] ISC-9: The reassessment flags no source-code changes as part of Phase 19.
 - [x] ISC-10: The learning note exists at `docs/plans/module-consolidation/phase-19-final-reassessment-learnings.md`.
 - [x] ISC-11: Cato or equivalent cross-vendor artifact audit runs, or a structured skip/error is recorded.
@@ -85,6 +85,7 @@ Create `docs/MODULE-CONSOLIDATION-FINAL-REASSESSMENT.md` as a read-only, source-
 - 2026-06-07: No Phase 16, Phase 17, or Phase 18 phase-specific artifacts were present. The reassessment treats those planned phases as remaining governance/tooling risks rather than completed improvements.
 - 2026-06-07: The final reassessment is read-only against source and writes a new artifact instead of modifying the original baseline assessment.
 - 2026-06-07: After corrective commits `2cf6b2bc`, `ab8d9364`, and `3b44f755`, Phase 19 adds a reconciliation addendum instead of rewriting history or amending the earlier Phase 19 commit.
+- 2026-06-07: Post-Phase-19 follow-up commit `90a41b26` closed the extended APDU support detection investigation that Phase 19 originally listed as remaining risk.
 
 ## Verification
 
@@ -95,7 +96,7 @@ Create `docs/MODULE-CONSOLIDATION-FINAL-REASSESSMENT.md` as a read-only, source-
 - ISC-5: Final matrix includes all baseline modules: Core, Management, Piv, Fido2, WebAuthn, Oath, YubiOtp, OpenPgp, SecurityDomain, YubiHsm, Cli.Shared, Cli, Cli.Commands, Tests.Shared, and Tests.TestProject.
 - ISC-6: Final artifact separates `What Improved`, `Grade Delta Summary`, and `Remaining Risks`.
 - ISC-7: Final artifact lines under `Scope And Governance` record that Phase 16-18 artifacts were not found during the initial Phase 19 pass.
-- ISC-8: Final artifact names API/package compatibility, FIDO2/WebAuthn UP/UV coordination, docs QA tooling, extended APDU support, Core DI documentation drift, and remaining CLI secret/string paths.
+- ISC-8: Final artifact names API/package compatibility, FIDO2/WebAuthn UP/UV coordination, docs QA tooling, extended APDU support, Core DI documentation drift, and remaining CLI secret/string paths; extended APDU support was later closed by commit `90a41b26`.
 - ISC-9: Final artifact states Phase 19 is read-only against source.
 - ISC-10: Readback confirmed `docs/plans/module-consolidation/phase-19-final-reassessment-learnings.md` exists.
 - ISC-11: Cato route resolved to `google-vertex-anthropic/claude-opus-4-8@default`; second audit output `/tmp/opencode/cato-phase19-final-reassessment-r2.jsonl` returned `concerns` for the then-missing learning note, and that warning is now resolved by this phase's learning note.
@@ -104,4 +105,5 @@ Create `docs/MODULE-CONSOLIDATION-FINAL-REASSESSMENT.md` as a read-only, source-
 - ISC-14: Final artifact explicitly records initially missing Phase 16-18 artifacts as historical remaining risks, not completed phases at that earlier point.
 - ISC-15: Status/diff checks showed no source file modifications from Phase 19.
 - ISC-16: Final reassessment addendum records commits `2cf6b2bc`, `ab8d9364`, and `3b44f755`, then narrows Phase 16-18 risks to baseline enforcement, human-run ceremony execution, and docs-QA CI/snippet limits.
+- Post-Phase-19 note: extended APDU support detection was closed later by commit `90a41b26`; Phase 20 carry-forward artifacts should treat that item as closed, not deferred.
 - ISC-17: Final Cato addendum audit output `/tmp/opencode/cato-phase19-addendum.jsonl` verified the addendum claims and identified unchecked ISC-16/ISC-17 boxes; those boxes are now checked and the finding is recorded in the learning note. Rerun output `/tmp/opencode/cato-phase19-addendum-rerun.jsonl` returned `pass` with info-only wording suggestions.

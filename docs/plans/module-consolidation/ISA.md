@@ -683,20 +683,130 @@ Targets:
 - create a new final reassessment artifact instead of rewriting the baseline
 - record grade deltas, evidence, remaining risks, and next recommended targets
 
-### Final Follow-Up Improvement Pass
+### Phase 20: Quality Convergence Program ISA
 
-Run after all planned module refactor phases complete, unless the human explicitly promotes a deferred candidate earlier. The concrete follow-up program is tracked by `docs/plans/module-consolidation/phase-10-follow-up-program-work-plan.md`.
+Artifacts:
+
+- `docs/plans/module-consolidation/phase-20-quality-convergence-before-composite-yubikey-ISA.md`
+- `docs/plans/module-consolidation/phase-20-quality-convergence-learnings.md`
 
 Targets:
 
-- review all deferred future improvement candidates from phase learning notes
-- review all `docs/plans/module-consolidation/follow-up-*.md` plans
-- investigate `src/Core/src/SmartCard/UsbSmartCardConnection.cs` `SupportsExtendedApdu()` against the `../yubikit-manager` SDK reference implementation
-- classify each candidate as implement now, merge into docs, defer to a new program, or reject
-- prioritize high-leverage Core/SCP, shared test harness, CLI, naming/API, and documentation cleanups
-- run Cato or equivalent review on any broad architectural follow-up before source changes
+- define the quality-convergence program before composite YubiKey device design
+- exclude `Tests.TestProject` from scoring, phase scope, and composite-readiness gates
+- require `Core`, every applet module, and `Tests.Shared` to reach at least `B+` before composite design starts
+- reframe package/API work as SDK-family public API shape alignment, not a hard external package compatibility gate
+- save composite YubiKey questions for later owner interviews and stop before that design begins
 
-This pass exists to preserve zen/elegance opportunities without letting them expand the scope of individual module phases.
+### Phase 21: Core A- Readiness And SDK-Family API Alignment Audit
+
+Targets:
+
+- repair Core DI documentation drift around removed entry points
+- audit duplicate CRC/checksum utilities and consolidate only if source evidence shows mechanical duplication
+- compare public Core/device/session concepts against `yubikit-swift`, Python `yubikey-manager` / `yubikit`, and `yubikit-android`
+- keep package validation audit-only unless a later owner decision establishes a baseline to protect
+
+### Phase 22: Tests.Shared Recorder And Harness Decision
+
+Targets:
+
+- decide whether repeated fake smart-card recorder patterns justify shared test infrastructure
+- preserve or improve the current `Tests.Shared` `B+` posture
+- keep integration-test allow-list and hardware safety guidance source-backed
+
+### Phase 23: PIV Byte-Level Coverage
+
+Targets:
+
+- add focused fake APDU coverage for high-risk crypto/key-operation encodings
+- simplify reset/auth/default-credential integration choreography only where maintainability improves
+- preserve flat PIV protocol flow and public API unless explicitly approved
+
+### Phase 24: YubiHsm Byte-Level Coverage
+
+Targets:
+
+- add fake APDU byte-level tests for credential operations
+- verify sensitive APDU payload lifecycle remains explicit
+- defer local example CLI parsing work unless it is still a material module risk
+
+### Phase 25: OpenPGP Session Wire Tests
+
+Targets:
+
+- add fake APDU tests around session-level wire behavior
+- preserve OpenPGP-specific model richness
+- consider shared DER, DigestInfo, or OID helpers only if reuse is proven
+
+### Phase 26: FIDO2 Remaining CTAP Consistency
+
+Targets:
+
+- apply the canonical request-construction pattern beyond MakeCredential and GetAssertion
+- prioritize PIN, credential management, config, bio enrollment, large blobs, and extension paths
+- resolve sensitive CBOR/auth-param copy ownership where touched
+
+### Phase 27: WebAuthn Maintainability Split
+
+Targets:
+
+- split ceremony orchestration, validation, PIN/UV token flow, request mapping, error mapping, and response building only where readability improves
+- preserve FIDO2 delegation
+- keep the public construction story stable unless a phase ISA explicitly approves a public change
+
+### Phase 28: OATH Locality Polish
+
+Targets:
+
+- reduce monolithic session pressure with pure encode/parse helpers where clarity improves
+- preserve Core configured chained-response behavior for `INS_SEND_REMAINING = 0xA5`
+- avoid a broad OATH rewrite
+
+### Phase 29: SecurityDomain Test And Locality Follow-Up
+
+Targets:
+
+- use the Phase 22 test-harness decision
+- add coverage or locality improvements only where they still improve maintainability
+- keep the ban on operation-specific `PutKeyCommand` / `GetDataCommand` style protocol objects
+
+### Phase 30: YubiOtp And Management Stability Polish
+
+Targets:
+
+- keep stable modules stable
+- extract YubiOtp protocol codecs only if current session noise is materially harming readability
+- tighten Management backend payload/read-path clarity only if source review finds remaining ambiguity
+
+### Phase 31: Docs QA CI Gate
+
+Targets:
+
+- wire `dotnet toolchain.cs -- docs-qa` into CI as a bounded active-doc validation gate
+- keep README snippet compilation separate unless a phase ISA explicitly approves it
+
+### Phase 32: Same-Criteria Quality Reassessment
+
+Targets:
+
+- regrade active surfaces using the same criteria as `docs/MODULE-CONSOLIDATION-ASSESSMENT.md`
+- exclude `Tests.TestProject`
+- record whether `Core`, every applet module, and `Tests.Shared` are at least `B+`
+- feed every Phase 20+ learning note into the reassessment
+
+### Stop Gate: Composite YubiKey Interviews
+
+After Phase 32, stop and wait for owner interviews before designing or implementing composite YubiKey discovery.
+
+Saved interview questions:
+
+- should `IYubiKey` remain a per-connection interface or become a physical-device abstraction?
+- how should `ConnectionType` filters behave when one physical key supports multiple interfaces?
+- what identity/cache key should be used: serial, PID plus fingerprint, reader/path group, or resolved `DeviceInfo` identity?
+- how should NFC avoid false USB aggregation?
+- should per-interface discovery remain available for advanced callers?
+- how closely should .NET follow Python's `_PidGroup` / `_UsbCompositeDevice` model versus using more explicit .NET types?
 
 ## Next Phase Input Rule
 
@@ -722,7 +832,7 @@ Use:
 - DevTeam implementation/review loop
 - cross-vendor review where available
 - focused verification
-- scoped read-only beta-key integration
+- phase-scoped documented beta-key integration when useful
 - learning note before next phase
 - commit after success
 - `/Ping` after each successful phase

@@ -79,7 +79,7 @@ Use this note as the handoff record for Phase 14 of module consolidation.
 - DevTeam reviewer route: `google-vertex-anthropic/claude-opus-4-8@default`
 - DevTeam verdict: no blocking issues.
 - Findings fixed before implementation: Cato plan feedback drove explicit criteria for classifier purity, default `Kind` fail-closed behavior, NFC-before-firmware branch ordering, no numeric enum casts, and source-backed `yubikey-manager` ATR inspiration.
-- Findings deferred: `UsbSmartCardConnection.SupportsExtendedApdu()` remains a separate final follow-up investigation, not part of Phase 14 transport provenance.
+- Findings deferred at Phase 14 time: `UsbSmartCardConnection.SupportsExtendedApdu()` was outside Phase 14 transport provenance. It was later closed by commit `90a41b26`.
 
 ## Tooling Notes
 
@@ -90,9 +90,9 @@ Use this note as the handoff record for Phase 14 of module consolidation.
 
 ## Deferred Future Improvements
 
-- Investigate `src/Core/src/SmartCard/UsbSmartCardConnection.cs` `SupportsExtendedApdu()` against the `../yubikit-manager` SDK reference implementation.
-- Decide whether extended-APDU support should be based on transport, reader capability, platform behavior, firmware, active protocol, or a bounded probe.
-- Save the extended-APDU investigation for the final follow-up improvement pass unless a future phase explicitly promotes it earlier.
+- Closed after Phase 14: `src/Core/src/SmartCard/UsbSmartCardConnection.cs` `SupportsExtendedApdu()` now enables extended APDUs only for confirmed USB PC/SC YubiKeys.
+- Closed after Phase 14: NFC, unknown, and wildcard PC/SC connection kinds now fall back to short APDU command chaining.
+- Closed after Phase 14: PC/SC receive buffer sizing now accounts for the maximum extended APDU response body plus the status word.
 - Consider whether the `UsbSmartCardConnection` type name should eventually become transport-neutral; Phase 14 intentionally fixed behavior without broad renaming.
 
 ## Cross-Module Implications
@@ -115,7 +115,7 @@ Use this note as the handoff record for Phase 14 of module consolidation.
 - Tests passed: Core build, FIDO2 build, Core unit tests, FIDO2 unit tests, formatting, and whitespace check.
 - Integration lifecycle: read-only FIDO2 SmartCard create/GetInfo smokes passed; no touch, PIN, UV, reset, or persistent-state mutation.
 - Review: Cato plan audit incorporated; DevTeam Vertex Opus 4.8 review found no blocking issues.
-- Deferred: `SupportsExtendedApdu()` investigation against `../yubikit-manager`, saved for final follow-up.
+- Deferred then, closed later: `SupportsExtendedApdu()` investigation was resolved by commit `90a41b26`.
 - Next phase recommendation: Phase 15 CLI Secret Policy + OATH Unlock Migration.
 - Learning note path: `docs/plans/module-consolidation/phase-14-fido2-smartcard-transport-provenance-learnings.md`
 - Implementation commit: `5d9ee1dd fix(fido2): detect smart card transport provenance`

@@ -39,7 +39,7 @@ Phase 10 records the transition from the original consolidation program into a s
 | Core connection semantics | `ConnectionType` is marked `[Flags]`, but `HidOtp = 3` is exactly equal to `Hid | HidFido`, and `All` redundantly ORs the overlapping value. | Fix now. |
 | Core firmware gates | Alpha/beta firmware sentinel handling is duplicated through direct `Major == 0` checks. | Fix now. |
 | FIDO2 SmartCard transport | USB/NFC SmartCard FIDO2 provenance and firmware gating need a source-backed boundary. | Fix now, after firmware-gate cleanup. |
-| Core SmartCard extended APDU | `UsbSmartCardConnection.SupportsExtendedApdu()` still returns `true` unconditionally and needs comparison with the `../yubikit-manager` SDK reference implementation. | Save for final follow-up unless promoted earlier. |
+| Core SmartCard extended APDU | `UsbSmartCardConnection.SupportsExtendedApdu()` returned `true` unconditionally during Phase 10 planning. | Closed later by commit `90a41b26 fix(core): restrict extended apdu support to usb`. |
 | CLI credential security | Remaining secret paths still use strings and argv-bound secrets need an explicit policy. | Fix now in a narrow slice. |
 | API/package compatibility | Branch-level compatibility should be checked before changing test/tooling infrastructure. | Fix now as a checkpoint. |
 | Test runner/tooling | xUnit v3 focused-filter behavior and FIDO/WebAuthn UP coordination remain friction points. | Fix now, after source-risk phases. |
@@ -72,7 +72,7 @@ These are real concerns, but not worth pulling into the immediate follow-up sequ
 - Bundled WebAuthn Public Suffix List verifier: defer to a WebAuthn hardening program.
 - Broader PIV crypto APDU matrix: defer until future PIV crypto protocol work.
 - Archived docs/plans cleanup: defer to a separate documentation archive program.
-- `UsbSmartCardConnection.SupportsExtendedApdu()` reference comparison: defer to the final follow-up improvement pass and decide then whether support should be transport, reader, firmware, platform, active-protocol, or probe based.
+- `UsbSmartCardConnection.SupportsExtendedApdu()` reference comparison: closed by commit `90a41b26`; confirmed USB can use extended APDUs while NFC/unknown/wildcard PC/SC connections fall back to short APDU command chaining.
 
 ## Reject
 

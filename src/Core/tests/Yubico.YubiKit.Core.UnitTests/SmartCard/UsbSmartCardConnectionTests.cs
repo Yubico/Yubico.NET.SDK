@@ -25,6 +25,18 @@ public class UsbSmartCardConnectionTests
         Assert.Equal(Transport.Usb, connection.Transport);
     }
 
+    [Theory]
+    [InlineData(PscsConnectionKind.Usb, true)]
+    [InlineData(PscsConnectionKind.Nfc, false)]
+    [InlineData(PscsConnectionKind.Unknown, false)]
+    [InlineData(PscsConnectionKind.Any, false)]
+    public void SupportsExtendedApdu_ReturnsTrueOnlyForConfirmedUsb(PscsConnectionKind kind, bool expected)
+    {
+        using var connection = new UsbSmartCardConnection(new FakePcscDevice(kind));
+
+        Assert.Equal(expected, connection.SupportsExtendedApdu());
+    }
+
     private sealed class FakePcscDevice(PscsConnectionKind kind = default) : IPcscDevice
     {
         public string ReaderName => "fake";

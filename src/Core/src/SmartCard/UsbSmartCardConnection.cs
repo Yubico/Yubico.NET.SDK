@@ -39,6 +39,8 @@ namespace Yubico.YubiKit.Core.SmartCard;
 internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSmartCardConnection>? logger = null)
     : ISmartCardConnection
 {
+    private const int MaxExtendedApduResponseSize = 65536 + 2;
+
     private readonly ILogger<UsbSmartCardConnection> _logger = logger ?? NullLogger<UsbSmartCardConnection>.Instance;
     private SCardCardHandle? _cardHandle;
     private SCardContext? _context;
@@ -256,9 +258,7 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
         ArgumentNullException.ThrowIfNull(_context);
         ArgumentNullException.ThrowIfNull(_cardHandle);
 
-        // Use a larger buffer for responses, especially for extended APDUs
-        const int bufferSize = 65536;
-        var outputBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+        var outputBuffer = ArrayPool<byte>.Shared.Rent(MaxExtendedApduResponseSize);
         var bytesReceived = 0;
 
         try
@@ -295,7 +295,7 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
     };
 
     public bool SupportsExtendedApdu() =>
-        true; // TODO determine who supports extended APDUs https://yubico.atlassian.net/browse/YESDK-1499
+        smartCardDevice.Kind == PscsConnectionKind.Usb;
 
     public IDisposable BeginTransaction(CancellationToken cancellationToken = default)
         => BeginTransactionInternal(SCARD_DISPOSITION.LEAVE_CARD, cancellationToken);

@@ -39,6 +39,7 @@ namespace Yubico.YubiKit.Core.SmartCard;
 internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSmartCardConnection>? logger = null)
     : ISmartCardConnection
 {
+    // Extended APDU responses can contain 65536 bytes of data plus a 2-byte status word.
     private const int MaxExtendedApduResponseSize = 65536 + 2;
 
     private readonly ILogger<UsbSmartCardConnection> _logger = logger ?? NullLogger<UsbSmartCardConnection>.Instance;

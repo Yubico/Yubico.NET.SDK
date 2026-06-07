@@ -94,6 +94,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
@@ -123,7 +124,10 @@ if (smokeTest)
 }
 
 // Dynamically discover projects using glob patterns
-var packableProjects = DiscoverProjects("src", ProjectPrefix);
+var buildableProjects = DiscoverProjects("src", ProjectPrefix);
+var packableProjects = buildableProjects
+    .Where(IsPackableProject)
+    .ToArray();
 var unitTestProjects = DiscoverProjects("tests", ".UnitTests", ProjectPrefix);
 var integrationTestProjects = DiscoverProjects("tests", ".IntegrationTests", ProjectPrefix);
 
@@ -169,14 +173,14 @@ Target("build", () =>
 
     if (!string.IsNullOrEmpty(projectFilter))
     {
-        var matchingProjects = packableProjects
+        var matchingProjects = buildableProjects
             .Where(p => Path.GetFileNameWithoutExtension(p)
                 .Contains(projectFilter, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         if (matchingProjects.Count == 0)
         {
-            PrintNoProjectsFound(projectFilter, packableProjects);
+            PrintNoProjectsFound(projectFilter, buildableProjects);
             return;
         }
 
@@ -781,6 +785,15 @@ string[] DiscoverProjects(string subdirectory, string nameFilter, string? additi
         .Select(p => Path.GetRelativePath(repoRoot, p))
         .OrderBy(p => p)
         .ToArray();
+
+bool IsPackableProject(string projectPath)
+{
+    var projectXml = File.ReadAllText(Path.Combine(repoRoot, projectPath));
+    return !Regex.IsMatch(
+        projectXml,
+        @"<IsPackable(?:\s+[^>]*)?>\s*false\s*</IsPackable>",
+        RegexOptions.IgnoreCase);
+}
 
 // Returns null when no projects matched and an error was already printed (caller should return early).
 List<string>? FilterProjectsByName(string[] projects, string? filter)

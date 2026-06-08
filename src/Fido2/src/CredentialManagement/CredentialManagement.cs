@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
-using Yubico.YubiKit.Fido2.Cbor;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
@@ -37,15 +37,10 @@ public sealed class CredentialManagement : IDisposable
 {
     private bool _disposed;
 
-    // NOTE: This field is typed as FidoSession (concrete) because it calls the internal
-    // SendCborAsync(byte, ReadOnlyMemory<byte>?, CancellationToken) method which is not
-    // exposed on IFidoSession. Changing to IFidoSession would require either promoting
-    // SendCborAsync to the public interface (leaking internal protocol details) or
-    // refactoring all call sites to assemble the full command+payload buffer manually.
-    private readonly FidoSession _session;
+    private readonly IFidoSession _session;
     private readonly IPinUvAuthProtocol _protocol;
     private readonly ReadOnlyMemory<byte> _pinUvAuthToken;
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CredentialManagement"/> class.
     /// </summary>
@@ -56,6 +51,14 @@ public sealed class CredentialManagement : IDisposable
         FidoSession session,
         IPinUvAuthProtocol protocol,
         ReadOnlyMemory<byte> pinUvAuthToken)
+        : this((IFidoSession)session, protocol, pinUvAuthToken)
+    {
+    }
+
+    internal CredentialManagement(
+        IFidoSession session,
+        IPinUvAuthProtocol protocol,
+        ReadOnlyMemory<byte> pinUvAuthToken)
     {
         ArgumentNullException.ThrowIfNull(session);
         ArgumentNullException.ThrowIfNull(protocol);
@@ -63,7 +66,7 @@ public sealed class CredentialManagement : IDisposable
         _protocol = protocol;
         _pinUvAuthToken = pinUvAuthToken;
     }
-    
+
     /// <summary>
     /// Gets metadata about stored credentials.
     /// </summary>
@@ -75,10 +78,10 @@ public sealed class CredentialManagement : IDisposable
         var payload = BuildCommandPayload(CredManagementSubCommand.GetCredsMetadata);
         var response = await SendCredentialManagementCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
-        
+
         return CredentialMetadata.Decode(response);
     }
-    
+
     /// <summary>
     /// Enumerates all relying parties with stored discoverable credentials.
     /// </summary>
@@ -88,11 +91,11 @@ public sealed class CredentialManagement : IDisposable
         CancellationToken cancellationToken = default)
     {
         var results = new List<RelyingPartyInfo>();
-        
+
         // Begin enumeration
         var payload = BuildCommandPayload(CredManagementSubCommand.EnumerateRPsBegin);
         ReadOnlyMemory<byte> response;
-        
+
         try
         {
             response = await SendCredentialManagementCommandAsync(payload, cancellationToken)
@@ -103,15 +106,15 @@ public sealed class CredentialManagement : IDisposable
             // No credentials stored - return empty list
             return results;
         }
-        
+
         var firstRp = RelyingPartyInfo.Decode(response);
         results.Add(firstRp);
-        
+
         // Get remaining RPs if any
         if (firstRp.TotalRpCount.HasValue && firstRp.TotalRpCount.Value > 1)
         {
             var nextPayload = BuildCommandPayload(CredManagementSubCommand.EnumerateRPsGetNextRP);
-            
+
             for (var i = 1; i < firstRp.TotalRpCount.Value; i++)
             {
                 response = await SendCredentialManagementCommandAsync(nextPayload, cancellationToken)
@@ -119,10 +122,10 @@ public sealed class CredentialManagement : IDisposable
                 results.Add(RelyingPartyInfo.Decode(response));
             }
         }
-        
+
         return results;
     }
-    
+
     /// <summary>
     /// Enumerates all credentials for a specific relying party.
     /// </summary>
@@ -134,11 +137,11 @@ public sealed class CredentialManagement : IDisposable
         CancellationToken cancellationToken = default)
     {
         var results = new List<StoredCredentialInfo>();
-        
+
         // Begin enumeration
         var payload = BuildEnumerateCredentialsPayload(rpIdHash);
         ReadOnlyMemory<byte> response;
-        
+
         try
         {
             response = await SendCredentialManagementCommandAsync(payload, cancellationToken)
@@ -149,15 +152,15 @@ public sealed class CredentialManagement : IDisposable
             // No credentials for this RP
             return results;
         }
-        
+
         var firstCred = StoredCredentialInfo.Decode(response);
         results.Add(firstCred);
-        
+
         // Get remaining credentials if any
         if (firstCred.TotalCredentials.HasValue && firstCred.TotalCredentials.Value > 1)
         {
             var nextPayload = BuildCommandPayload(CredManagementSubCommand.EnumerateCredentialsGetNextCredential);
-            
+
             for (var i = 1; i < firstCred.TotalCredentials.Value; i++)
             {
                 response = await SendCredentialManagementCommandAsync(nextPayload, cancellationToken)
@@ -165,10 +168,10 @@ public sealed class CredentialManagement : IDisposable
                 results.Add(StoredCredentialInfo.Decode(response));
             }
         }
-        
+
         return results;
     }
-    
+
     /// <summary>
     /// Deletes a discoverable credential.
     /// </summary>
@@ -182,7 +185,7 @@ public sealed class CredentialManagement : IDisposable
         await SendCredentialManagementCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
     }
-    
+
     /// <summary>
     /// Updates the user information for a discoverable credential.
     /// </summary>
@@ -201,7 +204,7 @@ public sealed class CredentialManagement : IDisposable
         await SendCredentialManagementCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
     }
-    
+
     public void Dispose()
     {
         if (_disposed)
@@ -216,164 +219,175 @@ public sealed class CredentialManagement : IDisposable
         ReadOnlyMemory<byte> payload,
         CancellationToken cancellationToken)
     {
-        // Use standard CTAP 2.1 credential management command
-        // Caller should verify authenticator supports credMgmt option before creating this instance
-        return await _session.SendCborAsync(CtapCommand.CredentialManagement, payload, cancellationToken)
-            .ConfigureAwait(false);
+        // Use standard CTAP 2.1 credential management command.
+        // Caller should verify authenticator supports credMgmt option before creating this instance.
+        var request = new byte[1 + payload.Length];
+        request[0] = CtapCommand.CredentialManagement;
+        payload.CopyTo(request.AsMemory(1));
+
+        try
+        {
+            return await _session.SendCborRequestAsync(request, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(request);
+        }
     }
-    
+
     private ReadOnlyMemory<byte> BuildCommandPayload(byte subCommand)
     {
         // Build PIN/UV auth param over just the subcommand
         var subCommandBytes = new byte[] { subCommand };
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, subCommandBytes);
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(3);
-        
+
         // 0x01: subCommand
         writer.WriteInt32(1);
         writer.WriteInt32(subCommand);
-        
+
         // 0x03: pinUvAuthProtocol
         writer.WriteInt32(3);
         writer.WriteInt32(_protocol.Version);
-        
+
         // 0x04: pinUvAuthParam
         writer.WriteInt32(4);
         writer.WriteByteString(pinUvAuthParam.AsSpan());
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
-    
+
     private ReadOnlyMemory<byte> BuildEnumerateCredentialsPayload(ReadOnlyMemory<byte> rpIdHash)
     {
         const byte subCommand = CredManagementSubCommand.EnumerateCredentialsBegin;
-        
+
         // Build message to authenticate: subCommand || subCommandParams
         var subCommandParams = BuildRpIdHashParam(rpIdHash);
         var messageToAuth = new byte[1 + subCommandParams.Length];
         messageToAuth[0] = subCommand;
         subCommandParams.Span.CopyTo(messageToAuth.AsSpan(1));
-        
+
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, messageToAuth);
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(4);
-        
+
         // 0x01: subCommand
         writer.WriteInt32(1);
         writer.WriteInt32(subCommand);
-        
+
         // 0x02: subCommandParams (rpIDHash)
         writer.WriteInt32(2);
         writer.WriteStartMap(1);
         writer.WriteInt32(1); // rpIDHash key
         writer.WriteByteString(rpIdHash.Span);
         writer.WriteEndMap();
-        
+
         // 0x03: pinUvAuthProtocol
         writer.WriteInt32(3);
         writer.WriteInt32(_protocol.Version);
-        
+
         // 0x04: pinUvAuthParam
         writer.WriteInt32(4);
         writer.WriteByteString(pinUvAuthParam.AsSpan());
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
-    
+
     private ReadOnlyMemory<byte> BuildDeleteCredentialPayload(PublicKeyCredentialDescriptor credentialId)
     {
         const byte subCommand = CredManagementSubCommand.DeleteCredential;
-        
+
         // Build message to authenticate: subCommand || subCommandParams
         var subCommandParams = BuildCredentialIdParam(credentialId);
         var messageToAuth = new byte[1 + subCommandParams.Length];
         messageToAuth[0] = subCommand;
         subCommandParams.Span.CopyTo(messageToAuth.AsSpan(1));
-        
+
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, messageToAuth);
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(4);
-        
+
         // 0x01: subCommand
         writer.WriteInt32(1);
         writer.WriteInt32(subCommand);
-        
+
         // 0x02: subCommandParams (credentialId)
         writer.WriteInt32(2);
         writer.WriteStartMap(1);
         writer.WriteInt32(2); // credentialId key
         WriteCredentialDescriptor(writer, credentialId);
         writer.WriteEndMap();
-        
+
         // 0x03: pinUvAuthProtocol
         writer.WriteInt32(3);
         writer.WriteInt32(_protocol.Version);
-        
+
         // 0x04: pinUvAuthParam
         writer.WriteInt32(4);
         writer.WriteByteString(pinUvAuthParam.AsSpan());
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
-    
+
     private ReadOnlyMemory<byte> BuildUpdateUserPayload(
         PublicKeyCredentialDescriptor credentialId,
         PublicKeyCredentialUserEntity user)
     {
         const byte subCommand = CredManagementSubCommand.UpdateUserInformation;
-        
+
         // Build message to authenticate: subCommand || subCommandParams
         var subCommandParams = BuildUpdateUserParams(credentialId, user);
         var messageToAuth = new byte[1 + subCommandParams.Length];
         messageToAuth[0] = subCommand;
         subCommandParams.Span.CopyTo(messageToAuth.AsSpan(1));
-        
+
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, messageToAuth);
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(4);
-        
+
         // 0x01: subCommand
         writer.WriteInt32(1);
         writer.WriteInt32(subCommand);
-        
+
         // 0x02: subCommandParams
         writer.WriteInt32(2);
         writer.WriteStartMap(2);
-        
+
         // credentialId (key 2)
         writer.WriteInt32(2);
         WriteCredentialDescriptor(writer, credentialId);
-        
+
         // user (key 3)
         writer.WriteInt32(3);
         WritePublicKeyCredentialUserEntity(writer, user);
-        
+
         writer.WriteEndMap();
-        
+
         // 0x03: pinUvAuthProtocol
         writer.WriteInt32(3);
         writer.WriteInt32(_protocol.Version);
-        
+
         // 0x04: pinUvAuthParam
         writer.WriteInt32(4);
         writer.WriteByteString(pinUvAuthParam.AsSpan());
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
-    
+
     private static ReadOnlyMemory<byte> BuildRpIdHashParam(ReadOnlyMemory<byte> rpIdHash)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -383,7 +397,7 @@ public sealed class CredentialManagement : IDisposable
         writer.WriteEndMap();
         return writer.Encode();
     }
-    
+
     private static ReadOnlyMemory<byte> BuildCredentialIdParam(PublicKeyCredentialDescriptor credentialId)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -393,65 +407,65 @@ public sealed class CredentialManagement : IDisposable
         writer.WriteEndMap();
         return writer.Encode();
     }
-    
+
     private static ReadOnlyMemory<byte> BuildUpdateUserParams(
         PublicKeyCredentialDescriptor credentialId,
         PublicKeyCredentialUserEntity user)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(2);
-        
+
         // credentialId (key 2)
         writer.WriteInt32(2);
         WriteCredentialDescriptor(writer, credentialId);
-        
+
         // user (key 3)
         writer.WriteInt32(3);
         WritePublicKeyCredentialUserEntity(writer, user);
-        
+
         writer.WriteEndMap();
         return writer.Encode();
     }
-    
+
     private static void WriteCredentialDescriptor(CborWriter writer, PublicKeyCredentialDescriptor descriptor)
     {
         writer.WriteStartMap(2);
-        
+
         // "id" comes before "type" alphabetically
         writer.WriteTextString("id");
         writer.WriteByteString(descriptor.Id.Span);
-        
+
         writer.WriteTextString("type");
         writer.WriteTextString(descriptor.Type);
-        
+
         writer.WriteEndMap();
     }
-    
+
     private static void WritePublicKeyCredentialUserEntity(CborWriter writer, PublicKeyCredentialUserEntity user)
     {
         // Count non-null fields
         var fieldCount = 1; // id is always present
         if (!string.IsNullOrEmpty(user.DisplayName)) fieldCount++;
         if (!string.IsNullOrEmpty(user.Name)) fieldCount++;
-        
+
         writer.WriteStartMap(fieldCount);
-        
+
         // Fields in CTAP2 canonical order (alphabetical for text keys)
         if (!string.IsNullOrEmpty(user.DisplayName))
         {
             writer.WriteTextString("displayName");
             writer.WriteTextString(user.DisplayName);
         }
-        
+
         writer.WriteTextString("id");
         writer.WriteByteString(user.Id.Span);
-        
+
         if (!string.IsNullOrEmpty(user.Name))
         {
             writer.WriteTextString("name");
             writer.WriteTextString(user.Name);
         }
-        
+
         writer.WriteEndMap();
     }
 }

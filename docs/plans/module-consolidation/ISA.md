@@ -29,17 +29,16 @@ The end state is an SDK that feels like one senior developer executed one archit
 - No operation-named `*Command` type that performs protocol validation, protocol encoding, APDU/CTAP construction, transmission, parsing, or state mutation, even if it has no `ExecuteAsync` method.
 - `ApduCommand` and plain DTOs are allowed only when they are generic data carriers, not operation-specific behavior holders.
 - No broad helper layer that hides APDU/CTAP construction.
-- No source-code changes without phase-specific human approval.
 - No unattended FIDO/FIDO2/WebAuthn integration tests requiring User Presence, UV, physical touch, or insert/remove coordination. User Presence tests fail unattended after roughly 30 seconds and must be deferred or explicitly human-coordinated.
-- No blanket permission for persistent-state or destructive applet integration tests. They are allowed only when the phase ISA records explicit human approval, command shape, and reset expectations.
+- No public module API changes without explicit approval. Core API changes are allowed when they improve ownership, security, explicitness, or architectural clarity.
 
 ## Goal
 
-Run consolidation on the dedicated `yubikit-consolidation` branch as a sequence of phase ISAs, one module or concern at a time, with the primary agent as orchestrator, `/DevTeam` handling implementation/review loops, cross-vendor review where available, focused verification, phase-approved integration testing on the YubiKey 5.8 beta key, learning capture, a commit after each successful phase, and `/Ping` after each successful phase.
+Run consolidation on the dedicated `yubikit-consolidation` branch as a sequence of phase ISAs, one module or concern at a time, with the primary agent as orchestrator, `/DevTeam` handling implementation/review loops, cross-vendor review where available, focused verification, all self-runnable integration testing on the YubiKey 5.8 beta key that does not require UP/UV/touch/insert-remove help, learning capture, a commit after each successful phase, and `/Ping` after each successful phase.
 
 ## Criteria
 
-- `ISC-1`: Every phase has a human-approved phase ISA before source-code changes begin.
+- `ISC-1`: Every phase has a phase ISA before source-code changes begin. Phase 25 through Phase 32 are covered by the approved autonomous program scope unless the phase ISA exceeds that scope or hits a stop gate.
 - `ISC-1.1`: Every phase verifies it is executing on branch `yubikit-consolidation` before source-code changes, build/test commands, or agent delegation begin.
 - `ISC-2`: No phase introduces operation-named command classes, operation-named `*Command` types, command-like types with execution methods, or command objects with protocol logic. Forbidden behavior includes protocol validation, protocol encoding, APDU/CTAP construction, transmission, parsing, state mutation, or method names such as `Execute`, `ExecuteAsync`, `Run`, `RunAsync`, `Transmit`, and `TransmitAsync` on command-like abstractions.
 - `ISC-3`: Protocol flow remains visible in session methods or narrowly scoped backend methods.
@@ -47,14 +46,17 @@ Run consolidation on the dedicated `yubikit-consolidation` branch as a sequence 
 - `ISC-5`: Sensitive source, intermediate, encoded APDU/CTAP/config payload, and response-derived sensitive buffers are zeroed where the phase touches sensitive data.
 - `ISC-6`: Focused build, unit-test, and integration-test commands are recorded with command text, exit result, and relevant filter/project arguments.
 - `ISC-7`: Beta-key integration phases record Management preflight evidence before applet tests run, including applet-reported firmware when observable.
-- `ISC-8`: Each phase ISA pre-declares exact agent-runnable integration test IDs, filters, approved full-module integration commands, or approved skip rationale. Persistent-state or destructive tests may run only when the phase ISA records explicit human approval for the module, command shape, and reset expectations. FIDO/FIDO2/WebAuthn User Presence, UV, touch, and insert/remove tests are deferred or human-coordinated because unattended User Presence waits fail after roughly 30 seconds.
+- `ISC-8`: Each phase ISA pre-declares exact self-runnable integration test IDs, filters, full-module integration commands, or skip rationale. Self-runnable integration tests are allowed even when they reset or mutate applet state, provided they do not require UP/UV/touch/insert-remove help and their cleanup/reset behavior is either self-contained or documented. FIDO/FIDO2/WebAuthn User Presence, UV, touch, and insert/remove tests are deferred or human-coordinated because unattended User Presence waits fail after roughly 30 seconds.
 - `ISC-9`: Cross-vendor review is completed through the resolved opposite-family route, or a human-approved waiver is recorded with reason, scope, and tooling failure evidence.
 - `ISC-10`: Core, `Tests.Shared`, and `Cli.Shared` promotion candidates are listed in the phase ISA up front, then explicitly accepted, rejected, or deferred with rationale at phase close.
 - `ISC-11`: Every completed or aborted phase produces and commits a learning note before the next phase begins.
 - `ISC-12`: Every phase produces a compact summary before the next phase begins.
 - `ISC-13`: Every successful phase sends `/Ping` after the phase commit and compact summary are complete.
 - `ISC-14`: Every phase records deferred future improvement candidates separately from phase-scope work, so possible end-of-program refinements are preserved without interrupting sequential module consolidation.
-- `ISC-15`: Remaining module refactor phases capture pre-refactor and post-refactor integration-test baselines using the phase-approved integration scope, excluding unattended FIDO/FIDO2/WebAuthn tests that require User Presence, UV, physical touch, insert/remove coordination, or human-only hardware interaction.
+- `ISC-15`: Remaining module refactor phases capture pre-refactor and post-refactor integration-test baselines using the phase-recorded integration scope, excluding unattended FIDO/FIDO2/WebAuthn tests that require User Presence, UV, physical touch, insert/remove coordination, or human-only hardware interaction.
+- `ISC-16`: Core APIs may change when the change makes ownership, memory cleanup, protocol flow, security, or design clarity better. Such changes must be explicit in the phase ISA and covered by affected-module verification.
+- `ISC-17`: Public module APIs remain stable by default and may change only with an explicit phase decision or later human approval.
+- `ISC-18`: Meaningful tests may be added when they prove protocol bytes, security cleanup, state transitions, integration behavior, or regression-prone behavior. Validation-only tests that only prove framework guard clauses remain out of scope.
 - `Anti-1`: A phase proceeds to the next phase without a learning note and commit.
 - `Anti-1.1`: Refactor implementation, verification, or delegation occurs on any branch other than `yubikit-consolidation`.
 - `Anti-2`: A refactor makes protocol flow harder to inspect in pursuit of DRY.
@@ -70,7 +72,7 @@ Run consolidation on the dedicated `yubikit-consolidation` branch as a sequence 
 - Extract only small pure encode/parse helpers.
 - Prefer module-local helpers until reuse is proven.
 - Promote to `Core`, `Tests.Shared`, or `Cli.Shared` only after review confirms cross-module value.
-- Preserve public API unless explicitly approved.
+- Core APIs may change when they improve ownership, security, explicitness, or architectural clarity; public module APIs remain stable unless explicitly approved.
 - Keep every phase small enough to review thoroughly.
 
 ## Standard Phase Lifecycle
@@ -112,11 +114,11 @@ Before code changes, create or present a phase-specific ISA that defines:
 - human decisions needed
 - whether `Core`, `Tests.Shared`, or `Cli.Shared` promotion is in scope
 
-### 2. Human Approval
+### 2. Scope Approval
 
-The human must approve the phase scope before implementation starts.
+The phase scope must be approved before implementation starts. Phase 25 through Phase 32 are covered by the approved autonomous program scope when the phase ISA stays within this master ISA, the original assessment, prior learning notes, and the phase's listed targets.
 
-If the phase might promote code into `Core`, `Tests.Shared`, or `Cli.Shared`, that promotion must be explicitly approved or deferred.
+If the phase might promote code into `Core`, `Tests.Shared`, or `Cli.Shared`, that promotion must be explicitly accepted, rejected, or deferred in the phase ISA. Core API changes are allowed when they improve ownership, security, explicitness, or architectural clarity; public module API changes still require explicit approval.
 
 ### 3. DevTeam Implementation
 
@@ -133,7 +135,7 @@ Each phase requires review focused on:
 - flat protocol flow
 - helper depth
 - security and memory ownership
-- API compatibility
+- API compatibility, including whether a Core API change would make ownership or security clearer and whether any public module API shape changed
 - test value
 - cross-module reuse opportunities
 - AI slop risk
@@ -195,14 +197,14 @@ Each phase runs focused verification only:
 - focused build for affected project(s)
 - focused unit tests
 - pre-refactor and post-refactor integration baselines for remaining module phases using the approved phase scope
-- scoped integration tests when feasible, including persistent-state applet tests only when the phase ISA records explicit human approval
+- scoped or full-module self-runnable integration tests when feasible, excluding only tests that require UP/UV/touch/insert-remove help or other human coordination
 - no broad full-suite runs unless phase scope requires it
 
 Use repository toolchain commands. Never use raw `dotnet build` or raw `dotnet test`.
 
 Each phase ISA must name the exact focused command shapes before implementation starts. Record command text, project/filter arguments, exit result, and any output path in the phase learning note.
 
-For remaining module refactor phases, integration baseline comparison is required unless the module has no integration project or the available tests require unattended FIDO/FIDO2/WebAuthn User Presence, UV, touch, insert/remove coordination, or human-only hardware interaction. Persistent-state applet tests may run when the phase ISA records explicit human approval for the module, command shape, and reset expectations. When integration baseline is skipped or filtered, the phase learning note must record the excluded test classes or categories and the rationale.
+For remaining module refactor phases, integration baseline comparison is required unless the module has no integration project or the available tests require unattended FIDO/FIDO2/WebAuthn User Presence, UV, touch, insert/remove coordination, or human-only hardware interaction. Self-runnable integration tests may run even when they reset or mutate applet state, provided they do not require human coordination and their cleanup/reset behavior is self-contained or documented. When integration baseline is skipped or filtered, the phase learning note must record the excluded test classes or categories and the rationale.
 
 Default command shapes:
 
@@ -224,7 +226,7 @@ Then update the phase ISA with the corrected command shape before continuing.
 
 ### 6. Integration Lifecycle
 
-Each phase that touches applet behavior should include a scoped integration lifecycle against the YubiKey 5.8 beta key when feasible.
+Each phase that touches applet behavior should include a scoped or full-module self-runnable integration lifecycle against the YubiKey 5.8 beta key when feasible.
 
 Because non-Management applets on the beta key may report firmware as `0.0.0` or `0.0.1`, integration lifecycle starts with a Management preflight.
 
@@ -327,7 +329,7 @@ Each integration-capable phase records the hardware target:
 - Serial: 103
 - Firmware source of truth: Management `GetDeviceInfoAsync`
 - Applet firmware caveat: applets may report 0.0.0 / 0.0.1
-- Allowed agent-run tests: phase-approved integration checks only; unattended FIDO/FIDO2/WebAuthn User Presence, UV, touch, and insert/remove tests are deferred or human-coordinated because User Presence waits fail after roughly 30 seconds
+- Allowed agent-run tests: all self-runnable integration checks; unattended FIDO/FIDO2/WebAuthn User Presence, UV, touch, and insert/remove tests are deferred or human-coordinated because User Presence waits fail after roughly 30 seconds
 ```
 
 The beta key serial is 103. The `appsettings.json` allow-list convention still needs confirmation before integration preflight commands run.
@@ -338,8 +340,7 @@ Agents may run integration tests only when all are true:
 
 - Scoped to the YubiKey 5.8 beta key.
 - Scoped to serial 103 when serial filtering is available.
-- The phase ISA explicitly approves the integration scope and command shape.
-- Persistent-state or destructive applet tests have explicit human approval and recorded reset expectations.
+- The phase ISA explicitly records the integration scope and command shape.
 - No unattended FIDO/FIDO2/WebAuthn User Presence.
 - No unattended FIDO/FIDO2/WebAuthn UV.
 - No unattended physical touch.
@@ -354,9 +355,9 @@ dotnet toolchain.cs -- test --integration --project <Module> --smoke --filter "<
 
 `--smoke` is the default because it skips `Slow` and `RequiresUserPresence`.
 
-`--smoke` is not sufficient by itself. Each phase ISA must also list the exact test IDs, filters, or explicitly approved full-module integration command the agent intends to run, and must classify whether any selected test mutates persistent device state. Agent-run integration filters are an allowlist unless the human explicitly approves a full-module integration run.
+`--smoke` is not sufficient by itself. Each phase ISA must also list the exact test IDs, filters, or full-module integration command the agent intends to run, and must classify whether any selected test requires human coordination. Agent-run integration filters are an allowlist unless the phase ISA records a full-module integration run.
 
-For this program, persistent state means any change that can remain after the test process exits, including applet reset, slot programming, key/certificate/object creation or deletion, PIN/PUK/password/access-code changes, management-key changes, credential enrollment, authenticator configuration, allowlist/certificate storage, or Security Domain key changes. Tests with persistent state are agent-runnable only when a phase ISA records explicit human approval and reset expectations.
+Applet reset, slot programming, key/certificate/object creation or deletion, PIN/PUK/password/access-code changes, management-key changes, credential enrollment, authenticator configuration, allowlist/certificate storage, or Security Domain key changes are not blocked merely because they mutate state. They are agent-runnable when the test is self-contained, can run unattended, and either restores or documents its cleanup/reset behavior.
 
 For FIDO2 and WebAuthn:
 
@@ -369,10 +370,11 @@ For FIDO2 and WebAuthn:
 A phase is not complete until:
 
 - [ ] Branch check shows `yubikit-consolidation` before implementation/delegation.
-- [ ] Phase ISA approved by human.
+- [ ] Phase ISA exists and stays within the approved autonomous program scope, or separately records explicit approval for any scope expansion.
 - [ ] Phase ISA maps work to `ISC-*` criteria.
 - [ ] Phase ISA lists candidate `Core`, `Tests.Shared`, or `Cli.Shared` promotions, or states none expected.
-- [ ] Phase ISA lists exact agent-runnable integration test IDs/filters, or approved skip rationale.
+- [ ] Phase ISA lists exact self-runnable integration test IDs/filters/full-module commands, or skip rationale.
+- [ ] Phase ISA records any Core API changes as intentional design/security/ownership improvements, and confirms no public module API change unless explicitly approved.
 - [ ] Beta key serial/scope confirmed if integration tests apply; serial is 103 unless superseded by human decision.
 - [ ] Management preflight evidence is captured if integration tests apply, including applet firmware when observable.
 - [ ] DevTeam implementation complete.
@@ -380,10 +382,10 @@ A phase is not complete until:
 - [ ] Cross-vendor review complete or human-approved waiver recorded.
 - [ ] Focused build passes.
 - [ ] Focused unit tests pass.
-- [ ] Pre-refactor and post-refactor integration baselines match or improve, excluding deferred unattended FIDO/FIDO2/WebAuthn User Presence / UV / touch / insert-remove tests.
-- [ ] Scoped integration tests pass, or skip rationale approved.
+- [ ] Pre-refactor and post-refactor integration baselines match or improve, excluding only deferred unattended FIDO/FIDO2/WebAuthn User Presence / UV / touch / insert-remove tests or other human-coordinated flows.
+- [ ] Scoped or full-module self-runnable integration tests pass, or skip rationale is recorded.
 - [ ] Verification command text, filters, and results are recorded.
-- [ ] Promotion candidates are accepted, rejected, or deferred with rationale.
+- [ ] Core, `Tests.Shared`, `Cli.Shared`, and public module API candidates are accepted, rejected, or deferred with rationale.
 - [ ] Deferred future improvement candidates are recorded in the learning note or explicitly marked none.
 - [ ] Learning document updated.
 - [ ] Compact summary produced.
@@ -401,13 +403,12 @@ A phase must stop and return for human decision when any of these occur:
 
 - The implementation requires broader source changes than the approved phase ISA allowed.
 - The worktree is not on `yubikit-consolidation` before implementation, verification, integration, or delegation.
-- The implementation needs public API changes not already approved.
+- The implementation needs public module API changes not already approved.
 - The phase creates pressure to introduce operation-specific command classes or deep helper layers.
 - Review finds the protocol flow became harder to inspect.
 - Focused verification fails twice for different root causes.
-- Integration testing needs FIDO/FIDO2/WebAuthn User Presence, UV, touch, insert/remove, slow, persistent-state, or destructive behavior not previously approved.
-- Integration testing needs persistent-state or destructive behavior that lacks explicit phase approval and reset expectations.
-- A Core, `Tests.Shared`, or `Cli.Shared` promotion decision becomes unavoidable but was not approved.
+- Integration testing needs FIDO/FIDO2/WebAuthn User Presence, UV, touch, insert/remove, or other human coordination not previously approved.
+- A public module API change decision becomes unavoidable but was not approved.
 
 The allowed outcomes are:
 
@@ -451,10 +452,12 @@ Constraints:
 - Do not add command classes with ExecuteAsync.
 - Minimize helper depth.
 - Prefer small, reviewable changes.
-- Preserve public API unless explicitly approved.
+- Core APIs may change when they improve ownership, security, explicitness, or architectural clarity.
+- Public module APIs remain stable unless explicitly approved.
 - Add behavior tests only.
+- Add meaningful tests when they prove protocol bytes, state transitions, security cleanup, integration behavior, or regression-prone behavior.
 - Zero sensitive buffers, including encoded command payloads.
-- Run only phase-approved integration tests; persistent-state or destructive applet tests require explicit approval and reset expectations.
+- Run all phase-recorded self-runnable integration tests; exclude only tests requiring UP/UV/touch/insert-remove help or other human coordination.
 - If FIDO/FIDO2/WebAuthn integration is run, defer User Presence / UV / touch flows unless explicitly human-coordinated because unattended User Presence waits fail after roughly 30 seconds.
 
 Return:

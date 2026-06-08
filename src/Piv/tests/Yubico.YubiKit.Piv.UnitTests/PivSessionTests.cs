@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
@@ -217,13 +218,139 @@ public class PivSessionTests
         Assert.Contains(connection.TransmittedCommands, command => command[1] == 0x87);
     }
 
+    [Fact]
+    public async Task GenerateKeyAsync_WithPolicies_TransmitsGenerateAsymmetricCommand()
+    {
+        var connection = CreateInitializedConnection(EccP256PublicKeyResponse());
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
+
+        _ = await session.GenerateKeyAsync(
+            PivSlot.Signature,
+            PivAlgorithm.EccP256,
+            PivPinPolicy.Once,
+            PivTouchPolicy.Never,
+            TestContext.Current.CancellationToken);
+
+        var command = LastCommand(connection);
+        // APDU header: INS=Generate Asymmetric, P1=0, P2=target slot.
+        Assert.Equal(0x47, command[1]);
+        Assert.Equal(0x00, command[2]);
+        Assert.Equal((byte)PivSlot.Signature, command[3]);
+        // Data: AC template containing algorithm(80), PIN policy(AA), and touch policy(AB) TLVs.
+        Assert.Equal([
+            0xAC, 0x09,
+            0x80, 0x01, (byte)PivAlgorithm.EccP256,
+            0xAA, 0x01, (byte)PivPinPolicy.Once,
+            0xAB, 0x01, (byte)PivTouchPolicy.Never
+        ], CommandData(command).ToArray());
+    }
+
+    [Fact]
+    public async Task SignOrDecryptAsync_TransmitsAuthenticateTemplateWithChallenge()
+    {
+        // Response data: dynamic-auth template(7C) containing one-byte result in response tag(82), then SW 9000.
+        var connection = CreateInitializedConnection([0x7C, 0x03, 0x82, 0x01, 0xAA, 0x90, 0x00]);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        // ECC P-256 sign/decrypt input is 32 bytes; 0xCC is a sentinel proving the payload survives encoding.
+        var data = new byte[32];
+        data[31] = 0xCC;
+
+        var result = await session.SignOrDecryptAsync(
+            PivSlot.Authentication,
+            PivAlgorithm.EccP256,
+            data,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal([0xAA], result.ToArray());
+        var command = LastCommand(connection);
+        // APDU header: INS=GENERAL AUTHENTICATE, P1=algorithm, P2=target slot.
+        Assert.Equal(0x87, command[1]);
+        Assert.Equal((byte)PivAlgorithm.EccP256, command[2]);
+        Assert.Equal((byte)PivSlot.Authentication, command[3]);
+        var commandData = CommandData(command);
+        // Short APDU data length: 7C template + empty 82 response tag + 32-byte 81 challenge.
+        Assert.Equal(0x26, commandData.Length);
+        // Data: dynamic-auth template(7C), expected response(82), challenge(81) with 32-byte P-256 input.
+        AssertStartsWith(commandData, [0x7C, 0x24, 0x82, 0x00, 0x81, 0x20]);
+        Assert.Equal(0xCC, commandData[^1]);
+    }
+
+    [Fact]
+    public async Task SignOrDecryptAsync_WhenSecurityStatusNotSatisfied_ThrowsInvalidOperationException()
+    {
+        // SW 6982 is returned without response data when the key requires prior PIN verification.
+        var connection = CreateInitializedConnection([0x69, 0x82]);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => session.SignOrDecryptAsync(
+            PivSlot.Authentication,
+            PivAlgorithm.EccP256,
+            new byte[32],
+            TestContext.Current.CancellationToken));
+
+        // SW 6982 is the PIV security-status-not-satisfied response.
+        Assert.Contains("Security status", exception.Message);
+        var command = LastCommand(connection);
+        Assert.Equal(0x87, command[1]);
+        Assert.Equal((byte)PivAlgorithm.EccP256, command[2]);
+        Assert.Equal((byte)PivSlot.Authentication, command[3]);
+    }
+
+    [Fact]
+    public async Task CalculateSecretAsync_TransmitsAuthenticateTemplateWithPeerPublicKey()
+    {
+        // Response data: dynamic-auth template(7C) containing 32-byte shared secret in response tag(82), then SW 9000.
+        var connection = CreateInitializedConnection([0x7C, 0x22, 0x82, 0x20, .. new byte[32], 0x90, 0x00]);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        using var peer = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+        var peerPublicKey = ECPublicKey.CreateFromParameters(peer.PublicKey.ExportParameters());
+
+        _ = await session.CalculateSecretAsync(
+            PivSlot.KeyManagement,
+            peerPublicKey,
+            TestContext.Current.CancellationToken);
+
+        var command = LastCommand(connection);
+        // APDU header: INS=GENERAL AUTHENTICATE, P1=algorithm, P2=target slot.
+        Assert.Equal(0x87, command[1]);
+        Assert.Equal((byte)PivAlgorithm.EccP256, command[2]);
+        Assert.Equal((byte)PivSlot.KeyManagement, command[3]);
+        var commandData = CommandData(command);
+        // Short APDU data length: 7C template + empty 82 response tag + 65-byte 85 public key.
+        Assert.Equal(0x47, commandData.Length);
+        // Data: dynamic-auth template(7C), expected response(82), peer public key(85) as 65-byte P-256 point.
+        AssertStartsWith(commandData, [0x7C, 0x45, 0x82, 0x00, 0x85, 0x41]);
+        Assert.Equal(peerPublicKey.PublicPoint.ToArray(), commandData[6..].ToArray());
+    }
+
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), VersionResponse(), ManagementKeyMetadataResponse(), .. trailingResponses]);
 
+    private static byte[] LastCommand(RecordingSmartCardConnection connection) =>
+        connection.TransmittedCommands[^1];
+
+    private static void MarkAuthenticated(PivSession session) =>
+        typeof(PivSession)
+            .GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .SetValue(session, true);
+
+    private static ReadOnlySpan<byte> CommandData(byte[] command) =>
+        // Short APDU format: CLA INS P1 P2 Lc Data; the recorder reports SupportsExtendedApdu=false.
+        command.AsSpan(5, command[4]);
+
+    private static void AssertStartsWith(ReadOnlySpan<byte> actual, byte[] expectedPrefix) =>
+        Assert.True(
+            actual.Length >= expectedPrefix.Length && actual[..expectedPrefix.Length].SequenceEqual(expectedPrefix),
+            $"Expected command data to start with {Convert.ToHexString(expectedPrefix)}.");
+
+    // SW 9000: successful APDU response with no data.
     private static byte[] OkResponse() => [0x90, 0x00];
 
+    // PIV version response: 0.0.1 followed by SW 9000.
     private static byte[] VersionResponse() => [0x00, 0x00, 0x01, 0x90, 0x00];
 
+    // Metadata TLVs: key type(01), touch/default policy(02), generated/default flag(05), then SW 9000.
     private static byte[] ManagementKeyMetadataResponse() =>
     [
         0x01, 0x01, (byte)PivManagementKeyType.TripleDes,
@@ -232,8 +359,10 @@ public class PivSessionTests
         0x90, 0x00
     ];
 
+    // PIN metadata TLVs: default flag(05) and retry counts(06), then SW 9000.
     private static byte[] PinMetadataResponse() => [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x03, 0x90, 0x00];
 
+    // Slot metadata TLVs: algorithm(01), PIN/touch policy(02), generated flag(03), then SW 9000.
     private static byte[] Rsa1024TouchAlwaysMetadataResponse() =>
     [
         0x01, 0x01, (byte)PivAlgorithm.Rsa1024,
@@ -241,5 +370,23 @@ public class PivSessionTests
         0x03, 0x01, 0x01,
         0x90, 0x00
     ];
+
+    private static byte[] EccP256PublicKeyResponse()
+    {
+        using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var parameters = key.ExportParameters(false);
+        var x = parameters.Q.X!;
+        var y = parameters.Q.Y!;
+
+        return [
+            // Public key response: 7F49 template, 86 public-point tag, uncompressed EC point, SW 9000.
+            0x7F, 0x49, 0x43,
+            0x86, 0x41,
+            0x04,
+            .. x,
+            .. y,
+            0x90, 0x00
+        ];
+    }
 
 }

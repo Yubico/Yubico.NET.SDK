@@ -125,6 +125,22 @@ public class PcscProtocolTests
     }
 
     [Fact]
+    public async Task TransmitAndReceiveAsync_ZerosFormattedPayloadAfterTransmit()
+    {
+        var connection = new RetainingSmartCardConnection([0x90, 0x00]);
+        var protocol = new PcscProtocol(connection, default, _logger);
+
+        await protocol.TransmitAndReceiveAsync(
+            new ApduCommand { Ins = 0x88, Data = Enumerable.Repeat((byte)0xA5, 16).ToArray() },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(connection.LastCommand);
+        Assert.True(
+            connection.LastCommand.Value.Span.ToArray().All(static b => b == 0),
+            "Expected the formatted APDU payload buffer to be zeroed after transmit.");
+    }
+
+    [Fact]
     public void Constructor_WithCustomInsSendRemaining_UsesProvidedValue()
     {
         // Arrange
@@ -384,6 +400,35 @@ public class PcscProtocolTests
             await protocol.TransmitAndReceiveAsync(new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty),
                 cancellationToken: TestContext.Current.CancellationToken);
         });
+    }
+
+    private sealed class RetainingSmartCardConnection(byte[] response) : ISmartCardConnection
+    {
+        public ReadOnlyMemory<byte>? LastCommand { get; private set; }
+
+        public Transport Transport { get; } = Transport.Usb;
+
+        public ConnectionType Type { get; } = ConnectionType.SmartCard;
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+            ReadOnlyMemory<byte> command,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            LastCommand = command;
+            return Task.FromResult((ReadOnlyMemory<byte>)response);
+        }
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
+            throw new NotImplementedException();
+
+        public bool SupportsExtendedApdu() => false;
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => default;
     }
 
 }

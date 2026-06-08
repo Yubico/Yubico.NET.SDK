@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
+
 namespace Yubico.YubiKit.Core.SmartCard;
 
 internal class ApduTransmitter(ISmartCardConnection connection, IApduFormatter formatter) : IApduProcessor
@@ -22,16 +24,25 @@ internal class ApduTransmitter(ISmartCardConnection connection, IApduFormatter f
     public virtual async Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = false,
         CancellationToken cancellationToken = default)
     {
-        var payload = formatter.Format(
-            command.Cla,
-            command.Ins,
-            command.P1,
-            command.P2,
-            command.Data,
-            command.Le);
+        Memory<byte> payload = default;
+        try
+        {
+            payload = formatter.Format(
+                command.Cla,
+                command.Ins,
+                command.P1,
+                command.P2,
+                command.Data,
+                command.Le);
 
-        var responseBytes = await connection.TransmitAndReceiveAsync(payload, cancellationToken).ConfigureAwait(false);
-        return new ApduResponse(responseBytes);
+            var responseBytes = await connection.TransmitAndReceiveAsync(payload, cancellationToken).ConfigureAwait(false);
+            return new ApduResponse(responseBytes);
+        }
+        finally
+        {
+            if (!payload.IsEmpty)
+                CryptographicOperations.ZeroMemory(payload.Span);
+        }
     }
 
 }

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Utils;
 
@@ -60,7 +59,7 @@ internal class ScpProcessor(
         byte[]? finalCommandData = null;
         byte[]? mac = null;
         byte[]? encryptedData = null; // Declared here so finally can zero it (T11)
-        byte[]? formattedApduArray = null; // Backing array of formattedApdu — zeroed after MAC is computed
+        Memory<byte> formattedApdu = default;
 
         try
         {
@@ -86,7 +85,6 @@ internal class ScpProcessor(
             var scpCommand = new ApduCommand(cla, command.Ins, command.P1, command.P2, scpCommandData, command.Le);
 
             // Step 5: Format the APDU with full length
-            ReadOnlyMemory<byte> formattedApdu;
             bool isExtendedApdu;
             if (macedData.Length > SmartCardMaxApduSizes.ShortApduMaxChunkSize)
             {
@@ -98,10 +96,6 @@ internal class ScpProcessor(
                 formattedApdu = Formatter.Format(scpCommand);
                 isExtendedApdu = Formatter is ApduFormatterExtended;
             }
-
-            // Capture the backing array so we can zero it in finally after MAC computation
-            if (MemoryMarshal.TryGetArray(formattedApdu, out var fmtSeg))
-                formattedApduArray = fmtSeg.Array;
 
             // Step 6: Compute MAC over formatted APDU minus last MacLength bytes (the MAC space)
             // Exclude Le field if present
@@ -145,7 +139,7 @@ internal class ScpProcessor(
         finally
         {
             if (encryptedData is not null) CryptographicOperations.ZeroMemory(encryptedData);
-            if (formattedApduArray is not null) CryptographicOperations.ZeroMemory(formattedApduArray);
+            if (!formattedApdu.IsEmpty) CryptographicOperations.ZeroMemory(formattedApdu.Span);
             if (scpCommandData is not null) CryptographicOperations.ZeroMemory(scpCommandData);
             if (finalCommandData is not null) CryptographicOperations.ZeroMemory(finalCommandData);
             if (mac is not null) CryptographicOperations.ZeroMemory(mac);

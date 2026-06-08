@@ -19,7 +19,7 @@ internal class ApduFormatterShort : IApduFormatter
     private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;
 
 
-    public ReadOnlyMemory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data,
+    public Memory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data,
         int le)
     {
         var length = data.Length;
@@ -55,7 +55,7 @@ internal class ApduFormatterShort : IApduFormatter
         return buffer.ToArray(); // TODO allocation. Can it be avoided?
     }
 
-    public ReadOnlyMemory<byte> Format(ApduCommand apdu) =>
+    public Memory<byte> Format(ApduCommand apdu) =>
         Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le);
 
 }

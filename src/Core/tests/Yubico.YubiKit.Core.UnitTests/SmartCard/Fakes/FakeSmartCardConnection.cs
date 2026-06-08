@@ -49,7 +49,7 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        TransmittedCommands.Add(command);
+        TransmittedCommands.Add(command.ToArray());
 
         if (_responses.Count == 0)
             throw new InvalidOperationException("No response enqueued for transmission");

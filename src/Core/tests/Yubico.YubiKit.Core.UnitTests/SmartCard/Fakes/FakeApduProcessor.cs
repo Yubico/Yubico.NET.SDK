@@ -61,7 +61,7 @@ internal sealed class FakeApduProcessor : IApduProcessor
 internal class FakeApduFormatter : IApduFormatter
 {
 
-    public ReadOnlyMemory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int le)
+    public Memory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int le)
     {
         var buffer = new List<byte> { cla, ins, p1, p2 };
 
@@ -77,7 +77,7 @@ internal class FakeApduFormatter : IApduFormatter
         return buffer.ToArray();
     }
 
-    public ReadOnlyMemory<byte> Format(ApduCommand apdu) =>
+    public Memory<byte> Format(ApduCommand apdu) =>
         Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le);
 
 }

@@ -16,8 +16,20 @@ namespace Yubico.YubiKit.Core.SmartCard;
 
 public interface IApduFormatter
 {
-    ReadOnlyMemory<byte> Format(
+    /// <summary>
+    ///     Formats an APDU into a freshly allocated, exclusively owned wire payload buffer.
+    /// </summary>
+    /// <remarks>
+    ///     Transmitters may zero the returned buffer after transmission because formatted APDUs can contain secrets.
+    /// </remarks>
+    Memory<byte> Format(
         byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int le);
 
-    ReadOnlyMemory<byte> Format(ApduCommand apdu);
+    /// <summary>
+    ///     Formats an APDU into a freshly allocated, exclusively owned wire payload buffer.
+    /// </summary>
+    /// <remarks>
+    ///     Transmitters may zero the returned buffer after transmission because formatted APDUs can contain secrets.
+    /// </remarks>
+    Memory<byte> Format(ApduCommand apdu);
 }

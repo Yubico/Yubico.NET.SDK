@@ -19,10 +19,10 @@ namespace Yubico.YubiKit.Core.SmartCard;
 internal class ApduFormatterExtended(int maxApduSize) : IApduFormatter
 {
 
-    public ReadOnlyMemory<byte> Format(ApduCommand apdu) =>
+    public Memory<byte> Format(ApduCommand apdu) =>
         Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le);
 
-    public ReadOnlyMemory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int le)
+    public Memory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int le)
     {
         // ISO 7816-4 Extended APDU Formats:
         // Case 1 (no data, no Le): CLA INS P1 P2 (4 bytes)

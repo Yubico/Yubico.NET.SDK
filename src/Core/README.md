@@ -201,11 +201,13 @@ YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
 });
 ```
 
-With dependency injection:
+With dependency injection, configure YubiKit logging from the DI-provided logger factory during startup:
 
 ```csharp
 services.AddLogging(builder => builder.AddConsole());
-services.AddYubiKeyManagerCore();  // Registers Core services and configures YubiKitLogging
+
+using var provider = services.BuildServiceProvider();
+YubiKitLogging.Configure(provider.GetRequiredService<ILoggerFactory>());
 ```
 
 ## Firmware Version Considerations

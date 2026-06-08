@@ -70,8 +70,8 @@ public static class DependencyInjection
         /// </list>
         /// </para>
         /// <para>
-        /// It also calls the core <c>AddYubiKeyManagerCore</c> method to set up
-        /// the YubiKey manager infrastructure.
+        /// Core device discovery uses the static <c>YubiKeyManager</c>; this method only registers
+        /// the FIDO2 session factory delegates for callers that use dependency injection.
         /// </para>
         /// </remarks>
         /// <example>

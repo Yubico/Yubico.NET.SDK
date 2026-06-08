@@ -141,7 +141,7 @@ dotnet toolchain.cs pack --include-docs
 - **Connection abstraction** — `IConnection` base, `IProtocol` per transport (e.g., `ISmartCardProtocol`). Factories: `ISmartCardConnectionFactory`, `IProtocolFactory<T>`, `IYubiKeyFactory`.
 - **APDU pipeline** — `IApduFormatter` (`Short`/`Extended`) → `IApduProcessor` decorators (`CommandChainingProcessor`, `ChainedResponseProcessor`, `ApduFormatProcessor`). Transparent size-limit + chaining handling.
 - **Application sessions** — `ApplicationSession` base; protocol-specific sessions like `ManagementSession<TConnection>` are generic over connection type.
-- **DI entry point** — `AddYubiKeyManagerCore()` in `src/Core/src/DependencyInjection.cs`.
+- **Device discovery entry point** — static `YubiKeyManager`; Core no longer requires a DI registration.
 
 ### Type Selection: readonly struct vs struct vs class
 
@@ -286,8 +286,8 @@ public sealed class SmartCardConnection : IConnection
     // ... implementation
 }
 
-// ✅ GOOD - Service/manager
-public class YubiKeyManager : IYubiKeyManager
+// ✅ GOOD - Service/manager implementation type
+internal sealed class YubiKeyDeviceManager
 {
     private readonly IDeviceRepository _repository;
     private readonly IYubiKeyFactory _factory;

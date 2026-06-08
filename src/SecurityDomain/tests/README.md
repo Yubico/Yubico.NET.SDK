@@ -101,7 +101,6 @@ Creates a session via the DI-registered `SecurityDomainSessionFactory`.
 
 ```csharp
 // Simple form - builds ServiceProvider internally with:
-//   services.AddYubiKeyManagerCore();
 //   services.AddYubiKeySecurityDomain();
 await state.WithSecurityDomainSessionFromDIAsync(
     resetBeforeUse: true,
@@ -112,7 +111,6 @@ await state.WithSecurityDomainSessionFromDIAsync(
 
 // Custom ServiceProvider (for additional service registrations)
 var services = new ServiceCollection();
-services.AddYubiKeyManagerCore();
 services.AddYubiKeySecurityDomain();
 services.AddSingleton<IMyService, MyService>(); // your services
 await using var provider = services.BuildServiceProvider();
@@ -126,7 +124,7 @@ await state.WithSecurityDomainSessionFromDIAsync(
     cancellationToken: ct);
 ```
 
-**Note:** `AddYubiKeySecurityDomain()` requires `AddYubiKeyManagerCore()` to be called first. The simple form handles this automatically.
+**Note:** `AddYubiKeySecurityDomain()` only registers the session factory. Core device discovery uses the static `YubiKeyManager` and does not require DI registration.
 
 ## Automatic SD Reset
 

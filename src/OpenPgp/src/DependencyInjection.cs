@@ -42,7 +42,8 @@ public static class DependencyInjection
     {
         /// <summary>
         ///     Registers the <see cref="OpenPgpSessionFactory" /> delegate in the DI container.
-        ///     Requires <c>AddYubiKeyManagerCore()</c> to have been called first.
+        ///     Core device discovery uses the static <c>YubiKeyManager</c>; this method only registers
+        ///     the OpenPGP session factory for callers that use dependency injection.
         /// </summary>
         public IServiceCollection AddOpenPgp()
         {

@@ -22,7 +22,7 @@
 - App modules are `Management`, `Piv`, `Fido2`, `WebAuthn`, `Oath`, `YubiOtp`, `OpenPgp`, `SecurityDomain`, and `YubiHsm`.
 - `WebAuthn` is a higher-level surface over `Fido2`; do not duplicate CTAP/FIDO behavior there.
 - Broad exploration shortcut: run `codemapper .` to generate gitignored API maps in `codebase_ast/`.
-- DI entry point for Core is `AddYubiKeyManagerCore()` in `src/Core/src/DependencyInjection.cs`.
+- Core device discovery uses the static `YubiKeyManager`; no Core DI registration is required.
 
 ## Architecture Gotchas
 - APDU flow is a decorator pipeline: command chaining, short/extended APDU formatting, `ISmartCardConnection.TransmitAsync()`, then chained response reassembly.

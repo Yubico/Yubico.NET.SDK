@@ -59,7 +59,7 @@ YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
 });
 ```
 
-If using DI, `services.AddYubiKey()` initializes `YubiKitLogging.LoggerFactory` from the DI-provided `ILoggerFactory`.
+If using DI, configure logging explicitly from the DI-provided `ILoggerFactory` once during startup: `YubiKitLogging.Configure(serviceProvider.GetRequiredService<ILoggerFactory>())`.
 
 ## Critical Patterns
 

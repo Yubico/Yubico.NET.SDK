@@ -46,8 +46,8 @@ public static class DependencyInjection
         ///         for creating OATH sessions via dependency injection.
         ///     </para>
         ///     <para>
-        ///         <b>Prerequisite:</b> Call <c>AddYubiKeyManagerCore()</c> before this method
-        ///         to register core YubiKey services.
+        ///         Core device discovery uses the static <c>YubiKeyManager</c>; this method only registers
+        ///         the OATH session factory for callers that use dependency injection.
         ///     </para>
         /// </remarks>
         /// <returns>The service collection for chaining.</returns>

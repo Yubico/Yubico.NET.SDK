@@ -51,7 +51,7 @@ public class DependencyInjectionTests
         // Assert - resolve twice and verify same instance
         var factory1 = provider.GetRequiredService<SecurityDomainSessionFactory>();
         var factory2 = provider.GetRequiredService<SecurityDomainSessionFactory>();
-        
+
         Assert.Same(factory1, factory2);
     }
 
@@ -78,10 +78,10 @@ public class DependencyInjectionTests
         services.AddYubiKeySecurityDomain();
         services.AddYubiKeySecurityDomain();
         services.AddYubiKeySecurityDomain();
-        
+
         var provider = services.BuildServiceProvider();
         var factory = provider.GetService<SecurityDomainSessionFactory>();
-        
+
         Assert.NotNull(factory);
     }
 
@@ -99,7 +99,7 @@ public class DependencyInjectionTests
         // Assert - verify delegate signature by checking method info
         var method = factory.Method;
         Assert.Equal(typeof(Task<SecurityDomainSession>), method.ReturnType);
-        
+
         var parameters = method.GetParameters();
         Assert.Equal(5, parameters.Length);
 

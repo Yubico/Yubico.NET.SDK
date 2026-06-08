@@ -416,6 +416,75 @@ public class SecurityDomainSessionTests
     }
 
     [Fact]
+    public async Task StoreAllowListAsync_TransmitsStoreDataWithSerialList()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), OkResponse());
+        using var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.StoreAllowListAsync(
+            new KeyReference(0x11, 0x01),
+            ["010203", "0A0B"],
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(
+            [
+                0x00, 0xE2, 0x90, 0x00, 0x11,
+                0xA6, 0x04, 0x83, 0x02, 0x11, 0x01,
+                0x70, 0x09,
+                0x93, 0x03, 0x01, 0x02, 0x03,
+                0x93, 0x02, 0x0A, 0x0B
+            ],
+            connection.TransmittedCommands[1]);
+    }
+
+    [Fact]
+    public async Task ClearAllowListAsync_TransmitsStoreDataWithEmptySerialList()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), OkResponse());
+        using var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.ClearAllowListAsync(
+            new KeyReference(0x11, 0x01),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(
+            [
+                0x00, 0xE2, 0x90, 0x00, 0x08,
+                0xA6, 0x04, 0x83, 0x02, 0x11, 0x01,
+                0x70, 0x00
+            ],
+            connection.TransmittedCommands[1]);
+    }
+
+    [Fact]
+    public async Task StoreCaIssuerAsync_TransmitsStoreDataWithKlccSkiAndKeyReference()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), OkResponse());
+        using var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.StoreCaIssuerAsync(
+            new KeyReference(0x13, 0x02),
+            new byte[] { 0x01, 0x02, 0x03, 0x04 },
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(
+            [
+                0x00, 0xE2, 0x90, 0x00, 0x0F,
+                0xA6, 0x0D,
+                0x80, 0x01, 0x01,
+                0x42, 0x04, 0x01, 0x02, 0x03, 0x04,
+                0x83, 0x02, 0x13, 0x02
+            ],
+            connection.TransmittedCommands[1]);
+    }
+
+    [Fact]
     public async Task ResetAsync_TransmitsRawBlockingApdusAndReselectsApplication()
     {
         var connection = new RecordingSmartCardConnection(

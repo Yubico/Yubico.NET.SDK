@@ -213,55 +213,14 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         try
         {
-            // TAG_NAME + TAG_KEY
-            using var nameTlv = new Tlv(OathConstants.TagName, credId);
-            using var keyTlv = new Tlv(OathConstants.TagKey, keyValue);
-
-            // Calculate total size for all TLVs
-            int totalSize = nameTlv.TotalLength + keyTlv.TotalLength;
-
-            // TAG_PROPERTY is raw bytes [tag, value], NOT TLV-encoded (no length field).
-            // This matches the ykman Python canonical: struct.pack(">BB", TAG_PROPERTY, PROP_REQUIRE_TOUCH)
-            byte[]? propBytes = null;
-            Tlv? imfTlv = null;
-
-            if (requireTouch)
-            {
-                propBytes = [OathConstants.TagProperty, OathConstants.PropRequireTouch];
-                totalSize += propBytes.Length;
-            }
-
-            if (credentialData.OathType == OathType.Hotp && credentialData.Counter > 0)
-            {
-                Span<byte> imfBytes = stackalloc byte[4];
-                BinaryPrimitives.WriteInt32BigEndian(imfBytes, credentialData.Counter);
-                imfTlv = new Tlv(OathConstants.TagImf, imfBytes);
-                totalSize += imfTlv.TotalLength;
-            }
-
             byte[]? data = null;
             try
             {
-                data = new byte[totalSize];
-                int offset = 0;
-
-                nameTlv.AsSpan().CopyTo(data.AsSpan(offset));
-                offset += nameTlv.TotalLength;
-
-                keyTlv.AsSpan().CopyTo(data.AsSpan(offset));
-                offset += keyTlv.TotalLength;
-
-                if (propBytes is not null)
-                {
-                    propBytes.CopyTo(data.AsSpan(offset));
-                    offset += propBytes.Length;
-                }
-
-                if (imfTlv is not null)
-                {
-                    imfTlv.AsSpan().CopyTo(data.AsSpan(offset));
-                }
-
+                data = EncodePutCredentialPayload(
+                    credId,
+                    keyValue,
+                    requireTouch,
+                    credentialData.OathType == OathType.Hotp ? credentialData.Counter : 0);
                 var command = new ApduCommand(0x00, OathConstants.InsPut, 0x00, 0x00, data);
                 await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
@@ -272,8 +231,6 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 {
                     CryptographicOperations.ZeroMemory(data);
                 }
-
-                imfTlv?.Dispose();
             }
 
             _logger.LogDebug("Credential stored: {CredentialIdLength} bytes", credId.Length);
@@ -282,6 +239,57 @@ public sealed class OathSession : ApplicationSession, IOathSession
         {
             CryptographicOperations.ZeroMemory(keyValue);
             CryptographicOperations.ZeroMemory(secret);
+        }
+    }
+
+    private static byte[] EncodePutCredentialPayload(
+        ReadOnlyMemory<byte> credentialId,
+        ReadOnlyMemory<byte> keyValue,
+        bool requireTouch,
+        int hotpCounter)
+    {
+        using var nameTlv = new Tlv(OathConstants.TagName, credentialId);
+        using var keyTlv = new Tlv(OathConstants.TagKey, keyValue);
+
+        byte[]? propBytes = requireTouch
+            ? [OathConstants.TagProperty, OathConstants.PropRequireTouch]
+            : null;
+
+        Tlv? imfTlv = null;
+        try
+        {
+            if (hotpCounter > 0)
+            {
+                Span<byte> imfBytes = stackalloc byte[4];
+                BinaryPrimitives.WriteInt32BigEndian(imfBytes, hotpCounter);
+                imfTlv = new Tlv(OathConstants.TagImf, imfBytes);
+            }
+
+            var totalSize = nameTlv.TotalLength + keyTlv.TotalLength + (propBytes?.Length ?? 0) + (imfTlv?.TotalLength ?? 0);
+            var data = new byte[totalSize];
+            var offset = 0;
+
+            nameTlv.AsSpan().CopyTo(data.AsSpan(offset));
+            offset += nameTlv.TotalLength;
+
+            keyTlv.AsSpan().CopyTo(data.AsSpan(offset));
+            offset += keyTlv.TotalLength;
+
+            // TAG_PROPERTY is raw bytes [tag, value], NOT TLV-encoded.
+            // This matches ykman Python: struct.pack(">BB", TAG_PROPERTY, PROP_REQUIRE_TOUCH).
+            if (propBytes is not null)
+            {
+                propBytes.CopyTo(data.AsSpan(offset));
+                offset += propBytes.Length;
+            }
+
+            imfTlv?.AsSpan().CopyTo(data.AsSpan(offset));
+
+            return data;
+        }
+        finally
+        {
+            imfTlv?.Dispose();
         }
     }
 

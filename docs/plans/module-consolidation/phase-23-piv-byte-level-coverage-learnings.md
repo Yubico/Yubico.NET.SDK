@@ -13,8 +13,8 @@ Use this note as the handoff record for Phase 23 of module consolidation.
 - Documentation files changed: master consolidation ISA and Phase 23 ISA/learning note
 - Integration tests: full PIV integration suite run with explicit approval and 20-minute shell timeout
 - Result: PIV byte-level coverage accepted, reviewed, and locally verified
-- Commit: pending Phase 23 repository commit
-- `/Ping` status: pending commit and compact summary
+- Commit: `7a55772a test(piv): add byte-level protocol coverage`
+- `/Ping` status: compact summary produced before Phase 24 setup; no separate shell command is available in this harness
 
 ## What Changed
 
@@ -105,5 +105,5 @@ Use this note as the handoff record for Phase 23 of module consolidation.
 - Deferred future improvements: short APDU helper only after reuse, repo-wide format cleanup separately.
 - Next phase recommendation: Phase 24 YubiHsm byte-level coverage.
 - Learning note path: `docs/plans/module-consolidation/phase-23-piv-byte-level-coverage-learnings.md`
-- Commit: pending Phase 23 repository commit.
-- `/Ping` status: pending commit and compact summary.
+- Commit: `7a55772a test(piv): add byte-level protocol coverage`.
+- `/Ping` status: compact summary produced before Phase 24 setup; no separate shell command is available in this harness.

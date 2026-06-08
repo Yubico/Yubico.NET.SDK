@@ -11,6 +11,8 @@
     <!-- Integration tests use xunit v2 with traditional test runner -->
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
+    <!-- Tests.Shared throws Xunit.SkipException, but its xUnit v2 packages are private to avoid leaking into xUnit v3 unit tests. -->
+    <PackageReference Include="Xunit.SkippableFact" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

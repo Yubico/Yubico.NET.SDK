@@ -12,6 +12,7 @@ The test infrastructure provides:
 - **Parameterized testing** - standard xUnit `[Theory]` tests receive `YubiKeyTestState` values from `[WithYubiKey]`.
 - **Fluent session helpers** - extension methods create application sessions with consistent disposal.
 - **Shared connection helpers** - `SharedSmartCardConnection` lets reset/setup helpers share one physical SmartCard connection safely.
+- **Byte-level unit-test recorder** - `RecordingSmartCardConnection` captures SmartCard APDUs and returns queued responses for focused unit tests.
 
 ## Quick Start
 
@@ -110,6 +111,12 @@ Test method
 - Non-owning wrapper for sharing one `ISmartCardConnection` across multiple sessions in a single integration helper.
 - Useful for reset-then-test flows where the setup session must not dispose the physical connection before the test session starts.
 
+**RecordingSmartCardConnection**
+
+- Unit-test-only `ISmartCardConnection` that records transmitted APDUs and returns queued raw responses.
+- Use when asserting byte-level SmartCard command flow without hardware.
+- Do not use as an integration-test hardware abstraction or as a broad APDU protocol emulator.
+
 ## Writing Integration Tests
 
 ### Basic Test
@@ -188,6 +195,22 @@ public static async Task WithOathAsync(
     await action(session, state.DeviceInfo);
 }
 ```
+
+## Byte-Level Unit Test Recorder
+
+Use `RecordingSmartCardConnection` in module unit tests that need to verify exact SmartCard APDU bytes:
+
+```csharp
+var connection = new RecordingSmartCardConnection(
+    [0x90, 0x00],
+    [0x01, 0x02, 0x90, 0x00]);
+
+await using var session = await SomeSession.CreateAsync(connection, cancellationToken: ct);
+
+Assert.Contains(connection.TransmittedCommands, command => command[1] == expectedInstruction);
+```
+
+This helper is intentionally narrow: queued responses in, transmitted APDUs out. It does not replace `[WithYubiKey]`, allow-list checks, or integration-test hardware coordination.
 
 ## Running Tests
 

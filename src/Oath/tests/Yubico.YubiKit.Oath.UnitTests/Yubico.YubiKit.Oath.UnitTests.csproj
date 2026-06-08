@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKit.Oath.csproj"/>
+    <ProjectReference Include="..\..\..\Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj"/>
   </ItemGroup>
 
 </Project>

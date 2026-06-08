@@ -4,6 +4,7 @@ using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.SecurityDomain.UnitTests;
 
@@ -460,48 +461,4 @@ public class SecurityDomainSessionTests
 
     private static byte[] GetDataCommand(byte tag) => [0x00, 0xCA, 0x00, tag, 0x00];
 
-    private sealed class RecordingSmartCardConnection(params byte[][] responses) : ISmartCardConnection
-    {
-        private readonly Queue<byte[]> _responses = new(responses);
-
-        public List<byte[]> TransmittedCommands { get; } = [];
-
-        public Transport Transport { get; } = Transport.Usb;
-
-        public ConnectionType Type { get; } = ConnectionType.SmartCard;
-
-        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-            ReadOnlyMemory<byte> command,
-            CancellationToken cancellationToken = default)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            TransmittedCommands.Add(command.ToArray());
-
-            if (_responses.Count == 0)
-            {
-                throw new InvalidOperationException("No response enqueued for transmission.");
-            }
-
-            return Task.FromResult((ReadOnlyMemory<byte>)_responses.Dequeue());
-        }
-
-        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) => NullDisposable.Instance;
-
-        public bool SupportsExtendedApdu() => false;
-
-        public void Dispose()
-        {
-        }
-
-        public ValueTask DisposeAsync() => default;
-    }
-
-    private sealed class NullDisposable : IDisposable
-    {
-        public static NullDisposable Instance { get; } = new();
-
-        public void Dispose()
-        {
-        }
-    }
 }

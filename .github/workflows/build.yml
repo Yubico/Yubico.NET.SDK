@@ -33,6 +33,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
+      - name: Validate active documentation
+        run: dotnet toolchain.cs -- docs-qa
+
       - name: Install PC/SC dependencies
         run: |
           sudo apt-get update -qq

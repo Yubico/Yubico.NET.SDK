@@ -319,6 +319,50 @@ public class WebAuthnStatusStreamTests
     }
 
     [Fact(Timeout = 5000)]
+    public async Task MakeCredentialDrainConvenience_NullPinBytesWhenRequired_ThrowsNotAllowed()
+    {
+        var mockBackend = Substitute.For<IWebAuthnBackend>();
+        var mockInfo = MockFido2Responses.CreateMockAuthenticatorInfo(
+            clientPinSupported: true,
+            uvSupported: false);
+        mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(mockInfo);
+
+        mockBackend.MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+
+        if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
+            throw new InvalidOperationException("Failed to parse origin");
+
+        await using var client = new WebAuthnClient(mockBackend, origin, _ => false);
+
+        var options = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(
+                RandomNumberGenerator.GetBytes(16),
+                "user@example.com",
+                "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)],
+            UserVerification = UserVerificationPreference.Required
+        };
+
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(
+            async () => await client.MakeCredentialAsync(options, pinBytes: null, TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, ex.Code);
+        Assert.Equal("PIN required but not provided", ex.Message);
+
+        await mockBackend.DidNotReceive().MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact(Timeout = 5000)]
     public async Task MakeCredentialStream_ConsumerBreaks_ProducerCancelledQuickly()
     {
         // Arrange - Mock backend with cancellable long-running operation

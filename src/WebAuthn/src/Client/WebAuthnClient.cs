@@ -49,6 +49,12 @@ public sealed class WebAuthnClient : IAsyncDisposable
     private readonly IReadOnlySet<string> _enterpriseRpIds;
     private bool _disposed;
 
+    private enum MissingPinBehavior
+    {
+        ThrowAfterCancel,
+        DrainFailedStatus
+    }
+
     /// <summary>
     /// Initializes a new instance of <see cref="WebAuthnClient"/>.
     /// </summary>
@@ -110,38 +116,11 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
-        await foreach (var status in MakeCredentialStreamAsync(options, cancellationToken).ConfigureAwait(false))
-        {
-            switch (status)
-            {
-                case WebAuthnStatusRequestingPin requestingPin:
-                    if (pinBytes is null)
-                    {
-                        await requestingPin.Cancel().ConfigureAwait(false);
-                        throw new WebAuthnClientError(
-                            WebAuthnClientErrorCode.NotAllowed,
-                            "PIN required but not provided");
-                    }
-
-                    await requestingPin.SubmitPin(pinBytes.Value).ConfigureAwait(false);
-                    break;
-
-                case WebAuthnStatusRequestingUv requestingUv:
-                    // Auto-respond with false (no UV) when not explicitly opted-in
-                    await requestingUv.SetUseUv(false).ConfigureAwait(false);
-                    break;
-
-                case WebAuthnStatusFinished<RegistrationResponse> finished:
-                    return finished.Result;
-
-                case WebAuthnStatusFailed failed:
-                    throw failed.Error;
-            }
-        }
-
-        throw new WebAuthnClientError(
-            WebAuthnClientErrorCode.Unknown,
-            "Stream completed without terminal state");
+        return await DrainInteractiveStreamAsync<RegistrationResponse>(
+            MakeCredentialStreamAsync(options, cancellationToken),
+            pinBytes,
+            useUv: false,
+            MissingPinBehavior.ThrowAfterCancel).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -178,38 +157,11 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
-        await foreach (var status in GetAssertionStreamAsync(options, cancellationToken).ConfigureAwait(false))
-        {
-            switch (status)
-            {
-                case WebAuthnStatusRequestingPin requestingPin:
-                    if (pinBytes is null)
-                    {
-                        await requestingPin.Cancel().ConfigureAwait(false);
-                        throw new WebAuthnClientError(
-                            WebAuthnClientErrorCode.NotAllowed,
-                            "PIN required but not provided");
-                    }
-
-                    await requestingPin.SubmitPin(pinBytes.Value).ConfigureAwait(false);
-                    break;
-
-                case WebAuthnStatusRequestingUv requestingUv:
-                    // Auto-respond with false (no UV) when not explicitly opted-in
-                    await requestingUv.SetUseUv(false).ConfigureAwait(false);
-                    break;
-
-                case WebAuthnStatusFinished<IReadOnlyList<MatchedCredential>> finished:
-                    return finished.Result;
-
-                case WebAuthnStatusFailed failed:
-                    throw failed.Error;
-            }
-        }
-
-        throw new WebAuthnClientError(
-            WebAuthnClientErrorCode.Unknown,
-            "Stream completed without terminal state");
+        return await DrainInteractiveStreamAsync<IReadOnlyList<MatchedCredential>>(
+            GetAssertionStreamAsync(options, cancellationToken),
+            pinBytes,
+            useUv: false,
+            MissingPinBehavior.ThrowAfterCancel).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -234,71 +186,11 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
-        // Create linked CTS to cancel producer when iterator is disposed
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var producerCt = linked.Token;
-
-        var channel = new StatusChannel<RegistrationResponse>();
-
-        // Start producer in background
-        var producerTask = Task.Run(async () =>
+        await foreach (var status in RunStatusStreamAsync<RegistrationResponse>(
+            (channel, producerCt) => MakeCredentialCoreAsync(options, channel, producerCt),
+            cancellationToken).ConfigureAwait(false))
         {
-            try
-            {
-                await channel.WriteAsync(new WebAuthnStatusProcessing(), producerCt).ConfigureAwait(false);
-
-                // Delegate to core implementation
-                var result = await MakeCredentialCoreAsync(options, channel, producerCt).ConfigureAwait(false);
-
-                // Emit terminal success
-                await channel.WriteAsync(new WebAuthnStatusFinished<RegistrationResponse>(result), producerCt)
-                    .ConfigureAwait(false);
-            }
-            catch (WebAuthnClientError error)
-            {
-                await channel.WriteAsync(new WebAuthnStatusFailed(error), CancellationToken.None).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException oce)
-            {
-                // Cancellation is semantically distinct from a backend failure; surface
-                // a typed Cancelled error so consumers can distinguish "I cancelled" from
-                // "device errored." Must precede the general Exception arm because
-                // OperationCanceledException is an Exception subclass.
-                var cancelledError = new WebAuthnClientError(
-                    WebAuthnClientErrorCode.Cancelled, "Operation was cancelled", oce);
-                await channel.WriteAsync(new WebAuthnStatusFailed(cancelledError), CancellationToken.None).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                var wrappedError = new WebAuthnClientError(WebAuthnClientErrorCode.Unknown, "Unexpected error", ex);
-                await channel.WriteAsync(new WebAuthnStatusFailed(wrappedError), CancellationToken.None).ConfigureAwait(false);
-            }
-            finally
-            {
-                channel.Complete();
-            }
-        }, producerCt);
-
-        try
-        {
-            // Yield statuses as they arrive
-            await foreach (var status in channel.Reader(cancellationToken).ConfigureAwait(false))
-            {
-                yield return status;
-            }
-        }
-        finally
-        {
-            // Cancel producer if consumer broke early (iterator disposal)
-            linked.Cancel();
-            try
-            {
-                await producerTask.ConfigureAwait(false);
-            }
-            catch
-            {
-                // Exceptions already observed via Failed status
-            }
+            yield return status;
         }
     }
 
@@ -324,71 +216,11 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
-        // Create linked CTS to cancel producer when iterator is disposed
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var producerCt = linked.Token;
-
-        var channel = new StatusChannel<IReadOnlyList<MatchedCredential>>();
-
-        // Start producer in background
-        var producerTask = Task.Run(async () =>
+        await foreach (var status in RunStatusStreamAsync<IReadOnlyList<MatchedCredential>>(
+            (channel, producerCt) => GetAssertionCoreAsync(options, channel, producerCt),
+            cancellationToken).ConfigureAwait(false))
         {
-            try
-            {
-                await channel.WriteAsync(new WebAuthnStatusProcessing(), producerCt).ConfigureAwait(false);
-
-                // Delegate to core implementation
-                var result = await GetAssertionCoreAsync(options, channel, producerCt).ConfigureAwait(false);
-
-                // Emit terminal success
-                await channel.WriteAsync(new WebAuthnStatusFinished<IReadOnlyList<MatchedCredential>>(result), producerCt)
-                    .ConfigureAwait(false);
-            }
-            catch (WebAuthnClientError error)
-            {
-                await channel.WriteAsync(new WebAuthnStatusFailed(error), CancellationToken.None).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException oce)
-            {
-                // Cancellation is semantically distinct from a backend failure; surface
-                // a typed Cancelled error so consumers can distinguish "I cancelled" from
-                // "device errored." Must precede the general Exception arm because
-                // OperationCanceledException is an Exception subclass.
-                var cancelledError = new WebAuthnClientError(
-                    WebAuthnClientErrorCode.Cancelled, "Operation was cancelled", oce);
-                await channel.WriteAsync(new WebAuthnStatusFailed(cancelledError), CancellationToken.None).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                var wrappedError = new WebAuthnClientError(WebAuthnClientErrorCode.Unknown, "Unexpected error", ex);
-                await channel.WriteAsync(new WebAuthnStatusFailed(wrappedError), CancellationToken.None).ConfigureAwait(false);
-            }
-            finally
-            {
-                channel.Complete();
-            }
-        }, producerCt);
-
-        try
-        {
-            // Yield statuses as they arrive
-            await foreach (var status in channel.Reader(cancellationToken).ConfigureAwait(false))
-            {
-                yield return status;
-            }
-        }
-        finally
-        {
-            // Cancel producer if consumer broke early (iterator disposal)
-            linked.Cancel();
-            try
-            {
-                await producerTask.ConfigureAwait(false);
-            }
-            catch
-            {
-                // Exceptions already observed via Failed status
-            }
+            yield return status;
         }
     }
 
@@ -411,58 +243,19 @@ public sealed class WebAuthnClient : IAsyncDisposable
         bool useUv,
         CancellationToken cancellationToken = default)
     {
-        IMemoryOwner<byte>? pinOwner = null;
-        int pinByteCount = 0;
+        var pinOwner = RentUtf8Pin(pin, out var pinByteCount);
 
         try
         {
-            // Pre-encode PIN if provided
-            if (pin is not null)
-            {
-                pinByteCount = Encoding.UTF8.GetByteCount(pin);
-                pinOwner = MemoryPool<byte>.Shared.Rent(pinByteCount);
-                Encoding.UTF8.GetBytes(pin, pinOwner.Memory.Span);
-            }
-
-            await foreach (var status in MakeCredentialStreamAsync(options, cancellationToken).ConfigureAwait(false))
-            {
-                switch (status)
-                {
-                    case WebAuthnStatusRequestingPin requestingPin:
-                        if (pinOwner is null)
-                        {
-                            // Cancel and continue iteration to drain Failed status
-                            await requestingPin.Cancel().ConfigureAwait(false);
-                            break; // Continue iteration - producer will emit Failed
-                        }
-
-                        await requestingPin.SubmitPin(pinOwner.Memory[..pinByteCount]).ConfigureAwait(false);
-                        break;
-
-                    case WebAuthnStatusRequestingUv requestingUv:
-                        await requestingUv.SetUseUv(useUv).ConfigureAwait(false);
-                        break;
-
-                    case WebAuthnStatusFinished<RegistrationResponse> finished:
-                        return finished.Result;
-
-                    case WebAuthnStatusFailed failed:
-                        throw failed.Error;
-                }
-            }
-
-            throw new WebAuthnClientError(
-                WebAuthnClientErrorCode.Unknown,
-                "Stream completed without terminal state");
+            return await DrainInteractiveStreamAsync<RegistrationResponse>(
+                MakeCredentialStreamAsync(options, cancellationToken),
+                pinOwner?.Memory[..pinByteCount],
+                useUv,
+                MissingPinBehavior.DrainFailedStatus).ConfigureAwait(false);
         }
         finally
         {
-            if (pinOwner is not null)
-            {
-                // Zero entire rented buffer for defense-in-depth even though only [..pinByteCount] was written.
-                CryptographicOperations.ZeroMemory(pinOwner.Memory.Span);
-                pinOwner.Dispose();
-            }
+            ZeroAndDispose(pinOwner);
         }
     }
 
@@ -485,58 +278,19 @@ public sealed class WebAuthnClient : IAsyncDisposable
         bool useUv,
         CancellationToken cancellationToken = default)
     {
-        IMemoryOwner<byte>? pinOwner = null;
-        int pinByteCount = 0;
+        var pinOwner = RentUtf8Pin(pin, out var pinByteCount);
 
         try
         {
-            // Pre-encode PIN if provided
-            if (pin is not null)
-            {
-                pinByteCount = Encoding.UTF8.GetByteCount(pin);
-                pinOwner = MemoryPool<byte>.Shared.Rent(pinByteCount);
-                Encoding.UTF8.GetBytes(pin, pinOwner.Memory.Span);
-            }
-
-            await foreach (var status in GetAssertionStreamAsync(options, cancellationToken).ConfigureAwait(false))
-            {
-                switch (status)
-                {
-                    case WebAuthnStatusRequestingPin requestingPin:
-                        if (pinOwner is null)
-                        {
-                            // Cancel and continue iteration to drain Failed status
-                            await requestingPin.Cancel().ConfigureAwait(false);
-                            break; // Continue iteration - producer will emit Failed
-                        }
-
-                        await requestingPin.SubmitPin(pinOwner.Memory[..pinByteCount]).ConfigureAwait(false);
-                        break;
-
-                    case WebAuthnStatusRequestingUv requestingUv:
-                        await requestingUv.SetUseUv(useUv).ConfigureAwait(false);
-                        break;
-
-                    case WebAuthnStatusFinished<IReadOnlyList<MatchedCredential>> finished:
-                        return finished.Result;
-
-                    case WebAuthnStatusFailed failed:
-                        throw failed.Error;
-                }
-            }
-
-            throw new WebAuthnClientError(
-                WebAuthnClientErrorCode.Unknown,
-                "Stream completed without terminal state");
+            return await DrainInteractiveStreamAsync<IReadOnlyList<MatchedCredential>>(
+                GetAssertionStreamAsync(options, cancellationToken),
+                pinOwner?.Memory[..pinByteCount],
+                useUv,
+                MissingPinBehavior.DrainFailedStatus).ConfigureAwait(false);
         }
         finally
         {
-            if (pinOwner is not null)
-            {
-                // Zero entire rented buffer for defense-in-depth even though only [..pinByteCount] was written.
-                CryptographicOperations.ZeroMemory(pinOwner.Memory.Span);
-                pinOwner.Dispose();
-            }
+            ZeroAndDispose(pinOwner);
         }
     }
 
@@ -548,6 +302,139 @@ public sealed class WebAuthnClient : IAsyncDisposable
             await _backend.DisposeAsync().ConfigureAwait(false);
             _disposed = true;
         }
+    }
+
+    private async IAsyncEnumerable<WebAuthnStatus> RunStatusStreamAsync<TResult>(
+        Func<StatusChannel<TResult>, CancellationToken, Task<TResult>> produceResultAsync,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var producerCt = linked.Token;
+        var channel = new StatusChannel<TResult>();
+
+        var producerTask = Task.Run(async () =>
+        {
+            try
+            {
+                await channel.WriteAsync(new WebAuthnStatusProcessing(), producerCt).ConfigureAwait(false);
+
+                var result = await produceResultAsync(channel, producerCt).ConfigureAwait(false);
+
+                await channel.WriteAsync(new WebAuthnStatusFinished<TResult>(result), producerCt)
+                    .ConfigureAwait(false);
+            }
+            catch (WebAuthnClientError error)
+            {
+                await channel.WriteAsync(new WebAuthnStatusFailed(error), CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException oce)
+            {
+                // Cancellation is semantically distinct from backend failure; consumers need the typed signal.
+                var cancelledError = new WebAuthnClientError(
+                    WebAuthnClientErrorCode.Cancelled, "Operation was cancelled", oce);
+                await channel.WriteAsync(new WebAuthnStatusFailed(cancelledError), CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                var wrappedError = new WebAuthnClientError(WebAuthnClientErrorCode.Unknown, "Unexpected error", ex);
+                await channel.WriteAsync(new WebAuthnStatusFailed(wrappedError), CancellationToken.None).ConfigureAwait(false);
+            }
+            finally
+            {
+                channel.Complete();
+            }
+        }, producerCt);
+
+        try
+        {
+            await foreach (var status in channel.Reader(cancellationToken).ConfigureAwait(false))
+            {
+                yield return status;
+            }
+        }
+        finally
+        {
+            linked.Cancel();
+            try
+            {
+                await producerTask.ConfigureAwait(false);
+            }
+            catch
+            {
+                // Exceptions are surfaced as Failed statuses by the producer.
+            }
+        }
+    }
+
+    private static async Task<TResult> DrainInteractiveStreamAsync<TResult>(
+        IAsyncEnumerable<WebAuthnStatus> statuses,
+        ReadOnlyMemory<byte>? pinBytes,
+        bool useUv,
+        MissingPinBehavior missingPinBehavior)
+    {
+        await foreach (var status in statuses.ConfigureAwait(false))
+        {
+            switch (status)
+            {
+                case WebAuthnStatusRequestingPin requestingPin:
+                    if (pinBytes is null)
+                    {
+                        await requestingPin.Cancel().ConfigureAwait(false);
+
+                        if (missingPinBehavior == MissingPinBehavior.ThrowAfterCancel)
+                        {
+                            throw new WebAuthnClientError(
+                                WebAuthnClientErrorCode.NotAllowed,
+                                "PIN required but not provided");
+                        }
+
+                        break;
+                    }
+
+                    await requestingPin.SubmitPin(pinBytes.Value).ConfigureAwait(false);
+                    break;
+
+                case WebAuthnStatusRequestingUv requestingUv:
+                    await requestingUv.SetUseUv(useUv).ConfigureAwait(false);
+                    break;
+
+                case WebAuthnStatusFinished<TResult> finished:
+                    return finished.Result;
+
+                case WebAuthnStatusFailed failed:
+                    throw failed.Error;
+            }
+        }
+
+        throw new WebAuthnClientError(
+            WebAuthnClientErrorCode.Unknown,
+            "Stream completed without terminal state");
+    }
+
+    private static IMemoryOwner<byte>? RentUtf8Pin(string? pin, out int pinByteCount)
+    {
+        if (pin is null)
+        {
+            pinByteCount = 0;
+            return null;
+        }
+
+        pinByteCount = Encoding.UTF8.GetByteCount(pin);
+        var pinOwner = MemoryPool<byte>.Shared.Rent(pinByteCount);
+        Encoding.UTF8.GetBytes(pin, pinOwner.Memory.Span);
+        return pinOwner;
+    }
+
+    private static void ZeroAndDispose(IMemoryOwner<byte>? owner)
+    {
+        if (owner is null)
+        {
+            return;
+        }
+
+        // Zero entire rented buffer for defense-in-depth even though only the PIN prefix was written.
+        CryptographicOperations.ZeroMemory(owner.Memory.Span);
+        owner.Dispose();
     }
 
     /// <summary>

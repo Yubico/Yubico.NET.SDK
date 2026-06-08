@@ -110,24 +110,13 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
 
     public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
     {
-        // TODO Add try catch
         byte page = 0;
         var allPagesTlvs = new List<Tlv>();
 
         var hasMoreData = true;
         while (hasMoreData)
         {
-            var encodedResult = await _backend.ReadConfigAsync(page, cancellationToken).ConfigureAwait(false);
-
-            if (encodedResult.Length < 1)
-                throw new BadResponseException($"Empty response for page {page}");
-
-            if (encodedResult.Length - 1 != encodedResult[0])
-            {
-                throw new BadResponseException("Invalid length");
-            }
-
-            var pageTlvs = TlvHelper.DecodeList(encodedResult.AsSpan()[1..]);
+            var pageTlvs = await ReadDeviceInfoPageAsync(page, cancellationToken).ConfigureAwait(false);
             allPagesTlvs.AddRange(pageTlvs);
 
             var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
@@ -141,6 +130,24 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
 
         using var allTlvs = new DisposableTlvList(allPagesTlvs);
         return DeviceInfo.CreateFromTlvs([.. allTlvs], _version);
+    }
+
+    private async Task<DisposableTlvList> ReadDeviceInfoPageAsync(byte page, CancellationToken cancellationToken)
+    {
+        var encodedResult = await _backend.ReadConfigAsync(page, cancellationToken).ConfigureAwait(false);
+
+        if (encodedResult.Length < 1)
+            throw new BadResponseException($"Empty response for page {page}");
+
+        var declaredLength = encodedResult[0];
+        var actualLength = encodedResult.Length - 1;
+        if (actualLength != declaredLength)
+        {
+            throw new BadResponseException(
+                $"Invalid device info length for page {page}: declared {declaredLength}, actual {actualLength}.");
+        }
+
+        return TlvHelper.DecodeList(encodedResult.AsSpan()[1..]);
     }
 
     public Task SetDeviceConfigAsync(

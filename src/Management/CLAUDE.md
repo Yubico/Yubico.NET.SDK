@@ -20,7 +20,7 @@ The Management module is the **primary interface for YubiKey device configuratio
 4. **Rich device filtering**: Test infrastructure provides declarative device selection
 
 **Key Files:**
-- [`ManagementSession.cs`](src/ManagementSession.cs) - Main session class (~236 lines)
+- [`ManagementSession.cs`](src/ManagementSession.cs) - Main session class
 - [`DeviceInfo.cs`](src/DeviceInfo.cs) - Device information model (~261 lines)
 - [`DeviceConfig.cs`](src/DeviceConfig.cs) - Configuration model (~190 lines)
 - [`IYubiKeyExtensions.cs`](src/IYubiKeyExtensions.cs) - Convenience extensions for `IYubiKey`
@@ -776,11 +776,12 @@ ManagementSession uses the **Backend pattern** to abstract protocol differences 
 // ManagementSession delegates all operations to a backend
 private readonly IManagementBackend _backend;
 
-// Backend interface defines three operations
+// Backend interface defines four operations
 internal interface IManagementBackend : IDisposable
 {
     ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken cancellationToken);
     ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken);
+    ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken);
     ValueTask DeviceResetAsync(CancellationToken cancellationToken);
 }
 ```

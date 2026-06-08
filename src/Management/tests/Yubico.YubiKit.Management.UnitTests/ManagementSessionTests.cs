@@ -18,6 +18,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 
 public class ManagementSessionTests
@@ -60,6 +61,35 @@ public class ManagementSessionTests
         Assert.True(backend.CapturedConfig.Span.ToArray().All(static b => b == 0));
     }
 
+    [Fact]
+    public async Task GetDeviceInfoAsync_MoreDataIndicator_ReadsNextPage()
+    {
+        var backend = new CapturingBackend(
+            CreateDeviceInfoPage(new Tlv(0x10, [0x01])),
+            CreateDeviceInfoPage(CreateRequiredDeviceInfoTlvs()));
+        var session = CreateSessionForBackend(backend);
+
+        var info = await session.GetDeviceInfoAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal([0, 1], backend.ReadPages);
+        Assert.Equal(0x01020304, info.SerialNumber);
+        Assert.Equal(new FirmwareVersion(5, 7, 2), info.FirmwareVersion);
+    }
+
+    [Fact]
+    public async Task GetDeviceInfoAsync_InvalidPageLength_ThrowsPageAwareBadResponse()
+    {
+        var backend = new CapturingBackend([0x02, 0x01]);
+        var session = CreateSessionForBackend(backend);
+
+        var ex = await Assert.ThrowsAsync<BadResponseException>(
+            () => session.GetDeviceInfoAsync(TestContext.Current.CancellationToken));
+
+        Assert.Contains("page 0", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("declared 2", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("actual 1", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static ManagementSession CreateSessionForBackend(IManagementBackend backend)
     {
         var session = (ManagementSession)RuntimeHelpers.GetUninitializedObject(typeof(ManagementSession));
@@ -75,13 +105,56 @@ public class ManagementSessionTests
         return session;
     }
 
+    private static byte[] CreateDeviceInfoPage(params Tlv[] tlvs)
+    {
+        var encodedTlvs = TlvHelper.EncodeAndDisposeList(tlvs);
+        var page = new byte[encodedTlvs.Length + 1];
+        page[0] = (byte)encodedTlvs.Length;
+        encodedTlvs.Span.CopyTo(page.AsSpan(1));
+        return page;
+    }
+
+    private static Tlv[] CreateRequiredDeviceInfoTlvs() =>
+    [
+        new(0x0A, [0x00]),
+        new(0x04, [(byte)FormFactor.UsbAKeychain]),
+        new(0x18, [0x00]),
+        new(0x03, [0x00, 0x01]),
+        new(0x01, [0x00, 0x01]),
+        new(0x0E, [0x00]),
+        new(0x0D, [0x00]),
+        new(0x14, [0x00]),
+        new(0x15, [0x00]),
+        new(0x06, [0x00, 0x00]),
+        new(0x07, [0x00]),
+        new(0x08, [0x00]),
+        new(0x05, [0x05, 0x07, 0x02]),
+        new(0x02, [0x01, 0x02, 0x03, 0x04])
+    ];
+
     private sealed class CapturingBackend : IManagementBackend
     {
+        private readonly Queue<byte[]> _readResponses = new();
+
+        public CapturingBackend(params byte[][] readResponses)
+        {
+            foreach (var response in readResponses)
+            {
+                _readResponses.Enqueue(response);
+            }
+        }
+
         public ReadOnlyMemory<byte> CapturedConfig { get; private set; }
         public bool SawNonZeroConfig { get; private set; }
+        public List<int> ReadPages { get; } = [];
 
-        public ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException();
+        public ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken cancellationToken = default)
+        {
+            ReadPages.Add(page);
+            return _readResponses.TryDequeue(out var response)
+                ? ValueTask.FromResult(response)
+                : throw new NotSupportedException();
+        }
 
         public ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken = default)
         {

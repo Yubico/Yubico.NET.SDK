@@ -49,6 +49,63 @@ After the Phase 19 addendum, Core extended APDU support detection was fixed in c
 - The PC/SC receive buffer now allows a maximum extended APDU response body plus the 2-byte status word.
 - Unit tests cover USB, NFC, unknown, and wildcard connection-kind behavior.
 
+## Phase 32 Addendum: Post-Quality-Convergence Gate
+
+Phase 32 re-ran the same-criteria reassessment after the Phase 20-31 quality-convergence program. This addendum supersedes the Phase 19 matrix for current gate status while preserving the Phase 19 history above.
+
+Completed follow-up phases changed the readiness picture materially:
+
+- Phase 21 commit `bad01416`: Core API alignment and DI documentation drift audit completed.
+- Phase 22 commit `5092c3e2`: shared smart-card APDU recorder promoted to `Tests.Shared`.
+- Phase 23 commit `7a55772a`: PIV high-risk byte-level protocol coverage added.
+- Phase 24 commit `7673ffdc`: Core formatted APDU payloads are zeroed after transmit; YubiHsm credential-operation wire coverage added in the same phase sequence.
+- Phase 25 commit `49d01783`: OpenPGP public-session wire coverage added.
+- Phase 26 commit `fe3f19e5`: remaining high-value FIDO2 CTAP wire coverage added for credential management and Client PIN retry paths.
+- Phase 27 commit `ef10ddd9`: WebAuthn ceremony stream handling was shared without hiding FIDO2 delegation.
+- Phase 28 commit `a5609309`: OATH PUT payload encoding was extracted and byte-tested while preserving chained-response behavior.
+- Phase 29 commit `96982b74`: SecurityDomain STORE DATA payloads gained exact APDU coverage.
+- Phase 30 commit `973c78ea`: Management device-info reads gained multi-page and malformed-length coverage; YubiOtp was audited and intentionally left unchanged.
+- Phase 31 commit `e82d02fb`: `dotnet toolchain.cs -- docs-qa` was added to CI as an active-documentation gate.
+
+### Phase 32 Current Health Matrix
+
+| Module | Baseline Overall | Phase 19 Overall | Phase 32 Overall | Complexity | Maturity | DRY | Rolling Own | Maintainability | Gate | Top Consolidation Target Now |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| `Core` | B | B+ | B+ | B | B+ | B | B+ | B+ | Pass | Resolve remaining CRC/API-shape decisions and keep package validation audit-only until a real baseline exists. |
+| `Management` | B- | B | B+ | B+ | B+ | B+ | B+ | B+ | Pass | Keep backend payload/read-path docs source-backed; run config-mutation tests only when hardware state is coordinated. |
+| `Piv` | B- | B | B+ | B | B+ | B+ | B+ | B+ | Pass | Expand representative APDU coverage only where high-risk key/crypto paths remain uncovered. |
+| `Fido2` | B- | B | B+ | B | B+ | B | B | B+ | Pass | Add opportunistic byte coverage around remaining manual CBOR surfaces; do not broad-rewrite CTAP construction. |
+| `WebAuthn` | B- | B | B+ | B | B+ | B | B | B | Pass | Continue small responsibility splits in `WebAuthnClient` only where FIDO2 delegation stays obvious. |
+| `Oath` | B- | B | B+ | B+ | B+ | B+ | B+ | B+ | Pass | Keep flat OATH flow; add pure encode/parse helpers only when tests prove clarity. |
+| `YubiOtp` | B+ | B+ | B+ | B | B+ | B+ | B+ | B+ | Pass | Leave stable unless a concrete codec defect or noisy session pattern appears. |
+| `OpenPgp` | B+ | B+ | B+ | B+ | B+ | B | B+ | B+ | Pass | Preserve rich protocol models and add wire tests for representative session behavior as needed. |
+| `SecurityDomain` | B- | B | B+ | B | B+ | B+ | B+ | B+ | Pass | Keep STORE DATA byte tests local; coordinate persistent-state flows before broad integration runs. |
+| `YubiHsm` | B- | B | B+ | B | B+ | B+ | B+ | B+ | Pass | Add targeted asymmetric/password-change/generate credential wire coverage when needed. |
+| `Tests.Shared` | B | B+ | B+ | B+ | B+ | B+ | B+ | B+ | Pass | Preserve recorder simplicity and document direct skip-package references in integration projects. |
+| `Cli.Shared` | B- | B | B | A- | B | B- | B- | B | Non-gate | Continue credential/selector adoption only when command-family evidence accumulates. |
+| `Cli` | C+ | B- | B- | C+ | C+ | C+ | C+ | C+ | Non-gate | Implement or remove `--interactive`, then define CLI UX/error taxonomy. |
+| `Cli.Commands` | C | C+ | C+ | C | C+ | C | C | C+ | Non-gate | Migrate remaining secret paths and parsing/session helpers one command family at a time. |
+| `Tests.TestProject` | C | C | Excluded | n/a | n/a | n/a | n/a | n/a | Excluded | Decide separately whether it is a template, demo, AOT sample, or integration test. |
+
+### Composite-Readiness Gate Result
+
+The Phase 20 composite-readiness quality gate passes for the active library surfaces: `Core`, every applet module including `WebAuthn`, and `Tests.Shared` are now at least `B+` overall by the original criteria. `Tests.TestProject` is explicitly excluded from scoring. CLI remains an important active consumer and should keep improving, but broad CLI consolidation was explicitly deferred by Phase 20 and does not block composite YubiKey owner interviews.
+
+This is not an A-grade or no-risk result. It is a readiness result: the library baseline is coherent enough to stop cleanup sequencing and start owner interviews about composite YubiKey discovery.
+
+### Remaining Gate-Adjacent Risks
+
+- Core still has A-range blockers around CRC/API-shape cleanup and package validation policy, but those do not pull it below `B+`.
+- FIDO2 still has manual CBOR surfaces outside the highest-value Phase 26 paths; future work should add opportunistic tests rather than broad rewrite.
+- WebAuthn overall passes, but `WebAuthnClient` remains a large orchestrator and should only be split further where delegation remains obvious.
+- Integration projects repeatedly need direct `Xunit.SkippableFact` references because `Tests.Shared` keeps xUnit v2 packages private; this is a known dependency-boundary pattern.
+- FIDO2/WebAuthn UP/UV/touch ceremonies remain human-coordinated and are not unattended CI gates.
+- `docs-qa` now runs in CI but still does not compile README snippets.
+
+### Stop Gate
+
+Do not proceed into composite YubiKey design or implementation from this reassessment. The next step is owner interviews using the saved questions in `docs/plans/module-consolidation/phase-20-quality-convergence-before-composite-yubikey-ISA.md`.
+
 ## Executive Summary
 
 The consolidation branch materially improved the SDK's architectural rhythm. The biggest wins are visible protocol flow, explicit sensitive-buffer lifecycles, shared test-harness pieces, FIDO2/WebAuthn construction coherence, firmware/transport support gates, and CLI credential handling in one narrow OATH unlock slice.

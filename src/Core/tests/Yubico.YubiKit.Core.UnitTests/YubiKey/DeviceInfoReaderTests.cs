@@ -97,10 +97,16 @@ public class DeviceInfoReaderTests
     }
 
     [Fact]
-    public async Task ReadAsync_NullProtocol_ThrowsArgumentNull()
+    public async Task ReadAsync_DefaultVersionProvided_OverridesFirmwareVersionTlv()
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(
-            () => DeviceInfoReader.ReadAsync(null!, null, TestContext.Current.CancellationToken));
+        // The page carries firmware-version TLV 0x05 = 5.7.2, but a non-null defaultVersion must
+        // win, proving the reader passes defaultVersion through to DeviceInfo.CreateFromTlvs.
+        var protocol = new FakeSmartCardProtocol(BuildPage(CreateRequiredDeviceInfoTlvs()));
+        var defaultVersion = new FirmwareVersion(5, 4, 3);
+
+        var info = await DeviceInfoReader.ReadAsync(protocol, defaultVersion, TestContext.Current.CancellationToken);
+
+        Assert.Equal(defaultVersion, info.FirmwareVersion);
     }
 
     private static byte[] BuildPage(params Tlv[] tlvs)

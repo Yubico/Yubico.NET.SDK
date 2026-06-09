@@ -20,12 +20,11 @@ Use this note as the handoff record for Phase 35 of the composite-device program
 
 ## Review Evidence
 
-- DevTeam reviewer route command: `bun ~/.claude/PAI/TOOLS/AgentHarnessRouter.ts --surface devteam --role reviewer --primary-model "google-vertex-anthropic/claude-opus-4-8@default" --dry-run --json`.
-- DevTeam reviewer route result: `openai/gpt-5.5` selected because the primary family is Anthropic (Vertex Opus 4.8).
-- DevTeam review execution: attempted via the router with `--execute`; the GPT-5.5 reviewer timed out after 200s and produced an empty output file (`/tmp/opencode/devteam-review-phase35.md`).
-- DevTeam review status: WAIVED. The cross-vendor reviewer (OpenAI GPT-5.5) is unavailable due to the rate/token limit the principal reported when switching the primary model to Vertex Opus 4.8. Per the program ISA (ISC-4 allows "review output or waiver") and the Phase 35 ISA decision, no same-family reviewer was substituted.
-- Supplementary primary-model self-review (not a cross-vendor substitute): verified page-loop termination and more-data handling match the prior Management implementation; per-page length validation preserves the page-aware `BadResponseException` message; OTP CRC strip/validation ports verbatim from `OtpBackend`; `defaultVersion` passthrough preserved; no Core-to-Management coupling; TLV disposal parity preserved.
-- Follow-up: a proper cross-vendor DevTeam review should be run against this phase once GPT-5.5 quota is available; the working tree is committed so the review can target commit range for Phase 35.
+- Primary DevTeam reviewer route: `openai/gpt-5.5` (selected because the primary family is Anthropic, Vertex Opus 4.8). The GPT-5.5 reviewer was unavailable: both the AgentHarnessRouter `--execute` attempt and a direct `opencode run -m openai/gpt-5.5` probe timed out (empty output / exit 124), consistent with the rate/token limit the principal reported.
+- Interim cross-vendor review: ran the GitHub Copilot CLI as an interim OpenAI-family reviewer (`gpt-5.4`, high reasoning) via `scripts/interim-cross-vendor-review.sh` (read-only, `--deny-tool=write`). Output: `/tmp/opencode/copilot-review-phase35-output.md`. This is the documented GPT-5.5 throttling workaround now recorded in `ISA.md` ("Interim Cross-Vendor Review").
+- Interim review verdict: PASS WITH NOTES.
+- Interim review finding (LOW), fixed: `DeviceInfoReaderTests.ReadAsync_NullProtocol_ThrowsArgumentNull` was a validation-only test (against the repo's "Tests Worth Writing" policy). Replaced with `ReadAsync_DefaultVersionProvided_OverridesFirmwareVersionTlv`, a behavior regression proving the reader passes `defaultVersion` through to `DeviceInfo.CreateFromTlvs` (it overrides the firmware-version TLV). Core reader tests now 8/8 pass.
+- Queued: a proper GPT-5.5 DevTeam review of commit `c36bec2a` must still be run when quota is restored; Phase 35 is not a broad public API-boundary phase so Cato is not required for it.
 
 ## Verification Evidence
 
@@ -43,7 +42,7 @@ Use this note as the handoff record for Phase 35 of the composite-device program
 
 ## What Did Not Work
 
-- The mandatory cross-vendor DevTeam reviewer (GPT-5.5) could not run because of the OpenAI rate/token limit; it was waived per the ISA rather than substituted with a same-family reviewer.
+- The mandatory GPT-5.5 cross-vendor reviewer could not run because of the OpenAI rate/token limit; rather than substituting a same-family reviewer, an interim GPT-5.4 Copilot review was run and the GPT-5.5 review was queued.
 - Delegating the read path away from `IManagementBackend.ReadConfigAsync` broke the two Management read-behavior unit tests; they were moved to Core where the read logic now lives, which is the correct home for them.
 
 ## Reusable Patterns
@@ -70,4 +69,4 @@ Use this note as the handoff record for Phase 35 of the composite-device program
 - Goal: Core-owned device-info reader; Management delegates.
 - Branch: `yubikit-composite-device-new`.
 - Scope: Core reader + Management delegation + tests.
-- Status: implementation verified; cross-vendor review waived (GPT-5.5 rate limit); ready for staging/commit.
+- Status: implementation verified; interim GPT-5.4 review PASS WITH NOTES (finding fixed); GPT-5.5 review queued.

@@ -119,7 +119,7 @@ Add an internal Core-owned device-info reader that reads `DeviceInfo` over Smart
 - 2026-06-09: Management delegates only the device-info read path to Core; `IManagementBackend` keeps mutating operations (write config, set mode, reset). The read-only `ReadConfig` responsibility moves out of the Management backend so the backend is mutating-only.
 - 2026-06-09: Device-info read-behavior tests move to Core because the read logic now lives in Core; Management retains config-write zeroing and disposability tests.
 - 2026-06-09: The Core reader passes `defaultVersion` through to `DeviceInfo.CreateFromTlvs` so Management can keep supplying its Select-header firmware version, and discovery can pass null to rely on the firmware-version TLV.
-- 2026-06-09: If the DevTeam cross-vendor reviewer (OpenAI GPT-5.5, selected because the primary is Vertex Opus 4.8) is unavailable due to rate limits, Phase 35 records an explicit review waiver per the program ISA's allowance rather than substituting a same-family reviewer.
+- 2026-06-09: The DevTeam cross-vendor reviewer (OpenAI GPT-5.5, selected because the primary is Vertex Opus 4.8) was unavailable due to rate limits. Per the program ISA "Interim Cross-Vendor Review" workaround, an interim opposite-family review was run with the GitHub Copilot CLI (GPT-5.4, high reasoning) via `scripts/interim-cross-vendor-review.sh`, and the GPT-5.5 review was queued. No same-family reviewer was substituted.
 
 ## Changelog
 

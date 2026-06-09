@@ -51,6 +51,7 @@ The result should feel obvious to a .NET v2 SDK user: select a physical key once
 - Each phase has a phase ISA before source changes.
 - Each implementation phase uses `/DevTeam` implementation/review/fix workflow or records an explicit docs-only review path.
 - Cato review is required for Phase 33 planning, any broad API-boundary decision phase, and the final program verification phase.
+- While the GPT-5.5 cross-vendor reviewer route is rate-limited, an interim opposite-family review may be run with the GitHub Copilot CLI (GPT-5.4, high reasoning) via `scripts/interim-cross-vendor-review.sh`, in lieu of the PAI DevTeam/Cato GPT-5.5 reviewers and AgentHarnessRouter scripts. A proper GPT-5.5 (and, where required, Cato) review must be queued and recorded for when quota is restored. No same-family reviewer substitution is allowed. See "Interim Cross-Vendor Review" below.
 - Commit only intended files after each phase; never use `git add .`, `git add -A`, or `git commit -a`.
 - Public module extension ergonomics should be preserved unless a phase ISA records and justifies a breaking shape.
 - Keep `ConnectionType` semantics source-backed and tested when moving from per-interface devices to capability/filter semantics.
@@ -170,6 +171,45 @@ Build the v2 composite YubiKey device model in staged, reviewable phases so Core
 - 2026-06-09: Cato identified that scalar `IYubiKey.ConnectionType` is not merely additive debt; it is a core breaking-change decision for the physical-device model and current extension methods.
 - 2026-06-09: Cato identified that `Tests.Shared` and CLI consumers of `DeviceInfo` require mandatory compile migration when metadata moves; optional richer behavior remains deferred.
 - 2026-06-09: Cato follow-up passed and surfaced two info-level tightenings: give raw/default connection behavior explicit test ownership and verify Phase 35 read-info sharing does not reintroduce Core-to-Management coupling.
+- 2026-06-09: The GPT-5.5 cross-vendor reviewer route (PAI DevTeam, and the opposite-family leg of Cato) is temporarily rate-limited. Interim opposite-family reviews use the GitHub Copilot CLI GPT-5.4 (high reasoning) via `scripts/interim-cross-vendor-review.sh`; the GPT-5.5 and any required Cato review are queued for when quota is restored. See "Interim Cross-Vendor Review" below.
+
+## Interim Cross-Vendor Review (GPT-5.5 Throttling Workaround)
+
+The program's cross-vendor reviews (PAI DevTeam, and the opposite-family leg of Cato) normally route through OpenAI GPT-5.5 via the PAI AgentHarnessRouter. While GPT-5.5 is rate-limited, use the GitHub Copilot CLI as an interim OpenAI-family reviewer so an Anthropic-family primary (e.g. Vertex Opus 4.8) still gets a genuine opposite-family review.
+
+Wrapper script: `scripts/interim-cross-vendor-review.sh` (read-only; denies the `write` tool, allows shell/read so the reviewer can run `git show` and read files).
+
+Example:
+
+```bash
+# prompt-file holds the full review brief (scope, intent, invariants, output format)
+./scripts/interim-cross-vendor-review.sh /tmp/review-prompt.md /tmp/review-output.md
+```
+
+Direct Copilot invocation it wraps:
+
+```bash
+copilot -p "$(cat /tmp/review-prompt.md)" \
+  --model gpt-5.4 --reasoning-effort high \
+  --allow-all-tools --deny-tool='write' -s
+```
+
+Relevant Copilot CLI parameters:
+
+- `-p, --prompt <text>`: non-interactive prompt mode.
+- `--model <model>`: model id (e.g. `gpt-5.4`); `gpt-5.5` once quota returns.
+- `--reasoning-effort <level>`: one of `none|low|medium|high|xhigh|max`; use `high`.
+- `--allow-all-tools`: required for non-interactive mode (lets it run `git`/read tools).
+- `--deny-tool='write'`: keeps the pass review-only (no file edits).
+- `-s, --silent`: emit only the agent response.
+- `--output-format <text|json>`: response format (default `text`).
+- Env overrides in the wrapper: `REVIEW_MODEL`, `REVIEW_EFFORT`, `REVIEW_TIMEOUT`.
+
+Rules:
+
+- This is temporary and does not by itself satisfy the permanent GPT-5.5 DevTeam requirement or a required Cato gate.
+- Every phase reviewed this way must queue a GPT-5.5 DevTeam review (and a Cato review for broad API-boundary phases and final verification) for when quota returns, and record that follow-up in the phase learning note.
+- No same-family (Anthropic) reviewer substitution is allowed; if even the interim Copilot reviewer is unavailable (exit code 124 / timeout), record a waiver instead.
 
 ## Changelog
 

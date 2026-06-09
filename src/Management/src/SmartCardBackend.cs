@@ -25,24 +25,9 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
     private readonly ISmartCardProtocol _protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
 
     // Instruction bytes for Management APDUs
-    private const byte InsGetDeviceInfo = 0x1D;
     private const byte InsSetDeviceInfo = 0x1C;
     private const byte InsSetMode = 0x16;
     private const byte InsDeviceReset = 0x1F;
-
-    public async ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken cancellationToken)
-    {
-        var apdu = new ApduCommand
-        {
-            Cla = 0,
-            Ins = InsGetDeviceInfo,
-            P1 = (byte)page,
-            P2 = 0
-        };
-
-        var response = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
-        return response.Data.ToArray();
-    }
 
     public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
     {

@@ -13,8 +13,9 @@
 // limitations under the License.
 
 using Spectre.Console;
-using SharedOutput = Yubico.YubiKit.Cli.Shared.Output.OutputHelpers;
+using Yubico.YubiKit.Core.YubiKey;
 using SharedConfirm = Yubico.YubiKit.Cli.Shared.Output.ConfirmationPrompts;
+using SharedOutput = Yubico.YubiKit.Cli.Shared.Output.OutputHelpers;
 
 namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Output;
 

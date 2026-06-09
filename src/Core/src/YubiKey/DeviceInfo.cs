@@ -16,9 +16,8 @@ using System.Buffers.Binary;
 using System.Text;
 using Yubico.YubiKit.Core.Extensions;
 using Yubico.YubiKit.Core.Utils;
-using Yubico.YubiKit.Core.YubiKey;
 
-namespace Yubico.YubiKit.Management;
+namespace Yubico.YubiKit.Core.YubiKey;
 
 public readonly record struct DeviceInfo
 {
@@ -191,14 +190,6 @@ public readonly record struct DeviceInfo
             iteration);
 
         var isFinalVersion = versionQualifier.Type == VersionQualifierType.Final;
-        if (!isFinalVersion)
-        {
-            // TODO
-            // var logger = Log.GetLogger<YubiKeyDeviceInfo>();
-            // logger.LogDebug("Overriding behavioral version with {FirmwareString}",
-            //     deviceInfo.VersionQualifier.FirmwareVersion);
-        }
-
         var finalVersion = isFinalVersion
             ? defaultFirmwareVersion
             : versionQualifier.FirmwareVersion;

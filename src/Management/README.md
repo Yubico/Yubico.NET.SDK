@@ -238,12 +238,7 @@ await mgmtSession.ResetDeviceAsync(cancellationToken);
 Yubico.YubiKit.Management/
 ├── src/
 │   ├── ManagementSession.cs           # Main session class
-│   ├── DeviceInfo.cs                  # Device information model
 │   ├── DeviceConfig.cs                # Configuration model
-│   ├── DeviceCapabilities.cs          # Capability flags enum
-│   ├── DeviceFlags.cs                 # Device flags enum
-│   ├── FormFactor.cs                  # Form factor enum
-│   ├── VersionQualifier.cs            # Firmware version qualifier
 │   ├── IYubiKeyExtensions.cs          # Convenience extensions
 │   ├── DependencyInjection.cs         # DI support
 │   └── Yubico.YubiKit.Management.csproj
@@ -253,9 +248,11 @@ Yubico.YubiKit.Management/
     │   ├── AdvancedManagementTests.cs
     │   └── ManagementTests.cs
     └── Yubico.YubiKit.Management.UnitTests/
-        ├── CapabilityMapperTests.cs
-        └── FirmwareVersionTests.cs
+        ├── FirmwareVersionTests.cs
+        └── ManagementSessionTests.cs
 ```
+
+Read-only device metadata types returned by `GetDeviceInfoAsync` live in `Yubico.YubiKit.Core.YubiKey` (`DeviceInfo`, `DeviceCapabilities`, `DeviceFlags`, `FormFactor`, and `VersionQualifier`). Management owns device configuration and reset operations, but not those metadata model definitions.
 
 ## Common Use Cases
 

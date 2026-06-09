@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.YubiKey;
-
-namespace Yubico.YubiKit.Management;
+namespace Yubico.YubiKit.Core.YubiKey;
 
 /// <summary>
 ///     Represents the type of version qualifier for a firmware version.
 ///     The version qualifier type indicates whether the version is an Alpha, Beta, or Final release.
 /// </summary>
-public enum VersionQualifierType 
+public enum VersionQualifierType
 {
     Alpha = 0x00,
     Beta = 0x01,

@@ -12,6 +12,7 @@ Yubico.YubiKit.Core is the foundation that all other SDK modules build upon. It 
 - 📡 **Protocol Handling** - ISO 7816-4 APDU processing with automatic command chaining
 - 🔐 **Secure Channel Protocol (SCP)** - SCP03, SCP11a/b/c support for secure communication
 - 🖥️ **Platform Interop** - Cross-platform native library loading and device enumeration
+- 🧾 **Device Metadata Models** - Read-only `DeviceInfo`, capability, form-factor, flag, and version qualifier types
 - 🛠️ **Utilities** - TLV processing, cryptographic key types, COSE encoding
 
 ## Installation

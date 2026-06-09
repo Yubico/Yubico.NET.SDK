@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Features.Results;
 
 namespace Yubico.YubiKit.Management.Examples.ManagementTool.Features;

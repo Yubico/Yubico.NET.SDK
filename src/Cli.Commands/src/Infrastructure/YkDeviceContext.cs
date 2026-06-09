@@ -3,6 +3,7 @@
 
 using Yubico.YubiKit.Cli.Shared.Device;
 using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Cli.Commands.Infrastructure;

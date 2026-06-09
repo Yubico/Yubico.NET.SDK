@@ -1,6 +1,7 @@
 using System.Buffers.Binary;
+using Yubico.YubiKit.Core.YubiKey;
 
-namespace Yubico.YubiKit.Management.UnitTests;
+namespace Yubico.YubiKit.Core.UnitTests.CoreYubiKey;
 
 public class CapabilityMapperTests
 {
@@ -41,7 +42,7 @@ public class CapabilityMapperTests
     [Fact]
     public void FromFips_AllFipsCapabilities_ReturnsExpected()
     {
-        var buffer = CreateBigEndianBytes(0x1F); // All 5 FIPS bits set
+        var buffer = CreateBigEndianBytes(0x1F);
 
         var result = CapabilityMapper.FromFips(buffer);
 
@@ -56,18 +57,17 @@ public class CapabilityMapperTests
     }
 
     [Theory]
-    [InlineData(0x20)] // Bit 5 - undefined
-    [InlineData(0x40)] // Bit 6 - undefined
-    [InlineData(0x80)] // Bit 7 - undefined
-    [InlineData(0xE0)] // Bits 5-7 all set
-    [InlineData(0xFF)] // All bits including undefined
+    [InlineData(0x20)]
+    [InlineData(0x40)]
+    [InlineData(0x80)]
+    [InlineData(0xE0)]
+    [InlineData(0xFF)]
     public void FromFips_UnknownBits_AreIgnored(int fipsValue)
     {
         var buffer = CreateBigEndianBytes(fipsValue);
 
         var result = CapabilityMapper.FromFips(buffer);
 
-        // Should only include known FIPS capabilities (bits 0-4)
         var knownBits = (DeviceCapabilities)(fipsValue & 0x1F);
         var knownBuffer = CreateBigEndianBytes((int)knownBits);
         var expected = CapabilityMapper.FromFips(knownBuffer);
@@ -78,7 +78,7 @@ public class CapabilityMapperTests
     [Fact]
     public void FromFips_UnknownBitsCombinedWithKnown_MapsKnownOnly()
     {
-        var buffer = CreateBigEndianBytes(0xE1); // Bits 7,6,5 (unknown) + bit 0 (Fido2)
+        var buffer = CreateBigEndianBytes(0xE1);
 
         var result = CapabilityMapper.FromFips(buffer);
 
@@ -98,12 +98,10 @@ public class CapabilityMapperTests
     [Fact]
     public void FromFips_HighByte_IsProcessed()
     {
-        // Test that high byte is properly handled (16-bit value)
-        var buffer = new byte[] { 0x01, 0x00 }; // 0x0100 big-endian
+        var buffer = new byte[] { 0x01, 0x00 };
 
         var result = CapabilityMapper.FromFips(buffer);
 
-        // Bit 8 should be ignored (undefined in FIPS mapping)
         Assert.Equal(DeviceCapabilities.None, result);
     }
 
@@ -163,7 +161,6 @@ public class CapabilityMapperTests
     [Fact]
     public void FromFips_DoesNotIncludeOtpOrU2f()
     {
-        // FIPS should never map to Otp or U2f (not FIPS-approved)
         var buffer = CreateBigEndianBytes(0xFF);
 
         var result = CapabilityMapper.FromFips(buffer);
@@ -192,7 +189,6 @@ public class CapabilityMapperTests
     [InlineData(DeviceCapabilities.HsmAuth)]
     public void FromFips_RoundTrip_EachFipsCapability(DeviceCapabilities capability)
     {
-        // Find which FIPS bit corresponds to this capability
         var fipsBit = capability switch
         {
             DeviceCapabilities.Fido2 => 0x01,
@@ -213,8 +209,7 @@ public class CapabilityMapperTests
     [Fact]
     public void FromFips_BigEndianEncoding_IsRespected()
     {
-        // Manually construct big-endian bytes
-        var buffer = new byte[] { 0x00, 0x1F }; // Big-endian 0x001F
+        var buffer = new byte[] { 0x00, 0x1F };
 
         var result = CapabilityMapper.FromFips(buffer);
 
@@ -231,8 +226,7 @@ public class CapabilityMapperTests
     [Fact]
     public void FromApp_BigEndianEncoding_IsRespected()
     {
-        // Manually construct big-endian bytes for HsmAuth | Fido2
-        var buffer = new byte[] { 0x03, 0x00 }; // Big-endian 0x0300
+        var buffer = new byte[] { 0x03, 0x00 };
 
         var result = CapabilityMapper.FromApp(buffer);
 
@@ -272,13 +266,11 @@ public class CapabilityMapperTests
         Assert.Equal(DeviceCapabilities.None, result);
     }
 
-
     [Fact]
     public void FromFips_MaxInt16_ParsesCorrectly()
     {
-        var buffer = new byte[] { 0x7F, 0xFF }; // Max positive int16
+        var buffer = new byte[] { 0x7F, 0xFF };
 
-        // Should ignore all high bits, only process bits 0-4
         var result = CapabilityMapper.FromFips(buffer);
 
         var expected =
@@ -294,9 +286,8 @@ public class CapabilityMapperTests
     [Fact]
     public void FromFips_NegativeInt16_ParsesCorrectly()
     {
-        var buffer = new byte[] { 0x80, 0x00 }; // -32768 as int16, 0x8000 as uint16
+        var buffer = new byte[] { 0x80, 0x00 };
 
-        // Should ignore high bits beyond bit 4
         var result = CapabilityMapper.FromFips(buffer);
 
         Assert.Equal(DeviceCapabilities.None, result);
@@ -308,10 +299,4 @@ public class CapabilityMapperTests
         BinaryPrimitives.WriteInt16BigEndian(buffer, (short)value);
         return buffer;
     }
-}
-
-// Add this to your enum if not present
-public static class YubiKeyCapabilitiesExtensions
-{
-    public const DeviceCapabilities None = 0;
 }

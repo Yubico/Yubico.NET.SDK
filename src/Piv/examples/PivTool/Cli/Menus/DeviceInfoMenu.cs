@@ -48,7 +48,7 @@ public static class DeviceInfoMenu
             });
     }
 
-    private static void DisplayDeviceDetails(Management.DeviceInfo info)
+    private static void DisplayDeviceDetails(DeviceInfo info)
     {
         OutputHelpers.WriteKeyValue("Serial Number", info.SerialNumber?.ToString());
         OutputHelpers.WriteKeyValue("Firmware Version", info.VersionName);

@@ -14,6 +14,7 @@
 
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Tests.Shared;

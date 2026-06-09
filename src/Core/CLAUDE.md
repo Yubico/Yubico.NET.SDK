@@ -36,7 +36,7 @@ src/
 │   ├── Windows/         # Windows-specific (HidD, Cfgmgr32)
 │   ├── MacOS/           # macOS-specific (IOKit, CoreFoundation)
 │   └── Linux/           # Linux-specific (udev, libc)
-├── YubiKey/             # YubiKey types, feature flags
+├── YubiKey/             # YubiKey types, feature flags, read-only metadata models
 └── Utils/               # TLV, CRC, byte utilities
 ```
 

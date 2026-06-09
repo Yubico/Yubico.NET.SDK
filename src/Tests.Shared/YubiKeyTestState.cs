@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Tests.Shared;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         This class wraps an <see cref="IYubiKey" /> and its <see cref="Management.DeviceInfo" />
+///         This class wraps an <see cref="IYubiKey" /> and its <see cref="DeviceInfo" />
 ///         for use with xUnit Theory tests via <see cref="Yubico.YubiKit.Tests.Shared.Infrastructure" />.
 ///     </para>
 ///     <para>

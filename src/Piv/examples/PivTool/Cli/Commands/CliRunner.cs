@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
 
@@ -138,7 +139,7 @@ internal static class CliRunner
             Console.WriteLine($"Security Key:     {deviceInfo.IsSky}");
             Console.WriteLine($"USB Supported:    {deviceInfo.UsbSupported}");
             Console.WriteLine($"USB Enabled:      {deviceInfo.UsbEnabled}");
-            if (deviceInfo.NfcSupported != Management.DeviceCapabilities.None)
+            if (deviceInfo.NfcSupported != DeviceCapabilities.None)
             {
                 Console.WriteLine($"NFC Supported:    {deviceInfo.NfcSupported}");
                 Console.WriteLine($"NFC Enabled:      {deviceInfo.NfcEnabled}");

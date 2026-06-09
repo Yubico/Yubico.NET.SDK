@@ -37,9 +37,9 @@ internal class HidYubiKey(
         $"hid:{hidDevice.ReaderName}:{hidDevice.DescriptorInfo.Usage:X4}";
 
     /// <summary>
-    /// The connection type this YubiKey interface supports.
+    /// The connections this YubiKey HID interface exposes (a single concrete HID connection in this phase).
     /// </summary>
-    public ConnectionType ConnectionType => ConnectionTypeMapper.ToConnectionType(hidDevice.InterfaceType);
+    public ConnectionType AvailableConnections => ConnectionTypeMapper.ToConnectionType(hidDevice.InterfaceType);
 
     public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection

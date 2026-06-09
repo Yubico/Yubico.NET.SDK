@@ -36,7 +36,7 @@ public static class DeviceSelector
                 info?.SerialNumber,
                 info?.FormFactor ?? FormFactor.Unknown,
                 info?.FirmwareVersion.ToString() ?? "Unknown",
-                device.ConnectionType);
+                device.AvailableConnections);
         }
 
         // Multiple devices -- in non-interactive mode, auto-select first device
@@ -49,7 +49,7 @@ public static class DeviceSelector
                 info?.SerialNumber,
                 info?.FormFactor ?? FormFactor.Unknown,
                 info?.FirmwareVersion.ToString() ?? "Unknown",
-                first.ConnectionType);
+                first.AvailableConnections);
         }
 
         return await PromptForDeviceSelectionAsync(devices, cancellationToken);
@@ -161,12 +161,12 @@ public static class DeviceSelector
             selected.Info?.SerialNumber,
             selected.Info?.FormFactor ?? FormFactor.Unknown,
             selected.Info?.FirmwareVersion.ToString() ?? "Unknown",
-            selected.Device.ConnectionType);
+            selected.Device.AvailableConnections);
     }
 
     private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
     {
-        var transport = ConnectionTypeFormatter.Format(device.ConnectionType);
+        var transport = ConnectionTypeFormatter.Format(device.AvailableConnections);
 
         if (info is null)
         {

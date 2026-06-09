@@ -176,7 +176,7 @@ public class YubiKeyDeviceRepositoryTests
 
         // Assert
         Assert.Equal(2, result.Count);
-        Assert.All(result, d => Assert.Equal(ConnectionType.SmartCard, d.ConnectionType));
+        Assert.All(result, d => Assert.Equal(ConnectionType.SmartCard, d.AvailableConnections));
     }
 
     [Fact]
@@ -515,7 +515,7 @@ public class YubiKeyDeviceRepositoryTests
     private sealed class FakeYubiKey(string deviceId, ConnectionType connectionType) : IYubiKey
     {
         public string DeviceId { get; } = deviceId;
-        public ConnectionType ConnectionType { get; } = connectionType;
+        public ConnectionType AvailableConnections { get; } = connectionType;
 
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection

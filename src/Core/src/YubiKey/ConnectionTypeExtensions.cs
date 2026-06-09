@@ -16,27 +16,68 @@ namespace Yubico.YubiKit.Core.YubiKey;
 
 internal static class ConnectionTypeExtensions
 {
-    private const ConnectionType HidConnectionTypes = ConnectionType.Hid | ConnectionType.HidFido | ConnectionType.HidOtp;
+    /// <summary>Concrete openable connection bits (excludes the <see cref="ConnectionType.Hid"/> group and <see cref="ConnectionType.All"/>).</summary>
+    public const ConnectionType ConcreteConnections =
+        ConnectionType.HidFido | ConnectionType.HidOtp | ConnectionType.SmartCard;
 
-    public static bool IncludesHidScan(this ConnectionType filter) => (filter & HidConnectionTypes) != 0;
+    private const ConnectionType HidGroup =
+        ConnectionType.Hid | ConnectionType.HidFido | ConnectionType.HidOtp;
 
-    public static bool MatchesDevice(this ConnectionType filter, ConnectionType deviceConnectionType)
+    /// <summary>True when the filter requests scanning any HID interface.</summary>
+    public static bool IncludesHidScan(this ConnectionType filter) => (filter & HidGroup) != 0;
+
+    /// <summary>
+    ///     Whether a device whose available connections are <paramref name="available"/> can open the
+    ///     <paramref name="requested"/> connection. Only concrete openable types are valid requests;
+    ///     <see cref="ConnectionType.Hid"/> means "HidFido or HidOtp present"; <see cref="ConnectionType.Unknown"/>,
+    ///     <see cref="ConnectionType.All"/>, and any other multi-bit combination return <c>false</c>.
+    /// </summary>
+    public static bool SupportsConnection(this ConnectionType available, ConnectionType requested)
     {
-        if (filter == ConnectionType.Unknown || deviceConnectionType == ConnectionType.Unknown)
-        {
+        if (requested == ConnectionType.Hid)
+            return (available & (ConnectionType.HidFido | ConnectionType.HidOtp)) != 0;
+
+        if (requested is ConnectionType.HidFido or ConnectionType.HidOtp or ConnectionType.SmartCard)
+            return (available & requested) == requested;
+
+        // Unknown, All, and any other multi-bit combination are not concrete openable requests.
+        return false;
+    }
+
+    /// <summary>
+    ///     Whether a discovery <paramref name="filter"/> matches a device whose available connections are
+    ///     <paramref name="available"/> (a capability SET). A device matches if it shares any requested concrete
+    ///     connect bit; <see cref="ConnectionType.Hid"/> in the filter expands to <c>HidFido|HidOtp</c> and
+    ///     <see cref="ConnectionType.All"/> matches any non-empty capability set.
+    /// </summary>
+    public static bool Matches(this ConnectionType filter, ConnectionType available)
+    {
+        if (filter == ConnectionType.Unknown || available == ConnectionType.Unknown)
             return false;
-        }
 
         if (filter == ConnectionType.All)
-        {
-            return true;
-        }
+            return (available & ConcreteConnections) != 0;
 
-        if (filter.HasFlag(ConnectionType.Hid) && deviceConnectionType is ConnectionType.Hid or ConnectionType.HidFido or ConnectionType.HidOtp)
-        {
-            return true;
-        }
+        var wanted = filter;
+        if ((filter & ConnectionType.Hid) != 0)
+            wanted |= ConnectionType.HidFido | ConnectionType.HidOtp;
 
-        return filter.HasFlag(deviceConnectionType);
+        return (wanted & available & ConcreteConnections) != 0;
+    }
+
+    /// <summary>
+    ///     Returns the single concrete connection in <paramref name="available"/>, or <see cref="ConnectionType.Unknown"/>
+    ///     when there are zero or more than one. Used by the ambiguity-safe default connect.
+    /// </summary>
+    public static ConnectionType SingleConcreteConnectionOrUnknown(this ConnectionType available)
+    {
+        var concrete = available & ConcreteConnections;
+        return concrete switch
+        {
+            ConnectionType.SmartCard => ConnectionType.SmartCard,
+            ConnectionType.HidFido => ConnectionType.HidFido,
+            ConnectionType.HidOtp => ConnectionType.HidOtp,
+            _ => ConnectionType.Unknown
+        };
     }
 }

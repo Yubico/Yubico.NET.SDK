@@ -31,7 +31,7 @@ public static class ConnectionTypeMapper
         {
             HidInterfaceType.Fido => ConnectionType.HidFido,
             HidInterfaceType.Otp => ConnectionType.HidOtp,
-            _ => ConnectionType.Hid
+            _ => ConnectionType.Unknown
         };
 
     /// <summary>
@@ -43,5 +43,5 @@ public static class ConnectionTypeMapper
     public static bool SupportsConnectionType(
         HidInterfaceType interfaceType,
         ConnectionType connectionType) =>
-        interfaceType != HidInterfaceType.Unknown && connectionType.MatchesDevice(ToConnectionType(interfaceType));
+        interfaceType != HidInterfaceType.Unknown && connectionType.Matches(ToConnectionType(interfaceType));
 }

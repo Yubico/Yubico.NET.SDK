@@ -22,7 +22,7 @@ public class ConnectionTypeMapperTests
     [Theory]
     [InlineData(HidInterfaceType.Fido, ConnectionType.HidFido)]
     [InlineData(HidInterfaceType.Otp, ConnectionType.HidOtp)]
-    [InlineData(HidInterfaceType.Unknown, ConnectionType.Hid)]
+    [InlineData(HidInterfaceType.Unknown, ConnectionType.Unknown)]
     public void ToConnectionType_MapsHidInterfaces(
         HidInterfaceType interfaceType,
         ConnectionType expectedConnectionType)

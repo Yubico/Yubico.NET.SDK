@@ -35,7 +35,7 @@ public class FindYubiKeys(
     {
         var yubiKeys = new List<IYubiKey>();
 
-        if (type.MatchesDevice(ConnectionType.SmartCard))
+        if (type.Matches(ConnectionType.SmartCard))
         {
             var ccidKeys = await FindAllCcid(cancellationToken).ConfigureAwait(false);
             yubiKeys.AddRange(ccidKeys);
@@ -58,7 +58,7 @@ public class FindYubiKeys(
         var hidDevices = await findHidService.FindAllAsync(cancellationToken).ConfigureAwait(false);
         return hidDevices
             .Select(yubiKeyFactory.Create)
-            .Where(yubiKey => type.MatchesDevice(yubiKey.ConnectionType))
+            .Where(yubiKey => type.Matches(yubiKey.AvailableConnections))
             .ToList();
     }
 

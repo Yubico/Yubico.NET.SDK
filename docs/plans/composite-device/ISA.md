@@ -242,7 +242,9 @@ Add Core-owned read-only device-info discovery over SmartCard, FIDO HID, and OTP
 
 ### Phase 36: Physical YubiKey Model
 
-Introduce the physical-device `IYubiKey` shape with `DeviceInfo`, `FirmwareVersion`, available connection flags, support predicates, and typed connection routing. This phase must decide what happens to the existing scalar `IYubiKey.ConnectionType` property and update all production routing assumptions that depended on one interface per device. It must also bind raw/default connection behavior to tests: either the behavior is explicit, unsupported for composite devices, or documented as an app-specific smart default owned by an extension method.
+Introduce the physical-device `IYubiKey` shape with available connection flags (`AvailableConnections`), a `SupportsConnection` support predicate, typed connection routing, and a safe (ambiguity-checked) default connect. This phase decides and records the disposition of the existing scalar `IYubiKey.ConnectionType` property (Phase 36 ISA: removed and replaced by `AvailableConnections`/`SupportsConnection`) and updates all production routing assumptions that depended on one interface per device. It binds raw/default connection behavior to tests: the default connect resolves only when unambiguous and throws otherwise. Read-only device-info access on `IYubiKey` (`DeviceInfo`/`FirmwareVersion`) is deferred to Phase 37, where it is read via the Phase 35 Core reader and populated during discovery, to avoid a Phase 36 collision with the Management `GetDeviceInfoAsync` extension and connection-ownership hazards.
+
+Sequencing rule: Phase 37 must not ship merged multi-connection physical devices until the parameterless default-connect consumers (the applet session-entry extensions in `Management`, `YubiOtp`, and FIDO2 that call `yubiKey.ConnectAsync()`) are rewritten or gated by Phase 38, because a merged device makes the parameterless default connect ambiguous. Phase 38 (extension smart defaults/overrides) therefore lands before, or together with, the Phase 37 multi-connection cutover.
 
 ### Phase 37: Composite Discovery And Repository Semantics
 

@@ -359,7 +359,7 @@ public class YubiKeyDeviceManagerTests
             ScanCount++;
             var filtered = type == ConnectionType.All
                 ? _devices
-                : _devices.Where(d => d.ConnectionType == type).ToList();
+                : _devices.Where(d => type.Matches(d.AvailableConnections)).ToList();
             return Task.FromResult<IReadOnlyList<IYubiKey>>(filtered);
         }
     }
@@ -370,7 +370,7 @@ public class YubiKeyDeviceManagerTests
     private sealed class FakeYubiKey(string deviceId, ConnectionType connectionType) : IYubiKey
     {
         public string DeviceId { get; } = deviceId;
-        public ConnectionType ConnectionType { get; } = connectionType;
+        public ConnectionType AvailableConnections { get; } = connectionType;
 
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection

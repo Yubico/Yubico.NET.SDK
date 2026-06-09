@@ -38,7 +38,7 @@ public class FindYubiKeysTests
 
         // Assert
         Assert.Single(result);
-        Assert.Equal(ConnectionType.HidFido, result[0].ConnectionType);
+        Assert.Equal(ConnectionType.HidFido, result[0].AvailableConnections);
         Assert.Equal(1, findHid.ScanCount);
     }
 
@@ -57,8 +57,8 @@ public class FindYubiKeysTests
 
         // Assert
         Assert.Equal(2, result.Count);
-        Assert.Contains(result, yubiKey => yubiKey.ConnectionType == ConnectionType.HidFido);
-        Assert.Contains(result, yubiKey => yubiKey.ConnectionType == ConnectionType.HidOtp);
+        Assert.Contains(result, yubiKey => yubiKey.AvailableConnections == ConnectionType.HidFido);
+        Assert.Contains(result, yubiKey => yubiKey.AvailableConnections == ConnectionType.HidOtp);
     }
 
     [Fact]
@@ -131,7 +131,7 @@ public class FindYubiKeysTests
     private sealed class FakeYubiKey(string deviceId, ConnectionType connectionType) : IYubiKey
     {
         public string DeviceId { get; } = deviceId;
-        public ConnectionType ConnectionType { get; } = connectionType;
+        public ConnectionType AvailableConnections { get; } = connectionType;
 
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection

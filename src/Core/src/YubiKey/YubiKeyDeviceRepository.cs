@@ -49,7 +49,7 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
     {
         ThrowIfDisposed();
 
-        return [.. _deviceCache.Values.Where(d => type.MatchesDevice(d.ConnectionType))];
+        return [.. _deviceCache.Values.Where(d => type.Matches(d.AvailableConnections))];
     }
 
     /// <inheritdoc/>

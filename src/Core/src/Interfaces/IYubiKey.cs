@@ -19,16 +19,42 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.Interfaces;
 
+/// <summary>
+///     Represents a physical YubiKey and the set of connections (interfaces) it exposes.
+/// </summary>
 public interface IYubiKey
 {
     string DeviceId { get; }
-    ConnectionType ConnectionType { get; }
+
+    /// <summary>
+    ///     The set of concrete connections this physical device exposes (any combination of
+    ///     <see cref="ConnectionType.SmartCard"/>, <see cref="ConnectionType.HidFido"/>, and
+    ///     <see cref="ConnectionType.HidOtp"/>). Never contains the <see cref="ConnectionType.Hid"/>
+    ///     group flag or <see cref="ConnectionType.All"/>.
+    /// </summary>
+    ConnectionType AvailableConnections { get; }
+
+    /// <summary>
+    ///     Whether this device can open the requested connection. Only concrete openable types are valid
+    ///     (<see cref="ConnectionType.SmartCard"/>, <see cref="ConnectionType.HidFido"/>,
+    ///     <see cref="ConnectionType.HidOtp"/>); <see cref="ConnectionType.Hid"/> means a HID interface is present;
+    ///     <see cref="ConnectionType.Unknown"/>, <see cref="ConnectionType.All"/>, and other combinations return <c>false</c>.
+    /// </summary>
+    bool SupportsConnection(ConnectionType connectionType) =>
+        AvailableConnections.SupportsConnection(connectionType);
 
     Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection;
+
+    /// <summary>
+    ///     Opens the device's connection when it exposes exactly one. For a physical device that exposes
+    ///     several connections this is ambiguous and throws; callers must use <see cref="ConnectAsync{TConnection}"/>
+    ///     or an application-specific extension that selects a transport intentionally.
+    /// </summary>
     async Task<IConnection> ConnectAsync(CancellationToken cancellationToken = default)
-    =>
-        ConnectionType switch
+    {
+        var single = AvailableConnections.SingleConcreteConnectionOrUnknown();
+        return single switch
         {
             ConnectionType.SmartCard => await ConnectAsync<ISmartCardConnection>(cancellationToken)
                 .ConfigureAwait(false),
@@ -36,7 +62,12 @@ public interface IYubiKey
                 .ConfigureAwait(false),
             ConnectionType.HidOtp => await ConnectAsync<IOtpHidConnection>(cancellationToken)
                 .ConfigureAwait(false),
-            _ => throw new NotSupportedException(
-                $"Connection type {ConnectionType} is not supported for management session creation."),
+            _ when (AvailableConnections & ConnectionTypeExtensions.ConcreteConnections) == ConnectionType.Unknown =>
+                throw new NotSupportedException(
+                    "This YubiKey exposes no openable connection."),
+            _ => throw new InvalidOperationException(
+                $"This YubiKey exposes multiple connections ({AvailableConnections}); the default connect is ambiguous. " +
+                "Use ConnectAsync<TConnection>() or an application-specific session extension to choose a transport.")
         };
+    }
 }

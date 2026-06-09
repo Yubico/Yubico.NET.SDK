@@ -211,12 +211,12 @@ internal static class YubiKeyTestInfrastructure
                     {
                         if (AllowList.IsDeviceAllowed(deviceInfo.Value.SerialNumber))
                         {
-                            var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.ConnectionType);
+                            var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.AvailableConnections);
                             authorizedDevices.Add(testDevice);
                             YubiKeyDeviceCache.AddDevice(testDevice);
 
                             Console.WriteLine(
-                                $"[YubiKey Infrastructure] Device SN:{deviceInfo.Value.SerialNumber} ({device.ConnectionType}) authorized " +
+                                $"[YubiKey Infrastructure] Device SN:{deviceInfo.Value.SerialNumber} ({device.AvailableConnections}) authorized " +
                                 $"(FW:{deviceInfo.Value.FirmwareVersion}, {deviceInfo.Value.FormFactor})");
                         }
                         else
@@ -228,12 +228,12 @@ internal static class YubiKeyTestInfrastructure
                     }
                     else if (deviceInfo is not null && AllowList.AllowUnknownSerials)
                     {
-                        var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.ConnectionType);
+                        var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.AvailableConnections);
                         authorizedDevices.Add(testDevice);
                         YubiKeyDeviceCache.AddDevice(testDevice);
 
                         Console.WriteLine(
-                            $"[YubiKey Infrastructure] Device ({device.ConnectionType}) authorized (unknown serial, AllowUnknownSerials=true, " +
+                            $"[YubiKey Infrastructure] Device ({device.AvailableConnections}) authorized (unknown serial, AllowUnknownSerials=true, " +
                             $"FW:{deviceInfo.Value.FirmwareVersion}, {deviceInfo.Value.FormFactor})");
                     }
                     else

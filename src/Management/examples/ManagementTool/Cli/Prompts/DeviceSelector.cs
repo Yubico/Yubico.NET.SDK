@@ -54,7 +54,7 @@ public static class DeviceSelector
                 info?.SerialNumber,
                 info?.FormFactor ?? FormFactor.Unknown,
                 info?.FirmwareVersion.ToString() ?? "Unknown",
-                device.ConnectionType);
+                device.AvailableConnections);
         }
 
         return await PromptForDeviceSelectionAsync(devices, cancellationToken);
@@ -70,7 +70,7 @@ public static class DeviceSelector
         {
             var allDevices = await YubiKeyManager.FindAllAsync(ConnectionType.All, cancellationToken: cancellationToken);
             var devices = allDevices
-                .Where(d => SupportedConnectionTypes.Contains(d.ConnectionType))
+                .Where(d => SupportedConnectionTypes.Any(d.SupportsConnection))
                 .ToList();
 
             if (devices.Count > 0)
@@ -105,7 +105,7 @@ public static class DeviceSelector
         catch (Exception ex)
         {
             AnsiConsole.MarkupLine(
-                $"[grey]Debug: {device.ConnectionType} device info failed: " +
+                $"[grey]Debug: {device.AvailableConnections} device info failed: " +
                 $"{Markup.Escape(ex.GetType().Name)}: {Markup.Escape(ex.Message)}[/]");
             return null;
         }
@@ -159,12 +159,12 @@ public static class DeviceSelector
             selected.Info?.SerialNumber,
             selected.Info?.FormFactor ?? FormFactor.Unknown,
             selected.Info?.FirmwareVersion.ToString() ?? "Unknown",
-            selected.Device.ConnectionType);
+            selected.Device.AvailableConnections);
     }
 
     private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
     {
-        var transport = ConnectionTypeFormatter.Format(device.ConnectionType);
+        var transport = ConnectionTypeFormatter.Format(device.AvailableConnections);
 
         if (info is null)
         {

@@ -109,7 +109,7 @@ public static class IYubiKeyExtensions
             ProtocolConfiguration? configuration = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await yubiKey.ConnectForFidoAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 return await FidoSession.CreateAsync(
@@ -134,17 +134,28 @@ public static class IYubiKeyExtensions
         /// <exception cref="NotSupportedException">
         /// Thrown if the YubiKey's connection type is not supported for FIDO2.
         /// </exception>
-        private async Task<IConnection> ConnectAsync(CancellationToken cancellationToken)
-            =>
-                yubiKey.ConnectionType switch
-                {
-                    ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-                        .ConfigureAwait(false),
-                    ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
-                        .ConfigureAwait(false),
-                    _ => throw new NotSupportedException(
-                        $"Connection type {yubiKey.ConnectionType} is not supported for FIDO2 session creation. " +
-                        "Use Ccid or HidFido connection types."),
-                };
+        private async Task<IConnection> ConnectForFidoAsync(CancellationToken cancellationToken)
+        {
+            var supportsFido = yubiKey.SupportsConnection(ConnectionType.HidFido);
+            var supportsSmartCard = yubiKey.SupportsConnection(ConnectionType.SmartCard);
+
+            // Phase 36: mechanical, preference-free migration off the removed scalar ConnectionType.
+            // A device exposing both FIDO-capable transports is ambiguous; explicit FIDO transport
+            // selection is defined in Phase 38. Single-interface devices resolve unchanged.
+            if (supportsFido && supportsSmartCard)
+                throw new NotSupportedException(
+                    "This YubiKey exposes both HID FIDO and SmartCard FIDO2 transports; explicit FIDO transport " +
+                    "selection is defined in Phase 38. Use yubiKey.ConnectAsync<TConnection>() to choose a transport.");
+
+            if (supportsFido)
+                return await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken).ConfigureAwait(false);
+
+            if (supportsSmartCard)
+                return await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken).ConfigureAwait(false);
+
+            throw new NotSupportedException(
+                $"This YubiKey does not expose a FIDO-capable connection (available: {yubiKey.AvailableConnections}). " +
+                "FIDO2 requires HID FIDO or SmartCard.");
+        }
     }
 }

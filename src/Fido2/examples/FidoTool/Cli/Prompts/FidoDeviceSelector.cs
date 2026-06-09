@@ -46,6 +46,6 @@ public sealed class FidoDeviceSelector : DeviceSelectorBase
     /// Falls back to the first available device if no FIDO HID device is found.
     /// </remarks>
     protected override IYubiKey? AutoSelectDevice(IReadOnlyList<IYubiKey> devices) =>
-        devices.FirstOrDefault(d => d.ConnectionType == ConnectionType.HidFido)
+        devices.FirstOrDefault(d => d.SupportsConnection(ConnectionType.HidFido))
         ?? devices[0];
 }

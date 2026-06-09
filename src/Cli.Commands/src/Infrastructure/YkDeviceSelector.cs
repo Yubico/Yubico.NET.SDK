@@ -59,6 +59,6 @@ public class YkDeviceSelector : DeviceSelectorBase
     ///     Falls back to the first device if none match.
     /// </summary>
     protected override IYubiKey? AutoSelectDevice(IReadOnlyList<IYubiKey> devices) =>
-        devices.FirstOrDefault(d => d.ConnectionType == _effectiveTypes[0])
+        devices.FirstOrDefault(d => d.SupportsConnection(_effectiveTypes[0]))
         ?? devices[0];
 }

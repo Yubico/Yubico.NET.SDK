@@ -33,7 +33,7 @@ internal static class DeviceHelper
     internal static async Task<IYubiKey?> GetDeviceAsync(int? serial, CancellationToken ct = default)
     {
         var all = await YubiKeyManager.FindAllAsync(ConnectionType.All, cancellationToken: ct);
-        var smartCard = all.Where(d => d.ConnectionType == ConnectionType.SmartCard).ToList();
+        var smartCard = all.Where(d => d.SupportsConnection(ConnectionType.SmartCard)).ToList();
 
         if (smartCard.Count == 0)
         {

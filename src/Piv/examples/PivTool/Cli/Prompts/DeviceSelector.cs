@@ -89,7 +89,7 @@ public static class DeviceSelector
             var allDevices = await YubiKeyManager.FindAllAsync(ConnectionType.All, cancellationToken: cancellationToken);
 
             // Filter to only SmartCard/PCSC devices (required for PIV operations)
-            var devices = allDevices.Where(d => d.ConnectionType == ConnectionType.SmartCard).ToList();
+            var devices = allDevices.Where(d => d.SupportsConnection(ConnectionType.SmartCard)).ToList();
 
             if (devices.Count > 0)
             {
@@ -176,7 +176,7 @@ public static class DeviceSelector
     {
         if (info is null)
         {
-            return $"YubiKey ({device.ConnectionType})";
+            return $"YubiKey ({device.AvailableConnections})";
         }
 
         var serial = info.Value.SerialNumber?.ToString() ?? "N/A";

@@ -48,18 +48,18 @@ public sealed class LargeBlobStorage
     private const int KeyLength = 0x04;
     private const int KeyPinUvAuthParam = 0x05;
     private const int KeyPinUvAuthProtocol = 0x06;
-    
+
     // Response keys
     private const int KeyConfig = 0x01;
-    
+
     // Hash size at the end of serialized array
     private const int ArrayHashSize = 16;
-    
+
     private readonly IFidoSession _session;
     private readonly IPinUvAuthProtocol? _protocol;
     private readonly ReadOnlyMemory<byte> _pinUvAuthToken;
     private readonly int _maxFragmentLength;
-    
+
     /// <summary>
     /// Initializes a new instance for read-only operations.
     /// </summary>
@@ -73,11 +73,11 @@ public sealed class LargeBlobStorage
     {
         ArgumentNullException.ThrowIfNull(session);
         _session = session;
-        _maxFragmentLength = maxFragmentLength > 0 
-            ? maxFragmentLength 
+        _maxFragmentLength = maxFragmentLength > 0
+            ? maxFragmentLength
             : throw new ArgumentOutOfRangeException(nameof(maxFragmentLength));
     }
-    
+
     /// <summary>
     /// Initializes a new instance for read and write operations.
     /// </summary>
@@ -100,7 +100,7 @@ public sealed class LargeBlobStorage
         _protocol = protocol;
         _pinUvAuthToken = pinUvAuthToken;
     }
-    
+
     /// <summary>
     /// Reads the entire large blob array from the authenticator.
     /// </summary>
@@ -110,15 +110,15 @@ public sealed class LargeBlobStorage
     public async Task<LargeBlobArray> ReadLargeBlobArrayAsync(CancellationToken cancellationToken = default)
     {
         var data = await ReadRawBlobAsync(cancellationToken).ConfigureAwait(false);
-        
+
         if (data.Length == 0)
         {
             return LargeBlobArray.CreateEmpty();
         }
-        
+
         return LargeBlobArray.Deserialize(data);
     }
-    
+
     /// <summary>
     /// Writes the entire large blob array to the authenticator.
     /// </summary>
@@ -131,18 +131,18 @@ public sealed class LargeBlobStorage
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(array);
-        
+
         if (_protocol is null)
         {
             throw new InvalidOperationException(
                 "PIN/UV authentication is required for writing large blobs. " +
                 "Use the constructor that accepts a protocol and token.");
         }
-        
+
         var serialized = array.Serialize();
         await WriteRawBlobAsync(serialized, cancellationToken).ConfigureAwait(false);
     }
-    
+
     /// <summary>
     /// Gets the blob data for a specific credential.
     /// </summary>
@@ -159,11 +159,11 @@ public sealed class LargeBlobStorage
         {
             throw new ArgumentException("Large blob key must be 32 bytes.", nameof(largeBlobKey));
         }
-        
+
         var array = await ReadLargeBlobArrayAsync(cancellationToken).ConfigureAwait(false);
         return array.FindAndDecrypt(largeBlobKey.Span);
     }
-    
+
     /// <summary>
     /// Sets the blob data for a specific credential.
     /// </summary>
@@ -189,10 +189,10 @@ public sealed class LargeBlobStorage
         {
             throw new ArgumentException("Large blob key must be 32 bytes.", nameof(largeBlobKey));
         }
-        
+
         // Read current array
         var array = await ReadLargeBlobArrayAsync(cancellationToken).ConfigureAwait(false);
-        
+
         // Remove existing entry for this key (if any)
         var newEntries = new List<LargeBlobEntry>();
         foreach (var entry in array.Entries)
@@ -203,16 +203,16 @@ public sealed class LargeBlobStorage
                 newEntries.Add(entry);
             }
         }
-        
+
         // Add new encrypted entry
         var newEntry = LargeBlobEntry.Encrypt(largeBlobKey.Span, data.Span);
         newEntries.Add(newEntry);
-        
+
         // Write back
         var newArray = new LargeBlobArray { Entries = newEntries };
         await WriteLargeBlobArrayAsync(newArray, cancellationToken).ConfigureAwait(false);
     }
-    
+
     /// <summary>
     /// Deletes the blob data for a specific credential.
     /// </summary>
@@ -230,14 +230,14 @@ public sealed class LargeBlobStorage
         {
             throw new ArgumentException("Large blob key must be 32 bytes.", nameof(largeBlobKey));
         }
-        
+
         // Read current array
         var array = await ReadLargeBlobArrayAsync(cancellationToken).ConfigureAwait(false);
-        
+
         // Find and remove entry for this key
         var newEntries = new List<LargeBlobEntry>();
         var found = false;
-        
+
         foreach (var entry in array.Entries)
         {
             if (entry.TryDecrypt(largeBlobKey.Span) is not null)
@@ -250,18 +250,18 @@ public sealed class LargeBlobStorage
                 newEntries.Add(entry);
             }
         }
-        
+
         if (!found)
         {
             return false;
         }
-        
+
         // Write back
         var newArray = new LargeBlobArray { Entries = newEntries };
         await WriteLargeBlobArrayAsync(newArray, cancellationToken).ConfigureAwait(false);
         return true;
     }
-    
+
     /// <summary>
     /// Reads raw blob data from the authenticator (for advanced use).
     /// </summary>
@@ -269,30 +269,30 @@ public sealed class LargeBlobStorage
     {
         using var result = new MemoryStream();
         var offset = 0;
-        
+
         while (true)
         {
             var fragment = await ReadFragmentAsync(offset, _maxFragmentLength, cancellationToken)
                 .ConfigureAwait(false);
-            
+
             if (fragment.Length == 0)
             {
                 break;
             }
-            
+
             result.Write(fragment.Span);
             offset += fragment.Length;
-            
+
             // If we got less than requested, we're done
             if (fragment.Length < _maxFragmentLength)
             {
                 break;
             }
         }
-        
+
         return result.ToArray();
     }
-    
+
     /// <summary>
     /// Reads a single fragment from the blob.
     /// </summary>
@@ -303,31 +303,31 @@ public sealed class LargeBlobStorage
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(2);
-        
+
         // 0x01: get (number of bytes to read)
         writer.WriteInt32(KeyGet);
         writer.WriteInt32(length);
-        
+
         // 0x03: offset
         writer.WriteInt32(KeyOffset);
         writer.WriteInt32(offset);
-        
+
         writer.WriteEndMap();
-        
+
         // Build full request: command byte + CBOR payload
         var payload = writer.Encode();
         var request = new byte[1 + payload.Length];
         request[0] = CtapCommand.LargeBlobs;
         payload.CopyTo(request.AsMemory(1));
-        
+
         var response = await _session.SendCborRequestAsync(
             request,
             cancellationToken).ConfigureAwait(false);
-        
+
         // Parse response - should have config (0x01) with the data
         return ParseReadResponse(response);
     }
-    
+
     /// <summary>
     /// Writes raw blob data to the authenticator (for advanced use).
     /// </summary>
@@ -337,20 +337,20 @@ public sealed class LargeBlobStorage
     {
         var totalLength = data.Length;
         var offset = 0;
-        
+
         while (offset < totalLength)
         {
             var remaining = totalLength - offset;
             var fragmentLength = Math.Min(remaining, _maxFragmentLength);
             var fragment = data.Slice(offset, fragmentLength);
-            
+
             await WriteFragmentAsync(fragment, offset, totalLength, cancellationToken)
                 .ConfigureAwait(false);
-            
+
             offset += fragmentLength;
         }
     }
-    
+
     /// <summary>
     /// Writes a single fragment to the blob.
     /// </summary>
@@ -364,7 +364,7 @@ public sealed class LargeBlobStorage
         // First, compute SHA-256 of the fragment
         Span<byte> fragmentHash = stackalloc byte[32];
         SHA256.HashData(fragment.Span, fragmentHash);
-        
+
         // Build auth message per CTAP 2.1 spec section 6.10.3:
         // authenticate(pinUvAuthToken, 32*0xff || 0x0C || 0x00 || uint32LittleEndian(offset) || SHA-256(contents of set byte string))
         var authMessage = new byte[32 + 2 + 4 + 32];
@@ -377,64 +377,64 @@ public sealed class LargeBlobStorage
             authMessage.AsSpan(34, 4).Reverse();
         }
         fragmentHash.CopyTo(authMessage.AsSpan(38));
-        
+
         var pinUvAuthParam = _protocol!.Authenticate(_pinUvAuthToken.Span, authMessage);
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        
+
         var mapCount = offset == 0 ? 5 : 4; // length only sent with first fragment
         writer.WriteStartMap(mapCount);
-        
+
         // 0x02: set (data to write)
         writer.WriteInt32(KeySet);
         writer.WriteByteString(fragment.Span);
-        
+
         // 0x03: offset
         writer.WriteInt32(KeyOffset);
         writer.WriteInt32(offset);
-        
+
         // 0x04: length (only for first fragment)
         if (offset == 0)
         {
             writer.WriteInt32(KeyLength);
             writer.WriteInt32(totalLength);
         }
-        
+
         // 0x05: pinUvAuthParam
         writer.WriteInt32(KeyPinUvAuthParam);
         writer.WriteByteString(pinUvAuthParam);
-        
+
         // 0x06: pinUvAuthProtocol
         writer.WriteInt32(KeyPinUvAuthProtocol);
         writer.WriteInt32(_protocol.Version);
-        
+
         writer.WriteEndMap();
-        
+
         // Build full request: command byte + CBOR payload
         var payload = writer.Encode();
         var request = new byte[1 + payload.Length];
         request[0] = CtapCommand.LargeBlobs;
         payload.CopyTo(request.AsMemory(1));
-        
+
         await _session.SendCborRequestAsync(
             request,
             cancellationToken).ConfigureAwait(false);
     }
-    
+
     private static ReadOnlyMemory<byte> ParseReadResponse(ReadOnlyMemory<byte> response)
     {
         if (response.Length == 0)
         {
             return ReadOnlyMemory<byte>.Empty;
         }
-        
+
         var reader = new CborReader(response, CborConformanceMode.Ctap2Canonical);
         var mapCount = reader.ReadStartMap() ?? 0;
-        
+
         for (var i = 0; i < mapCount; i++)
         {
             var key = reader.ReadInt32();
-            
+
             if (key == KeyConfig)
             {
                 return reader.ReadByteString();
@@ -444,7 +444,7 @@ public sealed class LargeBlobStorage
                 reader.SkipValue();
             }
         }
-        
+
         return ReadOnlyMemory<byte>.Empty;
     }
 }

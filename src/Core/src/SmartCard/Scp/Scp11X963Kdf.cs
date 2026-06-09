@@ -39,8 +39,8 @@ internal static class Scp11X963Kdf
             !TlvHelper.TryFindValue(0x81, a6Value.Span, out var keyLen))
             throw new InvalidOperationException("Missing required tags (95, 80, 81) in A6 container");
 
-        byte[] sharedInfo = [..keyUsage.Span, ..keyType.Span, ..keyLen.Span];
-        byte[] keyAgreementData = [..oceAuthenticateData.Span, ..ePkSdEcka.Span];
+        byte[] sharedInfo = [.. keyUsage.Span, .. keyType.Span, .. keyLen.Span];
+        byte[] keyAgreementData = [.. oceAuthenticateData.Span, .. ePkSdEcka.Span];
         var keyMaterial = GetSharedSecret(eSkOceEcka, skOceEcka, pkSdEcka, ePkSdEcka);
 
         const int keyCount = 5;
@@ -103,7 +103,8 @@ internal static class Scp11X963Kdf
             Curve = ECCurve.NamedCurves.nistP256,
             Q = new ECPoint
             {
-                X = ePkSdEckaEncodedPoint.Span[1..33].ToArray(), Y = ePkSdEckaEncodedPoint.Span[33..].ToArray()
+                X = ePkSdEckaEncodedPoint.Span[1..33].ToArray(),
+                Y = ePkSdEckaEncodedPoint.Span[33..].ToArray()
             }
         };
 

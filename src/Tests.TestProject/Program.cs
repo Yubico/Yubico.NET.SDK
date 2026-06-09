@@ -29,13 +29,14 @@ app.MapGet("/di-demo/minimal", async (
 
     var deviceInfo = await yubiKeys[0].GetDeviceInfoAsync(cancellationToken);
     var yubiInfo = new YubiInfo(
-        deviceInfo.SerialNumber?.ToString() ?? "Unknown", 
+        deviceInfo.SerialNumber?.ToString() ?? "Unknown",
         deviceInfo.FirmwareVersion.ToString()
     );
-    
-    return Results.Ok(new { 
+
+    return Results.Ok(new
+    {
         Message = "Session type is ManagementSessionSimple",
-        YubiKey = yubiInfo 
+        YubiKey = yubiInfo
     });
 });
 

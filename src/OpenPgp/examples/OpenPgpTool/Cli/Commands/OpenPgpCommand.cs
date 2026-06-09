@@ -1,15 +1,15 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
-using System.Buffers;
-using System.Text;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System.Buffers;
+using System.Text;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.OpenPgp.Credentials;
 using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.OpenPgp.Credentials;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Prompts;
 

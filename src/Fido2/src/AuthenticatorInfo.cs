@@ -61,7 +61,7 @@ public sealed class AuthenticatorInfo
     private const int KeyMaxPinLength = 0x1D;
     private const int KeyEncCredStoreState = 0x1E;
     private const int KeyAuthenticatorConfigCommands = 0x1F;
-    
+
     /// <summary>
     /// Gets the CTAP versions supported by the authenticator.
     /// </summary>
@@ -69,12 +69,12 @@ public sealed class AuthenticatorInfo
     /// Common values: "FIDO_2_0", "FIDO_2_1", "FIDO_2_1_PRE", "U2F_V2"
     /// </remarks>
     public IReadOnlyList<string> Versions { get; init; } = [];
-    
+
     /// <summary>
     /// Gets the extensions supported by the authenticator.
     /// </summary>
     public IReadOnlyList<string> Extensions { get; init; } = [];
-    
+
     /// <summary>
     /// Gets the AAGUID (Authenticator Attestation GUID).
     /// </summary>
@@ -82,7 +82,7 @@ public sealed class AuthenticatorInfo
     /// This is a 128-bit identifier that identifies the type of authenticator.
     /// </remarks>
     public ReadOnlyMemory<byte> Aaguid { get; init; }
-    
+
     /// <summary>
     /// Gets the options supported by the authenticator.
     /// </summary>
@@ -91,107 +91,107 @@ public sealed class AuthenticatorInfo
     /// "plat" (platform device), "clientPin", "credentialMgmt", "bioEnroll", etc.
     /// </remarks>
     public IReadOnlyDictionary<string, bool> Options { get; init; } = ReadOnlyDictionary<string, bool>.Empty;
-    
+
     /// <summary>
     /// Gets the maximum message size in bytes.
     /// </summary>
     public int? MaxMsgSize { get; init; }
-    
+
     /// <summary>
     /// Gets the PIN/UV auth protocol versions supported.
     /// </summary>
     public IReadOnlyList<int> PinUvAuthProtocols { get; init; } = [];
-    
+
     /// <summary>
     /// Gets the maximum number of credentials in the allow/exclude list.
     /// </summary>
     public int? MaxCredentialCountInList { get; init; }
-    
+
     /// <summary>
     /// Gets the maximum credential ID length in bytes.
     /// </summary>
     public int? MaxCredentialIdLength { get; init; }
-    
+
     /// <summary>
     /// Gets the transports supported by the authenticator.
     /// </summary>
     public IReadOnlyList<string> Transports { get; init; } = [];
-    
+
     /// <summary>
     /// Gets the algorithms supported for credential creation.
     /// </summary>
     public IReadOnlyList<PublicKeyCredentialParameters> Algorithms { get; init; } = [];
-    
+
     /// <summary>
     /// Gets the maximum size of the serialized large blob array.
     /// </summary>
     public int? MaxSerializedLargeBlobArray { get; init; }
-    
+
     /// <summary>
     /// Gets whether the authenticator requires PIN change.
     /// </summary>
     public bool? ForcePinChange { get; init; }
-    
+
     /// <summary>
     /// Gets the minimum PIN length required.
     /// </summary>
     public int? MinPinLength { get; init; }
-    
+
     /// <summary>
     /// Gets the firmware version as reported by the authenticator.
     /// </summary>
     public FirmwareVersion? FirmwareVersion { get; init; }
-    
+
     /// <summary>
     /// Gets the maximum credBlob length in bytes.
     /// </summary>
     public int? MaxCredBlobLength { get; init; }
-    
+
     /// <summary>
     /// Gets the maximum number of RP IDs for setMinPINLength.
     /// </summary>
     public int? MaxRpidsForSetMinPinLength { get; init; }
-    
+
     /// <summary>
     /// Gets the preferred number of platform UV attempts.
     /// </summary>
     public int? PreferredPlatformUvAttempts { get; init; }
-    
+
     /// <summary>
     /// Gets the UV modality flags.
     /// </summary>
     public int? UvModality { get; init; }
-    
+
     /// <summary>
     /// Gets the certifications held by the authenticator.
     /// </summary>
     public IReadOnlyDictionary<string, int> Certifications { get; init; } = ReadOnlyDictionary<string, int>.Empty;
-    
+
     /// <summary>
     /// Gets the remaining discoverable credential slots.
     /// </summary>
     public int? RemainingDiscoverableCredentials { get; init; }
-    
+
     /// <summary>
     /// Gets the vendor prototype config commands supported.
     /// </summary>
     public IReadOnlyList<int> VendorPrototypeConfigCommands { get; init; } = [];
-    
+
     /// <summary>
     /// Gets the attestation formats supported.
     /// </summary>
     public IReadOnlyList<string> AttestationFormats { get; init; } = [];
-    
+
     /// <summary>
     /// Gets the UV count since last PIN entry.
     /// </summary>
     public int? UvCountSinceLastPinEntry { get; init; }
-    
+
     /// <summary>
     /// Gets whether long touch is required for reset.
     /// </summary>
     public bool? LongTouchForReset { get; init; }
-    
+
     /// <summary>
     /// Gets the encrypted credential identifier (YubiKey 5.7+).
     /// </summary>
@@ -206,7 +206,7 @@ public sealed class AuthenticatorInfo
     /// </para>
     /// </remarks>
     public ReadOnlyMemory<byte>? EncIdentifier { get; init; }
-    
+
     /// <summary>
     /// Gets the transports available for authenticator reset (CTAP 2.3).
     /// </summary>
@@ -215,7 +215,7 @@ public sealed class AuthenticatorInfo
     /// Common values include "usb", "nfc", and "ble".
     /// </remarks>
     public IReadOnlyList<string> TransportsForReset { get; init; } = [];
-    
+
     /// <summary>
     /// Gets whether PIN complexity policy is enforced (CTAP 2.3).
     /// </summary>
@@ -224,7 +224,7 @@ public sealed class AuthenticatorInfo
     /// by <see cref="PinComplexityPolicyUrl"/>.
     /// </remarks>
     public bool? PinComplexityPolicy { get; init; }
-    
+
     /// <summary>
     /// Gets the URL describing the PIN complexity policy (CTAP 2.3).
     /// </summary>
@@ -233,7 +233,7 @@ public sealed class AuthenticatorInfo
     /// enforced by the authenticator.
     /// </remarks>
     public string? PinComplexityPolicyUrl { get; init; }
-    
+
     /// <summary>
     /// Gets the maximum PIN length supported by the authenticator (CTAP 2.3).
     /// </summary>
@@ -242,7 +242,7 @@ public sealed class AuthenticatorInfo
     /// Complements <see cref="MinPinLength"/>.
     /// </remarks>
     public int? MaxPinLength { get; init; }
-    
+
     /// <summary>
     /// Gets the encrypted credential store state (YubiKey 5.8+).
     /// </summary>
@@ -257,7 +257,7 @@ public sealed class AuthenticatorInfo
     /// </para>
     /// </remarks>
     public ReadOnlyMemory<byte>? EncCredStoreState { get; init; }
-    
+
     /// <summary>
     /// Gets the authenticator config commands supported (CTAP 2.3).
     /// </summary>
@@ -271,7 +271,7 @@ public sealed class AuthenticatorInfo
     /// </list>
     /// </remarks>
     public IReadOnlyList<int> AuthenticatorConfigCommands { get; init; } = [];
-    
+
     /// <summary>
     /// Decodes an AuthenticatorInfo from CBOR-encoded data.
     /// </summary>
@@ -282,14 +282,14 @@ public sealed class AuthenticatorInfo
         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
         return Parse(reader);
     }
-    
+
     /// <summary>
     /// Parses an AuthenticatorInfo from a CBOR reader.
     /// </summary>
     internal static AuthenticatorInfo Parse(CborReader reader)
     {
         var mapLength = reader.ReadStartMap();
-        
+
         List<string>? versions = null;
         List<string>? extensions = null;
         byte[]? aaguid = null;
@@ -321,148 +321,148 @@ public sealed class AuthenticatorInfo
         int? maxPinLength = null;
         byte[]? encCredStoreState = null;
         List<int>? authenticatorConfigCommands = null;
-        
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadInt32();
-            
+
             switch (key)
             {
                 case KeyVersions:
                     versions = ReadStringArray(reader);
                     break;
-                    
+
                 case KeyExtensions:
                     extensions = ReadStringArray(reader);
                     break;
-                    
+
                 case KeyAaguid:
                     aaguid = reader.ReadByteString();
                     break;
-                    
+
                 case KeyOptions:
                     options = ReadBoolMap(reader);
                     break;
-                    
+
                 case KeyMaxMsgSize:
                     maxMsgSize = reader.ReadInt32();
                     break;
-                    
+
                 case KeyPinUvAuthProtocols:
                     pinUvAuthProtocols = ReadIntArray(reader);
                     break;
-                    
+
                 case KeyMaxCredentialCountInList:
                     maxCredentialCountInList = reader.ReadInt32();
                     break;
-                    
+
                 case KeyMaxCredentialIdLength:
                     maxCredentialIdLength = reader.ReadInt32();
                     break;
-                    
+
                 case KeyTransports:
                     transports = ReadStringArray(reader);
                     break;
-                    
+
                 case KeyAlgorithms:
                     algorithms = ReadAlgorithms(reader);
                     break;
-                    
+
                 case KeyMaxSerializedLargeBlobArray:
                     maxSerializedLargeBlobArray = reader.ReadInt32();
                     break;
-                    
+
                 case KeyForcePinChange:
                     forcePinChange = reader.ReadBoolean();
                     break;
-                    
+
                 case KeyMinPinLength:
                     minPinLength = reader.ReadInt32();
                     break;
-                    
+
                 case KeyFirmwareVersion:
                     var fwValue = reader.ReadUInt64();
                     firmwareVersion = DecodeFirmwareVersion(fwValue);
                     break;
-                    
+
                 case KeyMaxCredBlobLength:
                     maxCredBlobLength = reader.ReadInt32();
                     break;
-                    
+
                 case KeyMaxRpidsForSetMinPinLength:
                     maxRpidsForSetMinPinLength = reader.ReadInt32();
                     break;
-                    
+
                 case KeyPreferredPlatformUvAttempts:
                     preferredPlatformUvAttempts = reader.ReadInt32();
                     break;
-                    
+
                 case KeyUvModality:
                     uvModality = reader.ReadInt32();
                     break;
-                    
+
                 case KeyCertifications:
                     certifications = ReadCertifications(reader);
                     break;
-                    
+
                 case KeyRemainingDiscoverableCredentials:
                     remainingDiscoverableCredentials = reader.ReadInt32();
                     break;
-                    
+
                 case KeyVendorPrototypeConfigCommands:
                     vendorPrototypeConfigCommands = ReadIntArray(reader);
                     break;
-                    
+
                 case KeyAttestationFormats:
                     attestationFormats = ReadStringArray(reader);
                     break;
-                    
+
                 case KeyUvCountSinceLastPinEntry:
                     uvCountSinceLastPinEntry = reader.ReadInt32();
                     break;
-                    
+
                 case KeyLongTouchForReset:
                     longTouchForReset = reader.ReadBoolean();
                     break;
-                    
+
                 case KeyEncIdentifier:
                     encIdentifier = reader.ReadByteString();
                     break;
-                    
+
                 case KeyTransportsForReset:
                     transportsForReset = ReadStringArray(reader);
                     break;
-                    
+
                 case KeyPinComplexityPolicy:
                     pinComplexityPolicy = reader.ReadBoolean();
                     break;
-                    
+
                 case KeyPinComplexityPolicyUrl:
                     // CBOR encodes as byte string (UTF-8), decode to string
                     var policyUrlBytes = reader.ReadByteString();
                     pinComplexityPolicyUrl = System.Text.Encoding.UTF8.GetString(policyUrlBytes);
                     break;
-                    
+
                 case KeyMaxPinLength:
                     maxPinLength = reader.ReadInt32();
                     break;
-                    
+
                 case KeyEncCredStoreState:
                     encCredStoreState = reader.ReadByteString();
                     break;
-                    
+
                 case KeyAuthenticatorConfigCommands:
                     authenticatorConfigCommands = ReadIntArray(reader);
                     break;
-                    
+
                 default:
                     reader.SkipValue();
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
-        
+
         return new AuthenticatorInfo
         {
             Versions = versions ?? [],
@@ -502,81 +502,81 @@ public sealed class AuthenticatorInfo
             AuthenticatorConfigCommands = authenticatorConfigCommands ?? []
         };
     }
-    
+
     private static List<string> ReadStringArray(CborReader reader)
     {
         var length = reader.ReadStartArray() ?? 0;
         var result = new List<string>((int)length);
-        
+
         for (var i = 0; i < length; i++)
         {
             result.Add(reader.ReadTextString());
         }
-        
+
         reader.ReadEndArray();
         return result;
     }
-    
+
     private static List<int> ReadIntArray(CborReader reader)
     {
         var length = reader.ReadStartArray() ?? 0;
         var result = new List<int>((int)length);
-        
+
         for (var i = 0; i < length; i++)
         {
             result.Add(reader.ReadInt32());
         }
-        
+
         reader.ReadEndArray();
         return result;
     }
-    
+
     private static Dictionary<string, bool> ReadBoolMap(CborReader reader)
     {
         var length = reader.ReadStartMap() ?? 0;
         var result = new Dictionary<string, bool>((int)length);
-        
+
         for (var i = 0; i < length; i++)
         {
             var key = reader.ReadTextString();
             var value = reader.ReadBoolean();
             result[key] = value;
         }
-        
+
         reader.ReadEndMap();
         return result;
     }
-    
+
     private static Dictionary<string, int> ReadCertifications(CborReader reader)
     {
         var length = reader.ReadStartMap() ?? 0;
         var result = new Dictionary<string, int>((int)length);
-        
+
         for (var i = 0; i < length; i++)
         {
             var key = reader.ReadTextString();
             var value = reader.ReadInt32();
             result[key] = value;
         }
-        
+
         reader.ReadEndMap();
         return result;
     }
-    
+
     private static List<PublicKeyCredentialParameters> ReadAlgorithms(CborReader reader)
     {
         var length = reader.ReadStartArray() ?? 0;
         var result = new List<PublicKeyCredentialParameters>((int)length);
-        
+
         for (var i = 0; i < length; i++)
         {
             result.Add(PublicKeyCredentialParameters.Parse(reader));
         }
-        
+
         reader.ReadEndArray();
         return result;
     }
-    
+
     private static FirmwareVersion DecodeFirmwareVersion(ulong value)
     {
         // Firmware version is encoded as major.minor.patch in the upper bytes
@@ -594,24 +594,24 @@ public sealed class AuthenticatorInfo
 public sealed class PublicKeyCredentialParameters
 {
     private const string TypePublicKey = "public-key";
-    
+
     /// <summary>
     /// Gets the credential type (always "public-key").
     /// </summary>
     public string Type { get; init; } = TypePublicKey;
-    
+
     /// <summary>
     /// Gets the COSE algorithm identifier.
     /// </summary>
     public CoseAlgorithmIdentifier Algorithm { get; init; }
-    
+
     /// <summary>
     /// Creates a new credential parameters instance.
     /// </summary>
     public PublicKeyCredentialParameters()
     {
     }
-    
+
     /// <summary>
     /// Creates a new credential parameters instance with the specified algorithm.
     /// </summary>
@@ -620,22 +620,22 @@ public sealed class PublicKeyCredentialParameters
     {
         Algorithm = algorithm;
     }
-    
+
     /// <summary>
     /// Creates ES256 credential parameters.
     /// </summary>
     public static PublicKeyCredentialParameters CreateES256() => new(CoseAlgorithmIdentifier.ES256);
-    
+
     /// <summary>
     /// Creates RS256 credential parameters.
     /// </summary>
     public static PublicKeyCredentialParameters CreateRS256() => new(CoseAlgorithmIdentifier.RS256);
-    
+
     /// <summary>
     /// Creates EdDSA credential parameters.
     /// </summary>
     public static PublicKeyCredentialParameters CreateEdDSA() => new(CoseAlgorithmIdentifier.EdDSA);
-    
+
     /// <summary>
     /// Encodes this parameters object as CBOR.
     /// </summary>
@@ -643,27 +643,27 @@ public sealed class PublicKeyCredentialParameters
     public void Encode(CborWriter writer)
     {
         writer.WriteStartMap(2);
-        
+
         writer.WriteTextString("type");
         writer.WriteTextString(Type);
-        
+
         writer.WriteTextString("alg");
         writer.WriteInt32((int)Algorithm);
-        
+
         writer.WriteEndMap();
     }
-    
+
     internal static PublicKeyCredentialParameters Parse(CborReader reader)
     {
         var mapLength = reader.ReadStartMap();
-        
+
         string type = TypePublicKey;
         var algorithm = CoseAlgorithmIdentifier.None;
-        
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadTextString();
-            
+
             switch (key)
             {
                 case "type":
@@ -677,9 +677,9 @@ public sealed class PublicKeyCredentialParameters
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
-        
+
         return new PublicKeyCredentialParameters
         {
             Type = type,

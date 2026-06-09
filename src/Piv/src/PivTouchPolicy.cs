@@ -21,13 +21,13 @@ public enum PivTouchPolicy : byte
 {
     /// <summary>Use YubiKey default touch policy.</summary>
     Default = 0x00,
-    
+
     /// <summary>Touch is never required.</summary>
     Never = 0x01,
-    
+
     /// <summary>Touch is required for every operation.</summary>
     Always = 0x02,
-    
+
     /// <summary>Touch is cached for 15 seconds after first touch (requires YubiKey 4.3+).</summary>
     Cached = 0x03
 }

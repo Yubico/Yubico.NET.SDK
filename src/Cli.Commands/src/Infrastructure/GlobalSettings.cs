@@ -1,8 +1,8 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
-using System.ComponentModel;
 using Spectre.Console.Cli;
+using System.ComponentModel;
 
 namespace Yubico.YubiKit.Cli.Commands.Infrastructure;
 

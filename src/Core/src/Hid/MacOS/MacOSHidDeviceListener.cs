@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Text;
 using Microsoft.Extensions.Logging;
+using System.Text;
 using Yubico.YubiKit.Core.PlatformInterop.MacOS.CoreFoundation;
-using IOKitNativeMethods = Yubico.YubiKit.Core.PlatformInterop.MacOS.IOKitFramework.NativeMethods;
 using CFNativeMethods = Yubico.YubiKit.Core.PlatformInterop.MacOS.CoreFoundation.NativeMethods;
+using IOKitNativeMethods = Yubico.YubiKit.Core.PlatformInterop.MacOS.IOKitFramework.NativeMethods;
 
 namespace Yubico.YubiKit.Core.Hid.MacOS;
 
@@ -31,7 +31,7 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
 {
     private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
     private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
-    
+
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<MacOSHidDeviceListener>();
 
     private readonly Lock _syncLock = new();
@@ -175,7 +175,7 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
             var modeBytes = Encoding.UTF8.GetBytes("kCFRunLoopDefaultMode");
             _runLoopMode = CFNativeMethods.CFStringCreateWithCString(
                 IntPtr.Zero,
-                [..modeBytes, 0],
+                [.. modeBytes, 0],
                 0x08000100); // kCFStringEncodingUTF8
 
             // Schedule the HID manager with this run loop

@@ -26,17 +26,17 @@ internal static class CtapConstants
     // Packet Structure
     public const int PacketSize = 64;
     public const int MaxPayloadSize = 7609;     // 64 - 7 + 128 * (64 - 5)
-    
+
     public const int InitHeaderSize = 7;
     public const int InitDataSize = PacketSize - InitHeaderSize;  // 57 bytes
-    
+
     public const int ContinuationHeaderSize = 5;
     public const int ContinuationDataSize = PacketSize - ContinuationHeaderSize;  // 59 bytes
 
     // Channel Management
     public const uint BroadcastChannelId = 0xFFFFFFFF;
     public const int NonceSize = 8;
-    
+
     // Bit masks
     public const byte InitPacketMask = 0x80;    // Bit 7 set for init packets
 }

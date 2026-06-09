@@ -108,7 +108,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         try
         {
             listener.Start();
-            
+
             // Act
             listener.Stop();
 

@@ -29,14 +29,14 @@ namespace Yubico.YubiKit.Core.Hid.MacOS;
 internal sealed class MacOSHidDevice : IHidDevice
 {
     private readonly long _entryId;
-    
+
     public string ReaderName => _entryId.ToString(CultureInfo.InvariantCulture);
-    
+
     /// <summary>
     /// Raw HID descriptor information as reported by the operating system.
     /// </summary>
     public HidDescriptorInfo DescriptorInfo { get; }
-    
+
     /// <summary>
     /// The classified YubiKey HID interface type.
     /// </summary>
@@ -83,9 +83,9 @@ internal sealed class MacOSHidDevice : IHidDevice
                     UsagePage = (ushort)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsagePage) ?? 0),
                     DevicePath = GetEntryId(device).ToString(CultureInfo.InvariantCulture)
                 };
-                
+
                 // Only include Yubico devices with supported interface types
-                if (descriptorInfo.VendorId == 0x1050 && 
+                if (descriptorInfo.VendorId == 0x1050 &&
                     HidInterfaceClassifier.IsSupported(descriptorInfo))
                 {
                     result.Add(new MacOSHidDevice(GetEntryId(device), descriptorInfo));

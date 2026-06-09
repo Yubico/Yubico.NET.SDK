@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System;
 using System.Buffers;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
@@ -100,10 +100,10 @@ internal static class PivAuthenticationProtocol
 
         // Challenge length: 8 bytes for 3DES, 16 bytes for AES
         int challengeLength = managementKeyType == PivManagementKeyType.TripleDes ? 8 : 16;
-        
+
         // Algorithm code for P1
         byte algorithmCode = (byte)managementKeyType;
-        
+
         const byte InsAuthenticate = 0x87;
         const byte SlotCardManagement = 0x9B;
         const byte TagDynAuth = 0x7C;
@@ -119,7 +119,7 @@ internal static class PivAuthenticationProtocol
             byte[] witnessRequest = [TagDynAuth, 0x02, TagAuthWitness, 0x00];
             var witnessCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, witnessRequest);
             var witnessResponse = await protocol.TransmitAndReceiveAsync(witnessCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
-            
+
             if (!witnessResponse.IsOK())
             {
                 throw ApduException.FromStatusWord(witnessResponse.SW, "Management key authentication failed - witness request");
@@ -133,7 +133,7 @@ internal static class PivAuthenticationProtocol
             byte[]? challenge = null;
             byte[]? responseBuffer = null;
             byte[]? expectedResponse = null;
-            
+
             try
             {
                 decryptedWitness = ArrayPool<byte>.Shared.Rent(challengeLength);
@@ -151,7 +151,7 @@ internal static class PivAuthenticationProtocol
                 int bytesWritten = BuildAuthResponse(decryptedWitness.AsSpan(0, challengeLength), challenge.AsSpan(0, challengeLength), responseBuffer.AsSpan(0, responseSize));
                 var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseBuffer.AsMemory(0, bytesWritten));
                 var challengeResponse = await protocol.TransmitAndReceiveAsync(challengeCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
-            
+
                 if (!challengeResponse.IsOK())
                 {
                     throw ApduException.FromStatusWord(challengeResponse.SW, "Management key authentication failed - challenge response");
@@ -578,7 +578,7 @@ internal static class PivAuthenticationProtocol
             // Format: [current PIN padded to 8][new PIN padded to 8]
             currentPin.Span.CopyTo(pinData);
             Array.Fill(pinData, (byte)0xFF, currentPin.Length, 8 - currentPin.Length);
-            
+
             newPin.Span.CopyTo(pinData.AsSpan(8));
             Array.Fill(pinData, (byte)0xFF, 8 + newPin.Length, 8 - newPin.Length);
 

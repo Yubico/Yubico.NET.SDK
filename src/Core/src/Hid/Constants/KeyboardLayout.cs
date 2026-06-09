@@ -14,6 +14,7 @@
 
 // ReSharper disable InconsistentNaming
 namespace Yubico.YubiKit.Core.Hid.Constants;
+
 public enum KeyboardLayout
 {
     ModHex = 0,

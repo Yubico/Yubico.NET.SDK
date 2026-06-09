@@ -28,12 +28,12 @@ public class PcscProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
     where TConnection : IConnection
 {
 
-    public ISmartCardProtocol Create(TConnection connection) 
+    public ISmartCardProtocol Create(TConnection connection)
     {
         if (connection is not ISmartCardConnection scConnection)
             throw new NotSupportedException(
                 $"The connection type {typeof(TConnection).Name} is not supported by this protocol factory.");
-        
+
         return new PcscProtocol(scConnection, logger: loggerFactory.CreateLogger<PcscProtocol>());
     }
 

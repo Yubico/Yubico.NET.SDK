@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2.Credentials;
 using Xunit;
+using Yubico.YubiKit.Fido2.Credentials;
 
 namespace Yubico.YubiKit.Fido2.UnitTests.Credentials;
 
@@ -25,7 +25,7 @@ public class AuthenticatorDataTests
 {
     // Minimum valid authenticator data: 32 bytes rpIdHash + 1 byte flags + 4 bytes signCount
     private static readonly byte[] MinimalAuthData = CreateMinimalAuthData();
-    
+
     private static byte[] CreateMinimalAuthData()
     {
         var data = new byte[37];
@@ -40,12 +40,12 @@ public class AuthenticatorDataTests
         data[36] = 0x01;
         return data;
     }
-    
+
     [Fact]
     public void Parse_MinimalAuthData_ReturnsValidResult()
     {
         var authData = AuthenticatorData.Parse(MinimalAuthData);
-        
+
         Assert.Equal(32, authData.RpIdHash.Length);
         Assert.True(authData.UserPresent);
         Assert.False(authData.UserVerified);
@@ -53,43 +53,43 @@ public class AuthenticatorDataTests
         Assert.Null(authData.AttestedCredentialData);
         Assert.Null(authData.Extensions);
     }
-    
+
     [Fact]
     public void Parse_WithUserVerifiedFlag_ReturnsUserVerified()
     {
         var data = MinimalAuthData.ToArray();
         data[32] = 0x05; // UP + UV flags
-        
+
         var authData = AuthenticatorData.Parse(data);
-        
+
         Assert.True(authData.UserPresent);
         Assert.True(authData.UserVerified);
     }
-    
+
     [Fact]
     public void Parse_TooShort_ThrowsArgumentException()
     {
         var shortData = new byte[36]; // Needs 37
-        
+
         Assert.Throws<ArgumentException>(() => AuthenticatorData.Parse(shortData));
     }
-    
+
     [Fact]
     public void VerifyRpIdHash_MatchingRpId_ReturnsTrue()
     {
         var authData = AuthenticatorData.Parse(MinimalAuthData);
-        
+
         Assert.True(authData.VerifyRpIdHash("example.com"));
     }
-    
+
     [Fact]
     public void VerifyRpIdHash_NonMatchingRpId_ReturnsFalse()
     {
         var authData = AuthenticatorData.Parse(MinimalAuthData);
-        
+
         Assert.False(authData.VerifyRpIdHash("different.com"));
     }
-    
+
     [Fact]
     public void Parse_SignCountBigEndian_ParsesCorrectly()
     {
@@ -99,51 +99,51 @@ public class AuthenticatorDataTests
         data[34] = 0x02;
         data[35] = 0x03;
         data[36] = 0x04;
-        
+
         var authData = AuthenticatorData.Parse(data);
-        
+
         Assert.Equal(0x01020304u, authData.SignCount);
     }
-    
+
     [Fact]
     public void Parse_BackupFlags_ParsesCorrectly()
     {
         var data = MinimalAuthData.ToArray();
         data[32] = 0x19; // UP + BE + BS
-        
+
         var authData = AuthenticatorData.Parse(data);
-        
+
         Assert.True(authData.BackupEligible);
         Assert.True(authData.BackedUp);
     }
-    
+
     [Fact]
     public void Parse_AttestedCredentialDataFlag_ReturnsTrue()
     {
         var data = MinimalAuthData.ToArray();
         data[32] = 0x41; // UP + AT flag
-        // Note: This would fail parsing without actual attested credential data
-        // Just test the flag detection logic
-        
+                         // Note: This would fail parsing without actual attested credential data
+                         // Just test the flag detection logic
+
         var flags = (AuthenticatorDataFlags)data[32];
         Assert.True(flags.HasFlag(AuthenticatorDataFlags.AttestedCredentialData));
     }
-    
+
     [Fact]
     public void Parse_ExtensionDataFlag_ReturnsTrue()
     {
         var data = MinimalAuthData.ToArray();
         data[32] = 0x81; // UP + ED flag
-        
+
         var flags = (AuthenticatorDataFlags)data[32];
         Assert.True(flags.HasFlag(AuthenticatorDataFlags.ExtensionData));
     }
-    
+
     [Fact]
     public void RawData_ContainsOriginalBytes()
     {
         var authData = AuthenticatorData.Parse(MinimalAuthData);
-        
+
         Assert.Equal(MinimalAuthData.Length, authData.RawData.Length);
         Assert.True(MinimalAuthData.AsSpan().SequenceEqual(authData.RawData.Span));
     }

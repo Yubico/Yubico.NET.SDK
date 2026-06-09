@@ -30,7 +30,7 @@ public class PivMetadataTests
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     };
-    
+
     private static readonly byte[] DefaultAesManagementKey = new byte[]
     {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -47,9 +47,9 @@ public class PivMetadataTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         var metadata = await session.GetPinMetadataAsync();
-        
+
         Assert.True(metadata.IsDefault);
         Assert.Equal(3, metadata.TotalRetries);
         Assert.Equal(3, metadata.RetriesRemaining);
@@ -61,9 +61,9 @@ public class PivMetadataTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
-        
+
         Assert.Null(metadata);
     }
 
@@ -75,9 +75,9 @@ public class PivMetadataTests
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
-        
+
         var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
-        
+
         Assert.NotNull(metadata);
         Assert.Equal(PivAlgorithm.EccP256, metadata.Value.Algorithm);
         Assert.True(metadata.Value.IsGenerated);
@@ -89,9 +89,9 @@ public class PivMetadataTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         var metadata = await session.GetManagementKeyMetadataAsync();
-        
+
         Assert.True(metadata.IsDefault);
         // Key type depends on firmware version
         if (state.FirmwareVersion >= new FirmwareVersion(5, 7, 0))
@@ -109,13 +109,13 @@ public class PivMetadataTests
     public async Task GetBioMetadataAsync_NonBioDevice_ThrowsOrReturnsError(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
-        
+
         var ex = await Record.ExceptionAsync(() => session.GetBioMetadataAsync());
-        
+
         // Only accept specific known error responses for non-Bio devices
         Assert.True(
-            ex is NotSupportedException || 
-            (ex is ApduException apduEx && 
+            ex is NotSupportedException ||
+            (ex is ApduException apduEx &&
                 (apduEx.SW == 0x6D00 || // INS not supported
                  apduEx.SW == 0x6A81 || // Function not supported
                  apduEx.SW == 0x6985 || // Conditions of use not satisfied

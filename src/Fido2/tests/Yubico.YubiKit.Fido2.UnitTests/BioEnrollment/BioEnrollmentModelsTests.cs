@@ -34,16 +34,16 @@ public class BioEnrollmentModelsTests
         writer.WriteInt32(5);
         writer.WriteEndMap();
         var cbor = writer.Encode();
-        
+
         // Act
         var info = FingerprintSensorInfo.Decode(cbor);
-        
+
         // Assert
         Assert.Equal(FingerprintKind.Touch, info.FingerprintKind);
         Assert.Equal(5, info.MaxCaptureSamplesRequiredForEnroll);
         Assert.Null(info.MaxTemplateCount);
     }
-    
+
     [Fact]
     public void FingerprintSensorInfo_Decode_ParsesSwipeSensor()
     {
@@ -56,15 +56,15 @@ public class BioEnrollmentModelsTests
         writer.WriteInt32(12);
         writer.WriteEndMap();
         var cbor = writer.Encode();
-        
+
         // Act
         var info = FingerprintSensorInfo.Decode(cbor);
-        
+
         // Assert
         Assert.Equal(FingerprintKind.Swipe, info.FingerprintKind);
         Assert.Equal(12, info.MaxCaptureSamplesRequiredForEnroll);
     }
-    
+
     [Fact]
     public void FingerprintSensorInfo_Decode_ParsesMaxTemplateCount()
     {
@@ -79,16 +79,16 @@ public class BioEnrollmentModelsTests
         writer.WriteInt32(3);
         writer.WriteEndMap();
         var cbor = writer.Encode();
-        
+
         // Act
         var info = FingerprintSensorInfo.Decode(cbor);
-        
+
         // Assert
         Assert.Equal(FingerprintKind.Touch, info.FingerprintKind);
         Assert.Equal(5, info.MaxCaptureSamplesRequiredForEnroll);
         Assert.Equal(3, info.MaxTemplateCount);
     }
-    
+
     [Fact]
     public void FingerprintSensorInfo_Decode_IgnoresUnknownKeys()
     {
@@ -105,15 +105,15 @@ public class BioEnrollmentModelsTests
         writer.WriteInt32(42);
         writer.WriteEndMap();
         var cbor = writer.Encode();
-        
+
         // Act
         var info = FingerprintSensorInfo.Decode(cbor);
-        
+
         // Assert
         Assert.Equal(FingerprintKind.Touch, info.FingerprintKind);
         Assert.Equal(5, info.MaxCaptureSamplesRequiredForEnroll);
     }
-    
+
     [Fact]
     public void EnrollmentSampleResult_Decode_ParsesFirstSample()
     {
@@ -129,17 +129,17 @@ public class BioEnrollmentModelsTests
         writer.WriteInt32(4);
         writer.WriteEndMap();
         var cbor = writer.Encode();
-        
+
         // Act
         var result = EnrollmentSampleResult.Decode(cbor);
-        
+
         // Assert
         Assert.Equal(templateId, result.TemplateId.ToArray());
         Assert.Equal(FingerprintSampleStatus.Good, result.LastSampleStatus);
         Assert.Equal(4, result.RemainingSamples);
         Assert.False(result.IsComplete);
     }
-    
+
     [Fact]
     public void EnrollmentSampleResult_Decode_ParsesCompletedEnrollment()
     {
@@ -155,15 +155,15 @@ public class BioEnrollmentModelsTests
         writer.WriteInt32(0);
         writer.WriteEndMap();
         var cbor = writer.Encode();
-        
+
         // Act
         var result = EnrollmentSampleResult.Decode(cbor);
-        
+
         // Assert
         Assert.Equal(0, result.RemainingSamples);
         Assert.True(result.IsComplete);
     }
-    
+
     [Fact]
     public void EnrollmentSampleResult_Decode_ParsesPoorQualitySample()
     {
@@ -179,16 +179,16 @@ public class BioEnrollmentModelsTests
         writer.WriteInt32(3); // May not decrement on poor quality
         writer.WriteEndMap();
         var cbor = writer.Encode();
-        
+
         // Act
         var result = EnrollmentSampleResult.Decode(cbor);
-        
+
         // Assert
         Assert.Equal(FingerprintSampleStatus.PoorQuality, result.LastSampleStatus);
         Assert.Equal(3, result.RemainingSamples);
         Assert.False(result.IsComplete);
     }
-    
+
     [Theory]
     [InlineData(FingerprintSampleStatus.TooHigh, 1)]
     [InlineData(FingerprintSampleStatus.TooLow, 2)]
@@ -218,14 +218,14 @@ public class BioEnrollmentModelsTests
         writer.WriteInt32(2);
         writer.WriteEndMap();
         var cbor = writer.Encode();
-        
+
         // Act
         var result = EnrollmentSampleResult.Decode(cbor);
-        
+
         // Assert
         Assert.Equal(expectedStatus, result.LastSampleStatus);
     }
-    
+
     [Fact]
     public void TemplateInfo_Decode_ParsesBasicTemplate()
     {
@@ -237,16 +237,16 @@ public class BioEnrollmentModelsTests
         writer.WriteByteString(templateId);
         writer.WriteEndMap();
         var cbor = writer.Encode();
-        
+
         // Act
         var info = TemplateInfo.Decode(cbor);
-        
+
         // Assert
         Assert.Equal(templateId, info.TemplateId.ToArray());
         Assert.Null(info.FriendlyName);
         Assert.Null(info.SampleCount);
     }
-    
+
     [Fact]
     public void TemplateInfo_Decode_ParsesWithFriendlyName()
     {
@@ -261,15 +261,15 @@ public class BioEnrollmentModelsTests
         writer.WriteTextString(friendlyName);
         writer.WriteEndMap();
         var cbor = writer.Encode();
-        
+
         // Act
         var info = TemplateInfo.Decode(cbor);
-        
+
         // Assert
         Assert.Equal(templateId, info.TemplateId.ToArray());
         Assert.Equal(friendlyName, info.FriendlyName);
     }
-    
+
     [Fact]
     public void TemplateInfo_Decode_ParsesWithSampleCount()
     {
@@ -285,16 +285,16 @@ public class BioEnrollmentModelsTests
         writer.WriteInt32(5);
         writer.WriteEndMap();
         var cbor = writer.Encode();
-        
+
         // Act
         var info = TemplateInfo.Decode(cbor);
-        
+
         // Assert
         Assert.Equal(templateId, info.TemplateId.ToArray());
         Assert.Equal("Left Thumb", info.FriendlyName);
         Assert.Equal(5, info.SampleCount);
     }
-    
+
     [Fact]
     public void EnrollmentEnumerationResult_Decode_ParsesSingleTemplate()
     {
@@ -308,16 +308,16 @@ public class BioEnrollmentModelsTests
         writer.WriteTextString("My Finger");
         writer.WriteEndMap();
         var cbor = writer.Encode();
-        
+
         // Act
         var result = EnrollmentEnumerationResult.Decode(cbor);
-        
+
         // Assert
         Assert.Single(result.Templates);
         Assert.Equal(templateId, result.Templates[0].TemplateId.ToArray());
         Assert.Equal("My Finger", result.Templates[0].FriendlyName);
     }
-    
+
     [Fact]
     public void EnrollmentEnumerationResult_FromTemplates_CreatesResult()
     {
@@ -327,16 +327,16 @@ public class BioEnrollmentModelsTests
             new() { TemplateId = new byte[] { 1, 2, 3 }, FriendlyName = "Finger 1" },
             new() { TemplateId = new byte[] { 4, 5, 6 }, FriendlyName = "Finger 2" }
         };
-        
+
         // Act
         var result = EnrollmentEnumerationResult.FromTemplates(templates);
-        
+
         // Assert
         Assert.Equal(2, result.Templates.Count);
         Assert.Equal("Finger 1", result.Templates[0].FriendlyName);
         Assert.Equal("Finger 2", result.Templates[1].FriendlyName);
     }
-    
+
     [Fact]
     public void FingerprintKind_HasCorrectValues()
     {
@@ -344,7 +344,7 @@ public class BioEnrollmentModelsTests
         Assert.Equal(1, (int)FingerprintKind.Touch);
         Assert.Equal(2, (int)FingerprintKind.Swipe);
     }
-    
+
     [Fact]
     public void FingerprintModality_HasCorrectValue()
     {

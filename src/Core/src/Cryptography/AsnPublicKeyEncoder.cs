@@ -124,7 +124,7 @@ internal static class AsnPublicKeyEncoder
 
         if (parameters.Curve.Oid.Value is null)
             throw new ArgumentException("Curve OID is null.");
-        
+
         var curveOid = parameters.Curve.Oid.Value;
 
         // Create the uncompressed EC point format: 0x04 || X || Y

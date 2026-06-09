@@ -152,4 +152,3 @@ public static class AuthorizedDevices
     /// </summary>
     public static int Count => GetAll().Count;
 }
-

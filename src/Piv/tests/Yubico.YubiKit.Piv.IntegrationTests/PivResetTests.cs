@@ -29,7 +29,7 @@ public class PivResetTests
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     };
-    
+
     private static readonly byte[] DefaultAesManagementKey = new byte[]
     {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -45,9 +45,9 @@ public class PivResetTests
     public async Task ResetAsync_RestoresToDefaults(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
-        
+
         await session.ResetAsync();
-        
+
         // Verify default state - management key type resets to TripleDes (or AES for fw >= 5.7.0)
         if (state.FirmwareVersion >= new FirmwareVersion(5, 7, 0))
         {
@@ -57,7 +57,7 @@ public class PivResetTests
         {
             Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
         }
-        
+
         // Verify we can authenticate with default management key
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
     }
@@ -67,9 +67,9 @@ public class PivResetTests
     public async Task ResetAsync_PinMetadataShowsDefault(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
-        
+
         await session.ResetAsync();
-        
+
         var pinMetadata = await session.GetPinMetadataAsync();
         Assert.True(pinMetadata.IsDefault);
         Assert.Equal(3, pinMetadata.TotalRetries);
@@ -82,14 +82,14 @@ public class PivResetTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         // Generate a key in a slot
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
-        
+
         // Reset again
         await session.ResetAsync();
-        
+
         // Verify slot is empty via metadata (null means no key)
         var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
         Assert.Null(metadata);

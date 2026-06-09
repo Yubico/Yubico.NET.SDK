@@ -27,9 +27,9 @@ public class MonitorService_Disabled_Tests : IAsyncLifetime
         // Don't start monitoring
         return Task.CompletedTask;
     }
-    
+
     public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
-    
+
     [Fact]
     public async Task WhenMonitoringDisabled_StillFindsDevicesOnDemand()
     {

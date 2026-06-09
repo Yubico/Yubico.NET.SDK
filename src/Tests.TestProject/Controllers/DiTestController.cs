@@ -29,13 +29,14 @@ public class DiTestController
         var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken);
 
         var yubiInfo = new YubiInfo(
-            deviceInfo.SerialNumber?.ToString() ?? "Unknown", 
+            deviceInfo.SerialNumber?.ToString() ?? "Unknown",
             deviceInfo.FirmwareVersion.ToString()
         );
-        
-        return Ok(new { 
+
+        return Ok(new
+        {
             Message = $"Session type is ManagementSessionSimple",
-            YubiKey = yubiInfo 
+            YubiKey = yubiInfo
         });
     }
 }

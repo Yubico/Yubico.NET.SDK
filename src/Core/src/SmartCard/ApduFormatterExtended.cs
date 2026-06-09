@@ -29,10 +29,10 @@ internal class ApduFormatterExtended(int maxApduSize) : IApduFormatter
         // Case 2E (no data, extended Le): CLA INS P1 P2 00 00 Le_hi Le_lo (7 bytes) -- simplified to Le_hi Le_lo for <=256
         // Case 3E (data, no Le): CLA INS P1 P2 00 Lc_hi Lc_lo [data] (7+ bytes)
         // Case 4E (data, extended Le): CLA INS P1 P2 00 Lc_hi Lc_lo [data] Le_hi Le_lo (9+ bytes)
-        
+
         bool hasData = data.Length > 0;
         bool hasLe = le > 0;
-        
+
         int totalLength;
         if (!hasData && !hasLe)
         {
@@ -54,7 +54,7 @@ internal class ApduFormatterExtended(int maxApduSize) : IApduFormatter
             // Case 4E: Header + 00 + 2-byte Lc + data + 2-byte Le
             totalLength = 4 + 1 + 2 + data.Length + 2;
         }
-        
+
         if (totalLength > maxApduSize)
             throw new NotSupportedException("APDU length exceeds YubiKey capability.");
 

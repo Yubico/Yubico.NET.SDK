@@ -42,7 +42,7 @@ public sealed class FingerprintBioEnrollment
     private readonly IPinUvAuthProtocol _protocol;
     private readonly ReadOnlyMemory<byte> _pinUvAuthToken;
     private readonly byte _command;
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="FingerprintBioEnrollment"/> class.
     /// </summary>
@@ -61,15 +61,15 @@ public sealed class FingerprintBioEnrollment
     {
         ArgumentNullException.ThrowIfNull(session);
         ArgumentNullException.ThrowIfNull(protocol);
-        
+
         _session = session;
         _protocol = protocol;
         _pinUvAuthToken = pinUvAuthToken;
-        _command = usePreviewCommand 
-            ? CtapCommand.PrototypeBioEnrollment 
+        _command = usePreviewCommand
+            ? CtapCommand.PrototypeBioEnrollment
             : CtapCommand.BioEnrollment;
     }
-    
+
     /// <summary>
     /// Gets information about the fingerprint sensor.
     /// </summary>
@@ -84,10 +84,10 @@ public sealed class FingerprintBioEnrollment
         var payload = BuildGetSensorInfoPayload();
         var response = await SendBioEnrollmentCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
-        
+
         return FingerprintSensorInfo.Decode(response);
     }
-    
+
     /// <summary>
     /// Begins a new fingerprint enrollment.
     /// </summary>
@@ -117,10 +117,10 @@ public sealed class FingerprintBioEnrollment
         var payload = BuildEnrollBeginPayload(timeout);
         var response = await SendBioEnrollmentCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
-        
+
         return EnrollmentSampleResult.Decode(response);
     }
-    
+
     /// <summary>
     /// Captures the next sample for an ongoing fingerprint enrollment.
     /// </summary>
@@ -149,10 +149,10 @@ public sealed class FingerprintBioEnrollment
         var payload = BuildEnrollCaptureNextPayload(templateId, timeout);
         var response = await SendBioEnrollmentCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
-        
+
         return EnrollmentSampleResult.Decode(response);
     }
-    
+
     /// <summary>
     /// Cancels an ongoing fingerprint enrollment.
     /// </summary>
@@ -167,7 +167,7 @@ public sealed class FingerprintBioEnrollment
         await SendBioEnrollmentCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
     }
-    
+
     /// <summary>
     /// Enumerates all enrolled fingerprint templates.
     /// </summary>
@@ -181,7 +181,7 @@ public sealed class FingerprintBioEnrollment
     {
         var payload = BuildEnumerateEnrollmentsPayload();
         ReadOnlyMemory<byte> response;
-        
+
         try
         {
             response = await SendBioEnrollmentCommandAsync(payload, cancellationToken)
@@ -192,49 +192,49 @@ public sealed class FingerprintBioEnrollment
             // No templates enrolled - return empty list
             return [];
         }
-        
+
         var results = new List<TemplateInfo>();
         var reader = new CborReader(response, CborConformanceMode.Lax);
-        
+
         // Parse the response which may contain a list or single template
         var mapCount = reader.ReadStartMap() ?? 0;
         ReadOnlyMemory<byte>? templateId = null;
         string? friendlyName = null;
-        
+
         for (var i = 0; i < mapCount; i++)
         {
             var key = reader.ReadInt32();
-            
+
             switch (key)
             {
                 case 4: // templateId
                     templateId = reader.ReadByteString();
                     break;
-                    
+
                 case 7: // templateFriendlyName
                     friendlyName = reader.ReadTextString();
                     break;
-                    
+
                 default:
                     reader.SkipValue();
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
-        
+
         if (templateId.HasValue)
         {
-            results.Add(new TemplateInfo 
-            { 
+            results.Add(new TemplateInfo
+            {
                 TemplateId = templateId.Value,
                 FriendlyName = friendlyName
             });
         }
-        
+
         return results;
     }
-    
+
     /// <summary>
     /// Sets a friendly name for an enrolled fingerprint template.
     /// </summary>
@@ -250,12 +250,12 @@ public sealed class FingerprintBioEnrollment
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(friendlyName);
-        
+
         var payload = BuildSetFriendlyNamePayload(templateId, friendlyName);
         await SendBioEnrollmentCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
     }
-    
+
     /// <summary>
     /// Removes an enrolled fingerprint template.
     /// </summary>
@@ -272,7 +272,7 @@ public sealed class FingerprintBioEnrollment
         await SendBioEnrollmentCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
     }
-    
+
     private async Task<ReadOnlyMemory<byte>> SendBioEnrollmentCommandAsync(
         ReadOnlyMemory<byte> payload,
         CancellationToken cancellationToken)
@@ -281,206 +281,206 @@ public sealed class FingerprintBioEnrollment
         var request = new byte[1 + payload.Length];
         request[0] = _command;
         payload.CopyTo(request.AsMemory(1));
-        
+
         return await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
     }
-    
+
     private ReadOnlyMemory<byte> BuildGetSensorInfoPayload()
     {
         // Get sensor info uses modality parameter but no auth
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(1);
-        
+
         // 0x01: modality (fingerprint = 0x01)
         writer.WriteInt32(1);
         writer.WriteInt32(FingerprintModality.Fingerprint);
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
-    
+
     private ReadOnlyMemory<byte> BuildEnrollBeginPayload(int? timeout)
     {
         const byte subCommand = BioEnrollmentSubCommand.EnrollBegin;
-        
+
         // Build message to authenticate (subCommand only for enrollBegin)
         var subCommandBytes = new byte[] { subCommand };
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, subCommandBytes);
-        
+
         // Count map entries
         var mapSize = 4; // modality, subCommand, pinUvAuthProtocol, pinUvAuthParam
         if (timeout.HasValue) mapSize++;
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(mapSize);
-        
+
         // 0x01: modality
         writer.WriteInt32(1);
         writer.WriteInt32(FingerprintModality.Fingerprint);
-        
+
         // 0x02: subCommand
         writer.WriteInt32(2);
         writer.WriteInt32(subCommand);
-        
+
         // 0x04: pinUvAuthProtocol
         writer.WriteInt32(4);
         writer.WriteInt32(_protocol.Version);
-        
+
         // 0x05: pinUvAuthParam
         writer.WriteInt32(5);
         writer.WriteByteString(pinUvAuthParam.AsSpan());
-        
+
         // 0x06: timeout (optional)
         if (timeout.HasValue)
         {
             writer.WriteInt32(6);
             writer.WriteInt32(timeout.Value);
         }
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
-    
+
     private ReadOnlyMemory<byte> BuildEnrollCaptureNextPayload(
         ReadOnlyMemory<byte> templateId,
         int? timeout)
     {
         const byte subCommand = BioEnrollmentSubCommand.EnrollCaptureNextSample;
-        
+
         // Build subCommandParams
         var subCommandParams = BuildTemplateIdParam(templateId);
-        
+
         // Build message to authenticate: subCommand || subCommandParams
         var messageToAuth = new byte[1 + subCommandParams.Length];
         messageToAuth[0] = subCommand;
         subCommandParams.Span.CopyTo(messageToAuth.AsSpan(1));
-        
+
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, messageToAuth);
-        
+
         // Count map entries
         var mapSize = 5; // modality, subCommand, subCommandParams, pinUvAuthProtocol, pinUvAuthParam
         if (timeout.HasValue) mapSize++;
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(mapSize);
-        
+
         // 0x01: modality
         writer.WriteInt32(1);
         writer.WriteInt32(FingerprintModality.Fingerprint);
-        
+
         // 0x02: subCommand
         writer.WriteInt32(2);
         writer.WriteInt32(subCommand);
-        
+
         // 0x03: subCommandParams
         writer.WriteInt32(3);
         writer.WriteStartMap(1);
         writer.WriteInt32(1); // templateId key
         writer.WriteByteString(templateId.Span);
         writer.WriteEndMap();
-        
+
         // 0x04: pinUvAuthProtocol
         writer.WriteInt32(4);
         writer.WriteInt32(_protocol.Version);
-        
+
         // 0x05: pinUvAuthParam
         writer.WriteInt32(5);
         writer.WriteByteString(pinUvAuthParam.AsSpan());
-        
+
         // 0x06: timeout (optional)
         if (timeout.HasValue)
         {
             writer.WriteInt32(6);
             writer.WriteInt32(timeout.Value);
         }
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
-    
+
     private ReadOnlyMemory<byte> BuildEnrollCancelPayload()
     {
         const byte subCommand = BioEnrollmentSubCommand.EnrollCancel;
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(2);
-        
+
         // 0x01: modality
         writer.WriteInt32(1);
         writer.WriteInt32(FingerprintModality.Fingerprint);
-        
+
         // 0x02: subCommand
         writer.WriteInt32(2);
         writer.WriteInt32(subCommand);
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
-    
+
     private ReadOnlyMemory<byte> BuildEnumerateEnrollmentsPayload()
     {
         const byte subCommand = BioEnrollmentSubCommand.EnumerateEnrollments;
-        
+
         // Build PIN/UV auth param over just the subcommand
         var subCommandBytes = new byte[] { subCommand };
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, subCommandBytes);
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(4);
-        
+
         // 0x01: modality
         writer.WriteInt32(1);
         writer.WriteInt32(FingerprintModality.Fingerprint);
-        
+
         // 0x02: subCommand
         writer.WriteInt32(2);
         writer.WriteInt32(subCommand);
-        
+
         // 0x04: pinUvAuthProtocol
         writer.WriteInt32(4);
         writer.WriteInt32(_protocol.Version);
-        
+
         // 0x05: pinUvAuthParam
         writer.WriteInt32(5);
         writer.WriteByteString(pinUvAuthParam.AsSpan());
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
-    
+
     private ReadOnlyMemory<byte> BuildSetFriendlyNamePayload(
         ReadOnlyMemory<byte> templateId,
         string friendlyName)
     {
         const byte subCommand = BioEnrollmentSubCommand.SetFriendlyName;
-        
+
         // Build subCommandParams
         var subCommandParams = BuildSetNameParams(templateId, friendlyName);
-        
+
         // Build message to authenticate: subCommand || subCommandParams
         var messageToAuth = new byte[1 + subCommandParams.Length];
         messageToAuth[0] = subCommand;
         subCommandParams.Span.CopyTo(messageToAuth.AsSpan(1));
-        
+
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, messageToAuth);
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(5);
-        
+
         // 0x01: modality
         writer.WriteInt32(1);
         writer.WriteInt32(FingerprintModality.Fingerprint);
-        
+
         // 0x02: subCommand
         writer.WriteInt32(2);
         writer.WriteInt32(subCommand);
-        
+
         // 0x03: subCommandParams
         writer.WriteInt32(3);
         writer.WriteStartMap(2);
@@ -489,65 +489,65 @@ public sealed class FingerprintBioEnrollment
         writer.WriteInt32(2); // templateFriendlyName key
         writer.WriteTextString(friendlyName);
         writer.WriteEndMap();
-        
+
         // 0x04: pinUvAuthProtocol
         writer.WriteInt32(4);
         writer.WriteInt32(_protocol.Version);
-        
+
         // 0x05: pinUvAuthParam
         writer.WriteInt32(5);
         writer.WriteByteString(pinUvAuthParam.AsSpan());
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
-    
+
     private ReadOnlyMemory<byte> BuildRemoveEnrollmentPayload(ReadOnlyMemory<byte> templateId)
     {
         const byte subCommand = BioEnrollmentSubCommand.RemoveEnrollment;
-        
+
         // Build subCommandParams
         var subCommandParams = BuildTemplateIdParam(templateId);
-        
+
         // Build message to authenticate: subCommand || subCommandParams
         var messageToAuth = new byte[1 + subCommandParams.Length];
         messageToAuth[0] = subCommand;
         subCommandParams.Span.CopyTo(messageToAuth.AsSpan(1));
-        
+
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, messageToAuth);
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(5);
-        
+
         // 0x01: modality
         writer.WriteInt32(1);
         writer.WriteInt32(FingerprintModality.Fingerprint);
-        
+
         // 0x02: subCommand
         writer.WriteInt32(2);
         writer.WriteInt32(subCommand);
-        
+
         // 0x03: subCommandParams
         writer.WriteInt32(3);
         writer.WriteStartMap(1);
         writer.WriteInt32(1); // templateId key
         writer.WriteByteString(templateId.Span);
         writer.WriteEndMap();
-        
+
         // 0x04: pinUvAuthProtocol
         writer.WriteInt32(4);
         writer.WriteInt32(_protocol.Version);
-        
+
         // 0x05: pinUvAuthParam
         writer.WriteInt32(5);
         writer.WriteByteString(pinUvAuthParam.AsSpan());
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
-    
+
     private static ReadOnlyMemory<byte> BuildTemplateIdParam(ReadOnlyMemory<byte> templateId)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -557,7 +557,7 @@ public sealed class FingerprintBioEnrollment
         writer.WriteEndMap();
         return writer.Encode();
     }
-    
+
     private static ReadOnlyMemory<byte> BuildSetNameParams(
         ReadOnlyMemory<byte> templateId,
         string friendlyName)

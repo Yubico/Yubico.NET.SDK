@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.PlatformInterop.Linux.Libc;
 using Yubico.YubiKit.Core.PlatformInterop.Linux.Udev;
 using LibcNativeMethods = Yubico.YubiKit.Core.PlatformInterop.Linux.Libc.NativeMethods;
@@ -86,7 +86,7 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
                     _monitorHandle,
                     UdevNativeMethods.UdevSubsystemName,
                     null);
-                
+
                 if (filterResult < 0)
                 {
                     Logger.LogWarning("Failed to add udev filter: {Result}", filterResult);
@@ -197,7 +197,7 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
                     {
                         continue;
                     }
-                    
+
                     Logger.LogWarning("poll() failed with error: {Error}", error);
                     continue;
                 }

@@ -63,7 +63,7 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
         InputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
         OutputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
-        
+
     }
 
     public int InputReportSize { get; }
@@ -73,7 +73,7 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        
+
         if (_reportsQueue.TryDequeue(out var report))
         {
             return report;
@@ -181,7 +181,7 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
         byte[] report,
         long reportLength)
     {
-        
+
         if (result != 0 || type != IOKitHidConstants.kIOHidReportTypeInput || reportId != 0 || reportLength < 0)
         {
             return;

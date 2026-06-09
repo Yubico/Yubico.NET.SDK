@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.SmartCard;
 
@@ -106,10 +106,10 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
             // Setup Rx subject for event coalescing
             _rescanTrigger = new Subject<Unit>();
-            
+
             // Setup listeners BEFORE starting them
             SetupListeners();
-            
+
             _monitoringCts = new CancellationTokenSource();
             _monitoringTask = Task.Run(() => MonitoringLoopAsync(_monitoringCts.Token));
 

@@ -32,7 +32,7 @@ public class PivCertificateTests
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     };
-    
+
     private static readonly byte[] DefaultAesManagementKey = new byte[]
     {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -51,13 +51,13 @@ public class PivCertificateTests
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         var publicKey = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
-        
+
         // Create a self-signed certificate (uses software key)
         var cert = CreateSelfSignedCertificate();
-        
+
         await session.StoreCertificateAsync(PivSlot.Authentication, cert);
         var retrieved = await session.GetCertificateAsync(PivSlot.Authentication);
-        
+
         Assert.NotNull(retrieved);
         Assert.Equal(cert.Thumbprint, retrieved.Thumbprint);
     }
@@ -68,9 +68,9 @@ public class PivCertificateTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         var cert = await session.GetCertificateAsync(PivSlot.Authentication);
-        
+
         Assert.Null(cert);
     }
 
@@ -81,7 +81,7 @@ public class PivCertificateTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        
+
         await session.DeleteCertificateAsync(PivSlot.Authentication);
         await session.DeleteCertificateAsync(PivSlot.Authentication);
     }
@@ -92,9 +92,9 @@ public class PivCertificateTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         var data = await session.GetObjectAsync(PivDataObject.Chuid);
-        
+
         Assert.True(data.IsEmpty);
     }
 
@@ -102,12 +102,12 @@ public class PivCertificateTests
     {
         // Create a software key pair for testing (not the YubiKey's key)
         using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-        
+
         var request = new CertificateRequest(
             "CN=Test Certificate",
             ecdsa,
             HashAlgorithmName.SHA256);
-        
+
         return request.CreateSelfSigned(
             DateTimeOffset.UtcNow,
             DateTimeOffset.UtcNow.AddYears(1));

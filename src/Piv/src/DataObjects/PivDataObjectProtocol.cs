@@ -45,7 +45,7 @@ internal static class PivDataObjectProtocol
 
         if (!response.IsOK())
         {
-            throw ApduException.FromStatusWord(response.SW, 
+            throw ApduException.FromStatusWord(response.SW,
                 $"Failed to read data object 0x{objectId:X6}");
         }
 
@@ -53,7 +53,7 @@ internal static class PivDataObjectProtocol
         // Format: 53 LL [data] - unwrap and return inner data
         return UnwrapDataObjectResponse(response.Data);
     }
-    
+
     /// <summary>
     /// Unwraps a GET DATA response that is wrapped in TAG 0x53.
     /// </summary>

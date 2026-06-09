@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
+using System.Runtime.Versioning;
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Hid;
 
@@ -42,7 +42,7 @@ public class HidEnumerationTests
 
         var loggerFactory = LoggerFactory.Create(builder =>
             builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
-        
+
         var finder = new FindHidDevices(loggerFactory.CreateLogger<FindHidDevices>());
 
         var devices = await finder.FindAllAsync();

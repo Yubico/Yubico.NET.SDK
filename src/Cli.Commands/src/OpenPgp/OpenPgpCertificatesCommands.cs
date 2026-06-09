@@ -7,8 +7,8 @@ using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
+using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.OpenPgp;
 using static Yubico.YubiKit.Cli.Commands.OpenPgp.OpenPgpHelpers;
@@ -83,17 +83,17 @@ public sealed class OpenPgpCertificatesExportCommand : YkCommandBase<Certificate
         switch (format)
         {
             case "PEM":
-            {
-                var pem = PemEncoding.Write("CERTIFICATE", cert.RawData);
-                AnsiConsole.WriteLine(new string(pem));
-                break;
-            }
+                {
+                    var pem = PemEncoding.Write("CERTIFICATE", cert.RawData);
+                    AnsiConsole.WriteLine(new string(pem));
+                    break;
+                }
             case "DER":
-            {
-                using var stdout = Console.OpenStandardOutput();
-                stdout.Write(cert.RawData);
-                break;
-            }
+                {
+                    using var stdout = Console.OpenStandardOutput();
+                    stdout.Write(cert.RawData);
+                    break;
+                }
             default:
                 OutputHelpers.WriteError($"Unsupported format: {settings.Format}. Use PEM or DER.");
                 return ExitCode.GenericError;

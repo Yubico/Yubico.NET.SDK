@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.Hid.Linux;
 using Yubico.YubiKit.Core.Hid.MacOS;

@@ -27,7 +27,7 @@ namespace Yubico.YubiKit.Core.Hid.Constants;
 /// </para>
 /// </remarks>
 [Obsolete("This enum is misleading. Use YubiKeyHidInterfaceType and HidInterfaceClassifier instead for proper interface type detection.")]
-public enum HidUsagePage 
+public enum HidUsagePage
 {
     Unknown = 0,
     Fido = 0xF1D0,  // 61904 - FIDO CTAP HID usage page

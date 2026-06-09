@@ -44,10 +44,10 @@ public readonly record struct ApduCommand
     {
         Cla = ByteUtils.ValidateByte(cla, nameof(cla));
         Ins = ByteUtils.ValidateByte(ins, nameof(ins));
-        P1  = ByteUtils.ValidateByte(p1,  nameof(p1));
-        P2  = ByteUtils.ValidateByte(p2,  nameof(p2));
+        P1 = ByteUtils.ValidateByte(p1, nameof(p1));
+        P2 = ByteUtils.ValidateByte(p2, nameof(p2));
         Data = data;
-        Le   = le;
+        Le = le;
     }
 
     /// <summary>Gets the CLA byte.</summary>

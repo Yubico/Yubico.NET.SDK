@@ -92,7 +92,7 @@ public class Scp11X963KdfTests
     {
         var keyAgreementData = Scp11X963Kdf.GetKeyAgreementData(hostAuthenticateTlvBytes, epkSdEckaTlvBytes);
         var keyMaterial = Scp11X963Kdf.GetSharedSecret(ephemeralOceEcka, skOceEcka, pkSdEcka, epkSdEckaTlvBytes);
-        byte[] sharedInfo = [..keyUsage.Span, ..keyType.Span, ..keyLen.Span];
+        byte[] sharedInfo = [.. keyUsage.Span, .. keyType.Span, .. keyLen.Span];
 
 
         // Derive keys

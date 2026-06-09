@@ -105,7 +105,7 @@ namespace Yubico.YubiKit.Core.Cryptography
 
             throw new NotSupportedException($"Unsupported RSA length: {keySizeBits}");
         }
-        
+
         public static KeyDefinition GetByRSAModulusLength(byte[] modulus) => GetByRSALength(modulus.Length * 8);
 
         /// <summary>
@@ -160,13 +160,13 @@ namespace Yubico.YubiKit.Core.Cryptography
             {
                 throw new ArgumentNullException(nameof(oid));
             }
-            
+
             if (string.Equals(oid, Oids.RSA, StringComparison.OrdinalIgnoreCase))
             {
                 throw new NotSupportedException(
                     "RSA keys are not supported by this method as all RSA keys share the same OID.");
             }
-            
+
             if (string.Equals(oid, Oids.ECDSA, StringComparison.OrdinalIgnoreCase))
             {
                 throw new NotSupportedException(

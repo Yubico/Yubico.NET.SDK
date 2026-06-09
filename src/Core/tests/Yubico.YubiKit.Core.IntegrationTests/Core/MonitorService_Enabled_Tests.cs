@@ -26,16 +26,16 @@ public class MonitorService_Enabled_Tests : IAsyncLifetime
         YubiKeyManager.StartMonitoring();
         return Task.CompletedTask;
     }
-    
+
     public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
-    
+
     [Fact]
     public async Task WhenMonitoringEnabled_FindsDevices()
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
         Assert.NotEmpty(devices);
     }
-    
+
     [Fact]
     public void WhenMonitoringEnabled_IsMonitoringReturnsTrue()
     {

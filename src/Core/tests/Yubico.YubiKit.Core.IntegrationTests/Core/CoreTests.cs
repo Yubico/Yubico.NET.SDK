@@ -10,9 +10,9 @@ public class CoreTests : IAsyncLifetime
         YubiKeyManager.StartMonitoring();
         return Task.CompletedTask;
     }
-    
+
     public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
-    
+
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     [Trait(TestCategories.Category, TestCategories.Slow)]

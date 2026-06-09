@@ -25,8 +25,8 @@ using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 using Yubico.YubiKit.WebAuthn.Preferences;
-using Fido2Extensions = Yubico.YubiKit.Fido2.Extensions;
 using static Yubico.YubiKit.WebAuthn.IntegrationTests.WebAuthnTestHelpers;
+using Fido2Extensions = Yubico.YubiKit.Fido2.Extensions;
 
 namespace Yubico.YubiKit.WebAuthn.IntegrationTests;
 

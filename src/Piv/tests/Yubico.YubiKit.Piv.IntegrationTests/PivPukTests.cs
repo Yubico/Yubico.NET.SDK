@@ -29,14 +29,14 @@ public class PivPukTests
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     };
-    
+
     private static readonly byte[] DefaultAesManagementKey = new byte[]
     {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     };
-    
+
     private static readonly byte[] DefaultPin = "123456"u8.ToArray();
     private static readonly byte[] DefaultPuk = "12345678"u8.ToArray();
 
@@ -68,20 +68,20 @@ public class PivPukTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         var newPuk = "87654321"u8.ToArray();
-        
+
         try
         {
             // Change PUK to new value
             await session.ChangePukAsync(DefaultPuk, newPuk);
-            
+
             // Block the PIN
             await BlockPinAsync(session);
-            
+
             // Unblock with new PUK (verifies the change worked)
             await session.UnblockPinAsync(newPuk, DefaultPin);
-            
+
             // Verify PIN works again
             await session.VerifyPinAsync(DefaultPin);
         }
@@ -97,28 +97,28 @@ public class PivPukTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         var newPin = "654321"u8.ToArray();
-        
+
         try
         {
             // Block the PIN
             await BlockPinAsync(session);
-            
+
             // Verify PIN is blocked (0 retries)
             var attempts = await session.GetPinAttemptsAsync();
             Assert.Equal(0, attempts);
-            
+
             // Verify PIN fails
             await Assert.ThrowsAsync<InvalidPinException>(
                 () => session.VerifyPinAsync(DefaultPin));
-            
+
             // Unblock with PUK
             await session.UnblockPinAsync(DefaultPuk, newPin);
-            
+
             // Verify new PIN works
             await session.VerifyPinAsync(newPin);
-            
+
             // Verify retries restored
             var restoredAttempts = await session.GetPinAttemptsAsync();
             Assert.Equal(3, restoredAttempts);
@@ -135,9 +135,9 @@ public class PivPukTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         var metadata = await session.GetPukMetadataAsync();
-        
+
         Assert.True(metadata.IsDefault);
         Assert.Equal(3, metadata.TotalRetries);
         Assert.Equal(3, metadata.RetriesRemaining);
@@ -149,25 +149,25 @@ public class PivPukTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         // SetPinAttemptsAsync requires BOTH PIN verification AND management key auth
         await session.VerifyPinAsync(DefaultPin);
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        
+
         try
         {
             // Set custom limits: 5 PIN attempts, 4 PUK attempts
             await session.SetPinAttemptsAsync(5, 4);
-            
+
             // Verify via metadata
             var pinMetadata = await session.GetPinMetadataAsync();
             Assert.Equal(5, pinMetadata.TotalRetries);
             Assert.Equal(5, pinMetadata.RetriesRemaining);
-            
+
             var pukMetadata = await session.GetPukMetadataAsync();
             Assert.Equal(4, pukMetadata.TotalRetries);
             Assert.Equal(4, pukMetadata.RetriesRemaining);
-            
+
             // Also verify via GetPinAttemptsAsync
             var attempts = await session.GetPinAttemptsAsync();
             Assert.Equal(5, attempts);

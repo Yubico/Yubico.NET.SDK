@@ -23,7 +23,7 @@ public class SecurityDomainSession_Scp03Tests
     public async Task CreateAsync_WithScp03_Succeeds(YubiKeyTestState state)
     {
         using var scpParams = Scp03KeyParameters.Default;
-        
+
         await state.WithSecurityDomainSessionAsync(true,
             session =>
             {

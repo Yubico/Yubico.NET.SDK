@@ -38,7 +38,7 @@ public sealed class MakeCredentialOptions
     /// Used to prevent duplicate credential creation.
     /// </remarks>
     public IReadOnlyList<PublicKeyCredentialDescriptor>? ExcludeList { get; set; }
-    
+
     /// <summary>
     /// Gets or sets whether to create a discoverable credential (resident key).
     /// </summary>
@@ -47,7 +47,7 @@ public sealed class MakeCredentialOptions
     /// discovered without providing a credential ID.
     /// </remarks>
     public bool? ResidentKey { get; set; }
-    
+
     /// <summary>
     /// Gets or sets whether user presence is required.
     /// </summary>
@@ -55,7 +55,7 @@ public sealed class MakeCredentialOptions
     /// Defaults to true. Setting to false is rarely allowed by authenticators.
     /// </remarks>
     public bool? UserPresence { get; set; }
-    
+
     /// <summary>
     /// Gets or sets whether user verification is required.
     /// </summary>
@@ -63,7 +63,7 @@ public sealed class MakeCredentialOptions
     /// When true, the authenticator must verify the user (e.g., PIN or biometric).
     /// </remarks>
     public bool? UserVerification { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the PIN/UV auth parameter for authorization.
     /// </summary>
@@ -71,12 +71,12 @@ public sealed class MakeCredentialOptions
     /// Required when user verification is needed. Computed using ClientPin.
     /// </remarks>
     public ReadOnlyMemory<byte>? PinUvAuthParam { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the PIN/UV auth protocol version.
     /// </summary>
     public int? PinUvAuthProtocol { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the enterprise attestation type.
     /// </summary>
@@ -85,19 +85,19 @@ public sealed class MakeCredentialOptions
     /// Requires authenticator support for enterprise attestation.
     /// </remarks>
     public int? EnterpriseAttestation { get; set; }
-    
+
     /// <summary>
     /// Gets or sets extension inputs as a CBOR-encoded map.
     /// </summary>
     public ReadOnlyMemory<byte>? Extensions { get; set; }
-    
+
     /// <summary>
     /// Creates default options.
     /// </summary>
     public MakeCredentialOptions()
     {
     }
-    
+
     /// <summary>
     /// Sets the discoverable credential (resident key) option.
     /// </summary>
@@ -108,7 +108,7 @@ public sealed class MakeCredentialOptions
         ResidentKey = value;
         return this;
     }
-    
+
     /// <summary>
     /// Sets the user verification option.
     /// </summary>
@@ -119,7 +119,7 @@ public sealed class MakeCredentialOptions
         UserVerification = value;
         return this;
     }
-    
+
     /// <summary>
     /// Sets the PIN/UV authentication parameters.
     /// </summary>
@@ -132,7 +132,7 @@ public sealed class MakeCredentialOptions
         PinUvAuthProtocol = protocol;
         return this;
     }
-    
+
     /// <summary>
     /// Sets the exclude list.
     /// </summary>
@@ -168,7 +168,7 @@ public sealed class GetAssertionOptions
     /// If empty or null, discoverable credentials for the RP will be searched.
     /// </remarks>
     public IReadOnlyList<PublicKeyCredentialDescriptor>? AllowList { get; set; }
-    
+
     /// <summary>
     /// Gets or sets whether user presence is required.
     /// </summary>
@@ -176,34 +176,34 @@ public sealed class GetAssertionOptions
     /// Defaults to true. Setting to false allows silent assertions.
     /// </remarks>
     public bool? UserPresence { get; set; }
-    
+
     /// <summary>
     /// Gets or sets whether user verification is required.
     /// </summary>
     public bool? UserVerification { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the PIN/UV auth parameter for authorization.
     /// </summary>
     public ReadOnlyMemory<byte>? PinUvAuthParam { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the PIN/UV auth protocol version.
     /// </summary>
     public int? PinUvAuthProtocol { get; set; }
-    
+
     /// <summary>
     /// Gets or sets extension inputs as a CBOR-encoded map.
     /// </summary>
     public ReadOnlyMemory<byte>? Extensions { get; set; }
-    
+
     /// <summary>
     /// Creates default options.
     /// </summary>
     public GetAssertionOptions()
     {
     }
-    
+
     /// <summary>
     /// Sets the user verification option.
     /// </summary>
@@ -214,7 +214,7 @@ public sealed class GetAssertionOptions
         UserVerification = value;
         return this;
     }
-    
+
     /// <summary>
     /// Sets the PIN/UV authentication parameters.
     /// </summary>
@@ -227,7 +227,7 @@ public sealed class GetAssertionOptions
         PinUvAuthProtocol = protocol;
         return this;
     }
-    
+
     /// <summary>
     /// Sets the allow list.
     /// </summary>
@@ -238,7 +238,7 @@ public sealed class GetAssertionOptions
         AllowList = allowList;
         return this;
     }
-    
+
     /// <summary>
     /// Sets the allow list from credential IDs.
     /// </summary>

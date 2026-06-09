@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Xunit;
 using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
-
-using Xunit;
 
 namespace Yubico.YubiKit.YubiOtp.IntegrationTests;
 

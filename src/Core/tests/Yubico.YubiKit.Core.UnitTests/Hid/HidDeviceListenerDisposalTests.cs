@@ -117,7 +117,7 @@ public class HidDeviceListenerDisposalTests
         try
         {
             listener.Start();
-            
+
             // Act
             listener.Stop();
 

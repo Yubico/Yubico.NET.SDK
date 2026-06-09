@@ -67,7 +67,7 @@ public sealed record Scp11KeyParameters : ScpKeyParameters
     public Scp11KeyParameters(KeyReference keyReference, ECPublicKey pkSdEcka)
         : this(keyReference, pkSdEcka, null, null, [])
     {
-        
+
     }
 
     /// <summary>

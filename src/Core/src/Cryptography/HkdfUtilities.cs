@@ -87,7 +87,7 @@ internal static class HkdfUtilities
             currentBlock
                 .AsSpan(0, bytesToCopy)
                 .CopyTo(outputKeyMaterial.AsSpan(blockOffset));
-            
+
             previousBlock = currentBlock;
         }
 

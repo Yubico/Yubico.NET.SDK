@@ -29,7 +29,7 @@ namespace Yubico.YubiKit.Core.Hid;
 public abstract class HidDeviceListener : IDisposable
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<HidDeviceListener>();
-    
+
     private bool _disposed;
 
     /// <summary>

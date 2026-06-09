@@ -2,8 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
-using SharedOutput = Yubico.YubiKit.Cli.Shared.Output.OutputHelpers;
 using SharedConfirm = Yubico.YubiKit.Cli.Shared.Output.ConfirmationPrompts;
+using SharedOutput = Yubico.YubiKit.Cli.Shared.Output.OutputHelpers;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
 

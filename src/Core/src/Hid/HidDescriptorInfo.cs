@@ -28,22 +28,22 @@ public sealed record HidDescriptorInfo
     /// HID Usage Page value from descriptor (e.g., 0x01 for Generic Desktop, 0xF1D0 for FIDO).
     /// </summary>
     public ushort UsagePage { get; init; }
-    
+
     /// <summary>
     /// HID Usage value from descriptor (e.g., 0x06 for Keyboard, 0x01 for U2F Device).
     /// </summary>
     public ushort Usage { get; init; }
-    
+
     /// <summary>
     /// Device path or identifier.
     /// </summary>
     public string DevicePath { get; init; } = string.Empty;
-    
+
     /// <summary>
     /// Vendor ID (e.g., 0x1050 for Yubico).
     /// </summary>
     public short VendorId { get; init; }
-    
+
     /// <summary>
     /// Product ID.
     /// </summary>

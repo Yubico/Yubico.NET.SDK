@@ -24,7 +24,7 @@ public enum HidReportType
     /// Typically 64-byte packets for CTAPHID protocol.
     /// </summary>
     InputOutput,
-    
+
     /// <summary>
     /// Feature reports (used for OTP).
     /// Typically 8-byte packets for YubiOTP protocol.

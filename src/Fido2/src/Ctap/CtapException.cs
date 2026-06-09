@@ -23,7 +23,7 @@ public class CtapException : Exception
     /// Gets the CTAP status code from the authenticator.
     /// </summary>
     public CtapStatus Status { get; }
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CtapException"/> class.
     /// </summary>
@@ -33,7 +33,7 @@ public class CtapException : Exception
     {
         Status = status;
     }
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CtapException"/> class.
     /// </summary>
@@ -44,7 +44,7 @@ public class CtapException : Exception
     {
         Status = status;
     }
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CtapException"/> class.
     /// </summary>
@@ -56,7 +56,7 @@ public class CtapException : Exception
     {
         Status = status;
     }
-    
+
     /// <summary>
     /// Throws a <see cref="CtapException"/> if the status is not <see cref="CtapStatus.Success"/>.
     /// </summary>
@@ -68,7 +68,7 @@ public class CtapException : Exception
             throw new CtapException(status);
         }
     }
-    
+
     /// <summary>
     /// Throws a <see cref="CtapException"/> if the status is not <see cref="CtapStatus.Success"/>.
     /// </summary>
@@ -77,7 +77,7 @@ public class CtapException : Exception
     {
         ThrowIfError((CtapStatus)status);
     }
-    
+
     private static string GetMessage(CtapStatus status) => status switch
     {
         CtapStatus.Success => "Success",

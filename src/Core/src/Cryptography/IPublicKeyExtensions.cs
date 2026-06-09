@@ -23,6 +23,6 @@ public static class IPublicKeyExtensions
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     /// <exception cref="InvalidCastException"></exception>
-    public static T Cast<T>(this IPublicKey key) where T : class, IPublicKey 
+    public static T Cast<T>(this IPublicKey key) where T : class, IPublicKey
         => key as T ?? throw new InvalidCastException($"Cannot cast {key.GetType()} to {typeof(T)}");
 }

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Buffers;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 
@@ -36,27 +36,27 @@ internal static class PivBioProtocol
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Getting biometric metadata");
-        
+
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x96, ReadOnlyMemory<byte>.Empty);
         var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-        
+
         // SW 0x6A82 means object/feature not found (not configured)
         // SW 0x6D00 means instruction not supported (non-Bio key)
         if (response.SW == 0x6A82 || response.SW == 0x6D00)
         {
             throw new NotSupportedException("Biometrics are not supported or not configured on this YubiKey");
         }
-        
+
         if (!response.IsOK())
         {
             throw ApduException.FromStatusWord(response.SW, "Failed to get biometric metadata");
         }
-        
+
         if (response.Data.IsEmpty)
         {
             throw new ApduException("Empty biometric metadata response");
         }
-        
+
         var data = response.Data.Span;
 
         // TODO: This parses response bytes by raw position, which is fragile.
@@ -69,7 +69,7 @@ internal static class PivBioProtocol
         var isConfigured = data.Length > 0 && data[0] != 0;
         var retriesRemaining = data.Length > 1 ? data[1] : 0;
         var temporaryPinEnabled = data.Length > 2 && data[2] == 1;
-        
+
         return new PivBioMetadata(isConfigured, retriesRemaining, temporaryPinEnabled);
     }
 
@@ -90,57 +90,57 @@ internal static class PivBioProtocol
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Verifying user via biometric (checkOnly={CheckOnly})", checkOnly);
-        
+
         // Build command data
         byte[] commandData;
         if (checkOnly || !requestTemporaryPin)
         {
             // TAG 0x02: Check only, don't return temporary PIN
-            commandData = [ 0x02, 0x00 ];
+            commandData = [0x02, 0x00];
         }
         else
         {
             // TAG 0x00: Return temporary PIN
-            commandData = [ 0x00, 0x00 ];
+            commandData = [0x00, 0x00];
         }
-        
+
         var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData);
         var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-        
+
         // SW 0x6A82 or 0x6D00 means biometrics not supported/configured
         if (response.SW == 0x6A82 || response.SW == 0x6D00)
         {
             throw new NotSupportedException("Biometrics are not supported or not configured on this YubiKey");
         }
-        
+
         if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
         {
             throw new InvalidOperationException($"Biometric verification failed. {retriesRemaining} retries remaining.");
         }
-        
+
         if (!response.IsOK())
         {
             throw ApduException.FromStatusWord(response.SW, "Failed to verify biometric");
         }
-        
+
         if (checkOnly || !requestTemporaryPin)
         {
             logger.LogDebug("PIV: Biometric verification succeeded (check only)");
             return null;
         }
-        
+
         // Parse temporary PIN from response
         if (response.Data.IsEmpty)
         {
             throw new ApduException("Expected temporary PIN in response but got empty data");
         }
-        
+
         var tempPin = new byte[response.Data.Length];
         response.Data.CopyTo(tempPin);
-        
+
         logger.LogDebug("PIV: Biometric verification succeeded, temporary PIN retrieved (length={Length})", tempPin.Length);
         logger.LogWarning("PIV: Caller MUST zero temporary PIN immediately after use!");
-        
+
         return tempPin;
     }
 
@@ -160,9 +160,9 @@ internal static class PivBioProtocol
         {
             throw new ArgumentException("Temporary PIN cannot be empty", nameof(temporaryPin));
         }
-        
+
         logger.LogDebug("PIV: Verifying temporary PIN");
-        
+
         // Build command with TAG 0x01 for temporary PIN
         var commandData = ArrayPool<byte>.Shared.Rent(2 + temporaryPin.Length);
         try
@@ -170,22 +170,22 @@ internal static class PivBioProtocol
             commandData[0] = 0x01; // TAG for temporary PIN
             commandData[1] = (byte)temporaryPin.Length;
             temporaryPin.Span.CopyTo(commandData.AsSpan(2));
-            
+
             var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData.AsMemory(0, 2 + temporaryPin.Length));
             var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-            
+
             if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
             {
                 throw new InvalidPinException(
                     retriesRemaining,
                     $"Temporary PIN verification failed. {retriesRemaining} retries remaining.");
             }
-            
+
             if (!response.IsOK())
             {
                 throw ApduException.FromStatusWord(response.SW, "Failed to verify temporary PIN");
             }
-            
+
             logger.LogDebug("PIV: Temporary PIN verified successfully");
         }
         finally

@@ -24,14 +24,14 @@ public enum HidInterfaceType
     /// Unknown or unsupported HID interface type.
     /// </summary>
     Unknown = 0,
-    
+
     /// <summary>
     /// FIDO/U2F interface using CTAPHID protocol.
     /// Uses I/O reports (64-byte packets).
     /// Requires UsagePage=0xF1D0 (FIDO Alliance) and Usage=0x01 (U2F Device).
     /// </summary>
     Fido,
-    
+
     /// <summary>
     /// OTP/YubiOTP interface using keyboard emulation.
     /// Uses feature reports (8-byte packets).

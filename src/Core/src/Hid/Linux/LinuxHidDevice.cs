@@ -30,14 +30,14 @@ namespace Yubico.YubiKit.Core.Hid.Linux;
 internal sealed class LinuxHidDevice : IHidDevice
 {
     private readonly string _devNode;
-    
+
     public string ReaderName => _devNode;
-    
+
     /// <summary>
     /// Raw HID descriptor information as reported by the operating system.
     /// </summary>
     public HidDescriptorInfo DescriptorInfo { get; }
-    
+
     /// <summary>
     /// The classified YubiKey HID interface type.
     /// </summary>
@@ -108,9 +108,9 @@ internal sealed class LinuxHidDevice : IHidDevice
                 if (!device.IsInvalid)
                 {
                     var descriptorInfo = ParseHidDescriptor(device);
-                    
+
                     // Only include Yubico devices with supported interface types
-                    if (descriptorInfo.VendorId == 0x1050 && 
+                    if (descriptorInfo.VendorId == 0x1050 &&
                         HidInterfaceClassifier.IsSupported(descriptorInfo))
                     {
                         devices.Add(new LinuxHidDevice(descriptorInfo));
@@ -243,22 +243,22 @@ internal sealed class LinuxHidDevice : IHidDevice
     private static (ushort UsagePage, ushort Usage) GetHidUsageFromDescriptor(string devNode)
     {
         LinuxFileSafeHandle? handle = null;
-        
+
         try
         {
             // Try opening with O_RDWR | O_NONBLOCK first (for descriptor reading)
-            handle = LibcNativeMethods.open(devNode, 
+            handle = LibcNativeMethods.open(devNode,
                 LibcNativeMethods.OpenFlags.O_RDWR | LibcNativeMethods.OpenFlags.O_NONBLOCK);
-            
+
             if (handle.IsInvalid)
             {
                 // Dispose the invalid handle before trying again
                 handle.Dispose();
-                
+
                 // O_RDWR failed, try O_RDONLY | O_NONBLOCK
-                handle = LibcNativeMethods.open(devNode, 
+                handle = LibcNativeMethods.open(devNode,
                     LibcNativeMethods.OpenFlags.O_RDONLY | LibcNativeMethods.OpenFlags.O_NONBLOCK);
-                
+
                 if (handle.IsInvalid)
                 {
                     return (0, 0);
@@ -329,7 +329,7 @@ internal sealed class LinuxHidDevice : IHidDevice
         // HID descriptor parsing - looking for Usage Page and Usage items
         // HID descriptor format: each item has a prefix byte followed by data
         // Prefix: bits 0-1 = size (0,1,2,4 bytes), bits 2-3 = type (0=main, 1=global, 2=local), bits 4-7 = tag
-        
+
         // IMPORTANT: We need to validate the UsagePage + Usage combination
         // Don't just return the first values found - parse both, then validate
 

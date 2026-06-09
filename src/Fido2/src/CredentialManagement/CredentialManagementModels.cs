@@ -26,18 +26,18 @@ public sealed class CredentialMetadata
     /// Gets the number of existing discoverable credentials on the authenticator.
     /// </summary>
     public int ExistingResidentCredentialsCount { get; }
-    
+
     /// <summary>
     /// Gets the maximum number of remaining discoverable credentials the authenticator can store.
     /// </summary>
     public int MaxPossibleRemainingResidentCredentialsCount { get; }
-    
+
     private CredentialMetadata(int existingCount, int maxRemaining)
     {
         ExistingResidentCredentialsCount = existingCount;
         MaxPossibleRemainingResidentCredentialsCount = maxRemaining;
     }
-    
+
     /// <summary>
     /// Decodes credential metadata from a CBOR response.
     /// </summary>
@@ -46,10 +46,10 @@ public sealed class CredentialMetadata
     public static CredentialMetadata Decode(ReadOnlyMemory<byte> data)
     {
         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
-        
+
         var existingCount = 0;
         var maxRemaining = 0;
-        
+
         var mapLength = reader.ReadStartMap();
         for (var i = 0; i < mapLength; i++)
         {
@@ -68,7 +68,7 @@ public sealed class CredentialMetadata
             }
         }
         reader.ReadEndMap();
-        
+
         return new CredentialMetadata(existingCount, maxRemaining);
     }
 }
@@ -82,24 +82,24 @@ public sealed class RelyingPartyInfo
     /// Gets the relying party entity information.
     /// </summary>
     public PublicKeyCredentialRpEntity RelyingParty { get; }
-    
+
     /// <summary>
     /// Gets the hash of the RP ID.
     /// </summary>
     public ReadOnlyMemory<byte> RpIdHash { get; }
-    
+
     /// <summary>
     /// Gets the total number of RPs (only present in first response).
     /// </summary>
     public int? TotalRpCount { get; }
-    
+
     private RelyingPartyInfo(PublicKeyCredentialRpEntity rp, ReadOnlyMemory<byte> rpIdHash, int? totalRpCount)
     {
         RelyingParty = rp;
         RpIdHash = rpIdHash;
         TotalRpCount = totalRpCount;
     }
-    
+
     /// <summary>
     /// Decodes relying party info from a CBOR response.
     /// </summary>
@@ -108,11 +108,11 @@ public sealed class RelyingPartyInfo
     public static RelyingPartyInfo Decode(ReadOnlyMemory<byte> data)
     {
         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
-        
+
         PublicKeyCredentialRpEntity? rp = null;
         byte[]? rpIdHash = null;
         int? totalRpCount = null;
-        
+
         var mapLength = reader.ReadStartMap();
         for (var i = 0; i < mapLength; i++)
         {
@@ -134,20 +134,20 @@ public sealed class RelyingPartyInfo
             }
         }
         reader.ReadEndMap();
-        
+
         if (rp is null || rpIdHash is null)
         {
             throw new InvalidOperationException("Invalid RP info response: missing required fields.");
         }
-        
+
         return new RelyingPartyInfo(rp, rpIdHash, totalRpCount);
     }
-    
+
     private static PublicKeyCredentialRpEntity DecodeRpEntity(CborReader reader)
     {
         string? id = null;
         string? name = null;
-        
+
         var mapLen = reader.ReadStartMap();
         for (var i = 0; i < mapLen; i++)
         {
@@ -166,7 +166,7 @@ public sealed class RelyingPartyInfo
             }
         }
         reader.ReadEndMap();
-        
+
         return new PublicKeyCredentialRpEntity(id ?? string.Empty, name);
     }
 }
@@ -180,37 +180,37 @@ public sealed class StoredCredentialInfo
     /// Gets the user entity associated with the credential.
     /// </summary>
     public PublicKeyCredentialUserEntity User { get; }
-    
+
     /// <summary>
     /// Gets the credential ID (public key credential descriptor).
     /// </summary>
     public PublicKeyCredentialDescriptor CredentialId { get; }
-    
+
     /// <summary>
     /// Gets the COSE public key.
     /// </summary>
     public ReadOnlyMemory<byte> PublicKey { get; }
-    
+
     /// <summary>
     /// Gets the total number of credentials for this RP (only present in first response).
     /// </summary>
     public int? TotalCredentials { get; }
-    
+
     /// <summary>
     /// Gets the credential protection policy.
     /// </summary>
     public int? CredProtectPolicy { get; }
-    
+
     /// <summary>
     /// Gets the large blob key associated with this credential.
     /// </summary>
     public ReadOnlyMemory<byte>? LargeBlobKey { get; }
-    
+
     /// <summary>
     /// Gets the third party payment flag.
     /// </summary>
     public bool? ThirdPartyPayment { get; }
-    
+
     private StoredCredentialInfo(
         PublicKeyCredentialUserEntity user,
         PublicKeyCredentialDescriptor credentialId,
@@ -228,7 +228,7 @@ public sealed class StoredCredentialInfo
         LargeBlobKey = largeBlobKey;
         ThirdPartyPayment = thirdPartyPayment;
     }
-    
+
     /// <summary>
     /// Decodes stored credential info from a CBOR response.
     /// </summary>
@@ -237,7 +237,7 @@ public sealed class StoredCredentialInfo
     public static StoredCredentialInfo Decode(ReadOnlyMemory<byte> data)
     {
         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
-        
+
         PublicKeyCredentialUserEntity? user = null;
         PublicKeyCredentialDescriptor? credentialId = null;
         byte[]? publicKey = null;
@@ -245,7 +245,7 @@ public sealed class StoredCredentialInfo
         int? credProtectPolicy = null;
         byte[]? largeBlobKey = null;
         bool? thirdPartyPayment = null;
-        
+
         var mapLength = reader.ReadStartMap();
         for (var i = 0; i < mapLength; i++)
         {
@@ -279,17 +279,17 @@ public sealed class StoredCredentialInfo
             }
         }
         reader.ReadEndMap();
-        
+
         if (user is null || credentialId is null || publicKey is null)
         {
             throw new InvalidOperationException("Invalid credential info response: missing required fields.");
         }
-        
+
         // Explicit cast for nullable ReadOnlyMemory<byte>
         ReadOnlyMemory<byte>? largeBlobKeyMemory = largeBlobKey is not null
             ? (ReadOnlyMemory<byte>?)new ReadOnlyMemory<byte>(largeBlobKey)
             : (ReadOnlyMemory<byte>?)null;
-        
+
         return new StoredCredentialInfo(
             user,
             credentialId,
@@ -299,5 +299,5 @@ public sealed class StoredCredentialInfo
             largeBlobKeyMemory,
             thirdPartyPayment);
     }
-    
+
 }

@@ -19,9 +19,9 @@ namespace Yubico.YubiKit.Core.IntegrationTests.Core;
 public class YubiKeyManagerTests : IAsyncLifetime
 {
     public Task InitializeAsync() => Task.CompletedTask;
-    
+
     public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
-    
+
     [Fact]
     public async Task FindAllAsync_HasAtLeastOneDevice()
     {

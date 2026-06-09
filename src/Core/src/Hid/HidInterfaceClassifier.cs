@@ -38,7 +38,7 @@ public static class HidInterfaceClassifier
     public static HidInterfaceType Classify(HidDescriptorInfo descriptorInfo)
     {
         ArgumentNullException.ThrowIfNull(descriptorInfo);
-        
+
         return (descriptorInfo.UsagePage, descriptorInfo.Usage) switch
         {
             (UsagePageFido, UsageU2fDevice) => HidInterfaceType.Fido,
@@ -46,7 +46,7 @@ public static class HidInterfaceClassifier
             _ => HidInterfaceType.Unknown
         };
     }
-    
+
     /// <summary>
     /// Checks if the HID descriptor represents a supported YubiKey interface.
     /// </summary>
@@ -57,7 +57,7 @@ public static class HidInterfaceClassifier
         ArgumentNullException.ThrowIfNull(descriptorInfo);
         return Classify(descriptorInfo) != HidInterfaceType.Unknown;
     }
-    
+
     /// <summary>
     /// Gets the expected report communication method for an interface type.
     /// </summary>

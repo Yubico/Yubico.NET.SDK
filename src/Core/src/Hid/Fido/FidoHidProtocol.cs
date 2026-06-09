@@ -44,7 +44,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         // Auto-initialize channel if not already done
         if (!IsChannelInitialized)
         {
@@ -72,7 +72,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         // Auto-initialize channel if not already done
         if (!IsChannelInitialized)
         {
@@ -85,7 +85,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         // For Management application, use CTAPHID_MSG (0x03) to send raw APDUs
         // Serialize the APDU command
         var apduBytes = SerializeApdu(command);
-        
+
         // Send via CTAP HID MSG command
         var response = await TransmitCommand(
                 _channelId!.Value,
@@ -96,7 +96,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
 
         // Parse response APDU
         var apduResponse = ParseApduResponse(response);
-        
+
         if (!apduResponse.IsOK())
             throw ApduException.FromResponse(apduResponse, command, "HID APDU command failed");
 
@@ -111,7 +111,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         // Auto-initialize channel if not already done
         if (!IsChannelInitialized)
         {
@@ -167,7 +167,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
 
         // Extract channel ID (bytes 8-11, big-endian)
         _channelId = BinaryPrimitives.ReadUInt32BigEndian(response.Span[8..12]);
-        
+
         // Extract firmware version (bytes 13-15) - skip protocol version byte at 12
         if (response.Length >= 16)
         {
@@ -177,7 +177,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
             _firmwareVersion = new FirmwareVersion(major, minor, patch);
             _logger.LogDebug("Extracted firmware version from CTAPHID_INIT: {Version}", _firmwareVersion);
         }
-        
+
         _logger.LogDebug("Acquired CTAP HID channel: 0x{ChannelId:X8}", _channelId.Value);
     }
 
@@ -259,12 +259,12 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         // Allocate buffer for complete response
         var responseData = new byte[responseLength];
         var initDataLength = Math.Min(responseLength, CtapConstants.InitDataSize);
-        
+
         // Ensure we don't try to read more data than the packet contains
         var availableDataInPacket = Math.Min(initDataLength, initPacket.Length - CtapConstants.InitHeaderSize);
         if (availableDataInPacket < 0)
             availableDataInPacket = 0;
-            
+
         initPacket.Span.Slice(CtapConstants.InitHeaderSize, availableDataInPacket)
             .CopyTo(responseData);
 
@@ -391,7 +391,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
     public void Dispose()
     {
         if (_disposed) return;
-        
+
         _channelId = null;
         _connection.Dispose();
         _disposed = true;

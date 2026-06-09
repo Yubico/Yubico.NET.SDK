@@ -67,7 +67,7 @@ public class Scp11Tests
 
         var ocePrivateKey = ECPrivateKey.CreateFromParameters(oceEcdh.ExportParameters(true));
         var sdPublicKey = ECPublicKey.CreateFromParameters(sdEcdh.PublicKey.ExportParameters());
-        
+
         var certBundle = ParseTestCertificates();
 
         // Act - Create SCP11a key params (with OCE and certs)
@@ -90,10 +90,10 @@ public class Scp11Tests
         // Arrange - Create keys and certs for SCP11c
         using var oceEcdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
         using var sdEcdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
-        
+
         var ocePrivateKey = ECPrivateKey.CreateFromParameters(oceEcdh.ExportParameters(true));
         var sdPublicKey = ECPublicKey.CreateFromParameters(sdEcdh.PublicKey.ExportParameters());
-        
+
         var certBundle = ParseTestCertificates();
 
         // Act - Create SCP11c key params
@@ -115,10 +115,10 @@ public class Scp11Tests
         // Arrange
         using var oceEcdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
         using var sdEcdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
-                
+
         var ocePrivateKey = ECPrivateKey.CreateFromParameters(oceEcdh.ExportParameters(true));
         var sdPublicKey = ECPublicKey.CreateFromParameters(sdEcdh.PublicKey.ExportParameters());
-        
+
         var sessionRef = new KeyReference(ScpKid.SCP11a, 0x3);
         var oceRef = new KeyReference(0x10, 0x3);
 
@@ -132,7 +132,7 @@ public class Scp11Tests
     {
         // Arrange
         using var sdEcdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
-        
+
         var sdPublicKey = ECPublicKey.CreateFromParameters(sdEcdh.PublicKey.ExportParameters());
         var certBundle = ParseTestCertificates();
         var sessionRef = new KeyReference(ScpKid.SCP11a, 0x3);
@@ -148,7 +148,7 @@ public class Scp11Tests
     {
         // Arrange
         using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
-                
+
         var sdPublicKey = ECPublicKey.CreateFromParameters(ecdh.PublicKey.ExportParameters());
         // Act & Assert - Invalid KID (not 0x11, 0x13, or 0x15)
         var invalidKeyRef = new KeyReference(0x99, 0x1);

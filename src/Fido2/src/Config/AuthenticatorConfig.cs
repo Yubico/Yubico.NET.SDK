@@ -41,7 +41,7 @@ public sealed class AuthenticatorConfig
     private readonly IFidoSession _session;
     private readonly IPinUvAuthProtocol _protocol;
     private readonly ReadOnlyMemory<byte> _pinUvAuthToken;
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="AuthenticatorConfig"/> class.
     /// </summary>
@@ -60,7 +60,7 @@ public sealed class AuthenticatorConfig
         _protocol = protocol;
         _pinUvAuthToken = pinUvAuthToken;
     }
-    
+
     /// <summary>
     /// Enables enterprise attestation on the authenticator.
     /// </summary>
@@ -83,7 +83,7 @@ public sealed class AuthenticatorConfig
         var payload = BuildCommandPayload(ConfigSubCommand.EnableEnterpriseAttestation);
         await SendConfigCommandAsync(payload, cancellationToken).ConfigureAwait(false);
     }
-    
+
     /// <summary>
     /// Toggles the alwaysUv setting on the authenticator.
     /// </summary>
@@ -106,7 +106,7 @@ public sealed class AuthenticatorConfig
         var payload = BuildCommandPayload(ConfigSubCommand.ToggleAlwaysUv);
         await SendConfigCommandAsync(payload, cancellationToken).ConfigureAwait(false);
     }
-    
+
     /// <summary>
     /// Sets the minimum PIN length required by the authenticator.
     /// </summary>
@@ -148,7 +148,7 @@ public sealed class AuthenticatorConfig
                 newMinPinLength,
                 "Minimum PIN length must be at least 4 characters.");
         }
-        
+
         if (newMinPinLength > 63)
         {
             throw new ArgumentOutOfRangeException(
@@ -156,11 +156,11 @@ public sealed class AuthenticatorConfig
                 newMinPinLength,
                 "Minimum PIN length cannot exceed 63 characters.");
         }
-        
+
         var payload = BuildSetMinPinLengthPayload(newMinPinLength, rpIds, forceChangePin);
         await SendConfigCommandAsync(payload, cancellationToken).ConfigureAwait(false);
     }
-    
+
     private async Task SendConfigCommandAsync(
         ReadOnlyMemory<byte> payload,
         CancellationToken cancellationToken)
@@ -169,11 +169,11 @@ public sealed class AuthenticatorConfig
         var request = new byte[1 + payload.Length];
         request[0] = CtapCommand.Config;
         payload.CopyTo(request.AsMemory(1));
-        
+
         await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
     }
-    
+
     private ReadOnlyMemory<byte> BuildCommandPayload(byte subCommand)
     {
         // Build PIN/UV auth param: authenticate(pinUvAuthToken, 32*0xff || 0x0D || subCommand)
@@ -183,27 +183,27 @@ public sealed class AuthenticatorConfig
         message[32] = CtapCommand.Config; // 0x0D
         message[33] = subCommand;
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, message);
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(3);
-        
+
         // 0x01: subCommand
         writer.WriteInt32(1);
         writer.WriteInt32(subCommand);
-        
+
         // 0x03: pinUvAuthProtocol
         writer.WriteInt32(3);
         writer.WriteInt32(_protocol.Version);
-        
+
         // 0x04: pinUvAuthParam
         writer.WriteInt32(4);
         writer.WriteByteString(pinUvAuthParam);
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
-    
+
     private ReadOnlyMemory<byte> BuildSetMinPinLengthPayload(
         int newMinPinLength,
         IReadOnlyList<string>? rpIds,
@@ -211,17 +211,17 @@ public sealed class AuthenticatorConfig
     {
         // Build the subCommandParams map first
         var paramsWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        
+
         var paramsCount = 1; // always have newMinPINLength
         if (rpIds is { Count: > 0 }) paramsCount++;
         if (forceChangePin) paramsCount++;
-        
+
         paramsWriter.WriteStartMap(paramsCount);
-        
+
         // 0x01: newMinPINLength
         paramsWriter.WriteInt32(1);
         paramsWriter.WriteInt32(newMinPinLength);
-        
+
         // 0x02: minPinLengthRPIDs (optional)
         if (rpIds is { Count: > 0 })
         {
@@ -233,17 +233,17 @@ public sealed class AuthenticatorConfig
             }
             paramsWriter.WriteEndArray();
         }
-        
+
         // 0x03: forceChangePin (optional)
         if (forceChangePin)
         {
             paramsWriter.WriteInt32(3);
             paramsWriter.WriteBoolean(true);
         }
-        
+
         paramsWriter.WriteEndMap();
         var subCommandParams = paramsWriter.Encode();
-        
+
         // Build PIN/UV auth param: authenticate(pinUvAuthToken, 32*0xff || 0x0D || subCommand || subCommandParams)
         // Per CTAP 2.1 spec section 6.8
         var subCommand = ConfigSubCommand.SetMinPinLength;
@@ -253,31 +253,31 @@ public sealed class AuthenticatorConfig
         message[32] = CtapCommand.Config; // 0x0D
         message[33] = subCommand;
         subCommandParams.CopyTo(message.AsMemory(34));
-        
+
         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, message);
-        
+
         // Build main payload
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(4);
-        
+
         // 0x01: subCommand
         writer.WriteInt32(1);
         writer.WriteInt32(subCommand);
-        
+
         // 0x02: subCommandParams
         writer.WriteInt32(2);
         writer.WriteEncodedValue(subCommandParams);
-        
+
         // 0x03: pinUvAuthProtocol
         writer.WriteInt32(3);
         writer.WriteInt32(_protocol.Version);
-        
+
         // 0x04: pinUvAuthParam
         writer.WriteInt32(4);
         writer.WriteByteString(pinUvAuthParam);
-        
+
         writer.WriteEndMap();
-        
+
         return writer.Encode();
     }
 }

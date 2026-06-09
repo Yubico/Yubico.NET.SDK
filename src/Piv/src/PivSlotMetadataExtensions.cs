@@ -163,7 +163,7 @@ public static class PivAlgorithmExtensions
     /// <param name="algorithm">The algorithm to check.</param>
     /// <returns><c>true</c> if the algorithm is RSA (1024, 2048, 3072, or 4096 bits); otherwise, <c>false</c>.</returns>
     public static bool IsRsa(this PivAlgorithm algorithm) =>
-        algorithm is PivAlgorithm.Rsa1024 or PivAlgorithm.Rsa2048 or 
+        algorithm is PivAlgorithm.Rsa1024 or PivAlgorithm.Rsa2048 or
                      PivAlgorithm.Rsa3072 or PivAlgorithm.Rsa4096;
 
     /// <summary>
@@ -179,6 +179,6 @@ public static class PivAlgorithmExtensions
     /// </para>
     /// </remarks>
     public static bool IsEcc(this PivAlgorithm algorithm) =>
-        algorithm is PivAlgorithm.EccP256 or PivAlgorithm.EccP384 or 
+        algorithm is PivAlgorithm.EccP256 or PivAlgorithm.EccP384 or
                      PivAlgorithm.Ed25519 or PivAlgorithm.X25519;
 }

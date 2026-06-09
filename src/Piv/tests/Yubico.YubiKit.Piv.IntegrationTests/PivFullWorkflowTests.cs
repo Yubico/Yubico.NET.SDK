@@ -31,14 +31,14 @@ public class PivFullWorkflowTests
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     };
-    
+
     private static readonly byte[] DefaultAesManagementKey = new byte[]
     {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     };
-    
+
     private static readonly byte[] DefaultPin = "123456"u8.ToArray();
 
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
@@ -50,32 +50,32 @@ public class PivFullWorkflowTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         // 1. Authenticate with management key
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        
+
         // 2. Generate key
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Signature, 
+            PivSlot.Signature,
             PivAlgorithm.EccP256,
             PivPinPolicy.Once);
-        
+
         Assert.NotNull(publicKey);
         Assert.IsType<ECPublicKey>(publicKey);
-        
+
         // 3. Verify PIN
         await session.VerifyPinAsync(DefaultPin);
-        
+
         // 4. Sign data with YubiKey's generated key
         var dataToSign = "important document"u8.ToArray();
         var hash = SHA256.HashData(dataToSign);
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Signature, 
-            PivAlgorithm.EccP256, 
+            PivSlot.Signature,
+            PivAlgorithm.EccP256,
             hash);
-        
+
         Assert.NotEmpty(signature.ToArray());
-        
+
         // 5. Verify signature using the YubiKey's public key
         using var ecdsa = ECDsa.Create();
         ecdsa.ImportSubjectPublicKeyInfo(((ECPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
@@ -89,31 +89,31 @@ public class PivFullWorkflowTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         // 1. Authenticate and generate key
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         var devicePublicKey = await session.GenerateKeyAsync(
-            PivSlot.KeyManagement, 
+            PivSlot.KeyManagement,
             PivAlgorithm.EccP256);
-        
+
         Assert.NotNull(devicePublicKey);
         Assert.IsType<ECPublicKey>(devicePublicKey);
-        
+
         // 2. Verify PIN
         await session.VerifyPinAsync(DefaultPin);
-        
+
         // 3. Generate ephemeral peer key
         using var peerKey = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
         var peerPublicKeyBytes = peerKey.PublicKey.ExportSubjectPublicKeyInfo();
         var peerPublicKey = ECPublicKey.CreateFromSubjectPublicKeyInfo(peerPublicKeyBytes);
-        
+
         // 4. Calculate shared secret on YubiKey
         var yubiKeySecret = await session.CalculateSecretAsync(
-            PivSlot.KeyManagement, 
+            PivSlot.KeyManagement,
             peerPublicKey);
-        
+
         Assert.Equal(32, yubiKeySecret.Length); // P-256 x-coordinate is 32 bytes
-        
+
         // 5. Calculate shared secret on peer side
         var deviceECDH = ECDiffieHellman.Create();
         deviceECDH.ImportSubjectPublicKeyInfo(
@@ -122,7 +122,7 @@ public class PivFullWorkflowTests
         var peerSecret = peerKey.DeriveKeyFromHash(
             deviceECDH.PublicKey,
             HashAlgorithmName.SHA256);
-        
+
         // Both should derive the same shared secret
         // Note: Actual secret comparison would need to account for different derivation methods
         Assert.NotEmpty(yubiKeySecret.ToArray());
@@ -135,28 +135,28 @@ public class PivFullWorkflowTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         // 1. Authenticate and generate key
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Authentication, 
+            PivSlot.Authentication,
             PivAlgorithm.EccP256);
-        
+
         // 2. Move key to retired slot
         await session.MoveKeyAsync(PivSlot.Authentication, PivSlot.Retired1);
-        
+
         // 3. Verify source is empty and destination has key
         var sourceCert = await session.GetCertificateAsync(PivSlot.Authentication);
         Assert.Null(sourceCert);
-        
+
         // 4. Use the moved key for signing
         await session.VerifyPinAsync(DefaultPin);
         var hash = SHA256.HashData("test"u8);
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Retired1, 
-            PivAlgorithm.EccP256, 
+            PivSlot.Retired1,
+            PivAlgorithm.EccP256,
             hash);
-        
+
         Assert.NotEmpty(signature.ToArray());
     }
 
@@ -166,22 +166,22 @@ public class PivFullWorkflowTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         // 1. Authenticate and generate key
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
-        
+
         // 2. Attest the generated key
         var attestation = await session.AttestKeyAsync(PivSlot.Authentication);
-        
+
         Assert.NotNull(attestation);
         // The attestation certificate is issued by the PIV Attestation CA
         Assert.False(string.IsNullOrEmpty(attestation.Issuer));
-        
+
         // 3. Verify attestation certificate has valid structure
         // YubiKey attestation cert validity varies by device/firmware
         Assert.True(attestation.NotBefore < attestation.NotAfter, "Certificate validity period is valid");
-        
+
         // 4. Verify the certificate has expected extensions for attestation
         // Attestation certs should have a serial number
         Assert.False(string.IsNullOrEmpty(attestation.SerialNumber));

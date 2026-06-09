@@ -21,25 +21,25 @@ public enum PivAlgorithm : byte
 {
     /// <summary>RSA 1024-bit key.</summary>
     Rsa1024 = 0x06,
-    
+
     /// <summary>RSA 2048-bit key.</summary>
     Rsa2048 = 0x07,
-    
+
     /// <summary>RSA 3072-bit key (requires YubiKey 5.7+).</summary>
     Rsa3072 = 0x05,
-    
+
     /// <summary>RSA 4096-bit key (requires YubiKey 5.7+).</summary>
     Rsa4096 = 0x16,
-    
+
     /// <summary>Elliptic Curve P-256 key.</summary>
     EccP256 = 0x11,
-    
+
     /// <summary>Elliptic Curve P-384 key (requires YubiKey 4.0+).</summary>
     EccP384 = 0x14,
-    
+
     /// <summary>Ed25519 signature key (requires YubiKey 5.7+).</summary>
     Ed25519 = 0xE0,
-    
+
     /// <summary>X25519 key exchange key (requires YubiKey 5.7+).</summary>
     X25519 = 0xE1
 }

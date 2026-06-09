@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Buffers.Binary;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Buffers.Binary;
 using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
@@ -110,7 +110,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         _logger.LogTrace("Sending OTP slot command 0x{Slot:X2} with {Length} bytes payload", slot, data.Length);
 
         var programmingSequence = await SendFrameAsync(slot, payload, cancellationToken).ConfigureAwait(false);
-        
+
         // Read response using Java-style single polling loop
         return await ReadFrameJavaStyleAsync(programmingSequence, cancellationToken).ConfigureAwait(false);
     }

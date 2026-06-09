@@ -23,7 +23,7 @@ public interface IFidoHidProtocol : IProtocol
     Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         ApduCommand command,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Sends a CTAP vendor command and receives the response.
     /// Used for Management application over HID.
@@ -36,7 +36,7 @@ public interface IFidoHidProtocol : IProtocol
         byte command,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Selects an application on the YubiKey. For HID, this returns version info.
     /// </summary>
@@ -46,12 +46,12 @@ public interface IFidoHidProtocol : IProtocol
     Task<ReadOnlyMemory<byte>> SelectAsync(
         ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets whether the HID channel has been initialized.
     /// </summary>
     bool IsChannelInitialized { get; }
-    
+
     /// <summary>
     /// Gets the firmware version reported during channel initialization.
     /// </summary>

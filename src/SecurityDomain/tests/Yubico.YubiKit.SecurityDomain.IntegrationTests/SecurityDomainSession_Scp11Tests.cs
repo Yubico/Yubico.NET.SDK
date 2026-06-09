@@ -54,7 +54,8 @@ public class SecurityDomainSession_Scp11Tests
             // Verify we can construct a valid ECParameters from the point
             var ecParameters = new ECParameters
             {
-                Curve = ECCurve.NamedCurves.nistP256, Q = new ECPoint { X = x.ToArray(), Y = y.ToArray() }
+                Curve = ECCurve.NamedCurves.nistP256,
+                Q = new ECPoint { X = x.ToArray(), Y = y.ToArray() }
             };
 
             // Verify we can create an ECDiffieHellman instance from the parameters
@@ -152,11 +153,11 @@ public class SecurityDomainSession_Scp11Tests
 
         var leaf = certificateList!.Last();
         var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!;
-        
+
         var keyParams = new Scp11KeyParameters(
-            keyReference, 
+            keyReference,
             ECPublicKey.CreateFromParameters(ecDsaPublicKey.ExportParameters(false)));
-        
+
         await state.WithSecurityDomainSessionAsync(false,
             async session =>
             {
@@ -166,9 +167,9 @@ public class SecurityDomainSession_Scp11Tests
                 );
             },
             scpKeyParams: keyParams);
-        
+
         return;
-        
+
         static async Task VerifyScp11bAuth(
             SecurityDomainSession session, CancellationToken cancellationToken = default)
         {

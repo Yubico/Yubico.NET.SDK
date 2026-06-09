@@ -44,8 +44,8 @@ public sealed class DisposableArrayPoolBuffer : IMemoryOwner<byte>
     }
 
     /// <inheritdoc />
-    public Memory<byte> Memory => _rentedBuffer is not null 
-        ? _rentedBuffer.AsMemory(0, _length) 
+    public Memory<byte> Memory => _rentedBuffer is not null
+        ? _rentedBuffer.AsMemory(0, _length)
         : throw new ObjectDisposedException(nameof(DisposableArrayPoolBuffer));
 
     /// <summary>

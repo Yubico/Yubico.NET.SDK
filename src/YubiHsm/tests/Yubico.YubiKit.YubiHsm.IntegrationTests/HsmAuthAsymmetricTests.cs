@@ -4,9 +4,9 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
-using Yubico.YubiKit.YubiHsm.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
+using Yubico.YubiKit.YubiHsm.IntegrationTests.TestExtensions;
 
 namespace Yubico.YubiKit.YubiHsm.IntegrationTests;
 

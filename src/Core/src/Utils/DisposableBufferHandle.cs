@@ -33,10 +33,10 @@ public class DisposableBufferHandle(Memory<byte> data) : IDisposable
     public int Count => Length;
     private bool _disposed;
 
-    public Memory<byte> Data => _disposed 
-        ? throw new ObjectDisposedException(nameof(DisposableBufferHandle)) 
+    public Memory<byte> Data => _disposed
+        ? throw new ObjectDisposedException(nameof(DisposableBufferHandle))
         : data;
-    
+
     public void Dispose()
     {
         if (_disposed)

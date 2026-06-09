@@ -41,22 +41,22 @@ public sealed class GetAssertionResponse
     /// if using non-discoverable credentials.
     /// </remarks>
     public PublicKeyCredentialDescriptor? Credential { get; }
-    
+
     /// <summary>
     /// Gets the authenticator data.
     /// </summary>
     public AuthenticatorData AuthenticatorData { get; }
-    
+
     /// <summary>
     /// Gets the raw authenticator data bytes.
     /// </summary>
     public ReadOnlyMemory<byte> AuthenticatorDataRaw { get; }
-    
+
     /// <summary>
     /// Gets the assertion signature.
     /// </summary>
     public ReadOnlyMemory<byte> Signature { get; }
-    
+
     /// <summary>
     /// Gets the user entity for discoverable credentials.
     /// </summary>
@@ -64,7 +64,7 @@ public sealed class GetAssertionResponse
     /// Only present for discoverable credentials when user verification is performed.
     /// </remarks>
     public PublicKeyCredentialUserEntity? User { get; }
-    
+
     /// <summary>
     /// Gets the total number of credentials matching the request.
     /// </summary>
@@ -73,22 +73,22 @@ public sealed class GetAssertionResponse
     /// Use GetNextAssertionAsync to retrieve additional assertions.
     /// </remarks>
     public int? NumberOfCredentials { get; }
-    
+
     /// <summary>
     /// Gets whether the user explicitly selected this credential.
     /// </summary>
     public bool? UserSelected { get; }
-    
+
     /// <summary>
     /// Gets the large blob key for this credential.
     /// </summary>
     public ReadOnlyMemory<byte>? LargeBlobKey { get; }
-    
+
     /// <summary>
     /// Gets the CBOR-encoded extension outputs, if any.
     /// </summary>
     public ReadOnlyMemory<byte>? ExtensionOutputs { get; }
-    
+
     private GetAssertionResponse(
         PublicKeyCredentialDescriptor? credential,
         AuthenticatorData authenticatorData,
@@ -110,7 +110,7 @@ public sealed class GetAssertionResponse
         LargeBlobKey = largeBlobKey;
         ExtensionOutputs = extensionOutputs;
     }
-    
+
     /// <summary>
     /// Parses a getAssertion response from CBOR-encoded data.
     /// </summary>
@@ -121,7 +121,7 @@ public sealed class GetAssertionResponse
         var reader = new CborReader(data, CborConformanceMode.Lax);
         return Decode(reader);
     }
-    
+
     /// <summary>
     /// Parses a getAssertion response from a CBOR reader.
     /// </summary>
@@ -130,7 +130,7 @@ public sealed class GetAssertionResponse
     public static GetAssertionResponse Decode(CborReader reader)
     {
         var mapLength = reader.ReadStartMap();
-        
+
         PublicKeyCredentialDescriptor? credential = null;
         byte[]? authDataRaw = null;
         AuthenticatorData? authData = null;
@@ -140,7 +140,7 @@ public sealed class GetAssertionResponse
         bool? userSelected = null;
         byte[]? largeBlobKey = null;
         ReadOnlyMemory<byte>? extensionOutputs = null;
-        
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadInt32();
@@ -177,14 +177,14 @@ public sealed class GetAssertionResponse
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
-        
+
         if (authData is null || authDataRaw is null || signature is null)
         {
             throw new InvalidOperationException("GetAssertion response missing required fields.");
         }
-        
+
         return new GetAssertionResponse(
             credential,
             authData,
@@ -196,12 +196,12 @@ public sealed class GetAssertionResponse
             largeBlobKey,
             extensionOutputs);
     }
-    
+
     /// <summary>
     /// Gets the credential ID from the credential descriptor or returns empty.
     /// </summary>
     public ReadOnlyMemory<byte> GetCredentialId() => Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
-    
+
     /// <summary>
     /// Gets the user handle from the user entity or returns empty.
     /// </summary>

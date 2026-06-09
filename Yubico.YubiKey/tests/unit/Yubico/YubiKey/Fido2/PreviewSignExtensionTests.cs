@@ -25,6 +25,8 @@ namespace Yubico.YubiKey.Fido2
 {
     public class PreviewSignExtensionTests
     {
+        // WARNING: This code is for testing purposes only and is not intended to be a
+        // secure or complete implementation of ARKG.
         private const int CoseKeyTypeArkgPub = -65537;
         private const int CoseAlgorithmArkgP256 = -65700;
 
@@ -525,6 +527,8 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void GetAssertionCborEncode_EmbedsArkgPreviewSignHelperArgs()
         {
+            // WARNING: This code is for testing purposes only and is not intended to be a
+            // secure or complete implementation of ARKG.
             var parameters = new GetAssertionParameters(
                 new RelyingParty("rp.example"),
                 new byte[32]);

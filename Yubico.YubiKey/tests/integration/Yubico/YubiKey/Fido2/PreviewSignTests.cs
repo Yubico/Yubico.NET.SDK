@@ -30,6 +30,8 @@ namespace Yubico.YubiKey.Fido2
     /// <remarks>
     /// These tests require a physical YubiKey with previewSign support (5.8.0-beta or newer).
     /// They will be skipped if no suitable device is found.
+    /// WARNING: This code is for testing purposes only and is not intended to be a
+    /// secure or complete implementation of ARKG.
     /// </remarks>
     public class PreviewSignTests : FidoSessionIntegrationTestBase
     {
@@ -91,6 +93,8 @@ namespace Yubico.YubiKey.Fido2
                 "YubiKey does not advertise previewSign extension");
 
             // Step A: Register with previewSign (requires user presence - touch #1)
+            // WARNING: This code is for testing purposes only and is not intended to be a
+            // secure or complete implementation of ARKG.
             MakeCredentialParameters.AddPreviewSignGenerateKeyExtension(
                 Session.AuthenticatorInfo,
                 new[] { PreviewSignParametersExtensions.ArkgP256ESP256 });
@@ -100,6 +104,8 @@ namespace Yubico.YubiKey.Fido2
             Assert.NotNull(generatedKey);
 
             // Step B: Offline derive public key
+            // WARNING: This code is for testing purposes only and is not intended to be a
+            // secure or complete implementation of ARKG.
             byte[] ikm = new byte[32];
             RandomNumberGenerator.Fill(ikm);
             byte[] ctx = System.Text.Encoding.ASCII.GetBytes("integration-test-ctx");

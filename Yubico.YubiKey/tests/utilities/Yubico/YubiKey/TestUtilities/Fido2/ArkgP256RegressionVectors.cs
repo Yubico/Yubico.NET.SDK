@@ -22,6 +22,10 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// </summary>
     /// <remarks>
     /// <para>
+    /// WARNING: This code is for testing purposes only and is not intended to be a
+    /// secure or complete implementation of ARKG.
+    /// </para>
+    /// <para>
     /// These are internal SDK regression fixtures, not published ARKG draft
     /// vectors. They detect unintended regressions in ARKG-P256 key derivation
     /// across refactors and cover three scenarios:

@@ -27,6 +27,10 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// </summary>
     /// <remarks>
     /// <para>
+    /// WARNING: This code is for testing purposes only and is not intended to be a
+    /// secure or complete implementation of ARKG.
+    /// </para>
+    /// <para>
     /// These methods enable Relying Party (RP) side public key derivation and
     /// signature verification for generated ARKG-P256 previewSign keys. These are
     /// test/verification utilities and not part of the authenticator-side SDK surface.
@@ -46,6 +50,10 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// Derives a public key using the ARKG-P256 algorithm.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// WARNING: This code is for testing purposes only and is not intended to be a
+        /// secure or complete implementation of ARKG.
+        /// </para>
         /// <para>
         /// This method performs offline key derivation using the ARKG-P256 algorithm.
         /// The derived public key can be used to verify signatures created by the
@@ -97,6 +105,10 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// Derives a public key using the ARKG-P256 algorithm.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// WARNING: This code is for testing purposes only and is not intended to be a
+        /// secure or complete implementation of ARKG.
+        /// </para>
         /// <para>
         /// This method performs offline key derivation using the ARKG-P256 algorithm.
         /// The derived public key can be used to verify signatures created by the

@@ -19,6 +19,10 @@ namespace Yubico.Core.Cryptography
     /// <summary>
     /// Defines cryptographic primitives required for ARKG-P256 operations.
     /// </summary>
+    /// <remarks>
+    /// WARNING: This code is for testing purposes only and is not intended to be a
+    /// secure or complete implementation of ARKG.
+    /// </remarks>
     internal interface IArkgPrimitives
     {
         /// <summary>
@@ -39,6 +43,10 @@ namespace Yubico.Core.Cryptography
         /// <summary>
         /// Derives a public key and ARKG key handle from ARKG-P256 seed public keys.
         /// </summary>
+        /// <remarks>
+        /// WARNING: This code is for testing purposes only and is not intended to be a
+        /// secure or complete implementation of ARKG.
+        /// </remarks>
         /// <param name="blindingPublicKey">The blinding public key in uncompressed SEC1 format.</param>
         /// <param name="kemPublicKey">The KEM public key in uncompressed SEC1 format.</param>
         /// <param name="inputKeyingMaterial">Input keying material for key derivation.</param>

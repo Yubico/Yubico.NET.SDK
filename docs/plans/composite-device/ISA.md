@@ -106,6 +106,7 @@ Build the v2 composite YubiKey device model in staged, reviewable phases so Core
 - [ ] ISC-21.1: Phase 38 explicitly rewrites extension-method transport selection away from scalar `IYubiKey.ConnectionType` assumptions, with FIDO2 called out because it currently switches on `yubiKey.ConnectionType`.
 - [ ] ISC-22: Smart defaults are app-specific and documented: SmartCard applets prefer SmartCard, FIDO2/WebAuthn prefer HID FIDO when available, Management can prefer SmartCard then FIDO HID then OTP HID.
 - [ ] ISC-23: Explicit connection preference or override is available where a module can reasonably use more than one transport.
+- [ ] ISC-23.1: Phase 38.5 adds held-transport fallback for multi-transport applets: when no explicit override is given and the preferred transport fails because another process holds it (`SCARD_E_SHARING_VIOLATION` / `SCARD_E_SERVER_TOO_BUSY`), the session falls back to the next supported transport; an explicit override never falls back.
 - [ ] ISC-24: Existing extension-method unit tests are updated to verify both default selection and explicit override behavior.
 
 ### Tests And Verification
@@ -154,8 +155,9 @@ Build the v2 composite YubiKey device model in staged, reviewable phases so Core
 | Phase 36 physical device model | Implement physical `IYubiKey` shape with metadata, available connections, support checks, typed connection routing, explicit scalar `IYubiKey.ConnectionType` disposition, and raw/default connection behavior tests. | ISC-8, ISC-13, ISC-13.1, ISC-13.2, ISC-14, ISC-15, ISC-15.1 | Phase 35 | false |
 | Phase 37 composite discovery | Merge partial PC/SC, OTP HID, and FIDO HID discoveries into physical devices with correct filtering and events. | ISC-16, ISC-17, ISC-18, ISC-19, ISC-20, ISC-27 | Phase 36 | false |
 | Phase 37.5 PID-based merge | Replace the Phase 37 serial-only merge with the Rust PID-from-reader-name model so a single physical key merges with no opens, fixing the exclusive-CCID-holder and serial-less/SKY limitations. Supersedes Phase 37's merge mechanism; public criteria unchanged. | ISC-16, ISC-17, ISC-19, ISC-20, ISC-27 | Phase 37 | false |
-| Phase 38 extension defaults | Preserve app-specific extension ergonomics, remove scalar-connection assumptions, and add smart defaults plus explicit overrides where needed. | ISC-21, ISC-21.1, ISC-22, ISC-23, ISC-24 | Phase 37.5 | true |
-| Phase 39 integration and final verification | Update docs, run safe hardware smoke, final tests, final Cato, and final learning note. | ISC-28, ISC-29, ISC-30 | Phase 38 | false |
+| Phase 38 extension defaults | Preserve app-specific extension ergonomics, remove scalar-connection assumptions, and add smart defaults plus explicit overrides where needed. Held-transport fallback is carved out to Phase 38.5. | ISC-21, ISC-21.1, ISC-22, ISC-23, ISC-24 | Phase 37.5 | true |
+| Phase 38.5 held-transport fallback | Add held-transport fallback for multi-transport applets: when no explicit override is given and the preferred transport is held by another process, fall back to the next supported transport, respecting explicit overrides. | ISC-23.1 | Phase 38 | false |
+| Phase 39 integration and final verification | Update docs, run safe hardware smoke, final tests, final Cato, and final learning note. | ISC-28, ISC-29, ISC-30 | Phase 38.5 | false |
 
 ## Decisions
 
@@ -174,6 +176,7 @@ Build the v2 composite YubiKey device model in staged, reviewable phases so Core
 - 2026-06-09: Cato follow-up passed and surfaced two info-level tightenings: give raw/default connection behavior explicit test ownership and verify Phase 35 read-info sharing does not reintroduce Core-to-Management coupling.
 - 2026-06-10: Phase 37's serial-only merge (open every interface, group by serial) was found on hardware to drop the CCID when another process holds it exclusively (GnuPG scdaemon → `SCARD_E_SHARING_VIOLATION`) and to be unable to merge serial-less keys (SKY series). Phase 37.5 adopts the Rust PID-from-reader-name model (merge by USB Product ID for the single-key case, serial only to disambiguate multiple same-model keys), which fixes both. Phase 37.5 supersedes the Phase 37 merge mechanism; Phase 37's public criteria remain satisfied.
 - 2026-06-09: The GPT-5.5 cross-vendor reviewer route (PAI DevTeam, and the opposite-family leg of Cato) is temporarily rate-limited. Interim opposite-family reviews use the GitHub Copilot CLI GPT-5.4 (high reasoning) via `scripts/interim-cross-vendor-review.sh`; the GPT-5.5 and any required Cato review are queued for when quota is restored. See "Interim Cross-Vendor Review" below.
+- 2026-06-11: Phase 38 is split. Extension smart defaults plus explicit overrides stay in Phase 38 (ISC-21..24): each multi-transport session-entry method (Management, YubiOtp, Fido2, WebAuthn) gains an optional `ConnectionType? preferredConnection = null` override, where null selects the documented default order and a concrete value is used exactly (throwing if unsupported); Fido2/WebAuthn default to `HidFido -> SmartCard`, replacing the Phase 36 placeholder dual-transport throw. Held-CCID transport fallback (a deferred candidate from `phase-37_5-pid-merge-learnings.md`) becomes Phase 38.5 under ISC-23.1, mirroring the Phase 37 -> 37.5 split, because it is a hardware-sensitive behavioral change with its own error taxonomy and verification; Phase 39 now depends on Phase 38.5.
 
 ## Interim Cross-Vendor Review (GPT-5.5 Throttling Workaround)
 
@@ -223,6 +226,10 @@ Rules:
   refuted by: `IYubiKey` lives in Core, and applet dependencies on Management would not solve Core-facing physical-device metadata without creating awkward package coupling.
   learned: Read-only metadata required by physical discovery belongs in Core; Management should keep mutating operations.
   criterion now: ISC-9, ISC-10, ISC-11, and ISC-12 govern the package boundary.
+- conjectured: Phase 38 would both formalize extension smart defaults/overrides and add held-CCID transport fallback (off a CCID held by another process to a HID transport) in one phase.
+  refuted by: Held-CCID fallback is a hardware-sensitive behavioral change with its own error taxonomy (`SCARD_E_SHARING_VIOLATION` / `SCARD_E_SERVER_TOO_BUSY` detection, override-respecting policy) and hardware verification, distinct from the API-shape work of defaults/overrides; bundling them widens the blast radius of one commit and one review.
+  learned: Mirror the clean Phase 37 -> 37.5 split — keep Phase 38 to ISC-21..24 (defaults + explicit overrides + tests + docs) and carve held-CCID fallback into a new Phase 38.5.
+  criterion now: Phase 38 satisfies ISC-21, ISC-21.1, ISC-22, ISC-23, and ISC-24 only; held-CCID fallback moves to Phase 38.5 under new ISC-23.1; Phase 39 now depends on Phase 38.5.
 
 ## Verification
 
@@ -258,7 +265,11 @@ Replace the Phase 37 serial-only merge with the Rust reference's PID-from-reader
 
 ### Phase 38: Extension Method Smart Defaults
 
-Update applet extension methods to preserve current ergonomics while using physical-device facts for app-specific smart defaults and explicit connection overrides. This phase must explicitly remove scalar `IYubiKey.ConnectionType` routing assumptions from current extension implementations, including FIDO2.
+Update applet extension methods to preserve current ergonomics while using physical-device facts for app-specific smart defaults and explicit connection overrides. This phase must explicitly remove scalar `IYubiKey.ConnectionType` routing assumptions from current extension implementations, including FIDO2. Each multi-transport session-entry method gains an optional `ConnectionType? preferredConnection = null` override (null selects the documented default order; a concrete value is used exactly and throws if unsupported), and Fido2/WebAuthn default to `HidFido -> SmartCard`, replacing the Phase 36 placeholder dual-transport throw. Held-transport fallback is out of scope here and is carved out to Phase 38.5.
+
+### Phase 38.5: Held-Transport Fallback
+
+For multi-transport applets (Management, YubiOtp, Fido2/WebAuthn), when no explicit transport override is given and the preferred transport fails because another process holds it (`SCARD_E_SHARING_VIOLATION` / `SCARD_E_SERVER_TOO_BUSY`), fall back to the next supported transport. An explicit override never falls back. This addresses the held-CCID connectivity gap recorded in `phase-37_5-pid-merge-learnings.md` (opening a CCID held by GnuPG scdaemon). Process-killing such as the Rust reference's `kill_pcsc_blockers` remains out of scope for the library.
 
 ### Phase 39: Integration, Docs, Migration, Final Cato
 

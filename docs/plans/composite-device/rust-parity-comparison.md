@@ -15,6 +15,13 @@ Grounded in:
 
 Status date: after Phase 37.5 (`feat(core): merge composite devices by USB Product ID`).
 
+Re-verified against upstream Rust HEAD `d9a77abb` (`experiment/rust`, in sync with origin): the recent
+pull is keys/PIV/OpenPGP, MSI, and device-*test* work only. The discovery/merge/connectivity logic is
+unchanged — `merge_devices` (Strategy 1 PID-count==2 + Strategy 2 `(version, serial)`), `pcsc::open`
+(9x USB retry, `kill_pcsc_blockers`, Exclusive->Shared), and `reinsert` all match. The `hardware` ->
+`pcsc`/`hid` feature split and the optional macOS hidapi shared-device feature are build-time only and
+do not change behavior. This comparison still holds in full.
+
 ## Discovery — at parity
 
 | Aspect | Rust | .NET (now) |

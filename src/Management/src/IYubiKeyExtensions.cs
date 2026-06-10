@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Hid.Fido;
+using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
@@ -103,7 +105,7 @@ public static class IYubiKeyExtensions
             ProtocolConfiguration? configuration = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync(cancellationToken);
+            var connection = await ConnectForManagementAsync(yubiKey, cancellationToken).ConfigureAwait(false);
             try
             {
                 return await ManagementSession.CreateAsync(
@@ -119,5 +121,31 @@ public static class IYubiKeyExtensions
                 throw;
             }
         }
+    }
+
+    // Management can run over SmartCard or HID. On a physical (possibly multi-connection) device the
+    // parameterless ConnectAsync() is ambiguous, so select a concrete transport in a defined order:
+    // SmartCard first (richest), then FIDO HID, then OTP HID. For a single-interface device this resolves
+    // to the only available transport (behavior parity). Full smart-default/override policy is Phase 38.
+    private static async Task<IConnection> ConnectForManagementAsync(
+        IYubiKey yubiKey,
+        CancellationToken cancellationToken)
+    {
+        var transport = yubiKey.ResolvePreferredConnection(
+            ConnectionType.SmartCard,
+            ConnectionType.HidFido,
+            ConnectionType.HidOtp);
+
+        return transport switch
+        {
+            ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
+                .ConfigureAwait(false),
+            ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
+                .ConfigureAwait(false),
+            ConnectionType.HidOtp => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
+                .ConfigureAwait(false),
+            _ => throw new NotSupportedException(
+                "This YubiKey exposes no connection usable for a Management session.")
+        };
     }
 }

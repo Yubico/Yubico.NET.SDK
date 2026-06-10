@@ -88,19 +88,41 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
             Logger.LogDebug("Device added: {DeviceId}", deviceId);
         }
 
-        // Update existing devices in cache (refresh connection info)
+        // Update existing devices in cache. The DeviceId is stable physical identity, but a physical
+        // device's available connections can change while it stays present (an interface appears or
+        // disappears). DeviceAction has only Added/Removed, so model a capability change as Removed+Added
+        // rather than overwriting silently (ISC-17).
+        var changedCount = 0;
         foreach (var deviceId in newIds.Intersect(currentIds))
         {
-            _deviceCache[deviceId] = newDeviceMap[deviceId];
+            var updated = newDeviceMap[deviceId];
+            if (_deviceCache.TryGetValue(deviceId, out var existing) &&
+                existing.AvailableConnections != updated.AvailableConnections)
+            {
+                _deviceCache[deviceId] = updated;
+                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, existing));
+                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, updated));
+                changedCount++;
+                Logger.LogDebug(
+                    "Device connections changed: {DeviceId} ({Old} -> {New})",
+                    deviceId,
+                    existing.AvailableConnections,
+                    updated.AvailableConnections);
+            }
+            else
+            {
+                _deviceCache[deviceId] = updated;
+            }
         }
 
         _hasData = true;
 
         Logger.LogDebug(
-            "Cache updated: {Total} devices, {Added} added, {Removed} removed",
+            "Cache updated: {Total} devices, {Added} added, {Removed} removed, {Changed} connection-changed",
             newDeviceMap.Count,
             addedIds.Count,
-            removedIds.Count);
+            removedIds.Count,
+            changedCount);
     }
 
     /// <inheritdoc/>

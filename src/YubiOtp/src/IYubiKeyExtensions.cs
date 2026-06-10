@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.YubiOtp;
 
@@ -79,7 +81,7 @@ public static class IYubiKeyExtensions
             ProtocolConfiguration? configuration = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await ConnectForYubiOtpAsync(yubiKey, cancellationToken).ConfigureAwait(false);
             try
             {
                 return await YubiOtpSession.CreateAsync(
@@ -95,5 +97,29 @@ public static class IYubiKeyExtensions
                 throw;
             }
         }
+    }
+
+    // YubiOTP is dual-transport (SmartCard or OTP HID). On a physical (possibly multi-connection) device
+    // the parameterless ConnectAsync() is ambiguous, so select a concrete transport in a defined order:
+    // SmartCard first (matching the shipped OtpTool example's "prefers SmartCard for richer protocol
+    // support"), then OTP HID. For a single-interface device this resolves to the only available transport
+    // (behavior parity). Full smart-default/override policy is Phase 38.
+    private static async Task<IConnection> ConnectForYubiOtpAsync(
+        IYubiKey yubiKey,
+        CancellationToken cancellationToken)
+    {
+        var transport = yubiKey.ResolvePreferredConnection(
+            ConnectionType.SmartCard,
+            ConnectionType.HidOtp);
+
+        return transport switch
+        {
+            ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
+                .ConfigureAwait(false),
+            ConnectionType.HidOtp => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
+                .ConfigureAwait(false),
+            _ => throw new NotSupportedException(
+                "This YubiKey exposes no connection usable for a YubiOTP session.")
+        };
     }
 }

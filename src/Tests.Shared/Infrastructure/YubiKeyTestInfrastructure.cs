@@ -96,9 +96,11 @@ internal static class YubiKeyTestInfrastructure
         if (criteria.RequireNfc)
             filtered = filtered.Where(d => d.IsNfcTransport);
 
-        // Filter by connection type
+        // Filter by requested connection type. criteria.ConnectionType is the REQUESTED transport; a device
+        // matches when its available connection set supports it. This is set-correct for merged physical
+        // devices (e.g. a composite SmartCard|HidFido|HidOtp device matches a SmartCard request).
         if (criteria.ConnectionType != ConnectionType.Unknown)
-            filtered = filtered.Where(d => d.ConnectionType == criteria.ConnectionType);
+            filtered = filtered.Where(d => d.Device.SupportsConnection(criteria.ConnectionType));
 
         // Filter by capability
         if (criteria.Capability != DeviceCapabilities.None)

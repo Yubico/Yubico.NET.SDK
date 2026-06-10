@@ -48,9 +48,38 @@ New tests: `CompositeDeviceMergerTests`, `CompositeYubiKeyTests`, `ResolvePrefer
 - Hardware smoke (serial 103, FW 5.8.0 beta, OTP+FIDO+CCID): all 3 pass — `FindAllAsync(All)` returns ONE merged device (`SmartCard|HidFido|HidOtp`); `SmartCard`/`HidFido`/`HidOtp` filters each return that same physical device; typed SmartCard/FIDO/OTP connects succeed. No UP/UV/touch. The local allow-list edit (serial 103) was reverted before commit.
 - Changed-file format clean; `git diff --check` clean; docs-qa validated 54 files; Core has no dependency on Management.
 
-## What Did Not Work / Hazards Found (important)
+## Known Limitations (FLAGGED — candidates for a follow-up)
 
-- **External exclusive CCID holders block the discovery serial read.** On the test machine, GnuPG `scdaemon --multi-server` held the YubiKey CCID, so the discovery `ConnectAsync<ISmartCardConnection>()` failed with `SCARD_E_SHARING_VIOLATION` on every attempt. The code degrades correctly: the CCID interface gets a null serial → conservative no-collapse → it appears as a separate `PcscYubiKey` while the two HID interfaces still merge. The merged-all-three result only appears when the CCID is free (`gpgconf --kill scdaemon`). This is inherent to serial-based merge in .NET: any process holding the CCID exclusively (scdaemon, OpenSC, browsers) prevents CCID from merging. Documented as a known limitation; a future phase could add USB-topology correlation to merge without opening the CCID.
+### 1. External exclusive CCID holders block the discovery serial read
+
+On the test machine, GnuPG `scdaemon --multi-server` held the YubiKey CCID, so the discovery `ConnectAsync<ISmartCardConnection>()` failed with `SCARD_E_SHARING_VIOLATION` on every attempt (the retry loop exhausted, not a transient race). The code degrades correctly: the CCID interface gets a null serial → conservative no-collapse → it appears as a separate `PcscYubiKey` while the two HID interfaces still merge. The merged-all-three result only appears when the CCID is free (`gpgconf --kill scdaemon`).
+
+This is **inherent to the serial-as-only-merge-key approach taken in Phase 37**: because we open every USB interface to read its serial and group by serial, any process holding the CCID exclusively (scdaemon/GnuPG, OpenSC/pkcs11, some browsers, Windows smart-card services) prevents the CCID interface from joining its physical device. The HID interfaces still merge; only CCID is left out. It is a correctness-degradation (extra device row), never a crash or wrong merge.
+
+**How the Rust reference avoids this (verified in `crates/yubikit/src/platform/pcsc.rs` and `device.rs`):**
+- It does NOT open every interface. For a single physical key, `open_single_usb` opens exactly ONE connection preferring CCID → OTP → FIDO and reads DeviceInfo over whichever succeeds; the other transports' paths are attached from the cheap enumeration by PID match. So a locked CCID is read over OTP/FIDO instead and the CCID path is still attached — it is never dropped.
+- `PcscSmartCardConnection::open_inner` tries `ShareMode::Exclusive` then falls back to `ShareMode::Shared`, and on failure calls `kill_pcsc_blockers()` which runs `pkill -9 scdaemon` then `pkill -1 yubikey-agent`, sleeps 100 ms, and retries. There is an `is_sharing_violation()` helper and a `YKMAN_NO_EXLUSIVE` env override. `open` also retries USB "no card" up to 9× at 500 ms.
+
+Recommended .NET remediation (NOT done in Phase 37; needs a Cato gate because it changes the merge model):
+- **Adopt the Rust PID-from-reader-name model.** Our PC/SC reader is named `"Yubico YubiKey OTP+FIDO+CCID 00 00"`; derive the USB PID from the capability substring (Rust `pid_from_interfaces`: OTP+FIDO+CCID → 0x0407, etc.) and correlate CCID with the HID interfaces by PID WITHOUT opening the CCID. Read DeviceInfo over a single preferred transport with CCID → OTP → FIDO fallback. This removes both the open-every-interface cost and the exclusive-holder limitation.
+- Optionally add `kill_pcsc_blockers`-style behavior for tooling/CLI contexts (not appropriate to kill a user's scdaemon silently inside an SDK library call; gate behind an explicit opt-in).
+- USB parent/bus/port topology correlation is an alternative to reader-name PID, but is more platform-interop work and PC/SC cannot expose the parent on macOS/Win7.
+
+### 2. Serial-less keys (SKY / Security Key series)
+
+Some keys do not report a serial number — notably the **SKY (Security Key) series**, and any key with serial-number API visibility disabled. Coverage in Phase 37:
+
+- **SKY single-interface (typical: FIDO HID only)** — handled correctly: a single serial-less USB interface needs no merge and passes through as exactly one device. Covered by `CompositeDeviceMergerTests.Merge_SeriallessSingleInterface_SkyStyle_PassesThroughAsOneDevice`. The `>1 USB interface` gate means no identity read is even attempted for a lone interface.
+- **Serial-less key exposing multiple interfaces** — conservative no-collapse: each interface stands alone (we will not merge without serial evidence, to avoid wrongly collapsing two distinct same-model keys). Covered by `Merge_SeriallessMultiInterface_DoesNotMerge_ConservativeNoCollapse` and `Merge_UsbInterfacesWithoutSerial_DoNotCollapse`. This means a serial-less multi-interface key currently appears as several device rows.
+
+**How the Rust reference handles serial-less keys (verified in `device.rs`):** Rust merges on **PID, not serial**, and obtains the CCID's PID from the reader name (`pid_from_reader_name`), so serial is not required to merge:
+- Single key (`pid_count ≤ 1`) → `open_single_usb` attaches all transport paths by PID; no serial needed. SKY (FIDO-only) is one device; SKY is detected by PID (`is_sky_pid` == 0x0120) plus a firmware fixup (pre-5.2.8 + no serial + FIDO-only ⇒ `is_sky`).
+- Multiple interfaces whose PID appears exactly twice (base+incoming) → Strategy 1 in `merge_devices` merges on PID alone, no serial.
+- Serial is only a tiebreaker (Strategy 2 `(version, serial)`) when a PID appears 3+ times; `merge_from` prefers the side that has a serial.
+
+Recommended .NET remediation (NOT done in Phase 37; same Cato-gated follow-up as limitation #1): adopt the Rust PID-from-reader-name + PID-count model. Both HID interfaces already expose a PID (`HidDescriptorInfo.ProductId`), and the CCID PID is derivable from the reader name, so a serial-less key (SKY-style or serial-disabled) could be merged on PID-uniqueness without any serial and without opening the CCID. This relaxes the merge-evidence rule, so it must go through a Cato gate (guard single-key vs multi-key carefully: PID alone cannot distinguish two same-model serial-less keys — Rust falls back to no-merge there too).
+
+## What Did Not Work / Hazards Found
 - **Concurrent discovery causes sharing violations.** The monitor's rescan and a caller's `forceRescan` both opening the same interface collided; fixed by serializing `FindYubiKeys.FindAllAsync` with a `SemaphoreSlim` and retrying transient failures.
 - **Caching failed reads is wrong.** Initially failures were cached as null (permanent split after a transient failure); fixed to cache only successful reads.
 - **Test namespace collision.** A test namespace `...UnitTests.YubiKey` shadowed `Core.YubiKey` and broke `YubiKey.FirmwareVersion` references elsewhere; use `...UnitTests.CoreYubiKey` (Phase 36 convention).
@@ -66,7 +95,7 @@ New tests: `CompositeDeviceMergerTests`, `CompositeYubiKeyTests`, `ResolvePrefer
 
 - Phase 38: documented smart-default policy, explicit per-call transport overrides, and the master ISA ISC-21..24 default+override test matrix across all applets.
 - A public `IYubiKey.DeviceInfo`/`FirmwareVersion` member (consistently populated) — deferred from Phase 37.
-- USB-topology / parent-path correlation to merge CCID without opening it (would remove the scdaemon/exclusive-holder limitation). Requires platform interop work (Linux syspath exists; macOS/Windows need work; smart cards can't provide it on macOS).
+- **Adopt the Rust PID-from-reader-name merge model (addresses Known Limitations 1 and 2 together):** derive the USB PID from the PC/SC reader name capability string and correlate CCID with HID by PID, reading DeviceInfo over a single preferred transport (CCID → OTP → FIDO fallback) instead of opening every interface and grouping by serial. This removes both the exclusive-CCID-holder limitation and the serial-less/SKY limitation, and lowers discovery cost. Needs a Cato gate (relaxes the serial-only merge rule; must keep the conservative no-merge fallback for two same-model serial-less keys). USB parent/bus/port topology is an alternative correlation signal but is more platform-interop work.
 - Reset/reconnect (`reinsert`) handle reacquisition (Rust `reinsert_*`).
 - Queued: GPT-5.5 DevTeam + Cato reviews of Phase 37.
 

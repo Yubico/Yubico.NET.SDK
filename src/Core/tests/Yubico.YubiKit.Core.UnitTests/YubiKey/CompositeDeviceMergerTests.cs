@@ -74,6 +74,36 @@ public class CompositeDeviceMergerTests
     }
 
     [Fact]
+    public void Merge_SeriallessSingleInterface_SkyStyle_PassesThroughAsOneDevice()
+    {
+        // SKY-series (Security Key) devices report no serial number and typically expose only the FIDO HID
+        // interface. A single serial-less interface needs no merge and passes through as one device.
+        var sky = new FakeYubiKey("hid:fido", ConnectionType.HidFido);
+        var merged = CompositeDeviceMerger.Merge([
+            new DeviceInterfaceDescriptor(sky, ConnectionType.HidFido, IsUsb: true, null, null)
+        ]);
+
+        var device = Assert.Single(merged);
+        Assert.Same(sky, device);
+        Assert.IsNotType<CompositeYubiKey>(device);
+    }
+
+    [Fact]
+    public void Merge_SeriallessMultiInterface_DoesNotMerge_ConservativeNoCollapse()
+    {
+        // A serial-less key exposing more than one interface cannot be merged on serial evidence, so each
+        // interface stands alone (conservative no-collapse). This is the known limitation for serial-less
+        // multi-interface keys; merging them would require PID/topology evidence (deferred).
+        var merged = CompositeDeviceMerger.Merge([
+            Usb("hid:fido", ConnectionType.HidFido, serial: null),
+            Usb("hid:otp", ConnectionType.HidOtp, serial: null)
+        ]);
+
+        Assert.Equal(2, merged.Count);
+        Assert.DoesNotContain(merged, d => d is CompositeYubiKey);
+    }
+
+    [Fact]
     public void Merge_NfcReader_NeverMergedWithUsbEvenOnSharedSerial()
     {
         var merged = CompositeDeviceMerger.Merge([

@@ -23,8 +23,8 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Core.IntegrationTests.Core;
 
 /// <summary>
-///     Safe hardware smoke for Phase 37 composite discovery. Requires a single composite USB YubiKey
-///     (OTP+FIDO+CCID) that is allow-listed; no touch / user-presence required.
+///     Safe hardware smoke for composite discovery (Phase 37 / Phase 37.5). Requires a single composite USB
+///     YubiKey (OTP+FIDO+CCID) that is allow-listed; no touch / user-presence required.
 /// </summary>
 public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
 {
@@ -34,6 +34,21 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
     public Task InitializeAsync() => Task.CompletedTask;
 
     public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+    public async Task FindAllAsync_MergesAllInterfacesByPid_WithoutRequiringConnections()
+    {
+        // Phase 37.5: a single physical key's CCID + FIDO + OTP interfaces merge into one device by USB PID,
+        // with no connection required for grouping — so the CCID is included even if another process
+        // (e.g. GnuPG scdaemon) holds it exclusively. This asserts only the discovery result; it does not
+        // depend on opening the CCID.
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+
+        var device = Assert.Single(devices);
+        Assert.Equal(FullKey, device.AvailableConnections);
+        Assert.StartsWith("ykphysical:", device.DeviceId);
+    }
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]

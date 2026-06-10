@@ -15,7 +15,6 @@
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Hid.Fido;
 using Yubico.YubiKit.Core.Hid.Interfaces;
-using Yubico.YubiKit.Core.Hid.Otp;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 
@@ -23,13 +22,14 @@ namespace Yubico.YubiKit.Core.YubiKey;
 
 /// <summary>
 ///     Reads read-only <see cref="DeviceInfo" /> (including the serial number) from a single per-interface
-///     device during composite-device discovery, so interfaces can be grouped into physical YubiKeys by serial.
+///     device, used to disambiguate multiple same-PID physical keys during composite discovery.
 /// </summary>
 /// <remarks>
-///     This opens a short-lived connection over the interface, reads device info via the Core-owned
-///     <see cref="DeviceInfoReader" />, and disposes the connection (via the protocol it owns) before returning.
-///     Any failure is swallowed and reported as <c>null</c> so discovery degrades to conservative no-merge
-///     rather than aborting. It uses only Core primitives and introduces no dependency on Management.
+///     This opens a short-lived connection over the interface and reads device info via the Core-owned
+///     <see cref="ProtocolDeviceInfo" />. It retries transient PC/SC sharing violations because, unlike the
+///     metadata read, a correct serial here is required to tell two same-model keys apart. Any failure is
+///     swallowed and reported as <c>null</c> so discovery degrades to conservative no-merge rather than
+///     aborting. It uses only Core primitives and introduces no dependency on Management.
 /// </remarks>
 internal static class DiscoveryIdentityReader
 {
@@ -41,20 +41,12 @@ internal static class DiscoveryIdentityReader
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        // A short retry handles transient PC/SC sharing violations (SCARD_E_SHARING_VIOLATION) and
-        // not-ready cards that occur when another connection to the same key is briefly open during
-        // discovery. A persistent failure resolves to null (conservative no-merge), never an error.
         for (var attempt = 1; ; attempt++)
         {
             try
             {
-                return connection switch
-                {
-                    ConnectionType.SmartCard => await ReadSmartCardAsync(device, cancellationToken).ConfigureAwait(false),
-                    ConnectionType.HidFido => await ReadFidoAsync(device, cancellationToken).ConfigureAwait(false),
-                    ConnectionType.HidOtp => await ReadOtpAsync(device, cancellationToken).ConfigureAwait(false),
-                    _ => null
-                };
+                var conn = await ConnectAsync(device, connection, cancellationToken).ConfigureAwait(false);
+                return await ProtocolDeviceInfo.ReadAsync(conn, cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -84,48 +76,17 @@ internal static class DiscoveryIdentityReader
         }
     }
 
-    private static async Task<DeviceInfo?> ReadSmartCardAsync(IYubiKey device, CancellationToken cancellationToken)
-    {
-        var conn = await device.ConnectAsync<ISmartCardConnection>(cancellationToken).ConfigureAwait(false);
-        var protocol = PcscProtocolFactory<ISmartCardConnection>.Create().Create(conn);
-        try
+    internal static Task<IConnection> ConnectAsync(
+        IYubiKey device,
+        ConnectionType connection,
+        CancellationToken cancellationToken) => connection switch
         {
-            await protocol.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
-            return await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            protocol.Dispose();
-        }
-    }
+            ConnectionType.SmartCard => Upcast(device.ConnectAsync<ISmartCardConnection>(cancellationToken)),
+            ConnectionType.HidFido => Upcast(device.ConnectAsync<IFidoHidConnection>(cancellationToken)),
+            ConnectionType.HidOtp => Upcast(device.ConnectAsync<IOtpHidConnection>(cancellationToken)),
+            _ => throw new NotSupportedException($"Cannot open connection {connection} for identity read.")
+        };
 
-    private static async Task<DeviceInfo?> ReadFidoAsync(IYubiKey device, CancellationToken cancellationToken)
-    {
-        var conn = await device.ConnectAsync<IFidoHidConnection>(cancellationToken).ConfigureAwait(false);
-        var protocol = FidoProtocolFactory.Create().Create(conn);
-        try
-        {
-            // Initializes the HID channel; the application id is unused for HID.
-            await protocol.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
-            return await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            protocol.Dispose();
-        }
-    }
-
-    private static async Task<DeviceInfo?> ReadOtpAsync(IYubiKey device, CancellationToken cancellationToken)
-    {
-        var conn = await device.ConnectAsync<IOtpHidConnection>(cancellationToken).ConfigureAwait(false);
-        var protocol = OtpProtocolFactory.Create().Create(conn);
-        try
-        {
-            return await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            protocol.Dispose();
-        }
-    }
+    private static async Task<IConnection> Upcast<TConnection>(Task<TConnection> task)
+        where TConnection : class, IConnection => await task.ConfigureAwait(false);
 }

@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using System.Text;
 using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.Interfaces;
@@ -33,14 +34,19 @@ public class FindYubiKeys(
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<FindYubiKeys>();
 
-    // Discovery-time identity cache keyed by the per-interface stable pre-key (the interface IYubiKey's
-    // DeviceId). Presence of a key means the interface's identity was already read this session; the value
-    // is the read result (null = read failed or serial-disabled). Entries are evicted when the interface
-    // leaves the inventory so a recycled reader name / HID path cannot reuse a stale serial (ISC-12.1).
+    // Hard timeout for a single best-effort metadata read over one transport. Bounded so a locked/slow CCID
+    // cannot stall discovery; reads run concurrently across keys so total added latency is ~one timeout.
+    private static readonly TimeSpan MetadataReadTimeout = TimeSpan.FromSeconds(3);
+
+    // Serial-disambiguation identity cache (PID-count>1 / force-serial path), keyed by per-interface DeviceId.
+    // Presence means the interface's identity was read; null value = read failed or serial-disabled.
     private readonly ConcurrentDictionary<string, DeviceInfo?> _identityCache = new();
 
-    // Serializes discovery so two concurrent scans (e.g. the monitor's rescan and a caller's forced
-    // rescan) do not open connections to the same interface at once, which causes PC/SC sharing violations.
+    // Best-effort metadata cache, keyed by the merged device's stable interface-set key (NOT the composite
+    // DeviceId, which can flip between pid- and serial-forms). Evicted when any member interface disappears.
+    private readonly ConcurrentDictionary<string, MetadataCacheEntry> _metadataCache = new();
+
+    // Serializes discovery so two concurrent scans do not open connections to the same interface at once.
     private readonly SemaphoreSlim _scanLock = new(1, 1);
 
     public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(
@@ -59,28 +65,38 @@ public class FindYubiKeys(
             var hidDevices = await findHidService.FindAllAsync(cancellationToken).ConfigureAwait(false);
 
             var interfaces = BuildInterfaces(pcscDevices, hidDevices);
-
             EvictAbsentIdentities(interfaces);
 
-            // Merging is only possible when more than one USB interface is present; otherwise skip the cost
-            // of opening connections to read identity (ISC-12).
-            var usbInterfaceCount = interfaces.Count(i => i.IsUsb);
+            // Reader-name drift: if any USB CCID reader name failed to parse to a known PID, PID correlation
+            // is untrustworthy this scan; degrade to serial-based merge for all USB interfaces (ISC-11).
+            var forceSerial = interfaces.Any(i =>
+                i is { IsUsb: true, Connection: ConnectionType.SmartCard, Pid: null });
+            if (forceSerial)
+            {
+                Logger.LogWarning(
+                    "A USB CCID reader name did not parse to a known YubiKey PID; falling back to serial-based " +
+                    "merge for all USB interfaces this scan (PID correlation degraded).");
+            }
+
+            var pidCounts = CompositeDeviceMerger.ComputePidCounts(
+                interfaces.Select(i => i.ToDescriptor(null)).Where(d => d.IsUsb));
+
             var descriptors = new List<DeviceInterfaceDescriptor>(interfaces.Count);
             foreach (var iface in interfaces)
             {
-                DeviceInfo? info = null;
-                if (iface.IsUsb && usbInterfaceCount > 1)
-                    info = await ReadIdentityAsync(iface, cancellationToken).ConfigureAwait(false);
+                var needsSerial = iface.IsUsb &&
+                    (forceSerial || (iface.Pid is { } pid && pidCounts.GetValueOrDefault(pid) > 1));
 
-                descriptors.Add(new DeviceInterfaceDescriptor(
-                    iface.Device,
-                    iface.Connection,
-                    iface.IsUsb,
-                    info?.SerialNumber,
-                    info));
+                var info = needsSerial
+                    ? await ReadIdentityAsync(iface, cancellationToken).ConfigureAwait(false)
+                    : null;
+
+                descriptors.Add(iface.ToDescriptor(info));
             }
 
-            var merged = CompositeDeviceMerger.Merge(descriptors);
+            var merged = CompositeDeviceMerger.Merge(descriptors, forceSerial);
+            await PopulateMetadataAsync(merged, interfaces, cancellationToken).ConfigureAwait(false);
+
             return [.. merged.Where(d => type.Matches(d.AvailableConnections))];
         }
         finally
@@ -98,16 +114,17 @@ public class FindYubiKeys(
         foreach (var pcscDevice in pcscDevices)
         {
             var device = yubiKeyFactory.Create(pcscDevice);
-            interfaces.Add(new InterfaceCandidate(
-                device,
-                ConnectionType.SmartCard,
-                pcscDevice.Kind == PscsConnectionKind.Usb));
+            var isUsb = pcscDevice.Kind == PscsConnectionKind.Usb;
+            var pid = isUsb ? ReaderNamePidParser.FromReaderName(pcscDevice.ReaderName) : null;
+            interfaces.Add(new InterfaceCandidate(device, ConnectionType.SmartCard, isUsb, pid));
         }
 
         foreach (var hidDevice in hidDevices)
         {
             var device = yubiKeyFactory.Create(hidDevice);
-            interfaces.Add(new InterfaceCandidate(device, device.AvailableConnections, IsUsb: true));
+            var rawPid = hidDevice.DescriptorInfo.ProductId;
+            ushort? pid = rawPid > 0 && ReaderNamePidParser.IsKnownPid((ushort)rawPid) ? (ushort)rawPid : null;
+            interfaces.Add(new InterfaceCandidate(device, device.AvailableConnections, IsUsb: true, pid));
         }
 
         return interfaces;
@@ -122,13 +139,59 @@ public class FindYubiKeys(
             .TryReadAsync(iface.Device, iface.Connection, Logger, cancellationToken)
             .ConfigureAwait(false);
 
-        // Cache only successful reads (including an authoritative null-serial read on a serial-disabled key).
-        // A failed read returns null and is NOT cached, so a transient failure (e.g. a brief PC/SC sharing
-        // violation) is retried on the next scan instead of permanently splitting the physical device.
+        // Cache only successful reads so a transient failure is retried on the next scan (not poisoned).
         if (info is not null)
             _identityCache[iface.Device.DeviceId] = info;
 
         return info;
+    }
+
+    private async Task PopulateMetadataAsync(
+        IReadOnlyList<IYubiKey> merged,
+        IReadOnlyList<InterfaceCandidate> interfaces,
+        CancellationToken cancellationToken)
+    {
+        // Always evict stale metadata once per scan, even when this scan has no composites (so unplugging
+        // the last composite does not leave entries behind).
+        EvictAbsentMetadata(interfaces);
+
+        var composites = merged.OfType<CompositeYubiKey>().Where(c => c.DeviceInfo is null).ToList();
+        if (composites.Count == 0)
+            return;
+
+        // Read best-effort metadata for each merged key concurrently (bounded by one timeout, never blocks
+        // the merge result which is already computed).
+        var reads = composites.Select(async composite =>
+        {
+            var key = MetadataKey(composite);
+            if (_metadataCache.TryGetValue(key, out var cached))
+            {
+                composite.DeviceInfo = cached.Info;
+                return;
+            }
+
+            var info = await CompositeMetadataReader
+                .TryReadAsync(composite, MetadataReadTimeout, Logger, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (info is not null)
+            {
+                _metadataCache[key] = new MetadataCacheEntry(info, composite.MemberDeviceIds);
+                composite.DeviceInfo = info;
+            }
+        });
+
+        await Task.WhenAll(reads).ConfigureAwait(false);
+    }
+
+    // Collision-free key over the (already sorted) member ids: length-prefixing each part makes the
+    // boundaries unambiguous even if a reader name / device path contains delimiter characters.
+    private static string MetadataKey(CompositeYubiKey composite)
+    {
+        var builder = new StringBuilder();
+        foreach (var id in composite.MemberDeviceIds)
+            builder.Append(id.Length).Append(':').Append(id);
+        return builder.ToString();
     }
 
     private void EvictAbsentIdentities(IReadOnlyList<InterfaceCandidate> interfaces)
@@ -138,8 +201,25 @@ public class FindYubiKeys(
             _ = _identityCache.TryRemove(staleKey, out _);
     }
 
+    private void EvictAbsentMetadata(IReadOnlyList<InterfaceCandidate> interfaces)
+    {
+        var present = interfaces.Select(i => i.Device.DeviceId).ToHashSet();
+        foreach (var entry in _metadataCache)
+        {
+            // An entry is kept only while all of its member interface ids are still enumerated.
+            if (entry.Value.MemberIds.Any(id => !present.Contains(id)))
+                _ = _metadataCache.TryRemove(entry.Key, out _);
+        }
+    }
+
     public static FindYubiKeys Create() =>
         new(FindPcscDevices.Create(), FindHidDevices.Create(), YubiKeyFactory.Create());
 
-    private readonly record struct InterfaceCandidate(IYubiKey Device, ConnectionType Connection, bool IsUsb);
+    private readonly record struct InterfaceCandidate(IYubiKey Device, ConnectionType Connection, bool IsUsb, ushort? Pid)
+    {
+        public DeviceInterfaceDescriptor ToDescriptor(DeviceInfo? info) =>
+            new(Device, Connection, IsUsb, Pid, info?.SerialNumber, info);
+    }
+
+    private readonly record struct MetadataCacheEntry(DeviceInfo? Info, IReadOnlyList<string> MemberIds);
 }

@@ -19,97 +19,79 @@ namespace Yubico.YubiKit.Core.UnitTests.CoreYubiKey;
 
 public class CompositeDeviceMergerTests
 {
-    private static DeviceInterfaceDescriptor Usb(string id, ConnectionType connection, int? serial, DeviceInfo? info = null) =>
-        new(new FakeYubiKey(id, connection), connection, IsUsb: true, serial, info);
+    private const ushort FullKeyPid = 0x0407; // OTP+FIDO+CCID
+    private const ushort SkyPid = 0x0120;
 
-    private static DeviceInterfaceDescriptor Nfc(string id, int? serial) =>
-        new(new FakeYubiKey(id, ConnectionType.SmartCard), ConnectionType.SmartCard, IsUsb: false, serial, null);
+    private static DeviceInterfaceDescriptor Usb(
+        string id, ConnectionType connection, ushort? pid, int? serial = null, DeviceInfo? info = null) =>
+        new(new FakeYubiKey(id, connection), connection, IsUsb: true, pid, serial, info);
+
+    private static DeviceInterfaceDescriptor Nfc(string id) =>
+        new(new FakeYubiKey(id, ConnectionType.SmartCard), ConnectionType.SmartCard, IsUsb: false, null, null, null);
 
     [Fact]
-    public void Merge_ThreeInterfacesSameSerial_ProducesOneCompositeWithUnionedConnections()
+    public void Merge_FullKeySamePid_MergesByPidWithoutSerial()
     {
         var merged = CompositeDeviceMerger.Merge([
-            Usb("hid:fido", ConnectionType.HidFido, 103),
-            Usb("pcsc:cc", ConnectionType.SmartCard, 103),
-            Usb("hid:otp", ConnectionType.HidOtp, 103)
+            Usb("pcsc:cc", ConnectionType.SmartCard, FullKeyPid),
+            Usb("hid:fido", ConnectionType.HidFido, FullKeyPid),
+            Usb("hid:otp", ConnectionType.HidOtp, FullKeyPid)
         ]);
 
-        var device = Assert.Single(merged);
-        var composite = Assert.IsType<CompositeYubiKey>(device);
+        var composite = Assert.IsType<CompositeYubiKey>(Assert.Single(merged));
         Assert.Equal(ConnectionType.SmartCard | ConnectionType.HidFido | ConnectionType.HidOtp,
             composite.AvailableConnections);
-        Assert.Equal("ykphysical:103", composite.DeviceId);
+        Assert.Equal("ykphysical:pid:0407", composite.DeviceId);
     }
 
     [Fact]
-    public void Merge_TwoKeysDifferentSerials_StayTwoDevicesEachPairingOwnInterfaces()
+    public void Merge_SkySingleFidoInterface_PassesThroughAsOneDevice()
+    {
+        // SKY (Security Key): FIDO-HID only, no serial — passes through as one device, keyed by PID alone.
+        var sky = new FakeYubiKey("hid:fido", ConnectionType.HidFido);
+        var merged = CompositeDeviceMerger.Merge([
+            new DeviceInterfaceDescriptor(sky, ConnectionType.HidFido, IsUsb: true, SkyPid, null, null)
+        ]);
+
+        Assert.Same(sky, Assert.Single(merged));
+    }
+
+    [Fact]
+    public void Merge_SeriallessMultiInterfaceSamePid_MergesByPid()
+    {
+        // The Phase 37.5 fix: a serial-less key exposing several interfaces of one PID merges by PID.
+        var merged = CompositeDeviceMerger.Merge([
+            Usb("hid:fido", ConnectionType.HidFido, FullKeyPid),
+            Usb("hid:otp", ConnectionType.HidOtp, FullKeyPid)
+        ]);
+
+        var composite = Assert.IsType<CompositeYubiKey>(Assert.Single(merged));
+        Assert.Equal(ConnectionType.HidFido | ConnectionType.HidOtp, composite.AvailableConnections);
+    }
+
+    [Fact]
+    public void Merge_TwoSamePidKeysWithSerials_StayTwoDevices()
     {
         var merged = CompositeDeviceMerger.Merge([
-            Usb("hid:otp:101", ConnectionType.HidOtp, 101),
-            Usb("pcsc:101", ConnectionType.SmartCard, 101),
-            Usb("hid:otp:102", ConnectionType.HidOtp, 102),
-            Usb("pcsc:102", ConnectionType.SmartCard, 102)
+            Usb("pcsc:101", ConnectionType.SmartCard, FullKeyPid, serial: 101),
+            Usb("hid:otp:101", ConnectionType.HidOtp, FullKeyPid, serial: 101),
+            Usb("pcsc:102", ConnectionType.SmartCard, FullKeyPid, serial: 102),
+            Usb("hid:otp:102", ConnectionType.HidOtp, FullKeyPid, serial: 102)
         ]);
 
         Assert.Equal(2, merged.Count);
         Assert.All(merged, d => Assert.IsType<CompositeYubiKey>(d));
-        Assert.Contains(merged, d => d.DeviceId == "ykphysical:101"
-            && d.AvailableConnections == (ConnectionType.SmartCard | ConnectionType.HidOtp));
-        Assert.Contains(merged, d => d.DeviceId == "ykphysical:102"
-            && d.AvailableConnections == (ConnectionType.SmartCard | ConnectionType.HidOtp));
+        Assert.Contains(merged, d => d.DeviceId == "ykphysical:101");
+        Assert.Contains(merged, d => d.DeviceId == "ykphysical:102");
     }
 
     [Fact]
-    public void Merge_UsbInterfacesWithoutSerial_DoNotCollapse()
+    public void Merge_NfcReader_StandaloneNeverMergedWithUsb()
     {
         var merged = CompositeDeviceMerger.Merge([
-            Usb("pcsc:cc", ConnectionType.SmartCard, serial: null),
-            Usb("hid:otp", ConnectionType.HidOtp, serial: null)
-        ]);
-
-        Assert.Equal(2, merged.Count);
-        Assert.DoesNotContain(merged, d => d is CompositeYubiKey);
-        Assert.Contains(merged, d => d.DeviceId == "pcsc:cc");
-        Assert.Contains(merged, d => d.DeviceId == "hid:otp");
-    }
-
-    [Fact]
-    public void Merge_SeriallessSingleInterface_SkyStyle_PassesThroughAsOneDevice()
-    {
-        // SKY-series (Security Key) devices report no serial number and typically expose only the FIDO HID
-        // interface. A single serial-less interface needs no merge and passes through as one device.
-        var sky = new FakeYubiKey("hid:fido", ConnectionType.HidFido);
-        var merged = CompositeDeviceMerger.Merge([
-            new DeviceInterfaceDescriptor(sky, ConnectionType.HidFido, IsUsb: true, null, null)
-        ]);
-
-        var device = Assert.Single(merged);
-        Assert.Same(sky, device);
-        Assert.IsNotType<CompositeYubiKey>(device);
-    }
-
-    [Fact]
-    public void Merge_SeriallessMultiInterface_DoesNotMerge_ConservativeNoCollapse()
-    {
-        // A serial-less key exposing more than one interface cannot be merged on serial evidence, so each
-        // interface stands alone (conservative no-collapse). This is the known limitation for serial-less
-        // multi-interface keys; merging them would require PID/topology evidence (deferred).
-        var merged = CompositeDeviceMerger.Merge([
-            Usb("hid:fido", ConnectionType.HidFido, serial: null),
-            Usb("hid:otp", ConnectionType.HidOtp, serial: null)
-        ]);
-
-        Assert.Equal(2, merged.Count);
-        Assert.DoesNotContain(merged, d => d is CompositeYubiKey);
-    }
-
-    [Fact]
-    public void Merge_NfcReader_NeverMergedWithUsbEvenOnSharedSerial()
-    {
-        var merged = CompositeDeviceMerger.Merge([
-            Usb("pcsc:usb", ConnectionType.SmartCard, 103),
-            Usb("hid:fido", ConnectionType.HidFido, 103),
-            Nfc("pcsc:nfc", 103)
+            Usb("pcsc:usb", ConnectionType.SmartCard, FullKeyPid),
+            Usb("hid:fido", ConnectionType.HidFido, FullKeyPid),
+            Nfc("pcsc:nfc")
         ]);
 
         Assert.Equal(2, merged.Count);
@@ -119,51 +101,59 @@ public class CompositeDeviceMergerTests
     }
 
     [Fact]
-    public void Merge_SingleUsbInterfaceWithSerial_PassesThroughWithoutWrapper()
+    public void Merge_NullPidUsb_NotForceSerial_StandsAlone()
     {
         var single = new FakeYubiKey("pcsc:cc", ConnectionType.SmartCard);
         var merged = CompositeDeviceMerger.Merge([
-            new DeviceInterfaceDescriptor(single, ConnectionType.SmartCard, IsUsb: true, 103, null)
+            new DeviceInterfaceDescriptor(single, ConnectionType.SmartCard, IsUsb: true, null, null, null)
         ]);
 
-        var device = Assert.Single(merged);
-        Assert.Same(single, device);
+        Assert.Same(single, Assert.Single(merged));
     }
 
     [Fact]
-    public void Merge_CompositeFilteringOverMergedSet_MatchesByCapability()
+    public void Merge_UnknownPid_TreatedAsNullAndStandsAlone()
     {
+        var single = new FakeYubiKey("hid:weird", ConnectionType.HidFido);
         var merged = CompositeDeviceMerger.Merge([
-            Usb("pcsc:cc", ConnectionType.SmartCard, 103),
-            Usb("hid:otp", ConnectionType.HidOtp, 103)
+            new DeviceInterfaceDescriptor(single, ConnectionType.HidFido, IsUsb: true, 0x9999, null, null)
         ]);
-        var available = Assert.Single(merged).AvailableConnections;
 
-        Assert.True(ConnectionType.SmartCard.Matches(available));
-        Assert.True(ConnectionType.HidOtp.Matches(available));
-        Assert.True(ConnectionType.Hid.Matches(available));
-        Assert.True(ConnectionType.All.Matches(available));
-        Assert.False(ConnectionType.HidFido.Matches(available));
+        Assert.Same(single, Assert.Single(merged));
     }
 
     [Fact]
-    public void Merge_Composite_CachesDiscoveryDeviceInfo()
+    public void Merge_ForceSerial_MergesAllUsbBySerial_RejoiningUnparsedCcid()
     {
-        var info = default(DeviceInfo) with
-        {
-            FirmwareVersion = new FirmwareVersion(5, 7, 2),
-            SerialNumber = 103
-        };
-
-        var merged = CompositeDeviceMerger.Merge([
-            Usb("pcsc:cc", ConnectionType.SmartCard, 103, info),
-            Usb("hid:otp", ConnectionType.HidOtp, 103)
-        ]);
+        // Reader-name drift: unparsed CCID (null PID) + HID sibling, both with serial 103, forceSerial=true.
+        var merged = CompositeDeviceMerger.Merge(
+            [
+                Usb("pcsc:cc", ConnectionType.SmartCard, null, serial: 103),
+                Usb("hid:otp", ConnectionType.HidOtp, FullKeyPid, serial: 103)
+            ],
+            forceSerialMerge: true);
 
         var composite = Assert.IsType<CompositeYubiKey>(Assert.Single(merged));
+        Assert.Equal(ConnectionType.SmartCard | ConnectionType.HidOtp, composite.AvailableConnections);
+        Assert.Equal("ykphysical:103", composite.DeviceId);
+    }
+
+    [Fact]
+    public void Merge_SerialPath_CachesDiscoveryDeviceInfo()
+    {
+        var info = default(DeviceInfo) with { FirmwareVersion = new FirmwareVersion(5, 7, 2), SerialNumber = 103 };
+
+        var merged = CompositeDeviceMerger.Merge([
+            Usb("pcsc:103", ConnectionType.SmartCard, FullKeyPid, serial: 103, info: info),
+            Usb("hid:otp:103", ConnectionType.HidOtp, FullKeyPid, serial: 103),
+            // Second same-PID key forces the serial path.
+            Usb("pcsc:104", ConnectionType.SmartCard, FullKeyPid, serial: 104),
+            Usb("hid:otp:104", ConnectionType.HidOtp, FullKeyPid, serial: 104)
+        ]);
+
+        var composite = merged.OfType<CompositeYubiKey>().Single(c => c.DeviceId == "ykphysical:103");
         Assert.NotNull(composite.DeviceInfo);
         Assert.Equal(103, composite.DeviceInfo!.Value.SerialNumber);
-        Assert.Equal(new FirmwareVersion(5, 7, 2), composite.FirmwareVersion);
     }
 
     private sealed class FakeYubiKey(string deviceId, ConnectionType connectionType) : IYubiKey

@@ -43,6 +43,7 @@ internal sealed class CompositeYubiKey : IYubiKey
         DeviceId = deviceId;
         _members = members;
         DeviceInfo = deviceInfo;
+        MemberDeviceIds = [.. members.Select(m => m.DeviceId).OrderBy(id => id, StringComparer.Ordinal)];
 
         var combined = ConnectionType.Unknown;
         foreach (var member in members)
@@ -54,8 +55,14 @@ internal sealed class CompositeYubiKey : IYubiKey
 
     public ConnectionType AvailableConnections { get; }
 
-    /// <summary>Read-only device metadata read during discovery (used internally; not part of the public contract yet).</summary>
-    public DeviceInfo? DeviceInfo { get; }
+    /// <summary>Sorted member interface DeviceIds — a stable key for the physical interface set across rescans.</summary>
+    internal IReadOnlyList<string> MemberDeviceIds { get; }
+
+    /// <summary>
+    ///     Read-only device metadata read during discovery (used internally; not part of the public contract
+    ///     yet). May be populated after construction by the best-effort metadata pass.
+    /// </summary>
+    public DeviceInfo? DeviceInfo { get; internal set; }
 
     /// <summary>Firmware version read during discovery, when available.</summary>
     public FirmwareVersion? FirmwareVersion => DeviceInfo?.FirmwareVersion;

@@ -153,7 +153,8 @@ Build the v2 composite YubiKey device model in staged, reviewable phases so Core
 | Phase 35 Core device-info reader | Add Core-owned read-info paths used by discovery without Management dependency and verify any shared read-info logic preserves dependency direction. | ISC-9, ISC-10, ISC-11, ISC-11.1, ISC-26 | Phase 34 | false |
 | Phase 36 physical device model | Implement physical `IYubiKey` shape with metadata, available connections, support checks, typed connection routing, explicit scalar `IYubiKey.ConnectionType` disposition, and raw/default connection behavior tests. | ISC-8, ISC-13, ISC-13.1, ISC-13.2, ISC-14, ISC-15, ISC-15.1 | Phase 35 | false |
 | Phase 37 composite discovery | Merge partial PC/SC, OTP HID, and FIDO HID discoveries into physical devices with correct filtering and events. | ISC-16, ISC-17, ISC-18, ISC-19, ISC-20, ISC-27 | Phase 36 | false |
-| Phase 38 extension defaults | Preserve app-specific extension ergonomics, remove scalar-connection assumptions, and add smart defaults plus explicit overrides where needed. | ISC-21, ISC-21.1, ISC-22, ISC-23, ISC-24 | Phase 37 | true |
+| Phase 37.5 PID-based merge | Replace the Phase 37 serial-only merge with the Rust PID-from-reader-name model so a single physical key merges with no opens, fixing the exclusive-CCID-holder and serial-less/SKY limitations. Supersedes Phase 37's merge mechanism; public criteria unchanged. | ISC-16, ISC-17, ISC-19, ISC-20, ISC-27 | Phase 37 | false |
+| Phase 38 extension defaults | Preserve app-specific extension ergonomics, remove scalar-connection assumptions, and add smart defaults plus explicit overrides where needed. | ISC-21, ISC-21.1, ISC-22, ISC-23, ISC-24 | Phase 37.5 | true |
 | Phase 39 integration and final verification | Update docs, run safe hardware smoke, final tests, final Cato, and final learning note. | ISC-28, ISC-29, ISC-30 | Phase 38 | false |
 
 ## Decisions
@@ -171,6 +172,7 @@ Build the v2 composite YubiKey device model in staged, reviewable phases so Core
 - 2026-06-09: Cato identified that scalar `IYubiKey.ConnectionType` is not merely additive debt; it is a core breaking-change decision for the physical-device model and current extension methods.
 - 2026-06-09: Cato identified that `Tests.Shared` and CLI consumers of `DeviceInfo` require mandatory compile migration when metadata moves; optional richer behavior remains deferred.
 - 2026-06-09: Cato follow-up passed and surfaced two info-level tightenings: give raw/default connection behavior explicit test ownership and verify Phase 35 read-info sharing does not reintroduce Core-to-Management coupling.
+- 2026-06-10: Phase 37's serial-only merge (open every interface, group by serial) was found on hardware to drop the CCID when another process holds it exclusively (GnuPG scdaemon → `SCARD_E_SHARING_VIOLATION`) and to be unable to merge serial-less keys (SKY series). Phase 37.5 adopts the Rust PID-from-reader-name model (merge by USB Product ID for the single-key case, serial only to disambiguate multiple same-model keys), which fixes both. Phase 37.5 supersedes the Phase 37 merge mechanism; Phase 37's public criteria remain satisfied.
 - 2026-06-09: The GPT-5.5 cross-vendor reviewer route (PAI DevTeam, and the opposite-family leg of Cato) is temporarily rate-limited. Interim opposite-family reviews use the GitHub Copilot CLI GPT-5.4 (high reasoning) via `scripts/interim-cross-vendor-review.sh`; the GPT-5.5 and any required Cato review are queued for when quota is restored. See "Interim Cross-Vendor Review" below.
 
 ## Interim Cross-Vendor Review (GPT-5.5 Throttling Workaround)
@@ -249,6 +251,10 @@ Sequencing rule: Phase 37 must not ship merged multi-connection physical devices
 ### Phase 37: Composite Discovery And Repository Semantics
 
 Implement merge behavior so CCID, FIDO HID, and OTP HID interfaces for one physical USB key become one SDK device. Update filtering, repository cache keys, and add/remove events.
+
+### Phase 37.5: Composite Merge By USB Product ID (Rust Model)
+
+Replace the Phase 37 serial-only merge with the Rust reference's PID-from-reader-name model. The CCID interface's USB Product ID is parsed from its PC/SC reader name and the HID interfaces' PID comes from the descriptor; a physical key whose PID is present exactly once merges its interfaces with no connection opened. Serial is consulted only to disambiguate multiple same-model keys present at once (conservative no-collapse when serial-less). Device metadata is read best-effort over a single preferred transport (CCID→OTP→FIDO fallback). This fixes the two Phase 37 limitations recorded in `phase-37-composite-discovery-learnings.md` (exclusive CCID holder such as GnuPG scdaemon dropping the CCID; serial-less / SKY keys not merging). See `phase-37_5-pid-merge-ISA.md`.
 
 ### Phase 38: Extension Method Smart Defaults
 

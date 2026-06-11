@@ -102,12 +102,12 @@ Build the v2 composite YubiKey device model in staged, reviewable phases so Core
 
 ### Extension Ergonomics
 
-- [ ] ISC-21: Existing applet `IYubiKeyExtensions` remain the primary ergonomic session-entry surface.
-- [ ] ISC-21.1: Phase 38 explicitly rewrites extension-method transport selection away from scalar `IYubiKey.ConnectionType` assumptions, with FIDO2 called out because it currently switches on `yubiKey.ConnectionType`.
-- [ ] ISC-22: Smart defaults are app-specific and documented: SmartCard applets prefer SmartCard, FIDO2/WebAuthn prefer HID FIDO when available, Management can prefer SmartCard then FIDO HID then OTP HID.
-- [ ] ISC-23: Explicit connection preference or override is available where a module can reasonably use more than one transport.
+- [x] ISC-21: Existing applet `IYubiKeyExtensions` remain the primary ergonomic session-entry surface. (Phase 38: signatures preserved via back-compat overloads.)
+- [x] ISC-21.1: Phase 38 explicitly rewrites extension-method transport selection away from scalar `IYubiKey.ConnectionType` assumptions, with FIDO2 called out because it currently switches on `yubiKey.ConnectionType`. (Phase 38: FIDO2 placeholder throw replaced; all selection via `ResolveSessionTransports`.)
+- [x] ISC-22: Smart defaults are app-specific and documented: SmartCard applets prefer SmartCard, FIDO2/WebAuthn prefer HID FIDO when available, Management can prefer SmartCard then FIDO HID then OTP HID. (Phase 38.)
+- [x] ISC-23: Explicit connection preference or override is available where a module can reasonably use more than one transport. (Phase 38: optional `preferredConnection` on Management/YubiOtp/Fido2/WebAuthn.)
 - [ ] ISC-23.1: Phase 38.5 adds held-transport fallback for multi-transport applets: when no explicit override is given and the preferred transport fails because another process holds it (`SCARD_E_SHARING_VIOLATION` / `SCARD_E_SERVER_TOO_BUSY`), the session falls back to the next supported transport; an explicit override never falls back.
-- [ ] ISC-24: Existing extension-method unit tests are updated to verify both default selection and explicit override behavior.
+- [x] ISC-24: Existing extension-method unit tests are updated to verify both default selection and explicit override behavior. (Phase 38: fake-probe `IYubiKeyExtensionsTransportTests` in Management/YubiOtp/Fido2/WebAuthn.)
 
 ### Tests And Verification
 

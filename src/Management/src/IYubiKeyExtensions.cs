@@ -93,6 +93,14 @@ public static class IYubiKeyExtensions
         ///     a secure session with the YubiKey device.
         /// </param>
         /// <param name="configuration"></param>
+        /// <param name="preferredConnection">
+        ///     Optional explicit transport override. When <see langword="null" /> (the default), Management
+        ///     selects a transport in its documented default order:
+        ///     <see cref="ConnectionType.SmartCard" />, then <see cref="ConnectionType.HidFido" />, then
+        ///     <see cref="ConnectionType.HidOtp" />. When set, it must be exactly one of those three transports
+        ///     and supported by the device; otherwise an <see cref="ArgumentException" /> (invalid transport) or
+        ///     <see cref="NotSupportedException" /> (transport not available on this device) is thrown.
+        /// </param>
         /// <param name="cancellationToken">
         ///     An optional token to cancel the operation.
         /// </param>
@@ -103,9 +111,11 @@ public static class IYubiKeyExtensions
         public async Task<ManagementSession> CreateManagementSessionAsync(
             ScpKeyParameters? scpKeyParams = null,
             ProtocolConfiguration? configuration = null,
+            ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await ConnectForManagementAsync(yubiKey, cancellationToken).ConfigureAwait(false);
+            var connection = await ConnectForManagementAsync(yubiKey, preferredConnection, cancellationToken)
+                .ConfigureAwait(false);
             try
             {
                 return await ManagementSession.CreateAsync(
@@ -121,31 +131,56 @@ public static class IYubiKeyExtensions
                 throw;
             }
         }
+
+        /// <summary>
+        ///     Source-compatibility overload preserving the pre-Phase-38 positional shape
+        ///     (<c>scpKeyParams, configuration, cancellationToken</c>); forwards using the default transport order.
+        /// </summary>
+        /// <param name="scpKeyParams">Optional SCP key parameters.</param>
+        /// <param name="configuration">Optional protocol configuration.</param>
+        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
+        /// <returns>A <see cref="ManagementSession" /> the caller must dispose.</returns>
+        public Task<ManagementSession> CreateManagementSessionAsync(
+            ScpKeyParameters? scpKeyParams,
+            ProtocolConfiguration? configuration,
+            CancellationToken cancellationToken) =>
+            yubiKey.CreateManagementSessionAsync(scpKeyParams, configuration, null, cancellationToken);
     }
 
     // Management can run over SmartCard or HID. On a physical (possibly multi-connection) device the
-    // parameterless ConnectAsync() is ambiguous, so select a concrete transport in a defined order:
-    // SmartCard first (richest), then FIDO HID, then OTP HID. For a single-interface device this resolves
-    // to the only available transport (behavior parity). Full smart-default/override policy is Phase 38.
+    // parameterless ConnectAsync() is ambiguous, so a transport is chosen by an app-specific smart default
+    // (SmartCard first/richest, then FIDO HID, then OTP HID) or an explicit caller override. The ordered
+    // default candidate list is kept explicit here so a future held-transport fallback (Phase 38.5) can
+    // iterate the remaining candidates without reshaping this method.
+    private static readonly ConnectionType[] ManagementTransportOrder =
+        [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp];
+
     private static async Task<IConnection> ConnectForManagementAsync(
         IYubiKey yubiKey,
+        ConnectionType? preferredConnection,
         CancellationToken cancellationToken)
     {
-        var transport = yubiKey.ResolvePreferredConnection(
-            ConnectionType.SmartCard,
-            ConnectionType.HidFido,
-            ConnectionType.HidOtp);
+        var candidates = yubiKey.ResolveSessionTransports(
+            preferredConnection,
+            "Management",
+            ManagementTransportOrder);
 
-        return transport switch
+        // Open the most-preferred candidate. The ordered list is the seam for Phase 38.5 held-transport
+        // fallback, which will try the next candidate when the preferred transport is held by another process.
+        foreach (var transport in candidates)
         {
-            ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-                .ConfigureAwait(false),
-            ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
-                .ConfigureAwait(false),
-            ConnectionType.HidOtp => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
-                .ConfigureAwait(false),
-            _ => throw new NotSupportedException(
-                "This YubiKey exposes no connection usable for a Management session.")
-        };
+            return transport switch
+            {
+                ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
+                    .ConfigureAwait(false),
+                ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
+                    .ConfigureAwait(false),
+                _ => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
+                    .ConfigureAwait(false)
+            };
+        }
+
+        throw new NotSupportedException(
+            "This YubiKey exposes no connection usable for a Management session.");
     }
 }

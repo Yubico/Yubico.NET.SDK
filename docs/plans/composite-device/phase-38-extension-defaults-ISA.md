@@ -128,7 +128,7 @@ verify the solution, run a safe hardware smoke (serial 103, CCID free), run inte
 
 ### Override API Shape
 
-- [ ] ISC-4: Each multi-transport session-entry method (Management `CreateManagementSessionAsync`, YubiOtp `CreateYubiOtpSessionAsync`, Fido2 `CreateFidoSessionAsync`, WebAuthn `CreateWebAuthnClientAsync`) gains an optional `ConnectionType? preferredConnection = null` parameter. The parameter is the last optional parameter so existing positional/named calls keep compiling.
+- [ ] ISC-4: Each multi-transport session-entry method (Management `CreateManagementSessionAsync`, YubiOtp `CreateYubiOtpSessionAsync`, Fido2 `CreateFidoSessionAsync`, WebAuthn `CreateWebAuthnClientAsync`) gains an optional `ConnectionType? preferredConnection = null` parameter, placed immediately before the trailing `CancellationToken` (CA1068 requires `CancellationToken` last; warnings-as-errors). Because inserting a parameter before `CancellationToken` would source-break callers that previously passed `CancellationToken` as the final positional argument, each method also keeps a back-compatibility overload with the exact pre-Phase-38 positional shape (ending in `CancellationToken`, no `preferredConnection`) that forwards with `preferredConnection: null`. The overload's parameters are all required, so C# better-function-member resolution selects it for the old full-positional call and the new method for all default/partial/named calls — verified to compile with no `CS0121` ambiguity (including the common `cancellationToken:`-named callers).
 - [ ] ISC-5: `preferredConnection == null` selects the app's **effective default candidate list** (the applet's documented order, ISC-8/ISC-9) via `ResolvePreferredConnection`; behavior on a single-interface device is unchanged (resolves to the only transport). There is exactly one reading of the null path: "resolve over the applet's ordered default candidate list."
 - [ ] ISC-6: A non-null `preferredConnection` is validated and resolved in this exact order, **before any connect attempt**:
   - **Not exactly one concrete transport** → `ArgumentException`. A valid override is *exactly one* of `ConnectionType.SmartCard`, `ConnectionType.HidFido`, or `ConnectionType.HidOtp`. Anything else — `Hid`, `All`, `Unknown`, `0`, or a combined flag such as `SmartCard | HidFido` — is a caller error and throws `ArgumentException` (it is not a device-capability question).
@@ -142,14 +142,14 @@ verify the solution, run a safe hardware smoke (serial 103, CCID free), run inte
 
 - [ ] ISC-8: Management default order is `SmartCard -> HidFido -> HidOtp`; YubiOtp default order is `SmartCard -> HidOtp` (parity with the shipped pre-Phase-38 gating).
 - [ ] ISC-9: Fido2/WebAuthn default order is `HidFido -> SmartCard` (master ISC-22). The Phase 36 placeholder dual-transport throw in `ConnectForFidoAsync` is removed; a device exposing both transports now defaults to HID FIDO. A device exposing neither FIDO-capable transport still throws `NotSupportedException`.
-- [ ] ISC-9.1: `scpKeyParams` does NOT change Fido2/WebAuthn transport selection in this phase. The default (`HidFido -> SmartCard`) and the override semantics (ISC-6) apply regardless of whether `scpKeyParams` is supplied. The pre-existing documented behavior that SCP parameters are ignored over a HID FIDO connection is unchanged (a caller who needs SCP must select SmartCard explicitly via `preferredConnection: ConnectionType.SmartCard`). Making `scpKeyParams` imply SmartCard is a separate behavior change beyond the master-approved defaults+overrides scope and is recorded as a deferred follow-up (Out of Scope), not implemented here.
+- [ ] ISC-9.1: `scpKeyParams` does NOT change Fido2/WebAuthn transport selection in this phase. The default (`HidFido -> SmartCard`) and the override semantics (ISC-6) apply regardless of whether `scpKeyParams` is supplied. SCP is only valid on the SmartCard transport: supplying `scpKeyParams` while a non-SmartCard transport is selected (including the default HID FIDO) results in `NotSupportedException` ("SCP is only supported on SmartCard protocols") thrown by `ApplicationSession.InitializeCoreAsync` during session initialization — this is a pre-existing Core contract, not introduced here, and is the same outcome a single-HID device with SCP produced before Phase 38. (The earlier Fido2 doc comment that SCP is "ignored over HID" was factually wrong — the code throws — and is corrected in this phase.) A caller who needs SCP must select SmartCard explicitly via `preferredConnection: ConnectionType.SmartCard`. Making `scpKeyParams` imply/auto-switch to SmartCard is a separate behavior change beyond the master-approved defaults+overrides scope and is recorded as a deferred follow-up (Out of Scope), not implemented here; silently dropping SCP on HID is explicitly rejected (it would hide a requested secure channel).
 - [ ] ISC-10: No remaining "Phase 38" placeholder throw or deferral comment exists in any extension transport-selection code path. No extension reasons about a scalar connection type (only `AvailableConnections`/`SupportsConnection`/`ResolvePreferredConnection`).
 
 ### Scope Boundaries
 
 - [ ] ISC-11: Single-transport applets (Piv, Oath, OpenPgp, SecurityDomain, YubiHsm) remain SmartCard-only and gain NO override parameter; only doc-comment cleanup (if any "Phase 38" language exists) is applied.
 - [ ] ISC-12: No held-transport fallback is implemented (an override or default that resolves to a held transport surfaces the underlying connect error unchanged); the design leaves room for Phase 38.5 to add fallback on the `null`-override default path without changing the public signature.
-- [ ] ISC-12.1: The `preferredConnection == null` default branch is implemented distinctly from the explicit-override branch and routes through a **dedicated default-path helper that receives an explicit ordered `ConnectionType[]` candidate list** (the applet's effective default list per ISC-5/ISC-8/ISC-9). Phase 38 may call `ResolvePreferredConnection` inside that helper for today's single-attempt behavior, but the ordered candidate list must remain explicit at the connect site (not pre-collapsed to one transport before the helper), so Phase 38.5 can wrap only that helper to add held-transport fallback over the remaining candidates without reshaping override semantics or the public signature. Anti: a one-shot `var t = ResolvePreferredConnection(...); connect(t);` at the call site that discards the ordered list.
+- [ ] ISC-12.1: The `preferredConnection == null` default branch is candidate-order-aware: the shared Core helper `ResolveSessionTransports` returns an **ordered, non-empty `IReadOnlyList<ConnectionType>`** of concrete transports to attempt (the device-supported subset of the applet's default order per ISC-5/ISC-8/ISC-9, preference order preserved; an explicit override returns a single-element list because an override never falls back). Each applet's connect site iterates that ordered list and opens the first candidate today, so Phase 38.5 can add held-transport fallback by wrapping each attempt in the existing loop and continuing to the next candidate — without reshaping override semantics or the public signature. Anti: collapsing the default path to a single transport before the connect site (discarding the ordered list).
 
 ### Tests And Verification
 
@@ -209,14 +209,16 @@ verify the solution, run a safe hardware smoke (serial 103, CCID free), run inte
 
 ## Decisions
 
-- 2026-06-11: **Override shape is an optional `ConnectionType? preferredConnection = null`** as the last
-  optional parameter on each multi-transport session-entry method. Chosen over a `params ConnectionType[]`
-  list (ambiguous empty-array semantics, larger surface) and over a separate forced overload (signature
-  duplication). This preserves **source** compatibility only: existing direct call sites keep compiling on
-  recompile, but adding an optional parameter is a binary signature change (precompiled callers and any
-  method-group/delegate consumers are not binary-compatible). This is acceptable at the current
-  `2.0.0-preview` stage; if binary compatibility ever becomes a hard requirement, switch to additive
-  overloads instead of changing the existing method signatures.
+- 2026-06-11: **Override shape is an optional `ConnectionType? preferredConnection = null`** placed
+  immediately before the trailing `CancellationToken` (CA1068 + warnings-as-errors require `CancellationToken`
+  last). Chosen over a `params ConnectionType[]` list (ambiguous empty-array semantics, larger surface).
+  To keep full **source** compatibility for the old positional shape (which ended in `CancellationToken`),
+  each method retains a back-compatibility overload with the exact pre-Phase-38 positional signature
+  (all-required params, ending in `CancellationToken`) that forwards with `preferredConnection: null`.
+  Better-function-member resolution disambiguates: the overload wins the old full-positional call; the new
+  method wins all default/partial/named calls (verified — no `CS0121`). Adding an optional parameter
+  remains a binary signature change for precompiled callers, which is acceptable at `2.0.0-preview`.
+  (The back-compat overload was added in response to the interim /DevTeam review HIGH finding.)
 - 2026-06-11: **`null` = documented default order via `ResolvePreferredConnection`; a concrete value is
   used exactly.** Supported concrete → used; unsupported concrete → `NotSupportedException`; non-concrete
   (`Hid`/`All`/`Unknown`) → `ArgumentException`. An override never falls back.

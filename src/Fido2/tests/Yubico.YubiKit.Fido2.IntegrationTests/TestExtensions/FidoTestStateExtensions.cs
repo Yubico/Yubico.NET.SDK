@@ -15,6 +15,7 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.Tests.Shared;
@@ -149,16 +150,23 @@ public static class FidoTestStateExtensions
         /// </param>
         /// <param name="configuration">Optional protocol configuration.</param>
         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
+        /// <param name="preferredConnection">
+        ///     Optional explicit FIDO2 transport override. Left <c>null</c> here so the shared default path
+        ///     keeps exercising the FIDO2 default order (HID FIDO first); SmartCard-tagged tests pass
+        ///     <see cref="ConnectionType.SmartCard" /> to pin the SmartCard transport (so they do not silently
+        ///     pass over HID FIDO on a merged composite device).
+        /// </param>
         /// <param name="cancellationToken">Cancellation token.</param>
         public async Task WithFidoSessionAsync(
             Func<FidoSession, Task> action,
             bool normalizePin = true,
             ProtocolConfiguration? configuration = null,
             ScpKeyParameters? scpKeyParams = null,
+            ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
             await using var session = await state.Device
-                .CreateFidoSessionAsync(scpKeyParams, configuration, cancellationToken)
+                .CreateFidoSessionAsync(scpKeyParams, configuration, preferredConnection, cancellationToken)
                 .ConfigureAwait(false);
 
             if (normalizePin)
@@ -181,16 +189,23 @@ public static class FidoTestStateExtensions
         /// </param>
         /// <param name="configuration">Optional protocol configuration.</param>
         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
+        /// <param name="preferredConnection">
+        ///     Optional explicit FIDO2 transport override. Left <c>null</c> here so the shared default path
+        ///     keeps exercising the FIDO2 default order (HID FIDO first); SmartCard-tagged tests pass
+        ///     <see cref="ConnectionType.SmartCard" /> to pin the SmartCard transport (so they do not silently
+        ///     pass over HID FIDO on a merged composite device).
+        /// </param>
         /// <param name="cancellationToken">Cancellation token.</param>
         public async Task WithFidoSessionAsync(
             Func<FidoSession, AuthenticatorInfo, Task> action,
             bool normalizePin = true,
             ProtocolConfiguration? configuration = null,
             ScpKeyParameters? scpKeyParams = null,
+            ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
             await using var session = await state.Device
-                .CreateFidoSessionAsync(scpKeyParams, configuration, cancellationToken)
+                .CreateFidoSessionAsync(scpKeyParams, configuration, preferredConnection, cancellationToken)
                 .ConfigureAwait(false);
 
             if (normalizePin)

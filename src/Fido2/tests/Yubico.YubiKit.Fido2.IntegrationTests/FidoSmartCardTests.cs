@@ -54,7 +54,7 @@ public class FidoSmartCardTests
                 Assert.NotNull(info);
                 Assert.True(info.Versions.Count > 0, "AuthenticatorInfo.Versions should not be empty");
                 Assert.Equal(16, info.Aaguid.Length);
-            });
+            }, preferredConnection: ConnectionType.SmartCard);
         }
         catch (NotSupportedException)
         {
@@ -90,7 +90,7 @@ public class FidoSmartCardTests
                     info.Versions.Contains("FIDO_2_1") ||
                     info.Versions.Contains("FIDO_2_2"),
                     $"Expected at least one FIDO2 version, got: [{string.Join(", ", info.Versions)}]");
-            });
+            }, preferredConnection: ConnectionType.SmartCard);
         }
         catch (NotSupportedException)
         {
@@ -125,7 +125,7 @@ public class FidoSmartCardTests
                 var hasEs256 = info.Algorithms.Any(a =>
                     a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.ES256);
                 Assert.True(hasEs256, "YubiKey should support ES256 algorithm");
-            });
+            }, preferredConnection: ConnectionType.SmartCard);
         }
         catch (NotSupportedException)
         {

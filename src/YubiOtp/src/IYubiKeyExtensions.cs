@@ -76,12 +76,24 @@ public static class IYubiKeyExtensions
         /// <summary>
         /// Creates a YubiOTP session for the device. The caller owns the session lifetime.
         /// </summary>
+        /// <param name="scpKeyParams">Optional SCP key parameters for a SmartCard session.</param>
+        /// <param name="configuration">Optional protocol configuration.</param>
+        /// <param name="preferredConnection">
+        /// Optional explicit transport override. When <see langword="null"/> (the default), YubiOTP selects a
+        /// transport in its documented default order: <see cref="ConnectionType.SmartCard"/>, then
+        /// <see cref="ConnectionType.HidOtp"/>. When set, it must be one of those two transports and supported
+        /// by the device; otherwise an <see cref="ArgumentException"/> (invalid transport) or
+        /// <see cref="NotSupportedException"/> (transport not available on this device) is thrown.
+        /// </param>
+        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         public async Task<YubiOtpSession> CreateYubiOtpSessionAsync(
             ScpKeyParameters? scpKeyParams = null,
             ProtocolConfiguration? configuration = null,
+            ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await ConnectForYubiOtpAsync(yubiKey, cancellationToken).ConfigureAwait(false);
+            var connection = await ConnectForYubiOtpAsync(yubiKey, preferredConnection, cancellationToken)
+                .ConfigureAwait(false);
             try
             {
                 return await YubiOtpSession.CreateAsync(
@@ -97,29 +109,54 @@ public static class IYubiKeyExtensions
                 throw;
             }
         }
+
+        /// <summary>
+        /// Source-compatibility overload preserving the pre-Phase-38 positional shape
+        /// (<c>scpKeyParams, configuration, cancellationToken</c>); forwards using the default transport order.
+        /// </summary>
+        /// <param name="scpKeyParams">Optional SCP key parameters.</param>
+        /// <param name="configuration">Optional protocol configuration.</param>
+        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
+        public Task<YubiOtpSession> CreateYubiOtpSessionAsync(
+            ScpKeyParameters? scpKeyParams,
+            ProtocolConfiguration? configuration,
+            CancellationToken cancellationToken) =>
+            yubiKey.CreateYubiOtpSessionAsync(scpKeyParams, configuration, null, cancellationToken);
     }
 
     // YubiOTP is dual-transport (SmartCard or OTP HID). On a physical (possibly multi-connection) device
-    // the parameterless ConnectAsync() is ambiguous, so select a concrete transport in a defined order:
-    // SmartCard first (matching the shipped OtpTool example's "prefers SmartCard for richer protocol
-    // support"), then OTP HID. For a single-interface device this resolves to the only available transport
-    // (behavior parity). Full smart-default/override policy is Phase 38.
+    // the parameterless ConnectAsync() is ambiguous, so a transport is chosen by an app-specific smart
+    // default (SmartCard first, matching the shipped OtpTool example's "prefers SmartCard for richer
+    // protocol support", then OTP HID) or an explicit caller override. The ordered default candidate list
+    // is kept explicit here so a future held-transport fallback (Phase 38.5) can iterate the remaining
+    // candidates without reshaping this method.
+    private static readonly ConnectionType[] YubiOtpTransportOrder =
+        [ConnectionType.SmartCard, ConnectionType.HidOtp];
+
     private static async Task<IConnection> ConnectForYubiOtpAsync(
         IYubiKey yubiKey,
+        ConnectionType? preferredConnection,
         CancellationToken cancellationToken)
     {
-        var transport = yubiKey.ResolvePreferredConnection(
-            ConnectionType.SmartCard,
-            ConnectionType.HidOtp);
+        var candidates = yubiKey.ResolveSessionTransports(
+            preferredConnection,
+            "YubiOTP",
+            YubiOtpTransportOrder);
 
-        return transport switch
+        // Open the most-preferred candidate. The ordered list is the seam for Phase 38.5 held-transport
+        // fallback, which will try the next candidate when the preferred transport is held by another process.
+        foreach (var transport in candidates)
         {
-            ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-                .ConfigureAwait(false),
-            ConnectionType.HidOtp => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
-                .ConfigureAwait(false),
-            _ => throw new NotSupportedException(
-                "This YubiKey exposes no connection usable for a YubiOTP session.")
-        };
+            return transport switch
+            {
+                ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
+                    .ConfigureAwait(false),
+                _ => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
+                    .ConfigureAwait(false)
+            };
+        }
+
+        throw new NotSupportedException(
+            "This YubiKey exposes no connection usable for a YubiOTP session.");
     }
 }

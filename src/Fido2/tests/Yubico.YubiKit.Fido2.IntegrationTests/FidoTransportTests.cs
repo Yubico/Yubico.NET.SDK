@@ -105,7 +105,7 @@ public class FidoTransportTests
                     await FidoTestHelpers.DeleteAllCredentialsForRpAsync(
                         session, FidoTestData.RpId, FidoTestData.PinUtf8);
                 }
-            });
+            }, preferredConnection: ConnectionType.SmartCard);
         }
         catch (NotSupportedException)
         {

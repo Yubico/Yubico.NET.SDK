@@ -141,6 +141,23 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Equal(typeof(IFidoHidConnection), device.RequestedConnection);
     }
 
+    // Phase 38.5 (ISC-10/ISC-14): the FIDO2 "no FIDO-capable connection" remap stays scoped to the
+    // ResolveSessionTransports call only. When ResolveSessionTransports succeeds but the HID FIDO connect
+    // fails with a non-held error, that error must surface unchanged — NOT be masked as the generic
+    // NotSupportedException — proving the remap did not widen around ConnectSessionTransportAsync.
+    [Fact]
+    public async Task CreateFidoSessionAsync_ConnectFailsNonHeld_SurfacesErrorNotGenericRemap()
+    {
+        var device = new ThrowingProbeYubiKey(
+            ConnectionType.HidFido | ConnectionType.SmartCard,
+            new InvalidOperationException("transport boom"));
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => device.CreateFidoSessionAsync(cancellationToken: Ct));
+
+        Assert.Equal("transport boom", ex.Message);
+    }
+
     private sealed class SelectionProbeYubiKey(ConnectionType available) : IYubiKey
     {
         public string DeviceId => "probe";
@@ -153,6 +170,17 @@ public class IYubiKeyExtensionsTransportTests
             RequestedConnection = typeof(TConnection);
             throw new ConnectProbeException();
         }
+    }
+
+    // Resolves a candidate list successfully, then throws a caller-supplied exception from the connect itself.
+    private sealed class ThrowingProbeYubiKey(ConnectionType available, Exception connectException) : IYubiKey
+    {
+        public string DeviceId => "throwing-probe";
+        public ConnectionType AvailableConnections { get; } = available;
+
+        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+            where TConnection : class, IConnection =>
+            throw connectException;
     }
 
     private sealed class ConnectProbeException : Exception;

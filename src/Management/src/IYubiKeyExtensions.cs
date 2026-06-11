@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Hid.Fido;
-using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
@@ -150,8 +148,8 @@ public static class IYubiKeyExtensions
     // Management can run over SmartCard or HID. On a physical (possibly multi-connection) device the
     // parameterless ConnectAsync() is ambiguous, so a transport is chosen by an app-specific smart default
     // (SmartCard first/richest, then FIDO HID, then OTP HID) or an explicit caller override. The ordered
-    // default candidate list is kept explicit here so a future held-transport fallback (Phase 38.5) can
-    // iterate the remaining candidates without reshaping this method.
+    // default candidate list resolved here drives ConnectSessionTransportAsync, which opens the most-preferred
+    // candidate and falls back to the next when the SmartCard transport is held by another process (Phase 38.5).
     private static readonly ConnectionType[] ManagementTransportOrder =
         [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp];
 
@@ -165,22 +163,7 @@ public static class IYubiKeyExtensions
             "Management",
             ManagementTransportOrder);
 
-        // Open the most-preferred candidate. The ordered list is the seam for Phase 38.5 held-transport
-        // fallback, which will try the next candidate when the preferred transport is held by another process.
-        foreach (var transport in candidates)
-        {
-            return transport switch
-            {
-                ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-                    .ConfigureAwait(false),
-                ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
-                    .ConfigureAwait(false),
-                _ => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
-                    .ConfigureAwait(false)
-            };
-        }
-
-        throw new NotSupportedException(
-            "This YubiKey exposes no connection usable for a Management session.");
+        return await yubiKey.ConnectSessionTransportAsync(candidates, "Management", cancellationToken)
+            .ConfigureAwait(false);
     }
 }

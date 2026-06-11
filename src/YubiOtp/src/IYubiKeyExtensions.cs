@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
@@ -128,8 +127,8 @@ public static class IYubiKeyExtensions
     // the parameterless ConnectAsync() is ambiguous, so a transport is chosen by an app-specific smart
     // default (SmartCard first, matching the shipped OtpTool example's "prefers SmartCard for richer
     // protocol support", then OTP HID) or an explicit caller override. The ordered default candidate list
-    // is kept explicit here so a future held-transport fallback (Phase 38.5) can iterate the remaining
-    // candidates without reshaping this method.
+    // resolved here drives ConnectSessionTransportAsync, which opens the most-preferred candidate and falls
+    // back to OTP HID when the SmartCard transport is held by another process (Phase 38.5).
     private static readonly ConnectionType[] YubiOtpTransportOrder =
         [ConnectionType.SmartCard, ConnectionType.HidOtp];
 
@@ -143,20 +142,7 @@ public static class IYubiKeyExtensions
             "YubiOTP",
             YubiOtpTransportOrder);
 
-        // Open the most-preferred candidate. The ordered list is the seam for Phase 38.5 held-transport
-        // fallback, which will try the next candidate when the preferred transport is held by another process.
-        foreach (var transport in candidates)
-        {
-            return transport switch
-            {
-                ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-                    .ConfigureAwait(false),
-                _ => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
-                    .ConfigureAwait(false)
-            };
-        }
-
-        throw new NotSupportedException(
-            "This YubiKey exposes no connection usable for a YubiOTP session.");
+        return await yubiKey.ConnectSessionTransportAsync(candidates, "YubiOTP", cancellationToken)
+            .ConfigureAwait(false);
     }
 }

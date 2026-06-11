@@ -12,7 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core.Hid.Fido;
+using Yubico.YubiKit.Core.Hid.Interfaces;
 using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
+using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
@@ -21,6 +26,8 @@ namespace Yubico.YubiKit.Core.YubiKey;
 /// </summary>
 public static class YubiKeyConnectionExtensions
 {
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger(nameof(YubiKeyConnectionExtensions));
+
     /// <summary>
     ///     Returns the first connection in <paramref name="preferenceOrder" /> that this device supports, or
     ///     <see cref="ConnectionType.Unknown" /> when it supports none of them.
@@ -134,4 +141,127 @@ public static class YubiKeyConnectionExtensions
 
         return candidates;
     }
+
+    /// <summary>
+    ///     Opens the first transport in <paramref name="candidates" /> that connects, falling back to the next
+    ///     candidate only when a <see cref="ConnectionType.SmartCard" /> connect fails because another process
+    ///     is holding the card (PC/SC <c>SCARD_E_SHARING_VIOLATION</c> / <c>SCARD_E_SERVER_TOO_BUSY</c>).
+    /// </summary>
+    /// <remarks>
+    ///     This is the connect half of the resolve→connect seam: callers pass the ordered, validated candidate
+    ///     list produced by <see cref="ResolveSessionTransports" /> and receive an opened connection. The
+    ///     "default-path-only fallback" and "override-never-falls-back" guarantees are properties of the applet
+    ///     entry points (which pass a single-element list for an explicit override, so the loop rethrows on the
+    ///     first failure); this helper simply follows the list it is given. Held-transport fallback is gated to
+    ///     the SmartCard transport: a held-coded error on any other transport propagates unchanged (a held HID
+    ///     transport is out of scope). Any non-held error, and <see cref="OperationCanceledException" />,
+    ///     propagates immediately. The helper does not re-validate device capability; a transport the device
+    ///     does not expose surfaces its own connect error.
+    /// </remarks>
+    /// <param name="yubiKey">The physical device.</param>
+    /// <param name="candidates">
+    ///     The ordered, non-empty list of concrete transports to attempt, most-preferred first (typically the
+    ///     output of <see cref="ResolveSessionTransports" />). Every element must be a single concrete transport
+    ///     (<see cref="ConnectionType.SmartCard" />, <see cref="ConnectionType.HidFido" />, or
+    ///     <see cref="ConnectionType.HidOtp" />) and no transport may appear more than once.
+    /// </param>
+    /// <param name="sessionName">The application/session name, used only for diagnostic logging.</param>
+    /// <param name="cancellationToken">A token to cancel the operation. Checked before each attempt.</param>
+    /// <returns>The opened <see cref="IConnection" />; the caller owns its disposal.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="yubiKey" /> or <paramref name="candidates" /> is null.</exception>
+    /// <exception cref="ArgumentException">
+    ///     <paramref name="candidates" /> is empty, contains a non-concrete transport, or contains a duplicate.
+    /// </exception>
+    public static async Task<IConnection> ConnectSessionTransportAsync(
+        this IYubiKey yubiKey,
+        IReadOnlyList<ConnectionType> candidates,
+        string sessionName,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(yubiKey);
+        ArgumentNullException.ThrowIfNull(candidates);
+
+        if (candidates.Count == 0)
+            throw new ArgumentException(
+                "At least one candidate transport is required.", nameof(candidates));
+
+        // Validate every element is a single concrete transport and that none repeats: the helper attempts
+        // each transport at most once, so a duplicate would be a same-transport retry, which is not its job.
+        var seen = ConnectionType.Unknown;
+        foreach (var candidate in candidates)
+        {
+            if (candidate is not (ConnectionType.SmartCard or ConnectionType.HidFido or ConnectionType.HidOtp))
+                throw new ArgumentException(
+                    $"Candidate '{candidate}' is not a single concrete transport. Each candidate must be one " +
+                    $"of {ConnectionType.SmartCard}, {ConnectionType.HidFido}, or {ConnectionType.HidOtp}.",
+                    nameof(candidates));
+
+            if ((seen & candidate) != 0)
+                throw new ArgumentException(
+                    $"Candidate transport '{candidate}' appears more than once; each transport is attempted " +
+                    "at most once.",
+                    nameof(candidates));
+
+            seen |= candidate;
+        }
+
+        for (var i = 0; i < candidates.Count; i++)
+        {
+            // Check before every attempt (including the first) and, by re-entering the loop, again after a
+            // fallback: a token canceled between attempts must stop us rather than open a fallback transport.
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var transport = candidates[i];
+            try
+            {
+                IConnection connection = transport switch
+                {
+                    ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
+                        .ConfigureAwait(false),
+                    ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
+                        .ConfigureAwait(false),
+                    _ => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
+                        .ConfigureAwait(false)
+                };
+
+                Logger.LogDebug(
+                    "Opened {Transport} connection for a {SessionName} session.", transport, sessionName);
+                return connection;
+            }
+            // Fall back ONLY when a held SmartCard transport failed AND a further candidate remains. The
+            // SmartCard gate keeps held-HID out of scope; the index gate makes the last candidate's held
+            // error (and an override's single element) propagate unchanged. Non-held errors and cancellation
+            // never match this filter, so they propagate immediately.
+            catch (Exception ex) when (
+                transport == ConnectionType.SmartCard
+                && IsHeldTransportError(ex)
+                && i < candidates.Count - 1)
+            {
+                Logger.LogDebug(
+                    ex,
+                    "The {Transport} transport for a {SessionName} session is held by another process; " +
+                    "falling back to the next supported transport.",
+                    transport,
+                    sessionName);
+            }
+        }
+
+        // Unreachable: the loop returns on success, and the catch filter cannot swallow the final candidate
+        // (it requires a further candidate), so the final candidate's failure always propagates from the try.
+        throw new NotSupportedException(
+            $"This YubiKey exposes no connection usable for a {sessionName} session.");
+    }
+
+    /// <summary>
+    ///     Returns <see langword="true" /> when <paramref name="exception" /> indicates the smart card is held
+    ///     by another process — a PC/SC <c>SCARD_E_SHARING_VIOLATION</c> or <c>SCARD_E_SERVER_TOO_BUSY</c>
+    ///     carried by an <see cref="SCardException" />. <see cref="SCardException" /> stores the PC/SC status in
+    ///     <see cref="System.Exception.HResult" /> (as <c>(int)errorCode</c>), so the round-trip compares
+    ///     <c>(uint)HResult</c>. Detection is intentionally narrow: no other exception type or status code
+    ///     counts as held.
+    /// </summary>
+    private static bool IsHeldTransportError(Exception exception) =>
+        exception is SCardException scardException
+        && (uint)scardException.HResult is ErrorCode.SCARD_E_SHARING_VIOLATION
+            or ErrorCode.SCARD_E_SERVER_TOO_BUSY;
 }

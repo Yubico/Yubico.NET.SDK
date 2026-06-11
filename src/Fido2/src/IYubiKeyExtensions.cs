@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Hid.Fido;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
@@ -172,8 +171,8 @@ public static class IYubiKeyExtensions
         {
             // FIDO2 is dual-transport (HID FIDO or SmartCard FIDO2). The app-specific smart default prefers
             // HID FIDO, then SmartCard (NFC, or USB on firmware 5.8.0+); an explicit override can force either.
-            // The ordered candidate list is kept explicit so a future held-transport fallback (Phase 38.5)
-            // can iterate the remaining candidates without reshaping this method.
+            // The ordered candidate list drives ConnectSessionTransportAsync, which opens the most-preferred
+            // candidate and falls back when a held SmartCard transport is detected (Phase 38.5).
             IReadOnlyList<ConnectionType> candidates;
             try
             {
@@ -181,29 +180,18 @@ public static class IYubiKeyExtensions
             }
             catch (NotSupportedException) when (preferredConnection is null)
             {
-                // Only the default path (no override) remaps to the FIDO-specific "no FIDO-capable connection"
-                // message. An explicit-override failure carries an accurate, override-specific diagnostic from
-                // ResolveSessionTransports (e.g. "does not expose the requested SmartCard connection"), so it
-                // must propagate unchanged.
+                // The remap stays scoped to the resolve call ONLY: only the default path (no override) remaps
+                // to the FIDO-specific "no FIDO-capable connection" message. An explicit-override failure
+                // carries an accurate, override-specific diagnostic from ResolveSessionTransports (e.g. "does
+                // not expose the requested SmartCard connection"), and a connect/held/fallback error from
+                // ConnectSessionTransportAsync must surface unchanged — neither is masked by this message.
                 throw new NotSupportedException(
                     $"This YubiKey does not expose a FIDO-capable connection (available: {yubiKey.AvailableConnections}). " +
                     "FIDO2 requires HID FIDO or SmartCard.");
             }
 
-            foreach (var transport in candidates)
-            {
-                return transport switch
-                {
-                    ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
-                        .ConfigureAwait(false),
-                    _ => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-                        .ConfigureAwait(false)
-                };
-            }
-
-            throw new NotSupportedException(
-                $"This YubiKey does not expose a FIDO-capable connection (available: {yubiKey.AvailableConnections}). " +
-                "FIDO2 requires HID FIDO or SmartCard.");
+            return await yubiKey.ConnectSessionTransportAsync(candidates, "FIDO2", cancellationToken)
+                .ConfigureAwait(false);
         }
     }
 

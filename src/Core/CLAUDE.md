@@ -180,6 +180,18 @@ var hidFactory = new HidConnectionFactory();
 using var connection = await hidFactory.CreateAsync(device, cancellationToken);
 ```
 
+### Physical Device Model
+
+`IYubiKey` represents **one physical YubiKey**, not a single transport handle. A composite USB key exposes
+several interfaces at once (CCID, HID FIDO, HID OTP), and discovery returns one `IYubiKey` for it with those
+interfaces in `AvailableConnections`. Use `SupportsConnection(...)` and the typed `ConnectAsync<TConnection>()`
+to select an interface; the parameterless `ConnectAsync()` throws on a multi-interface device. Read-only
+metadata types (`DeviceInfo`, `FormFactor`, `DeviceCapabilities`, `DeviceFlags`, `VersionQualifier`,
+`VersionQualifierType`) are Core-owned (`Yubico.YubiKit.Core.YubiKey`); mutating operations stay in
+Management. Applet session extensions choose a transport via a documented default order plus an optional
+`preferredConnection` override, with held-transport fallback on the default path. Full reference:
+[Physical Device Model](../../docs/architecture/physical-device-model.md).
+
 ### ConnectionType Semantics
 
 `ConnectionType` is a `[Flags]` enum with explicit values. `HidFido`, `HidOtp`, and `SmartCard` represent concrete discovered device interfaces. `Hid` is a group filter that includes both HID FIDO and HID OTP interfaces when used with discovery/cache filtering APIs. `Unknown` matches no devices.

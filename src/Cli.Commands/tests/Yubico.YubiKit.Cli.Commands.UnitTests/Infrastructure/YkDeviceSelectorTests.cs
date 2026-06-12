@@ -93,15 +93,15 @@ public sealed class YkDeviceSelectorTests
 
     private sealed class FakeYubiKey : IYubiKey
     {
-        public FakeYubiKey(string deviceId, ConnectionType connectionType)
+        public FakeYubiKey(string deviceId, ConnectionType availableConnections)
         {
             DeviceId = deviceId;
-            ConnectionType = connectionType;
+            AvailableConnections = availableConnections;
         }
 
         public string DeviceId { get; }
 
-        public ConnectionType ConnectionType { get; }
+        public ConnectionType AvailableConnections { get; }
 
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection =>

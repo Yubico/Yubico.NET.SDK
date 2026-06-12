@@ -67,38 +67,38 @@ Build the v2 composite YubiKey device model in staged, reviewable phases so Core
 
 ### Program Governance
 
-- [ ] ISC-1: Branch check shows `## yubikit-composite-device-new` before any composite-device edits, build/test commands, review delegation, or commit.
-- [ ] ISC-2: `../yubikey-manager` reference branch is recorded as `experiment/rust` before design decisions cite Rust behavior.
-- [ ] ISC-3: Every phase has a phase ISA before source changes begin.
-- [ ] ISC-4: Every implementation phase records `/DevTeam` review, fixes findings, and records review output or waiver before commit.
-- [ ] ISC-5: Cato review is completed for Phase 33 planning, broad API-boundary phases, and final program verification.
-- [ ] ISC-6: Every phase writes a learning note and commits only intended files before the next phase begins.
-- [ ] ISC-7: Anti: source changes occur on any branch other than `yubikit-composite-device-new`.
+- [x] ISC-1: Branch check shows `## yubikit-composite-device-new` before any composite-device edits, build/test commands, review delegation, or commit. (All phases 33-39 executed on this branch; verified at each phase.)
+- [x] ISC-2: `../yubikey-manager` reference branch is recorded as `experiment/rust` before design decisions cite Rust behavior. (Phase 33; re-verified in `rust-parity-comparison.md`.)
+- [x] ISC-3: Every phase has a phase ISA before source changes begin. (Phase ISAs 33, 34, 35, 36, 37, 37.5, 38, 38.5, 39 all present in `docs/plans/composite-device/`.)
+- [x] ISC-4: Every implementation phase records `/DevTeam` review, fixes findings, and records review output or waiver before commit. (Phases 34-38.5 recorded interim GPT-5.4 /DevTeam reviews in their learnings; GPT-5.5 DevTeam reviews queued.)
+- [x] ISC-5: Cato review is completed for Phase 33 planning, broad API-boundary phases, and final program verification. (Phase 33 plan Cato; Phase 38/38.5 interim Cato gates; Phase 39 final program Cato audit — interim GPT-5.4 PASS, GPT-5.5 final Cato queued.)
+- [x] ISC-6: Every phase writes a learning note and commits only intended files before the next phase begins. (Learnings notes 33-39 present; commits staged intended files explicitly.)
+- [x] ISC-7: Anti: source changes occur on any branch other than `yubikit-composite-device-new`. (No; all on-branch.)
 
 ### Architecture
 
-- [ ] ISC-8: `IYubiKey` represents one physical YubiKey rather than one concrete interface handle.
-- [ ] ISC-9: Core owns read-only physical-device metadata needed by `IYubiKey`, including firmware version, serial, form factor, capabilities, and version qualifier facts.
-- [ ] ISC-9.1: Phase 34 records the public namespace/API migration strategy for `DeviceInfo`, `FormFactor`, `DeviceCapabilities`, `DeviceFlags`, `VersionQualifier`, and `VersionQualifierType` before moving or splitting types.
-- [ ] ISC-9.2: Phase 34 verification includes an API-surface or source-compatibility check appropriate for the approved v2 break policy, so unintended namespace/API fallout is visible before commit.
-- [ ] ISC-10: Management owns mutating device configuration, reset, lock, reboot, and mode behavior.
-- [ ] ISC-11: Core does not reference `Yubico.YubiKit.Management`.
-- [ ] ISC-11.1: Phase 35 verifies any shared read-info logic still preserves the Core-to-Management dependency direction and does not introduce direct, indirect, or helper-mediated Core reliance on Management.
-- [ ] ISC-12: Applet modules do not reference `Yubico.YubiKit.Management` solely for physical-device metadata.
-- [ ] ISC-13: `IYubiKey` exposes available connection flags and a `SupportsConnection(...)`-style predicate or equivalent.
-- [ ] ISC-13.1: Phase 36 records the disposition of the existing scalar `IYubiKey.ConnectionType` property and updates all production call sites that assume one interface per `IYubiKey`.
-- [ ] ISC-13.2: Phase 36 verification includes a grep or API check proving no production code still relies on scalar `yubiKey.ConnectionType` for composite-device routing unless that usage is explicitly approved.
-- [ ] ISC-14: Typed `ConnectAsync<TConnection>()` routes to the requested concrete interface when available and fails clearly when unsupported.
-- [ ] ISC-15: Raw untyped/default connection APIs do not silently choose surprising transports for composite devices.
-- [ ] ISC-15.1: Phase 36 or Phase 38 includes focused tests proving raw/default connection behavior is either explicit, unsupported, or documented as an app-specific smart default.
+- [x] ISC-8: `IYubiKey` represents one physical YubiKey rather than one concrete interface handle. (Phase 36; verified by Phase 39 hardware smoke — one merged device.)
+- [x] ISC-9: Core owns read-only physical-device metadata needed by `IYubiKey`, including firmware version, serial, form factor, capabilities, and version qualifier facts. (Phase 34 — types in `Yubico.YubiKit.Core.YubiKey`.)
+- [x] ISC-9.1: Phase 34 records the public namespace/API migration strategy for `DeviceInfo`, `FormFactor`, `DeviceCapabilities`, `DeviceFlags`, `VersionQualifier`, and `VersionQualifierType` before moving or splitting types. (Phase 34 ISA/learnings.)
+- [x] ISC-9.2: Phase 34 verification includes an API-surface or source-compatibility check appropriate for the approved v2 break policy, so unintended namespace/API fallout is visible before commit. (Phase 34 learnings.)
+- [x] ISC-10: Management owns mutating device configuration, reset, lock, reboot, and mode behavior. (Unchanged; `ManagementSession` retains mutating ops.)
+- [x] ISC-11: Core does not reference `Yubico.YubiKit.Management`. (Verified at HEAD: no Management `ProjectReference` in `src/Core/src/Yubico.YubiKit.Core.csproj`; the `InternalsVisibleTo` is the allowed reverse direction.)
+- [x] ISC-11.1: Phase 35 verifies any shared read-info logic still preserves the Core-to-Management dependency direction and does not introduce direct, indirect, or helper-mediated Core reliance on Management. (Phase 35.)
+- [x] ISC-12: Applet modules do not reference `Yubico.YubiKit.Management` solely for physical-device metadata. (Verified at HEAD: no applet `src` references Management.)
+- [x] ISC-13: `IYubiKey` exposes available connection flags and a `SupportsConnection(...)`-style predicate or equivalent. (Phase 36 — `AvailableConnections` + `SupportsConnection`.)
+- [x] ISC-13.1: Phase 36 records the disposition of the existing scalar `IYubiKey.ConnectionType` property and updates all production call sites that assume one interface per `IYubiKey`. (Phase 36 removed the scalar property; Phase 39 final gate caught and migrated one remaining consumer — the CLI `YkDeviceSelectorTests` fake — to `AvailableConnections`.)
+- [x] ISC-13.2: Phase 36 verification includes a grep or API check proving no production code still relies on scalar `yubiKey.ConnectionType` for composite-device routing unless that usage is explicitly approved. (Phase 36; re-verified at HEAD in Phase 39 — no scalar-connection routing in production source.)
+- [x] ISC-14: Typed `ConnectAsync<TConnection>()` routes to the requested concrete interface when available and fails clearly when unsupported. (Phase 36; verified by Phase 39 hardware smoke — typed SmartCard/FIDO/OTP connects on the merged device.)
+- [x] ISC-15: Raw untyped/default connection APIs do not silently choose surprising transports for composite devices. (Phase 36 — parameterless `ConnectAsync()` throws on multi-interface devices.)
+- [x] ISC-15.1: Phase 36 or Phase 38 includes focused tests proving raw/default connection behavior is either explicit, unsupported, or documented as an app-specific smart default. (Phase 36 raw/default tests; Phase 38 applet smart-default tests.)
 
 ### Discovery And Identity
 
-- [ ] ISC-16: `YubiKeyManager.FindAllAsync(ConnectionType.All)` returns one logical device per physical USB YubiKey when CCID, FIDO HID, and OTP HID are all visible.
-- [ ] ISC-17: `ConnectionType` filters return devices capable of the requested connection, not duplicate per-interface rows.
-- [ ] ISC-18: NFC PC/SC devices are never merged with USB HID or USB CCID devices.
-- [ ] ISC-19: Multiple same-PID USB keys are not collapsed unless identity evidence is strong enough.
-- [ ] ISC-20: Repository add/remove events are keyed by physical-device identity rather than per-interface identity.
+- [x] ISC-16: `YubiKeyManager.FindAllAsync(ConnectionType.All)` returns one logical device per physical USB YubiKey when CCID, FIDO HID, and OTP HID are all visible. (Phase 37/37.5; verified by Phase 39 hardware smoke — `FindAllAsync_CompositeUsbKey_ReturnsOneMergedDevice`.)
+- [x] ISC-17: `ConnectionType` filters return devices capable of the requested connection, not duplicate per-interface rows. (Phase 37/37.5; verified by Phase 39 smoke — `FindAllAsync_PerConnectionFilters_ReturnTheSamePhysicalDevice`.)
+- [x] ISC-18: NFC PC/SC devices are never merged with USB HID or USB CCID devices. (Phase 37/37.5 — NFC no-merge; unit tests.)
+- [x] ISC-19: Multiple same-PID USB keys are not collapsed unless identity evidence is strong enough. (Phase 37.5 conservative no-collapse; unit tests.)
+- [x] ISC-20: Repository add/remove events are keyed by physical-device identity rather than per-interface identity. (Phase 37; unit tests.)
 
 ### Extension Ergonomics
 
@@ -111,19 +111,19 @@ Build the v2 composite YubiKey device model in staged, reviewable phases so Core
 
 ### Tests And Verification
 
-- [ ] ISC-25: Unit tests cover metadata promotion and parsing after read-only types move into Core.
-- [ ] ISC-25.1: Phase 34 includes mandatory compile migration for `Tests.Shared` and CLI consumers of moved metadata; optional richer test filtering and smarter CLI selection stay deferred.
-- [ ] ISC-26: Unit tests cover Core device-info read behavior over fake SmartCard/FIDO/OTP paths where feasible.
-- [ ] ISC-27: Unit tests cover single-PID merge, same-PID conservative no-collapse behavior, NFC no-merge behavior, filter semantics, and repository event diffs.
-- [ ] ISC-28: Safe integration smoke verifies physical-device discovery and typed connection opening on allowed hardware without UP/UV/touch ceremony requirements.
-- [ ] ISC-29: Active docs explain physical-device semantics, read-only metadata ownership, smart defaults, and migration from per-interface handles.
-- [ ] ISC-30: Anti: final verification claims composite readiness without docs QA, focused tests, safe hardware smoke or skip rationale, DevTeam review, and Cato review.
+- [x] ISC-25: Unit tests cover metadata promotion and parsing after read-only types move into Core. (Phase 34.)
+- [x] ISC-25.1: Phase 34 includes mandatory compile migration for `Tests.Shared` and CLI consumers of moved metadata; optional richer test filtering and smarter CLI selection stay deferred. (Phase 34; the one remaining CLI consumer break — an `IYubiKey` interface gap, not a metadata break — was migrated in Phase 39.)
+- [x] ISC-26: Unit tests cover Core device-info read behavior over fake SmartCard/FIDO/OTP paths where feasible. (Phase 35.)
+- [x] ISC-27: Unit tests cover single-PID merge, same-PID conservative no-collapse behavior, NFC no-merge behavior, filter semantics, and repository event diffs. (Phase 37/37.5.)
+- [x] ISC-28: Safe integration smoke verifies physical-device discovery and typed connection opening on allowed hardware without UP/UV/touch ceremony requirements. (Phase 39 — `CompositeDiscoveryIntegrationTests` 4/4 on serial 103, no UP/UV.)
+- [x] ISC-29: Active docs explain physical-device semantics, read-only metadata ownership, smart defaults, and migration from per-interface handles. (Phase 39 — `docs/architecture/physical-device-model.md` + Core README/CLAUDE updates.)
+- [x] ISC-30: Anti: final verification claims composite readiness without docs QA, focused tests, safe hardware smoke or skip rationale, DevTeam review, and Cato review. (Phase 39 final gate: docs-qa 55, full build 0/0, 12/12 unit projects, hardware smoke 4/4, interim /DevTeam reviews recorded + GPT-5.5 queued, interim final Cato PASS + GPT-5.5 final Cato queued.)
 
 ### Deferred Improvements
 
-- [ ] ISC-31: A deferred downstream capability audit is recorded for opportunities unlocked by promoting `DeviceInfo` to Core.
-- [ ] ISC-31.1: Mandatory consumer migration is not classified as deferred downstream capability work.
-- [ ] ISC-32: Anti: downstream capability opportunities are implemented during metadata promotion before the physical-device model is stable.
+- [x] ISC-31: A deferred downstream capability audit is recorded for opportunities unlocked by promoting `DeviceInfo` to Core. (Recorded in the master ISA "Deferred Follow-Up" section and Phase 33/34 docs.)
+- [x] ISC-31.1: Mandatory consumer migration is not classified as deferred downstream capability work. (Phase 34 migrated mandatory `Tests.Shared`/CLI consumers; Phase 39 migrated the last CLI test consumer — none deferred.)
+- [x] ISC-32: Anti: downstream capability opportunities are implemented during metadata promotion before the physical-device model is stable. (None implemented; the audit remains deferred through Phase 39.)
 
 ## Test Strategy
 
@@ -233,7 +233,34 @@ Rules:
 
 ## Verification
 
-Verification is populated by each phase learning note. This master ISA is not complete until Phase 39 records final docs QA, focused build/test evidence, safe integration smoke or skip rationale, DevTeam review, Cato final audit, and commit evidence.
+Each phase recorded its own verification in its learning note (`phase-*-learnings.md`). Phase 39 ran the
+final program gate and reconciled every criterion above against evidence true at HEAD:
+
+- **Build**: `dotnet toolchain.cs build` — succeeded, 0 errors (1 pre-existing, unrelated `Tests.TestProject`
+  test-SDK CS7022 warning).
+- **Unit tests**: `dotnet toolchain.cs -- test` — 12/12 unit test projects passed (Core, Management, YubiOtp,
+  Fido2, WebAuthn, Piv, Oath, OpenPgp, SecurityDomain, YubiHsm, Cli.Shared, Cli.Commands).
+- **Hardware smoke (ISC-28)**: serial 103 (composite OTP+FIDO+CCID, CCID freed via `gpgconf --kill scdaemon`,
+  no UP/UV) — `CompositeDiscoveryIntegrationTests` 4/4: one merged device, per-connection filters return the
+  same device, typed SmartCard/FIDO/OTP connects succeed. (Phase 38.5 additionally proved live held-CCID
+  fallback on the same key.)
+- **Docs QA (ISC-29)**: `dotnet toolchain.cs -- docs-qa` — 55 active documentation files validated, including
+  the new `docs/architecture/physical-device-model.md`.
+- **Format / whitespace**: changed-file `dotnet format --verify-no-changes` clean and `git diff --check`
+  clean. The Phase 39 diff also includes two whitespace-only Core edits — `DeviceInfoReader.cs` and
+  `PhysicalYubiKeyTests.cs` each had a stray trailing newline that violated `.editorconfig`
+  (`insert_final_newline = false`); `dotnet format` removed it (the `FINALNEWLINE` fix deletes the extra
+  newline). No code changed. Remaining repo-wide `dotnet format` diagnostics are unrelated AOT/trim analyzer
+  warnings in `src/Tests.TestProject/Program.cs` (ASP.NET `MapGet`), out of scope for this program.
+- **Structural invariants**: no `Core` -> `Management` `ProjectReference`; no production scalar
+  `IYubiKey.ConnectionType` routing; no applet `src` references Management for metadata.
+- **Reviews**: every implementation phase recorded an interim opposite-family (GPT-5.4) /DevTeam review;
+  Phase 38/38.5 recorded interim Cato gates; Phase 39 recorded the interim final program Cato audit (PASS).
+  The GPT-5.5 /DevTeam reviews (Phases 35, 36, 37, 37.5, 38, 38.5) and the GPT-5.5 final Cato are **queued**
+  for when quota returns (see "Interim Cross-Vendor Review").
+
+The composite-device program is complete with the GPT-5.5 cross-vendor reviews queued. See
+`phase-39-integration-final-learnings.md` for the full closeout record.
 
 ## Phase Order
 

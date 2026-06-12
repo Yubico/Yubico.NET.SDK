@@ -29,6 +29,8 @@ This package is automatically included when you install any application-specific
 
 An `IYubiKey` represents **one physical YubiKey** (which may expose several interfaces — CCID, HID FIDO,
 HID OTP — at once), not a single transport handle. See [Physical Device Model](../../docs/architecture/physical-device-model.md).
+HID interface enumeration is implemented on macOS and Linux; on Windows, HID discovery is not yet
+implemented, so a YubiKey currently surfaces only its PC/SC (CCID) interface there.
 
 ```csharp
 using Yubico.YubiKit.Core;

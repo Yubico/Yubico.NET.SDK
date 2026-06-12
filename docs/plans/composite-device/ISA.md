@@ -117,7 +117,7 @@ Build the v2 composite YubiKey device model in staged, reviewable phases so Core
 - [x] ISC-27: Unit tests cover single-PID merge, same-PID conservative no-collapse behavior, NFC no-merge behavior, filter semantics, and repository event diffs. (Phase 37/37.5.)
 - [x] ISC-28: Safe integration smoke verifies physical-device discovery and typed connection opening on allowed hardware without UP/UV/touch ceremony requirements. (Phase 39 — `CompositeDiscoveryIntegrationTests` 4/4 on serial 103, no UP/UV.)
 - [x] ISC-29: Active docs explain physical-device semantics, read-only metadata ownership, smart defaults, and migration from per-interface handles. (Phase 39 — `docs/architecture/physical-device-model.md` + Core README/CLAUDE updates.)
-- [x] ISC-30: Anti: final verification claims composite readiness without docs QA, focused tests, safe hardware smoke or skip rationale, DevTeam review, and Cato review. (Phase 39 final gate: docs-qa 55, full build 0/0, 12/12 unit projects, hardware smoke 4/4, interim /DevTeam reviews recorded + GPT-5.5 queued, interim final Cato PASS + GPT-5.5 final Cato queued.)
+- [x] ISC-30: Anti: final verification claims composite readiness without docs QA, focused tests, safe hardware smoke or skip rationale, DevTeam review, and Cato review. (Phase 39 final gate: docs-qa 55, full build 0 errors (1 pre-existing unrelated warning), 12/12 unit projects, hardware smoke 4/4, interim /DevTeam reviews recorded + GPT-5.5 queued, interim final Cato PASS + GPT-5.5 final Cato queued.)
 
 ### Deferred Improvements
 

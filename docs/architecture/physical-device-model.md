@@ -7,6 +7,10 @@ by `AvailableConnections`. This document explains the model, how to discover and
 metadata lives, how each applet picks a transport, and how to migrate code written against the old
 per-interface-handle model.
 
+> **Platform note:** HID interface enumeration is implemented on macOS and Linux. On Windows, HID discovery
+> is not yet implemented, so a YubiKey currently surfaces only its PC/SC (CCID) interface there. See
+> [Platform Support For HID Discovery](#platform-support-for-hid-discovery).
+
 See also: [event-driven device discovery](./event-driven-device-discovery.md) and the
 [Core module README](../../src/Core/README.md).
 
@@ -54,10 +58,24 @@ foreach (var device in devices)
 var fidoCapable = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
 ```
 
-Discovery merges the interfaces of a single physical key by USB Product ID parsed from the PC/SC reader name
-(serial number is consulted only to disambiguate multiple same-model keys). NFC PC/SC devices are never
-merged with USB interfaces. This means a physical key is returned as one device even when no connection is
-opened, and even when another process holds the CCID exclusively.
+In the common case, discovery merges the interfaces of a single physical key by USB Product ID parsed from
+the PC/SC reader name (serial number is consulted only to disambiguate multiple same-model keys), so a
+physical key is returned as one device even when no connection is opened and even when another process holds
+the CCID exclusively. NFC PC/SC devices are never merged with USB interfaces.
+
+The one-device-per-physical-key result is the common merge case, not an absolute guarantee. Discovery
+intentionally degrades to conservative **no-merge** in ambiguous cases — for example when a USB CCID reader
+name cannot be parsed for its Product ID, or when a serial number needed to disambiguate same-Product-ID
+keys cannot be read. In those cases interfaces are left unmerged rather than risk wrongly collapsing two
+distinct keys, so one physical key can surface as more than one row.
+
+### Platform Support For HID Discovery
+
+HID interface enumeration (HID FIDO, HID OTP) is implemented on **macOS and Linux**. On **Windows** HID
+enumeration is not yet implemented, so today a YubiKey is discovered through its PC/SC (CCID) interface only:
+`AvailableConnections` will not include `HidFido`/`HidOtp`, HID connection filters return no devices, and a
+composite USB key cannot merge HID interfaces it cannot see. The PC/SC SmartCard path works on all
+platforms. This is a known platform residual tracked outside the composite-device model itself.
 
 ## Opening A Connection
 

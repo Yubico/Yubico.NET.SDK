@@ -65,7 +65,15 @@ whitespace-only Core trailing-newline removals above — nothing else.
     but flagged that the closeout narrative called the two Core edits "fixes" while the diff *removes* a
     trailing newline — a wording/scope-precision mismatch. Fixed by describing the two whitespace-only Core
     edits exactly (trailing-newline removal per `.editorconfig insert_final_newline = false`).
-  - Round 3 → PASS: re-audited against committed HEAD; program may be declared complete with the GPT-5.5
+  - Round 3 → CHANGES REQUIRED: a deeper code-review pass caught two real documentation overclaims the
+    earlier rounds missed — (1) the docs presented the composite HID+CCID model as current general behavior
+    while **Windows HID enumeration is not implemented** (`FindHidDevices.cs` returns `[]` on Windows), and
+    (2) the architecture doc stated "one `IYubiKey` per physical key" as an absolute guarantee, ignoring the
+    intentional conservative no-merge fallbacks (unparsed USB CCID PID, unreadable serial). Both fixed:
+    explicit Windows/platform caveat added to the architecture doc + Core README, the 1:1 result qualified as
+    the common PID-merge case with the no-merge caveats, the residual recorded as a deferred follow-up, and
+    "build 0/0" tightened to "0 errors (1 pre-existing warning)".
+  - Round 4 → PASS: re-audited against committed HEAD; program may be declared complete with the GPT-5.5
     reviews queued.
   - Outputs: `/tmp/opencode/cato-final-program-audit-output*.md`.
 - The code side was clean from the first audit pass (build + 12/12 units; no other stale scalar-connection
@@ -87,6 +95,13 @@ whitespace-only Core trailing-newline removals above — nothing else.
 
 ## Deferred Candidates (carried out of the program)
 
+- **Windows HID enumeration** is not yet implemented (`src/Core/src/Hid/FindHidDevices.cs` returns `[]` on
+  Windows), so on Windows a YubiKey currently surfaces only its PC/SC (CCID) interface — HID FIDO/OTP
+  interfaces are not discovered or merged there, and HID filters return nothing. This is a platform-interop
+  gap (a known residual noted since Phase 37.5), not a composite-device-model gap: the model, PID-based
+  merge logic, and applet extensions are complete and were verified on Linux. The new docs carry an explicit
+  Windows caveat. Implementing Windows HID enumeration is the follow-up that makes the composite model fully
+  cross-platform.
 - Downstream `DeviceInfo`-promotion capability audit (master ISC-31) — recorded and intentionally deferred;
   none implemented.
 - HID-held transport fallback (Phase 38.5 deferred) — only SmartCard PC/SC held codes are handled.
@@ -97,16 +112,18 @@ whitespace-only Core trailing-newline removals above — nothing else.
 
 ## Program Status
 
-The composite-device program (Phases 33-39) is **complete**: `IYubiKey` is a physical-device model with
-Core-owned read-only metadata, PID-based composite discovery, and applet transport smart-defaults +
-overrides + held-transport fallback; all 32 master criteria are satisfied and reconciled with HEAD evidence;
-final build/tests/docs/hardware gates pass; interim cross-vendor reviews are recorded and the GPT-5.5
-reviews are queued for when quota returns.
+The composite-device program (Phases 33-39) is **complete** for its scope: `IYubiKey` is a physical-device
+model with Core-owned read-only metadata, PID-based composite discovery, and applet transport smart-defaults
++ overrides + held-transport fallback; all 32 master criteria are satisfied and reconciled with HEAD
+evidence; final build/tests/docs/hardware gates pass; interim cross-vendor reviews are recorded and the
+GPT-5.5 reviews are queued for when quota returns. One platform residual remains outside the model's scope:
+**Windows HID enumeration is not yet implemented**, so HID discovery/merge is macOS/Linux today (documented
+caveat; deferred follow-up).
 
 ## Compact Summary
 
 - Goal: document the physical-device model, run the safe hardware smoke + final gate, and reconcile the
   master ISA — closing out the composite-device program.
 - Branch: `yubikit-composite-device-new`.
-- Status: complete. Build 0/0; 12/12 unit projects; hardware smoke 4/4 on serial 103; docs-qa 55; all 32
+- Status: complete. Build 0 errors (1 pre-existing unrelated warning); 12/12 unit projects; hardware smoke 4/4 on serial 103; docs-qa 55; all 32
   master criteria reconciled; interim final Cato PASS; GPT-5.5 final Cato + backlog DevTeam reviews queued.

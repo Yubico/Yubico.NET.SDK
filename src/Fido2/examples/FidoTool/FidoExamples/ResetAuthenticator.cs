@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Fido2.Ctap;
 
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.FidoExamples;
@@ -67,11 +68,18 @@ public static class ResetAuthenticator
     /// </summary>
     public static async Task<ResetPreflightInfo?> GetPreflightInfoAsync(
         IYubiKey yubiKey,
+        CancellationToken cancellationToken) =>
+        await GetPreflightInfoAsync(yubiKey, null, cancellationToken).ConfigureAwait(false);
+
+    public static async Task<ResetPreflightInfo?> GetPreflightInfoAsync(
+        IYubiKey yubiKey,
+        ConnectionType? preferredConnection = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
             await using var session = await yubiKey.CreateFidoSessionAsync(
+                preferredConnection: preferredConnection,
                 cancellationToken: cancellationToken);
 
             var info = await session.GetInfoAsync(cancellationToken);
@@ -95,11 +103,18 @@ public static class ResetAuthenticator
     /// </summary>
     public static async Task<ResetResult> ResetAsync(
         IYubiKey yubiKey,
+        CancellationToken cancellationToken) =>
+        await ResetAsync(yubiKey, null, cancellationToken).ConfigureAwait(false);
+
+    public static async Task<ResetResult> ResetAsync(
+        IYubiKey yubiKey,
+        ConnectionType? preferredConnection = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
             await using var session = await yubiKey.CreateFidoSessionAsync(
+                preferredConnection: preferredConnection,
                 cancellationToken: cancellationToken);
 
             await session.ResetAsync(cancellationToken);

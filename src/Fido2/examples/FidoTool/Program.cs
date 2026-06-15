@@ -142,8 +142,9 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
             return 1;
         }
 
+        var preResetTransport = ResetMenu.SelectResetTransport(preSelection.Device.AvailableConnections);
         var preflight = await ResetAuthenticator.GetPreflightInfoAsync(
-            preSelection.Device, cancellationToken);
+            preSelection.Device, preResetTransport, cancellationToken);
 
         var touchInstruction = preflight?.LongTouchForReset == true
             ? "Press and hold for 10 seconds after re-inserting"
@@ -167,14 +168,16 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
         return 1;
     }
 
+    var resetTransport = ResetMenu.SelectResetTransport(selection.Device.AvailableConnections);
+
     // Query the (reinserted) device for accurate touch message
     var reinsertedPreflight = await ResetAuthenticator.GetPreflightInfoAsync(
-        selection.Device, cancellationToken);
+        selection.Device, resetTransport, cancellationToken);
 
     var touchMsg = reinsertedPreflight?.TouchMessage ?? "Touch your YubiKey to confirm.";
     AnsiConsole.MarkupLine($"[yellow]{Markup.Escape(touchMsg)}[/]");
 
-    var result = await ResetAuthenticator.ResetAsync(selection.Device, cancellationToken);
+    var result = await ResetAuthenticator.ResetAsync(selection.Device, resetTransport, cancellationToken);
 
     if (result.Success)
     {

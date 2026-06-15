@@ -85,7 +85,9 @@ public class FindYubiKeys(
             foreach (var iface in interfaces)
             {
                 var needsSerial = iface.IsUsb &&
-                    (forceSerial || (iface.Pid is { } pid && pidCounts.GetValueOrDefault(pid) > 1));
+                    (forceSerial
+                        || (iface.Pid is { } pid && pidCounts.GetValueOrDefault(pid) > 1)
+                        || NeedsSerialForAmbiguousPartialPid(interfaces, iface));
 
                 var info = needsSerial
                     ? await ReadIdentityAsync(iface, cancellationToken).ConfigureAwait(false)
@@ -128,6 +130,25 @@ public class FindYubiKeys(
         }
 
         return interfaces;
+    }
+
+    private static bool NeedsSerialForAmbiguousPartialPid(
+        IReadOnlyList<InterfaceCandidate> interfaces,
+        InterfaceCandidate iface)
+    {
+        if (iface.Pid is not (0x0116 or 0x0407))
+            return false;
+
+        var samePid = interfaces.Where(i => i.IsUsb && i.Pid == iface.Pid).ToList();
+        if (samePid.Count != 2)
+            return false;
+
+        var observed = samePid.Aggregate(
+            ConnectionType.Unknown,
+            static (current, candidate) => current | candidate.Connection);
+
+        return observed.SupportsConnection(ConnectionType.SmartCard)
+            && observed != ReaderNamePidParser.ExpectedConnectionsForPid(iface.Pid.Value);
     }
 
     private async Task<DeviceInfo?> ReadIdentityAsync(InterfaceCandidate iface, CancellationToken cancellationToken)

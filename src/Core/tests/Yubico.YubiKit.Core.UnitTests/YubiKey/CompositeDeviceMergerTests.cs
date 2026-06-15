@@ -70,6 +70,18 @@ public class CompositeDeviceMergerTests
     }
 
     [Fact]
+    public void Merge_DisjointPartialSamePidWithoutSerial_DoesNotMergeAcrossPossibleKeys()
+    {
+        var merged = CompositeDeviceMerger.Merge([
+            Usb("pcsc:key-a", ConnectionType.SmartCard, FullKeyPid),
+            Usb("hid-fido:key-b", ConnectionType.HidFido, FullKeyPid)
+        ]);
+
+        Assert.Equal(2, merged.Count);
+        Assert.DoesNotContain(merged, d => d is CompositeYubiKey);
+    }
+
+    [Fact]
     public void Merge_TwoSamePidKeysWithSerials_StayTwoDevices()
     {
         var merged = CompositeDeviceMerger.Merge([
@@ -91,12 +103,13 @@ public class CompositeDeviceMergerTests
         var merged = CompositeDeviceMerger.Merge([
             Usb("pcsc:usb", ConnectionType.SmartCard, FullKeyPid),
             Usb("hid:fido", ConnectionType.HidFido, FullKeyPid),
+            Usb("hid:otp", ConnectionType.HidOtp, FullKeyPid),
             Nfc("pcsc:nfc")
         ]);
 
         Assert.Equal(2, merged.Count);
         var composite = Assert.Single(merged.OfType<CompositeYubiKey>());
-        Assert.Equal(ConnectionType.SmartCard | ConnectionType.HidFido, composite.AvailableConnections);
+        Assert.Equal(ConnectionType.SmartCard | ConnectionType.HidFido | ConnectionType.HidOtp, composite.AvailableConnections);
         Assert.Contains(merged, d => d.DeviceId == "pcsc:nfc" && d is not CompositeYubiKey);
     }
 

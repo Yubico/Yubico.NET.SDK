@@ -52,6 +52,19 @@ internal static class ReaderNamePidParser
     /// <summary>Whether <paramref name="pid"/> is the Security Key (SKY) Product ID.</summary>
     public static bool IsSky(ushort pid) => pid == SkyPid;
 
+    /// <summary>Returns the concrete USB interfaces encoded by a known Yubico Product ID.</summary>
+    public static ConnectionType ExpectedConnectionsForPid(ushort pid) => pid switch
+    {
+        0x0110 or 0x0401 => ConnectionType.HidOtp,
+        0x0111 or 0x0405 => ConnectionType.HidOtp | ConnectionType.SmartCard,
+        0x0112 or 0x0404 => ConnectionType.SmartCard,
+        0x0113 or 0x0402 or SkyPid => ConnectionType.HidFido,
+        0x0114 or 0x0403 => ConnectionType.HidOtp | ConnectionType.HidFido,
+        0x0115 or 0x0406 => ConnectionType.HidFido | ConnectionType.SmartCard,
+        0x0116 or 0x0407 => ConnectionType.HidOtp | ConnectionType.HidFido | ConnectionType.SmartCard,
+        _ => ConnectionType.Unknown
+    };
+
     /// <summary>
     ///     Parses the USB Product ID from a USB YubiKey PC/SC reader name, or returns <c>null</c> when the name
     ///     is not a recognizable USB Yubico reader or the interface combination is not a valid YubiKey PID.

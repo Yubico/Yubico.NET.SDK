@@ -97,7 +97,7 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
         {
             var updated = newDeviceMap[deviceId];
             if (_deviceCache.TryGetValue(deviceId, out var existing) &&
-                existing.AvailableConnections != updated.AvailableConnections)
+                HasPhysicalIdentityChanged(existing, updated))
             {
                 _deviceCache[deviceId] = updated;
                 _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, existing));
@@ -134,6 +134,17 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
         _hasData = false;
 
         Logger.LogDebug("Cache cleared");
+    }
+
+    private static bool HasPhysicalIdentityChanged(IYubiKey existing, IYubiKey updated)
+    {
+        if (existing.AvailableConnections != updated.AvailableConnections)
+            return true;
+
+        if (existing is CompositeYubiKey existingComposite && updated is CompositeYubiKey updatedComposite)
+            return !existingComposite.MemberDeviceIds.SequenceEqual(updatedComposite.MemberDeviceIds);
+
+        return false;
     }
 
     private void ThrowIfDisposed()

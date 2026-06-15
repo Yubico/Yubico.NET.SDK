@@ -72,7 +72,12 @@ internal static class CompositeDeviceMerger
         // USB interfaces with a known PID present on exactly one physical key: merge by PID (no serial).
         var mergeableByPid = usb.Where(d => d.Pid is { } pid && pidCounts.GetValueOrDefault(pid) == 1);
         foreach (var group in mergeableByPid.GroupBy(d => d.Pid!.Value).OrderBy(g => g.Key))
-            AddMerged(group, $"ykphysical:pid:{group.Key:X4}", result);
+        {
+            if (CanMergeByPidWithoutSerial(group))
+                AddMerged(group, $"ykphysical:pid:{group.Key:X4}", result);
+            else
+                MergeUsbBySerial(group, result);
+        }
 
         // USB interfaces with a known PID present on more than one physical key: disambiguate by serial.
         var ambiguous = usb.Where(d => d.Pid is { } pid && pidCounts.GetValueOrDefault(pid) > 1);
@@ -105,6 +110,28 @@ internal static class CompositeDeviceMerger
         }
 
         return perPidPerConnection.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Values.Max());
+    }
+
+    private static bool CanMergeByPidWithoutSerial(IGrouping<ushort, DeviceInterfaceDescriptor> group)
+    {
+        var descriptors = group.ToList();
+        if (descriptors.Count < 2)
+            return true;
+
+        var observed = descriptors.Aggregate(
+            ConnectionType.Unknown,
+            static (current, descriptor) => current | descriptor.Connection);
+        var expected = ReaderNamePidParser.ExpectedConnectionsForPid(group.Key);
+
+        // A full OTP+FIDO+CCID PID observed as CCID plus exactly one HID interface is ambiguous: the missing
+        // HID interface could mean partial enumeration of one key or disjoint interfaces from two same-model
+        // keys. Keep the observations separate unless serial evidence exists.
+        var hasSmartCard = observed.SupportsConnection(ConnectionType.SmartCard);
+        var hidCount = descriptors.Count(d => d.Connection is ConnectionType.HidFido or ConnectionType.HidOtp);
+        return !(expected == (ConnectionType.SmartCard | ConnectionType.HidFido | ConnectionType.HidOtp)
+            && hasSmartCard
+            && hidCount == 1
+            && observed != expected);
     }
 
     private static void MergeUsbBySerial(IEnumerable<DeviceInterfaceDescriptor> usbDescriptors, List<IYubiKey> result)

@@ -76,6 +76,35 @@ public class YubiKeyDeviceRepositoryCompositeTests
         Assert.Equal("ykphysical:103", evt.Device.DeviceId);
     }
 
+    [Fact]
+    public void UpdateCache_SamePidCompositeDifferentMemberIds_EmitsRemovedThenAdded()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        var first = Composite("ykphysical:pid:0407", "pcsc:key-a", "hid:key-a");
+        var second = Composite("ykphysical:pid:0407", "pcsc:key-b", "hid:key-b");
+        repository.UpdateCache([first]);
+
+        var events = new List<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+
+        repository.UpdateCache([second]);
+
+        Assert.Equal(2, events.Count);
+        Assert.Equal(DeviceAction.Removed, events[0].Action);
+        Assert.Same(first, events[0].Device);
+        Assert.Equal(DeviceAction.Added, events[1].Action);
+        Assert.Same(second, events[1].Device);
+    }
+
+    private static CompositeYubiKey Composite(string deviceId, string smartCardId, string hidFidoId) =>
+        new(
+            deviceId,
+            [
+                new FakeYubiKey(smartCardId, ConnectionType.SmartCard),
+                new FakeYubiKey(hidFidoId, ConnectionType.HidFido)
+            ],
+            null);
+
     private sealed class FakeYubiKey(string deviceId, ConnectionType connectionType) : IYubiKey
     {
         public string DeviceId { get; } = deviceId;

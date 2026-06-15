@@ -78,7 +78,8 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
             {
                 Device = selection.Device,
                 Selection = selection,
-                Info = deviceInfo
+                Info = deviceInfo,
+                PreferredConnection = requestedTransport
             };
 
             OutputHelpers.WriteActiveDevice(deviceContext.DisplayBanner);

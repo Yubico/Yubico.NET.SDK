@@ -37,6 +37,12 @@ public sealed class YkDeviceContext
     public DeviceInfo? Info { get; init; }
 
     /// <summary>
+    ///     The concrete transport requested by the global <c>--transport</c> option, or <see langword="null" />
+    ///     to use each applet's default transport order.
+    /// </summary>
+    public ConnectionType? PreferredConnection { get; init; }
+
+    /// <summary>
     ///     Returns a human-readable device banner line, preferring the part number from
     ///     <see cref="Info" /> over the generic form-factor display name.
     /// </summary>

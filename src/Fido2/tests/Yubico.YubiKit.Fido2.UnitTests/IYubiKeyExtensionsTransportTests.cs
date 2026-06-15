@@ -125,12 +125,9 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Null(device.RequestedConnection);
     }
 
-    // (i) SCP does not change transport SELECTION: scpKeyParams + default still routes to HID FIDO (deferred
-    // "SCP implies SmartCard" behavior is NOT implemented); SmartCard is reached only via explicit override.
-    // (Past selection, SCP over a non-SmartCard transport throws NotSupportedException in
-    // ApplicationSession.InitializeCoreAsync — a pre-existing Core contract, not Phase 38 behavior.)
+    // (i) SCP implies SmartCard when no explicit transport override is supplied because SCP is SmartCard-only.
     [Fact]
-    public async Task CreateFidoSessionAsync_ScpWithDefault_StillRoutesToHidFido()
+    public async Task CreateFidoSessionAsync_ScpWithDefault_RoutesToSmartCard()
     {
         var device = new SelectionProbeYubiKey(ConnectionType.HidFido | ConnectionType.SmartCard);
         using var scp = Scp03KeyParameters.Default;
@@ -138,7 +135,7 @@ public class IYubiKeyExtensionsTransportTests
         await Assert.ThrowsAsync<ConnectProbeException>(
             () => device.CreateFidoSessionAsync(scpKeyParams: scp, cancellationToken: Ct));
 
-        Assert.Equal(typeof(IFidoHidConnection), device.RequestedConnection);
+        Assert.Equal(typeof(ISmartCardConnection), device.RequestedConnection);
     }
 
     // Phase 38.5 (ISC-10/ISC-14): the FIDO2 "no FIDO-capable connection" remap stays scoped to the

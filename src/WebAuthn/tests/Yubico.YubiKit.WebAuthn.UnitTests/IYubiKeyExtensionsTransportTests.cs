@@ -91,11 +91,9 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Null(device.RequestedConnection);
     }
 
-    // SCP does not change transport SELECTION (forwarded to FIDO2): scpKeyParams + default still routes to
-    // HID FIDO. (Past selection, SCP over a non-SmartCard transport throws NotSupportedException in
-    // ApplicationSession.InitializeCoreAsync — a pre-existing Core contract, not Phase 38 behavior.)
+    // SCP implies SmartCard when no explicit transport override is supplied because SCP is SmartCard-only.
     [Fact]
-    public async Task CreateWebAuthnClientAsync_ScpWithDefault_StillRoutesToHidFido()
+    public async Task CreateWebAuthnClientAsync_ScpWithDefault_RoutesToSmartCard()
     {
         var device = new SelectionProbeYubiKey(ConnectionType.HidFido | ConnectionType.SmartCard);
         using var scp = Scp03KeyParameters.Default;
@@ -103,7 +101,7 @@ public class IYubiKeyExtensionsTransportTests
         await Assert.ThrowsAsync<ConnectProbeException>(
             () => device.CreateWebAuthnClientAsync(Origin, NeverPublicSuffix, scpKeyParams: scp, cancellationToken: Ct));
 
-        Assert.Equal(typeof(IFidoHidConnection), device.RequestedConnection);
+        Assert.Equal(typeof(ISmartCardConnection), device.RequestedConnection);
     }
 
     // Non-concrete override -> ArgumentException from the shared FIDO2 validation, no connect attempt.

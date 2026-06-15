@@ -128,22 +128,20 @@ public static class IYubiKeyExtensions
             ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectForFidoAsync(preferredConnection, cancellationToken)
+            var candidates = yubiKey.ResolveFidoSessionTransports(
+                scpKeyParams is not null && preferredConnection is null ? ConnectionType.SmartCard : preferredConnection);
+
+            return await yubiKey.ConnectSessionTransportAsync(
+                    candidates,
+                    "FIDO2",
+                    async (connection, _, ct) => await FidoSession.CreateAsync(
+                            connection,
+                            configuration,
+                            scpKeyParams,
+                            cancellationToken: ct)
+                        .ConfigureAwait(false),
+                    cancellationToken)
                 .ConfigureAwait(false);
-            try
-            {
-                return await FidoSession.CreateAsync(
-                        connection,
-                        configuration,
-                        scpKeyParams,
-                        cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            catch
-            {
-                await connection.DisposeAsync().ConfigureAwait(false);
-                throw;
-            }
         }
 
         /// <summary>
@@ -160,23 +158,19 @@ public static class IYubiKeyExtensions
             yubiKey.CreateFidoSessionAsync(scpKeyParams, configuration, null, cancellationToken);
 
         /// <summary>
-        /// Connects to a YubiKey using the appropriate connection type for FIDO2.
+        /// Resolves the candidate transports for FIDO2.
         /// </summary>
         /// <param name="preferredConnection">Optional explicit transport override (see CreateFidoSessionAsync).</param>
-        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-        /// <returns>A connection suitable for FIDO2 operations.</returns>
-        private async Task<IConnection> ConnectForFidoAsync(
-            ConnectionType? preferredConnection,
-            CancellationToken cancellationToken)
+        /// <returns>Candidate transports suitable for FIDO2 operations.</returns>
+        private IReadOnlyList<ConnectionType> ResolveFidoSessionTransports(ConnectionType? preferredConnection)
         {
             // FIDO2 is dual-transport (HID FIDO or SmartCard FIDO2). The app-specific smart default prefers
             // HID FIDO, then SmartCard (NFC, or USB on firmware 5.8.0+); an explicit override can force either.
             // The ordered candidate list drives ConnectSessionTransportAsync, which opens the most-preferred
             // candidate and falls back when a held SmartCard transport is detected (Phase 38.5).
-            IReadOnlyList<ConnectionType> candidates;
             try
             {
-                candidates = yubiKey.ResolveSessionTransports(preferredConnection, "FIDO2", FidoTransportOrder);
+                return yubiKey.ResolveSessionTransports(preferredConnection, "FIDO2", FidoTransportOrder);
             }
             catch (NotSupportedException) when (preferredConnection is null)
             {
@@ -189,9 +183,6 @@ public static class IYubiKeyExtensions
                     $"This YubiKey does not expose a FIDO-capable connection (available: {yubiKey.AvailableConnections}). " +
                     "FIDO2 requires HID FIDO or SmartCard.");
             }
-
-            return await yubiKey.ConnectSessionTransportAsync(candidates, "FIDO2", cancellationToken)
-                .ConfigureAwait(false);
         }
     }
 

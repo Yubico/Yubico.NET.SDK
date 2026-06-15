@@ -91,22 +91,22 @@ public static class IYubiKeyExtensions
             ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await ConnectForYubiOtpAsync(yubiKey, preferredConnection, cancellationToken)
-                .ConfigureAwait(false);
-            try
-            {
-                return await YubiOtpSession.CreateAsync(
+            var candidates = yubiKey.ResolveSessionTransports(
+                scpKeyParams is not null && preferredConnection is null ? ConnectionType.SmartCard : preferredConnection,
+                "YubiOTP",
+                YubiOtpTransportOrder);
+
+            return await yubiKey.ConnectSessionTransportAsync(
+                    candidates,
+                    "YubiOTP",
+                    async (connection, _, ct) => await YubiOtpSession.CreateAsync(
                         connection,
                         configuration,
                         scpKeyParams,
-                        cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            catch
-            {
-                await connection.DisposeAsync().ConfigureAwait(false);
-                throw;
-            }
+                        ct)
+                    .ConfigureAwait(false),
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -132,17 +132,4 @@ public static class IYubiKeyExtensions
     private static readonly ConnectionType[] YubiOtpTransportOrder =
         [ConnectionType.SmartCard, ConnectionType.HidOtp];
 
-    private static async Task<IConnection> ConnectForYubiOtpAsync(
-        IYubiKey yubiKey,
-        ConnectionType? preferredConnection,
-        CancellationToken cancellationToken)
-    {
-        var candidates = yubiKey.ResolveSessionTransports(
-            preferredConnection,
-            "YubiOTP",
-            YubiOtpTransportOrder);
-
-        return await yubiKey.ConnectSessionTransportAsync(candidates, "YubiOTP", cancellationToken)
-            .ConfigureAwait(false);
-    }
 }

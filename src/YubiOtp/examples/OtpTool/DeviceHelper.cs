@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool;
 /// <param name="SerialNumber">The device serial number, if available.</param>
 /// <param name="FormFactor">The device form factor.</param>
 /// <param name="FirmwareVersion">The firmware version string.</param>
-/// <param name="ConnectionType">The connection type used to connect to this device.</param>
+/// <param name="ConnectionType">The available connection set displayed for this device.</param>
 public record DeviceSelection(
     IYubiKey Device,
     int? SerialNumber,
@@ -276,11 +276,19 @@ public static class DeviceHelper
     /// <summary>
     /// Formats connection type for display.
     /// </summary>
-    public static string FormatConnectionType(ConnectionType connectionType) =>
-        connectionType switch
-        {
-            ConnectionType.SmartCard => "SmartCard",
-            ConnectionType.HidOtp => "OTP HID",
-            _ => "Unknown"
-        };
+    public static string FormatConnectionType(ConnectionType connectionType)
+    {
+        if (connectionType == ConnectionType.Unknown)
+            return "Unknown";
+
+        var parts = new List<string>();
+        if ((connectionType & ConnectionType.SmartCard) != 0)
+            parts.Add("SmartCard");
+        if ((connectionType & ConnectionType.HidOtp) != 0)
+            parts.Add("OTP HID");
+        if ((connectionType & ConnectionType.HidFido) != 0)
+            parts.Add("FIDO HID");
+
+        return parts.Count == 0 ? "Unknown" : string.Join(", ", parts);
+    }
 }

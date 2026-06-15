@@ -2,9 +2,9 @@ name: Build and Test (2.0)
 
 on:
   push:
-    branches: [ yubikit, yubikit-applets ]
+    branches: [ yubikit* yubikit/** ]
   pull_request:
-    branches: [ yubikit, yubikit-applets ]
+    branches: [ yubikit*, yubikit/** ]
 
 jobs:
   build-and-test:

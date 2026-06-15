@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Hid.Fido;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 
 namespace Yubico.YubiKit.Management;
 

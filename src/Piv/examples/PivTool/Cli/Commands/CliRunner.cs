@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
 

@@ -24,7 +24,7 @@ The Management application is the primary interface for configuring and managing
 
 ```csharp
 using Yubico.YubiKit.Management;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 
 IYubiKey yubiKey = ...;
 using var mgmtSession = await yubiKey.CreateManagementSessionAsync();
@@ -277,7 +277,7 @@ Yubico.YubiKit.Management/
         └── ManagementSessionTests.cs
 ```
 
-Read-only device metadata types returned by `GetDeviceInfoAsync` live in `Yubico.YubiKit.Core.YubiKey` (`DeviceInfo`, `DeviceCapabilities`, `DeviceFlags`, `FormFactor`, and `VersionQualifier`). Management owns device configuration and reset operations, but not those metadata model definitions.
+Read-only device metadata types returned by `GetDeviceInfoAsync` live in `Yubico.YubiKit.Core.Devices` (`DeviceInfo`, `DeviceCapabilities`, `DeviceFlags`, `FormFactor`, and `VersionQualifier`). Management owns device configuration and reset operations, but not those metadata model definitions.
 
 ## Common Use Cases
 

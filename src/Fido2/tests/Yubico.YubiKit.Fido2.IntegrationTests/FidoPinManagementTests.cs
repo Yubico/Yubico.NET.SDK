@@ -14,7 +14,7 @@
 
 using System.Text;
 using Xunit;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.IntegrationTests.TestExtensions;

@@ -24,20 +24,26 @@ Core is the **foundational library** for the entire SDK. It provides:
 **Key Directories:**
 ```
 src/
-├── SmartCard/           # APDU processing, protocols, SCP
-│   └── Scp/             # Secure Channel Protocol implementations
-├── Hid/                 # HID device handling (FIDO, OTP)
-│   ├── Fido/            # FIDO HID protocol
-│   └── Otp/             # OTP HID protocol
+├── Abstractions/        # Shared public contracts: IYubiKey, IConnection, IProtocol
+├── Devices/             # Physical YubiKey model, discovery, monitoring, metadata
+├── Sessions/            # ApplicationSession and ApplicationIds
+├── Transports/          # HID and SmartCard device/connection/listener implementations
+│   ├── Hid/             # HID transport, platform implementations, keyboard translation
+│   └── SmartCard/       # PC/SC transport, device discovery, connection factory
+├── Protocols/           # Protocol layers over transports
+│   ├── SmartCard/Apdu/  # ISO 7816-4 APDU pipeline
+│   ├── SmartCard/Scp/   # Secure Channel Protocol implementations
+│   ├── Fido/Hid/        # FIDO/CTAP HID protocol binding
+│   └── Otp/Hid/         # OTP HID protocol binding
 ├── Cryptography/        # Key types, COSE, ASN.1
 │   └── Cose/            # COSE key representations
-├── PlatformInterop/     # Native interop per platform
+├── Native/              # Native interop per platform
 │   ├── Desktop/SCard/   # PC/SC interop
 │   ├── Windows/         # Windows-specific (HidD, Cfgmgr32)
 │   ├── MacOS/           # macOS-specific (IOKit, CoreFoundation)
 │   └── Linux/           # Linux-specific (udev, libc)
-├── YubiKey/             # YubiKey types, feature flags, read-only metadata models
-└── Utils/               # TLV, CRC, byte utilities
+├── Credentials/         # Secure credential reading helpers
+└── Utilities/           # TLV, CRC, byte, buffer utilities
 ```
 
 ## Logging
@@ -82,7 +88,7 @@ ApduResponse
 ```
 
 **Key classes:**
-- `PcscProtocol` - Main protocol implementation (`SmartCard/PcscProtocol.cs`)
+- `PcscProtocol` - Main protocol implementation (`Protocols/SmartCard/Apdu/PcscProtocol.cs`)
 - `ApduCommand` / `ApduResponse` - APDU representations
 - `IApduProcessor` - Pipeline element interface
 - `ChainedApduTransmitter` / `ChainedResponseReceiver` - Chaining handlers
@@ -114,9 +120,9 @@ var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey, ocePrivateKey, oce
 ```
 
 **Key files:**
-- `SmartCard/Scp/` - SCP implementations
-- `SmartCard/Scp/SessionKeys.cs` - Derived session keys
-- `SmartCard/Scp/ScpKid.cs` - Key identifiers
+- `Protocols/SmartCard/Scp/` - SCP implementations
+- `Protocols/SmartCard/Scp/SessionKeys.cs` - Derived session keys
+- `Protocols/SmartCard/Scp/ScpKid.cs` - Key identifiers
 
 ### TLV Processing
 
@@ -144,7 +150,7 @@ using (var nested = builder.AddNested(0xE0))
 
 ### Platform Interop Pattern
 
-Native methods are isolated in `PlatformInterop/`:
+Native methods are isolated in `Native/`:
 
 ```csharp
 // Platform detection
@@ -187,7 +193,7 @@ several interfaces at once (CCID, HID FIDO, HID OTP), and discovery returns one 
 interfaces in `AvailableConnections`. Use `SupportsConnection(...)` and the typed `ConnectAsync<TConnection>()`
 to select an interface; the parameterless `ConnectAsync()` throws on a multi-interface device. Read-only
 metadata types (`DeviceInfo`, `FormFactor`, `DeviceCapabilities`, `DeviceFlags`, `VersionQualifier`,
-`VersionQualifierType`) are Core-owned (`Yubico.YubiKit.Core.YubiKey`); mutating operations stay in
+`VersionQualifierType`) are Core-owned (`Yubico.YubiKit.Core.Devices`); mutating operations stay in
 Management. Applet session extensions choose a transport via a documented default order plus an optional
 `preferredConnection` override, with held-transport fallback on the default path. Full reference:
 [Physical Device Model](../../docs/architecture/physical-device-model.md).
@@ -213,15 +219,18 @@ Prefer using `IsSupported(feature)` / `EnsureSupports(feature)` on `IApplication
 ```
 tests/
 ├── Yubico.YubiKit.Core.UnitTests/
-│   ├── SmartCard/
-│   │   ├── Scp/              # SCP protocol tests
-│   │   ├── Fakes/            # FakeSmartCardConnection, FakeApduProcessor
-│   │   └── PcscProtocolTests.cs
-│   ├── Utils/                # TLV, utility tests
-│   └── Hid/                  # HID protocol tests
+│   ├── Devices/              # YubiKey model, discovery, metadata tests
+│   ├── Protocols/
+│   │   ├── SmartCard/Apdu/   # APDU protocol tests and fakes
+│   │   ├── SmartCard/Scp/    # SCP protocol tests
+│   │   └── Otp/Hid/          # OTP HID protocol tests
+│   ├── Transports/           # HID and SmartCard transport tests
+│   ├── Cryptography/
+│   ├── Credentials/
+│   └── Utilities/            # TLV, utility tests
 └── Yubico.YubiKit.Core.IntegrationTests/
-    ├── Core/                 # YubiKeyManager, device tests
-    └── Hid/                  # HID enumeration tests
+    ├── Devices/              # YubiKeyManager, device tests
+    └── Transports/           # HID and SmartCard integration tests
 ```
 
 ### Faking Connections

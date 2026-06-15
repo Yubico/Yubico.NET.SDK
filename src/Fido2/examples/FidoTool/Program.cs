@@ -14,7 +14,7 @@
 
 using Spectre.Console;
 using Yubico.YubiKit.Cli.Shared.Cli;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Menus;
 using Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Output;
 using Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Prompts;

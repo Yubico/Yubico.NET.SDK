@@ -21,7 +21,7 @@ names, interface hierarchy.
 
 ### What happened
 
-The Engineer called `get_code_structure` on `src/Core/src/Hid/Otp/`. It returned 6
+The Engineer called `get_code_structure` on `src/Core/src/Protocols/Otp/Hid/`. It returned 6
 types but **0 methods** for `OtpHidProtocol`. The method `WaitForReadyToReadAsync` —
 the center of the entire bug — was invisible.
 
@@ -39,7 +39,7 @@ Add a `visibility` parameter:
 
 ```json
 mcp__vslsp__get_code_structure({
-  "path": "/abs/path/src/Core/src/Hid/Otp/",
+  "path": "/abs/path/src/Core/src/Protocols/Otp/Hid/",
   "language": "csharp",
   "depth": "signatures",
   "visibility": "all"
@@ -76,7 +76,7 @@ mcp__vslsp__find_symbol({
     {
       "name": "WaitForReadyToReadAsync",
       "kind": "method",
-      "file": "/abs/path/src/Core/src/Hid/Otp/OtpHidProtocol.cs",
+      "file": "/abs/path/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
       "line": 151,
       "signature": "private async Task<(ReadOnlyMemory<byte>, bool)> WaitForReadyToReadAsync(int, CancellationToken)"
     }
@@ -109,7 +109,7 @@ mcp__vslsp__find_usages({
   "solution": "/abs/path/Yubico.YubiKit.sln",
   "symbol": "WaitForReadyToReadAsync"
   // OR — precise form:
-  // "file": "/abs/path/src/Core/src/Hid/Otp/OtpHidProtocol.cs",
+  // "file": "/abs/path/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
   // "line": 151,
   // "column": 52
 })
@@ -117,12 +117,12 @@ mcp__vslsp__find_usages({
 // Output
 {
   "definition": {
-    "file": "/abs/path/src/Core/src/Hid/Otp/OtpHidProtocol.cs",
+    "file": "/abs/path/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
     "line": 151
   },
   "usages": [
     {
-      "file": "/abs/path/src/Core/src/Hid/Otp/OtpHidProtocol.cs",
+      "file": "/abs/path/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
       "line": 132,
       "context": "var (firstReport, hasData) = await WaitForReadyToReadAsync(programmingSequence, cancellationToken)"
     }

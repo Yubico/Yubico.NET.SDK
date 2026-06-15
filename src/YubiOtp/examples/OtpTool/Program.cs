@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Cli.Shared.Cli;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.YubiOtp.Examples.OtpTool;
 using Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 

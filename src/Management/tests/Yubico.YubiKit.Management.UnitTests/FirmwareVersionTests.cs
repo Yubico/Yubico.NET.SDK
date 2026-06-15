@@ -1,4 +1,4 @@
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Management.UnitTests;
 

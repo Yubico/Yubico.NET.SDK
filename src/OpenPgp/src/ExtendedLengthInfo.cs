@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Buffers.Binary;
-using Yubico.YubiKit.Core.Utils;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.OpenPgp;
 

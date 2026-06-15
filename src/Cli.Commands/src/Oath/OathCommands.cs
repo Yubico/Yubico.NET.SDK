@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Cli.Shared.Output;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Oath;
 using static Yubico.YubiKit.Cli.Commands.Oath.OathHelpers;
 

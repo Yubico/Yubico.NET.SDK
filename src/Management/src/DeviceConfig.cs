@@ -15,7 +15,7 @@
 using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Utils;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Management;
 

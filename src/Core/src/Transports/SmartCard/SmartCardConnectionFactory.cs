@@ -1,0 +1,31 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+
+namespace Yubico.YubiKit.Core.Transports.SmartCard;
+
+public interface ISmartCardConnectionFactory
+{
+    Task<ISmartCardConnection> CreateAsync(IPcscDevice smartCardDevice, CancellationToken cancellationToken = default);
+}
+
+public class SmartCardConnectionFactory(ILoggerFactory loggerFactory) : ISmartCardConnectionFactory
+{
+    private readonly ILoggerFactory _loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
+
+
+    public async Task<ISmartCardConnection> CreateAsync(IPcscDevice smartCardDevice,
+        CancellationToken cancellationToken = default)
+    {
+        var connection = new UsbSmartCardConnection(
+            smartCardDevice,
+            _loggerFactory.CreateLogger<UsbSmartCardConnection>());
+
+        await connection.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        return connection;
+    }
+
+
+    public static SmartCardConnectionFactory CreateDefault(ILoggerFactory? loggerFactory = null) =>
+        new(loggerFactory ?? NullLoggerFactory.Instance);
+}

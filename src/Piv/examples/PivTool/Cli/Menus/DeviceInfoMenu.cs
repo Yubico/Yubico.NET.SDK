@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;

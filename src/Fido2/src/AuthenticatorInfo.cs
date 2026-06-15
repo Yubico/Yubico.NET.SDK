@@ -15,7 +15,7 @@
 using System.Collections.ObjectModel;
 using System.Formats.Cbor;
 using Yubico.YubiKit.Core.Cryptography.Cose;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Fido2;
 

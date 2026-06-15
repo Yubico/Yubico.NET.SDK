@@ -1,8 +1,8 @@
 using FluentAssertions;
 using NSubstitute;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Fido2.UnitTests;
 

@@ -14,7 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Hid.Fido;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Fido2.Ctap;
 
 namespace Yubico.YubiKit.Fido2.Backend;

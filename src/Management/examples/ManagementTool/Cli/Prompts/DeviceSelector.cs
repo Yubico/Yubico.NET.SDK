@@ -14,8 +14,8 @@
 
 using Spectre.Console;
 using Yubico.YubiKit.Cli.Shared.Device;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
 

@@ -112,22 +112,22 @@ public static class IYubiKeyExtensions
             ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await ConnectForManagementAsync(yubiKey, preferredConnection, cancellationToken)
-                .ConfigureAwait(false);
-            try
-            {
-                return await ManagementSession.CreateAsync(
+            var candidates = yubiKey.ResolveSessionTransports(
+                scpKeyParams is not null && preferredConnection is null ? ConnectionType.SmartCard : preferredConnection,
+                "Management",
+                ManagementTransportOrder);
+
+            return await yubiKey.ConnectSessionTransportAsync(
+                    candidates,
+                    "Management",
+                    async (connection, _, ct) => await ManagementSession.CreateAsync(
                         connection,
                         configuration,
                         scpKeyParams,
-                        cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            catch
-            {
-                await connection.DisposeAsync().ConfigureAwait(false);
-                throw;
-            }
+                        cancellationToken: ct)
+                    .ConfigureAwait(false),
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -153,17 +153,4 @@ public static class IYubiKeyExtensions
     private static readonly ConnectionType[] ManagementTransportOrder =
         [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp];
 
-    private static async Task<IConnection> ConnectForManagementAsync(
-        IYubiKey yubiKey,
-        ConnectionType? preferredConnection,
-        CancellationToken cancellationToken)
-    {
-        var candidates = yubiKey.ResolveSessionTransports(
-            preferredConnection,
-            "Management",
-            ManagementTransportOrder);
-
-        return await yubiKey.ConnectSessionTransportAsync(candidates, "Management", cancellationToken)
-            .ConfigureAwait(false);
-    }
 }

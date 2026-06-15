@@ -2,7 +2,7 @@ name: Build and Test (2.0)
 
 on:
   push:
-    branches: [ yubikit* yubikit/** ]
+    branches: [ yubikit*, yubikit/** ]
   pull_request:
     branches: [ yubikit*, yubikit/** ]
 

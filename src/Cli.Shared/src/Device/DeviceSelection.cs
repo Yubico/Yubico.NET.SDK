@@ -25,7 +25,7 @@ namespace Yubico.YubiKit.Cli.Shared.Device;
 /// <param name="SerialNumber">The device serial number, if available.</param>
 /// <param name="FormFactor">The device form factor.</param>
 /// <param name="FirmwareVersion">The firmware version string.</param>
-/// <param name="ConnectionType">The connection type used to connect to this device.</param>
+/// <param name="ConnectionType">The available connection set displayed for this device.</param>
 public record DeviceSelection(
     IYubiKey Device,
     int? SerialNumber,

@@ -176,9 +176,85 @@ public static class YubiKeyConnectionExtensions
         this IYubiKey yubiKey,
         IReadOnlyList<ConnectionType> candidates,
         string sessionName,
+        CancellationToken cancellationToken = default) =>
+        await yubiKey.ConnectSessionTransportAsync(
+                candidates,
+                sessionName,
+                static (connection, _, _) => Task.FromResult(connection),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+    /// <summary>
+    ///     Opens candidate transports in order and invokes <paramref name="createAsync" /> for the selected
+    ///     connection, falling back past a held SmartCard error raised either while opening the connection or
+    ///     while creating the session over it.
+    /// </summary>
+    public static async Task<TResult> ConnectSessionTransportAsync<TResult>(
+        this IYubiKey yubiKey,
+        IReadOnlyList<ConnectionType> candidates,
+        string sessionName,
+        Func<IConnection, ConnectionType, CancellationToken, Task<TResult>> createAsync,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(yubiKey);
+        ArgumentNullException.ThrowIfNull(createAsync);
+        ValidateSessionTransportCandidates(candidates);
+
+        for (var i = 0; i < candidates.Count; i++)
+        {
+            // Check before every attempt (including the first) and, by re-entering the loop, again after a
+            // fallback: a token canceled between attempts must stop us rather than open a fallback transport.
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var transport = candidates[i];
+            IConnection? connection = null;
+            try
+            {
+                connection = await yubiKey.OpenSessionConnectionAsync(transport, cancellationToken)
+                    .ConfigureAwait(false);
+
+                Logger.LogDebug(
+                    "Opened {Transport} connection for a {SessionName} session.", transport, sessionName);
+
+                var result = await createAsync(connection, transport, cancellationToken).ConfigureAwait(false);
+                connection = null;
+                return result;
+            }
+            // Fall back ONLY when a held SmartCard transport failed AND a further candidate remains. The
+            // SmartCard gate keeps held-HID out of scope; the index gate makes the last candidate's held
+            // error (and an override's single element) propagate unchanged. Non-held errors and cancellation
+            // never match this filter, so they propagate immediately.
+            catch (Exception ex) when (
+                transport == ConnectionType.SmartCard
+                && IsHeldTransportError(ex)
+                && i < candidates.Count - 1)
+            {
+                if (connection is not null)
+                    await connection.DisposeAsync().ConfigureAwait(false);
+
+                Logger.LogDebug(
+                    ex,
+                    "The {Transport} transport for a {SessionName} session is held by another process; " +
+                    "falling back to the next supported transport.",
+                    transport,
+                    sessionName);
+            }
+            catch
+            {
+                if (connection is not null)
+                    await connection.DisposeAsync().ConfigureAwait(false);
+                throw;
+            }
+        }
+
+        // Unreachable: the loop returns on success, and the catch filter cannot swallow the final candidate
+        // (it requires a further candidate), so the final candidate's failure always propagates from the try.
+        throw new NotSupportedException(
+            $"This YubiKey exposes no connection usable for a {sessionName} session.");
+    }
+
+    private static void ValidateSessionTransportCandidates(IReadOnlyList<ConnectionType> candidates)
+    {
         ArgumentNullException.ThrowIfNull(candidates);
 
         if (candidates.Count == 0)
@@ -204,53 +280,20 @@ public static class YubiKeyConnectionExtensions
 
             seen |= candidate;
         }
-
-        for (var i = 0; i < candidates.Count; i++)
-        {
-            // Check before every attempt (including the first) and, by re-entering the loop, again after a
-            // fallback: a token canceled between attempts must stop us rather than open a fallback transport.
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var transport = candidates[i];
-            try
-            {
-                IConnection connection = transport switch
-                {
-                    ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-                        .ConfigureAwait(false),
-                    ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
-                        .ConfigureAwait(false),
-                    _ => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
-                        .ConfigureAwait(false)
-                };
-
-                Logger.LogDebug(
-                    "Opened {Transport} connection for a {SessionName} session.", transport, sessionName);
-                return connection;
-            }
-            // Fall back ONLY when a held SmartCard transport failed AND a further candidate remains. The
-            // SmartCard gate keeps held-HID out of scope; the index gate makes the last candidate's held
-            // error (and an override's single element) propagate unchanged. Non-held errors and cancellation
-            // never match this filter, so they propagate immediately.
-            catch (Exception ex) when (
-                transport == ConnectionType.SmartCard
-                && IsHeldTransportError(ex)
-                && i < candidates.Count - 1)
-            {
-                Logger.LogDebug(
-                    ex,
-                    "The {Transport} transport for a {SessionName} session is held by another process; " +
-                    "falling back to the next supported transport.",
-                    transport,
-                    sessionName);
-            }
-        }
-
-        // Unreachable: the loop returns on success, and the catch filter cannot swallow the final candidate
-        // (it requires a further candidate), so the final candidate's failure always propagates from the try.
-        throw new NotSupportedException(
-            $"This YubiKey exposes no connection usable for a {sessionName} session.");
     }
+
+    private static async Task<IConnection> OpenSessionConnectionAsync(
+        this IYubiKey yubiKey,
+        ConnectionType transport,
+        CancellationToken cancellationToken) => transport switch
+        {
+            ConnectionType.SmartCard => await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
+                .ConfigureAwait(false),
+            ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
+                .ConfigureAwait(false),
+            _ => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
+                .ConfigureAwait(false)
+        };
 
     /// <summary>
     ///     Returns <see langword="true" /> when <paramref name="exception" /> indicates the smart card is held

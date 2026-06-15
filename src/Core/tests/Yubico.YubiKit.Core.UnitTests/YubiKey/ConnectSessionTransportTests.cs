@@ -261,6 +261,33 @@ public class ConnectSessionTransportTests
         Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }
 
+    [Fact]
+    public async Task ConnectSessionTransportAsync_SessionInitSharingViolation_FallsBackAndDisposesFailedConnection()
+    {
+        var smartCard = new RecordingConnection(ConnectionType.SmartCard);
+        var hid = new RecordingConnection(ConnectionType.HidFido);
+        var device = new FallbackProbeYubiKey()
+            .Returns(ConnectionType.SmartCard, smartCard)
+            .Returns(ConnectionType.HidFido, hid);
+
+        var result = await device.ConnectSessionTransportAsync(
+            [ConnectionType.SmartCard, ConnectionType.HidFido],
+            "Test",
+            async (connection, transport, _) =>
+            {
+                await Task.Yield();
+                if (transport == ConnectionType.SmartCard)
+                    throw Held(ErrorCode.SCARD_E_SHARING_VIOLATION);
+                return connection;
+            },
+            Ct);
+
+        Assert.Same(hid, result);
+        Assert.True(smartCard.Disposed);
+        Assert.False(hid.Disposed);
+        Assert.Equal([ConnectionType.SmartCard, ConnectionType.HidFido], device.Attempts);
+    }
+
     /// <summary>
     ///     A fake physical device whose per-transport <see cref="ConnectAsync{TConnection}" /> either returns a
     ///     recording connection or throws a caller-supplied exception, recording the ordered attempts.

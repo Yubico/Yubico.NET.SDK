@@ -38,6 +38,8 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
 
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<DesktopSmartCardDeviceListener>();
 
+    private readonly ISCardApi _sCardApi;
+    private readonly Action<TimeSpan> _sleep;
     private readonly Lock _syncLock = new();
     private SCardContext? _context;
     private Thread? _listenerThread;
@@ -55,9 +57,18 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
     /// Creates a new instance. The listener does not start automatically - call <see cref="Start"/>
     /// after setting up the <see cref="DeviceEvent"/> callback.
     /// </summary>
-    public DesktopSmartCardDeviceListener()
+    public DesktopSmartCardDeviceListener() : this(NativeSCardApi.Instance, Thread.Sleep)
     {
         // Lazy start - do nothing in constructor
+    }
+
+    internal DesktopSmartCardDeviceListener(ISCardApi sCardApi, Action<TimeSpan> sleep)
+    {
+        ArgumentNullException.ThrowIfNull(sCardApi);
+        ArgumentNullException.ThrowIfNull(sleep);
+
+        _sCardApi = sCardApi;
+        _sleep = sleep;
     }
 
     /// <inheritdoc />
@@ -72,7 +83,7 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
 
             try
             {
-                var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
+                var result = _sCardApi.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
                 if (result != ErrorCode.SCARD_S_SUCCESS)
                 {
                     Logger.LogWarning("Failed to establish SCard context: 0x{Result:X8}", result);
@@ -112,8 +123,12 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
             {
                 return;
             }
+        }
 
-            StopListening();
+        StopListening();
+
+        lock (_syncLock)
+        {
             _knownReaders = null;
             Status = DeviceListenerStatus.Stopped;
         }
@@ -127,7 +142,7 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
             return;
         }
 
-        var result = NativeMethods.SCardListReaders(_context, null, out var currentReaders);
+        var result = _sCardApi.SCardListReaders(_context, null, out var currentReaders);
 
         if (result == ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
         {
@@ -149,22 +164,29 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
     {
         _shouldStop = true;
 
-        // Signal the SCard context to cancel any blocking calls
-        if (_context is { IsInvalid: false })
+        SCardContext? context;
+        Thread? listenerThread;
+        lock (_syncLock)
         {
-            _ = NativeMethods.SCardCancel(_context);
+            context = _context;
+            listenerThread = _listenerThread;
+            _listenerThread = null;
+        }
+
+        // Signal the SCard context to cancel any blocking calls
+        if (context is { IsInvalid: false })
+        {
+            _ = _sCardApi.SCardCancel(context);
         }
 
         // Wait for the listener thread to exit
-        if (_listenerThread is not null && _listenerThread.IsAlive)
+        if (listenerThread is not null && listenerThread.IsAlive)
         {
-            if (!_listenerThread.Join(MaxDisposalWaitTime))
+            if (!listenerThread.Join(MaxDisposalWaitTime))
             {
                 Logger.LogWarning("SmartCard listener thread did not exit within timeout");
             }
         }
-
-        _listenerThread = null;
     }
 
     private void ListenerThreadProc()
@@ -179,7 +201,7 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
                 }
 
                 // Get current list of readers
-                var result = NativeMethods.SCardListReaders(_context, null, out var currentReaders);
+                var result = _sCardApi.SCardListReaders(_context, null, out var currentReaders);
 
                 if (result == ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
                 {
@@ -192,15 +214,11 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
 
                 if (result != ErrorCode.SCARD_S_SUCCESS)
                 {
-                    if (result == ErrorCode.SCARD_E_CANCELLED ||
-                        result == ErrorCode.SCARD_E_SERVICE_STOPPED ||
-                        result == ErrorCode.SCARD_E_NO_SERVICE)
+                    if (!HandleSCardFailure(result, "SCardListReaders"))
                     {
                         break;
                     }
 
-                    Logger.LogWarning("SCardListReaders failed: 0x{Result:X8}", result);
-                    Thread.Sleep(CheckForChangesWaitTime);
                     continue;
                 }
 
@@ -248,11 +266,16 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
         var pnpState = SCARD_READER_STATE.Create(PnpNotificationReaderName);
         var states = new[] { pnpState };
 
-        _ = NativeMethods.SCardGetStatusChange(
+        var result = _sCardApi.SCardGetStatusChange(
             _context,
             (int)CheckForChangesWaitTime.TotalMilliseconds,
             states,
             states.Length);
+
+        if (result != ErrorCode.SCARD_S_SUCCESS && !_shouldStop)
+        {
+            _ = HandleSCardFailure(result, "SCardGetStatusChange");
+        }
 
         // Free the allocated string
         if (pnpState.ReaderName != IntPtr.Zero)
@@ -265,7 +288,7 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
     {
         if (_context is null || _context.IsInvalid || _shouldStop || readers.Length == 0)
         {
-            Thread.Sleep(CheckForChangesWaitTime);
+            _sleep(CheckForChangesWaitTime);
             return;
         }
 
@@ -279,11 +302,16 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
 
         try
         {
-            _ = NativeMethods.SCardGetStatusChange(
+            var result = _sCardApi.SCardGetStatusChange(
                 _context,
                 (int)CheckForChangesWaitTime.TotalMilliseconds,
                 allStates,
                 allStates.Length);
+
+            if (result != ErrorCode.SCARD_S_SUCCESS && !_shouldStop)
+            {
+                _ = HandleSCardFailure(result, "SCardGetStatusChange");
+            }
         }
         finally
         {
@@ -297,6 +325,86 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
             }
         }
     }
+
+    private bool HandleSCardFailure(uint result, string operation)
+    {
+        if (_shouldStop || result == ErrorCode.SCARD_E_CANCELLED)
+        {
+            return false;
+        }
+
+        Logger.LogWarning("{Operation} failed: 0x{Result:X8}", operation, result);
+        _sleep(CheckForChangesWaitTime);
+
+        if (_shouldStop)
+        {
+            return false;
+        }
+
+        if (IsRecoverableContextError(result))
+        {
+            return TryReestablishContext(operation, result);
+        }
+
+        return true;
+    }
+
+    private bool TryReestablishContext(string operation, uint result)
+    {
+        SCardContext? oldContext;
+        lock (_syncLock)
+        {
+            oldContext = _context;
+            _context = null;
+        }
+
+        try
+        {
+            oldContext?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogDebug(
+                ex,
+                "Failed to dispose stale SCard context after {Operation} returned 0x{Result:X8}",
+                operation,
+                result);
+        }
+
+        var establishResult = _sCardApi.SCardEstablishContext(SCARD_SCOPE.USER, out var newContext);
+        if (establishResult != ErrorCode.SCARD_S_SUCCESS)
+        {
+            Logger.LogWarning(
+                "Failed to re-establish SCard context after {Operation} returned 0x{Result:X8}: 0x{EstablishResult:X8}",
+                operation,
+                result,
+                establishResult);
+            Status = DeviceListenerStatus.Error;
+            return false;
+        }
+
+        lock (_syncLock)
+        {
+            if (_shouldStop)
+            {
+                newContext.Dispose();
+                return false;
+            }
+
+            _context = newContext;
+            Status = DeviceListenerStatus.Started;
+        }
+
+        EstablishBaseline();
+        return true;
+    }
+
+    private static bool IsRecoverableContextError(uint result) =>
+        result is ErrorCode.SCARD_E_INVALID_HANDLE
+            or ErrorCode.SCARD_E_SYSTEM_CANCELLED
+            or ErrorCode.ERROR_BROKEN_PIPE
+            or ErrorCode.SCARD_E_SERVICE_STOPPED
+            or ErrorCode.SCARD_E_NO_SERVICE;
 
     private void OnDeviceEvent()
     {

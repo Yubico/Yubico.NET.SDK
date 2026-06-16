@@ -10,6 +10,7 @@ This folder records phase closeouts for the runtime resilience workstream. Each 
 - [Phase 4: SmartCard Context Leak Invariant](phase-04-smartcard-context-leak.md)
 - [Phase 5: Minimal Fast Runner](phase-05-minimal-fast-runner.md)
 - [Phase 6: Diagnostics Project Deferred](phase-06-diagnostics-project-deferred.md)
+- [Phase 7: Audit Skill Deferred](phase-07-audit-skill-deferred.md)
 
 ## Closeout Rule
 

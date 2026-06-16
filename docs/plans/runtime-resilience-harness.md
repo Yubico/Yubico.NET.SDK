@@ -199,12 +199,25 @@ Do not build yet:
 
 ## Phase 7: Reusable Local Audit Skill, Last
 
+- [x] Evaluate promotion gate for a reusable `yubikit-runtime-audit` skill.
 - [ ] Create a `yubikit-runtime-audit` skill only after the toolchain/local runner shape stabilizes.
 - [ ] The skill should orchestrate existing commands, not invent parallel behavior.
 - [ ] It should produce a concise report and recommend next probes.
 
+Decision:
+- Do not create a `yubikit-runtime-audit` skill yet.
+- The stable user interface is currently one command: `dotnet toolchain.cs -- resilience --fast`.
+- A skill would mostly wrap that single command and restate the plan; it would not add meaningful orchestration until diagnostics or multiple runner modes exist.
+- Reopen this phase after Phase 6 reopens, a diagnostics project exists, a live optional diagnostic exists, or a multi-command audit workflow exists.
+
+Evidence:
+- The command-line harness is already useful without a skill.
+- Phase 6 deferred the diagnostics project, so there is no scenario registry or report layer for a skill to orchestrate.
+- Avoiding the skill follows the same anti-shelfware rule used for the diagnostics project.
+- DevTeam review validated the defer decision and found no concrete skill capability that adds value beyond the single runner command today.
+
 Proof of value required:
-- The command-line harness is already useful without the skill.
+- The command-line harness is already useful without the skill. Satisfied by Phase 5 red-green runner evidence.
 
 ## Live-Hardware Safety Rules
 

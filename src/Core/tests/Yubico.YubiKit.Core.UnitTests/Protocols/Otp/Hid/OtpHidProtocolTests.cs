@@ -1,6 +1,7 @@
 // Copyright 2025 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
 
+using System.Diagnostics;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Transports.Hid;
@@ -89,9 +90,12 @@ public class OtpHidProtocolTests
         // Response: sequence incremented (no data response)
         mock.QueueReport([0x00, 0x05, 0x04, 0x03, 0x02, 0x00, 0x00, 0x00]); // progSeq=2
 
+        var stopwatch = Stopwatch.StartNew();
         var result = await protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken);
+        stopwatch.Stop();
 
         Assert.Equal(6, result.Length); // Status-only response returns 6 status bytes
+        Assert.True(stopwatch.ElapsedMilliseconds < 200, $"Ready-to-write polling took {stopwatch.ElapsedMilliseconds}ms");
     }
 
     [Fact]

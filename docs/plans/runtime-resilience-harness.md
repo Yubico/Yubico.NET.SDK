@@ -219,6 +219,27 @@ Evidence:
 Proof of value required:
 - The command-line harness is already useful without the skill. Satisfied by Phase 5 red-green runner evidence.
 
+## Next-Step Rules From Current Learnings
+
+- Treat `dotnet toolchain.cs -- resilience --fast` as the default local and CI gate for any change that touches Core runtime loops, polling paths, recovery logic, or listener lifecycle cleanup.
+- Start the next resilience slice only from a concrete bug seed, suspicious runtime behavior, or a specific missing invariant. Do not start from a desire to add more diagnostics infrastructure.
+- Prefer the smallest new detector that proves the bug class: existing unit test, fake seam, seeded-source scanner fixture, or strict resource-release invariant.
+- Use BenchmarkDotNet to discover or confirm a foreground performance problem, then convert the finding into the cheapest stable regression gate that can run without hardware.
+- Keep new gates no-hardware by default. Add live optional diagnostics only when the bug class cannot be proven credibly with a fake seam or deterministic local invariant.
+- Reopen Phase 6 only if at least one of these becomes true:
+  - a live OS handle or file-descriptor diagnostic is approved,
+  - another module needs runtime-resilience orchestration outside normal unit tests,
+  - multiple live optional scenarios exist and need a shared runner/report layer.
+- Reopen Phase 7 only after Phase 6 reopens or the workflow grows beyond one stable command.
+- Keep the closeout loop strict for every future slice: smallest useful change, focused verification, broader gate when code changed, cross-vendor review when behavior or proof changes, learning doc, then commit.
+
+## Current Recommended Next Slice Order
+
+1. Add another no-hardware invariant only when a new Core runtime risk is observed in review, profiling, or bug investigation.
+2. If a real risk cannot be proven with the current seams, define one narrowly scoped live optional diagnostic and keep it read-only by default.
+3. Only after step 2 produces a real orchestration need, reconsider a diagnostics project.
+4. Only after step 3 creates multiple commands or modes, reconsider a reusable audit skill.
+
 ## Live-Hardware Safety Rules
 
 - [ ] Default live scenarios must be read-only.

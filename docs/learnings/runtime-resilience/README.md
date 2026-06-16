@@ -21,3 +21,11 @@ Each future phase should close in this order:
 3. Run cross-vendor review when the change affects runtime behavior or proof quality.
 4. Write the phase learning document.
 5. Commit the phase before starting the next one.
+
+## What The Next Work Should Do
+
+- Use `dotnet toolchain.cs -- resilience --fast` as the default runtime-resilience verification command.
+- Start from a concrete bug seed or missing invariant, not from a desire to add infrastructure.
+- Prefer no-hardware proof first: fake seams, deterministic timing/resource-release invariants, or seeded scanner fixtures.
+- Use BenchmarkDotNet for discovery and evidence, then convert proven foreground regressions into cheap gates.
+- Keep the diagnostics project and audit skill deferred until the workflow grows beyond the current single-command runner.

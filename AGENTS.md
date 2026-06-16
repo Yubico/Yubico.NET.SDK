@@ -30,6 +30,7 @@
 - Platform interop belongs under `src/Core/src/PlatformInterop/{Windows,MacOS,Linux,Desktop}` with safe handles and `SdkPlatformInfo` platform selection.
 - FIDO2 over USB primarily uses HID FIDO. SmartCard/CCID FIDO2 is supported over NFC and over USB when the FIDO2 AID is exposed; USB SmartCard FIDO2 requires firmware 5.8.0+.
 - `TlvBuilder` and `DisposableTlvList` must be disposed.
+- Listener/native retry loops must block, back off, exit, or throttle on every failure path; add no-hardware fault-injection tests for persistent native errors.
 
 ## Hardware And Integration Tests
 - Integration tests require authorized YubiKey hardware. The shared test infrastructure reads `YubiKeyTests:AllowedSerialNumbers` from `appsettings.json`; an empty/missing allow list can hard-fail with `Environment.Exit(-1)`, and unauthorized devices are filtered out.
@@ -52,6 +53,7 @@
 - Do not add validation-only tests that just prove `ArgumentNullException.ThrowIfNull` or framework type checks work.
 - Do not add skipped placeholder tests. If behavior cannot be unit-tested, document the limitation and point to an integration path.
 - Use fake connections, queued APDU responses, and byte/vector assertions for protocol behavior; use integration tests only for real hardware behavior.
+- Runtime resilience tests should use fakes/seams and must not self-skip because PC/SC, HID, or YubiKey hardware is unavailable.
 
 ## Git And Release Notes
 - The workflow file currently triggers on `yubikit` and `yubikit-applets`; verify the active plan/branch before assuming a PR base.

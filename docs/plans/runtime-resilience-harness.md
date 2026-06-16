@@ -172,11 +172,24 @@ Proof of value required before moving on:
 
 ## Phase 6: Dedicated Diagnostics Project, Only If Justified
 
+- [x] Evaluate promotion gate for `diagnostics/Yubico.YubiKit.RuntimeDiagnostics`.
 - [ ] Create `diagnostics/Yubico.YubiKit.RuntimeDiagnostics` only if the same runner patterns are reused across at least three modules or bug classes.
 - [ ] Add scenario registry only after multiple scenarios exist.
 - [ ] Add JSON/markdown reports only for asserted invariants.
 - [ ] Record device serial, model, firmware, and transport for every live result.
 - [ ] Default to read-only, non-destructive operations.
+
+Decision:
+- Do not create `diagnostics/Yubico.YubiKit.RuntimeDiagnostics` yet.
+- Current gates cover multiple bug classes, but they are all no-hardware Core unit-test gates and already run through `dotnet toolchain.cs -- resilience --fast`.
+- There is no live-hardware scenario registry yet, no repeated cross-module runner pattern, and no asserted JSON/markdown report that would add value over test output.
+- Reopen this phase after a live OS-handle/fd diagnostic is approved, at least one live optional diagnostic exists, or another module-specific runtime-resilience gate needs orchestration outside unit tests.
+
+Evidence:
+- The fast runner already catches the known SmartCard and OTP seeded regressions in under 90 seconds.
+- No default live scenario is approved yet, so a diagnostics project would currently be empty orchestration.
+- Keeping diagnostics deferred follows the Phase Closeout Gate and avoids building shelfware.
+- DevTeam review validated the defer decision and corrected the checklist representation so deferred deliverables remain unchecked.
 
 Do not build yet:
 - Cross-module all-applet orchestration.

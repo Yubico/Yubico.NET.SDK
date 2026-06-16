@@ -180,13 +180,32 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
         }
 
         // Wait for the listener thread to exit
+        var listenerStopped = true;
         if (listenerThread is not null && listenerThread.IsAlive)
         {
             if (!listenerThread.Join(MaxDisposalWaitTime))
             {
                 Logger.LogWarning("SmartCard listener thread did not exit within timeout");
+                listenerStopped = false;
             }
         }
+
+        if (!listenerStopped)
+        {
+            // The listener may still be using the native context. Prefer a bounded leak over
+            // disposing a handle that could still be active on the background thread.
+            return;
+        }
+
+        lock (_syncLock)
+        {
+            if (ReferenceEquals(_context, context))
+            {
+                _context = null;
+            }
+        }
+
+        context?.Dispose();
     }
 
     private void ListenerThreadProc()

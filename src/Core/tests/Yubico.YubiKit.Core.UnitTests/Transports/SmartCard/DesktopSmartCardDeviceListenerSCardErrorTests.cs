@@ -147,6 +147,25 @@ public sealed class DesktopSmartCardDeviceListenerSCardErrorTests
         }
     }
 
+    [Fact]
+    public void WhenListenerRestarts_PreviousContextsAreDisposed()
+    {
+        var interop = new FakeSCardApi
+        {
+            ListReaders = _ => (ErrorCode.SCARD_E_NO_READERS_AVAILABLE, [])
+        };
+        using var listener = new DesktopSmartCardDeviceListener(interop, _ => { });
+
+        listener.Start();
+        listener.Stop();
+        listener.Start();
+        listener.Stop();
+        listener.Dispose();
+
+        Assert.Equal(2, interop.EstablishContextCalls);
+        Assert.Equal(interop.EstablishContextCalls, interop.ReleasedContextCalls);
+    }
+
     private sealed class BlockingSleeper : IDisposable
     {
         private readonly ManualResetEventSlim _sleeping = new();
@@ -186,11 +205,12 @@ public sealed class DesktopSmartCardDeviceListenerSCardErrorTests
         public int EstablishContextCalls { get; private set; }
         public int GetStatusChangeCalls { get; private set; }
         public int ListReadersCalls { get; private set; }
+        public int ReleasedContextCalls { get; private set; }
 
         public uint SCardEstablishContext(SCARD_SCOPE scope, out SCardContext context)
         {
             EstablishContextCalls++;
-            context = new TestSCardContext(new IntPtr(EstablishContextCalls));
+            context = new TestSCardContext(new IntPtr(EstablishContextCalls), this);
             return EstablishContext(EstablishContextCalls);
         }
 
@@ -214,9 +234,15 @@ public sealed class DesktopSmartCardDeviceListenerSCardErrorTests
 
         public uint SCardCancel(SCardContext context) => ErrorCode.SCARD_S_SUCCESS;
 
-        private sealed class TestSCardContext(IntPtr handle) : SCardContext(handle)
+        private void RecordReleasedContext() => ReleasedContextCalls++;
+
+        private sealed class TestSCardContext(IntPtr handle, FakeSCardApi owner) : SCardContext(handle)
         {
-            protected override bool ReleaseHandle() => true;
+            protected override bool ReleaseHandle()
+            {
+                owner.RecordReleasedContext();
+                return true;
+            }
         }
     }
 }

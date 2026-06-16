@@ -7,6 +7,7 @@ This folder records phase closeouts for the runtime resilience workstream. Each 
 - [Phase 1: SmartCard Listener Recovery](phase-01-smartcard-listener.md)
 - [Phase 2: OTP HID Ready-To-Write Polling](phase-02-otp-polling.md)
 - [Phase 3: Static Runtime-Resilience Scanner](phase-03-static-scanner.md)
+- [Phase 4: SmartCard Context Leak Invariant](phase-04-smartcard-context-leak.md)
 
 ## Closeout Rule
 

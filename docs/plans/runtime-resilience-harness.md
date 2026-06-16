@@ -126,13 +126,25 @@ Proof of value required before moving on:
 
 ## Phase 4: Handle And File Descriptor Leak Invariant
 
-- [ ] Define a cross-platform metric for handles/file descriptors where possible.
-- [ ] Add a small no-hardware fake test if live handle counts are too platform-specific.
+- [x] Define a cross-platform metric for handles/file descriptors where possible.
+- [x] Add a small no-hardware fake test if live handle counts are too platform-specific.
 - [ ] Add a live optional diagnostic for repeated connect/disconnect/listener start/stop cycles.
-- [ ] Assert handles/fds return to baseline within a strict tolerance.
+- [x] Assert handles/fds return to baseline within a strict tolerance.
+
+Decision:
+- Use fake `SCardContext` release counts as the Phase 4 cross-platform metric. OS handle/fd counts are platform-specific and too noisy for the default no-hardware gate.
+- Defer live optional diagnostics until there is a runner in Phase 5 or a second handle/fd class to exercise.
+- Treat `ReleasedContextCalls == EstablishContextCalls` after restart/dispose as the strict no-hardware baseline-return invariant.
+
+Evidence:
+- `WhenListenerRestarts_PreviousContextsAreDisposed` initially failed with 2 contexts established and only 1 released.
+- `StopListening()` now disposes the stopped context only after the listener thread has joined; if join times out, it intentionally leaves the context alive to avoid disposing a handle the background thread may still use.
+- After the fix, focused SmartCard tests passed: 5 total, 5 succeeded, 0 skipped.
+- Core tests passed: 523 total, 521 succeeded, 2 skipped.
+- DevTeam review returned `pass` and confirmed the leak-vs-use-after-free tradeoff.
 
 Proof of value required before moving on:
-- A deliberately leaked connection/listener handle must be detected locally.
+- A deliberately leaked connection/listener handle must be detected locally. Satisfied by the red-green fake-context release invariant above.
 
 ## Phase 5: Minimal Local Runner
 

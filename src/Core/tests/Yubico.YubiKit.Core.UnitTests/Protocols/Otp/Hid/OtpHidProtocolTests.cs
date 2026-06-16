@@ -9,7 +9,7 @@ using Yubico.YubiKit.Core.Transports.Hid;
 namespace Yubico.YubiKit.Core.UnitTests.Protocols.Otp.Hid;
 
 /// <summary>
-/// Unit tests for OtpHidProtocol to verify behavior before refactoring.
+/// Unit tests for OtpHidProtocol behavior and no-hardware runtime resilience invariants.
 /// </summary>
 public class OtpHidProtocolTests
 {
@@ -71,7 +71,8 @@ public class OtpHidProtocolTests
     }
 
     [Fact]
-    public async Task SendAndReceiveAsync_EmptyPayload_Succeeds()
+    [Trait("Category", "RuntimeResilience")]
+    public async Task SendAndReceiveAsync_WhenReadyToWriteImmediately_DoesNotSleepBeforePolling()
     {
         var mock = new MockHidConnection();
         var protocol = CreateProtocolWithMock(mock);
@@ -95,6 +96,11 @@ public class OtpHidProtocolTests
         stopwatch.Stop();
 
         Assert.Equal(6, result.Length); // Status-only response returns 6 status bytes
+        Assert.Equal(10, mock.SentReports.Count);
+
+        // This fake path is intentionally no-hardware and immediately write-ready. The old
+        // sleep-first loop added at least 10 x 50ms before these writes, so a loose 200ms budget
+        // catches that regression without relying on BenchmarkDotNet in normal unit runs.
         Assert.True(stopwatch.ElapsedMilliseconds < 200, $"Ready-to-write polling took {stopwatch.ElapsedMilliseconds}ms");
     }
 

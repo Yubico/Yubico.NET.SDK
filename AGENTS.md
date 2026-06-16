@@ -10,6 +10,7 @@
 - Do not run `dotnet build` directly. Use `dotnet toolchain.cs build` or `dotnet toolchain.cs build --project Piv`.
 - Do not run `dotnet test` directly. Unit tests mix xUnit v3/Microsoft Testing Platform and xUnit v2; `dotnet toolchain.cs test` detects and invokes the right runner.
 - Focus tests with both module and filter when possible: `dotnet toolchain.cs test --project Fido2 --filter "Method~Sign"`.
+- When touching Core runtime loops, polling paths, recovery logic, or listener lifecycle cleanup, also run `dotnet toolchain.cs -- resilience --fast`.
 - `--integration` requires `--project`: `dotnet toolchain.cs -- test --integration --project Piv --smoke`.
 - `--smoke` skips `Slow` and `RequiresUserPresence`; agents should not run touch/insert/remove tests unless a human explicitly coordinates hardware.
 - Use `dotnet toolchain.cs -- --help` when arguments act strangely; `--help` and some options need the `--` separator.

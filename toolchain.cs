@@ -22,6 +22,7 @@
  *   restore        - Restore NuGet dependencies
  *   build          - Build the solution (restores only if needed)
  *   test           - Run unit tests with summary output
+ *   resilience     - Run fast no-hardware runtime resilience gates
  *   docs-qa        - Validate active documentation hygiene
  *   coverage       - Run tests with code coverage
  *   pack           - Create NuGet packages
@@ -43,6 +44,7 @@
  *   --project <name>               Build/test specific project only (partial match)
  *   --integration                  Include integration tests (requires --project, unit tests only by default)
  *   --smoke                        Smoke test mode: skip Slow and RequiresUserPresence tests
+ *   --fast                         Required fast mode for resilience gates
  *
  * EXAMPLES:
  *   dotnet toolchain.cs build
@@ -51,6 +53,7 @@
  *   dotnet toolchain.cs docs-qa
  *   dotnet toolchain.cs test --filter "FullyQualifiedName~MyTestClass"
  *   dotnet toolchain.cs test --project Piv --filter "Method~Sign"
+ *   dotnet toolchain.cs -- resilience --fast
  *   dotnet toolchain.cs -- test --integration --project Piv --smoke   (quick integration smoke test)
  *   dotnet toolchain.cs coverage
  *   dotnet toolchain.cs publish --package-version 1.0.0-preview.1
@@ -117,6 +120,7 @@ var testFilter = GetArgument("--filter");
 var projectFilter = GetArgument("--project");
 var includeIntegration = HasFlag("--integration");
 var smokeTest = HasFlag("--smoke");
+var fastMode = HasFlag("--fast");
 
 // --smoke injects trait filters to skip slow and user-presence tests
 if (smokeTest)
@@ -281,6 +285,47 @@ Target("coverage", () =>
         throw new InvalidOperationException($"{failCount} test project(s) failed during coverage collection");
 });
 
+Target("resilience", () =>
+{
+    PrintHeader("Running fast runtime resilience gates");
+
+    if (!fastMode)
+    {
+        throw new InvalidOperationException("The resilience target currently requires --fast; only fast no-hardware mode is implemented.");
+    }
+
+    var previousFilter = testFilter;
+    try
+    {
+        testFilter = string.IsNullOrEmpty(previousFilter)
+            ? "Category=RuntimeResilience"
+            : $"{previousFilter}&Category=RuntimeResilience";
+
+        var projectsToTest = FilterToProject(testProjectInfos, "Core");
+        if (projectsToTest is null)
+            return;
+
+        var stopwatch = Stopwatch.StartNew();
+        var results = RunTestProjects(projectsToTest);
+        stopwatch.Stop();
+
+        PrintTestSummary(results, "RUNTIME RESILIENCE");
+        PrintInfo("Evidence: Core unit tests with Category=RuntimeResilience");
+        PrintInfo($"Elapsed: {stopwatch.Elapsed.TotalSeconds:F1}s");
+
+        var failCount = results.Count(r => !r.Passed);
+        if (failCount > 0)
+            throw new InvalidOperationException($"{failCount} runtime resilience test project(s) failed");
+
+        if (results.Count > 0 && results.All(r => r.Skipped))
+            throw new InvalidOperationException("No runtime resilience tests matched the specified filter");
+    }
+    finally
+    {
+        testFilter = previousFilter;
+    }
+});
+
 Target("docs-qa", () =>
 {
     PrintHeader("Validating active documentation");
@@ -390,7 +435,7 @@ if (args.Contains("--help") || args.Contains("-h"))
 var bullseyeArgs = FilterBullseyeArgs(args,
     optionsWithValues: ["--project", "--filter", "--package-version", "--nuget-feed-name", "--nuget-feed-path",
                         "--nuget-feed-url", "--nuget-api-key"],
-    flags: ["--integration", "--include-docs", "--dry-run", "--clean", "--smoke"]);
+    flags: ["--integration", "--include-docs", "--dry-run", "--clean", "--smoke", "--fast"]);
 await RunTargetsAndExitAsync(bullseyeArgs);
 
 // ─── Helper functions ──────────────────────────────────────────────────────────
@@ -616,6 +661,7 @@ TARGETS:
   restore        - Restore NuGet dependencies
   build          - Build the solution (restores only if needed)
   test           - Run unit tests with summary output
+  resilience     - Run fast no-hardware runtime resilience gates
   docs-qa        - Validate active documentation hygiene
   coverage       - Run tests with code coverage
   pack           - Create NuGet packages
@@ -637,6 +683,7 @@ OPTIONS:
   --project <name>               Build/test specific project only (partial match)
   --integration                  Include integration tests (requires --project)
   --smoke                        Smoke test mode: skip Slow and RequiresUserPresence tests
+  --fast                         Required fast mode for resilience gates
   -h, --help                     Show this help message
 
 EXAMPLES:
@@ -646,6 +693,7 @@ EXAMPLES:
   dotnet toolchain.cs docs-qa
   dotnet toolchain.cs test --filter ""FullyQualifiedName~MyTestClass""
   dotnet toolchain.cs test --project Piv --filter ""Method~Sign""
+  dotnet toolchain.cs -- resilience --fast
   dotnet toolchain.cs -- test --integration --project Piv --smoke
   dotnet toolchain.cs coverage
   dotnet toolchain.cs publish --package-version 1.0.0-preview.1

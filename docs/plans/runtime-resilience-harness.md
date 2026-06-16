@@ -148,14 +148,27 @@ Proof of value required before moving on:
 
 ## Phase 5: Minimal Local Runner
 
-- [ ] Add a single toolchain entry point only after Phases 1-4 prove useful.
-- [ ] Suggested shape: `dotnet toolchain.cs -- resilience --fast`.
-- [ ] Fast mode should run no-hardware resilience tests, static scanner, and selected benchmark budget checks.
-- [ ] Output should be pass/fail with paths to evidence, not a dashboard.
-- [ ] Keep the fast path under 90 seconds.
+- [x] Add a single toolchain entry point only after Phases 1-4 prove useful.
+- [x] Suggested shape: `dotnet toolchain.cs -- resilience --fast`.
+- [x] Fast mode should run no-hardware resilience tests, static scanner, and selected benchmark budget checks.
+- [x] Output should be pass/fail with paths to evidence, not a dashboard.
+- [x] Keep the fast path under 90 seconds.
+
+Decision:
+- Add `resilience` as a `toolchain.cs` target instead of a separate diagnostics project.
+- Require `--fast` because only the no-hardware fast mode exists today.
+- Implement the runner by executing Core unit tests tagged `Category=RuntimeResilience`.
+- Do not add BenchmarkDotNet to the default runner; the OTP unit timing guard is the fast budget check, and BenchmarkDotNet remains supporting evidence.
+
+Evidence:
+- `dotnet toolchain.cs -- resilience --fast` passed 13 runtime-resilience tests in 3.2s after final hardening.
+- Running `dotnet toolchain.cs -- resilience` fails immediately with guidance because `--fast` is required.
+- A temporary OTP sleep-first regression made the runner fail with both scanner and OTP timing failures.
+- A temporary SmartCard context leak regression made the runner fail with the context-release invariant.
+- DevTeam review returned `pass`; we hardened the target afterward by restoring the captured `testFilter` in `finally` and making `--fast` required rather than advisory.
 
 Proof of value required before moving on:
-- One command catches at least the SmartCard and OTP seeded regressions.
+- One command catches at least the SmartCard and OTP seeded regressions. Satisfied by the red-green runner checks above.
 
 ## Phase 6: Dedicated Diagnostics Project, Only If Justified
 

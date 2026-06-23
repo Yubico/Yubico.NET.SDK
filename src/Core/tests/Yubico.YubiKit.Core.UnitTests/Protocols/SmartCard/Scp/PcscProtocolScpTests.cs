@@ -254,6 +254,68 @@ public class PcscProtocolScpTests
         Assert.True(rawProcessor.TransmittedCommands[1].Data.Length >= 8);
     }
 
+    [Fact]
+    public async Task TransmitAsync_ShortFormatter_MacInputExcludesAppendedLe()
+    {
+        var rawProcessor = new RecordingApduProcessor(new ApduFormatterShort());
+        using var state = CreateZeroedScpState();
+        using var processor = new ScpProcessor(rawProcessor, state);
+
+        var commandData = new byte[] { 0x01, 0x02, 0x03 };
+        var command = new ApduCommand(0x00, 0xCA, 0x00, 0x00, commandData, le: 0);
+
+        await processor.TransmitAsync(command, useScp: true, encrypt: false, TestContext.Current.CancellationToken);
+
+        var transmittedData = rawProcessor.TransmittedCommandData;
+        var expectedMacInput = new byte[] { 0x04, 0xCA, 0x00, 0x00, 0x0B, 0x01, 0x02, 0x03 };
+        var expectedMac = ComputeMac(expectedMacInput);
+        Assert.Equal(expectedMac, transmittedData[^8..]);
+    }
+
+    [Fact]
+    public async Task TransmitAsync_ExtendedFormatter_MacInputExcludesAppendedLe()
+    {
+        var rawProcessor = new RecordingApduProcessor(new ApduFormatterExtended(SmartCardMaxApduSizes.Yk43));
+        using var state = CreateZeroedScpState();
+        using var processor = new ScpProcessor(rawProcessor, state);
+
+        var commandData = new byte[] { 0x01, 0x02, 0x03 };
+        var command = new ApduCommand(0x00, 0xCA, 0x00, 0x00, commandData, le: 0);
+
+        await processor.TransmitAsync(command, useScp: true, encrypt: false, TestContext.Current.CancellationToken);
+
+        var transmittedData = rawProcessor.TransmittedCommandData;
+        var expectedMacInput = new byte[] { 0x04, 0xCA, 0x00, 0x00, 0x00, 0x00, 0x0B, 0x01, 0x02, 0x03 };
+        var expectedMac = ComputeMac(expectedMacInput);
+        Assert.Equal(expectedMac, transmittedData[^8..]);
+    }
+
+    private static ScpState CreateZeroedScpState() =>
+        new(new SessionKeys(new byte[16], new byte[16], new byte[16]), new byte[16]);
+
+    private static byte[] ComputeMac(byte[] macInput)
+    {
+        using var state = CreateZeroedScpState();
+        return state.Mac(macInput);
+    }
+
+    private sealed class RecordingApduProcessor(IApduFormatter formatter) : IApduProcessor
+    {
+        public IApduFormatter Formatter { get; } = formatter;
+
+        public byte[] TransmittedCommandData { get; private set; } = [];
+
+        public Task<ApduResponse> TransmitAsync(
+            ApduCommand command,
+            bool useScp = true,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            TransmittedCommandData = command.Data.ToArray();
+            return Task.FromResult(new ApduResponse(new byte[] { 0x90, 0x00 }));
+        }
+    }
+
     private sealed class DisposableApduProcessor : IApduProcessor, IDisposable
     {
         public IApduFormatter Formatter { get; } = new FakeApduFormatter();

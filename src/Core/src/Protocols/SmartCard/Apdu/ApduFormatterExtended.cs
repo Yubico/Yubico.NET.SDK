@@ -25,36 +25,15 @@ internal class ApduFormatterExtended(int maxApduSize) : IApduFormatter
 
     public Memory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int le)
     {
-        // ISO 7816-4 Extended APDU Formats:
-        // Case 1 (no data, no Le): CLA INS P1 P2 (4 bytes)
-        // Case 2E (no data, extended Le): CLA INS P1 P2 00 00 Le_hi Le_lo (7 bytes) -- simplified to Le_hi Le_lo for <=256
-        // Case 3E (data, no Le): CLA INS P1 P2 00 Lc_hi Lc_lo [data] (7+ bytes)
-        // Case 4E (data, extended Le): CLA INS P1 P2 00 Lc_hi Lc_lo [data] Le_hi Le_lo (9+ bytes)
+        if (le is < 0 or > 65536)
+            throw new ArgumentException("Le must be between 0 and 65536", nameof(le));
+
+        // ISO 7816-4 extended APDU formats used here always include Le:
+        // Case 2E (no data): CLA INS P1 P2 00 Le_hi Le_lo (7 bytes)
+        // Case 4E (data): CLA INS P1 P2 00 Lc_hi Lc_lo [data] Le_hi Le_lo (9+ bytes)
 
         bool hasData = data.Length > 0;
-        bool hasLe = le > 0;
-
-        int totalLength;
-        if (!hasData && !hasLe)
-        {
-            // Case 1: Just header
-            totalLength = 4;
-        }
-        else if (!hasData && hasLe)
-        {
-            // Case 2: Header + short Le (use short format for simplicity when Le <= 256)
-            totalLength = 5;
-        }
-        else if (hasData && !hasLe)
-        {
-            // Case 3E: Header + 00 + 2-byte Lc + data
-            totalLength = 4 + 1 + 2 + data.Length;
-        }
-        else
-        {
-            // Case 4E: Header + 00 + 2-byte Lc + data + 2-byte Le
-            totalLength = 4 + 1 + 2 + data.Length + 2;
-        }
+        var totalLength = 4 + (hasData ? 1 + 2 + data.Length : 1) + 2;
 
         if (totalLength > maxApduSize)
             throw new NotSupportedException("APDU length exceeds YubiKey capability.");
@@ -73,26 +52,19 @@ internal class ApduFormatterExtended(int maxApduSize) : IApduFormatter
         {
             // Extended Lc encoding: 00 Lc_hi Lc_lo
             buffer[position++] = 0x00;
-            BinaryPrimitives.WriteInt16BigEndian(buffer[position..], (short)data.Length);
+            BinaryPrimitives.WriteUInt16BigEndian(buffer[position..], (ushort)data.Length);
             position += 2;
             data.Span.CopyTo(buffer[position..]);
             position += data.Length;
         }
 
-        if (hasLe)
+        if (!hasData)
         {
-            if (hasData)
-            {
-                // Extended Le after data: 2 bytes
-                BinaryPrimitives.WriteInt16BigEndian(buffer[position..], (short)le);
-            }
-            else
-            {
-                // Case 2 without data: use short Le (single byte) for compatibility
-                // Le=0 means 256 in short APDU
-                buffer[position] = (byte)(le == 256 ? 0 : le);
-            }
+            buffer[position++] = 0x00;
         }
+
+        var actualLe = le == 65536 ? 0 : le;
+        BinaryPrimitives.WriteUInt16BigEndian(buffer[position..], (ushort)actualLe);
 
         return buffer.ToArray();
     }

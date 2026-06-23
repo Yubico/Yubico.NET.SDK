@@ -38,6 +38,21 @@ public class DeviceInfoReaderTests
     }
 
     [Fact]
+    public async Task ReadAsync_SmartCardMoreDataCount_ReadsRemainingPages()
+    {
+        var protocol = new FakeSmartCardProtocol(
+            BuildPage(new Tlv(0x10, [0x02])),
+            BuildPage(new Tlv(0x10, [0x01])),
+            BuildPage(CreateRequiredDeviceInfoTlvs()));
+
+        var info = await DeviceInfoReader.ReadAsync(protocol, null, TestContext.Current.CancellationToken);
+
+        Assert.Equal([0, 1, 2], protocol.RequestedPages);
+        Assert.Equal(0x01020304, info.SerialNumber);
+        Assert.Equal(new FirmwareVersion(5, 7, 2), info.FirmwareVersion);
+    }
+
+    [Fact]
     public async Task ReadAsync_SmartCardInvalidPageLength_ThrowsPageAwareBadResponse()
     {
         var protocol = new FakeSmartCardProtocol([0x02, 0x01]);

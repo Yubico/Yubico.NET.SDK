@@ -61,17 +61,29 @@ internal static class DeviceInfoReader
         byte page = 0;
         var allPagesTlvs = new List<Tlv>();
 
-        var hasMoreData = true;
-        while (hasMoreData)
+        var remainingPages = 1;
+        while (remainingPages > 0)
         {
+            --remainingPages;
             var pageTlvs = await ReadPageAsync(protocol, page, cancellationToken).ConfigureAwait(false);
-            allPagesTlvs.AddRange(pageTlvs);
 
             var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
-            if (moreData is null)
-                break;
+            if (moreData is not null && moreData.Length > 0)
+            {
+                remainingPages = moreData.Value.Span[^1];
+            }
 
-            hasMoreData = moreData.Length == 1 && moreData.Value.Span[0] == 1;
+            foreach (var tlv in pageTlvs)
+            {
+                if (tlv.Tag == TagMoreDeviceInfo)
+                {
+                    tlv.Dispose();
+                    continue;
+                }
+
+                allPagesTlvs.Add(tlv);
+            }
+
             ++page;
         }
 

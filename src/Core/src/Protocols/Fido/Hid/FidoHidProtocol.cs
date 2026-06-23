@@ -271,9 +271,11 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
 
         // Receive continuation packets if needed
         var bytesReceived = availableDataInPacket;
+        byte expectedSequence = 0;
         while (bytesReceived < responseLength)
         {
             var contPacket = await _connection.ReceiveAsync(cancellationToken).ConfigureAwait(false);
+            ValidateContinuationPacket(contPacket.Span, expectedSequence);
             var contDataLength = Math.Min(
                 responseLength - bytesReceived,
                 CtapConstants.ContinuationDataSize);
@@ -287,6 +289,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
                 .CopyTo(responseData.AsSpan(bytesReceived));
 
             bytesReceived += availableContData;
+            expectedSequence++;
         }
 
         _logger.LogTrace("Received {Length} bytes in response", responseLength);
@@ -342,6 +345,19 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
     /// </summary>
     private static byte GetPacketCommand(ReadOnlySpan<byte> packet) =>
         (byte)(packet[4] & ~CtapConstants.InitPacketMask);
+
+    private static void ValidateContinuationPacket(ReadOnlySpan<byte> packet, byte expectedSequence)
+    {
+        if (packet.Length < CtapConstants.ContinuationHeaderSize)
+            throw new InvalidOperationException("CTAP HID continuation packet is too short");
+
+        var sequence = packet[4];
+        if (!IsExpectedContinuationSequence(sequence, expectedSequence))
+            throw new InvalidOperationException("CTAP HID continuation packet sequence mismatch");
+    }
+
+    internal static bool IsExpectedContinuationSequence(byte sequence, byte expectedSequence) =>
+        (sequence & ~CtapConstants.InitPacketMask) == (expectedSequence & ~CtapConstants.InitPacketMask);
 
     /// <summary>
     /// Extracts the payload length from an init packet.

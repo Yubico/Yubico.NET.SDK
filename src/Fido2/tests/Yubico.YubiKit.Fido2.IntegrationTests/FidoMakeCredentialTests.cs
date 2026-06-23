@@ -265,13 +265,13 @@ public class FidoMakeCredentialTests
         });
 
     /// <summary>
-    /// Tests that MakeCredential throws PinRequired when PIN is required but not provided.
+    /// Tests that MakeCredential fails when PIN/UV auth is required but not provided.
     /// </summary>
     /// <remarks>
     /// <para>
     /// This test verifies the error path when the authenticator requires PIN/UV but the client
-    /// does not provide pinUvAuthParam. The authenticator should return CtapStatus.PinRequired
-    /// or CtapStatus.PinInvalid depending on firmware version.
+    /// does not provide pinUvAuthParam. The authenticator should return an error such as
+    /// CtapStatus.PuatRequired or CtapStatus.PinInvalid depending on firmware version.
     /// </para>
     /// <para>
     /// This closes the architectural gap where WebAuthn proved this error path on hardware
@@ -281,7 +281,7 @@ public class FidoMakeCredentialTests
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
-    public async Task MakeCredential_WhenPinRequiredButNotProvided_ThrowsInvalidParameter(YubiKeyTestState state) =>
+    public async Task MakeCredential_WhenPinUvAuthRequiredButNotProvided_ThrowsCtapError(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
             // Arrange: Ensure PIN is set (this makes the device require PIN for operations)
@@ -308,7 +308,7 @@ public class FidoMakeCredentialTests
                 // PinUvAuthProtocol = null
             };
 
-            // Act & Assert: Expect CtapException with PuatRequired or PinAuthInvalid
+            // Act & Assert: Expect a CTAP error when PIN/UV auth is required but absent.
             var ctapEx = await Assert.ThrowsAsync<CtapException>(async () =>
             {
                 await session.MakeCredentialAsync(

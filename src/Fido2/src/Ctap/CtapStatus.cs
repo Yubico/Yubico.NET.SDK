@@ -15,11 +15,18 @@
 namespace Yubico.YubiKit.Fido2.Ctap;
 
 /// <summary>
-/// CTAP2 status codes per FIDO Alliance specification.
+/// CTAP2 status codes per FIDO Alliance specifications.
 /// </summary>
 /// <remarks>
 /// <para>
-/// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#error-responses
+/// This enum includes CTAP 2.1 status codes plus CTAP 2.2 status-code additions used by
+/// newer authenticators.
+/// </para>
+/// <para>
+/// CTAP 2.1: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#error-responses
+/// </para>
+/// <para>
+/// CTAP 2.2 Review Draft: https://fidoalliance.org/specs/fido-v2.2-rd-20241003/fido-client-to-authenticator-protocol-v2.2-rd-20241003.html#error-responses
 /// </para>
 /// </remarks>
 public enum CtapStatus : byte

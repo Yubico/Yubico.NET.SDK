@@ -13,14 +13,12 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using System.Runtime.Versioning;
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.Hid;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Transports.Hid;
 
-[SupportedOSPlatform("macos")]
 public class HidEnumerationTests
 {
     private readonly ITestOutputHelper _output;
@@ -35,12 +33,6 @@ public class HidEnumerationTests
     [Trait("RequiresHardware", "false")]
     public async Task FindHidDevices_EnumeratesYubicoDevices()
     {
-        if (!OperatingSystem.IsMacOS())
-        {
-            _output.WriteLine("Test skipped: not running on macOS");
-            return;
-        }
-
         var loggerFactory = LoggerFactory.Create(builder =>
             builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
 
@@ -53,7 +45,7 @@ public class HidEnumerationTests
         foreach (var device in devices)
         {
             _output.WriteLine($"  VID={device.DescriptorInfo.VendorId:X4} PID={device.DescriptorInfo.ProductId:X4} " +
-                            $"Usage={device.DescriptorInfo.Usage:X4} UsagePage={device.DescriptorInfo.UsagePage}");
+                            $"Usage={device.DescriptorInfo.Usage:X4} UsagePage={device.DescriptorInfo.UsagePage:X4}");
         }
 
         Assert.True(devices.Count >= 0, "Should not fail even if no devices present");
@@ -64,12 +56,6 @@ public class HidEnumerationTests
     [Trait("RequiresHardware", "true")]
     public async Task FindYubiKeys_IncludesHidDevices()
     {
-        if (!OperatingSystem.IsMacOS())
-        {
-            _output.WriteLine("Test skipped: not running on macOS");
-            return;
-        }
-
         var finder = FindYubiKeys.Create();
 
         var yubiKeys = await finder.FindAllAsync();

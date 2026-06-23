@@ -17,7 +17,6 @@ using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Native.Linux.Libc;
 using Yubico.YubiKit.Core.Native.Linux.Udev;
-using Yubico.YubiKit.Core.Transports.Hid;
 using LibcNativeMethods = Yubico.YubiKit.Core.Native.Linux.Libc.NativeMethods;
 using UdevNativeMethods = Yubico.YubiKit.Core.Native.Linux.Udev.NativeMethods;
 
@@ -110,7 +109,7 @@ internal sealed class LinuxHidDevice : IHidDevice
                     var descriptorInfo = ParseHidDescriptor(device);
 
                     // Only include Yubico devices with supported interface types
-                    if (descriptorInfo.VendorId == 0x1050 &&
+                    if (descriptorInfo.VendorId == HidConstants.YubicoVendorId &&
                         HidInterfaceClassifier.IsSupported(descriptorInfo))
                     {
                         devices.Add(new LinuxHidDevice(descriptorInfo));

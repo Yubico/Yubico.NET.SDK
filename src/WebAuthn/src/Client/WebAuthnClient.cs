@@ -943,7 +943,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
         {
             CtapStatus.PinAuthInvalid or CtapStatus.PinInvalid or CtapStatus.PinAuthBlocked
                 or CtapStatus.PinBlocked or CtapStatus.PinPolicyViolation
-                or CtapStatus.PuvathRequired or CtapStatus.NotAllowed or CtapStatus.OperationDenied
+                or CtapStatus.PuatRequired or CtapStatus.PinTokenExpired
+                or CtapStatus.NotAllowed or CtapStatus.OperationDenied
                 => new WebAuthnClientError(WebAuthnClientErrorCode.NotAllowed, ex.Message, ex),
             CtapStatus.KeyStoreFull or CtapStatus.LargeBlobStorageFull or CtapStatus.FpDatabaseFull
                 or CtapStatus.LimitExceeded or CtapStatus.RequestTooLarge or CtapStatus.UserActionTimeout

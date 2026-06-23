@@ -15,11 +15,18 @@
 namespace Yubico.YubiKit.Fido2.Ctap;
 
 /// <summary>
-/// CTAP2 status codes per FIDO Alliance specification.
+/// CTAP2 status codes per FIDO Alliance specifications.
 /// </summary>
 /// <remarks>
 /// <para>
-/// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#error-responses
+/// This enum includes CTAP 2.1 status codes plus CTAP 2.2 status-code additions used by
+/// newer authenticators.
+/// </para>
+/// <para>
+/// CTAP 2.1: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#error-responses
+/// </para>
+/// <para>
+/// CTAP 2.2 Review Draft: https://fidoalliance.org/specs/fido-v2.2-rd-20241003/fido-client-to-authenticator-protocol-v2.2-rd-20241003.html#error-responses
 /// </para>
 /// </remarks>
 public enum CtapStatus : byte
@@ -203,12 +210,23 @@ public enum CtapStatus : byte
     /// <summary>
     /// A pinUvAuthToken is required for the selected operation.
     /// </summary>
-    PuvathRequired = 0x36,
+    PuatRequired = 0x36,
+
+    /// <summary>
+    /// A pinUvAuthToken is required for the selected operation.
+    /// </summary>
+    [Obsolete("Use PuatRequired instead.", false)]
+    PuvathRequired = PuatRequired,
 
     /// <summary>
     /// PIN policy violation. Currently only enforces minimum length.
     /// </summary>
     PinPolicyViolation = 0x37,
+
+    /// <summary>
+    /// The pinUvAuthToken has expired.
+    /// </summary>
+    PinTokenExpired = 0x38,
 
     /// <summary>
     /// Authenticator cannot handle this request due to memory constraints.

@@ -53,6 +53,35 @@ public class DeviceInfoReaderTests
     }
 
     [Fact]
+    public async Task ReadAsync_SmartCardMoreDataCountOnFirstPage_ReadsRemainingPagesWithoutRepeatedMoreDataTag()
+    {
+        var protocol = new FakeSmartCardProtocol(
+            BuildPage(new Tlv(0x10, [0x02])),
+            BuildPage(new Tlv(0x1F, [0x00])),
+            BuildPage(CreateRequiredDeviceInfoTlvs()));
+
+        var info = await DeviceInfoReader.ReadAsync(protocol, null, TestContext.Current.CancellationToken);
+
+        Assert.Equal([0, 1, 2], protocol.RequestedPages);
+        Assert.Equal(0x01020304, info.SerialNumber);
+        Assert.Equal(new FirmwareVersion(5, 7, 2), info.FirmwareVersion);
+    }
+
+    [Fact]
+    public async Task ReadAsync_SmartCardMoreDataCountZero_StopsAfterCurrentPage()
+    {
+        var protocol = new FakeSmartCardProtocol(
+            BuildPage([.. CreateRequiredDeviceInfoTlvs(), new Tlv(0x10, [0x00])]),
+            BuildPage(new Tlv(0x0A, [0x00])));
+
+        var info = await DeviceInfoReader.ReadAsync(protocol, null, TestContext.Current.CancellationToken);
+
+        Assert.Equal([0], protocol.RequestedPages);
+        Assert.Equal(0x01020304, info.SerialNumber);
+        Assert.Equal(new FirmwareVersion(5, 7, 2), info.FirmwareVersion);
+    }
+
+    [Fact]
     public async Task ReadAsync_SmartCardInvalidPageLength_ThrowsPageAwareBadResponse()
     {
         var protocol = new FakeSmartCardProtocol([0x02, 0x01]);
@@ -78,6 +107,21 @@ public class DeviceInfoReaderTests
     }
 
     [Fact]
+    public async Task ReadAsync_FidoMoreDataCount_ReadsRemainingPages()
+    {
+        var protocol = new FakeFidoHidProtocol(
+            BuildPage(new Tlv(0x10, [0x02])),
+            BuildPage(new Tlv(0x1F, [0x00])),
+            BuildPage(CreateRequiredDeviceInfoTlvs()));
+
+        var info = await DeviceInfoReader.ReadAsync(protocol, null, TestContext.Current.CancellationToken);
+
+        Assert.Equal([0, 1, 2], protocol.RequestedPages);
+        Assert.Equal(0x01020304, info.SerialNumber);
+        Assert.Equal(new FirmwareVersion(5, 7, 2), info.FirmwareVersion);
+    }
+
+    [Fact]
     public async Task ReadAsync_OtpSinglePage_ParsesDeviceInfo()
     {
         var frame = BuildOtpFrame(BuildPage(CreateRequiredDeviceInfoTlvs()));
@@ -85,6 +129,22 @@ public class DeviceInfoReaderTests
 
         var info = await DeviceInfoReader.ReadAsync(protocol, null, TestContext.Current.CancellationToken);
 
+        Assert.Equal(0x01020304, info.SerialNumber);
+        Assert.Equal(new FirmwareVersion(5, 7, 2), info.FirmwareVersion);
+        Assert.Equal([0], protocol.RequestedPages);
+    }
+
+    [Fact]
+    public async Task ReadAsync_OtpMoreDataCount_ReadsRemainingPages()
+    {
+        var protocol = new FakeOtpHidProtocol(
+            BuildOtpFrame(BuildPage(new Tlv(0x10, [0x02]))),
+            BuildOtpFrame(BuildPage(new Tlv(0x1F, [0x00]))),
+            BuildOtpFrame(BuildPage(CreateRequiredDeviceInfoTlvs())));
+
+        var info = await DeviceInfoReader.ReadAsync(protocol, null, TestContext.Current.CancellationToken);
+
+        Assert.Equal([0, 1, 2], protocol.RequestedPages);
         Assert.Equal(0x01020304, info.SerialNumber);
         Assert.Equal(new FirmwareVersion(5, 7, 2), info.FirmwareVersion);
     }
@@ -232,13 +292,18 @@ public class DeviceInfoReaderTests
     {
         private readonly Queue<byte[]> _frames = new(frames);
 
+        public List<byte> RequestedPages { get; } = [];
+
         public FirmwareVersion? FirmwareVersion => null;
 
         public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
             byte slot,
             ReadOnlyMemory<byte> data,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult<ReadOnlyMemory<byte>>(_frames.Dequeue());
+            CancellationToken cancellationToken = default)
+        {
+            RequestedPages.Add(data.Length == 0 ? (byte)0 : data.Span[0]);
+            return Task.FromResult<ReadOnlyMemory<byte>>(_frames.Dequeue());
+        }
 
         public Task<ReadOnlyMemory<byte>> ReadStatusAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();

@@ -308,7 +308,7 @@ public class FidoMakeCredentialTests
                 // PinUvAuthProtocol = null
             };
 
-            // Act & Assert: Expect CtapException with PuvathRequired or PinAuthInvalid
+            // Act & Assert: Expect CtapException with PuatRequired or PinAuthInvalid
             var ctapEx = await Assert.ThrowsAsync<CtapException>(async () =>
             {
                 await session.MakeCredentialAsync(
@@ -320,13 +320,13 @@ public class FidoMakeCredentialTests
             });
 
             // Different firmware versions may return different status codes:
-            // - PuvathRequired (0x36): Standard CTAP2 response when pinUvAuthToken is needed
+            // - PuatRequired (0x36): Standard CTAP2 response when pinUvAuthToken is needed
             // - PinInvalid (0x31): Some firmware versions return this when PIN auth is missing
             // - PinAuthInvalid (0x33): Alternative error when pinUvAuthParam is absent
             // - MissingParameter (0x14): Another possible response when required param is missing
             Assert.True(
-                ctapEx.Status is CtapStatus.PuvathRequired or CtapStatus.PinInvalid or CtapStatus.PinAuthInvalid or CtapStatus.MissingParameter,
-                $"Expected PuvathRequired/PinInvalid/PinAuthInvalid/MissingParameter, got {ctapEx.Status}");
+                ctapEx.Status is CtapStatus.PuatRequired or CtapStatus.PinInvalid or CtapStatus.PinAuthInvalid or CtapStatus.MissingParameter,
+                $"Expected PuatRequired/PinInvalid/PinAuthInvalid/MissingParameter, got {ctapEx.Status}");
         });
 
     private static async Task CleanupCredentialAsync(FidoSession session, byte[] credentialId)

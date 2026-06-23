@@ -203,12 +203,23 @@ public enum CtapStatus : byte
     /// <summary>
     /// A pinUvAuthToken is required for the selected operation.
     /// </summary>
-    PuvathRequired = 0x36,
+    PuatRequired = 0x36,
+
+    /// <summary>
+    /// A pinUvAuthToken is required for the selected operation.
+    /// </summary>
+    [Obsolete("Use PuatRequired instead.", false)]
+    PuvathRequired = PuatRequired,
 
     /// <summary>
     /// PIN policy violation. Currently only enforces minimum length.
     /// </summary>
     PinPolicyViolation = 0x37,
+
+    /// <summary>
+    /// The pinUvAuthToken has expired.
+    /// </summary>
+    PinTokenExpired = 0x38,
 
     /// <summary>
     /// Authenticator cannot handle this request due to memory constraints.

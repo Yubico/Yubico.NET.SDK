@@ -20,6 +20,9 @@ namespace Yubico.YubiKit.Core.Native.Windows.HidD;
 internal sealed class HidDDevice : IHidDDevice
 {
     private const int ErrorAccessDenied = 5;
+    private const string WindowsHidAccessDeniedGuidance =
+        "Windows denied access to the HID interface. The interface may be held exclusively by another process, " +
+        "or this environment may require running the process elevated as Administrator to open YubiKey HID reports.";
     private SafeFileHandle _handle;
     private bool _disposed;
 
@@ -152,7 +155,10 @@ internal sealed class HidDDevice : IHidDDevice
         {
             var error = Marshal.GetLastWin32Error();
             if (error == ErrorAccessDenied)
-                throw new UnauthorizedAccessException($"Access denied opening HID device '{DevicePath}'.");
+            {
+                throw new UnauthorizedAccessException(
+                    $"Access denied opening HID device '{DevicePath}'. {WindowsHidAccessDeniedGuidance}");
+            }
 
             throw new PlatformApiException(nameof(Kernel32.NativeMethods.CreateFile), error,
                 $"Failed to open HID device '{DevicePath}'.");
@@ -211,7 +217,7 @@ internal sealed class HidDDevice : IHidDDevice
     {
         var error = Marshal.GetLastWin32Error();
         if (error == ErrorAccessDenied)
-            throw new UnauthorizedAccessException(message);
+            throw new UnauthorizedAccessException($"{message} {WindowsHidAccessDeniedGuidance}");
 
         throw new PlatformApiException(source, error, message);
     }

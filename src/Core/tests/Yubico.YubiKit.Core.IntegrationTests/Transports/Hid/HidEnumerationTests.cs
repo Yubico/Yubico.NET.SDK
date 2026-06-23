@@ -48,6 +48,14 @@ public class HidEnumerationTests
                             $"Usage={device.DescriptorInfo.Usage:X4} UsagePage={device.DescriptorInfo.UsagePage:X4}");
         }
 
+        if (OperatingSystem.IsWindows())
+        {
+            _output.WriteLine(
+                "Windows HID enumeration reads interface metadata without opening report handles. " +
+                "Access denied failures while opening HID reports usually mean the test host must run elevated as Administrator, " +
+                "or another process is holding the HID interface exclusively.");
+        }
+
         Assert.True(devices.Count >= 0, "Should not fail even if no devices present");
     }
 

@@ -19,6 +19,7 @@ using Xunit;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
+using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 
@@ -221,6 +222,58 @@ public class WebAuthnClientGetAssertionTests
     }
 
     [Fact]
+    public async Task GetAssertion_PuvathRequired_RetriesWithUserVerificationRequired()
+    {
+        // Arrange
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(CreateMockAuthenticatorInfo(clientPinSet: true));
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
+
+        var credentialId = RandomNumberGenerator.GetBytes(32);
+        var options = new AuthenticationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = "example.com"
+        };
+
+        var requests = new List<BackendGetAssertionRequest>();
+        var callCount = 0;
+        _mockBackend.GetAssertionAsync(
+            Arg.Do<BackendGetAssertionRequest>(r => requests.Add(r)),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                callCount++;
+                if (callCount == 1)
+                {
+                    throw new CtapException(CtapStatus.PuvathRequired);
+                }
+
+                return CreateMockGetAssertionResponse(credentialId);
+            });
+
+        // Act
+        var result = await _client.GetAssertionAsync(options, "123456", useUv: false, CancellationToken.None);
+
+        // Assert
+        Assert.Single(result);
+        Assert.Equal(2, requests.Count);
+        Assert.Null(requests[0].Options);
+        Assert.NotNull(requests[1].Options);
+        Assert.True(requests[1].Options!.TryGetValue("uv", out var uv) && uv);
+        Assert.NotNull(requests[1].PinUvAuthParam);
+        Assert.Equal((byte)2, requests[1].PinUvAuthProtocol.GetValueOrDefault());
+    }
+
+    [Fact]
     public async Task GetAssertion_EmptyAllowList_OnAuthenticatorWithoutDiscoverable_ReturnsEmpty()
     {
         // Arrange
@@ -357,12 +410,12 @@ public class WebAuthnClientGetAssertionTests
         return writer.Encode();
     }
 
-    private static AuthenticatorInfo CreateMockAuthenticatorInfo()
+    private static AuthenticatorInfo CreateMockAuthenticatorInfo(bool clientPinSet = false, bool uvSupported = false)
     {
         // Create minimal authenticatorInfo CBOR for testing
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
-        writer.WriteStartMap(3);
+        writer.WriteStartMap(clientPinSet || uvSupported ? 4 : 3);
 
         // 0x01: versions
         writer.WriteInt32(1);
@@ -381,9 +434,50 @@ public class WebAuthnClientGetAssertionTests
         writer.WriteInt32(3);
         writer.WriteByteString(Guid.NewGuid().ToByteArray());
 
+        if (clientPinSet || uvSupported)
+        {
+            writer.WriteInt32(4);
+            writer.WriteStartMap((clientPinSet ? 1 : 0) + (uvSupported ? 1 : 0));
+            if (clientPinSet)
+            {
+                writer.WriteTextString("clientPin");
+                writer.WriteBoolean(true);
+            }
+
+            if (uvSupported)
+            {
+                writer.WriteTextString("uv");
+                writer.WriteBoolean(true);
+            }
+
+            writer.WriteEndMap();
+        }
+
         writer.WriteEndMap();
 
         return AuthenticatorInfo.Decode(writer.Encode());
+    }
+
+    private sealed class TestPinUvAuthProtocol : IPinUvAuthProtocol
+    {
+        public int Version => 2;
+        public int AuthenticationTagLength => 16;
+
+        public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message) => new byte[16];
+
+        public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext) => throw new NotImplementedException();
+
+        public void Dispose() { }
+
+        public (Dictionary<int, object?> KeyAgreement, byte[] SharedSecret) Encapsulate(
+            IReadOnlyDictionary<int, object?> peerCoseKey) => throw new NotImplementedException();
+
+        public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext) => throw new NotImplementedException();
+
+        public byte[] Kdf(ReadOnlySpan<byte> z) => throw new NotImplementedException();
+
+        public bool Verify(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message, ReadOnlySpan<byte> signature) =>
+            throw new NotImplementedException();
     }
 
     [Fact(Timeout = 5000)]

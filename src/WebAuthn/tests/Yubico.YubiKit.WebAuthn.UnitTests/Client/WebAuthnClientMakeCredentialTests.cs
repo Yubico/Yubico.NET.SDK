@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using System.Formats.Cbor;
 using System.Security.Cryptography;
 using Xunit;
@@ -225,6 +226,123 @@ public class WebAuthnClientMakeCredentialTests
     }
 
     [Fact]
+    public async Task MakeCredential_PuvathRequired_RetriesWithUserVerificationRequired()
+    {
+        // Arrange
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(CreateMockAuthenticatorInfo(clientPinSet: true));
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            Arg.Any<PinUvAuthTokenPermissions>(),
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
+
+        var options = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)]
+        };
+
+        var requests = new List<BackendMakeCredentialRequest>();
+        var callCount = 0;
+        _mockBackend.MakeCredentialAsync(
+            Arg.Do<BackendMakeCredentialRequest>(r => requests.Add(r)),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                callCount++;
+                if (callCount == 1)
+                {
+                    throw new CtapException(CtapStatus.PuvathRequired);
+                }
+
+                return CreateMockResponse();
+            });
+
+        // Act
+        await _client.MakeCredentialAsync(options, "123456", useUv: false, CancellationToken.None);
+
+        // Assert
+        Assert.Equal(2, requests.Count);
+        Assert.Null(requests[0].Options);
+        Assert.NotNull(requests[1].Options);
+        Assert.True(requests[1].Options!.TryGetValue("uv", out var uv) && uv);
+        Assert.NotNull(requests[1].PinUvAuthParam);
+        Assert.Equal((byte)2, requests[1].PinUvAuthProtocol.GetValueOrDefault());
+    }
+
+    [Fact]
+    public async Task MakeCredential_PuvathRequired_WithExcludeList_RetriesWithGetAssertionPermissionForPreflight()
+    {
+        // Arrange
+        var tokenPermissions = new List<PinUvAuthTokenPermissions>();
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(CreateMockAuthenticatorInfo(clientPinSet: true));
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            Arg.Do<PinUvAuthTokenPermissions>(p => tokenPermissions.Add(p)),
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Throws(new CtapException(CtapStatus.NoCredentials));
+
+        var options = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)],
+            ExcludeCredentials = [new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32))]
+        };
+
+        var callCount = 0;
+        _mockBackend.MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                callCount++;
+                if (callCount == 1)
+                {
+                    throw new CtapException(CtapStatus.PuvathRequired);
+                }
+
+                return CreateMockResponse();
+            });
+
+        // Act
+        await _client.MakeCredentialAsync(options, "123456", useUv: false, CancellationToken.None);
+
+        // Assert
+        Assert.Equal(4, tokenPermissions.Count);
+        Assert.Equal(
+            PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion,
+            tokenPermissions[0]);
+        Assert.Equal(PinUvAuthTokenPermissions.MakeCredential, tokenPermissions[1]);
+        Assert.Equal(
+            PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion,
+            tokenPermissions[2]);
+        Assert.Equal(PinUvAuthTokenPermissions.MakeCredential, tokenPermissions[3]);
+        await _mockBackend.Received(2).GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task MakeCredential_BackendDisposed_OnClientDisposeAsync()
     {
         // Arrange
@@ -330,12 +448,12 @@ public class WebAuthnClientMakeCredentialTests
         return writer.Encode();
     }
 
-    private static AuthenticatorInfo CreateMockAuthenticatorInfo()
+    private static AuthenticatorInfo CreateMockAuthenticatorInfo(bool clientPinSet = false, bool uvSupported = false)
     {
         // Create minimal authenticatorInfo CBOR for testing
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
-        writer.WriteStartMap(3);
+        writer.WriteStartMap(clientPinSet || uvSupported ? 4 : 3);
 
         // 0x01: versions
         writer.WriteInt32(1);
@@ -354,9 +472,50 @@ public class WebAuthnClientMakeCredentialTests
         writer.WriteInt32(3);
         writer.WriteByteString(Guid.NewGuid().ToByteArray());
 
+        if (clientPinSet || uvSupported)
+        {
+            writer.WriteInt32(4);
+            writer.WriteStartMap((clientPinSet ? 1 : 0) + (uvSupported ? 1 : 0));
+            if (clientPinSet)
+            {
+                writer.WriteTextString("clientPin");
+                writer.WriteBoolean(true);
+            }
+
+            if (uvSupported)
+            {
+                writer.WriteTextString("uv");
+                writer.WriteBoolean(true);
+            }
+
+            writer.WriteEndMap();
+        }
+
         writer.WriteEndMap();
 
         return AuthenticatorInfo.Decode(writer.Encode());
+    }
+
+    private sealed class TestPinUvAuthProtocol : IPinUvAuthProtocol
+    {
+        public int Version => 2;
+        public int AuthenticationTagLength => 16;
+
+        public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message) => new byte[16];
+
+        public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext) => throw new NotImplementedException();
+
+        public void Dispose() { }
+
+        public (Dictionary<int, object?> KeyAgreement, byte[] SharedSecret) Encapsulate(
+            IReadOnlyDictionary<int, object?> peerCoseKey) => throw new NotImplementedException();
+
+        public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext) => throw new NotImplementedException();
+
+        public byte[] Kdf(ReadOnlySpan<byte> z) => throw new NotImplementedException();
+
+        public bool Verify(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message, ReadOnlySpan<byte> signature) =>
+            throw new NotImplementedException();
     }
 
     private static byte[] EncodeAaguidBigEndian(Guid guid)

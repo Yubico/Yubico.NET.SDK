@@ -17,6 +17,7 @@ using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
+using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.WebAuthn.Internal;
 
@@ -99,48 +100,55 @@ internal static class ExcludeListPreflight
         // Compute pinUvAuthParam for GetAssertion (Java line 889)
         byte[] pinUvAuthParam = protocol.Authenticate(pinUvAuthToken.Span, dummyClientDataHash);
 
-        // Chunk the list and probe each chunk
-        int offset = 0;
-        while (offset < excludeCredentials.Count)
+        try
         {
-            int chunkSize = Math.Min(maxCreds, excludeCredentials.Count - offset);
-            var chunk = excludeCredentials.Skip(offset).Take(chunkSize).ToList();
-
-            try
+            // Chunk the list and probe each chunk
+            int offset = 0;
+            while (offset < excludeCredentials.Count)
             {
-                // Build GetAssertion request with up=false (Java line 899-907)
-                var request = new BackendGetAssertionRequest
-                {
-                    ClientDataHash = dummyClientDataHash,
-                    RpId = rpId,
-                    AllowList = chunk,
-                    Options = new Dictionary<string, bool> { ["up"] = false },
-                    PinUvAuthParam = pinUvAuthParam,
-                    PinUvAuthProtocol = (byte)protocol.Version
-                };
+                int chunkSize = Math.Min(maxCreds, excludeCredentials.Count - offset);
+                var chunk = excludeCredentials.Skip(offset).Take(chunkSize).ToList();
 
-                var response = await backend.GetAssertionAsync(request, progress: null, cancellationToken);
-
-                // Match found - return the credential that matched
-                // Java lines 909-916: if chunk.size == 1, return chunk[0]; else extract from response.credentialId
-                if (chunk.Count == 1)
+                try
                 {
-                    return chunk[0];
+                    // Build GetAssertion request with up=false (Java line 899-907)
+                    var request = new BackendGetAssertionRequest
+                    {
+                        ClientDataHash = dummyClientDataHash,
+                        RpId = rpId,
+                        AllowList = chunk,
+                        Options = new Dictionary<string, bool> { ["up"] = false },
+                        PinUvAuthParam = pinUvAuthParam,
+                        PinUvAuthProtocol = (byte)protocol.Version
+                    };
+
+                    var response = await backend.GetAssertionAsync(request, progress: null, cancellationToken);
+
+                    // Match found - return the credential that matched
+                    // Java lines 909-916: if chunk.size == 1, return chunk[0]; else extract from response.credentialId
+                    if (chunk.Count == 1)
+                    {
+                        return chunk[0];
+                    }
+
+                    // Multiple creds in chunk - identify which one matched from response
+                    var matchedId = response.GetCredentialId();
+                    return chunk.FirstOrDefault(desc => desc.Id.Span.SequenceEqual(matchedId.Span));
                 }
+                catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
+                {
+                    // No match in this chunk - continue to next (Java line 920-923)
+                    offset += chunkSize;
+                }
+                // Other CtapExceptions propagate (Java line 933 "throw ctapException")
+            }
 
-                // Multiple creds in chunk - identify which one matched from response
-                var matchedId = response.GetCredentialId();
-                return chunk.FirstOrDefault(desc => desc.Id.Span.SequenceEqual(matchedId.Span));
-            }
-            catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
-            {
-                // No match in this chunk - continue to next (Java line 920-923)
-                offset += chunkSize;
-            }
-            // Other CtapExceptions propagate (Java line 933 "throw ctapException")
+            // No match found in any chunk
+            return null;
         }
-
-        // No match found in any chunk
-        return null;
+        finally
+        {
+            CryptographicOperations.ZeroMemory(pinUvAuthParam);
+        }
     }
 }

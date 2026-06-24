@@ -22,6 +22,7 @@ using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
+using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 
@@ -38,7 +39,7 @@ public class WebAuthnClientGetAssertionTests
             throw new InvalidOperationException("Failed to parse origin");
 
         // Setup default mock responses
-        var mockInfo = CreateMockAuthenticatorInfo();
+        var mockInfo = MockFido2Responses.CreateMockAuthenticatorInfo();
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(mockInfo);
 
@@ -222,11 +223,11 @@ public class WebAuthnClientGetAssertionTests
     }
 
     [Fact]
-    public async Task GetAssertion_PuvathRequired_RetriesWithUserVerificationRequired()
+    public async Task GetAssertion_PuatRequired_RetriesWithUserVerificationRequired()
     {
         // Arrange
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(CreateMockAuthenticatorInfo(clientPinSet: true));
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
         _mockBackend.GetPinUvTokenAsync(
             PinUvAuthMethod.Pin,
             PinUvAuthTokenPermissions.GetAssertion,
@@ -254,7 +255,7 @@ public class WebAuthnClientGetAssertionTests
                 callCount++;
                 if (callCount == 1)
                 {
-                    throw new CtapException(CtapStatus.PuvathRequired);
+                    throw new CtapException(CtapStatus.PuatRequired);
                 }
 
                 return CreateMockGetAssertionResponse(credentialId);
@@ -271,6 +272,46 @@ public class WebAuthnClientGetAssertionTests
         Assert.True(requests[1].Options!.TryGetValue("uv", out var uv) && uv);
         Assert.NotNull(requests[1].PinUvAuthParam);
         Assert.Equal((byte)2, requests[1].PinUvAuthProtocol.GetValueOrDefault());
+    }
+
+    [Fact]
+    public async Task GetAssertion_PuatRequiredThenNoCredentials_ReturnsEmptyList()
+    {
+        // Arrange
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
+
+        var options = new AuthenticationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = "example.com"
+        };
+
+        var callCount = 0;
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns<GetAssertionResponse>(_ =>
+            {
+                callCount++;
+                throw new CtapException(callCount == 1 ? CtapStatus.PuatRequired : CtapStatus.NoCredentials);
+            });
+
+        // Act
+        var result = await _client.GetAssertionAsync(options, "123456", useUv: false, CancellationToken.None);
+
+        // Assert
+        Assert.Empty(result);
+        Assert.Equal(2, callCount);
     }
 
     [Fact]
@@ -408,76 +449,6 @@ public class WebAuthnClientGetAssertionTests
         writer.WriteEndMap();
 
         return writer.Encode();
-    }
-
-    private static AuthenticatorInfo CreateMockAuthenticatorInfo(bool clientPinSet = false, bool uvSupported = false)
-    {
-        // Create minimal authenticatorInfo CBOR for testing
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-
-        writer.WriteStartMap(clientPinSet || uvSupported ? 4 : 3);
-
-        // 0x01: versions
-        writer.WriteInt32(1);
-        writer.WriteStartArray(2);
-        writer.WriteTextString("FIDO_2_0");
-        writer.WriteTextString("FIDO_2_1");
-        writer.WriteEndArray();
-
-        // 0x02: extensions
-        writer.WriteInt32(2);
-        writer.WriteStartArray(1);
-        writer.WriteTextString("hmac-secret");
-        writer.WriteEndArray();
-
-        // 0x03: aaguid
-        writer.WriteInt32(3);
-        writer.WriteByteString(Guid.NewGuid().ToByteArray());
-
-        if (clientPinSet || uvSupported)
-        {
-            writer.WriteInt32(4);
-            writer.WriteStartMap((clientPinSet ? 1 : 0) + (uvSupported ? 1 : 0));
-            if (clientPinSet)
-            {
-                writer.WriteTextString("clientPin");
-                writer.WriteBoolean(true);
-            }
-
-            if (uvSupported)
-            {
-                writer.WriteTextString("uv");
-                writer.WriteBoolean(true);
-            }
-
-            writer.WriteEndMap();
-        }
-
-        writer.WriteEndMap();
-
-        return AuthenticatorInfo.Decode(writer.Encode());
-    }
-
-    private sealed class TestPinUvAuthProtocol : IPinUvAuthProtocol
-    {
-        public int Version => 2;
-        public int AuthenticationTagLength => 16;
-
-        public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message) => new byte[16];
-
-        public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext) => throw new NotImplementedException();
-
-        public void Dispose() { }
-
-        public (Dictionary<int, object?> KeyAgreement, byte[] SharedSecret) Encapsulate(
-            IReadOnlyDictionary<int, object?> peerCoseKey) => throw new NotImplementedException();
-
-        public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext) => throw new NotImplementedException();
-
-        public byte[] Kdf(ReadOnlySpan<byte> z) => throw new NotImplementedException();
-
-        public bool Verify(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message, ReadOnlySpan<byte> signature) =>
-            throw new NotImplementedException();
     }
 
     [Fact(Timeout = 5000)]

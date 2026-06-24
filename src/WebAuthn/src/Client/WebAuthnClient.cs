@@ -14,6 +14,7 @@
 
 using System.Buffers;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Cryptography.Cose;
@@ -481,86 +482,23 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
         try
         {
-            // Handle token acquisition if needed
-            if (uvDecision.UseToken)
-            {
-                // Request PIN from consumer if needed
-                if (uvDecision.Method == PinUvAuthMethod.Pin && channel is not null)
-                {
-                    var (pinStatus, pinResponseTask) = channel.CreatePinRequest();
-                    await channel.WriteAsync(pinStatus, cancellationToken).ConfigureAwait(false);
-
-                    var response = await pinResponseTask.ConfigureAwait(false);
-                    if (response is null)
-                    {
-                        throw new WebAuthnClientError(
-                            WebAuthnClientErrorCode.NotAllowed,
-                            "PIN required but cancelled");
-                    }
-
-                    // Copy to secure buffer
-                    pinOwner = MemoryPool<byte>.Shared.Rent(response.Value.Length);
-                    response.Value.Span.CopyTo(pinOwner.Memory.Span);
-                    pinBytes = pinOwner.Memory[..response.Value.Length];
-                }
-
-                tokenSession = await AcquirePinUvTokenWithRetryAsync(
-                    uvDecision.Method!.Value,
-                    uvDecision.Permissions,
-                    options.Rp.Id,
-                    pinBytes,
-                    cancellationToken).ConfigureAwait(false);
-            }
+            (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
+                uvDecision,
+                options.Rp.Id,
+                channel,
+                pinOwner,
+                pinBytes,
+                cancellationToken).ConfigureAwait(false);
 
             // Pre-flight excludeList when non-empty (mirroring yubikit-android Ctap2Client.filterCreds)
             PublicKeyCredentialDescriptor? matchedExclude = null;
-            if (options.ExcludeCredentials is not null && options.ExcludeCredentials.Count > 0 && tokenSession is not null)
-            {
-                // ToArray() creates a copy; pre-flight needs to pass token across async boundary
-                var tokenCopy = tokenSession.Token.ToArray();
-                try
-                {
-                    matchedExclude = await Internal.ExcludeListPreflight.FindFirstMatchAsync(
-                        _backend,
-                        options.Rp.Id,
-                        options.ExcludeCredentials,
-                        info,
-                        tokenCopy,
-                        tokenSession.Protocol,
-                        cancellationToken).ConfigureAwait(false);
-                }
-                catch (CtapException preflightEx)
-                {
-                    // Pre-flight failed (e.g., authenticator does not support up=false probes,
-                    // or returned an unexpected status). Fall back: pass the full exclude list
-                    // and surface a typed error if the device then rejects with CredentialExcluded
-                    // or similar. We attach the pre-flight cause to the diagnostic surface.
-                    throw new WebAuthnClientError(
-                        WebAuthnClientErrorCode.Unknown,
-                        $"Pre-flight excludeList probe failed (device returned {preflightEx.Status}). " +
-                        "This authenticator may not support silent excludeList probing.",
-                        preflightEx);
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(tokenCopy);
-                }
-
-                // Re-mint the pinUvAuthToken between pre-flight and MakeCredential.
-                // CTAP 2.1 §6.5.5.7: authenticators MAY consume permissions on use. On
-                // YubiKey 5.8.0, the pre-flight's GetAssertion(up=false) consumes the
-                // GetAssertion permission and the same token can no longer authorize a
-                // subsequent MakeCredential — the device returns PinAuthInvalid.
-                // Mint a fresh token scoped to MakeCredential only for the actual ceremony.
-                tokenSession.Dispose();
-                tokenSession = null; // explicit torn-state guard — outer finally is a no-op until reassigned
-                tokenSession = await AcquirePinUvTokenWithRetryAsync(
-                    uvDecision.Method!.Value,
-                    PinUvAuthTokenPermissions.MakeCredential,
-                    options.Rp.Id,
-                    pinBytes,
-                    cancellationToken).ConfigureAwait(false);
-            }
+            (matchedExclude, tokenSession) = await PreflightExcludeListAndRemintAsync(
+                options,
+                info,
+                uvDecision,
+                tokenSession,
+                pinBytes,
+                cancellationToken).ConfigureAwait(false);
 
             // Build backend request with filtered exclude list
             var request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude);
@@ -569,8 +507,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
             MakeCredentialResponse ctapResponse;
             try
             {
-                ctapResponse = await _backend.MakeCredentialAsync(request, progress: null, cancellationToken)
-                    .ConfigureAwait(false);
+                ctapResponse = await ExecuteMakeCredentialAsync(request, cancellationToken).ConfigureAwait(false);
             }
             catch (CtapException ex) when (ShouldRetryWithRequiredUv(ex, options.UserVerification))
             {
@@ -583,76 +520,26 @@ public sealed class WebAuthnClient : IAsyncDisposable
                     pinAvailable: channel is not null,
                     requestedPermissions: PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion);
 
-                if (uvDecision.UseToken)
-                {
-                    if (uvDecision.Method == PinUvAuthMethod.Pin && pinBytes is null && channel is not null)
-                    {
-                        var (pinStatus, pinResponseTask) = channel.CreatePinRequest();
-                        await channel.WriteAsync(pinStatus, cancellationToken).ConfigureAwait(false);
+                (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
+                    uvDecision,
+                    options.Rp.Id,
+                    channel,
+                    pinOwner,
+                    pinBytes,
+                    cancellationToken).ConfigureAwait(false);
 
-                        var response = await pinResponseTask.ConfigureAwait(false);
-                        if (response is null)
-                        {
-                            throw new WebAuthnClientError(
-                                WebAuthnClientErrorCode.NotAllowed,
-                                "PIN required but cancelled");
-                        }
-
-                        pinOwner = MemoryPool<byte>.Shared.Rent(response.Value.Length);
-                        response.Value.Span.CopyTo(pinOwner.Memory.Span);
-                        pinBytes = pinOwner.Memory[..response.Value.Length];
-                    }
-
-                    tokenSession = await AcquirePinUvTokenWithRetryAsync(
-                        uvDecision.Method!.Value,
-                        uvDecision.Permissions,
-                        options.Rp.Id,
-                        pinBytes,
-                        cancellationToken).ConfigureAwait(false);
-                }
-
-                if (options.ExcludeCredentials is not null && options.ExcludeCredentials.Count > 0 && tokenSession is not null)
-                {
-                    var tokenCopy = tokenSession.Token.ToArray();
-                    try
-                    {
-                        matchedExclude = await Internal.ExcludeListPreflight.FindFirstMatchAsync(
-                            _backend,
-                            options.Rp.Id,
-                            options.ExcludeCredentials,
-                            info,
-                            tokenCopy,
-                            tokenSession.Protocol,
-                            cancellationToken).ConfigureAwait(false);
-                    }
-                    catch (CtapException preflightEx)
-                    {
-                        throw new WebAuthnClientError(
-                            WebAuthnClientErrorCode.Unknown,
-                            $"Pre-flight excludeList probe failed (device returned {preflightEx.Status}). " +
-                            "This authenticator may not support silent excludeList probing.",
-                            preflightEx);
-                    }
-                    finally
-                    {
-                        CryptographicOperations.ZeroMemory(tokenCopy);
-                    }
-
-                    tokenSession.Dispose();
-                    tokenSession = null;
-                    tokenSession = await AcquirePinUvTokenWithRetryAsync(
-                        uvDecision.Method!.Value,
-                        PinUvAuthTokenPermissions.MakeCredential,
-                        options.Rp.Id,
-                        pinBytes,
-                        cancellationToken).ConfigureAwait(false);
-                }
+                (matchedExclude, tokenSession) = await PreflightExcludeListAndRemintAsync(
+                    options,
+                    info,
+                    uvDecision,
+                    tokenSession,
+                    pinBytes,
+                    cancellationToken).ConfigureAwait(false);
 
                 request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude);
                 try
                 {
-                    ctapResponse = await _backend.MakeCredentialAsync(request, progress: null, cancellationToken)
-                        .ConfigureAwait(false);
+                    ctapResponse = await ExecuteMakeCredentialAsync(request, cancellationToken).ConfigureAwait(false);
                 }
                 catch (CtapException retryEx)
                 {
@@ -738,36 +625,13 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
         try
         {
-            // Handle token acquisition if needed
-            if (uvDecision.UseToken)
-            {
-                // Request PIN from consumer if needed
-                if (uvDecision.Method == PinUvAuthMethod.Pin && channel is not null)
-                {
-                    var (pinStatus, pinResponseTask) = channel.CreatePinRequest();
-                    await channel.WriteAsync(pinStatus, cancellationToken).ConfigureAwait(false);
-
-                    var response = await pinResponseTask.ConfigureAwait(false);
-                    if (response is null)
-                    {
-                        throw new WebAuthnClientError(
-                            WebAuthnClientErrorCode.NotAllowed,
-                            "PIN required but cancelled");
-                    }
-
-                    // Copy to secure buffer
-                    pinOwner = MemoryPool<byte>.Shared.Rent(response.Value.Length);
-                    response.Value.Span.CopyTo(pinOwner.Memory.Span);
-                    pinBytes = pinOwner.Memory[..response.Value.Length];
-                }
-
-                tokenSession = await AcquirePinUvTokenWithRetryAsync(
-                    uvDecision.Method!.Value,
-                    uvDecision.Permissions,
-                    options.RpId,
-                    pinBytes,
-                    cancellationToken).ConfigureAwait(false);
-            }
+            (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
+                uvDecision,
+                options.RpId,
+                channel,
+                pinOwner,
+                pinBytes,
+                cancellationToken).ConfigureAwait(false);
 
             // Build backend request
             var request = BuildGetAssertionRequest(options, clientData, tokenSession, uvDecision);
@@ -776,8 +640,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
             IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)> matches;
             try
             {
-                matches = await CredentialMatcher.MatchAsync(_backend, request, cancellationToken)
-                    .ConfigureAwait(false);
+                matches = await MatchCredentialsAsync(request, cancellationToken).ConfigureAwait(false);
             }
             catch (CtapException ex) when (ShouldRetryWithRequiredUv(ex, options.UserVerification))
             {
@@ -790,39 +653,18 @@ public sealed class WebAuthnClient : IAsyncDisposable
                     pinAvailable: channel is not null,
                     requestedPermissions: PinUvAuthTokenPermissions.GetAssertion);
 
-                if (uvDecision.UseToken)
-                {
-                    if (uvDecision.Method == PinUvAuthMethod.Pin && pinBytes is null && channel is not null)
-                    {
-                        var (pinStatus, pinResponseTask) = channel.CreatePinRequest();
-                        await channel.WriteAsync(pinStatus, cancellationToken).ConfigureAwait(false);
-
-                        var response = await pinResponseTask.ConfigureAwait(false);
-                        if (response is null)
-                        {
-                            throw new WebAuthnClientError(
-                                WebAuthnClientErrorCode.NotAllowed,
-                                "PIN required but cancelled");
-                        }
-
-                        pinOwner = MemoryPool<byte>.Shared.Rent(response.Value.Length);
-                        response.Value.Span.CopyTo(pinOwner.Memory.Span);
-                        pinBytes = pinOwner.Memory[..response.Value.Length];
-                    }
-
-                    tokenSession = await AcquirePinUvTokenWithRetryAsync(
-                        uvDecision.Method!.Value,
-                        uvDecision.Permissions,
-                        options.RpId,
-                        pinBytes,
-                        cancellationToken).ConfigureAwait(false);
-                }
+                (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
+                    uvDecision,
+                    options.RpId,
+                    channel,
+                    pinOwner,
+                    pinBytes,
+                    cancellationToken).ConfigureAwait(false);
 
                 request = BuildGetAssertionRequest(options, clientData, tokenSession, uvDecision);
                 try
                 {
-                    matches = await CredentialMatcher.MatchAsync(_backend, request, cancellationToken)
-                        .ConfigureAwait(false);
+                    matches = await MatchCredentialsAsync(request, cancellationToken).ConfigureAwait(false);
                 }
                 catch (CtapException retryEx)
                 {
@@ -918,21 +760,6 @@ public sealed class WebAuthnClient : IAsyncDisposable
     }
 
     /// <summary>
-    /// Acquires a PIN/UV auth token from the backend.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// On PinAuthInvalid, this method throws immediately without retrying.
-    /// The original Swift retry was for transient encryption-state mismatches
-    /// that no longer apply in our current PinUvAuthProtocolV2 implementation.
-    /// Retrying with identical PIN bytes would burn YubiKey PIN attempts on wrong-PIN scenarios.
-    /// </para>
-    /// <para>
-    /// Callers experiencing PinAuthInvalid should re-invoke MakeCredentialAsync/GetAssertionAsync
-    /// with fresh PIN bytes (after re-prompting the user).
-    /// </para>
-    /// </remarks>
-    /// <summary>
     /// Maps a raw <see cref="CtapException"/> to a typed <see cref="WebAuthnClientError"/> per
     /// the WebAuthn module rule that low-level CTAP status codes never escape the public API.
     /// CredentialExcluded and previewSign-specific statuses are handled by their own catch arms
@@ -986,9 +813,158 @@ public sealed class WebAuthnClient : IAsyncDisposable
     private static bool ShouldRetryWithRequiredUv(
         CtapException ex,
         Preferences.UserVerificationPreference userVerification) =>
-        ex.Status == CtapStatus.PuvathRequired &&
+        ex.Status == CtapStatus.PuatRequired &&
         userVerification != Preferences.UserVerificationPreference.Required;
 
+    private async Task<MakeCredentialResponse> ExecuteMakeCredentialAsync(
+        BackendMakeCredentialRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _backend.MakeCredentialAsync(request, progress: null, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            ZeroMemory(request.PinUvAuthParam);
+        }
+    }
+
+    private async Task<IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)>> MatchCredentialsAsync(
+        BackendGetAssertionRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await CredentialMatcher.MatchAsync(_backend, request, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            ZeroMemory(request.PinUvAuthParam);
+        }
+    }
+
+    private static void ZeroMemory(ReadOnlyMemory<byte>? memory)
+    {
+        if (memory is null || memory.Value.IsEmpty)
+        {
+            return;
+        }
+
+        if (MemoryMarshal.TryGetArray(memory.Value, out var segment) && segment.Array is not null)
+        {
+            CryptographicOperations.ZeroMemory(segment.AsSpan());
+        }
+    }
+
+    private async Task<(
+        PinUvAuthTokenSession? TokenSession,
+        IMemoryOwner<byte>? PinOwner,
+        ReadOnlyMemory<byte>? PinBytes)> AcquireTokenForDecisionAsync<T>(
+        UvDecision uvDecision,
+        string rpId,
+        StatusChannel<T>? channel,
+        IMemoryOwner<byte>? pinOwner,
+        ReadOnlyMemory<byte>? pinBytes,
+        CancellationToken cancellationToken)
+    {
+        if (!uvDecision.UseToken)
+        {
+            return (null, pinOwner, pinBytes);
+        }
+
+        if (uvDecision.Method == PinUvAuthMethod.Pin && pinBytes is null && channel is not null)
+        {
+            var (pinStatus, pinResponseTask) = channel.CreatePinRequest();
+            await channel.WriteAsync(pinStatus, cancellationToken).ConfigureAwait(false);
+
+            var response = await pinResponseTask.ConfigureAwait(false);
+            if (response is null)
+            {
+                throw new WebAuthnClientError(
+                    WebAuthnClientErrorCode.NotAllowed,
+                    "PIN required but cancelled");
+            }
+
+            pinOwner = MemoryPool<byte>.Shared.Rent(response.Value.Length);
+            response.Value.Span.CopyTo(pinOwner.Memory.Span);
+            pinBytes = pinOwner.Memory[..response.Value.Length];
+        }
+
+        var tokenSession = await AcquirePinUvTokenWithRetryAsync(
+            uvDecision.Method!.Value,
+            uvDecision.Permissions,
+            rpId,
+            pinBytes,
+            cancellationToken).ConfigureAwait(false);
+
+        return (tokenSession, pinOwner, pinBytes);
+    }
+
+    private async Task<(PublicKeyCredentialDescriptor? MatchedExclude, PinUvAuthTokenSession? TokenSession)> PreflightExcludeListAndRemintAsync(
+        RegistrationOptions options,
+        AuthenticatorInfo info,
+        UvDecision uvDecision,
+        PinUvAuthTokenSession? tokenSession,
+        ReadOnlyMemory<byte>? pinBytes,
+        CancellationToken cancellationToken)
+    {
+        if (options.ExcludeCredentials is null || options.ExcludeCredentials.Count == 0 || tokenSession is null)
+        {
+            return (null, tokenSession);
+        }
+
+        // ToArray() creates a copy; pre-flight needs to pass token across async boundary.
+        var tokenCopy = tokenSession.Token.ToArray();
+        try
+        {
+            var matchedExclude = await Internal.ExcludeListPreflight.FindFirstMatchAsync(
+                _backend,
+                options.Rp.Id,
+                options.ExcludeCredentials,
+                info,
+                tokenCopy,
+                tokenSession.Protocol,
+                cancellationToken).ConfigureAwait(false);
+
+            // Re-mint the pinUvAuthToken between pre-flight and MakeCredential.
+            // CTAP 2.1 §6.5.5.7: authenticators MAY consume permissions on use. On
+            // YubiKey 5.8.0, the pre-flight's GetAssertion(up=false) consumes the
+            // GetAssertion permission and the same token can no longer authorize a
+            // subsequent MakeCredential; the device returns PinAuthInvalid.
+            tokenSession.Dispose();
+            tokenSession = await AcquirePinUvTokenWithRetryAsync(
+                uvDecision.Method!.Value,
+                PinUvAuthTokenPermissions.MakeCredential,
+                options.Rp.Id,
+                pinBytes,
+                cancellationToken).ConfigureAwait(false);
+
+            return (matchedExclude, tokenSession);
+        }
+        catch (CtapException preflightEx)
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.Unknown,
+                $"Pre-flight excludeList probe failed (device returned {preflightEx.Status}). " +
+                "This authenticator may not support silent excludeList probing.",
+                preflightEx);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(tokenCopy);
+        }
+    }
+
+    /// <summary>
+    /// Acquires a PIN/UV auth token from the backend.
+    /// </summary>
+    /// <remarks>
+    /// On PinAuthInvalid, this method throws immediately without retrying. Retrying with identical
+    /// PIN bytes would burn YubiKey PIN attempts on wrong-PIN scenarios.
+    /// </remarks>
     private async Task<PinUvAuthTokenSession> AcquirePinUvTokenWithRetryAsync(
         PinUvAuthMethod method,
         PinUvAuthTokenPermissions permissions,

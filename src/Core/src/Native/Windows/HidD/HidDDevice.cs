@@ -60,7 +60,9 @@ internal sealed class HidDDevice : IHidDDevice
         var buffer = new byte[FeatureReportByteLength];
 
         if (!NativeMethods.HidD_GetFeature(_handle, buffer, buffer.Length))
+        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+        }
 
         // Windows includes the report ID byte; the SDK exposes only report payload bytes.
         var returnBuf = new byte[FeatureReportByteLength - 1];
@@ -74,14 +76,18 @@ internal sealed class HidDDevice : IHidDDevice
         EnsureOpenHandle();
 
         if (buffer.Length != FeatureReportByteLength - 1)
+        {
             throw new InvalidOperationException("The HID feature report buffer length is invalid.");
+        }
 
         // Windows expects the report ID byte before the report payload.
         var sendBuf = new byte[buffer.Length + 1];
         Array.Copy(buffer, 0, sendBuf, 1, buffer.Length);
 
         if (!NativeMethods.HidD_SetFeature(_handle, sendBuf, sendBuf.Length))
+        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+        }
     }
 
     public byte[] GetInputReport()
@@ -91,7 +97,9 @@ internal sealed class HidDDevice : IHidDDevice
         var buffer = new byte[InputReportByteLength];
         if (!Kernel32.NativeMethods.ReadFile(_handle, buffer, buffer.Length, out var bytesRead, IntPtr.Zero)
             || bytesRead != buffer.Length)
+        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+        }
 
         // Windows includes the report ID byte; the SDK exposes only report payload bytes.
         var returnBuf = new byte[InputReportByteLength - 1];
@@ -105,7 +113,9 @@ internal sealed class HidDDevice : IHidDDevice
         EnsureOpenHandle();
 
         if (buffer.Length != OutputReportByteLength - 1)
+        {
             throw new InvalidOperationException("The HID output report buffer length is invalid.");
+        }
 
         // Windows expects the report ID byte before the report payload.
         var sendBuf = new byte[buffer.Length + 1];
@@ -113,7 +123,9 @@ internal sealed class HidDDevice : IHidDDevice
 
         if (!Kernel32.NativeMethods.WriteFile(_handle, sendBuf, sendBuf.Length, out var bytesWritten, IntPtr.Zero)
             || bytesWritten != sendBuf.Length)
+        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+        }
     }
 
 
@@ -122,16 +134,17 @@ internal sealed class HidDDevice : IHidDDevice
         NativeMethods.HIDP_CAPS capabilities = new();
 
         if (!NativeMethods.HidD_GetPreparsedData(safeHandle, out var preparsedData))
+        {
             ThrowHidDWin32Failure(nameof(NativeMethods.HidD_GetPreparsedData), "Failed to get HID preparsed data.");
+        }
 
         try
         {
             var result = NativeMethods.HidP_GetCaps(preparsedData, ref capabilities);
-            if (result != NativeMethods.HidpStatusSuccess)
-                throw new PlatformApiException(nameof(NativeMethods.HidP_GetCaps), result,
+            return result == NativeMethods.HidpStatusSuccess
+                ? capabilities
+                : throw new PlatformApiException(nameof(NativeMethods.HidP_GetCaps), result,
                     "Failed to get HID capabilities.");
-
-            return capabilities;
         }
         finally
         {
@@ -217,7 +230,9 @@ internal sealed class HidDDevice : IHidDDevice
     {
         var error = Marshal.GetLastWin32Error();
         if (error == ErrorAccessDenied)
+        {
             throw new UnauthorizedAccessException($"{message} {WindowsHidAccessDeniedGuidance}");
+        }
 
         throw new PlatformApiException(source, error, message);
     }
@@ -227,13 +242,17 @@ internal sealed class HidDDevice : IHidDDevice
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         if (_handle.IsInvalid || _handle.IsClosed)
+        {
             throw new InvalidOperationException($"The HID device handle for '{DevicePath}' is not open.");
+        }
     }
 
     public void Dispose()
     {
         if (_disposed)
+        {
             return;
+        }
 
         _handle.Dispose();
         _disposed = true;

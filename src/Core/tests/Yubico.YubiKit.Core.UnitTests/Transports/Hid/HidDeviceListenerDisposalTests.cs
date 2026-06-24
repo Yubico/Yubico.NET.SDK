@@ -41,10 +41,6 @@ public class HidDeviceListenerDisposalTests
         {
             return;
         }
-        catch (Exception)
-        {
-            return;
-        }
 
         try
         {
@@ -73,17 +69,13 @@ public class HidDeviceListenerDisposalTests
         {
             return;
         }
-        catch (Exception)
-        {
-            return;
-        }
 
         try
         {
             // Act
             listener.Start();
 
-            // Assert - either Started or Error (if HID subsystem unavailable)
+            // Assert - either Started or Error (if HID subsystem unavailable in sandboxed/CI environments)
             Assert.True(
                 listener.Status is DeviceListenerStatus.Started or DeviceListenerStatus.Error,
                 $"Expected Started or Error, but got {listener.Status}");
@@ -107,10 +99,6 @@ public class HidDeviceListenerDisposalTests
             listener = HidDeviceListener.Create();
         }
         catch (PlatformNotSupportedException)
-        {
-            return;
-        }
-        catch (Exception)
         {
             return;
         }
@@ -147,10 +135,6 @@ public class HidDeviceListenerDisposalTests
         {
             return;
         }
-        catch (Exception)
-        {
-            return;
-        }
 
         try
         {
@@ -164,6 +148,9 @@ public class HidDeviceListenerDisposalTests
 
             // Assert
             Assert.Null(exception);
+            Assert.True(
+                listener.Status is DeviceListenerStatus.Started or DeviceListenerStatus.Error,
+                $"Expected Started or Error after multiple Start() calls, but got {listener.Status}");
         }
         finally
         {
@@ -187,10 +174,6 @@ public class HidDeviceListenerDisposalTests
         {
             return;
         }
-        catch (Exception)
-        {
-            return;
-        }
 
         try
         {
@@ -204,6 +187,7 @@ public class HidDeviceListenerDisposalTests
 
             // Assert
             Assert.Null(exception);
+            Assert.Equal(DeviceListenerStatus.Stopped, listener.Status);
         }
         finally
         {
@@ -227,10 +211,6 @@ public class HidDeviceListenerDisposalTests
         {
             return;
         }
-        catch (Exception)
-        {
-            return;
-        }
 
         try
         {
@@ -249,44 +229,6 @@ public class HidDeviceListenerDisposalTests
         }
     }
 
-
-
-    /// <summary>
-    /// Verifies that the factory returns the correct platform-specific implementation.
-    /// </summary>
-    [Fact]
-    public void Create_ReturnsPlatformSpecificImplementation()
-    {
-        // Arrange & Act
-        HidDeviceListener? listener = null;
-        try
-        {
-            listener = HidDeviceListener.Create();
-        }
-        catch (PlatformNotSupportedException)
-        {
-            return;
-        }
-        catch (Exception)
-        {
-            return;
-        }
-
-        try
-        {
-            // Assert - Type should match current platform
-            var typeName = listener.GetType().Name;
-            var expectedNames = new[] { "WindowsHidDeviceListener", "MacOSHidDeviceListener", "LinuxHidDeviceListener" };
-            Assert.Contains(typeName, expectedNames);
-        }
-        finally
-        {
-            listener?.Dispose();
-        }
-    }
-
-
-
     /// <summary>
     /// Verifies that Dispose completes within a reasonable timeout when listener is running.
     /// If this test hangs, the cancellation logic is broken.
@@ -302,10 +244,6 @@ public class HidDeviceListenerDisposalTests
             listener.Start(); // Start the listener
         }
         catch (PlatformNotSupportedException)
-        {
-            return;
-        }
-        catch (Exception)
         {
             return;
         }
@@ -334,10 +272,6 @@ public class HidDeviceListenerDisposalTests
         {
             return;
         }
-        catch (Exception)
-        {
-            return;
-        }
 
         // Act & Assert - should complete very quickly
         var disposeTask = Task.Run(() => listener.Dispose(), TestContext.Current.CancellationToken);
@@ -360,10 +294,6 @@ public class HidDeviceListenerDisposalTests
             listener.Start();
         }
         catch (PlatformNotSupportedException)
-        {
-            return;
-        }
-        catch (Exception)
         {
             return;
         }
@@ -393,10 +323,6 @@ public class HidDeviceListenerDisposalTests
             listener.Start();
         }
         catch (PlatformNotSupportedException)
-        {
-            return;
-        }
-        catch (Exception)
         {
             return;
         }

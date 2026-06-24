@@ -30,7 +30,7 @@ public class HidEnumerationTests
 
     [Fact]
     [Trait("Category", "Integration")]
-    [Trait("RequiresHardware", "false")]
+    [Trait("RequiresHardware", "true")]
     public async Task FindHidDevices_EnumeratesYubicoDevices()
     {
         var loggerFactory = LoggerFactory.Create(builder =>
@@ -48,7 +48,7 @@ public class HidEnumerationTests
                             $"Usage={device.DescriptorInfo.Usage:X4} UsagePage={device.DescriptorInfo.UsagePage:X4}");
         }
 
-        if (OperatingSystem.IsWindows())
+        if (devices.Count == 0 && OperatingSystem.IsWindows())
         {
             _output.WriteLine(
                 "Windows HID enumeration reads interface metadata without opening report handles. " +
@@ -56,7 +56,7 @@ public class HidEnumerationTests
                 "or another process is holding the HID interface exclusively.");
         }
 
-        Assert.True(devices.Count >= 0, "Should not fail even if no devices present");
+        Assert.True(devices.Count > 0, "Expected at least one Yubico HID device with hardware present");
     }
 
     [Fact]
@@ -75,9 +75,10 @@ public class HidEnumerationTests
             _output.WriteLine($"  DeviceId={yubiKey.DeviceId}");
         }
 
-        var hidYubiKeys = yubiKeys.Where(yk => yk.DeviceId.StartsWith("hid:")).ToList();
+        var hidYubiKeys = yubiKeys.Where(yk => yk.SupportsConnection(ConnectionType.Hid)).ToList();
         _output.WriteLine($"Found {hidYubiKeys.Count} HID YubiKeys");
 
-        Assert.True(yubiKeys.Count >= 0, "Should not fail even if no devices present");
+        Assert.True(yubiKeys.Count > 0, "Expected at least one YubiKey with hardware present");
+        Assert.True(hidYubiKeys.Count > 0, "Expected at least one YubiKey with HID interfaces");
     }
 }

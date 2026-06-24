@@ -15,6 +15,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Runtime.Versioning;
+using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Transports.Hid.Linux;
 using Yubico.YubiKit.Core.Transports.Hid.MacOS;
 using Yubico.YubiKit.Core.Transports.Hid.Windows;
@@ -46,25 +47,15 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
         return yubicoDevices;
     }
 
-    private IReadOnlyList<IHidDevice> GetPlatformDevices()
-    {
-        if (OperatingSystem.IsMacOS())
+    private IReadOnlyList<IHidDevice> GetPlatformDevices() =>
+        SdkPlatformInfo.OperatingSystem switch
         {
-            return FindAllMacOS();
-        }
-
-        if (OperatingSystem.IsLinux())
-        {
-            return FindAllLinux();
-        }
-
-        if (OperatingSystem.IsWindows())
-        {
-            return FindAllWindows();
-        }
-
-        return [];
-    }
+            SdkPlatform.MacOS => FindAllMacOS(),
+            SdkPlatform.Linux => FindAllLinux(),
+            SdkPlatform.Windows => FindAllWindows(),
+            SdkPlatform.Unknown => [],
+            _ => []
+        };
 
     [SupportedOSPlatform("macos")]
     private static IReadOnlyList<IHidDevice> FindAllMacOS() =>

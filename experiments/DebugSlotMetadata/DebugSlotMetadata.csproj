@@ -11,7 +11,7 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="9.0.0" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../Yubico.YubiKit.Core/src/Yubico.YubiKit.Core.csproj" />
-    <ProjectReference Include="../../Yubico.YubiKit.Piv/src/Yubico.YubiKit.Piv.csproj" />
+    <ProjectReference Include="../../src/Core/src/Yubico.YubiKit.Core.csproj" />
+    <ProjectReference Include="../../src/Piv/src/Yubico.YubiKit.Piv.csproj" />
   </ItemGroup>
 </Project>

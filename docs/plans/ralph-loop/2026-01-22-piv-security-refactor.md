@@ -95,13 +95,13 @@ status: complete
 
 - [x] 1.8: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   Must exit 0.
 
 - [x] 1.9: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Piv"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Piv"
   ```
   All PIV tests must pass.
   
@@ -167,12 +167,12 @@ status: complete
 
 - [x] 2.6: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 - [x] 2.7: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Piv"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Piv"
   ```
   
   **Result:** PIV Unit tests: 31 passed
@@ -221,12 +221,12 @@ status: complete
 
 - [x] 3.4: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 - [x] 3.5: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Piv"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Piv"
   ```
   
   **Result:** PIV Unit tests: 31 passed
@@ -269,12 +269,12 @@ status: complete
 
 - [x] 4.3: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 - [x] 4.4: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Piv"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Piv"
   ```
   
   **Result:** PIV Unit tests: 31 passed
@@ -299,26 +299,26 @@ status: complete
 
 - [x] 5.1: **Full solution build**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
   **Result:** Succeeded (0 errors)
 
 - [x] 5.2: **Full PIV test suite**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Piv"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Piv"
   ```
   **Result:** PIV Unit tests: 31 passed
 
 - [x] 5.3: **Core module tests**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Core"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Core"
   ```
   **Result:** 147 passed, 2 skipped, 1 failed (pre-existing OtpHidProtocol issue unrelated to changes)
   Interface changes do not break Core tests.
 
 - [x] 5.4: **Other module smoke test**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Management"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Management"
   ```
   **Result:** Management Unit tests: 59 passed
 
@@ -344,8 +344,8 @@ status: complete
 Only emit `<promise>PIV_SECURITY_REFACTOR_COMPLETE</promise>` when:
 
 1. All Phase 1-5 tasks are marked `[x]`
-2. `dotnet build.cs build` exits 0
-3. `dotnet build.cs test --filter "FullyQualifiedName~Piv"` shows all tests passing
+2. `dotnet toolchain.cs build` exits 0
+3. `dotnet toolchain.cs test --filter "FullyQualifiedName~Piv"` shows all tests passing
 4. `TransmitAsync` method removed from `ISmartCardProtocol`
 5. `throwOnError` parameter added to `TransmitAndReceiveAsync`
 6. `CryptographicOperations.ZeroMemory()` applied to all sensitive buffers

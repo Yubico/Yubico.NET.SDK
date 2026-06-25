@@ -95,7 +95,7 @@ Assert.Equal(expected, captured.AsSpan(1).ToArray()); // Skip command byte
 After each batch of mock updates:
 
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~<TestClassName>"
+dotnet toolchain.cs test --filter "FullyQualifiedName~<TestClassName>"
 ```
 
 Track failure count: should decrease with each fix batch.
@@ -135,7 +135,7 @@ session.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<Cancellati
 
 **Step 5: Verify**
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~AuthenticatorConfigTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~AuthenticatorConfigTests"
 ```
 
 ## Common Mistakes

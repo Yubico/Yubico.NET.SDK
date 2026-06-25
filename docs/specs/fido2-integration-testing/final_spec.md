@@ -252,7 +252,7 @@ await using var session = await state.Device.CreateFidoSessionAsync(cancellation
 
 ### 5.2 Must Not
 
-- Must not use `dotnet test` directly (use `dotnet build.cs test`)
+- Must not use `dotnet test` directly (use `dotnet toolchain.cs test`)
 - Must not hard-code serial numbers or device identifiers
 - Must not skip credential cleanup (use `try/finally`)
 - Must not run destructive tests (Reset) in CI without explicit opt-in

@@ -177,8 +177,8 @@ export function formatProgressContext(state: ProgressFileState): string {
 All tasks complete! Verify everything passes, then output the completion promise.
 
 Final verification:
-1. Run: \`dotnet build.cs build\` - must exit 0
-2. Run: \`dotnet build.cs test\` - all tests must pass
+1. Run: \`dotnet toolchain.cs build\` - must exit 0
+2. Run: \`dotnet toolchain.cs test\` - all tests must pass
 3. Check: No regressions in existing tests
 `;
   }
@@ -255,7 +255,7 @@ SKILL RULES:
 - BEFORE any build/test/commit action, check if a skill covers it
 - Use \`skill invoke <name>\` or follow skill instructions
 - Mandatory skills MUST be used - direct commands (dotnet build, dotnet test, git add .) are FORBIDDEN
-- This repo has mixed xUnit v2/v3 - ONLY use \`dotnet build.cs test\`, never \`dotnet test\`
+- This repo has mixed xUnit v2/v3 - ONLY use \`dotnet toolchain.cs test\`, never \`dotnet test\`
 `;
 }
 

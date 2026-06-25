@@ -606,7 +606,7 @@ public static class PinPrompt
 - [ ] Audit: No credential values logged
 - [ ] Audit: Timing-safe comparison used in confirmation
 - [ ] Audit: Exception paths zero allocated result buffers
-- [ ] Run `dotnet build.cs test` - all tests pass
+- [ ] Run `dotnet toolchain.cs test` - all tests pass
 
 ## Design Decisions (Resolved 2026-01-25)
 

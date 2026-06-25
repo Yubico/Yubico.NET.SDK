@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TargetFramework inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.WebAuthn</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.WebAuthn</AssemblyName>
+
+    <!-- Package Metadata -->
+    <Description>WebAuthn client implementation for YubiKey FIDO2 authenticators with support for credential management, extensions, and the previewSign draft specification.</Description>
+    <PackageTags>yubikey;yubico;webauthn;fido2;passkeys;authentication</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Fido2\src\Yubico.YubiKit.Fido2.csproj" />
+  </ItemGroup>
+
+</Project>

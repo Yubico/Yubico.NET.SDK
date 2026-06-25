@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Yubico.YubiKit.Core/src/Yubico.YubiKit.Core.csproj" />
-    <ProjectReference Include="../../Yubico.YubiKit.Management/src/Yubico.YubiKit.Management.csproj" />
+    <ProjectReference Include="../../src/Core/src/Yubico.YubiKit.Core.csproj" />
+    <ProjectReference Include="../../src/Management/src/Yubico.YubiKit.Management.csproj" />
   </ItemGroup>
 
   <ItemGroup>

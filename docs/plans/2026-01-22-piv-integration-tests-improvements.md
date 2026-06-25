@@ -59,7 +59,7 @@ public async Task VerifyPinAsync_WithCorrectPin_Succeeds(YubiKeyTestState state)
 **Step 3: Run tests**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~PivAuthenticationTests"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~PivAuthenticationTests"
 ```
 
 **Step 4: Commit**
@@ -106,7 +106,7 @@ public async Task ResetAsync_ClearsAllSlots(YubiKeyTestState state)
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~ResetAsync_ClearsAllSlots"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~ResetAsync_ClearsAllSlots"
 ```
 
 **Step 3: Commit**
@@ -174,7 +174,7 @@ Either fix it similarly or delete it since PivCryptoTests now has proper coverag
 **Step 3: Run tests**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~CalculateSecret"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~CalculateSecret"
 ```
 
 **Step 4: Commit**
@@ -215,7 +215,7 @@ public async Task GetBioMetadataAsync_NonBioDevice_ThrowsNotSupported(YubiKeyTes
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~GetBioMetadataAsync"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~GetBioMetadataAsync"
 ```
 
 **Step 3: Commit**
@@ -279,7 +279,7 @@ public async Task CompleteWorkflow_GenerateKeySignVerify(YubiKeyTestState state)
 **Step 2: Run tests**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~CompleteWorkflow_GenerateKey"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~CompleteWorkflow_GenerateKey"
 ```
 
 **Step 3: Commit**
@@ -337,7 +337,7 @@ public async Task MoveKeyAsync_MovesToNewSlot_KeyRemainsFunctional(YubiKeyTestSt
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~MoveKeyAsync"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~MoveKeyAsync"
 ```
 
 **Step 3: Commit**
@@ -391,7 +391,7 @@ public async Task SignOrDecryptAsync_EccP384Sign_ProducesValidSignature(YubiKeyT
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~EccP384Sign"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~EccP384Sign"
 ```
 
 **Step 3: Commit**
@@ -443,7 +443,7 @@ public async Task CalculateSecretAsync_X25519_ProducesSharedSecret(YubiKeyTestSt
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~X25519"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~X25519"
 ```
 
 **Step 3: Commit**
@@ -504,7 +504,7 @@ public async Task SignOrDecryptAsync_Ed25519_ProducesSignature(YubiKeyTestState 
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~Ed25519"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~Ed25519"
 ```
 
 **Step 3: Commit**
@@ -604,7 +604,7 @@ private static byte[] CreatePkcs1v15Padding(byte[] digestInfo, byte[] hash, int 
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~Rsa2048Sign"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~Rsa2048Sign"
 ```
 
 **Step 3: Commit**
@@ -714,7 +714,7 @@ public async Task SignOrDecryptAsync_Rsa3072And4096Sign_ProducesValidSignature(
 **Step 2: Run tests**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~Rsa"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~Rsa"
 ```
 
 **Step 3: Commit**
@@ -793,7 +793,7 @@ public async Task SignOrDecryptAsync_Rsa2048Decrypt_DecryptsCorrectly(YubiKeyTes
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~Rsa2048Decrypt"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~Rsa2048Decrypt"
 ```
 
 **Step 3: Commit**
@@ -937,7 +937,7 @@ public class PivPukTests
 **Step 2: Run tests**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~PivPukTests"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~PivPukTests"
 ```
 
 **Step 3: Commit**
@@ -1063,7 +1063,7 @@ public class PivManagementKeyTests
 **Step 2: Run tests**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~PivManagementKeyTests"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~PivManagementKeyTests"
 ```
 
 **Step 3: Commit**
@@ -1120,7 +1120,7 @@ public async Task ImportKeyAsync_EccP256_CanSign(YubiKeyTestState state)
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~ImportKeyAsync"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~ImportKeyAsync"
 ```
 
 **Step 3: Commit**
@@ -1167,7 +1167,7 @@ public async Task DeleteKeyAsync_RemovesKey_SlotBecomesEmpty(YubiKeyTestState st
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~DeleteKeyAsync"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~DeleteKeyAsync"
 ```
 
 **Step 3: Commit**
@@ -1218,7 +1218,7 @@ public async Task PutObjectAsync_GetObjectAsync_RoundTrip(YubiKeyTestState state
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~PutObjectAsync"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~PutObjectAsync"
 ```
 
 **Step 3: Commit**
@@ -1270,7 +1270,7 @@ public async Task SetPinAttemptsAsync_CustomLimit_EnforcesLimit(YubiKeyTestState
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~SetPinAttemptsAsync"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~SetPinAttemptsAsync"
 ```
 
 **Step 3: Commit**
@@ -1307,7 +1307,7 @@ public async Task GetSerialNumberAsync_ReturnsDeviceSerial(YubiKeyTestState stat
 **Step 2: Run test**
 
 ```bash
-dotnet build.cs test --project Piv --filter "FullyQualifiedName~GetSerialNumberAsync"
+dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~GetSerialNumberAsync"
 ```
 
 **Step 3: Commit**
@@ -1457,7 +1457,7 @@ Replace local constants with `PivTestHelpers.DefaultPin`, `PivTestHelpers.GetDef
 **Step 3: Run all tests**
 
 ```bash
-dotnet build.cs test --project Piv
+dotnet toolchain.cs test --project Piv
 ```
 
 **Step 4: Commit**
@@ -1502,6 +1502,6 @@ git commit -m "refactor(piv-tests): extract shared test helpers to reduce duplic
 - [ ] All PIV algorithms have integration coverage (P256, P384, Ed25519*, X25519*, RSA 1024/2048/3072/4096)
 - [ ] All missing API methods have tests
 - [ ] No duplicate constants across test files
-- [ ] All tests pass: `dotnet build.cs test --project Piv`
+- [ ] All tests pass: `dotnet toolchain.cs test --project Piv`
 
 *Ed25519/X25519 verification limited until OpenSSL/BouncyCastle support added

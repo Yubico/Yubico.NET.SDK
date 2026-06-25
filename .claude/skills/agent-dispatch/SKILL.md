@@ -78,8 +78,8 @@ Good agent prompts are:
 BEFORE STARTING: Read CLAUDE.md and review available skills in .claude/skills/
 
 MANDATORY SKILLS (use these - NEVER use direct commands):
-- build-project: Use `dotnet build.cs build` - NEVER `dotnet build`
-- test-project: Use `dotnet build.cs test` - NEVER `dotnet test`
+- build-project: Use `dotnet toolchain.cs build` - NEVER `dotnet build`
+- test-project: Use `dotnet toolchain.cs test` - NEVER `dotnet test`
 - commit: Follow commit guidelines - NEVER use `git add .`
 ```
 
@@ -89,8 +89,8 @@ MANDATORY SKILLS (use these - NEVER use direct commands):
 BEFORE STARTING: Read CLAUDE.md and review available skills in .claude/skills/
 
 MANDATORY SKILLS:
-- build-project: Use `dotnet build.cs build` - NEVER `dotnet build`
-- test-project: Use `dotnet build.cs test` - NEVER `dotnet test`
+- build-project: Use `dotnet toolchain.cs build` - NEVER `dotnet build`
+- test-project: Use `dotnet toolchain.cs test` - NEVER `dotnet test`
 
 Fix the 3 failing tests in src/agents/agent-tool-abort.test.ts:
 

@@ -71,12 +71,12 @@
 
 - [ ] 1.5: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 - [ ] 1.6: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~PivPukTests"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivPukTests"
   ```
   Expected: All 4 tests should be SKIPPED (not failed).
 
@@ -126,12 +126,12 @@
 
 - [ ] 2.2: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 - [ ] 2.3: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~PivMetadataTests"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivMetadataTests"
   ```
   Expected: GetBioMetadataAsync_NonBioDevice_ThrowsOrReturnsError should pass.
 
@@ -218,12 +218,12 @@
 
 - [ ] 3.4: **Build verification**
   ```bash
-  dotnet build.cs build
+  dotnet toolchain.cs build
   ```
 
 - [ ] 3.5: **Test verification**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~PivKeyOperationsTests"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivKeyOperationsTests"
   ```
   Expected: ImportKeyAsync test skipped, PutObjectAsync and GetSerialNumber tests pass.
 
@@ -250,7 +250,7 @@
 
 - [ ] 4.1: **Run RSA tests individually to capture exact error**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~Rsa2048Sign" 2>&1 | tail -50
+  dotnet toolchain.cs test --filter "FullyQualifiedName~Rsa2048Sign" 2>&1 | tail -50
   ```
   Document the exact error message.
 
@@ -286,8 +286,8 @@
 
 - [ ] 4.4: **Build and test verification**
   ```bash
-  dotnet build.cs build
-  dotnet build.cs test --filter "FullyQualifiedName~PivCryptoTests"
+  dotnet toolchain.cs build
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivCryptoTests"
   ```
 
 - [ ] 4.5: **Commit changes**
@@ -311,7 +311,7 @@
 
 - [ ] 5.1: **Run management key tests to verify status**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~PivManagementKeyTests" 2>&1 | tail -50
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivManagementKeyTests" 2>&1 | tail -50
   ```
 
 - [ ] 5.2: **Fix any failing tests**
@@ -320,8 +320,8 @@
 
 - [ ] 5.3: **Build and test verification**
   ```bash
-  dotnet build.cs build
-  dotnet build.cs test --filter "FullyQualifiedName~PivManagementKeyTests"
+  dotnet toolchain.cs build
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivManagementKeyTests"
   ```
 
 - [ ] 5.4: **Commit changes (if any)**
@@ -342,7 +342,7 @@
 
 - [ ] 6.1: **Run all targeted tests**
   ```bash
-  dotnet build.cs test --filter "FullyQualifiedName~PivPukTests|FullyQualifiedName~PivMetadataTests|FullyQualifiedName~PivManagementKeyTests|FullyQualifiedName~PivKeyOperationsTests|FullyQualifiedName~PivCryptoTests"
+  dotnet toolchain.cs test --filter "FullyQualifiedName~PivPukTests|FullyQualifiedName~PivMetadataTests|FullyQualifiedName~PivManagementKeyTests|FullyQualifiedName~PivKeyOperationsTests|FullyQualifiedName~PivCryptoTests"
   ```
 
 - [ ] 6.2: **Document final status**
@@ -362,7 +362,7 @@
 
 ## Verification Requirements (MUST PASS BEFORE COMPLETION)
 
-1. **Build:** `dotnet build.cs build` (must exit 0)
+1. **Build:** `dotnet toolchain.cs build` (must exit 0)
 2. **Target tests:** Run filter for all 5 test classes
    - No test should FAIL
    - Tests may PASS or SKIP (with clear skip reason)

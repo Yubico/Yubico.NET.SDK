@@ -84,12 +84,12 @@ Update test methods to use `GetDefaultManagementKey(state.FirmwareVersion)` inst
 
 **Step 4: Verify build**
 ```bash
-dotnet build.cs build
+dotnet toolchain.cs build
 ```
 
 **Step 5: Run tests to see new failures**
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"
 ```
 
 **Step 6: Commit**
@@ -109,7 +109,7 @@ git commit -m "fix(piv): add SmartCardConnection filter to integration tests"
 **Loop Process:**
 ```
 while (tests fail):
-    1. Run: dotnet build.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"
+    1. Run: dotnet toolchain.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"
     2. Analyze failures (group by error type)
     3. Fix root cause
     4. Re-run tests
@@ -136,8 +136,8 @@ while (tests fail):
 
 **Step N: After each fix batch, verify build**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"
 ```
 
 **Step N+1: Commit when a logical group of fixes is complete**
@@ -514,8 +514,8 @@ public class PivMetadataTests
 
 **Step: Verify build and tests**
 ```bash
-dotnet build.cs build
-dotnet build.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"
+dotnet toolchain.cs build
+dotnet toolchain.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"
 ```
 
 **Step: Commit**
@@ -536,7 +536,7 @@ Same process as Phase 2 - iterate until all new tests pass.
 
 **Loop:**
 ```bash
-dotnet build.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"
+dotnet toolchain.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"
 # Analyze failures, fix, repeat
 ```
 
@@ -552,14 +552,14 @@ git commit -m "fix(piv): <describe fixes for new tests>"
 
 ## Verification Requirements (MUST PASS BEFORE COMPLETION)
 
-1. **Build:** `dotnet build.cs build` (must exit 0)
-2. **PIV Unit Tests:** `dotnet build.cs test --filter "FullyQualifiedName~Piv.UnitTests"` (all pass)
-3. **PIV Integration Tests:** `dotnet build.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"` (all pass)
-4. **No Regressions:** `dotnet build.cs test` (full suite passes)
+1. **Build:** `dotnet toolchain.cs build` (must exit 0)
+2. **PIV Unit Tests:** `dotnet toolchain.cs test --filter "FullyQualifiedName~Piv.UnitTests"` (all pass)
+3. **PIV Integration Tests:** `dotnet toolchain.cs test --filter "FullyQualifiedName~Piv.IntegrationTests"` (all pass)
+4. **No Regressions:** `dotnet toolchain.cs test` (full suite passes)
 
 **Final verification:**
 ```bash
-dotnet build.cs build && dotnet build.cs test
+dotnet toolchain.cs build && dotnet toolchain.cs test
 ```
 
 Only after ALL pass, output `<promise>PIV_TESTS_FIXED</promise>`.

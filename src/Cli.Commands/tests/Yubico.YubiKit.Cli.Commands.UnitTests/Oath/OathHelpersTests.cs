@@ -4,7 +4,7 @@
 using System.Text;
 using Yubico.YubiKit.Cli.Commands.Oath;
 using Yubico.YubiKit.Cli.Shared.Output;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Oath;
 
 namespace Yubico.YubiKit.Cli.Commands.UnitTests.Oath;

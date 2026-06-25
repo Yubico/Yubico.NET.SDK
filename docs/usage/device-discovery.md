@@ -5,7 +5,7 @@ This guide covers how to discover and monitor YubiKey devices using the static `
 ## Quick Start
 
 ```csharp
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 
 // Find all connected YubiKeys
 var devices = await YubiKeyManager.FindAllAsync();
@@ -62,7 +62,7 @@ For applications that need to react to device connections/disconnections:
 
 ```csharp
 using System.Reactive.Linq;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 
 // Subscribe to device events
 using var subscription = YubiKeyManager.DeviceChanges.Subscribe(e =>

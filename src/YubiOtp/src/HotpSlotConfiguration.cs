@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Buffers.Binary;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.YubiOtp;
 

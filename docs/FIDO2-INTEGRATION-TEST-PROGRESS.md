@@ -10,7 +10,7 @@ Successfully debugged and fixed the FIDO2 integration tests. All 42 tests now pa
 ## Fixes Applied
 
 ### 1. Linux HID Report ID Bug
-**File:** `Yubico.YubiKit.Core/src/Hid/Linux/LinuxHidIOReportConnection.cs`
+**File:** `Yubico.YubiKit.Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs`
 
 **Problem:** Linux hidraw requires prepending a report ID byte (0x00) on writes, but the code was writing the 64-byte packet directly.
 
@@ -91,7 +91,7 @@ data.CopyTo(writeBuffer[1..]);
 
 ## Files Modified
 
-1. `Yubico.YubiKit.Core/src/Hid/Linux/LinuxHidIOReportConnection.cs` - HID report ID fix
+1. `Yubico.YubiKit.Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs` - HID report ID fix
 2. `Yubico.YubiKit.Fido2/src/Pin/PinUvAuthProtocolV2.cs` - Token length fix
 3. `Yubico.YubiKit.Fido2/src/Pin/PinUvAuthProtocolV1.cs` - Token length fix
 4. `Yubico.YubiKit.Fido2/src/Credentials/PublicKeyCredentialTypes.cs` - Optional user fields

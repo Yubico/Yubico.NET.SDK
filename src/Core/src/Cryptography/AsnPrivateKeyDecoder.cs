@@ -15,7 +15,7 @@
 using System.Formats.Asn1;
 using System.Globalization;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Utils;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Cryptography;
 

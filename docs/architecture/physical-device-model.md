@@ -16,7 +16,7 @@ See also: [event-driven device discovery](./event-driven-device-discovery.md) an
 
 ## One IYubiKey Per Physical Device
 
-`IYubiKey` (defined in `src/Core/src/Interfaces/IYubiKey.cs`) is intentionally small:
+`IYubiKey` (defined in `src/Core/src/Abstractions/IYubiKey.cs`) is intentionally small:
 
 - `string DeviceId` — a stable identifier for the physical device.
 - `ConnectionType AvailableConnections` — the concrete interfaces this device exposes, any combination of
@@ -39,7 +39,7 @@ none.
 
 ```csharp
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 
 // One IYubiKey per physical device, even when CCID + HID FIDO + HID OTP are all present.
 var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
@@ -82,9 +82,9 @@ platforms. This is a known platform residual tracked outside the composite-devic
 Open a specific interface with the typed overload:
 
 ```csharp
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.Hid.Fido;
-using Yubico.YubiKit.Core.Hid.Interfaces;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 await using var smartCard = await device.ConnectAsync<ISmartCardConnection>();
 await using var fido = await device.ConnectAsync<IFidoHidConnection>();
@@ -97,7 +97,7 @@ interface device, use the typed overload above or an applet session extension (b
 
 ## Read-Only Metadata Ownership
 
-Read-only physical-device metadata lives in **Core** (`Yubico.YubiKit.Core.YubiKey`): `DeviceInfo`,
+Read-only physical-device metadata lives in **Core** (`Yubico.YubiKit.Core.Devices`): `DeviceInfo`,
 `FormFactor`, `DeviceCapabilities`, `DeviceFlags`, `VersionQualifier`, and `VersionQualifierType`. This lets
 Core describe a physical device without depending on the Management module. Reading the metadata from a
 device uses the Management extension, which opens a transient session:
@@ -175,7 +175,7 @@ connection type and enumerated one row per interface. In v2:
 | One `IYubiKey` per interface; multiple rows for one physical key | One `IYubiKey` per physical key; interfaces in `AvailableConnections` |
 | Scalar `yubiKey.ConnectionType` to decide routing | `yubiKey.AvailableConnections` + `yubiKey.SupportsConnection(...)` |
 | Parameterless `ConnectAsync()` picks "the" transport | `ConnectAsync<TConnection>()` for a specific interface; parameterless throws on multi-interface devices |
-| Reaching for Management types to read metadata | Read-only metadata types now in `Yubico.YubiKit.Core.YubiKey`; read via `GetDeviceInfoAsync()` |
+| Reaching for Management types to read metadata | Read-only metadata types now in `Yubico.YubiKit.Core.Devices`; read via `GetDeviceInfoAsync()` |
 | Applet extension assumed a single transport | Applet extensions select via documented default order + optional `preferredConnection` |
 
 Practical steps:
@@ -186,4 +186,4 @@ Practical steps:
    extension.
 3. Where you need a specific transport, pass `preferredConnection`; otherwise rely on the documented default
    order (and held-transport fallback).
-4. Update metadata type references to `Yubico.YubiKit.Core.YubiKey`.
+4. Update metadata type references to `Yubico.YubiKit.Core.Devices`.

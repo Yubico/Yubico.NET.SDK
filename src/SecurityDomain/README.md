@@ -22,7 +22,7 @@ The Security Domain is the root security application on YubiKey firmware 5.3.0 a
 
 ```csharp
 using Yubico.YubiKit.SecurityDomain;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
 
 IYubiKey yubiKey = ...;
 using var sdSession = await yubiKey.CreateSecurityDomainSessionAsync();

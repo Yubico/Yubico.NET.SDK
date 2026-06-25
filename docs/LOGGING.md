@@ -142,10 +142,10 @@ YubiKit uses the following log categories (class names):
 
 | Category | Description |
 |----------|-------------|
-| `Yubico.YubiKit.Core.DeviceMonitorService` | Device arrival/removal events |
-| `Yubico.YubiKit.Core.DeviceListenerService` | Background device cache updates |
-| `Yubico.YubiKit.Core.DeviceRepositoryCached` | Device cache operations |
-| `Yubico.YubiKit.Core.SmartCard.*` | Smart card/PCSC operations |
+| `Yubico.YubiKit.Core.Devices.*` | Device discovery, metadata, and cache operations |
+| `Yubico.YubiKit.Core.Transports.SmartCard.*` | Smart card/PC/SC transport operations |
+| `Yubico.YubiKit.Core.Protocols.SmartCard.*` | APDU and SCP protocol operations |
+| `Yubico.YubiKit.Core.Transports.Hid.*` | HID device and transport operations |
 | `Yubico.YubiKit.Management.ManagementSession` | Management application commands |
 | `Yubico.YubiKit.Piv.PivSession` | PIV application commands |
 | `Yubico.YubiKit.Fido2.Fido2Session` | FIDO2 application commands |

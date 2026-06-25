@@ -1,0 +1,436 @@
+// Copyright 2025 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Microsoft.Extensions.Logging.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
+
+namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu;
+
+/// <summary>
+///     Unit tests for PcscProtocol class.
+///     Tests configuration, APDU transmission, and SELECT command functionality.
+/// </summary>
+public class PcscProtocolTests
+{
+    private readonly FakeSmartCardConnection _fakeConnection = new();
+    private readonly NullLogger<PcscProtocol> _logger = NullLogger<PcscProtocol>.Instance;
+
+
+    [Fact]
+    public void Configure_FirmwareBelow400_IgnoresConfiguration()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var firmware = new FirmwareVersion(3, 5);
+
+        // Act
+        protocol.Configure(firmware, null);
+
+        // Assert - Should not throw, processor remains default
+        Assert.NotNull(protocol);
+    }
+
+    [Fact]
+    public void Configure_Firmware400To429_UsesYk4MaxSize()
+    {
+        // Arrange
+        _fakeConnection.SupportsExtendedApduValue = true;
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var firmware = new FirmwareVersion(4, 2, 5);
+
+        // Act
+        protocol.Configure(firmware, null);
+
+        // Assert - Should configure with YK4 max size
+        Assert.NotNull(protocol);
+        Assert.Equal(SmartCardMaxApduSizes.Yk4, protocol.MaxApduSize);
+    }
+
+    [Fact]
+    public void Configure_Firmware430AndAbove_UsesYk43MaxSize()
+    {
+        // Arrange
+        _fakeConnection.SupportsExtendedApduValue = true;
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var firmware = new FirmwareVersion(5, 7, 2);
+
+        // Act
+        protocol.Configure(firmware, null);
+
+        // Assert - Should configure with YK43 max size
+        Assert.NotNull(protocol);
+        Assert.Equal(SmartCardMaxApduSizes.Yk43, protocol.MaxApduSize);
+    }
+
+    [Fact]
+    public void Configure_ForceShortApdusTrue_UsesCommandChaining()
+    {
+        // Arrange
+        _fakeConnection.SupportsExtendedApduValue = true;
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var firmware = new FirmwareVersion(5, 7, 2);
+        var config = new ProtocolConfiguration { ForceShortApdus = true };
+
+        // Act
+        protocol.Configure(firmware, config);
+
+        // Assert - Should use command chaining despite extended APDU support
+        Assert.NotNull(protocol);
+        Assert.False(protocol.UseExtendedApdus);
+    }
+
+    [Fact]
+    public void Configure_ConnectionNoExtendedApdu_UsesCommandChaining()
+    {
+        // Arrange
+        _fakeConnection.SupportsExtendedApduValue = false;
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var firmware = new FirmwareVersion(5, 7, 2);
+
+        // Act
+        protocol.Configure(firmware, null);
+
+        // Assert - Should use command chaining when connection doesn't support extended
+        Assert.NotNull(protocol);
+        Assert.False(protocol.UseExtendedApdus);
+    }
+
+    [Fact]
+    public void Configure_ExtendedApduSupported_UsesExtendedApduProcessor()
+    {
+        // Arrange
+        _fakeConnection.SupportsExtendedApduValue = true;
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var firmware = new FirmwareVersion(5, 7, 2);
+
+        // Act
+        protocol.Configure(firmware, null);
+
+        // Assert - Should use extended APDU processor
+        Assert.NotNull(protocol);
+        Assert.True(protocol.UseExtendedApdus);
+    }
+
+    [Fact]
+    public async Task TransmitAndReceiveAsync_ZerosFormattedPayloadAfterTransmit()
+    {
+        var connection = new RetainingSmartCardConnection([0x90, 0x00]);
+        var protocol = new PcscProtocol(connection, default, _logger);
+
+        await protocol.TransmitAndReceiveAsync(
+            new ApduCommand { Ins = 0x88, Data = Enumerable.Repeat((byte)0xA5, 16).ToArray() },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(connection.LastCommand);
+        Assert.True(
+            connection.LastCommand.Value.Span.ToArray().All(static b => b == 0),
+            "Expected the formatted APDU payload buffer to be zeroed after transmit.");
+    }
+
+    [Fact]
+    public void Constructor_WithCustomInsSendRemaining_UsesProvidedValue()
+    {
+        // Arrange
+        byte customIns = 0xC2;
+        ReadOnlyMemory<byte> insMemory = new[] { customIns };
+
+        // Act
+        var protocol = new PcscProtocol(_fakeConnection, insMemory, _logger);
+
+        // Assert - Should use custom INS_SEND_REMAINING
+        Assert.NotNull(protocol);
+        Assert.Equal(customIns, protocol.InsSendRemaining);
+    }
+
+    [Fact]
+    public void Constructor_WithDefaultInsSendRemaining_Uses0xC0()
+    {
+        // Act
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+
+        // Assert - Should use default 0xC0
+        Assert.NotNull(protocol);
+        Assert.Equal((byte)0xC0, protocol.InsSendRemaining);
+    }
+
+    [Fact]
+    public void Dispose_Twice_DisposesConnectionOnce()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+
+        // Act
+        protocol.Dispose();
+        protocol.Dispose();
+
+        // Assert
+        Assert.Equal(1, _fakeConnection.DisposeCount);
+    }
+
+    [Fact]
+    public async Task TransmitAndReceiveAsync_AfterDispose_ThrowsObjectDisposedException()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        protocol.Dispose();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+            protocol.TransmitAndReceiveAsync(new ApduCommand(), cancellationToken: TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task SelectAsync_AfterDispose_ThrowsObjectDisposedException()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        protocol.Dispose();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+            protocol.SelectAsync(ApplicationIds.Piv, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public void Configure_AfterDispose_ThrowsObjectDisposedException()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        protocol.Dispose();
+
+        // Act & Assert
+        Assert.Throws<ObjectDisposedException>(() =>
+            protocol.Configure(new FirmwareVersion(5, 7, 2)));
+    }
+
+    [Fact]
+    public async Task TransmitAndReceiveAsync_ChainedResponseWithConfiguredInsSendRemaining_UsesConfiguredCommand()
+    {
+        // Arrange
+        _fakeConnection.SupportsExtendedApduValue = false;
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var firmware = new FirmwareVersion(5, 7, 2);
+        var config = new ProtocolConfiguration { InsSendRemaining = 0xA5 };
+        protocol.Configure(firmware, config);
+
+        _fakeConnection.EnqueueResponse(new byte[] { 0x01, 0x61, 0x01 });
+        _fakeConnection.EnqueueResponse(new byte[] { 0x02, 0x90, 0x00 });
+
+        var command = new ApduCommand(0x00, 0xA1, 0x00, 0x00);
+
+        // Act
+        var result = await protocol.TransmitAndReceiveAsync(command, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Equal(new byte[] { 0x01, 0x02 }, result.Data.ToArray());
+        Assert.Equal(2, _fakeConnection.TransmittedCommands.Count);
+        Assert.Equal((byte)0xA5, _fakeConnection.TransmittedCommands[1].Span[1]);
+    }
+
+
+
+    [Fact]
+    public async Task TransmitAndReceiveAsync_SuccessResponse_ReturnsData()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var expectedData = new byte[] { 0x01, 0x02, 0x03 };
+        var response = new byte[expectedData.Length + 2];
+        expectedData.CopyTo(response, 0);
+        response[^2] = 0x90;
+        response[^1] = 0x00;
+        _fakeConnection.EnqueueResponse(response);
+
+        var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+
+        // Act
+        var result = await protocol.TransmitAndReceiveAsync(command, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Equal(expectedData, result.Data.ToArray());
+    }
+
+    [Fact]
+    public async Task TransmitAndReceiveAsync_NonSuccessResponse_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var response = new byte[] { 0x69, 0x82 }; // Security status not satisfied
+        _fakeConnection.EnqueueResponse(response);
+
+        var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<ApduException>(() =>
+            protocol.TransmitAndReceiveAsync(command, cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Contains("6982", ex.Message);
+    }
+
+    [Fact]
+    public async Task TransmitAndReceiveAsync_ExceptionMessage_FormattedCorrectly()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var response = new byte[] { 0x6A, 0x82 }; // File not found
+        _fakeConnection.EnqueueResponse(response);
+
+        var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<ApduException>(() =>
+            protocol.TransmitAndReceiveAsync(command, cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Contains("6A82", ex.Message);
+    }
+
+    [Fact]
+    public async Task TransmitAndReceiveAsync_RespectsCancellationToken()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+
+        // Act & Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            protocol.TransmitAndReceiveAsync(command, cancellationToken: cts.Token));
+    }
+
+
+
+    [Fact]
+    public async Task SelectAsync_ConstructsCorrectApdu()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var response = new byte[] { 0x90, 0x00 };
+        _fakeConnection.EnqueueResponse(response);
+
+        var appId = new byte[] { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01 };
+
+        // Act
+        await protocol.SelectAsync(appId, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Single(_fakeConnection.TransmittedCommands);
+        // Note: We can't directly inspect the APDU structure from transmitted bytes
+        // but we verified it doesn't throw, which means the command was accepted
+    }
+
+    [Fact]
+    public async Task SelectAsync_SuccessResponse_ReturnsData()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var expectedData = new byte[] { 0x61, 0x10 }; // FCI template tag
+        var response = new byte[expectedData.Length + 2];
+        expectedData.CopyTo(response, 0);
+        response[^2] = 0x90;
+        response[^1] = 0x00;
+        _fakeConnection.EnqueueResponse(response);
+
+        var appId = new byte[] { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01 };
+
+        // Act
+        var result = await protocol.SelectAsync(appId, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Equal(expectedData, result.ToArray());
+    }
+
+    [Fact]
+    public async Task SelectAsync_NonSuccessResponse_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var response = new byte[] { 0x6A, 0x82 }; // File not found
+        _fakeConnection.EnqueueResponse(response);
+
+        var appId = new byte[] { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01 };
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<ApduException>(() =>
+            protocol.SelectAsync(appId, TestContext.Current.CancellationToken));
+        Assert.Contains("6A82", ex.Message);
+    }
+
+    [Fact]
+    public async Task SelectAsync_RespectsCancellationToken()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        var appId = new byte[] { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01 };
+
+        // Act & Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => protocol.SelectAsync(appId, cts.Token));
+    }
+
+    [Fact]
+    public async Task Dispose_DisposesConnection()
+    {
+        // Arrange
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
+
+        // Act
+        protocol.Dispose();
+
+        // Assert - Subsequent operations should fail on disposed connection
+        // (FakeSmartCardConnection throws ObjectDisposedException when disposed)
+        await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
+        {
+            var response = new byte[] { 0x90, 0x00 };
+            _fakeConnection.EnqueueResponse(response);
+            await protocol.TransmitAndReceiveAsync(new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty),
+                cancellationToken: TestContext.Current.CancellationToken);
+        });
+    }
+
+    private sealed class RetainingSmartCardConnection(byte[] response) : ISmartCardConnection
+    {
+        public ReadOnlyMemory<byte>? LastCommand { get; private set; }
+
+        public Transport Transport { get; } = Transport.Usb;
+
+        public ConnectionType Type { get; } = ConnectionType.SmartCard;
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+            ReadOnlyMemory<byte> command,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            LastCommand = command;
+            return Task.FromResult((ReadOnlyMemory<byte>)response);
+        }
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
+            throw new NotImplementedException();
+
+        public bool SupportsExtendedApdu() => false;
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => default;
+    }
+
+}

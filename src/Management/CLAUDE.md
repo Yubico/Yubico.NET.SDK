@@ -24,7 +24,7 @@ The Management module is the **primary interface for YubiKey device configuratio
 - [`DeviceConfig.cs`](src/DeviceConfig.cs) - Configuration model (~190 lines)
 - [`IYubiKeyExtensions.cs`](src/IYubiKeyExtensions.cs) - Convenience extensions for `IYubiKey`
 
-Read-only device metadata types returned by `GetDeviceInfoAsync` (`DeviceInfo`, `DeviceCapabilities`, `DeviceFlags`, `FormFactor`, `VersionQualifier`) live in `Core/src/YubiKey` under `Yubico.YubiKit.Core.YubiKey`.
+Read-only device metadata types returned by `GetDeviceInfoAsync` (`DeviceInfo`, `DeviceCapabilities`, `DeviceFlags`, `FormFactor`, `VersionQualifier`) live in `Core/src/Devices` under `Yubico.YubiKit.Core.Devices`.
 
 ## Test Infrastructure - Advanced Device Filtering
 

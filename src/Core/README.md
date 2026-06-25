@@ -34,7 +34,7 @@ implemented, so a YubiKey currently surfaces only its PC/SC (CCID) interface the
 
 ```csharp
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 
 // One IYubiKey per physical device, even when several interfaces are present.
 var devices = await YubiKeyManager.FindAllAsync();
@@ -60,9 +60,9 @@ extensions (e.g. `CreateManagementSessionAsync`) select a transport via a docume
 optional `preferredConnection` override — see [Physical Device Model](../../docs/architecture/physical-device-model.md).
 
 ```csharp
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.Hid.Fido;
-using Yubico.YubiKit.Core.Hid.Interfaces;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 // Open SmartCard connection
 await using var smartCardConnection = await device.ConnectAsync<ISmartCardConnection>();
@@ -77,7 +77,9 @@ await using var otpConnection = await device.ConnectAsync<IOtpHidConnection>();
 ### Protocol Communication
 
 ```csharp
-using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 // Create protocol from connection
 var protocol = PcscProtocolFactory<ISmartCardConnection>.Create().Create(smartCardConnection);
@@ -104,7 +106,8 @@ var responseData = await protocol.TransmitAndReceiveAsync(command, cancellationT
 ### Secure Channel Protocol (SCP)
 
 ```csharp
-using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 
 // Establish SCP03 session
 var staticKeys = new StaticKeys(
@@ -127,7 +130,7 @@ staticKeys.Dispose();
 ### TLV Processing
 
 ```csharp
-using Yubico.YubiKit.Core.Tlv;
+using Yubico.YubiKit.Core.Utilities;
 
 // Parse TLV data
 var tlvs = TlvHelper.ParseMany(responseData);

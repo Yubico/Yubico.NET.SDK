@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using Xunit;
-using Yubico.YubiKit.Core.Hid.Interfaces;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 

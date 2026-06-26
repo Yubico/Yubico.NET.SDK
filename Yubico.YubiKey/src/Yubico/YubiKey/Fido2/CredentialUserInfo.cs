@@ -52,6 +52,12 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public ReadOnlyMemory<byte>? LargeBlobKey { get; private set; }
 
+        /// <summary>
+        /// Whether this credential is third-party payment enabled.
+        /// Null if the credential was not created with the thirdPartyPayment extension.
+        /// </summary>
+        public bool? ThirdPartyPayment { get; private set; }
+
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private CredentialUserInfo()
@@ -80,12 +86,17 @@ namespace Yubico.YubiKey.Fido2
         /// that can be used to encrypt or decrypt large blob data for the
         /// credential.
         /// </param>
+        /// <param name="thirdPartyPayment">
+        /// Whether the credential was created as payment-enabled. If null, the
+        /// authenticator did not return the thirdPartyPayment element.
+        /// </param>
         public CredentialUserInfo(
             UserEntity user,
             CredentialId credentialId,
             CoseKey credentialPublicKey,
             int credProtectPolicy,
-            ReadOnlyMemory<byte>? largeBlobKey = null
+            ReadOnlyMemory<byte>? largeBlobKey = null,
+            bool? thirdPartyPayment = null
             )
         {
             User = user;
@@ -93,6 +104,7 @@ namespace Yubico.YubiKey.Fido2
             CredentialPublicKey = credentialPublicKey;
             CredProtectPolicy = (CredProtectPolicy)credProtectPolicy;
             LargeBlobKey = largeBlobKey;
+            ThirdPartyPayment = thirdPartyPayment;
         }
     }
 }

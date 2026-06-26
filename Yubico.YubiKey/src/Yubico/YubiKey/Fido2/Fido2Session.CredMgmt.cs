@@ -273,7 +273,8 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="CredentialUserInfo.CredentialId"/>,
         /// <see cref="CredentialUserInfo.CredentialPublicKey"/>,
         /// <see cref="CredentialUserInfo.CredProtectPolicy"/>, and possibly
-        /// <see cref="CredentialUserInfo.LargeBlobKey"/>,
+        /// <see cref="CredentialUserInfo.LargeBlobKey"/> and
+        /// <see cref="CredentialUserInfo.ThirdPartyPayment"/>.
         /// </para>
         /// </remarks>
         /// <param name="relyingParty">

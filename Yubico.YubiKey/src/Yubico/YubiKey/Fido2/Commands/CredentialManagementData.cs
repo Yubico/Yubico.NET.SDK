@@ -59,6 +59,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int KeyTotalRpCredentials = 9;
         private const int KeyCredProtectPolicy = 10;
         private const int KeyLargeBlobKey = 11;
+        private const int KeyThirdPartyPayment = 12;
 
         /// <summary>
         /// The number of discoverable credentials on the YubiKey. This is not
@@ -166,6 +167,12 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </remarks>
         public ReadOnlyMemory<byte>? LargeBlobKey { get; private set; }
 
+        /// <summary>
+        /// Whether this credential is third-party payment enabled.
+        /// Null if the credential was not created with the thirdPartyPayment extension.
+        /// </summary>
+        public bool? ThirdPartyPayment { get; private set; }
+
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private CredentialManagementData()
@@ -246,6 +253,10 @@ namespace Yubico.YubiKey.Fido2.Commands
 
                     case KeyLargeBlobKey:
                         LargeBlobKey = cborReader.ReadByteString();
+                        break;
+
+                    case KeyThirdPartyPayment:
+                        ThirdPartyPayment = cborReader.ReadBoolean();
                         break;
                 }
                 count--;

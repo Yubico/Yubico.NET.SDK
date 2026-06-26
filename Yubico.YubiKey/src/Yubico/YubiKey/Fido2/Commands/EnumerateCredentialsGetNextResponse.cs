@@ -54,7 +54,8 @@ namespace Yubico.YubiKey.Fido2.Commands
                     credentialManagementData.CredentialId,
                     credentialManagementData.CredentialPublicKey,
                     credentialManagementData.CredProtectPolicy.Value,
-                    credentialManagementData.LargeBlobKey);
+                    credentialManagementData.LargeBlobKey,
+                    credentialManagementData.ThirdPartyPayment);
             }
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);

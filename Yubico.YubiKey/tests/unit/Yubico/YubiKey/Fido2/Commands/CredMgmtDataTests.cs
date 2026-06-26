@@ -41,6 +41,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int TotalCount = 9;
         private const int CredProtect = 10;
         private const int BlobKey = 11;
+        private const int ThirdPartyPmt = 12;
 
         [Fact]
         public void CredMgm_Decode_CorrectNumCredentials()
@@ -342,12 +343,23 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.True(isCorrect);
         }
 
+        [Fact]
+        public void CredMgm_Decode_CorrectThirdPartyPayment()
+        {
+            CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
+            object expected = expectedValues[ThirdPartyPmt];
+
+            Assert.True(mgmtData.ThirdPartyPayment.HasValue);
+            Assert.True(expected is bool);
+            Assert.Equal((bool)expected, mgmtData.ThirdPartyPayment!.Value);
+        }
+
         private CredentialManagementData GetFullCredMgmtData(out Dictionary<int, object> expectedValues)
         {
             expectedValues = new Dictionary<int, object>(20);
 
             byte[] encodedData = new byte[] {
-                0xAB,
+                0xAC,
                   0x01, 0x02,
                   0x02, 0x17,
                   0x03, 0xA2,
@@ -390,6 +402,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                  0x0B, 0x58, 0x20,
                        0xBC, 0x29, 0xFC, 0xE7, 0xAC, 0x3E, 0x44, 0xCC, 0xC4, 0x21, 0xFA, 0xCB, 0xAA, 0x98, 0x47, 0x5F,
                        0x8A, 0x98, 0xF1, 0x10, 0xD3, 0x49, 0x7B, 0x02, 0x21, 0x00, 0xB7, 0x74, 0xDF, 0x0E, 0xF9, 0x9B,
+                 0x0C, 0xF5,
             };
 
             expectedValues.Add(NumCredentials, (int)2);
@@ -424,6 +437,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                                                      0xC4, 0x21, 0xFA, 0xCB, 0xAA, 0x98, 0x47, 0x5F,
                                                      0x8A, 0x98, 0xF1, 0x10, 0xD3, 0x49, 0x7B, 0x02,
                                                      0x21, 0x00, 0xB7, 0x74, 0xDF, 0x0E, 0xF9, 0x9B });
+            expectedValues.Add(ThirdPartyPmt, true);
 
             return new CredentialManagementData(encodedData);
         }

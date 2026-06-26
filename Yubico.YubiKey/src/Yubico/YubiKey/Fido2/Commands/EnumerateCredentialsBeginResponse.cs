@@ -84,7 +84,8 @@ namespace Yubico.YubiKey.Fido2.Commands
                     credentialManagementData.CredentialId,
                     credentialManagementData.CredentialPublicKey,
                     credentialManagementData.CredProtectPolicy.Value,
-                    credentialManagementData.LargeBlobKey);
+                    credentialManagementData.LargeBlobKey,
+                    credentialManagementData.ThirdPartyPayment);
 
                 return (credentialManagementData.TotalCredentialsForRelyingParty.Value, userInfo);
             }

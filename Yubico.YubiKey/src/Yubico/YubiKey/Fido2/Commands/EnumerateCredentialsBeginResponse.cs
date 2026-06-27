@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
+using System.Formats.Cbor;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
@@ -31,6 +33,8 @@ namespace Yubico.YubiKey.Fido2.Commands
     public class EnumerateCredentialsBeginResponse
         : Fido2Response, IYubiKeyResponseWithData<(int credentialCount, CredentialUserInfo credentialUserInfo)>
     {
+        private const int KeyTotalRpCredentials = 9;
+
         private readonly CredentialManagementResponse _response;
 
         /// <summary>
@@ -71,23 +75,27 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </exception>
         public (int credentialCount, CredentialUserInfo credentialUserInfo) GetData()
         {
-            var credentialManagementData = _response.GetData();
+            var credentialManagementData = _response.GetDataMap();
 
-            if (!(credentialManagementData.TotalCredentialsForRelyingParty is null)
-                && !(credentialManagementData.User is null)
-                && !(credentialManagementData.CredentialId is null)
-                && !(credentialManagementData.CredentialPublicKey is null)
-                && !(credentialManagementData.CredProtectPolicy is null))
+            if (credentialManagementData.Contains(KeyTotalRpCredentials))
             {
-                var userInfo = new CredentialUserInfo(
-                    credentialManagementData.User,
-                    credentialManagementData.CredentialId,
-                    credentialManagementData.CredentialPublicKey,
-                    credentialManagementData.CredProtectPolicy.Value,
-                    credentialManagementData.LargeBlobKey,
-                    credentialManagementData.ThirdPartyPayment);
+                try
+                {
+                    var userInfo = CredentialUserInfo.FromCredentialManagementData(credentialManagementData);
 
-                return (credentialManagementData.TotalCredentialsForRelyingParty.Value, userInfo);
+                    return (CredentialUserInfo.ReadInt32(credentialManagementData, KeyTotalRpCredentials), userInfo);
+                }
+                catch (Ctap2DataException)
+                {
+                    throw;
+                }
+                catch (Exception exception) when (
+                    exception is CborContentException ||
+                    exception is InvalidOperationException ||
+                    exception is KeyNotFoundException)
+                {
+                    throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, exception);
+                }
             }
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);

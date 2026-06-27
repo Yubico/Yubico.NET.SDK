@@ -13,7 +13,10 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
+using System.Formats.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
+using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -24,6 +27,16 @@ namespace Yubico.YubiKey.Fido2
     /// </summary>
     public class CredentialUserInfo
     {
+        private const int KeyUser = 6;
+        private const int KeyCredentialId = 7;
+        private const int KeyPublicKey = 8;
+        private const int KeyTotalRpCredentials = 9;
+        private const int KeyCredProtectPolicy = 10;
+        private const int KeyLargeBlobKey = 11;
+        private const int KeyThirdPartyPayment = 12;
+
+        private readonly IReadOnlyDictionary<int, ReadOnlyMemory<byte>>? _credentialManagementFields;
+
         /// <summary>
         /// The user entity for a credential returned.
         /// </summary>
@@ -96,8 +109,7 @@ namespace Yubico.YubiKey.Fido2
             CoseKey credentialPublicKey,
             int credProtectPolicy,
             ReadOnlyMemory<byte>? largeBlobKey = null,
-            bool? thirdPartyPayment = null
-            )
+            bool? thirdPartyPayment = null)
         {
             User = user;
             CredentialId = credentialId;
@@ -106,5 +118,135 @@ namespace Yubico.YubiKey.Fido2
             LargeBlobKey = largeBlobKey;
             ThirdPartyPayment = thirdPartyPayment;
         }
+
+        private CredentialUserInfo(
+            UserEntity user,
+            CredentialId credentialId,
+            CoseKey credentialPublicKey,
+            int credProtectPolicy,
+            ReadOnlyMemory<byte>? largeBlobKey,
+            bool? thirdPartyPayment,
+            IReadOnlyDictionary<int, ReadOnlyMemory<byte>> credentialManagementFields)
+            : this(
+                user,
+                credentialId,
+                credentialPublicKey,
+                credProtectPolicy,
+                largeBlobKey,
+                thirdPartyPayment)
+        {
+            _credentialManagementFields = credentialManagementFields;
+        }
+
+        /// <summary>
+        /// Gets the raw CBOR-encoded value for a field in the credential
+        /// management response that produced this instance.
+        /// </summary>
+        /// <remarks>
+        /// This method provides access to credential-specific fields in the
+        /// credential-management response that do not yet have a dedicated SDK
+        /// property. The returned value is the raw CBOR encoding of the field
+        /// value, not a decoded .NET object.
+        /// It returns <see langword="false"/> for instances that were not built
+        /// from a credential-management response returned by the SDK.
+        /// </remarks>
+        /// <param name="key">
+        /// The integer CTAP map key to read.
+        /// </param>
+        /// <param name="encodedValue">
+        /// The raw CBOR-encoded value for <paramref name="key"/>, if present.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the response contained <paramref name="key"/>;
+        /// otherwise, <see langword="false"/>.
+        /// </returns>
+        public bool TryGetCredentialManagementField(int key, out ReadOnlyMemory<byte> encodedValue)
+        {
+            encodedValue = default;
+            if (_credentialManagementFields is null
+                || !_credentialManagementFields.TryGetValue(key, out encodedValue))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        internal static CredentialUserInfo FromCredentialManagementData(CborMap<int> credentialManagementData)
+        {
+            if (!credentialManagementData.Contains(KeyUser)
+                || !credentialManagementData.Contains(KeyCredentialId)
+                || !credentialManagementData.Contains(KeyPublicKey)
+                || !credentialManagementData.Contains(KeyCredProtectPolicy))
+            {
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
+            }
+
+            try
+            {
+                var user = new UserEntity(credentialManagementData.ReadEncodedValue(KeyUser), out int _);
+                var credentialId = new CredentialId(credentialManagementData.ReadEncodedValue(KeyCredentialId), out int _);
+                var credentialPublicKey = CoseKey.Create(credentialManagementData.ReadEncodedValue(KeyPublicKey), out int _);
+                int credProtectPolicy = ReadInt32(credentialManagementData, KeyCredProtectPolicy);
+                ReadOnlyMemory<byte>? largeBlobKey = credentialManagementData.Contains(KeyLargeBlobKey)
+                    ? credentialManagementData.ReadByteString(KeyLargeBlobKey)
+                    : null;
+                bool? thirdPartyPayment = credentialManagementData.Contains(KeyThirdPartyPayment)
+                    ? credentialManagementData.ReadBoolean(KeyThirdPartyPayment)
+                    : null;
+
+                return new CredentialUserInfo(
+                    user,
+                    credentialId,
+                    credentialPublicKey,
+                    credProtectPolicy,
+                    largeBlobKey,
+                    thirdPartyPayment,
+                    BuildCredentialManagementFields(credentialManagementData));
+            }
+            catch (Exception exception) when (
+                exception is CborContentException ||
+                exception is InvalidCastException ||
+                exception is InvalidOperationException ||
+                exception is KeyNotFoundException)
+            {
+                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, exception);
+            }
+        }
+
+        internal static int ReadInt32(CborMap<int> cborMap, int key)
+        {
+            var reader = new CborReader(cborMap.ReadEncodedValue(key), CborConformanceMode.Ctap2Canonical);
+            int value = reader.ReadInt32();
+            if (reader.BytesRemaining != 0)
+            {
+                throw new InvalidOperationException(ExceptionMessages.InvalidFido2Info);
+            }
+
+            return value;
+        }
+
+        private static IReadOnlyDictionary<int, ReadOnlyMemory<byte>> BuildCredentialManagementFields(
+            CborMap<int> credentialManagementData)
+        {
+            var fields = new Dictionary<int, ReadOnlyMemory<byte>>();
+            foreach (int key in credentialManagementData.Keys)
+            {
+                if (IsKnownField(key))
+                {
+                    continue;
+                }
+
+                fields[key] = credentialManagementData.ReadEncodedValue(key);
+            }
+
+            return fields;
+        }
+
+        private static bool IsKnownField(int key) => key switch
+        {
+            1 or 2 or 3 or 4 or 5 or KeyUser or KeyCredentialId or KeyPublicKey or KeyTotalRpCredentials or KeyCredProtectPolicy or KeyLargeBlobKey or KeyThirdPartyPayment => true,
+            _ => false,
+        };
     }
 }

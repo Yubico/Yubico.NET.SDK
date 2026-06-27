@@ -42,23 +42,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <inheritdoc/>
         public CredentialUserInfo GetData()
         {
-            var credentialManagementData = _response.GetData();
+            var credentialManagementData = _response.GetDataMap();
 
-            if (!(credentialManagementData.User is null)
-                && !(credentialManagementData.CredentialId is null)
-                && !(credentialManagementData.CredentialPublicKey is null)
-                && !(credentialManagementData.CredProtectPolicy is null))
-            {
-                return new CredentialUserInfo(
-                    credentialManagementData.User,
-                    credentialManagementData.CredentialId,
-                    credentialManagementData.CredentialPublicKey,
-                    credentialManagementData.CredProtectPolicy.Value,
-                    credentialManagementData.LargeBlobKey,
-                    credentialManagementData.ThirdPartyPayment);
-            }
-
-            throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
+            return CredentialUserInfo.FromCredentialManagementData(credentialManagementData);
         }
     }
 }

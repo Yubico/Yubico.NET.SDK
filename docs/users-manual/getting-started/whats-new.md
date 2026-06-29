@@ -26,11 +26,13 @@ Features:
 
 - The FIDO2 application now exposes the raw CBOR-encoded GetAssertion response data through `GetAssertionData.RawData`, allowing callers to inspect, forward, or preserve the original assertion response. ([#510](https://github.com/Yubico/Yubico.NET.SDK/pull/510))
 
+- The FIDO2 application now exposes raw credential management response data through `CredentialManagementData.RawData` and allows unknown credential fields to be retrieved for forward compatibility with future protocol extensions. ([#508](https://github.com/Yubico/Yubico.NET.SDK/pull/508))
+
 Bug Fixes:
 
 - Fixed an issue where FIDO2 credential management responses containing the `thirdPartyPayment` field could throw a `Ctap2DataException` on YubiKeys with firmware version 5.8 and above. ([#507](https://github.com/Yubico/Yubico.NET.SDK/pull/507))
 
-- Fixed an issue where unknown FIDO2 credential management response fields were rejected instead of being preserved for forward compatibility with future protocol extensions. Credential management responses now expose raw response data through `CredentialManagementData.RawData` and allow unknown credential fields to be retrieved. ([#508](https://github.com/Yubico/Yubico.NET.SDK/pull/508))
+- Fixed an issue where unknown FIDO2 credential management response fields were rejected instead of being preserved for forward compatibility with future protocol extensions. ([#508](https://github.com/Yubico/Yubico.NET.SDK/pull/508))
 
 Documentation:
 

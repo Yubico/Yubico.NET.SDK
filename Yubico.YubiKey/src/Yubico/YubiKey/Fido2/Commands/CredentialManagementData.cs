@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 
@@ -60,6 +61,22 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int KeyCredProtectPolicy = 10;
         private const int KeyLargeBlobKey = 11;
         private const int KeyThirdPartyPayment = 12;
+
+        /// <summary>
+        /// Gets the raw CBOR-encoded credential management response from the YubiKey.
+        /// </summary>
+        /// <remarks>
+        /// This preserves the complete response for callers that need to forward,
+        /// store, or inspect the original credential-management response outside
+        /// the SDK's decoded field model.
+        /// </remarks>
+        public ReadOnlyMemory<byte> RawData { get; }
+
+        /// <summary>
+        /// Gets response fields that were not recognized by this SDK, keyed by
+        /// their CTAP map key and stored as raw CBOR-encoded values.
+        /// </summary>
+        public IReadOnlyDictionary<int, ReadOnlyMemory<byte>> UnknownFields { get; }
 
         /// <summary>
         /// The number of discoverable credentials on the YubiKey. This is not
@@ -199,6 +216,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </exception>
         public CredentialManagementData(ReadOnlyMemory<byte> cborEncoding)
         {
+            RawData = cborEncoding.ToArray();
+            var unknownFields = new Dictionary<int, ReadOnlyMemory<byte>>();
             var cborReader = new CborReader(cborEncoding, CborConformanceMode.Ctap2Canonical);
             int? entries = cborReader.ReadStartMap();
             int count = entries ?? 0;
@@ -209,7 +228,8 @@ namespace Yubico.YubiKey.Fido2.Commands
                 switch (currentKey)
                 {
                     default:
-                        throw new Ctap2DataException(ExceptionMessages.Ctap2CborUnexpectedKey);
+                        unknownFields[currentKey] = cborReader.ReadEncodedValue().ToArray();
+                        break;
 
                     case KeyNumberCredentials:
                         NumberOfDiscoverableCredentials = cborReader.ReadInt32();
@@ -263,6 +283,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             }
 
             cborReader.ReadEndMap();
+            UnknownFields = unknownFields;
         }
     }
 }

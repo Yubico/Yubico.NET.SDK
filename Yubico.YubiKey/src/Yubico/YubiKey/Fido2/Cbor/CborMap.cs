@@ -224,14 +224,14 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
         private static int ReadInt32(object? value)
         {
-            try
+            return value switch
             {
-                return Convert.ToInt32(value, null);
-            }
-            catch (OverflowException overflowException)
-            {
-                throw new InvalidCastException(null, overflowException);
-            }
+                int intValue => intValue,
+                uint uintValue when uintValue <= int.MaxValue => (int)uintValue,
+                long longValue when longValue >= int.MinValue && longValue <= int.MaxValue => (int)longValue,
+                ulong ulongValue when ulongValue <= int.MaxValue => (int)ulongValue,
+                _ => throw new InvalidCastException()
+            };
         }
 
         /// <summary>

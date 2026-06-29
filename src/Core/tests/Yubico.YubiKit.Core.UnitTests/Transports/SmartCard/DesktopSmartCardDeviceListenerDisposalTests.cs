@@ -253,6 +253,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         var completed = await Task.WhenAny(disposeTask, Task.Delay(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken)) == disposeTask;
 
         Assert.True(completed, "Dispose should complete within 10 seconds");
+        await disposeTask;
     }
 
     /// <summary>
@@ -277,6 +278,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         var completed = await Task.WhenAny(disposeTask, Task.Delay(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken)) == disposeTask;
 
         Assert.True(completed, "Dispose should complete within 1 second when not started");
+        await disposeTask;
     }
 
     /// <summary>

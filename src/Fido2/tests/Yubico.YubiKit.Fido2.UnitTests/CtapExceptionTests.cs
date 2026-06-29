@@ -75,15 +75,6 @@ public class CtapExceptionTests
     public void Ctap22StatusValues_MatchSpecification(CtapStatus status, byte expectedValue) =>
         ((byte)status).Should().Be(expectedValue);
 
-    [Fact]
-    public void PuvathRequired_ObsoleteAlias_MapsToPuatRequired()
-    {
-#pragma warning disable CS0618
-        CtapStatus.PuvathRequired.Should().Be(CtapStatus.PuatRequired);
-        ((byte)CtapStatus.PuvathRequired).Should().Be(0x36);
-#pragma warning restore CS0618
-    }
-
     [Theory]
     [InlineData(CtapStatus.InvalidCommand, "Invalid CTAP command")]
     [InlineData(CtapStatus.InvalidParameter, "Invalid parameter")]

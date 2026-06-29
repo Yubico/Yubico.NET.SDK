@@ -77,7 +77,9 @@ internal sealed class HidDDevice : IHidDDevice
 
         if (buffer.Length != FeatureReportByteLength - 1)
         {
-            throw new InvalidOperationException("The HID feature report buffer length is invalid.");
+            throw new ArgumentException(
+                $"The HID feature report buffer length is invalid. Expected {FeatureReportByteLength - 1} bytes, but got {buffer.Length}.",
+                nameof(buffer));
         }
 
         // Windows expects the report ID byte before the report payload.
@@ -114,7 +116,9 @@ internal sealed class HidDDevice : IHidDDevice
 
         if (buffer.Length != OutputReportByteLength - 1)
         {
-            throw new InvalidOperationException("The HID output report buffer length is invalid.");
+            throw new ArgumentException(
+                $"The HID output report buffer length is invalid. Expected {OutputReportByteLength - 1} bytes, but got {buffer.Length}.",
+                nameof(buffer));
         }
 
         // Windows expects the report ID byte before the report payload.

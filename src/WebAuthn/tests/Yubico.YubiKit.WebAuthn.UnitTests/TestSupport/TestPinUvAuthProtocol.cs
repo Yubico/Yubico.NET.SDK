@@ -22,7 +22,7 @@ internal sealed class TestPinUvAuthProtocol : IPinUvAuthProtocol
 
     public int AuthenticationTagLength => 16;
 
-    public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message) => new byte[16];
+    public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message) => new byte[AuthenticationTagLength];
 
     public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext) => throw new NotImplementedException();
 

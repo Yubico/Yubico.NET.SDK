@@ -227,6 +227,39 @@ public class WebAuthnClientMakeCredentialTests
     }
 
     [Fact]
+    public async Task MakeCredential_ExcludeListWithoutToken_PreservesOriginalExcludeList()
+    {
+        // Arrange
+        var excludeCredential = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
+        var options = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)],
+            ExcludeCredentials = [excludeCredential]
+        };
+
+        BackendMakeCredentialRequest? capturedRequest = null;
+        _mockBackend.MakeCredentialAsync(
+            Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(CreateMockResponse());
+
+        // Act
+        await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(capturedRequest);
+        Assert.Same(options.ExcludeCredentials, capturedRequest.ExcludeList);
+        await _mockBackend.DidNotReceive().GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task MakeCredential_PuatRequired_RetriesWithUserVerificationRequired()
     {
         // Arrange

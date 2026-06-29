@@ -189,7 +189,7 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
                 request.RpId,
                 request.ClientDataHash,
                 options,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -215,7 +215,7 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        return await _session.GetNextAssertionAsync(cancellationToken);
+        return await _session.GetNextAssertionAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

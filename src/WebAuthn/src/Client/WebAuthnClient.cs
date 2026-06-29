@@ -492,7 +492,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
             // Pre-flight excludeList when non-empty (mirroring yubikit-android Ctap2Client.filterCreds)
             PublicKeyCredentialDescriptor? matchedExclude = null;
-            (matchedExclude, tokenSession) = await PreflightExcludeListAndRemintAsync(
+            bool preflightPerformed;
+            (matchedExclude, tokenSession, preflightPerformed) = await PreflightExcludeListAndRemintAsync(
                 options,
                 info,
                 uvDecision,
@@ -501,7 +502,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 cancellationToken).ConfigureAwait(false);
 
             // Build backend request with filtered exclude list
-            var request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude);
+            var request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed);
 
             // Execute MakeCredential
             MakeCredentialResponse ctapResponse;
@@ -528,7 +529,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                     pinBytes,
                     cancellationToken).ConfigureAwait(false);
 
-                (matchedExclude, tokenSession) = await PreflightExcludeListAndRemintAsync(
+                (matchedExclude, tokenSession, preflightPerformed) = await PreflightExcludeListAndRemintAsync(
                     options,
                     info,
                     uvDecision,
@@ -536,7 +537,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                     pinBytes,
                     cancellationToken).ConfigureAwait(false);
 
-                request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude);
+                request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed);
                 try
                 {
                     ctapResponse = await ExecuteMakeCredentialAsync(request, cancellationToken).ConfigureAwait(false);
@@ -903,7 +904,10 @@ public sealed class WebAuthnClient : IAsyncDisposable
         return (tokenSession, pinOwner, pinBytes);
     }
 
-    private async Task<(PublicKeyCredentialDescriptor? MatchedExclude, PinUvAuthTokenSession? TokenSession)> PreflightExcludeListAndRemintAsync(
+    private async Task<(
+        PublicKeyCredentialDescriptor? MatchedExclude,
+        PinUvAuthTokenSession? TokenSession,
+        bool PreflightPerformed)> PreflightExcludeListAndRemintAsync(
         RegistrationOptions options,
         AuthenticatorInfo info,
         UvDecision uvDecision,
@@ -913,7 +917,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
     {
         if (options.ExcludeCredentials is null || options.ExcludeCredentials.Count == 0 || tokenSession is null)
         {
-            return (null, tokenSession);
+            return (null, tokenSession, false);
         }
 
         // ToArray() creates a copy; pre-flight needs to pass token across async boundary.
@@ -942,7 +946,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 pinBytes,
                 cancellationToken).ConfigureAwait(false);
 
-            return (matchedExclude, tokenSession);
+            return (matchedExclude, tokenSession, true);
         }
         catch (CtapException preflightEx)
         {
@@ -1000,7 +1004,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
         WebAuthnClientData clientData,
         PinUvAuthTokenSession? tokenSession,
         UvDecision uvDecision,
-        PublicKeyCredentialDescriptor? matchedExclude)
+        PublicKeyCredentialDescriptor? matchedExclude,
+        bool preflightPerformed)
     {
         // Map options to backend request
         var optionsDict = new Dictionary<string, bool>();
@@ -1029,11 +1034,11 @@ public sealed class WebAuthnClient : IAsyncDisposable
         // Build extensions CBOR via pipeline
         var extensionsCbor = ExtensionPipeline.BuildRegistrationExtensionsCbor(options.Extensions, options);
 
-        // Use filtered exclude list: if pre-flight found a match, send only that one credential.
-        // If pre-flight found no match, send empty list. If no pre-flight (empty original list), send null.
-        IReadOnlyList<PublicKeyCredentialDescriptor>? excludeList = matchedExclude is not null
-            ? new[] { matchedExclude }
-            : (options.ExcludeCredentials is not null && options.ExcludeCredentials.Count > 0 ? Array.Empty<PublicKeyCredentialDescriptor>() : null);
+        // Use filtered exclude list only after pre-flight actually ran. Without pre-flight, preserve
+        // the caller's original exclude list so authenticators still enforce it.
+        IReadOnlyList<PublicKeyCredentialDescriptor>? excludeList = preflightPerformed
+            ? matchedExclude is not null ? new[] { matchedExclude } : Array.Empty<PublicKeyCredentialDescriptor>()
+            : options.ExcludeCredentials;
 
         return new BackendMakeCredentialRequest
         {

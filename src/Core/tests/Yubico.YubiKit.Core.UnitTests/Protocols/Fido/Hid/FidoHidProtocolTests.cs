@@ -141,6 +141,24 @@ public class FidoHidProtocolTests
         Assert.Equal(responsePayload, response.ToArray());
     }
 
+    [Fact]
+    public async Task SendVendorCommandAsync_ResponseContinuationInInitPositionMatchingKeepAliveCommand_ThrowsInvalidOperationException()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+
+        connection.QueueResponsePackets(
+            CreateContinuationPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [0xAA]),
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xBB]));
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendVendorCommandAsync(
+            CtapConstants.CtapVendorFirst,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken));
+
+        Assert.Contains("init", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static byte[] CreateInitPacket(uint channelId, byte command, ReadOnlySpan<byte> payload)
     {
         var packet = new byte[CtapConstants.PacketSize];

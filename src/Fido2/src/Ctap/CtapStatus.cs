@@ -213,6 +213,12 @@ public enum CtapStatus : byte
     PuatRequired = 0x36,
 
     /// <summary>
+    /// A pinUvAuthToken is required for the selected operation.
+    /// </summary>
+    [Obsolete("Use PuatRequired instead.", false)]
+    PuvathRequired = PuatRequired,
+
+    /// <summary>
     /// PIN policy violation. Currently only enforces minimum length.
     /// </summary>
     PinPolicyViolation = 0x37,

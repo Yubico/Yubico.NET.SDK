@@ -350,6 +350,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
 
     private static bool IsKeepAlivePacket(ReadOnlySpan<byte> packet) =>
         packet.Length >= CtapConstants.InitHeaderSize &&
+        (packet[4] & CtapConstants.InitPacketMask) != 0 &&
         GetPacketCommand(packet) == CtapConstants.CtapHidKeepAlive;
 
     private static void ValidateInitPacket(ReadOnlySpan<byte> packet, uint channelId)

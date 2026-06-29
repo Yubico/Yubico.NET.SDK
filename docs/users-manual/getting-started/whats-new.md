@@ -28,9 +28,7 @@ Features:
 
 Bug Fixes:
 
-- Fixed an issue where FIDO2 credential management responses containing the `thirdPartyPayment` field could throw a `Ctap2DataException` on YubiKeys with firmware version 5.8 and above. ([#507](https://github.com/Yubico/Yubico.NET.SDK/pull/507))
-
-- Fixed an issue where unknown FIDO2 credential management response fields were rejected instead of being preserved for forward compatibility with future protocol extensions. ([#508](https://github.com/Yubico/Yubico.NET.SDK/pull/508))
+- Fixed an issue where FIDO2 credential management responses containing fields introduced after CTAP 2.1 could throw a `Ctap2DataException`, including the `thirdPartyPayment` field on YubiKeys with firmware version 5.8 and above. The known `thirdPartyPayment` field is now parsed, and other unknown fields are preserved for forward compatibility. ([#507](https://github.com/Yubico/Yubico.NET.SDK/pull/507), [#508](https://github.com/Yubico/Yubico.NET.SDK/pull/508))
 
 Documentation:
 

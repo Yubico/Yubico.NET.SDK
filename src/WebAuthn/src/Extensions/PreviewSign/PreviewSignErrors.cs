@@ -46,10 +46,14 @@ internal static class PreviewSignErrors
                 "previewSign: user presence required but not provided",
                 ex),
 
-            // Note: CtapStatus constant is "PuvathRequired" (not "PuatRequired")
-            CtapStatus.PuvathRequired => new WebAuthnClientError(
+            CtapStatus.PuatRequired => new WebAuthnClientError(
                 WebAuthnClientErrorCode.NotAllowed,
                 "previewSign: PIN/UV auth token required",
+                ex),
+
+            CtapStatus.PinTokenExpired => new WebAuthnClientError(
+                WebAuthnClientErrorCode.NotAllowed,
+                "previewSign: PIN/UV auth token expired",
                 ex),
 
             CtapStatus.InvalidCredential => new WebAuthnClientError(

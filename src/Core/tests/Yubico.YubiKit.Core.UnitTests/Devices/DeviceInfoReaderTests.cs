@@ -95,6 +95,33 @@ public class DeviceInfoReaderTests
     }
 
     [Fact]
+    public async Task ReadAsync_SmartCardDuplicateMoreDataTags_ThrowsPageAwareBadResponse()
+    {
+        var protocol = new FakeSmartCardProtocol(BuildPage(new Tlv(0x10, [0x01]), new Tlv(0x10, [0x01])));
+
+        var ex = await Assert.ThrowsAsync<BadResponseException>(
+            () => DeviceInfoReader.ReadAsync(protocol, null, TestContext.Current.CancellationToken));
+
+        Assert.Contains("Duplicate", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("page 0", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ReadAsync_SmartCardDuplicateMoreDataTagsAfterAccumulatingTlvs_ThrowsPageAwareBadResponse()
+    {
+        var protocol = new FakeSmartCardProtocol(
+            BuildPage(new Tlv(0x1F, [0x00]), new Tlv(0x10, [0x01])),
+            BuildPage(new Tlv(0x10, [0x01]), new Tlv(0x10, [0x01])));
+
+        var ex = await Assert.ThrowsAsync<BadResponseException>(
+            () => DeviceInfoReader.ReadAsync(protocol, null, TestContext.Current.CancellationToken));
+
+        Assert.Equal([0, 1], protocol.RequestedPages);
+        Assert.Contains("Duplicate", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("page 1", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task ReadAsync_FidoSinglePage_ParsesDeviceInfo()
     {
         var protocol = new FakeFidoHidProtocol(BuildPage(CreateRequiredDeviceInfoTlvs()));

@@ -27,6 +27,11 @@ namespace Yubico.YubiKey.Fido2
     /// </summary>
     public class CredentialUserInfo
     {
+        private const int KeyNumberCredentials = 1;
+        private const int KeyRemainingCredentialCount = 2;
+        private const int KeyRpEntity = 3;
+        private const int KeyRpIdHash = 4;
+        private const int KeyTotalRps = 5;
         private const int KeyUser = 6;
         private const int KeyCredentialId = 7;
         private const int KeyPublicKey = 8;
@@ -187,7 +192,7 @@ namespace Yubico.YubiKey.Fido2
                 var user = new UserEntity(credentialManagementData.ReadEncodedValue(KeyUser), out int _);
                 var credentialId = new CredentialId(credentialManagementData.ReadEncodedValue(KeyCredentialId), out int _);
                 var credentialPublicKey = CoseKey.Create(credentialManagementData.ReadEncodedValue(KeyPublicKey), out int _);
-                int credProtectPolicy = ReadInt32(credentialManagementData, KeyCredProtectPolicy);
+                int credProtectPolicy = credentialManagementData.ReadInt32(KeyCredProtectPolicy);
                 ReadOnlyMemory<byte>? largeBlobKey = credentialManagementData.Contains(KeyLargeBlobKey)
                     ? credentialManagementData.ReadByteString(KeyLargeBlobKey)
                     : null;
@@ -214,18 +219,6 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        internal static int ReadInt32(CborMap<int> cborMap, int key)
-        {
-            var reader = new CborReader(cborMap.ReadEncodedValue(key), CborConformanceMode.Ctap2Canonical);
-            int value = reader.ReadInt32();
-            if (reader.BytesRemaining != 0)
-            {
-                throw new InvalidOperationException(ExceptionMessages.InvalidFido2Info);
-            }
-
-            return value;
-        }
-
         private static IReadOnlyDictionary<int, ReadOnlyMemory<byte>> BuildCredentialManagementFields(
             CborMap<int> credentialManagementData)
         {
@@ -245,7 +238,7 @@ namespace Yubico.YubiKey.Fido2
 
         private static bool IsKnownField(int key) => key switch
         {
-            1 or 2 or 3 or 4 or 5 or KeyUser or KeyCredentialId or KeyPublicKey or KeyTotalRpCredentials or KeyCredProtectPolicy or KeyLargeBlobKey or KeyThirdPartyPayment => true,
+            KeyNumberCredentials or KeyRemainingCredentialCount or KeyRpEntity or KeyRpIdHash or KeyTotalRps or KeyUser or KeyCredentialId or KeyPublicKey or KeyTotalRpCredentials or KeyCredProtectPolicy or KeyLargeBlobKey or KeyThirdPartyPayment => true,
             _ => false,
         };
     }

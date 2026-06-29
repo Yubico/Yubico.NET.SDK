@@ -63,8 +63,13 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int KeyThirdPartyPayment = 12;
 
         /// <summary>
-        /// The raw CBOR-encoded credential management response from the YubiKey.
+        /// Gets the raw CBOR-encoded credential management response from the YubiKey.
         /// </summary>
+        /// <remarks>
+        /// This preserves the complete response for callers that need to forward,
+        /// store, or inspect the original credential-management response outside
+        /// the SDK's decoded field model.
+        /// </remarks>
         public ReadOnlyMemory<byte> RawData { get; }
 
         /// <summary>

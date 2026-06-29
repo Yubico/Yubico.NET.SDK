@@ -97,7 +97,37 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             var cborMap = new CborMap<int>(cborWriter.Encode());
 
-            Assert.Throws<FormatException>(() => cborMap.ReadInt32(1));
+            Assert.Throws<InvalidCastException>(() => cborMap.ReadInt32(1));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ReadInt32_Boolean_ThrowsInvalidCast(bool value)
+        {
+            var cborWriter = new CborWriter();
+            cborWriter.WriteStartMap(1);
+            cborWriter.WriteInt32(1);
+            cborWriter.WriteBoolean(value);
+            cborWriter.WriteEndMap();
+
+            var cborMap = new CborMap<int>(cborWriter.Encode());
+
+            Assert.Throws<InvalidCastException>(() => cborMap.ReadInt32(1));
+        }
+
+        [Fact]
+        public void ReadInt32_Null_ThrowsInvalidCast()
+        {
+            var cborWriter = new CborWriter();
+            cborWriter.WriteStartMap(1);
+            cborWriter.WriteInt32(1);
+            cborWriter.WriteNull();
+            cborWriter.WriteEndMap();
+
+            var cborMap = new CborMap<int>(cborWriter.Encode());
+
+            Assert.Throws<InvalidCastException>(() => cborMap.ReadInt32(1));
         }
 
         bool TestInt32(byte[] encoding, int flags)

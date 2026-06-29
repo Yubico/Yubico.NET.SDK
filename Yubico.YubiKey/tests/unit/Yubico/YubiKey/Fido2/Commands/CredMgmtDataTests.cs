@@ -372,6 +372,22 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         [Fact]
+        public void CredMgm_Decode_RawData_PreservesOriginalEncoding()
+        {
+            byte[] encodedData = {
+                0xA1,
+                  0x01, 0x02,
+            };
+
+            var mgmtData = new CredentialManagementData(encodedData);
+            encodedData[0] = 0xA0;
+
+            Assert.True(MemoryExtensions.SequenceEqual(
+                mgmtData.RawData.Span,
+                new byte[] { 0xA1, 0x01, 0x02 }));
+        }
+
+        [Fact]
         public void CredentialUserInfo_TryGetCredentialManagementField_ReturnsEncodedValue()
         {
             byte[] encodedData = {

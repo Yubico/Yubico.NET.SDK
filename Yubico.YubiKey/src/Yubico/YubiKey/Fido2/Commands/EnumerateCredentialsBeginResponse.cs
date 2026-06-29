@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Formats.Cbor;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
@@ -79,23 +77,9 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             if (credentialManagementData.Contains(KeyTotalRpCredentials))
             {
-                try
-                {
-                    var userInfo = CredentialUserInfo.FromCredentialManagementData(credentialManagementData);
+                var userInfo = CredentialUserInfo.FromCredentialManagementData(credentialManagementData);
 
-                    return (CredentialUserInfo.ReadInt32(credentialManagementData, KeyTotalRpCredentials), userInfo);
-                }
-                catch (Ctap2DataException)
-                {
-                    throw;
-                }
-                catch (Exception exception) when (
-                    exception is CborContentException ||
-                    exception is InvalidOperationException ||
-                    exception is KeyNotFoundException)
-                {
-                    throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info, exception);
-                }
+                return (credentialManagementData.ReadInt32(KeyTotalRpCredentials), userInfo);
             }
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);

@@ -24,9 +24,7 @@ Release date: June 29th, 2026
 
 Features:
 
-- The FIDO2 application now exposes the raw CBOR-encoded GetAssertion response data through `GetAssertionData.RawData`, allowing callers to inspect, forward, or preserve the original assertion response. ([#510](https://github.com/Yubico/Yubico.NET.SDK/pull/510))
-
-- The FIDO2 application now exposes raw credential management response data through `CredentialManagementData.RawData` and allows unknown credential fields to be retrieved for forward compatibility with future protocol extensions. ([#508](https://github.com/Yubico/Yubico.NET.SDK/pull/508))
+- The FIDO2 application now exposes raw CBOR-encoded response data for GetAssertion and credential management operations through `GetAssertionData.RawData` and `CredentialManagementData.RawData`, allowing callers to inspect, forward, or preserve original response data while remaining forward-compatible with future protocol extensions. ([#510](https://github.com/Yubico/Yubico.NET.SDK/pull/510), [#508](https://github.com/Yubico/Yubico.NET.SDK/pull/508))
 
 Bug Fixes:
 

@@ -102,6 +102,16 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public ReadOnlyMemory<byte>? LargeBlobKey { get; private set; }
 
+        /// <summary>
+        /// Gets the raw CBOR-encoded GetAssertion response from the YubiKey.
+        /// </summary>
+        /// <remarks>
+        /// This preserves the complete response for callers that need to forward,
+        /// store, or inspect the original assertion response outside the SDK's
+        /// decoded field model.
+        /// </remarks>
+        public ReadOnlyMemory<byte> RawData { get; }
+
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private GetAssertionData()
@@ -128,9 +138,11 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public GetAssertionData(ReadOnlyMemory<byte> cborEncoding)
         {
+            RawData = cborEncoding.ToArray();
+
             try
             {
-                var map = new CborMap<int>(cborEncoding);
+                var map = new CborMap<int>(RawData);
                 var stringCborMap = map.ReadMap<string>(KeyCredential);
 
                 CredentialId = new CredentialId

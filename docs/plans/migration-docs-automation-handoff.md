@@ -132,7 +132,7 @@ Result:
 - No C# public API candidates were found, as expected for a docs/workflow PR.
 - The repo remained clean after the dry run.
 
-Local WSL required a temporary `safe.directory` override due Windows-owned repo paths. No global Git config was changed.
+Local WSL required a temporary `safe.directory` override due to Windows-owned repo paths. No global Git config was changed.
 
 ## Verification Performed
 

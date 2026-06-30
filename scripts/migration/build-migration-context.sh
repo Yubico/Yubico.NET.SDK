@@ -141,15 +141,18 @@ grep -Ff "$tmp_symbols" docs/migration/v1-to-v2.md docs/migration/v1-to-v2-chang
   | head -n 200 > "$output_dir/docs-coverage-hits.txt" || true
 
 : > "$output_dir/v1-symbol-candidates.txt"
+candidate_lines=0
 while IFS= read -r symbol; do
   [[ -z "$symbol" ]] && continue
-  if [[ "$(wc -l < "$output_dir/v1-symbol-candidates.txt")" -ge 300 ]]; then
+  if [[ "$candidate_lines" -ge 300 ]]; then
     break
   fi
 
   matches="$(git grep -n --no-color -F -- "$symbol" "$v1_baseline" -- 'Yubico.Core' 'Yubico.YubiKey' 2>/dev/null | head -n 3 || true)"
   if [[ -n "$matches" ]]; then
     printf '%s\n' "$matches" >> "$output_dir/v1-symbol-candidates.txt"
+    added_lines="$(printf '%s\n' "$matches" | wc -l | tr -d ' ')"
+    candidate_lines=$((candidate_lines + added_lines))
   fi
 done < "$tmp_symbols"
 

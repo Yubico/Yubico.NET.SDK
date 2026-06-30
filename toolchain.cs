@@ -23,6 +23,7 @@
  *   build          - Build the solution (restores only if needed)
  *   test           - Run unit tests with summary output
  *   resilience     - Run fast no-hardware runtime resilience gates
+ *   benchmark      - Run performance benchmarks (manual, not CI)
  *   docs-qa        - Validate active documentation hygiene
  *   coverage       - Run tests with code coverage
  *   pack           - Create NuGet packages
@@ -45,6 +46,7 @@
  *   --integration                  Include integration tests (requires --project, unit tests only by default)
  *   --smoke                        Smoke test mode: skip Slow and RequiresUserPresence tests
  *   --fast                         Required fast mode for resilience gates
+ *   --benchmark-args <args>         Arguments passed to BenchmarkDotNet
  *
  * EXAMPLES:
  *   dotnet toolchain.cs build
@@ -54,6 +56,7 @@
  *   dotnet toolchain.cs test --filter "FullyQualifiedName~MyTestClass"
  *   dotnet toolchain.cs test --project Piv --filter "Method~Sign"
  *   dotnet toolchain.cs -- resilience --fast
+ *   dotnet toolchain.cs benchmark --benchmark-args "--list flat"
  *   dotnet toolchain.cs -- test --integration --project Piv --smoke   (quick integration smoke test)
  *   dotnet toolchain.cs coverage
  *   dotnet toolchain.cs publish --package-version 1.0.0-preview.1
@@ -121,6 +124,7 @@ var projectFilter = GetArgument("--project");
 var includeIntegration = HasFlag("--integration");
 var smokeTest = HasFlag("--smoke");
 var fastMode = HasFlag("--fast");
+var benchmarkArgs = GetArgument("--benchmark-args") ?? "";
 
 // --smoke injects trait filters to skip slow and user-presence tests
 if (smokeTest)
@@ -326,6 +330,19 @@ Target("resilience", () =>
     }
 });
 
+Target("benchmark", () =>
+{
+    PrintHeader("Running performance benchmarks");
+
+    var benchmarkProject = Path.Combine(
+        repoRoot,
+        "benchmarks",
+        "Yubico.YubiKit.PerformanceBenchmarks",
+        "Yubico.YubiKit.PerformanceBenchmarks.csproj");
+
+    Run("dotnet", $"run --project \"{benchmarkProject}\" -c {configuration} -- {benchmarkArgs}");
+});
+
 Target("docs-qa", () =>
 {
     PrintHeader("Validating active documentation");
@@ -434,7 +451,7 @@ if (args.Contains("--help") || args.Contains("-h"))
 // Run Bullseye — strip all custom args so Bullseye only sees target names and its own flags
 var bullseyeArgs = FilterBullseyeArgs(args,
     optionsWithValues: ["--project", "--filter", "--package-version", "--nuget-feed-name", "--nuget-feed-path",
-                        "--nuget-feed-url", "--nuget-api-key"],
+                        "--nuget-feed-url", "--nuget-api-key", "--benchmark-args"],
     flags: ["--integration", "--include-docs", "--dry-run", "--clean", "--smoke", "--fast"]);
 await RunTargetsAndExitAsync(bullseyeArgs);
 
@@ -662,6 +679,7 @@ TARGETS:
   build          - Build the solution (restores only if needed)
   test           - Run unit tests with summary output
   resilience     - Run fast no-hardware runtime resilience gates
+  benchmark      - Run performance benchmarks (manual, not CI)
   docs-qa        - Validate active documentation hygiene
   coverage       - Run tests with code coverage
   pack           - Create NuGet packages
@@ -684,6 +702,7 @@ OPTIONS:
   --integration                  Include integration tests (requires --project)
   --smoke                        Smoke test mode: skip Slow and RequiresUserPresence tests
   --fast                         Required fast mode for resilience gates
+  --benchmark-args <args>         Arguments passed to BenchmarkDotNet
   -h, --help                     Show this help message
 
 EXAMPLES:
@@ -694,6 +713,7 @@ EXAMPLES:
   dotnet toolchain.cs test --filter ""FullyQualifiedName~MyTestClass""
   dotnet toolchain.cs test --project Piv --filter ""Method~Sign""
   dotnet toolchain.cs -- resilience --fast
+  dotnet toolchain.cs benchmark --benchmark-args ""--list flat""
   dotnet toolchain.cs -- test --integration --project Piv --smoke
   dotnet toolchain.cs coverage
   dotnet toolchain.cs publish --package-version 1.0.0-preview.1

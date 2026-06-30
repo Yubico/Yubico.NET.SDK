@@ -194,6 +194,14 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
         {
             // The listener may still be using the native context. Prefer a bounded leak over
             // disposing a handle that could still be active on the background thread.
+            lock (_syncLock)
+            {
+                if (ReferenceEquals(_context, context))
+                {
+                    _context = null;
+                }
+            }
+
             return;
         }
 

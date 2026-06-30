@@ -26,7 +26,7 @@ limitations under the License. -->
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SharpFuzz" Version="2.2.0" />
+    <PackageReference Include="SharpFuzz" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>

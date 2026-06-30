@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
+using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2.Commands
@@ -41,6 +42,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int TotalCount = 9;
         private const int CredProtect = 10;
         private const int BlobKey = 11;
+        private const int ThirdPartyPmt = 12;
 
         [Fact]
         public void CredMgm_Decode_CorrectNumCredentials()
@@ -342,12 +344,116 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.True(isCorrect);
         }
 
+        [Fact]
+        public void CredMgm_Decode_CorrectThirdPartyPayment()
+        {
+            CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
+            object expected = expectedValues[ThirdPartyPmt];
+
+            Assert.True(mgmtData.ThirdPartyPayment.HasValue);
+            Assert.True(expected is bool);
+            Assert.Equal((bool)expected, mgmtData.ThirdPartyPayment!.Value);
+        }
+
+        [Fact]
+        public void CredMgm_Decode_UnknownKey_PreservesEncodedValue()
+        {
+            byte[] encodedData = {
+                0xA2,
+                  0x01, 0x02,
+                  0x18, 0x63, 0xF5,
+            };
+
+            var mgmtData = new CredentialManagementData(encodedData);
+
+            Assert.Equal(2, mgmtData.NumberOfDiscoverableCredentials);
+            Assert.True(mgmtData.UnknownFields.TryGetValue(99, out var unknownValue));
+            Assert.True(MemoryExtensions.SequenceEqual(unknownValue.Span, new byte[] { 0xF5 }));
+        }
+
+        [Fact]
+        public void CredMgm_Decode_RawData_PreservesOriginalEncoding()
+        {
+            byte[] encodedData = {
+                0xA1,
+                  0x01, 0x02,
+            };
+
+            var mgmtData = new CredentialManagementData(encodedData);
+            encodedData[0] = 0xA0;
+
+            Assert.True(MemoryExtensions.SequenceEqual(
+                mgmtData.RawData.Span,
+                new byte[] { 0xA1, 0x01, 0x02 }));
+        }
+
+        [Fact]
+        public void CredentialUserInfo_TryGetCredentialManagementField_ReturnsEncodedValue()
+        {
+            byte[] encodedData = {
+                0xA6,
+                  0x06, 0xA3,
+                        0x62, 0x69, 0x64,
+                              0x46, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64,
+                        0x64, 0x6E, 0x61, 0x6D, 0x65,
+                              0x68, 0x75, 0x73, 0x65, 0x72, 0x4E, 0x61, 0x6D, 0x65,
+                        0x6B, 0x64, 0x69, 0x73, 0x70, 0x6C, 0x61, 0x79, 0x4E, 0x61, 0x6D, 0x65,
+                              0x69, 0x55, 0x73, 0x65, 0x72, 0x20, 0x4E, 0x61, 0x6D, 0x65,
+                  0x07, 0xA2,
+                        0x62, 0x69, 0x64,
+                              0x44, 0x31, 0x32, 0x33, 0x34,
+                        0x64, 0x74, 0x79, 0x70, 0x65,
+                              0x6A, 0x70, 0x75, 0x62, 0x6C, 0x69, 0x63, 0x2D, 0x6B, 0x65, 0x79,
+                  0x08, 0xA5,
+                        0x01, 0x02,
+                        0x03, 0x38, 0x18,
+                        0x20, 0x01,
+                        0x21, 0x58, 0x20,
+                              0x8B, 0x1C, 0x84, 0x52, 0x7E, 0x02, 0x89, 0x9F, 0x58, 0x5C, 0xFF, 0xDB, 0x35, 0x48, 0xC3, 0x6E,
+                              0xBC, 0x29, 0xFC, 0xE7, 0xAC, 0x3E, 0x44, 0xCC, 0xC4, 0x21, 0xFA, 0xCB, 0xAA, 0x98, 0x47, 0x5F,
+                        0x22, 0x58, 0x20,
+                              0x38, 0x08, 0x01, 0xD5, 0xC2, 0x31, 0x1E, 0x0C, 0x9D, 0x79, 0x6A, 0x57, 0xDD, 0xD4, 0x42, 0x7B,
+                              0x8A, 0x98, 0xF1, 0x10, 0xD3, 0x49, 0x7B, 0x02, 0x21, 0x00, 0xB7, 0x74, 0xDF, 0x0E, 0xF9, 0x9B,
+                  0x09, 0x01,
+                  0x0A, 0x02,
+                  0x18, 0x63, 0x66, 0x66, 0x75, 0x74, 0x75, 0x72, 0x65,
+            };
+
+            var map = new CborMap<int>(encodedData);
+            var userInfo = CredentialUserInfo.FromCredentialManagementData(map);
+
+            Assert.True(userInfo.TryGetCredentialManagementField(99, out var encodedValue));
+            Assert.True(MemoryExtensions.SequenceEqual(
+                encodedValue.Span,
+                new byte[] { 0x66, 0x66, 0x75, 0x74, 0x75, 0x72, 0x65 }));
+            Assert.False(userInfo.TryGetCredentialManagementField(TotalCount, out _));
+            Assert.False(userInfo.TryGetCredentialManagementField(CredProtect, out _));
+        }
+
+        [Fact]
+        public void CredentialUserInfo_FromCredentialManagementData_BooleanCredProtect_ThrowsCtap2DataException()
+        {
+            byte[] encodedData = GetMinimalCredentialUserInfoEncoding(0xF5);
+            var map = new CborMap<int>(encodedData);
+
+            Assert.Throws<Ctap2DataException>(() => CredentialUserInfo.FromCredentialManagementData(map));
+        }
+
+        [Fact]
+        public void CredentialUserInfo_FromCredentialManagementData_NullCredProtect_ThrowsCtap2DataException()
+        {
+            byte[] encodedData = GetMinimalCredentialUserInfoEncoding(0xF6);
+            var map = new CborMap<int>(encodedData);
+
+            Assert.Throws<Ctap2DataException>(() => CredentialUserInfo.FromCredentialManagementData(map));
+        }
+
         private CredentialManagementData GetFullCredMgmtData(out Dictionary<int, object> expectedValues)
         {
             expectedValues = new Dictionary<int, object>(20);
 
             byte[] encodedData = new byte[] {
-                0xAB,
+                0xAC,
                   0x01, 0x02,
                   0x02, 0x17,
                   0x03, 0xA2,
@@ -390,6 +496,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                  0x0B, 0x58, 0x20,
                        0xBC, 0x29, 0xFC, 0xE7, 0xAC, 0x3E, 0x44, 0xCC, 0xC4, 0x21, 0xFA, 0xCB, 0xAA, 0x98, 0x47, 0x5F,
                        0x8A, 0x98, 0xF1, 0x10, 0xD3, 0x49, 0x7B, 0x02, 0x21, 0x00, 0xB7, 0x74, 0xDF, 0x0E, 0xF9, 0x9B,
+                 0x0C, 0xF5,
             };
 
             expectedValues.Add(NumCredentials, (int)2);
@@ -424,8 +531,41 @@ namespace Yubico.YubiKey.Fido2.Commands
                                                      0xC4, 0x21, 0xFA, 0xCB, 0xAA, 0x98, 0x47, 0x5F,
                                                      0x8A, 0x98, 0xF1, 0x10, 0xD3, 0x49, 0x7B, 0x02,
                                                      0x21, 0x00, 0xB7, 0x74, 0xDF, 0x0E, 0xF9, 0x9B });
+            expectedValues.Add(ThirdPartyPmt, true);
 
             return new CredentialManagementData(encodedData);
+        }
+
+        private static byte[] GetMinimalCredentialUserInfoEncoding(byte credProtectValue)
+        {
+            byte[] encodedData = {
+                0xA4,
+                  0x06, 0xA3,
+                        0x62, 0x69, 0x64,
+                              0x46, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64,
+                        0x64, 0x6E, 0x61, 0x6D, 0x65,
+                              0x68, 0x75, 0x73, 0x65, 0x72, 0x4E, 0x61, 0x6D, 0x65,
+                        0x6B, 0x64, 0x69, 0x73, 0x70, 0x6C, 0x61, 0x79, 0x4E, 0x61, 0x6D, 0x65,
+                              0x69, 0x55, 0x73, 0x65, 0x72, 0x20, 0x4E, 0x61, 0x6D, 0x65,
+                  0x07, 0xA2,
+                        0x62, 0x69, 0x64,
+                              0x44, 0x31, 0x32, 0x33, 0x34,
+                        0x64, 0x74, 0x79, 0x70, 0x65,
+                              0x6A, 0x70, 0x75, 0x62, 0x6C, 0x69, 0x63, 0x2D, 0x6B, 0x65, 0x79,
+                  0x08, 0xA5,
+                        0x01, 0x02,
+                        0x03, 0x38, 0x18,
+                        0x20, 0x01,
+                        0x21, 0x58, 0x20,
+                              0x8B, 0x1C, 0x84, 0x52, 0x7E, 0x02, 0x89, 0x9F, 0x58, 0x5C, 0xFF, 0xDB, 0x35, 0x48, 0xC3, 0x6E,
+                              0xBC, 0x29, 0xFC, 0xE7, 0xAC, 0x3E, 0x44, 0xCC, 0xC4, 0x21, 0xFA, 0xCB, 0xAA, 0x98, 0x47, 0x5F,
+                        0x22, 0x58, 0x20,
+                              0x38, 0x08, 0x01, 0xD5, 0xC2, 0x31, 0x1E, 0x0C, 0x9D, 0x79, 0x6A, 0x57, 0xDD, 0xD4, 0x42, 0x7B,
+                              0x8A, 0x98, 0xF1, 0x10, 0xD3, 0x49, 0x7B, 0x02, 0x21, 0x00, 0xB7, 0x74, 0xDF, 0x0E, 0xF9, 0x9B,
+                  0x0A, credProtectValue,
+            };
+
+            return encodedData;
         }
     }
 }

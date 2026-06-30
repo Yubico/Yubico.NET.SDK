@@ -23,6 +23,10 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
     /// </summary>
     /// <remarks>
     /// <para>
+    /// WARNING: This code is for testing purposes only and is not intended to be a
+    /// secure or complete implementation of ARKG.
+    /// </para>
+    /// <para>
     /// This class contains the derived public key and handles needed for the
     /// ESP256-split-ARKG previewSign test-helper path. Instances are obtained
     /// by calling <see cref="PreviewSignGeneratedKeyExtensions.DerivePublicKey(PreviewSignGeneratedKey, byte[], byte[])"/> with
@@ -86,6 +90,10 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// </summary>
         /// <remarks>
         /// <para>
+        /// WARNING: This code is for testing purposes only and is not intended to be a
+        /// secure or complete implementation of ARKG.
+        /// </para>
+        /// <para>
         /// This method verifies that a signature produced by the ESP256-split-ARKG
         /// previewSign path (obtained via <see cref="AuthenticatorData.GetPreviewSignSignature"/>)
         /// is valid for the given message using the derived public key from ARKG-P256
@@ -123,6 +131,10 @@ namespace Yubico.YubiKey.TestUtilities.Fido2
         /// Verifies a signature against the derived public key.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// WARNING: This code is for testing purposes only and is not intended to be a
+        /// secure or complete implementation of ARKG.
+        /// </para>
         /// <para>
         /// This method verifies that a signature produced by the ESP256-split-ARKG
         /// previewSign path (obtained via <see cref="AuthenticatorData.GetPreviewSignSignature"/>)

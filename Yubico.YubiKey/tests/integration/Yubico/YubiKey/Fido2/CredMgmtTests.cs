@@ -20,134 +20,108 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
-    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
     [Trait(TraitTypes.Category, TestCategories.Elevated)]
-    public class CredMgmtTests : IClassFixture<BioFido2Fixture>
+    public class CredMgmtTests : FidoSessionIntegrationTestBase
     {
-        private readonly BioFido2Fixture _bioFido2Fixture; // This test should be able to run without a bio key
-
-        public CredMgmtTests(BioFido2Fixture bioFido2Fixture)
-        {
-            _bioFido2Fixture = bioFido2Fixture;
-            if (_bioFido2Fixture.HasCredentials)
-            {
-                return;
-            }
-
-            _bioFido2Fixture.AddCredentials(2, 1);
-            _bioFido2Fixture.AddCredentials(1, 0);
-        }
+        // Defeat the macOS YubiKeyDeviceListener startup race before the
+        // base class's instance ctor runs. See DeviceListenerCacheWarmup
+        // for the full rationale.
+        static CredMgmtTests() => DeviceListenerCacheWarmup.WaitForFirstDevice();
 
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void GetMetadata_Succeeds()
         {
-            using (var fido2Session = new Fido2Session(_bioFido2Fixture.Device))
-            {
-                fido2Session.KeyCollector = _bioFido2Fixture.KeyCollector;
-                fido2Session.AddPermissions(
-                    PinUvAuthTokenPermissions.MakeCredential, _bioFido2Fixture.RpInfoList[0].RelyingParty.Id);
+            _ = AddCredential("metadata.example.com", 1);
 
-                (int credCount, int slotCount) = fido2Session.GetCredentialMetadata();
-                Assert.Equal(3, credCount);
-                Assert.Equal(22, slotCount);
-            }
+            (int credCount, int slotCount) = Session.GetCredentialMetadata();
+
+            Assert.InRange(credCount, 1, int.MaxValue);
+            Assert.InRange(slotCount, 1, int.MaxValue);
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void EnumerateRps_Succeeds()
         {
-            using (var fido2Session = new Fido2Session(_bioFido2Fixture.Device))
-            {
-                fido2Session.KeyCollector = _bioFido2Fixture.KeyCollector;
-                fido2Session.AddPermissions(PinUvAuthTokenPermissions.CredentialManagement, "rp-3");
+            RelyingParty relyingParty = AddCredential("enumerate-rps.example.com", 1);
 
-                IReadOnlyList<RelyingParty> rpList = fido2Session.EnumerateRelyingParties();
-                Assert.Equal(2, rpList.Count);
+            IReadOnlyList<RelyingParty> rpList = Session.EnumerateRelyingParties();
 
-                RpInfo rpInfo = _bioFido2Fixture.MatchRelyingParty(rpList[0]);
-                bool isValid = rpInfo.RelyingPartyIdHash.Span.SequenceEqual(rpList[0].RelyingPartyIdHash.Span);
-                Assert.True(isValid);
-            }
+            Assert.Contains(rpList, rp => rp.Id == relyingParty.Id);
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void EnumerateCreds_Succeeds()
         {
-            using (var fido2Session = new Fido2Session(_bioFido2Fixture.Device))
-            {
-                fido2Session.KeyCollector = _bioFido2Fixture.KeyCollector;
-                fido2Session.AddPermissions(PinUvAuthTokenPermissions.MakeCredential, "rp-3");
+            RelyingParty relyingParty = AddCredential("enumerate-creds.example.com", 1);
 
-                RpInfo rpInfo = _bioFido2Fixture.RpInfoList[0];
-                IReadOnlyList<CredentialUserInfo> ykCredList =
-                    fido2Session.EnumerateCredentialsForRelyingParty(rpInfo.RelyingParty);
-                Assert.Equal(rpInfo.DiscoverableCount, ykCredList.Count);
+            IReadOnlyList<CredentialUserInfo> credList =
+                Session.EnumerateCredentialsForRelyingParty(relyingParty);
 
-                UserEntity ykUser = ykCredList[0].User;
-
-                Tuple<UserEntity, MakeCredentialData> userInfo = _bioFido2Fixture.MatchUser(rpInfo.RelyingParty, ykUser);
-                ReadOnlyMemory<byte> targetKey = userInfo.Item2.LargeBlobKey
-                    ?? throw new InvalidOperationException("No matching User.");
-                ReadOnlyMemory<byte> ykLargeBlobKey = ykCredList[0].LargeBlobKey
-                    ?? throw new InvalidOperationException("No matching User.");
-
-                bool isValid = targetKey.Span.SequenceEqual(ykLargeBlobKey.Span);
-                Assert.True(isValid);
-            }
+            Assert.Single(credList);
+            Assert.Equal("user-1", credList[0].User.Name);
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void DeleteCred_Succeeds()
         {
-            _bioFido2Fixture.AddCredentials(1, 0);
-            using (var fido2Session = new Fido2Session(_bioFido2Fixture.Device))
-            {
-                fido2Session.KeyCollector = _bioFido2Fixture.KeyCollector;
-                fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration);
+            RelyingParty relyingParty = AddCredential("delete-creds.example.com", 1);
 
-                IReadOnlyList<CredentialUserInfo> credList =
-                    fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[2].RelyingParty);
-                int count = credList.Count;
-                Assert.Equal(1, count);
+            IReadOnlyList<CredentialUserInfo> credList =
+                Session.EnumerateCredentialsForRelyingParty(relyingParty);
+            Assert.Single(credList);
 
-                fido2Session.ClearAuthToken();
-                fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration);
+            Session.ClearAuthToken();
+            Session.DeleteCredential(credList[0].CredentialId);
 
-                fido2Session.DeleteCredential(credList[0].CredentialId);
-
-                credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[2].RelyingParty);
-                Assert.NotNull(credList);
-                Assert.True(credList.Count == count - 1);
-            }
+            credList = Session.EnumerateCredentialsForRelyingParty(relyingParty);
+            Assert.Empty(credList);
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void UpdateUserInfo_Succeeds()
         {
             string updatedDisplayName = "Updated Display Name";
+            RelyingParty relyingParty = AddCredential("update-user.example.com", 1);
 
-            using (var fido2Session = new Fido2Session(_bioFido2Fixture.Device))
+            IReadOnlyList<CredentialUserInfo> credList =
+                Session.EnumerateCredentialsForRelyingParty(relyingParty);
+            Assert.Single(credList);
+
+            Session.ClearAuthToken();
+
+            UserEntity newInfo = credList[0].User;
+            newInfo.DisplayName = updatedDisplayName;
+
+            Session.UpdateUserInfoForCredential(credList[0].CredentialId, newInfo);
+
+            credList = Session.EnumerateCredentialsForRelyingParty(relyingParty);
+
+            string displayName = credList[0].User.DisplayName ?? "";
+            Assert.Equal(updatedDisplayName, displayName);
+        }
+
+        private RelyingParty AddCredential(string relyingPartyId, int userId)
+        {
+            var relyingParty = new RelyingParty(relyingPartyId)
             {
-                fido2Session.KeyCollector = _bioFido2Fixture.KeyCollector;
-                fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration);
+                Name = relyingPartyId,
+            };
 
-                IReadOnlyList<CredentialUserInfo> credList =
-                    fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0].RelyingParty);
-                Assert.NotEmpty(credList);
+            var user = new UserEntity(new byte[] { (byte)userId })
+            {
+                Name = $"user-{userId}",
+                DisplayName = $"User {userId}",
+            };
 
-                fido2Session.ClearAuthToken();
-                fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration);
+            var makeCredentialParameters = new MakeCredentialParameters(relyingParty, user)
+            {
+                ClientDataHash = ClientDataHash,
+            };
+            makeCredentialParameters.AddOption(AuthenticatorOptions.rk, true);
 
-                UserEntity newInfo = credList[0].User;
-                newInfo.DisplayName = updatedDisplayName;
+            Session.MakeCredential(makeCredentialParameters);
 
-                fido2Session.UpdateUserInfoForCredential(credList[0].CredentialId, newInfo);
-
-                credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0].RelyingParty);
-
-                string displayName = credList[0].User.DisplayName ?? "";
-                Assert.Equal(updatedDisplayName, displayName);
-            }
+            return relyingParty;
         }
     }
 }

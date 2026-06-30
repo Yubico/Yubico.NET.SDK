@@ -14,6 +14,7 @@
 
 using System;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -48,6 +49,16 @@ namespace Yubico.YubiKey.Fido2.Commands
             }
 
             return new CredentialManagementData(ResponseApdu.Data);
+        }
+
+        internal CborMap<int> GetDataMap()
+        {
+            if (Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(StatusMessage);
+            }
+
+            return new CborMap<int>(ResponseApdu.Data);
         }
     }
 }

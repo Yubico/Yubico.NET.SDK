@@ -18,6 +18,28 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.17.x Releases
 
+### 1.17.1
+
+Release date: June 29th, 2026
+
+Features:
+
+- The FIDO2 application now exposes raw CBOR-encoded response data for GetAssertion and credential management operations through `GetAssertionData.RawData` and `CredentialManagementData.RawData`, allowing callers to inspect, forward, or preserve original response data while remaining forward-compatible with future protocol extensions. ([#510](https://github.com/Yubico/Yubico.NET.SDK/pull/510), [#508](https://github.com/Yubico/Yubico.NET.SDK/pull/508))
+
+Bug Fixes:
+
+- Fixed an issue where FIDO2 credential management responses containing fields introduced after CTAP 2.1 could throw a `Ctap2DataException`, including the `thirdPartyPayment` field on YubiKeys with firmware version 5.8 and above. The known `thirdPartyPayment` field is now parsed, and other unknown fields are preserved for forward compatibility. ([#507](https://github.com/Yubico/Yubico.NET.SDK/pull/507), [#508](https://github.com/Yubico/Yubico.NET.SDK/pull/508))
+
+Documentation:
+
+- Warning language has been added to clarify that ARKG-related `previewSign` code and test utilities are experimental and not production cryptographic guidance. ([#488](https://github.com/Yubico/Yubico.NET.SDK/pull/488))
+
+Dependencies:
+
+- Several dependencies across the Yubico.Core project, GitHub Actions workflows, and Docker-based documentation image have been updated to newer versions. ([#494](https://github.com/Yubico/Yubico.NET.SDK/pull/494), [#495](https://github.com/Yubico/Yubico.NET.SDK/pull/495), [#497](https://github.com/Yubico/Yubico.NET.SDK/pull/497), [#498](https://github.com/Yubico/Yubico.NET.SDK/pull/498), [#499](https://github.com/Yubico/Yubico.NET.SDK/pull/499))
+
+_________
+
 ### 1.17.0
 
 Release date: June 2nd, 2026

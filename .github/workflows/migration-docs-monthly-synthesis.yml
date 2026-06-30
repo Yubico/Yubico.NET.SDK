@@ -1,0 +1,70 @@
+name: Migration Docs Monthly Synthesis
+
+on:
+  workflow_dispatch:
+  # GitHub schedule triggers run only from the repository default branch.
+  # Mirror this workflow to the default branch if monthly synthesis should run automatically.
+  schedule:
+    - cron: '41 3 1 * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: migration-docs-monthly-synthesis
+  cancel-in-progress: false
+
+jobs:
+  synthesize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out yubikit
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          ref: yubikit
+
+      - name: Fetch migration baselines
+        run: |
+          git fetch origin +refs/heads/develop:refs/remotes/origin/develop
+          git fetch origin +refs/heads/yubikit:refs/remotes/origin/yubikit
+
+      - name: Build migration context
+        shell: bash
+        run: |
+          bash ./scripts/migration/build-migration-context.sh \
+            --mode update \
+            --v1-baseline origin/develop \
+            --v2-branch origin/yubikit \
+            --base-range origin/yubikit~1..HEAD \
+            --output-dir .migration-context
+
+      - name: Synthesize migration documentation
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            Read and follow `.github/prompts/migration-docs-monthly-synthesis.md`.
+            The generated context is in `.migration-context/`.
+            Improve only migration documentation files.
+          claude_args: >-
+            --allowedTools Read,Grep,Glob,Edit,Write
+
+      - name: Create migration synthesis PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/migration-docs-monthly-synthesis
+          base: yubikit
+          title: Polish v1 to v2 migration documentation
+          commit-message: docs: polish migration documentation
+          body: |
+            Monthly synthesis pass for v1-to-v2 migration documentation.
+
+            Review for clarity, excessive confidence, and remaining manual-review gaps.
+          add-paths: |
+            docs/migration/v1-to-v2.md
+            docs/migration/v1-to-v2-map.yml
+            docs/migration/v1-to-v2-changelog.md
+            docs/migration/.state.yml

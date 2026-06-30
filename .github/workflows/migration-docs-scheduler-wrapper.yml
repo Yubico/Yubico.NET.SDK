@@ -1,0 +1,89 @@
+name: Migration Docs Scheduler Wrapper
+
+on:
+  # GitHub schedule triggers run only from the repository default branch.
+  # Keep this wrapper on the default branch. It checks out yubikit and opens
+  # migration documentation PRs back into yubikit.
+  schedule:
+    - cron: '23 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: migration-docs-scheduler-wrapper
+  cancel-in-progress: false
+
+jobs:
+  reconcile-yubikit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out yubikit
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          ref: yubikit
+
+      - name: Fetch migration baselines
+        run: |
+          git fetch origin +refs/heads/develop:refs/remotes/origin/develop
+          git fetch origin +refs/heads/yubikit:refs/remotes/origin/yubikit
+
+      - name: Resolve migration range
+        id: range
+        shell: bash
+        run: |
+          state_path='docs/migration/.state.yml'
+          if [[ -f "$state_path" ]]; then
+            last=$(sed -n 's/^last_analyzed_commit:[[:space:]]*//p' "$state_path" | head -n 1)
+          else
+            last=''
+          fi
+
+          if [[ -z "$last" ]]; then
+            last='origin/yubikit^'
+          fi
+
+          echo "base_range=$last..HEAD" >> "$GITHUB_OUTPUT"
+
+      - name: Build migration context
+        shell: bash
+        run: |
+          bash ./scripts/migration/build-migration-context.sh \
+            --mode update \
+            --v1-baseline origin/develop \
+            --v2-branch origin/yubikit \
+            --base-range '${{ steps.range.outputs.base_range }}' \
+            --output-dir .migration-context
+
+      - name: Reconcile migration documentation
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            Read and follow `.github/prompts/migration-docs-post-merge.md`.
+            This is a scheduled reconciliation run from the default-branch wrapper.
+            The generated context is in `.migration-context/`.
+            Update only the allowed migration documentation files.
+          claude_args: >-
+            --allowedTools Read,Grep,Glob,Edit,Write
+
+      - name: Create migration documentation PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/migration-docs-weekly-reconciliation
+          base: yubikit
+          title: Reconcile v1 to v2 migration documentation
+          commit-message: docs: reconcile migration documentation
+          body: |
+            Weekly migration documentation reconciliation for `${{ steps.range.outputs.base_range }}`.
+
+            This workflow is intended to live on the repository default branch and update docs on `yubikit`.
+          add-paths: |
+            docs/migration/v1-to-v2.md
+            docs/migration/v1-to-v2-map.yml
+            docs/migration/v1-to-v2-changelog.md
+            docs/migration/.state.yml

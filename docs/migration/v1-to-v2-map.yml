@@ -1,0 +1,195 @@
+format_version: 1
+generated_from:
+  v1_baseline: develop
+  v2_branch: yubikit
+  initial_snapshot_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+mapping_status_values:
+  - automatic
+  - assisted
+  - manual
+  - removed
+  - unknown
+mappings:
+  - id: package-core
+    status: assisted
+    confidence: high
+    migration_kind: package
+    v1: Yubico.Core
+    v2: Yubico.YubiKit.Core
+    evidence:
+      - develop:Yubico.Core/
+      - yubikit:src/Core/
+    notes: Core infrastructure moved into the YubiKit package family; verify specific type mappings before mechanical replacement.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: package-yubikey-to-yubikit
+    status: assisted
+    confidence: high
+    migration_kind: package
+    v1: Yubico.YubiKey.*
+    v2: Yubico.YubiKit.*
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/
+      - yubikit:src/Core/
+      - yubikit:src/Management/
+      - yubikit:src/Piv/
+      - yubikit:src/Fido2/
+      - yubikit:src/Oath/
+      - yubikit:src/YubiOtp/
+      - yubikit:src/OpenPgp/
+      - yubikit:src/SecurityDomain/
+      - yubikit:src/YubiHsm/
+    notes: V2 is split by core infrastructure, management, and applet packages.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: namespace-core
+    status: assisted
+    confidence: high
+    migration_kind: namespace
+    v1: Yubico.Core
+    v2: Yubico.YubiKit.Core
+    evidence:
+      - develop:Yubico.Core/
+      - yubikit:src/Core/
+    notes: Namespace replacement is not guaranteed to be one-to-one for every type.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: namespace-applications
+    status: assisted
+    confidence: high
+    migration_kind: namespace
+    v1: Yubico.YubiKey.*
+    v2: Yubico.YubiKit.{Management,Piv,Fido2,Oath,YubiOtp,OpenPgp,SecurityDomain,YubiHsm}
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/
+      - yubikit:src/Management/
+      - yubikit:src/Piv/
+      - yubikit:src/Fido2/
+      - yubikit:src/Oath/
+      - yubikit:src/YubiOtp/
+      - yubikit:src/OpenPgp/
+      - yubikit:src/SecurityDomain/
+      - yubikit:src/YubiHsm/
+    notes: Select the v2 package by applet or infrastructure area rather than applying one namespace substitution globally.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: device-discovery-model
+    status: manual
+    confidence: medium
+    migration_kind: behavior
+    v1: v1 device discovery and device access APIs
+    v2: Yubico.YubiKit.Core device repository, device, connection, and protocol abstractions
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiKeyDevice.Static.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/IYubiKeyDevice.cs
+      - yubikit:src/Core/
+    notes: Discovery, transport selection, and connection ownership must be reviewed at call sites.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: session-lifecycle
+    status: manual
+    confidence: medium
+    migration_kind: async lifecycle
+    v1: v1 applet session construction and disposal
+    v2: applet-specific Yubico.YubiKit sessions
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/ApplicationSession.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Piv/PivSession.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Fido2Session.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Oath/OathSession.cs
+      - yubikit:src/Core/src/Sessions/ApplicationSession.cs
+      - yubikit:src/Piv/src/PivSession.cs
+      - yubikit:src/Fido2/src/FidoSession.cs
+    notes: Check construction, async disposal, transport, authentication, and connection reuse semantics before migrating mechanically.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: applet-piv
+    status: assisted
+    confidence: high
+    migration_kind: package
+    v1: v1 PIV APIs
+    v2: Yubico.YubiKit.Piv
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Piv/PivSession.cs
+      - yubikit:src/Piv/
+    notes: Security-sensitive operations still require manual behavior review.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: applet-fido2
+    status: assisted
+    confidence: high
+    migration_kind: package
+    v1: v1 FIDO2 APIs
+    v2: Yubico.YubiKit.Fido2
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Fido2Session.cs
+      - yubikit:src/Fido2/
+    notes: Review PIN/UV and transport behavior manually.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: applet-oath
+    status: assisted
+    confidence: high
+    migration_kind: package
+    v1: v1 OATH APIs
+    v2: Yubico.YubiKit.Oath
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Oath/OathSession.cs
+      - yubikit:src/Oath/
+    notes: Review secret and password handling manually.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: applet-yubiotp
+    status: assisted
+    confidence: high
+    migration_kind: package
+    v1: v1 OTP APIs
+    v2: Yubico.YubiKit.YubiOtp
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Otp/OtpSession.cs
+      - yubikit:src/YubiOtp/
+    notes: Review slot configuration behavior manually.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: applet-openpgp
+    status: assisted
+    confidence: high
+    migration_kind: package
+    v1: v1 OpenPGP APIs
+    v2: Yubico.YubiKit.OpenPgp
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/OpenPgp/
+      - yubikit:src/OpenPgp/
+    notes: Review PIN, key slot, and card state behavior manually.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: applet-security-domain
+    status: manual
+    confidence: high
+    migration_kind: package
+    v1: v1 secure channel or security domain APIs
+    v2: Yubico.YubiKit.SecurityDomain
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Scp/SecurityDomainSession.cs
+      - yubikit:src/SecurityDomain/
+    notes: Cryptographic key and secure channel migrations require manual review.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: applet-yubihsm
+    status: manual
+    confidence: high
+    migration_kind: package
+    v1: v1 YubiHSM or HSM Auth APIs
+    v2: Yubico.YubiKit.YubiHsm
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiHsmAuth/YubiHsmAuthSession.cs
+      - yubikit:src/YubiHsm/
+    notes: Authentication, connector, object, and command behavior require manual review.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: low-level-commands
+    status: manual
+    confidence: high
+    migration_kind: command
+    v1: raw APDU or low-level command usage
+    v2: v2 command, APDU, protocol, or applet session abstractions
+    evidence:
+      - develop:Yubico.Core/
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/InterIndustry/
+      - yubikit:src/Core/
+    notes: Verify byte-level behavior, status words, and response parsing before migration.
+    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+manual_review:
+  - device discovery call sites
+  - transport selection assumptions
+  - session construction and disposal
+  - authentication, PIN, PUK, password, and key material handling
+  - raw APDU and low-level command usage
+  - behavior-dependent tests and exception contracts

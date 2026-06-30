@@ -16,7 +16,6 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.Tests.Shared;
@@ -138,6 +137,10 @@ public static class FidoTestStateExtensions
         }
     }
 
+    private static string GetWindowsHidAccessDeniedTestMessage(ConnectionType? preferredConnection) =>
+        $"Windows denied access while opening a FIDO2 session over {preferredConnection ?? ConnectionType.HidFido}. " +
+        "If this test targets HID FIDO, run the test host elevated as Administrator or close software that may hold the HID interface exclusively.";
+
     extension(YubiKeyTestState state)
     {
         /// <summary>
@@ -166,17 +169,28 @@ public static class FidoTestStateExtensions
             ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
-            await using var session = await state.Device
-                .CreateFidoSessionAsync(scpKeyParams, configuration, preferredConnection, cancellationToken)
-                .ConfigureAwait(false);
-
-            if (normalizePin)
+            FidoSession session;
+            try
             {
-                await NormalizePinAsync(session, cancellationToken)
+                session = await state.Device
+                    .CreateFidoSessionAsync(scpKeyParams, configuration, preferredConnection, cancellationToken)
                     .ConfigureAwait(false);
             }
+            catch (UnauthorizedAccessException ex) when (OperatingSystem.IsWindows())
+            {
+                throw new UnauthorizedAccessException(GetWindowsHidAccessDeniedTestMessage(preferredConnection), ex);
+            }
 
-            await action(session).ConfigureAwait(false);
+            await using (session.ConfigureAwait(false))
+            {
+                if (normalizePin)
+                {
+                    await NormalizePinAsync(session, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+
+                await action(session).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -205,18 +219,29 @@ public static class FidoTestStateExtensions
             ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
-            await using var session = await state.Device
-                .CreateFidoSessionAsync(scpKeyParams, configuration, preferredConnection, cancellationToken)
-                .ConfigureAwait(false);
-
-            if (normalizePin)
+            FidoSession session;
+            try
             {
-                await NormalizePinAsync(session, cancellationToken)
+                session = await state.Device
+                    .CreateFidoSessionAsync(scpKeyParams, configuration, preferredConnection, cancellationToken)
                     .ConfigureAwait(false);
             }
+            catch (UnauthorizedAccessException ex) when (OperatingSystem.IsWindows())
+            {
+                throw new UnauthorizedAccessException(GetWindowsHidAccessDeniedTestMessage(preferredConnection), ex);
+            }
 
-            var info = await session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
-            await action(session, info).ConfigureAwait(false);
+            await using (session.ConfigureAwait(false))
+            {
+                if (normalizePin)
+                {
+                    await NormalizePinAsync(session, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+
+                var info = await session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
+                await action(session, info).ConfigureAwait(false);
+            }
         }
     }
 }

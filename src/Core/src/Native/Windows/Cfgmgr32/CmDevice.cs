@@ -194,7 +194,7 @@ public class CmDevice
         }
     }
 
-    private static IList<string> GetDevicePaths(Guid classGuid, string? deviceInstanceId)
+    internal static IList<string> GetDevicePaths(Guid classGuid, string? deviceInstanceId)
     {
         var errorCode = NativeMethods.CM_Get_Device_Interface_List_Size(
             out var bufferLength,
@@ -216,7 +216,7 @@ public class CmDevice
             classGuid,
             deviceInstanceId,
             buffer,
-            bufferLength * 2,
+            bufferLength,
             NativeMethods.CM_GET_DEVICE_LIST.PRESENT
         );
 

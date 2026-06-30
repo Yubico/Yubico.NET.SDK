@@ -60,10 +60,8 @@ public static class SdkPlatformInfo
         {
             if (OperatingSystem == SdkPlatform.Windows)
             {
-#pragma warning disable CA1416
                 return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole
                     .Administrator);
-#pragma warning restore CA1416
             }
 
             return false;

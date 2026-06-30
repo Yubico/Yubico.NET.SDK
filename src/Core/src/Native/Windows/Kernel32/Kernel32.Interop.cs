@@ -153,7 +153,7 @@ internal static partial class NativeMethods
 
 
     [LibraryImport(Libraries.Kernel32, EntryPoint = "CreateFileW", SetLastError = true,
-        StringMarshalling = StringMarshalling.Utf8)]
+        StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial SafeFileHandle CreateFile(
         string lpFileName,

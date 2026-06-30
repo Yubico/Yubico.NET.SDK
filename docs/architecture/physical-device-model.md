@@ -7,8 +7,9 @@ by `AvailableConnections`. This document explains the model, how to discover and
 metadata lives, how each applet picks a transport, and how to migrate code written against the old
 per-interface-handle model.
 
-> **Platform note:** HID interface enumeration is implemented on macOS and Linux. On Windows, HID discovery
-> is not yet implemented, so a YubiKey currently surfaces only its PC/SC (CCID) interface there. See
+> **Platform note:** HID interface enumeration is implemented on macOS, Linux, and Windows. On Windows,
+> opening HID report handles can fail with access denied if another process holds the interface or if the
+> environment requires an elevated process. See
 > [Platform Support For HID Discovery](#platform-support-for-hid-discovery).
 
 See also: [event-driven device discovery](./event-driven-device-discovery.md) and the
@@ -71,11 +72,12 @@ distinct keys, so one physical key can surface as more than one row.
 
 ### Platform Support For HID Discovery
 
-HID interface enumeration (HID FIDO, HID OTP) is implemented on **macOS and Linux**. On **Windows** HID
-enumeration is not yet implemented, so today a YubiKey is discovered through its PC/SC (CCID) interface only:
-`AvailableConnections` will not include `HidFido`/`HidOtp`, HID connection filters return no devices, and a
-composite USB key cannot merge HID interfaces it cannot see. The PC/SC SmartCard path works on all
-platforms. This is a known platform residual tracked outside the composite-device model itself.
+HID interface enumeration (HID FIDO, HID OTP) is implemented on **macOS, Linux, and Windows**. On Windows,
+discovery uses ConfigMgr interface metadata and does not need to open report handles just to identify YubiKey
+HID interfaces. Opening a HID report connection can still fail with `UnauthorizedAccessException` when Windows
+denies access to the interface, for example because another process holds it exclusively or because the
+current environment requires the process to run elevated as Administrator. The PC/SC SmartCard path works on
+all platforms and is unaffected by HID report-handle access.
 
 ## Opening A Connection
 

@@ -61,22 +61,47 @@ internal static class DeviceInfoReader
         byte page = 0;
         var allPagesTlvs = new List<Tlv>();
 
-        var hasMoreData = true;
-        while (hasMoreData)
+        var remainingPages = 1;
+        while (remainingPages > 0)
         {
+            --remainingPages;
             var pageTlvs = await ReadPageAsync(protocol, page, cancellationToken).ConfigureAwait(false);
-            allPagesTlvs.AddRange(pageTlvs);
 
-            var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
-            if (moreData is null)
-                break;
+            Tlv? moreData = null;
+            foreach (var tlv in pageTlvs)
+            {
+                if (tlv.Tag != TagMoreDeviceInfo)
+                {
+                    continue;
+                }
 
-            hasMoreData = moreData.Length == 1 && moreData.Value.Span[0] == 1;
+                if (moreData is not null)
+                {
+                    throw new BadResponseException($"Duplicate more-data tags in device info page {page}.");
+                }
+
+                moreData = tlv;
+            }
+
+            if (moreData is not null && moreData.Length > 0)
+            {
+                remainingPages = moreData.Value.Span[^1];
+            }
+
+            foreach (var tlv in pageTlvs)
+            {
+                if (tlv.Tag == TagMoreDeviceInfo)
+                {
+                    continue;
+                }
+
+                allPagesTlvs.Add(tlv);
+            }
+
             ++page;
         }
 
-        using var allTlvs = new DisposableTlvList(allPagesTlvs);
-        return DeviceInfo.CreateFromTlvs([.. allTlvs], defaultVersion);
+        return DeviceInfo.CreateFromTlvs(allPagesTlvs, defaultVersion);
     }
 
     private static async Task<DisposableTlvList> ReadPageAsync(

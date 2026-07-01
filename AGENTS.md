@@ -45,6 +45,7 @@
 - Async byte data crossing awaits should use `Memory<byte>`, `ReadOnlyMemory<byte>`, or `IMemoryOwner<byte>`, not `Span<byte>`.
 - Avoid `.ToArray()` and LINQ on byte data unless data must escape the current scope.
 - Always zero PINs, PUKs, keys, SCP material, and secret-derived buffers with `CryptographicOperations.ZeroMemory()`.
+- Classify YubiKey-returned data by semantics: device metadata/status does not need special zeroing; authentication material, token material, decrypted plaintext, and secret-derived output does.
 - Use `CryptographicOperations.FixedTimeEquals` for secret-derived comparisons; do not use `SequenceEqual` on secrets.
 - Never store a privately cloned sensitive `byte[]` in a struct; struct copies keep references you cannot reliably zero. Use a sealed disposable class for owned sensitive buffers.
 - Logging is static via `YubiKitLogging.CreateLogger<T>()`; do not add SDK constructors that require `ILogger`/`ILoggerFactory`.

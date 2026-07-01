@@ -4,11 +4,6 @@ on:
   push:
     branches: [ yubikit ]
   workflow_dispatch:
-  # GitHub only runs scheduled workflows from the repository default branch.
-  # Keep this trigger here for when the workflow is mirrored to the default branch
-  # or the repository default branch changes to yubikit.
-  schedule:
-    - cron: '17 3 * * 1'
 
 permissions:
   contents: write
@@ -61,7 +56,7 @@ jobs:
             --output-dir .migration-context
 
       - name: Update migration documentation
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@28f83620103c48a57093dcc2837eec89e036bb9f # beta (v0.0.63)
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -73,12 +68,12 @@ jobs:
             --allowedTools Read,Grep,Glob,Edit,Write
 
       - name: Create migration documentation PR
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
         with:
           branch: automation/migration-docs-update
           base: yubikit
           title: Update v1 to v2 migration documentation
-          commit-message: docs: update migration documentation
+          commit-message: "docs: update migration documentation"
           body: |
             Automated migration documentation update for `${{ steps.range.outputs.base_range }}`.
 

@@ -56,7 +56,7 @@ It:
 1. Checks out the PR with full history.
 2. Fetches `origin/develop` and `origin/yubikit`.
 3. Builds `.migration-context/` using `scripts/migration/build-migration-context.sh`.
-4. Invokes `anthropics/claude-code-action@beta` with `.github/prompts/migration-docs-pr-preview.md`.
+4. Invokes `anthropics/claude-code-action` pinned to the commit behind `beta` with `.github/prompts/migration-docs-pr-preview.md`.
 5. Comments on migration impact only; it should not edit files.
 
 ### Post-Merge Update
@@ -69,7 +69,7 @@ It:
 2. Reads `docs/migration/.state.yml`.
 3. Analyzes `last_analyzed_commit..HEAD`.
 4. Invokes Claude with `.github/prompts/migration-docs-post-merge.md`.
-5. Opens a migration-doc update PR back into `yubikit` using `peter-evans/create-pull-request@v7`.
+5. Opens a migration-doc update PR back into `yubikit` using `peter-evans/create-pull-request` pinned to the `v7` commit.
 
 The prompt tells Claude to advance `.state.yml` after successful analysis, even for no-impact ranges, so old commits do not get reanalyzed forever.
 
@@ -77,7 +77,7 @@ The prompt tells Claude to advance `.state.yml` after successful analysis, even 
 
 GitHub cron only runs workflows from the repository default branch. The repository default branch is currently `develop`, while the migration docs live on `yubikit`.
 
-`.github/workflows/migration-docs-scheduler-wrapper.yml` is therefore a wrapper intended to exist on the default branch. It checks out `yubikit`, runs reconciliation there, and opens PRs back into `yubikit`.
+`.github/workflows/migration-docs-scheduler-wrapper.yml` is therefore a wrapper intended to exist on the default branch. It checks out `yubikit`, scans the full `origin/develop..HEAD` v1-to-v2 tree delta for reconciliation, and opens PRs back into `yubikit`.
 
 Until this wrapper is present on the default branch, weekly reconciliation will not run automatically. Push-triggered and manually dispatched runs on `yubikit` still work.
 
@@ -154,8 +154,8 @@ The implementation proceeded with DevTeam review instead.
 
 - `ANTHROPIC_API_KEY` repository secret, unless the workflows are changed to Vertex/Bedrock/OIDC auth.
 - GitHub Actions must allow workflows to create pull requests.
-- `peter-evans/create-pull-request@v7` must be permitted to push automation branches and open PRs.
-- `anthropics/claude-code-action@beta` behavior should be validated on the first real workflow run.
+- `peter-evans/create-pull-request` must be permitted to push automation branches and open PRs.
+- `anthropics/claude-code-action` behavior should be validated on the first real workflow run.
 - Scheduler/monthly cron automation requires wrapper workflows on the repository default branch.
 
 ## Expected First Behavior After Merge To `yubikit`

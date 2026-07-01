@@ -98,7 +98,58 @@ public class FidoHidProtocolTests
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
 
-        Assert.Contains("too short", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("exactly", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task SendVendorCommandAsync_ResponseWithPartialInitPacket_ThrowsInvalidOperationException()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+
+        var packet = CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]);
+        connection.QueueResponsePackets(packet[..CtapConstants.InitHeaderSize]);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+
+        Assert.Contains("exactly", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task SendVendorCommandAsync_ResponseWithPartialContinuationPacket_ThrowsInvalidOperationException()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+
+        var responsePayload = Enumerable.Range(0, CtapConstants.InitDataSize + 1)
+            .Select(i => (byte)i)
+            .ToArray();
+        var continuation = CreateContinuationPacket(0x01020304, sequence: 0, responsePayload.AsSpan(CtapConstants.InitDataSize));
+        connection.QueueResponsePackets(
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, responsePayload),
+            continuation[..CtapConstants.ContinuationHeaderSize]);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+
+        Assert.Contains("exactly", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task SendVendorCommandAsync_ResponseWithWrongChannelKeepAlive_ThrowsInvalidOperationException()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+
+        connection.QueueResponsePackets(
+            CreateInitPacket(0x05060708, CtapConstants.CtapHidKeepAlive, [0x01]),
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+
+        Assert.Contains("channel", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

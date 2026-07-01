@@ -32,7 +32,7 @@ internal static class ConfigSubCommand
     /// credential creation when requested. Requires ep option support.
     /// </remarks>
     public const byte EnableEnterpriseAttestation = 0x01;
-    
+
     /// <summary>
     /// Toggle always require UV (0x02).
     /// </summary>
@@ -41,7 +41,7 @@ internal static class ConfigSubCommand
     /// always required regardless of the uv parameter in requests.
     /// </remarks>
     public const byte ToggleAlwaysUv = 0x02;
-    
+
     /// <summary>
     /// Set minimum PIN length (0x03).
     /// </summary>
@@ -50,7 +50,7 @@ internal static class ConfigSubCommand
     /// The new value must be greater than or equal to the current value.
     /// </remarks>
     public const byte SetMinPinLength = 0x03;
-    
+
     /// <summary>
     /// Vendor specific prototype command for config (0x04).
     /// </summary>
@@ -58,7 +58,7 @@ internal static class ConfigSubCommand
     /// Used by some implementations for vendor-specific configuration.
     /// </remarks>
     public const byte VendorPrototype = 0x04;
-    
+
     /// <summary>
     /// Set minimum PIN length with RP IDs list (0x05).
     /// </summary>

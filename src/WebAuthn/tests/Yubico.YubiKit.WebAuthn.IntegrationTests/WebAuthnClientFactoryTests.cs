@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
@@ -36,11 +36,20 @@ public class WebAuthnClientFactoryTests
     {
         var origin = ParseOrigin(TestOriginUrl);
 
-        await using var client = await state.Device.CreateWebAuthnClientAsync(
-            origin,
-            isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk");
+        try
+        {
+            await using var client = await state.Device.CreateWebAuthnClientAsync(
+                origin,
+                isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk",
+                preferredConnection: ConnectionType.SmartCard);
 
-        Assert.NotNull(client);
+            Assert.NotNull(client);
+        }
+        catch (NotSupportedException)
+        {
+            Skip.If(true,
+                "FIDO2 SmartCard session failed because the connected authenticator did not expose the FIDO2 AID or does not support USB SmartCard FIDO2 on this firmware.");
+        }
     }
 
     [SkippableTheory]
@@ -48,7 +57,20 @@ public class WebAuthnClientFactoryTests
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task CreateWebAuthnClientAsync_WithSmartCard_MakeCredentialReturnsResponse(YubiKeyTestState state)
     {
-        await using (var setupSession = await state.Device.CreateFidoSessionAsync())
+        FidoSession setupSession;
+        try
+        {
+            setupSession = await state.Device.CreateFidoSessionAsync(
+                preferredConnection: ConnectionType.SmartCard);
+        }
+        catch (NotSupportedException)
+        {
+            Skip.If(true,
+                "FIDO2 SmartCard session failed because the connected authenticator did not expose the FIDO2 AID or does not support USB SmartCard FIDO2 on this firmware.");
+            return;
+        }
+
+        await using (setupSession)
         {
             await NormalizePinAsync(setupSession);
         }
@@ -56,7 +78,8 @@ public class WebAuthnClientFactoryTests
         var origin = ParseOrigin(TestOriginUrl);
         await using var client = await state.Device.CreateWebAuthnClientAsync(
             origin,
-            isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk");
+            isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk",
+            preferredConnection: ConnectionType.SmartCard);
 
         var options = new RegistrationOptions
         {

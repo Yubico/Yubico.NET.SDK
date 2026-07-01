@@ -1,9 +1,9 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
-using System.Security.Cryptography;
 using Spectre.Console;
-using Yubico.YubiKit.Core.YubiKey;
+using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Output;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Features;

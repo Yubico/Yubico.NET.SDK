@@ -17,7 +17,7 @@ using System.Buffers;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Credentials;
-using Yubico.YubiKit.Core.Utils;
+using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;

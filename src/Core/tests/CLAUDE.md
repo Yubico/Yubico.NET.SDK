@@ -18,15 +18,18 @@ For Core-specific patterns and test utilities, see the **Test Infrastructure** s
 ```
 tests/
 ├── Yubico.YubiKit.Core.UnitTests/
-│   ├── SmartCard/
-│   │   ├── Scp/              # SCP protocol tests
-│   │   ├── Fakes/            # FakeSmartCardConnection, FakeApduProcessor
-│   │   └── PcscProtocolTests.cs
-│   ├── Utils/                # TLV, utility tests
-│   └── Hid/                  # HID protocol tests
+│   ├── Devices/              # YubiKey model, discovery, metadata tests
+│   ├── Protocols/
+│   │   ├── SmartCard/Apdu/   # APDU protocol tests and fakes
+│   │   ├── SmartCard/Scp/    # SCP protocol tests
+│   │   └── Otp/Hid/          # OTP HID protocol tests
+│   ├── Transports/           # HID and SmartCard transport tests
+│   ├── Cryptography/
+│   ├── Credentials/
+│   └── Utilities/            # TLV, utility tests
 └── Yubico.YubiKit.Core.IntegrationTests/
-    ├── Core/                 # YubiKeyManager, device tests
-    └── Hid/                  # HID enumeration tests
+    ├── Devices/              # YubiKeyManager, device tests
+    └── Transports/           # HID and SmartCard integration tests
 ```
 
 ## Key Test Utilities

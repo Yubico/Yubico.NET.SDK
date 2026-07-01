@@ -12,6 +12,7 @@ Yubico.YubiKit.Core is the foundation that all other SDK modules build upon. It 
 - 📡 **Protocol Handling** - ISO 7816-4 APDU processing with automatic command chaining
 - 🔐 **Secure Channel Protocol (SCP)** - SCP03, SCP11a/b/c support for secure communication
 - 🖥️ **Platform Interop** - Cross-platform native library loading and device enumeration
+- 🧾 **Device Metadata Models** - Read-only `DeviceInfo`, capability, form-factor, flag, and version qualifier types
 - 🛠️ **Utilities** - TLV processing, cryptographic key types, COSE encoding
 
 ## Installation
@@ -26,14 +27,21 @@ This package is automatically included when you install any application-specific
 
 ### Device Discovery
 
+An `IYubiKey` represents **one physical YubiKey** (which may expose several interfaces — CCID, HID FIDO,
+HID OTP — at once), not a single transport handle. See [Physical Device Model](../../docs/architecture/physical-device-model.md).
+HID interface enumeration is implemented on macOS and Linux; on Windows, HID discovery is not yet
+implemented, so a YubiKey currently surfaces only its PC/SC (CCID) interface there.
+
 ```csharp
 using Yubico.YubiKit.Core;
-// Get currently connected devices
+using Yubico.YubiKit.Core.Devices;
+
+// One IYubiKey per physical device, even when several interfaces are present.
 var devices = await YubiKeyManager.FindAllAsync();
 
 foreach (var device in devices)
 {
-    Console.WriteLine($"Found YubiKey: {device.SerialNumber}");
+    Console.WriteLine($"{device.DeviceId}: {device.AvailableConnections}");
 }
 
 // Force a rescan when device topology may have changed
@@ -46,8 +54,15 @@ var fidoDevices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
 
 ### Opening a Connection
 
+Open a specific interface with the typed overload. The parameterless `ConnectAsync()` is only for
+single-interface devices; on a composite device it throws rather than guessing a transport. Applet session
+extensions (e.g. `CreateManagementSessionAsync`) select a transport via a documented default order plus an
+optional `preferredConnection` override — see [Physical Device Model](../../docs/architecture/physical-device-model.md).
+
 ```csharp
-using Yubico.YubiKit.Core.Connections;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 // Open SmartCard connection
 await using var smartCardConnection = await device.ConnectAsync<ISmartCardConnection>();
@@ -55,14 +70,16 @@ await using var smartCardConnection = await device.ConnectAsync<ISmartCardConnec
 // Open HID FIDO connection
 await using var fidoConnection = await device.ConnectAsync<IFidoHidConnection>();
 
-// Open HID OTP connection  
+// Open HID OTP connection
 await using var otpConnection = await device.ConnectAsync<IOtpHidConnection>();
 ```
 
 ### Protocol Communication
 
 ```csharp
-using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 // Create protocol from connection
 var protocol = PcscProtocolFactory<ISmartCardConnection>.Create().Create(smartCardConnection);
@@ -89,7 +106,8 @@ var responseData = await protocol.TransmitAndReceiveAsync(command, cancellationT
 ### Secure Channel Protocol (SCP)
 
 ```csharp
-using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 
 // Establish SCP03 session
 var staticKeys = new StaticKeys(
@@ -112,7 +130,7 @@ staticKeys.Dispose();
 ### TLV Processing
 
 ```csharp
-using Yubico.YubiKit.Core.Tlv;
+using Yubico.YubiKit.Core.Utilities;
 
 // Parse TLV data
 var tlvs = TlvHelper.ParseMany(responseData);
@@ -137,9 +155,13 @@ using (var nested = nestedBuilder.AddNested(0x7F49))  // Public key template
 
 ### Connection Abstraction
 
+A physical `IYubiKey` exposes one or more concrete interfaces; a typed `ConnectAsync<TConnection>()` routes
+to the requested interface.
+
 ```
-IYubiKeyDevice
-    ↓
+IYubiKey (one physical device)
+    │  AvailableConnections / SupportsConnection(...)
+    ↓  ConnectAsync<TConnection>()
 IConnection
     ├── ISmartCardConnection (PC/SC)
     ├── IFidoHidConnection (HID FIDO)
@@ -249,3 +271,7 @@ if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_7_2))
 ## Developer Documentation
 
 For in-depth patterns, test infrastructure, and implementation details, see [CLAUDE.md](CLAUDE.md).
+
+For the physical-device model (one `IYubiKey` per physical key, metadata ownership, applet transport
+selection, and migration from per-interface handles), see
+[Physical Device Model](../../docs/architecture/physical-device-model.md).

@@ -11,7 +11,7 @@ Upgrading introduces 189 new analyzer errors, primarily:
 
 ## Scope
 Files with known violations:
-- `Yubico.YubiKit.Core/src/SmartCard/Scp/ScpState.Scp11.cs` - Multiple CA2000 (Tlv, ECDiffieHellman disposal)
+- `Yubico.YubiKit.Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs` - Multiple CA2000 (Tlv, ECDiffieHellman disposal)
 - `Yubico.YubiKit.Core/src/DependencyInjection.cs` - CA1724 naming conflict
 
 ## Action

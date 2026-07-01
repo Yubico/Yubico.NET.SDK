@@ -24,7 +24,7 @@ The Management application is the primary interface for configuring and managing
 
 ```csharp
 using Yubico.YubiKit.Management;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 
 IYubiKey yubiKey = ...;
 using var mgmtSession = await yubiKey.CreateManagementSessionAsync();
@@ -68,6 +68,31 @@ Capabilities can be configured separately for each transport:
 
 - **USB**: Over USB connection (all YubiKeys)
 - **NFC**: Over NFC connection (NFC-enabled YubiKeys only)
+
+### Session transport selection (smart default + override)
+
+A physical YubiKey may expose several connections (SmartCard, HID FIDO, HID OTP). Each application's
+`Create…SessionAsync` extension picks a transport using an app-specific **smart default**; modules that
+can use more than one transport also accept an optional explicit **override** via a
+`preferredConnection` parameter. Passing `null` (the default) uses the documented order below; passing a
+concrete `ConnectionType` forces that transport (throwing `ArgumentException` if it is not a valid
+transport for that application, or `NotSupportedException` if the device does not expose it).
+
+| Application | Default transport order | Override parameter |
+|-------------|-------------------------|--------------------|
+| Management | SmartCard → HID FIDO → HID OTP | yes |
+| YubiOTP | SmartCard → HID OTP | yes |
+| FIDO2 / WebAuthn | HID FIDO → SmartCard | yes |
+| PIV, OATH, OpenPGP, Security Domain, YubiHSM Auth | SmartCard only | no (SmartCard-only) |
+
+```csharp
+// Default (SmartCard preferred for Management):
+await using var mgmt = await yubiKey.CreateManagementSessionAsync();
+
+// Force a specific transport:
+await using var mgmtOverOtp = await yubiKey.CreateManagementSessionAsync(
+    preferredConnection: ConnectionType.HidOtp);
+```
 
 ### Form Factors
 
@@ -238,12 +263,7 @@ await mgmtSession.ResetDeviceAsync(cancellationToken);
 Yubico.YubiKit.Management/
 ├── src/
 │   ├── ManagementSession.cs           # Main session class
-│   ├── DeviceInfo.cs                  # Device information model
 │   ├── DeviceConfig.cs                # Configuration model
-│   ├── DeviceCapabilities.cs          # Capability flags enum
-│   ├── DeviceFlags.cs                 # Device flags enum
-│   ├── FormFactor.cs                  # Form factor enum
-│   ├── VersionQualifier.cs            # Firmware version qualifier
 │   ├── IYubiKeyExtensions.cs          # Convenience extensions
 │   ├── DependencyInjection.cs         # DI support
 │   └── Yubico.YubiKit.Management.csproj
@@ -253,9 +273,11 @@ Yubico.YubiKit.Management/
     │   ├── AdvancedManagementTests.cs
     │   └── ManagementTests.cs
     └── Yubico.YubiKit.Management.UnitTests/
-        ├── CapabilityMapperTests.cs
-        └── FirmwareVersionTests.cs
+        ├── FirmwareVersionTests.cs
+        └── ManagementSessionTests.cs
 ```
+
+Read-only device metadata types returned by `GetDeviceInfoAsync` live in `Yubico.YubiKit.Core.Devices` (`DeviceInfo`, `DeviceCapabilities`, `DeviceFlags`, `FormFactor`, and `VersionQualifier`). Management owns device configuration and reset operations, but not those metadata model definitions.
 
 ## Common Use Cases
 

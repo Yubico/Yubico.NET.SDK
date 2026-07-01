@@ -26,32 +26,32 @@ internal static class CredManagementSubCommand
     /// getCredsMetadata (0x01) - Get credential storage metadata.
     /// </summary>
     public const byte GetCredsMetadata = 0x01;
-    
+
     /// <summary>
     /// enumerateRPsBegin (0x02) - Start enumerating relying parties.
     /// </summary>
     public const byte EnumerateRPsBegin = 0x02;
-    
+
     /// <summary>
     /// enumerateRPsGetNextRP (0x03) - Get next relying party.
     /// </summary>
     public const byte EnumerateRPsGetNextRP = 0x03;
-    
+
     /// <summary>
     /// enumerateCredentialsBegin (0x04) - Start enumerating credentials for an RP.
     /// </summary>
     public const byte EnumerateCredentialsBegin = 0x04;
-    
+
     /// <summary>
     /// enumerateCredentialsGetNextCredential (0x05) - Get next credential.
     /// </summary>
     public const byte EnumerateCredentialsGetNextCredential = 0x05;
-    
+
     /// <summary>
     /// deleteCredential (0x06) - Delete a credential.
     /// </summary>
     public const byte DeleteCredential = 0x06;
-    
+
     /// <summary>
     /// updateUserInformation (0x07) - Update user information for a credential.
     /// </summary>

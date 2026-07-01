@@ -15,7 +15,7 @@
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKit.Core.Cryptography.Cose;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Fido2.Pin;

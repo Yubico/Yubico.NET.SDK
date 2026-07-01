@@ -1,11 +1,11 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
-using System.ComponentModel;
 using Spectre.Console.Cli;
-using Yubico.YubiKit.Cli.Shared.Output;
+using System.ComponentModel;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Cli.Shared.Output;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Cli.Commands.Management;
@@ -59,7 +59,7 @@ public sealed class ManagementResetCommand : YkCommandBase<ManagementResetSettin
             }
         }
 
-        await using var session = await deviceContext.Device.CreateManagementSessionAsync();
+        await using var session = await deviceContext.Device.CreateManagementSessionAsync(preferredConnection: deviceContext.PreferredConnection);
         await session.ResetDeviceAsync();
 
         OutputHelpers.WriteSuccess("Device has been factory reset.");

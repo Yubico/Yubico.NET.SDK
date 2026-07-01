@@ -1,5 +1,5 @@
-using System.Formats.Cbor;
 using FluentAssertions;
+using System.Formats.Cbor;
 using Yubico.YubiKit.Core.Cryptography.Cose;
 
 namespace Yubico.YubiKit.Fido2.UnitTests;
@@ -19,23 +19,23 @@ public class AuthenticatorInfoTests
         writer.WriteEndArray();
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.Versions.Should().HaveCount(2);
         info.Versions.Should().Contain("FIDO_2_0");
         info.Versions.Should().Contain("U2F_V2");
     }
-    
+
     [Fact]
     public void Decode_WithAaguid_ParsesCorrectly()
     {
         // Arrange
         byte[] aaguid = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                          0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10];
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(2);
         writer.WriteInt32(0x01); // versions
@@ -46,14 +46,14 @@ public class AuthenticatorInfoTests
         writer.WriteByteString(aaguid);
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.Aaguid.ToArray().Should().BeEquivalentTo(aaguid);
     }
-    
+
     [Fact]
     public void Decode_WithOptions_ParsesBoolMap()
     {
@@ -75,17 +75,17 @@ public class AuthenticatorInfoTests
         writer.WriteEndMap();
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.Options.Should().HaveCount(3);
         info.Options["rk"].Should().BeTrue();
         info.Options["up"].Should().BeTrue();
         info.Options["uv"].Should().BeFalse();
     }
-    
+
     [Fact]
     public void Decode_WithMaxMsgSize_ParsesInteger()
     {
@@ -100,14 +100,14 @@ public class AuthenticatorInfoTests
         writer.WriteInt32(2048);
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.MaxMsgSize.Should().Be(2048);
     }
-    
+
     [Fact]
     public void Decode_WithPinProtocols_ParsesIntArray()
     {
@@ -125,16 +125,16 @@ public class AuthenticatorInfoTests
         writer.WriteEndArray();
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.PinUvAuthProtocols.Should().HaveCount(2);
         info.PinUvAuthProtocols.Should().Contain(1);
         info.PinUvAuthProtocols.Should().Contain(2);
     }
-    
+
     [Fact]
     public void Decode_WithAlgorithms_ParsesCredentialParameters()
     {
@@ -157,16 +157,16 @@ public class AuthenticatorInfoTests
         writer.WriteEndArray();
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.Algorithms.Should().HaveCount(1);
         info.Algorithms[0].Algorithm.Should().Be(CoseAlgorithmIdentifier.ES256);
         info.Algorithms[0].Type.Should().Be("public-key");
     }
-    
+
     [Fact]
     public void Decode_WithExtensions_ParsesStringArray()
     {
@@ -185,17 +185,17 @@ public class AuthenticatorInfoTests
         writer.WriteEndArray();
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.Extensions.Should().HaveCount(3);
         info.Extensions.Should().Contain("hmac-secret");
         info.Extensions.Should().Contain("credProtect");
         info.Extensions.Should().Contain("credBlob");
     }
-    
+
     [Fact]
     public void Decode_WithUnknownKeys_SkipsUnknownValues()
     {
@@ -210,22 +210,22 @@ public class AuthenticatorInfoTests
         writer.WriteTextString("unknown value");
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act - Should not throw
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.Versions.Should().HaveCount(1);
     }
-    
-    
+
+
     [Fact]
     public void Decode_WithEncIdentifier_ParsesByteString()
     {
         // Arrange
         byte[] encIdentifier = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                                 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10];
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(2);
         writer.WriteInt32(0x01); // versions
@@ -236,15 +236,15 @@ public class AuthenticatorInfoTests
         writer.WriteByteString(encIdentifier);
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.EncIdentifier.Should().NotBeNull();
         info.EncIdentifier!.Value.ToArray().Should().BeEquivalentTo(encIdentifier);
     }
-    
+
     [Fact]
     public void Decode_WithTransportsForReset_ParsesStringArray()
     {
@@ -262,16 +262,16 @@ public class AuthenticatorInfoTests
         writer.WriteEndArray();
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.TransportsForReset.Should().HaveCount(2);
         info.TransportsForReset.Should().Contain("usb");
         info.TransportsForReset.Should().Contain("nfc");
     }
-    
+
     [Fact]
     public void Decode_WithPinComplexityPolicy_ParsesTrue()
     {
@@ -286,14 +286,14 @@ public class AuthenticatorInfoTests
         writer.WriteBoolean(true);
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.PinComplexityPolicy.Should().BeTrue();
     }
-    
+
     [Fact]
     public void Decode_WithPinComplexityPolicy_ParsesFalse()
     {
@@ -308,21 +308,21 @@ public class AuthenticatorInfoTests
         writer.WriteBoolean(false);
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.PinComplexityPolicy.Should().BeFalse();
     }
-    
+
     [Fact]
     public void Decode_WithPinComplexityPolicyUrl_ParsesUtf8String()
     {
         // Arrange
         string expectedUrl = "https://example.com/pin-policy";
         byte[] urlBytes = System.Text.Encoding.UTF8.GetBytes(expectedUrl);
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(2);
         writer.WriteInt32(0x01); // versions
@@ -333,14 +333,14 @@ public class AuthenticatorInfoTests
         writer.WriteByteString(urlBytes); // CBOR spec: byte string (UTF-8)
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.PinComplexityPolicyUrl.Should().Be(expectedUrl);
     }
-    
+
     [Fact]
     public void Decode_WithMaxPinLength_ParsesInteger()
     {
@@ -355,21 +355,21 @@ public class AuthenticatorInfoTests
         writer.WriteInt32(63);
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.MaxPinLength.Should().Be(63);
     }
-    
+
     [Fact]
     public void Decode_WithEncCredStoreState_ParsesByteString()
     {
         // Arrange
         byte[] encCredStoreState = [0xCA, 0xFE, 0xBA, 0xBE, 0xDE, 0xAD, 0xBE, 0xEF,
                                      0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(2);
         writer.WriteInt32(0x01); // versions
@@ -380,15 +380,15 @@ public class AuthenticatorInfoTests
         writer.WriteByteString(encCredStoreState);
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.EncCredStoreState.Should().NotBeNull();
         info.EncCredStoreState!.Value.ToArray().Should().BeEquivalentTo(encCredStoreState);
     }
-    
+
     [Fact]
     public void Decode_WithAuthenticatorConfigCommands_ParsesIntegerArray()
     {
@@ -407,16 +407,15 @@ public class AuthenticatorInfoTests
         writer.WriteEndArray();
         writer.WriteEndMap();
         var data = writer.Encode();
-        
+
         // Act
         var info = AuthenticatorInfo.Decode(data);
-        
+
         // Assert
         info.AuthenticatorConfigCommands.Should().HaveCount(3);
         info.AuthenticatorConfigCommands.Should().Contain(0x01);
         info.AuthenticatorConfigCommands.Should().Contain(0x02);
         info.AuthenticatorConfigCommands.Should().Contain(0x03);
     }
-    
-}
 
+}

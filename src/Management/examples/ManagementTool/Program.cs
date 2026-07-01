@@ -4,7 +4,7 @@
 using Spectre.Console;
 using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Commands;
 

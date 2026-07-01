@@ -45,13 +45,13 @@ public sealed class PinUvAuthProtocolV1 : IPinUvAuthProtocol
     private const int V1AuthTagLength = 16;
 
     private bool _disposed;
-    
+
     /// <inheritdoc />
     public int Version => 1;
-    
+
     /// <inheritdoc />
     public int AuthenticationTagLength => V1AuthTagLength;
-    
+
     /// <inheritdoc />
     public (Dictionary<int, object?> KeyAgreement, byte[] SharedSecret) Encapsulate(
         IReadOnlyDictionary<int, object?> peerCoseKey)
@@ -69,40 +69,40 @@ public sealed class PinUvAuthProtocolV1 : IPinUvAuthProtocol
             CryptographicOperations.ZeroMemory(rawZ);
         }
     }
-    
+
     /// <inheritdoc />
     public byte[] Kdf(ReadOnlySpan<byte> z)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         if (z.IsEmpty)
         {
             throw new ArgumentException("Shared secret cannot be empty.", nameof(z));
         }
-        
+
         // V1 KDF: SHA-256(z)
         var sharedSecret = new byte[SharedSecretLength];
         SHA256.HashData(z, sharedSecret);
         return sharedSecret;
     }
-    
+
     /// <inheritdoc />
     public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         if (key.Length != SharedSecretLength)
         {
             throw new ArgumentException(
                 $"Key must be {SharedSecretLength} bytes.", nameof(key));
         }
-        
+
         if (plaintext.Length == 0 || plaintext.Length % AesBlockSize != 0)
         {
             throw new ArgumentException(
                 $"Plaintext must be a non-empty multiple of {AesBlockSize} bytes.", nameof(plaintext));
         }
-        
+
         using var aes = Aes.Create();
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
@@ -177,37 +177,37 @@ public sealed class PinUvAuthProtocolV1 : IPinUvAuthProtocol
             if (inputArray is not null) CryptographicOperations.ZeroMemory(inputArray);
         }
     }
-    
+
     /// <inheritdoc />
     public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         // V1 PIN token can be 16 or 32 bytes
         if (key.Length != 16 && key.Length != SharedSecretLength)
         {
             throw new ArgumentException(
                 $"Key must be 16 or {SharedSecretLength} bytes.", nameof(key));
         }
-        
+
         // Compute HMAC-SHA-256
         Span<byte> fullHash = stackalloc byte[32];
         HMACSHA256.HashData(key, message, fullHash);
-        
+
         // V1 returns only first 16 bytes
         return fullHash[..V1AuthTagLength].ToArray();
     }
-    
+
     /// <inheritdoc />
     public bool Verify(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message, ReadOnlySpan<byte> signature)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         if (signature.Length != V1AuthTagLength)
         {
             return false;
         }
-        
+
         var expected = Authenticate(key, message);
         try
         {
@@ -218,7 +218,7 @@ public sealed class PinUvAuthProtocolV1 : IPinUvAuthProtocol
             CryptographicOperations.ZeroMemory(expected);
         }
     }
-    
+
     /// <inheritdoc />
     public void Dispose()
     {

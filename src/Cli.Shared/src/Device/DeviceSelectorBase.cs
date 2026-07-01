@@ -15,8 +15,8 @@
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Cli.Shared.Device;
@@ -156,7 +156,7 @@ public abstract class DeviceSelectorBase
         }
         catch (Exception ex)
         {
-            Logger.LogDebug(ex, "{ConnectionType} device info query failed", device.ConnectionType);
+            Logger.LogDebug(ex, "{ConnectionType} device info query failed", device.AvailableConnections);
             return null;
         }
     }
@@ -168,7 +168,7 @@ public abstract class DeviceSelectorBase
     /// </summary>
     protected virtual IReadOnlyList<IYubiKey> FilterDevices(IReadOnlyList<IYubiKey> allDevices) =>
         allDevices
-            .Where(d => SupportedConnectionTypes.Contains(d.ConnectionType))
+            .Where(d => SupportedConnectionTypes.Any(d.SupportsConnection))
             .ToList();
 
     /// <summary>
@@ -253,7 +253,7 @@ public abstract class DeviceSelectorBase
             selected.Info?.SerialNumber,
             selected.Info?.FormFactor ?? FormFactor.Unknown,
             selected.Info?.FirmwareVersion.ToString() ?? "Unknown",
-            selected.Device.ConnectionType);
+            selected.Device.AvailableConnections);
     }
 
     /// <summary>
@@ -269,7 +269,7 @@ public abstract class DeviceSelectorBase
             info?.SerialNumber,
             info?.FormFactor ?? FormFactor.Unknown,
             info?.FirmwareVersion.ToString() ?? "Unknown",
-            device.ConnectionType);
+            device.AvailableConnections);
     }
 
     /// <summary>
@@ -277,7 +277,7 @@ public abstract class DeviceSelectorBase
     /// </summary>
     private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
     {
-        var transport = ConnectionTypeFormatter.Format(device.ConnectionType);
+        var transport = ConnectionTypeFormatter.Format(device.AvailableConnections);
 
         if (info is null)
         {

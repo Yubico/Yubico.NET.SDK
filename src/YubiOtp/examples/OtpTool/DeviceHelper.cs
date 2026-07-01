@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using Spectre.Console;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool;
@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool;
 /// <param name="SerialNumber">The device serial number, if available.</param>
 /// <param name="FormFactor">The device form factor.</param>
 /// <param name="FirmwareVersion">The firmware version string.</param>
-/// <param name="ConnectionType">The connection type used to connect to this device.</param>
+/// <param name="ConnectionType">The available connection set displayed for this device.</param>
 public record DeviceSelection(
     IYubiKey Device,
     int? SerialNumber,
@@ -99,13 +99,13 @@ public static class DeviceHelper
                 info?.SerialNumber,
                 info?.FormFactor ?? FormFactor.Unknown,
                 info?.FirmwareVersion.ToString() ?? "Unknown",
-                device.ConnectionType);
+                device.AvailableConnections);
         }
 
         // Multiple devices found — in non-interactive mode, prefer SmartCard (richer protocol)
         if (!AnsiConsole.Profile.Capabilities.Interactive)
         {
-            var preferred = devices.FirstOrDefault(d => d.ConnectionType == ConnectionType.SmartCard)
+            var preferred = devices.FirstOrDefault(d => d.SupportsConnection(ConnectionType.SmartCard))
                 ?? devices[0];
             var info = await GetDeviceInfoAsync(preferred, cancellationToken);
             return new DeviceSelection(
@@ -113,7 +113,7 @@ public static class DeviceHelper
                 info?.SerialNumber,
                 info?.FormFactor ?? FormFactor.Unknown,
                 info?.FirmwareVersion.ToString() ?? "Unknown",
-                preferred.ConnectionType);
+                preferred.AvailableConnections);
         }
 
         return await PromptForDeviceSelectionAsync(devices, cancellationToken);
@@ -134,7 +134,7 @@ public static class DeviceHelper
 
             // Filter to supported connection types for OTP
             var devices = allDevices
-                .Where(d => SupportedConnectionTypes.Contains(d.ConnectionType))
+                .Where(d => SupportedConnectionTypes.Any(d.SupportsConnection))
                 .ToList();
 
             if (devices.Count > 0)
@@ -175,7 +175,7 @@ public static class DeviceHelper
         catch (Exception ex)
         {
             AnsiConsole.MarkupLine(
-                $"[grey]Debug: {device.ConnectionType} device info failed: " +
+                $"[grey]Debug: {device.AvailableConnections} device info failed: " +
                 $"{Markup.Escape(ex.GetType().Name)}: {Markup.Escape(ex.Message)}[/]");
             return null;
         }
@@ -235,7 +235,7 @@ public static class DeviceHelper
             selected.Info?.SerialNumber,
             selected.Info?.FormFactor ?? FormFactor.Unknown,
             selected.Info?.FirmwareVersion.ToString() ?? "Unknown",
-            selected.Device.ConnectionType);
+            selected.Device.AvailableConnections);
     }
 
     /// <summary>
@@ -243,7 +243,7 @@ public static class DeviceHelper
     /// </summary>
     private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
     {
-        var transport = FormatConnectionType(device.ConnectionType);
+        var transport = FormatConnectionType(device.AvailableConnections);
 
         if (info is null)
         {
@@ -276,11 +276,19 @@ public static class DeviceHelper
     /// <summary>
     /// Formats connection type for display.
     /// </summary>
-    public static string FormatConnectionType(ConnectionType connectionType) =>
-        connectionType switch
-        {
-            ConnectionType.SmartCard => "SmartCard",
-            ConnectionType.HidOtp => "OTP HID",
-            _ => "Unknown"
-        };
+    public static string FormatConnectionType(ConnectionType connectionType)
+    {
+        if (connectionType == ConnectionType.Unknown)
+            return "Unknown";
+
+        var parts = new List<string>();
+        if ((connectionType & ConnectionType.SmartCard) != 0)
+            parts.Add("SmartCard");
+        if ((connectionType & ConnectionType.HidOtp) != 0)
+            parts.Add("OTP HID");
+        if ((connectionType & ConnectionType.HidFido) != 0)
+            parts.Add("FIDO HID");
+
+        return parts.Count == 0 ? "Unknown" : string.Join(", ", parts);
+    }
 }

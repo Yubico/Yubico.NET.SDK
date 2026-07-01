@@ -14,7 +14,7 @@
 
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.Abstractions;
 
 namespace Yubico.YubiKit.OpenPgp;
 

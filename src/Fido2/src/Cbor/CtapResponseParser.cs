@@ -38,7 +38,7 @@ internal static class CtapResponseParser
     {
         ArgumentNullException.ThrowIfNull(reader);
         ArgumentNullException.ThrowIfNull(fieldHandler);
-        
+
         var mapLength = reader.ReadStartMap();
         for (var i = 0; i < mapLength; i++)
         {
@@ -47,7 +47,7 @@ internal static class CtapResponseParser
         }
         reader.ReadEndMap();
     }
-    
+
     /// <summary>
     /// Reads a CBOR map with text (string) keys and invokes the handler for each key-value pair.
     /// </summary>
@@ -63,7 +63,7 @@ internal static class CtapResponseParser
     {
         ArgumentNullException.ThrowIfNull(reader);
         ArgumentNullException.ThrowIfNull(fieldHandler);
-        
+
         var mapLength = reader.ReadStartMap();
         for (var i = 0; i < mapLength; i++)
         {
@@ -72,7 +72,7 @@ internal static class CtapResponseParser
         }
         reader.ReadEndMap();
     }
-    
+
     /// <summary>
     /// Converts a nullable byte array to nullable ReadOnlyMemory.
     /// </summary>
@@ -80,7 +80,7 @@ internal static class CtapResponseParser
     /// <returns>ReadOnlyMemory wrapping the data, or null if data is null.</returns>
     public static ReadOnlyMemory<byte>? ToNullableMemory(byte[]? data) =>
         data is not null ? new ReadOnlyMemory<byte>(data) : null;
-    
+
     /// <summary>
     /// Reads a CBOR array and invokes the handler for each element.
     /// </summary>
@@ -92,7 +92,7 @@ internal static class CtapResponseParser
     {
         ArgumentNullException.ThrowIfNull(reader);
         ArgumentNullException.ThrowIfNull(elementHandler);
-        
+
         var arrayLength = reader.ReadStartArray();
         for (var i = 0; i < arrayLength; i++)
         {
@@ -100,7 +100,7 @@ internal static class CtapResponseParser
         }
         reader.ReadEndArray();
     }
-    
+
     /// <summary>
     /// Reads a CBOR array and returns a list of parsed elements.
     /// </summary>
@@ -114,7 +114,7 @@ internal static class CtapResponseParser
     {
         ArgumentNullException.ThrowIfNull(reader);
         ArgumentNullException.ThrowIfNull(elementParser);
-        
+
         var result = new List<T>();
         var arrayLength = reader.ReadStartArray();
         for (var i = 0; i < arrayLength; i++)
@@ -124,7 +124,7 @@ internal static class CtapResponseParser
         reader.ReadEndArray();
         return result;
     }
-    
+
     /// <summary>
     /// Safely reads an optional integer value from the reader, returning null if not present.
     /// </summary>
@@ -139,7 +139,7 @@ internal static class CtapResponseParser
         }
         return reader.ReadInt32();
     }
-    
+
     /// <summary>
     /// Safely reads an optional boolean value from the reader, returning null if not present.
     /// </summary>
@@ -154,7 +154,7 @@ internal static class CtapResponseParser
         }
         return reader.ReadBoolean();
     }
-    
+
     /// <summary>
     /// Safely reads an optional byte array from the reader, returning null if not present.
     /// </summary>
@@ -169,7 +169,7 @@ internal static class CtapResponseParser
         }
         return reader.ReadByteString();
     }
-    
+
     /// <summary>
     /// Safely reads an optional text string from the reader, returning null if not present.
     /// </summary>

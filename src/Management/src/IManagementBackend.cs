@@ -21,14 +21,6 @@ namespace Yubico.YubiKit.Management;
 internal interface IManagementBackend : IDisposable
 {
     /// <summary>
-    /// Read configuration data from the specified page.
-    /// </summary>
-    /// <param name="page">Page number to read (0-based).</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Raw TLV-encoded configuration data.</returns>
-    ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken cancellationToken);
-
-    /// <summary>
     /// Write configuration data to the device.
     /// </summary>
     /// <param name="config">TLV-encoded configuration data.</param>

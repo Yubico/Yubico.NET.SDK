@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Tests.Shared;

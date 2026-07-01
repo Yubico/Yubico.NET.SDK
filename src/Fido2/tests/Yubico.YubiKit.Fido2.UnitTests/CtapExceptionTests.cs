@@ -10,36 +10,36 @@ public class CtapExceptionTests
     {
         // Arrange & Act
         var exception = new CtapException(CtapStatus.PinInvalid);
-        
+
         // Assert
         exception.Status.Should().Be(CtapStatus.PinInvalid);
         exception.Message.Should().Contain("PIN");
     }
-    
+
     [Fact]
     public void Constructor_WithStatusAndMessage_SetsProperties()
     {
         // Arrange & Act
         var exception = new CtapException(CtapStatus.NoCredentials, "Custom message");
-        
+
         // Assert
         exception.Status.Should().Be(CtapStatus.NoCredentials);
         exception.Message.Should().Be("Custom message");
     }
-    
+
     [Fact]
     public void Constructor_WithInnerException_PreservesInnerException()
     {
         // Arrange
         var inner = new InvalidOperationException("Inner");
-        
+
         // Act
         var exception = new CtapException(CtapStatus.Other, "Outer", inner);
-        
+
         // Assert
         exception.InnerException.Should().Be(inner);
     }
-    
+
     [Fact]
     public void ThrowIfError_WithSuccess_DoesNotThrow()
     {
@@ -47,7 +47,7 @@ public class CtapExceptionTests
         var action = () => CtapException.ThrowIfError(CtapStatus.Success);
         action.Should().NotThrow();
     }
-    
+
     [Fact]
     public void ThrowIfError_WithError_ThrowsException()
     {
@@ -56,7 +56,7 @@ public class CtapExceptionTests
         action.Should().Throw<CtapException>()
             .Which.Status.Should().Be(CtapStatus.PinBlocked);
     }
-    
+
     [Fact]
     public void ThrowIfError_WithByte_ThrowsException()
     {
@@ -65,7 +65,16 @@ public class CtapExceptionTests
         action.Should().Throw<CtapException>()
             .Which.Status.Should().Be(CtapStatus.PinBlocked);
     }
-    
+
+    [Theory]
+    [InlineData(CtapStatus.PinNotSet, 0x35)]
+    [InlineData(CtapStatus.PuatRequired, 0x36)]
+    [InlineData(CtapStatus.PinTokenExpired, 0x38)]
+    [InlineData(CtapStatus.ActionTimeout, 0x3A)]
+    [InlineData(CtapStatus.UpRequired, 0x3B)]
+    public void Ctap22StatusValues_MatchSpecification(CtapStatus status, byte expectedValue) =>
+        ((byte)status).Should().Be(expectedValue);
+
     [Theory]
     [InlineData(CtapStatus.InvalidCommand, "Invalid CTAP command")]
     [InlineData(CtapStatus.InvalidParameter, "Invalid parameter")]
@@ -73,11 +82,13 @@ public class CtapExceptionTests
     [InlineData(CtapStatus.CredentialExcluded, "excluded")]
     [InlineData(CtapStatus.NoCredentials, "No credentials")]
     [InlineData(CtapStatus.UserActionTimeout, "timeout")]
+    [InlineData(CtapStatus.PuatRequired, "token required")]
+    [InlineData(CtapStatus.PinTokenExpired, "token expired")]
     public void Constructor_WithKnownStatus_HasDescriptiveMessage(CtapStatus status, string expectedContains)
     {
         // Arrange & Act
         var exception = new CtapException(status);
-        
+
         // Assert
         exception.Message.Should().ContainEquivalentOf(expectedContains);
     }

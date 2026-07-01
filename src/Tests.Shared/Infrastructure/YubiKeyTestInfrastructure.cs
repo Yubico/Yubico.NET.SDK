@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -96,9 +96,11 @@ internal static class YubiKeyTestInfrastructure
         if (criteria.RequireNfc)
             filtered = filtered.Where(d => d.IsNfcTransport);
 
-        // Filter by connection type
+        // Filter by requested connection type. criteria.ConnectionType is the REQUESTED transport; a device
+        // matches when its available connection set supports it. This is set-correct for merged physical
+        // devices (e.g. a composite SmartCard|HidFido|HidOtp device matches a SmartCard request).
         if (criteria.ConnectionType != ConnectionType.Unknown)
-            filtered = filtered.Where(d => d.ConnectionType == criteria.ConnectionType);
+            filtered = filtered.Where(d => d.Device.SupportsConnection(criteria.ConnectionType));
 
         // Filter by capability
         if (criteria.Capability != DeviceCapabilities.None)
@@ -211,12 +213,12 @@ internal static class YubiKeyTestInfrastructure
                     {
                         if (AllowList.IsDeviceAllowed(deviceInfo.Value.SerialNumber))
                         {
-                            var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.ConnectionType);
+                            var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.AvailableConnections);
                             authorizedDevices.Add(testDevice);
                             YubiKeyDeviceCache.AddDevice(testDevice);
 
                             Console.WriteLine(
-                                $"[YubiKey Infrastructure] Device SN:{deviceInfo.Value.SerialNumber} ({device.ConnectionType}) authorized " +
+                                $"[YubiKey Infrastructure] Device SN:{deviceInfo.Value.SerialNumber} ({device.AvailableConnections}) authorized " +
                                 $"(FW:{deviceInfo.Value.FirmwareVersion}, {deviceInfo.Value.FormFactor})");
                         }
                         else
@@ -228,12 +230,12 @@ internal static class YubiKeyTestInfrastructure
                     }
                     else if (deviceInfo is not null && AllowList.AllowUnknownSerials)
                     {
-                        var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.ConnectionType);
+                        var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.AvailableConnections);
                         authorizedDevices.Add(testDevice);
                         YubiKeyDeviceCache.AddDevice(testDevice);
 
                         Console.WriteLine(
-                            $"[YubiKey Infrastructure] Device ({device.ConnectionType}) authorized (unknown serial, AllowUnknownSerials=true, " +
+                            $"[YubiKey Infrastructure] Device ({device.AvailableConnections}) authorized (unknown serial, AllowUnknownSerials=true, " +
                             $"FW:{deviceInfo.Value.FirmwareVersion}, {deviceInfo.Value.FormFactor})");
                     }
                     else

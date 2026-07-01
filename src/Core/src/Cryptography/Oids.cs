@@ -53,22 +53,22 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// Represents the OID for NIST P-521 curve (also known as secp521r1)
         /// </summary>
         public const string ECP521 = "1.3.132.0.35";
-        
+
         /// <summary>
         /// Represents the OID for AES-128 in CBC mode
         /// </summary>
         public const string AES128Cbc = "2.16.840.1.101.3.4.1.2";
-        
+
         /// <summary>
         /// Represents the OID for AES-192 in CBC mode
         /// </summary>
         public const string AES192Cbc = "2.16.840.1.101.3.4.1.22";
-        
+
         /// <summary>
         /// Represents the OID for AES-256 in CBC mode
         /// </summary>
         public const string AES256Cbc = "2.16.840.1.101.3.4.1.42";
-        
+
         /// <summary>
         /// Represents the OID for Triple DES in CBC mode
         /// </summary>
@@ -92,12 +92,12 @@ namespace Yubico.YubiKit.Core.Cryptography
 
                 KeyType.X25519 => (X25519, null),
                 KeyType.Ed25519 => (Ed25519, null),
-                
+
                 KeyType.AES128 => (AES128Cbc, null),
                 KeyType.AES192 => (AES192Cbc, null),
                 KeyType.AES256 => (AES256Cbc, null),
                 KeyType.TripleDES => (TripleDESCbc, null),
-                
+
                 _ => throw new ArgumentException($"Unsupported key type: {keyType}")
             };
         }

@@ -38,22 +38,22 @@ namespace Yubico.YubiKit.Fido2.Extensions;
 public sealed class ExtensionOutput
 {
     private readonly IReadOnlyDictionary<string, ReadOnlyMemory<byte>> _extensions;
-    
+
     private ExtensionOutput(IReadOnlyDictionary<string, ReadOnlyMemory<byte>> extensions)
     {
         _extensions = extensions;
     }
-    
+
     /// <summary>
     /// Gets whether this output contains any extensions.
     /// </summary>
     public bool HasExtensions => _extensions.Count > 0;
-    
+
     /// <summary>
     /// Gets the extension identifiers present in this output.
     /// </summary>
     public IEnumerable<string> ExtensionIds => _extensions.Keys;
-    
+
     /// <summary>
     /// Attempts to get the credProtect extension output.
     /// </summary>
@@ -62,24 +62,24 @@ public sealed class ExtensionOutput
     public bool TryGetCredProtect(out CredProtectPolicy policy)
     {
         policy = default;
-        
+
         if (!_extensions.TryGetValue(ExtensionIdentifiers.CredProtect, out var data))
         {
             return false;
         }
-        
+
         var reader = new CborReader(data, CborConformanceMode.Lax);
         var value = reader.ReadInt32();
-        
+
         if (value is >= 1 and <= 3)
         {
             policy = (CredProtectPolicy)value;
             return true;
         }
-        
+
         return false;
     }
-    
+
     /// <summary>
     /// Attempts to get the credBlob extension output (makeCredential response).
     /// </summary>
@@ -88,24 +88,24 @@ public sealed class ExtensionOutput
     public bool TryGetCredBlobStored(out bool stored)
     {
         stored = false;
-        
+
         if (!_extensions.TryGetValue(ExtensionIdentifiers.CredBlob, out var data))
         {
             return false;
         }
-        
+
         var reader = new CborReader(data, CborConformanceMode.Lax);
-        
+
         // Check if it's a boolean (makeCredential) or byte string (getAssertion)
         if (reader.PeekState() == CborReaderState.Boolean)
         {
             stored = reader.ReadBoolean();
             return true;
         }
-        
+
         return false;
     }
-    
+
     /// <summary>
     /// Attempts to get the credBlob extension output (getAssertion response).
     /// </summary>
@@ -114,24 +114,24 @@ public sealed class ExtensionOutput
     public bool TryGetCredBlob(out ReadOnlyMemory<byte> blob)
     {
         blob = default;
-        
+
         if (!_extensions.TryGetValue(ExtensionIdentifiers.CredBlob, out var data))
         {
             return false;
         }
-        
+
         var reader = new CborReader(data, CborConformanceMode.Lax);
-        
+
         // Check if it's a byte string (getAssertion)
         if (reader.PeekState() == CborReaderState.ByteString)
         {
             blob = reader.ReadByteString();
             return true;
         }
-        
+
         return false;
     }
-    
+
     /// <summary>
     /// Attempts to get the hmac-secret extension output.
     /// </summary>
@@ -140,16 +140,16 @@ public sealed class ExtensionOutput
     public bool TryGetHmacSecret(out HmacSecretOutput? output)
     {
         output = null;
-        
+
         if (!_extensions.TryGetValue(ExtensionIdentifiers.HmacSecret, out var data))
         {
             return false;
         }
-        
+
         output = HmacSecretOutput.Decode(data);
         return true;
     }
-    
+
     /// <summary>
     /// Attempts to get the largeBlob extension output.
     /// </summary>
@@ -158,14 +158,14 @@ public sealed class ExtensionOutput
     public bool TryGetLargeBlob(out LargeBlobOutput? output)
     {
         output = null;
-        
+
         if (!_extensions.TryGetValue(ExtensionIdentifiers.LargeBlob, out var data))
         {
             return false;
         }
-        
+
         var reader = new CborReader(data, CborConformanceMode.Lax);
-        
+
         // During makeCredential, output is just a boolean
         if (reader.PeekState() == CborReaderState.Boolean)
         {
@@ -173,12 +173,12 @@ public sealed class ExtensionOutput
             output = new LargeBlobOutput { Written = supported };
             return true;
         }
-        
+
         // During getAssertion, output is a map
         output = LargeBlobOutput.Decode(reader);
         return true;
     }
-    
+
     /// <summary>
     /// Attempts to get the largeBlobKey from extension output.
     /// </summary>
@@ -187,7 +187,7 @@ public sealed class ExtensionOutput
     public bool TryGetLargeBlobKey(out ReadOnlyMemory<byte> key)
     {
         key = default;
-        
+
         if (!_extensions.TryGetValue(ExtensionIdentifiers.LargeBlobKey, out var data))
         {
             // Also check in largeBlob output
@@ -198,12 +198,12 @@ public sealed class ExtensionOutput
             }
             return false;
         }
-        
+
         var reader = new CborReader(data, CborConformanceMode.Lax);
         key = reader.ReadByteString();
         return true;
     }
-    
+
     /// <summary>
     /// Attempts to get the minPinLength extension output.
     /// </summary>
@@ -212,17 +212,17 @@ public sealed class ExtensionOutput
     public bool TryGetMinPinLength(out int minLength)
     {
         minLength = 0;
-        
+
         if (!_extensions.TryGetValue(ExtensionIdentifiers.MinPinLength, out var data))
         {
             return false;
         }
-        
+
         var reader = new CborReader(data, CborConformanceMode.Lax);
         minLength = reader.ReadInt32();
         return true;
     }
-    
+
     /// <summary>
     /// Attempts to get raw extension data by identifier.
     /// </summary>
@@ -233,7 +233,7 @@ public sealed class ExtensionOutput
     {
         return _extensions.TryGetValue(extensionId, out data);
     }
-    
+
     /// <summary>
     /// Decodes extension output from CBOR bytes, preserving raw data for each extension.
     /// </summary>
@@ -241,7 +241,7 @@ public sealed class ExtensionOutput
     /// <returns>The decoded extension output with raw data preserved.</returns>
     public static ExtensionOutput Decode(ReadOnlyMemory<byte> data) =>
         DecodeWithRawData(data);
-    
+
     /// <summary>
     /// Decodes extension output from a CBOR reader.
     /// </summary>
@@ -253,9 +253,9 @@ public sealed class ExtensionOutput
     public static ExtensionOutput Decode(CborReader reader)
     {
         ArgumentNullException.ThrowIfNull(reader);
-        
+
         var extensions = new Dictionary<string, ReadOnlyMemory<byte>>();
-        
+
         var mapCount = reader.ReadStartMap() ?? 0;
         for (var i = 0; i < mapCount; i++)
         {
@@ -265,10 +265,10 @@ public sealed class ExtensionOutput
             extensions[key] = ReadOnlyMemory<byte>.Empty;
         }
         reader.ReadEndMap();
-        
+
         return new ExtensionOutput(extensions);
     }
-    
+
     /// <summary>
     /// Decodes extension output from CBOR bytes, preserving raw data.
     /// </summary>
@@ -280,25 +280,25 @@ public sealed class ExtensionOutput
         {
             return new ExtensionOutput(new Dictionary<string, ReadOnlyMemory<byte>>());
         }
-        
+
         var reader = new CborReader(data, CborConformanceMode.Lax);
         var extensions = new Dictionary<string, ReadOnlyMemory<byte>>();
-        
+
         var mapCount = reader.ReadStartMap() ?? 0;
         for (var i = 0; i < mapCount; i++)
         {
             var key = reader.ReadTextString();
-            
+
             // Get the start position and read/encode the value to get its bytes
             var valueWriter = new CborWriter(CborConformanceMode.Lax);
             CopyCborValue(reader, valueWriter);
             extensions[key] = valueWriter.Encode();
         }
         reader.ReadEndMap();
-        
+
         return new ExtensionOutput(extensions);
     }
-    
+
     private static void CopyCborValue(CborReader reader, CborWriter writer)
     {
         switch (reader.PeekState())

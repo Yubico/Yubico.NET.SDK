@@ -46,11 +46,11 @@ public sealed class ClientPin : IDisposable
     private const int PinMinLength = 4;
     private const int PinMaxLength = 63;
     private const int PinBlockSize = 64;
-    
+
     private readonly IFidoSession _session;
     private readonly IPinUvAuthProtocol _protocol;
     private bool _disposed;
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ClientPin"/> class.
     /// </summary>
@@ -61,16 +61,16 @@ public sealed class ClientPin : IDisposable
     {
         ArgumentNullException.ThrowIfNull(session);
         ArgumentNullException.ThrowIfNull(protocol);
-        
+
         _session = session;
         _protocol = protocol;
     }
-    
+
     /// <summary>
     /// Gets the PIN/UV auth protocol used by this instance.
     /// </summary>
     public IPinUvAuthProtocol Protocol => _protocol;
-    
+
     /// <summary>
     /// Gets the number of PIN retries remaining before the authenticator locks.
     /// </summary>
@@ -86,18 +86,18 @@ public sealed class ClientPin : IDisposable
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        
+
         var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
             .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
             .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetRetries)
             .Build();
-        
+
         var response = await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
-        
+
         return ParsePinRetriesResponse(response);
     }
-    
+
     /// <summary>
     /// Gets the number of UV retries remaining (CTAP 2.1).
     /// </summary>
@@ -113,18 +113,18 @@ public sealed class ClientPin : IDisposable
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        
+
         var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
             .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
             .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetUvRetries)
             .Build();
-        
+
         var response = await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
-        
+
         return ParseUvRetriesResponse(response);
     }
-    
+
     /// <summary>
     /// Sets a new PIN on the authenticator (first-time setup).
     /// </summary>
@@ -175,7 +175,7 @@ public sealed class ClientPin : IDisposable
             if (pinUvAuthParam is not null) CryptographicOperations.ZeroMemory(pinUvAuthParam);
         }
     }
-    
+
     /// <summary>
     /// Changes the existing PIN on the authenticator.
     /// </summary>
@@ -246,7 +246,7 @@ public sealed class ClientPin : IDisposable
             if (pinUvAuthParam is not null) CryptographicOperations.ZeroMemory(pinUvAuthParam);
         }
     }
-    
+
     /// <summary>
     /// Gets a PIN token using the PIN.
     /// </summary>
@@ -387,7 +387,7 @@ public sealed class ClientPin : IDisposable
             if (pinHashEnc is not null) CryptographicOperations.ZeroMemory(pinHashEnc);
         }
     }
-    
+
     /// <summary>
     /// Gets a PIN/UV auth token using UV with specified permissions (CTAP 2.1).
     /// </summary>
@@ -415,19 +415,19 @@ public sealed class ClientPin : IDisposable
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        
+
         if (permissions == PinUvAuthTokenPermissions.None)
         {
             throw new ArgumentException("At least one permission must be specified.", nameof(permissions));
         }
-        
+
         // Get authenticator's key agreement key
         var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
             .ConfigureAwait(false);
-        
+
         // Perform ECDH key agreement
         var (platformKey, sharedSecret) = _protocol.Encapsulate(authenticatorKey);
-        
+
         try
         {
             var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin)
@@ -435,16 +435,16 @@ public sealed class ClientPin : IDisposable
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetPinUvAuthTokenUsingUvWithPermissions)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
                 .WithUInt(ClientPinParam.Permissions, (uint)permissions);
-            
+
             if (!string.IsNullOrEmpty(rpId))
             {
                 builder.WithString(ClientPinParam.RpId, rpId);
             }
-            
+
             var request = builder.Build();
             var response = await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
-            
+
             var encryptedToken = ParsePinTokenResponse(response);
             return _protocol.Decrypt(sharedSecret, encryptedToken);
         }
@@ -453,7 +453,7 @@ public sealed class ClientPin : IDisposable
             CryptographicOperations.ZeroMemory(sharedSecret);
         }
     }
-    
+
     /// <summary>
     /// Gets the authenticator's key agreement public key.
     /// </summary>
@@ -463,18 +463,18 @@ public sealed class ClientPin : IDisposable
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        
+
         var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
             .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
             .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetKeyAgreement)
             .Build();
-        
+
         var response = await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
-        
+
         return ParseKeyAgreementResponse(response);
     }
-    
+
     private static void ValidatePin(ReadOnlyMemory<byte> pinUtf8)
     {
         if (pinUtf8.Length < PinMinLength)
@@ -510,19 +510,19 @@ public sealed class ClientPin : IDisposable
             CryptographicOperations.ZeroMemory(hash);
         }
     }
-    
+
     private static (int Retries, bool PowerCycleRequired) ParsePinRetriesResponse(ReadOnlyMemory<byte> data)
     {
         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
         var mapLength = reader.ReadStartMap();
-        
+
         int retries = 0;
         var powerCycleRequired = false;
-        
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadInt32();
-            
+
             switch (key)
             {
                 case ClientPinResponse.PinRetries:
@@ -536,23 +536,23 @@ public sealed class ClientPin : IDisposable
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
         return (retries, powerCycleRequired);
     }
-    
+
     private static (int Retries, bool PowerCycleRequired) ParseUvRetriesResponse(ReadOnlyMemory<byte> data)
     {
         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
         var mapLength = reader.ReadStartMap();
-        
+
         int retries = 0;
         var powerCycleRequired = false;
-        
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadInt32();
-            
+
             switch (key)
             {
                 case ClientPinResponse.UvRetries:
@@ -566,22 +566,22 @@ public sealed class ClientPin : IDisposable
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
         return (retries, powerCycleRequired);
     }
-    
+
     private static Dictionary<int, object?> ParseKeyAgreementResponse(ReadOnlyMemory<byte> data)
     {
         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
         var mapLength = reader.ReadStartMap();
-        
+
         Dictionary<int, object?>? keyAgreement = null;
-        
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadInt32();
-            
+
             if (key == ClientPinResponse.KeyAgreement)
             {
                 keyAgreement = ParseCoseKey(reader);
@@ -591,24 +591,24 @@ public sealed class ClientPin : IDisposable
                 reader.SkipValue();
             }
         }
-        
+
         reader.ReadEndMap();
-        
+
         return keyAgreement ?? throw new InvalidOperationException(
             "Response missing required keyAgreement field.");
     }
-    
+
     private static byte[] ParsePinTokenResponse(ReadOnlyMemory<byte> data)
     {
         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
         var mapLength = reader.ReadStartMap();
-        
+
         byte[]? pinToken = null;
-        
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadInt32();
-            
+
             if (key == ClientPinResponse.PinUvAuthToken)
             {
                 pinToken = reader.ReadByteString();
@@ -618,22 +618,22 @@ public sealed class ClientPin : IDisposable
                 reader.SkipValue();
             }
         }
-        
+
         reader.ReadEndMap();
-        
+
         return pinToken ?? throw new InvalidOperationException(
             "Response missing required pinUvAuthToken field.");
     }
-    
+
     private static Dictionary<int, object?> ParseCoseKey(CborReader reader)
     {
         var mapLength = reader.ReadStartMap();
         var result = new Dictionary<int, object?>((int)mapLength!);
-        
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadInt32();
-            
+
             switch (reader.PeekState())
             {
                 case CborReaderState.UnsignedInteger:
@@ -655,22 +655,22 @@ public sealed class ClientPin : IDisposable
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
         return result;
     }
-    
+
     private void EnsureNotDisposed()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
     }
-    
+
     /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed)
             return;
-        
+
         _protocol.Dispose();
         _disposed = true;
     }

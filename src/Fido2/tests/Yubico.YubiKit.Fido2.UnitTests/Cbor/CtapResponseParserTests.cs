@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.Fido2.UnitTests.Cbor;
 /// </summary>
 public class CtapResponseParserTests
 {
-    
+
     [Fact]
     public void ReadIntKeyMap_ParsesMapCorrectly()
     {
@@ -34,12 +34,12 @@ public class CtapResponseParserTests
         writer.WriteInt32(2);
         writer.WriteTextString("hello");
         writer.WriteEndMap();
-        
+
         var reader = new CborReader(writer.Encode(), CborConformanceMode.Ctap2Canonical);
-        
+
         var intValue = 0;
         var stringValue = "";
-        
+
         // Act
         CtapResponseParser.ReadIntKeyMap(reader, (key, r) =>
         {
@@ -56,12 +56,12 @@ public class CtapResponseParserTests
                     break;
             }
         });
-        
+
         // Assert
         Assert.Equal(42, intValue);
         Assert.Equal("hello", stringValue);
     }
-    
+
     [Fact]
     public void ReadIntKeyMap_HandlesEmptyMap()
     {
@@ -69,24 +69,24 @@ public class CtapResponseParserTests
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(0);
         writer.WriteEndMap();
-        
+
         var reader = new CborReader(writer.Encode(), CborConformanceMode.Ctap2Canonical);
         var callCount = 0;
-        
+
         // Act
         CtapResponseParser.ReadIntKeyMap(reader, (_, _) => callCount++);
-        
+
         // Assert
         Assert.Equal(0, callCount);
     }
-    
+
     [Fact]
     public void ReadIntKeyMap_ThrowsOnNullReader()
     {
         Assert.Throws<ArgumentNullException>(() =>
             CtapResponseParser.ReadIntKeyMap(null!, (_, _) => { }));
     }
-    
+
     [Fact]
     public void ReadIntKeyMap_ThrowsOnNullHandler()
     {
@@ -94,13 +94,13 @@ public class CtapResponseParserTests
         writer.WriteStartMap(0);
         writer.WriteEndMap();
         var reader = new CborReader(writer.Encode(), CborConformanceMode.Ctap2Canonical);
-        
+
         Assert.Throws<ArgumentNullException>(() =>
             CtapResponseParser.ReadIntKeyMap(reader, null!));
     }
-    
-    
-    
+
+
+
     [Fact]
     public void ReadTextKeyMap_ParsesMapCorrectly()
     {
@@ -112,12 +112,12 @@ public class CtapResponseParserTests
         writer.WriteTextString("value");
         writer.WriteInt32(123);
         writer.WriteEndMap();
-        
+
         var reader = new CborReader(writer.Encode(), CborConformanceMode.Ctap2Canonical);
-        
+
         var name = "";
         var value = 0;
-        
+
         // Act
         CtapResponseParser.ReadTextKeyMap(reader, (key, r) =>
         {
@@ -134,26 +134,26 @@ public class CtapResponseParserTests
                     break;
             }
         });
-        
+
         // Assert
         Assert.Equal("test", name);
         Assert.Equal(123, value);
     }
-    
-    
-    
+
+
+
     [Fact]
     public void ToNullableMemory_WithData_ReturnsMemory()
     {
         var data = new byte[] { 1, 2, 3 };
         var result = CtapResponseParser.ToNullableMemory(data);
-        
+
         Assert.NotNull(result);
         Assert.Equal(data, result.Value.ToArray());
     }
-    
-    
-    
+
+
+
     [Fact]
     public void ReadArrayAsList_ParsesArrayCorrectly()
     {
@@ -164,67 +164,67 @@ public class CtapResponseParserTests
         writer.WriteInt32(2);
         writer.WriteInt32(3);
         writer.WriteEndArray();
-        
+
         var reader = new CborReader(writer.Encode(), CborConformanceMode.Ctap2Canonical);
-        
+
         // Act
         var result = CtapResponseParser.ReadArrayAsList(reader, r => r.ReadInt32());
-        
+
         // Assert
         Assert.Equal([1, 2, 3], result);
     }
-    
+
     [Fact]
     public void ReadArrayAsList_HandlesEmptyArray()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartArray(0);
         writer.WriteEndArray();
-        
+
         var reader = new CborReader(writer.Encode(), CborConformanceMode.Ctap2Canonical);
         var result = CtapResponseParser.ReadArrayAsList(reader, r => r.ReadInt32());
-        
+
         Assert.Empty(result);
     }
-    
-    
-    
+
+
+
     [Fact]
     public void ReadOptionalInt32_WithValue_ReturnsValue()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteInt32(42);
         var reader = new CborReader(writer.Encode(), CborConformanceMode.Ctap2Canonical);
-        
+
         var result = CtapResponseParser.ReadOptionalInt32(reader);
-        
+
         Assert.Equal(42, result);
     }
-    
+
     [Fact]
     public void ReadOptionalInt32_WithNull_ReturnsNull()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteNull();
         var reader = new CborReader(writer.Encode(), CborConformanceMode.Ctap2Canonical);
-        
+
         var result = CtapResponseParser.ReadOptionalInt32(reader);
-        
+
         Assert.Null(result);
     }
-    
+
     [Fact]
     public void ReadOptionalBoolean_WithValue_ReturnsValue()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteBoolean(true);
         var reader = new CborReader(writer.Encode(), CborConformanceMode.Ctap2Canonical);
-        
+
         var result = CtapResponseParser.ReadOptionalBoolean(reader);
-        
+
         Assert.True(result);
     }
-    
+
     [Fact]
     public void ReadOptionalByteString_WithValue_ReturnsValue()
     {
@@ -232,34 +232,34 @@ public class CtapResponseParserTests
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteByteString(data);
         var reader = new CborReader(writer.Encode(), CborConformanceMode.Ctap2Canonical);
-        
+
         var result = CtapResponseParser.ReadOptionalByteString(reader);
-        
+
         Assert.Equal(data, result);
     }
-    
+
     [Fact]
     public void ReadOptionalTextString_WithValue_ReturnsValue()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteTextString("test");
         var reader = new CborReader(writer.Encode(), CborConformanceMode.Ctap2Canonical);
-        
+
         var result = CtapResponseParser.ReadOptionalTextString(reader);
-        
+
         Assert.Equal("test", result);
     }
-    
+
     [Fact]
     public void ReadOptionalTextString_WithNull_ReturnsNull()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteNull();
         var reader = new CborReader(writer.Encode(), CborConformanceMode.Ctap2Canonical);
-        
+
         var result = CtapResponseParser.ReadOptionalTextString(reader);
-        
+
         Assert.Null(result);
     }
-    
+
 }

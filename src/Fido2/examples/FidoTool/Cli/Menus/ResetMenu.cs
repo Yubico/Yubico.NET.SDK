@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Spectre.Console;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Output;
 using Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Prompts;
 using Yubico.YubiKit.Fido2.Examples.FidoTool.FidoExamples;
@@ -39,16 +40,18 @@ public static class ResetMenu
 
         OutputHelpers.WriteActiveDevice(selection.DisplayName);
 
+        var resetTransport = SelectResetTransport(selection.Device.AvailableConnections);
+
         // Query authenticator for reset-specific capabilities
         var preflight = await ResetAuthenticator.GetPreflightInfoAsync(
-            selection.Device, cancellationToken);
+            selection.Device, resetTransport, cancellationToken);
 
         // Check transport restrictions
         if (preflight is { TransportsForReset.Count: > 0 })
         {
-            var currentTransport = selection.ConnectionType.ToString().ToLowerInvariant();
+            var currentTransport = ToCtapTransport(resetTransport);
             var allowed = preflight.TransportsForReset;
-            if (!allowed.Any(t => currentTransport.Contains(t, StringComparison.OrdinalIgnoreCase)))
+            if (currentTransport is not null && !allowed.Any(t => currentTransport.Equals(t, StringComparison.OrdinalIgnoreCase)))
             {
                 OutputHelpers.WriteError(
                     $"Cannot perform FIDO reset over the current transport. " +
@@ -95,7 +98,7 @@ public static class ResetMenu
 
         // Query preflight from the reinserted device for the accurate touch message
         var reinsertedPreflight = await ResetAuthenticator.GetPreflightInfoAsync(
-            newSelection.Device, cancellationToken);
+            newSelection.Device, resetTransport, cancellationToken);
 
         var touchMsg = reinsertedPreflight?.TouchMessage ?? "Touch your YubiKey to confirm.";
         AnsiConsole.MarkupLine($"[yellow]{Markup.Escape(touchMsg)}[/]");
@@ -103,7 +106,7 @@ public static class ResetMenu
         var result = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Resetting FIDO2 application...", async _ =>
-                await ResetAuthenticator.ResetAsync(newSelection.Device, cancellationToken));
+                await ResetAuthenticator.ResetAsync(newSelection.Device, resetTransport, cancellationToken));
 
         if (result.Success)
         {
@@ -116,4 +119,21 @@ public static class ResetMenu
             OutputHelpers.WriteError(result.ErrorMessage!);
         }
     }
+
+    internal static ConnectionType SelectResetTransport(ConnectionType availableConnections)
+    {
+        if ((availableConnections & ConnectionType.HidFido) != 0)
+            return ConnectionType.HidFido;
+        if ((availableConnections & ConnectionType.SmartCard) != 0)
+            return ConnectionType.SmartCard;
+
+        throw new NotSupportedException("FIDO reset requires HID FIDO or SmartCard.");
+    }
+
+    internal static string? ToCtapTransport(ConnectionType concreteTransport) => concreteTransport switch
+    {
+        ConnectionType.HidFido => "usb",
+        ConnectionType.SmartCard => null,
+        _ => throw new ArgumentException("FIDO reset requires HID FIDO or SmartCard.", nameof(concreteTransport))
+    };
 }

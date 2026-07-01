@@ -16,21 +16,21 @@ using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Hid.Fido;
-using Yubico.YubiKit.Core.Hid.Interfaces;
-using Yubico.YubiKit.Core.Hid.Otp;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Core.Utils;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Protocols.Otp.Hid;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Management;
 
 public sealed class ManagementSession : ApplicationSession, IManagementSession
 {
-    private const int TagMoreDeviceInfo = 0x10;
-
     private static readonly Feature FeatureDeviceInfo =
         new("Device Info", 4, 1, 0);
 
@@ -108,47 +108,8 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
     }
 
-    public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
-    {
-        byte page = 0;
-        var allPagesTlvs = new List<Tlv>();
-
-        var hasMoreData = true;
-        while (hasMoreData)
-        {
-            var pageTlvs = await ReadDeviceInfoPageAsync(page, cancellationToken).ConfigureAwait(false);
-            allPagesTlvs.AddRange(pageTlvs);
-
-            var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
-            if (moreData is null)
-                break;
-
-            var moreDataValue = moreData.Value;
-            hasMoreData = moreData?.Length == 1 && moreDataValue.Span[0] == 1;
-            ++page;
-        }
-
-        using var allTlvs = new DisposableTlvList(allPagesTlvs);
-        return DeviceInfo.CreateFromTlvs([.. allTlvs], _version);
-    }
-
-    private async Task<DisposableTlvList> ReadDeviceInfoPageAsync(byte page, CancellationToken cancellationToken)
-    {
-        var encodedResult = await _backend.ReadConfigAsync(page, cancellationToken).ConfigureAwait(false);
-
-        if (encodedResult.Length < 1)
-            throw new BadResponseException($"Empty response for page {page}");
-
-        var declaredLength = encodedResult[0];
-        var actualLength = encodedResult.Length - 1;
-        if (actualLength != declaredLength)
-        {
-            throw new BadResponseException(
-                $"Invalid device info length for page {page}: declared {declaredLength}, actual {actualLength}.");
-        }
-
-        return TlvHelper.DecodeList(encodedResult.AsSpan()[1..]);
-    }
+    public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default) =>
+        DeviceInfoReader.ReadAsync(_protocol, _version, cancellationToken);
 
     public Task SetDeviceConfigAsync(
         DeviceConfig config,

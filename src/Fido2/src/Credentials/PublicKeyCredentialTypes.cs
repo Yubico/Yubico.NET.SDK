@@ -35,22 +35,22 @@ public sealed class PublicKeyCredentialDescriptor
     /// The credential type (always "public-key" for WebAuthn).
     /// </summary>
     public const string PublicKeyType = "public-key";
-    
+
     /// <summary>
     /// Gets the credential type.
     /// </summary>
     public string Type { get; }
-    
+
     /// <summary>
     /// Gets the credential ID.
     /// </summary>
     public ReadOnlyMemory<byte> Id { get; }
-    
+
     /// <summary>
     /// Gets the optional transport hints.
     /// </summary>
     public IReadOnlyList<string>? Transports { get; }
-    
+
     /// <summary>
     /// Creates a new credential descriptor.
     /// </summary>
@@ -67,12 +67,12 @@ public sealed class PublicKeyCredentialDescriptor
         {
             throw new ArgumentException("Credential ID cannot be empty.", nameof(id));
         }
-        
+
         Type = type;
         Id = id;
         Transports = transports;
     }
-    
+
     /// <summary>
     /// Creates a credential descriptor from a credential ID.
     /// </summary>
@@ -80,7 +80,7 @@ public sealed class PublicKeyCredentialDescriptor
     /// <returns>A new credential descriptor.</returns>
     public static PublicKeyCredentialDescriptor FromCredentialId(ReadOnlyMemory<byte> credentialId) =>
         new(credentialId);
-    
+
     /// <summary>
     /// Parses a credential descriptor from CBOR.
     /// </summary>
@@ -89,11 +89,11 @@ public sealed class PublicKeyCredentialDescriptor
     public static PublicKeyCredentialDescriptor Parse(CborReader reader)
     {
         var mapLength = reader.ReadStartMap();
-        
+
         string? type = null;
         byte[]? id = null;
         List<string>? transports = null;
-        
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadTextString();
@@ -119,17 +119,17 @@ public sealed class PublicKeyCredentialDescriptor
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
-        
+
         if (type is null || id is null)
         {
             throw new InvalidOperationException("Credential descriptor missing required fields.");
         }
-        
+
         return new PublicKeyCredentialDescriptor(id, type, transports);
     }
-    
+
     /// <summary>
     /// Encodes this descriptor as CBOR.
     /// </summary>
@@ -138,13 +138,13 @@ public sealed class PublicKeyCredentialDescriptor
     {
         var mapSize = Transports is { Count: > 0 } ? 3 : 2;
         writer.WriteStartMap(mapSize);
-        
+
         writer.WriteTextString("type");
         writer.WriteTextString(Type);
-        
+
         writer.WriteTextString("id");
         writer.WriteByteString(Id.Span);
-        
+
         if (Transports is { Count: > 0 })
         {
             writer.WriteTextString("transports");
@@ -155,7 +155,7 @@ public sealed class PublicKeyCredentialDescriptor
             }
             writer.WriteEndArray();
         }
-        
+
         writer.WriteEndMap();
     }
 }
@@ -178,12 +178,12 @@ public sealed class PublicKeyCredentialRpEntity
     /// Gets the relying party identifier.
     /// </summary>
     public string Id { get; }
-    
+
     /// <summary>
     /// Gets the relying party name for display.
     /// </summary>
     public string? Name { get; }
-    
+
     /// <summary>
     /// Creates a new RP entity.
     /// </summary>
@@ -195,7 +195,7 @@ public sealed class PublicKeyCredentialRpEntity
         Id = id;
         Name = name;
     }
-    
+
     /// <summary>
     /// Parses an RP entity from CBOR.
     /// </summary>
@@ -204,10 +204,10 @@ public sealed class PublicKeyCredentialRpEntity
     public static PublicKeyCredentialRpEntity Parse(CborReader reader)
     {
         var mapLength = reader.ReadStartMap();
-        
+
         string? id = null;
         string? name = null;
-        
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadTextString();
@@ -224,17 +224,17 @@ public sealed class PublicKeyCredentialRpEntity
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
-        
+
         if (id is null)
         {
             throw new InvalidOperationException("RP entity missing required 'id' field.");
         }
-        
+
         return new PublicKeyCredentialRpEntity(id, name);
     }
-    
+
     /// <summary>
     /// Encodes this RP entity as CBOR.
     /// </summary>
@@ -243,16 +243,16 @@ public sealed class PublicKeyCredentialRpEntity
     {
         var mapSize = Name is not null ? 2 : 1;
         writer.WriteStartMap(mapSize);
-        
+
         writer.WriteTextString("id");
         writer.WriteTextString(Id);
-        
+
         if (Name is not null)
         {
             writer.WriteTextString("name");
             writer.WriteTextString(Name);
         }
-        
+
         writer.WriteEndMap();
     }
 }
@@ -275,7 +275,7 @@ public sealed class PublicKeyCredentialUserEntity
     /// Gets the user handle (unique identifier for the user).
     /// </summary>
     public ReadOnlyMemory<byte> Id { get; }
-    
+
     /// <summary>
     /// Gets the human-readable user name.
     /// </summary>
@@ -283,7 +283,7 @@ public sealed class PublicKeyCredentialUserEntity
     /// This may be null when parsing a GetAssertion response, as only the user ID is required.
     /// </remarks>
     public string? Name { get; }
-    
+
     /// <summary>
     /// Gets the human-readable display name.
     /// </summary>
@@ -291,7 +291,7 @@ public sealed class PublicKeyCredentialUserEntity
     /// This may be null when parsing a GetAssertion response, as only the user ID is required.
     /// </remarks>
     public string? DisplayName { get; }
-    
+
     /// <summary>
     /// Creates a new user entity.
     /// </summary>
@@ -313,12 +313,12 @@ public sealed class PublicKeyCredentialUserEntity
         }
         ArgumentException.ThrowIfNullOrEmpty(name);
         ArgumentException.ThrowIfNullOrEmpty(displayName);
-        
+
         Id = id;
         Name = name;
         DisplayName = displayName;
     }
-    
+
     /// <summary>
     /// Internal constructor for parsing responses where name/displayName may be absent.
     /// </summary>
@@ -336,12 +336,12 @@ public sealed class PublicKeyCredentialUserEntity
         {
             throw new ArgumentException("User ID cannot exceed 64 bytes.", nameof(id));
         }
-        
+
         Id = id;
         Name = name;
         DisplayName = displayName;
     }
-    
+
     /// <summary>
     /// Parses a user entity from CBOR.
     /// </summary>
@@ -350,11 +350,11 @@ public sealed class PublicKeyCredentialUserEntity
     public static PublicKeyCredentialUserEntity Parse(CborReader reader)
     {
         var mapLength = reader.ReadStartMap();
-        
+
         byte[]? id = null;
         string? name = null;
         string? displayName = null;
-        
+
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadTextString();
@@ -374,18 +374,18 @@ public sealed class PublicKeyCredentialUserEntity
                     break;
             }
         }
-        
+
         reader.ReadEndMap();
-        
+
         if (id is null)
         {
             throw new InvalidOperationException("User entity missing required 'id' field.");
         }
-        
+
         // Use private constructor since name/displayName are optional in GetAssertion responses
         return new PublicKeyCredentialUserEntity(id, name, displayName, fromParse: true);
     }
-    
+
     /// <summary>
     /// Encodes this user entity as CBOR.
     /// </summary>
@@ -396,24 +396,24 @@ public sealed class PublicKeyCredentialUserEntity
         var fieldCount = 1; // id is always present
         if (Name is not null) fieldCount++;
         if (DisplayName is not null) fieldCount++;
-        
+
         writer.WriteStartMap(fieldCount);
-        
+
         writer.WriteTextString("id");
         writer.WriteByteString(Id.Span);
-        
+
         if (Name is not null)
         {
             writer.WriteTextString("name");
             writer.WriteTextString(Name);
         }
-        
+
         if (DisplayName is not null)
         {
             writer.WriteTextString("displayName");
             writer.WriteTextString(DisplayName);
         }
-        
+
         writer.WriteEndMap();
     }
 }

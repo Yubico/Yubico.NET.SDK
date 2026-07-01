@@ -44,32 +44,32 @@ public sealed class MakeCredentialResponse
     /// "fido-u2f", "apple", "none"
     /// </remarks>
     public string Format { get; }
-    
+
     /// <summary>
     /// Gets the authenticator data containing the new credential.
     /// </summary>
     public AuthenticatorData AuthenticatorData { get; }
-    
+
     /// <summary>
     /// Gets the raw authenticator data bytes.
     /// </summary>
     public ReadOnlyMemory<byte> AuthenticatorDataRaw { get; }
-    
+
     /// <summary>
     /// Gets the attestation statement.
     /// </summary>
     public AttestationStatement AttestationStatement { get; }
-    
+
     /// <summary>
     /// Gets whether enterprise attestation was used.
     /// </summary>
     public bool? EnterpriseAttestation { get; }
-    
+
     /// <summary>
     /// Gets the large blob key if the largeBlobKey extension was requested.
     /// </summary>
     public ReadOnlyMemory<byte>? LargeBlobKey { get; }
-    
+
     /// <summary>
     /// Gets the CBOR-encoded extension outputs, if any.
     /// </summary>
@@ -85,7 +85,7 @@ public sealed class MakeCredentialResponse
     /// Aligned with yubikit-swift, yubikit-android, yubikit-python.
     /// </remarks>
     public IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? UnsignedExtensionOutputs { get; }
-    
+
     private MakeCredentialResponse(
         string format,
         AuthenticatorData authenticatorData,
@@ -105,7 +105,7 @@ public sealed class MakeCredentialResponse
         ExtensionOutputs = extensionOutputs;
         UnsignedExtensionOutputs = unsignedExtensionOutputs;
     }
-    
+
     /// <summary>
     /// Parses a makeCredential response from CBOR-encoded data.
     /// </summary>
@@ -116,7 +116,7 @@ public sealed class MakeCredentialResponse
         var reader = new CborReader(data, CborConformanceMode.Lax);
         return DecodeInternal(reader, data);
     }
-    
+
     /// <summary>
     /// Parses a makeCredential response from a CBOR reader.
     /// </summary>
@@ -261,14 +261,14 @@ public sealed class MakeCredentialResponse
     /// <returns>The credential ID, or empty if not present.</returns>
     public ReadOnlyMemory<byte> GetCredentialId() =>
         AuthenticatorData.AttestedCredentialData?.CredentialId ?? ReadOnlyMemory<byte>.Empty;
-    
+
     /// <summary>
     /// Gets the credential public key from the attested credential data.
     /// </summary>
     /// <returns>The COSE-encoded public key, or empty if not present.</returns>
     public ReadOnlyMemory<byte> GetCredentialPublicKey() =>
         AuthenticatorData.AttestedCredentialData?.CredentialPublicKey ?? ReadOnlyMemory<byte>.Empty;
-    
+
     /// <summary>
     /// Gets the AAGUID from the attested credential data.
     /// </summary>

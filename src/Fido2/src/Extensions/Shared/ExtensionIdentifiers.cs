@@ -30,7 +30,7 @@ public static class ExtensionIdentifiers
     /// Useful for disk encryption, password managers, etc.
     /// </remarks>
     public const string HmacSecret = "hmac-secret";
-    
+
     /// <summary>
     /// The hmac-secret-mc extension identifier (during makeCredential).
     /// </summary>
@@ -39,7 +39,7 @@ public static class ExtensionIdentifiers
     /// credential creation, not just assertion.
     /// </remarks>
     public const string HmacSecretMakeCredential = "hmac-secret-mc";
-    
+
     /// <summary>
     /// The credProtect extension identifier.
     /// </summary>
@@ -48,7 +48,7 @@ public static class ExtensionIdentifiers
     /// user verification is required.
     /// </remarks>
     public const string CredProtect = "credProtect";
-    
+
     /// <summary>
     /// The credBlob extension identifier.
     /// </summary>
@@ -57,7 +57,7 @@ public static class ExtensionIdentifiers
     /// along with the credential. Retrieved during assertions.
     /// </remarks>
     public const string CredBlob = "credBlob";
-    
+
     /// <summary>
     /// The largeBlob extension identifier.
     /// </summary>
@@ -67,7 +67,7 @@ public static class ExtensionIdentifiers
     /// support; actual data storage uses authenticatorLargeBlobs command.
     /// </remarks>
     public const string LargeBlob = "largeBlob";
-    
+
     /// <summary>
     /// The largeBlobKey extension identifier.
     /// </summary>
@@ -76,7 +76,7 @@ public static class ExtensionIdentifiers
     /// the key used to encrypt large blob data for this credential.
     /// </remarks>
     public const string LargeBlobKey = "largeBlobKey";
-    
+
     /// <summary>
     /// The minPinLength extension identifier.
     /// </summary>
@@ -86,7 +86,7 @@ public static class ExtensionIdentifiers
     /// the PIN complexity requirements.
     /// </remarks>
     public const string MinPinLength = "minPinLength";
-    
+
     /// <summary>
     /// The prf extension identifier (WebAuthn).
     /// </summary>

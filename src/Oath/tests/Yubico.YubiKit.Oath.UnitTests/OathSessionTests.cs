@@ -15,8 +15,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.Oath.UnitTests;
@@ -254,7 +255,8 @@ public class OathSessionTests
         Assert.Equal(0x00, putCommand[2]);
         Assert.Equal(0x00, putCommand[3]);
         Assert.Equal(expectedData.Length, putCommand[4]);
-        Assert.Equal(expectedData, putCommand[5..]);
+        Assert.Equal(expectedData, putCommand[5..^1]);
+        Assert.Equal(0x00, putCommand[^1]);
     }
 
     [Fact]
@@ -301,7 +303,8 @@ public class OathSessionTests
         Assert.Equal(0x00, putCommand[2]);
         Assert.Equal(0x00, putCommand[3]);
         Assert.Equal(expectedData.Length, putCommand[4]);
-        Assert.Equal(expectedData, putCommand[5..]);
+        Assert.Equal(expectedData, putCommand[5..^1]);
+        Assert.Equal(0x00, putCommand[^1]);
     }
 
     private static byte[] SelectResponse() =>

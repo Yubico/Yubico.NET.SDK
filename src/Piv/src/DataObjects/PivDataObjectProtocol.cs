@@ -14,8 +14,9 @@
 
 using System.Buffers;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.Utils;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Piv.DataObjects;
 
@@ -45,7 +46,7 @@ internal static class PivDataObjectProtocol
 
         if (!response.IsOK())
         {
-            throw ApduException.FromStatusWord(response.SW, 
+            throw ApduException.FromStatusWord(response.SW,
                 $"Failed to read data object 0x{objectId:X6}");
         }
 
@@ -53,7 +54,7 @@ internal static class PivDataObjectProtocol
         // Format: 53 LL [data] - unwrap and return inner data
         return UnwrapDataObjectResponse(response.Data);
     }
-    
+
     /// <summary>
     /// Unwraps a GET DATA response that is wrapped in TAG 0x53.
     /// </summary>

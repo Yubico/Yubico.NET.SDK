@@ -1,9 +1,10 @@
 using NSubstitute;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.SecurityDomain.UnitTests;
@@ -342,7 +343,7 @@ public class SecurityDomainSessionTests
             new KeyReference(0x10, 0x01),
             cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal([0x80, 0xE4, 0x00, 0x00, 0x06, 0xD0, 0x01, 0x10, 0xD2, 0x01, 0x01],
+        Assert.Equal([0x80, 0xE4, 0x00, 0x00, 0x06, 0xD0, 0x01, 0x10, 0xD2, 0x01, 0x01, 0x00],
             connection.TransmittedCommands[1]);
     }
 
@@ -359,7 +360,7 @@ public class SecurityDomainSessionTests
             deleteLast: true,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal([0x80, 0xE4, 0x00, 0x01, 0x03, 0xD2, 0x01, 0xFF],
+        Assert.Equal([0x80, 0xE4, 0x00, 0x01, 0x03, 0xD2, 0x01, 0xFF, 0x00],
             connection.TransmittedCommands[1]);
     }
 
@@ -395,7 +396,7 @@ public class SecurityDomainSessionTests
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotNull(generatedKey);
-        Assert.Equal([0x80, 0xF1, 0x00, 0x13, 0x04, 0x02, 0xF0, 0x01, 0x00],
+        Assert.Equal([0x80, 0xF1, 0x00, 0x13, 0x04, 0x02, 0xF0, 0x01, 0x00, 0x00],
             connection.TransmittedCommands[1]);
     }
 
@@ -411,7 +412,7 @@ public class SecurityDomainSessionTests
             new byte[] { 0xA6, 0x04, 0x83, 0x02, 0x10, 0x01 },
             TestContext.Current.CancellationToken);
 
-        Assert.Equal([0x00, 0xE2, 0x90, 0x00, 0x06, 0xA6, 0x04, 0x83, 0x02, 0x10, 0x01],
+        Assert.Equal([0x00, 0xE2, 0x90, 0x00, 0x06, 0xA6, 0x04, 0x83, 0x02, 0x10, 0x01, 0x00],
             connection.TransmittedCommands[1]);
     }
 
@@ -434,7 +435,8 @@ public class SecurityDomainSessionTests
                 0xA6, 0x04, 0x83, 0x02, 0x11, 0x01,
                 0x70, 0x09,
                 0x93, 0x03, 0x01, 0x02, 0x03,
-                0x93, 0x02, 0x0A, 0x0B
+                0x93, 0x02, 0x0A, 0x0B,
+                0x00
             ],
             connection.TransmittedCommands[1]);
     }
@@ -455,7 +457,8 @@ public class SecurityDomainSessionTests
             [
                 0x00, 0xE2, 0x90, 0x00, 0x08,
                 0xA6, 0x04, 0x83, 0x02, 0x11, 0x01,
-                0x70, 0x00
+                0x70, 0x00,
+                0x00
             ],
             connection.TransmittedCommands[1]);
     }
@@ -479,7 +482,8 @@ public class SecurityDomainSessionTests
                 0xA6, 0x0D,
                 0x80, 0x01, 0x01,
                 0x42, 0x04, 0x01, 0x02, 0x03, 0x04,
-                0x83, 0x02, 0x13, 0x02
+                0x83, 0x02, 0x13, 0x02,
+                0x00
             ],
             connection.TransmittedCommands[1]);
     }
@@ -525,7 +529,8 @@ public class SecurityDomainSessionTests
     private static byte[] SelectSecurityDomainCommand() =>
     [
         0x00, 0xA4, 0x04, 0x00, 0x08,
-        0xA0, 0x00, 0x00, 0x01, 0x51, 0x00, 0x00, 0x00
+        0xA0, 0x00, 0x00, 0x01, 0x51, 0x00, 0x00, 0x00,
+        0x00
     ];
 
     private static byte[] GetDataCommand(byte tag) => [0x00, 0xCA, 0x00, tag, 0x00];

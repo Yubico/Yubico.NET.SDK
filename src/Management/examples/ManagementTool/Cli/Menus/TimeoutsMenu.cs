@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Output;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Features;
@@ -47,8 +47,8 @@ public static class TimeoutsMenu
         var autoEject = AnsiConsole.Prompt(
             new TextPrompt<ushort>("[blue]Auto-eject timeout (0-3600 seconds, 0 to disable):[/]")
                 .DefaultValue(info.AutoEjectTimeout)
-                .Validate(value => value <= 3600 
-                    ? ValidationResult.Success() 
+                .Validate(value => value <= 3600
+                    ? ValidationResult.Success()
                     : ValidationResult.Error("[red]Value must be 0-3600 seconds[/]")));
 
         // Prompt for challenge-response timeout
@@ -56,8 +56,8 @@ public static class TimeoutsMenu
         var crTimeout = AnsiConsole.Prompt(
             new TextPrompt<byte>("[blue]Challenge-response timeout (0-60 seconds):[/]")
                 .DefaultValue(currentCrTimeout)
-                .Validate(value => value <= 60 
-                    ? ValidationResult.Success() 
+                .Validate(value => value <= 60
+                    ? ValidationResult.Success()
                     : ValidationResult.Error("[red]Value must be 0-60 seconds[/]")));
 
         // Prompt for lock code if device is locked

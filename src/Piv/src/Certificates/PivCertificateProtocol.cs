@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Buffers;
 using System.IO.Compression;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Utils;
-using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Piv.DataObjects;
 
 namespace Yubico.YubiKit.Piv.Certificates;
@@ -46,7 +47,7 @@ internal static class PivCertificateProtocol
 
         // Read the data object
         var certData = await PivDataObjectProtocol.GetObjectAsync(protocol, objectId, cancellationToken).ConfigureAwait(false);
-        
+
         if (certData.IsEmpty)
         {
             return null;
@@ -56,12 +57,12 @@ internal static class PivCertificateProtocol
         // Note: GetObjectAsync already unwraps the outer 0x53 tag
         var tlvDict = TlvHelper.DecodeDictionary(certData.Span);
 
-        byte[]? certBytes = tlvDict.TryGetValue(0x70, out var cert) 
-            ? cert.ToArray() 
+        byte[]? certBytes = tlvDict.TryGetValue(0x70, out var cert)
+            ? cert.ToArray()
             : null;
 
-        bool isCompressed = tlvDict.TryGetValue(0x71, out var info) 
-            && info.Length > 0 
+        bool isCompressed = tlvDict.TryGetValue(0x71, out var info)
+            && info.Length > 0
             && info.Span[0] == 0x01;
 
         if (certBytes is null || certBytes.Length == 0)

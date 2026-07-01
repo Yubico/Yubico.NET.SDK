@@ -14,8 +14,9 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.YubiHsm;
 

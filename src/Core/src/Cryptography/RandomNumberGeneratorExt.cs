@@ -45,7 +45,7 @@ namespace Yubico.YubiKit.Core.Cryptography
             {
                 throw new ArithmeticException(string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.ValueMustBeBetweenXandY,"+
+                    "ExceptionMessages.ValueMustBeBetweenXandY," +
                     int.MinValue,
                     (long)int.MaxValue + 1));
             }

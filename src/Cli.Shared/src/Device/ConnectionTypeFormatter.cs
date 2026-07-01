@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Cli.Shared.Device;
 
@@ -24,12 +24,19 @@ public static class ConnectionTypeFormatter
     /// <summary>
     /// Formats a connection type as a human-readable string.
     /// </summary>
-    public static string Format(ConnectionType connectionType) =>
-        connectionType switch
-        {
-            ConnectionType.SmartCard => "SmartCard",
-            ConnectionType.HidFido => "FIDO HID",
-            ConnectionType.HidOtp => "OTP HID",
-            _ => "Unknown"
-        };
+    public static string Format(ConnectionType connectionType)
+    {
+        if (connectionType == ConnectionType.Unknown)
+            return "Unknown";
+
+        var parts = new List<string>();
+        if ((connectionType & ConnectionType.SmartCard) != 0)
+            parts.Add("SmartCard");
+        if ((connectionType & ConnectionType.HidFido) != 0)
+            parts.Add("FIDO HID");
+        if ((connectionType & ConnectionType.HidOtp) != 0)
+            parts.Add("OTP HID");
+
+        return parts.Count == 0 ? "Unknown" : string.Join(", ", parts);
+    }
 }

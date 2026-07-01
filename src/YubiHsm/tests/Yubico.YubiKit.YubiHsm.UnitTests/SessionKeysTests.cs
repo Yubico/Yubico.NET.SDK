@@ -15,7 +15,8 @@
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 using System.Reflection;
-using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 public class SessionKeysTests
 {

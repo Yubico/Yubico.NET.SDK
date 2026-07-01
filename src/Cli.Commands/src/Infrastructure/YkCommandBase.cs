@@ -4,7 +4,7 @@
 using Spectre.Console.Cli;
 using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Cli.Shared.Output;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Cli.Commands.Infrastructure;
@@ -78,7 +78,8 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
             {
                 Device = selection.Device,
                 Selection = selection,
-                Info = deviceInfo
+                Info = deviceInfo,
+                PreferredConnection = requestedTransport
             };
 
             OutputHelpers.WriteActiveDevice(deviceContext.DisplayBanner);

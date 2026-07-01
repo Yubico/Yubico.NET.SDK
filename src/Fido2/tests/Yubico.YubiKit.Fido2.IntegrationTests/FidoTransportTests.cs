@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using Xunit;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.IntegrationTests.TestExtensions;
@@ -105,7 +105,7 @@ public class FidoTransportTests
                     await FidoTestHelpers.DeleteAllCredentialsForRpAsync(
                         session, FidoTestData.RpId, FidoTestData.PinUtf8);
                 }
-            });
+            }, preferredConnection: ConnectionType.SmartCard);
         }
         catch (NotSupportedException)
         {

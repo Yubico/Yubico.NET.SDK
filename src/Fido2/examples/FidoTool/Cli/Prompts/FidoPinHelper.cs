@@ -15,7 +15,7 @@
 using System.Buffers;
 using System.Text;
 using Yubico.YubiKit.Core.Credentials;
-using Yubico.YubiKit.Core.Utils;
+using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Fido2.Credentials;
 
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Prompts;

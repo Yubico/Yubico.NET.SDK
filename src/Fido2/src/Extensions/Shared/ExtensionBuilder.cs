@@ -52,7 +52,7 @@ public sealed class ExtensionBuilder
     private PrfInput? _prfInput;
     private PreviewSignRegistrationInput? _previewSignRegistration;
     private PreviewSignAuthenticationInput? _previewSignAuthentication;
-    
+
     /// <summary>
     /// Adds the credProtect extension with the specified policy.
     /// </summary>
@@ -60,14 +60,14 @@ public sealed class ExtensionBuilder
     /// <param name="enforcePolicy">If true, credential creation fails if policy cannot be honored.</param>
     /// <returns>This builder for chaining.</returns>
     public ExtensionBuilder WithCredProtect(
-        CredProtectPolicy policy, 
+        CredProtectPolicy policy,
         bool enforcePolicy = false)
     {
         _credProtect = policy;
         _credProtectEnforcePolicy = enforcePolicy;
         return this;
     }
-    
+
     /// <summary>
     /// Adds the credBlob extension with data to store.
     /// </summary>
@@ -78,7 +78,7 @@ public sealed class ExtensionBuilder
         _credBlob = blob;
         return this;
     }
-    
+
     /// <summary>
     /// Adds the largeBlob extension for makeCredential.
     /// </summary>
@@ -89,7 +89,7 @@ public sealed class ExtensionBuilder
         _largeBlob = new LargeBlobInput { Support = support };
         return this;
     }
-    
+
     /// <summary>
     /// Adds the largeBlob extension for getAssertion with read.
     /// </summary>
@@ -99,7 +99,7 @@ public sealed class ExtensionBuilder
         _largeBlobAssertion = new LargeBlobAssertionInput { Read = true };
         return this;
     }
-    
+
     /// <summary>
     /// Adds the largeBlob extension for getAssertion with write.
     /// </summary>
@@ -110,7 +110,7 @@ public sealed class ExtensionBuilder
         _largeBlobAssertion = new LargeBlobAssertionInput { Write = data };
         return this;
     }
-    
+
     /// <summary>
     /// Adds the largeBlobKey CTAP extension for makeCredential or getAssertion.
     /// </summary>
@@ -144,7 +144,7 @@ public sealed class ExtensionBuilder
         _hmacSecret = input;
         return this;
     }
-    
+
     /// <summary>
     /// Adds the hmac-secret extension for getAssertion using protocol helpers.
     /// </summary>
@@ -163,17 +163,17 @@ public sealed class ExtensionBuilder
     {
         ArgumentNullException.ThrowIfNull(protocol);
         ArgumentNullException.ThrowIfNull(keyAgreement);
-        
+
         if (salt1.Length != 32)
         {
             throw new ArgumentException("Salt1 must be exactly 32 bytes.", nameof(salt1));
         }
-        
+
         if (!salt2.IsEmpty && salt2.Length != 32)
         {
             throw new ArgumentException("Salt2 must be exactly 32 bytes if provided.", nameof(salt2));
         }
-        
+
         // Prepare salt data
         byte[] saltData;
         if (!salt2.IsEmpty)
@@ -186,13 +186,13 @@ public sealed class ExtensionBuilder
         {
             saltData = salt1.ToArray();
         }
-        
+
         // Encrypt salts
         var saltEnc = protocol.Encrypt(sharedSecret, saltData);
-        
+
         // Compute auth tag
         var saltAuth = protocol.Authenticate(sharedSecret, saltEnc);
-        
+
         _hmacSecret = new HmacSecretInput
         {
             KeyAgreement = keyAgreement,
@@ -200,10 +200,10 @@ public sealed class ExtensionBuilder
             SaltAuth = saltAuth,
             PinUvAuthProtocol = protocol.Version
         };
-        
+
         return this;
     }
-    
+
     /// <summary>
     /// Adds the hmac-secret-mc extension for makeCredential.
     /// </summary>
@@ -217,7 +217,7 @@ public sealed class ExtensionBuilder
         _hmacSecretMc = true;
         return this;
     }
-    
+
     /// <summary>
     /// Adds the minPinLength extension.
     /// </summary>
@@ -227,7 +227,7 @@ public sealed class ExtensionBuilder
         _minPinLength = true;
         return this;
     }
-    
+
     /// <summary>
     /// Indicates PRF extension support request for makeCredential.
     /// </summary>
@@ -237,7 +237,7 @@ public sealed class ExtensionBuilder
         _prf = true;
         return this;
     }
-    
+
     /// <summary>
     /// Adds PRF extension with evaluation inputs for getAssertion.
     /// </summary>
@@ -285,12 +285,12 @@ public sealed class ExtensionBuilder
         {
             return null;
         }
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         Encode(writer);
         return writer.Encode();
     }
-    
+
     /// <summary>
     /// Encodes the extensions map to a CBOR writer.
     /// </summary>
@@ -304,31 +304,31 @@ public sealed class ExtensionBuilder
 
         // Extensions must be sorted by key for canonical CBOR
         // Sort order: "credBlob" < "credProtect" < "hmac-secret" < "hmac-secret-mc" < "largeBlob" < "minPinLength" < "previewSign" < "prf"
-        
+
         if (_credBlob.HasValue)
         {
             writer.WriteTextString(ExtensionIdentifiers.CredBlob);
             writer.WriteByteString(_credBlob.Value.Span);
         }
-        
+
         if (_credProtect.HasValue)
         {
             writer.WriteTextString(ExtensionIdentifiers.CredProtect);
             writer.WriteInt32((int)_credProtect.Value);
         }
-        
+
         if (_hmacSecret is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.HmacSecret);
             _hmacSecret.Encode(writer);
         }
-        
+
         if (_hmacSecretMc)
         {
             writer.WriteTextString(ExtensionIdentifiers.HmacSecretMakeCredential);
             writer.WriteBoolean(true);
         }
-        
+
         if (_largeBlobAssertion is not null)
         {
             // Assertion input takes precedence over makeCredential input;
@@ -382,7 +382,7 @@ public sealed class ExtensionBuilder
 
         writer.WriteEndMap();
     }
-    
+
     private static void EncodePrfInput(CborWriter writer, PrfInput input)
     {
         writer.WriteStartMap(1);
@@ -489,7 +489,7 @@ public sealed class ExtensionBuilder
                 throw new InvalidOperationException($"Unsupported CBOR state: {state}");
         }
     }
-    
+
     private bool HasExtensions()
     {
         return _credProtect.HasValue ||
@@ -504,7 +504,7 @@ public sealed class ExtensionBuilder
                _previewSignRegistration is not null ||
                _previewSignAuthentication is not null;
     }
-    
+
     private int CountExtensions()
     {
         var count = 0;

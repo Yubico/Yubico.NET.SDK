@@ -39,12 +39,12 @@ public interface IPinUvAuthProtocol : IDisposable
     /// Gets the protocol version number (1 or 2).
     /// </summary>
     int Version { get; }
-    
+
     /// <summary>
     /// Gets the length of authentication tags produced by this protocol.
     /// </summary>
     int AuthenticationTagLength { get; }
-    
+
     /// <summary>
     /// Performs ECDH key agreement with the authenticator's public key and derives a shared secret.
     /// </summary>
@@ -60,14 +60,14 @@ public interface IPinUvAuthProtocol : IDisposable
     /// <exception cref="ArgumentException">If the peer key is malformed or invalid.</exception>
     (Dictionary<int, object?> KeyAgreement, byte[] SharedSecret) Encapsulate(
         IReadOnlyDictionary<int, object?> peerCoseKey);
-    
+
     /// <summary>
     /// Derives a symmetric key from a raw ECDH shared secret using the protocol's KDF.
     /// </summary>
     /// <param name="z">The raw ECDH shared secret (X coordinate of shared point).</param>
     /// <returns>The derived key material.</returns>
     byte[] Kdf(ReadOnlySpan<byte> z);
-    
+
     /// <summary>
     /// Encrypts plaintext using AES-256-CBC with the protocol's key derivation.
     /// </summary>
@@ -76,7 +76,7 @@ public interface IPinUvAuthProtocol : IDisposable
     /// <returns>For V1: ciphertext only. For V2: IV || ciphertext.</returns>
     /// <exception cref="ArgumentException">If plaintext is not a multiple of 16 bytes.</exception>
     byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext);
-    
+
     /// <summary>
     /// Decrypts ciphertext using AES-256-CBC with the protocol's key derivation.
     /// </summary>
@@ -85,7 +85,7 @@ public interface IPinUvAuthProtocol : IDisposable
     /// <returns>The decrypted plaintext.</returns>
     /// <exception cref="ArgumentException">If ciphertext has invalid length.</exception>
     byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext);
-    
+
     /// <summary>
     /// Computes an authentication tag (MAC) over a message.
     /// </summary>
@@ -96,7 +96,7 @@ public interface IPinUvAuthProtocol : IDisposable
     /// For V2: All 32 bytes of HMAC-SHA-256.
     /// </returns>
     byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message);
-    
+
     /// <summary>
     /// Verifies an authentication tag against an expected value.
     /// </summary>

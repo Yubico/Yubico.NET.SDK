@@ -14,8 +14,8 @@
 
 using Spectre.Console;
 using Yubico.YubiKit.Cli.Shared.Device;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Prompts;
@@ -57,13 +57,13 @@ public static class DeviceSelector
                 info?.SerialNumber,
                 info?.FormFactor ?? FormFactor.Unknown,
                 info?.FirmwareVersion.ToString() ?? "Unknown",
-                device.ConnectionType);
+                device.AvailableConnections);
         }
 
         // Multiple devices - prefer HID FIDO in non-interactive mode (FIDO2 native transport)
         if (!AnsiConsole.Profile.Capabilities.Interactive)
         {
-            var hidFido = devices.FirstOrDefault(d => d.ConnectionType == ConnectionType.HidFido)
+            var hidFido = devices.FirstOrDefault(d => d.SupportsConnection(ConnectionType.HidFido))
                 ?? devices[0];
             var info = await GetDeviceInfoAsync(hidFido, cancellationToken);
             return new DeviceSelection(
@@ -71,7 +71,7 @@ public static class DeviceSelector
                 info?.SerialNumber,
                 info?.FormFactor ?? FormFactor.Unknown,
                 info?.FirmwareVersion.ToString() ?? "Unknown",
-                hidFido.ConnectionType);
+                hidFido.AvailableConnections);
         }
 
         return await PromptForDeviceSelectionAsync(devices, cancellationToken);
@@ -89,7 +89,7 @@ public static class DeviceSelector
                 ConnectionType.All, cancellationToken: cancellationToken);
 
             var devices = allDevices
-                .Where(d => SupportedConnectionTypes.Contains(d.ConnectionType))
+                .Where(d => SupportedConnectionTypes.Any(d.SupportsConnection))
                 .ToList();
 
             if (devices.Count > 0)
@@ -126,7 +126,7 @@ public static class DeviceSelector
         catch (Exception ex)
         {
             AnsiConsole.MarkupLine(
-                $"[grey]Debug: {device.ConnectionType} device info failed: " +
+                $"[grey]Debug: {device.AvailableConnections} device info failed: " +
                 $"{Markup.Escape(ex.GetType().Name)}: {Markup.Escape(ex.Message)}[/]");
             return null;
         }
@@ -180,12 +180,12 @@ public static class DeviceSelector
             selected.Info?.SerialNumber,
             selected.Info?.FormFactor ?? FormFactor.Unknown,
             selected.Info?.FirmwareVersion.ToString() ?? "Unknown",
-            selected.Device.ConnectionType);
+            selected.Device.AvailableConnections);
     }
 
     private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
     {
-        var transport = ConnectionTypeFormatter.Format(device.ConnectionType);
+        var transport = ConnectionTypeFormatter.Format(device.AvailableConnections);
 
         if (info is null)
         {

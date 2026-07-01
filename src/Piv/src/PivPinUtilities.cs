@@ -4,7 +4,8 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
-using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Piv;
 

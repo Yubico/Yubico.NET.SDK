@@ -14,7 +14,8 @@
 
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.OpenPgp;
 

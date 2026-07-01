@@ -19,10 +19,12 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Core.Utils;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.SecurityDomain;
 

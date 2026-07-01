@@ -21,13 +21,13 @@ public enum PivManagementKeyType : byte
 {
     /// <summary>3DES key (24 bytes, 8-byte challenge).</summary>
     TripleDes = 0x03,
-    
+
     /// <summary>AES-128 key (16 bytes, 16-byte challenge) - requires YubiKey 5.4+.</summary>
     Aes128 = 0x08,
-    
+
     /// <summary>AES-192 key (24 bytes, 16-byte challenge) - requires YubiKey 5.4+.</summary>
     Aes192 = 0x0A,
-    
+
     /// <summary>AES-256 key (32 bytes, 16-byte challenge) - requires YubiKey 5.4+.</summary>
     Aes256 = 0x0C
 }

@@ -33,12 +33,12 @@ public sealed class LargeBlobEntry
 {
     private const int NonceSize = 12;
     private const int TagSize = 16;
-    
+
     /// <summary>
     /// Gets the encrypted blob entry data.
     /// </summary>
     public ReadOnlyMemory<byte> EncryptedData { get; init; }
-    
+
     /// <summary>
     /// Attempts to decrypt this entry using the provided large blob key.
     /// </summary>
@@ -60,23 +60,23 @@ public sealed class LargeBlobEntry
         {
             throw new ArgumentException("Large blob key must be 32 bytes.", nameof(largeBlobKey));
         }
-        
+
         var encryptedSpan = EncryptedData.Span;
         if (encryptedSpan.Length < NonceSize + TagSize)
         {
             return null;
         }
-        
+
         var nonce = encryptedSpan[..NonceSize];
         var ciphertext = encryptedSpan[NonceSize..^TagSize];
         var tag = encryptedSpan[^TagSize..];
-        
+
         try
         {
             using var aesGcm = new AesGcm(largeBlobKey, TagSize);
             var plaintext = new byte[ciphertext.Length];
             aesGcm.Decrypt(nonce, ciphertext, tag, plaintext);
-            
+
             // Parse the CBOR plaintext to extract the actual blob data
             return ParseDecryptedBlob(plaintext);
         }
@@ -85,7 +85,7 @@ public sealed class LargeBlobEntry
             return null;
         }
     }
-    
+
     /// <summary>
     /// Creates an encrypted large blob entry from plaintext data.
     /// </summary>
@@ -98,29 +98,29 @@ public sealed class LargeBlobEntry
         {
             throw new ArgumentException("Large blob key must be 32 bytes.", nameof(largeBlobKey));
         }
-        
+
         // Create the CBOR plaintext: { data, origSize (optional if compressed) }
         var plaintext = CreatePlaintext(data);
-        
+
         // Generate random nonce
         var nonce = new byte[NonceSize];
         RandomNumberGenerator.Fill(nonce);
-        
+
         // Encrypt with AES-GCM
         using var aesGcm = new AesGcm(largeBlobKey, TagSize);
         var ciphertext = new byte[plaintext.Length];
         var tag = new byte[TagSize];
         aesGcm.Encrypt(nonce, plaintext, ciphertext, tag);
-        
+
         // Combine: nonce || ciphertext || tag
         var encrypted = new byte[NonceSize + ciphertext.Length + TagSize];
         nonce.CopyTo(encrypted, 0);
         ciphertext.CopyTo(encrypted.AsSpan(NonceSize));
         tag.CopyTo(encrypted.AsSpan(NonceSize + ciphertext.Length));
-        
+
         return new LargeBlobEntry { EncryptedData = encrypted };
     }
-    
+
     private static byte[] CreatePlaintext(ReadOnlySpan<byte> data)
     {
         // CBOR map with data field
@@ -132,22 +132,22 @@ public sealed class LargeBlobEntry
         writer.WriteEndMap();
         return writer.Encode();
     }
-    
+
     private static byte[]? ParseDecryptedBlob(ReadOnlySpan<byte> plaintext)
     {
         try
         {
             var reader = new CborReader(plaintext.ToArray(), CborConformanceMode.Ctap2Canonical);
             var mapCount = reader.ReadStartMap() ?? 0;
-            
+
             byte[]? data = null;
-            
+
             for (var i = 0; i < mapCount; i++)
             {
                 var key = reader.PeekState() == CborReaderState.ByteString
                     ? reader.ReadByteString()
                     : null;
-                
+
                 if (key is { Length: 0 })
                 {
                     // Empty byte string key = data field
@@ -165,7 +165,7 @@ public sealed class LargeBlobEntry
                     reader.SkipValue();
                 }
             }
-            
+
             reader.ReadEndMap();
             return data;
         }
@@ -191,12 +191,12 @@ public sealed class LargeBlobEntry
 public sealed class LargeBlobArray
 {
     private const int HashSize = 16;
-    
+
     /// <summary>
     /// Gets the entries in the large blob array.
     /// </summary>
     public IReadOnlyList<LargeBlobEntry> Entries { get; init; } = [];
-    
+
     /// <summary>
     /// Deserializes a large blob array from raw bytes.
     /// </summary>
@@ -209,24 +209,24 @@ public sealed class LargeBlobArray
         {
             throw new ArgumentException("Data too short for valid large blob array.", nameof(data));
         }
-        
+
         var span = data.Span;
         var arrayData = span[..^HashSize];
         var expectedHash = span[^HashSize..];
-        
+
         // Verify hash
         Span<byte> computedHash = stackalloc byte[32];
         SHA256.HashData(arrayData, computedHash);
-        
+
         if (!CryptographicOperations.FixedTimeEquals(computedHash[..HashSize], expectedHash))
         {
             throw new ArgumentException("Large blob array hash verification failed.", nameof(data));
         }
-        
+
         // Parse CBOR array
         var entries = new List<LargeBlobEntry>();
         var reader = new CborReader(arrayData.ToArray(), CborConformanceMode.Ctap2Canonical);
-        
+
         var arrayLength = reader.ReadStartArray() ?? 0;
         for (var i = 0; i < arrayLength; i++)
         {
@@ -234,10 +234,10 @@ public sealed class LargeBlobArray
             entries.Add(new LargeBlobEntry { EncryptedData = entryData });
         }
         reader.ReadEndArray();
-        
+
         return new LargeBlobArray { Entries = entries };
     }
-    
+
     /// <summary>
     /// Serializes this large blob array to bytes including the hash.
     /// </summary>
@@ -247,33 +247,33 @@ public sealed class LargeBlobArray
         // Encode CBOR array
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartArray(Entries.Count);
-        
+
         foreach (var entry in Entries)
         {
             writer.WriteByteString(entry.EncryptedData.Span);
         }
-        
+
         writer.WriteEndArray();
         var arrayData = writer.Encode();
-        
+
         // Compute hash
         Span<byte> hash = stackalloc byte[32];
         SHA256.HashData(arrayData, hash);
-        
+
         // Combine: array || LEFT(hash, 16)
         var result = new byte[arrayData.Length + HashSize];
         arrayData.CopyTo(result, 0);
         hash[..HashSize].CopyTo(result.AsSpan(arrayData.Length));
-        
+
         return result;
     }
-    
+
     /// <summary>
     /// Creates an empty large blob array.
     /// </summary>
     /// <returns>A new empty array.</returns>
     public static LargeBlobArray CreateEmpty() => new() { Entries = [] };
-    
+
     /// <summary>
     /// Creates a new array with an additional entry.
     /// </summary>
@@ -284,7 +284,7 @@ public sealed class LargeBlobArray
         var newEntries = new List<LargeBlobEntry>(Entries) { entry };
         return new LargeBlobArray { Entries = newEntries };
     }
-    
+
     /// <summary>
     /// Creates a new array with the specified entry removed.
     /// </summary>
@@ -296,12 +296,12 @@ public sealed class LargeBlobArray
         {
             throw new ArgumentOutOfRangeException(nameof(index));
         }
-        
+
         var newEntries = new List<LargeBlobEntry>(Entries);
         newEntries.RemoveAt(index);
         return new LargeBlobArray { Entries = newEntries };
     }
-    
+
     /// <summary>
     /// Finds and decrypts the blob for the given large blob key.
     /// </summary>
@@ -317,7 +317,7 @@ public sealed class LargeBlobArray
                 return decrypted;
             }
         }
-        
+
         return null;
     }
 }

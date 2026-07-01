@@ -2,9 +2,9 @@ name: Build and Test (2.0)
 
 on:
   push:
-    branches: [ yubikit, yubikit-applets ]
+    branches: [ yubikit*, yubikit/** ]
   pull_request:
-    branches: [ yubikit, yubikit-applets ]
+    branches: [ yubikit*, yubikit/** ]
 
 jobs:
   build-and-test:
@@ -54,6 +54,9 @@ jobs:
 
       - name: Run unit tests
         run: dotnet toolchain.cs test
+
+      - name: Run runtime resilience checks
+        run: dotnet toolchain.cs -- resilience --fast
 
       - name: Pack NuGet packages
         run: dotnet toolchain.cs pack --package-version 2.0.0-preview.${{ github.run_number }}

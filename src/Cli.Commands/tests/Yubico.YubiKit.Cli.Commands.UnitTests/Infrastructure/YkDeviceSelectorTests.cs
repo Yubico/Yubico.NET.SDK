@@ -2,11 +2,12 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
-using Yubico.YubiKit.Core.Hid.Fido;
-using Yubico.YubiKit.Core.Hid.Interfaces;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Cli.Commands.UnitTests.Infrastructure;
@@ -93,15 +94,15 @@ public sealed class YkDeviceSelectorTests
 
     private sealed class FakeYubiKey : IYubiKey
     {
-        public FakeYubiKey(string deviceId, ConnectionType connectionType)
+        public FakeYubiKey(string deviceId, ConnectionType availableConnections)
         {
             DeviceId = deviceId;
-            ConnectionType = connectionType;
+            AvailableConnections = availableConnections;
         }
 
         public string DeviceId { get; }
 
-        public ConnectionType ConnectionType { get; }
+        public ConnectionType AvailableConnections { get; }
 
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection =>

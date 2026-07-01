@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;

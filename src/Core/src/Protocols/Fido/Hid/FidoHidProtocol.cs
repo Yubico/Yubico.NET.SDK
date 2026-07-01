@@ -247,11 +247,14 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
 
         // Get initialization packet, handling keep-alive
         var initPacket = await _connection.ReceiveAsync(cancellationToken).ConfigureAwait(false);
-        while (GetPacketCommand(initPacket.Span) == CtapConstants.CtapHidKeepAlive)
+        while (IsKeepAlivePacket(initPacket.Span))
         {
+            ValidateInitPacket(initPacket.Span, channelId);
             _logger.LogTrace("Received keep-alive, waiting for response");
             initPacket = await _connection.ReceiveAsync(cancellationToken).ConfigureAwait(false);
         }
+
+        ValidateInitPacket(initPacket.Span, channelId);
 
         var responseLength = GetPacketLength(initPacket.Span);
         if (responseLength > CtapConstants.MaxPayloadSize)
@@ -261,32 +264,25 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         var responseData = new byte[responseLength];
         var initDataLength = Math.Min(responseLength, CtapConstants.InitDataSize);
 
-        // Ensure we don't try to read more data than the packet contains
-        var availableDataInPacket = Math.Min(initDataLength, initPacket.Length - CtapConstants.InitHeaderSize);
-        if (availableDataInPacket < 0)
-            availableDataInPacket = 0;
-
-        initPacket.Span.Slice(CtapConstants.InitHeaderSize, availableDataInPacket)
+        initPacket.Span.Slice(CtapConstants.InitHeaderSize, initDataLength)
             .CopyTo(responseData);
 
         // Receive continuation packets if needed
-        var bytesReceived = availableDataInPacket;
+        var bytesReceived = initDataLength;
+        byte expectedSequence = 0;
         while (bytesReceived < responseLength)
         {
             var contPacket = await _connection.ReceiveAsync(cancellationToken).ConfigureAwait(false);
+            ValidateContinuationPacket(contPacket.Span, channelId, expectedSequence);
             var contDataLength = Math.Min(
                 responseLength - bytesReceived,
                 CtapConstants.ContinuationDataSize);
 
-            // Ensure we don't try to read more data than the packet contains
-            var availableContData = Math.Min(contDataLength, contPacket.Length - CtapConstants.ContinuationHeaderSize);
-            if (availableContData < 0)
-                availableContData = 0;
-
-            contPacket.Span.Slice(CtapConstants.ContinuationHeaderSize, availableContData)
+            contPacket.Span.Slice(CtapConstants.ContinuationHeaderSize, contDataLength)
                 .CopyTo(responseData.AsSpan(bytesReceived));
 
-            bytesReceived += availableContData;
+            bytesReceived += contDataLength;
+            expectedSequence++;
         }
 
         _logger.LogTrace("Received {Length} bytes in response", responseLength);
@@ -342,6 +338,44 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
     /// </summary>
     private static byte GetPacketCommand(ReadOnlySpan<byte> packet) =>
         (byte)(packet[4] & ~CtapConstants.InitPacketMask);
+
+    private static bool IsKeepAlivePacket(ReadOnlySpan<byte> packet) =>
+        packet.Length >= CtapConstants.InitHeaderSize &&
+        (packet[4] & CtapConstants.InitPacketMask) != 0 &&
+        GetPacketCommand(packet) == CtapConstants.CtapHidKeepAlive;
+
+    private static void ValidateInitPacket(ReadOnlySpan<byte> packet, uint channelId)
+    {
+        if (packet.Length != CtapConstants.PacketSize)
+            throw new InvalidOperationException("CTAP HID init packet must be exactly 64 bytes");
+
+        var packetChannelId = BinaryPrimitives.ReadUInt32BigEndian(packet);
+        if (packetChannelId != channelId)
+            throw new InvalidOperationException("CTAP HID init packet channel mismatch");
+
+        if ((packet[4] & CtapConstants.InitPacketMask) == 0)
+            throw new InvalidOperationException("CTAP HID response packet is not an init packet");
+    }
+
+    private static void ValidateContinuationPacket(ReadOnlySpan<byte> packet, uint channelId, byte expectedSequence)
+    {
+        if (packet.Length != CtapConstants.PacketSize)
+            throw new InvalidOperationException("CTAP HID continuation packet must be exactly 64 bytes");
+
+        var packetChannelId = BinaryPrimitives.ReadUInt32BigEndian(packet);
+        if (packetChannelId != channelId)
+            throw new InvalidOperationException("CTAP HID continuation packet channel mismatch");
+
+        if ((packet[4] & CtapConstants.InitPacketMask) != 0)
+            throw new InvalidOperationException("CTAP HID continuation packet has init bit set");
+
+        var sequence = packet[4];
+        if (!IsExpectedContinuationSequence(sequence, expectedSequence))
+            throw new InvalidOperationException("CTAP HID continuation packet sequence mismatch");
+    }
+
+    internal static bool IsExpectedContinuationSequence(byte sequence, byte expectedSequence) =>
+        (sequence & ~CtapConstants.InitPacketMask) == (expectedSequence & ~CtapConstants.InitPacketMask);
 
     /// <summary>
     /// Extracts the payload length from an init packet.

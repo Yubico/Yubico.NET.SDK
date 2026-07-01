@@ -18,34 +18,32 @@ using Yubico.YubiKit.WebAuthn.Attestation;
 namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 /// <summary>
-/// Represents a generated signing key from the previewSign registration ceremony.
+/// Represents the generated key material returned by the YubiKey during
+/// previewSign extension registration.
 /// </summary>
 /// <remarks>
 /// <para>
-/// The signing key is separate from the WebAuthn credential authentication key pair.
-/// It is used for signing arbitrary data via the previewSign extension during authentication.
-/// </para>
-/// <para>
-/// Per CTAP v4 draft specification, the attestation object is the authoritative source
-/// for the public key and flags. The loose KeyHandle and PublicKey fields are provided
-/// for convenience but should be verified against the attestation object.
+/// This corresponds to the <see href="https://yubicolabs.github.io/webauthn-sign-extension/4/#dictdef-authenticationextensionssigngeneratedkey">
+/// <c>AuthenticationExtensionsSignGeneratedKey</c></see> output defined by the previewSign
+/// extension specification. The generated signing key is represented by an embedded attestation
+/// object whose attested credential data contains the signing key handle and public key.
 /// </para>
 /// </remarks>
 /// <param name="KeyHandle">
-/// The key handle for the signing private key. May be empty if the authenticator stores
-/// the key internally. Used during authentication to identify which signing key to use.
+/// The key handle used to request signatures from this generated signing key. This is copied from
+/// the credential ID in the embedded attestation object's attested credential data and can be empty.
 /// </param>
 /// <param name="PublicKey">
-/// The COSE-encoded public key. Relying Parties should prefer extracting this from
-/// the verified attestation object.
+/// The COSE public key for the generated signing key. This is the
+/// <see href="https://yubicolabs.github.io/webauthn-sign-extension/4/#dom-authenticationextensionssigngeneratedkey-publickey">
+/// <c>publicKey</c></see> field of the <c>AuthenticationExtensionsSignGeneratedKey</c> client
+/// extension output.
 /// </param>
 /// <param name="Algorithm">
-/// The COSE algorithm chosen by the authenticator from the provided list.
-/// May differ from the algorithm in PublicKey if using split-signing algorithms.
+/// The signing algorithm chosen from the <c>algorithms</c> extension input.
 /// </param>
 /// <param name="AttestationObject">
-/// The attestation object for the signing key pair (nullable in fallback path).
-/// When present, contains the authoritative public key and authenticator data.
+/// The attestation object for the generated signing key pair.
 /// </param>
 public sealed record class GeneratedSigningKey(
     ReadOnlyMemory<byte> KeyHandle,

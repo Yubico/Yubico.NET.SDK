@@ -22,6 +22,10 @@ namespace Yubico.YubiKit.Fido2.UnitTests.Extensions;
 /// <summary>
 /// Tests for <see cref="PreviewSignGeneratedKey"/> ARKG derivation.
 /// </summary>
+/// <remarks>
+/// WARNING -- EXPERIMENTAL -- test only: ARKG previewSign derivation is not ready for production use and must not
+/// be treated as production cryptographic guidance.
+/// </remarks>
 public class PreviewSignGeneratedKeyTests
 {
     // Reuse Phase B KAT vectors from Core

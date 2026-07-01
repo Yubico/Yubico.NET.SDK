@@ -72,10 +72,8 @@ public abstract record CoseKey
 
         CoseAlgorithm algorithm = new(alg);
 
-        // Dispatch on alg FIRST for placeholder algorithms. ARKG seed keys use a sentinel
-        // kty (e.g. -65537 from YK 5.8.0-beta firmware) that is not in the standard COSE
-        // kty registry, so the regular kty switch cannot route them. python-fido2 follows
-        // the same alg-first pattern (see cose.py CoseKey.parse → for_alg).
+        // Dispatch on alg first for ARKG seed keys. They use a sentinel kty that is not in
+        // the standard COSE kty registry, so the regular kty switch cannot route them.
         if (alg == -65700)
         {
             return CoseArkgP256SeedKey.Decode(parameters, algorithm);

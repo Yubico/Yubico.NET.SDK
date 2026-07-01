@@ -15,35 +15,29 @@
 namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 /// <summary>
-/// User presence and verification policy flags for previewSign extension.
+/// Supported flag combinations encoded in the MakeCredential previewSign extension input.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Defines the authenticator behavior required for signing operations.
-/// These flags are set at registration time and enforced during signing.
-/// </para>
-/// <para>
-/// Per CTAP v4 draft Web Authentication sign extension, only three bit patterns are valid:
-/// - 0b000 (Unattended): No user presence or verification required
-/// - 0b001 (RequireUserPresence): User presence required (default)
-/// - 0b101 (RequireUserVerification): User presence AND verification required
+/// Defines the authenticator behavior required for signing operations. These flags are set at
+/// registration time and enforced during signing.
 /// </para>
 /// </remarks>
 [Flags]
 public enum PreviewSignFlags : byte
 {
     /// <summary>
-    /// No user presence or verification required (unattended signing).
+    /// Do not require user presence or user verification for signing operations.
     /// </summary>
     Unattended = 0b000,
 
     /// <summary>
-    /// User presence required (default). Authenticator will require physical touch.
+    /// Require user presence for signing operations.
     /// </summary>
     RequireUserPresence = 0b001,
 
     /// <summary>
-    /// User presence AND verification required. Authenticator will require physical touch and PIN/biometric.
+    /// Require user presence and user verification for signing operations.
     /// </summary>
     RequireUserVerification = 0b101
 }

@@ -23,18 +23,17 @@ using Yubico.YubiKit.WebAuthn.Preferences;
 namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
 
 /// <summary>
-/// Adapter for the previewSign extension (CTAP v4 draft).
+/// Adapter for the <c>previewSign</c> WebAuthn extension.
 /// </summary>
 /// <remarks>
 /// <para>
-/// PreviewSign allows a WebAuthn credential to sign arbitrary data using a separate signing key
-/// bound to the same authenticator device. Registration generates a new signing key pair;
-/// authentication signs data without clientDataJSON or authenticator data wrapping.
+/// The previewSign extension generates a separate signing key bound to the same authenticator.
+/// Registration requests the generated signing key; authentication requests a signature over
+/// algorithm-specific signing inputs.
 /// </para>
 /// <para>
-/// This adapter enforces all client-side validation rules per CTAP v4 draft specification §8:
-/// - Registration: validates algorithms non-empty, resolves flags from UserVerification preference
-/// - Authentication: validates allowCredentials non-empty, validates signByCredential completeness
+/// This adapter translates WebAuthn-level previewSign inputs to the Fido2 extension encoder and
+/// translates extension outputs back into WebAuthn-level previewSign outputs.
 /// </para>
 /// </remarks>
 internal static class PreviewSignAdapter
@@ -48,20 +47,13 @@ internal static class PreviewSignAdapter
     /// <param name="input">The previewSign registration input.</param>
     /// <param name="options">The original registration options (used for UV preference).</param>
     /// <exception cref="WebAuthnClientError">
-    /// Thrown when:
-    /// - Explicit flags conflict with UserVerification preference (InvalidRequest)
+    /// Thrown when the previewSign registration input cannot be applied.
     /// </exception>
     /// <remarks>
     /// <para>
-    /// Flag selection rule (spec §8 + Swift parity):
-    /// - If UserVerification == Required → flags MUST be RequireUserVerification (0b101)
-    /// - If user supplied explicit flags that conflict with UV preference → throw InvalidRequest
-    /// - Otherwise → use the flags from input (default RequireUserPresence = 0b001)
-    /// </para>
-    /// <para>
-    /// This prevents silent promotion that might surprise the caller. If the user explicitly
-    /// requested Unattended (0b000) but UV preference is Required, that's a contradiction
-    /// the caller must resolve.
+    /// The adapter derives the previewSign signing policy from the WebAuthn user verification
+    /// preference: required user verification maps to <see cref="PreviewSignFlags.RequireUserVerification"/>;
+    /// other values map to <see cref="PreviewSignFlags.RequireUserPresence"/>.
     /// </para>
     /// </remarks>
     public static void ApplyToBuilderForRegistration(
@@ -69,9 +61,7 @@ internal static class PreviewSignAdapter
         PreviewSign.PreviewSignRegistrationInput input,
         RegistrationOptions options)
     {
-        // Derive flags from UserVerification per spec §10.2.1 step 4 (line 4962):
-        // "The CDDL value 0b101 if pkOptions.authenticatorSelection.userVerification is
-        // set to required, otherwise the CDDL value 0b001."
+        // Derive flags from the WebAuthn user verification preference.
         byte resolvedFlags = options.UserVerification == UserVerificationPreference.Required
             ? (byte)PreviewSignFlags.RequireUserVerification
             : (byte)PreviewSignFlags.RequireUserPresence;
@@ -91,23 +81,18 @@ internal static class PreviewSignAdapter
     /// <param name="input">The previewSign authentication input.</param>
     /// <param name="allowCredentials">The allow list from authentication options.</param>
     /// <exception cref="WebAuthnClientError">
-    /// Thrown when:
-    /// - allowCredentials is null or empty (InvalidRequest)
-    /// - signByCredential is missing entries for one or more allowCredentials (InvalidRequest)
+    /// Thrown when the previewSign authentication input cannot be applied.
     /// </exception>
     /// <remarks>
-    /// Per CTAP v4 draft §8, authentication with previewSign requires:
-    /// - allowCredentials MUST NOT be empty (signing requires knowing which key to use)
-    /// - signByCredential MUST contain an entry for EVERY credential in allowCredentials
-    ///
-    /// This validation happens BEFORE any CTAP roundtrip to fail fast on client-side errors.
+    /// Authentication with previewSign requires a non-empty allow list and a corresponding
+    /// <c>signByCredential</c> entry for each allowed credential.
     /// </remarks>
     public static void ApplyToBuilderForAuthentication(
         ExtensionBuilder builder,
         PreviewSign.PreviewSignAuthenticationInput input,
         IReadOnlyList<Fido2.Credentials.PublicKeyCredentialDescriptor>? allowCredentials)
     {
-        // Spec §8 validation: allowCredentials MUST NOT be empty
+        // Signing requires knowing which credential's generated key to use.
         if (allowCredentials is null || allowCredentials.Count == 0)
         {
             throw new WebAuthnClientError(
@@ -115,7 +100,7 @@ internal static class PreviewSignAdapter
                 "previewSign authentication requires a non-empty allowCredentials list");
         }
 
-        // Spec §8 validation: signByCredential MUST contain ALL allowCredentials IDs
+        // Each allowed credential must have a corresponding previewSign input entry.
         var signByCredIds = new HashSet<ReadOnlyMemory<byte>>(
             input.SignByCredential.Keys,
             ByteArrayKeyComparer.Instance);
@@ -130,14 +115,13 @@ internal static class PreviewSignAdapter
             }
         }
 
-        // Phase 9.2 limitation: single-credential only (multi-credential probe deferred to Phase 10)
+        // Multi-credential probe-selection is not implemented yet; keep the current auth path single-credential.
         if (input.SignByCredential.Count != 1)
         {
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.NotSupported,
                 "previewSign authentication currently supports only single-credential scope; " +
-                "multi-credential probe-selection (CTAP up=false probe per CTAP v4 §10.2.1 step 7) " +
-                "is deferred to Phase 10. See Plans/phase-10-previewsign-auth.md for tracking. " +
+                "multi-credential probe-selection is not implemented. " +
                 "To use previewSign now: scope signByCredential to exactly one credential " +
                 "that matches the single entry in allowCredentials.");
         }
@@ -153,13 +137,12 @@ internal static class PreviewSignAdapter
                 "previewSign signByCredential's single entry must match allowCredentials[0]");
         }
 
-        // Translate WebAuthn SigningParams to Fido2 SigningParams.
-        // CoseSignArgs is the same Fido2 type re-exported by WebAuthn — pass through unchanged
-        // (no clone, no CBOR built here; Fido2 owns the canonical encoder).
+        // Translate WebAuthn SigningParams to Fido2 SigningParams. additionalArgs are
+        // algorithm-specific bytes and pass through unchanged.
         var fido2SigningParams = new Fido2.Extensions.PreviewSignSigningParams(
             keyHandle: signingParams.KeyHandle,
             tbs: signingParams.Tbs,
-            coseSignArgs: signingParams.CoseSignArgs);
+            additionalArgs: signingParams.AdditionalArgs);
 
         // Translate to Fido2 authentication input (expects dictionary)
         var signByCredential = new Dictionary<ReadOnlyMemory<byte>, Fido2.Extensions.PreviewSignSigningParams>(
@@ -184,10 +167,10 @@ internal static class PreviewSignAdapter
     /// Thrown when the extension output is present but malformed (InvalidState).
     /// </exception>
     /// <remarks>
-    /// Per spec §10.2.1 step 5 (registration), reads algorithm from authData.extensions["previewSign"]
-    /// and attestation object from unsignedExtensionOutputs["previewSign"] (top-level CTAP response map).
-    /// If unsignedExtensionOutputs is missing, builds GeneratedSigningKey from authData's attested
-    /// credential data (Swift fallback per PreviewSign.swift:170-176).
+    /// Reads the algorithm from <c>authData.extensions["previewSign"]</c> and the generated signing
+    /// key attestation object from <c>unsignedExtensionOutputs["previewSign"]</c>. If unsigned
+    /// extension outputs are missing, the method builds the generated key from the response
+    /// authenticator data's attested credential data.
     /// </remarks>
     public static PreviewSign.PreviewSignRegistrationOutput? ParseRegistrationOutput(
         WebAuthnAuthenticatorData authData,
@@ -211,13 +194,9 @@ internal static class PreviewSignAdapter
         // Try to read attestation object from unsignedExtensionOutputs["previewSign"]
         if (unsignedExtensionOutputs?.TryGetValue(ExtensionId, out var unsignedCbor) == true)
         {
-            // Decode the CTAP-shaped inner attestation object via the Fido2 decoder.
-            // The wire payload is {1:fmt, 2:authData, 3:attStmt} (integer keys, NOT WebAuthn
-            // text-string keys). Feeding the inner bytes directly to WebAuthnAttestationObject.Decode
-            // would crash on "next CBOR data item is of major type '0'" because the WebAuthn
-            // decoder expects text keys. Per legacy SDK reference (Yubico.NET.SDK-Legacy
-            // Fido2/PreviewSignExtension.cs:144-147 and 249-282) and python-fido2 the inner
-            // shape is canonical CTAP. Fido2 owns this decode; WebAuthn rebuilds the spec object.
+            // Decode the CTAP-shaped inner attestation object via the Fido2 decoder. The wire
+            // payload uses integer keys ({1:fmt, 2:authData, 3:attStmt}), so WebAuthn rebuilds
+            // the attestation object from the decoded components.
             Fido2.Extensions.PreviewSignCbor.InnerAttestationObject inner =
                 Fido2.Extensions.PreviewSignCbor.DecodeUnsignedRegistrationOutput(unsignedCbor);
 
@@ -244,7 +223,7 @@ internal static class PreviewSignAdapter
             return new PreviewSign.PreviewSignRegistrationOutput(generatedKey);
         }
 
-        // Fallback: build from authData's attested credential data (Swift PreviewSign.swift:170-176)
+        // Fallback: build from authData's attested credential data.
         if (authData.AttestedCredentialData is null)
         {
             throw new WebAuthnClientError(

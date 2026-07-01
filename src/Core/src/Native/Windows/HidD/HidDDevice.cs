@@ -17,16 +17,20 @@ using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.Native.Windows.HidD;
 
-internal class HidDDevice : IHidDDevice
+internal sealed class HidDDevice : IHidDDevice
 {
+    private const int ErrorAccessDenied = 5;
+    private const string WindowsHidAccessDeniedGuidance =
+        "Windows denied access to the HID interface. The interface may be held exclusively by another process, " +
+        "or this environment may require running the process elevated as Administrator to open YubiKey HID reports.";
     private SafeFileHandle _handle;
+    private bool _disposed;
 
     public HidDDevice(string devicePath)
     {
         DevicePath = devicePath;
 
-        _handle = OpenHandleWithAccess(Kernel32.NativeMethods.DESIRED_ACCESS.NONE);
-        var capabilities = GetCapabilities(_handle);
+        _handle = OpenHandleForMetadata(out var capabilities);
 
         Usage = capabilities.Usage;
         UsagePage = capabilities.UsagePage;
@@ -44,27 +48,23 @@ internal class HidDDevice : IHidDDevice
     public short FeatureReportByteLength { get; }
 
     public void OpenIOConnection()
-    {
-        _handle.Dispose();
-        _handle = OpenHandleWithAccess(Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_READ |
-                                       Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_WRITE);
-    }
+        => OpenReportConnection();
 
     public void OpenFeatureConnection()
-    {
-        _handle.Dispose();
-        _handle = OpenHandleWithAccess(Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_WRITE);
-    }
+        => OpenReportConnection();
 
     public byte[] GetFeatureReport()
     {
-        if (_handle is null) throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
+        EnsureOpenHandle();
 
         var buffer = new byte[FeatureReportByteLength];
 
         if (!NativeMethods.HidD_GetFeature(_handle, buffer, buffer.Length))
+        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+        }
 
+        // Windows includes the report ID byte; the SDK exposes only report payload bytes.
         var returnBuf = new byte[FeatureReportByteLength - 1];
         Array.Copy(buffer, 1, returnBuf, 0, returnBuf.Length);
 
@@ -73,27 +73,37 @@ internal class HidDDevice : IHidDDevice
 
     public void SetFeatureReport(byte[] buffer)
     {
-        if (_handle is null) throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
+        EnsureOpenHandle();
 
         if (buffer.Length != FeatureReportByteLength - 1)
-            throw new InvalidOperationException("ExceptionMessages.InvalidReportBufferLength");
+        {
+            throw new ArgumentException(
+                $"The HID feature report buffer length is invalid. Expected {FeatureReportByteLength - 1} bytes, but got {buffer.Length}.",
+                nameof(buffer));
+        }
 
+        // Windows expects the report ID byte before the report payload.
         var sendBuf = new byte[buffer.Length + 1];
         Array.Copy(buffer, 0, sendBuf, 1, buffer.Length);
 
         if (!NativeMethods.HidD_SetFeature(_handle, sendBuf, sendBuf.Length))
+        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+        }
     }
 
     public byte[] GetInputReport()
     {
-        if (_handle is null) throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
+        EnsureOpenHandle();
 
         var buffer = new byte[InputReportByteLength];
         if (!Kernel32.NativeMethods.ReadFile(_handle, buffer, buffer.Length, out var bytesRead, IntPtr.Zero)
             || bytesRead != buffer.Length)
+        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+        }
 
+        // Windows includes the report ID byte; the SDK exposes only report payload bytes.
         var returnBuf = new byte[InputReportByteLength - 1];
         Array.Copy(buffer, 1, returnBuf, 0, returnBuf.Length);
 
@@ -102,16 +112,24 @@ internal class HidDDevice : IHidDDevice
 
     public void SetOutputReport(byte[] buffer)
     {
-        if (_handle is null) throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
-        if (buffer.Length != OutputReportByteLength - 1)
-            throw new InvalidOperationException("ExceptionMessages.InvalidReportBufferLength");
+        EnsureOpenHandle();
 
+        if (buffer.Length != OutputReportByteLength - 1)
+        {
+            throw new ArgumentException(
+                $"The HID output report buffer length is invalid. Expected {OutputReportByteLength - 1} bytes, but got {buffer.Length}.",
+                nameof(buffer));
+        }
+
+        // Windows expects the report ID byte before the report payload.
         var sendBuf = new byte[buffer.Length + 1];
         Array.Copy(buffer, 0, sendBuf, 1, buffer.Length);
 
         if (!Kernel32.NativeMethods.WriteFile(_handle, sendBuf, sendBuf.Length, out var bytesWritten, IntPtr.Zero)
             || bytesWritten != sendBuf.Length)
+        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+        }
     }
 
 
@@ -120,14 +138,17 @@ internal class HidDDevice : IHidDDevice
         NativeMethods.HIDP_CAPS capabilities = new();
 
         if (!NativeMethods.HidD_GetPreparsedData(safeHandle, out var preparsedData))
-            Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+        {
+            ThrowHidDWin32Failure(nameof(NativeMethods.HidD_GetPreparsedData), "Failed to get HID preparsed data.");
+        }
 
         try
         {
-            if (!NativeMethods.HidP_GetCaps(preparsedData, ref capabilities))
-                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-
-            return capabilities;
+            var result = NativeMethods.HidP_GetCaps(preparsedData, ref capabilities);
+            return result == NativeMethods.HidpStatusSuccess
+                ? capabilities
+                : throw new PlatformApiException(nameof(NativeMethods.HidP_GetCaps), result,
+                    "Failed to get HID capabilities.");
         }
         finally
         {
@@ -140,32 +161,105 @@ internal class HidDDevice : IHidDDevice
         var handle = Kernel32.NativeMethods.CreateFile(
             DevicePath,
             desiredAccess,
-            Kernel32.NativeMethods.FILE_SHARE.READWRITE,
+            Kernel32.NativeMethods.FILE_SHARE.ALL,
             IntPtr.Zero,
             Kernel32.NativeMethods.CREATION_DISPOSITION.OPEN_EXISTING,
             Kernel32.NativeMethods.FILE_FLAG.NORMAL,
             IntPtr.Zero
         );
 
-        if (handle.IsInvalid) Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+        if (handle.IsInvalid)
+        {
+            var error = Marshal.GetLastWin32Error();
+            if (error == ErrorAccessDenied)
+            {
+                throw new UnauthorizedAccessException(
+                    $"Access denied opening HID device '{DevicePath}'. {WindowsHidAccessDeniedGuidance}");
+            }
+
+            throw new PlatformApiException(nameof(Kernel32.NativeMethods.CreateFile), error,
+                $"Failed to open HID device '{DevicePath}'.");
+        }
 
         return handle;
     }
 
-
-    private bool disposedValue; // To detect redundant calls
-
-    protected virtual void Dispose(bool disposing)
+    private SafeFileHandle OpenHandleForMetadata(out NativeMethods.HIDP_CAPS capabilities)
     {
-        if (!disposedValue)
+        try
         {
-            if (disposing) _handle.Dispose();
-
-            disposedValue = true;
+            var handle = OpenHandleWithAccess(Kernel32.NativeMethods.DESIRED_ACCESS.NONE);
+            try
+            {
+                capabilities = GetCapabilities(handle);
+                return handle;
+            }
+            catch
+            {
+                handle.Dispose();
+                throw;
+            }
+        }
+        catch (Exception ex) when (RequiresReadWriteMetadataHandle(ex))
+        {
+            var handle = OpenReadWriteHandle();
+            try
+            {
+                capabilities = GetCapabilities(handle);
+                return handle;
+            }
+            catch
+            {
+                handle.Dispose();
+                throw;
+            }
         }
     }
 
-    // This code added to correctly implement the disposable pattern.
-    public void Dispose() => Dispose(true);
+    private void OpenReportConnection()
+    {
+        var handle = OpenReadWriteHandle();
+        _handle.Dispose();
+        _handle = handle;
+    }
+
+    private SafeFileHandle OpenReadWriteHandle()
+        => OpenHandleWithAccess(Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_READ |
+                                Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_WRITE);
+
+    private static bool RequiresReadWriteMetadataHandle(Exception exception)
+        => exception is UnauthorizedAccessException;
+
+    private static void ThrowHidDWin32Failure(string source, string message)
+    {
+        var error = Marshal.GetLastWin32Error();
+        if (error == ErrorAccessDenied)
+        {
+            throw new UnauthorizedAccessException($"{message} {WindowsHidAccessDeniedGuidance}");
+        }
+
+        throw new PlatformApiException(source, error, message);
+    }
+
+    private void EnsureOpenHandle()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (_handle.IsInvalid || _handle.IsClosed)
+        {
+            throw new InvalidOperationException($"The HID device handle for '{DevicePath}' is not open.");
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _handle.Dispose();
+        _disposed = true;
+    }
 
 }

@@ -16,7 +16,6 @@ using System.Globalization;
 using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;
-using Yubico.YubiKit.Core.Transports.Hid;
 using CFNativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;
 using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.NativeMethods;
 
@@ -85,7 +84,7 @@ internal sealed class MacOSHidDevice : IHidDevice
                 };
 
                 // Only include Yubico devices with supported interface types
-                if (descriptorInfo.VendorId == 0x1050 &&
+                if (descriptorInfo.VendorId == HidConstants.YubicoVendorId &&
                     HidInterfaceClassifier.IsSupported(descriptorInfo))
                 {
                     result.Add(new MacOSHidDevice(GetEntryId(device), descriptorInfo));

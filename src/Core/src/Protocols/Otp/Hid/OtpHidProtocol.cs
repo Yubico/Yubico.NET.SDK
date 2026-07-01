@@ -335,21 +335,22 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
 
     /// <summary>
     /// Waits for the WRITE flag to be cleared (device ready to receive).
-    /// Uses "sleep-first" pattern: delay BEFORE checking the flag.
-    /// This gives the device time to process each frame before we poll.
     /// </summary>
     private async Task AwaitReadyToWriteAsync(CancellationToken cancellationToken)
     {
-        for (var i = 0; i < 20; i++)
-        {
-            // Sleep first - give device time to clear write flag
-            await Task.Delay(50, cancellationToken).ConfigureAwait(false);
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        const int timeLimitMs = 1000;
+        const int pollIntervalMs = 5;
 
+        while (stopwatch.ElapsedMilliseconds < timeLimitMs)
+        {
             var report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
             if ((report.Span[OtpConstants.FeatureReportDataSize] & OtpConstants.SlotWriteFlag) == 0)
             {
                 return;
             }
+
+            await Task.Delay(pollIntervalMs, cancellationToken).ConfigureAwait(false);
         }
 
         throw new TimeoutException("Timeout waiting for YubiKey to become ready to receive");

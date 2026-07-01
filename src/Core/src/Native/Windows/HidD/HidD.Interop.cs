@@ -32,12 +32,12 @@ internal static partial class NativeMethods
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal unsafe struct HIDP_CAPS
     {
-        public fixed short Reserved[17];
         public short Usage;
         public short UsagePage;
         public short InputReportByteLength;
         public short OutputReportByteLength;
         public short FeatureReportByteLength;
+        public fixed short Reserved[17];
         public short NumberLinkCollectionNodes;
 
         public short NumberInputButtonCaps;
@@ -53,7 +53,7 @@ internal static partial class NativeMethods
         public short NumberFeatureDataIndices;
     }
 
-
+    internal const int HidpStatusSuccess = 0x00110000;
 
     [LibraryImport(Libraries.Hid, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
@@ -67,7 +67,7 @@ internal static partial class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool HidD_GetAttributes(
         SafeFileHandle HidDeviceObject,
-        out HIDD_ATTRIBUTES Attributes
+        ref HIDD_ATTRIBUTES Attributes
     );
 
     [LibraryImport(Libraries.Hid, SetLastError = true)]
@@ -116,8 +116,7 @@ internal static partial class NativeMethods
 
     [LibraryImport(Libraries.Hid, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool HidP_GetCaps(
+    internal static partial int HidP_GetCaps(
         IntPtr PreparsedData,
         ref HIDP_CAPS Capabilities
     );

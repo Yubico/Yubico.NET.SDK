@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
@@ -46,16 +46,17 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
         CancellationToken cancellationToken = default)
     {
         if (_disposed)
+        {
             throw new ObjectDisposedException(nameof(FakeSmartCardConnection));
+        }
 
         cancellationToken.ThrowIfCancellationRequested();
 
         TransmittedCommands.Add(command.ToArray());
 
-        if (_responses.Count == 0)
-            throw new InvalidOperationException("No response enqueued for transmission");
-
-        return await Task.FromResult(_responses.Dequeue());
+        return _responses.Count == 0
+            ? throw new InvalidOperationException("No response enqueued for transmission")
+            : await Task.FromResult(_responses.Dequeue());
     }
 
     public void Dispose()
@@ -64,9 +65,8 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
         _disposed = true;
     }
 
-    public async ValueTask DisposeAsync()
-    {
+    public ValueTask DisposeAsync() =>
         // TODO release managed resources here
-    }
+        ValueTask.CompletedTask;
 
 }

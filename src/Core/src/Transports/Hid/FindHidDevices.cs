@@ -15,9 +15,10 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Runtime.Versioning;
-using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Transports.Hid.Linux;
 using Yubico.YubiKit.Core.Transports.Hid.MacOS;
+using Yubico.YubiKit.Core.Transports.Hid.Windows;
 
 namespace Yubico.YubiKit.Core.Transports.Hid;
 
@@ -28,8 +29,6 @@ public interface IFindHidDevices
 
 public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
 {
-    private const short YubicoVendorId = 0x1050;
-
     public async Task<IReadOnlyList<IHidDevice>> FindAllAsync(CancellationToken cancellationToken = default) =>
         await Task.Run(FindAll, cancellationToken).ConfigureAwait(false);
 
@@ -40,7 +39,7 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
         var allDevices = GetPlatformDevices();
 
         var yubicoDevices = allDevices
-            .Where(d => d.DescriptorInfo.VendorId == YubicoVendorId)
+            .Where(d => d.DescriptorInfo.VendorId == HidConstants.YubicoVendorId)
             .ToList();
 
         logger.LogDebug("Found {Count} Yubico HID devices", yubicoDevices.Count);
@@ -48,21 +47,15 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
         return yubicoDevices;
     }
 
-    private IReadOnlyList<IHidDevice> GetPlatformDevices()
-    {
-        if (OperatingSystem.IsMacOS())
+    private IReadOnlyList<IHidDevice> GetPlatformDevices() =>
+        SdkPlatformInfo.OperatingSystem switch
         {
-            return FindAllMacOS();
-        }
-
-        if (OperatingSystem.IsLinux())
-        {
-            return FindAllLinux();
-        }
-
-        // Windows not yet implemented, return empty list
-        return [];
-    }
+            SdkPlatform.MacOS => FindAllMacOS(),
+            SdkPlatform.Linux => FindAllLinux(),
+            SdkPlatform.Windows => FindAllWindows(),
+            SdkPlatform.Unknown => [],
+            _ => []
+        };
 
     [SupportedOSPlatform("macos")]
     private static IReadOnlyList<IHidDevice> FindAllMacOS() =>
@@ -81,6 +74,10 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
             return [];
         }
     }
+
+    [SupportedOSPlatform("windows")]
+    private static IReadOnlyList<IHidDevice> FindAllWindows() =>
+        WindowsHidDevice.GetList();
 
     public static FindHidDevices Create(ILogger<FindHidDevices>? logger = null) =>
         new(logger ?? NullLogger<FindHidDevices>.Instance);

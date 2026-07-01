@@ -13,14 +13,12 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using System.Runtime.Versioning;
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.Hid;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Transports.Hid;
 
-[SupportedOSPlatform("macos")]
 public class HidEnumerationTests
 {
     private readonly ITestOutputHelper _output;
@@ -32,15 +30,9 @@ public class HidEnumerationTests
 
     [Fact]
     [Trait("Category", "Integration")]
-    [Trait("RequiresHardware", "false")]
+    [Trait("RequiresHardware", "true")]
     public async Task FindHidDevices_EnumeratesYubicoDevices()
     {
-        if (!OperatingSystem.IsMacOS())
-        {
-            _output.WriteLine("Test skipped: not running on macOS");
-            return;
-        }
-
         var loggerFactory = LoggerFactory.Create(builder =>
             builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
 
@@ -53,10 +45,18 @@ public class HidEnumerationTests
         foreach (var device in devices)
         {
             _output.WriteLine($"  VID={device.DescriptorInfo.VendorId:X4} PID={device.DescriptorInfo.ProductId:X4} " +
-                            $"Usage={device.DescriptorInfo.Usage:X4} UsagePage={device.DescriptorInfo.UsagePage}");
+                            $"Usage={device.DescriptorInfo.Usage:X4} UsagePage={device.DescriptorInfo.UsagePage:X4}");
         }
 
-        Assert.True(devices.Count >= 0, "Should not fail even if no devices present");
+        if (devices.Count == 0 && OperatingSystem.IsWindows())
+        {
+            _output.WriteLine(
+                "Windows HID enumeration reads interface metadata without opening report handles. " +
+                "Access denied failures while opening HID reports usually mean the test host must run elevated as Administrator, " +
+                "or another process is holding the HID interface exclusively.");
+        }
+
+        Assert.True(devices.Count > 0, "Expected at least one Yubico HID device with hardware present");
     }
 
     [Fact]
@@ -64,12 +64,6 @@ public class HidEnumerationTests
     [Trait("RequiresHardware", "true")]
     public async Task FindYubiKeys_IncludesHidDevices()
     {
-        if (!OperatingSystem.IsMacOS())
-        {
-            _output.WriteLine("Test skipped: not running on macOS");
-            return;
-        }
-
         var finder = FindYubiKeys.Create();
 
         var yubiKeys = await finder.FindAllAsync();
@@ -81,9 +75,10 @@ public class HidEnumerationTests
             _output.WriteLine($"  DeviceId={yubiKey.DeviceId}");
         }
 
-        var hidYubiKeys = yubiKeys.Where(yk => yk.DeviceId.StartsWith("hid:")).ToList();
+        var hidYubiKeys = yubiKeys.Where(yk => yk.SupportsConnection(ConnectionType.Hid)).ToList();
         _output.WriteLine($"Found {hidYubiKeys.Count} HID YubiKeys");
 
-        Assert.True(yubiKeys.Count >= 0, "Should not fail even if no devices present");
+        Assert.True(yubiKeys.Count > 0, "Expected at least one YubiKey with hardware present");
+        Assert.True(hidYubiKeys.Count > 0, "Expected at least one YubiKey with HID interfaces");
     }
 }

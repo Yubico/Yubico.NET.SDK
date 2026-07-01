@@ -98,13 +98,12 @@ internal class ScpProcessor(
                 isExtendedApdu = Formatter is ApduFormatterExtended;
             }
 
-            // Step 6: Compute MAC over formatted APDU minus last MacLength bytes (the MAC space)
-            // Exclude Le field if present
+            // Step 6: Compute MAC over formatted APDU minus the MAC placeholder and trailing Le.
             var apduToMac = formattedApdu.Span;
-            var macLength = apduToMac.Length - MacLength; // Don't MAC the MAC space
-            if (scpCommand.Le > 0)
-                // Extended APDU has 3-byte Le, short APDU has 1-byte Le
-                macLength -= isExtendedApdu ? 3 : 1;
+            // SCP commands always include the data field because macedData reserves the 8-byte MAC slot,
+            // so extended APDUs use the data-bearing 2-byte Le form rather than no-data Case 2E.
+            var leLength = isExtendedApdu ? 2 : 1;
+            var macLength = apduToMac.Length - MacLength - leLength;
 
             mac = State.Mac(apduToMac[..macLength]);
 

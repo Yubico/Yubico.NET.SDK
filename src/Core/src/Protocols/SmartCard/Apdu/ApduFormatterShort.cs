@@ -31,7 +31,7 @@ internal class ApduFormatterShort : IApduFormatter
         if (le is < 0 or > ShortApduMaxChunk)
             throw new ArgumentException($"Le must be between 0 and {ShortApduMaxChunk}", nameof(le));
 
-        var totalLength = 4 + (length > 0 ? 1 + length : 0) + (le > 0 ? 1 : 0) + (length == 0 && le == 0 ? 1 : 0);
+        var totalLength = 4 + (length > 0 ? 1 + length : 0) + 1;
         Span<byte> buffer = stackalloc byte[totalLength];
         var position = 0;
 
@@ -49,10 +49,7 @@ internal class ApduFormatterShort : IApduFormatter
             position += length;
         }
 
-        if (le > 0)
-            buffer[position] = (byte)le;
-        else if (length == 0)
-            buffer[position] = 0;
+        buffer[position] = le > 0 ? (byte)le : (byte)0;
 
         return buffer.ToArray(); // TODO allocation. Can it be avoided?
     }

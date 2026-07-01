@@ -255,7 +255,8 @@ public class OathSessionTests
         Assert.Equal(0x00, putCommand[2]);
         Assert.Equal(0x00, putCommand[3]);
         Assert.Equal(expectedData.Length, putCommand[4]);
-        Assert.Equal(expectedData, putCommand[5..]);
+        Assert.Equal(expectedData, putCommand[5..^1]);
+        Assert.Equal(0x00, putCommand[^1]);
     }
 
     [Fact]
@@ -302,7 +303,8 @@ public class OathSessionTests
         Assert.Equal(0x00, putCommand[2]);
         Assert.Equal(0x00, putCommand[3]);
         Assert.Equal(expectedData.Length, putCommand[4]);
-        Assert.Equal(expectedData, putCommand[5..]);
+        Assert.Equal(expectedData, putCommand[5..^1]);
+        Assert.Equal(0x00, putCommand[^1]);
     }
 
     private static byte[] SelectResponse() =>

@@ -37,9 +37,8 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         {
             listener = new DesktopSmartCardDeviceListener();
         }
-        catch (Exception)
+        catch (PlatformNotSupportedException)
         {
-            // Platform may not support SmartCard - skip test
             return;
         }
 
@@ -66,9 +65,8 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         {
             listener = new DesktopSmartCardDeviceListener();
         }
-        catch (Exception)
+        catch (PlatformNotSupportedException)
         {
-            // Platform may not support SmartCard - skip test
             return;
         }
 
@@ -100,9 +98,8 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         {
             listener = new DesktopSmartCardDeviceListener();
         }
-        catch (Exception)
+        catch (PlatformNotSupportedException)
         {
-            // Platform may not support SmartCard - skip test
             return;
         }
 
@@ -134,9 +131,8 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         {
             listener = new DesktopSmartCardDeviceListener();
         }
-        catch (Exception)
+        catch (PlatformNotSupportedException)
         {
-            // Platform may not support SmartCard - skip test
             return;
         }
 
@@ -152,6 +148,9 @@ public class DesktopSmartCardDeviceListenerDisposalTests
 
             // Assert
             Assert.Null(exception);
+            Assert.True(
+                listener.Status is DeviceListenerStatus.Started or DeviceListenerStatus.Error,
+                $"Expected Started or Error after multiple Start() calls, but got {listener.Status}");
         }
         finally
         {
@@ -171,9 +170,8 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         {
             listener = new DesktopSmartCardDeviceListener();
         }
-        catch (Exception)
+        catch (PlatformNotSupportedException)
         {
-            // Platform may not support SmartCard - skip test
             return;
         }
 
@@ -189,6 +187,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
 
             // Assert
             Assert.Null(exception);
+            Assert.Equal(DeviceListenerStatus.Stopped, listener.Status);
         }
         finally
         {
@@ -208,9 +207,8 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         {
             listener = new DesktopSmartCardDeviceListener();
         }
-        catch (Exception)
+        catch (PlatformNotSupportedException)
         {
-            // Platform may not support SmartCard - skip test
             return;
         }
 
@@ -231,8 +229,6 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         }
     }
 
-
-
     /// <summary>
     /// Verifies that Dispose completes within a reasonable timeout when listener is running.
     /// If this test hangs, the cancellation logic is broken.
@@ -245,11 +241,10 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         try
         {
             listener = new DesktopSmartCardDeviceListener();
-            listener.Start(); // Start the listener
+            listener.Start();
         }
-        catch (Exception)
+        catch (PlatformNotSupportedException)
         {
-            // Platform may not support SmartCard - skip test
             return;
         }
 
@@ -258,6 +253,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         var completed = await Task.WhenAny(disposeTask, Task.Delay(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken)) == disposeTask;
 
         Assert.True(completed, "Dispose should complete within 10 seconds");
+        await disposeTask;
     }
 
     /// <summary>
@@ -271,11 +267,9 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         try
         {
             listener = new DesktopSmartCardDeviceListener();
-            // Don't call Start()
         }
-        catch (Exception)
+        catch (PlatformNotSupportedException)
         {
-            // Platform may not support SmartCard - skip test
             return;
         }
 
@@ -284,6 +278,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         var completed = await Task.WhenAny(disposeTask, Task.Delay(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken)) == disposeTask;
 
         Assert.True(completed, "Dispose should complete within 1 second when not started");
+        await disposeTask;
     }
 
     /// <summary>
@@ -299,9 +294,8 @@ public class DesktopSmartCardDeviceListenerDisposalTests
             listener = new DesktopSmartCardDeviceListener();
             listener.Start();
         }
-        catch (Exception)
+        catch (PlatformNotSupportedException)
         {
-            // Platform may not support SmartCard - skip test
             return;
         }
 

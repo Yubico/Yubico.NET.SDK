@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -122,16 +124,21 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
             options.Extensions = request.Extensions;
         }
 
-        var response = await _session.MakeCredentialAsync(
-            request.ClientDataHash,
-            request.Rp,
-            request.User,
-            request.PubKeyCredParams,
-            options,
-            cancellationToken
-        ).ConfigureAwait(false);
-
-        return response;
+        try
+        {
+            return await _session.MakeCredentialAsync(
+                request.ClientDataHash,
+                request.Rp,
+                request.User,
+                request.PubKeyCredParams,
+                options,
+                cancellationToken
+            ).ConfigureAwait(false);
+        }
+        finally
+        {
+            ZeroMemory(options.PinUvAuthParam);
+        }
     }
 
     /// <inheritdoc/>
@@ -159,6 +166,11 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
             options.UserVerification = uv;
         }
 
+        if (request.Options?.TryGetValue("up", out var up) == true)
+        {
+            options.UserPresence = up;
+        }
+
         // Add PIN/UV auth if provided
         if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
         {
@@ -171,11 +183,31 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
             options.Extensions = request.Extensions;
         }
 
-        return await _session.GetAssertionAsync(
-            request.RpId,
-            request.ClientDataHash,
-            options,
-            cancellationToken);
+        try
+        {
+            return await _session.GetAssertionAsync(
+                request.RpId,
+                request.ClientDataHash,
+                options,
+                cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            ZeroMemory(options.PinUvAuthParam);
+        }
+    }
+
+    private static void ZeroMemory(ReadOnlyMemory<byte>? memory)
+    {
+        if (memory is null || memory.Value.IsEmpty)
+        {
+            return;
+        }
+
+        if (MemoryMarshal.TryGetArray(memory.Value, out var segment) && segment.Array is not null)
+        {
+            CryptographicOperations.ZeroMemory(segment.AsSpan());
+        }
     }
 
     /// <inheritdoc/>
@@ -183,7 +215,7 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        return await _session.GetNextAssertionAsync(cancellationToken);
+        return await _session.GetNextAssertionAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

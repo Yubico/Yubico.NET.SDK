@@ -78,7 +78,6 @@ internal static class DeviceInfoReader
                 if (moreData is not null)
                 {
                     pageTlvs.Dispose();
-                    DisposeAll(allPagesTlvs);
                     throw new BadResponseException($"Duplicate more-data tags in device info page {page}.");
                 }
 
@@ -106,14 +105,6 @@ internal static class DeviceInfoReader
 
         using var allTlvs = new DisposableTlvList(allPagesTlvs);
         return DeviceInfo.CreateFromTlvs([.. allTlvs], defaultVersion);
-    }
-
-    private static void DisposeAll(IEnumerable<Tlv> tlvs)
-    {
-        foreach (var tlv in tlvs)
-        {
-            tlv.Dispose();
-        }
     }
 
     private static async Task<DisposableTlvList> ReadPageAsync(

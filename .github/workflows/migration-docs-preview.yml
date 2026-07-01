@@ -1,0 +1,45 @@
+name: Migration Docs Preview
+
+on:
+  pull_request:
+    branches: [ yubikit ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch migration baselines
+        run: |
+          git fetch origin +refs/heads/develop:refs/remotes/origin/develop
+          git fetch origin +refs/heads/yubikit:refs/remotes/origin/yubikit
+
+      - name: Build migration context
+        shell: bash
+        run: |
+          bash ./scripts/migration/build-migration-context.sh \
+            --mode preview \
+            --v1-baseline origin/develop \
+            --v2-branch origin/yubikit \
+            --base-range origin/yubikit...HEAD \
+            --output-dir .migration-context
+
+      - name: Comment with migration documentation preview
+        uses: anthropics/claude-code-action@28f83620103c48a57093dcc2837eec89e036bb9f # beta (v0.0.63)
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            Read and follow `.github/prompts/migration-docs-pr-preview.md`.
+            The generated context is in `.migration-context/`.
+            Preview mode must comment on migration impact only; do not edit files.
+          claude_args: >-
+            --allowedTools Read,Grep,Glob

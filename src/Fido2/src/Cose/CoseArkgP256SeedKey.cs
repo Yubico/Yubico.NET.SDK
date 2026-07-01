@@ -19,13 +19,13 @@ namespace Yubico.YubiKit.Fido2.Cose;
 /// <summary>
 /// ARKG-P256 seed-key COSE_Key variant (alg -65700).
 /// </summary>
-    /// <remarks>
-    /// <para>
-    /// <b>WARNING -- EXPERIMENTAL --</b> ARKG previewSign seed-key support is not ready for production use and
-    /// must not be treated as production cryptographic guidance.
-    /// </para>
-    /// <para>
-    /// An ARKG-P256 seed-key is a specialized COSE_Key structure encoding two P-256 public keys
+/// <remarks>
+/// <para>
+/// <b>WARNING -- EXPERIMENTAL --</b> ARKG previewSign seed-key support is not ready for production use and
+/// must not be treated as production cryptographic guidance.
+/// </para>
+/// <para>
+/// An ARKG-P256 seed-key is a specialized COSE_Key structure encoding two P-256 public keys
 /// (pkKem and pkBl) used for offline key derivation. Unlike standard EC2 keys where parameter -1
 /// is the curve identifier, ARKG seed-keys use -1/-2 to carry NESTED COSE_Key maps (not flat
 /// SEC1 byte strings).

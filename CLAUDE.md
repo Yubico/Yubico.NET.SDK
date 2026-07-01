@@ -56,6 +56,7 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 
 **Security:**
 - ✅ ALWAYS zero sensitive data: `CryptographicOperations.ZeroMemory()`
+- ✅ Classify byte data by semantic meaning, not by direction. YubiKey-returned device metadata/status (device info TLVs, firmware version, capabilities, form factor, public status) does not require special zeroing beyond normal ownership/disposal. YubiKey-returned authentication material, token material, decrypted plaintext, or secret-derived output does.
 - ✅ ALWAYS dispose crypto objects: `using var aes = Aes.Create()`
 - ✅ ALWAYS use `CryptographicOperations.FixedTimeEquals` for secret-derived comparisons
 - ❌ NEVER log PINs, keys, or sensitive payloads

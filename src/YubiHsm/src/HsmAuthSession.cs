@@ -851,7 +851,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 nameof(managementKey));
     }
 
-    private static void ZeroApduResponse(ApduResponse response)
+    internal static void ZeroApduResponse(ApduResponse response)
     {
         if (MemoryMarshal.TryGetArray(response.RawData, out var rawData))
             CryptographicOperations.ZeroMemory(rawData.AsSpan());

@@ -13,10 +13,7 @@
 // limitations under the License.
 
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
-
-using System.Reflection;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.SmartCard;
 
 public class SessionKeysTests
 {
@@ -107,12 +104,8 @@ public class SessionKeysTests
         responseBytes[^2] = 0x90;
 
         var response = new ApduResponse(responseBytes);
-        var method = typeof(HsmAuthSession).GetMethod(
-            "ZeroApduResponse",
-            BindingFlags.Static | BindingFlags.NonPublic);
 
-        Assert.NotNull(method);
-        method.Invoke(null, [response]);
+        HsmAuthSession.ZeroApduResponse(response);
 
         Assert.True(response.RawData.Span.ToArray().All(static b => b == 0));
     }

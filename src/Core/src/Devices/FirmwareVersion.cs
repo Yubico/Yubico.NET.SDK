@@ -95,7 +95,8 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
         bool thisIsAlphaOrBeta = IsAlphaOrBeta;
         bool otherIsAlphaOrBeta = other.IsAlphaOrBeta;
 
-        if (thisIsAlphaOrBeta && otherIsAlphaOrBeta) return 0;
+        if (thisIsAlphaOrBeta && otherIsAlphaOrBeta)
+            return CompareVersion(other.Major, other.Minor, other.Patch);
         if (thisIsAlphaOrBeta) return 1;  // This is alpha/beta, so it's "greater"
         if (otherIsAlphaOrBeta) return -1; // Other is alpha/beta, so this is "less"
 

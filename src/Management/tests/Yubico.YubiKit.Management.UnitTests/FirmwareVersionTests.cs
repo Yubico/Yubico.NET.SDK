@@ -104,12 +104,13 @@ public class FirmwareVersionTests
     }
 
     [Fact]
-    public void AlphaOrBeta_Equality_UsesExactVersionIdentity()
+    public void AlphaOrBeta_CompareTo_OrdersByExactVersionIdentity()
     {
         var defaultSentinel = new FirmwareVersion(0, 0, 0);
         var placeholderSentinel = new FirmwareVersion(0, 0, 1);
 
-        Assert.Equal(0, defaultSentinel.CompareTo(placeholderSentinel));
+        Assert.True(defaultSentinel.CompareTo(placeholderSentinel) < 0);
+        Assert.True(placeholderSentinel.CompareTo(defaultSentinel) > 0);
         Assert.False(defaultSentinel.Equals(placeholderSentinel));
         Assert.False(defaultSentinel == placeholderSentinel);
         Assert.True(defaultSentinel != placeholderSentinel);

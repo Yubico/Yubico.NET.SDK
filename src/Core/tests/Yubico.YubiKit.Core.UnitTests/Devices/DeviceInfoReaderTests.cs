@@ -20,6 +20,7 @@ public class DeviceInfoReaderTests
 
         Assert.Equal(0x01020304, info.SerialNumber);
         Assert.Equal(new FirmwareVersion(5, 7, 2), info.FirmwareVersion);
+        Assert.Equal([0x2A], info.ChallengeResponseTimeout.ToArray());
         Assert.Equal([0], protocol.RequestedPages);
     }
 
@@ -249,7 +250,7 @@ public class DeviceInfoReaderTests
         new(0x14, [0x00]),
         new(0x15, [0x00]),
         new(0x06, [0x00, 0x00]),
-        new(0x07, [0x00]),
+        new(0x07, [0x2A]),
         new(0x08, [0x00]),
         new(0x05, [0x05, 0x07, 0x02]),
         new(0x02, [0x01, 0x02, 0x03, 0x04])

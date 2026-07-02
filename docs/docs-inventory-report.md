@@ -2,7 +2,7 @@
 
 > Report-only snapshot. This file does not make staleness claims by itself; it lists signals for maintainer review.
 
-- Generated: `2026-07-02T14:44:37Z`
+- Generated: `2026-07-02T15:03:27Z`
 - Active-doc boundary source: `dotnet toolchain.cs -- docs-list-active`
 - Active documentation files: `54`
 - Excluded by docs-qa boundary: `docs/archive/**`, `docs/completed/**`, `docs/plans/**`, `docs/research/**`, `docs/reviews/**`, `docs/specs/**`, `docs/templates/**`
@@ -34,7 +34,7 @@
 | `docs/CRYPTO-APIS.md` | top-level-docs | 81 | d4b95038 (2026-04-27) | 66 | none |
 | `docs/CSHARP-PATTERNS.md` | top-level-docs | 274 | d4b95038 (2026-04-27) | 66 | none |
 | `docs/DEV-GUIDE.md` | top-level-docs | 32 | 594dd849 (2026-04-20) | 72 | none |
-| `docs/docs-inventory-report.md` | top-level-docs | 79 | 5d285e66 (2026-07-02) | 0 | none |
+| `docs/docs-inventory-report.md` | top-level-docs | 79 | 7dddc1a3 (2026-07-02) | 0 | none |
 | `docs/linux-setup.md` | top-level-docs | 93 | 767dae35 (2026-01-16) | 167 | none |
 | `docs/live-documentation-governance.md` | top-level-docs | 47 | 5d285e66 (2026-07-02) | 0 | none |
 | `docs/LOGGING.md` | top-level-docs | 258 | 752b34ef (2026-06-15) | 17 | none |

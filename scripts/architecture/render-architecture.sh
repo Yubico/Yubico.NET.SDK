@@ -73,7 +73,7 @@ if [[ $check_only -eq 1 ]]; then
 fi
 
 mkdir -p "$ARCH_IMAGES_DIR" "$ARCH_PNG_DIR"
-tmpd="$(mktemp -d)"
+tmpd="$(mktemp -d 2>/dev/null || mktemp -d "${TMPDIR:-/tmp}/yubikit-architecture-render.XXXXXX")"
 trap 'rm -rf "$tmpd"' EXIT
 
 manifest_tmp="$tmpd/manifest"

@@ -35,7 +35,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 mkdir -p "$(dirname "$output")"
-tmpd="$(mktemp -d)"
+tmpd="$(mktemp -d 2>/dev/null || mktemp -d "${TMPDIR:-/tmp}/yubikit-docs-inventory.XXXXXX")"
 trap 'rm -rf "$tmpd"' EXIT
 
 raw_active_list="$tmpd/active-docs.raw.txt"

@@ -15,20 +15,15 @@
 namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 /// <summary>
-/// Output from previewSign registration ceremony.
+/// Output from the previewSign extension registration.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Contains the generated signing key details including the key handle, public key,
-/// algorithm, attestation object, and user verification flags.
-/// </para>
-/// <para>
-/// The attestation object is the authoritative source for the public key and should
-/// be verified before trusting the other fields (per CTAP v4 draft §4).
+/// Represents the generated key material returned by the YubiKey during
+/// previewSign extension registration.
 /// </para>
 /// </remarks>
 /// <param name="GeneratedKey">
-/// The generated signing key including key handle, public key, algorithm, attestation,
-/// and flags policy.
+/// The generated signing key.
 /// </param>
 public sealed record class PreviewSignRegistrationOutput(GeneratedSigningKey GeneratedKey);

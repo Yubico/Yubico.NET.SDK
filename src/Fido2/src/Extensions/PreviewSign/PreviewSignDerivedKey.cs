@@ -22,8 +22,12 @@ namespace Yubico.YubiKit.Fido2.Extensions;
 /// </summary>
 /// <remarks>
 /// <para>
-/// This class contains the derived public key and handles needed for
-/// authentication via the previewSign extension. Instances are obtained
+/// <b>WARNING -- EXPERIMENTAL --</b> ARKG previewSign derived-key helpers are not ready for production use and
+/// must not be treated as production cryptographic guidance.
+/// </para>
+/// <para>
+/// This class contains the derived public key and handles needed for the
+/// ESP256-split-ARKG previewSign helper path. Instances are obtained
 /// by calling <see cref="PreviewSignGeneratedKey.DerivePublicKey"/> with
 /// application-provided input keying material and a context string.
 /// </para>
@@ -33,8 +37,9 @@ namespace Yubico.YubiKit.Fido2.Extensions;
 /// Use <see cref="VerifySignature"/> to validate signatures against this key.
 /// </para>
 /// <para>
-/// To request a signature from the YubiKey using this derived key, include
-/// the necessary parameters in the previewSign authentication extension input.
+/// To request a signature from the YubiKey using this derived key, pass the
+/// <see cref="DeviceKeyHandle"/>, <see cref="ArkgKeyHandle"/>, and
+/// <see cref="Context"/> properties to the previewSign authentication extension input.
 /// </para>
 /// </remarks>
 public sealed class PreviewSignDerivedKey
@@ -45,7 +50,7 @@ public sealed class PreviewSignDerivedKey
     public ReadOnlyMemory<byte> PublicKey { get; init; }
 
     /// <summary>
-    /// Gets the ARKG key handle (KEM ciphertext to send to the authenticator at sign time).
+    /// Gets the ARKG key handle.
     /// </summary>
     public ReadOnlyMemory<byte> ArkgKeyHandle { get; init; }
 
@@ -83,14 +88,18 @@ public sealed class PreviewSignDerivedKey
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This method verifies that a signature produced by the YubiKey (obtained via
-    /// the previewSign extension authentication output) is valid for the
-    /// given message using the derived public key from ARKG-P256 derivation.
+    /// <b>WARNING -- EXPERIMENTAL --</b> This ARKG signature-verification helper is not ready for production use
+    /// and must not be treated as production cryptographic guidance.
+    /// </para>
+    /// <para>
+    /// This method verifies that a signature produced by the ESP256-split-ARKG
+    /// previewSign path is valid for the given message using the derived public key
+    /// from ARKG-P256 derivation.
     /// </para>
     /// <para>
     /// The signature must be in DER-encoded ECDSA format, as returned by the
-    /// YubiKey's previewSign extension. The message is the raw data that was
-    /// signed, not a hash.
+    /// YubiKey's previewSign extension. The message should be the original raw data,
+    /// not a pre-hashed value.
     /// </para>
     /// </remarks>
     /// <param name="message">
@@ -98,8 +107,7 @@ public sealed class PreviewSignDerivedKey
     /// before verifying the signature.
     /// </param>
     /// <param name="signature">
-    /// The DER-encoded ECDSA signature to verify, as returned by the previewSign
-    /// extension authentication output.
+    /// The DER-encoded ESP256-split-ARKG previewSign signature to verify.
     /// </param>
     /// <returns>
     /// <c>true</c> if the signature is valid for the message using the derived

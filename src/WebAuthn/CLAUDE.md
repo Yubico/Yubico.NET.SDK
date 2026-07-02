@@ -35,9 +35,9 @@ src/
 │   ├── WebAuthnAttestationObject.cs
 │   └── WebAuthnAuthenticatorData.cs
 ├── Extensions/                   # CTAP v4 extension framework
-│   ├── PreviewSign/              # CTAP v4 previewSign extension
-│   │   ├── PreviewSignAdapter.cs
-│   │   ├── PreviewSignCbor.cs
+│   ├── Adapters/
+│   │   └── PreviewSignAdapter.cs  # WebAuthn-level adapter (translates to Fido2)
+│   ├── PreviewSign/              # previewSign extension
 │   │   ├── PreviewSignAuthenticationInput.cs
 │   │   ├── PreviewSignRegistrationInput.cs
 │   │   └── PreviewSignErrors.cs
@@ -56,7 +56,7 @@ src/
 
 WebAuthn uses `YubiKitLogging` (NOT `LoggingFactory` — that does not exist). The canonical logger factory is at `src/Core/src/YubiKitLogging.cs:20`.
 
-**WebAuthn currently has zero `ILogger` calls** — logging at protocol/extension boundaries is deferred to Phase 9.2 (auth/probe logging).
+**WebAuthn currently has zero `ILogger` calls** — logging at protocol/extension boundaries is not implemented yet.
 
 When adding logs:
 ```csharp
@@ -169,51 +169,56 @@ public interface IExtensionAdapter<in TInput, out TOutput>
 
 **previewSign Example:**
 ```csharp
-// Registration
-var adapter = new PreviewSignAdapter();
-var input = new PreviewSignRegistrationInput { Algorithms = [-7, -257] };
-var extensionsDict = new Dictionary<string, object>();
-adapter.EncodeInput(input, extensionsDict);
+// Registration: request a generated signing key.
+var registrationExtensions = new RegistrationExtensionInputs(
+    PreviewSign: PreviewSignRegistrationInput.GenerateKey(CoseAlgorithm.Es256));
 
-// Send to FIDO2
-var fidoOptions = new MakeCredentialOptions { Extensions = extensionsDict };
+// Authentication: provide keyHandle, algorithm-specific tbs, and optional raw additionalArgs.
+var signingParams = new PreviewSignSigningParams(
+    keyHandle: generatedKey.KeyHandle,
+    tbs: toBeSigned,
+    additionalArgs: algorithmSpecificAdditionalArgs);
 
-// Decode output
-var output = adapter.DecodeOutput(response.UnsignedExtensionOutputs);
-// output.GeneratedKey contains keyHandle, publicKey, algorithm, attestationObject
+var authenticationExtensions = new AuthenticationExtensionInputs(
+    PreviewSign: PreviewSignAuthenticationInput.CreateSignByCredential(
+        new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
+        {
+            [credentialId] = signingParams
+        }));
 ```
 
-## CTAP v4 previewSign Extension
-
-**Reference:** `Plans/previewSign_Implementation_Requirements.md` (authoritative spec for SDK implementation)
+## previewSign Extension
 
 **Purpose:** Use a WebAuthn credential for arbitrary data signing, separate from authentication assertions.
 
-**Wire Format:** CTAP v4 draft extension identifier `previewSign`.
+**Wire Format:** previewSign extension identifier `previewSign`.
 
 **Key Features:**
 - **Registration:** Generates a new signing key pair, returns public key + keyHandle
-- **Authentication:** Signs arbitrary `tbs` (to-be-signed) bytes using keyHandle (NOT YET VALIDATED ON HARDWARE — see Phase 9.2 parity check)
-- **Multi-credential probe:** CTAP v4 §10.2.1 step 7 iteration over `allowCredentials` (deferred to Phase 9.2)
+- **Authentication:** Signs algorithm-specific `tbs` (to-be-signed) bytes using keyHandle and optional raw `additionalArgs`
+- **Multi-credential probe:** Single-credential authentication is implemented; multi-credential probe-selection is not implemented yet
+- **Algorithm agility:** `tbs` and `additionalArgs` are algorithm-specific values and are passed through unchanged
 
-**Current Status (as of Phase 9.1):**
-- Registration path: ✅ **WORKING** on YubiKey 5.8.0-beta
-- Authentication path: ⚠️ **DEFERRED** — throws `NotSupported` if `signByCredential.Count != 1` (awaiting Swift parity confirmation in Phase 9.2)
+**Current Status:**
+- Registration path: working on previewSign-capable YubiKeys
+- Authentication path: working for single-credential scope; throws `NotSupported` if `signByCredential.Count != 1`
+- Full ceremony: `FullCeremony_RegisterWithPreviewSign_ThenSign_ReturnsSignature` verifies registration, ARKG derivation, signing, and offline signature verification with user presence
+- ARKG helpers: **WARNING -- EXPERIMENTAL --** public experimental conveniences; not the generic previewSign API contract; not ready for production use and must not be treated as production cryptographic guidance
 
 **Key Files:**
-- `src/Extensions/PreviewSign/PreviewSignAdapter.cs` — WebAuthn-level adapter (translates to Fido2)
+- `src/Extensions/Adapters/PreviewSignAdapter.cs` — WebAuthn-level adapter (translates to Fido2)
 - `../../Fido2/src/Extensions/PreviewSign/` — Canonical Fido2 types and encoder
-- `src/Extensions/PreviewSign/PreviewSignAuthenticationInput.cs:58` — Auth defer point
+- `src/Extensions/PreviewSign/PreviewSignAuthenticationInput.cs` — WebAuthn authentication input
 - `Plans/previewSign_Implementation_Requirements.md` — Full spec
 
-**Architectural Note:** The CBOR encoding logic lives in the Fido2 layer (`Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor`), ensuring a single canonical encoder shared by both Fido2 and WebAuthn. The WebAuthn adapter translates WebAuthn-level types to Fido2 types and delegates encoding to the Fido2 layer.
+**Architectural Note:** The CBOR encoding logic lives in the Fido2 layer (`Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor`), ensuring a single canonical encoder shared by both Fido2 and WebAuthn. The WebAuthn adapter translates WebAuthn-level types to Fido2 types and delegates encoding to the Fido2 layer. Generic signing params carry raw `additionalArgs`; ARKG-specific helpers can be converted to raw bytes with `PreviewSignCbor.EncodeAdditionalArgs(...)` before being passed to WebAuthn. **WARNING -- EXPERIMENTAL --** Those ARKG helpers are not ready for production use and must not be treated as production cryptographic guidance.
 
 ## Security Boundary
 
 **Sensitive Data Handling:**
 - **PINs:** Never logged, zeroed via `CryptographicOperations.ZeroMemory` after use
 - **Private keys:** Never exposed in public API; signing operations use FIDO2 CTAP commands internally
-- **`tbs` payloads (previewSign auth):** Raw bytes signed by hardware; NOT logged; caller is responsible for semantic validation
+- **`tbs` and `additionalArgs` payloads (previewSign auth):** Algorithm-specific bytes; NOT logged; caller is responsible for semantic validation
 - **Credential IDs:** Public identifiers — safe to log
 
 **Memory Management:**
@@ -233,7 +238,7 @@ var output = adapter.DecodeOutput(response.UnsignedExtensionOutputs);
 
 **Test Helpers:**
 - `WebAuthnTestHelpers.NormalizePinAsync(FidoSession, ReadOnlyMemory<byte>, CancellationToken)` — Sets/verifies PIN, more defensive than Fido2's helper (handles `ForcePinChange`, skips on mismatch)
-- `WebAuthnTestHelpers.DeleteAllCredentialsForRpAsync(FidoSession, string rpId, CancellationToken)` — Cleanup helper (added in Phase 9.1)
+- `WebAuthnTestHelpers.DeleteAllCredentialsForRpAsync(FidoSession, string rpId, CancellationToken)` — Cleanup helper
 
 **Traits:**
 - `[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]` — Tests requiring touch
@@ -297,16 +302,9 @@ dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
 
 ## Known Gotchas
 
-1. **previewSign auth not hardware-validated yet** — Phase 9.2 will confirm Swift parity before shipping multi-credential probe
+1. **previewSign auth is single-credential only for now** — multi-credential probe-selection is not implemented yet
 2. **Extension passthrough bug (fixed in commit `95abc0c5`)** — Extensions were silently dropped at backend; now wired correctly
-3. **`flags` optional in previewSign registration output** — Matches Swift `PreviewSign.swift:132-176`; YubiKey 5.8.0-beta returns only key 3 (algorithm)
+3. **`flags` optional in previewSign registration output** — Some authenticators return only key 3 (algorithm)
 4. **No LoggingFactory** — Use `YubiKitLogging.CreateLogger<T>()` from Core
 5. **Status stream must be consumed** — `IAsyncEnumerable` won't advance unless caller enumerates
-6. **CBOR key constants split** — `PreviewSignCbor.Signature` and `PreviewSignCbor.ToBeSigned` were both `6` in the same scope; fixed in Phase 9.1 with nested static classes
-
-## Future Work (Post-Phase 9)
-
-See `Plans/yes-we-have-started-composed-horizon.md` for Phase 9 breakdown:
-- **Phase 9.2:** Swift parity check → conditional auth/probe implementation
-- **Phase 9.3:** Hardware verification with user-presence testing
-- **Post-Phase-9:** Fido2 canonical extension coverage assessment
+6. **CBOR key constants are context-specific** — key `7` means authentication `additionalArgs` in GetAssertion input and attestation object in MakeCredential unsigned output; keep parsing paths context-specific

@@ -23,6 +23,9 @@ namespace Yubico.YubiKit.Fido2.UnitTests.Extensions;
 /// and the python-fido2 ARKG test vectors.
 /// </summary>
 /// <remarks>
+/// <b>WARNING -- EXPERIMENTAL -- test only:</b> ARKG previewSign vectors and helper shapes are not ready for
+/// production use and must not be treated as production cryptographic guidance.
+///
 /// References:
 /// - cnh-authenticator-rs-extension @ get_assertion.rs:290-323 (serde_cbor encoder)
 /// - python-fido2/tests/test_arkg.py:36-73 (deterministic ARKG vectors — used for KH/CTX shapes)
@@ -46,7 +49,7 @@ public class PreviewSignCborTests
         var signingParams = new PreviewSignSigningParams(
             keyHandle: keyHandle,
             tbs: tbs,
-            coseSignArgs: null);
+            additionalArgs: null);
 
         // Act
         byte[] cborBytes = PreviewSignCbor.EncodeAuthenticationInput(signingParams);
@@ -72,9 +75,10 @@ public class PreviewSignCborTests
     }
 
     [Fact]
-    public void EncodeAuthenticationInput_WithCoseSignArgs_MatchesRustThreeKeyStructure()
+    public void EncodeAuthenticationInput_WithAdditionalArgs_MatchesLegacyThreeKeyStructure()
     {
-        // Arrange: ARKG case — exercise the typed builder end-to-end through EncodeAuthenticationInput.
+        // Arrange: WARNING -- EXPERIMENTAL -- ARKG case, not production cryptographic guidance.
+        // Exercise the typed builder end-to-end through EncodeAuthenticationInput.
         // alg = -65539 (Esp256SplitArkgPlaceholder / "ARKG-P256-ESP256") — NOT -9 (Esp256, the
         // output signature alg). YK 5.8.0-beta firmware rejects everything but -65539 here.
         byte[] keyHandle = [0x01, 0x02, 0x03, 0x04];
@@ -86,10 +90,13 @@ public class PreviewSignCborTests
         // Real ARKG context: ASCII label per python-fido2 vectors.
         byte[] context = "ARKG-P256.test vectors"u8.ToArray();
 
+        byte[] additionalArgs = PreviewSignCbor.EncodeAdditionalArgs(
+            new ArkgP256SignArgs(arkgKeyHandle, context));
+
         var signingParams = new PreviewSignSigningParams(
             keyHandle: keyHandle,
             tbs: tbs,
-            coseSignArgs: new ArkgP256SignArgs(arkgKeyHandle, context));
+            additionalArgs: additionalArgs);
 
         // Act
         byte[] cborBytes = PreviewSignCbor.EncodeAuthenticationInput(signingParams);
@@ -107,15 +114,12 @@ public class PreviewSignCborTests
         Assert.Equal(6, reader.ReadInt32());
         Assert.Equal(tbs, reader.ReadByteString());
 
-        // Key 7: typed COSE_Sign_Args (byte-wrapped CBOR)
+        // Key 7: algorithm-specific additionalArgs (byte-wrapped CBOR)
         Assert.Equal(7, reader.ReadInt32());
         byte[] decodedArgs = reader.ReadByteString();
 
-        // The decoded inner bytes must equal what EncodeCoseSignArgs would produce
-        // independently — proves the integration point and that no extra wrapping occurs.
-        byte[] expectedArgs = PreviewSignCbor.EncodeCoseSignArgs(
-            new ArkgP256SignArgs(arkgKeyHandle, context));
-        Assert.Equal(expectedArgs, decodedArgs);
+        // The decoded inner bytes must equal the caller-provided raw additionalArgs exactly.
+        Assert.Equal(additionalArgs, decodedArgs);
 
         reader.ReadEndMap();
     }
@@ -149,6 +153,18 @@ public class PreviewSignCborTests
         // (PRD §4 said 125 — arithmetic error in PRD; corrected here. The byte-for-byte
         // structural assertion above is the binding contract.)
         Assert.Equal(126, actual.Length);
+    }
+
+    [Fact]
+    public void EncodeAdditionalArgs_ArkgP256_MatchesCoseSignArgsBridge()
+    {
+        byte[] kh = BuildArkgKeyHandleFixture(tagPattern: 0x33, pubKeyPattern: 0x44);
+        byte[] ctx = "ARKG-P256.test vectors"u8.ToArray();
+        var args = new ArkgP256SignArgs(kh, ctx);
+
+        byte[] additionalArgs = PreviewSignCbor.EncodeAdditionalArgs(args);
+
+        Assert.Equal(PreviewSignCbor.EncodeCoseSignArgs(args), additionalArgs);
     }
 
     [Fact]
@@ -199,7 +215,7 @@ public class PreviewSignCborTests
         var signingParams = new PreviewSignSigningParams(
             keyHandle: keyHandle,
             tbs: tbs,
-            coseSignArgs: null);
+            additionalArgs: null);
 
         // Act
         byte[] cborBytes = PreviewSignCbor.EncodeAuthenticationInput(signingParams);

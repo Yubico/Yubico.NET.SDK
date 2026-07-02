@@ -20,12 +20,18 @@ namespace Yubico.YubiKit.Fido2.Arkg;
 /// Provides ARKG-P256 (Asynchronous Remote Key Generation for P-256) operations.
 /// </summary>
 /// <remarks>
+/// <para>
+/// <b>WARNING -- EXPERIMENTAL --</b> ARKG previewSign primitives are not ready for production use
+/// and must not be treated as production cryptographic guidance.
+/// </para>
+/// <para>
 /// Thin wrapper that routes to the OpenSSL-backed
 /// <see cref="IArkgPrimitives"/> (via <see cref="CryptographyProviders.ArkgPrimitivesCreator"/>).
 /// The full algorithm body lives in <c>Yubico.YubiKit.Core.Cryptography.ArkgPrimitivesOpenSsl.Derive</c>
 /// because it needs Core's internal OpenSSL P/Invoke surface.
 /// Conforms to draft-bradleylundberg-cfrg-arkg-10; reference implementation in
 /// cnh-authenticator-rs-extension/native/crates/hid-test/src/arkg.rs.
+/// </para>
 /// </remarks>
 internal static class ArkgP256
 {

@@ -156,10 +156,10 @@ The SDK uses the **ExtensionBuilder** fluent pattern for all WebAuthn/CTAP exten
 | credBlob | `.WithCredBlob()` | Per-credential blob storage | 5.5+ |
 | largeBlob | `.WithLargeBlobKey()` | Large blob storage key | 5.5+ |
 | minPinLength | `.WithMinPinLength()` | Require minimum PIN length | 5.4+ |
-| previewSign | `.WithPreviewSign(...)` | Delegated signing of arbitrary bytes (CTAP v4) | YubiKey FW with previewSign support |
+| previewSign | `.WithPreviewSign(...)` | Delegated signing with a generated signing key | YubiKey FW with previewSign support |
 | prf | `.WithPrf()` | WebAuthn PRF extension (wraps hmac-secret) | 5.2+ |
 
-> **Note:** The `previewSign` extension is a first-class Fido2 extension via `WithPreviewSign(PreviewSignRegistrationInput)` and `WithPreviewSign(PreviewSignAuthenticationInput)`. WebAuthn provides a high-level adapter (`Yubico.YubiKit.WebAuthn.Extensions.PreviewSign`) for Client API consumers; both layers share the canonical encoder in Fido2.
+> **Note:** The `previewSign` extension is a first-class Fido2 extension via `WithPreviewSign(PreviewSignRegistrationInput)` and `WithPreviewSign(PreviewSignAuthenticationInput)`. The generic signing API is algorithm-agile: `tbs` and optional `additionalArgs` are algorithm-specific bytes and are encoded unchanged. **WARNING -- EXPERIMENTAL --** Public ARKG helpers remain available as experimental conveniences; they are not ready for production use and must not be treated as production cryptographic guidance. Convert them to raw `additionalArgs` with `PreviewSignCbor.EncodeAdditionalArgs(...)`. WebAuthn provides a high-level adapter (`Yubico.YubiKit.WebAuthn.Extensions.PreviewSign`) for Client API consumers; both layers share the canonical encoder in Fido2.
 
 #### Example Usage
 

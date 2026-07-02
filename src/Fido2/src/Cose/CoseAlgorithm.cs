@@ -51,13 +51,19 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     public static readonly CoseAlgorithm Rs256 = new(-257);
 
     /// <summary>
-    /// ESP256 split-key ARKG placeholder (CTAP v4 draft previewSign extension).
+    /// ESP256 split-key ARKG placeholder for the previewSign extension.
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// <b>WARNING -- EXPERIMENTAL --</b> ARKG previewSign identifiers are not ready for production use and must
+    /// not be treated as production cryptographic guidance.
+    /// </para>
+    /// <para>
     /// This is the wire-level COSE algorithm identifier for the ARKG-P256-ESP256 signing operation,
     /// written under key 3 of a <c>COSE_Sign_Args</c> map (previewSign authentication request).
     /// Do NOT confuse with the seed-key COSE-key alg identifier <c>-65700</c>
     /// (<c>ARKG_P256_PLACEHOLDER.ALGORITHM</c> in python-fido2) which lives at a different protocol layer.
+    /// </para>
     /// </remarks>
     public static readonly CoseAlgorithm Esp256SplitArkgPlaceholder = new(-65539);
 
@@ -66,6 +72,10 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     /// <see cref="Esp256SplitArkgPlaceholder"/>; value <c>-65539</c>).
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// <b>WARNING -- EXPERIMENTAL --</b> ARKG previewSign helpers and identifiers are not ready for production use
+    /// and must not be treated as production cryptographic guidance.
+    /// </para>
     /// <para>
     /// Stable, intent-revealing alias for the ARKG-P256 signing-operation alg ID. Use this on
     /// <c>ArkgP256SignArgs.Algorithm</c> and any caller-facing API that names the request alg.
@@ -84,6 +94,10 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     /// ARKG-P256 seed-key COSE algorithm identifier (value <c>-65700</c>).
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// <b>WARNING -- EXPERIMENTAL --</b> ARKG previewSign seed-key handling is not ready for production use and
+    /// must not be treated as production cryptographic guidance.
+    /// </para>
     /// <para>
     /// This is the seed-key COSE-key <c>alg</c> parameter (key 3) identifying an ARKG-P256
     /// placeholder key structure, per python-fido2's <c>ARKG_P256_PLACEHOLDER.ALGORITHM</c>.

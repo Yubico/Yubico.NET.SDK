@@ -26,8 +26,8 @@
  *   benchmark      - Run performance benchmarks (manual, not CI)
  *   docs-qa        - Validate active documentation hygiene
  *   docs-list-active - Print the exact active documentation set used by docs-qa
- *   docs-inventory - Generate report-only active documentation inventory
- *   docs-architecture - Validate architecture diagram evidence map + image freshness
+ *   docs-inventory - Generate report-only active documentation inventory (requires Bash)
+ *   docs-architecture - Validate architecture diagram evidence map + image freshness (requires Bash)
  *   coverage       - Run tests with code coverage
  *   pack           - Create NuGet packages
  *   setup-feed     - Configure local NuGet feed

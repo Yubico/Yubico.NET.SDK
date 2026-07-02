@@ -5,6 +5,7 @@ This project uses a .NET 10 C# script for build automation with Bullseye task ru
 ## Prerequisites
 
 - .NET 10 SDK
+- Bash for `docs-inventory` and `docs-architecture` (macOS/Linux, Git Bash, or WSL)
 
 ## Usage
 

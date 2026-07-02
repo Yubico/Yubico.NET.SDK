@@ -2,7 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Yubico.YubiKit.Cli.Shared.Device;
-using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Cli.Commands.Infrastructure;
@@ -34,6 +35,12 @@ public sealed class YkDeviceContext
     ///     <c>null</c> if the ManagementSession could not be opened (e.g., SmartCard unavailable).
     /// </summary>
     public DeviceInfo? Info { get; init; }
+
+    /// <summary>
+    ///     The concrete transport requested by the global <c>--transport</c> option, or <see langword="null" />
+    ///     to use each applet's default transport order.
+    /// </summary>
+    public ConnectionType? PreferredConnection { get; init; }
 
     /// <summary>
     ///     Returns a human-readable device banner line, preferring the part number from

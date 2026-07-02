@@ -14,6 +14,11 @@
 
 using System.Security.Cryptography;
 using System.Text;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.Oath.UnitTests;
 
@@ -163,4 +168,150 @@ public class OathSessionTests
 
         Assert.NotEqual(key1, key2);
     }
+
+    [Fact]
+    public async Task ListCredentialsAsync_ChainedResponse_UsesOathSendRemainingInstruction()
+    {
+        var credentialId = Encoding.UTF8.GetBytes("issuer:alice");
+        byte[] credentialTlv = [0x72, (byte)(credentialId.Length + 1), (byte)OathType.Totp, .. credentialId];
+        byte[] firstChunk = [.. credentialTlv[..4], 0x61, 0x01];
+        byte[] finalChunk = [.. credentialTlv[4..], 0x90, 0x00];
+        var connection = new RecordingSmartCardConnection(SelectResponse(), firstChunk, finalChunk);
+
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var credentials = await session.ListCredentialsAsync(TestContext.Current.CancellationToken);
+
+        Assert.Single(credentials);
+        Assert.Equal("alice", credentials[0].Name);
+        Assert.Equal("issuer", credentials[0].Issuer);
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == OathConstants.InsSendRemaining);
+        Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0xC0);
+    }
+
+    [Fact]
+    public async Task CalculateAllAsync_ChainedResponse_UsesOathSendRemainingInstruction()
+    {
+        var credentialId = Encoding.UTF8.GetBytes("issuer:bob");
+        byte[] responseTlvs = [
+            0x71, (byte)credentialId.Length, ..credentialId,
+            0x76, 0x05, 0x06, 0x00, 0x00, 0x00, 0x01
+        ];
+        byte[] firstChunk = [.. responseTlvs[..5], 0x61, 0x01];
+        byte[] finalChunk = [.. responseTlvs[5..], 0x90, 0x00];
+        var connection = new RecordingSmartCardConnection(SelectResponse(), firstChunk, finalChunk);
+
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var codes = await session.CalculateAllAsync(1704067200, TestContext.Current.CancellationToken);
+
+        var entry = Assert.Single(codes);
+        Assert.Equal("bob", entry.Key.Name);
+        Assert.Equal("issuer", entry.Key.Issuer);
+        Assert.NotNull(entry.Value);
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == OathConstants.InsSendRemaining);
+        Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0xC0);
+    }
+
+    [Fact]
+    public async Task PutCredentialAsync_Totp_SendsOrderedPutPayload()
+    {
+        byte[] secret = [
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
+            0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34
+        ];
+        var expectedSecret = secret.ToArray();
+        var connection = new RecordingSmartCardConnection(SelectResponse(), [0x90, 0x00]);
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        using var credential = new CredentialData
+        {
+            Name = "alice",
+            Issuer = "issuer",
+            OathType = OathType.Totp,
+            HashAlgorithm = OathHashAlgorithm.Sha1,
+            Secret = secret,
+            Digits = 6
+        };
+
+        await session.PutCredentialAsync(credential, cancellationToken: TestContext.Current.CancellationToken);
+
+        var putCommand = Assert.Single(connection.TransmittedCommands, command => command[1] == OathConstants.InsPut);
+        byte[] expectedId = Encoding.UTF8.GetBytes("issuer:alice");
+        byte[] expectedData = [
+            OathConstants.TagName, (byte)expectedId.Length, .. expectedId,
+            OathConstants.TagKey, (byte)(2 + expectedSecret.Length),
+            (byte)((byte)OathType.Totp | (byte)OathHashAlgorithm.Sha1), 0x06, .. expectedSecret
+        ];
+
+        Assert.Equal(0x00, putCommand[0]);
+        Assert.Equal(OathConstants.InsPut, putCommand[1]);
+        Assert.Equal(0x00, putCommand[2]);
+        Assert.Equal(0x00, putCommand[3]);
+        Assert.Equal(expectedData.Length, putCommand[4]);
+        Assert.Equal(expectedData, putCommand[5..^1]);
+        Assert.Equal(0x00, putCommand[^1]);
+    }
+
+    [Fact]
+    public async Task PutCredentialAsync_HotpWithTouchAndCounter_SendsPropertyAndImfPayload()
+    {
+        byte[] secret = [
+            0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
+            0x48, 0x49, 0x50, 0x51, 0x52, 0x53, 0x54
+        ];
+        var expectedSecret = secret.ToArray();
+        var connection = new RecordingSmartCardConnection(SelectResponse(), [0x90, 0x00]);
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        using var credential = new CredentialData
+        {
+            Name = "bob",
+            Issuer = "issuer",
+            OathType = OathType.Hotp,
+            HashAlgorithm = OathHashAlgorithm.Sha1,
+            Secret = secret,
+            Digits = 8,
+            Counter = 7
+        };
+
+        await session.PutCredentialAsync(
+            credential,
+            requireTouch: true,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var putCommand = Assert.Single(connection.TransmittedCommands, command => command[1] == OathConstants.InsPut);
+        byte[] expectedId = Encoding.UTF8.GetBytes("issuer:bob");
+        byte[] expectedData = [
+            OathConstants.TagName, (byte)expectedId.Length, .. expectedId,
+            OathConstants.TagKey, (byte)(2 + expectedSecret.Length),
+            (byte)((byte)OathType.Hotp | (byte)OathHashAlgorithm.Sha1), 0x08, .. expectedSecret,
+            OathConstants.TagProperty, OathConstants.PropRequireTouch,
+            OathConstants.TagImf, 0x04, 0x00, 0x00, 0x00, 0x07
+        ];
+
+        Assert.Equal(0x00, putCommand[0]);
+        Assert.Equal(OathConstants.InsPut, putCommand[1]);
+        Assert.Equal(0x00, putCommand[2]);
+        Assert.Equal(0x00, putCommand[3]);
+        Assert.Equal(expectedData.Length, putCommand[4]);
+        Assert.Equal(expectedData, putCommand[5..^1]);
+        Assert.Equal(0x00, putCommand[^1]);
+    }
+
+    private static byte[] SelectResponse() =>
+    [
+        0x79, 0x03, 0x05, 0x07, 0x00,
+        0x71, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x90, 0x00
+    ];
+
 }

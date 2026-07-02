@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Core.Utils;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.YubiHsm;
 
@@ -300,11 +303,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 nameof(keyMac));
 
         byte[]? credPwBytes = null;
+        Memory<byte> data = default;
         try
         {
             credPwBytes = ParseCredentialPassword(credentialPassword);
 
-            var data = TlvHelper.EncodeAndDisposeList(
+            data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagAlgorithm, [(byte)HsmAuthAlgorithm.Aes128YubicoAuthentication]),
@@ -321,6 +325,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             if (credPwBytes is not null)
                 CryptographicOperations.ZeroMemory(credPwBytes);
+            if (!data.IsEmpty)
+                CryptographicOperations.ZeroMemory(data.Span);
         }
     }
 
@@ -368,13 +374,22 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ValidateManagementKey(managementKey.Span);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        var data = TlvHelper.EncodeAndDisposeList(
-            new Tlv(TagManagementKey, managementKey.Span),
-            new Tlv(TagLabel, labelBytes));
+        Memory<byte> data = default;
+        try
+        {
+            data = TlvHelper.EncodeAndDisposeList(
+                new Tlv(TagManagementKey, managementKey.Span),
+                new Tlv(TagLabel, labelBytes));
 
-        var command = new ApduCommand { Ins = InsDelete, Data = data };
-        await TransmitWithRetryCheckAsync(
-            command, ThrowOnManagementKeyFailure, "DELETE credential", cancellationToken);
+            var command = new ApduCommand { Ins = InsDelete, Data = data };
+            await TransmitWithRetryCheckAsync(
+                command, ThrowOnManagementKeyFailure, "DELETE credential", cancellationToken);
+        }
+        finally
+        {
+            if (!data.IsEmpty)
+                CryptographicOperations.ZeroMemory(data.Span);
+        }
     }
 
     /// <inheritdoc />
@@ -389,6 +404,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var labelBytes = ValidateAndEncodeLabel(label);
 
         byte[]? credPwBytes = null;
+        Memory<byte> data = default;
         try
         {
             credPwBytes = ParseCredentialPassword(credentialPassword);
@@ -404,18 +420,27 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
             tlvs.Add(new Tlv(TagCredentialPassword, credPwBytes));
 
-            var data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
+            data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
 
             var command = new ApduCommand { Ins = InsCalculate, Data = data };
             var response = await TransmitWithRetryCheckAsync(
                 command, ThrowOnCredentialPasswordFailure, "CALCULATE symmetric session keys", cancellationToken);
 
-            return SessionKeys.Parse(response.Data.Span);
+            try
+            {
+                return SessionKeys.Parse(response.Data.Span);
+            }
+            finally
+            {
+                ZeroApduResponse(response);
+            }
         }
         finally
         {
             if (credPwBytes is not null)
                 CryptographicOperations.ZeroMemory(credPwBytes);
+            if (!data.IsEmpty)
+                CryptographicOperations.ZeroMemory(data.Span);
         }
     }
 
@@ -448,13 +473,22 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ValidateManagementKey(currentManagementKey.Span);
         ValidateManagementKey(newManagementKey.Span);
 
-        var data = TlvHelper.EncodeAndDisposeList(
-            new Tlv(TagManagementKey, currentManagementKey.Span),
-            new Tlv(TagManagementKey, newManagementKey.Span));
+        Memory<byte> data = default;
+        try
+        {
+            data = TlvHelper.EncodeAndDisposeList(
+                new Tlv(TagManagementKey, currentManagementKey.Span),
+                new Tlv(TagManagementKey, newManagementKey.Span));
 
-        var command = new ApduCommand { Ins = InsPutManagementKey, Data = data };
-        await TransmitWithRetryCheckAsync(
-            command, ThrowOnManagementKeyFailure, "PUT management key", cancellationToken);
+            var command = new ApduCommand { Ins = InsPutManagementKey, Data = data };
+            await TransmitWithRetryCheckAsync(
+                command, ThrowOnManagementKeyFailure, "PUT management key", cancellationToken);
+        }
+        finally
+        {
+            if (!data.IsEmpty)
+                CryptographicOperations.ZeroMemory(data.Span);
+        }
     }
 
     /// <inheritdoc />
@@ -493,13 +527,14 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var labelBytes = ValidateAndEncodeLabel(label);
 
         byte[]? credPwBytes = null;
+        Memory<byte> data = default;
         try
         {
             credPwBytes = ParseCredentialPassword(credentialPassword);
 
             // APDU payload order matches Python canonical SDK:
             // TAG_LABEL, TAG_CONTEXT, TAG_PUBLIC_KEY, TAG_RESPONSE, TAG_CREDENTIAL_PASSWORD
-            var data = TlvHelper.EncodeAndDisposeList(
+            data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagContext, context.Span),
                 new Tlv(TagPublicKey, publicKey.Span),
@@ -510,12 +545,21 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             var response = await TransmitWithRetryCheckAsync(
                 command, ThrowOnCredentialPasswordFailure, "CALCULATE asymmetric session keys", cancellationToken);
 
-            return SessionKeys.Parse(response.Data.Span);
+            try
+            {
+                return SessionKeys.Parse(response.Data.Span);
+            }
+            finally
+            {
+                ZeroApduResponse(response);
+            }
         }
         finally
         {
             if (credPwBytes is not null)
                 CryptographicOperations.ZeroMemory(credPwBytes);
+            if (!data.IsEmpty)
+                CryptographicOperations.ZeroMemory(data.Span);
         }
     }
 
@@ -530,6 +574,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var labelBytes = ValidateAndEncodeLabel(label);
 
         byte[]? credPwBytes = null;
+        Memory<byte> data = default;
         try
         {
             var tlvs = new List<Tlv> { new(TagLabel, labelBytes) };
@@ -541,14 +586,14 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 credPwBytes = ParseCredentialPassword(credentialPassword);
                 tlvs.Add(new Tlv(TagCredentialPassword, credPwBytes));
             }
-            else if (!IsSupported(FeatureGetChallengeNoPassword) && FirmwareVersion.Major != 0)
+            else if (!IsSupported(FeatureGetChallengeNoPassword) && !FirmwareVersion.IsAlphaOrBeta)
             {
                 throw new ArgumentException(
                     "Credential password is required for firmware versions before 5.7.1.",
                     nameof(credentialPassword));
             }
 
-            var data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
+            data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
 
             var command = new ApduCommand { Ins = InsGetChallenge, Data = data };
             var response = await _protocol!.TransmitAndReceiveAsync(
@@ -561,6 +606,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             if (credPwBytes is not null)
                 CryptographicOperations.ZeroMemory(credPwBytes);
+            if (!data.IsEmpty)
+                CryptographicOperations.ZeroMemory(data.Span);
         }
     }
 
@@ -624,13 +671,14 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var labelBytes = ValidateAndEncodeLabel(label);
 
         byte[]? credPwBytes = null;
+        Memory<byte> data = default;
         try
         {
             credPwBytes = ParseCredentialPassword(credentialPassword);
 
             // TAG_PRIVATE_KEY with empty value signals on-device key generation.
             // Python canonical: _put_credential(management_key, label, b"", EC_P256, credential_password)
-            var data = TlvHelper.EncodeAndDisposeList(
+            data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagAlgorithm, [(byte)HsmAuthAlgorithm.EcP256YubicoAuthentication]),
@@ -646,6 +694,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             if (credPwBytes is not null)
                 CryptographicOperations.ZeroMemory(credPwBytes);
+            if (!data.IsEmpty)
+                CryptographicOperations.ZeroMemory(data.Span);
         }
     }
 
@@ -686,12 +736,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
         byte[]? currentPwBytes = null;
         byte[]? newPwBytes = null;
+        Memory<byte> data = default;
         try
         {
             currentPwBytes = ParseCredentialPassword(currentPassword);
             newPwBytes = ParseCredentialPassword(newPassword);
 
-            var data = TlvHelper.EncodeAndDisposeList(
+            data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagCredentialPassword, currentPwBytes),
                 new Tlv(TagCredentialPassword, newPwBytes));
@@ -706,6 +757,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 CryptographicOperations.ZeroMemory(currentPwBytes);
             if (newPwBytes is not null)
                 CryptographicOperations.ZeroMemory(newPwBytes);
+            if (!data.IsEmpty)
+                CryptographicOperations.ZeroMemory(data.Span);
         }
     }
 
@@ -722,11 +775,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var labelBytes = ValidateAndEncodeLabel(label);
 
         byte[]? newPwBytes = null;
+        Memory<byte> data = default;
         try
         {
             newPwBytes = ParseCredentialPassword(newPassword);
 
-            var data = TlvHelper.EncodeAndDisposeList(
+            data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagCredentialPassword, newPwBytes));
@@ -739,6 +793,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             if (newPwBytes is not null)
                 CryptographicOperations.ZeroMemory(newPwBytes);
+            if (!data.IsEmpty)
+                CryptographicOperations.ZeroMemory(data.Span);
         }
     }
 
@@ -793,6 +849,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             throw new ArgumentException(
                 $"Management key must be exactly {ManagementKeyLength} bytes, got {managementKey.Length}.",
                 nameof(managementKey));
+    }
+
+    internal static void ZeroApduResponse(ApduResponse response)
+    {
+        if (MemoryMarshal.TryGetArray(response.RawData, out var rawData))
+            CryptographicOperations.ZeroMemory(rawData.AsSpan());
     }
 
     /// <summary>

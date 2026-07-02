@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 
@@ -48,7 +48,7 @@ public interface IFidoSession : IApplicationSession
     Task<ReadOnlyMemory<byte>> SendCborRequestAsync(
         ReadOnlyMemory<byte> request,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets authenticator information. Always fetches fresh data from device.
     /// </summary>
@@ -59,7 +59,7 @@ public interface IFidoSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The authenticator information.</returns>
     Task<AuthenticatorInfo> GetInfoAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Requests the user to select this authenticator by touching the device.
     /// </summary>
@@ -69,7 +69,7 @@ public interface IFidoSession : IApplicationSession
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task SelectionAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Resets the FIDO application to factory defaults.
     /// </summary>
@@ -88,7 +88,7 @@ public interface IFidoSession : IApplicationSession
     /// device insertion.
     /// </exception>
     Task ResetAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Creates a new credential on the authenticator.
     /// </summary>
@@ -118,7 +118,7 @@ public interface IFidoSession : IApplicationSession
         IReadOnlyList<PublicKeyCredentialParameters> pubKeyCredParams,
         MakeCredentialOptions? options = null,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets an assertion for authentication.
     /// </summary>
@@ -145,7 +145,7 @@ public interface IFidoSession : IApplicationSession
         ReadOnlyMemory<byte> clientDataHash,
         GetAssertionOptions? options = null,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets the next assertion when multiple credentials match.
     /// </summary>

@@ -56,6 +56,7 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 
 **Security:**
 - ✅ ALWAYS zero sensitive data: `CryptographicOperations.ZeroMemory()`
+- ✅ Classify byte data by semantic meaning, not by direction. YubiKey-returned device metadata/status (device info TLVs, firmware version, capabilities, form factor, public status) does not require special zeroing beyond normal ownership/disposal. YubiKey-returned authentication material, token material, decrypted plaintext, or secret-derived output does.
 - ✅ ALWAYS dispose crypto objects: `using var aes = Aes.Create()`
 - ✅ ALWAYS use `CryptographicOperations.FixedTimeEquals` for secret-derived comparisons
 - ❌ NEVER log PINs, keys, or sensitive payloads
@@ -133,13 +134,15 @@ dotnet toolchain.cs pack --include-docs
 
 ## Architecture
 
+**House style:** `docs/SDK-HOUSE-STYLE.md` is the v2 architectural style guide. Load it before module consolidation, refactoring, or protocol-flow work. It defines flat protocol flow, minimal helper depth, plain `ApduCommand`/DTO usage, and the rule against operation-specific command classes like `AuthenticateCommand`, `PutKeyCommand`, and `GetDataCommand`.
+
 `codemapper .` generates the full surface map. The non-obvious patterns:
 
 - **Device discovery** — `IDeviceRepository` + `DeviceMonitorService` (hosted) + `DeviceListenerService` (background). Events flow as `IObservable<DeviceEvent>` via System.Reactive.
 - **Connection abstraction** — `IConnection` base, `IProtocol` per transport (e.g., `ISmartCardProtocol`). Factories: `ISmartCardConnectionFactory`, `IProtocolFactory<T>`, `IYubiKeyFactory`.
 - **APDU pipeline** — `IApduFormatter` (`Short`/`Extended`) → `IApduProcessor` decorators (`CommandChainingProcessor`, `ChainedResponseProcessor`, `ApduFormatProcessor`). Transparent size-limit + chaining handling.
 - **Application sessions** — `ApplicationSession` base; protocol-specific sessions like `ManagementSession<TConnection>` are generic over connection type.
-- **DI entry point** — `AddYubiKeyManagerCore()` in `src/Core/src/DependencyInjection.cs`.
+- **Device discovery entry point** — static `YubiKeyManager`; Core no longer requires a DI registration.
 
 ### Type Selection: readonly struct vs struct vs class
 
@@ -284,8 +287,8 @@ public sealed class SmartCardConnection : IConnection
     // ... implementation
 }
 
-// ✅ GOOD - Service/manager
-public class YubiKeyManager : IYubiKeyManager
+// ✅ GOOD - Service/manager implementation type
+internal sealed class YubiKeyDeviceManager
 {
     private readonly IDeviceRepository _repository;
     private readonly IYubiKeyFactory _factory;

@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 using Xunit;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Cryptography;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -33,14 +34,14 @@ public class PivAuthenticationTests
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     };
-    
+
     private static readonly byte[] DefaultAesManagementKey = new byte[]
     {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     };
-    
+
     private static readonly byte[] DefaultPin = "123456"u8.ToArray();
 
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
@@ -52,9 +53,9 @@ public class PivAuthenticationTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync(); // Ensure default state
-        
+
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        
+
         Assert.True(session.IsAuthenticated);
     }
 
@@ -64,14 +65,14 @@ public class PivAuthenticationTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         // Use a non-DES-weak wrong key (all-zeros is a DES weak key rejected by .NET)
         var wrongKey = new byte[24];
         Array.Fill<byte>(wrongKey, 0xAB);
-        
+
         await Assert.ThrowsAsync<ApduException>(
             () => session.AuthenticateAsync(wrongKey));
-        
+
         Assert.False(session.IsAuthenticated);
     }
 
@@ -81,9 +82,9 @@ public class PivAuthenticationTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         await session.VerifyPinAsync(DefaultPin);
-        
+
         // Verify PIN attempts still at max after successful verify
         var attempts = await session.GetPinAttemptsAsync();
         Assert.Equal(3, attempts);
@@ -95,12 +96,12 @@ public class PivAuthenticationTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         var wrongPin = "000000"u8.ToArray();
-        
+
         var ex = await Assert.ThrowsAsync<InvalidPinException>(
             () => session.VerifyPinAsync(wrongPin));
-        
+
         Assert.True(ex.RetriesRemaining >= 0);
         Assert.True(ex.RetriesRemaining < 3); // One attempt used
     }
@@ -111,9 +112,9 @@ public class PivAuthenticationTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         var attempts = await session.GetPinAttemptsAsync();
-        
+
         Assert.Equal(3, attempts); // Default after reset
     }
 
@@ -123,17 +124,17 @@ public class PivAuthenticationTests
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
-        
+
         var newPin = "654321"u8.ToArray();
-        
+
         try
         {
             await session.ChangePinAsync(DefaultPin, newPin);
-            
+
             // Verify old PIN no longer works
             await Assert.ThrowsAsync<InvalidPinException>(
                 () => session.VerifyPinAsync(DefaultPin));
-            
+
             // Verify new PIN works
             await session.VerifyPinAsync(newPin);
         }

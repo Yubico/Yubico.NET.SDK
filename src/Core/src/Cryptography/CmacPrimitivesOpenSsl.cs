@@ -15,7 +15,7 @@
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.PlatformInterop;
+using Yubico.YubiKit.Core.Native;
 
 namespace Yubico.YubiKit.Core.Cryptography;
 

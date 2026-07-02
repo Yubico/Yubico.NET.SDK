@@ -20,9 +20,9 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" />
     <!-- This library uses xunit v2 extensibility APIs (DataAttribute, etc.) -->
     <!-- xunit v3 has a different extensibility model - keeping v2 for now as a library dependency -->
-    <PackageReference Include="xunit.core" />
-    <PackageReference Include="xunit.abstractions" />
-    <PackageReference Include="Xunit.SkippableFact" />
+    <PackageReference Include="xunit.core" PrivateAssets="all" />
+    <PackageReference Include="xunit.abstractions" PrivateAssets="all" />
+    <PackageReference Include="Xunit.SkippableFact" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

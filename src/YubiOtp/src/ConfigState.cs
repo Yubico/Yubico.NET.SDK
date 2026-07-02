@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.YubiOtp;
 
@@ -87,8 +87,7 @@ public readonly struct ConfigState
     /// <exception cref="InvalidOperationException">Thrown when firmware is too old to report this information.</exception>
     public bool IsConfigured(Slot slot)
     {
-        // Major == 0 is a sentinel for alpha/beta firmware reporting a placeholder version.
-        if (FirmwareVersion.Major != 0 && FirmwareVersion < MinVersionConfigured)
+        if (!FirmwareVersion.IsAlphaOrBeta && FirmwareVersion < MinVersionConfigured)
         {
             throw new InvalidOperationException(
                 $"Slot configuration state requires firmware {MinVersionConfigured} or later.");
@@ -111,7 +110,7 @@ public readonly struct ConfigState
     /// <exception cref="InvalidOperationException">Thrown when firmware is too old to report this information.</exception>
     public bool IsTouchTriggered(Slot slot)
     {
-        if (FirmwareVersion.Major != 0 && FirmwareVersion < MinVersionTouchTriggered)
+        if (!FirmwareVersion.IsAlphaOrBeta && FirmwareVersion < MinVersionTouchTriggered)
         {
             throw new InvalidOperationException(
                 $"Touch trigger state requires firmware {MinVersionTouchTriggered} or later.");

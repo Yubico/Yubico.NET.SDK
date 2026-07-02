@@ -28,37 +28,37 @@ internal static class BioEnrollmentSubCommand
     /// Get fingerprint sensor info (0x01).
     /// </summary>
     public const byte GetFingerprintSensorInfo = 0x01;
-    
+
     /// <summary>
     /// Begin fingerprint enrollment (0x02).
     /// </summary>
     public const byte EnrollBegin = 0x02;
-    
+
     /// <summary>
     /// Continue fingerprint enrollment (0x03).
     /// </summary>
     public const byte EnrollCaptureNextSample = 0x03;
-    
+
     /// <summary>
     /// Cancel fingerprint enrollment (0x04).
     /// </summary>
     public const byte EnrollCancel = 0x04;
-    
+
     /// <summary>
     /// Begin enumeration of enrolled templates (0x05).
     /// </summary>
     public const byte EnumerateEnrollments = 0x05;
-    
+
     /// <summary>
     /// Set friendly name for enrolled template (0x06).
     /// </summary>
     public const byte SetFriendlyName = 0x06;
-    
+
     /// <summary>
     /// Remove enrolled template (0x07).
     /// </summary>
     public const byte RemoveEnrollment = 0x07;
-    
+
     /// <summary>
     /// Get template info - returns sample count for existing template (0x08).
     /// </summary>

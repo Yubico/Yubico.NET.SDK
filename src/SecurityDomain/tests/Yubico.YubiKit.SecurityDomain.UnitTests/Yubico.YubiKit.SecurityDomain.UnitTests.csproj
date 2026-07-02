@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKit.SecurityDomain.csproj"/>
+    <ProjectReference Include="..\..\..\Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj"/>
   </ItemGroup>
 
 </Project>

@@ -15,7 +15,8 @@
 using NSubstitute;
 using Xunit;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Piv.UnitTests;
 
@@ -26,7 +27,7 @@ public class TouchNotificationTests
     {
         // Verify the delegate signature has no parameters (security requirement)
         var method = typeof(TouchNotificationCallback).GetMethod("Invoke");
-        
+
         Assert.NotNull(method);
         Assert.Empty(method.GetParameters());
         Assert.Equal(typeof(void), method.ReturnType);
@@ -38,7 +39,7 @@ public class TouchNotificationTests
         // Arrange
         var mockConnection = Substitute.For<ISmartCardConnection>();
         mockConnection.Transport.Returns(Transport.Usb);
-        
+
         var session = new PivSession(mockConnection, null);
 
         // Act & Assert: Default is null
@@ -47,9 +48,9 @@ public class TouchNotificationTests
         // Can set callback
         bool callbackInvoked = false;
         session.OnTouchRequired = () => callbackInvoked = true;
-        
+
         Assert.NotNull(session.OnTouchRequired);
-        
+
         // Can invoke
         session.OnTouchRequired();
         Assert.True(callbackInvoked);
@@ -65,9 +66,9 @@ public class TouchNotificationTests
         // Arrange: Session with old firmware (0.0.0 < 5.3)
         var mockConnection = Substitute.For<ISmartCardConnection>();
         mockConnection.Transport.Returns(Transport.Usb);
-        
+
         var session = new PivSession(mockConnection, null);
-        
+
         int callbackCount = 0;
         session.OnTouchRequired = () => callbackCount++;
 

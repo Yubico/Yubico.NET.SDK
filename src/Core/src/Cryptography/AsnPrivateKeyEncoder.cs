@@ -14,7 +14,7 @@
 
 using System.Formats.Asn1;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Utils;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Cryptography;
 
@@ -123,10 +123,10 @@ internal static class AsnPrivateKeyEncoder
         {
             throw new ArgumentException("Private key parameter D must be provided.");
         }
-        
-        if(parameters.Curve.Oid.Value is null)
+
+        if (parameters.Curve.Oid.Value is null)
             throw new ArgumentException("Curve OID is null.");
-        
+
         ReadOnlyMemory<byte> privateKey = parameters.D;
 
         // Create public point if Q coordinates are available
@@ -142,7 +142,7 @@ internal static class AsnPrivateKeyEncoder
             yCoordinate.CopyTo(uncompressedPoint[(1 + xCoordinate.Length)..]);
             publicPoint = uncompressedPoint;
         }
-        
+
         var curveOid = parameters.Curve.Oid.Value;
         return EncodeECKey(privateKey, curveOid, publicPoint);
     }
@@ -238,7 +238,7 @@ internal static class AsnPrivateKeyEncoder
         // PrivateKey as OCTET STRING
         var privateKeyWriter = new AsnWriter(AsnEncodingRules.DER);
         privateKeyWriter.WriteOctetString(privateKey);
-        
+
         using var privateKeyBytesHandle = new DisposableBufferHandle(privateKeyWriter.Encode());
         writer.WriteOctetString(privateKeyBytesHandle.Data.Span);
 

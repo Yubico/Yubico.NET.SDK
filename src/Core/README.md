@@ -12,6 +12,7 @@ Yubico.YubiKit.Core is the foundation that all other SDK modules build upon. It 
 - 📡 **Protocol Handling** - ISO 7816-4 APDU processing with automatic command chaining
 - 🔐 **Secure Channel Protocol (SCP)** - SCP03, SCP11a/b/c support for secure communication
 - 🖥️ **Platform Interop** - Cross-platform native library loading and device enumeration
+- 🧾 **Device Metadata Models** - Read-only `DeviceInfo`, capability, form-factor, flag, and version qualifier types
 - 🛠️ **Utilities** - TLV processing, cryptographic key types, COSE encoding
 
 ## Installation
@@ -26,58 +27,62 @@ This package is automatically included when you install any application-specific
 
 ### Device Discovery
 
+An `IYubiKey` represents **one physical YubiKey** (which may expose several interfaces — CCID, HID FIDO,
+HID OTP — at once), not a single transport handle. See [Physical Device Model](../../docs/architecture/physical-device-model.md).
+HID interface enumeration is implemented on macOS and Linux; on Windows, HID discovery is not yet
+implemented, so a YubiKey currently surfaces only its PC/SC (CCID) interface there.
+
 ```csharp
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 
-// Create device repository
-var deviceRepository = new DeviceRepository();
-
-// Get currently connected devices
-var devices = await deviceRepository.GetDevicesAsync();
+// One IYubiKey per physical device, even when several interfaces are present.
+var devices = await YubiKeyManager.FindAllAsync();
 
 foreach (var device in devices)
 {
-    Console.WriteLine($"Found YubiKey: {device.SerialNumber}");
-    Console.WriteLine($"  Transport: {device.AvailableTransports}");
+    Console.WriteLine($"{device.DeviceId}: {device.AvailableConnections}");
 }
 
-// Monitor for device arrival/removal
-deviceRepository.DeviceArrived += (sender, e) =>
-{
-    Console.WriteLine($"YubiKey connected: {e.Device.SerialNumber}");
-};
+// Force a rescan when device topology may have changed
+var freshDevices = await YubiKeyManager.FindAllAsync(forceRescan: true);
 
-deviceRepository.DeviceRemoved += (sender, e) =>
-{
-    Console.WriteLine($"YubiKey disconnected: {e.Device.SerialNumber}");
-};
-
-await deviceRepository.StartMonitoringAsync();
+// Filter discovery. ConnectionType.Hid includes HID FIDO and HID OTP interfaces.
+var hidDevices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
+var fidoDevices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
 ```
 
 ### Opening a Connection
 
+Open a specific interface with the typed overload. The parameterless `ConnectAsync()` is only for
+single-interface devices; on a composite device it throws rather than guessing a transport. Applet session
+extensions (e.g. `CreateManagementSessionAsync`) select a transport via a documented default order plus an
+optional `preferredConnection` override — see [Physical Device Model](../../docs/architecture/physical-device-model.md).
+
 ```csharp
-using Yubico.YubiKit.Core.Connections;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 // Open SmartCard connection
-using var smartCardConnection = await device.OpenConnectionAsync<ISmartCardConnection>();
+await using var smartCardConnection = await device.ConnectAsync<ISmartCardConnection>();
 
 // Open HID FIDO connection
-using var fidoConnection = await device.OpenConnectionAsync<IFidoConnection>();
+await using var fidoConnection = await device.ConnectAsync<IFidoHidConnection>();
 
-// Open HID OTP connection  
-using var otpConnection = await device.OpenConnectionAsync<IOtpConnection>();
+// Open HID OTP connection
+await using var otpConnection = await device.ConnectAsync<IOtpHidConnection>();
 ```
 
 ### Protocol Communication
 
 ```csharp
-using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 // Create protocol from connection
-var protocol = PcscProtocolFactory.Create(smartCardConnection);
+var protocol = PcscProtocolFactory<ISmartCardConnection>.Create().Create(smartCardConnection);
 
 // Select an application (e.g., PIV)
 await protocol.SelectAsync(ApplicationIds.Piv, cancellationToken);
@@ -101,7 +106,8 @@ var responseData = await protocol.TransmitAndReceiveAsync(command, cancellationT
 ### Secure Channel Protocol (SCP)
 
 ```csharp
-using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 
 // Establish SCP03 session
 var staticKeys = new StaticKeys(
@@ -124,7 +130,7 @@ staticKeys.Dispose();
 ### TLV Processing
 
 ```csharp
-using Yubico.YubiKit.Core.Tlv;
+using Yubico.YubiKit.Core.Utilities;
 
 // Parse TLV data
 var tlvs = TlvHelper.ParseMany(responseData);
@@ -149,13 +155,17 @@ using (var nested = nestedBuilder.AddNested(0x7F49))  // Public key template
 
 ### Connection Abstraction
 
+A physical `IYubiKey` exposes one or more concrete interfaces; a typed `ConnectAsync<TConnection>()` routes
+to the requested interface.
+
 ```
-IYubiKeyDevice
-    ↓
+IYubiKey (one physical device)
+    │  AvailableConnections / SupportsConnection(...)
+    ↓  ConnectAsync<TConnection>()
 IConnection
     ├── ISmartCardConnection (PC/SC)
-    ├── IFidoConnection (HID FIDO)
-    └── IOtpConnection (HID OTP)
+    ├── IFidoHidConnection (HID FIDO)
+    └── IOtpHidConnection (HID OTP)
 ```
 
 ### APDU Processing Pipeline
@@ -187,11 +197,11 @@ Platform detection is automatic via `SdkPlatformInfo.OperatingSystem`.
 
 | Class | Purpose |
 |-------|---------|
-| `DeviceRepository` | Central registry for device discovery and monitoring |
-| `IYubiKeyDevice` | Represents a physical or virtual YubiKey device |
+| `YubiKeyManager` | Static entry point for YubiKey discovery and cache management |
+| `IYubiKey` | Represents a physical or virtual YubiKey device |
 | `ISmartCardConnection` | SmartCard (PC/SC) transport connection |
-| `IFidoConnection` | HID FIDO transport connection |
-| `IOtpConnection` | HID OTP transport connection |
+| `IFidoHidConnection` | HID FIDO transport connection |
+| `IOtpHidConnection` | HID OTP transport connection |
 | `PcscProtocol` | ISO 7816-4 APDU protocol implementation |
 | `ApduCommand` / `ApduResponse` | APDU command/response representations |
 | `ScpProtocol` | Secure Channel Protocol wrapper (SCP03, SCP11) |
@@ -213,11 +223,13 @@ YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
 });
 ```
 
-With dependency injection:
+With dependency injection, configure YubiKit logging from the DI-provided logger factory during startup:
 
 ```csharp
 services.AddLogging(builder => builder.AddConsole());
-services.AddYubiKey();  // Automatically configures YubiKitLogging
+
+using var provider = services.BuildServiceProvider();
+YubiKitLogging.Configure(provider.GetRequiredService<ILoggerFactory>());
 ```
 
 ## Firmware Version Considerations
@@ -251,11 +263,15 @@ if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_7_2))
 
 ## Related Modules
 
-- **[Yubico.YubiKit.Management](../Yubico.YubiKit.Management/)** - Device information and capability queries
-- **[Yubico.YubiKit.Piv](../Yubico.YubiKit.Piv/)** - PIV smart card operations
-- **[Yubico.YubiKit.Fido2](../Yubico.YubiKit.Fido2/)** - FIDO2/WebAuthn authentication
-- **[Yubico.YubiKit.SecurityDomain](../Yubico.YubiKit.SecurityDomain/)** - SCP key management
+- **[Yubico.YubiKit.Management](../Management/)** - Device information and capability queries
+- **[Yubico.YubiKit.Piv](../Piv/)** - PIV smart card operations
+- **[Yubico.YubiKit.Fido2](../Fido2/)** - FIDO2/WebAuthn authentication
+- **[Yubico.YubiKit.SecurityDomain](../SecurityDomain/)** - SCP key management
 
 ## Developer Documentation
 
 For in-depth patterns, test infrastructure, and implementation details, see [CLAUDE.md](CLAUDE.md).
+
+For the physical-device model (one `IYubiKey` per physical key, metadata ownership, applet transport
+selection, and migration from per-interface handles), see
+[Physical Device Model](../../docs/architecture/physical-device-model.md).

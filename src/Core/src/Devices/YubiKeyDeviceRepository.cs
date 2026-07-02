@@ -1,0 +1,182 @@
+// Copyright 2025 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using Yubico.YubiKit.Core.Abstractions;
+
+namespace Yubico.YubiKit.Core.Devices;
+
+/// <summary>
+/// Pure cache repository for YubiKey devices with diff-based change detection.
+/// </summary>
+/// <remarks>
+/// This class maintains a thread-safe cache of discovered devices and emits
+/// <see cref="DeviceEvent"/>s when the cache is updated via <see cref="UpdateCache"/>.
+/// It has no discovery capability - that responsibility belongs to the monitor service.
+/// </remarks>
+internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
+{
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyDeviceRepository>();
+
+    private readonly ConcurrentDictionary<string, IYubiKey> _deviceCache = new();
+    private readonly Subject<DeviceEvent> _deviceChanges = new();
+
+    private volatile bool _hasData;
+    private int _disposed;
+
+    /// <inheritdoc/>
+    public IObservable<DeviceEvent> DeviceChanges => _deviceChanges.AsObservable();
+
+    /// <inheritdoc/>
+    public bool HasData => _hasData;
+
+    /// <inheritdoc/>
+    public IReadOnlyList<IYubiKey> GetAll(ConnectionType type = ConnectionType.All)
+    {
+        ThrowIfDisposed();
+
+        return [.. _deviceCache.Values.Where(d => type.Matches(d.AvailableConnections))];
+    }
+
+    /// <inheritdoc/>
+    public void UpdateCache(IEnumerable<IYubiKey> devices)
+    {
+        ThrowIfDisposed();
+
+        var currentIds = _deviceCache.Keys.ToHashSet();
+        var newDeviceMap = new Dictionary<string, IYubiKey>();
+
+        foreach (var device in devices)
+        {
+            newDeviceMap[device.DeviceId] = device;
+        }
+
+        var newIds = newDeviceMap.Keys.ToHashSet();
+        var addedIds = newIds.Except(currentIds).ToList();
+        var removedIds = currentIds.Except(newIds).ToList();
+
+        // Handle removed devices first (include the removed device object in event)
+        foreach (var deviceId in removedIds)
+        {
+            if (_deviceCache.TryRemove(deviceId, out var removedDevice))
+            {
+                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, removedDevice));
+                Logger.LogDebug("Device removed: {DeviceId}", deviceId);
+            }
+        }
+
+        // Handle added devices
+        foreach (var deviceId in addedIds)
+        {
+            var device = newDeviceMap[deviceId];
+            _deviceCache[deviceId] = device;
+            _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, device));
+            Logger.LogDebug("Device added: {DeviceId}", deviceId);
+        }
+
+        // Update existing devices in cache. The DeviceId is stable physical identity, but a physical
+        // device's available connections can change while it stays present (an interface appears or
+        // disappears). DeviceAction has only Added/Removed, so model a capability change as Removed+Added
+        // rather than overwriting silently (ISC-17).
+        var changedCount = 0;
+        foreach (var deviceId in newIds.Intersect(currentIds))
+        {
+            var updated = newDeviceMap[deviceId];
+            if (_deviceCache.TryGetValue(deviceId, out var existing) &&
+                HasPhysicalIdentityChanged(existing, updated))
+            {
+                _deviceCache[deviceId] = updated;
+                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, existing));
+                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, updated));
+                changedCount++;
+                Logger.LogDebug(
+                    "Device connections changed: {DeviceId} ({Old} -> {New})",
+                    deviceId,
+                    existing.AvailableConnections,
+                    updated.AvailableConnections);
+            }
+            else
+            {
+                _deviceCache[deviceId] = updated;
+            }
+        }
+
+        _hasData = true;
+
+        Logger.LogDebug(
+            "Cache updated: {Total} devices, {Added} added, {Removed} removed, {Changed} connection-changed",
+            newDeviceMap.Count,
+            addedIds.Count,
+            removedIds.Count,
+            changedCount);
+    }
+
+    /// <inheritdoc/>
+    public void Clear()
+    {
+        ThrowIfDisposed();
+
+        _deviceCache.Clear();
+        _hasData = false;
+
+        Logger.LogDebug("Cache cleared");
+    }
+
+    private static bool HasPhysicalIdentityChanged(IYubiKey existing, IYubiKey updated)
+    {
+        if (existing.AvailableConnections != updated.AvailableConnections)
+            return true;
+
+        if (existing is CompositeYubiKey existingComposite && updated is CompositeYubiKey updatedComposite)
+            return !existingComposite.MemberDeviceIds.SequenceEqual(updatedComposite.MemberDeviceIds);
+
+        return false;
+    }
+
+    private void ThrowIfDisposed()
+    {
+        if (_disposed == 1)
+        {
+            throw new ObjectDisposedException(nameof(YubiKeyDeviceRepository));
+        }
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) == 1)
+        {
+            return;
+        }
+
+        try
+        {
+            _deviceChanges.OnCompleted();
+            _deviceChanges.Dispose();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Already disposed, ignore
+        }
+
+        _deviceCache.Clear();
+
+        Logger.LogDebug("YubiKeyDeviceRepository disposed");
+
+        GC.SuppressFinalize(this);
+    }
+}

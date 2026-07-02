@@ -49,7 +49,7 @@ public sealed class AllowList
         ArgumentNullException.ThrowIfNull(provider);
 
         var serialList = provider.GetList();
-        _allowedSerials = [..serialList];
+        _allowedSerials = [.. serialList];
         AllowUnknownSerials = provider.AllowUnknownSerials;
 
         if (_allowedSerials.Count == 0 && !AllowUnknownSerials)

@@ -13,13 +13,13 @@ This directory contains unit and integration tests for the Security Domain modul
 
 ```bash
 # Unit tests only (no hardware)
-dotnet test Yubico.YubiKit.SecurityDomain.UnitTests
+dotnet toolchain.cs -- test --project SecurityDomain --filter "FullyQualifiedName~Yubico.YubiKit.SecurityDomain.UnitTests"
 
 # Integration tests (requires YubiKey)
-dotnet test Yubico.YubiKit.SecurityDomain.IntegrationTests
+dotnet toolchain.cs -- test --integration --project SecurityDomain --smoke --filter "FullyQualifiedName~Yubico.YubiKit.SecurityDomain.IntegrationTests"
 
 # All Security Domain tests
-dotnet test Yubico.YubiKit.SecurityDomain/tests
+dotnet toolchain.cs test --project SecurityDomain
 ```
 
 ## Integration Test Setup
@@ -101,7 +101,6 @@ Creates a session via the DI-registered `SecurityDomainSessionFactory`.
 
 ```csharp
 // Simple form - builds ServiceProvider internally with:
-//   services.AddYubiKeyManagerCore();
 //   services.AddYubiKeySecurityDomain();
 await state.WithSecurityDomainSessionFromDIAsync(
     resetBeforeUse: true,
@@ -112,7 +111,6 @@ await state.WithSecurityDomainSessionFromDIAsync(
 
 // Custom ServiceProvider (for additional service registrations)
 var services = new ServiceCollection();
-services.AddYubiKeyManagerCore();
 services.AddYubiKeySecurityDomain();
 services.AddSingleton<IMyService, MyService>(); // your services
 await using var provider = services.BuildServiceProvider();
@@ -126,7 +124,7 @@ await state.WithSecurityDomainSessionFromDIAsync(
     cancellationToken: ct);
 ```
 
-**Note:** `AddYubiKeySecurityDomain()` requires `AddYubiKeyManagerCore()` to be called first. The simple form handles this automatically.
+**Note:** `AddYubiKeySecurityDomain()` only registers the session factory. Core device discovery uses the static `YubiKeyManager` and does not require DI registration.
 
 ## Automatic SD Reset
 

@@ -129,6 +129,12 @@ When running filtered tests **outside** the build script (ad-hoc debugging), syn
 
 **Recommendation:** Use `dotnet toolchain.cs test --filter "..."` which handles this automatically.
 
+### xUnit v3 Focused Filters
+
+`toolchain.cs` translates common VSTest-style filters to Microsoft.Testing.Platform-native xUnit v3 flags. Positive filters are preflighted with `--list-tests`; if a selected xUnit v3 project has no matching tests, that project is reported as `no matching tests`. If every selected xUnit v3 project preflighted by the positive filter has no matching tests, the toolchain fails clearly with `No tests matched the specified filter`. Exclusion filters still apply to the actual run.
+
+This matters when a project filter selects multiple FIDO2/WebAuthn test projects and only one contains the focused method.
+
 ### Standard Filter Expressions
 
 ```
@@ -145,6 +151,35 @@ Name!=SkipMe                   Exclude tests named 'SkipMe'
 3. Use `--project` for module filtering
 4. Use `--filter` for test filtering
 5. When in doubt, run `dotnet toolchain.cs test` without filters first
+
+## FIDO2/WebAuthn Hardware Coordination
+
+FIDO2 and WebAuthn tests often need User Presence (touch), User Verification (PIN/bio), credential creation, or reset timing. These checks are not unattended agent gates.
+
+Use these lanes:
+
+| Lane | Examples | Agent-runnable? | Rule |
+|------|----------|-----------------|------|
+| Read-only smoke | `GetInfo`, construction/unit tests | Yes | Use `dotnet toolchain.cs test` or integration `--smoke` |
+| User Presence | `MakeCredential`, `GetAssertion`, `previewSign` ceremonies | No by default | Mark with `Category=RequiresUserPresence`; run only with a human present |
+| User Verification / PIN | PIN token, UV-required/preferred, bio enrollment | No by default | Requires explicit human approval and known device/PIN state |
+| Reset/destructive | FIDO2 reset, persistent credential deletion | No | Human-approved destructive run only |
+| Insert/remove/touch timing | Reset power-cycle window, physical insertion/removal | No | Human-coordinated timing only |
+
+Agent-safe FIDO2/WebAuthn integration commands must skip User Presence:
+
+```bash
+dotnet toolchain.cs -- test --integration --project Fido2 --smoke
+dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
+dotnet toolchain.cs -- test --integration --project WebAuthn --filter "Category!=RequiresUserPresence"
+```
+
+Human-coordinated UP/UV commands require approval immediately before execution:
+
+```bash
+dotnet toolchain.cs -- test --integration --project Fido2 --filter "Category=RequiresUserPresence"
+dotnet toolchain.cs -- test --integration --project WebAuthn --filter "Category=RequiresUserPresence"
+```
 
 ## xUnit v3 Known Limitations
 

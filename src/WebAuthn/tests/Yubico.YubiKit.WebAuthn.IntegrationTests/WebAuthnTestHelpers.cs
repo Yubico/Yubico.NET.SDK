@@ -31,11 +31,10 @@ internal static class WebAuthnTestHelpers
 
     internal static WebAuthnClient CreateClient(FidoSession session)
     {
-        var backend = new FidoSessionWebAuthnBackend(session);
         WebAuthnOrigin.TryParse(TestOriginUrl, out var origin);
 
         return new WebAuthnClient(
-            backend,
+            session,
             origin!,
             isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk");
     }

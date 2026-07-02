@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using Spectre.Console;
-using SharedOutput = Yubico.YubiKit.Cli.Shared.Output.OutputHelpers;
 using SharedConfirm = Yubico.YubiKit.Cli.Shared.Output.ConfirmationPrompts;
+using SharedOutput = Yubico.YubiKit.Cli.Shared.Output.OutputHelpers;
 using SharedPin = Yubico.YubiKit.Cli.Shared.Output.PinPrompt;
 
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Output;

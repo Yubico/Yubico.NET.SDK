@@ -208,15 +208,15 @@ public class ConsoleCredentialReaderTests
         // Arrange
         var mock = new MockConsoleInput();
         // Don't enqueue any keys - the reader should check cancellation before blocking
-        
+
         var reader = new ConsoleCredentialReader(mock);
         var cts = new CancellationTokenSource();
         cts.Cancel();
-        
+
         var options = CredentialReaderOptions.ForPin();
 
         // Act & Assert
-        Assert.Throws<OperationCanceledException>(() => 
+        Assert.Throws<OperationCanceledException>(() =>
             reader.ReadCredential(options, cts.Token));
     }
 }

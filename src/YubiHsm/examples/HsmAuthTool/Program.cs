@@ -3,7 +3,7 @@
 
 using Spectre.Console;
 using Yubico.YubiKit.Cli.Shared.Cli;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Commands;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Menus;
 

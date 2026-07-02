@@ -14,8 +14,9 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.OpenPgp;
 
@@ -42,7 +43,8 @@ public static class DependencyInjection
     {
         /// <summary>
         ///     Registers the <see cref="OpenPgpSessionFactory" /> delegate in the DI container.
-        ///     Requires <c>AddYubiKeyManagerCore()</c> to have been called first.
+        ///     Core device discovery uses the static <c>YubiKeyManager</c>; this method only registers
+        ///     the OpenPGP session factory for callers that use dependency injection.
         /// </summary>
         public IServiceCollection AddOpenPgp()
         {

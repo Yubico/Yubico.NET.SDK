@@ -15,10 +15,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Fido2;
 
@@ -70,8 +71,8 @@ public static class DependencyInjection
         /// </list>
         /// </para>
         /// <para>
-        /// It also calls the core <c>AddYubiKeyManagerCore</c> method to set up
-        /// the YubiKey manager infrastructure.
+        /// Core device discovery uses the static <c>YubiKeyManager</c>; this method only registers
+        /// the FIDO2 session factory delegates for callers that use dependency injection.
         /// </para>
         /// </remarks>
         /// <example>

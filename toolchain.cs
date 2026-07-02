@@ -22,6 +22,9 @@
  *   restore        - Restore NuGet dependencies
  *   build          - Build the solution (restores only if needed)
  *   test           - Run unit tests with summary output
+ *   resilience     - Run fast no-hardware runtime resilience gates
+ *   benchmark      - Run performance benchmarks (manual, not CI)
+ *   docs-qa        - Validate active documentation hygiene
  *   coverage       - Run tests with code coverage
  *   pack           - Create NuGet packages
  *   setup-feed     - Configure local NuGet feed
@@ -42,13 +45,18 @@
  *   --project <name>               Build/test specific project only (partial match)
  *   --integration                  Include integration tests (requires --project, unit tests only by default)
  *   --smoke                        Smoke test mode: skip Slow and RequiresUserPresence tests
+ *   --fast                         Required fast mode for resilience gates
+ *   --benchmark-args <args>         Arguments passed to BenchmarkDotNet
  *
  * EXAMPLES:
  *   dotnet toolchain.cs build
  *   dotnet toolchain.cs build --project Piv
  *   dotnet toolchain.cs test
+ *   dotnet toolchain.cs docs-qa
  *   dotnet toolchain.cs test --filter "FullyQualifiedName~MyTestClass"
  *   dotnet toolchain.cs test --project Piv --filter "Method~Sign"
+ *   dotnet toolchain.cs -- resilience --fast
+ *   dotnet toolchain.cs benchmark --benchmark-args "--list flat"
  *   dotnet toolchain.cs -- test --integration --project Piv --smoke   (quick integration smoke test)
  *   dotnet toolchain.cs coverage
  *   dotnet toolchain.cs publish --package-version 1.0.0-preview.1
@@ -93,6 +101,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
@@ -113,6 +123,8 @@ var testFilter = GetArgument("--filter");
 var projectFilter = GetArgument("--project");
 var includeIntegration = HasFlag("--integration");
 var smokeTest = HasFlag("--smoke");
+var fastMode = HasFlag("--fast");
+var benchmarkArgs = GetArgument("--benchmark-args") ?? "";
 
 // --smoke injects trait filters to skip slow and user-presence tests
 if (smokeTest)
@@ -122,9 +134,13 @@ if (smokeTest)
 }
 
 // Dynamically discover projects using glob patterns
-var packableProjects = DiscoverProjects("src", ProjectPrefix);
+var buildableProjects = DiscoverProjects("src", ProjectPrefix);
+var packableProjects = buildableProjects
+    .Where(IsPackableProject)
+    .ToArray();
 var unitTestProjects = DiscoverProjects("tests", ".UnitTests", ProjectPrefix);
 var integrationTestProjects = DiscoverProjects("tests", ".IntegrationTests", ProjectPrefix);
+var activeDocumentationFiles = DiscoverActiveDocumentationFiles();
 
 var testProjects = includeIntegration
     ? [..unitTestProjects, ..integrationTestProjects]
@@ -168,14 +184,14 @@ Target("build", () =>
 
     if (!string.IsNullOrEmpty(projectFilter))
     {
-        var matchingProjects = packableProjects
+        var matchingProjects = buildableProjects
             .Where(p => Path.GetFileNameWithoutExtension(p)
                 .Contains(projectFilter, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         if (matchingProjects.Count == 0)
         {
-            PrintNoProjectsFound(projectFilter, packableProjects);
+            PrintNoProjectsFound(projectFilter, buildableProjects);
             return;
         }
 
@@ -218,6 +234,9 @@ Target("test", () =>
     var failCount = results.Count(r => !r.Passed);
     if (failCount > 0)
         throw new InvalidOperationException($"{failCount} test project(s) failed");
+
+    if (results.Count > 0 && results.All(r => r.Skipped))
+        throw new InvalidOperationException("No tests matched the specified filter");
 });
 
 Target("coverage", () =>
@@ -233,7 +252,7 @@ Target("coverage", () =>
     if (projectsToCover is null)
         return;
 
-    var results = new List<(string Project, bool Passed, string? Error)>();
+    var results = new List<(string Project, bool Passed, string? Error, bool Skipped)>();
 
     foreach (var project in projectsToCover)
     {
@@ -243,12 +262,12 @@ Target("coverage", () =>
         try
         {
             Run("dotnet", $"test {project} -c {configuration} --settings coverlet.runsettings.xml --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}");
-            results.Add((projectName, true, null));
+            results.Add((projectName, true, null, false));
             PrintColored($"✓ {projectName} - Coverage collected", ConsoleColor.Green);
         }
         catch (Exception ex)
         {
-            results.Add((projectName, false, ex.Message));
+            results.Add((projectName, false, ex.Message, false));
             PrintColored($"✗ {projectName} - Coverage collection failed", ConsoleColor.Red);
         }
     }
@@ -268,6 +287,77 @@ Target("coverage", () =>
     var failCount = results.Count(r => !r.Passed);
     if (failCount > 0)
         throw new InvalidOperationException($"{failCount} test project(s) failed during coverage collection");
+});
+
+Target("resilience", () =>
+{
+    PrintHeader("Running fast runtime resilience gates");
+
+    if (!fastMode)
+    {
+        throw new InvalidOperationException("The resilience target currently requires --fast; only fast no-hardware mode is implemented.");
+    }
+
+    var previousFilter = testFilter;
+    try
+    {
+        testFilter = string.IsNullOrEmpty(previousFilter)
+            ? "Category=RuntimeResilience"
+            : $"{previousFilter}&Category=RuntimeResilience";
+
+        var projectsToTest = FilterToProject(testProjectInfos, "Core");
+        if (projectsToTest is null)
+            return;
+
+        var stopwatch = Stopwatch.StartNew();
+        var results = RunTestProjects(projectsToTest);
+        stopwatch.Stop();
+
+        PrintTestSummary(results, "RUNTIME RESILIENCE");
+        PrintInfo("Evidence: Core unit tests with Category=RuntimeResilience");
+        PrintInfo($"Elapsed: {stopwatch.Elapsed.TotalSeconds:F1}s");
+
+        var failCount = results.Count(r => !r.Passed);
+        if (failCount > 0)
+            throw new InvalidOperationException($"{failCount} runtime resilience test project(s) failed");
+
+        if (results.Count > 0 && results.All(r => r.Skipped))
+            throw new InvalidOperationException("No runtime resilience tests matched the specified filter");
+    }
+    finally
+    {
+        testFilter = previousFilter;
+    }
+});
+
+Target("benchmark", () =>
+{
+    PrintHeader("Running performance benchmarks");
+
+    var benchmarkProject = Path.Combine(
+        repoRoot,
+        "benchmarks",
+        "Yubico.YubiKit.PerformanceBenchmarks",
+        "Yubico.YubiKit.PerformanceBenchmarks.csproj");
+
+    Run("dotnet", $"run --project \"{benchmarkProject}\" -c {configuration} -- {benchmarkArgs}");
+});
+
+Target("docs-qa", () =>
+{
+    PrintHeader("Validating active documentation");
+
+    var failures = ValidateActiveDocumentation(activeDocumentationFiles);
+    if (failures.Count > 0)
+    {
+        PrintColored($"Found {failures.Count} documentation issue(s):", ConsoleColor.Red);
+        foreach (var failure in failures)
+            Console.WriteLine($"  - {failure}");
+
+        throw new InvalidOperationException($"{failures.Count} documentation issue(s) found");
+    }
+
+    PrintInfo($"Validated {activeDocumentationFiles.Length} active documentation file(s)");
 });
 
 Target("pack", DependsOn("build"), () =>
@@ -361,8 +451,8 @@ if (args.Contains("--help") || args.Contains("-h"))
 // Run Bullseye — strip all custom args so Bullseye only sees target names and its own flags
 var bullseyeArgs = FilterBullseyeArgs(args,
     optionsWithValues: ["--project", "--filter", "--package-version", "--nuget-feed-name", "--nuget-feed-path",
-                        "--nuget-feed-url", "--nuget-api-key"],
-    flags: ["--integration", "--include-docs", "--dry-run", "--clean", "--smoke"]);
+                        "--nuget-feed-url", "--nuget-api-key", "--benchmark-args"],
+    flags: ["--integration", "--include-docs", "--dry-run", "--clean", "--smoke", "--fast"]);
 await RunTargetsAndExitAsync(bullseyeArgs);
 
 // ─── Helper functions ──────────────────────────────────────────────────────────
@@ -468,10 +558,10 @@ List<(string ProjectPath, bool UsesTestingPlatformRunner)>? FilterToProject(
     return [..projectInfos.Where(p => matchedSet.Contains(p.ProjectPath))];
 }
 
-List<(string Project, bool Passed, string? Error)> RunTestProjects(
+List<(string Project, bool Passed, string? Error, bool Skipped)> RunTestProjects(
     IEnumerable<(string ProjectPath, bool UsesTestingPlatformRunner)> projects)
 {
-    var results = new List<(string Project, bool Passed, string? Error)>();
+    var results = new List<(string Project, bool Passed, string? Error, bool Skipped)>();
 
     foreach (var (projectPath, usesTestingPlatformRunner) in projects)
     {
@@ -488,11 +578,16 @@ List<(string Project, bool Passed, string? Error)> RunTestProjects(
                 command = $"run --project {projectPath} -c {configuration}";
                 if (!string.IsNullOrEmpty(testFilter))
                 {
-                    var (mtpFilter, hasPositiveFilters) = TranslateToMtpFilter(testFilter);
-                    // --minimum-expected-tests is incompatible with exclusion-only simple filters
-                    // (--filter-not-trait, etc.) in the MTP runner — only add for positive filters.
-                    var minTests = hasPositiveFilters ? "--minimum-expected-tests 0 " : "";
-                    command += $" -- {minTests}{mtpFilter}";
+                    var (mtpFilter, hasPositiveFilters, positiveMtpFilterArgs) = TranslateToMtpFilter(testFilter);
+                    // Preflight only the inclusion filter. Exclusions still apply to the real run.
+                    if (hasPositiveFilters && !MtpFilterHasMatches(projectPath, positiveMtpFilterArgs))
+                    {
+                        results.Add((projectName, true, "No matching tests", true));
+                        PrintColored($"○ {projectName} - No matching tests", ConsoleColor.Yellow);
+                        continue;
+                    }
+
+                    command += $" -- {mtpFilter}";
                 }
             }
             else
@@ -504,12 +599,12 @@ List<(string Project, bool Passed, string? Error)> RunTestProjects(
             }
 
             Run("dotnet", command);
-            results.Add((projectName, true, null));
+            results.Add((projectName, true, null, false));
             PrintColored($"✓ {projectName} - All tests passed", ConsoleColor.Green);
         }
         catch (Exception ex)
         {
-            results.Add((projectName, false, ex.Message));
+            results.Add((projectName, false, ex.Message, false));
             PrintColored($"✗ {projectName} - Tests failed", ConsoleColor.Red);
         }
     }
@@ -517,16 +612,20 @@ List<(string Project, bool Passed, string? Error)> RunTestProjects(
     return results;
 }
 
-void PrintTestSummary(List<(string Project, bool Passed, string? Error)> results, string label)
+void PrintTestSummary(List<(string Project, bool Passed, string? Error, bool Skipped)> results, string label)
 {
     var separator = new string('=', 60);
     Console.WriteLine($"\n{separator}");
     Console.WriteLine($"{label} SUMMARY");
     Console.WriteLine(separator);
 
-    foreach (var (project, passed, error) in results)
+    foreach (var (project, passed, error, skipped) in results)
     {
-        if (passed)
+        if (skipped)
+        {
+            PrintColored($"  ○ {project} (no matching tests)", ConsoleColor.Yellow);
+        }
+        else if (passed)
         {
             PrintColored($"  ✓ {project}", ConsoleColor.Green);
         }
@@ -538,7 +637,8 @@ void PrintTestSummary(List<(string Project, bool Passed, string? Error)> results
         }
     }
 
-    var passedCount = results.Count(r => r.Passed);
+    var skippedCount = results.Count(r => r.Skipped);
+    var passedCount = results.Count(r => r.Passed && !r.Skipped);
     var failedCount = results.Count(r => !r.Passed);
 
     Console.WriteLine(separator);
@@ -548,6 +648,10 @@ void PrintTestSummary(List<(string Project, bool Passed, string? Error)> results
     Console.Write(" | ");
     Console.ForegroundColor = failedCount > 0 ? ConsoleColor.Red : ConsoleColor.Gray;
     Console.Write($"Failed: {failedCount}");
+    Console.ResetColor();
+    Console.Write(" | ");
+    Console.ForegroundColor = skippedCount > 0 ? ConsoleColor.Yellow : ConsoleColor.Gray;
+    Console.Write($"Skipped: {skippedCount}");
     Console.ResetColor();
     Console.WriteLine($" | Total: {results.Count}");
     Console.WriteLine(separator);
@@ -574,6 +678,9 @@ TARGETS:
   restore        - Restore NuGet dependencies
   build          - Build the solution (restores only if needed)
   test           - Run unit tests with summary output
+  resilience     - Run fast no-hardware runtime resilience gates
+  benchmark      - Run performance benchmarks (manual, not CI)
+  docs-qa        - Validate active documentation hygiene
   coverage       - Run tests with code coverage
   pack           - Create NuGet packages
   setup-feed     - Configure local NuGet feed
@@ -594,14 +701,19 @@ OPTIONS:
   --project <name>               Build/test specific project only (partial match)
   --integration                  Include integration tests (requires --project)
   --smoke                        Smoke test mode: skip Slow and RequiresUserPresence tests
+  --fast                         Required fast mode for resilience gates
+  --benchmark-args <args>         Arguments passed to BenchmarkDotNet
   -h, --help                     Show this help message
 
 EXAMPLES:
   dotnet toolchain.cs build
   dotnet toolchain.cs build --project Piv
   dotnet toolchain.cs test
+  dotnet toolchain.cs docs-qa
   dotnet toolchain.cs test --filter ""FullyQualifiedName~MyTestClass""
   dotnet toolchain.cs test --project Piv --filter ""Method~Sign""
+  dotnet toolchain.cs -- resilience --fast
+  dotnet toolchain.cs benchmark --benchmark-args ""--list flat""
   dotnet toolchain.cs -- test --integration --project Piv --smoke
   dotnet toolchain.cs coverage
   dotnet toolchain.cs publish --package-version 1.0.0-preview.1
@@ -637,11 +749,11 @@ static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPa
 // Translates a VSTest-style --filter expression to xUnit v3 MTP native filter arguments.
 // Supports: FullyQualifiedName~X, Method~X, Category!=X, Category=X, and '&' compounds.
 // Returns (filter args string, whether any positive/inclusion filters are present).
-// MTP runner does not allow --minimum-expected-tests alongside exclusion-only simple filters.
-static (string Args, bool HasPositiveFilters) TranslateToMtpFilter(string vstestFilter)
+static (string Args, bool HasPositiveFilters, string[] PositiveArgs) TranslateToMtpFilter(string vstestFilter)
 {
     var parts = vstestFilter.Split('&');
     var mtpArgs = new List<string>();
+    var positiveArgs = new List<string>();
     var hasPositiveFilters = false;
 
     foreach (var part in parts)
@@ -662,11 +774,16 @@ static (string Args, bool HasPositiveFilters) TranslateToMtpFilter(string vstest
             var property = segments[0].Trim();
             var value = segments[1].Trim();
 
-            mtpArgs.Add(property switch
+            var filterOption = property switch
             {
-                "ClassName" or "Namespace" => $"--filter-class \"*{value}*\"",
-                _ => $"--filter-method \"*{value}*\""
-            });
+                "ClassName" or "Namespace" => "--filter-class",
+                _ => "--filter-method"
+            };
+            var filterValue = $"*{value}*";
+
+            mtpArgs.Add($"{filterOption} \"{filterValue}\"");
+            positiveArgs.Add(filterOption);
+            positiveArgs.Add(filterValue);
         }
         // Category=Value → --filter-trait "Category=Value"
         else if (trimmed.Contains('='))
@@ -677,19 +794,76 @@ static (string Args, bool HasPositiveFilters) TranslateToMtpFilter(string vstest
             var value = segments[1].Trim();
 
             if (property is "FullyQualifiedName" or "Name" or "Method")
+            {
                 mtpArgs.Add($"--filter-method \"{value}\"");
+                positiveArgs.Add("--filter-method");
+                positiveArgs.Add(value);
+            }
             else
+            {
                 mtpArgs.Add($"--filter-trait \"{property}={value}\"");
+                positiveArgs.Add("--filter-trait");
+                positiveArgs.Add($"{property}={value}");
+            }
         }
         else
         {
             hasPositiveFilters = true;
             // Unrecognized pattern — pass as-is to --filter-method with wildcards
-            mtpArgs.Add($"--filter-method \"*{trimmed}*\"");
+            var filterValue = $"*{trimmed}*";
+            mtpArgs.Add($"--filter-method \"{filterValue}\"");
+            positiveArgs.Add("--filter-method");
+            positiveArgs.Add(filterValue);
         }
     }
 
-    return (string.Join(" ", mtpArgs), hasPositiveFilters);
+    return (string.Join(" ", mtpArgs), hasPositiveFilters, [..positiveArgs]);
+}
+
+bool MtpFilterHasMatches(string projectPath, string[] positiveMtpFilterArgs)
+{
+    var args = new List<string>
+    {
+        "run",
+        "--project",
+        projectPath,
+        "-c",
+        configuration,
+        "--",
+        "--list-tests"
+    };
+    args.AddRange(positiveMtpFilterArgs);
+
+    var (exitCode, output) = RunDotnetAndCapture(args);
+    // xUnit v3 MTP 3.0.0 reports zero discovery matches with this summary text.
+    if (output.Contains("found 0 test(s)", StringComparison.OrdinalIgnoreCase))
+        return false;
+
+    if (exitCode != 0)
+        throw new InvalidOperationException($"Failed to list tests for {projectPath}: {output}");
+
+    return true;
+}
+
+static (int ExitCode, string Output) RunDotnetAndCapture(IReadOnlyList<string> arguments)
+{
+    var startInfo = new ProcessStartInfo("dotnet")
+    {
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        UseShellExecute = false
+    };
+    foreach (var argument in arguments)
+    {
+        startInfo.ArgumentList.Add(argument);
+    }
+
+    using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start dotnet process");
+    var stdout = process.StandardOutput.ReadToEndAsync();
+    var stderr = process.StandardError.ReadToEndAsync();
+    process.WaitForExit();
+
+    return (process.ExitCode, stdout.GetAwaiter().GetResult() + stderr.GetAwaiter().GetResult());
 }
 
 string[] DiscoverProjects(string subdirectory, string nameFilter, string? additionalFilter = null) =>
@@ -701,6 +875,171 @@ string[] DiscoverProjects(string subdirectory, string nameFilter, string? additi
         .Select(p => Path.GetRelativePath(repoRoot, p))
         .OrderBy(p => p)
         .ToArray();
+
+bool IsPackableProject(string projectPath)
+{
+    var projectXml = File.ReadAllText(Path.Combine(repoRoot, projectPath));
+    return !Regex.IsMatch(
+        projectXml,
+        @"<IsPackable(?:\s+[^>]*)?>\s*false\s*</IsPackable>",
+        RegexOptions.IgnoreCase);
+}
+
+string[] DiscoverActiveDocumentationFiles()
+{
+    var rootDocs = Directory.GetFiles(repoRoot, "*.md", SearchOption.TopDirectoryOnly);
+    var docsRoot = Directory.Exists(Path.Combine(repoRoot, "docs"))
+        ? Directory.GetFiles(Path.Combine(repoRoot, "docs"), "*.md", SearchOption.TopDirectoryOnly)
+        : [];
+    var docsUsage = GetMarkdownFilesUnder("docs", "usage");
+    var docsTroubleshooting = GetMarkdownFilesUnder("docs", "troubleshooting");
+    var docsArchitecture = GetMarkdownFilesUnder("docs", "architecture");
+    var srcReadmes = Directory.GetFiles(Path.Combine(repoRoot, "src"), "README.md", SearchOption.AllDirectories);
+    var srcClaudeDocs = Directory.GetFiles(Path.Combine(repoRoot, "src"), "CLAUDE.md", SearchOption.AllDirectories);
+
+    return [..rootDocs
+        .Concat(docsRoot)
+        .Concat(docsUsage)
+        .Concat(docsTroubleshooting)
+        .Concat(docsArchitecture)
+        .Concat(srcReadmes)
+        .Concat(srcClaudeDocs)
+        .Select(p => Path.GetRelativePath(repoRoot, p))
+        .Where(p => !IsArchivedOrPlanningDoc(p))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)];
+}
+
+string[] GetMarkdownFilesUnder(params string[] pathParts)
+{
+    var path = Path.Combine([repoRoot, ..pathParts]);
+    return Directory.Exists(path)
+        ? Directory.GetFiles(path, "*.md", SearchOption.AllDirectories)
+        : [];
+}
+
+static bool IsArchivedOrPlanningDoc(string relativePath)
+{
+    var normalized = relativePath.Replace(Path.DirectorySeparatorChar, '/');
+    return normalized.StartsWith("docs/archive/", StringComparison.OrdinalIgnoreCase) ||
+           normalized.StartsWith("docs/completed/", StringComparison.OrdinalIgnoreCase) ||
+           normalized.StartsWith("docs/plans/", StringComparison.OrdinalIgnoreCase) ||
+           normalized.StartsWith("docs/research/", StringComparison.OrdinalIgnoreCase) ||
+           normalized.StartsWith("docs/reviews/", StringComparison.OrdinalIgnoreCase) ||
+           normalized.StartsWith("docs/specs/", StringComparison.OrdinalIgnoreCase) ||
+           normalized.StartsWith("docs/templates/", StringComparison.OrdinalIgnoreCase);
+}
+
+List<string> ValidateActiveDocumentation(string[] documentationFiles)
+{
+    var failures = new List<string>();
+
+    foreach (var relativePath in documentationFiles)
+    {
+        var fullPath = Path.Combine(repoRoot, relativePath);
+        var lines = File.ReadAllLines(fullPath);
+
+        ValidateCodeFences(relativePath, lines, failures);
+        ValidateKnownStaleDocPatterns(relativePath, lines, failures);
+        ValidateLocalMarkdownLinks(relativePath, fullPath, lines, failures);
+    }
+
+    return failures;
+}
+
+static void ValidateCodeFences(string relativePath, string[] lines, List<string> failures)
+{
+    var openFenceLine = 0;
+    for (var i = 0; i < lines.Length; i++)
+    {
+        if (!IsCodeFenceLine(lines[i]))
+            continue;
+
+        if (openFenceLine == 0)
+        {
+            openFenceLine = i + 1;
+        }
+        else
+        {
+            openFenceLine = 0;
+        }
+    }
+
+    if (openFenceLine != 0)
+        failures.Add($"{relativePath}:{openFenceLine}: unclosed fenced code block");
+}
+
+static void ValidateKnownStaleDocPatterns(string relativePath, string[] lines, List<string> failures)
+{
+    var stalePatterns = new[]
+    {
+        "RequiresUserPresence!=true",
+        "RequiresUserPresence=true",
+        "Trait(\"RequiresUserPresence\""
+    };
+
+    for (var i = 0; i < lines.Length; i++)
+    {
+        foreach (var pattern in stalePatterns)
+        {
+            if (lines[i].Contains(pattern, StringComparison.Ordinal))
+                failures.Add($"{relativePath}:{i + 1}: stale FIDO2 user-presence doc pattern '{pattern}'");
+        }
+    }
+}
+
+static void ValidateLocalMarkdownLinks(
+    string relativePath,
+    string fullPath,
+    string[] lines,
+    List<string> failures)
+{
+    var inCodeFence = false;
+    for (var i = 0; i < lines.Length; i++)
+    {
+        if (IsCodeFenceLine(lines[i]))
+        {
+            inCodeFence = !inCodeFence;
+            continue;
+        }
+
+        if (inCodeFence)
+            continue;
+
+        foreach (Match match in Regex.Matches(lines[i], @"(?<!!)\[[^\]]+\]\((?<target>[^)]+)\)"))
+        {
+            var target = match.Groups["target"].Value.Trim();
+            if (ShouldSkipMarkdownLink(target))
+                continue;
+
+            var pathOnly = target.Split('#', 2)[0];
+            var decodedPath = Uri.UnescapeDataString(pathOnly);
+            var containingDirectory = Path.GetDirectoryName(fullPath) ?? Directory.GetCurrentDirectory();
+            var resolvedPath = Path.GetFullPath(Path.Combine(containingDirectory, decodedPath));
+
+            if (!File.Exists(resolvedPath) && !Directory.Exists(resolvedPath))
+                failures.Add($"{relativePath}:{i + 1}: local markdown link target not found: {target}");
+        }
+    }
+}
+
+static bool ShouldSkipMarkdownLink(string target)
+{
+    if (string.IsNullOrWhiteSpace(target) || target.StartsWith('#'))
+        return true;
+
+    if (target.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+        target.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+        target.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase))
+        return true;
+
+    if (target.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
+        return true;
+
+    return false;
+}
+
+static bool IsCodeFenceLine(string line) => Regex.IsMatch(line, @"^\s*```");
 
 // Returns null when no projects matched and an error was already printed (caller should return early).
 List<string>? FilterProjectsByName(string[] projects, string? filter)

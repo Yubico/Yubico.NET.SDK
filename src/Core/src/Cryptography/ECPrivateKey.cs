@@ -183,4 +183,3 @@ namespace Yubico.YubiKit.Core.Cryptography
         }
     }
 }
-

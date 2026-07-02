@@ -3,8 +3,8 @@
 
 using System.Buffers;
 using System.Text;
-using Yubico.YubiKit.Core.Utils;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Oath;
 using Yubico.YubiKit.Oath.Examples.OathTool.Commands;
 

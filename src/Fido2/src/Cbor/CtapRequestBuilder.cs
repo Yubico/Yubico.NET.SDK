@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Fido2.Cbor;
 
@@ -29,19 +30,19 @@ public sealed class CtapRequestBuilder
 {
     private readonly byte _command;
     private readonly SortedDictionary<int, Action<CborWriter>> _parameters = new();
-    
+
     private CtapRequestBuilder(byte command)
     {
         _command = command;
     }
-    
+
     /// <summary>
     /// Creates a new builder for the specified CTAP command.
     /// </summary>
     /// <param name="command">The CTAP command byte.</param>
     /// <returns>A new builder instance.</returns>
     public static CtapRequestBuilder Create(byte command) => new(command);
-    
+
     /// <summary>
     /// Adds an integer parameter.
     /// </summary>
@@ -53,7 +54,7 @@ public sealed class CtapRequestBuilder
         _parameters[key] = writer => writer.WriteInt32(value);
         return this;
     }
-    
+
     /// <summary>
     /// Adds an unsigned integer parameter.
     /// </summary>
@@ -65,7 +66,7 @@ public sealed class CtapRequestBuilder
         _parameters[key] = writer => writer.WriteUInt32(value);
         return this;
     }
-    
+
     /// <summary>
     /// Adds a byte array parameter.
     /// </summary>
@@ -78,7 +79,7 @@ public sealed class CtapRequestBuilder
         _parameters[key] = writer => writer.WriteByteString(copy);
         return this;
     }
-    
+
     /// <summary>
     /// Adds a byte array parameter from Memory.
     /// </summary>
@@ -91,7 +92,7 @@ public sealed class CtapRequestBuilder
         _parameters[key] = writer => writer.WriteByteString(copy);
         return this;
     }
-    
+
     /// <summary>
     /// Adds a string parameter.
     /// </summary>
@@ -103,7 +104,7 @@ public sealed class CtapRequestBuilder
         _parameters[key] = writer => writer.WriteTextString(value);
         return this;
     }
-    
+
     /// <summary>
     /// Adds a boolean parameter.
     /// </summary>
@@ -115,7 +116,19 @@ public sealed class CtapRequestBuilder
         _parameters[key] = writer => writer.WriteBoolean(value);
         return this;
     }
-    
+
+    /// <summary>
+    /// Adds a parameter using a caller-provided CBOR writer callback.
+    /// </summary>
+    /// <param name="key">The CBOR map key.</param>
+    /// <param name="writeValue">Action that writes the complete CBOR value.</param>
+    /// <returns>This builder for chaining.</returns>
+    public CtapRequestBuilder WithValue(int key, Action<CborWriter> writeValue)
+    {
+        _parameters[key] = writeValue;
+        return this;
+    }
+
     /// <summary>
     /// Adds a CBOR map parameter.
     /// </summary>
@@ -124,10 +137,9 @@ public sealed class CtapRequestBuilder
     /// <returns>This builder for chaining.</returns>
     public CtapRequestBuilder WithMap(int key, Action<CborWriter> writeMap)
     {
-        _parameters[key] = writeMap;
-        return this;
+        return WithValue(key, writeMap);
     }
-    
+
     /// <summary>
     /// Adds a CBOR array parameter.
     /// </summary>
@@ -136,10 +148,9 @@ public sealed class CtapRequestBuilder
     /// <returns>This builder for chaining.</returns>
     public CtapRequestBuilder WithArray(int key, Action<CborWriter> writeArray)
     {
-        _parameters[key] = writeArray;
-        return this;
+        return WithValue(key, writeArray);
     }
-    
+
     /// <summary>
     /// Adds a pre-encoded CBOR value parameter.
     /// </summary>
@@ -152,7 +163,7 @@ public sealed class CtapRequestBuilder
         _parameters[key] = writer => writer.WriteEncodedValue(copy);
         return this;
     }
-    
+
     /// <summary>
     /// Builds the CTAP request as a byte array.
     /// </summary>
@@ -164,29 +175,36 @@ public sealed class CtapRequestBuilder
             // No parameters - just return the command byte
             return [_command];
         }
-        
+
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        
+
         // Write CBOR map with parameters sorted by key (canonical encoding)
         writer.WriteStartMap(_parameters.Count);
-        
+
         foreach (var (key, writeValue) in _parameters)
         {
             writer.WriteInt32(key);
             writeValue(writer);
         }
-        
+
         writer.WriteEndMap();
-        
-        // Prepend command byte
+
+        // Prepend command byte, then clear the intermediate CBOR copy.
         var cbor = writer.Encode();
-        var result = new byte[1 + cbor.Length];
-        result[0] = _command;
-        cbor.CopyTo(result, 1);
-        
-        return result;
+        try
+        {
+            var result = new byte[1 + cbor.Length];
+            result[0] = _command;
+            cbor.CopyTo(result, 1);
+
+            return result;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(cbor);
+        }
     }
-    
+
     /// <summary>
     /// Builds the CTAP request as a ReadOnlyMemory.
     /// </summary>

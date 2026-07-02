@@ -13,9 +13,10 @@
 // limitations under the License.
 
 using System.Text;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Commands;
@@ -33,7 +34,7 @@ internal static class DeviceHelper
     internal static async Task<IYubiKey?> GetDeviceAsync(int? serial, CancellationToken ct = default)
     {
         var all = await YubiKeyManager.FindAllAsync(ConnectionType.All, cancellationToken: ct);
-        var smartCard = all.Where(d => d.ConnectionType == ConnectionType.SmartCard).ToList();
+        var smartCard = all.Where(d => d.SupportsConnection(ConnectionType.SmartCard)).ToList();
 
         if (smartCard.Count == 0)
         {

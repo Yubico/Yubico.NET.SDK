@@ -75,4 +75,3 @@ dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Management.
 # Run specific test class
 dotnet toolchain.cs test --filter "FullyQualifiedName~ManagementIntegrationTests"
 ```
-

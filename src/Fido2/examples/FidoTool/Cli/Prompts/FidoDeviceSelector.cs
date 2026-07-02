@@ -13,14 +13,14 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Cli.Shared.Device;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Prompts;
 
 /// <summary>
 /// Device selector for FIDO2 operations.
-/// Supports FIDO HID (USB) and SmartCard (NFC) transports.
+/// Supports FIDO HID and SmartCard transports.
 /// In non-interactive mode, prefers FIDO HID as the native FIDO2 transport.
 /// </summary>
 public sealed class FidoDeviceSelector : DeviceSelectorBase
@@ -38,7 +38,7 @@ public sealed class FidoDeviceSelector : DeviceSelectorBase
     ];
 
     /// <inheritdoc />
-    protected override string SupportedTransportsDescription => "FIDO HID (USB), SmartCard (NFC)";
+    protected override string SupportedTransportsDescription => "FIDO HID, SmartCard (USB requires firmware 5.8+)";
 
     /// <inheritdoc />
     /// <remarks>
@@ -46,6 +46,6 @@ public sealed class FidoDeviceSelector : DeviceSelectorBase
     /// Falls back to the first available device if no FIDO HID device is found.
     /// </remarks>
     protected override IYubiKey? AutoSelectDevice(IReadOnlyList<IYubiKey> devices) =>
-        devices.FirstOrDefault(d => d.ConnectionType == ConnectionType.HidFido)
+        devices.FirstOrDefault(d => d.SupportsConnection(ConnectionType.HidFido))
         ?? devices[0];
 }

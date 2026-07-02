@@ -14,9 +14,10 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Management;
 
@@ -47,8 +48,8 @@ public static class DependencyInjection
         ///         for creating Management sessions via dependency injection.
         ///     </para>
         ///     <para>
-        ///         <b>Prerequisite:</b> Call <c>AddYubiKeyManagerCore()</c> before this method
-        ///         to register core YubiKey services.
+        ///         Core device discovery uses the static <c>YubiKeyManager</c>; this method only registers
+        ///         the Management session factory for callers that use dependency injection.
         ///     </para>
         /// </remarks>
         /// <returns>The service collection for chaining.</returns>

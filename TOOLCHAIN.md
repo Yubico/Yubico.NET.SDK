@@ -39,6 +39,7 @@ dotnet toolchain.cs -- build --project Piv --clean
 - **restore** - Restore NuGet dependencies
 - **build** - Build the solution (depends on: restore)
 - **test** - Run unit tests with nice summary output (depends on: restore, build)
+- **docs-qa** - Validate active documentation hygiene
 - **coverage** - Run tests with code coverage collection (depends on: restore, build)
 - **pack** - Create NuGet packages (depends on: restore, build)
 - **setup-feed** - Configure local NuGet feed
@@ -76,6 +77,9 @@ dotnet toolchain.cs build --project Piv
 
 # Run tests
 dotnet toolchain.cs test
+
+# Validate active documentation hygiene
+dotnet toolchain.cs docs-qa
 
 # Run tests for specific project with filter
 dotnet toolchain.cs test --project Piv --filter "Method~Sign"
@@ -124,6 +128,27 @@ clean  (standalone — must be specified explicitly)
 
 - Run `dotnet format` (or `dotnet format --verify-no-changes` in CI) to apply analyzer-driven fixes and ensure the workspace matches the shared `.editorconfig` rules.
 - Analyzer configuration details live in `docs/DEV-GUIDE.md`; review that guide before introducing new rules or suppressions.
+
+## Documentation QA
+
+Run `dotnet toolchain.cs docs-qa` to validate bounded active documentation hygiene.
+
+The target scans:
+
+- root `*.md` files
+- top-level `docs/*.md`
+- `docs/usage/**`, `docs/troubleshooting/**`, and `docs/architecture/**`
+- module `src/**/README.md` and `src/**/CLAUDE.md`
+
+It intentionally excludes archived or planning material under `docs/archive`, `docs/completed`, `docs/plans`, `docs/research`, `docs/reviews`, `docs/specs`, and `docs/templates`.
+
+Current checks:
+
+- fenced code blocks are balanced
+- local markdown links outside fenced code examples resolve to existing files or directories
+- stale FIDO2 user-presence trait examples that do not use `Category=RequiresUserPresence` are rejected
+
+Snippet compilation is not part of this target. README examples are treated as documentation samples whose local links and fences must stay valid; compile-time snippet validation needs a separate approved phase.
 
 ## Project Discovery
 

@@ -14,9 +14,10 @@
 
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Cryptography;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Piv;
 

@@ -19,8 +19,10 @@ using Xunit;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
+using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
+using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 
@@ -37,7 +39,7 @@ public class WebAuthnClientGetAssertionTests
             throw new InvalidOperationException("Failed to parse origin");
 
         // Setup default mock responses
-        var mockInfo = CreateMockAuthenticatorInfo();
+        var mockInfo = MockFido2Responses.CreateMockAuthenticatorInfo();
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(mockInfo);
 
@@ -221,6 +223,98 @@ public class WebAuthnClientGetAssertionTests
     }
 
     [Fact]
+    public async Task GetAssertion_PuatRequired_RetriesWithUserVerificationRequired()
+    {
+        // Arrange
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
+
+        var credentialId = RandomNumberGenerator.GetBytes(32);
+        var options = new AuthenticationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = "example.com"
+        };
+
+        var requests = new List<BackendGetAssertionRequest>();
+        var callCount = 0;
+        _mockBackend.GetAssertionAsync(
+            Arg.Do<BackendGetAssertionRequest>(r => requests.Add(r)),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                callCount++;
+                if (callCount == 1)
+                {
+                    throw new CtapException(CtapStatus.PuatRequired);
+                }
+
+                return CreateMockGetAssertionResponse(credentialId);
+            });
+
+        // Act
+        var result = await _client.GetAssertionAsync(options, "123456", useUv: false, CancellationToken.None);
+
+        // Assert
+        Assert.Single(result);
+        Assert.Equal(2, requests.Count);
+        Assert.Null(requests[0].Options);
+        Assert.NotNull(requests[1].Options);
+        Assert.True(requests[1].Options!.TryGetValue("uv", out var uv) && uv);
+        Assert.NotNull(requests[1].PinUvAuthParam);
+        Assert.Equal((byte)2, requests[1].PinUvAuthProtocol.GetValueOrDefault());
+    }
+
+    [Fact]
+    public async Task GetAssertion_PuatRequiredThenNoCredentials_ReturnsEmptyList()
+    {
+        // Arrange
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
+
+        var options = new AuthenticationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = "example.com"
+        };
+
+        var callCount = 0;
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns<GetAssertionResponse>(_ =>
+            {
+                callCount++;
+                throw new CtapException(callCount == 1 ? CtapStatus.PuatRequired : CtapStatus.NoCredentials);
+            });
+
+        // Act
+        var result = await _client.GetAssertionAsync(options, "123456", useUv: false, CancellationToken.None);
+
+        // Assert
+        Assert.Empty(result);
+        Assert.Equal(2, callCount);
+    }
+
+    [Fact]
     public async Task GetAssertion_EmptyAllowList_OnAuthenticatorWithoutDiscoverable_ReturnsEmpty()
     {
         // Arrange
@@ -355,35 +449,6 @@ public class WebAuthnClientGetAssertionTests
         writer.WriteEndMap();
 
         return writer.Encode();
-    }
-
-    private static AuthenticatorInfo CreateMockAuthenticatorInfo()
-    {
-        // Create minimal authenticatorInfo CBOR for testing
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-
-        writer.WriteStartMap(3);
-
-        // 0x01: versions
-        writer.WriteInt32(1);
-        writer.WriteStartArray(2);
-        writer.WriteTextString("FIDO_2_0");
-        writer.WriteTextString("FIDO_2_1");
-        writer.WriteEndArray();
-
-        // 0x02: extensions
-        writer.WriteInt32(2);
-        writer.WriteStartArray(1);
-        writer.WriteTextString("hmac-secret");
-        writer.WriteEndArray();
-
-        // 0x03: aaguid
-        writer.WriteInt32(3);
-        writer.WriteByteString(Guid.NewGuid().ToByteArray());
-
-        writer.WriteEndMap();
-
-        return AuthenticatorInfo.Decode(writer.Encode());
     }
 
     [Fact(Timeout = 5000)]

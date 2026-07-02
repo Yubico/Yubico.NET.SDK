@@ -6,7 +6,7 @@ YubiKit uses Microsoft.Extensions.Logging for all diagnostic output. This guide 
 
 ```csharp
 // No logging (default) - just use the SDK
-var manager = host.Services.GetRequiredService<IYubiKeyManager>();
+var devices = await YubiKeyManager.FindAllAsync();
 
 // With logging - one line before using SDK
 YubiKitLogging.Configure(loggerFactory);
@@ -26,11 +26,7 @@ By default, YubiKit produces **no log output**. This is intentional:
 Simply don't configure logging. YubiKit uses `NullLoggerFactory` internally.
 
 ```csharp
-using var host = Host.CreateDefaultBuilder()
-    .ConfigureServices(services => services.AddYubiKeyManagerCore())
-    .Build();
-
-var manager = host.Services.GetRequiredService<IYubiKeyManager>();
+var devices = await YubiKeyManager.FindAllAsync();
 // No logging output
 ```
 
@@ -54,7 +50,7 @@ YubiKitLogging.Configure(loggerFactory);
 
 ```
 
-### 3. DI with Explicit Setup (Recommended)
+### 3. DI with Explicit Logging Setup
 
 Best for: Applications using dependency injection where you want explicit control.
 
@@ -65,38 +61,16 @@ using var host = Host.CreateDefaultBuilder()
         logging.AddConsole();
         logging.SetMinimumLevel(LogLevel.Information);
     })
-    .ConfigureServices(services => services
-        .AddYubiKeyManagerCore()
-        .AddYubiKeyManager())
     .Build();
 
-// Explicit setup - recommended for clarity
+// Explicit setup from the DI-provided ILoggerFactory
 YubiKitLogging.Configure(host.Services.GetRequiredService<ILoggerFactory>());
 
 await host.StartAsync();
-var manager = host.Services.GetRequiredService<IYubiKeyManager>();
+var devices = await YubiKeyManager.FindAllAsync();
 ```
 
-### 4. DI Auto-Wire (Convenience)
-
-Best for: Quick prototypes or when you trust DI defaults.
-
-If you register `ILoggerFactory` in DI but don't call `YubiKitLogging.Configure()`, 
-YubiKit will automatically use the DI logger factory when `IYubiKeyManager` is first resolved.
-
-```csharp
-using var host = Host.CreateDefaultBuilder()  // Registers ILoggerFactory automatically
-    .ConfigureServices(services => services.AddYubiKeyManagerCore())
-    .Build();
-
-// No explicit Configure() call - auto-wires from DI
-var manager = host.Services.GetRequiredService<IYubiKeyManager>();
-// Logging now active via DI's ILoggerFactory
-```
-
-**Note:** Explicit `YubiKitLogging.Configure()` always takes precedence over auto-wire.
-
-### 5. ASP.NET Core
+### 4. ASP.NET Core
 
 Best for: Web applications and APIs.
 
@@ -104,18 +78,13 @@ Best for: Web applications and APIs.
 var builder = WebApplication.CreateBuilder(args);
 
 // ASP.NET Core already configures logging
-builder.Services.AddYubiKeyManagerCore();
-builder.Services.AddYubiKeyManager();
 
 var app = builder.Build();
 
-// Optional: Explicit setup if you want control
-// YubiKitLogging.Configure(app.Services.GetRequiredService<ILoggerFactory>());
-
-// Or let auto-wire handle it when IYubiKeyManager is resolved
+YubiKitLogging.Configure(app.Services.GetRequiredService<ILoggerFactory>());
 ```
 
-### 6. appsettings.json Configuration
+### 5. appsettings.json Configuration
 
 Best for: Production deployments with environment-specific settings.
 
@@ -141,13 +110,12 @@ Best for: Production deployments with environment-specific settings.
 **Program.cs:**
 ```csharp
 using var host = Host.CreateDefaultBuilder(args)  // Loads appsettings.json
-    .ConfigureServices(services => services.AddYubiKeyManagerCore())
     .Build();
 
 YubiKitLogging.Configure(host.Services.GetRequiredService<ILoggerFactory>());
 ```
 
-### 7. Serilog Integration
+### 6. Serilog Integration
 
 Best for: Structured logging, file output, or log aggregation services.
 
@@ -163,7 +131,6 @@ Log.Logger = new LoggerConfiguration()
 
 using var host = Host.CreateDefaultBuilder()
     .UseSerilog()
-    .ConfigureServices(services => services.AddYubiKeyManagerCore())
     .Build();
 
 YubiKitLogging.Configure(host.Services.GetRequiredService<ILoggerFactory>());
@@ -175,10 +142,10 @@ YubiKit uses the following log categories (class names):
 
 | Category | Description |
 |----------|-------------|
-| `Yubico.YubiKit.Core.DeviceMonitorService` | Device arrival/removal events |
-| `Yubico.YubiKit.Core.DeviceListenerService` | Background device cache updates |
-| `Yubico.YubiKit.Core.DeviceRepositoryCached` | Device cache operations |
-| `Yubico.YubiKit.Core.SmartCard.*` | Smart card/PCSC operations |
+| `Yubico.YubiKit.Core.Devices.*` | Device discovery, metadata, and cache operations |
+| `Yubico.YubiKit.Core.Transports.SmartCard.*` | Smart card/PC/SC transport operations |
+| `Yubico.YubiKit.Core.Protocols.SmartCard.*` | APDU and SCP protocol operations |
+| `Yubico.YubiKit.Core.Transports.Hid.*` | HID device and transport operations |
 | `Yubico.YubiKit.Management.ManagementSession` | Management application commands |
 | `Yubico.YubiKit.Piv.PivSession` | PIV application commands |
 | `Yubico.YubiKit.Fido2.Fido2Session` | FIDO2 application commands |

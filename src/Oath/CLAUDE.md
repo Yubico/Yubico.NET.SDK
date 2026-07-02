@@ -1,6 +1,6 @@
 # CLAUDE.md - OATH Module
 
-This file provides Claude-specific guidance for working with the OATH module. **Read the root [CLAUDE.md](../CLAUDE.md) first** for project-wide conventions.
+This file provides Claude-specific guidance for working with the OATH module. **Read the root [CLAUDE.md](../../CLAUDE.md) first** for project-wide conventions.
 
 ## Module Context
 

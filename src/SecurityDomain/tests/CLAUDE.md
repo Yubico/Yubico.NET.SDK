@@ -63,17 +63,16 @@ extension(YubiKeyTestState state)
 
 **Implementation:**
 - Simple form builds `ServiceCollection` + `ServiceProvider` internally
-- Registers both `AddYubiKeyManagerCore()` and `AddYubiKeySecurityDomain()` (no chaining)
+- Registers `AddYubiKeySecurityDomain()` for the session factory
 - Resolves `SecurityDomainSessionFactory` and invokes with connection
 - Same reset pattern as direct creation
 - Provider is disposed after test completes
 
-**DI Pattern (no chaining):**
+**DI Pattern:**
 ```csharp
-// Each module registers only its own services
-// Caller must register dependencies explicitly
-services.AddYubiKeyManagerCore();      // Core services (idempotent via TryAdd*)
-services.AddYubiKeySecurityDomain();   // SecurityDomain factory (idempotent)
+// Core device discovery uses the static YubiKeyManager.
+// The module DI extension only registers the SecurityDomain factory.
+services.AddYubiKeySecurityDomain();
 ```
 
 ### SharedSmartCardConnection
@@ -194,4 +193,4 @@ Assert.Equal(expectedKeyCount, keyInfo.Count);
 2. **Don't reset between related sessions** - Use `resetBeforeUse: false` for second session in multi-session tests
 3. **CancellationToken in GetDataAsync** - Use named parameter: `GetDataAsync(0x66, cancellationToken: ct)`
 4. **Firmware checks** - SCP11 tests require `MinFirmware = "5.7.2"`
-5. **DI prerequisite** - `AddYubiKeySecurityDomain()` requires `AddYubiKeyManagerCore()` first (no chaining)
+5. **DI scope** - `AddYubiKeySecurityDomain()` only registers the SecurityDomain session factory; Core discovery uses static `YubiKeyManager`

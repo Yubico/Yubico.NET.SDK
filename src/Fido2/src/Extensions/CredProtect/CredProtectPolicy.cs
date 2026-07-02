@@ -37,7 +37,7 @@ public enum CredProtectPolicy
     /// This is the default for non-discoverable credentials.
     /// </remarks>
     UserVerificationOptional = 1,
-    
+
     /// <summary>
     /// User verification is optional with credential ID list.
     /// </summary>
@@ -48,7 +48,7 @@ public enum CredProtectPolicy
     /// This is the default for discoverable credentials on most authenticators.
     /// </remarks>
     UserVerificationOptionalWithCredentialIdList = 2,
-    
+
     /// <summary>
     /// User verification is always required.
     /// </summary>

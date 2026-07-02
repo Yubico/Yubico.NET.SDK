@@ -14,7 +14,7 @@ For overall repo conventions, see the repository root [CLAUDE.md](../../CLAUDE.m
 ## Module Context
 
 The WebAuthn module implements the W3C Web Authentication API (Level 2/3) on top of the FIDO2 CTAP protocol. It provides:
-- **High-level WebAuthn API**: `IWebAuthnClient` abstracts credential registration and authentication
+- **High-level WebAuthn API**: `WebAuthnClient` orchestrates credential registration and authentication
 - **Extension Framework**: Pluggable CTAP v4 extensions (e.g., `previewSign`)
 - **Backend Abstraction**: Transparently routes operations through `IFidoSession`
 - **Status Streaming**: Async enumerable for operation progress (`IAsyncEnumerable<WebAuthnStatus>`)
@@ -27,8 +27,8 @@ The WebAuthn module implements the W3C Web Authentication API (Level 2/3) on top
 ```
 src/
 ├── Client/                       # WebAuthn Client API
-│   ├── IWebAuthnClient.cs
 │   ├── WebAuthnClient.cs
+│   ├── PublicSuffixChecker.cs
 │   ├── FidoSessionWebAuthnBackend.cs
 │   └── WebAuthnStatus.cs
 ├── Attestation/                  # Attestation object types
@@ -42,14 +42,14 @@ src/
 │   │   ├── PreviewSignRegistrationInput.cs
 │   │   └── PreviewSignErrors.cs
 │   └── IExtensionAdapter.cs
-├── Protocol/                     # Request/response types
-│   ├── WebAuthnCredentialCreateOptions.cs
-│   ├── WebAuthnCredentialRequestOptions.cs
-│   ├── WebAuthnMakeCredentialResponse.cs
-│   └── WebAuthnGetAssertionResponse.cs
-└── Error/                        # Error handling
-    ├── WebAuthnClientError.cs
-    └── WebAuthnClientException.cs
+├── Client/Registration/          # Registration options and responses
+│   ├── RegistrationOptions.cs
+│   └── RegistrationResponse.cs
+├── Client/Authentication/        # Authentication options and responses
+│   ├── AuthenticationOptions.cs
+│   ├── AuthenticationResponse.cs
+│   └── MatchedCredential.cs
+└── WebAuthnClientError.cs        # Error handling
 ```
 
 ## Logging
@@ -74,24 +74,32 @@ Logger.LogError(ex, "PreviewSign authentication failed");
 ### WebAuthn Client Usage
 
 ```csharp
-// Create client
-var backend = new FidoSessionWebAuthnBackend(fidoSession);
-var client = new WebAuthnClient(backend);
+// Create client from an existing FIDO2 session.
+// The PublicSuffixChecker should be backed by Public Suffix List data.
+await using var client = new WebAuthnClient(
+    fidoSession,
+    origin,
+    isPublicSuffix: domain => publicSuffixList.Contains(domain));
+
+// Or create the FIDO2 session and WebAuthn client from a YubiKey device.
+await using var clientFromDevice = await yubiKey.CreateWebAuthnClientAsync(
+    origin,
+    isPublicSuffix: domain => publicSuffixList.Contains(domain));
 
 // Registration
-var createOptions = new WebAuthnCredentialCreateOptions
+var createOptions = new RegistrationOptions
 {
     Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
-    User = new PublicKeyCredentialUserEntity { Id = userId, Name = "user@example.com" },
+    User = new PublicKeyCredentialUserEntity(userId, "user@example.com", "User"),
     Challenge = challenge,
-    PubKeyCredParams = [new PublicKeyCredentialParameters { Alg = -7, Type = "public-key" }],
+    PubKeyCredParams = [CoseAlgorithm.Es256],
     Extensions = extensionInputs
 };
 
-var credential = await client.CreateCredentialAsync(createOptions);
+var credential = await client.MakeCredentialAsync(createOptions, pin: null, useUv: false);
 
 // Authentication
-var requestOptions = new WebAuthnCredentialRequestOptions
+var requestOptions = new AuthenticationOptions
 {
     Challenge = challenge,
     RpId = "example.com",
@@ -99,7 +107,8 @@ var requestOptions = new WebAuthnCredentialRequestOptions
     Extensions = extensionInputs
 };
 
-var assertion = await client.GetAssertionAsync(requestOptions);
+var matches = await client.GetAssertionAsync(requestOptions, pin: null, useUv: false);
+var assertion = await matches[0].SelectAsync();
 ```
 
 ### Status Streaming
@@ -107,22 +116,43 @@ var assertion = await client.GetAssertionAsync(requestOptions);
 WebAuthn operations expose progress via `IAsyncEnumerable<WebAuthnStatus>`:
 
 ```csharp
-await foreach (var status in client.CreateCredentialAsync(options))
+await foreach (var status in client.MakeCredentialStreamAsync(options))
 {
-    Console.WriteLine($"[{status.Stage}] {status.Message}");
-    
-    if (status.Stage == WebAuthnStage.WaitingForUserPresence)
+    switch (status)
     {
-        Console.WriteLine("Touch your YubiKey...");
+        case WebAuthnStatusProcessing:
+            Console.WriteLine("Processing WebAuthn ceremony...");
+            break;
+        case WebAuthnStatusRequestingPin requestingPin:
+            await requestingPin.SubmitPin(pinBytes);
+            break;
+        case WebAuthnStatusRequestingUv requestingUv:
+            await requestingUv.SetUseUv(false);
+            break;
+        case WebAuthnStatusFinished<RegistrationResponse> finished:
+            Console.WriteLine($"Created credential {Convert.ToHexString(finished.Result.CredentialId.Span)}");
+            break;
+        case WebAuthnStatusFailed failed:
+            throw failed.Error;
     }
 }
 ```
 
-**Status stages:**
-- `Initializing` — Validating request
-- `SelectingCredential` — Credential probe (auth only)
-- `WaitingForUserPresence` — Awaiting touch
-- `Complete` — Operation succeeded
+**Status records:**
+- `WebAuthnStatusProcessing` — ceremony work is in progress
+- `WebAuthnStatusRequestingPin` — caller must supply PIN bytes or cancel
+- `WebAuthnStatusRequestingUv` — caller must opt in/out of UV
+- `WebAuthnStatusFinished<T>` — operation completed successfully
+- `WebAuthnStatusFailed` — operation completed with a typed WebAuthn error
+
+### RP ID Validation
+
+`WebAuthnClient` validates RP IDs against `WebAuthnOrigin` before CTAP operations. Public suffixes such as `com` and `co.uk` must be rejected for suffix matches, so production callers must provide a `PublicSuffixChecker` backed by Public Suffix List data.
+
+Cross-SDK alignment:
+- Swift uses the same caller-supplied public-suffix checker pattern for `WebAuthn.Client`.
+- Python `python-fido2` ships bundled PSL data and validates with `verify_rp_id`.
+- Android accepts caller-supplied `effectiveDomain`; .NET intentionally keeps the safer explicit suffix-checker model.
 
 ### Extension Adapter Pattern
 
@@ -214,6 +244,18 @@ var authenticationExtensions = new AuthenticationExtensionInputs(
 - `[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]` — Tests requiring touch
 - `[Trait(TestCategories.Category, TestCategories.Slow)]` — RSA 3072/4096 keygen or >5s tests (skipped by `--smoke`)
 
+**Coordination lanes:**
+
+| Lane | Examples | Agent-runnable? | Rule |
+|------|----------|-----------------|------|
+| Unit/fake-backend | WebAuthn client, origin, extension adapter, status-stream unit tests | Yes | Run through `dotnet toolchain.cs test --project WebAuthn` |
+| Integration smoke without UP | factory/session checks that do not ask for touch | Yes | Use `--smoke` or `Category!=RequiresUserPresence` |
+| User Presence | registration/authentication ceremonies, previewSign hardware checks | No by default | Mark with `Category=RequiresUserPresence`; run only with a human present |
+| User Verification / PIN | PIN normalization, UV-required/preferred flows | No by default | Requires explicit human approval and known PIN/device state |
+| Reset/destructive cleanup | reset or broad persistent credential deletion | No | Human-approved destructive run only |
+
+Agents must not run WebAuthn User Presence, UV/PIN, reset, insert/remove, or destructive hardware checks unless a human explicitly approves the exact command and is physically present for the interaction.
+
 **Key Pattern:**
 ```csharp
 [Theory]
@@ -222,9 +264,12 @@ public async Task Registration_WithPreviewSign_ReturnsGeneratedSigningKey(YubiKe
 {
     await using var fidoSession = await state.Device.CreateFidoSessionAsync();
     await WebAuthnTestHelpers.NormalizePinAsync(fidoSession, TestPin);
-    
-    var backend = new FidoSessionWebAuthnBackend(fidoSession);
-    var client = new WebAuthnClient(backend);
+
+    WebAuthnOrigin.TryParse(TestOriginUrl, out var origin);
+    await using var client = new WebAuthnClient(
+        fidoSession,
+        origin!,
+        isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk");
     
     // Test logic...
 }
@@ -238,10 +283,10 @@ dotnet toolchain.cs -- test --project WebAuthn
 # Integration tests (no UP)
 dotnet toolchain.cs -- test --integration --project WebAuthn --filter "Category!=RequiresUserPresence"
 
-# Integration tests (with UP, user present)
+# Integration tests (with UP, human-coordinated only)
 dotnet toolchain.cs -- test --integration --project WebAuthn --filter "Category=RequiresUserPresence"
 
-# Smoke tests only (skip Slow)
+# Smoke tests only (skip Slow and RequiresUserPresence)
 dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
 ```
 

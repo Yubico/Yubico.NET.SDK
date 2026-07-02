@@ -15,7 +15,7 @@
 using Spectre.Console;
 using Yubico.YubiKit.Cli.Shared.Device;
 using Yubico.YubiKit.Cli.Shared.Output;
-using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.Abstractions;
 
 namespace Yubico.YubiKit.Cli.Shared.Cli;
 

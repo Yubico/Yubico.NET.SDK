@@ -13,9 +13,10 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Cryptography.Cose;
-using Yubico.YubiKit.Core.Hid.Fido;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Fido2.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -33,23 +34,32 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 public class FidoSessionSimpleTests
 {
     /// <summary>
-    /// Tests that creating a FidoSession over USB SmartCard (CCID) correctly throws NotSupportedException.
-    /// FIDO2 is only available over NFC SmartCard or USB HID FIDO interfaces.
+    /// Tests that creating a FidoSession over SmartCard (CCID) succeeds.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task CreateFidoSession_With_UsbSmartCard_ThrowsNotSupportedException(YubiKeyTestState state)
+    public async Task CreateFidoSession_With_SmartCard_CreateAsync(YubiKeyTestState state)
     {
         await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>();
 
-        // USB CCID does not support FIDO2 - only NFC SmartCard or USB HID FIDO
-        var exception = await Assert.ThrowsAsync<NotSupportedException>(async () =>
+        FidoSession? session;
+        try
         {
-            await FidoSession.CreateAsync(connection);
-        });
+            session = await FidoSession.CreateAsync(connection);
+        }
+        catch (NotSupportedException ex)
+        {
+            Skip.If(true, ex.Message);
+            return;
+        }
 
-        Assert.Contains("NFC transport", exception.Message);
-        Assert.Contains("IFidoHidConnection", exception.Message);
+        await using (session)
+        {
+            var info = await session.GetInfoAsync();
+
+            Assert.NotNull(info);
+            Assert.True(info.Versions.Count > 0, "AuthenticatorInfo.Versions should not be empty");
+        }
     }
 
     [Theory]

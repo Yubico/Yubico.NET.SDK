@@ -1,6 +1,6 @@
 # CLAUDE.md - FIDO2 Module
 
-This file provides Claude-specific guidance for working with the FIDO2 module. **Read the root [CLAUDE.md](../CLAUDE.md) first** for general repository patterns.
+This file provides Claude-specific guidance for working with the FIDO2 module. **Read the root [CLAUDE.md](../../CLAUDE.md) first** for general repository patterns.
 
 ## Documentation Maintenance
 
@@ -15,11 +15,18 @@ The FIDO2 module implements CTAP 2.1/2.3 (Client to Authenticator Protocol) for 
 
 **Transports Supported:**
 - FIDO HID protocol over USB (primary transport)
-- SmartCard (CCID) via NFC only (USB CCID is NOT supported for FIDO2)
+- SmartCard (CCID) over NFC or USB when the connected authenticator exposes the FIDO2 AID
+- USB SmartCard on firmware 5.8.0+; older USB-connected YubiKeys must use HID FIDO
+- NFC SmartCard remains allowed when the current PC/SC connection reports `Transport.Nfc`; Core classifies PC/SC YubiKey transport from ATR evidence, not from model NFC capability
 
-> **Important:** FIDO2 over USB uses the HID FIDO interface, NOT the CCID/SmartCard interface. 
-> The SmartCard transport only works over NFC. Attempting to create a FidoSession with a USB CCID 
-> connection will throw `NotSupportedException`.
+> **Important:** HID FIDO is the primary USB FIDO2 interface.
+> USB SmartCard FIDO2 is also supported on firmware 5.8.0+ when the FIDO2 AID is exposed;
+> older USB-connected YubiKeys must use `IFidoHidConnection`.
+> The firmware gate runs after SmartCard FIDO2 AID selection because FIDO firmware is obtained from
+> CTAP GetInfo on this transport.
+> FIDO GetInfo can report a `0.x` sentinel firmware (for example `0.0.1`) on devices whose real
+> firmware is available through Management; firmware gates use `Feature.IsSupportedByFirmware(...)`
+> so `Major == 0` sentinel firmware is treated as modern.
 
 ## Architecture Overview
 
@@ -33,8 +40,8 @@ Yubico.YubiKit.Fido2/
 │   ├── IYubiKeyExtensions.cs       # Extension methods for IYubiKey
 │   ├── Backend/                    # Transport backends
 │   │   ├── IFidoBackend.cs
-│   │   ├── FidoHidBackend.cs       # HID transport
-│   │   └── SmartCardFidoBackend.cs # SmartCard/CCID transport
+│   │   ├── HidBackend.cs           # HID transport
+│   │   └── SmartCardBackend.cs     # SmartCard/CCID transport
 │   ├── Cbor/                       # CBOR serialization
 │   │   ├── CtapRequestBuilder.cs   # Fluent CBOR request builder
 │   │   └── CtapResponseParser.cs   # CBOR response parsing utilities
@@ -241,6 +248,8 @@ Key rules:
 - Parameters are **integer keys** (not strings) for CTAP
 - Use **Ctap2Canonical** conformance mode (sorted integer keys)
 - Build request returns command byte + CBOR payload
+- Use `.WithValue(key, writer => ...)` for complex values or sensitive byte spans that should be written directly instead of copied through `.WithBytes(...)`
+- Keep operation-level request builders as pure encoding helpers; do not introduce operation-specific CTAP command classes
 
 ## Security Requirements
 
@@ -322,7 +331,7 @@ var reader = new CborReader(cborPayload, CborConformanceMode.Ctap2Canonical);
 
 ### Hardware Integration Tests
 
-Tests requiring user presence must be marked and excluded:
+Tests requiring user presence must be marked and excluded from unattended runs:
 
 ```csharp
 // Test that can run without user interaction
@@ -336,7 +345,7 @@ public async Task GetInfoAsync_Returns_AAGUID()
 
 // Test requiring user touch - MUST be excluded from automated runs
 [Fact]
-[Trait("RequiresUserPresence", "true")]
+[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
 public async Task MakeCredentialAsync_CreatesPasskey()
 {
     // This requires user touch
@@ -345,7 +354,7 @@ public async Task MakeCredentialAsync_CreatesPasskey()
 
 Run tests excluding user presence:
 ```bash
-dotnet test --filter "RequiresUserPresence!=true"
+dotnet toolchain.cs -- test --project Fido2 --smoke --filter "Category!=RequiresUserPresence"
 ```
 
 ## Feature Flags

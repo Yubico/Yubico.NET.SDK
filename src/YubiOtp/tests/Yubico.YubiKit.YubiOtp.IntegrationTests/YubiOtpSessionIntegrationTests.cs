@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
@@ -25,8 +25,7 @@ public class YubiOtpSessionIntegrationTests
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task GetSerial_ReturnsPositiveSerialNumber(YubiKeyTestState state)
     {
-        var connection = await state.Device.ConnectAsync();
-        await using var session = await YubiOtpSession.CreateAsync(connection);
+        await using var session = await state.Device.CreateYubiOtpSessionAsync();
 
         var serial = await session.GetSerialAsync();
 
@@ -38,8 +37,7 @@ public class YubiOtpSessionIntegrationTests
     [WithYubiKey]
     public async Task GetConfigState_ReturnsValidState(YubiKeyTestState state)
     {
-        var connection = await state.Device.ConnectAsync();
-        await using var session = await YubiOtpSession.CreateAsync(connection);
+        await using var session = await state.Device.CreateYubiOtpSessionAsync();
 
         var configState = session.GetConfigState();
 
@@ -51,8 +49,7 @@ public class YubiOtpSessionIntegrationTests
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task PutConfiguration_HmacSha1_ThenDelete_Succeeds(YubiKeyTestState state)
     {
-        var connection = await state.Device.ConnectAsync();
-        await using var session = await YubiOtpSession.CreateAsync(connection);
+        await using var session = await state.Device.CreateYubiOtpSessionAsync();
 
         // Program slot 2 with HMAC-SHA1
         using var config = new HmacSha1SlotConfiguration(
@@ -77,8 +74,7 @@ public class YubiOtpSessionIntegrationTests
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     public async Task CalculateHmacSha1_WithKnownKey_ReturnsExpectedResponse(YubiKeyTestState state)
     {
-        var connection = await state.Device.ConnectAsync();
-        await using var session = await YubiOtpSession.CreateAsync(connection);
+        await using var session = await state.Device.CreateYubiOtpSessionAsync();
 
         // Program slot 2 with a known HMAC-SHA1 key
         byte[] key = new byte[20];
@@ -106,8 +102,7 @@ public class YubiOtpSessionIntegrationTests
     [WithYubiKey(MinFirmware = "2.3.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task SwapSlots_Succeeds(YubiKeyTestState state)
     {
-        var connection = await state.Device.ConnectAsync();
-        await using var session = await YubiOtpSession.CreateAsync(connection);
+        await using var session = await state.Device.CreateYubiOtpSessionAsync();
 
         // This test only verifies the swap command completes without error.
         // A full test would configure both slots and verify the swap,
@@ -122,8 +117,7 @@ public class YubiOtpSessionIntegrationTests
     [WithYubiKey(MinFirmware = "3.0.0")]
     public async Task SetNdefConfiguration_UriType_Succeeds(YubiKeyTestState state)
     {
-        var connection = await state.Device.ConnectAsync();
-        await using var session = await YubiOtpSession.CreateAsync(connection);
+        await using var session = await state.Device.CreateYubiOtpSessionAsync();
 
         // Configure NDEF for slot 2
         await session.SetNdefConfigurationAsync(

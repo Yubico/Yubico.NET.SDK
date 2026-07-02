@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Hid.Otp;
+using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 
 namespace Yubico.YubiKit.Management;
 
@@ -25,44 +25,11 @@ internal sealed class OtpBackend(IOtpHidProtocol otpProtocol) : IManagementBacke
 {
     private readonly IOtpHidProtocol _otpProtocol = otpProtocol ?? throw new ArgumentNullException(nameof(otpProtocol));
 
-    public async ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken cancellationToken)
+    public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
     {
-        // Send CMD_YK4_CAPABILITIES (0x13) with page payload
-        // For page 0, send empty payload (Java sends null which becomes 64 zeros)
-        // For page > 0, send single byte with page number
-        var pagePayload = page == 0 ? ReadOnlyMemory<byte>.Empty : new byte[] { (byte)page };
-        var response = await _otpProtocol.SendAndReceiveAsync(
-                OtpConstants.CmdYk4Capabilities, 
-                pagePayload, 
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        // Response format: [length][TLV data...][CRC16]
-        // Verify CRC: checkCrc(response, response[0] + 1 + 2)
-        // response[0] is the length of TLV data, +1 for the length byte, +2 for CRC
-        var totalLength = response.Span[0] + 1 + 2;
-        if (totalLength > response.Length)
-        {
-            throw new BadResponseException(
-                $"OTP response length field ({response.Span[0]}) exceeds buffer size ({response.Length}).");
-        }
-
-        if (!ChecksumUtils.CheckCrc(response.Span, totalLength))
-        {
-            throw new BadResponseException("Invalid CRC in OTP response");
-        }
-
-        // Return data without CRC: response[0..length+1]
-        return response[..(response.Span[0] + 1)].ToArray();
-    }
-
-    public async ValueTask WriteConfigAsync(byte[] config, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(config);
-
         await _otpProtocol.SendAndReceiveAsync(
-                OtpConstants.CmdYk4SetDeviceInfo, 
-                config, 
+                OtpConstants.CmdYk4SetDeviceInfo,
+                config,
                 cancellationToken)
             .ConfigureAwait(false);
     }
@@ -72,8 +39,8 @@ internal sealed class OtpBackend(IOtpHidProtocol otpProtocol) : IManagementBacke
         ArgumentNullException.ThrowIfNull(data);
 
         await _otpProtocol.SendAndReceiveAsync(
-                OtpConstants.CmdDeviceConfig, 
-                data, 
+                OtpConstants.CmdDeviceConfig,
+                data,
                 cancellationToken)
             .ConfigureAwait(false);
     }

@@ -488,7 +488,7 @@ After green only: remove duplication, improve names.
 # CLAUDE.md - Security Domain Module
 
 This file provides Claude-specific guidance for the Security Domain module.
-**Read [README.md](README.md) first** for general documentation.
+**Read the module README first** for general documentation.
 
 ## Module Context
 

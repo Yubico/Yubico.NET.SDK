@@ -13,23 +13,24 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Hid.Fido;
-using Yubico.YubiKit.Core.Hid.Interfaces;
-using Yubico.YubiKit.Core.Hid.Otp;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Core.Utils;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Protocols.Otp.Hid;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Management;
 
 public sealed class ManagementSession : ApplicationSession, IManagementSession
 {
-    private const int TagMoreDeviceInfo = 0x10;
-
     private static readonly Feature FeatureDeviceInfo =
         new("Device Info", 4, 1, 0);
 
@@ -107,40 +108,8 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
     }
 
-    public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
-    {
-        // TODO Add try catch
-        byte page = 0;
-        var allPagesTlvs = new List<Tlv>();
-
-        var hasMoreData = true;
-        while (hasMoreData)
-        {
-            var encodedResult = await _backend.ReadConfigAsync(page, cancellationToken).ConfigureAwait(false);
-
-            if (encodedResult.Length < 1)
-                throw new BadResponseException($"Empty response for page {page}");
-                
-            if (encodedResult.Length - 1 != encodedResult[0])
-            {
-                throw new BadResponseException("Invalid length");
-            }
-
-            var pageTlvs = TlvHelper.DecodeList(encodedResult.AsSpan()[1..]);
-            allPagesTlvs.AddRange(pageTlvs);
-
-            var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
-            if (moreData is null)
-                break;
-
-            var moreDataValue = moreData.Value;
-            hasMoreData = moreData?.Length == 1 && moreDataValue.Span[0] == 1;
-            ++page;
-        }
-
-        using var allTlvs = new DisposableTlvList(allPagesTlvs);
-        return DeviceInfo.CreateFromTlvs([.. allTlvs], _version);
-    }
+    public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default) =>
+        DeviceInfoReader.ReadAsync(_protocol, _version, cancellationToken);
 
     public Task SetDeviceConfigAsync(
         DeviceConfig config,
@@ -160,7 +129,23 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             throw new ArgumentException("New lock code must be 16 bytes", nameof(newLockCode));
 
         var configBytes = config.GetBytes(reboot, currentLockCode, newLockCode);
-        return _backend.WriteConfigAsync(configBytes.ToArray(), cancellationToken).AsTask();
+        return WriteConfigAndZeroAsync(_backend, configBytes, cancellationToken);
+
+        static async Task WriteConfigAndZeroAsync(
+            IManagementBackend backend,
+            Memory<byte> configBytes,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                await backend.WriteConfigAsync(configBytes, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (!configBytes.IsEmpty)
+                    CryptographicOperations.ZeroMemory(configBytes.Span);
+            }
+        }
     }
 
     public Task ResetDeviceAsync(CancellationToken cancellationToken = default)
@@ -183,7 +168,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
                 "Could not get version from DeviceInfo, fallback to versionHeader in Management.Select");
         }
 
-        return defaultVersion 
+        return defaultVersion
             ?? throw new InvalidOperationException("Could not determine firmware version from device");
     }
 
@@ -228,7 +213,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         var protocol = PcscProtocolFactory<ISmartCardConnection>
             .Create()
             .Create(connection);
-        
+
         var backend = new SmartCardBackend(protocol as ISmartCardProtocol ?? throw new InvalidOperationException());
         return (protocol, backend);
     }

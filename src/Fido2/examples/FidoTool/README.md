@@ -6,7 +6,7 @@ A Spectre.Console CLI application that exposes the full FIDO2/CTAP2 API surface 
 
 ```bash
 # Build
-dotnet build
+dotnet toolchain.cs -- build --project Fido2
 
 # Interactive mode (menu-driven)
 dotnet run
@@ -132,9 +132,9 @@ Operations targeting unsupported firmware will return a clear error message.
 ## Transport Support
 
 - **FIDO HID** (USB) - Primary transport
-- **SmartCard** (NFC only) - Secondary transport
+- **SmartCard/CCID** - NFC and USB APDU transport when the connected authenticator exposes the FIDO2 AID
 
-FIDO2 is NOT available over USB CCID/SmartCard or OTP HID.
+Prefer HID FIDO for ordinary USB FIDO2 coverage. USB SmartCard FIDO2 is supported on firmware 5.8.0+ when the FIDO2 AID is exposed; older USB-connected YubiKeys must use HID FIDO. FIDO2 is not available over OTP HID.
 
 ## Device Selection
 

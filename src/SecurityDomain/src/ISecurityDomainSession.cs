@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Cryptography;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 namespace Yubico.YubiKit.SecurityDomain;
 

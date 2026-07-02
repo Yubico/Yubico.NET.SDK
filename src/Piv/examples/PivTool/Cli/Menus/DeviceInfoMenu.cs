@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
@@ -48,7 +48,7 @@ public static class DeviceInfoMenu
             });
     }
 
-    private static void DisplayDeviceDetails(Management.DeviceInfo info)
+    private static void DisplayDeviceDetails(DeviceInfo info)
     {
         OutputHelpers.WriteKeyValue("Serial Number", info.SerialNumber?.ToString());
         OutputHelpers.WriteKeyValue("Firmware Version", info.VersionName);

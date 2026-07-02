@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using Xunit.Abstractions;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Tests.Shared;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         This class wraps an <see cref="IYubiKey" /> and its <see cref="Management.DeviceInfo" />
+///         This class wraps an <see cref="IYubiKey" /> and its <see cref="DeviceInfo" />
 ///         for use with xUnit Theory tests via <see cref="Yubico.YubiKit.Tests.Shared.Infrastructure" />.
 ///     </para>
 ///     <para>
@@ -198,7 +198,10 @@ public class YubiKeyTestState : IXunitSerializable
     private DeviceInfo _deviceInfo;
 
     /// <summary>
-    ///     Gets the connection type for this device instance.
+    ///     Gets the requested transport for this bound device instance — the transport named in
+    ///     <c>[WithYubiKey(ConnectionType = ...)]</c>, or the device's full available set when no transport
+    ///     filter was given. Use <see cref="AvailableConnections"/> for the device's actual connection set
+    ///     and the device's <see cref="IYubiKey.SupportsConnection"/> to test a specific transport.
     ///     For placeholders, accessing this property triggers lazy device binding.
     /// </summary>
     public ConnectionType ConnectionType
@@ -212,6 +215,13 @@ public class YubiKeyTestState : IXunitSerializable
     }
 
     private ConnectionType _connectionType;
+
+    /// <summary>
+    ///     Gets the set of connections the bound physical device actually exposes (the union for a merged
+    ///     composite device). Distinct from <see cref="ConnectionType"/>, which carries the requested
+    ///     transport for transport-specific tests.
+    /// </summary>
+    public ConnectionType AvailableConnections => Device.AvailableConnections;
 
     /// <summary>
     ///     Gets the firmware version.
@@ -327,7 +337,13 @@ public class YubiKeyTestState : IXunitSerializable
 
         _device = device.Device;
         DeviceInfo = device.DeviceInfo;
-        ConnectionType = device.ConnectionType;
+        // Record the REQUESTED transport (the [WithYubiKey(ConnectionType = ...)] filter) so transport-
+        // specific tests keep seeing the single transport they asked for, even when the bound device is a
+        // merged physical device exposing several connections. With no transport filter, fall back to the
+        // device's full available set. The device's real connection set is always on AvailableConnections.
+        ConnectionType = _filterCriteria.ConnectionType != ConnectionType.Unknown
+            ? _filterCriteria.ConnectionType
+            : device.AvailableConnections;
         IsPlaceholder = false;
     }
 

@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Buffers;
+using Microsoft.Extensions.Logging;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Core.Utils;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Oath;
 
@@ -73,9 +74,12 @@ public sealed class OathSession : ApplicationSession, IOathSession
         CancellationToken cancellationToken = default)
     {
         var session = new OathSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+        await session.InitializeAsync(CreateOathProtocolConfiguration(configuration), cancellationToken).ConfigureAwait(false);
         return session;
     }
+
+    private static ProtocolConfiguration CreateOathProtocolConfiguration(ProtocolConfiguration? configuration) =>
+        (configuration ?? default) with { InsSendRemaining = OathConstants.InsSendRemaining };
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
@@ -159,7 +163,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        var responseData = await CollectResponseData(response, cancellationToken).ConfigureAwait(false);
+        var responseData = response.Data;
 
         if (responseData.Length == 0)
             return [];
@@ -211,55 +215,14 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         try
         {
-            // TAG_NAME + TAG_KEY
-            using var nameTlv = new Tlv(OathConstants.TagName, credId);
-            using var keyTlv = new Tlv(OathConstants.TagKey, keyValue);
-
-            // Calculate total size for all TLVs
-            int totalSize = nameTlv.TotalLength + keyTlv.TotalLength;
-
-            // TAG_PROPERTY is raw bytes [tag, value], NOT TLV-encoded (no length field).
-            // This matches the ykman Python canonical: struct.pack(">BB", TAG_PROPERTY, PROP_REQUIRE_TOUCH)
-            byte[]? propBytes = null;
-            Tlv? imfTlv = null;
-
-            if (requireTouch)
-            {
-                propBytes = [OathConstants.TagProperty, OathConstants.PropRequireTouch];
-                totalSize += propBytes.Length;
-            }
-
-            if (credentialData.OathType == OathType.Hotp && credentialData.Counter > 0)
-            {
-                Span<byte> imfBytes = stackalloc byte[4];
-                BinaryPrimitives.WriteInt32BigEndian(imfBytes, credentialData.Counter);
-                imfTlv = new Tlv(OathConstants.TagImf, imfBytes);
-                totalSize += imfTlv.TotalLength;
-            }
-
             byte[]? data = null;
             try
             {
-                data = new byte[totalSize];
-                int offset = 0;
-
-                nameTlv.AsSpan().CopyTo(data.AsSpan(offset));
-                offset += nameTlv.TotalLength;
-
-                keyTlv.AsSpan().CopyTo(data.AsSpan(offset));
-                offset += keyTlv.TotalLength;
-
-                if (propBytes is not null)
-                {
-                    propBytes.CopyTo(data.AsSpan(offset));
-                    offset += propBytes.Length;
-                }
-
-                if (imfTlv is not null)
-                {
-                    imfTlv.AsSpan().CopyTo(data.AsSpan(offset));
-                }
-
+                data = EncodePutCredentialPayload(
+                    credId,
+                    keyValue,
+                    requireTouch,
+                    credentialData.OathType == OathType.Hotp ? credentialData.Counter : 0);
                 var command = new ApduCommand(0x00, OathConstants.InsPut, 0x00, 0x00, data);
                 await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
@@ -270,8 +233,6 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 {
                     CryptographicOperations.ZeroMemory(data);
                 }
-
-                imfTlv?.Dispose();
             }
 
             _logger.LogDebug("Credential stored: {CredentialIdLength} bytes", credId.Length);
@@ -280,6 +241,57 @@ public sealed class OathSession : ApplicationSession, IOathSession
         {
             CryptographicOperations.ZeroMemory(keyValue);
             CryptographicOperations.ZeroMemory(secret);
+        }
+    }
+
+    private static byte[] EncodePutCredentialPayload(
+        ReadOnlyMemory<byte> credentialId,
+        ReadOnlyMemory<byte> keyValue,
+        bool requireTouch,
+        int hotpCounter)
+    {
+        using var nameTlv = new Tlv(OathConstants.TagName, credentialId);
+        using var keyTlv = new Tlv(OathConstants.TagKey, keyValue);
+
+        byte[]? propBytes = requireTouch
+            ? [OathConstants.TagProperty, OathConstants.PropRequireTouch]
+            : null;
+
+        Tlv? imfTlv = null;
+        try
+        {
+            if (hotpCounter > 0)
+            {
+                Span<byte> imfBytes = stackalloc byte[4];
+                BinaryPrimitives.WriteInt32BigEndian(imfBytes, hotpCounter);
+                imfTlv = new Tlv(OathConstants.TagImf, imfBytes);
+            }
+
+            var totalSize = nameTlv.TotalLength + keyTlv.TotalLength + (propBytes?.Length ?? 0) + (imfTlv?.TotalLength ?? 0);
+            var data = new byte[totalSize];
+            var offset = 0;
+
+            nameTlv.AsSpan().CopyTo(data.AsSpan(offset));
+            offset += nameTlv.TotalLength;
+
+            keyTlv.AsSpan().CopyTo(data.AsSpan(offset));
+            offset += keyTlv.TotalLength;
+
+            // TAG_PROPERTY is raw bytes [tag, value], NOT TLV-encoded.
+            // This matches ykman Python: struct.pack(">BB", TAG_PROPERTY, PROP_REQUIRE_TOUCH).
+            if (propBytes is not null)
+            {
+                propBytes.CopyTo(data.AsSpan(offset));
+                offset += propBytes.Length;
+            }
+
+            imfTlv?.AsSpan().CopyTo(data.AsSpan(offset));
+
+            return data;
+        }
+        finally
+        {
+            imfTlv?.Dispose();
         }
     }
 
@@ -313,7 +325,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         using var oldNameTlv = new Tlv(OathConstants.TagName, oldId);
         using var newNameTlv = new Tlv(OathConstants.TagName, newId);
-        byte[] data = [..oldNameTlv.AsSpan(), ..newNameTlv.AsSpan()];
+        byte[] data = [.. oldNameTlv.AsSpan(), .. newNameTlv.AsSpan()];
 
         try
         {
@@ -328,7 +340,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 newName,
                 credential.OathType,
                 credential.Period,
-                credential.TouchRequired);   
+                credential.TouchRequired);
         }
         finally
         {
@@ -348,7 +360,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
 
-        byte[] data = [..nameTlv.AsSpan(), ..challengeTlv.AsSpan()];
+        byte[] data = [.. nameTlv.AsSpan(), .. challengeTlv.AsSpan()];
         try
         {
             var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x00, data);
@@ -396,7 +408,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
 
-        byte[] data = [..nameTlv.AsSpan(), ..challengeTlv.AsSpan()];
+        byte[] data = [.. nameTlv.AsSpan(), .. challengeTlv.AsSpan()];
         try
         {
             // P2=0x01 requests truncated response
@@ -439,7 +451,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        var responseData = await CollectResponseData(response, cancellationToken).ConfigureAwait(false);
+        var responseData = response.Data;
 
         var result = new Dictionary<Credential, Code?>();
 
@@ -537,7 +549,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             using var responseTlv = new Tlv(OathConstants.TagResponse, clientResponse);
             using var challengeTlv = new Tlv(OathConstants.TagChallenge, clientChallenge);
 
-            byte[] data = [..responseTlv.AsSpan(), ..challengeTlv.AsSpan()];
+            byte[] data = [.. responseTlv.AsSpan(), .. challengeTlv.AsSpan()];
             try
             {
                 var command = new ApduCommand(0x00, OathConstants.InsValidate, 0x00, 0x00, data);
@@ -616,7 +628,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             using var challengeTlv = new Tlv(OathConstants.TagChallenge, clientChallenge);
             using var responseTlv = new Tlv(OathConstants.TagResponse, clientResponse);
 
-            byte[] data = [..keyTlv.AsSpan(), ..challengeTlv.AsSpan(), ..responseTlv.AsSpan()];
+            byte[] data = [.. keyTlv.AsSpan(), .. challengeTlv.AsSpan(), .. responseTlv.AsSpan()];
             try
             {
                 var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, data);
@@ -661,31 +673,4 @@ public sealed class OathSession : ApplicationSession, IOathSession
         base.Dispose(disposing);
     }
 
-    private async Task<ReadOnlyMemory<byte>> CollectResponseData(
-        ApduResponse response,
-        CancellationToken cancellationToken)
-    {
-        if (response.Data.Length == 0 && response.IsOK())
-            return ReadOnlyMemory<byte>.Empty;
-
-        // Check for chained response (SW1=0x61)
-        if (response.SW1 != 0x61)
-            return response.Data;
-
-        // Collect all chained data using ArrayBufferWriter to avoid the double allocation from MemoryStream.ToArray()
-        var buffer = new ArrayBufferWriter<byte>();
-        buffer.Write(response.Data.Span);
-
-        var currentResponse = response;
-        while (currentResponse.SW1 == 0x61)
-        {
-            var sendRemaining = new ApduCommand(0x00, OathConstants.InsSendRemaining, 0x00, 0x00);
-            currentResponse = await _protocol
-                .TransmitAndReceiveAsync(sendRemaining, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-            buffer.Write(currentResponse.Data.Span);
-        }
-
-        return buffer.WrittenMemory;
-    }
 }

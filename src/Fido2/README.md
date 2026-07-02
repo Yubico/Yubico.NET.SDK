@@ -21,9 +21,9 @@ This module implements the CTAP 2.1/2.3 (Client to Authenticator Protocol) for Y
 - **Firmware**: 5.0+ (some features require 5.2+, 5.4+, 5.7+)
 - **Transports**:
   - USB: HID FIDO interface (primary)
-  - NFC: SmartCard/CCID interface only
+  - SmartCard/CCID: NFC and USB FIDO2 APDU paths when the connected authenticator exposes the FIDO2 AID
 
-⚠️ **Important**: FIDO2 over USB uses HID FIDO, NOT CCID. USB CCID connections are NOT supported for FIDO2.
+⚠️ **Important**: Prefer HID FIDO for ordinary USB FIDO2 coverage. SmartCard FIDO2 over USB requires firmware 5.8.0+ and a FIDO2 AID exposed over CCID; older USB-connected YubiKeys must use HID FIDO.
 
 ## Installation
 
@@ -193,7 +193,7 @@ var credOptions = new MakeCredentialOptions
 {
     // ... rp, user, etc.
     Extensions = new ExtensionBuilder()
-        .AddCredProtect(CredProtectPolicy.UserVerificationRequired)
+        .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
         .Build()
 };
 
@@ -202,10 +202,7 @@ var assertionOptions = new GetAssertionOptions
 {
     // ... rpId, etc.
     Extensions = new ExtensionBuilder()
-        .AddHmacSecret(
-            salt1: saltBytes,
-            salt2: null,
-            pinUvAuthProtocol: fidoSession.PinUvAuthProtocol)
+        .WithHmacSecret(hmacSecretInput)
         .Build()
 };
 
@@ -297,9 +294,30 @@ Different features require specific firmware versions:
 
 | Transport | Connection Type | Use Case |
 |-----------|----------------|----------|
-| USB HID | `IFidoConnection` | Primary FIDO2 interface |
-| NFC SmartCard | `ISmartCardConnection` | Mobile NFC only |
-| USB CCID | ❌ NOT SUPPORTED | Use HID instead |
+| USB HID | `IFidoHidConnection` | Primary FIDO2 interface |
+| SmartCard | `ISmartCardConnection` | FIDO2 APDU path when the FIDO2 AID is exposed; NFC is allowed when the current PC/SC connection reports `Transport.Nfc`, while USB SmartCard requires firmware 5.8.0+; prefer HID for ordinary USB FIDO2 coverage |
+
+### Transport selection (smart default + override)
+
+On a physical YubiKey that exposes more than one FIDO2-capable transport, `CreateFidoSessionAsync`
+(and `CreateWebAuthnClientAsync`) selects a transport by an app-specific **smart default**, with an
+optional explicit **override** via the `preferredConnection` parameter:
+
+- Default order: **HID FIDO**, then **SmartCard FIDO2**.
+- `preferredConnection: ConnectionType.SmartCard` (or `HidFido`) forces a transport. It must be a
+  transport FIDO2 can use and that the device exposes; otherwise it throws `ArgumentException`
+  (not a valid FIDO2 transport, e.g. `HidOtp`) or `NotSupportedException` (valid but not on this device).
+- SCP applies only to SmartCard. Supplying `scpKeyParams` while a non-SmartCard transport is selected
+  (including the default HID FIDO first choice) throws `NotSupportedException` at session init
+  ("SCP is only supported on SmartCard protocols"); to use SCP, pass
+  `preferredConnection: ConnectionType.SmartCard`.
+
+```csharp
+// Force SmartCard FIDO2 with SCP on a dual-transport key
+using var scp = Scp03KeyParameters.Default;
+await using var session = await yubiKey.CreateFidoSessionAsync(
+    scpKeyParams: scp, preferredConnection: ConnectionType.SmartCard);
+```
 
 ## Common Patterns
 

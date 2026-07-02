@@ -20,10 +20,11 @@ The Management module is the **primary interface for YubiKey device configuratio
 4. **Rich device filtering**: Test infrastructure provides declarative device selection
 
 **Key Files:**
-- [`ManagementSession.cs`](src/ManagementSession.cs) - Main session class (~236 lines)
-- [`DeviceInfo.cs`](src/DeviceInfo.cs) - Device information model (~261 lines)
+- [`ManagementSession.cs`](src/ManagementSession.cs) - Main session class
 - [`DeviceConfig.cs`](src/DeviceConfig.cs) - Configuration model (~190 lines)
 - [`IYubiKeyExtensions.cs`](src/IYubiKeyExtensions.cs) - Convenience extensions for `IYubiKey`
+
+Read-only device metadata types returned by `GetDeviceInfoAsync` (`DeviceInfo`, `DeviceCapabilities`, `DeviceFlags`, `FormFactor`, `VersionQualifier`) live in `Core/src/Devices` under `Yubico.YubiKit.Core.Devices`.
 
 ## Test Infrastructure - Advanced Device Filtering
 
@@ -333,7 +334,7 @@ var info = await state.Device.GetDeviceInfoAsync();
 
 ### WithManagementAsync Pattern
 
-Located in [`ManagementTestState.cs`](../Yubico.YubiKit.Tests.Shared/ManagementTestState.cs) (shared test infrastructure):
+Located in [`YubiKeyTestStateExtensions.cs`](../Tests.Shared/YubiKeyTestStateExtensions.cs) (shared test infrastructure):
 
 ```csharp
 extension(YubiKeyTestState state)
@@ -556,7 +557,8 @@ public async Task DESTRUCTIVE_ConfigurationChange_DedicatedDevice()
     
     // Use specific device, not from shared allowlist
     var dedicatedSerial = 12345678; // Document this requirement
-    var device = YubiKeyDevice.FindBySerialNumber(dedicatedSerial);
+    var devices = await YubiKeyManager.FindAllAsync(forceRescan: true);
+    var device = devices.SingleOrDefault(device => device.SerialNumber == dedicatedSerial);
     Skip.If(device == null, $"Dedicated test device {dedicatedSerial} not found");
     
     using var connection = await device.ConnectAsync<ISmartCardConnection>();
@@ -778,10 +780,10 @@ private readonly IManagementBackend _backend;
 // Backend interface defines four operations
 internal interface IManagementBackend : IDisposable
 {
-    ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken ct);
-    ValueTask WriteConfigAsync(byte[] config, CancellationToken ct);
-    ValueTask SetModeAsync(byte[] data, CancellationToken ct);
-    ValueTask DeviceResetAsync(CancellationToken ct);
+    ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken cancellationToken);
+    ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken);
+    ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken);
+    ValueTask DeviceResetAsync(CancellationToken cancellationToken);
 }
 ```
 
@@ -865,16 +867,17 @@ using var mgmt = await ManagementSession.CreateAsync(
 
 ```csharp
 // Find all connected YubiKeys
-var devices = YubiKeyDevice.FindAll();
+var devices = await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken);
 foreach (var device in devices)
 {
-    Console.WriteLine($"Serial: {device.SerialNumber}");
-    Console.WriteLine($"Firmware: {device.FirmwareVersion}");
-    Console.WriteLine($"USB: {device.HasSmartCard}");
+    var info = await device.GetDeviceInfoAsync(cancellationToken);
+    Console.WriteLine($"Serial: {info.SerialNumber}");
+    Console.WriteLine($"Firmware: {info.FirmwareVersion}");
+    Console.WriteLine($"USB enabled: {info.UsbEnabled}");
 }
 
 // Find specific device
-var yubiKey = YubiKeyDevice.FindBySerialNumber(12345678);
+var yubiKey = devices.SingleOrDefault(device => device.SerialNumber == 12345678);
 ```
 
 ## Known Gotchas

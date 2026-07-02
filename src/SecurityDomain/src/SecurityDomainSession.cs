@@ -19,10 +19,12 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Core.Utils;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.SecurityDomain;
 
@@ -58,12 +60,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     private const byte TagControlReference = 0xA6;
     private const byte TagKidKvn = 0x83;
 
-    // TLV tags for DeleteKey filter parameters
-    private const byte TagKid = 0xD0; // Key ID (KID)
-    private const byte TagKvn = 0xD2; // Key Version Number (KVN)
     private const byte DeleteLastFlag = 0x01; // P2 flag for "delete last"
 
-    private const byte KeyTypeAes = 0x88; // AES key type for SCP03
     private const byte KeyTypeEccPrivateKey = 0xB1;
     private const byte KeyTypeEccPublicKey = 0xB0;
     private const byte KeyTypeEccKeyParams = 0xF0;
@@ -438,9 +436,9 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             buffer.Write([keyReference.Kvn]);
 
             // Encrypt and encode each key component (ENC, MAC, DEK)
-            EncodeKeyComponent(staticKeys.Enc, encryptor, buffer);
-            EncodeKeyComponent(staticKeys.Mac, encryptor, buffer);
-            EncodeKeyComponent(staticKeys.Dek, encryptor, buffer);
+            SecurityDomainKeyMaterial.EncodeKeyComponent(staticKeys.Enc, encryptor, buffer);
+            SecurityDomainKeyMaterial.EncodeKeyComponent(staticKeys.Mac, encryptor, buffer);
+            SecurityDomainKeyMaterial.EncodeKeyComponent(staticKeys.Dek, encryptor, buffer);
 
             // Build and send PUT KEY command
             // P2: 0x80 | KID (0x80 flag required by GlobalPlatform)
@@ -450,7 +448,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             var response = await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
 
             // Validate response contains expected KCVs
-            ValidateKcv(staticKeys, response.Span);
+            SecurityDomainKeyMaterial.ValidateKcv(staticKeys, response.Span);
 
             _logger.LogInformation("Successfully imported SCP03 keys for Key Reference: {KeyReference}",
                 keyReference);
@@ -477,8 +475,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         bool deleteLast = false,
         CancellationToken cancellationToken = default)
     {
-        var (kid, kvn) = NormalizeDeletePolicy(keyReference);
-        var payload = EncodeDeleteFilter(kid, kvn);
+        var (kid, kvn) = SecurityDomainTlvEncoding.NormalizeDeletePolicy(keyReference);
+        var payload = SecurityDomainTlvEncoding.EncodeDeleteFilter(kid, kvn);
         var command = new ApduCommand
         {
             Cla = ClaGlobalPlatform,
@@ -492,35 +490,6 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             keyReference, deleteLast ? " (allow delete last)" : string.Empty);
 
         return TransmitAndGetResponseDataAsync(command, cancellationToken);
-    }
-
-    private static (byte Kid, byte Kvn) NormalizeDeletePolicy(KeyReference keyReference)
-    {
-        var kid = keyReference.Kid;
-        var kvn = keyReference.Kvn;
-
-        if (kid == 0 && kvn == 0)
-            throw new ArgumentException("At least one of KID or KVN must be non-zero", nameof(keyReference));
-
-        // SCP03 keys (KIDs 0x01, 0x02, 0x03) may only be deleted by KVN.
-        // If KVN is provided, zero KID (wildcard).
-        if (kid is 0x01 or 0x02 or 0x03) kid = 0; // wildcard KID when KVN specified for SCP03
-
-        return (kid, kvn);
-    }
-
-    private static ReadOnlyMemory<byte> EncodeDeleteFilter(byte kid, byte kvn)
-    {
-        if (kid == 0 && kvn == 0)
-            return ReadOnlyMemory<byte>.Empty;
-
-        var dict = new Dictionary<int, byte[]?>(2);
-        if (kid != 0)
-            dict[TagKid] = [kid];
-        if (kvn != 0)
-            dict[TagKvn] = [kvn];
-
-        return TlvHelper.EncodeDictionary(dict);
     }
 
     /// <summary>
@@ -680,7 +649,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
             // Validate the checksum response
             ReadOnlySpan<byte> expectedResponseData = [keyReference.Kvn];
-            ValidateCheckSum(expectedResponseData, response.Span);
+            SecurityDomainKeyMaterial.ValidateCheckSum(expectedResponseData, response.Span);
 
             _logger.LogInformation("Successfully put {KeyKind} key for Key Reference: {KeyReference}",
                 keyKindLabel, keyReference);
@@ -976,120 +945,6 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             if (rented is not null)
                 ArrayPool<byte>.Shared.Return(rented, true);
         }
-    }
-
-    private static void ValidateCheckSum(ReadOnlySpan<byte> expected, ReadOnlySpan<byte> actual)
-    {
-        if (!CryptographicOperations.FixedTimeEquals(expected, actual))
-            throw new InvalidOperationException("Checksum validation failed");
-    }
-
-    /// <summary>
-    ///     Encodes a single key component (ENC, MAC, or DEK) for PUT KEY command.
-    /// </summary>
-    /// <param name="key">The 16-byte key to encode.</param>
-    /// <param name="encryptor">The data encryptor from the SCP session.</param>
-    /// <param name="buffer">The buffer to write the encoded TLV to.</param>
-    private static void EncodeKeyComponent(
-        ReadOnlySpan<byte> key,
-        DataEncryptor encryptor,
-        ArrayBufferWriter<byte> buffer)
-    {
-        // Calculate KCV (Key Check Value)
-        Span<byte> kcv = stackalloc byte[3];
-        CalculateKcv(key, kcv);
-
-        // Encrypt the key - rent buffer to avoid allocation on key parameter
-        byte[]? keyBuffer = null;
-        try
-        {
-            keyBuffer = ArrayPool<byte>.Shared.Rent(key.Length);
-            key.CopyTo(keyBuffer);
-            var encrypted = encryptor(keyBuffer.AsSpan(0, key.Length));
-
-            // Write TLV with just the encrypted key data
-            using var keyTlv = new Tlv(KeyTypeAes, encrypted);
-            buffer.Write(keyTlv.AsSpan());
-
-            // Write KCV length and KCV bytes after the TLV
-            buffer.Write([(byte)kcv.Length]);
-            buffer.Write(kcv);
-        }
-        finally
-        {
-            if (keyBuffer is not null)
-            {
-                CryptographicOperations.ZeroMemory(keyBuffer.AsSpan(0, key.Length));
-                ArrayPool<byte>.Shared.Return(keyBuffer);
-            }
-        }
-    }
-
-    /// <summary>
-    ///     Calculates the Key Check Value (KCV) for an AES key.
-    /// </summary>
-    /// <param name="key">The 16-byte AES key.</param>
-    /// <param name="output">The 3-byte output span for the KCV.</param>
-    /// <remarks>
-    ///     KCV is calculated as the first 3 bytes of AES-CBC encryption of 16 bytes (all 0x01) using a zero IV.
-    ///     This matches the implementation in the Java SDK.
-    /// </remarks>
-    private static void CalculateKcv(ReadOnlySpan<byte> key, Span<byte> output)
-    {
-        using var aes = Aes.Create();
-
-        aes.SetKey(key);
-        aes.Mode = CipherMode.CBC;
-        aes.Padding = PaddingMode.None;
-
-        // KCV = first 3 bytes of AES-CBC encrypt of 16 bytes (all 0x01) using zero IV
-        Span<byte> kcvInput = stackalloc byte[16];
-        kcvInput.Fill(0x01);
-
-        Span<byte> iv = stackalloc byte[16];
-        iv.Clear();
-
-        Span<byte> encrypted = stackalloc byte[16];
-        aes.EncryptCbc(kcvInput, iv, encrypted, PaddingMode.None);
-
-        encrypted[..3].CopyTo(output);
-    }
-
-    /// <summary>
-    ///     Validates that the Key Check Values in the response match the expected values.
-    /// </summary>
-    /// <param name="staticKeys">The static keys that were imported.</param>
-    /// <param name="response">The response data from the PUT KEY command.</param>
-    /// <exception cref="InvalidOperationException">Thrown when KCV validation fails.</exception>
-    private static void ValidateKcv(StaticKeys staticKeys, ReadOnlySpan<byte> response)
-    {
-        // Response format: KVN || kcv_enc || kcv_mac || kcv_dek
-        if (response.Length < 10) // 1 byte KVN + 3*3 bytes kcv
-            throw new InvalidOperationException("Response too short for KCV validation");
-
-        // Calculate expected KCVs
-        Span<byte> expectedKcvEnc = stackalloc byte[3];
-        Span<byte> expectedKcvMac = stackalloc byte[3];
-        Span<byte> expectedKcvDek = stackalloc byte[3];
-
-        CalculateKcv(staticKeys.Enc, expectedKcvEnc);
-        CalculateKcv(staticKeys.Mac, expectedKcvMac);
-        CalculateKcv(staticKeys.Dek, expectedKcvDek);
-
-        // Extract actual KCVs from response (skip first byte = KVN)
-        var actualKcvEnc = response.Slice(1, 3);
-        var actualKcvMac = response.Slice(4, 3);
-        var actualKcvDek = response.Slice(7, 3);
-
-        // Validate each KCV using constant-time comparison
-        if (!CryptographicOperations.FixedTimeEquals(expectedKcvEnc, actualKcvEnc))
-            throw new InvalidOperationException("ENC key check value mismatch");
-
-        if (!CryptographicOperations.FixedTimeEquals(expectedKcvMac, actualKcvMac))
-            throw new InvalidOperationException("MAC key check value mismatch");
-
-        if (!CryptographicOperations.FixedTimeEquals(expectedKcvDek, actualKcvDek))
-            throw new InvalidOperationException("DEK key check value mismatch");
     }
 
     /// <summary>

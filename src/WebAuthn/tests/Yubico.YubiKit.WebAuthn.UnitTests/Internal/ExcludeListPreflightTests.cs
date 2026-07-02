@@ -12,63 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Formats.Cbor;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using System.Formats.Cbor;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Internal;
+using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Internal;
 
 public class ExcludeListPreflightTests
 {
-    // Test-only protocol implementation (NSubstitute cannot mock methods with Span parameters)
     private static IPinUvAuthProtocol CreateMockProtocol()
     {
         return new TestPinUvAuthProtocol();
-    }
-
-    private sealed class TestPinUvAuthProtocol : IPinUvAuthProtocol
-    {
-        public int Version => 2;
-        public int AuthenticationTagLength => 16;
-
-        public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
-        {
-            return new byte[16]; // Return predictable 16-byte auth param
-        }
-
-        public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Dispose() { }
-
-        public (Dictionary<int, object?> KeyAgreement, byte[] SharedSecret) Encapsulate(
-            IReadOnlyDictionary<int, object?> peerCoseKey)
-        {
-            throw new NotImplementedException();
-        }
-
-        public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
-        {
-            throw new NotImplementedException();
-        }
-
-        public byte[] Kdf(ReadOnlySpan<byte> z)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Verify(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message, ReadOnlySpan<byte> signature)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     [Fact]

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using Spectre.Console;
-using Yubico.YubiKit.Core.Interfaces;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Fido2.CredentialManagement;
 using Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Output;
 using Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Prompts;

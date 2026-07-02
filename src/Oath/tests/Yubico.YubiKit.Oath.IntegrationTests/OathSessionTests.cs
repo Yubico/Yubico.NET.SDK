@@ -13,8 +13,10 @@
 // limitations under the License.
 
 using System.Text;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Oath.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -55,6 +57,46 @@ public class OathSessionTests
             Issuer = issuer,
             Counter = counter
         };
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0", CustomFilter = typeof(BetaSerial103Filter))]
+    public async Task ManagementPreflight_Serial103_ReportsFirmware(YubiKeyTestState state) =>
+        await state.WithManagementAsync(async (mgmt, _) =>
+        {
+            var deviceInfo = await mgmt.GetDeviceInfoAsync();
+
+            Assert.Equal(103, deviceInfo.SerialNumber);
+            Assert.True(
+                deviceInfo.FirmwareVersion.IsAtLeast(5, 8, 0),
+                $"Expected beta firmware 5.8.x or later, got {deviceInfo.FirmwareVersion}.");
+        }, cancellationToken: NewToken());
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0", CustomFilter = typeof(BetaSerial103Filter))]
+    public async Task OathSession_Create_ReadsSelectMetadataWithoutReset(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreateOathSessionAsync(cancellationToken: NewToken());
+
+        Assert.Equal(103, state.SerialNumber);
+        Assert.NotEmpty(session.DeviceId);
+        Assert.True(session.Salt.Length > 0);
+        Assert.NotNull(session.FirmwareVersion);
+    }
+
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.3", CustomFilter = typeof(BetaSerial103Filter))]
+    public async Task OathSession_CreateWithScp03_ReadsSelectMetadataWithoutReset(YubiKeyTestState state)
+    {
+        using var scpParams = Scp03KeyParameters.Default;
+        await using var session = await state.Device.CreateOathSessionAsync(
+            scpParams,
+            cancellationToken: NewToken());
+
+        Assert.Equal(103, state.SerialNumber);
+        Assert.NotEmpty(session.DeviceId);
+        Assert.True(session.Salt.Length > 0);
+        Assert.NotNull(session.FirmwareVersion);
+    }
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
@@ -298,4 +340,11 @@ public class OathSessionTests
             Assert.Null(entry.Value);
             Assert.True(entry.Key.TouchRequired);
         }, cancellationToken: NewToken());
+
+    public sealed class BetaSerial103Filter : IYubiKeyFilter
+    {
+        public bool Matches(YubiKeyTestState device) => device.SerialNumber == 103;
+
+        public string GetDescription() => "Serial 103";
+    }
 }

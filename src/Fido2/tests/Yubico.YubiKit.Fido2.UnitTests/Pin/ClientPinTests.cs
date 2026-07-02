@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using NSubstitute;
 using System.Formats.Cbor;
 using System.Text;
-using NSubstitute;
 using Xunit;
+using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 
 namespace Yubico.YubiKit.Fido2.UnitTests.Pin;
@@ -32,79 +33,79 @@ public sealed class ClientPinTests : IDisposable
     private readonly IFidoSession _mockSession;
     private readonly FakePinUvAuthProtocol _fakeProtocol;
     private bool _disposed;
-    
+
     public ClientPinTests()
     {
         _mockSession = Substitute.For<IFidoSession>();
         _fakeProtocol = new FakePinUvAuthProtocol();
     }
-    
+
     private ClientPin CreateClientPin() => new(_mockSession, _fakeProtocol);
-    
+
     [Fact]
     public void Constructor_WithNullCommands_ThrowsArgumentNullException()
     {
         var protocol = Substitute.For<IPinUvAuthProtocol>();
         Assert.Throws<ArgumentNullException>(() => new ClientPin((IFidoSession)null!, protocol));
     }
-    
+
     [Fact]
     public void Constructor_WithNullProtocol_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => new ClientPin(_mockSession, null!));
     }
-    
+
     [Fact]
     public void Protocol_ReturnsProvidedProtocol()
     {
         using var clientPin = CreateClientPin();
-        
+
         Assert.Same(_fakeProtocol, clientPin.Protocol);
     }
-    
+
     [Fact]
     public async Task GetPinRetriesAsync_ReturnsCorrectRetries()
     {
         using var clientPin = CreateClientPin();
-        
+
         // Setup mock response: pinRetries = 5, powerCycleState = false
         var responseData = CreatePinRetriesResponse(5, false);
         SetupMockResponse(responseData);
-        
+
         var (retries, powerCycleRequired) = await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
-        
+
         Assert.Equal(5, retries);
         Assert.False(powerCycleRequired);
     }
-    
+
     [Fact]
     public async Task GetPinRetriesAsync_WithPowerCycleRequired_ReturnsTrue()
     {
         using var clientPin = CreateClientPin();
-        
+
         var responseData = CreatePinRetriesResponse(0, true);
         SetupMockResponse(responseData);
-        
+
         var (retries, powerCycleRequired) = await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
-        
+
         Assert.Equal(0, retries);
         Assert.True(powerCycleRequired);
     }
-    
+
     [Fact]
     public async Task GetUvRetriesAsync_ReturnsCorrectRetries()
     {
         using var clientPin = CreateClientPin();
-        
+
         var responseData = CreateUvRetriesResponse(3, false);
         SetupMockResponse(responseData);
-        
+
         var (retries, powerCycleRequired) = await clientPin.GetUvRetriesAsync(TestContext.Current.CancellationToken);
-        
+
         Assert.Equal(3, retries);
         Assert.False(powerCycleRequired);
     }
-    
+
     [Theory]
     [InlineData("")]
     [InlineData("a")]
@@ -233,147 +234,193 @@ public sealed class ClientPinTests : IDisposable
 
         Assert.NotNull(token);
     }
-    
+
     [Fact]
     public async Task GetPinUvAuthTokenUsingUvAsync_WithNoPermissions_ThrowsArgumentException()
     {
         using var clientPin = CreateClientPin();
-        
+
         await Assert.ThrowsAsync<ArgumentException>(
             () => clientPin.GetPinUvAuthTokenUsingUvAsync(PinUvAuthTokenPermissions.None, cancellationToken: TestContext.Current.CancellationToken));
     }
-    
+
     [Fact]
     public async Task GetPinUvAuthTokenUsingUvAsync_WithPermissions_ReturnsToken()
     {
         using var clientPin = CreateClientPin();
-        
+
         // Setup mock responses
         var keyAgreementResponse = CreateKeyAgreementResponse(CreateMockCoseKey());
         var tokenResponse = CreatePinTokenResponse(new byte[32]);
-        
+
         _mockSession.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(keyAgreementResponse, tokenResponse);
-        
+
         var token = await clientPin.GetPinUvAuthTokenUsingUvAsync(PinUvAuthTokenPermissions.BioEnrollment, null, TestContext.Current.CancellationToken);
-        
+
         Assert.NotNull(token);
     }
-    
+
     [Fact]
     public void Dispose_DisposesProtocol()
     {
         var clientPin = CreateClientPin();
-        
+
         clientPin.Dispose();
-        
+
         Assert.True(_fakeProtocol.IsDisposed);
     }
-    
+
     [Fact]
     public void Dispose_CanBeCalledMultipleTimes()
     {
         var clientPin = CreateClientPin();
-        
+
         clientPin.Dispose();
         var disposeCount = _fakeProtocol.DisposeCount;
-        
+
         clientPin.Dispose();
-        
+
         Assert.Equal(disposeCount, _fakeProtocol.DisposeCount);
     }
-    
+
     [Fact]
     public async Task GetPinRetriesAsync_AfterDispose_ThrowsObjectDisposedException()
     {
         var clientPin = CreateClientPin();
-        
+
         clientPin.Dispose();
-        
+
         await Assert.ThrowsAsync<ObjectDisposedException>(() => clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken));
     }
-    
+
     [Fact]
     public async Task GetPinRetriesAsync_SendsCorrectProtocolVersion()
     {
         using var clientPin = CreateClientPin();
-        
+
         var responseData = CreatePinRetriesResponse(8, false);
         SetupMockResponse(responseData);
-        
+
         await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
-        
+
         // Verify the request was sent
         await _mockSession.ReceivedWithAnyArgs(1).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
     }
-    
+
+    [Fact]
+    public async Task GetPinRetriesAsync_SendsCanonicalClientPinRequest()
+    {
+        using var clientPin = CreateClientPin();
+        ReadOnlyMemory<byte> capturedRequest = default;
+
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(request => capturedRequest = request),
+                Arg.Any<CancellationToken>())
+            .Returns(CreatePinRetriesResponse(8, false));
+
+        await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(CtapCommand.ClientPin, capturedRequest.Span[0]);
+        var reader = CborPayloadReader(capturedRequest);
+        Assert.Equal(2, reader.ReadStartMap());
+        Assert.Equal(ClientPinParam.PinUvAuthProtocol, reader.ReadInt32());
+        Assert.Equal(_fakeProtocol.Version, reader.ReadInt32());
+        Assert.Equal(ClientPinParam.SubCommand, reader.ReadInt32());
+        Assert.Equal(ClientPinSubCommand.GetRetries, reader.ReadInt32());
+        reader.ReadEndMap();
+    }
+
+    [Fact]
+    public async Task GetUvRetriesAsync_SendsCanonicalClientPinRequest()
+    {
+        using var clientPin = CreateClientPin();
+        ReadOnlyMemory<byte> capturedRequest = default;
+
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(request => capturedRequest = request),
+                Arg.Any<CancellationToken>())
+            .Returns(CreateUvRetriesResponse(4, false));
+
+        await clientPin.GetUvRetriesAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(CtapCommand.ClientPin, capturedRequest.Span[0]);
+        var reader = CborPayloadReader(capturedRequest);
+        Assert.Equal(2, reader.ReadStartMap());
+        Assert.Equal(ClientPinParam.PinUvAuthProtocol, reader.ReadInt32());
+        Assert.Equal(_fakeProtocol.Version, reader.ReadInt32());
+        Assert.Equal(ClientPinParam.SubCommand, reader.ReadInt32());
+        Assert.Equal(ClientPinSubCommand.GetUvRetries, reader.ReadInt32());
+        reader.ReadEndMap();
+    }
+
     // Helper methods
-    
+
     private void SetupMockResponse(ReadOnlyMemory<byte> response)
     {
         _mockSession.SendCborRequestAsync(default, default)
             .ReturnsForAnyArgs(response);
     }
-    
+
     private static ReadOnlyMemory<byte> CreatePinRetriesResponse(int retries, bool powerCycleRequired)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(powerCycleRequired ? 2 : 1);
-        
+
         writer.WriteInt32(0x03); // pinRetries
         writer.WriteInt32(retries);
-        
+
         if (powerCycleRequired)
         {
             writer.WriteInt32(0x04); // powerCycleState
             writer.WriteBoolean(true);
         }
-        
+
         writer.WriteEndMap();
         return writer.Encode();
     }
-    
+
     private static ReadOnlyMemory<byte> CreateUvRetriesResponse(int retries, bool powerCycleRequired)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(powerCycleRequired ? 2 : 1);
-        
+
         writer.WriteInt32(0x05); // uvRetries
         writer.WriteInt32(retries);
-        
+
         if (powerCycleRequired)
         {
             writer.WriteInt32(0x04); // powerCycleState
             writer.WriteBoolean(true);
         }
-        
+
         writer.WriteEndMap();
         return writer.Encode();
     }
-    
+
     private static ReadOnlyMemory<byte> CreateKeyAgreementResponse(Dictionary<int, object?> coseKey)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(1);
-        
+
         writer.WriteInt32(0x01); // keyAgreement
         WriteCoseKeyToWriter(writer, coseKey);
-        
+
         writer.WriteEndMap();
         return writer.Encode();
     }
-    
+
     private static ReadOnlyMemory<byte> CreatePinTokenResponse(byte[] encryptedToken)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(1);
-        
+
         writer.WriteInt32(0x02); // pinUvAuthToken
         writer.WriteByteString(encryptedToken);
-        
+
         writer.WriteEndMap();
         return writer.Encode();
     }
-    
+
     private static ReadOnlyMemory<byte> CreateEmptyResponse()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -381,7 +428,7 @@ public sealed class ClientPinTests : IDisposable
         writer.WriteEndMap();
         return writer.Encode();
     }
-    
+
     private static Dictionary<int, object?> CreateMockCoseKey()
     {
         return new Dictionary<int, object?>
@@ -393,17 +440,17 @@ public sealed class ClientPinTests : IDisposable
             [-3] = new byte[32], // y
         };
     }
-    
+
     private static void WriteCoseKeyToWriter(CborWriter writer, Dictionary<int, object?> key)
     {
         var sortedKeys = key.Keys.OrderBy(k => k).ToList();
-        
+
         writer.WriteStartMap(key.Count);
-        
+
         foreach (var k in sortedKeys)
         {
             writer.WriteInt32(k);
-            
+
             switch (key[k])
             {
                 case int intVal:
@@ -417,15 +464,18 @@ public sealed class ClientPinTests : IDisposable
                     break;
             }
         }
-        
+
         writer.WriteEndMap();
     }
-    
+
+    private static CborReader CborPayloadReader(ReadOnlyMemory<byte> request) =>
+        new(request.Slice(1), CborConformanceMode.Ctap2Canonical);
+
     public void Dispose()
     {
         if (_disposed)
             return;
-        
+
         _fakeProtocol.Dispose();
         _disposed = true;
     }
@@ -440,7 +490,7 @@ internal sealed class FakePinUvAuthProtocol : IPinUvAuthProtocol
     public int AuthenticationTagLength => 32;
     public bool IsDisposed { get; private set; }
     public int DisposeCount { get; private set; }
-    
+
     public (Dictionary<int, object?> KeyAgreement, byte[] SharedSecret) Encapsulate(
         IReadOnlyDictionary<int, object?> peerCoseKey)
     {
@@ -452,24 +502,24 @@ internal sealed class FakePinUvAuthProtocol : IPinUvAuthProtocol
             [-2] = new byte[32],
             [-3] = new byte[32],
         };
-        
+
         return (keyAgreement, new byte[64]);
     }
-    
+
     public byte[] Kdf(ReadOnlySpan<byte> z) => new byte[64];
-    
+
     public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
         => plaintext.ToArray();
-    
+
     public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext)
         => ciphertext.ToArray();
-    
+
     public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
         => new byte[32];
-    
+
     public bool Verify(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message, ReadOnlySpan<byte> signature)
         => true;
-    
+
     public void Dispose()
     {
         if (!IsDisposed)

@@ -6,9 +6,9 @@ using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text;
-using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Cli.Shared.Output;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.BioEnrollment;
 using Yubico.YubiKit.Fido2.Config;
@@ -137,7 +137,7 @@ public sealed class FidoInfoCommand : YkCommandBase<GlobalSettings>
 
         try
         {
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             var info = await session.GetInfoAsync();
 
             FidoHelpers.DisplayAuthenticatorInfo(info);
@@ -181,7 +181,7 @@ public sealed class FidoResetCommand : YkCommandBase<FidoResetSettings>
         {
             AnsiConsole.MarkupLine("[yellow]Touch your YubiKey to confirm the reset...[/]");
 
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             await session.ResetAsync();
 
             OutputHelpers.WriteSuccess("FIDO2 application has been factory reset.");
@@ -222,7 +222,7 @@ public sealed class FidoAccessSetPinCommand : YkCommandBase<FidoPinSettings>
         {
             newPinBytes = Encoding.UTF8.GetBytes(newPin);
 
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
@@ -264,7 +264,7 @@ public sealed class FidoAccessChangePinCommand : YkCommandBase<FidoPinSettings>
             pinBytes = Encoding.UTF8.GetBytes(pin);
             newPinBytes = Encoding.UTF8.GetBytes(newPin);
 
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
@@ -309,7 +309,7 @@ public sealed class FidoAccessVerifyPinCommand : YkCommandBase<FidoVerifyPinSett
         {
             pinBytes = Encoding.UTF8.GetBytes(pin);
 
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
@@ -354,7 +354,7 @@ public sealed class FidoConfigToggleAlwaysUvCommand : YkCommandBase<FidoConfigSe
         {
             pinBytes = Encoding.UTF8.GetBytes(pin);
 
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
@@ -403,7 +403,7 @@ public sealed class FidoConfigEnableEpAttestationCommand : YkCommandBase<FidoCon
         {
             pinBytes = Encoding.UTF8.GetBytes(pin);
 
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
@@ -452,7 +452,7 @@ public sealed class FidoCredentialsListCommand : YkCommandBase<FidoCredentialsLi
         {
             pinBytes = Encoding.UTF8.GetBytes(pin);
 
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
@@ -569,7 +569,7 @@ public sealed class FidoCredentialsDeleteCommand : YkCommandBase<FidoCredentials
         {
             pinBytes = Encoding.UTF8.GetBytes(pin);
 
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
@@ -621,7 +621,7 @@ public sealed class FidoFingerprintsListCommand : YkCommandBase<FidoFingerprints
         {
             pinBytes = Encoding.UTF8.GetBytes(pin);
 
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
@@ -683,7 +683,7 @@ public sealed class FidoFingerprintsAddCommand : YkCommandBase<FidoFingerprintsA
         {
             pinBytes = Encoding.UTF8.GetBytes(pin);
 
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
@@ -779,7 +779,7 @@ public sealed class FidoFingerprintsDeleteCommand : YkCommandBase<FidoFingerprin
         {
             pinBytes = Encoding.UTF8.GetBytes(pin);
 
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
@@ -839,7 +839,7 @@ public sealed class FidoFingerprintsRenameCommand : YkCommandBase<FidoFingerprin
         {
             pinBytes = Encoding.UTF8.GetBytes(pin);
 
-            await using var session = await deviceContext.Device.CreateFidoSessionAsync();
+            await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 

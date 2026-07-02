@@ -84,7 +84,7 @@ dotnet toolchain.cs build
 
 ```bash
 # From the repository root
-dotnet run --project Yubico.YubiKit.Piv/examples/PivTool/PivTool.csproj
+dotnet run --project src/Piv/examples/PivTool/PivTool.csproj
 ```
 
 ## Usage
@@ -127,7 +127,7 @@ This example uses the following SDK methods:
 6. `ChangePinAsync()` - PIN change
 7. `ChangePukAsync()` - PUK change
 8. `UnblockPinAsync()` - PIN unblock
-9. `SetRetryLimitsAsync()` - Retry configuration
+9. `SetPinAttemptsAsync()` - Retry configuration
 10. `GetPinMetadataAsync()` - PIN metadata
 11. `GetPukMetadataAsync()` - PUK metadata
 12. `GetManagementKeyMetadataAsync()` - Management key info

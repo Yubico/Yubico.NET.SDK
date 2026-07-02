@@ -40,7 +40,7 @@ namespace Yubico.YubiKit.Fido2.Crypto;
 public static class EncryptedMetadataDecryptor
 {
     private static readonly byte[] ZeroSalt = new byte[32];
-    
+
     /// <summary>
     /// Decrypts the encIdentifier field using PPUAT-derived key.
     /// </summary>
@@ -57,7 +57,7 @@ public static class EncryptedMetadataDecryptor
     {
         return DecryptWithInfo(ppuat, encIdentifier, "encIdentifier"u8);
     }
-    
+
     /// <summary>
     /// Decrypts the encCredStoreState field using PPUAT-derived key.
     /// </summary>
@@ -74,7 +74,7 @@ public static class EncryptedMetadataDecryptor
     {
         return DecryptWithInfo(ppuat, encCredStoreState, "encCredStoreState"u8);
     }
-    
+
     /// <summary>
     /// Derives an AES-128 key from PPUAT using HKDF-SHA256.
     /// </summary>
@@ -91,7 +91,7 @@ public static class EncryptedMetadataDecryptor
         {
             throw new ArgumentException("PPUAT cannot be empty.", nameof(ppuat));
         }
-        
+
         var key = new byte[16];
         HKDF.DeriveKey(
             HashAlgorithmName.SHA256,
@@ -99,12 +99,12 @@ public static class EncryptedMetadataDecryptor
             key,
             salt: ZeroSalt,
             info: info);
-        
+
         return key;
     }
-    
+
     private static byte[]? DecryptWithInfo(
-        ReadOnlySpan<byte> ppuat, 
+        ReadOnlySpan<byte> ppuat,
         ReadOnlySpan<byte> encryptedData,
         ReadOnlySpan<byte> info)
     {
@@ -112,18 +112,18 @@ public static class EncryptedMetadataDecryptor
         {
             return null;
         }
-        
+
         // Encrypted data format: [IV (16 bytes) | ciphertext]
         // Minimum length is 16 bytes for IV (even if plaintext is empty)
         if (encryptedData.Length < 16)
         {
             return null;
         }
-        
+
         // Extract IV from first 16 bytes
         ReadOnlySpan<byte> iv = encryptedData[..16];
         ReadOnlySpan<byte> ciphertext = encryptedData[16..];
-        
+
         // Derive AES-128 key using HKDF-SHA256
         Span<byte> key = stackalloc byte[16];
         HKDF.DeriveKey(
@@ -132,7 +132,7 @@ public static class EncryptedMetadataDecryptor
             key,
             salt: ZeroSalt,
             info: info);
-        
+
         try
         {
             // Decrypt using AES-128-CBC (Java YubiKit format)
@@ -140,10 +140,10 @@ public static class EncryptedMetadataDecryptor
             aes.SetKey(key);
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.None;
-            
+
             var plaintext = new byte[ciphertext.Length];
             aes.DecryptCbc(ciphertext, iv, plaintext, PaddingMode.None);
-            
+
             return plaintext;
         }
         catch (CryptographicException)

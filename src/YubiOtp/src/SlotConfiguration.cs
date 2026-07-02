@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Hid.Otp;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 
 namespace Yubico.YubiKit.YubiOtp;
 
@@ -56,10 +56,10 @@ public abstract class SlotConfiguration : IDisposable
 
     /// <summary>
     /// Checks whether this configuration is supported by the given firmware version.
-    /// Major version 0 is treated as a sentinel for alpha firmware (see ApplicationSession.IsSupported).
+    /// Alpha/beta firmware sentinels are treated as modern firmware (see <see cref="FirmwareVersion.IsAlphaOrBeta" />).
     /// </summary>
     public bool IsSupportedBy(FirmwareVersion version) =>
-        version.Major == 0 || version.IsAtLeast(MinimumFirmwareVersion);
+        version.IsAlphaOrBeta || version.IsAtLeast(MinimumFirmwareVersion);
 
     /// <summary>
     /// Enables or disables the AllowUpdate flag, permitting future update operations on this slot.

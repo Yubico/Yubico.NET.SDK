@@ -50,8 +50,7 @@ ManagementTool/
 
 ```bash
 # Build and run
-cd Yubico.YubiKit.Management/examples/ManagementTool
-dotnet run
+dotnet run --project src/Management/examples/ManagementTool/ManagementTool.csproj
 ```
 
 ## Security Considerations

@@ -15,8 +15,8 @@
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Interfaces;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Cli.Shared.Device;
@@ -48,6 +48,11 @@ public abstract class DeviceSelectorBase
     /// (e.g., <see cref="ConnectionType.SmartCard"/> for SmartCard-only CLIs).
     /// </summary>
     protected virtual ConnectionType FindAllConnectionTypeFilter => ConnectionType.All;
+
+    /// <summary>
+    /// Gets the target serial number, when the caller requested a specific YubiKey.
+    /// </summary>
+    protected virtual int? TargetSerialNumber => null;
 
     /// <summary>
     /// Selects a device from the discovered list when multiple devices are found
@@ -111,10 +116,9 @@ public abstract class DeviceSelectorBase
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            var allDevices = await YubiKeyManager.FindAllAsync(
-                FindAllConnectionTypeFilter, cancellationToken: cancellationToken);
+            var allDevices = await FindAllDevicesAsync(cancellationToken);
 
-            var devices = FilterDevices(allDevices);
+            var devices = await FilterDevicesAsync(allDevices, cancellationToken);
 
             if (devices.Count > 0)
             {
@@ -152,7 +156,7 @@ public abstract class DeviceSelectorBase
         }
         catch (Exception ex)
         {
-            Logger.LogDebug(ex, "{ConnectionType} device info query failed", device.ConnectionType);
+            Logger.LogDebug(ex, "{ConnectionType} device info query failed", device.AvailableConnections);
             return null;
         }
     }
@@ -164,8 +168,37 @@ public abstract class DeviceSelectorBase
     /// </summary>
     protected virtual IReadOnlyList<IYubiKey> FilterDevices(IReadOnlyList<IYubiKey> allDevices) =>
         allDevices
-            .Where(d => SupportedConnectionTypes.Contains(d.ConnectionType))
+            .Where(d => SupportedConnectionTypes.Any(d.SupportsConnection))
             .ToList();
+
+    /// <summary>
+    /// Finds all connected devices. Overridable so selector behavior can be tested without hardware.
+    /// </summary>
+    protected virtual Task<IReadOnlyList<IYubiKey>> FindAllDevicesAsync(CancellationToken cancellationToken) =>
+        YubiKeyManager.FindAllAsync(FindAllConnectionTypeFilter, cancellationToken: cancellationToken);
+
+    private async Task<IReadOnlyList<IYubiKey>> FilterDevicesAsync(
+        IReadOnlyList<IYubiKey> allDevices,
+        CancellationToken cancellationToken)
+    {
+        var devices = FilterDevices(allDevices);
+        if (TargetSerialNumber is not { } serialNumber)
+        {
+            return devices;
+        }
+
+        var matchingDevices = new List<IYubiKey>();
+        foreach (var device in devices)
+        {
+            var info = await GetDeviceInfoAsync(device, cancellationToken);
+            if (info?.SerialNumber == serialNumber)
+            {
+                matchingDevices.Add(device);
+            }
+        }
+
+        return matchingDevices;
+    }
 
     /// <summary>
     /// Prompts user to select from multiple devices.
@@ -220,7 +253,7 @@ public abstract class DeviceSelectorBase
             selected.Info?.SerialNumber,
             selected.Info?.FormFactor ?? FormFactor.Unknown,
             selected.Info?.FirmwareVersion.ToString() ?? "Unknown",
-            selected.Device.ConnectionType);
+            selected.Device.AvailableConnections);
     }
 
     /// <summary>
@@ -236,7 +269,7 @@ public abstract class DeviceSelectorBase
             info?.SerialNumber,
             info?.FormFactor ?? FormFactor.Unknown,
             info?.FirmwareVersion.ToString() ?? "Unknown",
-            device.ConnectionType);
+            device.AvailableConnections);
     }
 
     /// <summary>
@@ -244,7 +277,7 @@ public abstract class DeviceSelectorBase
     /// </summary>
     private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
     {
-        var transport = ConnectionTypeFormatter.Format(device.ConnectionType);
+        var transport = ConnectionTypeFormatter.Format(device.AvailableConnections);
 
         if (info is null)
         {

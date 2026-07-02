@@ -17,6 +17,8 @@ Tests.Shared provides the foundation for all YubiKit integration tests. It imple
 - `Infrastructure/AllowList.cs` - Security layer preventing unauthorized testing
 - `YubiKeyTestState.cs` - Device wrapper implementing `IXunitSerializable`
 - `YubiKeyTestStateExtensions.cs` - Application-specific session helpers
+- `SharedSmartCardConnection.cs` - Non-owning SmartCard connection wrapper for multi-session integration helpers
+- `RecordingSmartCardConnection.cs` - xUnit-free SmartCard APDU recorder for byte-level unit tests
 
 ## Critical Design Patterns
 
@@ -197,7 +199,7 @@ public static async Task WithOathAsync(
     ScpKeyParameters? scpKeyParams = null,
     CancellationToken cancellationToken = default)
 {
-    await using var connection = await state.Device.OpenConnectionAsync<ISmartCardConnection>(cancellationToken);
+    await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>(cancellationToken);
 
     await using var session = await OathSession.CreateAsync(
         connection,
@@ -207,6 +209,14 @@ public static async Task WithOathAsync(
     await action(session, state.DeviceInfo);
 }
 ```
+
+### Sharing a SmartCard Connection Across Sessions
+
+Use `SharedSmartCardConnection` when an integration helper must create more than one session over the same physical connection, such as reset-then-test flows. The wrapper forwards all SmartCard operations but ignores `Dispose()` and `DisposeAsync()`, so the `WithConnectionAsync` owner remains responsible for the real connection lifetime.
+
+### Recording SmartCard APDUs In Unit Tests
+
+Use `RecordingSmartCardConnection` when a unit test needs to assert exact APDU bytes without hardware. The helper records every transmitted command and returns queued raw responses. Keep it narrow: do not turn it into an APDU DSL, protocol emulator, or replacement for `[WithYubiKey]` integration tests.
 
 ### Adding New Filter Criteria
 

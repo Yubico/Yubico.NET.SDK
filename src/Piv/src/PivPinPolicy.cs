@@ -21,19 +21,19 @@ public enum PivPinPolicy : byte
 {
     /// <summary>Use YubiKey default PIN policy.</summary>
     Default = 0x00,
-    
+
     /// <summary>PIN verification is never required.</summary>
     Never = 0x01,
-    
+
     /// <summary>PIN verification required once per session.</summary>
     Once = 0x02,
-    
+
     /// <summary>PIN verification required for every operation.</summary>
     Always = 0x03,
-    
+
     /// <summary>PIN verification required once per session, with biometric match.</summary>
     MatchOnce = 0x04,
-    
+
     /// <summary>PIN verification required for every operation, with biometric match.</summary>
     MatchAlways = 0x05
 }

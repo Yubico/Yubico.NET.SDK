@@ -46,19 +46,19 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
     private const int AesBlockSize = 16;
     private const int HmacKeyLength = 32;
     private const int SharedSecretLength = HmacKeyLength + AesKeyLength;
-    
+
     // HKDF info strings as per CTAP2.1 spec
     private static ReadOnlySpan<byte> HkdfInfoHmacKey => "CTAP2 HMAC key"u8;
     private static ReadOnlySpan<byte> HkdfInfoAesKey => "CTAP2 AES key"u8;
 
     private bool _disposed;
-    
+
     /// <inheritdoc />
     public int Version => 2;
-    
+
     /// <inheritdoc />
     public int AuthenticationTagLength => 32;
-    
+
     /// <inheritdoc />
     public (Dictionary<int, object?> KeyAgreement, byte[] SharedSecret) Encapsulate(
         IReadOnlyDictionary<int, object?> peerCoseKey)
@@ -76,20 +76,20 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
             CryptographicOperations.ZeroMemory(rawZ);
         }
     }
-    
+
     /// <inheritdoc />
     public byte[] Kdf(ReadOnlySpan<byte> z)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         if (z.IsEmpty)
         {
             throw new ArgumentException("Shared secret cannot be empty.", nameof(z));
         }
-        
+
         // Derive HMAC key and AES key separately using HKDF
         var sharedSecret = new byte[SharedSecretLength];
-        
+
         try
         {
             // Derive HMAC key: HKDF(z, salt=empty, info="CTAP2 HMAC key")
@@ -99,7 +99,7 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
                 sharedSecret.AsSpan(0, HmacKeyLength),
                 salt: [],
                 info: HkdfInfoHmacKey);
-            
+
             // Derive AES key: HKDF(z, salt=empty, info="CTAP2 AES key")
             HKDF.DeriveKey(
                 HashAlgorithmName.SHA256,
@@ -107,7 +107,7 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
                 sharedSecret.AsSpan(HmacKeyLength, AesKeyLength),
                 salt: [],
                 info: HkdfInfoAesKey);
-            
+
             return sharedSecret;
         }
         catch
@@ -116,24 +116,24 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
             throw;
         }
     }
-    
+
     /// <inheritdoc />
     public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         if (key.Length != SharedSecretLength)
         {
             throw new ArgumentException(
                 $"Key must be {SharedSecretLength} bytes (HMAC key + AES key).", nameof(key));
         }
-        
+
         if (plaintext.Length == 0 || plaintext.Length % AesBlockSize != 0)
         {
             throw new ArgumentException(
                 $"Plaintext must be a non-empty multiple of {AesBlockSize} bytes.", nameof(plaintext));
         }
-        
+
         // Extract AES key from shared secret
         var aesKey = key.Slice(HmacKeyLength, AesKeyLength);
 
@@ -177,26 +177,26 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
             if (ciphertext is not null) CryptographicOperations.ZeroMemory(ciphertext);
         }
     }
-    
+
     /// <inheritdoc />
     public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         if (key.Length != SharedSecretLength)
         {
             throw new ArgumentException(
                 $"Key must be {SharedSecretLength} bytes (HMAC key + AES key).", nameof(key));
         }
-        
+
         // V2 ciphertext format: IV (16 bytes) || encrypted data
         if (ciphertext.Length < AesBlockSize * 2 || ciphertext.Length % AesBlockSize != 0)
         {
             throw new ArgumentException(
-                $"Ciphertext must be at least {AesBlockSize * 2} bytes and a multiple of {AesBlockSize}.", 
+                $"Ciphertext must be at least {AesBlockSize * 2} bytes and a multiple of {AesBlockSize}.",
                 nameof(ciphertext));
         }
-        
+
         // Extract AES key from shared secret
         var aesKey = key.Slice(HmacKeyLength, AesKeyLength);
         var iv = ciphertext[..AesBlockSize];
@@ -232,12 +232,12 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
             if (inputArray is not null) CryptographicOperations.ZeroMemory(inputArray);
         }
     }
-    
+
     /// <inheritdoc />
     public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         // Key can be either:
         // - 32-byte PIN token (used for pinUvAuthParam computation)
         // - 64-byte shared secret (HMAC key + AES key)
@@ -247,27 +247,27 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
             throw new ArgumentException(
                 $"Key must be {HmacKeyLength} bytes (PIN token) or {SharedSecretLength} bytes (shared secret).", nameof(key));
         }
-        
+
         // Use first 32 bytes as HMAC key (works for both token and shared secret)
         var hmacKey = key[..HmacKeyLength];
-        
+
         // Compute HMAC-SHA-256 (full 32 bytes for V2)
         var hash = new byte[AuthenticationTagLength];
         HMACSHA256.HashData(hmacKey, message, hash);
-        
+
         return hash;
     }
-    
+
     /// <inheritdoc />
     public bool Verify(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message, ReadOnlySpan<byte> signature)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
+
         if (signature.Length != AuthenticationTagLength)
         {
             return false;
         }
-        
+
         var expected = Authenticate(key, message);
         try
         {
@@ -278,7 +278,7 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
             CryptographicOperations.ZeroMemory(expected);
         }
     }
-    
+
     /// <inheritdoc />
     public void Dispose()
     {

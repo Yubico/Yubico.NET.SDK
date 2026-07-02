@@ -1,11 +1,9 @@
 name: Architecture Docs Monthly Synthesis
 
 on:
+  # GitHub schedules run only from the repository default branch. Keep this
+  # yubikit workflow manually dispatchable; use a default-branch wrapper for cron.
   workflow_dispatch:
-  # GitHub schedule triggers run only from the repository default branch.
-  # Mirror this workflow to the default branch if monthly synthesis should run automatically.
-  schedule:
-    - cron: '17 4 1 * *'
 
 permissions:
   contents: write

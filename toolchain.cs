@@ -369,11 +369,6 @@ Target("docs-qa", () =>
     PrintInfo($"Validated {activeDocumentationFiles.Length} active documentation file(s)");
 });
 
-Target("docs-list-active", () =>
-{
-    PrintActiveDocumentationFiles(activeDocumentationFiles);
-});
-
 Target("docs-inventory", () =>
 {
     PrintHeader("Generating active documentation inventory");

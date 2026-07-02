@@ -40,7 +40,7 @@ trap 'rm -rf "$tmpd"' EXIT
 
 raw_active_list="$tmpd/active-docs.raw.txt"
 active_list="$tmpd/active-docs.txt"
-dotnet toolchain.cs docs-list-active > "$raw_active_list"
+dotnet toolchain.cs -- docs-list-active > "$raw_active_list"
 
 : > "$active_list"
 unexpected_output=0

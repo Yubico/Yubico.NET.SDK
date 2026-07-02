@@ -706,6 +706,7 @@ TARGETS:
   resilience     - Run fast no-hardware runtime resilience gates
   benchmark      - Run performance benchmarks (manual, not CI)
   docs-qa        - Validate active documentation hygiene
+  docs-architecture - Validate architecture diagram evidence map + image freshness
   coverage       - Run tests with code coverage
   pack           - Create NuGet packages
   setup-feed     - Configure local NuGet feed

@@ -34,24 +34,28 @@ check_only=0
 [[ "${1:-}" == "--check" ]] && check_only=1
 
 # --- locate mmdc + verify pinned version ---------------------------------
+# Probe candidates and pick the one whose --version equals the pin, so a stale
+# global mmdc does not shadow a correctly-versioned local install.
 mmdc_bin=""
-if command -v mmdc >/dev/null 2>&1; then
-  mmdc_bin="mmdc"
-elif command -v npx >/dev/null 2>&1; then
-  mmdc_bin="npx --no-install @mermaid-js/mermaid-cli"
-else
-  echo "ERROR: mmdc not found. Install @mermaid-js/mermaid-cli@${MERMAID_CLI_VERSION}." >&2
-  exit 2
-fi
+installed_ver=""
+for cand in "mmdc" "npx --no-install @mermaid-js/mermaid-cli"; do
+  # Only consider a candidate that can actually run.
+  ver="$($cand --version 2>/dev/null | tr -d '[:space:]' || true)"
+  [[ -z "$ver" ]] && continue
+  if [[ "$ver" == "$MERMAID_CLI_VERSION" ]]; then
+    mmdc_bin="$cand"; installed_ver="$ver"; break
+  fi
+  # Remember the first runnable candidate for a helpful mismatch message.
+  [[ -z "$installed_ver" ]] && installed_ver="$ver"
+done
 
-installed_ver="$($mmdc_bin --version 2>/dev/null | tr -d '[:space:]' || true)"
-if [[ -z "$installed_ver" ]]; then
-  echo "ERROR: could not determine mmdc version." >&2
-  exit 2
-fi
-if [[ "$installed_ver" != "$MERMAID_CLI_VERSION" ]]; then
-  echo "ERROR: mmdc version mismatch: installed '$installed_ver', pinned '$MERMAID_CLI_VERSION'." >&2
-  echo "       Renders must be reproducible. Install the pinned version or bump architecture-images.env deliberately." >&2
+if [[ -z "$mmdc_bin" ]]; then
+  if [[ -z "$installed_ver" ]]; then
+    echo "ERROR: mmdc not found. Install @mermaid-js/mermaid-cli@${MERMAID_CLI_VERSION}." >&2
+  else
+    echo "ERROR: no mmdc at pinned version '$MERMAID_CLI_VERSION' (found '$installed_ver')." >&2
+    echo "       Renders must be reproducible. Install the pinned version or bump architecture-images.env deliberately." >&2
+  fi
   exit 2
 fi
 
@@ -76,7 +80,7 @@ manifest_tmp="$tmpd/manifest"
 : > "$manifest_tmp"
 {
   echo "# architecture image freshness manifest"
-  echo "# image_basename<TAB>source_block_sha256"
+  echo "# image_basename<TAB>source_block_sha256<TAB>svg_sha256<TAB>png_sha256"
   echo "# regenerate with scripts/architecture/render-architecture.sh"
   echo "mermaid_cli_version=$MERMAID_CLI_VERSION"
 } >> "$manifest_tmp"
@@ -100,7 +104,9 @@ while [[ $i -lt $n_blocks ]]; do
     -c "$ARCH_MERMAID_CONFIG" -b white -s 3 >/dev/null 2>&1
 
   h="$(arch_hash_stdin < "$block_file")"
-  printf '%s\t%s\n' "$name" "$h" >> "$manifest_tmp"
+  svg_h="$(arch_hash_file "$ARCH_IMAGES_DIR/$name.svg")"
+  png_h="$(arch_hash_file "$ARCH_PNG_DIR/$name.png")"
+  printf '%s\t%s\t%s\t%s\n' "$name" "$h" "$svg_h" "$png_h" >> "$manifest_tmp"
   i=$((i+1))
 done
 

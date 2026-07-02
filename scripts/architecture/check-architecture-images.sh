@@ -51,16 +51,31 @@ while [[ $i -lt $n_names ]]; do
   name="${ARCH_IMAGE_NAMES[$i]}"
   svg="$ARCH_IMAGES_DIR/$name.svg"
   png="$ARCH_PNG_DIR/$name.png"
-  [[ -f "$svg" ]] || err "missing SVG: $svg"
-  [[ -f "$png" ]] || err "missing PNG: $png"
+  svg_ok=1; png_ok=1
+  [[ -f "$svg" ]] || { err "missing SVG: $svg"; svg_ok=0; }
+  [[ -f "$png" ]] || { err "missing PNG: $png"; png_ok=0; }
 
   if [[ $i -lt $n_blocks ]]; then
     want="$(arch_block_hash "$ARCH_DIAGRAMS_FILE" "$i")"
+    # manifest columns: name<TAB>source_sha<TAB>svg_sha<TAB>png_sha
     have="$(awk -F'\t' -v n="$name" '$1==n {print $2}' "$ARCH_MANIFEST" | head -n1)"
+    m_svg="$(awk -F'\t' -v n="$name" '$1==n {print $3}' "$ARCH_MANIFEST" | head -n1)"
+    m_png="$(awk -F'\t' -v n="$name" '$1==n {print $4}' "$ARCH_MANIFEST" | head -n1)"
     if [[ -z "$have" ]]; then
       err "no manifest entry for '$name' (run render-architecture.sh)"
-    elif [[ "$want" != "$have" ]]; then
-      err "stale image '$name': source block changed since last render (source=$want manifest=$have). Run render-architecture.sh."
+    else
+      # Freshness: source block unchanged since last render.
+      [[ "$want" == "$have" ]] || \
+        err "stale image '$name': source block changed since last render (source=$want manifest=$have). Run render-architecture.sh."
+      # Integrity: committed image bytes match what render produced.
+      if [[ $svg_ok -eq 1 && -n "$m_svg" ]]; then
+        [[ "$(arch_hash_file "$svg")" == "$m_svg" ]] || \
+          err "image integrity: $svg differs from manifest digest (hand-edited/corrupted?). Run render-architecture.sh."
+      fi
+      if [[ $png_ok -eq 1 && -n "$m_png" ]]; then
+        [[ "$(arch_hash_file "$png")" == "$m_png" ]] || \
+          err "image integrity: $png differs from manifest digest (hand-edited/corrupted?). Run render-architecture.sh."
+      fi
     fi
   fi
   i=$((i+1))

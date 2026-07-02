@@ -19,7 +19,19 @@
 
 arch_count_blocks() {
   local file="$1"
-  grep -c '^```mermaid[[:space:]]*$' "$file"
+  # grep -c exits 1 on zero matches; guard so callers under `set -e` still get
+  # a "0" and can emit their own count-mismatch diagnostics.
+  grep -c '^```mermaid[[:space:]]*$' "$file" || true
+}
+
+arch_hash_file() {
+  # sha256 of a file's bytes (artifact integrity for rendered images).
+  local f="$1"
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$f" | awk '{print $1}'
+  else
+    shasum -a 256 "$f" | awk '{print $1}'
+  fi
 }
 
 arch_extract_block() {

@@ -2,9 +2,10 @@
 
 > **Study & presentation material.** Layered mermaid diagrams at progressive zoom depths.
 > Authoritative branch: `yubikit`. Source of truth: `src/<Module>/src/*.csproj` + `docs/architecture/`.
-> Diagram-to-source evidence is tracked in `docs/architecture/sdk-architecture-map.yml` and verified by
-> `dotnet toolchain.cs -- docs-architecture` (renders each Mermaid block, checks image freshness, and
-> resolves the evidence map). Do not hand-edit rendered images; regenerate them via that target.
+> Diagram-to-source evidence is tracked in `docs/architecture/sdk-architecture-map.yml`. Validate with
+> `dotnet toolchain.cs -- docs-architecture` (resolves the evidence map and checks image freshness +
+> integrity). Regenerate images with `scripts/architecture/render-architecture.sh`; do not hand-edit
+> rendered images.
 >
 > **How to use these:** Read top to bottom. Each level zooms in one step. For a talk, one
 > diagram per slide, in this order. For learning, study L2–L4 with the code open beside you —

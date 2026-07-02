@@ -82,6 +82,7 @@ project_edge_exists() {
 project_edge_absent() {
   local from="$1" to="$2"
   [[ -f "$from" ]] || { err "forbidden_project_edge source csproj not found: $from"; return 0; }
+  [[ -f "$to" ]]   || { err "forbidden_project_edge target csproj not found: $to"; return 0; }
   local to_base; to_base="$(basename "$to")"
   if grep -oE 'ProjectReference[[:space:]]+Include="[^"]+"' "$from" \
      | sed -E 's/.*Include="//; s/"$//; s#\\#/#g' \

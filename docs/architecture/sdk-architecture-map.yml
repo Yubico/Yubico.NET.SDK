@@ -24,8 +24,8 @@
 # Pedagogical boxes: some diagram boxes are teaching labels, not grep-able types
 # (e.g. "OS transport layer", "APDU decorator pipeline"). Those are intentionally
 # NOT in `symbols`. Every box that IS a real, grep-able type SHOULD be mapped so a
-# rename/removal fails loudly. See docs/architecture/sdk-architecture-map.md-notes
-# in the diagrams file for which boxes are pedagogical.
+# rename/removal fails loudly. Pedagogical labels are documented inline in the
+# diagrams file's teaching notes, not in a separate notes file.
 #
 # Keep this file honest: if you move or rename a type, this map breaks loudly,
 # which is the whole point.

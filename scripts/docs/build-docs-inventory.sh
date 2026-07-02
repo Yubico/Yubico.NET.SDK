@@ -12,9 +12,27 @@ repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$repo_root"
 
 output="docs/docs-inventory-report.md"
-if [[ "${1:-}" == "--output" ]]; then
-  output="${2:-}"
-fi
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --output)
+      if [[ -z "${2:-}" ]]; then
+        echo "ERROR: --output requires a path" >&2
+        exit 2
+      fi
+      output="$2"
+      shift 2
+      ;;
+    -h|--help)
+      echo "Usage: build-docs-inventory.sh [--output PATH]"
+      exit 0
+      ;;
+    *)
+      echo "ERROR: unknown argument: $1" >&2
+      echo "Usage: build-docs-inventory.sh [--output PATH]" >&2
+      exit 2
+      ;;
+  esac
+done
 
 mkdir -p "$(dirname "$output")"
 tmpd="$(mktemp -d)"

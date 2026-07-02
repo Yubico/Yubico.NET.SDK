@@ -25,6 +25,8 @@
  *   resilience     - Run fast no-hardware runtime resilience gates
  *   benchmark      - Run performance benchmarks (manual, not CI)
  *   docs-qa        - Validate active documentation hygiene
+ *   docs-list-active - Print the exact active documentation set used by docs-qa
+ *   docs-inventory - Generate report-only active documentation inventory
  *   docs-architecture - Validate architecture diagram evidence map + image freshness
  *   coverage       - Run tests with code coverage
  *   pack           - Create NuGet packages
@@ -153,6 +155,12 @@ var testProjectInfos = testProjects
 
 var artifactsDir = Path.Combine(repoRoot, "artifacts");
 var packagesDir = Path.Combine(artifactsDir, "packages");
+
+if (args.Length == 1 && string.Equals(args[0], "docs-list-active", StringComparison.OrdinalIgnoreCase))
+{
+    PrintActiveDocumentationFiles(activeDocumentationFiles);
+    return;
+}
 
 // Define Bullseye targets
 Target("clean", () =>
@@ -361,6 +369,23 @@ Target("docs-qa", () =>
     PrintInfo($"Validated {activeDocumentationFiles.Length} active documentation file(s)");
 });
 
+Target("docs-list-active", () =>
+{
+    PrintActiveDocumentationFiles(activeDocumentationFiles);
+});
+
+Target("docs-inventory", () =>
+{
+    PrintHeader("Generating active documentation inventory");
+
+    var inventoryBuilder = Path.Combine(repoRoot, "scripts", "docs", "build-docs-inventory.sh");
+    if (!File.Exists(inventoryBuilder))
+        throw new InvalidOperationException($"Missing {inventoryBuilder}");
+
+    Run("bash", $"\"{inventoryBuilder}\"", workingDirectory: repoRoot);
+    PrintInfo("Active documentation inventory generated");
+});
+
 Target("docs-architecture", () =>
 {
     PrintHeader("Validating architecture diagrams (evidence map + image freshness)");
@@ -485,9 +510,22 @@ await RunTargetsAndExitAsync(bullseyeArgs);
 string GetRepoRoot()
 {
     var current = Directory.GetCurrentDirectory();
-    while (current is not null && !Directory.Exists(Path.Combine(current, ".git")))
+    while (current is not null)
+    {
+        var gitPath = Path.Combine(current, ".git");
+        if (Directory.Exists(gitPath) || File.Exists(gitPath))
+            return current;
+
         current = Directory.GetParent(current)?.FullName;
-    return current ?? Directory.GetCurrentDirectory();
+    }
+
+    return Directory.GetCurrentDirectory();
+}
+
+void PrintActiveDocumentationFiles(string[] files)
+{
+    foreach (var file in files)
+        Console.WriteLine(file.Replace(Path.DirectorySeparatorChar, '/'));
 }
 
 // Use the captured top-level `args`, not Environment.GetCommandLineArgs() which includes the host path.
@@ -706,6 +744,8 @@ TARGETS:
   resilience     - Run fast no-hardware runtime resilience gates
   benchmark      - Run performance benchmarks (manual, not CI)
   docs-qa        - Validate active documentation hygiene
+  docs-list-active - Print the exact active documentation set used by docs-qa
+  docs-inventory - Generate report-only active documentation inventory
   docs-architecture - Validate architecture diagram evidence map + image freshness
   coverage       - Run tests with code coverage
   pack           - Create NuGet packages
@@ -736,6 +776,7 @@ EXAMPLES:
   dotnet toolchain.cs build --project Piv
   dotnet toolchain.cs test
   dotnet toolchain.cs docs-qa
+  dotnet toolchain.cs -- docs-inventory
   dotnet toolchain.cs test --filter ""FullyQualifiedName~MyTestClass""
   dotnet toolchain.cs test --project Piv --filter ""Method~Sign""
   dotnet toolchain.cs -- resilience --fast

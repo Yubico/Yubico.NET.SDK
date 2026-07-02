@@ -1,0 +1,151 @@
+name: Architecture Docs Update
+
+on:
+  push:
+    branches: [ yubikit ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: architecture-docs-yubikit
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out yubikit
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          ref: yubikit
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Install pinned Mermaid CLI
+        shell: bash
+        run: |
+          version="$(sed -n 's/^MERMAID_CLI_VERSION="\(.*\)"/\1/p' scripts/architecture/architecture-images.env | head -n 1)"
+          npm install -g "@mermaid-js/mermaid-cli@$version"
+          bash scripts/architecture/render-architecture.sh --check
+
+      - name: Fetch architecture baseline
+        run: |
+          git fetch origin +refs/heads/yubikit:refs/remotes/origin/yubikit
+
+      - name: Resolve architecture range
+        id: range
+        shell: bash
+        run: |
+          state_path='docs/architecture/.state.yml'
+          if [[ -f "$state_path" ]]; then
+            last="$(sed -n 's/^last_analyzed_commit:[[:space:]]*//p' "$state_path" | head -n 1)"
+          else
+            last=''
+          fi
+
+          if [[ -z "$last" || "$last" == "unset" ]]; then
+            last='origin/yubikit^'
+          fi
+
+          echo "base_range=$last..HEAD" >> "$GITHUB_OUTPUT"
+
+      - name: Build architecture context
+        shell: bash
+        run: |
+          bash ./scripts/architecture/build-architecture-context.sh \
+            --mode update \
+            --v2-branch origin/yubikit \
+            --base-range '${{ steps.range.outputs.base_range }}' \
+            --output-dir .architecture-context
+
+      - name: Check architecture impact
+        id: impact
+        shell: bash
+        run: |
+          if [[ -s .architecture-context/affected-diagrams.txt ]]; then
+            echo "has_affected=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_affected=false" >> "$GITHUB_OUTPUT"
+            echo "No mapped architecture diagram impact; skipping AI update and state-only PR."
+          fi
+
+      - name: Update architecture documentation
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        uses: anthropics/claude-code-action@28f83620103c48a57093dcc2837eec89e036bb9f # beta (v0.0.63)
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            Read and follow `.github/prompts/architecture-docs-post-merge.md`.
+            The generated context is in `.architecture-context/`.
+            Update only the allowed architecture documentation files.
+          claude_args: >-
+            --allowedTools Read,Grep,Glob,Edit,Write,Bash
+
+      - name: Enforce architecture-only edits
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        shell: bash
+        run: |
+          if ! git diff --quiet -- docs/architecture/.state.yml; then
+            echo "Architecture docs automation must not edit docs/architecture/.state.yml directly; the workflow owns the watermark." >&2
+            exit 1
+          fi
+          outside="$(git status --porcelain --untracked-files=all | while IFS= read -r line; do path="${line#???}"; case "$path" in docs/architecture/*|.architecture-context/*) ;; *) printf '%s\n' "$path" ;; esac; done)"
+          if [[ -n "$outside" ]]; then
+            echo "Architecture docs automation edited files outside docs/architecture:" >&2
+            printf '%s\n' "$outside" >&2
+            exit 1
+          fi
+
+      - name: Render architecture images
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        shell: bash
+        run: |
+          if git diff --quiet -- docs/architecture/sdk-architecture-diagrams.md; then
+            echo "No Mermaid source changes; skipping render."
+          else
+            bash scripts/architecture/render-architecture.sh
+          fi
+
+      - name: Validate architecture documentation
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        run: dotnet toolchain.cs -- docs-architecture
+
+      - name: Advance architecture watermark
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        shell: bash
+        run: |
+          if grep -R -q --include='*.md' --include='*.yml' --exclude='architecture-docs-automation.md' 'MANUAL-REVIEW' docs/architecture 2>/dev/null; then
+            echo "MANUAL-REVIEW marker present; leaving docs/architecture/.state.yml unchanged."
+            exit 0
+          fi
+          head_sha="$(sed -n 's/^head_sha:[[:space:]]*//p' .architecture-context/state.txt | head -n 1)"
+          if [[ -z "$head_sha" ]]; then
+            echo "Could not resolve head_sha from .architecture-context/state.txt" >&2
+            exit 1
+          fi
+          tmp="$(mktemp)"
+          awk -v sha="$head_sha" 'BEGIN{done=0} /^last_analyzed_commit:/ {print "last_analyzed_commit: " sha; done=1; next} {print} END{if(done==0) print "last_analyzed_commit: " sha}' docs/architecture/.state.yml > "$tmp"
+          mv "$tmp" docs/architecture/.state.yml
+
+      - name: Create architecture documentation PR
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        with:
+          branch: automation/architecture-docs-update
+          base: yubikit
+          title: Update architecture documentation
+          commit-message: "docs: update architecture documentation"
+          body: |
+            Automated architecture documentation update for `${{ steps.range.outputs.base_range }}`.
+
+            Review diagram edits, rendered images, evidence-map updates, and state changes before merging.
+          add-paths: |
+            docs/architecture/

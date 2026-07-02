@@ -36,6 +36,9 @@ jobs:
       - name: Validate active documentation
         run: dotnet toolchain.cs -- docs-qa
 
+      - name: Validate architecture documentation
+        run: dotnet toolchain.cs -- docs-architecture
+
       - name: Install PC/SC dependencies
         run: |
           sudo apt-get update -qq

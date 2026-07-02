@@ -1,0 +1,7 @@
+format_version: 1
+v2_branch: yubikit
+# Advanced by the architecture-docs post-merge automation after a range is
+# analyzed AND (no diagram affected) OR (affected diagrams edited + re-rendered
+# + docs-architecture green). NOT advanced when render fails or a finding is
+# manual-review; see .github/prompts/architecture-docs-post-merge.md.
+last_analyzed_commit: unset

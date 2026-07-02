@@ -1,7 +1,10 @@
 # Yubico Yubikit .NET SDK v2 — Architecture Diagrams
 
 > **Study & presentation material.** Layered mermaid diagrams at progressive zoom depths.
-> Branch: `yubikit-consolidation`. Source of truth: `src/<Module>/src/*.csproj` + `docs/architecture/`.
+> Authoritative branch: `yubikit`. Source of truth: `src/<Module>/src/*.csproj` + `docs/architecture/`.
+> Diagram-to-source evidence is tracked in `docs/architecture/sdk-architecture-map.yml` and verified by
+> `dotnet toolchain.cs -- docs-architecture` (renders each Mermaid block, checks image freshness, and
+> resolves the evidence map). Do not hand-edit rendered images; regenerate them via that target.
 >
 > **How to use these:** Read top to bottom. Each level zooms in one step. For a talk, one
 > diagram per slide, in this order. For learning, study L2–L4 with the code open beside you —
@@ -396,5 +399,7 @@ Requires `@mermaid-js/mermaid-cli` (`npm i -g @mermaid-js/mermaid-cli`).
 
 ---
 
-*Diagrams generated from `yubikit-consolidation`. Verify against source before presenting;
-type names cited are grep-able in `src/Core/src/` and `src/<Module>/src/`.*
+*Authoritative branch: `yubikit`. Type names cited are grep-able in `src/Core/src/` and
+`src/<Module>/src/`, and are tracked in `docs/architecture/sdk-architecture-map.yml`.
+Verify against source before presenting; `dotnet toolchain.cs -- docs-architecture` checks
+diagram-to-source evidence, renders, and image freshness.*

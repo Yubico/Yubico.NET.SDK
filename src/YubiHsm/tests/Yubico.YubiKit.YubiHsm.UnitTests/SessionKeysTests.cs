@@ -13,7 +13,8 @@
 // limitations under the License.
 
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
-using Yubico.YubiKit.Core.SmartCard;
+
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 public class SessionKeysTests
 {

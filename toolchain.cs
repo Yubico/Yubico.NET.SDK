@@ -25,6 +25,7 @@
  *   resilience     - Run fast no-hardware runtime resilience gates
  *   benchmark      - Run performance benchmarks (manual, not CI)
  *   docs-qa        - Validate active documentation hygiene
+ *   docs-architecture - Validate architecture diagram evidence map + image freshness
  *   coverage       - Run tests with code coverage
  *   pack           - Create NuGet packages
  *   setup-feed     - Configure local NuGet feed
@@ -358,6 +359,30 @@ Target("docs-qa", () =>
     }
 
     PrintInfo($"Validated {activeDocumentationFiles.Length} active documentation file(s)");
+});
+
+Target("docs-architecture", () =>
+{
+    PrintHeader("Validating architecture diagrams (evidence map + image freshness)");
+
+    // 1. Diagram-to-source evidence map resolves (types/projects/edges present).
+    // 2. Rendered images exist and are fresh vs their source Mermaid blocks.
+    // Both scripts are bash 3.2-portable and exit non-zero on any drift.
+    var mapChecker = Path.Combine(repoRoot, "scripts", "architecture", "check-architecture-map.sh");
+    var imageChecker = Path.Combine(repoRoot, "scripts", "architecture", "check-architecture-images.sh");
+
+    if (!File.Exists(mapChecker))
+        throw new InvalidOperationException($"Missing {mapChecker}");
+    if (!File.Exists(imageChecker))
+        throw new InvalidOperationException($"Missing {imageChecker}");
+
+    // Resolve evidence map (fails loudly if a mapped type/project/edge drifted).
+    Run("bash", $"\"{mapChecker}\"", workingDirectory: repoRoot);
+
+    // Verify image presence + freshness (source-block hash vs manifest).
+    Run("bash", $"\"{imageChecker}\"", workingDirectory: repoRoot);
+
+    PrintInfo("Architecture diagrams validated (map resolves; images present and fresh)");
 });
 
 Target("pack", DependsOn("build"), () =>

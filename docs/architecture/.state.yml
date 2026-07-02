@@ -1,0 +1,8 @@
+format_version: 1
+v2_branch: yubikit
+# Advanced by the architecture-docs post-merge automation only after a range has
+# mapped architecture impact AND affected diagrams are edited + re-rendered +
+# docs-architecture is green. No-impact ranges do not advance the watermark or
+# open state-only PRs. NOT advanced when render fails or a finding is
+# manual-review; see .github/prompts/architecture-docs-post-merge.md.
+last_analyzed_commit: unset

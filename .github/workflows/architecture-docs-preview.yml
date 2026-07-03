@@ -41,4 +41,5 @@ jobs:
             The generated context is in `.architecture-context/`.
             Preview mode must comment on architecture diagram impact only; do not edit files.
           claude_args: >-
+            --model sonnet
             --allowedTools Read,Grep,Glob

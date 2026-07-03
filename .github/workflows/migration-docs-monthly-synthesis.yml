@@ -50,6 +50,7 @@ jobs:
             The generated context is in `.migration-context/`.
             Improve only migration documentation files.
           claude_args: >-
+            --model opus
             --allowedTools Read,Grep,Glob,Edit,Write
 
       - name: Create migration synthesis PR

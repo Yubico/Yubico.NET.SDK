@@ -97,7 +97,7 @@ jobs:
             'Read and follow `.github/prompts/migration-docs-post-merge.md`.' \
             'The generated context is in `.migration-context/`.' \
             'Update only the allowed migration documentation files.' \
-            | "$HOME/.local/bin/claude" -p --allowedTools Read,Grep,Glob,Edit,Write
+            | "$HOME/.local/bin/claude" -p --model sonnet --allowedTools Read,Grep,Glob,Edit,Write
 
       - name: Set up .NET SDK
         if: ${{ steps.impact.outputs.has_impact == 'true' }}

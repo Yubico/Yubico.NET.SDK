@@ -59,6 +59,7 @@ jobs:
             The generated context is in `.migration-context/`.
             Update only the allowed migration documentation files.
           claude_args: >-
+            --model sonnet
             --allowedTools Read,Grep,Glob,Edit,Write
 
       - name: Create migration documentation PR

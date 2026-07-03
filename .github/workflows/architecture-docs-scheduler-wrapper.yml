@@ -91,6 +91,7 @@ jobs:
             The generated context is in `.architecture-context/`.
             Update only the allowed architecture documentation files.
           claude_args: >-
+            --model sonnet
             --allowedTools Read,Grep,Glob,Edit,Write,Bash
 
       - name: Enforce architecture-only edits

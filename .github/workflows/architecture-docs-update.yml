@@ -76,18 +76,22 @@ jobs:
             echo "No mapped architecture diagram impact; skipping AI update and state-only PR."
           fi
 
+      - name: Install Claude Code
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash -s 2.1.199
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
       - name: Update architecture documentation
         if: ${{ steps.impact.outputs.has_affected == 'true' }}
-        uses: anthropics/claude-code-action@769e3bdff9bb7ecfb51bad4c9cba23d6f5fc5ea5 # v1.0.163
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          prompt: |
-            Read and follow `.github/prompts/architecture-docs-post-merge.md`.
-            The generated context is in `.architecture-context/`.
-            Update only the allowed architecture documentation files.
-          claude_args: >-
-            --allowedTools Read,Grep,Glob,Edit,Write,Bash
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          "$HOME/.local/bin/claude" -p \
+            --allowedTools Read,Grep,Glob,Edit,Write,Bash \
+            "Read and follow \`.github/prompts/architecture-docs-post-merge.md\`.
+          The generated context is in \`.architecture-context/\`.
+          Update only the allowed architecture documentation files."
 
       - name: Enforce architecture-only edits
         if: ${{ steps.impact.outputs.has_affected == 'true' }}

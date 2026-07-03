@@ -186,6 +186,24 @@ mappings:
       - yubikit:src/Core/
     notes: Verify byte-level behavior, status words, and response parsing before migration.
     last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: session-creation-extension-methods
+    status: assisted
+    confidence: high
+    migration_kind: construction
+    v1: v1 session construction from a device object or dedicated session constructor
+    v2: IYubiKey.Create{Applet}SessionAsync(...) extension methods per applet package
+    evidence:
+      - yubikit:src/Piv/src/IYubiKeyExtensions.cs
+      - yubikit:src/Fido2/src/IYubiKeyExtensions.cs
+      - yubikit:src/Oath/src/IYubiKeyExtensions.cs
+      - yubikit:src/OpenPgp/src/IYubiKeyExtensions.cs
+      - yubikit:src/SecurityDomain/src/IYubiKeyExtensions.cs
+      - yubikit:src/YubiHsm/src/IYubiKeyExtensions.cs
+      - yubikit:src/YubiOtp/src/IYubiKeyExtensions.cs
+      - yubikit:src/Management/src/IYubiKeyExtensions.cs
+      - yubikit:src/Piv/CLAUDE.md
+    notes: Every applet package exposes a Create{Applet}SessionAsync(...) extension method as the standard construction entry point, superseding manual ConnectAsync<TConnection>() plus direct session-constructor call sites shown in earlier session-pattern diffs. Underlying transport defaults, SCP key parameter handling, and connection disposal semantics still require manual review at each v1 call site.
+    last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
 manual_review:
   - device discovery call sites
   - transport selection assumptions

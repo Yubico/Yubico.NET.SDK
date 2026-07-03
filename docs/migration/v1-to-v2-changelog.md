@@ -13,3 +13,10 @@
 - Added an assisted, high-confidence mapping (`session-creation-extension-methods`) documenting that every v2 applet package now exposes an `IYubiKey.Create{Applet}SessionAsync(...)` extension method as the standard v2 session-construction entry point, and referenced it from the Session Lifecycle section of the migration guide.
 - The bulk of the analyzed range is v2-internal: device discovery/composite-device internals, APDU/CTAPHID protocol fixes, WebAuthn Swift/Rust exploration and documentation, previewSign/ARKG experimental API notes, and documentation/CI automation tooling. None of this required new v1-to-v2 mapping guidance beyond the session-construction update above; existing manual-review guidance for device discovery, transport selection, and security-sensitive flows still applies.
 - Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `5a82db9bce05addc0385162e9f085adbc2366c5b`.
+
+## 2026-07-03 - Post-merge no-impact update through commit a41eac1c
+
+- Analyzed range `5a82db9bce05addc0385162e9f085adbc2366c5b..a41eac1c34e423f239b9cfc7500ec1d94929f80b` (2 commits, 4 changed files).
+- The only changes in range are the prior post-merge automation's own edits to `docs/migration/.state.yml`, `docs/migration/v1-to-v2-map.yml`, and `docs/migration/v1-to-v2.md` (merged via PR #520). No v1 or v2 source, package, namespace, or API changes are present in this range.
+- No new migration guidance is required; the migration guide and map are unchanged this cycle.
+- Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `a41eac1c34e423f239b9cfc7500ec1d94929f80b`.

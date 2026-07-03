@@ -55,12 +55,31 @@ jobs:
             --base-range '${{ steps.range.outputs.base_range }}' \
             --output-dir .migration-context
 
+      - name: Check migration impact
+        id: impact
+        shell: bash
+        run: |
+          if [[ ! -s .migration-context/changed-files.txt ]]; then
+            echo "has_impact=false" >> "$GITHUB_OUTPUT"
+            echo "No files changed in migration range; skipping documentation update."
+            exit 0
+          fi
+
+          if awk 'index($0, "docs/migration/") != 1 { found=1 } END { exit found ? 0 : 1 }' .migration-context/changed-files.txt; then
+            echo "has_impact=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_impact=false" >> "$GITHUB_OUTPUT"
+            echo "Only docs/migration files changed in migration range; skipping self-only documentation update."
+          fi
+
       - name: Install Claude Code
+        if: ${{ steps.impact.outputs.has_impact == 'true' }}
         run: |
           curl -fsSL https://claude.ai/install.sh | bash -s 2.1.199
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Update migration documentation
+        if: ${{ steps.impact.outputs.has_impact == 'true' }}
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
@@ -71,14 +90,17 @@ jobs:
             | "$HOME/.local/bin/claude" -p --allowedTools Read,Grep,Glob,Edit,Write
 
       - name: Set up .NET SDK
+        if: ${{ steps.impact.outputs.has_impact == 'true' }}
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
         with:
           dotnet-version: "10.0.x"
 
       - name: Validate migration documentation
+        if: ${{ steps.impact.outputs.has_impact == 'true' }}
         run: dotnet toolchain.cs -- docs-qa
 
       - name: Create migration documentation PR
+        if: ${{ steps.impact.outputs.has_impact == 'true' }}
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
         with:
           branch: automation/migration-docs-update

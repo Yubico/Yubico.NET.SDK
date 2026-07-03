@@ -70,6 +70,14 @@ jobs:
             'Update only the allowed migration documentation files.' \
             | "$HOME/.local/bin/claude" -p --allowedTools Read,Grep,Glob,Edit,Write
 
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Validate migration documentation
+        run: dotnet toolchain.cs -- docs-qa
+
       - name: Create migration documentation PR
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
         with:

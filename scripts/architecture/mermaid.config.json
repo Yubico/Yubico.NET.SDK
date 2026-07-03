@@ -1,0 +1,5 @@
+{
+  "theme": "neutral",
+  "flowchart": { "htmlLabels": true, "curve": "basis" },
+  "sequence": { "useMaxWidth": true }
+}

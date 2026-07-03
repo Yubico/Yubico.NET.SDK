@@ -5,6 +5,7 @@ This project uses a .NET 10 C# script for build automation with Bullseye task ru
 ## Prerequisites
 
 - .NET 10 SDK
+- Bash for `docs-inventory` and `docs-architecture` (macOS/Linux, Git Bash, or WSL)
 
 ## Usage
 
@@ -40,6 +41,9 @@ dotnet toolchain.cs -- build --project Piv --clean
 - **build** - Build the solution (depends on: restore)
 - **test** - Run unit tests with nice summary output (depends on: restore, build)
 - **docs-qa** - Validate active documentation hygiene
+- **docs-list-active** - Print the exact active documentation set used by `docs-qa`
+- **docs-inventory** - Generate the report-only active documentation inventory
+- **docs-architecture** - Validate architecture diagram evidence map and rendered-image freshness
 - **coverage** - Run tests with code coverage collection (depends on: restore, build)
 - **pack** - Create NuGet packages (depends on: restore, build)
 - **setup-feed** - Configure local NuGet feed
@@ -80,6 +84,9 @@ dotnet toolchain.cs test
 
 # Validate active documentation hygiene
 dotnet toolchain.cs docs-qa
+
+# Generate report-only active documentation inventory
+dotnet toolchain.cs -- docs-inventory
 
 # Run tests for specific project with filter
 dotnet toolchain.cs test --project Piv --filter "Method~Sign"
@@ -149,6 +156,8 @@ Current checks:
 - stale FIDO2 user-presence trait examples that do not use `Category=RequiresUserPresence` are rejected
 
 Snippet compilation is not part of this target. README examples are treated as documentation samples whose local links and fences must stay valid; compile-time snippet validation needs a separate approved phase.
+
+Use `dotnet toolchain.cs -- docs-list-active` to print the exact active documentation set consumed by `docs-qa`. Use `dotnet toolchain.cs -- docs-inventory` to regenerate `docs/docs-inventory-report.md`; the inventory is report-only triage input and must not be treated as an auto-rewrite instruction.
 
 ## Project Discovery
 

@@ -1,0 +1,170 @@
+# Architecture diagram -> source-evidence map
+#
+# Purpose: anchor each layered architecture diagram in
+# docs/architecture/sdk-architecture-diagrams.md to real, grep-able source
+# evidence. Automation (scripts/architecture/build-architecture-context.sh)
+# intersects changed files/symbols against this map to decide which diagrams a
+# code change may have made stale ("affected diagrams"), instead of guessing.
+#
+# Contract:
+#   - Every diagram in the diagrams file has exactly one entry here (id matches
+#     the "## Lx" / "### Lxb" heading anchor).
+#   - `symbols` map a grep-able type name to the file that declares it. The
+#     resolver (scripts/architecture/check-architecture-map.sh) fails if any
+#     declaring file is missing OR no longer declares that type.
+#   - `projects` list csproj files whose <ProjectReference> graph the diagram
+#     depicts. The resolver fails if any listed csproj is missing.
+#   - `project_edges` assert directed <ProjectReference> edges "A -> B" where A
+#     and B are csproj paths. The resolver parses A's <ProjectReference> entries
+#     and fails if the edge to B is absent. This makes the L1 dependency-graph
+#     claims verifiable, not just "the files exist".
+#   - `paths` list directories/files a diagram depends on structurally (e.g.,
+#     the APDU pipeline directory). The resolver fails if any is missing.
+#
+# Pedagogical boxes: some diagram boxes are teaching labels, not grep-able types
+# (e.g. "OS transport layer", "APDU decorator pipeline"). Those are intentionally
+# NOT in `symbols`. Every box that IS a real, grep-able type SHOULD be mapped so a
+# rename/removal fails loudly. Pedagogical labels are documented inline in the
+# diagrams file's teaching notes, not in a separate notes file.
+#
+# Keep this file honest: if you move or rename a type, this map breaks loudly,
+# which is the whole point.
+
+format_version: 1
+v2_branch: yubikit
+diagrams_file: docs/architecture/sdk-architecture-diagrams.md
+
+diagrams:
+  L0-context:
+    title: "Context: what the SDK is"
+    # High-level; anchored to the module set + Core hub existing at all.
+    projects:
+      - src/Core/src/Yubico.YubiKit.Core.csproj
+    paths:
+      - src/Core/src
+    symbols: {}
+
+  L1-assembly-deps:
+    title: "Assembly dependency graph"
+    # The one-hub + WebAuthn->Fido2 story is a pure <ProjectReference> claim,
+    # asserted as directed edges below (verified against each csproj).
+    projects:
+      - src/Core/src/Yubico.YubiKit.Core.csproj
+      - src/Management/src/Yubico.YubiKit.Management.csproj
+      - src/Piv/src/Yubico.YubiKit.Piv.csproj
+      - src/Oath/src/Yubico.YubiKit.Oath.csproj
+      - src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj
+      - src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj
+      - src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj
+      - src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj
+      - src/Fido2/src/Yubico.YubiKit.Fido2.csproj
+      - src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj
+    project_edges:
+      - src/Management/src/Yubico.YubiKit.Management.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
+      - src/Piv/src/Yubico.YubiKit.Piv.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
+      - src/Oath/src/Yubico.YubiKit.Oath.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
+      - src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
+      - src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
+      - src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
+      - src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
+      - src/Fido2/src/Yubico.YubiKit.Fido2.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
+      - src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj -> src/Fido2/src/Yubico.YubiKit.Fido2.csproj
+    forbidden_project_edges:
+      # "App modules are independent verticals over Core" + "WebAuthn is the only
+      # 2nd-level module". These assert edges that MUST NOT exist; the resolver
+      # fails if any appears (catches a new cross-module reference silently
+      # invalidating the L1 story).
+      - src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
+      - src/Piv/src/Yubico.YubiKit.Piv.csproj -> src/Fido2/src/Yubico.YubiKit.Fido2.csproj
+      - src/Management/src/Yubico.YubiKit.Management.csproj -> src/Piv/src/Yubico.YubiKit.Piv.csproj
+      - src/Oath/src/Yubico.YubiKit.Oath.csproj -> src/Piv/src/Yubico.YubiKit.Piv.csproj
+    paths: []
+    symbols: {}
+
+  L2-layered-stack:
+    title: "Layered stack: how one module is built"
+    projects:
+      - src/Piv/src/Yubico.YubiKit.Piv.csproj
+      - src/Fido2/src/Yubico.YubiKit.Fido2.csproj
+    paths:
+      - src/Core/src/Protocols/SmartCard/Apdu
+      - src/Fido2/src/Backend
+    symbols:
+      PivSession: src/Piv/src/PivSession.cs
+      IPivSession: src/Piv/src/IPivSession.cs
+      FidoSession: src/Fido2/src/FidoSession.cs
+      ApplicationSession: src/Core/src/Sessions/ApplicationSession.cs
+      ISmartCardProtocol: src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs
+      IFidoHidProtocol: src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs
+      IOtpHidProtocol: src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs
+      ChainedResponseReceiver: src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs
+      ApduTransmitter: src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs
+      IApduFormatter: src/Core/src/Protocols/SmartCard/Apdu/IApduFormatter.cs
+      ChainedApduTransmitter: src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs
+      ScpProcessor: src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs
+      ISmartCardConnection: src/Core/src/Transports/SmartCard/ISmartCardConnection.cs
+      IFidoHidConnection: src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs
+      IOtpHidConnection: src/Core/src/Transports/Hid/IOtpHidConnection.cs
+      CtapRequestBuilder: src/Fido2/src/Cbor/CtapRequestBuilder.cs
+      CtapResponseParser: src/Fido2/src/Cbor/CtapResponseParser.cs
+      IFidoBackend: src/Fido2/src/Backend/IFidoBackend.cs
+      HidBackend: src/Fido2/src/Backend/HidBackend.cs
+      SmartCardBackend: src/Fido2/src/Backend/SmartCardBackend.cs
+
+  L3-apdu-sequence:
+    title: "Command execution: how one API call becomes bytes and back"
+    projects:
+      - src/Piv/src/Yubico.YubiKit.Piv.csproj
+    paths:
+      - src/Core/src/Protocols/SmartCard/Apdu
+    symbols:
+      PivSession: src/Piv/src/PivSession.cs
+      ISmartCardProtocol: src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs
+      PcscProtocol: src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs
+      ChainedResponseReceiver: src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs
+      ApduTransmitter: src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs
+      ChainedApduTransmitter: src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs
+      ScpProcessor: src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs
+      IApduFormatter: src/Core/src/Protocols/SmartCard/Apdu/IApduFormatter.cs
+      ISmartCardConnection: src/Core/src/Transports/SmartCard/ISmartCardConnection.cs
+      ApduCommand: src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs
+      ApduResponse: src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs
+
+  L3b-fido2-ctap-sequence:
+    title: "FIDO2 CTAP variant"
+    projects:
+      - src/Fido2/src/Yubico.YubiKit.Fido2.csproj
+    paths:
+      - src/Fido2/src/Backend
+      - src/Fido2/src/Cbor
+    symbols:
+      FidoSession: src/Fido2/src/FidoSession.cs
+      CtapRequestBuilder: src/Fido2/src/Cbor/CtapRequestBuilder.cs
+      CtapResponseParser: src/Fido2/src/Cbor/CtapResponseParser.cs
+      IFidoBackend: src/Fido2/src/Backend/IFidoBackend.cs
+      HidBackend: src/Fido2/src/Backend/HidBackend.cs
+      SmartCardBackend: src/Fido2/src/Backend/SmartCardBackend.cs
+
+  L4-discovery:
+    title: "Device discovery & connection flow"
+    # Covers both the discovery flowchart and the connection (transport
+    # selection) sub-diagram; both render from the "## L4" section.
+    projects:
+      - src/Core/src/Yubico.YubiKit.Core.csproj
+    paths:
+      - src/Core/src/Devices
+    symbols:
+      YubiKeyManager: src/Core/src/Devices/YubiKeyManager.cs
+      YubiKeyDeviceManager: src/Core/src/Devices/YubiKeyDeviceManager.cs
+      YubiKeyDeviceRepository: src/Core/src/Devices/YubiKeyDeviceRepository.cs
+      YubiKeyDeviceMonitorService: src/Core/src/Devices/YubiKeyDeviceMonitorService.cs
+      FindYubiKeys: src/Core/src/Devices/FindYubiKeys.cs
+      IYubiKeyFactory: src/Core/src/Devices/YubiKeyFactory.cs
+      IFindPcscDevices: src/Core/src/Transports/SmartCard/FindPcscDevices.cs
+      IFindHidDevices: src/Core/src/Transports/Hid/FindHidDevices.cs
+      IYubiKey: src/Core/src/Abstractions/IYubiKey.cs
+      IConnection: src/Core/src/Abstractions/IConnection.cs
+      ISmartCardConnection: src/Core/src/Transports/SmartCard/ISmartCardConnection.cs
+      PcscYubiKey: src/Core/src/Devices/Implementations/PcscYubiKey.cs
+      HidYubiKey: src/Core/src/Devices/Implementations/HidYubiKey.cs
+      CompositeYubiKey: src/Core/src/Devices/CompositeYubiKey.cs

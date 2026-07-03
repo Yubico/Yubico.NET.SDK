@@ -65,11 +65,21 @@ jobs:
             exit 0
           fi
 
-          if awk 'index($0, "docs/migration/") != 1 { found=1 } END { exit found ? 0 : 1 }' .migration-context/changed-files.txt; then
-            echo "has_impact=true" >> "$GITHUB_OUTPUT"
+          has_impact=false
+          while IFS= read -r path; do
+            case "$path" in
+              src/*|*.sln|*.slnx|Directory.Build.props|Directory.Build.targets|Directory.Packages.props|NuGet.config|global.json)
+                has_impact=true
+                break
+                ;;
+            esac
+          done < .migration-context/changed-files.txt
+
+          echo "has_impact=$has_impact" >> "$GITHUB_OUTPUT"
+          if [[ "$has_impact" == "true" ]]; then
+            echo "Migration-relevant source or package files changed; running documentation update."
           else
-            echo "has_impact=false" >> "$GITHUB_OUTPUT"
-            echo "Only docs/migration files changed in migration range; skipping self-only documentation update."
+            echo "No migration-relevant source or package files changed; skipping documentation update."
           fi
 
       - name: Install Claude Code

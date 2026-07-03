@@ -38,6 +38,8 @@ Migration review is required for code that:
 - Reuses one connection across multiple applet sessions.
 - Depends on implicit transport selection.
 
+Every v2 applet package exposes an `IYubiKey.Create{Applet}SessionAsync(...)` extension method (for example `CreatePivSessionAsync`, `CreateFidoSessionAsync`, `CreateOathSessionAsync`, `CreateOpenPgpSessionAsync`, `CreateSecurityDomainSessionAsync`, `CreateHsmAuthSessionAsync`, `CreateYubiOtpSessionAsync`) and `Yubico.YubiKit.Management` exposes `CreateManagementSessionAsync`. These are the preferred v2 entry points: they open the correct connection/transport and construct the session in one call. Treat the underlying connection handling, transport selection defaults, and SCP key parameter plumbing as assisted rather than automatic until the specific v1 call site is reviewed.
+
 ## Application Sections
 
 ### PIV

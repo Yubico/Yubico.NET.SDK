@@ -64,11 +64,11 @@ jobs:
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
-          "$HOME/.local/bin/claude" -p \
-            --allowedTools Read,Grep,Glob,Edit,Write \
-            "Read and follow \`.github/prompts/migration-docs-post-merge.md\`.
-          The generated context is in \`.migration-context/\`.
-          Update only the allowed migration documentation files."
+          printf '%s\n' \
+            'Read and follow `.github/prompts/migration-docs-post-merge.md`.' \
+            'The generated context is in `.migration-context/`.' \
+            'Update only the allowed migration documentation files.' \
+            | "$HOME/.local/bin/claude" -p --allowedTools Read,Grep,Glob,Edit,Write
 
       - name: Create migration documentation PR
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7

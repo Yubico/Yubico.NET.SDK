@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.Native.Windows.Cfgmgr32;
 
@@ -40,8 +41,6 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
     private const int SymbolicLinkOffset = 24;
 
     private readonly Lock _syncLock = new();
-    private readonly Lock _cacheLock = new();
-    private readonly HashSet<string> _knownSymbolicLinks = new(StringComparer.OrdinalIgnoreCase);
     private GCHandle _marshalableThisPtr;
     private NativeMethods.CM_NOTIFY_CALLBACK? _callbackDelegate;
     private IntPtr _notificationHandle;
@@ -71,11 +70,12 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
                 // Keep callback delegate alive for the duration of the listener
                 _callbackDelegate = NotificationCallback;
 
-                // Pin 'this' so we can pass it to the callback
-                _marshalableThisPtr = GCHandle.Alloc(this);
+                // Keep a weak reference so native callbacks can recover the listener without self-rooting it.
+                _marshalableThisPtr = GCHandle.Alloc(this, GCHandleType.Weak);
 
                 // Build the notification filter for HID device interfaces
                 var filterSize = Marshal.SizeOf<NativeMethods.CM_NOTIFY_FILTER>();
+                Debug.Assert(filterSize == NativeMethods.CmNotifyFilterSize);
                 var filter = new NativeMethods.CM_NOTIFY_FILTER
                 {
                     cbSize = filterSize,
@@ -99,6 +99,7 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
                     {
                         Logger.LogWarning("Failed to register HID notification: {Result}", result);
                         Status = DeviceListenerStatus.Error;
+                        ClearRegistrationState();
                         return;
                     }
 
@@ -113,6 +114,7 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
             {
                 Logger.LogError(ex, "Failed to start Windows HID listener");
                 Status = DeviceListenerStatus.Error;
+                ClearRegistrationState();
             }
         }
     }
@@ -134,17 +136,7 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
                 _notificationHandle = IntPtr.Zero;
             }
 
-            // Free the GCHandle
-            if (_marshalableThisPtr.IsAllocated)
-            {
-                _marshalableThisPtr.Free();
-            }
-
-            _callbackDelegate = null;
-            lock (_cacheLock)
-            {
-                _knownSymbolicLinks.Clear();
-            }
+            ClearRegistrationState();
 
             Status = DeviceListenerStatus.Stopped;
         }
@@ -166,7 +158,7 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
 
         try
         {
-            listener.HandleNotification(action, eventData);
+            listener.HandleNotification(action, eventData, eventDataSize);
         }
         catch (Exception ex)
         {
@@ -176,33 +168,28 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
         return 0; // ERROR_SUCCESS
     }
 
-    private void HandleNotification(NativeMethods.CM_NOTIFY_ACTION action, IntPtr eventData)
+    private void HandleNotification(NativeMethods.CM_NOTIFY_ACTION action, IntPtr eventData, int eventDataSize)
     {
         switch (action)
         {
             case NativeMethods.CM_NOTIFY_ACTION.DEVICEINTERFACEARRIVAL:
-                HandleDeviceArrival(eventData);
+                HandleDeviceArrival(eventData, eventDataSize);
                 break;
             case NativeMethods.CM_NOTIFY_ACTION.DEVICEINTERFACEREMOVAL:
-                HandleDeviceRemoval(eventData);
+                HandleDeviceRemoval(eventData, eventDataSize);
                 break;
         }
     }
 
-    private void HandleDeviceArrival(IntPtr eventData)
+    private void HandleDeviceArrival(IntPtr eventData, int eventDataSize)
     {
         try
         {
-            var devicePath = ReadSymbolicLink(eventData);
+            var devicePath = ReadSymbolicLink(eventData, eventDataSize);
             if (devicePath is null)
             {
                 OnDeviceEvent(new HidDeviceRescanHint(HidDeviceChangeKind.Added));
                 return;
-            }
-
-            lock (_cacheLock)
-            {
-                _knownSymbolicLinks.Add(devicePath);
             }
 
             Logger.LogDebug("HID device arrived: {DevicePath}", devicePath);
@@ -211,23 +198,19 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
         catch (Exception ex)
         {
             Logger.LogWarning(ex, "Failed to process device arrival");
+            OnDeviceEvent(new HidDeviceRescanHint(HidDeviceChangeKind.Added));
         }
     }
 
-    private void HandleDeviceRemoval(IntPtr eventData)
+    private void HandleDeviceRemoval(IntPtr eventData, int eventDataSize)
     {
         try
         {
-            var devicePath = ReadSymbolicLink(eventData);
+            var devicePath = ReadSymbolicLink(eventData, eventDataSize);
             if (devicePath is null)
             {
                 OnDeviceEvent(new HidDeviceRescanHint(HidDeviceChangeKind.Removed));
                 return;
-            }
-
-            lock (_cacheLock)
-            {
-                _knownSymbolicLinks.Remove(devicePath);
             }
 
             Logger.LogDebug("HID device removed: {DevicePath}", devicePath);
@@ -240,10 +223,18 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
         }
     }
 
-    private static string? ReadSymbolicLink(IntPtr eventData)
+    private static string? ReadSymbolicLink(IntPtr eventData, int eventDataSize)
     {
         if (eventData == IntPtr.Zero)
         {
+            return null;
+        }
+
+        if (eventDataSize < SymbolicLinkOffset + sizeof(char))
+        {
+            Logger.LogDebug(
+                "HID notification event data too small for symbolic link: {EventDataSize}",
+                eventDataSize);
             return null;
         }
 
@@ -258,6 +249,17 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
 
     private static string NormalizeSymbolicLink(string devicePath) =>
         devicePath.ToUpperInvariant();
+
+    private void ClearRegistrationState()
+    {
+        if (_marshalableThisPtr.IsAllocated)
+        {
+            _marshalableThisPtr.Free();
+        }
+
+        _callbackDelegate = null;
+        _notificationHandle = IntPtr.Zero;
+    }
 
     protected override void Dispose(bool disposing)
     {

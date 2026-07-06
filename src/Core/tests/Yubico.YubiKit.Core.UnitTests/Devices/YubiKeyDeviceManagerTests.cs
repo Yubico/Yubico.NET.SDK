@@ -14,6 +14,8 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
@@ -336,7 +338,14 @@ public class YubiKeyDeviceManagerTests
     {
         var repository = new YubiKeyDeviceRepository();
         var findYubiKeys = new FakeFindYubiKeys([]);
-        var monitorService = new YubiKeyDeviceMonitorService(repository, findYubiKeys);
+
+        // Use fake listeners: real platform listeners would surface genuine hotplug events
+        // during test runs and perturb exact ScanCount assertions.
+        var monitorService = new YubiKeyDeviceMonitorService(
+            repository,
+            findYubiKeys,
+            static () => new FakeHidDeviceListener(),
+            static () => new FakeSmartCardDeviceListener());
         var manager = new YubiKeyDeviceManager(repository, monitorService);
 
         return (manager, findYubiKeys, repository);
@@ -357,26 +366,62 @@ public class YubiKeyDeviceManagerTests
     }
 
     /// <summary>
-    /// Fake IFindYubiKeys for testing with scan counting.
+    /// Fake IFindYubiKeys for testing with scan counting. Counters use interlocked/volatile
+    /// access because scans run on the monitor loop while tests read from the test thread.
     /// </summary>
     private sealed class FakeFindYubiKeys(IReadOnlyList<IYubiKey> initialDevices) : IFindYubiKeys
     {
+        private readonly Lock _syncLock = new();
         private IReadOnlyList<IYubiKey> _devices = initialDevices;
+        private int _scanCount;
 
-        public int ScanCount { get; private set; }
+        public int ScanCount => Volatile.Read(ref _scanCount);
 
-        public void SetDevices(IReadOnlyList<IYubiKey> devices) => _devices = devices;
+        public void SetDevices(IReadOnlyList<IYubiKey> devices)
+        {
+            lock (_syncLock)
+            {
+                _devices = devices;
+            }
+        }
 
         public Task<IReadOnlyList<IYubiKey>> FindAllAsync(
             ConnectionType type,
             CancellationToken cancellationToken = default)
         {
-            ScanCount++;
+            Interlocked.Increment(ref _scanCount);
+
+            IReadOnlyList<IYubiKey> devices;
+            lock (_syncLock)
+            {
+                devices = _devices;
+            }
+
             var filtered = type == ConnectionType.All
-                ? _devices
-                : _devices.Where(d => type.Matches(d.AvailableConnections)).ToList();
+                ? devices
+                : devices.Where(d => type.Matches(d.AvailableConnections)).ToList();
             return Task.FromResult<IReadOnlyList<IYubiKey>>(filtered);
         }
+    }
+
+    private sealed class FakeHidDeviceListener : HidDeviceListener
+    {
+        public override void Start() => Status = DeviceListenerStatus.Started;
+
+        public override void Stop() => Status = DeviceListenerStatus.Stopped;
+    }
+
+    private sealed class FakeSmartCardDeviceListener : ISmartCardDeviceListener
+    {
+        public Action? DeviceEvent { get; set; }
+
+        public DeviceListenerStatus Status { get; private set; } = DeviceListenerStatus.Stopped;
+
+        public void Start() => Status = DeviceListenerStatus.Started;
+
+        public void Stop() => Status = DeviceListenerStatus.Stopped;
+
+        public void Dispose() => DeviceEvent = null;
     }
 
     /// <summary>

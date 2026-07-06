@@ -77,6 +77,10 @@ internal static class NativeMethods
 
     [DllImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    public static extern IntPtr CFRetain(IntPtr theObject);
+
+    [DllImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr CFRunLoopGetCurrent();
 
     [DllImport(Libraries.CoreFoundation)]

@@ -13,11 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using System.Runtime.InteropServices;
-using Yubico.YubiKit.Core.Native.Linux.Libc;
-using Yubico.YubiKit.Core.Native.Linux.Udev;
-using LibcNativeMethods = Yubico.YubiKit.Core.Native.Linux.Libc.NativeMethods;
-using UdevNativeMethods = Yubico.YubiKit.Core.Native.Linux.Udev.NativeMethods;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 
@@ -25,8 +20,17 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 /// Linux implementation of HID device listener using udev_monitor with poll().
 /// </summary>
 /// <remarks>
-/// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="DeviceEvent"/>
-/// callback.
+/// <para>
+/// The listener does not auto-start. Call <see cref="Start"/> after setting up
+/// <see cref="HidDeviceListener.DeviceEvent"/> callback.
+/// </para>
+/// <para>
+/// Each <see cref="Start"/> creates an independent session that owns its native resources
+/// (udev context, monitor, shutdown event fd). The session's listener thread disposes those
+/// resources when its loop exits. If <see cref="Stop"/> times out waiting for a wedged thread,
+/// the cancelled session is abandoned rather than torn down, so a late-exiting thread can never
+/// touch recycled file descriptors or state belonging to a newer session.
+/// </para>
 /// </remarks>
 internal sealed class LinuxHidDeviceListener : HidDeviceListener
 {
@@ -36,21 +40,30 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<LinuxHidDeviceListener>();
 
     private readonly Lock _syncLock = new();
-    private readonly HashSet<string> _knownDeviceIds = new(StringComparer.Ordinal);
-    private LinuxUdevSafeHandle? _udevHandle;
-    private LinuxUdevMonitorSafeHandle? _monitorHandle;
-    private LinuxEventFdSafeHandle? _shutdownEventHandle;
-    private Thread? _listenerThread;
-    private volatile bool _shouldStop;
+    private readonly Func<ILinuxHidEventSource> _eventSourceFactory;
+    private ListenerSession? _session;
     private bool _disposed;
 
     /// <summary>
     /// Creates a new instance. The listener does not start automatically - call <see cref="Start"/>
-    /// after setting up the <see cref="DeviceEvent"/> callback.
+    /// after setting up the <see cref="HidDeviceListener.DeviceEvent"/> callback.
     /// </summary>
     public LinuxHidDeviceListener()
+        : this(null)
     {
-        // Lazy start - do nothing in constructor
+    }
+
+    /// <summary>
+    /// Creates a new instance with a custom event source factory. Used by tests to inject a
+    /// fake <see cref="ILinuxHidEventSource"/> for no-hardware fault injection.
+    /// </summary>
+    /// <param name="eventSourceFactory">
+    /// Factory invoked once per <see cref="Start"/> to create the session's event source,
+    /// or null to use the udev-backed production source.
+    /// </param>
+    internal LinuxHidDeviceListener(Func<ILinuxHidEventSource>? eventSourceFactory)
+    {
+        _eventSourceFactory = eventSourceFactory ?? (static () => new LinuxUdevHidEventSource());
     }
 
     /// <inheritdoc />
@@ -63,79 +76,41 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
                 return;
             }
 
+            // A previous session's thread may still be exiting after a Stop() join timeout.
+            // It is cancelled and owns its own cleanup; start a fresh, independent session.
+            if (_session?.Thread is { IsAlive: true })
+            {
+                Logger.LogWarning("Previous Linux HID listener thread is still exiting; starting a new session");
+            }
+
+            var source = _eventSourceFactory();
             try
             {
-                // Create udev context
-                _udevHandle = UdevNativeMethods.udev_new();
-                if (_udevHandle.IsInvalid)
+                if (!source.Initialize())
                 {
-                    Logger.LogWarning("Failed to create udev context");
                     Status = DeviceListenerStatus.Error;
-                    ReleaseNativeHandles();
+                    source.Dispose();
                     return;
                 }
 
-                // Create monitor for netlink events
-                _monitorHandle = UdevNativeMethods.udev_monitor_new_from_netlink(_udevHandle, UdevNativeMethods.UdevMonitorName);
-                if (_monitorHandle.IsInvalid)
-                {
-                    Logger.LogWarning("Failed to create udev monitor");
-                    Status = DeviceListenerStatus.Error;
-                    ReleaseNativeHandles();
-                    return;
-                }
-
-                // Filter for hidraw subsystem
-                var filterResult = UdevNativeMethods.udev_monitor_filter_add_match_subsystem_devtype(
-                    _monitorHandle,
-                    UdevNativeMethods.UdevSubsystemName,
-                    null);
-
-                if (filterResult < 0)
-                {
-                    Logger.LogWarning("Failed to add udev filter: {Result}", filterResult);
-                    Status = DeviceListenerStatus.Error;
-                    ReleaseNativeHandles();
-                    return;
-                }
-
-                // Enable receiving
-                var enableResult = UdevNativeMethods.udev_monitor_enable_receiving(_monitorHandle);
-                if (enableResult < 0)
-                {
-                    Logger.LogWarning("Failed to enable udev receiving: {Result}", enableResult);
-                    Status = DeviceListenerStatus.Error;
-                    ReleaseNativeHandles();
-                    return;
-                }
-
-                _shutdownEventHandle = LibcNativeMethods.eventfd(
-                    0,
-                    LibcNativeMethods.EFD_CLOEXEC | LibcNativeMethods.EFD_NONBLOCK);
-                if (_shutdownEventHandle.IsInvalid)
-                {
-                    Logger.LogWarning("Failed to create Linux HID listener shutdown event fd: {Error}", Marshal.GetLastWin32Error());
-                    Status = DeviceListenerStatus.Error;
-                    ReleaseNativeHandles();
-                    return;
-                }
-
-                _shouldStop = false;
-                Status = DeviceListenerStatus.Started;
-
-                // Start the listener thread
-                _listenerThread = new Thread(ListenerThreadProc)
+                var session = new ListenerSession(source);
+                var thread = new Thread(() => ListenerThreadProc(session))
                 {
                     Name = "LinuxHidDeviceListener",
                     IsBackground = true
                 };
-                _listenerThread.Start();
+                session.Thread = thread;
+
+                _session = session;
+                Status = DeviceListenerStatus.Started;
+                thread.Start();
             }
             catch (Exception ex)
             {
                 Logger.LogError(ex, "Failed to start Linux HID listener");
                 Status = DeviceListenerStatus.Error;
-                ReleaseNativeHandles();
+                _session = null;
+                source.Dispose();
             }
         }
     }
@@ -150,199 +125,162 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
                 return;
             }
 
-            _shouldStop = true;
-            SignalShutdownEvent();
-
-            // Wait for the listener thread to exit
-            if (_listenerThread is not null && _listenerThread.IsAlive)
+            var session = _session;
+            if (session is not null)
             {
-                if (!_listenerThread.Join(MaxDisposalWaitTime))
+                session.Cancel();
+                session.Source.SignalShutdown();
+
+                if (session.Thread is { IsAlive: true } thread && !thread.Join(MaxDisposalWaitTime))
                 {
-                    Logger.LogWarning("Linux HID listener thread did not exit within timeout");
+                    // Abandon rather than tear down: the cancelled session owns its handles and
+                    // disposes them when its thread finally unblocks. Freeing them here would let
+                    // a still-running thread poll recycled file descriptors.
+                    Logger.LogError(
+                        "Linux HID listener thread did not exit within {Timeout}; abandoning its session resources",
+                        MaxDisposalWaitTime);
                 }
+
+                _session = null;
             }
-
-            _listenerThread = null;
-
-            ReleaseNativeHandles();
-            _knownDeviceIds.Clear();
 
             Status = DeviceListenerStatus.Stopped;
         }
     }
 
-    private void ListenerThreadProc()
+    private void ListenerThreadProc(ListenerSession session)
     {
-        if (_monitorHandle is null || _monitorHandle.IsInvalid || _shutdownEventHandle is null || _shutdownEventHandle.IsInvalid)
-        {
-            if (!_shouldStop)
-            {
-                Status = DeviceListenerStatus.Error;
-            }
-
-            return;
-        }
-
         try
         {
-            // Get the file descriptor for the monitor
-            var fd = UdevNativeMethods.udev_monitor_get_fd(_monitorHandle);
-            if (fd == IntPtr.Zero || fd.ToInt32() < 0)
+            RunEventLoop(session);
+        }
+        catch (Exception ex)
+        {
+            if (!session.Cancelled)
             {
-                Logger.LogWarning("Failed to get udev monitor fd");
-                Status = DeviceListenerStatus.Error;
+                Logger.LogError(ex, "Linux HID listener thread encountered an error");
+                SetErrorStatus(session);
+            }
+        }
+        finally
+        {
+            session.Source.Dispose();
+        }
+    }
+
+    private void RunEventLoop(ListenerSession session)
+    {
+        while (!session.Cancelled)
+        {
+            var outcome = session.Source.WaitForEvent();
+
+            if (session.Cancelled)
+            {
                 return;
             }
 
-            var shutdownFd = _shutdownEventHandle.DangerousGetHandle().ToInt32();
-            if (shutdownFd < 0)
+            switch (outcome)
             {
-                Logger.LogWarning("Invalid Linux HID listener shutdown fd");
-                Status = DeviceListenerStatus.Error;
+                case LinuxHidPollOutcome.Event:
+                    ProcessUdevEvent(session);
+                    break;
+
+                case LinuxHidPollOutcome.Retry:
+                    break;
+
+                case LinuxHidPollOutcome.ShutdownSignaled:
+                    return;
+
+                case LinuxHidPollOutcome.ShutdownFdError:
+                case LinuxHidPollOutcome.MonitorFdError:
+                case LinuxHidPollOutcome.PollFailed:
+                    SetErrorStatus(session);
+                    return;
+
+                default:
+                    Logger.LogWarning("Unexpected Linux HID poll outcome: {Outcome}", outcome);
+                    SetErrorStatus(session);
+                    return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Transitions the listener to <see cref="DeviceListenerStatus.Error"/> unless the session
+    /// was cancelled, so an abandoned (zombie) session can never stamp Error onto a newer session.
+    /// </summary>
+    private void SetErrorStatus(ListenerSession session)
+    {
+        if (!session.Cancelled)
+        {
+            Status = DeviceListenerStatus.Error;
+        }
+    }
+
+    private void ProcessUdevEvent(ListenerSession session)
+    {
+        try
+        {
+            var udevEvent = session.Source.ReceiveEvent();
+            if (udevEvent is null)
+            {
+                // Receive failures matter most during event storms (e.g. ENOBUFS after the kernel
+                // dropped notifications) — exactly when a removal may have been lost. Never
+                // suppress: hint a rescan so discovery re-syncs with reality.
+                Logger.LogWarning("Failed to receive udev event; emitting unknown-change rescan hint");
+                OnDeviceEvent(HidDeviceRescanHint.Unknown);
                 return;
             }
 
-            var pollFds = new LibcNativeMethods.PollFd[2];
-            pollFds[0].fd = fd.ToInt32();
-            pollFds[0].events = (short)(LibcNativeMethods.POLLIN | LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP);
-            pollFds[1].fd = shutdownFd;
-            pollFds[1].events = (short)(LibcNativeMethods.POLLIN | LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP);
-
-            while (!_shouldStop)
+            switch (udevEvent.Action)
             {
-                var pollResult = LibcNativeMethods.poll(pollFds, pollFds.Length, -1);
-
-                if (_shouldStop)
-                {
+                case "add":
+                    HandleDeviceAdd(session, udevEvent);
                     break;
-                }
 
-                if (pollResult < 0)
-                {
-                    var error = Marshal.GetLastWin32Error();
-                    if (error == LibcNativeMethods.EINTR)
-                    {
-                        continue;
-                    }
-
-                    Logger.LogWarning("poll() failed with error: {Error}", error);
-                    Status = DeviceListenerStatus.Error;
+                case "remove":
+                    HandleDeviceRemove(udevEvent);
                     break;
-                }
 
-                if (pollResult == 0)
-                {
-                    continue;
-                }
-
-                if ((pollFds[1].revents & LibcNativeMethods.POLLIN) != 0)
-                {
-                    DrainShutdownEvent();
+                case null:
+                    Logger.LogDebug("udev event missing action; emitting unknown-change rescan hint");
+                    OnDeviceEvent(HidDeviceRescanHint.Unknown);
                     break;
-                }
 
-                if ((pollFds[1].revents & (LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP | LibcNativeMethods.POLLNVAL)) != 0)
-                {
-                    Logger.LogWarning("Linux HID listener shutdown fd reported error: {Revents}", pollFds[1].revents);
-                    if (!_shouldStop)
-                    {
-                        Status = DeviceListenerStatus.Error;
-                    }
-
+                default:
+                    // Recognized non-topology actions ("change", "bind", ...) do not affect discovery.
+                    Logger.LogTrace(
+                        "Ignoring udev action '{Action}' for {Identity}",
+                        udevEvent.Action,
+                        udevEvent.StableIdentity);
                     break;
-                }
-
-                if ((pollFds[0].revents & LibcNativeMethods.POLLIN) != 0)
-                {
-                    ProcessUdevEvent();
-                }
-
-                if ((pollFds[0].revents & (LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP | LibcNativeMethods.POLLNVAL)) != 0)
-                {
-                    Logger.LogWarning("udev monitor fd reported error: {Revents}", pollFds[0].revents);
-                    Status = DeviceListenerStatus.Error;
-                    break;
-                }
             }
         }
         catch (Exception ex)
         {
-            if (!_shouldStop)
-            {
-                Logger.LogError(ex, "Linux HID listener thread encountered an error");
-                Status = DeviceListenerStatus.Error;
-            }
+            Logger.LogWarning(ex, "Failed to process udev event; emitting unknown-change rescan hint");
+            OnDeviceEvent(HidDeviceRescanHint.Unknown);
         }
     }
 
-    private void ProcessUdevEvent()
+    private void HandleDeviceAdd(ListenerSession session, LinuxHidUdevEvent udevEvent)
     {
-        if (_monitorHandle is null || _monitorHandle.IsInvalid)
-        {
-            return;
-        }
-
-        using var device = UdevNativeMethods.udev_monitor_receive_device(_monitorHandle);
-        if (device.IsInvalid)
-        {
-            return;
-        }
-
-        // Get the action
-        var actionPtr = UdevNativeMethods.udev_device_get_action(device);
-        if (actionPtr == IntPtr.Zero)
-        {
-            return;
-        }
-
-        var action = Marshal.PtrToStringAnsi(actionPtr);
-
-        switch (action)
-        {
-            case "add":
-                HandleDeviceAdd(device);
-                break;
-            case "remove":
-                HandleDeviceRemove(device);
-                break;
-        }
-    }
-
-    private void HandleDeviceAdd(LinuxUdevDeviceSafeHandle device)
-    {
-        var hint = CreateHint(HidDeviceChangeKind.Added, device);
-        if (hint.PlatformDeviceId is not null)
-        {
-            _knownDeviceIds.Add(hint.PlatformDeviceId);
-        }
-
+        var hint = new HidDeviceRescanHint(HidDeviceChangeKind.Added, udevEvent.StableIdentity, udevEvent.DevNode);
         OnDeviceEvent(hint);
 
-        if (!IsHidrawReady(hint.DevicePath))
+        if (!session.Source.IsHidrawReady(hint.DevicePath))
         {
-            QueueReadinessFallback(hint);
+            QueueReadinessFallback(session, hint);
         }
     }
 
-    private void HandleDeviceRemove(LinuxUdevDeviceSafeHandle device)
+    private void HandleDeviceRemove(LinuxHidUdevEvent udevEvent)
     {
-        var hint = CreateHint(HidDeviceChangeKind.Removed, device);
-        if (hint.PlatformDeviceId is not null)
-        {
-            _knownDeviceIds.Remove(hint.PlatformDeviceId);
-        }
-
+        var hint = new HidDeviceRescanHint(HidDeviceChangeKind.Removed, udevEvent.StableIdentity, udevEvent.DevNode);
         OnDeviceEvent(hint);
     }
 
-    private HidDeviceRescanHint CreateHint(HidDeviceChangeKind changeKind, LinuxUdevDeviceSafeHandle device)
-    {
-        var stableIdentity = GetStableUdevIdentity(device);
-        var devNode = GetDevNode(device);
-        return new HidDeviceRescanHint(changeKind, stableIdentity, devNode);
-    }
-
-    private void QueueReadinessFallback(HidDeviceRescanHint hint)
+    private void QueueReadinessFallback(ListenerSession session, HidDeviceRescanHint hint)
     {
         _ = Task.Run(async () =>
         {
@@ -350,7 +288,7 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
             {
                 await Task.Delay(HidrawReadinessFallbackDelay).ConfigureAwait(false);
 
-                if (_shouldStop || Status != DeviceListenerStatus.Started)
+                if (session.Cancelled || Status != DeviceListenerStatus.Started)
                 {
                     return;
                 }
@@ -362,112 +300,6 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
                 Logger.LogTrace(ex, "Ignored delayed hidraw readiness rescan hint");
             }
         });
-    }
-
-    private static bool IsHidrawReady(string? devNode)
-    {
-        if (string.IsNullOrEmpty(devNode) || !File.Exists(devNode))
-        {
-            return false;
-        }
-
-        using var handle = LibcNativeMethods.open(
-            devNode,
-            LibcNativeMethods.OpenFlags.O_RDONLY | LibcNativeMethods.OpenFlags.O_NONBLOCK);
-        return !handle.IsInvalid;
-    }
-
-    private static string? GetStableUdevIdentity(LinuxUdevDeviceSafeHandle device)
-    {
-        var parent = UdevNativeMethods.udev_device_get_parent(device);
-        var syspath = parent == IntPtr.Zero
-            ? PtrToString(UdevNativeMethods.udev_device_get_syspath(device))
-            : PtrToString(UdevNativeMethods.udev_device_get_syspath(parent));
-
-        if (string.IsNullOrEmpty(syspath))
-        {
-            return null;
-        }
-
-        const string hidrawSegment = "/hidraw/";
-        var hidrawIndex = syspath.LastIndexOf(hidrawSegment, StringComparison.Ordinal);
-        if (hidrawIndex >= 0)
-        {
-            return syspath[..hidrawIndex];
-        }
-
-        const string hidrawDirectorySuffix = "/hidraw";
-        return syspath.EndsWith(hidrawDirectorySuffix, StringComparison.Ordinal)
-            ? syspath[..^hidrawDirectorySuffix.Length]
-            : syspath;
-    }
-
-    private static string? GetDevNode(LinuxUdevDeviceSafeHandle device) =>
-        PtrToString(UdevNativeMethods.udev_device_get_devnode(device));
-
-    private static string? PtrToString(IntPtr value) =>
-        value == IntPtr.Zero ? null : Marshal.PtrToStringAnsi(value);
-
-    private void SignalShutdownEvent()
-    {
-        if (_shutdownEventHandle is null || _shutdownEventHandle.IsInvalid)
-        {
-            return;
-        }
-
-        var signal = BitConverter.GetBytes(1UL);
-        var result = LibcNativeMethods.write(_shutdownEventHandle, signal, signal.Length);
-        if (result < 0)
-        {
-            var error = Marshal.GetLastWin32Error();
-            if (error != LibcNativeMethods.EAGAIN)
-            {
-                Logger.LogDebug("Failed to signal Linux HID listener shutdown fd: {Error}", error);
-            }
-        }
-    }
-
-    private void DrainShutdownEvent()
-    {
-        if (_shutdownEventHandle is null || _shutdownEventHandle.IsInvalid)
-        {
-            return;
-        }
-
-        var buffer = new byte[sizeof(ulong)];
-        while (true)
-        {
-            var result = LibcNativeMethods.read(_shutdownEventHandle, buffer, buffer.Length);
-            if (result > 0)
-            {
-                continue;
-            }
-
-            if (result == 0)
-            {
-                return;
-            }
-
-            var error = Marshal.GetLastWin32Error();
-            if (error != LibcNativeMethods.EAGAIN && error != LibcNativeMethods.EINTR)
-            {
-                Logger.LogDebug("Failed to drain Linux HID listener shutdown fd: {Error}", error);
-            }
-
-            return;
-        }
-    }
-
-    private void ReleaseNativeHandles()
-    {
-        _shutdownEventHandle?.Dispose();
-        _shutdownEventHandle = null;
-
-        _monitorHandle?.Dispose();
-        _monitorHandle = null;
-
-        _udevHandle?.Dispose();
-        _udevHandle = null;
     }
 
     protected override void Dispose(bool disposing)
@@ -486,10 +318,13 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
         }
         else
         {
-            // Finalizer path - minimal cleanup
-            _shouldStop = true;
-            SignalShutdownEvent();
-            ReleaseNativeHandles();
+            // Finalizer path: cancel and wake the session; its thread owns handle cleanup.
+            var session = _session;
+            if (session is not null)
+            {
+                session.Cancel();
+                session.Source.SignalShutdown();
+            }
         }
 
         base.Dispose(disposing);
@@ -498,5 +333,28 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
     ~LinuxHidDeviceListener()
     {
         Dispose(disposing: false);
+    }
+
+    /// <summary>
+    /// Per-<see cref="Start"/> state: the event source, its listener thread, and the
+    /// cancellation flag. Sessions are never reused; a session's thread is the sole owner of
+    /// its source's disposal.
+    /// </summary>
+    private sealed class ListenerSession
+    {
+        private volatile bool _cancelled;
+
+        public ListenerSession(ILinuxHidEventSource source)
+        {
+            Source = source;
+        }
+
+        public ILinuxHidEventSource Source { get; }
+
+        public Thread? Thread { get; set; }
+
+        public bool Cancelled => _cancelled;
+
+        public void Cancel() => _cancelled = true;
     }
 }

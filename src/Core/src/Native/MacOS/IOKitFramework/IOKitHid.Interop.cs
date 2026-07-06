@@ -59,29 +59,6 @@ internal static partial class NativeMethods
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     internal static extern IntPtr IOHIDManagerCreate(IntPtr allocator, int options); /* OS >= 10.5 */
 
-    /*! @function   IOHIDManagerOpen
-        @abstract   Opens the HID manager.
-        @discussion Opening the manager establishes communication with currently matched
-                    devices and allows callbacks for matched devices to be delivered.
-        @param      manager Reference to an IOHIDManager.
-        @param      options Option bits to be sent down to the manager.
-        @result     Returns kIOReturnSuccess if successful.
-    */
-    [DllImport(Libraries.IOKitFramework)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern int IOHIDManagerOpen(IntPtr manager, int options); /* OS >= 10.5 */
-
-    /*! @function   IOHIDManagerClose
-        @abstract   Closes the HID manager.
-        @discussion Closes communication established by IOHIDManagerOpen.
-        @param      manager Reference to an IOHIDManager.
-        @param      options Option bits to be sent down to the manager.
-        @result     Returns kIOReturnSuccess if successful.
-    */
-    [DllImport(Libraries.IOKitFramework)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern int IOHIDManagerClose(IntPtr manager, int options); /* OS >= 10.5 */
-
     /*! @function   IOHIDManagerSetDeviceMatching
         @abstract   Sets matching criteria for device enumeration.
         @discussion Matching keys are prefixed by kIOHIDDevice and declared in

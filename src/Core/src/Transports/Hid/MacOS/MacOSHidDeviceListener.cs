@@ -43,12 +43,12 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
     private IntPtr _runLoopMode;
     private Thread? _listenerThread;
     private volatile bool _shouldStop;
-    private volatile bool _managerOpened;
     private bool _disposed;
 
     // Keep callback delegates alive to prevent GC
     private IOKitNativeMethods.IOHIDDeviceCallback? _arrivedCallbackDelegate;
     private IOKitNativeMethods.IOHIDDeviceCallback? _removedCallbackDelegate;
+    private readonly List<IOKitNativeMethods.IOHIDDeviceCallback> _abandonedCallbackDelegates = [];
 
     /// <summary>
     /// Creates a new instance. The listener does not start automatically - call <see cref="Start"/>
@@ -68,6 +68,15 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
             {
                 return;
             }
+
+            if (_listenerThread is not null && _listenerThread.IsAlive)
+            {
+                Logger.LogWarning("macOS HID listener thread is still running; cannot restart until it exits");
+                Status = DeviceListenerStatus.Error;
+                return;
+            }
+
+            ReleaseDeadListenerState();
 
             try
             {
@@ -114,6 +123,7 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
             {
                 Logger.LogError(ex, "Failed to start macOS HID listener");
                 Status = DeviceListenerStatus.Error;
+                ReleaseDeadListenerState();
             }
         }
     }
@@ -123,7 +133,7 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
     {
         lock (_syncLock)
         {
-            if (Status == DeviceListenerStatus.Stopped)
+            if (Status == DeviceListenerStatus.Stopped && _listenerThread is null && !HasNativeState)
             {
                 return;
             }
@@ -141,26 +151,21 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
             {
                 if (!_listenerThread.Join(MaxDisposalWaitTime))
                 {
-                    Logger.LogWarning("macOS HID listener thread did not exit within timeout");
+                    Logger.LogError(
+                        "macOS HID listener thread did not exit within timeout; abandoning native handles to avoid use-after-free");
+                    AbandonNativeReferences();
+                    lock (_cacheLock)
+                    {
+                        _knownEntryIds.Clear();
+                    }
+
+                    Status = DeviceListenerStatus.Stopped;
+                    return;
                 }
             }
 
             _listenerThread = null;
-
-            // Release the run loop mode string
-            if (_runLoopMode != IntPtr.Zero)
-            {
-                CFNativeMethods.CFRelease(_runLoopMode);
-                _runLoopMode = IntPtr.Zero;
-            }
-
-            // Release the HID manager
-            if (_hidManager != IntPtr.Zero)
-            {
-                CFNativeMethods.CFRelease(_hidManager);
-                _hidManager = IntPtr.Zero;
-            }
-
+            ReleaseNativeReferences();
             _arrivedCallbackDelegate = null;
             _removedCallbackDelegate = null;
             lock (_cacheLock)
@@ -177,7 +182,16 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
         try
         {
             // Get the current run loop for this thread
-            _runLoop = CFNativeMethods.CFRunLoopGetCurrent();
+            var currentRunLoop = CFNativeMethods.CFRunLoopGetCurrent();
+            _runLoop = currentRunLoop == IntPtr.Zero
+                ? IntPtr.Zero
+                : CFNativeMethods.CFRetain(currentRunLoop);
+            if (_runLoop == IntPtr.Zero)
+            {
+                Logger.LogWarning("Failed to retain macOS HID listener run loop");
+                Status = DeviceListenerStatus.Error;
+                return;
+            }
 
             // Create the run loop mode string
             var modeBytes = Encoding.UTF8.GetBytes("kCFRunLoopDefaultMode");
@@ -187,20 +201,12 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
                 0x08000100); // kCFStringEncodingUTF8
 
             // Schedule the HID manager with this run loop
+            // Deliberately do not open the manager. Matching/removal callbacks do not require it, and
+            // opening all matched HID devices can require Input Monitoring TCC on macOS 10.15+.
             IOKitNativeMethods.IOHIDManagerScheduleWithRunLoop(
                 _hidManager,
                 _runLoop,
                 _runLoopMode);
-
-            var openResult = IOKitNativeMethods.IOHIDManagerOpen(_hidManager, 0);
-            if (openResult != 0)
-            {
-                Logger.LogWarning("IOHIDManagerOpen failed: 0x{Result:X8}", openResult);
-                Status = DeviceListenerStatus.Error;
-                return;
-            }
-
-            _managerOpened = true;
 
             // Run the loop until stopped
             while (!_shouldStop)
@@ -235,17 +241,6 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
         }
         finally
         {
-            if (_managerOpened && _hidManager != IntPtr.Zero)
-            {
-                var closeResult = IOKitNativeMethods.IOHIDManagerClose(_hidManager, 0);
-                if (!_shouldStop && closeResult != 0)
-                {
-                    Logger.LogWarning("IOHIDManagerClose failed: 0x{Result:X8}", closeResult);
-                }
-
-                _managerOpened = false;
-            }
-
             // Cleanup run loop resources
             if (_hidManager != IntPtr.Zero && _runLoop != IntPtr.Zero && _runLoopMode != IntPtr.Zero)
             {
@@ -370,7 +365,7 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
             }
 
             var entryId = MacOSHidDevice.GetEntryId(deviceRef).ToString(CultureInfo.InvariantCulture);
-            return new HidDeviceRescanHint(changeKind, entryId, entryId);
+            return new HidDeviceRescanHint(changeKind, entryId);
         }
         catch (Exception ex)
         {
@@ -400,6 +395,70 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
         }
     }
 
+    private bool HasNativeState =>
+        _hidManager != IntPtr.Zero ||
+        _runLoop != IntPtr.Zero ||
+        _runLoopMode != IntPtr.Zero ||
+        _arrivedCallbackDelegate is not null ||
+        _removedCallbackDelegate is not null;
+
+    private void ReleaseDeadListenerState()
+    {
+        if (_listenerThread is not null && _listenerThread.IsAlive)
+        {
+            return;
+        }
+
+        _listenerThread = null;
+        ReleaseNativeReferences();
+        _arrivedCallbackDelegate = null;
+        _removedCallbackDelegate = null;
+        lock (_cacheLock)
+        {
+            _knownEntryIds.Clear();
+        }
+    }
+
+    private void ReleaseNativeReferences()
+    {
+        if (_runLoopMode != IntPtr.Zero)
+        {
+            CFNativeMethods.CFRelease(_runLoopMode);
+            _runLoopMode = IntPtr.Zero;
+        }
+
+        if (_hidManager != IntPtr.Zero)
+        {
+            CFNativeMethods.CFRelease(_hidManager);
+            _hidManager = IntPtr.Zero;
+        }
+
+        if (_runLoop != IntPtr.Zero)
+        {
+            CFNativeMethods.CFRelease(_runLoop);
+            _runLoop = IntPtr.Zero;
+        }
+    }
+
+    private void AbandonNativeReferences()
+    {
+        if (_arrivedCallbackDelegate is not null)
+        {
+            _abandonedCallbackDelegates.Add(_arrivedCallbackDelegate);
+        }
+
+        if (_removedCallbackDelegate is not null)
+        {
+            _abandonedCallbackDelegates.Add(_removedCallbackDelegate);
+        }
+
+        _hidManager = IntPtr.Zero;
+        _runLoop = IntPtr.Zero;
+        _runLoopMode = IntPtr.Zero;
+        _arrivedCallbackDelegate = null;
+        _removedCallbackDelegate = null;
+    }
+
     protected override void Dispose(bool disposing)
     {
         if (_disposed)
@@ -422,13 +481,17 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
             {
                 CFNativeMethods.CFRunLoopStop(_runLoop);
             }
-            if (_runLoopMode != IntPtr.Zero)
+
+            if (_listenerThread is not null && _listenerThread.IsAlive)
             {
-                CFNativeMethods.CFRelease(_runLoopMode);
+                AbandonNativeReferences();
             }
-            if (_hidManager != IntPtr.Zero)
+            else
             {
-                CFNativeMethods.CFRelease(_hidManager);
+                _listenerThread = null;
+                ReleaseNativeReferences();
+                _arrivedCallbackDelegate = null;
+                _removedCallbackDelegate = null;
             }
         }
 

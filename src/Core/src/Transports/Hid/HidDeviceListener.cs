@@ -31,6 +31,7 @@ public abstract class HidDeviceListener : IDisposable
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<HidDeviceListener>();
 
     private bool _disposed;
+    private volatile DeviceListenerStatus _status = DeviceListenerStatus.Stopped;
 
     /// <summary>
     /// Callback invoked when a HID listener observes a topology change.
@@ -44,7 +45,16 @@ public abstract class HidDeviceListener : IDisposable
     /// <summary>
     /// Gets the current status of the listener.
     /// </summary>
-    public DeviceListenerStatus Status { get; protected set; } = DeviceListenerStatus.Stopped;
+    /// <remarks>
+    /// The status is written by platform listener threads and may be read from any thread;
+    /// reads and writes use volatile semantics. It is diagnostic state, not a synchronization
+    /// primitive.
+    /// </remarks>
+    public DeviceListenerStatus Status
+    {
+        get => _status;
+        protected set => _status = value;
+    }
 
     /// <summary>
     /// Starts the listener. Establishes baseline of currently connected devices,
@@ -60,8 +70,16 @@ public abstract class HidDeviceListener : IDisposable
     /// Stops the listener and releases monitoring resources.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// After calling Stop(), the listener can be restarted by calling <see cref="Start"/> again.
     /// Calling Stop() on an already stopped listener has no effect.
+    /// </para>
+    /// <para>
+    /// Do not call <see cref="Stop"/> or <see cref="Dispose()"/> from within the
+    /// <see cref="DeviceEvent"/> callback. Platform implementations wait for their native
+    /// registration or listener thread to drain before returning, so stopping from inside the
+    /// callback can deadlock or stall for the full disposal timeout.
+    /// </para>
     /// </remarks>
     public abstract void Stop();
 
@@ -121,6 +139,9 @@ public abstract class HidDeviceListener : IDisposable
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// Do not call from within the <see cref="DeviceEvent"/> callback; see <see cref="Stop"/>.
+    /// </remarks>
     public void Dispose()
     {
         Dispose(disposing: true);

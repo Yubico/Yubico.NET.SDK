@@ -13,9 +13,8 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Threading.Channels;
-using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
@@ -32,18 +31,30 @@ namespace Yubico.YubiKit.Core.Devices;
 internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyDeviceMonitorService>();
-    private static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(200);
+
+    /// <summary>
+    /// Quiet period after the last listener hint before a coalesced repository rescan runs.
+    /// </summary>
+    internal static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(200);
+
+    /// <summary>
+    /// Maximum time listener hints may be coalesced before forcing a repository rescan.
+    /// </summary>
+    internal static readonly TimeSpan MaxCoalesceInterval = 5 * ThrottleInterval;
 
     private readonly IYubiKeyDeviceRepository _repository;
     private readonly IFindYubiKeys _findYubiKeys;
     private readonly Lock _monitorLock = new();
+    private readonly SemaphoreSlim _rescanGate = new(1, 1);
 
     // Device listeners for event-driven discovery
     private HidDeviceListener? _hidListener;
     private ISmartCardDeviceListener? _smartCardListener;
 
-    // Channel-based event coalescing. Native listener callbacks may be concurrent;
-    // the single reader is the only place that performs repository rescans.
+    // Channel-based event coalescing. Native listener callbacks may be concurrent,
+    // so a single reader serializes hint ingress and debounce. All repository
+    // rescans, including manual RescanAsync calls, are serialized through
+    // _rescanGate before updating the repository cache.
     private Channel<DeviceMonitorRescanRequest>? _rescanRequests;
 
     // Monitoring lifecycle fields
@@ -107,10 +118,18 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
     private async Task RescanCoreAsync(CancellationToken cancellationToken)
     {
-        Logger.LogDebug("Rescanning devices...");
-        var devices = await _findYubiKeys.FindAllAsync(ConnectionType.All, cancellationToken)
-            .ConfigureAwait(false);
-        _repository.UpdateCache(devices);
+        await _rescanGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            Logger.LogDebug("Rescanning devices...");
+            var devices = await _findYubiKeys.FindAllAsync(ConnectionType.All, cancellationToken)
+                .ConfigureAwait(false);
+            _repository.UpdateCache(devices);
+        }
+        finally
+        {
+            _rescanGate.Release();
+        }
     }
 
     /// <inheritdoc/>
@@ -121,6 +140,8 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
         lock (_monitorLock)
         {
+            ThrowIfDisposed();
+
             if (_monitoringTask is not null)
             {
                 return; // Already monitoring, idempotent
@@ -147,18 +168,43 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     /// <inheritdoc/>
     public void StopMonitoring()
     {
-        Task? taskToAwait;
-        CancellationTokenSource? ctsToDispose;
+        var (taskToAwait, ctsToDispose) = StopMonitoringCore(teardownWhenNotMonitoring: false);
+        if (taskToAwait is null)
+        {
+            return;
+        }
 
+        // Wait for monitoring loop to complete (outside lock to avoid deadlock)
+        try
+        {
+            taskToAwait.Wait(TimeSpan.FromSeconds(10));
+        }
+        catch (AggregateException)
+        {
+            // Ignore exceptions from the monitoring task - it's being stopped
+        }
+
+        ctsToDispose?.Dispose();
+
+        Logger.LogInformation("Device monitoring stopped");
+    }
+
+    private (Task? TaskToAwait, CancellationTokenSource? CtsToDispose) StopMonitoringCore(bool teardownWhenNotMonitoring)
+    {
         lock (_monitorLock)
         {
             if (_monitoringTask is null)
             {
-                return; // Not monitoring, idempotent
+                if (teardownWhenNotMonitoring)
+                {
+                    TeardownListeners();
+                }
+
+                return (null, null); // Not monitoring, idempotent
             }
 
-            taskToAwait = _monitoringTask;
-            ctsToDispose = _monitoringCts;
+            var taskToAwait = _monitoringTask;
+            var ctsToDispose = _monitoringCts;
 
             // Signal cancellation
             _monitoringCts?.Cancel();
@@ -170,29 +216,15 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
             // Teardown listeners under lock
             TeardownListeners();
+
+            return (taskToAwait, ctsToDispose);
         }
-
-        // Wait for monitoring loop to complete (outside lock to avoid deadlock)
-        if (taskToAwait is not null)
-        {
-            try
-            {
-                taskToAwait.Wait(TimeSpan.FromSeconds(10));
-            }
-            catch (AggregateException)
-            {
-                // Ignore exceptions from the monitoring task - it's being stopped
-            }
-        }
-
-        // Dispose the CancellationTokenSource
-        ctsToDispose?.Dispose();
-
-        Logger.LogInformation("Device monitoring stopped");
     }
 
     /// <summary>
-    /// Internal monitoring loop that processes debounced listener events and interval fallback scans.
+    /// Internal monitoring loop that processes listener events using a
+    /// <see cref="ThrottleInterval"/> quiet period capped by
+    /// <see cref="MaxCoalesceInterval"/>, plus interval fallback scans.
     /// </summary>
     private async Task MonitoringLoopAsync(
         TimeSpan interval,
@@ -231,6 +263,10 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         {
             // Expected during shutdown
         }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "monitoring loop terminated unexpectedly");
+        }
     }
 
     private async Task RescanSafelyAsync(string reason, CancellationToken cancellationToken)
@@ -257,13 +293,31 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         }
     }
 
+    /// <summary>
+    /// Waits for listener hints to stay quiet for <see cref="ThrottleInterval"/>,
+    /// forcing a rescan once the coalescing round reaches
+    /// <see cref="MaxCoalesceInterval"/>.
+    /// </summary>
     private static async Task<bool> WaitForDebounceQuietPeriodAsync(
         ChannelReader<DeviceMonitorRescanRequest> reader,
         CancellationToken cancellationToken)
     {
+        var coalesceStarted = Stopwatch.GetTimestamp();
+
         while (true)
         {
-            var trigger = await WaitForTriggerAsync(reader, ThrottleInterval, cancellationToken).ConfigureAwait(false);
+            var elapsed = Stopwatch.GetElapsedTime(coalesceStarted);
+            if (elapsed >= MaxCoalesceInterval)
+            {
+                return true;
+            }
+
+            var remainingCoalesce = MaxCoalesceInterval - elapsed;
+            var waitInterval = remainingCoalesce < ThrottleInterval
+                ? remainingCoalesce
+                : ThrottleInterval;
+
+            var trigger = await WaitForTriggerAsync(reader, waitInterval, cancellationToken).ConfigureAwait(false);
             if (trigger == DeviceMonitorWaitResult.Timeout)
             {
                 return true;
@@ -321,7 +375,8 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     {
         try
         {
-            if (_rescanRequests is null || !_rescanRequests.Writer.TryWrite(request))
+            var rescanRequests = _rescanRequests;
+            if (rescanRequests is null || !rescanRequests.Writer.TryWrite(request))
             {
                 Logger.LogTrace("Ignored device rescan request from {Source}; monitoring is stopping", request.Source);
                 return;
@@ -428,16 +483,13 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             return;
         }
 
-        // 1. Signal cancellation
-        _monitoringCts?.Cancel();
-        _rescanRequests?.Writer.TryComplete();
+        var (taskToAwait, ctsToDispose) = StopMonitoringCore(teardownWhenNotMonitoring: true);
 
-        // 2. Wait for monitoring loop to exit (with timeout)
-        if (_monitoringTask is not null)
+        if (taskToAwait is not null)
         {
             try
             {
-                await _monitoringTask.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+                await taskToAwait.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
             }
             catch
             {
@@ -445,30 +497,12 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             }
         }
 
-        // 3. Stop listeners
-        _hidListener?.Stop();
-        _smartCardListener?.Stop();
+        ctsToDispose?.Dispose();
 
-        // 4. Clear callbacks (prevent events during disposal)
-        if (_hidListener is not null)
-        {
-            _hidListener.DeviceEvent = null;
-        }
-        if (_smartCardListener is not null)
-        {
-            _smartCardListener.DeviceEvent = null;
-        }
+        await _rescanGate.WaitAsync().ConfigureAwait(false);
+        _rescanGate.Release();
 
-        // 5. Dispose listeners
-        _hidListener?.Dispose();
-        _smartCardListener?.Dispose();
-
-        // 6. Complete channel resources
-        _rescanRequests?.Writer.TryComplete();
-        _rescanRequests = null;
-
-        // 7. Dispose primitives
-        _monitoringCts?.Dispose();
+        _rescanGate.Dispose();
 
         Logger.LogDebug("YubiKeyDeviceMonitorService disposed");
     }

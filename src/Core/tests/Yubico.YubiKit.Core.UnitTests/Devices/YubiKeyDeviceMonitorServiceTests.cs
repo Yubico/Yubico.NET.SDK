@@ -106,6 +106,7 @@ public class YubiKeyDeviceMonitorServiceTests
 
 
     [Fact]
+    [Trait("Category", "RuntimeResilience")]
     public async Task StartMonitoring_PerformsInitialRescan()
     {
         // Arrange
@@ -126,6 +127,7 @@ public class YubiKeyDeviceMonitorServiceTests
     }
 
     [Fact]
+    [Trait("Category", "RuntimeResilience")]
     public async Task HidListenerHint_DoesNotEmitPublicDeviceChangeWithoutRepositoryDiff()
     {
         // Arrange
@@ -154,6 +156,7 @@ public class YubiKeyDeviceMonitorServiceTests
     }
 
     [Fact]
+    [Trait("Category", "RuntimeResilience")]
     public async Task HidUnknownRemoval_TriggersRepositoryRescan()
     {
         // Arrange
@@ -177,6 +180,7 @@ public class YubiKeyDeviceMonitorServiceTests
     }
 
     [Fact]
+    [Trait("Category", "RuntimeResilience")]
     public async Task ConcurrentListenerEvents_DoNotRunConcurrentRescans()
     {
         // Arrange
@@ -218,6 +222,97 @@ public class YubiKeyDeviceMonitorServiceTests
         await service.DisposeAsync();
         repository.Dispose();
         start.Dispose();
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task HintBurst_CoalescesIntoBoundedRescans()
+    {
+        // Arrange
+        var (service, repository, findYubiKeys, hidListener, _) = CreateService();
+        service.StartMonitoring(TimeSpan.FromSeconds(30));
+        await WaitUntilAsync(
+            () => findYubiKeys.ScanCount >= 1 && findYubiKeys.ActiveScans == 0,
+            "Initial monitoring rescan did not complete");
+
+        findYubiKeys.ResetCounters();
+
+        // Act - a rapid burst must coalesce into few rescans, not one rescan per hint.
+        for (var i = 0; i < 32; i++)
+        {
+            hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Added, $"hid-{i}"));
+        }
+
+        await WaitUntilAsync(() => findYubiKeys.ScanCount >= 1, "Hint burst did not trigger a rescan");
+
+        // Allow any (incorrect) trailing per-hint rescans to surface before asserting the bound.
+        await Task.Delay(YubiKeyDeviceMonitorService.MaxCoalesceInterval + YubiKeyDeviceMonitorService.ThrottleInterval,
+            TestContext.Current.CancellationToken);
+
+        // Assert - the whole burst lands within the debounce window: at most the coalesced
+        // rescan plus one straggler, never anything approaching one rescan per hint.
+        Assert.InRange(findYubiKeys.ScanCount, 1, 2);
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task SustainedHintStorm_RescanRunsWithinMaxCoalesceInterval()
+    {
+        // Arrange
+        var (service, repository, findYubiKeys, hidListener, _) = CreateService();
+        service.StartMonitoring(TimeSpan.FromSeconds(30));
+        await WaitUntilAsync(
+            () => findYubiKeys.ScanCount >= 1 && findYubiKeys.ActiveScans == 0,
+            "Initial monitoring rescan did not complete");
+
+        findYubiKeys.ResetCounters();
+
+        // Act - hints arriving faster than the quiet period re-arm the debounce forever;
+        // the max coalesce cap must force a rescan while the storm is still running.
+        using var stormDone = new CancellationTokenSource();
+        var storm = Task.Run(async () =>
+        {
+            var i = 0;
+            while (!stormDone.IsCancellationRequested)
+            {
+                hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Added, $"storm-{i++}"));
+                try
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(20), stormDone.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+        }, TestContext.Current.CancellationToken);
+
+        try
+        {
+            // Assert - without the cap this deadline is unreachable: the quiet period re-arms
+            // on every 20 ms hint until the storm ends.
+            var deadline = DateTimeOffset.UtcNow + YubiKeyDeviceMonitorService.MaxCoalesceInterval + TimeSpan.FromSeconds(2);
+            while (findYubiKeys.ScanCount < 1)
+            {
+                Assert.True(
+                    DateTimeOffset.UtcNow < deadline,
+                    "Sustained hint storm starved the rescan beyond the max coalesce interval");
+                await Task.Delay(TimeSpan.FromMilliseconds(20), TestContext.Current.CancellationToken);
+            }
+        }
+        finally
+        {
+            stormDone.Cancel();
+            await storm;
+        }
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
     }
 
     [Fact]

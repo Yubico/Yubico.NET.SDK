@@ -16,5 +16,5 @@
 
 ## 2026-07-06 - HID listener rescan hint migration note
 
-- Added `hid-listener-rescan-hints` migration guidance for the 2.0 break where low-level HID listener callbacks now carry `HidDeviceRescanHint` diagnostics.
-- Clarified that listener hints are rescan triggers only; public `YubiKeyManager.DeviceChanges` remains repository-diffed Added/Removed truth.
+- Added `hid-listener-rescan-hints` migration guidance for the change from v1 `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived`/`Removed` events (`EventHandler<HidDeviceEventArgs>`) to the v2 low-level `HidDeviceListener.DeviceEvent` callback carrying `HidDeviceRescanHint` diagnostics.
+- Clarified that v2 HID listener hints are rescan triggers only; public `YubiKeyManager.DeviceChanges` remains repository-diffed Added/Removed truth.

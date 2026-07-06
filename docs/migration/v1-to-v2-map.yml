@@ -85,14 +85,20 @@ mappings:
     status: manual
     confidence: high
     migration_kind: behavior
-    v1: Low-level HID listener DeviceEvent parameterless callbacks
-    v2: HidDeviceListener.DeviceEvent callbacks carrying HidDeviceRescanHint diagnostics
+    v1: Yubico.Core.Devices.Hid.HidDeviceListener Arrived/Removed events (EventHandler<HidDeviceEventArgs>) carrying IHidDevice payloads
+    v2: Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent callback (Action<HidDeviceRescanHint>?) carrying diagnostic rescan hints
     evidence:
+      - develop:Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs
+      - develop:Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceEventArgs.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiKeyDeviceListener.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiKeyDevice.Static.cs
       - yubikit:src/Core/src/Transports/Hid/HidDeviceListener.cs
       - yubikit:src/Core/src/Transports/Hid/HidDeviceRescanHint.cs
       - yubikit:src/Core/src/Devices/YubiKeyDeviceMonitorService.cs
-    notes: Direct HID listener consumers must update callback signatures and must not treat listener hints as public physical-device truth. Use YubiKeyManager.DeviceChanges for repository-diffed Added/Removed events.
-    last_reviewed_commit: pending
+      - yubikit:src/Core/src/Devices/YubiKeyDeviceRepository.cs
+      - yubikit:src/Core/src/Devices/YubiKeyManager.cs
+    notes: V1 low-level HID consumers handled Arrived/Removed EventHandler<HidDeviceEventArgs> events with per-HID-device payloads, while v1 device-level consumers used YubiKeyDeviceListener.Arrived/Removed and YubiKeyDevice.FindAll() over the listener cache. V2 low-level HID DeviceEvent is only a diagnostic rescan hint (HidDeviceChangeKind plus optional platform id/path), not public physical-device truth. Use YubiKeyManager.DeviceChanges for repository-diffed Added/Removed events after YubiKeyDeviceRepository.UpdateCache.
+    last_reviewed_commit: b1744cb36974ba8885fc7d9c007fe9fc5012b225
   - id: session-lifecycle
     status: manual
     confidence: medium

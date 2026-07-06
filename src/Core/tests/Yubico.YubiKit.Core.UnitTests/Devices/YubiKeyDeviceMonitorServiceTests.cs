@@ -471,6 +471,28 @@ public class YubiKeyDeviceMonitorServiceTests
     }
 
     [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task DisposeAsync_RescanHungIgnoringCancellation_CompletesWithinBoundedTime()
+    {
+        // Arrange - discovery scan hangs and ignores cancellation, holding the rescan gate
+        var (service, repository, findYubiKeys, _, _) = CreateService(shutdownTimeout: TimeSpan.FromMilliseconds(250));
+        findYubiKeys.HangIgnoringCancellation = true;
+
+        service.StartMonitoring(TimeSpan.FromHours(1));
+        await WaitUntilAsync(() => findYubiKeys.ActiveScans == 1, "Initial rescan never started");
+
+        // Act - disposal must abandon the stuck loop and rescan gate instead of hanging
+        await service.DisposeAsync().AsTask()
+            .WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+        // Cleanup - unblock the stuck scan; the abandoned (undisposed) gate accepts its Release
+        findYubiKeys.ReleaseHungScans();
+        await WaitUntilAsync(() => findYubiKeys.ActiveScans == 0, "Hung rescan never completed after release");
+
+        repository.Dispose();
+    }
+
+    [Fact]
     public async Task RescanAsync_AfterDispose_ThrowsObjectDisposedException()
     {
         // Arrange
@@ -534,7 +556,7 @@ public class YubiKeyDeviceMonitorServiceTests
         YubiKeyDeviceRepository Repository,
         FakeFindYubiKeys FindYubiKeys,
         FakeHidDeviceListener HidListener,
-        FakeSmartCardDeviceListener SmartCardListener) CreateService()
+        FakeSmartCardDeviceListener SmartCardListener) CreateService(TimeSpan? shutdownTimeout = null)
     {
         var repository = new YubiKeyDeviceRepository();
         var findYubiKeys = new FakeFindYubiKeys([]);
@@ -544,7 +566,8 @@ public class YubiKeyDeviceMonitorServiceTests
             repository,
             findYubiKeys,
             () => hidListener,
-            () => smartCardListener);
+            () => smartCardListener,
+            shutdownTimeout);
 
         return (service, repository, findYubiKeys, hidListener, smartCardListener);
     }
@@ -590,12 +613,20 @@ public class YubiKeyDeviceMonitorServiceTests
     private sealed class FakeFindYubiKeys(IReadOnlyList<IYubiKey> initialDevices) : IFindYubiKeys
     {
         private readonly Lock _syncLock = new();
+        private readonly TaskCompletionSource _hangReleased = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private IReadOnlyList<IYubiKey> _devices = initialDevices;
         private int _activeScans;
         private int _maxConcurrentScans;
         private int _scanCount;
 
         public TimeSpan ScanDelay { get; set; }
+
+        /// <summary>
+        /// When set, scans block until <see cref="ReleaseHungScans"/> is called,
+        /// ignoring the caller's cancellation token. Models a discovery backend
+        /// stuck in native I/O.
+        /// </summary>
+        public bool HangIgnoringCancellation { get; set; }
 
         public int ScanCount => Volatile.Read(ref _scanCount);
 
@@ -610,6 +641,8 @@ public class YubiKeyDeviceMonitorServiceTests
                 _devices = devices;
             }
         }
+
+        public void ReleaseHungScans() => _hangReleased.TrySetResult();
 
         public void ResetCounters()
         {
@@ -628,6 +661,11 @@ public class YubiKeyDeviceMonitorServiceTests
 
             try
             {
+                if (HangIgnoringCancellation)
+                {
+                    await _hangReleased.Task.ConfigureAwait(false);
+                }
+
                 if (ScanDelay > TimeSpan.Zero)
                 {
                     await Task.Delay(ScanDelay, cancellationToken).ConfigureAwait(false);

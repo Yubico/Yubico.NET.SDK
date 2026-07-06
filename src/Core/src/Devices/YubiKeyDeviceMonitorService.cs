@@ -42,10 +42,17 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     /// </summary>
     internal static readonly TimeSpan MaxCoalesceInterval = 5 * ThrottleInterval;
 
+    /// <summary>
+    /// Default maximum time <see cref="StopMonitoring"/> and <see cref="DisposeAsync"/>
+    /// wait for the monitoring loop and in-flight rescans before abandoning them.
+    /// </summary>
+    internal static readonly TimeSpan DefaultShutdownTimeout = TimeSpan.FromSeconds(10);
+
     private readonly IYubiKeyDeviceRepository _repository;
     private readonly IFindYubiKeys _findYubiKeys;
     private readonly Lock _monitorLock = new();
     private readonly SemaphoreSlim _rescanGate = new(1, 1);
+    private readonly TimeSpan _shutdownTimeout;
 
     // Device listeners for event-driven discovery
     private HidDeviceListener? _hidListener;
@@ -79,7 +86,8 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         IYubiKeyDeviceRepository repository,
         IFindYubiKeys findYubiKeys,
         Func<HidDeviceListener> hidListenerFactory,
-        Func<ISmartCardDeviceListener> smartCardListenerFactory)
+        Func<ISmartCardDeviceListener> smartCardListenerFactory,
+        TimeSpan? shutdownTimeout = null)
     {
         ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(findYubiKeys);
@@ -88,6 +96,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
         _repository = repository;
         _findYubiKeys = findYubiKeys;
+        _shutdownTimeout = shutdownTimeout ?? DefaultShutdownTimeout;
         HidListenerFactory = hidListenerFactory;
         SmartCardListenerFactory = smartCardListenerFactory;
     }
@@ -144,7 +153,20 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
             if (_monitoringTask is not null)
             {
-                return; // Already monitoring, idempotent
+                if (!_monitoringTask.IsCompleted)
+                {
+                    return; // Already monitoring, idempotent
+                }
+
+                // The monitoring loop only completes through StopMonitoring or
+                // DisposeAsync, which also clear this field. A completed task here
+                // means the loop terminated unexpectedly; tear down the stale
+                // session state so monitoring can restart cleanly.
+                Logger.LogWarning("Previous monitoring loop terminated unexpectedly; restarting device monitoring");
+                TeardownListeners();
+                _monitoringCts?.Dispose();
+                _monitoringCts = null;
+                _monitoringTask = null;
             }
 
             _rescanRequests = Channel.CreateUnbounded<DeviceMonitorRescanRequest>(
@@ -175,13 +197,25 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         }
 
         // Wait for monitoring loop to complete (outside lock to avoid deadlock)
+        var loopStopped = false;
         try
         {
-            taskToAwait.Wait(TimeSpan.FromSeconds(10));
+            loopStopped = taskToAwait.Wait(_shutdownTimeout);
         }
         catch (AggregateException)
         {
-            // Ignore exceptions from the monitoring task - it's being stopped
+            // The monitoring task faulted, which means it has completed.
+            loopStopped = true;
+        }
+
+        if (!loopStopped)
+        {
+            // Abandon the stuck loop (e.g. a rescan blocked in native I/O) rather
+            // than dispose the CTS out from under it while it may still run.
+            Logger.LogWarning(
+                "Device monitoring loop did not stop within {Timeout}; abandoning it",
+                _shutdownTimeout);
+            return;
         }
 
         ctsToDispose?.Dispose();
@@ -485,24 +519,46 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
         var (taskToAwait, ctsToDispose) = StopMonitoringCore(teardownWhenNotMonitoring: true);
 
+        var loopStopped = true;
         if (taskToAwait is not null)
         {
             try
             {
-                await taskToAwait.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+                await taskToAwait.WaitAsync(_shutdownTimeout).ConfigureAwait(false);
+            }
+            catch (TimeoutException)
+            {
+                loopStopped = false;
+                Logger.LogWarning(
+                    "Device monitoring loop did not stop within {Timeout} during dispose; abandoning it",
+                    _shutdownTimeout);
             }
             catch
             {
-                // Ignore timeout/cancellation
+                // Faulted or canceled means the loop has completed.
             }
         }
 
-        ctsToDispose?.Dispose();
+        if (loopStopped)
+        {
+            ctsToDispose?.Dispose();
+        }
 
-        await _rescanGate.WaitAsync().ConfigureAwait(false);
-        _rescanGate.Release();
-
-        _rescanGate.Dispose();
+        // Drain any in-flight rescan before disposing the gate, bounded so a hung
+        // discovery scan cannot hang disposal. On timeout the semaphore is
+        // abandoned rather than disposed so the stuck rescan's Release() does not
+        // hit a disposed handle.
+        if (await _rescanGate.WaitAsync(_shutdownTimeout).ConfigureAwait(false))
+        {
+            _rescanGate.Release();
+            _rescanGate.Dispose();
+        }
+        else
+        {
+            Logger.LogWarning(
+                "In-flight device rescan did not finish within {Timeout} during dispose; abandoning rescan gate",
+                _shutdownTimeout);
+        }
 
         Logger.LogDebug("YubiKeyDeviceMonitorService disposed");
     }

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 using System.Text;
 using Yubico.YubiKit.Core.Native.MacOS.CoreFoundation;
 using CFNativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;
@@ -35,11 +36,14 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<MacOSHidDeviceListener>();
 
     private readonly Lock _syncLock = new();
+    private readonly Lock _cacheLock = new();
+    private readonly HashSet<long> _knownEntryIds = [];
     private IntPtr _hidManager;
     private IntPtr _runLoop;
     private IntPtr _runLoopMode;
     private Thread? _listenerThread;
     private volatile bool _shouldStop;
+    private volatile bool _managerOpened;
     private bool _disposed;
 
     // Keep callback delegates alive to prevent GC
@@ -78,6 +82,7 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
 
                 // Set device matching to all HID devices
                 IOKitNativeMethods.IOHIDManagerSetDeviceMatching(_hidManager, IntPtr.Zero);
+                PopulateInitialKnownEntryIds();
 
                 // Keep callback delegates alive
                 _arrivedCallbackDelegate = DeviceArrivedCallback;
@@ -95,6 +100,7 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
                     IntPtr.Zero);
 
                 _shouldStop = false;
+                Status = DeviceListenerStatus.Started;
 
                 // Start the listener thread
                 _listenerThread = new Thread(ListenerThreadProc)
@@ -103,8 +109,6 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
                     IsBackground = true
                 };
                 _listenerThread.Start();
-
-                Status = DeviceListenerStatus.Started;
             }
             catch (Exception ex)
             {
@@ -159,6 +163,10 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
 
             _arrivedCallbackDelegate = null;
             _removedCallbackDelegate = null;
+            lock (_cacheLock)
+            {
+                _knownEntryIds.Clear();
+            }
 
             Status = DeviceListenerStatus.Stopped;
         }
@@ -183,6 +191,16 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
                 _hidManager,
                 _runLoop,
                 _runLoopMode);
+
+            var openResult = IOKitNativeMethods.IOHIDManagerOpen(_hidManager, 0);
+            if (openResult != 0)
+            {
+                Logger.LogWarning("IOHIDManagerOpen failed: 0x{Result:X8}", openResult);
+                Status = DeviceListenerStatus.Error;
+                return;
+            }
+
+            _managerOpened = true;
 
             // Run the loop until stopped
             while (!_shouldStop)
@@ -217,6 +235,17 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
         }
         finally
         {
+            if (_managerOpened && _hidManager != IntPtr.Zero)
+            {
+                var closeResult = IOKitNativeMethods.IOHIDManagerClose(_hidManager, 0);
+                if (!_shouldStop && closeResult != 0)
+                {
+                    Logger.LogWarning("IOHIDManagerClose failed: 0x{Result:X8}", closeResult);
+                }
+
+                _managerOpened = false;
+            }
+
             // Cleanup run loop resources
             if (_hidManager != IntPtr.Zero && _runLoop != IntPtr.Zero && _runLoopMode != IntPtr.Zero)
             {
@@ -237,11 +266,22 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
                 return;
             }
 
-            OnDeviceEvent();
+            var hint = CreateHint(HidDeviceChangeKind.Added, deviceRef);
+            if (hint.PlatformDeviceId is not null && long.TryParse(hint.PlatformDeviceId, CultureInfo.InvariantCulture, out var entryId))
+            {
+                if (!TryRegisterArrivedEntryId(entryId))
+                {
+                    Logger.LogTrace("Suppressing initial macOS HID matching callback for entry ID {EntryId}", entryId);
+                    return;
+                }
+            }
+
+            OnDeviceEvent(hint);
         }
         catch (Exception ex)
         {
             Logger.LogWarning(ex, "Failed to process macOS device arrival");
+            OnDeviceEvent(new HidDeviceRescanHint(HidDeviceChangeKind.Added));
         }
     }
 
@@ -249,11 +289,114 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
     {
         try
         {
-            OnDeviceEvent();
+            var hint = CreateHint(HidDeviceChangeKind.Removed, deviceRef);
+            if (hint.PlatformDeviceId is not null && long.TryParse(hint.PlatformDeviceId, CultureInfo.InvariantCulture, out var entryId))
+            {
+                lock (_cacheLock)
+                {
+                    _knownEntryIds.Remove(entryId);
+                }
+            }
+
+            OnDeviceEvent(hint);
         }
         catch (Exception ex)
         {
             Logger.LogWarning(ex, "Failed to process macOS device removal");
+            OnDeviceEvent(new HidDeviceRescanHint(HidDeviceChangeKind.Removed));
+        }
+    }
+
+    private void PopulateInitialKnownEntryIds()
+    {
+        if (_hidManager == IntPtr.Zero)
+        {
+            return;
+        }
+
+        var deviceSet = IOKitNativeMethods.IOHIDManagerCopyDevices(_hidManager);
+        if (deviceSet == IntPtr.Zero)
+        {
+            return;
+        }
+
+        try
+        {
+            var deviceSetCount = CFNativeMethods.CFSetGetCount(deviceSet);
+            if (deviceSetCount <= 0)
+            {
+                return;
+            }
+
+            var devices = new IntPtr[deviceSetCount];
+            CFNativeMethods.CFSetGetValues(deviceSet, devices);
+
+            lock (_cacheLock)
+            {
+                foreach (var device in devices)
+                {
+                    if (TryGetEntryId(device, out var entryId))
+                    {
+                        _knownEntryIds.Add(entryId);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogDebug(ex, "Failed to populate initial macOS HID listener baseline");
+        }
+        finally
+        {
+            CFNativeMethods.CFRelease(deviceSet);
+        }
+    }
+
+    private bool TryRegisterArrivedEntryId(long entryId)
+    {
+        lock (_cacheLock)
+        {
+            return _knownEntryIds.Add(entryId);
+        }
+    }
+
+    private static HidDeviceRescanHint CreateHint(HidDeviceChangeKind changeKind, IntPtr deviceRef)
+    {
+        try
+        {
+            if (deviceRef == IntPtr.Zero)
+            {
+                return new HidDeviceRescanHint(changeKind);
+            }
+
+            var entryId = MacOSHidDevice.GetEntryId(deviceRef).ToString(CultureInfo.InvariantCulture);
+            return new HidDeviceRescanHint(changeKind, entryId, entryId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogDebug(ex, "Failed to read macOS HID registry entry ID");
+            return new HidDeviceRescanHint(changeKind);
+        }
+    }
+
+    private static bool TryGetEntryId(IntPtr deviceRef, out long entryId)
+    {
+        try
+        {
+            if (deviceRef == IntPtr.Zero)
+            {
+                entryId = 0;
+                return false;
+            }
+
+            entryId = MacOSHidDevice.GetEntryId(deviceRef);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogDebug(ex, "Failed to read macOS HID registry entry ID");
+            entryId = 0;
+            return false;
         }
     }
 

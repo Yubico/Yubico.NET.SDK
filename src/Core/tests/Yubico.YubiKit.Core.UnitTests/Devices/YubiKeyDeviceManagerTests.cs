@@ -104,9 +104,10 @@ public class YubiKeyDeviceManagerTests
         // Populate cache with an initial scan before monitoring starts
         await manager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        // Start monitoring (event-driven, does not trigger its own scan)
+        // Start monitoring performs one startup rescan, then FindAllAsync returns cache.
         manager.StartMonitoring(TimeSpan.FromSeconds(10));
 
+        await WaitUntilAsync(() => findYubiKeys.ScanCount >= 2, "Monitoring startup rescan did not run");
         var scanCountAfterStart = findYubiKeys.ScanCount;
 
         // Act - Call FindAllAsync while monitoring
@@ -339,6 +340,20 @@ public class YubiKeyDeviceManagerTests
         var manager = new YubiKeyDeviceManager(repository, monitorService);
 
         return (manager, findYubiKeys, repository);
+    }
+
+    private static async Task WaitUntilAsync(Func<bool> condition, string failureMessage)
+    {
+        var deadline = DateTimeOffset.UtcNow.AddSeconds(5);
+        while (!condition())
+        {
+            if (DateTimeOffset.UtcNow >= deadline)
+            {
+                throw new TimeoutException(failureMessage);
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(20), TestContext.Current.CancellationToken);
+        }
     }
 
     /// <summary>

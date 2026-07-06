@@ -27,6 +27,10 @@ Review code that assumes:
 - A device object that directly owns all applet operations.
 - Synchronous connection setup for operations that are async in v2.
 
+### HID Listener Callbacks
+
+The low-level `HidDeviceListener.DeviceEvent` callback now receives a `HidDeviceRescanHint` instead of a parameterless `Action`. This is a 2.0 breaking change for direct HID listener consumers. Treat the hint as diagnostic input for triggering discovery only; it is not authoritative physical-device state. Applications that need real YubiKey arrivals and removals should use `YubiKeyManager.DeviceChanges`, which is emitted after the device repository rescans and diffs the discovered device set.
+
 ## Session Lifecycle
 
 V2 application sessions are applet-specific and commonly own connection/protocol state. Prefer the v2 session factory or constructor pattern documented by each applet package rather than carrying v1 session setup forward mechanically.

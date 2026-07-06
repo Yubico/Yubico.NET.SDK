@@ -40,6 +40,8 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
     private const int SymbolicLinkOffset = 24;
 
     private readonly Lock _syncLock = new();
+    private readonly Lock _cacheLock = new();
+    private readonly HashSet<string> _knownSymbolicLinks = new(StringComparer.OrdinalIgnoreCase);
     private GCHandle _marshalableThisPtr;
     private NativeMethods.CM_NOTIFY_CALLBACK? _callbackDelegate;
     private IntPtr _notificationHandle;
@@ -139,6 +141,10 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
             }
 
             _callbackDelegate = null;
+            lock (_cacheLock)
+            {
+                _knownSymbolicLinks.Clear();
+            }
 
             Status = DeviceListenerStatus.Stopped;
         }
@@ -178,31 +184,29 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
                 HandleDeviceArrival(eventData);
                 break;
             case NativeMethods.CM_NOTIFY_ACTION.DEVICEINTERFACEREMOVAL:
-                HandleDeviceRemoval();
+                HandleDeviceRemoval(eventData);
                 break;
         }
     }
 
     private void HandleDeviceArrival(IntPtr eventData)
     {
-        if (eventData == IntPtr.Zero)
-        {
-            return;
-        }
-
         try
         {
-            // The symbolic link (device path) starts at offset 24 in the event data
-            var symbolicLinkPtr = IntPtr.Add(eventData, SymbolicLinkOffset);
-            var devicePath = Marshal.PtrToStringUni(symbolicLinkPtr);
-
-            if (string.IsNullOrEmpty(devicePath))
+            var devicePath = ReadSymbolicLink(eventData);
+            if (devicePath is null)
             {
+                OnDeviceEvent(new HidDeviceRescanHint(HidDeviceChangeKind.Added));
                 return;
             }
 
+            lock (_cacheLock)
+            {
+                _knownSymbolicLinks.Add(devicePath);
+            }
+
             Logger.LogDebug("HID device arrived: {DevicePath}", devicePath);
-            OnDeviceEvent();
+            OnDeviceEvent(CreateHint(HidDeviceChangeKind.Added, devicePath));
         }
         catch (Exception ex)
         {
@@ -210,10 +214,50 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
         }
     }
 
-    private void HandleDeviceRemoval()
+    private void HandleDeviceRemoval(IntPtr eventData)
     {
-        OnDeviceEvent();
+        try
+        {
+            var devicePath = ReadSymbolicLink(eventData);
+            if (devicePath is null)
+            {
+                OnDeviceEvent(new HidDeviceRescanHint(HidDeviceChangeKind.Removed));
+                return;
+            }
+
+            lock (_cacheLock)
+            {
+                _knownSymbolicLinks.Remove(devicePath);
+            }
+
+            Logger.LogDebug("HID device removed: {DevicePath}", devicePath);
+            OnDeviceEvent(CreateHint(HidDeviceChangeKind.Removed, devicePath));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to process device removal");
+            OnDeviceEvent(new HidDeviceRescanHint(HidDeviceChangeKind.Removed));
+        }
     }
+
+    private static string? ReadSymbolicLink(IntPtr eventData)
+    {
+        if (eventData == IntPtr.Zero)
+        {
+            return null;
+        }
+
+        // The symbolic link (device path) starts at offset 24 in CM_NOTIFY_EVENT_DATA.
+        var symbolicLinkPtr = IntPtr.Add(eventData, SymbolicLinkOffset);
+        var devicePath = Marshal.PtrToStringUni(symbolicLinkPtr);
+        return string.IsNullOrEmpty(devicePath) ? null : devicePath;
+    }
+
+    private static HidDeviceRescanHint CreateHint(HidDeviceChangeKind changeKind, string devicePath) =>
+        new(changeKind, NormalizeSymbolicLink(devicePath), devicePath);
+
+    private static string NormalizeSymbolicLink(string devicePath) =>
+        devicePath.ToUpperInvariant();
 
     protected override void Dispose(bool disposing)
     {

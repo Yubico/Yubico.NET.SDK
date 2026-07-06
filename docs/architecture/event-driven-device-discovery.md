@@ -92,7 +92,7 @@
 │  │  │ Change(1000ms)     │  │  │  │ Notification│ + CFRunLoop │ monitor   │ │ │   │
 │  │  │      │             │  │  │  │   ▲        │   ▲         │ + poll()  │ │ │   │
 │  │  │      │ Blocks up   │  │  │  │   │callback│   │callback │   ▲       │ │ │   │
-│  │  │      │ to 1000ms   │  │  │  │   │        │   │         │   │100ms  │ │ │   │
+│  │  │      │ to 1000ms   │  │  │  │   │        │   │         │   │eventfd│ │ │   │
 │  │  │      ▼             │  │  │  └───┼────────┴───┼─────────┴───┼───────┘ │ │   │
 │  │  │ Checks _isListening│  │  │      │            │             │         │ │   │
 │  │  │ flag, loops        │  │  │      │ OS notifies│ OS notifies │ fd ready│ │   │
@@ -100,21 +100,21 @@
 │  │           │              │                        │                       │   │
 │  └───────────┼──────────────┴────────────────────────┼───────────────────────┘   │
 │              │                                       │                           │
-│              │  Arrived/Removed                      │  Arrived/Removed          │
-│              │  events                               │  events                   │
+│              │  Rescan trigger                       │  Rescan hint              │
+│              │  callback                             │  callback                 │
 │              ▼                                       ▼                           │
 │         ┌─────────────────────────────────────────────────┐                      │
-│         │              SignalEvent()                       │                      │
-│         │         _eventSemaphore.Release()                │                      │
+│         │              Channel write                       │                      │
+│         │         single-reader debounce queue             │                      │
 │         └───────────────────────┬─────────────────────────┘                      │
 │                                 │                                                │
 │                                 ▼                                                │
 │         ┌─────────────────────────────────────────────────┐                      │
 │         │           Event Coalescing Loop                  │                      │
 │         │                                                  │                      │
-│         │  await _eventSemaphore.WaitAsync()               │                      │
+│         │  await channel.Reader.WaitToReadAsync()          │                      │
 │         │  await Task.Delay(200ms) ◄── Coalesce rapid      │                      │
-│         │  drain remaining signals    events               │                      │
+│         │  drain queued triggers      events               │                      │
 │         │  PerformDeviceScan()                             │                      │
 │         └───────────────────────┬─────────────────────────┘                      │
 │                                 │                                                │
@@ -168,11 +168,10 @@
 │ ISmartCardDeviceListener│         │   HidDeviceListener     │
 │      (interface)        │         │    (abstract class)     │
 ├─────────────────────────┤         ├─────────────────────────┤
-│ + Arrived event         │         │ + Arrived event         │
-│ + Removed event         │         │ + Removed event         │
+│ + DeviceEvent callback  │         │ + DeviceEvent callback  │
 │ + Status { get; }       │         │ + Status { get; set; }  │
-└────────────┬────────────┘         │ # OnArrived(device)     │
-             │                      │ # OnRemoved(device)     │
+└────────────┬────────────┘         │ # OnDeviceEvent(hint)   │
+             │                      │ + HidDeviceRescanHint   │
              │                      │ + Create() : static     │
              ▼                      └────────────┬────────────┘
 ┌─────────────────────────┐                      │
@@ -211,16 +210,16 @@ Why different patterns?
 │ Notification     │  │ Create()         │  │ new_from_netlink │
 │     │            │  │     │            │  │     │            │
 │     ▼            │  │     ▼            │  │     ▼            │
-│ Callback from OS │  │ CFRunLoop        │  │ poll(fd, 100ms)  │
+│ Callback from OS │  │ CFRunLoop        │  │ poll(monitor+fd) │
 │ on device change │  │ RunInMode(100ms) │  │     │            │
 │     │            │  │     │            │  │     ▼            │
 │     ▼            │  │     ▼            │  │ udev_monitor_    │
-│ OnArrived() or   │  │ Matching/Removal │  │ receive_device   │
-│ OnRemoved()      │  │ callbacks fire   │  │     │            │
+│ Rescan hint      │  │ Matching/Removal │  │ receive_device   │
+│ callback         │  │ callbacks fire   │  │     │            │
 │                  │  │     │            │  │     ▼            │
 │ GCHandle pins    │  │     ▼            │  │ Check action:    │
-│ callback delegate│  │ OnArrived() or   │  │ add → OnArrived  │
-│                  │  │ OnRemoved()      │  │ remove→OnRemoved │
+│ callback delegate│  │ Rescan hint      │  │ add/remove hint  │
+│                  │  │ callback         │  │ stable identity  │
 └──────────────────┘  └──────────────────┘  └──────────────────┘
 ```
 
@@ -237,17 +236,17 @@ Why different patterns?
            │                  │ Device notification  │                   │               │
            │                  ├─────────────────────►│                   │               │
            │                  │                      │                   │               │
-           │                  │                      │ Arrived event     │               │
+           │                  │                      │ Rescan hint       │               │
            │                  │                      ├──────────────────►│               │
            │                  │                      │                   │               │
-           │                  │                      │                   │ SignalEvent() │
-           │                  │                      │                   │ semaphore++   │
+           │                  │                      │                   │ Channel write │
+           │                  │                      │                   │ (single read) │
            │                  │                      │                   │               │
            │                  │                      │                   │◄──────────────┤
            │                  │                      │                   │ Wait 200ms    │
            │                  │                      │                   │ (coalesce)    │
            │                  │                      │                   │               │
-           │                  │                      │                   │ Drain sema    │
+           │                  │                      │                   │ Drain queue   │
            │                  │                      │                   │               │
            │                  │                      │                   │ FindAll()     │
            │                  │                      │                   ├───────────────┤
@@ -256,8 +255,8 @@ Why different patterns?
            │                  │                      │                   │ .Write()      │
            │                  │                      │                   ├──────────────►│
            │                  │                      │                   │               │
-           │                  │                      │                   │               │ DeviceEvent
-           │                  │                      │                   │               │ (Arrived)
+           │                  │                      │                   │               │ DeviceChanges
+           │                  │                      │                   │               │ (Added)
            │                  │                      │                   │               ├──────────►
 ```
 
@@ -273,8 +272,8 @@ Why different patterns?
 | **HID Windows** | ❌ Not implemented | ✅ CM_Register_Notification |
 | **HID macOS** | Full enumeration | ✅ IOHIDManager callbacks |
 | **HID Linux** | udev_enumerate | ✅ udev_monitor + poll() |
-| **Event Coalescing** | None | 200ms debounce |
-| **Cancellation** | Unreliable | Responsive (100-1000ms) |
+| **Event Coalescing** | None | Single-reader queue + 200ms debounce |
+| **Cancellation** | Unreliable | Responsive (eventfd/run-loop stop/PCSC timeout) |
 
 ---
 
@@ -306,7 +305,7 @@ INFINITE timeout (0xFFFFFFFF):
 │ }                                                            │
 └──────────────────────────────────────────────────────────────┘
 
-HID: 100ms poll/CFRunLoop timeout for same reason
+HID: macOS stops its run loop directly; Linux polls the udev monitor and an explicit shutdown event fd.
 ```
 
 ---

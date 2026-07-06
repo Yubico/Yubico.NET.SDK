@@ -30,14 +30,16 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 /// </remarks>
 internal sealed class LinuxHidDeviceListener : HidDeviceListener
 {
-    private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
+    private static readonly TimeSpan HidrawReadinessFallbackDelay = TimeSpan.FromMilliseconds(250);
     private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
 
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<LinuxHidDeviceListener>();
 
     private readonly Lock _syncLock = new();
+    private readonly HashSet<string> _knownDeviceIds = new(StringComparer.Ordinal);
     private LinuxUdevSafeHandle? _udevHandle;
     private LinuxUdevMonitorSafeHandle? _monitorHandle;
+    private LinuxEventFdSafeHandle? _shutdownEventHandle;
     private Thread? _listenerThread;
     private volatile bool _shouldStop;
     private bool _disposed;
@@ -69,6 +71,7 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
                 {
                     Logger.LogWarning("Failed to create udev context");
                     Status = DeviceListenerStatus.Error;
+                    ReleaseNativeHandles();
                     return;
                 }
 
@@ -78,6 +81,7 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
                 {
                     Logger.LogWarning("Failed to create udev monitor");
                     Status = DeviceListenerStatus.Error;
+                    ReleaseNativeHandles();
                     return;
                 }
 
@@ -91,6 +95,7 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
                 {
                     Logger.LogWarning("Failed to add udev filter: {Result}", filterResult);
                     Status = DeviceListenerStatus.Error;
+                    ReleaseNativeHandles();
                     return;
                 }
 
@@ -100,10 +105,23 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
                 {
                     Logger.LogWarning("Failed to enable udev receiving: {Result}", enableResult);
                     Status = DeviceListenerStatus.Error;
+                    ReleaseNativeHandles();
+                    return;
+                }
+
+                _shutdownEventHandle = LibcNativeMethods.eventfd(
+                    0,
+                    LibcNativeMethods.EFD_CLOEXEC | LibcNativeMethods.EFD_NONBLOCK);
+                if (_shutdownEventHandle.IsInvalid)
+                {
+                    Logger.LogWarning("Failed to create Linux HID listener shutdown event fd: {Error}", Marshal.GetLastWin32Error());
+                    Status = DeviceListenerStatus.Error;
+                    ReleaseNativeHandles();
                     return;
                 }
 
                 _shouldStop = false;
+                Status = DeviceListenerStatus.Started;
 
                 // Start the listener thread
                 _listenerThread = new Thread(ListenerThreadProc)
@@ -112,13 +130,12 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
                     IsBackground = true
                 };
                 _listenerThread.Start();
-
-                Status = DeviceListenerStatus.Started;
             }
             catch (Exception ex)
             {
                 Logger.LogError(ex, "Failed to start Linux HID listener");
                 Status = DeviceListenerStatus.Error;
+                ReleaseNativeHandles();
             }
         }
     }
@@ -134,6 +151,7 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
             }
 
             _shouldStop = true;
+            SignalShutdownEvent();
 
             // Wait for the listener thread to exit
             if (_listenerThread is not null && _listenerThread.IsAlive)
@@ -146,12 +164,8 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
 
             _listenerThread = null;
 
-            // Cleanup udev resources
-            _monitorHandle?.Dispose();
-            _monitorHandle = null;
-
-            _udevHandle?.Dispose();
-            _udevHandle = null;
+            ReleaseNativeHandles();
+            _knownDeviceIds.Clear();
 
             Status = DeviceListenerStatus.Stopped;
         }
@@ -159,8 +173,13 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
 
     private void ListenerThreadProc()
     {
-        if (_monitorHandle is null || _monitorHandle.IsInvalid)
+        if (_monitorHandle is null || _monitorHandle.IsInvalid || _shutdownEventHandle is null || _shutdownEventHandle.IsInvalid)
         {
+            if (!_shouldStop)
+            {
+                Status = DeviceListenerStatus.Error;
+            }
+
             return;
         }
 
@@ -175,14 +194,23 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
                 return;
             }
 
-            var pollFds = new LibcNativeMethods.PollFd[1];
+            var shutdownFd = _shutdownEventHandle.DangerousGetHandle().ToInt32();
+            if (shutdownFd < 0)
+            {
+                Logger.LogWarning("Invalid Linux HID listener shutdown fd");
+                Status = DeviceListenerStatus.Error;
+                return;
+            }
+
+            var pollFds = new LibcNativeMethods.PollFd[2];
             pollFds[0].fd = fd.ToInt32();
             pollFds[0].events = (short)(LibcNativeMethods.POLLIN | LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP);
+            pollFds[1].fd = shutdownFd;
+            pollFds[1].events = (short)(LibcNativeMethods.POLLIN | LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP);
 
             while (!_shouldStop)
             {
-                // Poll with timeout
-                var pollResult = LibcNativeMethods.poll(pollFds, 1, (int)CheckForChangesWaitTime.TotalMilliseconds);
+                var pollResult = LibcNativeMethods.poll(pollFds, pollFds.Length, -1);
 
                 if (_shouldStop)
                 {
@@ -192,32 +220,47 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
                 if (pollResult < 0)
                 {
                     var error = Marshal.GetLastWin32Error();
-                    // EINTR (4) is normal for interrupted system calls
-                    if (error == 4)
+                    if (error == LibcNativeMethods.EINTR)
                     {
                         continue;
                     }
 
                     Logger.LogWarning("poll() failed with error: {Error}", error);
-                    continue;
+                    Status = DeviceListenerStatus.Error;
+                    break;
                 }
 
                 if (pollResult == 0)
                 {
-                    // Timeout, continue polling
                     continue;
                 }
 
-                // Check if there's data to read
+                if ((pollFds[1].revents & LibcNativeMethods.POLLIN) != 0)
+                {
+                    DrainShutdownEvent();
+                    break;
+                }
+
+                if ((pollFds[1].revents & (LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP | LibcNativeMethods.POLLNVAL)) != 0)
+                {
+                    Logger.LogWarning("Linux HID listener shutdown fd reported error: {Revents}", pollFds[1].revents);
+                    if (!_shouldStop)
+                    {
+                        Status = DeviceListenerStatus.Error;
+                    }
+
+                    break;
+                }
+
                 if ((pollFds[0].revents & LibcNativeMethods.POLLIN) != 0)
                 {
                     ProcessUdevEvent();
                 }
 
-                // Check for errors
-                if ((pollFds[0].revents & (LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP)) != 0)
+                if ((pollFds[0].revents & (LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP | LibcNativeMethods.POLLNVAL)) != 0)
                 {
-                    Logger.LogWarning("poll() reported error or hangup");
+                    Logger.LogWarning("udev monitor fd reported error: {Revents}", pollFds[0].revents);
+                    Status = DeviceListenerStatus.Error;
                     break;
                 }
             }
@@ -257,17 +300,174 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
         switch (action)
         {
             case "add":
-                HandleDeviceAdd();
+                HandleDeviceAdd(device);
                 break;
             case "remove":
-                OnDeviceEvent();
+                HandleDeviceRemove(device);
                 break;
         }
     }
 
-    private void HandleDeviceAdd()
+    private void HandleDeviceAdd(LinuxUdevDeviceSafeHandle device)
     {
-        OnDeviceEvent();
+        var hint = CreateHint(HidDeviceChangeKind.Added, device);
+        if (hint.PlatformDeviceId is not null)
+        {
+            _knownDeviceIds.Add(hint.PlatformDeviceId);
+        }
+
+        OnDeviceEvent(hint);
+
+        if (!IsHidrawReady(hint.DevicePath))
+        {
+            QueueReadinessFallback(hint);
+        }
+    }
+
+    private void HandleDeviceRemove(LinuxUdevDeviceSafeHandle device)
+    {
+        var hint = CreateHint(HidDeviceChangeKind.Removed, device);
+        if (hint.PlatformDeviceId is not null)
+        {
+            _knownDeviceIds.Remove(hint.PlatformDeviceId);
+        }
+
+        OnDeviceEvent(hint);
+    }
+
+    private HidDeviceRescanHint CreateHint(HidDeviceChangeKind changeKind, LinuxUdevDeviceSafeHandle device)
+    {
+        var stableIdentity = GetStableUdevIdentity(device);
+        var devNode = GetDevNode(device);
+        return new HidDeviceRescanHint(changeKind, stableIdentity, devNode);
+    }
+
+    private void QueueReadinessFallback(HidDeviceRescanHint hint)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(HidrawReadinessFallbackDelay).ConfigureAwait(false);
+
+                if (_shouldStop || Status != DeviceListenerStatus.Started)
+                {
+                    return;
+                }
+
+                OnDeviceEvent(hint);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogTrace(ex, "Ignored delayed hidraw readiness rescan hint");
+            }
+        });
+    }
+
+    private static bool IsHidrawReady(string? devNode)
+    {
+        if (string.IsNullOrEmpty(devNode) || !File.Exists(devNode))
+        {
+            return false;
+        }
+
+        using var handle = LibcNativeMethods.open(
+            devNode,
+            LibcNativeMethods.OpenFlags.O_RDONLY | LibcNativeMethods.OpenFlags.O_NONBLOCK);
+        return !handle.IsInvalid;
+    }
+
+    private static string? GetStableUdevIdentity(LinuxUdevDeviceSafeHandle device)
+    {
+        var parent = UdevNativeMethods.udev_device_get_parent(device);
+        var syspath = parent == IntPtr.Zero
+            ? PtrToString(UdevNativeMethods.udev_device_get_syspath(device))
+            : PtrToString(UdevNativeMethods.udev_device_get_syspath(parent));
+
+        if (string.IsNullOrEmpty(syspath))
+        {
+            return null;
+        }
+
+        const string hidrawSegment = "/hidraw/";
+        var hidrawIndex = syspath.LastIndexOf(hidrawSegment, StringComparison.Ordinal);
+        if (hidrawIndex >= 0)
+        {
+            return syspath[..hidrawIndex];
+        }
+
+        const string hidrawDirectorySuffix = "/hidraw";
+        return syspath.EndsWith(hidrawDirectorySuffix, StringComparison.Ordinal)
+            ? syspath[..^hidrawDirectorySuffix.Length]
+            : syspath;
+    }
+
+    private static string? GetDevNode(LinuxUdevDeviceSafeHandle device) =>
+        PtrToString(UdevNativeMethods.udev_device_get_devnode(device));
+
+    private static string? PtrToString(IntPtr value) =>
+        value == IntPtr.Zero ? null : Marshal.PtrToStringAnsi(value);
+
+    private void SignalShutdownEvent()
+    {
+        if (_shutdownEventHandle is null || _shutdownEventHandle.IsInvalid)
+        {
+            return;
+        }
+
+        var signal = BitConverter.GetBytes(1UL);
+        var result = LibcNativeMethods.write(_shutdownEventHandle, signal, signal.Length);
+        if (result < 0)
+        {
+            var error = Marshal.GetLastWin32Error();
+            if (error != LibcNativeMethods.EAGAIN)
+            {
+                Logger.LogDebug("Failed to signal Linux HID listener shutdown fd: {Error}", error);
+            }
+        }
+    }
+
+    private void DrainShutdownEvent()
+    {
+        if (_shutdownEventHandle is null || _shutdownEventHandle.IsInvalid)
+        {
+            return;
+        }
+
+        var buffer = new byte[sizeof(ulong)];
+        while (true)
+        {
+            var result = LibcNativeMethods.read(_shutdownEventHandle, buffer, buffer.Length);
+            if (result > 0)
+            {
+                continue;
+            }
+
+            if (result == 0)
+            {
+                return;
+            }
+
+            var error = Marshal.GetLastWin32Error();
+            if (error != LibcNativeMethods.EAGAIN && error != LibcNativeMethods.EINTR)
+            {
+                Logger.LogDebug("Failed to drain Linux HID listener shutdown fd: {Error}", error);
+            }
+
+            return;
+        }
+    }
+
+    private void ReleaseNativeHandles()
+    {
+        _shutdownEventHandle?.Dispose();
+        _shutdownEventHandle = null;
+
+        _monitorHandle?.Dispose();
+        _monitorHandle = null;
+
+        _udevHandle?.Dispose();
+        _udevHandle = null;
     }
 
     protected override void Dispose(bool disposing)
@@ -288,8 +488,8 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
         {
             // Finalizer path - minimal cleanup
             _shouldStop = true;
-            _monitorHandle?.Dispose();
-            _udevHandle?.Dispose();
+            SignalShutdownEvent();
+            ReleaseNativeHandles();
         }
 
         base.Dispose(disposing);

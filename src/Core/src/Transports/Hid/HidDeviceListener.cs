@@ -33,9 +33,13 @@ public abstract class HidDeviceListener : IDisposable
     private bool _disposed;
 
     /// <summary>
-    /// Callback invoked when any HID device event (arrival or removal) occurs.
+    /// Callback invoked when a HID listener observes a topology change.
     /// </summary>
-    public Action? DeviceEvent { get; set; }
+    /// <remarks>
+    /// The callback receives a diagnostic rescan hint only. It must not be treated as
+    /// authoritative YubiKey arrival or removal state.
+    /// </remarks>
+    public Action<HidDeviceRescanHint>? DeviceEvent { get; set; }
 
     /// <summary>
     /// Gets the current status of the listener.
@@ -81,11 +85,14 @@ public abstract class HidDeviceListener : IDisposable
     /// <summary>
     /// Signals that a device event has occurred.
     /// </summary>
-    protected void OnDeviceEvent()
+    /// <param name="hint">The diagnostic rescan hint to pass to subscribers.</param>
+    protected void OnDeviceEvent(HidDeviceRescanHint hint)
     {
+        ArgumentNullException.ThrowIfNull(hint);
+
         try
         {
-            DeviceEvent?.Invoke();
+            DeviceEvent?.Invoke(hint);
         }
         catch (Exception ex)
         {

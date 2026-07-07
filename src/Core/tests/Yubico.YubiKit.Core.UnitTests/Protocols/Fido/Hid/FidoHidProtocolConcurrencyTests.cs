@@ -103,6 +103,41 @@ public class FidoHidProtocolConcurrencyTests
         Assert.Equal(payloadB.ToArray(), responseB.ToArray());
     }
 
+    [Fact]
+    public async Task Configure_RacingFirstUseOperation_InitializesChannelExactlyOnce()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var fake = new FakeCtapHidDevice { Responder = (_, payload) => payload };
+        using var protocol = new FidoHidProtocol(fake);
+
+        var payloadA = CreatePayload(PayloadTagA, 4);
+
+        // Operation A enters the gate first and starts the lazy CTAPHID_INIT handshake.
+        fake.HoldSends();
+        var operationA = Task.Run(() => protocol.SendVendorCommandAsync(VendorCommandA, payloadA, ct), ct);
+        Assert.True(await fake.WaitForSendsAsync(1, ObservationWindow, ct));
+
+        // Configure() is sync-over-async; pre-fix it initialized the channel outside the gate and
+        // raced a second CTAPHID_INIT onto the wire mid-transaction.
+        var configure = Task.Run(() => protocol.Configure(new FirmwareVersion(5, 8, 0)), ct);
+
+        // Operation A is parked inside SendAsync with _channelId still unset, so pre-fix Configure
+        // unconditionally starts its own ungated INIT — its packet is recorded as a second held send
+        // within milliseconds. Post-fix Configure blocks on the gate and nothing reaches the wire.
+        var secondInitObserved = await fake.WaitForSendsAsync(2, TimeSpan.FromSeconds(1), ct);
+        Assert.False(
+            secondInitObserved,
+            "Configure raced a second ungated CTAPHID_INIT onto the wire while a first-use operation held the gate mid-INIT.");
+
+        fake.ReleaseSends();
+        var responseA = await operationA.WaitAsync(CompletionBound, ct);
+        await configure.WaitAsync(CompletionBound, ct);
+
+        Assert.Equal(1, fake.InitExchangeCount);
+        Assert.True(protocol.IsChannelInitialized);
+        Assert.Equal(payloadA.ToArray(), responseA.ToArray());
+    }
+
     private static ReadOnlyMemory<byte> CreatePayload(byte tag, int length)
     {
         var payload = new byte[length];

@@ -40,11 +40,17 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
 
     public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
     {
-        // Initialize CTAP HID channel if not already done
-        if (!IsChannelInitialized)
-        {
-            AcquireCtapHidChannelAsync(CancellationToken.None).GetAwaiter().GetResult();
-        }
+        // Channel initialization transmits, so it must hold the gate like any exchange.
+        _exchangeGate.RunExclusiveAsync(
+                async exchangeToken =>
+                {
+                    await EnsureChannelInitializedAsync(exchangeToken).ConfigureAwait(false);
+                    return true;
+                },
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
         _logger.LogDebug("HID protocol configured for firmware version {Version}", version);
     }
 

@@ -56,7 +56,17 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
 
     public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
     {
-        EnsureInitializedAsync(CancellationToken.None).GetAwaiter().GetResult();
+        // Initialization touches the wire, so it must hold the gate like any exchange.
+        _exchangeGate.RunExclusiveAsync(
+                async exchangeToken =>
+                {
+                    await EnsureInitializedAsync(exchangeToken).ConfigureAwait(false);
+                    return true;
+                },
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
         _logger.LogDebug("OTP protocol configured, firmware version: {Version}", _firmwareVersion);
     }
 

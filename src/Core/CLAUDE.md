@@ -363,6 +363,15 @@ if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_7_2))
 }
 ```
 
+## Concurrency Model
+
+Behavior added by the discovery/session concurrency hardening (see `AsyncExchangeGate`, `DeviceConnectionRegistry`):
+
+- **Protocols serialize logical exchanges.** `PcscProtocol` (+ SCP wrapper), `FidoHidProtocol`, and `OtpHidProtocol` each run full logical exchanges (chained APDUs, multi-packet CTAP transactions, multi-report OTP frames, lazy initialization) through an internal `AsyncExchangeGate`. Concurrent calls on one session/protocol are **safe but sequential** — no throughput gain, no interleaving corruption.
+- **Cancellation gates entry only.** A `CancellationToken` passed to a protocol method cancels the *wait for a turn*; an exchange already in flight always runs to completion (aborting mid-exchange would strand device state for the next caller).
+- **Discovery skips in-use devices.** `DeviceConnectionRegistry` refcounts open connections per interface `DeviceId`. Discovery identity/metadata readers skip devices with live connections (conservative no-merge/cached info, same degradation as exclusive-mode path) instead of opening a second handle and clobbering the selected applet. In-process only — cross-process contention is not covered.
+- **Discovery reads are time-bounded.** Identity reads: 2s/attempt; composite metadata: 3s budget. Hung native calls are abandoned (not aborted); the scan proceeds with unknown/cached info and retries next scan.
+
 ## Known Gotchas
 
 1. **APDU Size Limits**: YubiKey Neo uses 254-byte max; YubiKey 4+ uses extended APDUs up to 2048 bytes
@@ -371,7 +380,7 @@ if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_7_2))
 4. **TLV Disposal**: `TlvBuilder` and `DisposableTlvList` must be disposed
 5. **Platform-Specific Behavior**: PC/SC APIs behave differently across platforms; test on all three
 6. **Chained Response Assembly**: `INS_SEND_REMAINING` (0xC0) is used by default; some apps use custom values
-7. **Connection Sharing**: Don't share connections across threads without synchronization
+7. **Connection Sharing**: Protocols serialize their own exchanges (see Concurrency Model), but raw `IConnection.TransmitAsync` calls bypass that gate — don't drive a shared connection directly from multiple threads
 
 ## Related Modules
 

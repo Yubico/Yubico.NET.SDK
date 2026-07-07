@@ -9,6 +9,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 
@@ -17,10 +18,18 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 /// Supports CTAP HID framing, channel management, and YubiKey Management vendor commands.
 /// Based on FIDO CTAP HID Protocol Specification.
 /// </summary>
+/// <remarks>
+///     Concurrency: CTAP HID permits one transaction at a time per channel — a request is an init
+///     packet plus continuation packets, and a foreign init packet mid-transaction aborts it on the
+///     device. This class serializes full logical exchanges (including lazy channel initialization)
+///     through an internal gate: concurrent calls are safe but execute sequentially. Cancellation
+///     tokens cancel only the wait for a turn; an exchange in flight runs to completion.
+/// </remarks>
 internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidProtocol>? logger = null)
     : IFidoHidProtocol
 {
     private readonly IFidoHidConnection _connection = connection ?? throw new ArgumentNullException(nameof(connection));
+    private readonly AsyncExchangeGate _exchangeGate = new();
     private readonly ILogger<FidoHidProtocol> _logger = logger ?? NullLogger<FidoHidProtocol>.Instance;
     private uint? _channelId;
     private FirmwareVersion? _firmwareVersion;
@@ -34,7 +43,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         // Initialize CTAP HID channel if not already done
         if (!IsChannelInitialized)
         {
-            AcquireCtapHidChannel();
+            AcquireCtapHidChannelAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         _logger.LogDebug("HID protocol configured for firmware version {Version}", version);
     }
@@ -46,21 +55,20 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        // Auto-initialize channel if not already done
-        if (!IsChannelInitialized)
-        {
-            _logger.LogDebug("Auto-initializing HID channel for SendVendorCommandAsync");
-            AcquireCtapHidChannel();
-        }
-
         _logger.LogTrace("Sending CTAP vendor command 0x{Command:X2} with {Length} bytes",
             command, data.Length);
 
-        // Send vendor command directly via CTAP HID
-        var response = await TransmitCommand(
-                _channelId!.Value,
-                command,
-                data,
+        var response = await _exchangeGate.RunExclusiveAsync(
+                async exchangeToken =>
+                {
+                    await EnsureChannelInitializedAsync(exchangeToken).ConfigureAwait(false);
+                    return await TransmitCommand(
+                            _channelId!.Value,
+                            command,
+                            data,
+                            exchangeToken)
+                        .ConfigureAwait(false);
+                },
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -74,13 +82,6 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        // Auto-initialize channel if not already done
-        if (!IsChannelInitialized)
-        {
-            _logger.LogDebug("Auto-initializing HID channel for TransmitAndReceiveAsync");
-            AcquireCtapHidChannel();
-        }
-
         _logger.LogTrace("Transmitting APDU over HID: {Command}", command);
 
         // For Management application, use CTAPHID_MSG (0x03) to send raw APDUs
@@ -88,10 +89,17 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         var apduBytes = SerializeApdu(command);
 
         // Send via CTAP HID MSG command
-        var response = await TransmitCommand(
-                _channelId!.Value,
-                CtapConstants.CtapHidMsg,
-                apduBytes,
+        var response = await _exchangeGate.RunExclusiveAsync(
+                async exchangeToken =>
+                {
+                    await EnsureChannelInitializedAsync(exchangeToken).ConfigureAwait(false);
+                    return await TransmitCommand(
+                            _channelId!.Value,
+                            CtapConstants.CtapHidMsg,
+                            apduBytes,
+                            exchangeToken)
+                        .ConfigureAwait(false);
+                },
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -113,12 +121,15 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        // Auto-initialize channel if not already done
-        if (!IsChannelInitialized)
-        {
-            _logger.LogDebug("Auto-initializing HID channel for SelectAsync");
-            AcquireCtapHidChannel();
-        }
+        // The lazy channel initialization transmits, so it runs under the gate like any exchange.
+        await _exchangeGate.RunExclusiveAsync(
+                async exchangeToken =>
+                {
+                    await EnsureChannelInitializedAsync(exchangeToken).ConfigureAwait(false);
+                    return true;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
 
         _logger.LogTrace("HID SelectAsync called for application ID, returning version string");
 
@@ -127,13 +138,27 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         var version = _firmwareVersion ?? new FirmwareVersion(5, 0, 0);
         var versionString = System.Text.Encoding.UTF8.GetBytes(
             $"YubiKey {version.Major}.{version.Minor}.{version.Patch}");
-        return await Task.FromResult<ReadOnlyMemory<byte>>(versionString).ConfigureAwait(false);
+        return versionString;
+    }
+
+    /// <summary>
+    /// Initializes the CTAP HID channel if not already done. Must be called from within the
+    /// exchange gate (or single-threaded initialization) — the INIT handshake is itself an
+    /// exchange that must not interleave with other traffic.
+    /// </summary>
+    private async Task EnsureChannelInitializedAsync(CancellationToken cancellationToken)
+    {
+        if (IsChannelInitialized)
+            return;
+
+        _logger.LogDebug("Auto-initializing HID channel");
+        await AcquireCtapHidChannelAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
     /// Acquires a CTAP HID channel by sending CTAPHID_INIT to the broadcast channel.
     /// </summary>
-    private void AcquireCtapHidChannel()
+    private async Task AcquireCtapHidChannelAsync(CancellationToken cancellationToken)
     {
         _logger.LogDebug("Acquiring CTAP HID channel");
 
@@ -142,13 +167,12 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         RandomNumberGenerator.Fill(nonce);
 
         // Send CTAPHID_INIT to broadcast channel
-        var response = TransmitCommand(
+        var response = await TransmitCommand(
                 CtapConstants.BroadcastChannelId,
                 CtapConstants.CtapHidInit,
                 nonce.AsMemory(),
-                CancellationToken.None)
-            .GetAwaiter()
-            .GetResult();
+                cancellationToken)
+            .ConfigureAwait(false);
 
         // Verify nonce echo
         if (response.Length < 17)  // nonce(8) + channelId(4) + version(1) + firmware(3) + capabilities(1)

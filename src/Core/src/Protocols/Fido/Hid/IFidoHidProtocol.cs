@@ -12,6 +12,13 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 /// Protocol interface for FIDO HID communication using CTAP HID framing.
 /// Supports both FIDO2/U2F operations (CTAPHID_MSG) and YubiKey Management vendor commands.
 /// </summary>
+/// <remarks>
+///     Implementations are safe for concurrent calls: full logical exchanges (multi-packet CTAP
+///     requests/responses, including lazy channel initialization) are serialized internally, so
+///     concurrent operations execute sequentially rather than interleaving packets on the wire.
+///     Cancellation tokens cancel only the wait for a turn — an exchange already in flight runs to
+///     completion to avoid stranding the device mid-transaction.
+/// </remarks>
 public interface IFidoHidProtocol : IProtocol
 {
     /// <summary>

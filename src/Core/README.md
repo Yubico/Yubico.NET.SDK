@@ -191,6 +191,11 @@ ISmartCardConnection
 ApduResponse
 ```
 
+### Concurrency
+
+- **Sessions/protocols are safe for concurrent calls, executed sequentially.** SmartCard (APDU/SCP), FIDO HID, and OTP HID protocols serialize full logical exchanges internally, so concurrent operations on one session never interleave packets on the wire. Cancellation tokens cancel only the wait for a turn — an exchange in flight runs to completion.
+- **Discovery never disturbs open sessions.** Device enumeration skips metadata reads on devices with a live in-process connection (reporting cached/unknown info instead), and all discovery reads are time-bounded so a busy device cannot stall scanning.
+
 ### Platform Support
 
 The Core module provides platform-specific implementations for:

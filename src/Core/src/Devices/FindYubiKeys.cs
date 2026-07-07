@@ -35,9 +35,10 @@ public class FindYubiKeys(
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<FindYubiKeys>();
 
-    // Hard timeout for a single best-effort metadata read over one transport. Bounded so a locked/slow CCID
-    // cannot stall discovery; reads run concurrently across keys so total added latency is ~one timeout.
-    private static readonly TimeSpan MetadataReadTimeout = TimeSpan.FromSeconds(3);
+    // Hard total wall-clock budget for one best-effort metadata read (shared across that device's
+    // transports). Bounded so a busy/locked CCID cannot stall discovery; reads run concurrently across
+    // keys so total added scan latency is at most ~one budget.
+    private static readonly TimeSpan MetadataReadBudget = TimeSpan.FromSeconds(3);
 
     // Serial-disambiguation identity cache (PID-count>1 / force-serial path), keyed by per-interface DeviceId.
     // Presence means the interface's identity was read; null value = read failed or serial-disabled.
@@ -193,7 +194,7 @@ public class FindYubiKeys(
             }
 
             var info = await CompositeMetadataReader
-                .TryReadAsync(composite, MetadataReadTimeout, Logger, cancellationToken)
+                .TryReadAsync(composite, MetadataReadBudget, Logger, cancellationToken)
                 .ConfigureAwait(false);
 
             if (info is not null)

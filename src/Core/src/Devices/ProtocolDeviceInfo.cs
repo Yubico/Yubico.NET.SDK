@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
@@ -32,6 +33,91 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </remarks>
 internal static class ProtocolDeviceInfo
 {
+    /// <summary>
+    ///     Opens a short-lived connection over the given interface and reads <see cref="DeviceInfo" />,
+    ///     bounded by a hard wall-clock budget.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         The budget bounds the caller's <em>wait</em>, not the work: an in-flight native call (e.g.
+    ///         <c>SCardTransmit</c> against a card busy with a long applet operation such as RSA key
+    ///         generation) cannot observe cancellation. On budget exhaustion the read is therefore
+    ///         <em>abandoned, not aborted</em> — this method throws <see cref="TimeoutException" /> so the
+    ///         scan can proceed, while the abandoned task keeps running in the background and disposes its
+    ///         protocol/connection through the normal <see cref="ReadAsync" /> control flow when the native
+    ///         call eventually returns.
+    ///     </para>
+    ///     <para>
+    ///         External cancellation via <paramref name="cancellationToken" /> likewise abandons the
+    ///         in-flight read (propagating <see cref="OperationCanceledException" />).
+    ///     </para>
+    /// </remarks>
+    /// <exception cref="TimeoutException">The budget elapsed before the read completed.</exception>
+    public static async Task<DeviceInfo> ReadBoundedAsync(
+        IYubiKey device,
+        ConnectionType connection,
+        TimeSpan budget,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        var readTask = ConnectAndReadAsync(device, connection, cancellationToken);
+        try
+        {
+            return await readTask.WaitAsync(budget, cancellationToken).ConfigureAwait(false);
+        }
+        catch (TimeoutException)
+        {
+            ObserveAbandoned(readTask, device.DeviceId, connection, logger);
+            throw;
+        }
+        catch (OperationCanceledException)
+        {
+            ObserveAbandoned(readTask, device.DeviceId, connection, logger);
+            throw;
+        }
+    }
+
+    private static async Task<DeviceInfo> ConnectAndReadAsync(
+        IYubiKey device,
+        ConnectionType connection,
+        CancellationToken cancellationToken)
+    {
+        var conn = await ConnectAsync(device, connection, cancellationToken).ConfigureAwait(false);
+        return await ReadAsync(conn, cancellationToken).ConfigureAwait(false);
+    }
+
+    private static Task<IConnection> ConnectAsync(
+        IYubiKey device,
+        ConnectionType connection,
+        CancellationToken cancellationToken) => connection switch
+        {
+            ConnectionType.SmartCard => Upcast(device.ConnectAsync<ISmartCardConnection>(cancellationToken)),
+            ConnectionType.HidFido => Upcast(device.ConnectAsync<IFidoHidConnection>(cancellationToken)),
+            ConnectionType.HidOtp => Upcast(device.ConnectAsync<IOtpHidConnection>(cancellationToken)),
+            _ => throw new NotSupportedException($"Cannot open connection {connection} for device info read.")
+        };
+
+    private static async Task<IConnection> Upcast<TConnection>(Task<TConnection> task)
+        where TConnection : class, IConnection => await task.ConfigureAwait(false);
+
+    // Attaches a fire-and-forget continuation so an abandoned read's eventual outcome is observed (no
+    // unobserved task exceptions) and visible in debug logs. Safe to attach to already-completed tasks.
+    private static void ObserveAbandoned(
+        Task<DeviceInfo> task,
+        string deviceId,
+        ConnectionType connection,
+        ILogger logger) =>
+        _ = task.ContinueWith(
+            t => logger.LogDebug(
+                t.Exception?.GetBaseException(),
+                "Abandoned discovery device-info read for {DeviceId} over {Connection} finished in the background (status: {Status}).",
+                deviceId,
+                connection,
+                t.Status),
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
+
     public static async Task<DeviceInfo> ReadAsync(IConnection connection, CancellationToken cancellationToken)
     {
         switch (connection)

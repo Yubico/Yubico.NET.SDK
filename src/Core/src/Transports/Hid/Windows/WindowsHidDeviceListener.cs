@@ -70,7 +70,13 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
                 // Keep callback delegate alive for the duration of the listener
                 _callbackDelegate = NotificationCallback;
 
-                // Keep a weak reference so native callbacks can recover the listener without self-rooting it.
+                // Deliberately Weak, not Normal: a strong handle would self-root the listener,
+                // making the finalizer unreachable while registered — an owner that drops the
+                // listener without Dispose() would leak the native registration forever and keep
+                // pumping events into an abandoned object graph. The Weak handle keeps the
+                // finalizer reachable so it can unregister (draining in-flight callbacks) and
+                // free this handle. During normal operation the owner strongly roots the
+                // listener, so callbacks never observe a collected target.
                 _marshalableThisPtr = GCHandle.Alloc(this, GCHandleType.Weak);
 
                 // Build the notification filter for HID device interfaces
@@ -153,6 +159,9 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
         var handle = GCHandle.FromIntPtr(context);
         if (!handle.IsAllocated || handle.Target is not WindowsHidDeviceListener listener)
         {
+            // Weak handle target collected (listener dropped without Dispose); the finalizer
+            // will unregister the native notification. Drop the hint until then.
+            Logger.LogDebug("HID notification received for a collected listener; ignoring");
             return 0;
         }
 
@@ -223,7 +232,9 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
         }
     }
 
-    private static string? ReadSymbolicLink(IntPtr eventData, int eventDataSize)
+    // Internal for unit testing: pure memory parsing with no P/Invoke, so the
+    // bounds behavior is verifiable on any platform.
+    internal static string? ReadSymbolicLink(IntPtr eventData, int eventDataSize)
     {
         if (eventData == IntPtr.Zero)
         {
@@ -239,8 +250,13 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
         }
 
         // The symbolic link (device path) starts at offset 24 in CM_NOTIFY_EVENT_DATA.
+        // Windows NUL-terminates the string within eventDataSize, but never trust native
+        // sizes blindly: bound the read to the event payload and trim at the first NUL.
         var symbolicLinkPtr = IntPtr.Add(eventData, SymbolicLinkOffset);
-        var devicePath = Marshal.PtrToStringUni(symbolicLinkPtr);
+        var maxChars = (eventDataSize - SymbolicLinkOffset) / sizeof(char);
+        var buffer = Marshal.PtrToStringUni(symbolicLinkPtr, maxChars);
+        var nulIndex = buffer.IndexOf('\0');
+        var devicePath = nulIndex >= 0 ? buffer[..nulIndex] : buffer;
         return string.IsNullOrEmpty(devicePath) ? null : devicePath;
     }
 

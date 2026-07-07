@@ -46,6 +46,15 @@ internal static class DiscoveryIdentityReader
         ILogger logger,
         CancellationToken cancellationToken)
     {
+        if (DeviceConnectionRegistry.IsInterfaceInUse(device, connection))
+        {
+            logger.LogDebug(
+                "Discovery identity read for {DeviceId} over {Connection} skipped: interface has a live connection in this process; treating serial as unknown.",
+                device.DeviceId,
+                connection);
+            return null;
+        }
+
         for (var attempt = 1; ; attempt++)
         {
             try
@@ -57,6 +66,16 @@ internal static class DiscoveryIdentityReader
             catch (OperationCanceledException)
             {
                 throw;
+            }
+            catch (DiscoveryReadSkippedException)
+            {
+                // A session opened the interface while the read was starting (TOCTOU window behind the
+                // pre-connect check above). Same degradation as the pre-connect skip; retrying is pointless.
+                logger.LogDebug(
+                    "Discovery identity read for {DeviceId} over {Connection} aborted: interface gained a live connection; treating serial as unknown.",
+                    device.DeviceId,
+                    connection);
+                return null;
             }
             catch (TimeoutException)
             {

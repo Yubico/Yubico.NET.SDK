@@ -82,7 +82,22 @@ internal static class ProtocolDeviceInfo
         ConnectionType connection,
         CancellationToken cancellationToken)
     {
+        var interfaceId = DeviceConnectionRegistry.ResolveInterfaceId(device, connection);
         var conn = await ConnectAsync(device, connection, cancellationToken).ConfigureAwait(false);
+
+        // TOCTOU guard: the caller's pre-connect skip check races with sessions opening concurrently.
+        // Our own connect registered exactly one holder for this interface; any additional holder means a
+        // session opened in the window. Abort BEFORE transmitting anything — our SELECT would deselect the
+        // session's applet. (A session whose handshake starts after our SELECT is unharmed: its own applet
+        // SELECT re-establishes state. The remaining sliver — a session's first SELECT interleaving between
+        // this check and our SELECT — degrades to a visible session-creation failure, not silent state
+        // corruption of an established session.)
+        if (DeviceConnectionRegistry.IsInUseByOther(interfaceId))
+        {
+            await conn.DisposeAsync().ConfigureAwait(false);
+            throw new DiscoveryReadSkippedException(interfaceId);
+        }
+
         return await ReadAsync(conn, cancellationToken).ConfigureAwait(false);
     }
 

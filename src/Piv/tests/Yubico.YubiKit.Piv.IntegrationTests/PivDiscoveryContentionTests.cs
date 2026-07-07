@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Diagnostics;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -39,6 +40,8 @@ public class PivDiscoveryContentionTests
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     ];
+
+    private static readonly byte[] DefaultPin = "123456"u8.ToArray();
 
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
@@ -97,5 +100,40 @@ public class PivDiscoveryContentionTests
         Assert.True(scanElapsed < TimeSpan.FromSeconds(4),
             $"Discovery scan stalled for {scanElapsed} behind the in-flight RSA-4096 keygen; " +
             "best-effort discovery reads must be time-bounded.");
+    }
+
+    /// <summary>
+    ///     Bug B: a cold-cache discovery scan's best-effort metadata read opens a SECOND shared-mode CCID
+    ///     handle to the card and issues SELECT Management on it. PC/SC shared handles share the card's
+    ///     basic logical channel, so that SELECT deselects the PIV applet and destroys the open session's
+    ///     security state (verified PIN). Enumerating devices must not break an already-open, authenticated
+    ///     applet session: a PIN-gated sign that succeeded before the scan must still succeed after it.
+    /// </summary>
+    [Theory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+    public async Task FindAllAsync_WhilePivSessionHasVerifiedPin_DoesNotClobberSessionState(
+        YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreatePivSessionAsync();
+        await session.ResetAsync();
+        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+        _ = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256, PivPinPolicy.Once);
+        await session.VerifyPinAsync(DefaultPin);
+
+        var digest = SHA256.HashData("discovery contention"u8);
+
+        // Baseline: the PIN-gated sign works on the open session.
+        var before = await session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest);
+        Assert.NotEqual(0, before.Length);
+
+        // Fresh FindYubiKeys instance = cold caches, exactly what a first enumeration or
+        // post-replug rescan does. Its metadata read SELECTs Management on a second handle.
+        var devices = await FindYubiKeys.Create().FindAllAsync(ConnectionType.All);
+        Assert.NotEmpty(devices);
+
+        // The already-open session must be unaffected by passive enumeration. Pre-fix this throws:
+        // the PIV applet was deselected (SW 6D00/6E00) or its PIN state reset (SW 6982).
+        var after = await session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest);
+        Assert.NotEqual(0, after.Length);
     }
 }

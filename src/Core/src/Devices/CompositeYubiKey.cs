@@ -59,6 +59,9 @@ internal sealed class CompositeYubiKey : IYubiKey
     /// <summary>Sorted member interface DeviceIds — a stable key for the physical interface set across rescans.</summary>
     internal IReadOnlyList<string> MemberDeviceIds { get; }
 
+    /// <summary>The per-interface member devices this composite routes connects to.</summary>
+    internal IReadOnlyList<IYubiKey> Members => _members;
+
     /// <summary>
     ///     Read-only device metadata read during discovery (used internally; not part of the public contract
     ///     yet). May be populated after construction by the best-effort metadata pass.

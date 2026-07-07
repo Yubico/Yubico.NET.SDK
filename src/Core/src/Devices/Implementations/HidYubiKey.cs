@@ -49,14 +49,17 @@ internal class HidYubiKey(
         if (typeof(TConnection) == typeof(IFidoHidConnection))
         {
             var connection = CreateFidoConnection();
-            return Task.FromResult(connection as TConnection ??
+            // Count the live connection so discovery reads skip this interface (see DeviceConnectionRegistry).
+            var registered = new RegisteredFidoHidConnection(connection, DeviceConnectionRegistry.Register(DeviceId));
+            return Task.FromResult(registered as TConnection ??
                    throw new InvalidOperationException("Connection is not of the expected type."));
         }
 
         if (typeof(TConnection) == typeof(IOtpHidConnection))
         {
             var connection = CreateOtpConnection();
-            return Task.FromResult(connection as TConnection ??
+            var registered = new RegisteredOtpHidConnection(connection, DeviceConnectionRegistry.Register(DeviceId));
+            return Task.FromResult(registered as TConnection ??
                    throw new InvalidOperationException("Connection is not of the expected type."));
         }
 

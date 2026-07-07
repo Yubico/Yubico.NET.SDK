@@ -48,6 +48,18 @@ internal static class CompositeMetadataReader
             if (!device.SupportsConnection(connection))
                 continue;
 
+            if (DeviceConnectionRegistry.IsInterfaceInUse(device, connection))
+            {
+                // Never disturb an interface this process is using (a discovery SELECT on a second shared
+                // CCID handle would deselect the session's applet). Other interfaces of the same physical
+                // key are independent USB interfaces and remain safe to read.
+                logger.LogDebug(
+                    "Metadata read for {DeviceId} over {Connection} skipped: interface has a live connection in this process; trying next transport.",
+                    device.DeviceId,
+                    connection);
+                continue;
+            }
+
             var remaining = totalBudget - clock.Elapsed;
             if (remaining <= TimeSpan.Zero)
             {

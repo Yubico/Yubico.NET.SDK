@@ -51,7 +51,9 @@ internal class PcscYubiKey(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
 
         var connection = await CreateConnection(cancellationToken).ConfigureAwait(false);
-        return connection as TConnection ??
+        // Count the live connection so discovery reads skip this interface (see DeviceConnectionRegistry).
+        var registration = DeviceConnectionRegistry.Register(DeviceId);
+        return new RegisteredSmartCardConnection(connection, registration) as TConnection ??
                throw new InvalidOperationException("Connection is not of the expected type.");
     }
 

@@ -14,17 +14,21 @@
 
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 /// <summary>
 ///     Decorator that wraps an ISmartCardProtocol with SCP (Secure Channel Protocol) functionality.
-///     All APDU transmissions are encrypted and MACed through the SCP processor.
+///     All APDU transmissions are encrypted and MACed through the SCP processor. Safe for concurrent
+///     calls: exchanges are serialized on the SAME gate as the wrapped protocol (SCP MAC chaining makes
+///     interleaving doubly fatal — each MAC depends on the previous command's MAC).
 /// </summary>
 public class PcscProtocolScp : ISmartCardProtocol
 {
     private readonly ISmartCardProtocol _baseProtocol;
     private readonly DataEncryptor _dataEncryptor;
+    private readonly AsyncExchangeGate _exchangeGate;
     private readonly IApduProcessor _scpProcessor;
     private bool _disposed;
 
@@ -42,6 +46,11 @@ public class PcscProtocolScp : ISmartCardProtocol
         _baseProtocol = baseProtocol;
         _scpProcessor = scpProcessor;
         _dataEncryptor = dataEncryptor;
+
+        // The SCP processor chain bypasses the base protocol's public methods and drives the same
+        // connection directly, so exchanges MUST share the base protocol's gate — otherwise gated
+        // plain traffic and SCP traffic could interleave on the wire.
+        _exchangeGate = baseProtocol is PcscProtocol pcsc ? pcsc.ExchangeGate : new AsyncExchangeGate();
     }
 
     /// <summary>
@@ -57,7 +66,9 @@ public class PcscProtocolScp : ISmartCardProtocol
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        var response = await _scpProcessor.TransmitAsync(command, true, cancellationToken)
+        var response = await _exchangeGate.RunExclusiveAsync(
+                exchangeToken => _scpProcessor.TransmitAsync(command, true, exchangeToken),
+                cancellationToken)
             .ConfigureAwait(false);
 
         if (throwOnError && !response.IsOK())
@@ -79,7 +90,9 @@ public class PcscProtocolScp : ISmartCardProtocol
         const byte P2_SELECT = 0x00;
 
         var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };
-        var response = await _scpProcessor.TransmitAsync(selectCommand, false, cancellationToken)
+        var response = await _exchangeGate.RunExclusiveAsync(
+                exchangeToken => _scpProcessor.TransmitAsync(selectCommand, false, exchangeToken),
+                cancellationToken)
             .ConfigureAwait(false);
 
         return response.IsOK()

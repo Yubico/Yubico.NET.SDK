@@ -35,6 +35,10 @@ if (APPLE OR UNIX)
         set(BACKEND "pcsc")
         # RELRO + NOW = full read-only relocations (exploit mitigation)
         add_link_options("-Wl,-z,relro,-z,now,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/exports.gnu")
+        # 16 KB max page size: required for Android 15+ devices with 16 KB memory pages
+        # (and by Google Play). x86_64 links at 4 KB by default; arm64 already defaults to 64 KB.
+        # https://developer.android.com/guide/practices/page-sizes
+        add_link_options("-Wl,-z,max-page-size=16384")
     endif()
 
     # --- macOS / Linux: security hardening (GCC/Clang) ---

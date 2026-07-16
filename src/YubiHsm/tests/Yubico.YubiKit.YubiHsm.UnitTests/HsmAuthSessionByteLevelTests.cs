@@ -21,6 +21,17 @@ namespace Yubico.YubiKit.YubiHsm.UnitTests;
 public class HsmAuthSessionByteLevelTests
 {
     [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    {
+        var connection = new RecordingSmartCardConnection();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            HsmAuthSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(1, connection.DisposeCount);
+    }
+
+    [Fact]
     public async Task PutCredentialSymmetricAsync_TransmitsOrderedCredentialTlvs()
     {
         var connection = CreateInitializedConnection(OkResponse());

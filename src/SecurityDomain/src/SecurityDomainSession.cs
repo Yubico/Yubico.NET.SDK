@@ -93,7 +93,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         ISmartCardConnection connection,
         ScpKeyParameters? scpKeyParams = null)
     {
-        _connection = connection;
+        _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         _logger = Logger;
         _scpKeyParams = scpKeyParams;
     }
@@ -123,9 +123,19 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         FirmwareVersion? firmwareVersion = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         var session = new SecurityDomainSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, firmwareVersion, cancellationToken).ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, firmwareVersion, cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     /// <summary>
@@ -142,8 +152,9 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         if (IsInitialized)
             return;
 
-        var protocol = YubiKeyProtocol.Create(_connection);
-        var backend = CreateBackend(protocol.Protocol);
+        var protocol = ProtocolFactory.Create(_connection);
+        Protocol = protocol;
+        ISecurityDomainBackend backend = new SecurityDomainBackend(protocol);
         await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         // Security Domain is available on firmware 5.3.0 and newer.
@@ -151,7 +162,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         _hasExplicitFirmwareVersion = firmwareVersion is not null;
         var resolvedFirmwareVersion = firmwareVersion ?? FirmwareVersion.V5_3_0;
 
-        protocol = await InitializeCoreAsync(
+        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
                 protocol,
                 resolvedFirmwareVersion,
                 configuration,
@@ -159,8 +170,13 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _protocol = protocol.Protocol;
-        _backend = CreateBackend(_protocol);
+        if (!ReferenceEquals(protocol, effectiveProtocol))
+        {
+            backend = new SecurityDomainBackend(effectiveProtocol);
+        }
+
+        _protocol = effectiveProtocol;
+        _backend = backend;
     }
 
     /// <summary>
@@ -836,9 +852,6 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
         return response.Data;
     }
-
-    private static ISecurityDomainBackend CreateBackend(ISmartCardProtocol protocol) =>
-        new SecurityDomainBackend(protocol);
 
     private bool TryGetResetParameters(KeyReference keyReference, out byte instruction,
         out KeyReference overrideKeyReference)

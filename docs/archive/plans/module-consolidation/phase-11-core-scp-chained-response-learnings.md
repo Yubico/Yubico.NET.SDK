@@ -57,7 +57,7 @@ Use this note as the handoff record for Phase 11 of module consolidation.
 - SecurityDomain SCP integration result: 1 passed, 0 failed; serial `103`; final post-Feature-gate test time `2.5369` seconds.
 - After-fix integration command: `dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --smoke --filter "FullyQualifiedName~OathSession_Create_ReadsSelectMetadataWithoutReset"`
 - After-fix integration result: 1 passed, 0 failed; serial `103`; final post-format test time `0.9283` seconds.
-- Touched-file format command: `dotnet format --verify-no-changes --include src/Core/src/SmartCard/ChainedResponseReceiver.cs src/Core/src/SmartCard/PcscProtocol.cs src/Core/src/SmartCard/Scp/ScpExtensions.cs src/Core/src/SmartCard/Scp/ScpInitializer.cs src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/PcscProtocolScpTests.cs src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/ScpExtensionsTests.cs src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathSessionTests.cs`
+- Touched-file format command: `dotnet format --verify-no-changes --include src/Core/src/SmartCard/ChainedResponseReceiver.cs src/Core/src/SmartCard/PcscProtocol.cs src/Core/src/SmartCard/Scp/PcscProtocolScpInitialization.cs src/Core/src/SmartCard/Scp/ScpInitializer.cs src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/PcscProtocolScpTests.cs src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/PcscProtocolScpInitializationTests.cs src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathSessionTests.cs`
 - Touched-file format result: passed; fresh post-Feature-gate result: passed.
 
 ## Tooling Notes

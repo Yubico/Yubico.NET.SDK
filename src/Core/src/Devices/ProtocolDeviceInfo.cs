@@ -17,9 +17,8 @@ using System.Collections.Concurrent;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Core.Transports.Hid;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Devices;
 
@@ -196,19 +195,31 @@ internal static class ProtocolDeviceInfo
 
     public static async Task<DeviceInfo> ReadAsync(IConnection connection, CancellationToken cancellationToken)
     {
-        var protocol = YubiKeyProtocol.Create(connection);
+        IProtocol protocol;
         try
         {
-            if (protocol is YubiKeyProtocol.SmartCard smartCard)
+            protocol = ProtocolFactory.Create(connection);
+        }
+        catch
+        {
+            // Preserve the ownership contract: if we can't build a protocol to adopt the connection,
+            // dispose the connection here rather than leaking it.
+            await connection.DisposeAsync().ConfigureAwait(false);
+            throw;
+        }
+
+        try
+        {
+            if (protocol is ISmartCardProtocol smartCard)
             {
-                await smartCard.Protocol.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
+                await smartCard.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
             }
-            else if (protocol is YubiKeyProtocol.FidoHid fidoHid)
+            else if (protocol is IFidoHidProtocol fidoHid)
             {
-                await fidoHid.Protocol.InitializeAsync(cancellationToken).ConfigureAwait(false);
+                await fidoHid.InitializeAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            return await DeviceInfoReader.ReadAsync(protocol.Inner, null, cancellationToken).ConfigureAwait(false);
+            return await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
         }
         finally
         {

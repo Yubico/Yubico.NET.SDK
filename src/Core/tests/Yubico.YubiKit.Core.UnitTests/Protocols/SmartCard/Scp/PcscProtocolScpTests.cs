@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Reflection;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -32,15 +33,13 @@ public class PcscProtocolScpTests
     private readonly NullLogger<PcscProtocol> _logger = NullLogger<PcscProtocol>.Instance;
 
     [Fact]
-    public void Constructor_UnsupportedBaseProtocol_ThrowsArgumentException()
+    public void Constructors_AreNonPublicAndRequireConcretePcscProtocol()
     {
-        var unsupported = new UnsupportedSmartCardProtocol();
+        Assert.Empty(typeof(PcscProtocolScp).GetConstructors(BindingFlags.Instance | BindingFlags.Public));
 
-        var exception = Assert.Throws<ArgumentException>(() =>
-            new PcscProtocolScp(unsupported, _fakeScpProcessor, null!));
-
-        Assert.Equal("baseProtocol", exception.ParamName);
-        Assert.Contains(nameof(PcscProtocol), exception.Message, StringComparison.Ordinal);
+        var constructor = Assert.Single(
+            typeof(PcscProtocolScp).GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic));
+        Assert.Equal(typeof(PcscProtocol), constructor.GetParameters()[0].ParameterType);
     }
 
     [Fact]
@@ -339,27 +338,5 @@ public class PcscProtocolScpTests
             Task.FromResult(new ApduResponse(new byte[] { 0x90, 0x00 }));
 
         public void Dispose() => DisposeCount++;
-    }
-
-    private sealed class UnsupportedSmartCardProtocol : ISmartCardProtocol
-    {
-        public Task<ApduResponse> TransmitAndReceiveAsync(
-            ApduCommand command,
-            bool throwOnError = true,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(new ApduResponse(new byte[] { 0x90, 0x00 }));
-
-        public Task<ReadOnlyMemory<byte>> SelectAsync(
-            ReadOnlyMemory<byte> applicationId,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(ReadOnlyMemory<byte>.Empty);
-
-        public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
-        {
-        }
-
-        public void Dispose()
-        {
-        }
     }
 }

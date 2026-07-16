@@ -9,9 +9,9 @@ The YubiOTP module implements the Yubico OTP application for .NET. It is unique 
 **Key Files:**
 - [`YubiOtpSession.cs`](src/YubiOtpSession.cs) - Main session class with factory pattern
 - [`IYubiOtpSession.cs`](src/IYubiOtpSession.cs) - Public session interface
-- [`IYubiOtpBackend.cs`](src/IYubiOtpBackend.cs) - Internal backend abstraction (2 primitives)
-- [`SmartCardBackend.cs`](src/SmartCardBackend.cs) - APDU-based backend with prog_seq validation
-- [`OtpHidBackend.cs`](src/OtpHidBackend.cs) - Feature report backend with CRC validation
+- [`IYubiOtpBackend.cs`](src/Backend/IYubiOtpBackend.cs) - Internal backend abstraction (2 primitives)
+- [`SmartCardBackend.cs`](src/Backend/SmartCardBackend.cs) - APDU-based backend with prog_seq validation
+- [`HidBackend.cs`](src/Backend/HidBackend.cs) - Feature report backend with CRC validation
 - [`SlotConfiguration.cs`](src/SlotConfiguration.cs) - Abstract base for 52-byte config struct
 - [`IYubiKeyExtensions.cs`](src/IYubiKeyExtensions.cs) - C# 14 extension convenience methods
 - [`DependencyInjection.cs`](src/DependencyInjection.cs) - `AddYubiOtp()` DI registration
@@ -38,13 +38,13 @@ SmartCard path:
 1. SELECT `AID.MANAGEMENT` (for NEO version reliability)
 2. SELECT `AID.OTP` → store status bytes
 3. Extract firmware version (NEO workaround: use max of management/OTP versions)
-4. `InitializeCoreAsync` → configure protocol, optionally establish SCP
-5. If SCP: recreate backend with wrapped protocol
+4. `InitializeProtocolAsync` → configure protocol, optionally establish SCP
+5. Recreate the SmartCard backend with the effective protocol while carrying forward the SELECT programming sequence
 
 OTP HID path:
 1. `ReadStatusAsync()` → store status bytes
 2. Extract firmware version from protocol or status bytes
-3. `InitializeCoreAsync` → configure protocol
+3. `InitializeProtocolAsync` → configure protocol
 
 ## Slot Configuration Model
 

@@ -257,7 +257,7 @@ SELECT response. The true firmware version is only available via the Management 
 **Current workaround:** `Major == 0` sentinel in `ApplicationSession.IsSupported()` and
 `PcscProtocol.Configure()` treats the device as modern (5.x). This works for internal
 alpha/beta hardware but is not a production-quality solution.
-**Proper fix:** At `ApplicationSession.InitializeCoreAsync()`, if the applet-reported
+**Proper fix:** At `ApplicationSession.InitializeProtocolAsync()`, if the applet-reported
 version has `Major == 0`, open a short-lived ManagementSession to read the true firmware
 version. Cache it for the session lifetime. This requires careful design to avoid PCSC
 transaction conflicts with the caller's open session.

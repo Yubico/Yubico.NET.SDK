@@ -22,7 +22,7 @@ The YubiHSM Auth module implements the **YubiHSM Auth applet** for authenticatin
 
 **Key Files:**
 - [`HsmAuthSession.cs`](src/HsmAuthSession.cs) - Main session class (all APDU operations)
-- [`HsmAuthBackend.cs`](src/HsmAuthBackend.cs) - SmartCard select/send backend for the YubiHSM Auth applet
+- [`HsmAuthBackend.cs`](src/Backend/HsmAuthBackend.cs) - SmartCard select/send backend for the YubiHSM Auth applet
 - [`IHsmAuthSession.cs`](src/IHsmAuthSession.cs) - Public interface contract
 - [`SessionKeys.cs`](src/SessionKeys.cs) - Disposable session key container (S-ENC, S-MAC, S-RMAC)
 - [`HsmAuthAlgorithm.cs`](src/HsmAuthAlgorithm.cs) - Algorithm enum with C# 14 extension properties

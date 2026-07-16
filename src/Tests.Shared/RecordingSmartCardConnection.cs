@@ -34,6 +34,11 @@ public sealed class RecordingSmartCardConnection(params byte[][] responses) : IS
     /// </summary>
     public List<byte[]> TransmittedCommands { get; } = [];
 
+    /// <summary>
+    ///     Gets the number of times the connection was disposed.
+    /// </summary>
+    public int DisposeCount { get; private set; }
+
     public Transport Transport { get; } = Transport.Usb;
 
     public ConnectionType Type { get; } = ConnectionType.SmartCard;
@@ -59,9 +64,14 @@ public sealed class RecordingSmartCardConnection(params byte[][] responses) : IS
 
     public void Dispose()
     {
+        DisposeCount++;
     }
 
-    public ValueTask DisposeAsync() => default;
+    public ValueTask DisposeAsync()
+    {
+        DisposeCount++;
+        return default;
+    }
 
     private sealed class NullDisposable : IDisposable
     {

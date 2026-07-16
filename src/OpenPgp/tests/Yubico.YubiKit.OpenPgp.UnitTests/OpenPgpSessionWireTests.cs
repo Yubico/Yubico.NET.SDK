@@ -21,6 +21,17 @@ namespace Yubico.YubiKit.OpenPgp.UnitTests;
 public sealed class OpenPgpSessionWireTests
 {
     [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    {
+        var connection = new RecordingSmartCardConnection();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            OpenPgpSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(1, connection.DisposeCount);
+    }
+
+    [Fact]
     public async Task CreateAsync_TransmitsSelectVersionAndApplicationRelatedData()
     {
         var connection = CreateInitializedConnection();

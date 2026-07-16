@@ -36,9 +36,10 @@ public sealed class OathSession : ApplicationSession, IOathSession
     private static readonly Feature FeatureScp03 = new("SCP03 for OATH", 5, 6, 3);
 
     private readonly ILogger _logger;
+    private readonly ISmartCardConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
 
-    private YubiKeyProtocol.SmartCard _protocol = null!;
+    private ISmartCardProtocol _protocol = null!;
     private IOathBackend _backend = null!;
     private byte[] _salt = [];
     private byte[] _challenge = [];
@@ -56,12 +57,11 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ISmartCardConnection connection,
         ScpKeyParameters? scpKeyParams = null)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        _connection = connection;
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
-
-        _protocol = YubiKeyProtocol.Create(connection);
-        _backend = CreateBackend(_protocol);
-        Protocol = _protocol.Inner;
     }
 
     /// <summary>
@@ -73,16 +73,23 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         var session = new OathSession(connection, scpKeyParams);
-        await session.InitializeAsync(CreateOathProtocolConfiguration(configuration), cancellationToken).ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(CreateOathProtocolConfiguration(configuration), cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     private static ProtocolConfiguration CreateOathProtocolConfiguration(ProtocolConfiguration? configuration) =>
         (configuration ?? default) with { InsSendRemaining = OathConstants.InsSendRemaining };
-
-    private static IOathBackend CreateBackend(YubiKeyProtocol.SmartCard protocol) =>
-        new OathBackend(protocol.Protocol);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
@@ -91,7 +98,11 @@ public sealed class OathSession : ApplicationSession, IOathSession
         if (IsInitialized)
             return;
 
-        var initialization = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var protocol = ProtocolFactory.Create(_connection);
+        Protocol = protocol;
+        IOathBackend backend = new OathBackend(protocol);
+
+        var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
         ApplyInitialization(initialization);
 
         if (_scpKeyParams is not null)
@@ -104,15 +115,21 @@ public sealed class OathSession : ApplicationSession, IOathSession
             }
         }
 
-        _protocol = await InitializeCoreAsync(
-                _protocol,
+        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+                protocol,
                 FirmwareVersion,
                 configuration,
                 _scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _backend = CreateBackend(_protocol);
+        if (!ReferenceEquals(protocol, effectiveProtocol))
+        {
+            backend = new OathBackend(effectiveProtocol);
+        }
+
+        _protocol = effectiveProtocol;
+        _backend = backend;
 
         _logger.LogDebug("OATH session initialized, DeviceId={DeviceId}, IsLocked={IsLocked}", DeviceId, IsLocked);
     }

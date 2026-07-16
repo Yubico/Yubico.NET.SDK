@@ -12,12 +12,65 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using NSubstitute;
+using System.Reflection;
 using System.Text;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.YubiOtp.Backend;
 
 namespace Yubico.YubiKit.YubiOtp.UnitTests;
 
 public class YubiOtpSessionTests
 {
+    [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    {
+        var connection = Substitute.For<IOtpHidConnection>();
+        connection.Type.Returns(ConnectionType.HidOtp);
+        connection.FeatureReportSize.Returns(8);
+        connection.SendAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new InvalidOperationException("session-init probe failure")));
+        connection.ReceiveAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<ReadOnlyMemory<byte>>(
+                new InvalidOperationException("session-init probe failure")));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            YubiOtpSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        connection.Received(1).Dispose();
+    }
+
+    [Fact]
+    public async Task CreateAsync_SmartCardBackendRebinding_PreservesProgrammingSequence()
+    {
+        var connection = Substitute.For<ISmartCardConnection>();
+        connection.Type.Returns(ConnectionType.SmartCard);
+        connection.Transport.Returns(Transport.Usb);
+        byte[] managementResponse = [.. "YubiKey 5.7.0"u8, 0x90, 0x00];
+        byte[] otpResponse = [5, 7, 0, 9, 0, 0, 0x90, 0x00];
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(
+                Task.FromResult((ReadOnlyMemory<byte>)managementResponse),
+                Task.FromResult((ReadOnlyMemory<byte>)otpResponse));
+
+        using var session = await YubiOtpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var backend = Assert.IsType<SmartCardBackend>(
+            typeof(YubiOtpSession)
+                .GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(session));
+        var programmingSequence = (byte)typeof(SmartCardBackend)
+            .GetField("_lastProgSeq", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(backend)!;
+
+        Assert.Equal(9, programmingSequence);
+    }
+
     public class NdefUriEncoding
     {
         [Fact]

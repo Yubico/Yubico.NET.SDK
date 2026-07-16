@@ -18,6 +18,33 @@ public class SecurityDomainSessionTests
     private const byte SW1Success = 0x90;
     private const byte SW2Success = 0x00;
 
+    [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    {
+        var connection = new RecordingSmartCardConnection();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            SecurityDomainSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(1, connection.DisposeCount);
+    }
+
+    [Fact]
+    public async Task CreateAsync_Success_RetainsProtocolUntilOneSessionDisposal()
+    {
+        var connection = CreateMockConnection();
+        var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        connection.DidNotReceive().Dispose();
+
+        session.Dispose();
+        session.Dispose();
+
+        connection.Received(1).Dispose();
+    }
+
     /// <summary>
     ///     Creates a mock connection that returns success for SELECT APDU.
     /// </summary>

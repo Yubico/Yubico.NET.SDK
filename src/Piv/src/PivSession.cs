@@ -128,8 +128,16 @@ public sealed class PivSession : ApplicationSession, IPivSession
         ArgumentNullException.ThrowIfNull(connection);
 
         var session = new PivSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     private async Task InitializeAsync(
@@ -139,8 +147,9 @@ public sealed class PivSession : ApplicationSession, IPivSession
         if (IsInitialized)
             return;
 
-        var protocol = YubiKeyProtocol.Create((ISmartCardConnection)_connection);
-        var backend = CreateBackend(protocol);
+        var protocol = ProtocolFactory.Create((ISmartCardConnection)_connection);
+        Protocol = protocol;
+        IPivBackend backend = new PivBackend(protocol);
 
         try
         {
@@ -152,7 +161,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
             Logger.LogDebug("PIV firmware version: {Version}", firmwareVersion);
 
             // Initialize base session
-            protocol = await InitializeCoreAsync(
+            var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
                     protocol,
                     firmwareVersion,
                     configuration,
@@ -160,7 +169,12 @@ public sealed class PivSession : ApplicationSession, IPivSession
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            _backend = CreateBackend(protocol);
+            if (!ReferenceEquals(protocol, effectiveProtocol))
+            {
+                backend = new PivBackend(effectiveProtocol);
+            }
+
+            _backend = backend;
 
             // Detect management key type from device metadata (firmware 5.3+)
             // This is critical for YubiKey 5.7+ which defaults to AES-192 instead of 3DES
@@ -189,7 +203,6 @@ public sealed class PivSession : ApplicationSession, IPivSession
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to initialize PIV session");
-            protocol.Dispose();
             throw;
         }
     }
@@ -690,7 +703,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
                 return;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 Logger.LogDebug(ex, "PIV: Failed to query slot metadata for touch policy, notifying conservatively");
             }
@@ -716,8 +729,5 @@ public sealed class PivSession : ApplicationSession, IPivSession
             throw new InvalidOperationException("PIV session is not initialized. Call InitializeAsync first.");
         }
     }
-
-    private static IPivBackend CreateBackend(YubiKeyProtocol.SmartCard protocol) =>
-        new PivBackend(protocol.Protocol);
 
 }

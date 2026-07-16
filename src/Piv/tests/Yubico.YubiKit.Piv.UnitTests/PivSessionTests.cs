@@ -26,6 +26,17 @@ namespace Yubico.YubiKit.Piv.UnitTests;
 public class PivSessionTests
 {
     [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    {
+        var connection = new RecordingSmartCardConnection();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(1, connection.DisposeCount);
+    }
+
+    [Fact]
     public async Task CreateAsync_WithValidConnection_ReturnsInitializedSession()
     {
         var mockConnection = Substitute.For<ISmartCardConnection>();

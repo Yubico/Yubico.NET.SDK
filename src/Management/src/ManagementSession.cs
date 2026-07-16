@@ -17,6 +17,8 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
@@ -36,10 +38,11 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         new("Device Reset", 5, 6, 0);
 
     private readonly ILogger _logger;
+    private readonly IConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
 
-    private YubiKeyProtocol _protocol;
-    private IManagementBackend _backend;
+    private IProtocol _protocol = null!;
+    private IManagementBackend _backend = null!;
 
     private FirmwareVersion? _version;
 
@@ -47,13 +50,11 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         IConnection connection,
         ScpKeyParameters? scpKeyParams = null)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        _connection = connection;
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
-
-        _protocol = YubiKeyProtocol.Create(connection);
-        _backend = CreateBackend(_protocol);
-
-        Protocol = _protocol.Inner;
     }
 
     public static async Task<ManagementSession> CreateAsync(
@@ -62,9 +63,19 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         var session = new ManagementSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     private async Task InitializeAsync(
@@ -74,27 +85,35 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         if (IsInitialized)
             return;
 
-        _version = await ResolveFirmwareVersionAsync(cancellationToken).ConfigureAwait(false);
+        var protocol = ProtocolFactory.Create(_connection);
+        Protocol = protocol;
+        var backend = CreateBackend(protocol);
+        _protocol = protocol;
+        _backend = backend;
 
-        _protocol = await InitializeCoreAsync(
-                _protocol,
+        _version = await ResolveFirmwareVersionAsync(backend, protocol, cancellationToken).ConfigureAwait(false);
+
+        var effectiveProtocol = await InitializeProtocolAsync(
+                protocol,
                 _version,
                 configuration,
                 _scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        if (IsAuthenticated)
+        if (!ReferenceEquals(protocol, effectiveProtocol))
         {
-            // Recreate backend with SCP-wrapped protocol
-            _backend = CreateBackend(_protocol);
+            backend = CreateBackend(effectiveProtocol);
         }
 
-        _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.Inner.GetType().Name);
+        _protocol = effectiveProtocol;
+        _backend = backend;
+
+        _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
     }
 
     public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default) =>
-        DeviceInfoReader.ReadAsync(_protocol.Inner, _version, cancellationToken);
+        DeviceInfoReader.ReadAsync(_protocol, _version, cancellationToken);
 
     public Task SetDeviceConfigAsync(
         DeviceConfig config,
@@ -139,15 +158,18 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         return _backend.DeviceResetAsync(cancellationToken).AsTask();
     }
 
-    private async Task<FirmwareVersion> ResolveFirmwareVersionAsync(CancellationToken cancellationToken)
+    private async Task<FirmwareVersion> ResolveFirmwareVersionAsync(
+        IManagementBackend backend,
+        IProtocol protocol,
+        CancellationToken cancellationToken)
     {
-        var probedVersion = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var probedVersion = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            var deviceInfo = await GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);
+            var deviceInfo = await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
             return deviceInfo.FirmwareVersion;
         }
-        catch (Exception e)
+        catch (Exception e) when (e is not OperationCanceledException)
         {
             _logger.LogDebug(e,
                 "Could not get version from DeviceInfo, fallback to versionHeader in Management.Select");
@@ -157,12 +179,12 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             ?? throw new InvalidOperationException("Could not determine firmware version from device");
     }
 
-    private static IManagementBackend CreateBackend(YubiKeyProtocol protocol) =>
+    private static IManagementBackend CreateBackend(IProtocol protocol) =>
         protocol switch
         {
-            YubiKeyProtocol.SmartCard sc => new SmartCardBackend(sc.Protocol),
-            YubiKeyProtocol.FidoHid fido => new FidoHidBackend(fido.Protocol),
-            YubiKeyProtocol.OtpHid otp => new OtpBackend(otp.Protocol),
+            ISmartCardProtocol smartCard => new SmartCardBackend(smartCard),
+            IFidoHidProtocol fidoHid => new FidoHidBackend(fidoHid),
+            IOtpHidProtocol otpHid => new OtpBackend(otpHid),
             _ => throw new NotSupportedException(
                 $"The protocol type {protocol.GetType().Name} is not supported by ManagementSession.")
         };

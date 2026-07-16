@@ -150,8 +150,8 @@ public class SmartCardManagementBenchmarks : YubiKeyHardwareBenchmarkBase
     public async Task<int> SelectManagementOverSmartCard()
     {
         var connection = await Device.ConnectAsync<ISmartCardConnection>().ConfigureAwait(false);
-        using var protocol = YubiKeyProtocol.Create(connection);
-        var response = await protocol.Protocol.SelectAsync(ApplicationIds.Management).ConfigureAwait(false);
+        using var protocol = ProtocolFactory.Create(connection);
+        var response = await protocol.SelectAsync(ApplicationIds.Management).ConfigureAwait(false);
         return response.Length;
     }
 

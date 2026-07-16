@@ -18,6 +18,7 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
@@ -113,8 +114,16 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         ArgumentNullException.ThrowIfNull(connection);
 
         var session = new FidoSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     private async Task InitializeAsync(
@@ -124,12 +133,10 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         if (IsInitialized)
             return;
 
-        // Create backend based on connection type
-        var protocol = YubiKeyProtocol.Create(_connection);
+        var protocol = ProtocolFactory.Create(_connection);
+        Protocol = protocol;
         var backend = CreateBackend(protocol);
         await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
-
-        _backend = backend;
 
         // Get firmware version from authenticator info
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
@@ -141,7 +148,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         }
 
         // Initialize base class
-        protocol = await InitializeCoreAsync(
+        var effectiveProtocol = await InitializeProtocolAsync(
                 protocol,
                 firmwareVersion,
                 configuration,
@@ -149,11 +156,12 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
                 cancellationToken)
             .ConfigureAwait(false);
 
-        // If SCP was established, recreate backend with wrapped protocol
-        if (IsAuthenticated && protocol is YubiKeyProtocol.SmartCard smartCardProtocol)
+        if (!ReferenceEquals(protocol, effectiveProtocol))
         {
-            _backend = new SmartCardBackend(smartCardProtocol.Protocol);
+            backend = CreateBackend(effectiveProtocol);
         }
+
+        _backend = backend;
 
         _logger.LogDebug(
             "FIDO session initialized. Firmware: {Version}, Versions: [{Versions}]",
@@ -361,13 +369,13 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         }
     }
 
-    private static IFidoBackend CreateBackend(YubiKeyProtocol protocol) =>
+    private static IFidoBackend CreateBackend(IProtocol protocol) =>
         protocol switch
         {
-            YubiKeyProtocol.SmartCard smartCard => new SmartCardBackend(smartCard.Protocol),
-            YubiKeyProtocol.FidoHid fidoHid => new HidBackend(fidoHid.Protocol),
+            ISmartCardProtocol smartCard => new SmartCardBackend(smartCard),
+            IFidoHidProtocol fidoHid => new HidBackend(fidoHid),
             _ => throw new NotSupportedException(
-                $"Connection type {protocol.ConnectionType} is not supported. " +
+                $"Protocol type {protocol.GetType().Name} is not supported. " +
                 "Use ISmartCardConnection or IFidoHidConnection.")
         };
 

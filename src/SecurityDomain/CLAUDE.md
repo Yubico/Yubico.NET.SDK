@@ -16,7 +16,7 @@ The Security Domain module manages YubiKey's root security application, which co
 
 **Key Files:**
 - [`SecurityDomainSession.cs`](src/SecurityDomainSession.cs) - Public facade, lifecycle/state owner, and visible GlobalPlatform APDU flows
-- [`SecurityDomainBackend.cs`](src/SecurityDomainBackend.cs) - Applet-owned selected SmartCard backend for normal APDU sends
+- [`SecurityDomainBackend.cs`](src/Backend/SecurityDomainBackend.cs) - Applet-owned selected SmartCard backend for normal APDU sends
 - [`SecurityDomainKeyMaterial.cs`](src/SecurityDomainKeyMaterial.cs) - Pure SCP key component, KCV, and checksum helpers
 - [`SecurityDomainTlvEncoding.cs`](src/SecurityDomainTlvEncoding.cs) - Pure TLV encoding helpers for delete filters and related payloads
 - Test infrastructure in `tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/`
@@ -212,7 +212,7 @@ private async Task InitializeAsync(
     CancellationToken cancellationToken = default)
 {
     // 1. Create protocol (uses global YubiKit logging)
-    var smartCardProtocol = YubiKeyProtocol.Create(connection).Protocol;
+    var smartCardProtocol = ProtocolFactory.Create(connection);
     var backend = new SecurityDomainBackend(smartCardProtocol);
 
     // 2. Select SD application + configure protocol
@@ -220,7 +220,7 @@ private async Task InitializeAsync(
     await backend.SelectAsync(cancellationToken);
 
     // 3. Establish SCP if keys provided
-    await InitializeCoreAsync(smartCardProtocol, firmwareVersion, configuration, scpKeyParams, cancellationToken);
+    await InitializeProtocolAsync(smartCardProtocol, firmwareVersion, configuration, scpKeyParams, cancellationToken);
     var selectedProtocol = Protocol as ISmartCardProtocol;
     if (selectedProtocol is null)
         throw new InvalidOperationException();

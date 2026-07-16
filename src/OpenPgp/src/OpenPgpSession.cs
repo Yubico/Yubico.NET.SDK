@@ -77,7 +77,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
     private OpenPgpSession(ISmartCardConnection connection)
     {
-        _connection = connection;
+        _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         _logger = Logger;
     }
 
@@ -97,10 +97,20 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         var session = new OpenPgpSession(connection);
-        await session.InitializeAsync(configuration, scpKeyParams, cancellationToken)
-            .ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, scpKeyParams, cancellationToken)
+                .ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     // ── Initialization ────────────────────────────────────────────────
@@ -113,13 +123,14 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         if (IsInitialized)
             return;
 
-        var protocol = YubiKeyProtocol.Create(_connection);
-        var backend = CreateBackend(protocol);
+        var protocol = ProtocolFactory.Create(_connection);
+        Protocol = protocol;
+        IOpenPgpBackend backend = new OpenPgpBackend(protocol);
 
         var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
         var firmwareVersion = initialization.FirmwareVersion;
 
-        protocol = await InitializeCoreAsync(
+        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
                 protocol,
                 firmwareVersion,
                 configuration,
@@ -127,7 +138,12 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _backend = CreateBackend(protocol);
+        if (!ReferenceEquals(protocol, effectiveProtocol))
+        {
+            backend = new OpenPgpBackend(effectiveProtocol);
+        }
+
+        _backend = backend;
 
         // Cache ApplicationRelatedData for feature detection and KDF state
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
@@ -288,9 +304,6 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         if (_backend is null)
             throw new InvalidOperationException("Session is not initialized.");
     }
-
-    private static IOpenPgpBackend CreateBackend(YubiKeyProtocol.SmartCard protocol) =>
-        new OpenPgpBackend(protocol.Protocol);
 
     /// <summary>
     ///     Loads and caches the KDF configuration from the card.

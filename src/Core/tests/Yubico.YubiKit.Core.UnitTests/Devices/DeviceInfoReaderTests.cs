@@ -3,12 +3,38 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
 using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 public class DeviceInfoReaderTests
 {
+    [Fact]
+    public async Task ProtocolDeviceInfo_ReadAsync_Success_DisposesProtocolExactlyOnce()
+    {
+        var connection = new FakeSmartCardConnection();
+        connection.EnqueueResponse(new byte[] { 0x90, 0x00 });
+        byte[] response = [.. BuildPage(CreateRequiredDeviceInfoTlvs()), 0x90, 0x00];
+        connection.EnqueueResponse(response);
+
+        var info = await ProtocolDeviceInfo.ReadAsync(connection, TestContext.Current.CancellationToken);
+
+        Assert.Equal(0x01020304, info.SerialNumber);
+        Assert.Equal(1, connection.DisposeCount);
+    }
+
+    [Fact]
+    public async Task ProtocolDeviceInfo_ReadAsync_Failure_DisposesProtocolExactlyOnce()
+    {
+        var connection = new FakeSmartCardConnection();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            ProtocolDeviceInfo.ReadAsync(connection, TestContext.Current.CancellationToken));
+
+        Assert.Equal(1, connection.DisposeCount);
+    }
+
     [Fact]
     public async Task ReadAsync_SmartCardSinglePage_ParsesDeviceInfo()
     {

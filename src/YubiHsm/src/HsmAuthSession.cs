@@ -91,13 +91,15 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
     private readonly ISmartCardConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
-    private YubiKeyProtocol.SmartCard _protocol = null!;
+    private ISmartCardProtocol _protocol = null!;
     private IHsmAuthBackend _backend = null!;
 
     private HsmAuthSession(
         ISmartCardConnection connection,
         ScpKeyParameters? scpKeyParams = null)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         _connection = connection;
         _scpKeyParams = scpKeyParams;
     }
@@ -118,10 +120,20 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         FirmwareVersion? firmwareVersion = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         var session = new HsmAuthSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, firmwareVersion, cancellationToken)
-            .ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, firmwareVersion, cancellationToken)
+                .ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     private async Task InitializeAsync(
@@ -132,25 +144,29 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         if (IsInitialized)
             return;
 
-        _protocol = YubiKeyProtocol.Create(_connection);
-        _backend = CreateBackend(_protocol);
+        var protocol = ProtocolFactory.Create(_connection);
+        Protocol = protocol;
+        IHsmAuthBackend backend = new HsmAuthBackend(protocol);
 
-        var initializationFirmwareVersion = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var initializationFirmwareVersion = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
         var resolvedFirmwareVersion = firmwareVersion ?? initializationFirmwareVersion;
 
-        _protocol = await InitializeCoreAsync(
-                _protocol,
+        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+                protocol,
                 resolvedFirmwareVersion,
                 configuration,
                 _scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _backend = CreateBackend(_protocol);
-    }
+        if (!ReferenceEquals(protocol, effectiveProtocol))
+        {
+            backend = new HsmAuthBackend(effectiveProtocol);
+        }
 
-    private static IHsmAuthBackend CreateBackend(YubiKeyProtocol.SmartCard protocol) =>
-        new HsmAuthBackend(protocol.Protocol);
+        _protocol = effectiveProtocol;
+        _backend = backend;
+    }
 
     /// <summary>
     ///     Parses a credential password string into a 16-byte buffer.

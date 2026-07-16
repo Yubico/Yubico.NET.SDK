@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Globalization;
-using Yubico.YubiKit.Core.Transports.Hid;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 

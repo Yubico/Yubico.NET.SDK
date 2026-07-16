@@ -14,7 +14,6 @@
 
 using System.Buffers.Binary;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 

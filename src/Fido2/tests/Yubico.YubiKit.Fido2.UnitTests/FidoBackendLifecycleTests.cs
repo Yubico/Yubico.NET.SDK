@@ -1,7 +1,6 @@
 using NSubstitute;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Fido2.Backend;
 
 namespace Yubico.YubiKit.Fido2.UnitTests;

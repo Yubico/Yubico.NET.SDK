@@ -17,7 +17,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.OpenPgp.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;

@@ -15,7 +15,6 @@
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Tests.Shared;

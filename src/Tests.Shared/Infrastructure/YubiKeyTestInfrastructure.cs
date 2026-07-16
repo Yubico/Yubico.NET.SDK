@@ -14,7 +14,6 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Tests.Shared.Infrastructure;

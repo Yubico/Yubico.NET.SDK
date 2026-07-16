@@ -1,7 +1,6 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
-using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Security.Cryptography;

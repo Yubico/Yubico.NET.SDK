@@ -17,7 +17,6 @@ using System.Collections.Concurrent;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
-using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;

@@ -19,7 +19,6 @@ using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;
-using Yubico.YubiKit.Core.Transports.Hid;
 using CFNativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;
 using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.NativeMethods;
 

@@ -14,7 +14,6 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Transports.Hid;

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Collections.Concurrent;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.Hid.Linux;
 

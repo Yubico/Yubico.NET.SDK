@@ -17,10 +17,8 @@ namespace Yubico.YubiKit.Management.UnitTests;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Management.Backend;
 
 public class ManagementSessionTests

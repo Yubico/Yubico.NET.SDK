@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Xunit;
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;

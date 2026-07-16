@@ -17,7 +17,6 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;

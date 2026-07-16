@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Pin;
 
 using CredentialManagementClass = Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement;

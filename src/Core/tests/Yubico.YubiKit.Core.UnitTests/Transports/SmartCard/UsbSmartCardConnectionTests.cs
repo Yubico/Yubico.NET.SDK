@@ -1,4 +1,3 @@
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 

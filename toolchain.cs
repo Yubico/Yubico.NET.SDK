@@ -103,8 +103,6 @@
  * See TOOLCHAIN.md for full documentation.
  */
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using static Bullseye.Targets;

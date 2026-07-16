@@ -15,9 +15,7 @@
 using Microsoft.Extensions.Logging;
 using System.Buffers;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Piv.Backend;
 
 namespace Yubico.YubiKit.Piv.Bio;

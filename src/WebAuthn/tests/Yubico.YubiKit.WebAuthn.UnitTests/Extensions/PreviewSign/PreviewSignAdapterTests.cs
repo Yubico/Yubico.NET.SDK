@@ -14,7 +14,6 @@
 
 using System.Formats.Cbor;
 using System.Security.Cryptography;
-using Xunit;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;

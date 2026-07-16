@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using System.Buffers;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Piv.Backend;
 

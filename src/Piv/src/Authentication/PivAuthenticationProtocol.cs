@@ -13,13 +13,9 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using System;
 using System.Buffers;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Piv.Backend;
 

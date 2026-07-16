@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Buffers;
 using System.Formats.Cbor;
 using Yubico.YubiKit.Fido2.Pin;
 

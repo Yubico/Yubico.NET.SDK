@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 
-namespace Yubico.YubiKit.Management;
+namespace Yubico.YubiKit.Management.Backend;
 
 /// <summary>
 /// Backend implementation for Management operations over FIDO HID.
@@ -27,6 +28,14 @@ internal sealed class FidoHidBackend(IFidoHidProtocol hidProtocol) : IManagement
     // CTAP vendor command codes
     private const byte CtapYubikeyDeviceConfig = 0xC0;
     private const byte CtapWriteConfig = 0xC3;
+
+    public async ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken)
+    {
+        await _hidProtocol.InitializeAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return _hidProtocol.FirmwareVersion;
+    }
 
     public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
     {

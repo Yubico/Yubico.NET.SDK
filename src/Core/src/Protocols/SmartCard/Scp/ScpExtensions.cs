@@ -57,7 +57,7 @@ public static class ScpExtensions
             if (protocol is not PcscProtocol pcscProtocol)
                 throw new ArgumentException(
                     "SCP is only supported on PcscProtocol. " +
-                    "Ensure the protocol was created via PcscProtocolFactory.",
+                    "Ensure the protocol was created via YubiKeyProtocol.",
                     nameof(protocol));
 
 

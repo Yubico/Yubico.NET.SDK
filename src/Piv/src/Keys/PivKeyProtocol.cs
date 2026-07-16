@@ -22,6 +22,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Piv.Backend;
 
 namespace Yubico.YubiKit.Piv.Keys;
 
@@ -41,7 +42,7 @@ internal static class PivKeyProtocol
     /// <exception cref="InvalidOperationException">If session is not authenticated.</exception>
     /// <exception cref="NotSupportedException">If the algorithm is not supported on this firmware version.</exception>
     internal static async Task<IPublicKey> GenerateKeyAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         bool isAuthenticated,
         PivSlot slot,
@@ -102,7 +103,7 @@ internal static class PivKeyProtocol
             }
 
             var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, data);
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -130,7 +131,7 @@ internal static class PivKeyProtocol
     /// <exception cref="InvalidOperationException">If session is not authenticated.</exception>
     /// <exception cref="NotSupportedException">If the key type is not supported.</exception>
     internal static async Task<PivAlgorithm> ImportKeyAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         bool isAuthenticated,
         PivSlot slot,
@@ -190,7 +191,7 @@ internal static class PivKeyProtocol
 
             // Send IMPORT KEY command: INS 0xFE, P1 = algorithm, P2 = slot
             var command = new ApduCommand(0x00, 0xFE, (byte)algorithm, (byte)slot, keyData);
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -309,7 +310,7 @@ internal static class PivKeyProtocol
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <exception cref="NotSupportedException">If firmware version is less than 5.7.0.</exception>
     internal static async Task MoveKeyAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         bool isAuthenticated,
         PivSlot sourceSlot,
@@ -334,7 +335,7 @@ internal static class PivKeyProtocol
 
         // INS 0xF6, P1 = destination slot, P2 = source slot, NO DATA
         var command = new ApduCommand(0x00, 0xF6, (byte)destinationSlot, (byte)sourceSlot);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -347,7 +348,7 @@ internal static class PivKeyProtocol
     /// Deletes a key from the specified slot.
     /// </summary>
     internal static async Task DeleteKeyAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         bool isAuthenticated,
         PivSlot slot,
@@ -365,7 +366,7 @@ internal static class PivKeyProtocol
 
         // INS 0xF6, P1 = 0xFF (delete), P2 = slot to delete, NO DATA
         var command = new ApduCommand(0x00, 0xF6, 0xFF, (byte)slot);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {
@@ -378,7 +379,7 @@ internal static class PivKeyProtocol
     /// Generates an attestation certificate for a key in the specified slot.
     /// </summary>
     internal static async Task<X509Certificate2> AttestKeyAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         PivSlot slot,
         CancellationToken cancellationToken = default)
@@ -391,7 +392,7 @@ internal static class PivKeyProtocol
         // INS 0xF9 (ATTEST), P1 = slot, P2 = 0, NO DATA, no explicit Le
         // The formatter adds a trailing 00 byte for Case 1 commands (no data, no Le)
         var command = new ApduCommand(0x00, 0xF9, (byte)slot, 0x00);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {

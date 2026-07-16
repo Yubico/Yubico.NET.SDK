@@ -15,6 +15,7 @@
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
@@ -38,15 +39,36 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         Logger = YubiKitLogging.CreateLogger(GetType().FullName ?? GetType().Name);
     }
 
-    protected async Task InitializeCoreAsync(
-        IProtocol protocol,
+    protected async Task<TProtocol> InitializeCoreAsync<TProtocol>(
+        TProtocol protocol,
         FirmwareVersion firmwareVersion,
         ProtocolConfiguration? configuration = null,
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
+        where TProtocol : IProtocol
+    {
+        ArgumentNullException.ThrowIfNull(protocol);
+
+        var effectiveProtocol = await InitializeProtocolCoreAsync(
+                UnwrapProtocol(protocol),
+                firmwareVersion,
+                configuration,
+                scpKeyParams,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return RebindProtocol(protocol, effectiveProtocol);
+    }
+
+    private async Task<IProtocol> InitializeProtocolCoreAsync(
+        IProtocol protocol,
+        FirmwareVersion firmwareVersion,
+        ProtocolConfiguration? configuration,
+        ScpKeyParameters? scpKeyParams,
+        CancellationToken cancellationToken)
     {
         if (IsInitialized)
-            return;
+            return Protocol ?? protocol;
 
         ArgumentNullException.ThrowIfNull(protocol);
 
@@ -72,7 +94,18 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         FirmwareVersion = firmwareVersion;
         IsAuthenticated = isAuthenticated;
         IsInitialized = true;
+
+        return effectiveProtocol;
     }
+
+    private static IProtocol UnwrapProtocol(IProtocol protocol) =>
+        protocol is YubiKeyProtocol binding ? binding.Inner : protocol;
+
+    private static TProtocol RebindProtocol<TProtocol>(TProtocol protocol, IProtocol effectiveProtocol)
+        where TProtocol : IProtocol =>
+        protocol is YubiKeyProtocol binding
+            ? (TProtocol)(object)binding.Rebind(effectiveProtocol)
+            : (TProtocol)effectiveProtocol;
 
     public bool IsSupported(Feature feature) =>
         feature.IsSupportedByFirmware(FirmwareVersion);
@@ -117,6 +150,9 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 
     protected virtual ValueTask DisposeAsyncCore()
     {
+        if (_disposed)
+            return ValueTask.CompletedTask;
+
         Protocol?.Dispose();
         Protocol = null;
         return ValueTask.CompletedTask;

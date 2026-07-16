@@ -85,14 +85,15 @@ await using var otpConnection = await device.ConnectAsync<IOtpHidConnection>();
 
 ```csharp
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 // Create protocol from connection
-var protocol = PcscProtocolFactory<ISmartCardConnection>.Create().Create(smartCardConnection);
+using var protocol = YubiKeyProtocol.Create(smartCardConnection);
 
 // Select an application (e.g., PIV)
-await protocol.SelectAsync(ApplicationIds.Piv, cancellationToken);
+await protocol.Protocol.SelectAsync(ApplicationIds.Piv, cancellationToken);
 
 // Configure for firmware version
 protocol.Configure(firmwareVersion);
@@ -107,7 +108,7 @@ var command = new ApduCommand
     Data = applicationId
 };
 
-var responseData = await protocol.TransmitAndReceiveAsync(command, cancellationToken);
+var responseData = await protocol.Protocol.TransmitAndReceiveAsync(command, cancellationToken);
 ```
 
 ### Secure Channel Protocol (SCP)

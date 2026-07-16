@@ -17,6 +17,7 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Piv.Backend;
 
 namespace Yubico.YubiKit.Piv.DataObjects;
 
@@ -31,13 +32,13 @@ internal static class PivDataObjectProtocol
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The object data, or empty if the object doesn't exist.</returns>
     internal static async Task<ReadOnlyMemory<byte>> GetObjectAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         int objectId,
         CancellationToken cancellationToken = default)
     {
         // INS 0xCB (GET DATA)
         var command = new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, EncodeObjectId(objectId));
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (response.SW == 0x6A82) // File not found
         {
@@ -84,7 +85,7 @@ internal static class PivDataObjectProtocol
     /// <param name="data">The data to write, or null to delete the object.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     internal static async Task PutObjectAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         bool isAuthenticated,
         int objectId,
         ReadOnlyMemory<byte>? data,
@@ -123,7 +124,7 @@ internal static class PivDataObjectProtocol
 
         // INS 0xDB (PUT DATA)
         var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, writer.WrittenMemory);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {

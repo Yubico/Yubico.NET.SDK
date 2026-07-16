@@ -291,10 +291,10 @@ public class MyTests : IntegrationTestBase
 ```csharp
 // From connection
 using var connection = await connectionFactory.CreateAsync(reader, ct);
-var protocol = PcscProtocolFactory<ISmartCardConnection>.Create().Create(connection);
+using var protocol = YubiKeyProtocol.Create(connection);
 
 // Select application
-await protocol.SelectAsync(ApplicationIds.SecurityDomain, ct);
+await protocol.Protocol.SelectAsync(ApplicationIds.SecurityDomain, ct);
 
 // Configure for firmware
 protocol.Configure(firmwareVersion);

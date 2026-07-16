@@ -14,18 +14,17 @@
 
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
-using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.Fido.Hid;
-using Yubico.YubiKit.Core.Protocols.Otp.Hid;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Management.Backend;
 
 namespace Yubico.YubiKit.Management;
 
@@ -43,7 +42,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     private readonly ILogger _logger;
     private readonly ScpKeyParameters? _scpKeyParams;
 
-    private IProtocol _protocol;
+    private YubiKeyProtocol _protocol;
     private IManagementBackend _backend;
 
     private FirmwareVersion? _version;
@@ -55,17 +54,10 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
 
-        (_protocol, _backend) = connection switch
-        {
-            ISmartCardConnection sc => CreateSmartCardBackend(sc),
-            IFidoHidConnection fido => CreateFidoBackend(fido),
-            IOtpHidConnection otp => CreateOtpBackend(otp),
-            _ => throw new NotSupportedException(
-                $"The connection type {connection.GetType().Name} is not supported by ManagementSession. " +
-                $"Supported types: ISmartCardConnection, IFidoHidConnection, IOtpHidConnection.")
-        };
+        _protocol = YubiKeyProtocol.Create(connection);
+        _backend = CreateBackend(_protocol);
 
-        Protocol = _protocol;
+        Protocol = _protocol.Inner;
     }
 
     public static async Task<ManagementSession> CreateAsync(
@@ -86,9 +78,9 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         if (IsInitialized)
             return;
 
-        _version = await GetVersionAsync(cancellationToken).ConfigureAwait(false);
+        _version = await ResolveFirmwareVersionAsync(cancellationToken).ConfigureAwait(false);
 
-        await InitializeCoreAsync(
+        _protocol = await InitializeCoreAsync(
                 _protocol,
                 _version,
                 configuration,
@@ -96,20 +88,17 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _protocol = Protocol ?? throw new InvalidOperationException();
-
         if (IsAuthenticated)
         {
             // Recreate backend with SCP-wrapped protocol
-            _backend = new SmartCardBackend(
-                _protocol as ISmartCardProtocol ?? throw new InvalidOperationException());
+            _backend = CreateBackend(_protocol);
         }
 
-        _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
+        _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.Inner.GetType().Name);
     }
 
     public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default) =>
-        DeviceInfoReader.ReadAsync(_protocol, _version, cancellationToken);
+        DeviceInfoReader.ReadAsync(_protocol.Inner, _version, cancellationToken);
 
     public Task SetDeviceConfigAsync(
         DeviceConfig config,
@@ -154,9 +143,9 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         return _backend.DeviceResetAsync(cancellationToken).AsTask();
     }
 
-    private async Task<FirmwareVersion> GetVersionAsync(CancellationToken cancellationToken)
+    private async Task<FirmwareVersion> ResolveFirmwareVersionAsync(CancellationToken cancellationToken)
     {
-        var defaultVersion = await GetVersionFromManagementHeader(cancellationToken).ConfigureAwait(false);
+        var probedVersion = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
         try
         {
             var deviceInfo = await GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);
@@ -168,76 +157,18 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
                 "Could not get version from DeviceInfo, fallback to versionHeader in Management.Select");
         }
 
-        return defaultVersion
+        return probedVersion
             ?? throw new InvalidOperationException("Could not determine firmware version from device");
     }
 
-    private async Task<FirmwareVersion?> GetVersionFromManagementHeader(CancellationToken cancellationToken)
-    {
-        var versionBytes = await SelectAsync(cancellationToken).ConfigureAwait(false);
-
-        var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
-        var versionString = deviceText.Split(' ').Last();
-        var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
-
-        return versionParts.Length == 3
-            ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
-            : null;
-    }
-
-    private Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken)
-    {
-        return _protocol switch
+    private static IManagementBackend CreateBackend(YubiKeyProtocol protocol) =>
+        protocol switch
         {
-            ISmartCardProtocol sc => sc.SelectAsync(ApplicationIds.Management, cancellationToken),
-            IFidoHidProtocol fido => fido.SelectAsync(ApplicationIds.Management, cancellationToken),
-            IOtpHidProtocol otp => GetOtpVersionAsync(otp, cancellationToken),
-            _ => throw new NotSupportedException("No supported protocol available")
+            YubiKeyProtocol.SmartCard sc => new SmartCardBackend(sc.Protocol),
+            YubiKeyProtocol.FidoHid fido => new FidoHidBackend(fido.Protocol),
+            YubiKeyProtocol.OtpHid otp => new OtpBackend(otp.Protocol),
+            _ => throw new NotSupportedException(
+                $"The protocol type {protocol.GetType().Name} is not supported by ManagementSession.")
         };
-    }
-
-    private static async Task<ReadOnlyMemory<byte>> GetOtpVersionAsync(
-        IOtpHidProtocol otpProtocol,
-        CancellationToken cancellationToken)
-    {
-        // For OTP, read status bytes (first 3 bytes are version)
-        var status = await otpProtocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
-        var version = otpProtocol.FirmwareVersion ?? new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);
-        var versionString = Encoding.UTF8.GetBytes($"YubiKey {version.Major}.{version.Minor}.{version.Patch}");
-        return versionString;
-    }
-
-    private static (IProtocol protocol, IManagementBackend backend) CreateSmartCardBackend(
-        ISmartCardConnection connection)
-    {
-        var protocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create()
-            .Create(connection);
-
-        var backend = new SmartCardBackend(protocol as ISmartCardProtocol ?? throw new InvalidOperationException());
-        return (protocol, backend);
-    }
-
-    private static (IProtocol protocol, IManagementBackend backend) CreateFidoBackend(
-        IFidoHidConnection connection)
-    {
-        var protocol = FidoProtocolFactory
-            .Create()
-            .Create(connection);
-
-        var backend = new FidoHidBackend(protocol);
-        return (protocol, backend);
-    }
-
-    private static (IProtocol protocol, IManagementBackend backend) CreateOtpBackend(
-        IOtpHidConnection connection)
-    {
-        var protocol = OtpProtocolFactory
-            .Create()
-            .Create(connection);
-
-        var backend = new OtpBackend(protocol);
-        return (protocol, backend);
-    }
 
 }

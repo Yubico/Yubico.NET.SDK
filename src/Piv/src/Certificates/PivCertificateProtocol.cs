@@ -20,6 +20,7 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Piv.Backend;
 using Yubico.YubiKit.Piv.DataObjects;
 
 namespace Yubico.YubiKit.Piv.Certificates;
@@ -35,7 +36,7 @@ internal static class PivCertificateProtocol
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The certificate, or null if the slot is empty.</returns>
     internal static async Task<X509Certificate2?> GetCertificateAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         PivSlot slot,
         CancellationToken cancellationToken = default)
@@ -46,7 +47,7 @@ internal static class PivCertificateProtocol
         int objectId = GetCertificateObjectId(slot);
 
         // Read the data object
-        var certData = await PivDataObjectProtocol.GetObjectAsync(protocol, objectId, cancellationToken).ConfigureAwait(false);
+        var certData = await PivDataObjectProtocol.GetObjectAsync(backend, objectId, cancellationToken).ConfigureAwait(false);
 
         if (certData.IsEmpty)
         {
@@ -93,7 +94,7 @@ internal static class PivCertificateProtocol
     /// <param name="compress">Whether to compress the certificate (default: auto-compress if > 1856 bytes).</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     internal static async Task StoreCertificateAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         bool isAuthenticated,
         PivSlot slot,
@@ -145,14 +146,14 @@ internal static class PivCertificateProtocol
 
         // Write to object
         int objectId = GetCertificateObjectId(slot);
-        await PivDataObjectProtocol.PutObjectAsync(protocol, isAuthenticated, objectId, writer.WrittenMemory, cancellationToken).ConfigureAwait(false);
+        await PivDataObjectProtocol.PutObjectAsync(backend, isAuthenticated, objectId, writer.WrittenMemory, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
     /// Deletes the certificate from the specified slot.
     /// </summary>
     internal static async Task DeleteCertificateAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         bool isAuthenticated,
         PivSlot slot,
@@ -166,7 +167,7 @@ internal static class PivCertificateProtocol
         }
 
         int objectId = GetCertificateObjectId(slot);
-        await PivDataObjectProtocol.PutObjectAsync(protocol, isAuthenticated, objectId, null, cancellationToken).ConfigureAwait(false);
+        await PivDataObjectProtocol.PutObjectAsync(backend, isAuthenticated, objectId, null, cancellationToken).ConfigureAwait(false);
     }
 
     private static int GetCertificateObjectId(PivSlot slot)

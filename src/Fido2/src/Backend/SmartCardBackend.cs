@@ -42,10 +42,19 @@ internal sealed class SmartCardBackend : IFidoBackend
     /// <summary>
     /// Initializes the backend by selecting the FIDO2 application.
     /// </summary>
-    public async Task SelectAsync(CancellationToken cancellationToken = default)
+    public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Selecting FIDO2 application via SmartCard");
-        await _protocol.SelectAsync(ApplicationIds.Fido2, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            _logger.LogDebug("Selecting FIDO2 application via SmartCard");
+            await _protocol.SelectAsync(ApplicationIds.Fido2, cancellationToken).ConfigureAwait(false);
+        }
+        catch (ApduException ex)
+        {
+            throw new NotSupportedException(
+                "FIDO2 over SmartCard is not supported because the authenticator did not expose the FIDO2 AID.",
+                ex);
+        }
     }
 
     public async Task<ReadOnlyMemory<byte>> SendCborAsync(

@@ -65,4 +65,18 @@ public class FidoBackendLifecycleTests
             Arg.Any<ReadOnlyMemory<byte>>(),
             TestContext.Current.CancellationToken);
     }
+
+    [Fact]
+    public async Task HidBackend_InitializeAsync_InitializesBorrowedProtocol()
+    {
+        // Arrange
+        var protocol = Substitute.For<IFidoHidProtocol>();
+        var backend = new HidBackend(protocol);
+
+        // Act
+        await backend.InitializeAsync(TestContext.Current.CancellationToken);
+
+        // Assert
+        await protocol.Received(1).InitializeAsync(TestContext.Current.CancellationToken);
+    }
 }

@@ -13,12 +13,13 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Sessions;
 
-namespace Yubico.YubiKit.YubiOtp;
+namespace Yubico.YubiKit.YubiOtp.Backend;
 
 /// <summary>
 /// Backend implementation for YubiOTP operations over SmartCard (CCID/NFC).
@@ -46,6 +47,42 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
         _protocol = protocol;
         _firmwareVersion = firmwareVersion;
         _lastProgSeq = initialProgSeq;
+    }
+
+    public async ValueTask<YubiOtpInitialization> InitializeAsync(CancellationToken cancellationToken)
+    {
+        FirmwareVersion? managementVersion = null;
+
+        try
+        {
+            var mgmtResponse = await _protocol
+                .SelectAsync(ApplicationIds.Management, cancellationToken)
+                .ConfigureAwait(false);
+
+            managementVersion = ParseManagementVersion(mgmtResponse.Span);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            Logger.LogDebug(ex, "Could not get version from Management SELECT, continuing with OTP SELECT.");
+        }
+
+        var status = await _protocol
+            .SelectAsync(ApplicationIds.Otp, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (status.Length < YubiOtpConstants.StatusBytesLength)
+        {
+            throw new BadResponseException(
+                $"OTP SELECT returned {status.Length} bytes, expected at least {YubiOtpConstants.StatusBytesLength}.");
+        }
+
+        var otpVersion = new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);
+
+        var firmwareVersion = managementVersion is not null && otpVersion.Major == 3
+            ? (managementVersion > otpVersion ? managementVersion : otpVersion)
+            : managementVersion ?? otpVersion;
+
+        return new YubiOtpInitialization(firmwareVersion, status);
     }
 
     public async ValueTask<ReadOnlyMemory<byte>> WriteUpdateAsync(
@@ -163,5 +200,16 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
     public void Dispose()
     {
         // Backend doesn't own the protocol - YubiOtpSession handles disposal
+    }
+
+    private static FirmwareVersion? ParseManagementVersion(ReadOnlySpan<byte> response)
+    {
+        var deviceText = Encoding.UTF8.GetString(response);
+        var versionString = deviceText.Split(' ').Last();
+        var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
+
+        return versionParts.Length == 3
+            ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
+            : null;
     }
 }

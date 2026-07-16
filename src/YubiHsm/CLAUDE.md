@@ -15,13 +15,14 @@ This file provides Claude-specific guidance for working with the YubiHSM Auth mo
 The YubiHSM Auth module implements the **YubiHSM Auth applet** for authenticating to YubiHSM 2 hardware security modules. This is the **most security-sensitive applet** in the SDK — every operation involves management keys, session keys, credential passwords, or EC private keys.
 
 **Key characteristics:**
-1. **SmartCard-only** — No HID or OTP transport; uses direct `ISmartCardProtocol` calls (SecurityDomain pattern)
-2. **No backend abstraction** — Single transport eliminates need for Backend pattern
+1. **SmartCard-only** — No HID or OTP transport; `HsmAuthBackend` owns applet select/send mechanics over `ISmartCardProtocol`
+2. **Applet-owned backend** — Session code keeps APDU construction, retry extraction, and sensitive-buffer lifecycle; backend remains a thin SmartCard transport wrapper
 3. **Two credential types** — Symmetric (AES-128, all firmware) and Asymmetric (EC P256, firmware 5.6.0+)
 4. **Strict security** — All sensitive buffers zeroed in `finally` blocks; `SessionKeys` is `IDisposable`
 
 **Key Files:**
 - [`HsmAuthSession.cs`](src/HsmAuthSession.cs) - Main session class (all APDU operations)
+- [`HsmAuthBackend.cs`](src/HsmAuthBackend.cs) - SmartCard select/send backend for the YubiHSM Auth applet
 - [`IHsmAuthSession.cs`](src/IHsmAuthSession.cs) - Public interface contract
 - [`SessionKeys.cs`](src/SessionKeys.cs) - Disposable session key container (S-ENC, S-MAC, S-RMAC)
 - [`HsmAuthAlgorithm.cs`](src/HsmAuthAlgorithm.cs) - Algorithm enum with C# 14 extension properties
@@ -126,7 +127,7 @@ CryptographicOperations.ZeroMemory(pw); // Never reached on exception
 **❌ Don't use `throwOnError: true` with management-key-gated operations**
 ```csharp
 // BAD — 0x63Cx is treated as generic error, retry count lost
-var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: ct);
+var response = await _backend.SendAsync(command, cancellationToken: ct);
 ```
 
 **❌ Don't forget firmware gates on asymmetric/password-change operations**

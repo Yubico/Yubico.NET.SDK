@@ -292,6 +292,9 @@ public class DeviceInfoReaderTests
 
         public FirmwareVersion? FirmwareVersion => null;
 
+        public Task InitializeAsync(CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
         public Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
             byte command,
             ReadOnlyMemory<byte> data,
@@ -300,16 +303,6 @@ public class DeviceInfoReaderTests
             RequestedPages.Add(data.Span[0]);
             return Task.FromResult<ReadOnlyMemory<byte>>(_pages.Dequeue());
         }
-
-        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-            ApduCommand command,
-            CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException();
-
-        public Task<ReadOnlyMemory<byte>> SelectAsync(
-            ReadOnlyMemory<byte> applicationId,
-            CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException();
 
         public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null) { }
 

@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Piv.Backend;
 
 namespace Yubico.YubiKit.Piv.Bio;
 
@@ -32,14 +33,14 @@ internal static class PivBioProtocol
     /// <returns>Biometric metadata including number of configured fingerprints.</returns>
     /// <exception cref="NotSupportedException">Thrown if the YubiKey does not support biometrics or biometrics are not configured.</exception>
     internal static async Task<PivBioMetadata> GetBioMetadataAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Getting biometric metadata");
 
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x96, ReadOnlyMemory<byte>.Empty);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // SW 0x6A82 means object/feature not found (not configured)
         // SW 0x6D00 means instruction not supported (non-Bio key)
@@ -84,7 +85,7 @@ internal static class PivBioProtocol
     /// <exception cref="NotSupportedException">Thrown if biometrics are not supported or configured.</exception>
     /// <exception cref="InvalidOperationException">Thrown if biometric verification fails.</exception>
     internal static async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         bool requestTemporaryPin = false,
         bool checkOnly = false,
@@ -106,7 +107,7 @@ internal static class PivBioProtocol
         }
 
         var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // SW 0x6A82 or 0x6D00 means biometrics not supported/configured
         if (response.SW == 0x6A82 || response.SW == 0x6D00)
@@ -152,7 +153,7 @@ internal static class PivBioProtocol
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <exception cref="InvalidPinException">Thrown if the temporary PIN is invalid.</exception>
     internal static async Task VerifyTemporaryPinAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         ReadOnlyMemory<byte> temporaryPin,
         CancellationToken cancellationToken = default)
@@ -173,7 +174,7 @@ internal static class PivBioProtocol
             temporaryPin.Span.CopyTo(commandData.AsSpan(2));
 
             var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData.AsMemory(0, 2 + temporaryPin.Length));
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
             {

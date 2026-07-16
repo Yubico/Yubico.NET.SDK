@@ -17,6 +17,7 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -125,15 +126,9 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
             return;
 
         // Create backend based on connection type
-        var (backend, protocol) = _connection switch
-        {
-            ISmartCardConnection sc => await CreateSmartCardBackendAsync(sc, cancellationToken)
-                .ConfigureAwait(false),
-            IFidoHidConnection fido => CreateHidBackend(fido),
-            _ => throw new NotSupportedException(
-                $"Connection type {_connection.GetType().Name} is not supported. " +
-                "Use ISmartCardConnection or IFidoHidConnection.")
-        };
+        var protocol = YubiKeyProtocol.Create(_connection);
+        var backend = CreateBackend(protocol);
+        await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         _backend = backend;
 
@@ -147,7 +142,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         }
 
         // Initialize base class
-        await InitializeCoreAsync(
+        protocol = await InitializeCoreAsync(
                 protocol,
                 firmwareVersion,
                 configuration,
@@ -156,9 +151,9 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
             .ConfigureAwait(false);
 
         // If SCP was established, recreate backend with wrapped protocol
-        if (IsAuthenticated && Protocol is ISmartCardProtocol scpProtocol)
+        if (IsAuthenticated && protocol is YubiKeyProtocol.SmartCard smartCardProtocol)
         {
-            _backend = new SmartCardBackend(scpProtocol);
+            _backend = new SmartCardBackend(smartCardProtocol.Protocol);
         }
 
         _logger.LogDebug(
@@ -367,44 +362,15 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         }
     }
 
-    private static async Task<(IFidoBackend backend, IProtocol protocol)> CreateSmartCardBackendAsync(
-        ISmartCardConnection connection,
-        CancellationToken cancellationToken)
-    {
-        var protocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create()
-            .Create(connection);
-
-        var smartCardProtocol = protocol as ISmartCardProtocol
-            ?? throw new InvalidOperationException("Failed to create SmartCard protocol.");
-
-        try
+    private static IFidoBackend CreateBackend(YubiKeyProtocol protocol) =>
+        protocol switch
         {
-            // Select the FIDO2 application
-            await smartCardProtocol.SelectAsync(ApplicationIds.Fido2, cancellationToken)
-                .ConfigureAwait(false);
-        }
-        catch (ApduException ex)
-        {
-            throw new NotSupportedException(
-                "FIDO2 over SmartCard is not supported because the authenticator did not expose the FIDO2 AID.",
-                ex);
-        }
-
-        var backend = new SmartCardBackend(smartCardProtocol);
-        return (backend, protocol);
-    }
-
-    private static (IFidoBackend backend, IProtocol protocol) CreateHidBackend(
-        IFidoHidConnection connection)
-    {
-        var protocol = FidoProtocolFactory
-            .Create()
-            .Create(connection);
-
-        var backend = new HidBackend(protocol);
-        return (backend, protocol);
-    }
+            YubiKeyProtocol.SmartCard smartCard => new SmartCardBackend(smartCard.Protocol),
+            YubiKeyProtocol.FidoHid fidoHid => new HidBackend(fidoHid.Protocol),
+            _ => throw new NotSupportedException(
+                $"Connection type {protocol.ConnectionType} is not supported. " +
+                "Use ISmartCardConnection or IFidoHidConnection.")
+        };
 
     internal static void EnsureSmartCardTransportSupported(
         Transport transport,

@@ -20,6 +20,7 @@ using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Piv.Backend;
 
 namespace Yubico.YubiKit.Piv.Cryptography;
 
@@ -46,16 +47,16 @@ internal static class PivCryptographicOperations
     /// </para>
     /// </remarks>
     internal static Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         PivSlot slot,
         PivAlgorithm algorithm,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default) =>
-        SignOrDecryptCoreAsync(protocol, logger, slot, algorithm, data, cancellationToken);
+        SignOrDecryptCoreAsync(backend, logger, slot, algorithm, data, cancellationToken);
 
     private static async Task<ReadOnlyMemory<byte>> SignOrDecryptCoreAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         PivSlot slot,
         PivAlgorithm algorithm,
@@ -101,7 +102,7 @@ internal static class PivCryptographicOperations
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
             var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, commandData);
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -128,7 +129,7 @@ internal static class PivCryptographicOperations
 
     /// <inheritdoc/>
     internal static async Task<ReadOnlyMemory<byte>> DecryptAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         Func<PivSlot, CancellationToken, Task<PivSlotMetadata?>> getSlotMetadataAsync,
         Func<PivSlot, CancellationToken, Task> notifyTouchIfRequiredAsync,
@@ -166,7 +167,7 @@ internal static class PivCryptographicOperations
 
         // Perform the raw RSA private key operation on the YubiKey
         await notifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
-        var rawDecrypted = await SignOrDecryptCoreAsync(protocol, logger, slot, algorithm, cipherText, cancellationToken).ConfigureAwait(false);
+        var rawDecrypted = await SignOrDecryptCoreAsync(backend, logger, slot, algorithm, cipherText, cancellationToken).ConfigureAwait(false);
 
         // Strip padding using a dummy RSA key — same technique as Python yubikey-manager's _unpad_message.
         // We generate a temporary RSA key of the same size, use textbook RSA (encrypt with public key)
@@ -255,7 +256,7 @@ internal static class PivCryptographicOperations
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The shared secret (x-coordinate for NIST curves, point for Curve25519).</returns>
     internal static async Task<ReadOnlyMemory<byte>> CalculateSecretAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         PivSlot slot,
         IPublicKey peerPublicKey,
@@ -309,7 +310,7 @@ internal static class PivCryptographicOperations
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
             var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, data);
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {

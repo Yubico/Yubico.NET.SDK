@@ -20,11 +20,13 @@ using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.SecurityDomain.Backend;
 
 namespace Yubico.YubiKit.SecurityDomain;
 
@@ -79,6 +81,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
     private readonly ScpKeyParameters? _scpKeyParams;
     private ISmartCardProtocol? _protocol;
+    private ISecurityDomainBackend? _backend;
     private bool _hasExplicitFirmwareVersion;
 
     /// <summary>
@@ -139,29 +142,25 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         if (IsInitialized)
             return;
 
-        var smartCardProtocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create()
-            .Create(_connection);
-        await smartCardProtocol
-            .SelectAsync(ApplicationIds.SecurityDomain, cancellationToken)
-            .ConfigureAwait(false);
+        var protocol = YubiKeyProtocol.Create(_connection);
+        var backend = CreateBackend(protocol.Protocol);
+        await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         // Security Domain is available on firmware 5.3.0 and newer.
         // If the caller already knows the firmware, they can provide it and enable feature gating.
         _hasExplicitFirmwareVersion = firmwareVersion is not null;
         var resolvedFirmwareVersion = firmwareVersion ?? FirmwareVersion.V5_3_0;
 
-        await InitializeCoreAsync(
-                smartCardProtocol,
+        protocol = await InitializeCoreAsync(
+                protocol,
                 resolvedFirmwareVersion,
                 configuration,
                 _scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _protocol = Protocol as ISmartCardProtocol;
-        if (_protocol is null)
-            throw new InvalidOperationException();
+        _protocol = protocol.Protocol;
+        _backend = CreateBackend(_protocol);
     }
 
     /// <summary>
@@ -809,30 +808,37 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         Protocol?.Dispose();
         Protocol = null;
         _protocol = null;
+        _backend = null;
         IsAuthenticated = false;
         IsInitialized = false;
 
         await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
-    [MemberNotNull(nameof(_protocol))]
-    private void EnsureInitializedProtocol()
+    [MemberNotNull(nameof(_protocol), nameof(_backend))]
+    private void EnsureInitializedBackend()
     {
         if (!IsInitialized)
             throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");
 
         if (_protocol is null)
             throw new InvalidOperationException("Security Domain protocol not available.");
+
+        if (_backend is null)
+            throw new InvalidOperationException("Security Domain backend not available.");
     }
 
     private async Task<ReadOnlyMemory<byte>> TransmitAndGetResponseDataAsync(
         ApduCommand command,
         CancellationToken cancellationToken)
     {
-        EnsureInitializedProtocol();
-        var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+        EnsureInitializedBackend();
+        var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
         return response.Data;
     }
+
+    private static ISecurityDomainBackend CreateBackend(ISmartCardProtocol protocol) =>
+        new SecurityDomainBackend(protocol);
 
     private bool TryGetResetParameters(KeyReference keyReference, out byte instruction,
         out KeyReference overrideKeyReference)
@@ -958,6 +964,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         base.Dispose(disposing);
 
         _protocol = null;
+        _backend = null;
         Protocol = null;
         IsAuthenticated = false;
         IsInitialized = false;

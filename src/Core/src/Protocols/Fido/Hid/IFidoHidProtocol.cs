@@ -3,14 +3,12 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 
 /// <summary>
 /// Protocol interface for FIDO HID communication using CTAP HID framing.
-/// Supports both FIDO2/U2F operations (CTAPHID_MSG) and YubiKey Management vendor commands.
+/// Supports CTAP HID channel initialization and YubiKey Management vendor commands.
 /// </summary>
 /// <remarks>
 ///     Implementations are safe for concurrent calls: full logical exchanges (multi-packet CTAP
@@ -22,15 +20,10 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 public interface IFidoHidProtocol : IProtocol
 {
     /// <summary>
-    /// Transmits an APDU command over HID and receives the response.
-    /// Used for FIDO2/U2F applications that use CTAPHID_MSG.
+    /// Initializes the CTAP HID channel if it has not already been initialized.
     /// </summary>
-    /// <param name="command">The APDU command to transmit.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The response data from the YubiKey.</returns>
-    Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-        ApduCommand command,
-        CancellationToken cancellationToken = default);
+    Task InitializeAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sends a CTAP vendor command and receives the response.
@@ -43,16 +36,6 @@ public interface IFidoHidProtocol : IProtocol
     Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
         byte command,
         ReadOnlyMemory<byte> data,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Selects an application on the YubiKey. For HID, this returns version info.
-    /// </summary>
-    /// <param name="applicationId">The application ID (unused for HID).</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Application version information.</returns>
-    Task<ReadOnlyMemory<byte>> SelectAsync(
-        ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default);
 
     /// <summary>

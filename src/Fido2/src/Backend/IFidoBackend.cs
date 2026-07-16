@@ -24,6 +24,12 @@ namespace Yubico.YubiKit.Fido2.Backend;
 internal interface IFidoBackend
 {
     /// <summary>
+    /// Performs transport-specific initialization needed before CTAP commands.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task InitializeAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Sends a CTAP CBOR command and receives the response.
     /// </summary>
     /// <param name="request">The serialized CTAP request (command byte + CBOR payload).</param>

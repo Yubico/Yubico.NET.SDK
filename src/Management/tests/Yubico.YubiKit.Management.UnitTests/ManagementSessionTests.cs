@@ -21,6 +21,7 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Management.Backend;
 
 public class ManagementSessionTests
 {
@@ -81,6 +82,9 @@ public class ManagementSessionTests
     {
         public ReadOnlyMemory<byte> CapturedConfig { get; private set; }
         public bool SawNonZeroConfig { get; private set; }
+
+        public ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken = default) =>
+            ValueTask.FromResult<FirmwareVersion?>(new FirmwareVersion(5, 0, 0));
 
         public ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken = default)
         {

@@ -15,14 +15,15 @@
 using NSubstitute;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
+using Yubico.YubiKit.YubiOtp.Backend;
 
 namespace Yubico.YubiKit.YubiOtp.UnitTests;
 
-public class OtpHidBackendTests
+public class HidBackendTests
 {
     private readonly IOtpHidProtocol _protocol = Substitute.For<IOtpHidProtocol>();
 
-    private OtpHidBackend CreateBackend() => new(_protocol);
+    private HidBackend CreateBackend() => new(_protocol);
 
     /// <summary>
     /// Creates response data with a valid CRC appended.

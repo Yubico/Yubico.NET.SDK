@@ -16,6 +16,7 @@ The Security Domain module manages YubiKey's root security application, which co
 
 **Key Files:**
 - [`SecurityDomainSession.cs`](src/SecurityDomainSession.cs) - Public facade, lifecycle/state owner, and visible GlobalPlatform APDU flows
+- [`SecurityDomainBackend.cs`](src/SecurityDomainBackend.cs) - Applet-owned selected SmartCard backend for normal APDU sends
 - [`SecurityDomainKeyMaterial.cs`](src/SecurityDomainKeyMaterial.cs) - Pure SCP key component, KCV, and checksum helpers
 - [`SecurityDomainTlvEncoding.cs`](src/SecurityDomainTlvEncoding.cs) - Pure TLV encoding helpers for delete filters and related payloads
 - Test infrastructure in `tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/`
@@ -169,7 +170,7 @@ Allowed helper extraction is intentionally narrow:
 SecurityDomainSession public method
   -> validate/session-state check
   -> build visible GlobalPlatform APDU/TLV payload
-  -> transmit through Core protocol or raw reset connection
+  -> transmit through SecurityDomainBackend or raw reset connection
   -> call pure encode/parse/KCV helper only where it clarifies local code
 ```
 
@@ -211,23 +212,20 @@ private async Task InitializeAsync(
     CancellationToken cancellationToken = default)
 {
     // 1. Create protocol (uses global YubiKit logging)
-    Protocol = PcscProtocolFactory<ISmartCardConnection>
-        .Create()
-        .Create(connection);
+    var smartCardProtocol = YubiKeyProtocol.Create(connection).Protocol;
+    var backend = new SecurityDomainBackend(smartCardProtocol);
 
     // 2. Select SD application + configure protocol
     firmwareVersion ??= FirmwareVersion.V5_3_0;
-    await Protocol.SelectAsync(ApplicationIds.SecurityDomain, cancellationToken);
-    Protocol.Configure(firmwareVersion, configuration);
+    await backend.SelectAsync(cancellationToken);
 
     // 3. Establish SCP if keys provided
-    if (scpKeyParams is not null && Protocol is ISmartCardProtocol sc)
-    {
-        Protocol = await sc.WithScpAsync(scpKeyParams, cancellationToken);
-        IsAuthenticated = true;
-    }
+    await InitializeCoreAsync(smartCardProtocol, firmwareVersion, configuration, scpKeyParams, cancellationToken);
+    var selectedProtocol = Protocol as ISmartCardProtocol;
+    if (selectedProtocol is null)
+        throw new InvalidOperationException();
 
-    IsInitialized = true;
+    _backend = new SecurityDomainBackend(selectedProtocol);
 }
 ```
 

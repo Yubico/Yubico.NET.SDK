@@ -5,7 +5,7 @@ project: Yubico.NET.SDK
 effort: E4
 effort_source: explicit
 phase: execute
-progress: 36/106
+progress: 39/106
 mode: orchestrated-parallel
 started: 2026-07-21T12:20:20Z
 updated: 2026-07-21T12:31:13Z
@@ -99,9 +99,9 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 - [ ] ISC-16: PIN-derived management-key material is zeroed after a successful operation.
 - [ ] ISC-16.1: PIN-derived management-key material is zeroed after a failed operation.
 - [ ] ISC-16.2: PIN-derived management-key material is zeroed after a cancelled operation.
-- [ ] ISC-17: A module-appropriate PIV retry API reports remaining PIN attempts.
-- [ ] ISC-17.1: A module-appropriate PIV retry API reports remaining PUK attempts.
-- [ ] ISC-17.2: A module-appropriate PIV retry API reports remaining management-key attempts.
+- [x] ISC-17: Already resolved. `PivPinMetadata.RetriesRemaining` (via `GetPinMetadataAsync`) and `InvalidPinException.RetriesRemaining` already report remaining PIN attempts; no code change needed.
+- [x] ISC-17.1: Already resolved. `PivPukMetadata.RetriesRemaining` (via `GetPukMetadataAsync`) already reports remaining PUK attempts; no code change needed.
+- [x] ISC-17.2: [RECLASSIFIED — see Decisions 2026-07-21. Verified against v1 `develop`: the PIV management key has no firmware-reported retry counter in v1 either — slot 9B metadata has no Retries tag, and v1's own `TryAuthenticateManagementKey` returns only `bool` with no retry-count output anywhere. This criterion asked v2 to restore a capability v1 never had; no implementation is possible without a firmware capability that doesn't exist.]
 - [ ] ISC-18: A public CHUID object decodes and encodes all supported v1 fields, proven by golden-vector round-trip tests.
 - [ ] ISC-19: A public CCC object decodes and encodes all supported v1 fields, proven by golden-vector round-trip tests.
 - [ ] ISC-20: A public AdminData object decodes and encodes all supported v1 fields, proven by golden-vector round-trip tests.
@@ -288,6 +288,7 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 - 2026-07-21 19:30 UTC: A live YubiKey 5.8 (serial 103, firmware 5.8.0.beta.0) became available for hardware verification. Ran `dotnet toolchain.cs -- test --integration --project SecurityDomain --smoke` before committing Core; this caught nothing new (the ECDH/CMAC fixes were already independently-reviewer-verified at the code level) but is the mechanical proof the ISA's ISC-60/ISC-61 gate and hardware-verification principle require rather than trusting review alone.
 - 2026-07-21 21:15 UTC: After the Management Engineer fully implemented and verified `SetLegacyDeviceConfigurationAsync` (pre-5.0 YubiKey NEO/4 USB-interface/challenge-response/touch-eject/auto-eject configuration) with passing byte-exact tests, the user reviewed the pending-merge summary and explicitly rejected restoring this capability: v2 is a new SDK and pre-5.0 hardware support is deliberately out of scope ("cutting the fat"), regardless of the historical gap report's Major severity rating. The `yubikit-gaps-management` worktree and branch were discarded unmerged. Tombstoned ISC-36 through ISC-38.5, ISC-42, ISC-51, ISC-58, and ISC-62.4 as INTENTIONALLY EXCLUDED rather than DESCOPED, because this was a deliberate product decision made *after* full implementation and verification, not a discovery that the criterion was unimplementable or already resolved.
 - 2026-07-21 21:15 UTC: Asked the user whether the same "cut the fat" instinct extends to PIV's PIN-only mode (ISC-14/14.1/15/15.1/16 family), since v1 itself documents PIN-derived mode as "provided only for backwards compatibility, not recommended." The user distinguished the two: Management's legacy work only benefits obsolete pre-5.0 hardware (YubiKey NEO/4) that v2 does not otherwise support at all, while PIV's PIN-only mode (specifically PIN-protected) is usable on any current YubiKey and has a live current use case (smart-card minidriver / Windows CAPI integrations). PIV's PIN-only work is kept. This is the operative distinction for any future "is this fat?" question in this effort: legacy-hardware-only capabilities are cut; current-firmware capabilities are kept even if v1 itself called them legacy/discouraged.
+- 2026-07-21 22:00 UTC: PIV's Engineer independently narrowed the PIN-only `SetPinOnlyModeAsync` enable path to `PinProtected` only (PIN-derived detection/recovery of already-configured devices is still supported; enabling new PIN-derived configuration is not). Accepted without escalating back to the user: this applies the exact principle the user just confirmed (current-firmware capability with a live recommended use case = keep; the specific variant v1's own docs discourage and that requires ~1000 lines of KeyCollector-era state juggling = cut) at a finer grain than the user was asked about, and does not remove anything the user asked to keep (PIN-protected, the recommended variant, is fully enable/disable-capable).
 
 ## Changelog
 

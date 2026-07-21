@@ -29,6 +29,8 @@ public enum ConfigSlot : byte
     Ndef2 = 0x09,
     DeviceSerial = 0x10,
     ScanMap = 0x12,
+    ChalYubico1 = 0x20,
+    ChalYubico2 = 0x28,
     ChalHmac1 = 0x30,
     ChalHmac2 = 0x38
 }

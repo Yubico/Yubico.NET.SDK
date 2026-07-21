@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Linq;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
+using Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 
 namespace Yubico.YubiKit.YubiOtp.UnitTests;
 
@@ -188,48 +190,25 @@ public class SlotConfigurationTests
     }
 
     [Fact]
-    public void HmacSha1_ShortKey_ZeroPadded()
+    public void HmacSha1_ShortKey_ThrowsBeforeAnyProcessing()
     {
         byte[] hmacKey = [0xAA, 0xBB, 0xCC];
 
-        using var config = new HmacSha1SlotConfiguration(hmacKey);
-        var result = config.GetConfig();
-
-        // First 3 bytes in key field
-        Assert.Equal(0xAA, result[KeyOffset]);
-        Assert.Equal(0xBB, result[KeyOffset + 1]);
-        Assert.Equal(0xCC, result[KeyOffset + 2]);
-
-        // Rest of key field should be zero
-        Assert.All(result[(KeyOffset + 3)..(KeyOffset + 16)], b => Assert.Equal(0, b));
-
-        // uid should be all zero (key didn't overflow)
-        Assert.All(result[UidOffset..(UidOffset + 6)], b => Assert.Equal(0, b));
-
-        AssertValidCrc(result);
+        var ex = Assert.Throws<ArgumentException>(() =>
+            new HmacSha1SlotConfiguration(hmacKey));
+        Assert.Equal("hmacKey", ex.ParamName);
     }
 
     [Fact]
-    public void HmacSha1_LongKey_ShortenedViaSha1()
+    public void HmacSha1_LongKey_ThrowsInsteadOfHashing()
     {
-        // Key longer than 20 bytes gets SHA-1 hashed
+        // Keys longer than 20 bytes must be rejected, not silently SHA-1 hashed.
         byte[] longKey = new byte[64];
         longKey.AsSpan().Fill(0xFF);
 
-        using var config = new HmacSha1SlotConfiguration(longKey);
-        var result = config.GetConfig();
-
-        // Compute expected SHA-1
-        Span<byte> expectedHash = stackalloc byte[20];
-        SHA1.HashData(longKey, expectedHash);
-
-        // First 16 bytes of SHA-1 in key field
-        Assert.Equal(expectedHash[..16].ToArray(), result[KeyOffset..(KeyOffset + 16)]);
-
-        // Last 4 bytes of SHA-1 in uid[0..4]
-        Assert.Equal(expectedHash[16..20].ToArray(), result[UidOffset..(UidOffset + 4)]);
-
-        AssertValidCrc(result);
+        var ex = Assert.Throws<ArgumentException>(() =>
+            new HmacSha1SlotConfiguration(longKey));
+        Assert.Equal("hmacKey", ex.ParamName);
     }
 
     [Fact]
@@ -237,6 +216,25 @@ public class SlotConfigurationTests
     {
         Assert.Throws<ArgumentException>(() =>
             new HmacSha1SlotConfiguration(ReadOnlySpan<byte>.Empty));
+    }
+
+    [Fact]
+    public void HmacSha1_ExactLengthKey_PreservedByteForByte_NotHashedOrPadded()
+    {
+        // ISC-30: valid-length keys must survive into the wire format unmodified.
+        byte[] hmacKey = Enumerable.Range(1, 20).Select(i => (byte)i).ToArray();
+
+        using var config = new HmacSha1SlotConfiguration(hmacKey);
+        var result = config.GetConfig();
+
+        Assert.Equal(hmacKey[..16], result[KeyOffset..(KeyOffset + 16)]);
+        Assert.Equal(hmacKey[16..20], result[UidOffset..(UidOffset + 4)]);
+
+        // Confirm this is NOT the SHA-1 hash of the key (which would indicate
+        // the old silent-hashing behavior leaked back in).
+        Span<byte> unexpectedHash = stackalloc byte[20];
+        SHA1.HashData(hmacKey, unexpectedHash);
+        Assert.NotEqual(unexpectedHash[..16].ToArray(), result[KeyOffset..(KeyOffset + 16)]);
     }
 
     [Fact]
@@ -279,6 +277,100 @@ public class SlotConfigurationTests
     {
         byte[] hmacKey = new byte[20];
         using var config = new HmacSha1SlotConfiguration(hmacKey);
+
+        Assert.True(config.IsSupportedBy(new FirmwareVersion(2, 2, 0)));
+        Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 1, 9)));
+    }
+
+
+
+    [Fact]
+    public void YubicoOtpChallengeResponse_GetConfig_ProducesValid52ByteStruct()
+    {
+        byte[] aesKey = new byte[16];
+        aesKey.AsSpan().Fill(0xAB);
+
+        using var config = new YubicoOtpChallengeResponseSlotConfiguration(aesKey);
+        var result = config.GetConfig();
+
+        AssertValidCrc(result);
+    }
+
+    [Fact]
+    public void YubicoOtpChallengeResponse_ExactLengthKey_PreservedByteForByte()
+    {
+        // ISC-30: valid-length keys must survive into the wire format unmodified.
+        byte[] aesKey = Enumerable.Range(1, 16).Select(i => (byte)i).ToArray();
+
+        using var config = new YubicoOtpChallengeResponseSlotConfiguration(aesKey);
+        var result = config.GetConfig();
+
+        Assert.Equal(aesKey, result[KeyOffset..(KeyOffset + 16)]);
+
+        // No uid/private-id material is set for challenge-response-only mode.
+        Assert.All(result[UidOffset..(UidOffset + 6)], b => Assert.Equal(0, b));
+    }
+
+    [Fact]
+    public void YubicoOtpChallengeResponse_SetsChalRespAndChalYubicoFlags()
+    {
+        byte[] aesKey = new byte[16];
+
+        using var config = new YubicoOtpChallengeResponseSlotConfiguration(aesKey);
+        var result = config.GetConfig();
+
+        Assert.Equal((byte)TicketFlag.ChalResp, result[TktFlagsOffset] & (byte)TicketFlag.ChalResp);
+        Assert.Equal((byte)ConfigFlag.ChalYubico, result[CfgFlagsOffset] & (byte)ConfigFlag.ChalYubico);
+
+        // Must NOT set the HMAC-only bit that differentiates ChalHmac (0x22) from ChalYubico (0x20).
+        Assert.Equal(0, result[CfgFlagsOffset] & 0x02);
+    }
+
+    [Fact]
+    public void YubicoOtpChallengeResponse_RequireTouch_SetsChalBtnTrigFlag()
+    {
+        byte[] aesKey = new byte[16];
+
+        using var config = new YubicoOtpChallengeResponseSlotConfiguration(aesKey);
+        config.RequireTouch();
+        var result = config.GetConfig();
+
+        Assert.Equal((byte)ConfigFlag.ChalBtnTrig, result[CfgFlagsOffset] & (byte)ConfigFlag.ChalBtnTrig);
+    }
+
+    [Fact]
+    public void YubicoOtpChallengeResponse_EmptyKey_Throws()
+    {
+        var ex = Assert.Throws<ArgumentException>(() =>
+            new YubicoOtpChallengeResponseSlotConfiguration(ReadOnlySpan<byte>.Empty));
+        Assert.Equal("aesKey", ex.ParamName);
+    }
+
+    [Fact]
+    public void YubicoOtpChallengeResponse_ShortKey_ThrowsInsteadOfPadding()
+    {
+        byte[] shortKey = new byte[15];
+
+        var ex = Assert.Throws<ArgumentException>(() =>
+            new YubicoOtpChallengeResponseSlotConfiguration(shortKey));
+        Assert.Equal("aesKey", ex.ParamName);
+    }
+
+    [Fact]
+    public void YubicoOtpChallengeResponse_LongKey_ThrowsInsteadOfHashing()
+    {
+        byte[] longKey = new byte[17];
+
+        var ex = Assert.Throws<ArgumentException>(() =>
+            new YubicoOtpChallengeResponseSlotConfiguration(longKey));
+        Assert.Equal("aesKey", ex.ParamName);
+    }
+
+    [Fact]
+    public void YubicoOtpChallengeResponse_MinimumFirmware_Is220()
+    {
+        byte[] aesKey = new byte[16];
+        using var config = new YubicoOtpChallengeResponseSlotConfiguration(aesKey);
 
         Assert.True(config.IsSupportedBy(new FirmwareVersion(2, 2, 0)));
         Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 1, 9)));
@@ -395,20 +487,35 @@ public class SlotConfigurationTests
     }
 
     [Fact]
-    public void Hotp_LongKey_ShortenedViaSha1()
+    public void Hotp_LongKey_ThrowsInsteadOfHashing()
     {
         byte[] longKey = new byte[32];
         longKey.AsSpan().Fill(0xDD);
 
-        using var config = new HotpSlotConfiguration(longKey);
-        var result = config.GetConfig();
+        var ex = Assert.Throws<ArgumentException>(() => new HotpSlotConfiguration(longKey));
+        Assert.Equal("hmacKey", ex.ParamName);
+    }
 
-        Span<byte> expectedHash = stackalloc byte[20];
-        SHA1.HashData(longKey, expectedHash);
+    [Fact]
+    public void Hotp_ShortKey_ThrowsInsteadOfPadding()
+    {
+        byte[] shortKey = [0x01, 0x02, 0x03];
 
-        Assert.Equal(expectedHash[..16].ToArray(), result[KeyOffset..(KeyOffset + 16)]);
-        Assert.Equal(expectedHash[16..20].ToArray(), result[UidOffset..(UidOffset + 4)]);
-        AssertValidCrc(result);
+        var ex = Assert.Throws<ArgumentException>(() => new HotpSlotConfiguration(shortKey));
+        Assert.Equal("hmacKey", ex.ParamName);
+    }
+
+    [Fact]
+    public void Hotp_InvalidImfAndInvalidKeyLength_ThrowsForImfFirst()
+    {
+        // Locks in validation order: IMF is checked before the key length (via ProcessHmacKey).
+        // If this ordering is intentionally reversed in the future, this test must be updated
+        // to match, so the change is deliberate rather than an unnoticed side effect.
+        byte[] shortKey = [0x01, 0x02, 0x03];
+
+        var ex = Assert.Throws<ArgumentException>(() => new HotpSlotConfiguration(shortKey, imf: 100));
+
+        Assert.Equal("imf", ex.ParamName);
     }
 
     [Fact]
@@ -512,6 +619,85 @@ public class SlotConfigurationTests
 
         Assert.Throws<ArgumentException>(() =>
             new StaticPasswordSlotConfiguration(scanCodes));
+    }
+
+    [Fact]
+    public void StaticPassword_FromString_EnUsLayout_TranslatesToExpectedScanCodes()
+    {
+        // ISC-27: exact HID scan-code vectors matching HidCodeTranslator's en_US mapping.
+        using var config = new StaticPasswordSlotConfiguration("abc", KeyboardLayout.en_US);
+        var result = config.GetConfig();
+
+        byte[] expectedScanCodes = [0x04, 0x05, 0x06]; // 'a', 'b', 'c'
+        Assert.Equal(expectedScanCodes, result[FixedOffset..(FixedOffset + 3)]);
+        Assert.Equal(3, result[FixedSizeOffset]);
+    }
+
+    [Fact]
+    public void StaticPassword_FromString_UppercaseCharacters_SetShiftBit()
+    {
+        using var config = new StaticPasswordSlotConfiguration("Ab1", KeyboardLayout.en_US);
+        var result = config.GetConfig();
+
+        // 'A' = 0x04 with the shift bit (0x80) set, 'b' = 0x05, '1' = 0x1e
+        byte[] expectedScanCodes = [0x04 | 0x80, 0x05, 0x1e];
+        Assert.Equal(expectedScanCodes, result[FixedOffset..(FixedOffset + 3)]);
+    }
+
+    [Fact]
+    public void StaticPassword_FromString_ModHexLayout_MatchesHidCodeTranslatorModHex()
+    {
+        var translator = HidCodeTranslator.GetInstance(KeyboardLayout.ModHex);
+        using var config = new StaticPasswordSlotConfiguration("cccb", KeyboardLayout.ModHex);
+        var result = config.GetConfig();
+
+        byte[] expectedScanCodes = [translator['c'], translator['c'], translator['c'], translator['b']];
+        Assert.Equal(expectedScanCodes, result[FixedOffset..(FixedOffset + 4)]);
+    }
+
+    [Fact]
+    public void StaticPassword_FromString_MatchesRawScanCodeConstructor()
+    {
+        // The string overload must produce byte-identical wire output to the
+        // equivalent raw scan-code constructor -- it is a convenience translation only.
+        var translator = HidCodeTranslator.GetInstance(KeyboardLayout.en_US);
+        byte[] rawScanCodes = translator.GetHidCodes("Password1");
+
+        using var fromString = new StaticPasswordSlotConfiguration("Password1", KeyboardLayout.en_US);
+        using var fromRaw = new StaticPasswordSlotConfiguration(rawScanCodes);
+
+        Assert.Equal(fromRaw.GetConfig(), fromString.GetConfig());
+    }
+
+    [Fact]
+    public void StaticPassword_FromString_NullPassword_Throws()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            new StaticPasswordSlotConfiguration(null!, KeyboardLayout.en_US));
+    }
+
+    [Fact]
+    public void StaticPassword_FromString_EmptyPassword_Throws()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            new StaticPasswordSlotConfiguration(string.Empty, KeyboardLayout.en_US));
+    }
+
+    [Fact]
+    public void StaticPassword_FromString_TooLong_Throws()
+    {
+        string password = new('a', 39);
+
+        Assert.Throws<ArgumentException>(() =>
+            new StaticPasswordSlotConfiguration(password, KeyboardLayout.en_US));
+    }
+
+    [Fact]
+    public void StaticPassword_FromString_UnsupportedCharacterForLayout_Throws()
+    {
+        // 'é' is not part of the en_US HID scan-code map.
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new StaticPasswordSlotConfiguration("café", KeyboardLayout.en_US));
     }
 
 

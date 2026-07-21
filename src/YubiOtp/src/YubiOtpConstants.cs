@@ -28,6 +28,8 @@ internal static class YubiOtpConstants
     public const int HmacKeySize = 20;
     public const int HmacChallengeSize = 64;
     public const int HmacResponseSize = 20;
+    public const int YubicoOtpChallengeSize = 6;
+    public const int YubicoOtpResponseSize = 16;
     public const int ScanCodesSize = FixedSize + UidSize + KeySize; // 38
 
     /// <summary>

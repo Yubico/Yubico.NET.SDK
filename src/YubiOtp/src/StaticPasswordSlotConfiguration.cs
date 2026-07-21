@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Transports.Hid.Keyboard;
+
 namespace Yubico.YubiKit.YubiOtp;
 
 /// <summary>
@@ -27,6 +29,31 @@ namespace Yubico.YubiKit.YubiOtp;
 /// </remarks>
 public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
 {
+    /// <summary>
+    /// Initializes a new static password configuration from a human-readable password,
+    /// translating each character to a HID scan code for the given keyboard layout.
+    /// </summary>
+    /// <remarks>
+    /// The YubiKey itself has no concept of a keyboard layout; it only emits HID scan
+    /// codes over USB. The scan codes produced here will render as <paramref name="password"/>
+    /// only on a host configured with the same <paramref name="keyboardLayout"/>. Use
+    /// <see cref="KeyboardLayout.ModHex"/> for a layout-independent password.
+    /// </remarks>
+    /// <param name="password">The human-readable password (up to 38 characters).</param>
+    /// <param name="keyboardLayout">The keyboard layout to translate characters with.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="password"/> is null.</exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="password"/> is empty or exceeds 38 characters.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="password"/> contains a character not supported by
+    /// <paramref name="keyboardLayout"/>.
+    /// </exception>
+    public StaticPasswordSlotConfiguration(string password, KeyboardLayout keyboardLayout)
+        : this(ToScanCodes(password, keyboardLayout))
+    {
+    }
+
     /// <summary>
     /// Initializes a new static password configuration.
     /// </summary>
@@ -72,5 +99,16 @@ public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
 
         _fixedSize = (byte)Math.Min(scanCodes.Length, YubiOtpConstants.FixedSize);
         _cfgFlags |= ConfigFlag.ShortTicket;
+    }
+
+    /// <summary>
+    /// Translates a human-readable password into HID scan codes for the given keyboard layout.
+    /// </summary>
+    private static byte[] ToScanCodes(string password, KeyboardLayout keyboardLayout)
+    {
+        ArgumentNullException.ThrowIfNull(password);
+
+        var translator = HidCodeTranslator.GetInstance(keyboardLayout);
+        return translator.GetHidCodes(password);
     }
 }

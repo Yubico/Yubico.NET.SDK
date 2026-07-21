@@ -204,6 +204,86 @@ mappings:
       - yubikit:src/Piv/CLAUDE.md
     notes: Every applet package exposes a Create{Applet}SessionAsync(...) extension method as the standard construction entry point, superseding manual ConnectAsync<TConnection>() plus direct session-constructor call sites shown in earlier session-pattern diffs. Underlying transport defaults, SCP key parameter handling, and connection disposal semantics still require manual review at each v1 call site.
     last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
+  - id: recipe-device-discovery-find-by-transport
+    status: assisted
+    confidence: high
+    migration_kind: behavior
+    v1: YubiKeyDevice.FindByTransport(...) / YubiKeyDevice.FindAll()
+    v2: YubiKeyManager.FindAllAsync(...)
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiKeyDevice.Static.cs
+      - develop:Yubico.YubiKey/examples/SharedSampleCode/YubiKeyOperations/ListYubiKeys.cs
+      - yubikit:src/Core/src/Devices/YubiKeyManager.cs
+    notes: V2 discovery is async and returns physical IYubiKey instances with explicit ConnectionType availability; review transport filters and cancellation behavior at each call site.
+    last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
+  - id: recipe-management-device-info
+    status: assisted
+    confidence: high
+    migration_kind: member
+    v1: IYubiKeyDevice.SerialNumber / IYubiKeyDevice.FirmwareVersion and related device metadata
+    v2: IYubiKey.CreateManagementSessionAsync(...).GetDeviceInfoAsync(...)
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/IYubiKeyDevice.cs
+      - yubikit:src/Management/src/IYubiKeyExtensions.cs
+      - yubikit:src/Management/src/IManagementSession.cs
+      - yubikit:src/Management/examples/ManagementTool/Commands/InfoCommand.cs
+    notes: Use Management for rich metadata and capability state; v1 FirmwareVersion usually maps to DeviceInfo.FirmwareVersion for comparisons and DeviceInfo.VersionName for display. Configuration-changing Management calls remain manual-review because they can persistently modify or reboot the device.
+    last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
+  - id: recipe-piv-generate-key
+    status: manual
+    confidence: medium
+    migration_kind: member
+    v1: PivSession.GenerateKeyPair(...)
+    v2: PivSession.AuthenticateAsync(...) followed by PivSession.GenerateKeyAsync(...)
+    evidence:
+      - develop:Yubico.YubiKey/examples/PivSampleCode/YubiKeyOperations/KeyPairs.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Piv/PivSession.cs
+      - yubikit:src/Piv/src/IPivSession.cs
+      - yubikit:src/Piv/src/IYubiKeyExtensions.cs
+    notes: Key generation is state-mutating and requires explicit management-key authentication and sensitive-buffer handling in v2; algorithm, slot, PIN policy, and touch policy values require manual review.
+    last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
+  - id: recipe-fido2-authenticator-info
+    status: assisted
+    confidence: high
+    migration_kind: member
+    v1: Fido2Session.AuthenticatorInfo
+    v2: IYubiKey.GetFidoInfoAsync(...) or FidoSession.GetInfoAsync(...)
+    evidence:
+      - develop:Yubico.YubiKey/examples/Fido2SampleCode/YubiKeyOperations/Fido2Protocol.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Fido2Session.cs
+      - yubikit:src/Fido2/src/IYubiKeyExtensions.cs
+      - yubikit:src/Fido2/src/IFidoSession.cs
+    notes: V2 returns authenticator info asynchronously and fetches fresh data. Transport choice, SCP, PIN/UV, and user-presence flows remain behavior-specific review items.
+    last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
+  - id: recipe-oath-credential-add-calculate
+    status: manual
+    confidence: medium
+    migration_kind: member
+    v1: OathSession.AddCredential(...) / OathSession.CalculateAllCredentials(...)
+    v2: CredentialData.ParseUri(...) or CredentialData with OathSession.PutCredentialAsync(...) / OathSession.CalculateAllAsync(...)
+    evidence:
+      - develop:Yubico.YubiKey/examples/OathSampleCode/YubiKeyOperations/AddCredential.cs
+      - develop:Yubico.YubiKey/examples/OathSampleCode/YubiKeyOperations/CalculateCredentials.cs
+      - yubikit:src/Oath/src/IOathSession.cs
+      - yubikit:src/Oath/examples/OathTool/Commands/AccountsCommand.cs
+    notes: V2 CredentialData uses decoded secret bytes and async calls; password-protected applets and persistent credential changes require manual security review.
+    last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
+  - id: recipe-yubiotp-hmac-sha1-challenge-response
+    status: manual
+    confidence: medium
+    migration_kind: member
+    v1: OtpSession.ConfigureChallengeResponse(...).UseHmacSha1(...).Execute() / OtpSession.CalculateChallengeResponse(...).GetDataBytes()
+    v2: HmacSha1SlotConfiguration with YubiOtpSession.PutConfigurationAsync(...) / YubiOtpSession.CalculateHmacSha1Async(...)
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Otp/OtpSession.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Otp/Operations/ConfigureChallengeResponse.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Otp/Operations/CalculateChallengeResponse.cs
+      - yubikit:src/YubiOtp/src/IYubiOtpSession.cs
+      - yubikit:src/YubiOtp/src/HmacSha1SlotConfiguration.cs
+      - yubikit:src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs
+      - yubikit:src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs
+    notes: Slot programming is persistent and requires manual review for slot number, access-code, touch, short-challenge, update, and NDEF behavior; v1 ShortPress/LongPress map semantically to v2 Slot.One/Slot.Two.
+    last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
 manual_review:
   - device discovery call sites
   - transport selection assumptions

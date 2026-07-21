@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -178,7 +179,9 @@ internal static class PivCryptographicOperations
 
         // rawBytes and reEncrypted are sensitive — zeroed in finally regardless of outcome.
         // The try starts before ModPow so rawBytes is zeroed even if ModPow throws.
-        var rawBytes = rawDecrypted.Span.ToArray();
+        // CopyAndZeroSource also zeroes rawDecrypted's own backing array immediately, since it is a
+        // second, separate unzeroed copy of the raw RSA output once rawBytes has been derived from it.
+        var rawBytes = CopyAndZeroSource(rawDecrypted);
         byte[]? reEncrypted = null;
         try
         {
@@ -389,22 +392,46 @@ internal static class PivCryptographicOperations
 
     private static ReadOnlyMemory<byte> ParseCryptoResponse(ReadOnlyMemory<byte> data)
     {
-        // Parse outer TLV (0x7C - Dynamic Auth Template)
-        using var outer = Tlv.Create(data.Span);
-        if (outer.Tag != 0x7C)
+        try
         {
-            throw new ApduException("Invalid crypto response format");
-        }
+            // Parse outer TLV (0x7C - Dynamic Auth Template)
+            using var outer = Tlv.Create(data.Span);
+            if (outer.Tag != 0x7C)
+            {
+                throw new ApduException("Invalid crypto response format");
+            }
 
-        // Parse inner TLV (0x82 - Response data)
-        using var inner = Tlv.Create(outer.Value.Span);
-        if (inner.Tag != 0x82)
+            // Parse inner TLV (0x82 - Response data)
+            using var inner = Tlv.Create(outer.Value.Span);
+            if (inner.Tag != 0x82)
+            {
+                throw new ApduException("Invalid crypto response - expected TAG 0x82");
+            }
+
+            // Copy the value before the Tlv objects are disposed
+            return inner.Value.ToArray();
+        }
+        finally
         {
-            throw new ApduException("Invalid crypto response - expected TAG 0x82");
+            // `data` is the raw AUTHENTICATE response payload, which for DecryptAsync/CalculateSecretAsync
+            // carries the device's raw decrypted plaintext / ECDH shared secret in the clear. Zero it
+            // unconditionally once the needed value has been copied out above - matching the approach
+            // already applied to PivDataObjectProtocol.GetObjectAsync's equivalent response buffer.
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(data).Span);
         }
+    }
 
-        // Copy the value before the Tlv objects are disposed
-        return inner.Value.ToArray();
+    /// <summary>
+    /// Copies <paramref name="source"/> into a fresh array and zeroes <paramref name="source"/>'s
+    /// backing buffer, since <paramref name="source"/> (the raw RSA decryption output returned by
+    /// <see cref="SignOrDecryptCoreAsync"/>) would otherwise be left as an unzeroed second copy of
+    /// the clear-text plaintext once the caller starts working from its own copy.
+    /// </summary>
+    internal static byte[] CopyAndZeroSource(ReadOnlyMemory<byte> source)
+    {
+        var copy = source.ToArray();
+        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(source).Span);
+        return copy;
     }
 
     private static byte[] EncodePeerPublicKey(IPublicKey publicKey)

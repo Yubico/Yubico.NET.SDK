@@ -41,7 +41,6 @@ public sealed class PivSession : ApplicationSession, IPivSession
 {
     // PIV instruction bytes
     private const byte InsVerify = 0x20;
-    private const byte InsResetRetry = 0x2C;
     private const byte InsReset = 0xFB;
 
     // PIV P2 parameter bytes
@@ -339,36 +338,10 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// <summary>
     /// Blocks the PUK by repeatedly calling RESET RETRY with empty credentials until blocked.
     /// </summary>
-    private async Task BlockPukAsync(CancellationToken cancellationToken)
+    private Task BlockPukAsync(CancellationToken cancellationToken)
     {
         EnsureBackend();
-        Logger.LogDebug("PIV: Blocking PUK");
-
-        // PUK blocking uses INS_RESET_RETRY (0x2C) with P2=0x80 (PIN_P2, not PUK_P2!)
-        // Data is 16 bytes: 8-byte empty PUK + 8-byte empty PIN (both all 0xFF)
-        byte[] emptyPukPin = PivPinUtilities.EncodePinPair(ReadOnlySpan<char>.Empty, ReadOnlySpan<char>.Empty);
-        try
-        {
-            int retriesRemaining = 1; // Start with 1 to enter loop
-            while (retriesRemaining > 0)
-            {
-                var pukCommand = new ApduCommand(0x00, InsResetRetry, 0x00, P2Pin, emptyPukPin);
-                var response = await _backend.SendAsync(pukCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
-
-                retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
-                if (retriesRemaining < 0)
-                {
-                    // Unexpected response - break to avoid infinite loop
-                    break;
-                }
-            }
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(emptyPukPin);
-        }
-
-        Logger.LogDebug("PIV: PUK blocked");
+        return PivMetadataProtocol.BlockPukAsync(_backend, Logger, cancellationToken);
     }
 
     /// <summary>
@@ -628,6 +601,106 @@ public sealed class PivSession : ApplicationSession, IPivSession
         EnsureBackend();
 
         await PivDataObjectProtocol.PutObjectAsync(_backend, _isAuthenticated, objectId, data, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<PivCardholderUniqueId> GetCardholderUniqueIdAsync(CancellationToken cancellationToken = default)
+    {
+        EnsureBackend();
+
+        return await PivTypedDataObjectProtocol.GetCardholderUniqueIdAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task SetCardholderUniqueIdAsync(PivCardholderUniqueId cardholderUniqueId, CancellationToken cancellationToken = default)
+    {
+        EnsureBackend();
+
+        await PivTypedDataObjectProtocol.SetCardholderUniqueIdAsync(_backend, Logger, _isAuthenticated, cardholderUniqueId, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<PivCardCapabilityContainer> GetCardCapabilityContainerAsync(CancellationToken cancellationToken = default)
+    {
+        EnsureBackend();
+
+        return await PivTypedDataObjectProtocol.GetCardCapabilityContainerAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task SetCardCapabilityContainerAsync(PivCardCapabilityContainer cardCapabilityContainer, CancellationToken cancellationToken = default)
+    {
+        EnsureBackend();
+
+        await PivTypedDataObjectProtocol.SetCardCapabilityContainerAsync(_backend, Logger, _isAuthenticated, cardCapabilityContainer, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<PivAdminData> GetAdminDataAsync(CancellationToken cancellationToken = default)
+    {
+        EnsureBackend();
+
+        return await PivTypedDataObjectProtocol.GetAdminDataAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task SetAdminDataAsync(PivAdminData adminData, CancellationToken cancellationToken = default)
+    {
+        EnsureBackend();
+
+        await PivTypedDataObjectProtocol.SetAdminDataAsync(_backend, Logger, _isAuthenticated, adminData, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<PivKeyHistory> GetKeyHistoryAsync(CancellationToken cancellationToken = default)
+    {
+        EnsureBackend();
+
+        return await PivTypedDataObjectProtocol.GetKeyHistoryAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task SetKeyHistoryAsync(PivKeyHistory keyHistory, CancellationToken cancellationToken = default)
+    {
+        EnsureBackend();
+
+        await PivTypedDataObjectProtocol.SetKeyHistoryAsync(_backend, Logger, _isAuthenticated, keyHistory, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<PivPinOnlyMode> GetPinOnlyModeAsync(CancellationToken cancellationToken = default)
+    {
+        EnsureBackend();
+
+        return await PivPinOnlyProtocol.GetPinOnlyModeAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<PivPinOnlyMode> RecoverPinOnlyModeAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default)
+    {
+        EnsureBackend();
+
+        return await PivPinOnlyProtocol.RecoverPinOnlyModeAsync(
+            _backend,
+            Logger,
+            ManagementKeyType,
+            pin,
+            (key, ct) => AuthenticateAsync(key, ct),
+            (p, ct) => VerifyPinAsync(p, ct),
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task SetPinOnlyModeAsync(
+        PivPinOnlyMode pinOnlyMode,
+        ReadOnlyMemory<byte> pin,
+        ReadOnlyMemory<byte>? managementKey = null,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureBackend();
+
+        await PivPinOnlyProtocol.SetPinOnlyModeAsync(
+            _backend,
+            Logger,
+            _isAuthenticated,
+            ManagementKeyType,
+            pinOnlyMode,
+            pin,
+            managementKey,
+            (p, ct) => VerifyPinAsync(p, ct),
+            (type, key, touch, ct) => SetManagementKeyAsync(type, key, touch, ct),
+            cancellationToken).ConfigureAwait(false);
     }
 
     public async Task SetManagementKeyAsync(

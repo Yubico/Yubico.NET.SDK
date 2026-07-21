@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Piv.Backend;
@@ -137,6 +138,10 @@ internal static class PivBioProtocol
 
         var tempPin = new byte[response.Data.Length];
         response.Data.CopyTo(tempPin);
+
+        // The original GET DATA response buffer also carries the temporary PIN in the clear; the
+        // caller only owns/zeroes `tempPin` (the copy above), so this method must zero the source.
+        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.Data).Span);
 
         logger.LogDebug("PIV: Biometric verification succeeded, temporary PIN retrieved (length={Length})", tempPin.Length);
         logger.LogWarning("PIV: Caller MUST zero temporary PIN immediately after use!");

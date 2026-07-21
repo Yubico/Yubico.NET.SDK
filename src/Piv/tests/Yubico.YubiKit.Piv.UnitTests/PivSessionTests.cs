@@ -333,6 +333,27 @@ public class PivSessionTests
         Assert.Equal(peerPublicKey.PublicPoint.ToArray(), commandData[6..].ToArray());
     }
 
+    [Fact]
+    public async Task ResetAsync_BlocksPinAndPukThenResets()
+    {
+        // Regression test for the BlockPukAsync -> PivMetadataProtocol.BlockPukAsync extraction:
+        // the APDU sequence (PIN metadata, VERIFY-until-blocked, RESET RETRY-until-blocked P2=0x80,
+        // RESET, re-fetch management key metadata) must be unchanged.
+        var connection = CreateInitializedConnection(
+            [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata: 1 retry remaining
+            [0x63, 0xC0], // VERIFY empty PIN -> blocked (0 retries)
+            [0x63, 0xC0], // RESET RETRY empty PUK/PIN -> blocked (0 retries)
+            [0x90, 0x00], // RESET
+            ManagementKeyMetadataResponse());
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.ResetAsync(TestContext.Current.CancellationToken);
+
+        Assert.Contains(connection.TransmittedCommands, c => c[1] == 0x20 && c[3] == 0x80); // VERIFY PIN
+        Assert.Contains(connection.TransmittedCommands, c => c[1] == 0x2C && c[3] == 0x80); // RESET RETRY, PUK-blocking quirk
+        Assert.Contains(connection.TransmittedCommands, c => c[1] == 0xFB); // RESET
+    }
+
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), VersionResponse(), ManagementKeyMetadataResponse(), .. trailingResponses]);
 

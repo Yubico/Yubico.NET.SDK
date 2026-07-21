@@ -175,14 +175,14 @@ internal static class PivKeyProtocol
             if (pinPolicy != PivPinPolicy.Default)
             {
                 using var pinPolicyTlv = new Tlv(0xAA, [(byte)pinPolicy]);
-                keyData = [.. keyData, .. pinPolicyTlv.AsSpan()];
+                keyData = AppendTlvZeroingPrevious(keyData!, pinPolicyTlv);
             }
 
             // Add touch policy TLV if not default
             if (touchPolicy != PivTouchPolicy.Default)
             {
                 using var touchPolicyTlv = new Tlv(0xAB, [(byte)touchPolicy]);
-                keyData = [.. keyData, .. touchPolicyTlv.AsSpan()];
+                keyData = AppendTlvZeroingPrevious(keyData!, touchPolicyTlv);
             }
 
             // Send IMPORT KEY command: INS 0xFE, P1 = algorithm, P2 = slot
@@ -204,6 +204,29 @@ internal static class PivKeyProtocol
             {
                 CryptographicOperations.ZeroMemory(keyData);
             }
+        }
+    }
+
+    /// <summary>
+    /// Concatenates <paramref name="previous"/> with the encoded bytes of <paramref name="tlv"/> and
+    /// zeroes <paramref name="previous"/> before returning, since <paramref name="previous"/> is
+    /// raw encoded private-key material that would otherwise be silently orphaned and left unzeroed
+    /// by the caller's reassignment (<c>keyData = AppendTlvZeroingPrevious(keyData, tlv)</c>).
+    /// </summary>
+    internal static byte[] AppendTlvZeroingPrevious(byte[] previous, Tlv tlv)
+    {
+        ArgumentNullException.ThrowIfNull(previous);
+
+        var combined = new byte[previous.Length + tlv.TotalLength];
+        try
+        {
+            previous.CopyTo(combined, 0);
+            tlv.AsSpan().CopyTo(combined.AsSpan(previous.Length));
+            return combined;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(previous);
         }
     }
 

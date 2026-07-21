@@ -14,7 +14,15 @@
 - The bulk of the analyzed range is v2-internal: device discovery/composite-device internals, APDU/CTAPHID protocol fixes, WebAuthn Swift/Rust exploration and documentation, previewSign/ARKG experimental API notes, and documentation/CI automation tooling. None of this required new v1-to-v2 mapping guidance beyond the session-construction update above; existing manual-review guidance for device discovery, transport selection, and security-sensitive flows still applies.
 - Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `5a82db9bce05addc0385162e9f085adbc2366c5b`.
 
+## 2026-07-03 - Lightweight recipe examples
+
+- Grounded recipe guidance in the existing analyzed migration state commit `5a82db9bce05addc0385162e9f085adbc2366c5b`. This was a manual documentation-authoring change and did not advance `docs/migration/.state.yml`.
+- Added a `Common Migration Recipes` section to `v1-to-v2.md` with source-backed before/after examples for device discovery, device info, applet session creation, PIV key generation, FIDO2 authenticator info, OATH credential add/calculate, and YubiOTP HMAC-SHA1 challenge-response.
+- Added recipe-backed mapping entries for the concrete v1 and v2 APIs used by those examples.
+- Kept mutating and security-sensitive flows marked as manual review rather than automatic migrations.
+
 ## 2026-07-06 - HID listener rescan hint migration note
 
 - Added `hid-listener-rescan-hints` migration guidance for the change from v1 `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived`/`Removed` events (`EventHandler<HidDeviceEventArgs>`) to the v2 low-level `HidDeviceListener.DeviceEvent` callback carrying `HidDeviceRescanHint` diagnostics.
 - Clarified that v2 HID listener hints are rescan triggers only; public `YubiKeyManager.DeviceChanges` remains repository-diffed Added/Removed truth.
+

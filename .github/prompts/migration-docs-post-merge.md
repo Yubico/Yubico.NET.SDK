@@ -42,6 +42,8 @@ Read and preserve the existing migration artifacts:
 - Preserve existing document structure and append rather than rewrite when practical.
 - Prefer appending changelog entries over broad prose rewrites.
 - Do not invent type, member, package, or behavior mappings.
+- Preserve the `Common Migration Recipes` section in `docs/migration/v1-to-v2.md`. Add or update recipes only when both the v1 and v2 sides are supported by source evidence, and use the existing format: scenario heading, `V1` snippet, `V2` snippet, and `Migration notes` bullets.
+- Every new recipe must have a corresponding source-backed `v1-to-v2-map.yml` entry or reuse an existing precise map entry. If the evidence is incomplete, keep the recipe out of the guide and add a manual-review item instead.
 - Mark uncertain mappings as manual-review with `status: manual` or `status: unknown` and `confidence: low` or `medium`.
 - Never claim automatic migration for lifecycle, transport, security-sensitive, protocol, exception-contract, or behavior-dependent changes unless the evidence is direct and unambiguous.
 - Treat internal-only changes as `none` and leave docs unchanged except for a workflow summary if needed.

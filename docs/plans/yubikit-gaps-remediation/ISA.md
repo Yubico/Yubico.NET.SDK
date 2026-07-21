@@ -5,7 +5,7 @@ project: Yubico.NET.SDK
 effort: E4
 effort_source: explicit
 phase: execute
-progress: 0/106
+progress: 24/106
 mode: orchestrated-parallel
 started: 2026-07-21T12:20:20Z
 updated: 2026-07-21T12:31:13Z
@@ -70,25 +70,25 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 
 ### Core
 
-- [ ] ISC-2: A public, replaceable AES-GCM primitive extension point exists and a unit test proves a supplied implementation is invoked.
-- [ ] ISC-3: A public, replaceable ECDH primitive extension point exists and a unit test proves a supplied implementation is invoked.
-- [ ] ISC-4: A public, replaceable CMAC primitive extension point exists and a unit test proves a supplied implementation is invoked.
-- [ ] ISC-5: The default cryptography-provider path passes known-answer tests without custom providers.
-- [ ] ISC-6: A public sequential TLV reader passes a consecutive typed-value advancement vector test.
-- [ ] ISC-7: A public TLV writer passes a consecutive-value encoding vector test.
-- [ ] ISC-7.1: A public TLV writer passes a nested-value encoding vector test.
-- [ ] ISC-8: The sequential TLV API rejects malformed tag encodings with its documented exception type.
-- [ ] ISC-8.1: The sequential TLV API rejects malformed length encodings with its documented exception type.
-- [ ] ISC-8.2: The sequential TLV API rejects truncated values with its documented exception type.
-- [ ] ISC-9: TLV-owned temporary buffers containing sensitive data are zeroed before release, proven by an observable disposal test or code-path inspection.
-- [ ] ISC-10: Public Base16 encode/decode passes valid round-trip vectors.
-- [ ] ISC-10.1: Public Base16 decode rejects malformed input.
-- [ ] ISC-11: Public Base32 encode/decode passes RFC-compatible round-trip vectors.
-- [ ] ISC-11.1: Public Base32 decode rejects malformed input.
-- [ ] ISC-12: Public BCD encode/decode passes supported digit round-trip vectors.
-- [ ] ISC-12.1: Public BCD encode rejects unsupported input.
-- [ ] ISC-13: Public ModHex encode/decode passes known Yubico round-trip vectors.
-- [ ] ISC-13.1: Public ModHex decode rejects unsupported characters.
+- [x] ISC-2: [DESCOPED — see Decisions 2026-07-21. No Core production consumer for AES-GCM exists; the user later scoped this pass to internal-only additions with real production value, and this primitive had neither.]
+- [x] ISC-3: A replaceable ECDH primitive extension point exists and a unit test proves a supplied implementation is invoked. (refined: delivered `internal`, not public — see Decisions 2026-07-21. Consumed by `Scp11X963Kdf`.)
+- [x] ISC-4: A replaceable CMAC primitive extension point exists and a unit test proves a supplied implementation is invoked. (refined: delivered `internal`, not public — see Decisions 2026-07-21. Consumed by `ScpState`/`StaticKeys`/`Scp11X963Kdf`.)
+- [x] ISC-5: The default cryptography-provider path passes known-answer tests without custom providers. Verified: RFC 4493 AES-128-CMAC KAT (`DefaultCmacProvider_PassesRfc4493KnownAnswerVector`) and a real independently-generated bidirectional ECDH cross-check against the BCL's own `DeriveRawSecretAgreement` (`DefaultEcdhProvider_LocalAndRemoteAgreeOnSharedSecret`).
+- [x] ISC-6: [DESCOPED — see Decisions 2026-07-21. Public sequential TLV reader not delivered; scope narrowed to no-new-public-API.]
+- [x] ISC-7: [DESCOPED — see Decisions 2026-07-21.]
+- [x] ISC-7.1: [DESCOPED — see Decisions 2026-07-21.]
+- [x] ISC-8: [DESCOPED — see Decisions 2026-07-21.]
+- [x] ISC-8.1: [DESCOPED — see Decisions 2026-07-21.]
+- [x] ISC-8.2: [DESCOPED — see Decisions 2026-07-21.]
+- [x] ISC-9: [DESCOPED — see Decisions 2026-07-21. No new public TLV writer was built to own such buffers; existing `Tlv`/`TlvHelper`/`DisposableTlvList` zeroing behavior is unchanged and was not a confirmed gap.]
+- [x] ISC-10: [DESCOPED — see Decisions 2026-07-21. Public Base16 codec not delivered; scope narrowed to no-new-public-API.]
+- [x] ISC-10.1: [DESCOPED — see Decisions 2026-07-21.]
+- [x] ISC-11: [DESCOPED — see Decisions 2026-07-21.]
+- [x] ISC-11.1: [DESCOPED — see Decisions 2026-07-21.]
+- [x] ISC-12: [DESCOPED — see Decisions 2026-07-21.]
+- [x] ISC-12.1: [DESCOPED — see Decisions 2026-07-21.]
+- [x] ISC-13: [DESCOPED — see Decisions 2026-07-21.]
+- [x] ISC-13.1: [DESCOPED — see Decisions 2026-07-21.]
 
 ### PIV
 
@@ -159,18 +159,18 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 - [ ] ISC-42: Management protocol or validation failures that callers must distinguish have a documented public module exception contract, or this ISA records evidence that existing typed Core exceptions preserve equivalent precision.
 - [ ] ISC-43: SecurityDomain secure-channel failures have a documented public typed exception contract, including retained status/cause information.
 - [ ] ISC-44: OpenPGP protocol or validation failures that callers must distinguish have a documented public module exception contract, or this ISA records evidence that existing typed Core exceptions preserve equivalent precision.
-- [ ] ISC-45: Core TLV failures satisfy the documented exception contract required by ISC-8.
+- [x] ISC-45: [DESCOPED — see Decisions 2026-07-21. Depends on ISC-8's public TLV exception contract, itself descoped by the no-new-public-API scope narrowing.]
 
 ### Review Gates
 
-- [ ] ISC-46: Core DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
+- [x] ISC-46: Core DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
 - [ ] ISC-47: PIV DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
 - [ ] ISC-48: OATH DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
 - [ ] ISC-49: YubiOTP DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
 - [ ] ISC-50: YubiHSM Auth DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
 - [ ] ISC-51: Management DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
 - [ ] ISC-52: Exception-taxonomy DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
-- [ ] ISC-53: Core independent read-only review returns PASS with no findings.
+- [x] ISC-53: Core independent read-only review returns PASS with no findings.
 - [ ] ISC-54: PIV independent read-only review returns PASS with no findings.
 - [ ] ISC-55: OATH independent read-only review returns PASS with no findings.
 - [ ] ISC-56: YubiOTP independent read-only review returns PASS with no findings.
@@ -180,8 +180,8 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 
 ### Build, Test, and Final Audit
 
-- [ ] ISC-60: `dotnet toolchain.cs build --project Core` exits 0 after Core integration.
-- [ ] ISC-61: `dotnet toolchain.cs test --project Core` exits 0 after Core integration.
+- [x] ISC-60: `dotnet toolchain.cs build --project Core` exits 0 after Core integration.
+- [x] ISC-61: `dotnet toolchain.cs test --project Core` exits 0 after Core integration.
 - [ ] ISC-62: Focused PIV unit tests exit 0 after PIV integration.
 - [ ] ISC-62.1: Focused OATH unit tests exit 0 after OATH integration.
 - [ ] ISC-62.2: Focused YubiOTP unit tests exit 0 after YubiOTP integration.
@@ -281,15 +281,25 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 - 2026-07-21 12:20 UTC: Core integrates first. Phase-one module branches are created from the post-Core integrated commit to avoid duplicating foundational types and to reduce merge conflicts.
 - 2026-07-21 12:20 UTC: Hardware verification uses a newly created disposable YubiHSM Auth credential only. Existing credentials are outside the test surface.
 - 2026-07-21 12:20 UTC: The 106 ISCs are below the E4 soft floor of 128. Further splitting would manufacture implementation-detail probes rather than independently falsifiable outcomes; every identified major gap, review gate, integration gate, and anti-criterion already has a named mechanical probe.
+- 2026-07-21 19:00 UTC: After Core's Engineer/Reviewer loop had already produced a public AES-GCM extension point, a public sequential TLV reader/writer, a public `TlvException`, and public Base16/Base32/Bcd/ModHex codecs (satisfying the original public-API-shaped ISC-2, ISC-6..ISC-13.1, and ISC-45), the user directed a scope narrowing: no new public classes/enums/interfaces in this pass, keep only internal additions with real production value, and exact v1 public-API parity is explicitly not a goal. The Engineer removed the AES-GCM abstraction (no Core production consumer existed) and all public TLV/codec/exception surfaces, retaining only `internal` ECDH and CMAC seams because SCP03/SCP11 genuinely consume them.
+- 2026-07-21 19:30 UTC: A live YubiKey 5.8 (serial 103, firmware 5.8.0.beta.0) became available for hardware verification. Ran `dotnet toolchain.cs -- test --integration --project SecurityDomain --smoke` before committing Core; this caught nothing new (the ECDH/CMAC fixes were already independently-reviewer-verified at the code level) but is the mechanical proof the ISA's ISC-60/ISC-61 gate and hardware-verification principle require rather than trusting review alone.
 
 ## Changelog
 
 - 2026-07-21 conjectured: the historical gap report can directly seed implementation work. / refuted by: the report itself identifies an older v2 baseline while `yubikit-gaps` is based on the later `yubikit-protocol-refactor` tip. / learned: branch archaeology must precede remediation or agents may recreate features already merged or reverse intentional refactors. / criterion now: ISC-1 requires a current-state disposition with file evidence for every in-scope Major finding.
 - 2026-07-21 conjectured: all module branches can start from the initial `yubikit-gaps` commit. / refuted by: PIV and YubiOTP may consume restored Core TLV, codec, or cryptography contracts, which would force duplicate implementations or late rebases. / learned: foundational API changes should cross both review gates and integrate before dependent worktrees branch. / criterion now: the CoreFoundation feature is a declared dependency of every phase-one module feature.
 - 2026-07-21 conjectured: 71 broad criteria were sufficiently atomic for orchestration. / refuted by: the E4 completeness probe identified independently failing operations and boundaries in 23 criteria. / learned: protocol configuration, execution, cleanup, and per-module tests need separate evidence even when implemented together. / criterion now: stable child IDs split those criteria without renumbering their parents.
+- 2026-07-21 conjectured: restoring v1-shaped public parity APIs (public AES-GCM/TLV-reader-writer/codec/exception surfaces) was the correct way to close the Core Major findings. / refuted by: the user rejected new public API surface mid-implementation, judging exact v1 parity unnecessary and preferring to keep the package's public surface minimal until community demand justifies it. / learned: "restore the capability" and "restore the public API shape" are different commitments; an ISA should ask which one is wanted before scaffolding parity-shaped criteria. / criterion now: ISC-2, ISC-6 through ISC-13.1, and ISC-45 are tombstoned DESCOPED; ISC-3/ISC-4 are refined to accept an `internal` extension point as satisfying evidence.
+- 2026-07-21 conjectured: the ECDH primitive's default implementation was straightforward to review-approve on first pass. / refuted by: the second DevTeam review round found `ComputeSharedSecret` combined the peer's public point with the local private scalar — a cryptographically invalid key-pair construction that .NET's ECDH backends do not reliably reject, so it could silently compute a wrong-but-plausible shared secret depending on platform. / learned: crypto-primitive review needs an explicit "does the local key's Q actually correspond to its D" check, not just a secret-zeroing/disposal audit. / criterion now: ISC-3's test strategy requires a real independently-generated bidirectional ECDH cross-check against the BCL's own `DeriveRawSecretAgreement`, not only a trivial D=1 known-answer vector (which cannot detect this class of bug).
 
 ## Verification
 
 Verification evidence is appended as each stable ISC passes. No criterion is checked based only on an agent summary; command output, source locations, reviewer verdicts, or hardware observations must be recorded here. The initial E4 completeness pass found and corrected compound criteria before implementation began.
 
 - E4 scaffold gate (2026-07-21): independent CheckCompleteness agent returned `PASS`; 12/12 sections present, 105 unique atomic criteria, 0 granularity violations, 0 ID-stability violations, 5 anti-criteria, and complete Feature/Test Strategy traceability. The 105/128 tier-floor shortfall is the acknowledged non-blocking soft warning recorded in Decisions.
+- ISC-3, ISC-4, ISC-5 (2026-07-21): `internal interface IEcdhPrimitives`/`ICmacPrimitives` and default `EcdhPrimitives`/`CmacPrimitives` implementations at `src/Core/src/Cryptography/`, consumed by `Scp11X963Kdf.GetSharedSecret`, `ScpState.Mac`/`Unmac`, and `StaticKeys.Derive`. `dotnet toolchain.cs -- test --project Core`: `CryptographyProviderExtensionTests` — `EcdhCreator_CustomPrimitive_IsInvoked`, `CmacCreator_CustomPrimitive_IsInvoked`, `DefaultCmacProvider_PassesRfc4493KnownAnswerVector` (PASS), `DefaultEcdhProvider_PassesP256KnownAnswerVector` (PASS), `DefaultEcdhProvider_LocalAndRemoteAgreeOnSharedSecret` (PASS, bidirectional real-key cross-check against `ECDiffieHellman.DeriveRawSecretAgreement`).
+- ISC-46 (2026-07-21): 4 DevTeam cross-vendor review iterations on the Core worktree; final verdict `PASS WITH NOTES` (one accepted non-blocking observation: no fast fake-processor unit test for SCP03/SCP11 init disposal-on-failure, covered instead by hardware integration tests).
+- ISC-53 (2026-07-21): 4 independent read-only review iterations (`pr-reviewer-readonly`); final verdict `RESULT: PASS`.
+- ISC-60 (2026-07-21): `dotnet toolchain.cs -- build --project Core` on integrated `yubikit-gaps` @ `9f857c4fad209fb6b7735cc25c180c75661ee3c4` — `Build succeeded. 0 Warning(s), 0 Error(s)` for all 3 matching projects.
+- ISC-61 (2026-07-21): `dotnet toolchain.cs -- test --project Core` on integrated `yubikit-gaps` @ `9f857c4fad209fb6b7735cc25c180c75661ee3c4` — `638 total, 635 succeeded, 0 failed, 3 skipped` (2 hardware-only, 1 Windows-only).
+- Hardware smoke (2026-07-21, supplements ISC-60/61, not a numbered ISC): `dotnet toolchain.cs -- test --integration --project SecurityDomain --smoke` against a connected YubiKey 5.8 (serial 103, firmware 5.8.0.beta.0) on integrated `yubikit-gaps` — `Total tests: 25, Passed: 25`, including `SecurityDomainSession_Scp03Tests.CreateAsync_WithScp03_Succeeds`, `SecurityDomainSession_Scp11Tests.Scp11b_EstablishSecureConnection_Succeeds`, `SecurityDomainSession_Scp11cTests.Scp11c_GenerateAndAuthenticate_Succeeds`, `SecurityDomainSession_Scp11Tests.Scp11a_WithAllowList_AllowsApprovedSerials`, and both `SecurityDomainSession_NegativeTests` wrong-key/wrong-public-key failure paths.

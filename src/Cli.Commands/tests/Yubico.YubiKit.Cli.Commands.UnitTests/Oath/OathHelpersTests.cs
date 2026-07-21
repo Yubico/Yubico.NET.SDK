@@ -109,6 +109,7 @@ public sealed class OathHelpersTests
         public string DeviceId => "test-device";
         public ReadOnlyMemory<byte> Salt => new byte[] { 0x00 };
         public bool IsLocked { get; set; } = true;
+        public bool IsPasswordProtected { get; set; } = true;
         public ReadOnlyMemory<byte> DerivedPasswordMemory { get; private set; }
         public byte[] DerivedPasswordBytes { get; private set; } = [];
         public List<ReadOnlyMemory<byte>> ValidatedKeys { get; } = [];
@@ -138,6 +139,48 @@ public sealed class OathHelpersTests
         public Task ResetAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task UnsetKeyAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public async Task<T> AuthenticateAndRetryAsync<T>(
+            Func<CancellationToken, Task<T>> operation,
+            Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                return await operation(cancellationToken).ConfigureAwait(false);
+            }
+            catch (OathException ex) when (ex.Reason == OathFailureReason.Locked)
+            {
+                ReadOnlyMemory<byte> password = await passwordProvider(cancellationToken).ConfigureAwait(false);
+                byte[] key = DeriveKey(password);
+                try
+                {
+                    await ValidateAsync(key, cancellationToken).ConfigureAwait(false);
+                }
+                finally
+                {
+                    Array.Clear(key);
+                }
+
+                return await operation(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        public async Task AuthenticateAndRetryAsync(
+            Func<CancellationToken, Task> operation,
+            Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
+            CancellationToken cancellationToken = default)
+        {
+            await AuthenticateAndRetryAsync<object?>(
+                async ct =>
+                {
+                    await operation(ct).ConfigureAwait(false);
+                    return null;
+                },
+                passwordProvider,
+                cancellationToken).ConfigureAwait(false);
+        }
+
         public void Dispose() { }
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }

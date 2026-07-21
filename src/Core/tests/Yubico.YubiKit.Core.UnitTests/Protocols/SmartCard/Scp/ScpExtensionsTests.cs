@@ -18,6 +18,7 @@ using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.UnitTests.Cryptography;
 using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
 
 namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
@@ -26,6 +27,16 @@ namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
 ///     Tests firmware validation in the internal PC/SC SCP initialization capability.
 ///     Verifies that appropriate NotSupportedException is thrown for unsupported firmware versions.
 /// </summary>
+/// <remarks>
+///     Shares <see cref="CryptographyProvidersCollection"/> because the SCP11b "proceeds past the firmware
+///     check" tests reach <c>ScpState.Scp11InitAsync</c>, which calls
+///     <c>CryptographyProviders.EcdhPrimitivesCreator().GenerateKeyPair(...)</c> before any APDU is
+///     transmitted (SCP11b skips the SCP11a/c-only PERFORM SECURITY OPERATION step). Without this,
+///     these tests could race against
+///     <see cref="Yubico.YubiKit.Core.UnitTests.Cryptography.CryptographyProviderExtensionTests"/>,
+///     which temporarily swaps that same static.
+/// </remarks>
+[Collection(CryptographyProvidersCollection.Name)]
 public class PcscProtocolScpInitializationTests
 {
     private readonly FakeSmartCardConnection _fakeConnection = new();

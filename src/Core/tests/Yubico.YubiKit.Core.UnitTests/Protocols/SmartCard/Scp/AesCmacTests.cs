@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
@@ -158,6 +159,40 @@ public class AesCmacTests
         var expectedEmptyMac = freshCmac.GetHashAndReset();
 
         Assert.Equal(expectedEmptyMac, emptyMac);
+    }
+
+    [Fact]
+    public void GetHashAndReset_WhenResultBufferIsInvalid_ZeroesAbandonedResult()
+    {
+        byte[]? abandonedResult = null;
+        using var cmac = new AesCmac(TestKey);
+        cmac.AppendData([0x01, 0x02]);
+
+        Assert.Throws<ArgumentException>(() => cmac.GetHashAndReset(length =>
+            abandonedResult = Enumerable.Repeat((byte)0xCC, length - 1).ToArray()));
+
+        byte[] observedResult = Assert.IsType<byte[]>(abandonedResult);
+        Assert.All(observedResult, value => Assert.Equal(0, value));
+    }
+
+    [Fact]
+    public void VerifyAndReset_ZeroesComputedMac()
+    {
+        byte[]? computedMac = null;
+        using var expectedCmac = new AesCmac(TestKey);
+        expectedCmac.AppendData([0x01, 0x02]);
+        byte[] expectedMac = expectedCmac.GetHashAndReset();
+        using var cmac = new AesCmac(TestKey);
+        cmac.AppendData([0x01, 0x02]);
+
+        bool verified = cmac.VerifyAndReset(
+            expectedMac,
+            length => computedMac = new byte[length]);
+
+        Assert.True(verified);
+        byte[] observedMac = Assert.IsType<byte[]>(computedMac);
+        Assert.All(observedMac, value => Assert.Equal(0, value));
+        CryptographicOperations.ZeroMemory(expectedMac);
     }
 
     [Fact]

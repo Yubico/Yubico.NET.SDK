@@ -15,6 +15,7 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.UnitTests.Cryptography;
 using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
@@ -22,6 +23,13 @@ namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
 /// <summary>
 ///     Unit tests for Scp11X963Kdf class.
 /// </summary>
+/// <remarks>
+///     Shares <see cref="CryptographyProvidersCollection"/> because these tests exercise the default ECDH/CMAC
+///     providers read from the mutable <c>CryptographyProviders</c> statics that
+///     <see cref="Yubico.YubiKit.Core.UnitTests.Cryptography.CryptographyProviderExtensionTests"/> temporarily
+///     swaps; without this, the two could race under parallel test-collection execution.
+/// </remarks>
+[Collection(CryptographyProvidersCollection.Name)]
 public class Scp11X963KdfTests
 {
     [Fact]
@@ -51,6 +59,38 @@ public class Scp11X963KdfTests
         // Expected shared secret: concatenation of ka1 and ka2
         // For test purposes, we can compute expected manually or assert length
         Assert.Equal(64, sharedSecret.Length); // 32 bytes each for P-256
+    }
+
+    [Fact]
+    public void GetSharedSecret_WhenSecondPrivateKeyExportFails_ZeroesFirstPrivateValue()
+    {
+        using var ephemeralOceKey = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+        using var staticOceKey = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+        using var staticSdKey = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+        using ECDiffieHellmanPublicKey staticSdPublicKey = staticSdKey.PublicKey;
+        ReadOnlyMemory<byte> ephemeralSdPublicKey = CreateTestEpkSdEckaTlv();
+        byte[]? firstPrivateValue = null;
+        var exportCalls = 0;
+
+        Assert.Throws<CryptographicException>(() => Scp11X963Kdf.GetSharedSecret(
+            ephemeralOceKey,
+            staticOceKey,
+            staticSdPublicKey,
+            ephemeralSdPublicKey,
+            key =>
+            {
+                if (++exportCalls == 2)
+                {
+                    throw new CryptographicException("Injected second private-key export failure.");
+                }
+
+                ECParameters parameters = key.ExportParameters(true);
+                firstPrivateValue = parameters.D;
+                return parameters;
+            }));
+
+        byte[] observedPrivateValue = Assert.IsType<byte[]>(firstPrivateValue);
+        Assert.All(observedPrivateValue, value => Assert.Equal(0, value));
     }
 
     [Fact]

@@ -18,6 +18,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.UnitTests.Cryptography;
 using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
 
 namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
@@ -26,6 +27,13 @@ namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
 ///     Unit tests for ScpProtocolAdapter class.
 ///     Tests the decorator pattern implementation that wraps a protocol with SCP.
 /// </summary>
+/// <remarks>
+///     Shares <see cref="CryptographyProvidersCollection"/> because SCP paths read the mutable
+///     <c>CryptographyProviders.EcdhPrimitivesCreator</c>/<c>CmacPrimitivesCreator</c> statics that
+///     <see cref="Yubico.YubiKit.Core.UnitTests.Cryptography.CryptographyProviderExtensionTests"/> temporarily
+///     swaps; without this, the two could race under parallel test-collection execution.
+/// </remarks>
+[Collection(CryptographyProvidersCollection.Name)]
 public class PcscProtocolScpTests
 {
     private readonly FakeSmartCardConnection _fakeConnection = new();

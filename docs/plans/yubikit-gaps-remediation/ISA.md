@@ -5,7 +5,7 @@ project: Yubico.NET.SDK
 effort: E4
 effort_source: explicit
 phase: execute
-progress: 0/105
+progress: 0/106
 mode: orchestrated-parallel
 started: 2026-07-21T12:20:20Z
 updated: 2026-07-21T12:31:13Z
@@ -26,6 +26,7 @@ V1 consumers can migrate to YubiKit v2 without losing the confirmed high-impact 
 - U2F/CTAP1 registration and authentication. This is explicitly deferred.
 - Adding .NET Framework or `netstandard` target frameworks.
 - Adding synchronous facades over the v2 asynchronous API.
+- Changing logging configuration, defaults, discovery, providers, or public logging APIs.
 - Reintroducing the v1 global `KeyCollector` delegate. Module-appropriate retry and notification APIs may be added where a confirmed capability gap requires them.
 - Minor and cosmetic findings from the handoff report unless they are necessary to implement or test an in-scope major finding correctly.
 - Reworking features already present on `yubikit-gaps`; re-verification must close stale findings without churn.
@@ -200,6 +201,7 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 - [ ] ISC-69: Anti: this effort adds target frameworks other than the repository-configured v2 target.
 - [ ] ISC-70: Anti: this effort introduces a global cross-applet `KeyCollector` callback.
 - [ ] ISC-71: Anti: hardware verification reads, changes, locks, or deletes any pre-existing YubiHSM Auth credential.
+- [ ] ISC-72: Anti: this effort changes logging configuration, defaults, discovery, providers, or public logging APIs.
 
 ## Test Strategy
 
@@ -216,7 +218,7 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 | ISC-39, ISC-40, ISC-41, ISC-42, ISC-43, ISC-44, ISC-45 | API/error audit | Typed exception precision by module | Each criterion implemented or evidence-backed as already equivalent | Focused tests + public API inspection |
 | ISC-46, ISC-47, ISC-48, ISC-49, ISC-50, ISC-51, ISC-52, ISC-53, ISC-54, ISC-55, ISC-56, ISC-57, ISC-58, ISC-59 | review | DevTeam and independent review | PASS; no findings for independent gate | Cross-vendor Reviewer + `pr-reviewer-readonly` |
 | ISC-60, ISC-61, ISC-62, ISC-62.1, ISC-62.2, ISC-62.3, ISC-62.4, ISC-62.5, ISC-62.6, ISC-63, ISC-64, ISC-65, ISC-66 | repository verification | Builds, tests, audit, formatting | Every command exits 0; no unresolved High/Medium audit findings | Repo toolchain, CodeAudit, dotnet format |
-| ISC-67, ISC-68, ISC-69, ISC-70, ISC-71 | anti-probe | Excluded architecture and hardware safety | Zero prohibited additions or existing-credential operations | Grep, diff review, hardware test fixture log |
+| ISC-67, ISC-68, ISC-69, ISC-70, ISC-71, ISC-72 | anti-probe | Excluded architecture and hardware safety | Zero prohibited additions or existing-credential operations | Grep, diff review, hardware test fixture log |
 
 ## Features
 
@@ -265,7 +267,7 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 
 - name: IntegratedQualityGate
   description: Serialize merges, run CodeAudit, fix verified findings, and pass full build/test/format gates.
-  satisfies: [ISC-1, ISC-62, ISC-62.1, ISC-62.2, ISC-62.3, ISC-62.4, ISC-62.5, ISC-62.6, ISC-63, ISC-64, ISC-65, ISC-66, ISC-67, ISC-68, ISC-69, ISC-70]
+  satisfies: [ISC-1, ISC-62, ISC-62.1, ISC-62.2, ISC-62.3, ISC-62.4, ISC-62.5, ISC-62.6, ISC-63, ISC-64, ISC-65, ISC-66, ISC-67, ISC-68, ISC-69, ISC-70, ISC-72]
   depends_on: [ExceptionTaxonomy]
   parallelizable: false
 ```
@@ -275,9 +277,10 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 - 2026-07-21 12:20 UTC: Use E4 because the effort changes multiple public packages, includes security-sensitive credential flows and hardware verification, and requires parallel branch integration plus independent review.
 - 2026-07-21 12:20 UTC: Treat `docs/migration/v1-to-v2-gaps.md` as hypotheses. Every agent must re-verify current code before implementing; stale findings are closed with evidence rather than recreated.
 - 2026-07-21 12:20 UTC: Defer U2F by explicit user instruction. Preserve the v2 async-only and target-framework architecture and do not resurrect the global v1 `KeyCollector`.
+- 2026-07-21 12:34 UTC: Logging changes are explicitly excluded alongside synchronous APIs and broader .NET compatibility. The historical silent-default logging finding is not part of this remediation effort.
 - 2026-07-21 12:20 UTC: Core integrates first. Phase-one module branches are created from the post-Core integrated commit to avoid duplicating foundational types and to reduce merge conflicts.
 - 2026-07-21 12:20 UTC: Hardware verification uses a newly created disposable YubiHSM Auth credential only. Existing credentials are outside the test surface.
-- 2026-07-21 12:20 UTC: The 105 ISCs are below the E4 soft floor of 128. Further splitting would manufacture implementation-detail probes rather than independently falsifiable outcomes; every identified major gap, review gate, integration gate, and anti-criterion already has a named mechanical probe.
+- 2026-07-21 12:20 UTC: The 106 ISCs are below the E4 soft floor of 128. Further splitting would manufacture implementation-detail probes rather than independently falsifiable outcomes; every identified major gap, review gate, integration gate, and anti-criterion already has a named mechanical probe.
 
 ## Changelog
 

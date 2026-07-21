@@ -5,7 +5,7 @@ project: Yubico.NET.SDK
 effort: E4
 effort_source: explicit
 phase: execute
-progress: 24/106
+progress: 36/106
 mode: orchestrated-parallel
 started: 2026-07-21T12:20:20Z
 updated: 2026-07-21T12:31:13Z
@@ -142,21 +142,21 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 
 ### Management
 
-- [ ] ISC-36: Management exposes legacy pre-5.0 USB interface mode switching through a tested public async API.
-- [ ] ISC-37: Legacy mode encoding covers supported OTP, CCID, and FIDO U2F combinations with v1-compatible bytes.
-- [ ] ISC-38: Legacy challenge-response timeout is validated before device I/O.
-- [ ] ISC-38.1: Legacy touch-eject is validated before device I/O.
-- [ ] ISC-38.2: Legacy auto-eject timeout is validated before device I/O.
-- [ ] ISC-38.3: Legacy challenge-response timeout produces v1-compatible command bytes.
-- [ ] ISC-38.4: Legacy touch-eject produces v1-compatible command bytes.
-- [ ] ISC-38.5: Legacy auto-eject timeout produces v1-compatible command bytes.
+- [x] ISC-36: [INTENTIONALLY EXCLUDED — see Decisions 2026-07-21. The user explicitly decided v2 will not restore pre-5.0 (YubiKey NEO/4) legacy USB-interface configuration; NEO/4 owners stay on v1. A full internal-only Engineer implementation was built and then discarded per this decision.]
+- [x] ISC-37: [INTENTIONALLY EXCLUDED — see Decisions 2026-07-21.]
+- [x] ISC-38: [INTENTIONALLY EXCLUDED — see Decisions 2026-07-21.]
+- [x] ISC-38.1: [INTENTIONALLY EXCLUDED — see Decisions 2026-07-21.]
+- [x] ISC-38.2: [INTENTIONALLY EXCLUDED — see Decisions 2026-07-21.]
+- [x] ISC-38.3: [INTENTIONALLY EXCLUDED — see Decisions 2026-07-21.]
+- [x] ISC-38.4: [INTENTIONALLY EXCLUDED — see Decisions 2026-07-21.]
+- [x] ISC-38.5: [INTENTIONALLY EXCLUDED — see Decisions 2026-07-21.]
 
 ### Exception Taxonomy
 
 - [ ] ISC-39: OATH public failures use the dedicated exception contract required by ISC-25.
 - [ ] ISC-40: YubiOTP protocol or validation failures that callers must distinguish have a documented public module exception contract, or this ISA records evidence that existing typed Core exceptions preserve equivalent precision.
 - [ ] ISC-41: YubiHSM Auth protocol or validation failures that callers must distinguish have a documented public module exception contract, or this ISA records evidence that existing typed Core exceptions preserve equivalent precision.
-- [ ] ISC-42: Management protocol or validation failures that callers must distinguish have a documented public module exception contract, or this ISA records evidence that existing typed Core exceptions preserve equivalent precision.
+- [x] ISC-42: [INTENTIONALLY EXCLUDED — see Decisions 2026-07-21. Moot: the only Management protocol path this criterion covered (legacy pre-5.0 configuration) is itself intentionally excluded per ISC-36.]
 - [ ] ISC-43: SecurityDomain secure-channel failures have a documented public typed exception contract, including retained status/cause information.
 - [ ] ISC-44: OpenPGP protocol or validation failures that callers must distinguish have a documented public module exception contract, or this ISA records evidence that existing typed Core exceptions preserve equivalent precision.
 - [x] ISC-45: [DESCOPED — see Decisions 2026-07-21. Depends on ISC-8's public TLV exception contract, itself descoped by the no-new-public-API scope narrowing.]
@@ -168,14 +168,14 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 - [ ] ISC-48: OATH DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
 - [ ] ISC-49: YubiOTP DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
 - [ ] ISC-50: YubiHSM Auth DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
-- [ ] ISC-51: Management DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
+- [x] ISC-51: [INTENTIONALLY EXCLUDED — see Decisions 2026-07-21. No Management change is being merged, so there is nothing to review.]
 - [ ] ISC-52: Exception-taxonomy DevTeam cross-vendor review verdict is PASS after all high- and medium-severity correctness findings are resolved.
 - [x] ISC-53: Core independent read-only review returns PASS with no findings.
 - [ ] ISC-54: PIV independent read-only review returns PASS with no findings.
 - [ ] ISC-55: OATH independent read-only review returns PASS with no findings.
 - [ ] ISC-56: YubiOTP independent read-only review returns PASS with no findings.
 - [ ] ISC-57: YubiHSM Auth independent read-only review returns PASS with no findings.
-- [ ] ISC-58: Management independent read-only review returns PASS with no findings.
+- [x] ISC-58: [INTENTIONALLY EXCLUDED — see Decisions 2026-07-21. No Management change is being merged, so there is nothing to review.]
 - [ ] ISC-59: Exception-taxonomy independent read-only review returns PASS with no findings.
 
 ### Build, Test, and Final Audit
@@ -186,7 +186,7 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 - [ ] ISC-62.1: Focused OATH unit tests exit 0 after OATH integration.
 - [ ] ISC-62.2: Focused YubiOTP unit tests exit 0 after YubiOTP integration.
 - [ ] ISC-62.3: Focused YubiHSM unit tests exit 0 after YubiHSM integration.
-- [ ] ISC-62.4: Focused Management unit tests exit 0 after Management integration.
+- [x] ISC-62.4: [INTENTIONALLY EXCLUDED — see Decisions 2026-07-21. No Management change is being integrated.]
 - [ ] ISC-62.5: Focused SecurityDomain unit tests exit 0 after exception-taxonomy integration.
 - [ ] ISC-62.6: Focused OpenPGP unit tests exit 0 after exception-taxonomy integration.
 - [ ] ISC-63: Final CodeAudit of all changed source and test paths reports no unresolved high- or medium-severity findings.
@@ -254,7 +254,10 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
   parallelizable: true
 
 - name: ManagementParity
-  description: Re-verify and restore legacy pre-5.0 mode switching and typed failures.
+  description: >
+    INTENTIONALLY EXCLUDED (see Decisions 2026-07-21) — the user decided v2 will not restore pre-5.0
+    (YubiKey NEO/4) legacy USB-interface configuration. A full internal implementation was built and
+    discarded (branch `yubikit-gaps-management` deleted, unmerged). Retained here only for audit trail.
   satisfies: [ISC-36, ISC-37, ISC-38, ISC-38.1, ISC-38.2, ISC-38.3, ISC-38.4, ISC-38.5, ISC-42, ISC-51, ISC-58]
   depends_on: [CoreFoundation]
   parallelizable: true
@@ -262,7 +265,7 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 - name: ExceptionTaxonomy
   description: Reconcile public typed error precision across changed modules plus SecurityDomain and OpenPGP after module integrations.
   satisfies: [ISC-39, ISC-40, ISC-41, ISC-42, ISC-43, ISC-44, ISC-45, ISC-52, ISC-59]
-  depends_on: [PivParity, OathParity, YubiOtpParity, YubiHsmParity, ManagementParity]
+  depends_on: [PivParity, OathParity, YubiOtpParity, YubiHsmParity]
   parallelizable: false
 
 - name: IntegratedQualityGate
@@ -283,6 +286,8 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 - 2026-07-21 12:20 UTC: The 106 ISCs are below the E4 soft floor of 128. Further splitting would manufacture implementation-detail probes rather than independently falsifiable outcomes; every identified major gap, review gate, integration gate, and anti-criterion already has a named mechanical probe.
 - 2026-07-21 19:00 UTC: After Core's Engineer/Reviewer loop had already produced a public AES-GCM extension point, a public sequential TLV reader/writer, a public `TlvException`, and public Base16/Base32/Bcd/ModHex codecs (satisfying the original public-API-shaped ISC-2, ISC-6..ISC-13.1, and ISC-45), the user directed a scope narrowing: no new public classes/enums/interfaces in this pass, keep only internal additions with real production value, and exact v1 public-API parity is explicitly not a goal. The Engineer removed the AES-GCM abstraction (no Core production consumer existed) and all public TLV/codec/exception surfaces, retaining only `internal` ECDH and CMAC seams because SCP03/SCP11 genuinely consume them.
 - 2026-07-21 19:30 UTC: A live YubiKey 5.8 (serial 103, firmware 5.8.0.beta.0) became available for hardware verification. Ran `dotnet toolchain.cs -- test --integration --project SecurityDomain --smoke` before committing Core; this caught nothing new (the ECDH/CMAC fixes were already independently-reviewer-verified at the code level) but is the mechanical proof the ISA's ISC-60/ISC-61 gate and hardware-verification principle require rather than trusting review alone.
+- 2026-07-21 21:15 UTC: After the Management Engineer fully implemented and verified `SetLegacyDeviceConfigurationAsync` (pre-5.0 YubiKey NEO/4 USB-interface/challenge-response/touch-eject/auto-eject configuration) with passing byte-exact tests, the user reviewed the pending-merge summary and explicitly rejected restoring this capability: v2 is a new SDK and pre-5.0 hardware support is deliberately out of scope ("cutting the fat"), regardless of the historical gap report's Major severity rating. The `yubikit-gaps-management` worktree and branch were discarded unmerged. Tombstoned ISC-36 through ISC-38.5, ISC-42, ISC-51, ISC-58, and ISC-62.4 as INTENTIONALLY EXCLUDED rather than DESCOPED, because this was a deliberate product decision made *after* full implementation and verification, not a discovery that the criterion was unimplementable or already resolved.
+- 2026-07-21 21:15 UTC: Asked the user whether the same "cut the fat" instinct extends to PIV's PIN-only mode (ISC-14/14.1/15/15.1/16 family), since v1 itself documents PIN-derived mode as "provided only for backwards compatibility, not recommended." The user distinguished the two: Management's legacy work only benefits obsolete pre-5.0 hardware (YubiKey NEO/4) that v2 does not otherwise support at all, while PIV's PIN-only mode (specifically PIN-protected) is usable on any current YubiKey and has a live current use case (smart-card minidriver / Windows CAPI integrations). PIV's PIN-only work is kept. This is the operative distinction for any future "is this fat?" question in this effort: legacy-hardware-only capabilities are cut; current-firmware capabilities are kept even if v1 itself called them legacy/discouraged.
 
 ## Changelog
 
@@ -291,6 +296,7 @@ Re-verify and remediate every in-scope major finding from `docs/migration/v1-to-
 - 2026-07-21 conjectured: 71 broad criteria were sufficiently atomic for orchestration. / refuted by: the E4 completeness probe identified independently failing operations and boundaries in 23 criteria. / learned: protocol configuration, execution, cleanup, and per-module tests need separate evidence even when implemented together. / criterion now: stable child IDs split those criteria without renumbering their parents.
 - 2026-07-21 conjectured: restoring v1-shaped public parity APIs (public AES-GCM/TLV-reader-writer/codec/exception surfaces) was the correct way to close the Core Major findings. / refuted by: the user rejected new public API surface mid-implementation, judging exact v1 parity unnecessary and preferring to keep the package's public surface minimal until community demand justifies it. / learned: "restore the capability" and "restore the public API shape" are different commitments; an ISA should ask which one is wanted before scaffolding parity-shaped criteria. / criterion now: ISC-2, ISC-6 through ISC-13.1, and ISC-45 are tombstoned DESCOPED; ISC-3/ISC-4 are refined to accept an `internal` extension point as satisfying evidence.
 - 2026-07-21 conjectured: the ECDH primitive's default implementation was straightforward to review-approve on first pass. / refuted by: the second DevTeam review round found `ComputeSharedSecret` combined the peer's public point with the local private scalar — a cryptographically invalid key-pair construction that .NET's ECDH backends do not reliably reject, so it could silently compute a wrong-but-plausible shared secret depending on platform. / learned: crypto-primitive review needs an explicit "does the local key's Q actually correspond to its D" check, not just a secret-zeroing/disposal audit. / criterion now: ISC-3's test strategy requires a real independently-generated bidirectional ECDH cross-check against the BCL's own `DeriveRawSecretAgreement`, not only a trivial D=1 known-answer vector (which cannot detect this class of bug).
+- 2026-07-21 conjectured: every Major-severity finding in the historical gap report represents a capability v2 should restore, once re-verified as still-current. / refuted by: the user rejected Management's fully-implemented, fully-tested legacy pre-5.0 (YubiKey NEO/4) firmware configuration restoration outright — not because it was broken, but because v2 deliberately does not carry forward support for hardware that predates the SDK rewrite. / learned: "Major severity in v1-to-v2 comparison" and "v2 should restore this" are different questions; the first is a fact about the diff, the second is a product decision this ISA cannot make unilaterally for anything that specifically exists to serve pre-5.0/obsolete hardware, even when framed as a capability loss. / criterion now: ISC-36 through ISC-38.5, ISC-42, ISC-51, ISC-58, and ISC-62.4 are INTENTIONALLY EXCLUDED; a full working implementation exists in the discarded `yubikit-gaps-management` branch history if this decision is ever revisited.
 
 ## Verification
 

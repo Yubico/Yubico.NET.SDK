@@ -215,7 +215,7 @@ public class HidDeviceListenerDisposalTests
         try
         {
             var eventCount = 0;
-            listener.DeviceEvent = () => Interlocked.Increment(ref eventCount);
+            listener.DeviceEvent = _ => Interlocked.Increment(ref eventCount);
 
             // Act - wait briefly, no events should fire
             Thread.Sleep(100);

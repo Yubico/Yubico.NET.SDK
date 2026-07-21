@@ -23,10 +23,15 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <example>
 /// <para><strong>Simple Device Discovery:</strong></para>
 /// <code>
+/// using System;
+/// using System.Reactive.Linq;
+/// using Yubico.YubiKit.Core;
+/// using Yubico.YubiKit.Core.Devices;
+///
 /// var devices = await YubiKeyManager.FindAllAsync();
 /// foreach (var device in devices)
 /// {
-///     Console.WriteLine($"Found: {device.SerialNumber}");
+///     Console.WriteLine($"Found: {device.DeviceId} ({device.AvailableConnections})");
 /// }
 /// </code>
 /// <para><strong>Force Fresh Scan:</strong></para>
@@ -37,7 +42,7 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <code>
 /// using var subscription = YubiKeyManager.DeviceChanges.Subscribe(e =>
 /// {
-///     Console.WriteLine($"{e.Action}: {e.Device.SerialNumber}");
+///     Console.WriteLine($"{e.Action}: {e.Device.DeviceId} ({e.Device.AvailableConnections})");
 /// });
 /// YubiKeyManager.StartMonitoring();
 /// // ... application runs ...

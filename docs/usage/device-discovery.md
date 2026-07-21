@@ -5,13 +5,14 @@ This guide covers how to discover and monitor YubiKey devices using the static `
 ## Quick Start
 
 ```csharp
+using System;
 using Yubico.YubiKit.Core.Devices;
 
 // Find all connected YubiKeys
 var devices = await YubiKeyManager.FindAllAsync();
 foreach (var device in devices)
 {
-    Console.WriteLine($"Found YubiKey: {device.SerialNumber}");
+    Console.WriteLine($"Found YubiKey: {device.DeviceId} ({device.AvailableConnections})");
 }
 ```
 
@@ -34,7 +35,7 @@ The `YubiKeyManager` class is a **static-only API** - no dependency injection or
 | `StartMonitoring(TimeSpan)` | Start monitoring with custom interval |
 | `StopMonitoring()` | Stop monitoring |
 | `IsMonitoring` | Check if monitoring is active |
-| `DeviceChanges` | Observable sequence of device events |
+| `DeviceChanges` | Observable sequence of repository-diffed device events |
 
 ### Lifecycle Methods
 
@@ -61,21 +62,22 @@ var hidDevices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
 For applications that need to react to device connections/disconnections:
 
 ```csharp
+using System;
 using System.Reactive.Linq;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 
 // Subscribe to device events
 using var subscription = YubiKeyManager.DeviceChanges.Subscribe(e =>
 {
-    switch (e.Action)
+    var message = e.Action switch
     {
-        case DeviceAction.Arrived:
-            Console.WriteLine($"Device connected: {e.Device.SerialNumber}");
-            break;
-        case DeviceAction.Removed:
-            Console.WriteLine($"Device removed: {e.Device.SerialNumber}");
-            break;
-    }
+        DeviceAction.Added => "connected",
+        DeviceAction.Removed => "removed",
+        _ => "changed"
+    };
+
+    Console.WriteLine($"Device {message}: {e.Device.DeviceId} ({e.Device.AvailableConnections})");
 });
 
 // Start monitoring (events won't flow until this is called)
@@ -86,6 +88,11 @@ YubiKeyManager.StartMonitoring();
 // Clean up
 await YubiKeyManager.ShutdownAsync();
 ```
+
+`StartMonitoring()` performs an initial repository rescan. Native SmartCard and HID listener notifications are
+treated as rescan triggers only. Public `DeviceChanges` events are emitted from repository diffs after discovery,
+so a raw HID listener notification is not itself authoritative evidence that a YubiKey physical device was added
+or removed.
 
 ### Custom Monitoring Interval
 
@@ -202,4 +209,5 @@ Key changes:
 All `YubiKeyManager` methods are thread-safe:
 - `FindAllAsync()` can be called from multiple threads concurrently
 - `StartMonitoring()` and `StopMonitoring()` are idempotent
+- Listener notifications are serialized through a single-reader debounce queue before rescans
 - `DeviceChanges` events may be delivered on any thread

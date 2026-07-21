@@ -1,4 +1,4 @@
-@arh# Event-Driven Device Discovery Architecture
+# Event-Driven Device Discovery Architecture
 
 ## Before vs After
 
@@ -6,57 +6,21 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         DeviceMonitorService                                 │
-│                         (BackgroundService)                                  │
+│                       Legacy timer-based polling                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│    ┌──────────────────┐                                                      │
-│    │  PeriodicTimer   │◄─── 500ms interval                                   │
-│    │    (polling)     │                                                      │
-│    └────────┬─────────┘                                                      │
-│             │                                                                │
-│             ▼ Every 500ms                                                    │
-│    ┌────────────────────────────────────────────────────────────┐            │
-│    │              Task.Run() - Async-over-sync 😞               │            │
-│    ├────────────────────┬───────────────────────────────────────┤            │
-│    │                    │                                       │            │
-│    ▼                    ▼                                       │            │
-│ ┌─────────────────┐  ┌─────────────────┐                        │            │
-│ │ FindPcscDevices │  │  FindHidDevices │                        │            │
-│ │                 │  │                 │                        │            │
-│ │ SCardGetStatus  │  │ Full platform   │                        │            │
-│ │ Change(0)       │  │ enumeration     │                        │            │
-│ │ ▲               │  │ every cycle     │                        │            │
-│ │ │ timeout=0     │  │                 │                        │            │
-│ │ │ (immediate)   │  │ • udev_enum     │                        │            │
-│ │ └───────────────┤  │ • IOHIDManager  │                        │            │
-│ └─────────────────┘  │   CopyDevices   │                        │            │
-│                      │ • Windows: N/A  │                        │            │
-│                      └─────────────────┘                        │            │
-│    └────────────────────────────────────────────────────────────┘            │
-│             │                                                                │
-│             ▼                                                                │
-│    ┌─────────────────┐                                                       │
-│    │  DeviceChannel  │◄─── Push all devices found                            │
-│    │   (Channel<T>)  │                                                       │
-│    └────────┬────────┘                                                       │
-│             │                                                                │
-└─────────────┼────────────────────────────────────────────────────────────────┘
-              │
-              ▼
-     ┌─────────────────────┐
-     │ DeviceListenerService│
-     │  (consumes channel)  │
-     └──────────┬──────────┘
-                │
-                ▼
-     ┌─────────────────────┐
-     │DeviceRepositoryCached│
-     │   (IObservable<>)    │
-     └──────────┬──────────┘
-                │
-                ▼
-         Application
+│  PeriodicTimer (500ms)                                                       │
+│      │                                                                       │
+│      ▼                                                                       │
+│  Task.Run() async-over-sync scan                                             │
+│      ├─ PC/SC scan: SCardGetStatusChange(timeout=0)                           │
+│      └─ HID scan: full platform enumeration every cycle                        │
+│      │                                                                       │
+│      ▼                                                                       │
+│  Cache update + observable device notifications                              │
+│      │                                                                       │
+│      ▼                                                                       │
+│  Application                                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Problems:**
@@ -72,86 +36,36 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
-│                              DeviceMonitorService                                    │
-│                              (BackgroundService)                                     │
+│                         YubiKeyDeviceMonitorService                                  │
+│                         (plain async service)                                         │
 ├─────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                      │
-│  ┌──────────────────────────────────────────────────────────────────────────────┐   │
-│  │                         Platform Event Listeners                              │   │
-│  │                         (Dedicated Background Threads)                        │   │
-│  ├──────────────────────────┬──────────────────────────────────────────────────┤   │
-│  │                          │                                                   │   │
-│  │  ┌────────────────────┐  │  ┌─────────────────────────────────────────────┐ │   │
-│  │  │DesktopSmartCard    │  │  │            HidDeviceListener                │ │   │
-│  │  │DeviceListener      │  │  │            (abstract base)                  │ │   │
-│  │  │                    │  │  │                                             │ │   │
-│  │  │ ISmartCardDevice   │  │  │  ┌─────────────┬─────────────┬───────────┐ │ │   │
-│  │  │ Listener (interface)│  │  │  │  Windows   │   macOS     │   Linux   │ │ │   │
-│  │  │                    │  │  │  │            │             │           │ │ │   │
-│  │  │ SCardGetStatus     │  │  │  │ CM_Register│ IOHIDManager│ udev_     │ │ │   │
-│  │  │ Change(1000ms)     │  │  │  │ Notification│ + CFRunLoop │ monitor   │ │ │   │
-│  │  │      │             │  │  │  │   ▲        │   ▲         │ + poll()  │ │ │   │
-│  │  │      │ Blocks up   │  │  │  │   │callback│   │callback │   ▲       │ │ │   │
-│  │  │      │ to 1000ms   │  │  │  │   │        │   │         │   │100ms  │ │ │   │
-│  │  │      ▼             │  │  │  └───┼────────┴───┼─────────┴───┼───────┘ │ │   │
-│  │  │ Checks _isListening│  │  │      │            │             │         │ │   │
-│  │  │ flag, loops        │  │  │      │ OS notifies│ OS notifies │ fd ready│ │   │
-│  │  └────────┬───────────┘  │  └──────┴────────────┴─────────────┴─────────┘ │   │
-│  │           │              │                        │                       │   │
-│  └───────────┼──────────────┴────────────────────────┼───────────────────────┘   │
-│              │                                       │                           │
-│              │  Arrived/Removed                      │  Arrived/Removed          │
-│              │  events                               │  events                   │
-│              ▼                                       ▼                           │
-│         ┌─────────────────────────────────────────────────┐                      │
-│         │              SignalEvent()                       │                      │
-│         │         _eventSemaphore.Release()                │                      │
-│         └───────────────────────┬─────────────────────────┘                      │
-│                                 │                                                │
-│                                 ▼                                                │
-│         ┌─────────────────────────────────────────────────┐                      │
-│         │           Event Coalescing Loop                  │                      │
-│         │                                                  │                      │
-│         │  await _eventSemaphore.WaitAsync()               │                      │
-│         │  await Task.Delay(200ms) ◄── Coalesce rapid      │                      │
-│         │  drain remaining signals    events               │                      │
-│         │  PerformDeviceScan()                             │                      │
-│         └───────────────────────┬─────────────────────────┘                      │
-│                                 │                                                │
-│                                 ▼                                                │
-│    ┌────────────────────────────────────────────────────────────┐                │
-│    │              Enumeration (only after event)                │                │
-│    ├────────────────────┬───────────────────────────────────────┤                │
-│    │                    │                                       │                │
-│    ▼                    ▼                                       │                │
-│ ┌─────────────────┐  ┌─────────────────┐                        │                │
-│ │ FindPcscDevices │  │  FindHidDevices │  ◄── Only runs when    │                │
-│ │   (snapshot)    │  │   (snapshot)    │      event received    │                │
-│ └─────────────────┘  └─────────────────┘                        │                │
-│    └────────────────────────────────────────────────────────────┘                │
-│                                 │                                                │
-│                                 ▼                                                │
-│                     ┌─────────────────┐                                          │
-│                     │  DeviceChannel  │                                          │
-│                     │   (Channel<T>)  │                                          │
-│                     └────────┬────────┘                                          │
-│                              │                                                   │
-└──────────────────────────────┼───────────────────────────────────────────────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │ DeviceListenerService│
-                    │  (consumes channel)  │
-                    └──────────┬──────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │DeviceRepositoryCached│
-                    │   (IObservable<>)    │
-                    └──────────┬──────────┘
-                               │
-                               ▼
-                        Application
+│  Platform listeners                                                                  │
+│    ├─ DesktopSmartCardDeviceListener: SCardGetStatusChange(1000ms)                   │
+│    └─ HidDeviceListener: Windows/macOS/Linux OS notifications                        │
+│             │                                                                        │
+│             ▼                                                                        │
+│  Channel<DeviceMonitorRescanRequest> (single reader)                                 │
+│             │                                                                        │
+│             ▼                                                                        │
+│  Event coalescing loop                                                               │
+│    ├─ initial RescanCoreAsync() at monitor startup                                   │
+│    ├─ listener hints wait for a 200ms quiet period                                   │
+│    ├─ each new hint re-arms the quiet period                                         │
+│    ├─ MaxCoalesceInterval = 5 × ThrottleInterval caps a hint storm                   │
+│    └─ periodic interval fallback triggers a rescan when no listener hint arrives     │
+│             │                                                                        │
+│             ▼                                                                        │
+│  RescanCoreAsync()                                                                   │
+│    ├─ IFindYubiKeys.FindAllAsync(ConnectionType.All, ...)                            │
+│    └─ YubiKeyDeviceRepository.UpdateCache(discoveredDevices)                         │
+│             │                                                                        │
+│             ▼                                                                        │
+│  YubiKeyDeviceRepository.DeviceChanges                                               │
+│    └─ repository-diffed DeviceEvent Added/Removed notifications                      │
+│             │                                                                        │
+│             ▼                                                                        │
+│  Application                                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -168,11 +82,9 @@
 │ ISmartCardDeviceListener│         │   HidDeviceListener     │
 │      (interface)        │         │    (abstract class)     │
 ├─────────────────────────┤         ├─────────────────────────┤
-│ + Arrived event         │         │ + Arrived event         │
-│ + Removed event         │         │ + Removed event         │
+│ + DeviceEvent callback  │         │ + DeviceEvent : Action<HidDeviceRescanHint> │
 │ + Status { get; }       │         │ + Status { get; set; }  │
-└────────────┬────────────┘         │ # OnArrived(device)     │
-             │                      │ # OnRemoved(device)     │
+└────────────┬────────────┘         │ # OnDeviceEvent(hint)   │
              │                      │ + Create() : static     │
              ▼                      └────────────┬────────────┘
 ┌─────────────────────────┐                      │
@@ -211,16 +123,16 @@ Why different patterns?
 │ Notification     │  │ Create()         │  │ new_from_netlink │
 │     │            │  │     │            │  │     │            │
 │     ▼            │  │     ▼            │  │     ▼            │
-│ Callback from OS │  │ CFRunLoop        │  │ poll(fd, 100ms)  │
+│ Callback from OS │  │ CFRunLoop        │  │ poll(monitor+fd) │
 │ on device change │  │ RunInMode(100ms) │  │     │            │
 │     │            │  │     │            │  │     ▼            │
 │     ▼            │  │     ▼            │  │ udev_monitor_    │
-│ OnArrived() or   │  │ Matching/Removal │  │ receive_device   │
-│ OnRemoved()      │  │ callbacks fire   │  │     │            │
+│ Rescan hint      │  │ Matching/Removal │  │ receive_device   │
+│ callback         │  │ callbacks fire   │  │     │            │
 │                  │  │     │            │  │     ▼            │
 │ GCHandle pins    │  │     ▼            │  │ Check action:    │
-│ callback delegate│  │ OnArrived() or   │  │ add → OnArrived  │
-│                  │  │ OnRemoved()      │  │ remove→OnRemoved │
+│ callback delegate│  │ Rescan hint      │  │ add/remove hint  │
+│                  │  │ callback         │  │ stable identity  │
 └──────────────────┘  └──────────────────┘  └──────────────────┘
 ```
 
@@ -229,36 +141,14 @@ Why different patterns?
 ## Event Flow Sequence
 
 ```
-         YubiKey              OS                  Listener            Service           App
-           │                  │                      │                   │               │
-           │ Insert device    │                      │                   │               │
-           ├─────────────────►│                      │                   │               │
-           │                  │                      │                   │               │
-           │                  │ Device notification  │                   │               │
-           │                  ├─────────────────────►│                   │               │
-           │                  │                      │                   │               │
-           │                  │                      │ Arrived event     │               │
-           │                  │                      ├──────────────────►│               │
-           │                  │                      │                   │               │
-           │                  │                      │                   │ SignalEvent() │
-           │                  │                      │                   │ semaphore++   │
-           │                  │                      │                   │               │
-           │                  │                      │                   │◄──────────────┤
-           │                  │                      │                   │ Wait 200ms    │
-           │                  │                      │                   │ (coalesce)    │
-           │                  │                      │                   │               │
-           │                  │                      │                   │ Drain sema    │
-           │                  │                      │                   │               │
-           │                  │                      │                   │ FindAll()     │
-           │                  │                      │                   ├───────────────┤
-           │                  │                      │                   │               │
-           │                  │                      │                   │ DeviceChannel │
-           │                  │                      │                   │ .Write()      │
-           │                  │                      │                   ├──────────────►│
-           │                  │                      │                   │               │
-           │                  │                      │                   │               │ DeviceEvent
-           │                  │                      │                   │               │ (Arrived)
-           │                  │                      │                   │               ├──────────►
+YubiKey/OS ──device notification──► Platform listener
+Platform listener ──rescan callback/hint──► YubiKeyDeviceMonitorService
+YubiKeyDeviceMonitorService ──TryWrite──► Channel<DeviceMonitorRescanRequest>
+Single reader ──drain queued requests──► 200ms quiet period (re-arms on new hints)
+Single reader ──cap reached or quiet period elapsed──► RescanCoreAsync()
+RescanCoreAsync() ──FindAllAsync snapshot──► YubiKeyDeviceRepository.UpdateCache()
+YubiKeyDeviceRepository ──diff──► DeviceChanges (DeviceAction.Added/Removed)
+Application subscription ◄──DeviceEvent── YubiKeyManager.DeviceChanges
 ```
 
 ---
@@ -273,8 +163,8 @@ Why different patterns?
 | **HID Windows** | ❌ Not implemented | ✅ CM_Register_Notification |
 | **HID macOS** | Full enumeration | ✅ IOHIDManager callbacks |
 | **HID Linux** | udev_enumerate | ✅ udev_monitor + poll() |
-| **Event Coalescing** | None | 200ms debounce |
-| **Cancellation** | Unreliable | Responsive (100-1000ms) |
+| **Event Coalescing** | None | Single-reader queue + 200ms quiet period capped at `MaxCoalesceInterval` |
+| **Cancellation** | Unreliable | Responsive (eventfd/run-loop stop/PCSC timeout) |
 
 ---
 
@@ -306,7 +196,7 @@ INFINITE timeout (0xFFFFFFFF):
 │ }                                                            │
 └──────────────────────────────────────────────────────────────┘
 
-HID: 100ms poll/CFRunLoop timeout for same reason
+HID: macOS stops its run loop directly; Linux polls the udev monitor and an explicit shutdown event fd.
 ```
 
 ---
@@ -314,24 +204,21 @@ HID: 100ms poll/CFRunLoop timeout for same reason
 ## Files Created/Modified
 
 ```
-Yubico.YubiKit.Core/
-├── src/
-│   ├── DeviceMonitorService.cs              ◄── MODIFIED: Event-driven loop
-│   ├── SmartCard/
-│   │   ├── ISmartCardDeviceListener.cs      ◄── NEW: Interface
-│   │   └── DesktopSmartCardDeviceListener.cs◄── NEW: Implementation
-│   ├── Hid/
-│   │   ├── HidDeviceListener.cs             ◄── NEW: Abstract base
-│   │   ├── NullDevice.cs                    ◄── NEW: Placeholder for removals
-│   │   ├── Windows/
-│   │   │   └── WindowsHidDeviceListener.cs  ◄── NEW
-│   │   ├── MacOS/
-│   │   │   └── MacOSHidDeviceListener.cs    ◄── NEW
-│   │   └── Linux/
-│   │       └── LinuxHidDeviceListener.cs    ◄── NEW
-│   ├── PlatformInterop/
-│   │   └── Linux/Libc/
-│   │       └── Libc.Interop.cs              ◄── MODIFIED: Added poll()
-│   └── YubiKey/
-│       └── YubiKeyManagerOptions.cs         ◄── MODIFIED: EventCoalescingDelay
+src/Core/src/
+├── Devices/
+│   ├── YubiKeyDeviceMonitorService.cs        ◄── Event-driven monitor loop
+│   ├── YubiKeyDeviceRepository.cs            ◄── Repository-diffed DeviceChanges
+│   ├── IYubiKeyDeviceMonitorService.cs       ◄── Monitor contract
+│   ├── IYubiKeyDeviceRepository.cs           ◄── Cache contract
+│   └── YubiKeyManager.cs                     ◄── Static public entry point
+└── Transports/
+    ├── SmartCard/
+    │   ├── ISmartCardDeviceListener.cs       ◄── Listener interface
+    │   └── DesktopSmartCardDeviceListener.cs ◄── PC/SC implementation
+    └── Hid/
+        ├── HidDeviceListener.cs              ◄── Abstract listener base
+        ├── HidDeviceRescanHint.cs            ◄── Diagnostic rescan hint
+        ├── Windows/WindowsHidDeviceListener.cs
+        ├── MacOS/MacOSHidDeviceListener.cs
+        └── Linux/LinuxHidDeviceListener.cs
 ```

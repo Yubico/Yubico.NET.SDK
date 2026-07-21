@@ -52,6 +52,13 @@ var hidDevices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
 var fidoDevices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
 ```
 
+### Device Monitoring
+
+`YubiKeyManager.StartMonitoring()` starts platform listeners and performs an initial repository rescan. Listener
+notifications are only rescan hints; public `YubiKeyManager.DeviceChanges` events are emitted after discovery
+updates the repository and computes an `Added` or `Removed` diff. This means an OS-level HID notification does
+not by itself mean a public YubiKey device was added or removed.
+
 ### Opening a Connection
 
 Open a specific interface with the typed overload. The parameterless `ConnectAsync()` is only for

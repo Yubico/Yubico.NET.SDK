@@ -179,7 +179,7 @@ internal static partial class NativeMethods
     internal const int OffsetGuidData4 = 24;
     internal const int LengthGuidData4 = 8;
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode, Size = CmNotifyFilterSize)]
     internal struct CM_NOTIFY_FILTER
     {
         internal int cbSize;

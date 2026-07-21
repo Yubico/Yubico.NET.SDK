@@ -14,6 +14,8 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
@@ -102,6 +104,216 @@ public class YubiKeyDeviceMonitorServiceTests
     }
 
 
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task StartMonitoring_PerformsInitialRescan()
+    {
+        // Arrange
+        var (service, repository, findYubiKeys, _, _) = CreateService();
+        findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.HidFido)]);
+
+        // Act
+        service.StartMonitoring(TimeSpan.FromSeconds(10));
+
+        // Assert
+        await WaitUntilAsync(() => repository.HasData, "Initial monitoring rescan did not update repository");
+        Assert.Single(repository.GetAll());
+        Assert.Equal(1, findYubiKeys.ScanCount);
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task HidListenerHint_DoesNotEmitPublicDeviceChangeWithoutRepositoryDiff()
+    {
+        // Arrange
+        var (service, repository, findYubiKeys, hidListener, _) = CreateService();
+        service.StartMonitoring(TimeSpan.FromSeconds(10));
+        await WaitUntilAsync(() => findYubiKeys.ScanCount >= 1, "Initial monitoring rescan did not run");
+
+        var events = new List<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var scanCount = findYubiKeys.ScanCount;
+
+        // Act
+        hidListener.Raise(new HidDeviceRescanHint(
+            HidDeviceChangeKind.Added,
+            PlatformDeviceId: "diagnostic-only",
+            DevicePath: "/dev/hidraw999"));
+
+        // Assert
+        await WaitUntilAsync(() => findYubiKeys.ScanCount > scanCount, "HID hint did not trigger rescan");
+        Assert.Empty(events);
+        Assert.Empty(repository.GetAll());
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task HidUnknownRemoval_TriggersRepositoryRescan()
+    {
+        // Arrange
+        var (service, repository, findYubiKeys, hidListener, _) = CreateService();
+        service.StartMonitoring(TimeSpan.FromSeconds(10));
+        await WaitUntilAsync(() => findYubiKeys.ScanCount >= 1, "Initial monitoring rescan did not run");
+
+        findYubiKeys.SetDevices([new FakeYubiKey("device-2", ConnectionType.HidOtp)]);
+
+        // Act - unknown removals must still fall back to a repository rescan.
+        hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Removed));
+
+        // Assert
+        await WaitUntilAsync(
+            () => repository.GetAll().Any(device => device.DeviceId == "device-2"),
+            "Unknown HID removal hint did not trigger repository rescan");
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task ConcurrentListenerEvents_DoNotRunConcurrentRescans()
+    {
+        // Arrange
+        var (service, repository, findYubiKeys, hidListener, smartCardListener) = CreateService();
+        findYubiKeys.ScanDelay = TimeSpan.FromMilliseconds(80);
+
+        service.StartMonitoring(TimeSpan.FromSeconds(10));
+        await WaitUntilAsync(
+            () => findYubiKeys.ScanCount >= 1 && findYubiKeys.ActiveScans == 0,
+            "Initial monitoring rescan did not complete");
+
+        findYubiKeys.ResetCounters();
+
+        // Act
+        var start = new ManualResetEventSlim();
+        var tasks = Enumerable.Range(0, 32)
+            .Select(i => Task.Run(() =>
+            {
+                start.Wait(TestContext.Current.CancellationToken);
+                if (i % 2 == 0)
+                {
+                    hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Added, $"hid-{i}"));
+                }
+                else
+                {
+                    smartCardListener.Raise();
+                }
+            }, TestContext.Current.CancellationToken))
+            .ToArray();
+
+        start.Set();
+        await Task.WhenAll(tasks);
+
+        // Assert
+        await WaitUntilAsync(() => findYubiKeys.ScanCount >= 1, "Listener events did not trigger a rescan");
+        Assert.Equal(1, findYubiKeys.MaxConcurrentScans);
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+        start.Dispose();
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task HintBurst_CoalescesIntoBoundedRescans()
+    {
+        // Arrange
+        var (service, repository, findYubiKeys, hidListener, _) = CreateService();
+        service.StartMonitoring(TimeSpan.FromSeconds(30));
+        await WaitUntilAsync(
+            () => findYubiKeys.ScanCount >= 1 && findYubiKeys.ActiveScans == 0,
+            "Initial monitoring rescan did not complete");
+
+        findYubiKeys.ResetCounters();
+
+        // Act - a rapid burst must coalesce into few rescans, not one rescan per hint.
+        for (var i = 0; i < 32; i++)
+        {
+            hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Added, $"hid-{i}"));
+        }
+
+        await WaitUntilAsync(() => findYubiKeys.ScanCount >= 1, "Hint burst did not trigger a rescan");
+
+        // Allow any (incorrect) trailing per-hint rescans to surface before asserting the bound.
+        await Task.Delay(YubiKeyDeviceMonitorService.MaxCoalesceInterval + YubiKeyDeviceMonitorService.ThrottleInterval,
+            TestContext.Current.CancellationToken);
+
+        // Assert - the whole burst lands within the debounce window: at most the coalesced
+        // rescan plus one straggler, never anything approaching one rescan per hint.
+        Assert.InRange(findYubiKeys.ScanCount, 1, 2);
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task SustainedHintStorm_RescanRunsWithinMaxCoalesceInterval()
+    {
+        // Arrange
+        var (service, repository, findYubiKeys, hidListener, _) = CreateService();
+        service.StartMonitoring(TimeSpan.FromSeconds(30));
+        await WaitUntilAsync(
+            () => findYubiKeys.ScanCount >= 1 && findYubiKeys.ActiveScans == 0,
+            "Initial monitoring rescan did not complete");
+
+        findYubiKeys.ResetCounters();
+
+        // Act - hints arriving faster than the quiet period re-arm the debounce forever;
+        // the max coalesce cap must force a rescan while the storm is still running.
+        using var stormDone = new CancellationTokenSource();
+        var storm = Task.Run(async () =>
+        {
+            var i = 0;
+            while (!stormDone.IsCancellationRequested)
+            {
+                hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Added, $"storm-{i++}"));
+                try
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(20), stormDone.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+        }, TestContext.Current.CancellationToken);
+
+        try
+        {
+            // Assert - without the cap this deadline is unreachable: the quiet period re-arms
+            // on every 20 ms hint until the storm ends.
+            var deadline = DateTimeOffset.UtcNow + YubiKeyDeviceMonitorService.MaxCoalesceInterval + TimeSpan.FromSeconds(2);
+            while (findYubiKeys.ScanCount < 1)
+            {
+                Assert.True(
+                    DateTimeOffset.UtcNow < deadline,
+                    "Sustained hint storm starved the rescan beyond the max coalesce interval");
+                await Task.Delay(TimeSpan.FromMilliseconds(20), TestContext.Current.CancellationToken);
+            }
+        }
+        finally
+        {
+            stormDone.Cancel();
+            await storm;
+        }
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+    }
 
     [Fact]
     public void IsMonitoring_InitiallyFalse()
@@ -259,6 +471,28 @@ public class YubiKeyDeviceMonitorServiceTests
     }
 
     [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task DisposeAsync_RescanHungIgnoringCancellation_CompletesWithinBoundedTime()
+    {
+        // Arrange - discovery scan hangs and ignores cancellation, holding the rescan gate
+        var (service, repository, findYubiKeys, _, _) = CreateService(shutdownTimeout: TimeSpan.FromMilliseconds(250));
+        findYubiKeys.HangIgnoringCancellation = true;
+
+        service.StartMonitoring(TimeSpan.FromHours(1));
+        await WaitUntilAsync(() => findYubiKeys.ActiveScans == 1, "Initial rescan never started");
+
+        // Act - disposal must abandon the stuck loop and rescan gate instead of hanging
+        await service.DisposeAsync().AsTask()
+            .WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+        // Cleanup - unblock the stuck scan; the abandoned (undisposed) gate accepts its Release
+        findYubiKeys.ReleaseHungScans();
+        await WaitUntilAsync(() => findYubiKeys.ActiveScans == 0, "Hung rescan never completed after release");
+
+        repository.Dispose();
+    }
+
+    [Fact]
     public async Task RescanAsync_AfterDispose_ThrowsObjectDisposedException()
     {
         // Arrange
@@ -317,20 +551,157 @@ public class YubiKeyDeviceMonitorServiceTests
     /// <summary>
     /// Fake IFindYubiKeys for testing.
     /// </summary>
+    private static (
+        YubiKeyDeviceMonitorService Service,
+        YubiKeyDeviceRepository Repository,
+        FakeFindYubiKeys FindYubiKeys,
+        FakeHidDeviceListener HidListener,
+        FakeSmartCardDeviceListener SmartCardListener) CreateService(TimeSpan? shutdownTimeout = null)
+    {
+        var repository = new YubiKeyDeviceRepository();
+        var findYubiKeys = new FakeFindYubiKeys([]);
+        var hidListener = new FakeHidDeviceListener();
+        var smartCardListener = new FakeSmartCardDeviceListener();
+        var service = new YubiKeyDeviceMonitorService(
+            repository,
+            findYubiKeys,
+            () => hidListener,
+            () => smartCardListener,
+            shutdownTimeout);
+
+        return (service, repository, findYubiKeys, hidListener, smartCardListener);
+    }
+
+    private static async Task WaitUntilAsync(Func<bool> condition, string failureMessage)
+    {
+        var deadline = DateTimeOffset.UtcNow.AddSeconds(5);
+        while (!condition())
+        {
+            if (DateTimeOffset.UtcNow >= deadline)
+            {
+                throw new TimeoutException(failureMessage);
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(20), TestContext.Current.CancellationToken);
+        }
+    }
+
+    private sealed class FakeHidDeviceListener : HidDeviceListener
+    {
+        public override void Start() => Status = DeviceListenerStatus.Started;
+
+        public override void Stop() => Status = DeviceListenerStatus.Stopped;
+
+        public void Raise(HidDeviceRescanHint hint) => OnDeviceEvent(hint);
+    }
+
+    private sealed class FakeSmartCardDeviceListener : ISmartCardDeviceListener
+    {
+        public Action? DeviceEvent { get; set; }
+
+        public DeviceListenerStatus Status { get; private set; } = DeviceListenerStatus.Stopped;
+
+        public void Start() => Status = DeviceListenerStatus.Started;
+
+        public void Stop() => Status = DeviceListenerStatus.Stopped;
+
+        public void Raise() => DeviceEvent?.Invoke();
+
+        public void Dispose() => DeviceEvent = null;
+    }
+
     private sealed class FakeFindYubiKeys(IReadOnlyList<IYubiKey> initialDevices) : IFindYubiKeys
     {
+        private readonly Lock _syncLock = new();
+        private readonly TaskCompletionSource _hangReleased = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private IReadOnlyList<IYubiKey> _devices = initialDevices;
+        private int _activeScans;
+        private int _maxConcurrentScans;
+        private int _scanCount;
 
-        public void SetDevices(IReadOnlyList<IYubiKey> devices) => _devices = devices;
+        public TimeSpan ScanDelay { get; set; }
 
-        public Task<IReadOnlyList<IYubiKey>> FindAllAsync(
+        /// <summary>
+        /// When set, scans block until <see cref="ReleaseHungScans"/> is called,
+        /// ignoring the caller's cancellation token. Models a discovery backend
+        /// stuck in native I/O.
+        /// </summary>
+        public bool HangIgnoringCancellation { get; set; }
+
+        public int ScanCount => Volatile.Read(ref _scanCount);
+
+        public int ActiveScans => Volatile.Read(ref _activeScans);
+
+        public int MaxConcurrentScans => Volatile.Read(ref _maxConcurrentScans);
+
+        public void SetDevices(IReadOnlyList<IYubiKey> devices)
+        {
+            lock (_syncLock)
+            {
+                _devices = devices;
+            }
+        }
+
+        public void ReleaseHungScans() => _hangReleased.TrySetResult();
+
+        public void ResetCounters()
+        {
+            Volatile.Write(ref _scanCount, 0);
+            Volatile.Write(ref _activeScans, 0);
+            Volatile.Write(ref _maxConcurrentScans, 0);
+        }
+
+        public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(
             ConnectionType type,
             CancellationToken cancellationToken = default)
         {
-            var filtered = type == ConnectionType.All
-                ? _devices
-                : _devices.Where(d => type.Matches(d.AvailableConnections)).ToList();
-            return Task.FromResult<IReadOnlyList<IYubiKey>>(filtered);
+            Interlocked.Increment(ref _scanCount);
+            var activeScans = Interlocked.Increment(ref _activeScans);
+            UpdateMaxConcurrentScans(activeScans);
+
+            try
+            {
+                if (HangIgnoringCancellation)
+                {
+                    await _hangReleased.Task.ConfigureAwait(false);
+                }
+
+                if (ScanDelay > TimeSpan.Zero)
+                {
+                    await Task.Delay(ScanDelay, cancellationToken).ConfigureAwait(false);
+                }
+
+                IReadOnlyList<IYubiKey> devices;
+                lock (_syncLock)
+                {
+                    devices = _devices;
+                }
+
+                return type == ConnectionType.All
+                    ? devices
+                    : devices.Where(d => type.Matches(d.AvailableConnections)).ToList();
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _activeScans);
+            }
+        }
+
+        private void UpdateMaxConcurrentScans(int activeScans)
+        {
+            while (true)
+            {
+                var current = Volatile.Read(ref _maxConcurrentScans);
+                if (activeScans <= current)
+                {
+                    return;
+                }
+
+                if (Interlocked.CompareExchange(ref _maxConcurrentScans, activeScans, current) == current)
+                {
+                    return;
+                }
+            }
         }
     }
 

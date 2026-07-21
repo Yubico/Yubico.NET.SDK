@@ -20,3 +20,9 @@
 - Added a `Common Migration Recipes` section to `v1-to-v2.md` with source-backed before/after examples for device discovery, device info, applet session creation, PIV key generation, FIDO2 authenticator info, OATH credential add/calculate, and YubiOTP HMAC-SHA1 challenge-response.
 - Added recipe-backed mapping entries for the concrete v1 and v2 APIs used by those examples.
 - Kept mutating and security-sensitive flows marked as manual review rather than automatic migrations.
+
+## 2026-07-06 - HID listener rescan hint migration note
+
+- Added `hid-listener-rescan-hints` migration guidance for the change from v1 `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived`/`Removed` events (`EventHandler<HidDeviceEventArgs>`) to the v2 low-level `HidDeviceListener.DeviceEvent` callback carrying `HidDeviceRescanHint` diagnostics.
+- Clarified that v2 HID listener hints are rescan triggers only; public `YubiKeyManager.DeviceChanges` remains repository-diffed Added/Removed truth.
+

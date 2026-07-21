@@ -61,6 +61,18 @@ internal static class NativeMethods
     /// <summary>Invalid request: fd not open (only returned in revents; ignored in events).</summary>
     public const short POLLNVAL = 0x0020;
 
+    /// <summary>Close the descriptor on exec.</summary>
+    public const int EFD_CLOEXEC = 0x80000;
+
+    /// <summary>Open the event fd in non-blocking mode.</summary>
+    public const int EFD_NONBLOCK = 0x800;
+
+    /// <summary>EINTR: interrupted system call.</summary>
+    public const int EINTR = 4;
+
+    /// <summary>EAGAIN/EWOULDBLOCK: no data available on a non-blocking descriptor.</summary>
+    public const int EAGAIN = 11;
+
     /// <summary>
     /// Wait for events on the specified file descriptors.
     /// </summary>
@@ -71,6 +83,10 @@ internal static class NativeMethods
     [DllImport(Libraries.LinuxKernelLib, EntryPoint = "poll", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern int poll([In, Out] PollFd[] fds, int nfds, int timeout);
+
+    [DllImport(Libraries.LinuxKernelLib, EntryPoint = "eventfd", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    public static extern LinuxEventFdSafeHandle eventfd(uint initval, int flags);
 
 
     public const long HIDIOCGRAWINFO = 0x0000000080084803;
@@ -143,10 +159,25 @@ internal static class NativeMethods
         byte[] outputBuffer,
         int count);
 
+    // Read count bytes from an event fd. Place them into outputBuffer.
+    [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "read", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    public static extern int read(LinuxEventFdSafeHandle handle,
+        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
+        byte[] outputBuffer,
+        int count);
+
     // Write the count bytes in inputBuffer.
     [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "write", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern int write(LinuxFileSafeHandle handle,
+        [MarshalAs(UnmanagedType.LPArray)] byte[] inputBuffer,
+        int count);
+
+    // Write count bytes to an event fd.
+    [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "write", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    public static extern int write(LinuxEventFdSafeHandle handle,
         [MarshalAs(UnmanagedType.LPArray)] byte[] inputBuffer,
         int count);
 

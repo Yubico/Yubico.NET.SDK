@@ -98,7 +98,7 @@ public class HsmAuthSessionByteLevelTests
     }
 
     [Fact]
-    public async Task DeleteCredentialAsync_WhenManagementKeyRetryFailure_ThrowsRetryAwareApduException()
+    public async Task DeleteCredentialAsync_WhenManagementKeyRetryFailure_ThrowsHsmAuthRetryException()
     {
         // SW 63C2 is the YubiHSM Auth retry-counter failure response with 2 attempts left.
         var connection = CreateInitializedConnection([0x63, 0xC2]);
@@ -107,12 +107,13 @@ public class HsmAuthSessionByteLevelTests
             firmwareVersion: new FirmwareVersion(5, 4, 3),
             cancellationToken: TestContext.Current.CancellationToken);
 
-        var exception = await Assert.ThrowsAsync<ApduException>(() => session.DeleteCredentialAsync(
+        var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.DeleteCredentialAsync(
             Sequence(0x10, 16),
             "cred",
             TestContext.Current.CancellationToken));
 
         Assert.Equal(unchecked((short)0x63C2), exception.SW);
+        Assert.Equal(2, exception.RetriesRemaining);
         Assert.Equal((byte)0x02, exception.Ins.GetValueOrDefault());
         Assert.Contains("2 attempt(s) remaining", exception.Message);
         var command = LastCommand(connection);

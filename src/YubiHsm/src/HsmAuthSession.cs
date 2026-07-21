@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -93,6 +94,18 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     private readonly ScpKeyParameters? _scpKeyParams;
     private ISmartCardProtocol _protocol = null!;
     private IHsmAuthBackend _backend = null!;
+
+    /// <summary>
+    ///     Gets or sets a callback invoked when a session-key calculation may require the user
+    ///     to physically touch the YubiKey. See <see cref="TouchNotificationCallback" /> for
+    ///     threading, reentrancy, and firing-condition details.
+    /// </summary>
+    /// <example>
+    ///     <code>
+    /// session.OnTouchRequired = () => Console.WriteLine("Touch your YubiKey now...");
+    /// </code>
+    /// </example>
+    public TouchNotificationCallback? OnTouchRequired { get; set; }
 
     private HsmAuthSession(
         ISmartCardConnection connection,
@@ -400,6 +413,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ThrowIfDisposed();
         var labelBytes = ValidateAndEncodeLabel(label);
 
+        await NotifyTouchIfRequiredAsync(label, cancellationToken).ConfigureAwait(false);
+
         byte[]? credPwBytes = null;
         Memory<byte> data = default;
         try
@@ -517,6 +532,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ThrowIfDisposed();
         EnsureSupports(FeatureAsymmetric);
         var labelBytes = ValidateAndEncodeLabel(label);
+
+        await NotifyTouchIfRequiredAsync(label, cancellationToken).ConfigureAwait(false);
 
         byte[]? credPwBytes = null;
         Memory<byte> data = default;
@@ -835,6 +852,49 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         return response;
     }
 
+    /// <summary>
+    ///     Notifies <see cref="OnTouchRequired" /> before a CALCULATE session-key exchange when
+    ///     the target credential's touch requirement is set or cannot be determined.
+    /// </summary>
+    /// <remarks>
+    ///     Short-circuits with no device I/O when no callback is registered, so callers who do
+    ///     not opt in observe no behavior or performance change.
+    /// </remarks>
+    private async Task NotifyTouchIfRequiredAsync(string label, CancellationToken cancellationToken)
+    {
+        if (OnTouchRequired is null)
+            return;
+
+        // The try/catch below guards only the credential-list query. OnTouchRequired.Invoke() is
+        // called unconditionally outside of it so a throwing caller callback propagates normally
+        // to the caller instead of being caught by the query's error handling, misdiagnosed as a
+        // query failure, and invoked a second time.
+        IReadOnlyList<HsmAuthCredential> credentials;
+        try
+        {
+            credentials = await ListCredentialsAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            Logger.LogDebug(
+                ex, "YubiHSM Auth: failed to query credential list for touch policy, notifying conservatively");
+            OnTouchRequired.Invoke();
+            return;
+        }
+
+        var credential = credentials.FirstOrDefault(
+            c => string.Equals(c.Label, label, StringComparison.Ordinal));
+
+        // Unknown touch semantics (null) are treated conservatively: notify so the caller
+        // can prompt the user before the blocking CALCULATE exchange. A missing credential
+        // means the subsequent CALCULATE call will fail for an unrelated reason, so no
+        // notification is warranted.
+        if (credential is { TouchRequired: not false })
+        {
+            OnTouchRequired.Invoke();
+        }
+    }
+
     private static void ValidateManagementKey(ReadOnlySpan<byte> managementKey)
     {
         if (managementKey.Length != ManagementKeyLength)
@@ -859,7 +919,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         if (retries is null)
             return;
 
-        throw new ApduException(
+        throw new HsmAuthRetryException(
+            retries.Value,
             $"{errorContext}, {retries} attempt(s) remaining (SW=0x{response.SW:X4})")
         {
             SW = response.SW,

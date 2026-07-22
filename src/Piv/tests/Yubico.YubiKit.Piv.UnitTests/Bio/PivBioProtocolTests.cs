@@ -52,6 +52,34 @@ public class PivBioProtocolTests
             b => Assert.Equal(0, b));
     }
 
+    [Fact]
+    public async Task VerifyUvAsync_WrongFingerprint_ThrowsInvalidPinExceptionWithRetriesRemaining()
+    {
+        var backend = new FixedStatusWordBackend(unchecked((short)0x63C3)); // 3 retries remaining
+
+        var exception = await Assert.ThrowsAsync<InvalidPinException>(() =>
+            PivBioProtocol.VerifyUvAsync(
+                backend,
+                NullLogger.Instance,
+                requestTemporaryPin: false,
+                checkOnly: true,
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal(3, exception.RetriesRemaining);
+    }
+
+    private sealed class FixedStatusWordBackend(short statusWord) : IPivBackend
+    {
+        public Task<PivInitialization> InitializeAsync(CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException("Not needed for these tests.");
+
+        public Task<ApduResponse> SendAsync(
+            ApduCommand command,
+            bool throwOnError = true,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(new ApduResponse(Array.Empty<byte>(), statusWord));
+    }
+
     private sealed class BioCapturingBackend(byte[] responseWithoutSw) : IPivBackend
     {
         public byte[]? CapturedRawDataArray { get; private set; }

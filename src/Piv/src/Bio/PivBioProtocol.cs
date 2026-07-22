@@ -82,7 +82,7 @@ internal static class PivBioProtocol
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>Temporary PIN if requestTemporaryPin is true, otherwise null. WARNING: Caller MUST zero this immediately after use!</returns>
     /// <exception cref="NotSupportedException">Thrown if biometrics are not supported or configured.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if biometric verification fails.</exception>
+    /// <exception cref="InvalidPinException">Thrown if biometric verification fails, with the remaining retry count.</exception>
     internal static async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(
         IPivBackend backend,
         ILogger logger,
@@ -116,7 +116,9 @@ internal static class PivBioProtocol
 
         if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
         {
-            throw new InvalidOperationException($"Biometric verification failed. {retriesRemaining} retries remaining.");
+            throw new InvalidPinException(
+                retriesRemaining,
+                $"Biometric verification failed. {retriesRemaining} retries remaining.");
         }
 
         if (!response.IsOK())
@@ -152,7 +154,7 @@ internal static class PivBioProtocol
     /// <summary>
     /// Verifies the temporary PIN obtained from biometric verification.
     /// </summary>
-    /// <param name="temporaryPin">The temporary PIN returned from VerifyUvAsync. WILL BE ZEROED after use.</param>
+    /// <param name="temporaryPin">The temporary PIN returned from VerifyUvAsync. This method does NOT zero it — the caller owns and must zero this buffer after use.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <exception cref="InvalidPinException">Thrown if the temporary PIN is invalid.</exception>
     internal static async Task VerifyTemporaryPinAsync(

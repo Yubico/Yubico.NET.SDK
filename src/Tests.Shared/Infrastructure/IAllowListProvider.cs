@@ -34,7 +34,13 @@ public interface IAllowListProvider
 
     /// <summary>
     ///     Gets whether devices without serial numbers should be allowed for testing.
-    ///     Useful for alpha firmware or devices where serial API visibility is disabled.
     /// </summary>
+    /// <remarks>
+    ///     This must stay <see langword="false"/> except when testing YubiKey Security Key series
+    ///     devices (FIDO-only editions that report no serial number). Setting this to
+    ///     <see langword="true"/> authorizes ANY connected device with an unreadable serial for
+    ///     destructive integration tests, including a production key that happens to have serial
+    ///     visibility disabled — defeating the purpose of the allow list.
+    /// </remarks>
     bool AllowUnknownSerials => false;
 }

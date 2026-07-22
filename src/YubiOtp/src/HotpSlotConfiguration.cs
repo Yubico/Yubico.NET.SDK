@@ -39,10 +39,13 @@ public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
     /// The HMAC secret key. Must be exactly <see cref="YubiOtpConstants.HmacKeySize"/> (20) bytes.
     /// </param>
     /// <param name="imf">
-    /// Initial moving factor. Must be 0 or a multiple of 0x10000, and at most 0xFFFF0000.
+    /// Initial moving factor. Must be 0 or a positive multiple of 0x10000. Because this
+    /// parameter is a signed <see cref="int"/>, the largest representable value is
+    /// 0x7FFF0000 (2,147,450,880) — not the wire format's theoretical 0xFFFF0000 maximum,
+    /// which would require an unsigned value wider than 31 bits.
     /// </param>
     /// <exception cref="ArgumentException">
-    /// Thrown when the key is not exactly 20 bytes, or IMF is not a valid multiple of 0x10000.
+    /// Thrown when the key is not exactly 20 bytes, or IMF is negative or not a multiple of 0x10000.
     /// </exception>
     public HotpSlotConfiguration(ReadOnlySpan<byte> hmacKey, int imf = 0)
     {

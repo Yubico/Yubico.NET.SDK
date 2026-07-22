@@ -82,6 +82,12 @@ public interface IOpenPgpSession : IApplicationSession
     ///     If <c>false</c>, verifies for signature operations (P2=0x81). Defaults to <c>false</c>.
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <exception cref="OpenPgpInvalidPinException">
+    ///     Thrown when the card rejects the supplied User PIN.
+    ///     <see cref="OpenPgpInvalidPinException.RetriesRemaining" /> reports the remaining
+    ///     attempts (<c>0</c> if the PIN is now blocked), or <c>null</c> if the count could not
+    ///     be determined.
+    /// </exception>
     Task VerifyPinAsync(
         ReadOnlyMemory<byte> pinUtf8,
         bool extended = false,
@@ -90,6 +96,12 @@ public interface IOpenPgpSession : IApplicationSession
     /// <summary>
     ///     Verifies the Admin PIN. If KDF is configured, the PIN is derived before sending.
     /// </summary>
+    /// <exception cref="OpenPgpInvalidPinException">
+    ///     Thrown when the card rejects the supplied Admin PIN.
+    ///     <see cref="OpenPgpInvalidPinException.RetriesRemaining" /> reports the remaining
+    ///     attempts (<c>0</c> if the PIN is now blocked), or <c>null</c> if the count could not
+    ///     be determined.
+    /// </exception>
     Task VerifyAdminAsync(
         ReadOnlyMemory<byte> pinUtf8,
         CancellationToken cancellationToken = default);
@@ -214,6 +226,14 @@ public interface IOpenPgpSession : IApplicationSession
     /// <summary>
     ///     Gets an attestation certificate for the specified key slot. Requires firmware 5.2.0+.
     /// </summary>
+    /// <exception cref="NotSupportedException">
+    ///     Thrown when the device firmware does not support key attestation (requires 5.2.0+).
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown when the device does not return an attestation certificate for
+    ///     <paramref name="keyRef" /> after a successful GET_ATTESTATION, indicating unexpected
+    ///     device behavior rather than a caller input error.
+    /// </exception>
     Task<X509Certificate2> AttestKeyAsync(
         KeyRef keyRef,
         CancellationToken cancellationToken = default);
@@ -296,6 +316,13 @@ public interface IOpenPgpSession : IApplicationSession
     /// <summary>
     ///     Gets the algorithm attributes for the specified key slot.
     /// </summary>
+    /// <exception cref="NotSupportedException">
+    ///     Thrown when <paramref name="keyRef" /> is <see cref="KeyRef.Att" /> and the device
+    ///     does not have an Attestation key slot.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    ///     Thrown when <paramref name="keyRef" /> is not a defined value.
+    /// </exception>
     Task<AlgorithmAttributes> GetAlgorithmAttributesAsync(
         KeyRef keyRef,
         CancellationToken cancellationToken = default);
@@ -333,6 +360,10 @@ public interface IOpenPgpSession : IApplicationSession
     /// <summary>
     ///     Signs a message using the Signature key.
     /// </summary>
+    /// <exception cref="NotSupportedException">
+    ///     Thrown when <paramref name="hashAlgorithm" /> is not one of SHA1, SHA256, SHA384, or
+    ///     SHA512.
+    /// </exception>
     Task<ReadOnlyMemory<byte>> SignAsync(
         ReadOnlyMemory<byte> message,
         HashAlgorithmName hashAlgorithm,
@@ -348,6 +379,10 @@ public interface IOpenPgpSession : IApplicationSession
     /// <summary>
     ///     Performs internal authentication using the Authentication key.
     /// </summary>
+    /// <exception cref="NotSupportedException">
+    ///     Thrown when <paramref name="hashAlgorithm" /> is not one of SHA1, SHA256, SHA384, or
+    ///     SHA512.
+    /// </exception>
     Task<ReadOnlyMemory<byte>> AuthenticateAsync(
         ReadOnlyMemory<byte> data,
         HashAlgorithmName hashAlgorithm,

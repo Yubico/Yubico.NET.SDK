@@ -53,7 +53,7 @@ internal static class CredentialsCommand
             return 0;
         }
 
-        var table = OutputHelpers.CreateTable("Label", "Algorithm", "Touch", "Counter");
+        var table = OutputHelpers.CreateTable("Label", "Algorithm", "Touch", "Retries");
 
         foreach (var cred in credentials.OrderBy(c => c.Label, StringComparer.OrdinalIgnoreCase))
         {
@@ -75,7 +75,7 @@ internal static class CredentialsCommand
                 Markup.Escape(cred.Label),
                 algorithm,
                 touch,
-                cred.Counter.ToString());
+                cred.RetriesRemaining.ToString());
         }
 
         AnsiConsole.Write(table);

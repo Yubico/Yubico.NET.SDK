@@ -231,7 +231,7 @@ public sealed class HsmAuthCredentialsListCommand : YkCommandBase<HsmAuthCredent
             return ExitCode.Success;
         }
 
-        var table = OutputHelpers.CreateTable("Label", "Algorithm", "Touch", "Counter");
+        var table = OutputHelpers.CreateTable("Label", "Algorithm", "Touch", "Retries");
 
         foreach (var cred in credentials.OrderBy(c => c.Label, StringComparer.OrdinalIgnoreCase))
         {
@@ -250,7 +250,7 @@ public sealed class HsmAuthCredentialsListCommand : YkCommandBase<HsmAuthCredent
             };
 
             table.AddRow(
-                Markup.Escape(cred.Label), algorithm, touch, cred.Counter.ToString());
+                Markup.Escape(cred.Label), algorithm, touch, cred.RetriesRemaining.ToString());
         }
 
         AnsiConsole.Write(table);

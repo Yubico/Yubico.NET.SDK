@@ -278,11 +278,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 0x01 => true,
                 _ => null
             };
-            var labelBytes = value[2..^1]; // Everything except algorithm, touch, and counter
-            var counter = value[^1];
+            var labelBytes = value[2..^1]; // Everything except algorithm, touch, and retries-remaining
+            var retriesRemaining = value[^1];
             var label = Encoding.UTF8.GetString(labelBytes);
 
-            credentials.Add(new HsmAuthCredential(label, algorithm, counter, touchRequired));
+            credentials.Add(new HsmAuthCredential(label, algorithm, retriesRemaining, touchRequired));
         }
 
         return credentials;

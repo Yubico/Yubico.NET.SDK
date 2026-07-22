@@ -20,7 +20,7 @@ public static class ListCredentials
             return;
         }
 
-        var table = OutputHelpers.CreateTable("Label", "Algorithm", "Touch", "Counter");
+        var table = OutputHelpers.CreateTable("Label", "Algorithm", "Touch", "Retries");
 
         foreach (var cred in credentials.OrderBy(c => c.Label, StringComparer.OrdinalIgnoreCase))
         {
@@ -42,7 +42,7 @@ public static class ListCredentials
                 Markup.Escape(cred.Label),
                 algorithm,
                 touch,
-                cred.Counter.ToString());
+                cred.RetriesRemaining.ToString());
         }
 
         AnsiConsole.Write(table);

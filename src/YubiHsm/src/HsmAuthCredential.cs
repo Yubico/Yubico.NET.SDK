@@ -20,12 +20,18 @@ namespace Yubico.YubiKit.YubiHsm;
 /// </summary>
 /// <param name="Label">The credential label (1-64 UTF-8 bytes).</param>
 /// <param name="Algorithm">The algorithm used by this credential.</param>
-/// <param name="Counter">The number of times this credential has been used.</param>
+/// <param name="RetriesRemaining">
+///     The number of authentication attempts remaining before this credential is permanently deleted by
+///     the device. Hardware-verified: decrements on each failed credential-password authentication
+///     attempt (observed 8 to 7 after one failed <see cref="IHsmAuthSession.CalculateSessionKeysSymmetricAsync"/>
+///     attempt). Behavior on successful authentication was not separately hardware-verified; per the
+///     YubiHSM Auth applet's design it is not expected to change on success. A fresh credential starts at 8.
+/// </param>
 /// <param name="TouchRequired">Whether touch is required to use this credential, or <c>null</c> if unknown.</param>
 public sealed record HsmAuthCredential(
     string Label,
     HsmAuthAlgorithm Algorithm,
-    int Counter,
+    int RetriesRemaining,
     bool? TouchRequired) : IComparable<HsmAuthCredential>
 {
     /// <inheritdoc />

@@ -116,6 +116,12 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <summary>
     ///     Factory helper that creates and initializes a Security Domain session.
     /// </summary>
+    /// <exception cref="SecureChannelException">
+    ///     <paramref name="scpKeyParams" /> was supplied and establishing the SCP secure channel failed
+    ///     (for example, a wrong SCP03 key, an SCP11 receipt/authentication mismatch, a rejected SCP11
+    ///     certificate, or SCP unsupported by the connected firmware/transport). The original failure is
+    ///     available as <see cref="Exception.InnerException" />.
+    /// </exception>
     public static async Task<SecurityDomainSession> CreateAsync(
         ISmartCardConnection connection,
         ProtocolConfiguration? configuration = null,
@@ -162,13 +168,30 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         _hasExplicitFirmwareVersion = firmwareVersion is not null;
         var resolvedFirmwareVersion = firmwareVersion ?? FirmwareVersion.V5_3_0;
 
-        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
-                protocol,
-                resolvedFirmwareVersion,
-                configuration,
-                _scpKeyParams,
-                cancellationToken)
-            .ConfigureAwait(false);
+        ISmartCardProtocol effectiveProtocol;
+        try
+        {
+            effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+                    protocol,
+                    resolvedFirmwareVersion,
+                    configuration,
+                    _scpKeyParams,
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (_scpKeyParams is not null &&
+            ex is ApduException or BadResponseException or NotSupportedException)
+        {
+            // Only the SCP handshake/authentication path can throw these exception types while
+            // _scpKeyParams is set (protocol.Configure(...) above does not transmit APDUs). Wrap as
+            // SecureChannelException so callers can distinguish "secure channel could not be
+            // established" from a generic post-handshake Security Domain operation failure.
+            throw new SecureChannelException(ex);
+        }
 
         if (!ReferenceEquals(protocol, effectiveProtocol))
         {
@@ -797,6 +820,10 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     Performs a factory reset by blocking all registered key references and reinitializing the session.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <exception cref="SecureChannelException">
+    ///     This session was created with SCP key parameters and reinitializing the secure channel after
+    ///     the reset failed. The original failure is available as <see cref="Exception.InnerException" />.
+    /// </exception>
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
         await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

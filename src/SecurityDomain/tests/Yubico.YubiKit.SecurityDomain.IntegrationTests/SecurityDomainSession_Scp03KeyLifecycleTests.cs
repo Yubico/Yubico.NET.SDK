@@ -80,14 +80,17 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests
                 await session.DeleteKeyAsync(keyRef1, cancellationToken: ct);
             }, scpKeyParams: keyParams2, cancellationToken: ct);
 
-        // Session 4: Verify first key no longer works
-        await Assert.ThrowsAsync<ApduException>(async () =>
+        // Session 4: Verify first key no longer works. The deleted key's KVN no longer exists on
+        // the device, so establishing the secure channel fails during SecurityDomainSession.CreateAsync
+        // and surfaces as SecureChannelException wrapping the device's APDU-level rejection.
+        var deletedKey1Ex = await Assert.ThrowsAsync<SecureChannelException>(async () =>
         {
             await state.WithSecurityDomainSessionAsync(false,
                 session => Task.CompletedTask,
                 scpKeyParams: keyParams1,
                 cancellationToken: ct);
         });
+        Assert.IsType<ApduException>(deletedKey1Ex.InnerException);
 
         // Session 5: Verify second key still works, and first key is gone from key info
         await state.WithSecurityDomainSessionAsync(false,
@@ -107,14 +110,17 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests
                 await session.DeleteKeyAsync(keyRef2, deleteLast: true, cancellationToken: ct);
             }, scpKeyParams: keyParams2, cancellationToken: ct);
 
-        // Session 7: Verify second key no longer works
-        await Assert.ThrowsAsync<ApduException>(async () =>
+        // Session 7: Verify second key no longer works. The deleted key's KVN no longer exists on
+        // the device, so establishing the secure channel fails during SecurityDomainSession.CreateAsync
+        // and surfaces as SecureChannelException wrapping the device's APDU-level rejection.
+        var deletedKey2Ex = await Assert.ThrowsAsync<SecureChannelException>(async () =>
         {
             await state.WithSecurityDomainSessionAsync(false,
                 session => Task.CompletedTask,
                 scpKeyParams: keyParams2,
                 cancellationToken: ct);
         });
+        Assert.IsType<ApduException>(deletedKey2Ex.InnerException);
     }
 
     /// <summary>
@@ -170,13 +176,17 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests
                 return Task.CompletedTask;
             }, scpKeyParams: rotatedKeyParams, cancellationToken: ct);
 
-        // Session 4: Verify the original key no longer works
-        await Assert.ThrowsAsync<ApduException>(async () =>
+        // Session 4: Verify the original key no longer works. The original KVN was replaced away
+        // on the device, so establishing the secure channel fails during
+        // SecurityDomainSession.CreateAsync and surfaces as SecureChannelException wrapping the
+        // device's APDU-level rejection.
+        var rotatedAwayEx = await Assert.ThrowsAsync<SecureChannelException>(async () =>
         {
             await state.WithSecurityDomainSessionAsync(false,
                 session => Task.CompletedTask,
                 scpKeyParams: originalKeyParams,
                 cancellationToken: ct);
         });
+        Assert.IsType<ApduException>(rotatedAwayEx.InnerException);
     }
 }

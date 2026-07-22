@@ -94,13 +94,16 @@ public class SecurityDomainSession_Scp03Tests
                 return Task.CompletedTask;
             }, scpKeyParams: newKeyParams, cancellationToken: CancellationTokenSource.Token);
 
-        // Step 3: Verify default keys no longer work
-        await Assert.ThrowsAsync<ApduException>(async () =>
+        // Step 3: Verify default keys no longer work. The default KVN was superseded on the
+        // device, so establishing the secure channel fails during SecurityDomainSession.CreateAsync
+        // and surfaces as SecureChannelException wrapping the device's APDU-level rejection.
+        var ex = await Assert.ThrowsAsync<SecureChannelException>(async () =>
         {
             await state.WithSecurityDomainSessionAsync(false,
                 session => Task.CompletedTask, scpKeyParams: Scp03KeyParameters.Default,
                 cancellationToken: CancellationTokenSource.Token);
         });
+        Assert.IsType<ApduException>(ex.InnerException);
     }
 
     [Theory]

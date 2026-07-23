@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 
 namespace Yubico.YubiKit.YubiOtp;
@@ -50,8 +51,26 @@ public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
     /// <paramref name="keyboardLayout"/>.
     /// </exception>
     public StaticPasswordSlotConfiguration(string password, KeyboardLayout keyboardLayout)
-        : this(ToScanCodes(password, keyboardLayout))
+        : this(password, keyboardLayout, ToScanCodes)
     {
+    }
+
+    internal StaticPasswordSlotConfiguration(
+        string password,
+        KeyboardLayout keyboardLayout,
+        Func<string, KeyboardLayout, byte[]> scanCodeFactory)
+    {
+        ArgumentNullException.ThrowIfNull(scanCodeFactory);
+
+        byte[] scanCodes = scanCodeFactory(password, keyboardLayout);
+        try
+        {
+            Initialize(scanCodes);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(scanCodes);
+        }
     }
 
     /// <summary>
@@ -64,6 +83,11 @@ public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
     /// Thrown when <paramref name="scanCodes"/> is empty or exceeds 38 bytes.
     /// </exception>
     public StaticPasswordSlotConfiguration(ReadOnlySpan<byte> scanCodes)
+    {
+        Initialize(scanCodes);
+    }
+
+    private void Initialize(ReadOnlySpan<byte> scanCodes)
     {
         if (scanCodes.IsEmpty)
         {
@@ -109,6 +133,18 @@ public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
         ArgumentNullException.ThrowIfNull(password);
 
         var translator = HidCodeTranslator.GetInstance(keyboardLayout);
-        return translator.GetHidCodes(password);
+        // Validate before allocating so unsupported characters cannot strand a partially populated sensitive buffer.
+        foreach (char character in password)
+        {
+            _ = translator[character];
+        }
+
+        var scanCodes = new byte[password.Length];
+        for (int index = 0; index < password.Length; index++)
+        {
+            scanCodes[index] = translator[password[index]];
+        }
+
+        return scanCodes;
     }
 }

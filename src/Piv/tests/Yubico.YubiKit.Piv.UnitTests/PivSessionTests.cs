@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -151,6 +152,46 @@ public class PivSessionTests
         Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xA4); // SELECT
         Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xFD); // GET VERSION
         Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xF7 && command[3] == 0x9B); // Management metadata
+    }
+
+    [Theory]
+    [InlineData(0x6A, 0x88)]
+    [InlineData(0x6D, 0x00)]
+    public async Task CreateAsync_WhenReliableFirmwareManagementMetadataUnavailable_UsesAes192Fallback(
+        int statusHigh,
+        int statusLow)
+    {
+        var connection = new RecordingSmartCardConnection(
+            OkResponse(),
+            [0x05, 0x07, 0x00, 0x90, 0x00],
+            [(byte)statusHigh, (byte)statusLow]);
+
+        await using var session = await PivSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+    }
+
+    [Theory]
+    [InlineData(0, 0, 0)]
+    [InlineData(0, 0, 1)]
+    [InlineData(0, 9, 9)]
+    public async Task CreateAsync_WhenSentinelFirmwareManagementMetadataUnavailable_UsesTripleDesFallback(
+        int major,
+        int minor,
+        int patch)
+    {
+        var connection = new RecordingSmartCardConnection(
+            OkResponse(),
+            [(byte)major, (byte)minor, (byte)patch, 0x90, 0x00],
+            [0x6A, 0x88]);
+
+        await using var session = await PivSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
     }
 
     [Fact]
@@ -334,6 +375,105 @@ public class PivSessionTests
     }
 
     [Fact]
+    public async Task SetManagementKeyAsync_WhenSuccessful_UpdatesTypeAndPreservesAuthentication()
+    {
+        var connection = CreateInitializedConnection([0x90, 0x00]);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
+        byte[] newKey = new byte[16];
+
+        try
+        {
+            await session.SetManagementKeyAsync(
+                PivManagementKeyType.Aes128,
+                newKey,
+                cancellationToken: TestContext.Current.CancellationToken);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(newKey);
+        }
+
+        Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
+        Assert.True(session.IsAuthenticated);
+        Assert.Equal(0xFF, LastCommand(connection)[1]);
+    }
+
+    [Fact]
+    public async Task SetManagementKeyAsync_WhenNonAuthenticationCommandFailureOccurs_PreservesTypeAndAuthentication()
+    {
+        var connection = CreateInitializedConnection([0x6A, 0x80]);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
+        byte[] newKey = new byte[16];
+
+        try
+        {
+            await Assert.ThrowsAsync<ApduException>(() => session.SetManagementKeyAsync(
+                PivManagementKeyType.Aes128,
+                newKey,
+                cancellationToken: TestContext.Current.CancellationToken));
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(newKey);
+        }
+
+        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+        Assert.True(session.IsAuthenticated);
+    }
+
+    [Fact]
+    public async Task SetManagementKeyAsync_SecurityStatusNotSatisfied_ClearsAuthenticationAndPreservesType()
+    {
+        var connection = CreateInitializedConnection([0x69, 0x82]);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
+        byte[] newKey = new byte[16];
+
+        try
+        {
+            var exception = await Assert.ThrowsAsync<ApduException>(() => session.SetManagementKeyAsync(
+                PivManagementKeyType.Aes128,
+                newKey,
+                cancellationToken: TestContext.Current.CancellationToken));
+            Assert.True(exception.SW == SWConstants.SecurityStatusNotSatisfied);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(newKey);
+        }
+
+        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+        Assert.False(session.IsAuthenticated);
+    }
+
+    [Fact]
+    public async Task AuthenticateAsync_WhenAttemptFails_ClearsPriorAuthentication()
+    {
+        var connection = CreateInitializedConnection([0x69, 0x82]);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
+        byte[] managementKey = new byte[24];
+
+        try
+        {
+            var exception = await Assert.ThrowsAsync<ApduException>(() => session.AuthenticateAsync(
+                managementKey,
+                TestContext.Current.CancellationToken));
+            Assert.True(exception.SW == SWConstants.SecurityStatusNotSatisfied);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(managementKey);
+        }
+
+        Assert.False(session.IsAuthenticated);
+        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+        Assert.Equal(0x87, LastCommand(connection)[1]);
+    }
+
+    [Fact]
     public async Task ResetAsync_BlocksPinAndPukThenResets()
     {
         // Regression test for the BlockPukAsync -> PivMetadataProtocol.BlockPukAsync extraction:
@@ -354,8 +494,138 @@ public class PivSessionTests
         Assert.Contains(connection.TransmittedCommands, c => c[1] == 0xFB); // RESET
     }
 
+    [Fact]
+    public async Task ResetAsync_WhenSuccessful_RefreshesManagementKeyTypeAndClearsAuthentication()
+    {
+        var connection = CreateInitializedConnection(
+            [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
+            [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
+            [0x63, 0xC0], // PIN blocked
+            [0x63, 0xC0], // PUK blocked
+            [0x90, 0x00], // RESET
+            ManagementKeyMetadataResponse(PivManagementKeyType.Aes128)); // authoritative post-reset metadata
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
+        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes256);
+
+        await session.ResetAsync(TestContext.Current.CancellationToken);
+
+        Assert.False(session.IsAuthenticated);
+        Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
+    }
+
+    [Fact]
+    public async Task ResetAsync_WhenMetadataUnsupported_UsesTripleDesFallbackAndClearsAuthentication()
+    {
+        var connection = CreateInitializedConnection(
+            [0x90, 0x00], // SET MANAGEMENT KEY -> AES128
+            [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
+            [0x63, 0xC0], // PIN blocked
+            [0x63, 0xC0], // PUK blocked
+            [0x90, 0x00], // RESET
+            [0x6D, 0x00]); // GET METADATA unsupported
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
+        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes128);
+
+        await session.ResetAsync(TestContext.Current.CancellationToken);
+
+        Assert.False(session.IsAuthenticated);
+        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+    }
+
+    [Fact]
+    public async Task ResetAsync_WhenReliableFirmwareMetadataUnsupported_UsesAes192FallbackAndClearsAuthentication()
+    {
+        var connection = CreateInitializedConnectionWithVersion(
+            [0x05, 0x07, 0x00, 0x90, 0x00],
+            [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
+            [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
+            [0x63, 0xC0], // PIN blocked
+            [0x63, 0xC0], // PUK blocked
+            [0x90, 0x00], // RESET
+            [0x6D, 0x00]); // GET METADATA unsupported
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
+        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes256);
+
+        await session.ResetAsync(TestContext.Current.CancellationToken);
+
+        Assert.False(session.IsAuthenticated);
+        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+    }
+
+    [Theory]
+    [InlineData(0x6A80)]
+    [InlineData(0x6A88)]
+    public async Task ResetAsync_WhenMetadataRefreshUnexpectedlyFails_UsesReliableFirmwareFallbackBeforePropagating(
+        int statusWord)
+    {
+        var connection = CreateInitializedConnectionWithVersion(
+            [0x05, 0x07, 0x00, 0x90, 0x00],
+            [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
+            [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
+            [0x63, 0xC0], // PIN blocked
+            [0x63, 0xC0], // PUK blocked
+            [0x90, 0x00], // RESET succeeded
+            [(byte)(statusWord >> 8), (byte)statusWord]); // unexpected metadata refresh failure
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
+        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes256);
+
+        var exception = await Assert.ThrowsAsync<ApduException>(() =>
+            session.ResetAsync(TestContext.Current.CancellationToken));
+
+        Assert.True(exception.SW == statusWord);
+        Assert.False(session.IsAuthenticated);
+        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+    }
+
+    [Fact]
+    public async Task ResetAsync_WhenMetadataRefreshUnexpectedlyFailsWithSentinelVersion_UsesTripleDesFallbackBeforePropagating()
+    {
+        var connection = CreateInitializedConnection(
+            [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
+            [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
+            [0x63, 0xC0], // PIN blocked
+            [0x63, 0xC0], // PUK blocked
+            [0x90, 0x00], // RESET succeeded
+            [0x6A, 0x80]); // unexpected metadata refresh failure
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
+        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes256);
+
+        await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(TestContext.Current.CancellationToken));
+
+        Assert.False(session.IsAuthenticated);
+        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+    }
+
+    [Fact]
+    public async Task ResetAsync_WhenPinBlockingReturnsUnexpectedStatus_ThrowsAndDoesNotSendReset()
+    {
+        var connection = CreateInitializedConnection(
+            [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata: 1 retry remaining
+            [0x6A, 0x80], // VERIFY empty PIN -> unexpected status
+            [0x63, 0xC0], // Would block PUK if ResetAsync continued
+            [0x90, 0x00], // Would reset PIV if ResetAsync continued
+            ManagementKeyMetadataResponse());
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        var exception = await Assert.ThrowsAsync<ApduException>(() =>
+            session.ResetAsync(TestContext.Current.CancellationToken));
+
+        Assert.True(exception.SW == 0x6A80);
+        Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0xFB);
+    }
+
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), VersionResponse(), ManagementKeyMetadataResponse(), .. trailingResponses]);
+
+    private static RecordingSmartCardConnection CreateInitializedConnectionWithVersion(
+        byte[] versionResponse,
+        params byte[][] trailingResponses) =>
+        new([OkResponse(), versionResponse, ManagementKeyMetadataResponse(), .. trailingResponses]);
 
     private static byte[] LastCommand(RecordingSmartCardConnection connection) =>
         connection.TransmittedCommands[^1];
@@ -364,6 +634,28 @@ public class PivSessionTests
         typeof(PivSession)
             .GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)!
             .SetValue(session, true);
+
+    private static async Task SetManagementKeyForTestAsync(PivSession session, PivManagementKeyType keyType)
+    {
+        int keyLength = keyType switch
+        {
+            PivManagementKeyType.Aes128 => 16,
+            PivManagementKeyType.Aes256 => 32,
+            _ => 24
+        };
+        byte[] key = new byte[keyLength];
+        try
+        {
+            await session.SetManagementKeyAsync(
+                keyType,
+                key,
+                cancellationToken: TestContext.Current.CancellationToken);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+        }
+    }
 
     private static ReadOnlySpan<byte> CommandData(byte[] command) =>
         // Short APDU format: CLA INS P1 P2 Lc Data; the recorder reports SupportsExtendedApdu=false.
@@ -381,9 +673,10 @@ public class PivSessionTests
     private static byte[] VersionResponse() => [0x00, 0x00, 0x01, 0x90, 0x00];
 
     // Metadata TLVs: key type(01), touch/default policy(02), generated/default flag(05), then SW 9000.
-    private static byte[] ManagementKeyMetadataResponse() =>
+    private static byte[] ManagementKeyMetadataResponse(
+        PivManagementKeyType keyType = PivManagementKeyType.TripleDes) =>
     [
-        0x01, 0x01, (byte)PivManagementKeyType.TripleDes,
+        0x01, 0x01, (byte)keyType,
         0x02, 0x02, 0x00, (byte)PivTouchPolicy.Default,
         0x05, 0x01, 0x01,
         0x90, 0x00

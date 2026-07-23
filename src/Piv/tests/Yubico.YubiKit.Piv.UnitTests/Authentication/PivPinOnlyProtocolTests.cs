@@ -41,6 +41,29 @@ public class PivPinOnlyProtocolTests
         return (new PivBackend(protocol), connection);
     }
 
+    private static Task SetPinOnlyModeAsync(
+        IPivBackend backend,
+        bool isAuthenticated,
+        PivManagementKeyType managementKeyType,
+        PivPinOnlyMode pinOnlyMode,
+        ReadOnlyMemory<byte> pin,
+        ReadOnlyMemory<byte>? managementKey,
+        Func<ReadOnlyMemory<byte>, CancellationToken, Task> authenticateAsync,
+        Func<ReadOnlyMemory<byte>, CancellationToken, Task> verifyPinAsync,
+        Func<PivManagementKeyType, ReadOnlyMemory<byte>, bool, CancellationToken, Task> setManagementKeyAsync) =>
+        PivPinOnlyProtocol.SetPinOnlyModeAsync(
+            backend,
+            NullLogger.Instance,
+            isAuthenticated,
+            managementKeyType,
+            pinOnlyMode,
+            pin,
+            managementKey,
+            authenticateAsync,
+            verifyPinAsync,
+            setManagementKeyAsync,
+            TestContext.Current.CancellationToken);
+
     // === ISC-14: detect PIN-only state from ADMIN DATA ===
 
     [Fact]
@@ -122,6 +145,79 @@ public class PivPinOnlyProtocolTests
 
         Assert.Equal(PivPinOnlyMode.PinProtected, mode);
         Assert.Equal(key, authenticatedWith);
+    }
+
+    [Fact]
+    public async Task RecoverPinOnlyModeAsync_ProtectedPrintedRequiresPin_VerifiesAndRetriesOnce()
+    {
+        byte[] key = Enumerable.Range(0, 24).Select(i => (byte)i).ToArray();
+        byte[] printed = [0x88, 0x1A, 0x89, 0x18, .. key];
+        var (backend, connection) = CreateBackendWithConnection(
+            [0x69, 0x82],
+            [0x53, (byte)printed.Length, .. printed, 0x90, 0x00],
+            [0x6A, 0x82]);
+
+        int verifyCount = 0;
+        byte[]? authenticatedWith = null;
+
+        var mode = await PivPinOnlyProtocol.RecoverPinOnlyModeAsync(
+            backend,
+            NullLogger.Instance,
+            PivManagementKeyType.TripleDes,
+            "123456"u8.ToArray(),
+            (suppliedKey, ct) =>
+            {
+                authenticatedWith = suppliedKey.ToArray();
+                return Task.CompletedTask;
+            },
+            (pin, ct) =>
+            {
+                verifyCount++;
+                return Task.CompletedTask;
+            },
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(PivPinOnlyMode.PinProtected, mode);
+        Assert.Equal(1, verifyCount);
+        Assert.Equal(key, authenticatedWith);
+        Assert.Equal(3, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task RecoverPinOnlyModeAsync_ProtectedAndDerivedAfterProtectedRead_VerifiesPinOnce()
+    {
+        byte[] key = Enumerable.Range(0, 24).Select(i => (byte)i).ToArray();
+        byte[] printed = [0x88, 0x1A, 0x89, 0x18, .. key];
+        byte[] salt = Enumerable.Range(100, 16).Select(i => (byte)i).ToArray();
+        byte[] adminData = [0x80, 0x15, 0x81, 0x01, 0x00, 0x82, 0x10, .. salt];
+        var backend = CreateBackend(
+            [0x69, 0x82],
+            [0x53, (byte)printed.Length, .. printed, 0x90, 0x00],
+            [0x53, (byte)adminData.Length, .. adminData, 0x90, 0x00]);
+
+        int verifyCount = 0;
+        int authenticateCount = 0;
+
+        var mode = await PivPinOnlyProtocol.RecoverPinOnlyModeAsync(
+            backend,
+            NullLogger.Instance,
+            PivManagementKeyType.TripleDes,
+            "123456"u8.ToArray(),
+            (suppliedKey, ct) =>
+            {
+                authenticateCount++;
+                return Task.CompletedTask;
+            },
+            (pin, ct) =>
+            {
+                verifyCount++;
+                return Task.CompletedTask;
+            },
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
+        Assert.Equal(1, verifyCount);
+        Assert.Equal(2, authenticateCount);
     }
 
     [Fact]
@@ -346,17 +442,16 @@ public class PivPinOnlyProtocolTests
     {
         var backend = CreateBackend();
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => PivPinOnlyProtocol.SetPinOnlyModeAsync(
+        await Assert.ThrowsAsync<InvalidOperationException>(() => SetPinOnlyModeAsync(
             backend,
-            NullLogger.Instance,
             isAuthenticated: false,
             PivManagementKeyType.TripleDes,
             PivPinOnlyMode.PinProtected,
             "123456"u8.ToArray(),
             new byte[24],
+            (k, ct) => Task.CompletedTask,
             (p, ct) => Task.CompletedTask,
-            (t, k, touch, ct) => Task.CompletedTask,
-            TestContext.Current.CancellationToken));
+            (t, k, touch, ct) => Task.CompletedTask));
     }
 
     [Fact]
@@ -364,17 +459,16 @@ public class PivPinOnlyProtocolTests
     {
         var backend = CreateBackend();
 
-        await Assert.ThrowsAsync<ArgumentException>(() => PivPinOnlyProtocol.SetPinOnlyModeAsync(
+        await Assert.ThrowsAsync<ArgumentException>(() => SetPinOnlyModeAsync(
             backend,
-            NullLogger.Instance,
             isAuthenticated: true,
             PivManagementKeyType.TripleDes,
             PivPinOnlyMode.PinDerived,
             "123456"u8.ToArray(),
             new byte[24],
+            (k, ct) => Task.CompletedTask,
             (p, ct) => Task.CompletedTask,
-            (t, k, touch, ct) => Task.CompletedTask,
-            TestContext.Current.CancellationToken));
+            (t, k, touch, ct) => Task.CompletedTask));
     }
 
     [Fact]
@@ -382,17 +476,73 @@ public class PivPinOnlyProtocolTests
     {
         var backend = CreateBackend();
 
-        await Assert.ThrowsAsync<ArgumentNullException>(() => PivPinOnlyProtocol.SetPinOnlyModeAsync(
+        await Assert.ThrowsAsync<ArgumentNullException>(() => SetPinOnlyModeAsync(
             backend,
-            NullLogger.Instance,
             isAuthenticated: true,
             PivManagementKeyType.TripleDes,
             PivPinOnlyMode.PinProtected,
             "123456"u8.ToArray(),
             managementKey: null,
+            (k, ct) => Task.CompletedTask,
             (p, ct) => Task.CompletedTask,
-            (t, k, touch, ct) => Task.CompletedTask,
-            TestContext.Current.CancellationToken));
+            (t, k, touch, ct) => Task.CompletedTask));
+    }
+
+    [Fact]
+    public async Task SetPinOnlyModeAsync_EnableWithWrongTypeSpecificLength_FailsBeforeAuthenticationOrMutation()
+    {
+        var (backend, connection) = CreateBackendWithConnection();
+        int authenticateCount = 0;
+        int verifyCount = 0;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => SetPinOnlyModeAsync(
+            backend,
+            isAuthenticated: true,
+            PivManagementKeyType.TripleDes,
+            PivPinOnlyMode.PinProtected,
+            "123456"u8.ToArray(),
+            new byte[16],
+            (k, ct) =>
+            {
+                authenticateCount++;
+                return Task.CompletedTask;
+            },
+            (p, ct) =>
+            {
+                verifyCount++;
+                return Task.CompletedTask;
+            },
+            (t, k, touch, ct) => Task.CompletedTask));
+
+        Assert.Equal(0, authenticateCount);
+        Assert.Equal(0, verifyCount);
+        Assert.Empty(connection.TransmittedCommands);
+    }
+
+    [Fact]
+    public async Task SetPinOnlyModeAsync_EnableWithWrongSameLengthKey_FailsBeforePinVerificationOrMutation()
+    {
+        var (backend, connection) = CreateBackendWithConnection();
+        int verifyCount = 0;
+
+        var exception = await Assert.ThrowsAsync<ApduException>(() => SetPinOnlyModeAsync(
+            backend,
+            isAuthenticated: true,
+            PivManagementKeyType.TripleDes,
+            PivPinOnlyMode.PinProtected,
+            "123456"u8.ToArray(),
+            new byte[24],
+            (k, ct) => throw ApduException.FromStatusWord(0x6982, "Wrong management key"),
+            (p, ct) =>
+            {
+                verifyCount++;
+                return Task.CompletedTask;
+            },
+            (t, k, touch, ct) => Task.CompletedTask));
+
+        Assert.True(exception.SW == 0x6982);
+        Assert.Equal(0, verifyCount);
+        Assert.Empty(connection.TransmittedCommands);
     }
 
     [Fact]
@@ -408,26 +558,34 @@ public class PivPinOnlyProtocolTests
             [0x6A, 0x82], // GET DATA (ADMIN DATA) - absent
             [0x90, 0x00]); // PUT DATA (ADMIN DATA)
 
-        bool pinVerified = false;
-        Task VerifyPin(ReadOnlyMemory<byte> pin, CancellationToken ct)
+        var operationOrder = new List<string>();
+        Task Authenticate(ReadOnlyMemory<byte> key, CancellationToken ct)
         {
-            pinVerified = true;
+            Assert.Equal(managementKey, key.ToArray());
+            Assert.Empty(connection.TransmittedCommands);
+            operationOrder.Add("authenticate");
             return Task.CompletedTask;
         }
 
-        await PivPinOnlyProtocol.SetPinOnlyModeAsync(
+        Task VerifyPin(ReadOnlyMemory<byte> pin, CancellationToken ct)
+        {
+            Assert.Empty(connection.TransmittedCommands);
+            operationOrder.Add("verify-pin");
+            return Task.CompletedTask;
+        }
+
+        await SetPinOnlyModeAsync(
             backend,
-            NullLogger.Instance,
             isAuthenticated: true,
             PivManagementKeyType.TripleDes,
             PivPinOnlyMode.PinProtected,
             "123456"u8.ToArray(),
             managementKey,
+            Authenticate,
             VerifyPin,
-            (t, k, touch, ct) => Task.CompletedTask,
-            TestContext.Current.CancellationToken);
+            (t, k, touch, ct) => Task.CompletedTask);
 
-        Assert.True(pinVerified);
+        Assert.Equal(["authenticate", "verify-pin"], operationOrder);
         Assert.Equal(4, connection.TransmittedCommands.Count);
 
         // Command 0: PUT DATA for PRINTED, containing 88/89-wrapped management key.
@@ -449,6 +607,31 @@ public class PivPinOnlyProtocolTests
     }
 
     [Fact]
+    public async Task SetPinOnlyModeAsync_EnableWhenBlockPukReturnsUnexpectedStatus_DoesNotUpdateAdminData()
+    {
+        byte[] managementKey = Enumerable.Range(0, 24).Select(i => (byte)i).ToArray();
+        var (backend, connection) = CreateBackendWithConnection(
+            [0x90, 0x00],
+            [0x6A, 0x80]);
+
+        var exception = await Assert.ThrowsAsync<ApduException>(() => SetPinOnlyModeAsync(
+            backend,
+            isAuthenticated: true,
+            PivManagementKeyType.TripleDes,
+            PivPinOnlyMode.PinProtected,
+            "123456"u8.ToArray(),
+            managementKey,
+            (k, ct) => Task.CompletedTask,
+            (p, ct) => Task.CompletedTask,
+            (t, k, touch, ct) => Task.CompletedTask));
+
+        Assert.True(exception.SW == 0x6A80);
+        Assert.Equal(2, connection.TransmittedCommands.Count);
+        Assert.Equal(0xDB, connection.TransmittedCommands[0][1]);
+        Assert.Equal(0x2C, connection.TransmittedCommands[1][1]);
+    }
+
+    [Fact]
     public async Task SetPinOnlyModeAsync_DisableWhenAlreadyDisabled_MakesNoChanges()
     {
         // GetPinOnlyModeAsync will read ADMIN DATA once and find it absent -> None -> no-op.
@@ -456,31 +639,30 @@ public class PivPinOnlyProtocolTests
 
         bool setManagementKeyCalled = false;
 
-        await PivPinOnlyProtocol.SetPinOnlyModeAsync(
+        await SetPinOnlyModeAsync(
             backend,
-            NullLogger.Instance,
             isAuthenticated: true,
             PivManagementKeyType.TripleDes,
             PivPinOnlyMode.None,
             ReadOnlyMemory<byte>.Empty,
             null,
+            (k, ct) => Task.CompletedTask,
             (p, ct) => Task.CompletedTask,
             (t, k, touch, ct) =>
             {
                 setManagementKeyCalled = true;
                 return Task.CompletedTask;
-            },
-            TestContext.Current.CancellationToken);
+            });
 
         Assert.False(setManagementKeyCalled);
         Assert.Single(connection.TransmittedCommands); // Only the ADMIN DATA read for the mode check.
     }
 
     [Fact]
-    public async Task SetPinOnlyModeAsync_DisableWhenEnabled_ClearsObjectsAndResetsManagementKeyToDefaultPattern()
+    public async Task SetPinOnlyModeAsync_DisableWhenEnabled_SetsDefaultKeyThenClearsPrintedAndAdminData()
     {
-        // GetPinOnlyModeAsync sees PinProtected set -> proceeds to clear PRINTED, clear ADMIN DATA,
-        // and reset the management key to the well-known default pattern.
+        // GetPinOnlyModeAsync sees PinProtected set -> resets the management key to the well-known
+        // default pattern, then clears PRINTED followed by ADMIN DATA.
         byte[] adminData = [0x80, 0x03, 0x81, 0x01, 0x02]; // PinProtected bit set.
         var (backend, connection) = CreateBackendWithConnection(
             [0x53, (byte)adminData.Length, .. adminData, 0x90, 0x00], // GetPinOnlyModeAsync's ADMIN DATA read
@@ -490,27 +672,117 @@ public class PivPinOnlyProtocolTests
         PivManagementKeyType? resetType = null;
         byte[]? resetKey = null;
 
-        await PivPinOnlyProtocol.SetPinOnlyModeAsync(
+        await SetPinOnlyModeAsync(
             backend,
-            NullLogger.Instance,
             isAuthenticated: true,
             PivManagementKeyType.TripleDes,
             PivPinOnlyMode.None,
             ReadOnlyMemory<byte>.Empty,
             null,
+            (k, ct) => Task.CompletedTask,
             (p, ct) => Task.CompletedTask,
             (t, k, touch, ct) =>
             {
+                Assert.Single(connection.TransmittedCommands);
                 resetType = t;
                 resetKey = k.ToArray();
                 return Task.CompletedTask;
-            },
-            TestContext.Current.CancellationToken);
+            });
 
         Assert.Equal(PivManagementKeyType.TripleDes, resetType);
         Assert.Equal(
             new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8 },
             resetKey);
         Assert.Equal(3, connection.TransmittedCommands.Count);
+        Assert.True(connection.TransmittedCommands[1].AsSpan().IndexOf(new byte[] { 0x5C, 0x03, 0x5F, 0xC1, 0x09 }) >= 0);
+        Assert.True(connection.TransmittedCommands[2].AsSpan().IndexOf(new byte[] { 0x5C, 0x03, 0x5F, 0xFF, 0x00 }) >= 0);
+    }
+
+    [Fact]
+    public async Task SetPinOnlyModeAsync_DisableWhenDefaultKeySetFails_DeletesNoObjects()
+    {
+        byte[] adminData = [0x80, 0x03, 0x81, 0x01, 0x02];
+        var (backend, connection) = CreateBackendWithConnection(
+            [0x53, (byte)adminData.Length, .. adminData, 0x90, 0x00]);
+
+        await Assert.ThrowsAsync<ApduException>(() => SetPinOnlyModeAsync(
+            backend,
+            isAuthenticated: true,
+            PivManagementKeyType.Aes256,
+            PivPinOnlyMode.None,
+            ReadOnlyMemory<byte>.Empty,
+            null,
+            (k, ct) => Task.CompletedTask,
+            (p, ct) => Task.CompletedTask,
+            (t, k, touch, ct) =>
+            {
+                Assert.Equal(PivManagementKeyType.Aes256, t);
+                Assert.Equal(32, k.Length);
+                throw ApduException.FromStatusWord(0x6982, "Failed to set default key");
+            }));
+
+        Assert.Single(connection.TransmittedCommands);
+        Assert.Equal(0xCB, connection.TransmittedCommands[0][1]);
+    }
+
+    [Fact]
+    public async Task SetPinOnlyModeAsync_DisableWhenPrintedDeleteFails_LeavesAdminData()
+    {
+        byte[] adminData = [0x80, 0x03, 0x81, 0x01, 0x02];
+        var (backend, connection) = CreateBackendWithConnection(
+            [0x53, (byte)adminData.Length, .. adminData, 0x90, 0x00],
+            [0x69, 0x82]);
+        bool defaultKeySet = false;
+
+        await Assert.ThrowsAsync<ApduException>(() => SetPinOnlyModeAsync(
+            backend,
+            isAuthenticated: true,
+            PivManagementKeyType.TripleDes,
+            PivPinOnlyMode.None,
+            ReadOnlyMemory<byte>.Empty,
+            null,
+            (k, ct) => Task.CompletedTask,
+            (p, ct) => Task.CompletedTask,
+            (t, k, touch, ct) =>
+            {
+                defaultKeySet = true;
+                return Task.CompletedTask;
+            }));
+
+        Assert.True(defaultKeySet);
+        Assert.Equal(2, connection.TransmittedCommands.Count);
+        Assert.True(connection.TransmittedCommands[1].AsSpan().IndexOf(new byte[] { 0x5C, 0x03, 0x5F, 0xC1, 0x09 }) >= 0);
+    }
+
+    [Fact]
+    public async Task SetPinOnlyModeAsync_DisableWhenAdminDeleteFails_PropagatesAfterKeyAndPrinted()
+    {
+        byte[] adminData = [0x80, 0x03, 0x81, 0x01, 0x02];
+        var (backend, connection) = CreateBackendWithConnection(
+            [0x53, (byte)adminData.Length, .. adminData, 0x90, 0x00],
+            [0x90, 0x00],
+            [0x69, 0x82]);
+        bool defaultKeySet = false;
+
+        var exception = await Assert.ThrowsAsync<ApduException>(() => SetPinOnlyModeAsync(
+            backend,
+            isAuthenticated: true,
+            PivManagementKeyType.TripleDes,
+            PivPinOnlyMode.None,
+            ReadOnlyMemory<byte>.Empty,
+            null,
+            (k, ct) => Task.CompletedTask,
+            (p, ct) => Task.CompletedTask,
+            (t, k, touch, ct) =>
+            {
+                defaultKeySet = true;
+                return Task.CompletedTask;
+            }));
+
+        Assert.True(exception.SW == 0x6982);
+        Assert.True(defaultKeySet);
+        Assert.Equal(3, connection.TransmittedCommands.Count);
+        Assert.True(connection.TransmittedCommands[1].AsSpan().IndexOf(new byte[] { 0x5C, 0x03, 0x5F, 0xC1, 0x09 }) >= 0);
+        Assert.True(connection.TransmittedCommands[2].AsSpan().IndexOf(new byte[] { 0x5C, 0x03, 0x5F, 0xFF, 0x00 }) >= 0);
     }
 }

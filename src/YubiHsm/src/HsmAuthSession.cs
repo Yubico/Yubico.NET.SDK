@@ -100,6 +100,10 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     ///     to physically touch the YubiKey. See <see cref="TouchNotificationCallback" /> for
     ///     threading, reentrancy, and firing-condition details.
     /// </summary>
+    /// <remarks>
+    ///     Each session-key calculation snapshots the callback before querying the credential
+    ///     list. Changes made while that query is in flight apply only to later calculations.
+    /// </remarks>
     /// <example>
     ///     <code>
     /// session.OnTouchRequired = () => Console.WriteLine("Touch your YubiKey now...");
@@ -862,10 +866,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// </remarks>
     private async Task NotifyTouchIfRequiredAsync(string label, CancellationToken cancellationToken)
     {
-        if (OnTouchRequired is null)
+        TouchNotificationCallback? callback = OnTouchRequired;
+        if (callback is null)
             return;
 
-        // The try/catch below guards only the credential-list query. OnTouchRequired.Invoke() is
+        // The try/catch below guards only the credential-list query. callback.Invoke() is
         // called unconditionally outside of it so a throwing caller callback propagates normally
         // to the caller instead of being caught by the query's error handling, misdiagnosed as a
         // query failure, and invoked a second time.
@@ -878,7 +883,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             Logger.LogDebug(
                 ex, "YubiHSM Auth: failed to query credential list for touch policy, notifying conservatively");
-            OnTouchRequired.Invoke();
+            callback.Invoke();
             return;
         }
 
@@ -891,7 +896,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         // notification is warranted.
         if (credential is { TouchRequired: not false })
         {
-            OnTouchRequired.Invoke();
+            callback.Invoke();
         }
     }
 

@@ -155,6 +155,9 @@ Use `EnsureSupports(...)` / `IsSupported(...)` from the session base instead of 
 4. **Certificate size limits**: PIV certificates may need compression or careful object sizing.
 5. **Default credentials**: never assume defaults are acceptable outside explicit test/reset flows.
 6. **Retry counters**: PIN/PUK blocking is persistent and human-coordinated.
+7. **PIN-only transitions**: enabling must authenticate the supplied active management key before PIN verification or writes; disabling restores the type-appropriate default key before deleting PRINTED, then ADMIN DATA.
+8. **Mixed PIN-only recovery**: a returned success flag must match the session's final authenticated candidate; restore an earlier protected-key success after a stale derived candidate fails, or return no success.
+9. **Management-key state**: successful SET updates the type and preserves card-session authentication without retaining key bytes; SET status `0x6982` clears recorded authentication while unrelated command failures preserve authentication and type; every failed authentication attempt clears prior authentication; initialization and successful RESET share the same conservative default-type fallback when metadata is unavailable, and RESET clears authentication before refresh.
 
 ## Related Modules
 

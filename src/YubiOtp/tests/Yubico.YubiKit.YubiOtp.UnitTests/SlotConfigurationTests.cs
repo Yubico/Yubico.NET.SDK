@@ -670,6 +670,52 @@ public class SlotConfigurationTests
     }
 
     [Fact]
+    public void StaticPassword_FromString_CopiesOwnedScanCodesBeforeZeroing()
+    {
+        byte[] ownedScanCodes = [0x04, 0x05, 0x06];
+        byte[] expectedScanCodes = [.. ownedScanCodes];
+
+        using var config = new StaticPasswordSlotConfiguration(
+            "abc",
+            KeyboardLayout.en_US,
+            (password, keyboardLayout) =>
+            {
+                Assert.Equal("abc", password);
+                Assert.Equal(KeyboardLayout.en_US, keyboardLayout);
+                return ownedScanCodes;
+            });
+        var result = config.GetConfig();
+
+        Assert.Equal(expectedScanCodes, result[FixedOffset..(FixedOffset + expectedScanCodes.Length)]);
+        Assert.All(ownedScanCodes, scanCode => Assert.Equal(0, scanCode));
+    }
+
+    [Fact]
+    public void StaticPassword_FromString_WhenInitializationFails_ZeroesOwnedScanCodes()
+    {
+        byte[] ownedScanCodes = Enumerable.Repeat((byte)0x04, 39).ToArray();
+
+        Assert.Throws<ArgumentException>(() =>
+            new StaticPasswordSlotConfiguration(
+                new string('a', 39),
+                KeyboardLayout.en_US,
+                (_, _) => ownedScanCodes));
+
+        Assert.All(ownedScanCodes, scanCode => Assert.Equal(0, scanCode));
+    }
+
+    [Fact]
+    public void StaticPassword_FromRawScanCodes_DoesNotZeroCallerBuffer()
+    {
+        byte[] callerOwnedScanCodes = [0x04, 0x05, 0x06];
+        byte[] expectedScanCodes = [.. callerOwnedScanCodes];
+
+        using var config = new StaticPasswordSlotConfiguration(callerOwnedScanCodes);
+
+        Assert.Equal(expectedScanCodes, callerOwnedScanCodes);
+    }
+
+    [Fact]
     public void StaticPassword_FromString_NullPassword_Throws()
     {
         Assert.Throws<ArgumentNullException>(() =>

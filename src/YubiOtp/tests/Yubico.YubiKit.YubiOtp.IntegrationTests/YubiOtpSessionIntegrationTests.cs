@@ -73,7 +73,8 @@ public class YubiOtpSessionIntegrationTests
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     public async Task CalculateHmacSha1_WithKnownKey_ReturnsExpectedResponse(YubiKeyTestState state)
     {
-        await using var session = await state.Device.CreateYubiOtpSessionAsync();
+        await using var session = await state.Device.CreateYubiOtpSessionAsync(
+            preferredConnection: ConnectionType.HidOtp);
 
         // Program slot 2 with a known HMAC-SHA1 key
         byte[] key = new byte[20];

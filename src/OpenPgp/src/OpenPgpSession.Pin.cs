@@ -243,6 +243,10 @@ public sealed partial class OpenPgpSession
                                 ? status.AttemptsAdmin
                                 : status.AttemptsReset;
                     }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
                     catch
                     {
                         // If status query fails, the retry count is genuinely unknown.

@@ -78,61 +78,101 @@ internal static class PivPinOnlyProtocol
         logger.LogDebug("PIV: Attempting to recover PIN-only management key authentication");
 
         var mode = PivPinOnlyMode.None;
+        bool pinVerified = false;
 
         // Try PIN-protected: the management key is stored, in the clear, in the PRINTED object.
-        var printedRaw = await PivDataObjectProtocol.GetObjectAsync(backend, PivDataObject.PrintedInformation, cancellationToken)
-            .ConfigureAwait(false);
-
-        if (TryDecodePinProtectedManagementKey(MemoryMarshal.AsMemory(printedRaw).Span, out var storedKey))
+        ReadOnlyMemory<byte> printedRaw;
+        try
         {
-            try
+            printedRaw = await PivDataObjectProtocol.GetObjectAsync(backend, PivDataObject.PrintedInformation, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (ApduException ex) when (ex.SW == SWConstants.SecurityStatusNotSatisfied)
+        {
+            await verifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
+            pinVerified = true;
+            printedRaw = await PivDataObjectProtocol.GetObjectAsync(backend, PivDataObject.PrintedInformation, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        Memory<byte> storedKey = Memory<byte>.Empty;
+        bool pinProtectedAuthenticated = false;
+        try
+        {
+            if (TryDecodePinProtectedManagementKey(MemoryMarshal.AsMemory(printedRaw).Span, out storedKey))
             {
-                await authenticateAsync(storedKey, cancellationToken).ConfigureAwait(false);
-                mode |= PivPinOnlyMode.PinProtected;
-                logger.LogDebug("PIV: PIN-protected management key authenticated");
+                try
+                {
+                    await authenticateAsync(storedKey, cancellationToken).ConfigureAwait(false);
+                    mode |= PivPinOnlyMode.PinProtected;
+                    pinProtectedAuthenticated = true;
+                    logger.LogDebug("PIV: PIN-protected management key authenticated");
+                }
+                catch (ApduException)
+                {
+                    logger.LogDebug("PIV: Stored PIN-protected management key did not authenticate");
+                }
             }
-            catch (ApduException)
+
+            // Try PIN-derived: derive a candidate management key from the PIN and the ADMIN DATA salt.
+            var adminRaw = await PivDataObjectProtocol.GetObjectAsync(backend, PivDataObject.AdminData, cancellationToken).ConfigureAwait(false);
+
+            if (PivAdminData.TryDecode(adminRaw, out var adminData) && adminData.Salt is { } salt)
             {
-                logger.LogDebug("PIV: Stored PIN-protected management key did not authenticate");
+                int keyLength = GetManagementKeyLength(managementKeyType);
+                byte[] derived = ArrayPool<byte>.Shared.Rent(keyLength);
+                try
+                {
+                    // PIN must be verified before it is used as key-derivation input. Reuse verification
+                    // performed to unlock a protected PRINTED object rather than consuming another retry.
+                    if (!pinVerified)
+                    {
+                        await verifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
+                        pinVerified = true;
+                    }
+                    DeriveManagementKey(pin.Span, salt.Span, derived.AsSpan(0, keyLength));
+
+                    try
+                    {
+                        await authenticateAsync(derived.AsMemory(0, keyLength), cancellationToken).ConfigureAwait(false);
+                        mode |= PivPinOnlyMode.PinDerived;
+                        logger.LogDebug("PIV: PIN-derived management key authenticated");
+                    }
+                    catch (ApduException)
+                    {
+                        logger.LogDebug("PIV: Derived management key did not authenticate; ADMIN DATA salt is stale");
+
+                        if (pinProtectedAuthenticated)
+                        {
+                            try
+                            {
+                                await authenticateAsync(storedKey, cancellationToken).ConfigureAwait(false);
+                                logger.LogDebug("PIV: Restored PIN-protected management key authentication");
+                            }
+                            catch (ApduException)
+                            {
+                                mode &= ~PivPinOnlyMode.PinProtected;
+                                logger.LogDebug("PIV: Failed to restore PIN-protected management key authentication");
+                            }
+                        }
+                    }
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(derived.AsSpan(0, keyLength));
+                    ArrayPool<byte>.Shared.Return(derived);
+                }
             }
-            finally
+
+            return mode;
+        }
+        finally
+        {
+            if (!storedKey.IsEmpty)
             {
                 CryptographicOperations.ZeroMemory(storedKey.Span);
             }
         }
-
-        // Try PIN-derived: derive a candidate management key from the PIN and the ADMIN DATA salt.
-        var adminRaw = await PivDataObjectProtocol.GetObjectAsync(backend, PivDataObject.AdminData, cancellationToken).ConfigureAwait(false);
-
-        if (PivAdminData.TryDecode(adminRaw, out var adminData) && adminData.Salt is { } salt)
-        {
-            int keyLength = GetManagementKeyLength(managementKeyType);
-            byte[] derived = ArrayPool<byte>.Shared.Rent(keyLength);
-            try
-            {
-                // PIN must be verified before it is used as key-derivation input.
-                await verifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
-                DeriveManagementKey(pin.Span, salt.Span, derived.AsSpan(0, keyLength));
-
-                try
-                {
-                    await authenticateAsync(derived.AsMemory(0, keyLength), cancellationToken).ConfigureAwait(false);
-                    mode |= PivPinOnlyMode.PinDerived;
-                    logger.LogDebug("PIV: PIN-derived management key authenticated");
-                }
-                catch (ApduException)
-                {
-                    logger.LogDebug("PIV: Derived management key did not authenticate; ADMIN DATA salt is stale");
-                }
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(derived.AsSpan(0, keyLength));
-                ArrayPool<byte>.Shared.Return(derived);
-            }
-        }
-
-        return mode;
     }
 
     internal static async Task SetPinOnlyModeAsync(
@@ -143,6 +183,7 @@ internal static class PivPinOnlyProtocol
         PivPinOnlyMode pinOnlyMode,
         ReadOnlyMemory<byte> pin,
         ReadOnlyMemory<byte>? managementKey,
+        Func<ReadOnlyMemory<byte>, CancellationToken, Task> authenticateAsync,
         Func<ReadOnlyMemory<byte>, CancellationToken, Task> verifyPinAsync,
         Func<PivManagementKeyType, ReadOnlyMemory<byte>, bool, CancellationToken, Task> setManagementKeyAsync,
         CancellationToken cancellationToken = default)
@@ -168,8 +209,17 @@ internal static class PivPinOnlyProtocol
                 throw new ArgumentNullException(nameof(managementKey), "A management key is required to enable PIN-protected mode.");
             }
 
+            int expectedKeyLength = GetManagementKeyLength(managementKeyType);
+            if (keyToProtect.Length != expectedKeyLength)
+            {
+                throw new ArgumentException(
+                    $"Invalid management key length {keyToProtect.Length} for {managementKeyType}. Expected {expectedKeyLength} bytes.",
+                    nameof(managementKey));
+            }
+
             logger.LogDebug("PIV: Enabling PIN-protected management key mode");
 
+            await authenticateAsync(keyToProtect, cancellationToken).ConfigureAwait(false);
             await verifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
             await StorePinProtectedManagementKeyAsync(backend, logger, keyToProtect, cancellationToken).ConfigureAwait(false);
             await PivMetadataProtocol.BlockPukAsync(backend, logger, cancellationToken).ConfigureAwait(false);
@@ -192,11 +242,6 @@ internal static class PivPinOnlyProtocol
         }
 
         logger.LogDebug("PIV: Disabling PIN-only management key mode");
-        await PivDataObjectProtocol.PutObjectAsync(backend, isAuthenticated, PivDataObject.PrintedInformation, null, cancellationToken)
-            .ConfigureAwait(false);
-        await PivDataObjectProtocol.PutObjectAsync(backend, isAuthenticated, PivDataObject.AdminData, null, cancellationToken)
-            .ConfigureAwait(false);
-
         int defaultKeyLength = GetManagementKeyLength(managementKeyType);
         byte[] defaultKey = ArrayPool<byte>.Shared.Rent(defaultKeyLength);
         try
@@ -210,6 +255,11 @@ internal static class PivPinOnlyProtocol
             CryptographicOperations.ZeroMemory(defaultKey.AsSpan(0, defaultKeyLength));
             ArrayPool<byte>.Shared.Return(defaultKey);
         }
+
+        await PivDataObjectProtocol.PutObjectAsync(backend, isAuthenticated, PivDataObject.PrintedInformation, null, cancellationToken)
+            .ConfigureAwait(false);
+        await PivDataObjectProtocol.PutObjectAsync(backend, isAuthenticated, PivDataObject.AdminData, null, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>

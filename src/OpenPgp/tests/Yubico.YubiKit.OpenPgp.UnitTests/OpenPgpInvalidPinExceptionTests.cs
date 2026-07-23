@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -135,6 +138,28 @@ public sealed class OpenPgpInvalidPinExceptionTests
         Assert.Equal(unchecked((short)0x6982), exception.SW);
     }
 
+    [Fact]
+    public async Task VerifyPinAsync_WhenPinStatusLookupIsCanceled_PropagatesCancellation()
+    {
+        var recordingConnection = CreateInitializedConnection(
+            KdfNotFoundResponse(),
+            [0x69, 0x82],
+            PwStatusResponse(attemptsUser: 5));
+        using var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
+            TestContext.Current.CancellationToken);
+        var connection = new CancelOnPwStatusLookupConnection(recordingConnection, cancellationSource);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => session.VerifyPinAsync(
+            "000000"u8.ToArray(),
+            cancellationToken: cancellationSource.Token));
+
+        Assert.True(connection.PinStatusLookupWasCanceled);
+        Assert.Equal(0x20, recordingConnection.TransmittedCommands[^1][1]); // VERIFY
+    }
+
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(), .. trailingResponses]);
 
@@ -150,6 +175,46 @@ public sealed class OpenPgpInvalidPinExceptionTests
 
     private static byte[] PwStatusResponse(int attemptsUser) =>
         [0x00, 0x7F, 0x7F, 0x7F, (byte)attemptsUser, 0x00, 0x03, 0x90, 0x00];
+
+    private sealed class CancelOnPwStatusLookupConnection(
+        RecordingSmartCardConnection inner,
+        CancellationTokenSource cancellationSource) : ISmartCardConnection
+    {
+        public bool PinStatusLookupWasCanceled { get; private set; }
+
+        public Transport Transport => inner.Transport;
+
+        public ConnectionType Type => inner.Type;
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+            ReadOnlyMemory<byte> command,
+            CancellationToken cancellationToken = default)
+        {
+            if (IsPwStatusLookup(command))
+            {
+                PinStatusLookupWasCanceled = true;
+                cancellationSource.Cancel();
+                return Task.FromCanceled<ReadOnlyMemory<byte>>(cancellationSource.Token);
+            }
+
+            return inner.TransmitAndReceiveAsync(command, cancellationToken);
+        }
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
+            inner.BeginTransaction(cancellationToken);
+
+        public bool SupportsExtendedApdu() => inner.SupportsExtendedApdu();
+
+        public void Dispose() => inner.Dispose();
+
+        public ValueTask DisposeAsync() => inner.DisposeAsync();
+
+        private static bool IsPwStatusLookup(ReadOnlyMemory<byte> command) =>
+            command.Length >= 4 &&
+            command.Span[1] == 0xCA && // GET DATA
+            command.Span[2] == 0x00 &&
+            command.Span[3] == 0xC4; // PW Status Bytes DO
+    }
 
     private static byte[] ApplicationRelatedDataResponse() => [.. BuildApplicationRelatedData(), 0x90, 0x00];
 

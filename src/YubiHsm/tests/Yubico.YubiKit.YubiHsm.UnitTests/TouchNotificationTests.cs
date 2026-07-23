@@ -13,7 +13,9 @@
 // limitations under the License.
 
 using System.Text;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
@@ -201,6 +203,67 @@ public class TouchNotificationTests
         Assert.Equal(2, connection.TransmittedCommands.Count);
     }
 
+    [Fact]
+    public async Task CalculateSessionKeysSymmetricAsync_WhenCallbackClearedWhileListPending_InvokesCapturedCallbackOnceAndSucceeds()
+    {
+        var connection = new GatedListSmartCardConnection(OkResponse(), SessionKeyResponse());
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var invocationCount = 0;
+        session.OnTouchRequired = () => invocationCount++;
+
+        var operation = session.CalculateSessionKeysSymmetricAsync(
+            "cred",
+            Sequence(0x40, 16),
+            "pass",
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await connection.ListCommandReceived.WaitAsync(TestContext.Current.CancellationToken);
+        session.OnTouchRequired = null;
+        connection.CompleteList(
+            ListResponse("cred", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x01, counter: 8));
+
+        using var keys = await operation;
+
+        Assert.Equal(1, invocationCount);
+        Assert.Equal(3, connection.TransmittedCommands.Count);
+        Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
+    }
+
+    [Fact]
+    public async Task CalculateSessionKeysSymmetricAsync_WhenCallbackReplacedWhileFailingListPending_InvokesCapturedCallbackOnceAndSucceeds()
+    {
+        var connection = new GatedListSmartCardConnection(OkResponse(), SessionKeyResponse());
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var originalInvocationCount = 0;
+        var replacementInvocationCount = 0;
+        session.OnTouchRequired = () => originalInvocationCount++;
+
+        var operation = session.CalculateSessionKeysSymmetricAsync(
+            "cred",
+            Sequence(0x40, 16),
+            "pass",
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await connection.ListCommandReceived.WaitAsync(TestContext.Current.CancellationToken);
+        session.OnTouchRequired = () => replacementInvocationCount++;
+        connection.FailList(new InvalidOperationException("LIST failed"));
+
+        using var keys = await operation;
+
+        Assert.Equal(1, originalInvocationCount);
+        Assert.Equal(0, replacementInvocationCount);
+        Assert.Equal(3, connection.TransmittedCommands.Count);
+        Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
+    }
+
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), .. trailingResponses]);
 
@@ -229,5 +292,67 @@ public class TouchNotificationTests
         byte[] value = [(byte)algorithm, touchByte, .. labelBytes, counter];
 
         return [0x72, (byte)value.Length, .. value, 0x90, 0x00];
+    }
+
+    private sealed class GatedListSmartCardConnection(params byte[][] nonListResponses) : ISmartCardConnection
+    {
+        private readonly Queue<byte[]> _nonListResponses = new(nonListResponses);
+        private readonly TaskCompletionSource _listCommandReceived =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly TaskCompletionSource<ReadOnlyMemory<byte>> _listResponse =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public Task ListCommandReceived => _listCommandReceived.Task;
+
+        public List<byte[]> TransmittedCommands { get; } = [];
+
+        public Transport Transport { get; } = Transport.Usb;
+
+        public ConnectionType Type { get; } = ConnectionType.SmartCard;
+
+        public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+            ReadOnlyMemory<byte> command,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            TransmittedCommands.Add(command.ToArray());
+
+            if (command.Span.Length > 1 && command.Span[1] == HsmAuthSession.InsList)
+            {
+                _listCommandReceived.SetResult();
+                return await _listResponse.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            if (_nonListResponses.Count == 0)
+            {
+                throw new InvalidOperationException("No response enqueued for transmission.");
+            }
+
+            return _nonListResponses.Dequeue();
+        }
+
+        public void CompleteList(ReadOnlyMemory<byte> response) => _listResponse.SetResult(response);
+
+        public void FailList(Exception exception) => _listResponse.SetException(exception);
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
+            NullDisposable.Instance;
+
+        public bool SupportsExtendedApdu() => false;
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => default;
+
+        private sealed class NullDisposable : IDisposable
+        {
+            public static NullDisposable Instance { get; } = new();
+
+            public void Dispose()
+            {
+            }
+        }
     }
 }

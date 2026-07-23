@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Piv.Authentication;
 internal static class PivAuthenticationProtocol
 {
     /// <summary>
-    /// Gets the factory default PIV management key (3DES).
+    /// Gets the well-known 24-byte factory-default PIV management key value.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -34,7 +34,9 @@ internal static class PivAuthenticationProtocol
     /// You SHOULD change this key after initial device setup to protect against unauthorized management operations.
     /// </para>
     /// <para>
-    /// The default key is: 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 (24 bytes, 3DES).
+    /// The default key is: 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08.
+    /// These 24 bytes are used with Triple-DES and AES-192 defaults; the session's management-key
+    /// type determines the algorithm.
     /// </para>
     /// </remarks>
     /// <example>
@@ -57,7 +59,7 @@ internal static class PivAuthenticationProtocol
     /// <summary>
     /// Authenticates the session using the PIV management key.
     /// </summary>
-    /// <param name="managementKey">The management key bytes. Must be 24 bytes (3DES).</param>
+    /// <param name="managementKey">The management key bytes. Length must match <paramref name="managementKeyType"/>.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <exception cref="ArgumentException">Thrown if the management key is the wrong length.</exception>
     /// <exception cref="ApduException">Thrown if authentication fails.</exception>
@@ -67,7 +69,7 @@ internal static class PivAuthenticationProtocol
     /// without transmitting it. The key is automatically zeroed after use for security.
     /// </para>
     /// <para>
-    /// Default management key (3DES): 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08
+    /// Default management key bytes (Triple-DES or AES-192): 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08
     /// </para>
     /// </remarks>
     internal static async Task AuthenticateAsync(

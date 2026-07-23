@@ -418,8 +418,7 @@ internal static class PivMetadataProtocol
                 retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
                 if (retriesRemaining < 0)
                 {
-                    // Unexpected response - break to avoid infinite loop
-                    break;
+                    throw ApduException.FromStatusWord(response.SW, "Failed to block PUK");
                 }
             }
         }

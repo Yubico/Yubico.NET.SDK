@@ -921,19 +921,34 @@ namespace Yubico.YubiKey.Fido2
                 {
                     if (TryVerifyPin(
                             keyEntryData.GetCurrentValue(), permissions, relyingPartyId, out int? retriesRemaining,
-                            out _))
+                            out bool? rebootRequired))
                     {
                         return true;
+                    }
+
+                    // A retry count of zero means the PIN is permanently blocked
+                    // (CTAP2_ERR_PIN_BLOCKED); a power cycle will not help, so report
+                    // that first.
+                    if (retriesRemaining == 0)
+                    {
+                        throw new SecurityException(ExceptionMessages.Fido2NoMoreRetries);
+                    }
+
+                    // The authenticator reported it must be power cycled (removed and
+                    // reinserted) before it will accept another PIN attempt (CTAP
+                    // getPINRetries powerCycleState). Re-prompting the KeyCollector
+                    // cannot succeed and would consume real retry attempts, so stop
+                    // and surface the actionable status instead of looping.
+                    if (rebootRequired == true)
+                    {
+                        throw new Fido2Exception(
+                            CtapStatus.PowerCycleRequired,
+                            ExceptionMessages.Fido2PowerCycleRequired);
                     }
 
                     keyEntryData.IsRetry = true;
                     keyEntryData.RetriesRemaining =
                         retriesRemaining!; // If we are retrying, we know this won't be null.
-
-                    if (keyEntryData.RetriesRemaining == 0)
-                    {
-                        throw new SecurityException(ExceptionMessages.Fido2NoMoreRetries);
-                    }
                 }
             }
             finally
@@ -1056,7 +1071,11 @@ namespace Yubico.YubiKey.Fido2
                 return false;
             }
 
-            throw new Fido2Exception(response.StatusMessage);
+            // Preserve the CTAP status the authenticator actually returned (e.g.
+            // CtapStatus.PowerCycleRequired / CTAP2_ERR_PIN_AUTH_BLOCKED 0x34) so
+            // callers can classify the failure via Fido2Exception.Status. Using
+            // the message-only constructor here would discard it.
+            throw new Fido2Exception(GetCtapError(response), response.StatusMessage);
         }
 
         private IYubiKeyCommand<GetPinUvAuthTokenResponse> GetPinToken(

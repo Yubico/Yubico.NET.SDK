@@ -100,16 +100,18 @@ public class PivMultiKeyContentionTests
             Assert.True(devices.Count >= states.Count,
                 $"Scan returned {devices.Count} devices but {states.Count} allow-listed keys are plugged in; " +
                 "an in-use device must still be enumerated (with conservative info), not dropped.");
+            Assert.Contains(devices, device => device.DeviceId == $"ykphysical:{keyB.SerialNumber}");
 
             // The open, authenticated session on key A survives the multi-device scan.
             var after = await session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest);
             Assert.NotEqual(0, after.Length);
         }
 
-        // Session A is closed now; identify the scan results over user-initiated Management reads
-        // (safe: no open session left to disturb). Both physical keys must be present.
+        // Session A is closed now; identify SmartCard-capable scan results over user-initiated
+        // Management reads (safe: no open session left to disturb). Standalone OTP rows may remain
+        // after conservative macOS duplicate-PID disambiguation and cannot answer Management reads.
         var serials = new List<int?>();
-        foreach (var device in devices)
+        foreach (var device in devices.Where(device => device.SupportsConnection(ConnectionType.SmartCard)))
         {
             serials.Add((await device.GetDeviceInfoAsync()).SerialNumber);
         }

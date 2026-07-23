@@ -21,7 +21,7 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-///     Transparent connection decorators that release a <see cref="DeviceConnectionRegistry" /> registration
+///     Transparent connection decorators that release a <see cref="DeviceConnectionRegistry" /> ownership lease
 ///     exactly once when the wrapped connection is disposed. Pure passthrough otherwise — behavior of the
 ///     inner connection is unchanged.
 /// </summary>

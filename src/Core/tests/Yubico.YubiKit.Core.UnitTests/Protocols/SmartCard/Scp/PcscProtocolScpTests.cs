@@ -33,6 +33,18 @@ public class PcscProtocolScpTests
     private readonly NullLogger<PcscProtocol> _logger = NullLogger<PcscProtocol>.Instance;
 
     [Fact]
+    public void Constructor_UnsupportedBaseProtocol_ThrowsArgumentException()
+    {
+        var unsupported = new UnsupportedSmartCardProtocol();
+
+        var exception = Assert.Throws<ArgumentException>(() =>
+            new PcscProtocolScp(unsupported, _fakeScpProcessor, null!));
+
+        Assert.Equal("baseProtocol", exception.ParamName);
+        Assert.Contains(nameof(PcscProtocol), exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task TransmitAndReceiveAsync_DelegatesToScpProcessor()
     {
         // Arrange
@@ -328,5 +340,27 @@ public class PcscProtocolScpTests
             Task.FromResult(new ApduResponse(new byte[] { 0x90, 0x00 }));
 
         public void Dispose() => DisposeCount++;
+    }
+
+    private sealed class UnsupportedSmartCardProtocol : ISmartCardProtocol
+    {
+        public Task<ApduResponse> TransmitAndReceiveAsync(
+            ApduCommand command,
+            bool throwOnError = true,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(new ApduResponse(new byte[] { 0x90, 0x00 }));
+
+        public Task<ReadOnlyMemory<byte>> SelectAsync(
+            ReadOnlyMemory<byte> applicationId,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(ReadOnlyMemory<byte>.Empty);
+
+        public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
+        {
+        }
+
+        public void Dispose()
+        {
+        }
     }
 }

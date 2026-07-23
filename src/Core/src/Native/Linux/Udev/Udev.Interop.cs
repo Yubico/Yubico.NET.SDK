@@ -284,5 +284,5 @@ internal static class NativeMethods
     [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_get_fd",
         SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern IntPtr udev_monitor_get_fd(LinuxUdevMonitorSafeHandle monitorObject);
+    public static extern int udev_monitor_get_fd(LinuxUdevMonitorSafeHandle monitorObject);
 }

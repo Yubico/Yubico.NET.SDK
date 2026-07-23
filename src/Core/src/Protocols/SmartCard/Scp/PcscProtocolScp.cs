@@ -43,6 +43,14 @@ public class PcscProtocolScp : ISmartCardProtocol
         IApduProcessor scpProcessor,
         DataEncryptor dataEncryptor)
     {
+        ArgumentNullException.ThrowIfNull(baseProtocol);
+        if (baseProtocol is not PcscProtocol pcscProtocol)
+        {
+            throw new ArgumentException(
+                $"SCP requires a {nameof(PcscProtocol)} base so encrypted and plain exchanges share one gate.",
+                nameof(baseProtocol));
+        }
+
         _baseProtocol = baseProtocol;
         _scpProcessor = scpProcessor;
         _dataEncryptor = dataEncryptor;
@@ -50,7 +58,7 @@ public class PcscProtocolScp : ISmartCardProtocol
         // The SCP processor chain bypasses the base protocol's public methods and drives the same
         // connection directly, so exchanges MUST share the base protocol's gate — otherwise gated
         // plain traffic and SCP traffic could interleave on the wire.
-        _exchangeGate = baseProtocol is PcscProtocol pcsc ? pcsc.ExchangeGate : new AsyncExchangeGate();
+        _exchangeGate = pcscProtocol.ExchangeGate;
     }
 
     /// <summary>

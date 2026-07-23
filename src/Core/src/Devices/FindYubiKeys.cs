@@ -83,8 +83,7 @@ public class FindYubiKeys(
             var pidCounts = CompositeDeviceMerger.ComputePidCounts(
                 interfaces.Select(i => i.ToDescriptor(null)).Where(d => d.IsUsb));
 
-            var descriptors = new List<DeviceInterfaceDescriptor>(interfaces.Count);
-            foreach (var iface in interfaces)
+            var descriptors = await Task.WhenAll(interfaces.Select(async iface =>
             {
                 var needsSerial = iface.IsUsb &&
                     (forceSerial
@@ -95,8 +94,8 @@ public class FindYubiKeys(
                     ? await ReadIdentityAsync(iface, cancellationToken).ConfigureAwait(false)
                     : null;
 
-                descriptors.Add(iface.ToDescriptor(info));
-            }
+                return iface.ToDescriptor(info);
+            })).ConfigureAwait(false);
 
             var merged = CompositeDeviceMerger.Merge(descriptors, forceSerial);
             await PopulateMetadataAsync(merged, interfaces, cancellationToken).ConfigureAwait(false);

@@ -194,7 +194,9 @@ ApduResponse
 ### Concurrency
 
 - **Sessions/protocols are safe for concurrent calls, executed sequentially.** SmartCard (APDU/SCP), FIDO HID, and OTP HID protocols serialize full logical exchanges internally, so concurrent operations on one session never interleave packets on the wire. Cancellation tokens cancel only the wait for a turn — an exchange in flight runs to completion.
-- **Discovery never disturbs open sessions.** Device enumeration skips metadata reads on devices with a live in-process connection (reporting cached/unknown info instead), and all discovery reads are time-bounded so a busy device cannot stall scanning.
+- **Discovery never disturbs open sessions.** Per-interface shared session leases and a nonblocking exclusive discovery lease make ownership atomic: sessions own the interface before physical connect, discovery skips active sessions, and sessions cannot cross a Management metadata read already in progress.
+- **Discovery work is bounded independently from caller waits.** Each caller has its own timeout/cancellation, while repeated scans share at most one underlying read per stable interface and connection type. Completion removes the single-flight entry for later retry; a permanently hung native call remains one operation rather than accumulating one operation per scan.
+- **Monitor hints are bounded occurrence signals.** Concurrent HID/SmartCard callbacks share one capacity-one wake-up signal; storms cannot build a payload queue, while quiet-period debounce, maximum coalescing, and periodic fallback scans remain intact. Listener startup either commits both listeners or rolls the attempt back completely.
 
 ### Platform Support
 

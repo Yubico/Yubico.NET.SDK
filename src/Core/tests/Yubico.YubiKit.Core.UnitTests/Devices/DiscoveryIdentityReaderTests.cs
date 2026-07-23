@@ -18,6 +18,7 @@ using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
+[Collection(DiscoveryWorkerAdmissionCollection.Name)]
 public class DiscoveryIdentityReaderTests
 {
     /// <summary>
@@ -32,21 +33,30 @@ public class DiscoveryIdentityReaderTests
     {
         var device = new HangingConnectYubiKey();
 
-        var readTask = DiscoveryIdentityReader.TryReadAsync(
-            device,
-            ConnectionType.SmartCard,
-            NullLogger.Instance,
-            TestContext.Current.CancellationToken);
+        try
+        {
+            var readTask = DiscoveryIdentityReader.TryReadAsync(
+                device,
+                ConnectionType.SmartCard,
+                NullLogger.Instance,
+                TestContext.Current.CancellationToken);
 
-        // Generous bound: 3 attempts x per-attempt timeout + retry backoff must all fit well inside it.
-        var winner = await Task.WhenAny(
-            readTask,
-            Task.Delay(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken));
+            // Generous bound: 3 attempts x per-attempt timeout + retry backoff must all fit well inside it.
+            var winner = await Task.WhenAny(
+                readTask,
+                Task.Delay(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken));
 
-        Assert.True(readTask == winner,
-            "DiscoveryIdentityReader.TryReadAsync did not complete within 10s when the connection open " +
-            "hung; a busy card stalls the whole discovery scan (holds FindYubiKeys._scanLock).");
-        Assert.Null(await readTask);
+            Assert.True(readTask == winner,
+                "DiscoveryIdentityReader.TryReadAsync did not complete within 10s when the connection open " +
+                "hung; a busy card stalls the whole discovery scan (holds FindYubiKeys._scanLock).");
+            Assert.Null(await readTask);
+        }
+        finally
+        {
+            device.FailConnect();
+            await device.ConnectFinished.Task.WaitAsync(TestContext.Current.CancellationToken);
+            await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        }
     }
 
     /// <summary>
@@ -55,14 +65,37 @@ public class DiscoveryIdentityReaderTests
     ///     cancellation once in flight. A fix that only signals a token into ConnectAsync would not fix the
     ///     real bug; the reader must abandon the wait (e.g. <c>Task.WaitAsync</c>) to stay bounded.
     /// </summary>
-    private sealed class HangingConnectYubiKey : IYubiKey
+    private sealed class HangingConnectYubiKey : IYubiKey, IDiscoveryConnectionProvider
     {
+        private readonly TaskCompletionSource<IConnection> _connect =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
         public string DeviceId => "test:hanging-connect";
 
         public ConnectionType AvailableConnections => ConnectionType.SmartCard;
 
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection =>
-            new TaskCompletionSource<TConnection>().Task;
+        public TaskCompletionSource ConnectFinished { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+            where TConnection : class, IConnection
+        {
+            try
+            {
+                return (TConnection)await _connect.Task;
+            }
+            finally
+            {
+                ConnectFinished.TrySetResult();
+            }
+        }
+
+        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+            ConnectionType connection,
+            CancellationToken cancellationToken) =>
+            ConnectAsync<IConnection>(cancellationToken);
+
+        public void FailConnect() =>
+            _connect.TrySetException(new InvalidOperationException("Released after timeout assertion."));
     }
 }

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -20,8 +21,42 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
+[Collection(DiscoveryWorkerAdmissionCollection.Name)]
 public class FindYubiKeysPidMergeTests
 {
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task FindAllAsync_DuplicatePidBlockedIdentityReads_AreBoundedAsOneGroup()
+    {
+        var factory = new BlockingIdentityFactory();
+        var find = new FindYubiKeys(
+            new FakeFindPcscDevices([
+                new FakePcscDevice("Yubico YubiKey OTP+FIDO+CCID", PscsConnectionKind.Usb),
+                new FakePcscDevice("Yubico YubiKey OTP+FIDO+CCID 01", PscsConnectionKind.Usb)
+            ]),
+            new FakeFindHidDevices([]),
+            factory);
+
+        IReadOnlyList<IYubiKey> result;
+        var stopwatch = Stopwatch.StartNew();
+        try
+        {
+            result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+            stopwatch.Stop();
+        }
+        finally
+        {
+            factory.FailAllReads();
+        }
+
+        Assert.True(
+            stopwatch.Elapsed < TimeSpan.FromSeconds(3),
+            $"Independent 2s identity budgets accumulated sequentially for {stopwatch.Elapsed}.");
+        Assert.Equal(2, result.Count);
+        Assert.Equal(2, factory.TotalConnectCalls);
+        Assert.All(result, device => Assert.Equal(ConnectionType.SmartCard, device.AvailableConnections));
+    }
+
     [Fact]
     public async Task FindAllAsync_FullKey_MergesByPid_EvenWhenEveryConnectFails()
     {
@@ -92,6 +127,55 @@ public class FindYubiKeysPidMergeTests
                 $"hid:{h.ReaderName}", ConnectionTypeMapper.ToConnectionType(h.InterfaceType)),
             _ => throw new NotSupportedException()
         };
+    }
+
+    private sealed class BlockingIdentityFactory : IYubiKeyFactory
+    {
+        private readonly List<BlockingIdentityYubiKey> _devices = [];
+
+        public int TotalConnectCalls => _devices.Sum(device => device.ConnectCalls);
+
+        public IYubiKey Create(IDevice device)
+        {
+            var pcscDevice = Assert.IsAssignableFrom<IPcscDevice>(device);
+            var yubiKey = new BlockingIdentityYubiKey($"pcsc:{pcscDevice.ReaderName}");
+            _devices.Add(yubiKey);
+            return yubiKey;
+        }
+
+        public void FailAllReads()
+        {
+            foreach (var device in _devices)
+                device.FailRead();
+        }
+    }
+
+    private sealed class BlockingIdentityYubiKey(string deviceId) : IYubiKey, IDiscoveryConnectionProvider
+    {
+        private readonly TaskCompletionSource<IConnection> _connection =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private int _connectCalls;
+
+        public int ConnectCalls => Volatile.Read(ref _connectCalls);
+
+        public string DeviceId { get; } = deviceId;
+
+        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
+
+        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+            where TConnection : class, IConnection =>
+            Task.FromException<TConnection>(new InvalidOperationException("Public connect must not be used by discovery."));
+
+        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+            ConnectionType connection,
+            CancellationToken cancellationToken)
+        {
+            _ = Interlocked.Increment(ref _connectCalls);
+            return _connection.Task;
+        }
+
+        public void FailRead() =>
+            _connection.TrySetException(new InvalidOperationException("Expected identity-read cleanup failure."));
     }
 
     private sealed class ThrowingYubiKey(string deviceId, ConnectionType connectionType) : IYubiKey

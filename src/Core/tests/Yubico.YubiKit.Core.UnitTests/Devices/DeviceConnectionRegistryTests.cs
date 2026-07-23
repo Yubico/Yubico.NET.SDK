@@ -20,6 +20,7 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
+[Collection(DiscoveryWorkerAdmissionCollection.Name)]
 public class DeviceConnectionRegistryTests
 {
     private static string NewId() => $"test:{Guid.NewGuid():N}";
@@ -81,31 +82,6 @@ public class DeviceConnectionRegistryTests
         Assert.Equal(1, otpMember.ConnectCalls);
     }
 
-    /// <summary>
-    ///     TOCTOU guard: if a session opens the interface between the pre-connect skip check and the first
-    ///     APDU, the read must abort after connect without transmitting anything (its SELECT would deselect
-    ///     the session's applet), release its own registration, and degrade to unknown identity without
-    ///     retrying (an owned interface is not a transient failure).
-    /// </summary>
-    [Fact]
-    public async Task IdentityRead_SessionOpensInterfaceDuringConnect_AbortsBeforeTransmitting()
-    {
-        var device = new SessionStealsInterfaceYubiKey(NewId());
-
-        var info = await DiscoveryIdentityReader.TryReadAsync(
-            device, ConnectionType.SmartCard, NullLogger.Instance, TestContext.Current.CancellationToken);
-
-        Assert.Null(info);
-        Assert.Equal(1, device.ConnectCalls);
-        Assert.Equal(0, device.LastConnection!.TransmitCalls);
-        Assert.True(device.LastConnection.Disposed);
-
-        // Discovery's own registration was released by the abort; only the session's remains.
-        Assert.True(DeviceConnectionRegistry.IsInUse(device.DeviceId));
-        device.ConcurrentSessionRegistration!.Dispose();
-        Assert.False(DeviceConnectionRegistry.IsInUse(device.DeviceId));
-    }
-
     [Fact]
     public async Task RegisteredSmartCardConnection_Dispose_ReleasesRegistration_EvenWhenInnerThrows()
     {
@@ -127,7 +103,7 @@ public class DeviceConnectionRegistryTests
         Assert.True(inner.Disposed);
     }
 
-    private sealed class RecordingYubiKey(string deviceId, ConnectionType available) : IYubiKey
+    private sealed class RecordingYubiKey(string deviceId, ConnectionType available) : IYubiKey, IDiscoveryConnectionProvider
     {
         public int ConnectCalls { get; private set; }
 
@@ -141,34 +117,13 @@ public class DeviceConnectionRegistryTests
             ConnectCalls++;
             throw new InvalidOperationException("Test connect refused by design.");
         }
-    }
 
-    /// <summary>
-    ///     Mirrors <c>PcscYubiKey.ConnectAsync</c> (registers its own connection, returns it wrapped) and
-    ///     simulates a session registering the same interface concurrently — the TOCTOU window between
-    ///     discovery's pre-connect check and its first APDU.
-    /// </summary>
-    private sealed class SessionStealsInterfaceYubiKey(string deviceId) : IYubiKey
-    {
-        public int ConnectCalls { get; private set; }
-
-        public FakeSmartCardConnection? LastConnection { get; private set; }
-
-        public IDisposable? ConcurrentSessionRegistration { get; private set; }
-
-        public string DeviceId => deviceId;
-
-        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection
+        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+            ConnectionType connection,
+            CancellationToken cancellationToken)
         {
             ConnectCalls++;
-            LastConnection = new FakeSmartCardConnection();
-            var wrapped = new RegisteredSmartCardConnection(
-                LastConnection, DeviceConnectionRegistry.Register(deviceId));
-            ConcurrentSessionRegistration = DeviceConnectionRegistry.Register(deviceId);
-            return Task.FromResult((TConnection)(object)wrapped);
+            throw new InvalidOperationException("Test discovery connect refused by design.");
         }
     }
 

@@ -62,7 +62,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     // so a single reader serializes hint ingress and debounce. All repository
     // rescans, including manual RescanAsync calls, are serialized through
     // _rescanGate before updating the repository cache.
-    private Channel<DeviceMonitorRescanRequest>? _rescanRequests;
+    private DeviceMonitorSignal? _rescanSignal;
 
     // Monitoring lifecycle fields
     private CancellationTokenSource? _monitoringCts;
@@ -169,19 +169,51 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 _monitoringTask = null;
             }
 
-            _rescanRequests = Channel.CreateUnbounded<DeviceMonitorRescanRequest>(
-                new UnboundedChannelOptions
-                {
-                    SingleReader = true,
-                    SingleWriter = false,
-                    AllowSynchronousContinuations = false
-                });
+            var rescanSignal = new DeviceMonitorSignal();
 
-            // Setup listeners BEFORE starting them
-            SetupListeners();
+            HidDeviceListener? hidListener = null;
+            ISmartCardDeviceListener? smartCardListener = null;
+            var hidStartAttempted = false;
+            var smartCardStartAttempted = false;
+            CancellationTokenSource? monitoringCts = null;
+            try
+            {
+                hidListener = HidListenerFactory();
+                smartCardListener = SmartCardListenerFactory();
 
-            _monitoringCts = new CancellationTokenSource();
-            _monitoringTask = Task.Run(() => MonitoringLoopAsync(interval, _rescanRequests.Reader, _monitoringCts.Token));
+                // Capture this attempt's signal so a stale callback can never signal a later attempt.
+                hidListener.DeviceEvent = hint => SignalHidEvent(rescanSignal, hint);
+                smartCardListener.DeviceEvent = () => SignalSmartCardEvent(rescanSignal);
+
+                hidStartAttempted = true;
+                hidListener.Start();
+                EnsureListenerStarted("HID", hidListener.Status);
+                smartCardStartAttempted = true;
+                smartCardListener.Start();
+                EnsureListenerStarted("SmartCard", smartCardListener.Status);
+
+                monitoringCts = new CancellationTokenSource();
+                var monitoringTask = Task.Run(
+                    () => MonitoringLoopAsync(interval, rescanSignal, monitoringCts.Token));
+
+                _hidListener = hidListener;
+                _smartCardListener = smartCardListener;
+                _rescanSignal = rescanSignal;
+                _monitoringCts = monitoringCts;
+                _monitoringTask = monitoringTask;
+            }
+            catch
+            {
+                monitoringCts?.Cancel();
+                rescanSignal.Complete();
+                CleanupListeners(
+                    hidListener,
+                    hidStartAttempted,
+                    smartCardListener,
+                    smartCardStartAttempted);
+                monitoringCts?.Dispose();
+                throw;
+            }
 
             Logger.LogInformation("Device monitoring started with interval {Interval}", interval);
         }
@@ -242,7 +274,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
             // Signal cancellation
             _monitoringCts?.Cancel();
-            _rescanRequests?.Writer.TryComplete();
+            _rescanSignal?.Complete();
 
             // Clear fields under lock
             _monitoringTask = null;
@@ -262,7 +294,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     /// </summary>
     private async Task MonitoringLoopAsync(
         TimeSpan interval,
-        ChannelReader<DeviceMonitorRescanRequest> reader,
+        DeviceMonitorSignal signal,
         CancellationToken cancellationToken)
     {
         try
@@ -271,7 +303,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                var trigger = await WaitForTriggerAsync(reader, interval, cancellationToken).ConfigureAwait(false);
+                var trigger = await WaitForTriggerAsync(signal, interval, cancellationToken).ConfigureAwait(false);
                 if (trigger == DeviceMonitorWaitResult.Timeout)
                 {
                     await RescanSafelyAsync("interval fallback", cancellationToken).ConfigureAwait(false);
@@ -283,9 +315,9 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                     break;
                 }
 
-                DrainQueuedRequests(reader);
+                _ = signal.TryConsume();
 
-                if (!await WaitForDebounceQuietPeriodAsync(reader, cancellationToken).ConfigureAwait(false))
+                if (!await WaitForDebounceQuietPeriodAsync(signal, cancellationToken).ConfigureAwait(false))
                 {
                     break;
                 }
@@ -320,20 +352,13 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         }
     }
 
-    private static void DrainQueuedRequests(ChannelReader<DeviceMonitorRescanRequest> reader)
-    {
-        while (reader.TryRead(out _))
-        {
-        }
-    }
-
     /// <summary>
     /// Waits for listener hints to stay quiet for <see cref="ThrottleInterval"/>,
     /// forcing a rescan once the coalescing round reaches
     /// <see cref="MaxCoalesceInterval"/>.
     /// </summary>
-    private static async Task<bool> WaitForDebounceQuietPeriodAsync(
-        ChannelReader<DeviceMonitorRescanRequest> reader,
+    private async Task<bool> WaitForDebounceQuietPeriodAsync(
+        DeviceMonitorSignal signal,
         CancellationToken cancellationToken)
     {
         var coalesceStarted = Stopwatch.GetTimestamp();
@@ -351,7 +376,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 ? remainingCoalesce
                 : ThrottleInterval;
 
-            var trigger = await WaitForTriggerAsync(reader, waitInterval, cancellationToken).ConfigureAwait(false);
+            var trigger = await WaitForTriggerAsync(signal, waitInterval, cancellationToken).ConfigureAwait(false);
             if (trigger == DeviceMonitorWaitResult.Timeout)
             {
                 return true;
@@ -362,12 +387,12 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 return false;
             }
 
-            DrainQueuedRequests(reader);
+            _ = signal.TryConsume();
         }
     }
 
     private static async Task<DeviceMonitorWaitResult> WaitForTriggerAsync(
-        ChannelReader<DeviceMonitorRescanRequest> reader,
+        DeviceMonitorSignal signal,
         TimeSpan timeout,
         CancellationToken cancellationToken)
     {
@@ -375,7 +400,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         using var readCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         var timeoutTask = Task.Delay(timeout, timeoutCts.Token);
-        var readTask = reader.WaitToReadAsync(readCts.Token).AsTask();
+        var readTask = signal.WaitToReadAsync(readCts.Token).AsTask();
         var completedTask = await Task.WhenAny(timeoutTask, readTask).ConfigureAwait(false);
 
         if (completedTask == timeoutTask)
@@ -405,43 +430,38 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         }
     }
 
-    private void QueueRescan(DeviceMonitorRescanRequest request)
+    private static void QueueRescan(DeviceMonitorSignal signal, string source)
     {
         try
         {
-            var rescanRequests = _rescanRequests;
-            if (rescanRequests is null || !rescanRequests.Writer.TryWrite(request))
+            if (!signal.TrySignal())
             {
-                Logger.LogTrace("Ignored device rescan request from {Source}; monitoring is stopping", request.Source);
+                Logger.LogTrace("Ignored device rescan request from {Source}; monitoring is stopping", source);
                 return;
-            }
-
-            if (request.HidHint is not null)
-            {
-                Logger.LogTrace(
-                    "Queued HID rescan hint: {Kind}, {PlatformDeviceId}, {DevicePath}",
-                    request.HidHint.ChangeKind,
-                    request.HidHint.PlatformDeviceId,
-                    request.HidHint.DevicePath);
             }
         }
         catch (Exception ex)
         {
-            Logger.LogTrace(ex, "Ignored device rescan request from {Source}", request.Source);
+            Logger.LogTrace(ex, "Ignored device rescan request from {Source}", source);
         }
     }
 
-    private void SignalHidEvent(HidDeviceRescanHint hint)
+    private static void SignalHidEvent(
+        DeviceMonitorSignal signal,
+        HidDeviceRescanHint hint)
     {
-        QueueRescan(new DeviceMonitorRescanRequest("HID", hint));
+        Logger.LogTrace(
+            "Received HID rescan hint: {Kind}, {PlatformDeviceId}, {DevicePath}",
+            hint.ChangeKind,
+            hint.PlatformDeviceId,
+            hint.DevicePath);
+        QueueRescan(signal, "HID");
     }
 
-    private void SignalSmartCardEvent()
+    private static void SignalSmartCardEvent(DeviceMonitorSignal signal)
     {
-        QueueRescan(new DeviceMonitorRescanRequest("SmartCard", null));
+        QueueRescan(signal, "SmartCard");
     }
-
-    private readonly record struct DeviceMonitorRescanRequest(string Source, HidDeviceRescanHint? HidHint);
 
     private enum DeviceMonitorWaitResult
     {
@@ -451,54 +471,61 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     }
 
     /// <summary>
-    /// Sets up device listeners for event-driven discovery.
-    /// </summary>
-    private void SetupListeners()
-    {
-        _hidListener = HidListenerFactory();
-        _smartCardListener = SmartCardListenerFactory();
-
-        // Wire event callbacks before starting listeners.
-        _hidListener.DeviceEvent = SignalHidEvent;
-        _smartCardListener.DeviceEvent = SignalSmartCardEvent;
-
-        // Start listeners AFTER wiring callbacks (explicit lifecycle)
-        _hidListener.Start();
-        _smartCardListener.Start();
-
-        Logger.LogDebug("Device listeners set up and started");
-    }
-
-    /// <summary>
     /// Tears down device listeners.
     /// </summary>
     private void TeardownListeners()
     {
-        // Stop listeners first
-        _hidListener?.Stop();
-        _smartCardListener?.Stop();
-
-        // Clear callbacks (prevent events during disposal)
-        if (_hidListener is not null)
-        {
-            _hidListener.DeviceEvent = null;
-        }
-        if (_smartCardListener is not null)
-        {
-            _smartCardListener.DeviceEvent = null;
-        }
-
-        // Dispose listeners
-        _hidListener?.Dispose();
+        var hidListener = _hidListener;
+        var smartCardListener = _smartCardListener;
         _hidListener = null;
-
-        _smartCardListener?.Dispose();
         _smartCardListener = null;
 
-        _rescanRequests?.Writer.TryComplete();
-        _rescanRequests = null;
+        _rescanSignal?.Complete();
+        _rescanSignal = null;
+
+        CleanupListeners(hidListener, hidListener is not null, smartCardListener, smartCardListener is not null);
 
         Logger.LogDebug("Device listeners torn down");
+    }
+
+    private static void CleanupListeners(
+        HidDeviceListener? hidListener,
+        bool hidStartAttempted,
+        ISmartCardDeviceListener? smartCardListener,
+        bool smartCardStartAttempted)
+    {
+        if (hidListener is not null)
+            BestEffort(() => hidListener.DeviceEvent = null, "clear HID listener callback");
+        if (smartCardListener is not null)
+            BestEffort(() => smartCardListener.DeviceEvent = null, "clear SmartCard listener callback");
+
+        if (hidStartAttempted && hidListener is not null)
+            BestEffort(hidListener.Stop, "stop HID listener");
+        if (smartCardStartAttempted && smartCardListener is not null)
+            BestEffort(smartCardListener.Stop, "stop SmartCard listener");
+
+        if (hidListener is not null)
+            BestEffort(hidListener.Dispose, "dispose HID listener");
+        if (smartCardListener is not null)
+            BestEffort(smartCardListener.Dispose, "dispose SmartCard listener");
+    }
+
+    private static void BestEffort(Action cleanup, string operation)
+    {
+        try
+        {
+            cleanup();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to {CleanupOperation} during monitor teardown", operation);
+        }
+    }
+
+    private static void EnsureListenerStarted(string listenerName, DeviceListenerStatus status)
+    {
+        if (status != DeviceListenerStatus.Started)
+            throw new InvalidOperationException($"{listenerName} listener failed to start (status: {status}).");
     }
 
     private void ThrowIfDisposed()
@@ -562,4 +589,28 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
         Logger.LogDebug("YubiKeyDeviceMonitorService disposed");
     }
+}
+
+/// <summary>
+///     Capacity-one occurrence signal for monitor wake-ups. Listener payloads are logged at ingress and are
+///     intentionally not queued because the consumer only needs to know that at least one rescan is pending.
+/// </summary>
+internal sealed class DeviceMonitorSignal
+{
+    private readonly Channel<bool> _channel = Channel.CreateBounded<bool>(
+        new BoundedChannelOptions(1)
+        {
+            SingleReader = true,
+            SingleWriter = false,
+            AllowSynchronousContinuations = false,
+            FullMode = BoundedChannelFullMode.DropWrite
+        });
+    public bool TrySignal() => _channel.Writer.TryWrite(true);
+
+    public ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken) =>
+        _channel.Reader.WaitToReadAsync(cancellationToken);
+
+    public bool TryConsume() => _channel.Reader.TryRead(out _);
+
+    public void Complete() => _channel.Writer.TryComplete();
 }

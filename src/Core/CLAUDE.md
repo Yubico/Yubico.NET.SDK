@@ -212,6 +212,8 @@ Management. Applet session extensions choose a transport via a documented defaul
 
 HID listeners expose typed `HidDeviceRescanHint` callbacks. These hints are diagnostic only and are never public physical-device truth. `YubiKeyManager.DeviceChanges` must remain repository-diffed output after a rescan. Unknown HID removals still trigger a rescan fallback rather than being suppressed, because the removed interface may be the only native signal for a physical-device diff.
 
+`YubiKeyDeviceMonitorService` logs hint details at ingress and carries only a capacity-one occurrence signal into its single-reader loop; payloads are not queued. Startup is transactional: factory/start failure or a post-`Start()` status other than `Started` clears attempt-local callbacks, completes the attempt signal, best-effort stops every listener whose start was attempted, disposes every acquired listener, and leaves the service restartable. Listener callbacks capture their attempt's signal so stale callbacks cannot enqueue into a later monitoring run. The loop consumes one occurrence per wake-up before checking debounce/max-coalesce time, so continuously refilled signals cannot starve the deadline check.
+
 ## Session Base Class
 
 `ApplicationSession` centralizes shared session state:
@@ -369,8 +371,8 @@ Behavior added by the discovery/session concurrency hardening (see `AsyncExchang
 
 - **Protocols serialize logical exchanges.** `PcscProtocol` (+ SCP wrapper), `FidoHidProtocol`, and `OtpHidProtocol` each run full logical exchanges (chained APDUs, multi-packet CTAP transactions, multi-report OTP frames, lazy initialization) through an internal `AsyncExchangeGate`. Concurrent calls on one session/protocol are **safe but sequential** — no throughput gain, no interleaving corruption.
 - **Cancellation gates entry only.** A `CancellationToken` passed to a protocol method cancels the *wait for a turn*; an exchange already in flight always runs to completion (aborting mid-exchange would strand device state for the next caller).
-- **Discovery skips in-use devices.** `DeviceConnectionRegistry` refcounts open connections per interface `DeviceId`. Discovery identity/metadata readers skip devices with live connections (conservative no-merge/cached info, same degradation as exclusive-mode path) instead of opening a second handle and clobbering the selected applet. In-process only — cross-process contention is not covered.
-- **Discovery reads are time-bounded.** Identity reads: 2s/attempt; composite metadata: 3s budget. Hung native calls are abandoned (not aborted); the scan proceeds with unknown/cached info and retries next scan.
+- **Discovery/session ownership is atomic.** `DeviceConnectionRegistry` coordinates each interface `DeviceId` with shared session leases and a nonblocking exclusive discovery lease. Sessions acquire ownership before physical connect; discovery skips immediately while a session is active, and sessions wait (cancellably) while discovery holds the interface across connect, Management exchange, and disposal. Discovery uses only the internal `IDiscoveryConnectionProvider` path; wrappers/custom `IYubiKey` implementations without it are skipped without calling public `ConnectAsync`. In-process only — cross-process contention is not covered. Idle coordinator entries are retained for the process lifetime to avoid unsafe eviction races and are bounded by unique interface IDs observed.
+- **Discovery reads are time-bounded and single-flight.** Identity reads: 2s/attempt; composite metadata: 3s budget. The budget bounds each caller's wait, while one underlying read per stable interface/`ConnectionType` continues independently. A hung native call is reused by later scans rather than multiplied; completion removes the single-flight entry so faults and cancellations can be retried.
 
 ## Known Gotchas
 

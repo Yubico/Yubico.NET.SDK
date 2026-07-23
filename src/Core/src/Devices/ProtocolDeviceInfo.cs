@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
@@ -33,6 +34,11 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </remarks>
 internal static class ProtocolDeviceInfo
 {
+    private static readonly ConcurrentDictionary<ReadKey, SharedRead> InFlightReads = new();
+    private static int _activeCompletionObserverCount;
+
+    internal static int ActiveCompletionObserverCount => Volatile.Read(ref _activeCompletionObserverCount);
+
     /// <summary>
     ///     Opens a short-lived connection over the given interface and reads <see cref="DeviceInfo" />,
     ///     bounded by a hard wall-clock budget.
@@ -48,8 +54,10 @@ internal static class ProtocolDeviceInfo
     ///         call eventually returns.
     ///     </para>
     ///     <para>
-    ///         External cancellation via <paramref name="cancellationToken" /> likewise abandons the
-    ///         in-flight read (propagating <see cref="OperationCanceledException" />).
+    ///         External cancellation via <paramref name="cancellationToken" /> likewise abandons only that
+    ///         caller's wait (propagating <see cref="OperationCanceledException" />). The shared operation's
+    ///         lifetime is independent of every waiter and remains the single in-flight read for its stable
+    ///         interface/connection key until it completes.
     ///     </para>
     /// </remarks>
     /// <exception cref="TimeoutException">The budget elapsed before the read completed.</exception>
@@ -60,19 +68,131 @@ internal static class ProtocolDeviceInfo
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        var readTask = ConnectAndReadAsync(device, connection, cancellationToken);
+        var key = new ReadKey(DeviceConnectionRegistry.ResolveInterfaceId(device, connection), connection);
+        var sharedRead = InFlightReads.GetOrAdd(
+            key,
+            _ => new SharedRead(key, device, connection, logger));
+
         try
         {
-            return await readTask.WaitAsync(budget, cancellationToken).ConfigureAwait(false);
+            return await sharedRead.Task.WaitAsync(budget, cancellationToken).ConfigureAwait(false);
         }
         catch (TimeoutException)
         {
-            ObserveAbandoned(readTask, device.DeviceId, connection, logger);
+            sharedRead.RecordAbandonment();
             throw;
         }
         catch (OperationCanceledException)
         {
-            ObserveAbandoned(readTask, device.DeviceId, connection, logger);
+            sharedRead.RecordAbandonment();
+            throw;
+        }
+    }
+
+    private readonly record struct ReadKey(string InterfaceId, ConnectionType Connection);
+
+    private sealed class SharedRead
+    {
+        private readonly ReadKey _key;
+        private readonly string _deviceId;
+        private readonly ConnectionType _connection;
+        private readonly ILogger _logger;
+        private readonly Lazy<Task<DeviceInfo>> _task;
+        private int _abandonedWaiterCount;
+
+        public SharedRead(
+            ReadKey key,
+            IYubiKey device,
+            ConnectionType connection,
+            ILogger logger)
+        {
+            _key = key;
+            _deviceId = device.DeviceId;
+            _connection = connection;
+            _logger = logger;
+            _task = new Lazy<Task<DeviceInfo>>(
+                () => StartAndObserve(device),
+                LazyThreadSafetyMode.ExecutionAndPublication);
+        }
+
+        public Task<DeviceInfo> Task => _task.Value;
+
+        public void RecordAbandonment() => Interlocked.Increment(ref _abandonedWaiterCount);
+
+        private Task<DeviceInfo> StartAndObserve(IYubiKey device)
+        {
+            var task = StartSharedRead(device, _connection);
+            _ = Interlocked.Increment(ref _activeCompletionObserverCount);
+            try
+            {
+                _ = task.ContinueWith(
+                    Complete,
+                    CancellationToken.None,
+                    TaskContinuationOptions.ExecuteSynchronously,
+                    TaskScheduler.Default);
+            }
+            catch
+            {
+                _ = Interlocked.Decrement(ref _activeCompletionObserverCount);
+                throw;
+            }
+
+            return task;
+        }
+
+        private void Complete(Task<DeviceInfo> task)
+        {
+            try
+            {
+                var exception = task.Exception?.GetBaseException();
+                _ = InFlightReads.TryRemove(KeyValuePair.Create(_key, this));
+
+                var abandonedWaiterCount = Volatile.Read(ref _abandonedWaiterCount);
+                if (abandonedWaiterCount > 0)
+                {
+                    _logger.LogDebug(
+                        exception,
+                        "Abandoned discovery device-info read for {DeviceId} over {Connection} finished in the background (status: {Status}, abandoned waiters: {AbandonedWaiterCount}).",
+                        _deviceId,
+                        _connection,
+                        task.Status,
+                        abandonedWaiterCount);
+                }
+            }
+            finally
+            {
+                _ = Interlocked.Decrement(ref _activeCompletionObserverCount);
+            }
+        }
+    }
+
+    private static Task<DeviceInfo> StartSharedRead(IYubiKey device, ConnectionType connection)
+    {
+        var interfaceId = DeviceConnectionRegistry.ResolveInterfaceId(device, connection);
+        if (!DiscoveryWorkerAdmission.TryAcquire(out var admission))
+            return Task.FromException<DeviceInfo>(new DiscoveryReadSkippedException(interfaceId));
+
+        try
+        {
+            // A bounded dedicated worker starts provider/native code only after this caller can install
+            // WaitAsync. Saturation skips instead of queuing or allocating another worker.
+            return Task.Factory.StartNew(
+                    async () =>
+                    {
+                        using (admission)
+                        {
+                            return await ConnectAndReadAsync(device, connection, CancellationToken.None)
+                                .ConfigureAwait(false);
+                        }
+                    },
+                    CancellationToken.None,
+                    TaskCreationOptions.DenyChildAttach | TaskCreationOptions.LongRunning,
+                    TaskScheduler.Default)
+                .Unwrap();
+        }
+        catch
+        {
+            admission.Dispose();
             throw;
         }
     }
@@ -83,55 +203,16 @@ internal static class ProtocolDeviceInfo
         CancellationToken cancellationToken)
     {
         var interfaceId = DeviceConnectionRegistry.ResolveInterfaceId(device, connection);
-        var conn = await ConnectAsync(device, connection, cancellationToken).ConfigureAwait(false);
-
-        // TOCTOU guard: the caller's pre-connect skip check races with sessions opening concurrently.
-        // Our own connect registered exactly one holder for this interface; any additional holder means a
-        // session opened in the window. Abort BEFORE transmitting anything — our SELECT would deselect the
-        // session's applet. (A session whose handshake starts after our SELECT is unharmed: its own applet
-        // SELECT re-establishes state. The remaining sliver — a session's first SELECT interleaving between
-        // this check and our SELECT — degrades to a visible session-creation failure, not silent state
-        // corruption of an established session.)
-        if (DeviceConnectionRegistry.IsInUseByOther(interfaceId))
-        {
-            await conn.DisposeAsync().ConfigureAwait(false);
+        if (device is not IDiscoveryConnectionProvider provider)
             throw new DiscoveryReadSkippedException(interfaceId);
-        }
 
+        using var discoveryLease = DeviceConnectionRegistry.TryAcquireDiscovery(interfaceId);
+        if (discoveryLease is null)
+            throw new DiscoveryReadSkippedException(interfaceId);
+
+        var conn = await provider.ConnectForDiscoveryAsync(connection, cancellationToken).ConfigureAwait(false);
         return await ReadAsync(conn, cancellationToken).ConfigureAwait(false);
     }
-
-    private static Task<IConnection> ConnectAsync(
-        IYubiKey device,
-        ConnectionType connection,
-        CancellationToken cancellationToken) => connection switch
-        {
-            ConnectionType.SmartCard => Upcast(device.ConnectAsync<ISmartCardConnection>(cancellationToken)),
-            ConnectionType.HidFido => Upcast(device.ConnectAsync<IFidoHidConnection>(cancellationToken)),
-            ConnectionType.HidOtp => Upcast(device.ConnectAsync<IOtpHidConnection>(cancellationToken)),
-            _ => throw new NotSupportedException($"Cannot open connection {connection} for device info read.")
-        };
-
-    private static async Task<IConnection> Upcast<TConnection>(Task<TConnection> task)
-        where TConnection : class, IConnection => await task.ConfigureAwait(false);
-
-    // Attaches a fire-and-forget continuation so an abandoned read's eventual outcome is observed (no
-    // unobserved task exceptions) and visible in debug logs. Safe to attach to already-completed tasks.
-    private static void ObserveAbandoned(
-        Task<DeviceInfo> task,
-        string deviceId,
-        ConnectionType connection,
-        ILogger logger) =>
-        _ = task.ContinueWith(
-            t => logger.LogDebug(
-                t.Exception?.GetBaseException(),
-                "Abandoned discovery device-info read for {DeviceId} over {Connection} finished in the background (status: {Status}).",
-                deviceId,
-                connection,
-                t.Status),
-            CancellationToken.None,
-            TaskContinuationOptions.ExecuteSynchronously,
-            TaskScheduler.Default);
 
     public static async Task<DeviceInfo> ReadAsync(IConnection connection, CancellationToken cancellationToken)
     {
@@ -179,6 +260,40 @@ internal static class ProtocolDeviceInfo
             default:
                 throw new NotSupportedException(
                     $"Connection type {connection.GetType().Name} is not supported for reading device info.");
+        }
+    }
+}
+
+/// <summary>
+///     Process-wide, nonqueueing admission for best-effort native discovery workers.
+/// </summary>
+internal static class DiscoveryWorkerAdmission
+{
+    internal const int MaximumConcurrentWorkers = 4;
+
+    private static readonly SemaphoreSlim Slots =
+        new(MaximumConcurrentWorkers, MaximumConcurrentWorkers);
+
+    public static bool TryAcquire(out IDisposable admission)
+    {
+        if (!Slots.Wait(0))
+        {
+            admission = null!;
+            return false;
+        }
+
+        admission = new Admission();
+        return true;
+    }
+
+    private sealed class Admission : IDisposable
+    {
+        private int _disposed;
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) == 0)
+                Slots.Release();
         }
     }
 }

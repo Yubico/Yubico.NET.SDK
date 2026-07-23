@@ -361,9 +361,7 @@ public class YubiKeyDeviceMonitorServiceTests
     public void StartMonitoring_SetsIsMonitoringTrue()
     {
         // Arrange
-        var repository = new YubiKeyDeviceRepository();
-        var findYubiKeys = new FakeFindYubiKeys([]);
-        var service = new YubiKeyDeviceMonitorService(repository, findYubiKeys);
+        var (service, repository, _, _, _) = CreateService();
 
         // Act
         service.StartMonitoring(TimeSpan.FromSeconds(5));
@@ -380,9 +378,7 @@ public class YubiKeyDeviceMonitorServiceTests
     public void StopMonitoring_SetsIsMonitoringFalse()
     {
         // Arrange
-        var repository = new YubiKeyDeviceRepository();
-        var findYubiKeys = new FakeFindYubiKeys([]);
-        var service = new YubiKeyDeviceMonitorService(repository, findYubiKeys);
+        var (service, repository, _, _, _) = CreateService();
         service.StartMonitoring(TimeSpan.FromSeconds(5));
 
         // Act
@@ -398,9 +394,7 @@ public class YubiKeyDeviceMonitorServiceTests
     public void StartMonitoring_Idempotent()
     {
         // Arrange
-        var repository = new YubiKeyDeviceRepository();
-        var findYubiKeys = new FakeFindYubiKeys([]);
-        var service = new YubiKeyDeviceMonitorService(repository, findYubiKeys);
+        var (service, repository, _, _, _) = CreateService();
 
         // Act - Call multiple times
         service.StartMonitoring(TimeSpan.FromSeconds(5));
@@ -652,9 +646,7 @@ public class YubiKeyDeviceMonitorServiceTests
     public async Task DisposeAsync_StopsMonitoring()
     {
         // Arrange
-        var repository = new YubiKeyDeviceRepository();
-        var findYubiKeys = new FakeFindYubiKeys([]);
-        var service = new YubiKeyDeviceMonitorService(repository, findYubiKeys);
+        var (service, repository, _, _, _) = CreateService();
         service.StartMonitoring(TimeSpan.FromSeconds(5));
 
         // Act

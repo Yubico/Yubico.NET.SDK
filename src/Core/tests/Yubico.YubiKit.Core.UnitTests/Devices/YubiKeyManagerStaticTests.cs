@@ -26,25 +26,6 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
         await YubiKeyManager.ShutdownAsync();
     }
 
-    /// <summary>
-    /// Starts static monitoring, skipping the test when the current environment
-    /// has no working device listener (for example, no PC/SC service in headless
-    /// CI). Monitoring startup is intentionally strict: a listener that cannot
-    /// reach <c>Started</c> rolls back and throws, so these lifecycle assertions
-    /// require real listeners and are hardware/PC-SC gated at runtime.
-    /// </summary>
-    private static void StartMonitoringOrSkip(TimeSpan interval)
-    {
-        try
-        {
-            YubiKeyManager.StartMonitoring(interval);
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("listener failed to start"))
-        {
-            Assert.Skip($"Device monitoring requires an available listener in this environment: {ex.Message}");
-        }
-    }
-
     [Fact]
     public async Task YubiKeyManager_FindAllAsync_IsStaticMethod()
     {
@@ -243,7 +224,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
         // Starting monitoring sets IsMonitoring to true
         Assert.False(YubiKeyManager.IsMonitoring);
 
-        StartMonitoringOrSkip(TimeSpan.FromSeconds(1));
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
 
         Assert.True(YubiKeyManager.IsMonitoring);
     }
@@ -252,7 +233,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     public void YubiKeyManager_StopMonitoring_SetsIsMonitoringFalse()
     {
         // Stopping monitoring sets IsMonitoring to false
-        StartMonitoringOrSkip(TimeSpan.FromSeconds(1));
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
         Assert.True(YubiKeyManager.IsMonitoring);
 
         YubiKeyManager.StopMonitoring();
@@ -264,7 +245,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     public void YubiKeyManager_StartMonitoring_WhenAlreadyMonitoring_IsIdempotent()
     {
         // StartMonitoring when already monitoring -> No-op (idempotent)
-        StartMonitoringOrSkip(TimeSpan.FromSeconds(1));
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
         Assert.True(YubiKeyManager.IsMonitoring);
 
         // Call again - should not throw or change behavior
@@ -371,7 +352,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
         var observable = YubiKeyManager.DeviceChanges;
         var subscription = observable.Subscribe(_ => { });
 
-        StartMonitoringOrSkip(TimeSpan.FromSeconds(1));
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
         Assert.True(YubiKeyManager.IsMonitoring);
 
         // Unsubscribe
@@ -415,7 +396,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     public async Task YubiKeyManager_ShutdownAsync_StopsMonitoring()
     {
         // Verify ShutdownAsync stops monitoring if active
-        StartMonitoringOrSkip(TimeSpan.FromSeconds(1));
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
         Assert.True(YubiKeyManager.IsMonitoring);
 
         await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
@@ -452,7 +433,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
         await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
 
         // StartMonitoring should work after shutdown
-        StartMonitoringOrSkip(TimeSpan.FromSeconds(1));
+        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
         Assert.True(YubiKeyManager.IsMonitoring);
     }
 

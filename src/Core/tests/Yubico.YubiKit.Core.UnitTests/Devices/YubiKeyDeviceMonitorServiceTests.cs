@@ -429,36 +429,26 @@ public class YubiKeyDeviceMonitorServiceTests
     }
 
     [Fact]
-    public async Task StartMonitoring_SmartCardFactoryThrows_RollsBackHidAndAllowsRetry()
+    public async Task StartMonitoring_SmartCardFactoryThrows_StartsWithHidOnly()
     {
         var repository = new YubiKeyDeviceRepository();
         var findYubiKeys = new FakeFindYubiKeys([]);
-        var failedHid = new FakeHidDeviceListener();
-        var retryHid = new FakeHidDeviceListener();
-        var retrySmartCard = new FakeSmartCardDeviceListener();
-        var hidAttempts = new Queue<FakeHidDeviceListener>([failedHid, retryHid]);
-        var smartCardFactoryCalls = 0;
+        var hid = new FakeHidDeviceListener();
         var service = new YubiKeyDeviceMonitorService(
             repository,
             findYubiKeys,
-            () => hidAttempts.Dequeue(),
-            () => ++smartCardFactoryCalls == 1
-                ? throw new InvalidOperationException("Expected SmartCard factory failure.")
-                : retrySmartCard);
+            () => hid,
+            () => throw new InvalidOperationException("Expected SmartCard factory failure."));
 
-        var exception = Assert.Throws<InvalidOperationException>(() =>
-            service.StartMonitoring(TimeSpan.FromSeconds(30)));
-
-        Assert.Equal("Expected SmartCard factory failure.", exception.Message);
-        Assert.False(service.IsMonitoring);
-        Assert.Null(failedHid.DeviceEvent);
-        Assert.Equal(0, failedHid.StopCount);
-        Assert.Equal(1, failedHid.DisposeCount);
-
+        // The SmartCard listener is unavailable, but HID starts, so monitoring
+        // runs (degraded). Startup must not throw for an unavailable transport.
         service.StartMonitoring(TimeSpan.FromSeconds(30));
+
         Assert.True(service.IsMonitoring);
-        Assert.Equal(1, retryHid.StartCount);
-        Assert.Equal(1, retrySmartCard.StartCount);
+        Assert.Equal(1, hid.StartCount);
+        Assert.NotNull(hid.DeviceEvent);
+        Assert.Equal(0, hid.StopCount);
+        Assert.Equal(0, hid.DisposeCount);
 
         service.StopMonitoring();
         await service.DisposeAsync();
@@ -466,7 +456,7 @@ public class YubiKeyDeviceMonitorServiceTests
     }
 
     [Fact]
-    public async Task StartMonitoring_HidStartThrows_RollsBackBothAcquiredListeners()
+    public async Task StartMonitoring_HidStartThrows_StartsWithSmartCardOnly()
     {
         var repository = new YubiKeyDeviceRepository();
         var hid = new FakeHidDeviceListener { ThrowOnStart = true };
@@ -477,135 +467,157 @@ public class YubiKeyDeviceMonitorServiceTests
             () => hid,
             () => smartCard);
 
-        var exception = Assert.Throws<InvalidOperationException>(() =>
-            service.StartMonitoring(TimeSpan.FromSeconds(30)));
+        // HID cannot start, but SmartCard starts, so monitoring runs (degraded).
+        service.StartMonitoring(TimeSpan.FromSeconds(30));
 
-        Assert.Equal("Expected HID start failure.", exception.Message);
-        Assert.False(service.IsMonitoring);
+        Assert.True(service.IsMonitoring);
+        // The failed HID listener is cleaned up individually.
         Assert.Null(hid.DeviceEvent);
-        Assert.Null(smartCard.DeviceEvent);
         Assert.Equal(1, hid.StopCount);
-        Assert.Equal(0, smartCard.StopCount);
         Assert.Equal(1, hid.DisposeCount);
+        // SmartCard remains the active listener and is not torn down.
+        Assert.NotNull(smartCard.DeviceEvent);
+        Assert.Equal(1, smartCard.StartCount);
+        Assert.Equal(0, smartCard.StopCount);
+        Assert.Equal(0, smartCard.DisposeCount);
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+    }
+
+    [Fact]
+    public async Task StartMonitoring_HidReturnsError_StartsWithSmartCardOnly()
+    {
+        var repository = new YubiKeyDeviceRepository();
+        var hid = new FakeHidDeviceListener { StartStatus = DeviceListenerStatus.Error };
+        var smartCard = new FakeSmartCardDeviceListener();
+        var findYubiKeys = new FakeFindYubiKeys([]);
+        var service = new YubiKeyDeviceMonitorService(
+            repository,
+            findYubiKeys,
+            () => hid,
+            () => smartCard);
+
+        // HID reports Error (does not throw); it is cleaned up while SmartCard
+        // keeps monitoring alive.
+        service.StartMonitoring(TimeSpan.FromSeconds(30));
+
+        Assert.True(service.IsMonitoring);
+        Assert.Null(hid.DeviceEvent);
+        Assert.Equal(1, hid.StartCount);
+        Assert.Equal(1, hid.StopCount);
+        Assert.Equal(1, hid.DisposeCount);
+        Assert.NotNull(smartCard.DeviceEvent);
+        Assert.Equal(1, smartCard.StartCount);
+        Assert.Equal(0, smartCard.StopCount);
+        Assert.Equal(0, smartCard.DisposeCount);
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+    }
+
+    [Fact]
+    public async Task StartMonitoring_SmartCardReturnsError_StartsWithHidOnly()
+    {
+        var repository = new YubiKeyDeviceRepository();
+        var hid = new FakeHidDeviceListener();
+        var smartCard = new FakeSmartCardDeviceListener { StartStatus = DeviceListenerStatus.Error };
+        var findYubiKeys = new FakeFindYubiKeys([]);
+        var service = new YubiKeyDeviceMonitorService(
+            repository,
+            findYubiKeys,
+            () => hid,
+            () => smartCard);
+
+        // SmartCard reports Error (the common no-PC/SC case); it is cleaned up
+        // while HID keeps monitoring alive.
+        service.StartMonitoring(TimeSpan.FromSeconds(30));
+
+        Assert.True(service.IsMonitoring);
+        Assert.NotNull(hid.DeviceEvent);
+        Assert.Equal(1, hid.StartCount);
+        Assert.Equal(0, hid.StopCount);
+        Assert.Equal(0, hid.DisposeCount);
+        Assert.Null(smartCard.DeviceEvent);
+        Assert.Equal(1, smartCard.StartCount);
+        Assert.Equal(1, smartCard.StopCount);
         Assert.Equal(1, smartCard.DisposeCount);
 
-        await service.DisposeAsync();
-        repository.Dispose();
-    }
-
-    [Fact]
-    public async Task StartMonitoring_HidReturnsError_RollsBackAndAllowsRetry()
-    {
-        var repository = new YubiKeyDeviceRepository();
-        var failedHid = new FakeHidDeviceListener { StartStatus = DeviceListenerStatus.Error };
-        var failedSmartCard = new FakeSmartCardDeviceListener();
-        var retryHid = new FakeHidDeviceListener();
-        var retrySmartCard = new FakeSmartCardDeviceListener();
-        var hidAttempts = new Queue<FakeHidDeviceListener>([failedHid, retryHid]);
-        var smartCardAttempts = new Queue<FakeSmartCardDeviceListener>([failedSmartCard, retrySmartCard]);
-        var findYubiKeys = new FakeFindYubiKeys([]);
-        var service = new YubiKeyDeviceMonitorService(
-            repository,
-            findYubiKeys,
-            () => hidAttempts.Dequeue(),
-            () => smartCardAttempts.Dequeue());
-
-        var exception = Assert.Throws<InvalidOperationException>(() =>
-            service.StartMonitoring(TimeSpan.FromSeconds(30)));
-
-        Assert.Equal("HID listener failed to start (status: Error).", exception.Message);
-        Assert.False(service.IsMonitoring);
-        Assert.Null(failedHid.DeviceEvent);
-        Assert.Null(failedSmartCard.DeviceEvent);
-        Assert.Equal(1, failedHid.StopCount);
-        Assert.Equal(0, failedSmartCard.StopCount);
-        Assert.Equal(1, failedHid.DisposeCount);
-        Assert.Equal(1, failedSmartCard.DisposeCount);
-
-        service.StartMonitoring(TimeSpan.FromSeconds(30));
-        Assert.True(service.IsMonitoring);
         service.StopMonitoring();
         await service.DisposeAsync();
         repository.Dispose();
     }
 
     [Fact]
-    public async Task StartMonitoring_SmartCardReturnsError_RollsBackAndAllowsRetry()
-    {
-        var repository = new YubiKeyDeviceRepository();
-        var failedHid = new FakeHidDeviceListener();
-        var failedSmartCard = new FakeSmartCardDeviceListener { StartStatus = DeviceListenerStatus.Error };
-        var retryHid = new FakeHidDeviceListener();
-        var retrySmartCard = new FakeSmartCardDeviceListener();
-        var hidAttempts = new Queue<FakeHidDeviceListener>([failedHid, retryHid]);
-        var smartCardAttempts = new Queue<FakeSmartCardDeviceListener>([failedSmartCard, retrySmartCard]);
-        var findYubiKeys = new FakeFindYubiKeys([]);
-        var service = new YubiKeyDeviceMonitorService(
-            repository,
-            findYubiKeys,
-            () => hidAttempts.Dequeue(),
-            () => smartCardAttempts.Dequeue());
-
-        var exception = Assert.Throws<InvalidOperationException>(() =>
-            service.StartMonitoring(TimeSpan.FromSeconds(30)));
-
-        Assert.Equal("SmartCard listener failed to start (status: Error).", exception.Message);
-        Assert.False(service.IsMonitoring);
-        Assert.Null(failedHid.DeviceEvent);
-        Assert.Null(failedSmartCard.DeviceEvent);
-        Assert.Equal(1, failedHid.StopCount);
-        Assert.Equal(1, failedSmartCard.StopCount);
-        Assert.Equal(1, failedHid.DisposeCount);
-        Assert.Equal(1, failedSmartCard.DisposeCount);
-
-        service.StartMonitoring(TimeSpan.FromSeconds(30));
-        Assert.True(service.IsMonitoring);
-        service.StopMonitoring();
-        await service.DisposeAsync();
-        repository.Dispose();
-    }
-
-    [Fact]
-    public async Task StartMonitoring_SmartCardStartThrows_RollbackPreservesInitiatingFailureAndAllowsRetry()
+    public async Task StartMonitoring_SmartCardStartThrows_StartsWithHidAndDetachesFailedListener()
     {
         var repository = new YubiKeyDeviceRepository();
         var findYubiKeys = new FakeFindYubiKeys([]);
-        var failedHid = new FakeHidDeviceListener { ThrowOnStop = true };
+        var hid = new FakeHidDeviceListener();
         var failedSmartCard = new FakeSmartCardDeviceListener { ThrowOnStart = true };
-        var retryHid = new FakeHidDeviceListener();
-        var retrySmartCard = new FakeSmartCardDeviceListener();
-        var hidAttempts = new Queue<FakeHidDeviceListener>([failedHid, retryHid]);
-        var smartCardAttempts = new Queue<FakeSmartCardDeviceListener>([failedSmartCard, retrySmartCard]);
         var service = new YubiKeyDeviceMonitorService(
             repository,
             findYubiKeys,
-            () => hidAttempts.Dequeue(),
-            () => smartCardAttempts.Dequeue());
+            () => hid,
+            () => failedSmartCard);
 
-        var exception = Assert.Throws<InvalidOperationException>(() =>
-            service.StartMonitoring(TimeSpan.FromSeconds(30)));
-
-        Assert.Equal("Expected SmartCard start failure.", exception.Message);
-        Assert.False(service.IsMonitoring);
-        Assert.Null(failedHid.DeviceEvent);
-        Assert.Null(failedSmartCard.DeviceEvent);
-        Assert.Equal(1, failedHid.StopCount);
-        Assert.Equal(1, failedSmartCard.StopCount);
-        Assert.Equal(1, failedHid.DisposeCount);
-        Assert.Equal(1, failedSmartCard.DisposeCount);
-        var staleCallback = Assert.IsType<Action<HidDeviceRescanHint>>(failedHid.CapturedDeviceEvent);
-
+        // SmartCard Start throws; HID starts, so monitoring runs (degraded).
         service.StartMonitoring(TimeSpan.FromSeconds(30));
+
         Assert.True(service.IsMonitoring);
+        Assert.NotNull(hid.DeviceEvent);
+        Assert.Equal(1, hid.StartCount);
+        // The failed SmartCard listener is cleaned up and detached from its signal.
+        Assert.Null(failedSmartCard.DeviceEvent);
+        Assert.Equal(1, failedSmartCard.StopCount);
+        Assert.Equal(1, failedSmartCard.DisposeCount);
+
         await WaitUntilAsync(
-            () => findYubiKeys.ScanCount == 1 && findYubiKeys.ActiveScans == 0,
-            "Retry initial scan did not finish");
+            () => findYubiKeys.ScanCount >= 1 && findYubiKeys.ActiveScans == 0,
+            "Initial scan did not finish");
         var scanCountBeforeStaleCallback = findYubiKeys.ScanCount;
-        staleCallback(new HidDeviceRescanHint(HidDeviceChangeKind.Added, "stale-attempt"));
+
+        // A callback from the detached, failed listener can no longer trigger a rescan.
+        failedSmartCard.Raise();
         await Task.Delay(
             YubiKeyDeviceMonitorService.ThrottleInterval + TimeSpan.FromMilliseconds(100),
             TestContext.Current.CancellationToken);
         Assert.Equal(scanCountBeforeStaleCallback, findYubiKeys.ScanCount);
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+    }
+
+    [Fact]
+    public async Task StartMonitoring_BothListenersFail_StartsIntervalOnlyMonitoring()
+    {
+        var repository = new YubiKeyDeviceRepository();
+        var findYubiKeys = new FakeFindYubiKeys([]);
+        var hid = new FakeHidDeviceListener { StartStatus = DeviceListenerStatus.Error };
+        var smartCard = new FakeSmartCardDeviceListener { StartStatus = DeviceListenerStatus.Error };
+        var service = new YubiKeyDeviceMonitorService(
+            repository,
+            findYubiKeys,
+            () => hid,
+            () => smartCard);
+
+        // Neither listener can start, but monitoring still runs on the interval
+        // rescan alone. Startup must not throw.
+        service.StartMonitoring(TimeSpan.FromMilliseconds(200));
+
+        Assert.True(service.IsMonitoring);
+        Assert.Null(hid.DeviceEvent);
+        Assert.Null(smartCard.DeviceEvent);
+        Assert.Equal(1, hid.DisposeCount);
+        Assert.Equal(1, smartCard.DisposeCount);
+
+        // With no listeners to signal, only the 200ms interval fallback can drive
+        // rescans. Require at least two scans so we prove the interval loop keeps
+        // running on its own, not merely the one-shot startup rescan.
+        await WaitUntilAsync(() => findYubiKeys.ScanCount >= 2, "Interval fallback rescan did not run without listeners");
 
         service.StopMonitoring();
         await service.DisposeAsync();

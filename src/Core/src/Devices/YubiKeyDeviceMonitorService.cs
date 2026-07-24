@@ -171,28 +171,20 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
             var rescanSignal = new DeviceMonitorSignal();
 
-            HidDeviceListener? hidListener = null;
-            ISmartCardDeviceListener? smartCardListener = null;
-            var hidStartAttempted = false;
-            var smartCardStartAttempted = false;
-            CancellationTokenSource? monitoringCts = null;
+            // Listeners are best-effort accelerators. A transport whose listener
+            // cannot start (for example, no PC/SC service on the host) simply
+            // contributes no event hints; it is never fatal to monitoring. Device
+            // truth always comes from the interval fallback rescan and the
+            // repository diff, so a transport whose listener is unavailable is
+            // still detected at interval granularity. This mirrors canonical
+            // yubikit (Rust/Python), where a transport that fails to enumerate is
+            // skipped and discovery continues with the others.
+            var hidListener = TryStartHidListener(rescanSignal);
+            var smartCardListener = TryStartSmartCardListener(rescanSignal);
+
+            var monitoringCts = new CancellationTokenSource();
             try
             {
-                hidListener = HidListenerFactory();
-                smartCardListener = SmartCardListenerFactory();
-
-                // Capture this attempt's signal so a stale callback can never signal a later attempt.
-                hidListener.DeviceEvent = hint => SignalHidEvent(rescanSignal, hint);
-                smartCardListener.DeviceEvent = () => SignalSmartCardEvent(rescanSignal);
-
-                hidStartAttempted = true;
-                hidListener.Start();
-                EnsureListenerStarted("HID", hidListener.Status);
-                smartCardStartAttempted = true;
-                smartCardListener.Start();
-                EnsureListenerStarted("SmartCard", smartCardListener.Status);
-
-                monitoringCts = new CancellationTokenSource();
                 var monitoringTask = Task.Run(
                     () => MonitoringLoopAsync(interval, rescanSignal, monitoringCts.Token));
 
@@ -204,19 +196,96 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             }
             catch
             {
-                monitoringCts?.Cancel();
+                // Scheduling the loop is not expected to fail, but keep the path
+                // leak-free: tear down every listener that did start.
+                monitoringCts.Cancel();
                 rescanSignal.Complete();
                 CleanupListeners(
                     hidListener,
-                    hidStartAttempted,
+                    hidListener is not null,
                     smartCardListener,
-                    smartCardStartAttempted);
-                monitoringCts?.Dispose();
+                    smartCardListener is not null);
+                monitoringCts.Dispose();
                 throw;
+            }
+
+            if (hidListener is null && smartCardListener is null)
+            {
+                Logger.LogWarning(
+                    "No device-change listener could start; monitoring will rely on the {Interval} interval rescan only.",
+                    interval);
             }
 
             Logger.LogInformation("Device monitoring started with interval {Interval}", interval);
         }
+    }
+
+    /// <summary>
+    /// Starts the HID device-change listener on a best-effort basis. Returns the
+    /// started listener, or <see langword="null"/> if it could not start; in that
+    /// case HID changes are still detected by the interval fallback rescan.
+    /// </summary>
+    private HidDeviceListener? TryStartHidListener(DeviceMonitorSignal rescanSignal)
+    {
+        HidDeviceListener? listener = null;
+        try
+        {
+            listener = HidListenerFactory();
+            // Capture this attempt's signal so a stale callback can never signal a later attempt.
+            listener.DeviceEvent = hint => SignalHidEvent(rescanSignal, hint);
+            listener.Start();
+            if (listener.Status == DeviceListenerStatus.Started)
+            {
+                return listener;
+            }
+
+            Logger.LogWarning(
+                "HID device-change listener did not start (status: {Status}); HID changes will be detected on the interval rescan",
+                listener.Status);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(
+                ex,
+                "HID device-change listener failed to start; HID changes will be detected on the interval rescan");
+        }
+
+        CleanupListeners(listener, listener is not null, smartCardListener: null, smartCardStartAttempted: false);
+        return null;
+    }
+
+    /// <summary>
+    /// Starts the SmartCard device-change listener on a best-effort basis. Returns
+    /// the started listener, or <see langword="null"/> if it could not start; in
+    /// that case SmartCard changes are still detected by the interval fallback
+    /// rescan. A missing or stopped PC/SC service is the common non-fatal cause.
+    /// </summary>
+    private ISmartCardDeviceListener? TryStartSmartCardListener(DeviceMonitorSignal rescanSignal)
+    {
+        ISmartCardDeviceListener? listener = null;
+        try
+        {
+            listener = SmartCardListenerFactory();
+            listener.DeviceEvent = () => SignalSmartCardEvent(rescanSignal);
+            listener.Start();
+            if (listener.Status == DeviceListenerStatus.Started)
+            {
+                return listener;
+            }
+
+            Logger.LogWarning(
+                "SmartCard device-change listener did not start (status: {Status}); SmartCard changes will be detected on the interval rescan",
+                listener.Status);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(
+                ex,
+                "SmartCard device-change listener failed to start; SmartCard changes will be detected on the interval rescan");
+        }
+
+        CleanupListeners(hidListener: null, hidStartAttempted: false, listener, smartCardStartAttempted: listener is not null);
+        return null;
     }
 
     /// <inheritdoc/>
@@ -520,12 +589,6 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         {
             Logger.LogWarning(ex, "Failed to {CleanupOperation} during monitor teardown", operation);
         }
-    }
-
-    private static void EnsureListenerStarted(string listenerName, DeviceListenerStatus status)
-    {
-        if (status != DeviceListenerStatus.Started)
-            throw new InvalidOperationException($"{listenerName} listener failed to start (status: {status}).");
     }
 
     private void ThrowIfDisposed()

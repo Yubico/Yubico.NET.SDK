@@ -29,16 +29,16 @@ If you use the wrong command or filter syntax, tests will fail with confusing er
 dotnet toolchain.cs test
 
 # Run tests for a specific module (partial match)
-dotnet toolchain.cs test --project Core
-dotnet toolchain.cs test --project Fido2
-dotnet toolchain.cs test --project Piv
+dotnet toolchain.cs -- test --project Core
+dotnet toolchain.cs -- test --project Fido2
+dotnet toolchain.cs -- test --project Piv
 
 # Run tests with a filter
-dotnet toolchain.cs test --filter "FullyQualifiedName~MyTestClass"
-dotnet toolchain.cs test --filter "Method~Sign"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~MyTestClass"
+dotnet toolchain.cs -- test --filter "Method~Sign"
 
 # Combine project and filter
-dotnet toolchain.cs test --project Piv --filter "Method~Sign"
+dotnet toolchain.cs -- test --project Piv --filter "Method~Sign"
 ```
 
 ## Integration Test Strategy
@@ -87,7 +87,7 @@ dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Yubico.Yub
 dotnet test --filter "FullyQualifiedName~MyTest"
 
 # CORRECT - Always use the build script
-dotnet toolchain.cs test --project Fido2 --filter "FullyQualifiedName~MyTest"
+dotnet toolchain.cs -- test --project Fido2 --filter "FullyQualifiedName~MyTest"
 ```
 
 ## How Detection Works
@@ -127,7 +127,7 @@ When running filtered tests **outside** the build script (ad-hoc debugging), syn
 - `3.x.x` → xUnit v3 syntax
 - `2.x.x` → xUnit v2 syntax
 
-**Recommendation:** Use `dotnet toolchain.cs test --filter "..."` which handles this automatically.
+**Recommendation:** Use `dotnet toolchain.cs -- test --filter "..."` which handles this automatically.
 
 ### xUnit v3 Focused Filters
 
@@ -366,16 +366,16 @@ public class MyTests
 
 ```bash
 # Skip tests requiring user interaction (for CI/agents)
-dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"
+dotnet toolchain.cs -- test --filter "Category!=RequiresUserPresence"
 
 # Skip slow tests
-dotnet toolchain.cs test --filter "Category!=Slow"
+dotnet toolchain.cs -- test --filter "Category!=Slow"
 
 # Skip hardware tests (run only unit tests)
-dotnet toolchain.cs test --filter "Category!=RequiresHardware"
+dotnet toolchain.cs -- test --filter "Category!=RequiresHardware"
 
 # Run only fast unit tests (no hardware, no user presence, not slow)
-dotnet toolchain.cs test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
+dotnet toolchain.cs -- test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
 ```
 
 ### When to Apply Each Trait
@@ -412,7 +412,7 @@ dotnet toolchain.cs test --filter "Category!=RequiresHardware&Category!=Requires
 
 **Agents should skip `RequiresUserPresence` tests** when running test suites:
 ```bash
-dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"
+dotnet toolchain.cs -- test --filter "Category!=RequiresUserPresence"
 ```
 
 ---

@@ -248,7 +248,7 @@ var authenticationExtensions = new AuthenticationExtensionInputs(
 
 | Lane | Examples | Agent-runnable? | Rule |
 |------|----------|-----------------|------|
-| Unit/fake-backend | WebAuthn client, origin, extension adapter, status-stream unit tests | Yes | Run through `dotnet toolchain.cs test --project WebAuthn` |
+| Unit/fake-backend | WebAuthn client, origin, extension adapter, status-stream unit tests | Yes | Run through `dotnet toolchain.cs -- test --project WebAuthn` |
 | Integration smoke without UP | factory/session checks that do not ask for touch | Yes | Use `--smoke` or `Category!=RequiresUserPresence` |
 | User Presence | registration/authentication ceremonies, previewSign hardware checks | No by default | Mark with `Category=RequiresUserPresence`; run only with a human present |
 | User Verification / PIN | PIN normalization, UV-required/preferred flows | No by default | Requires explicit human approval and known PIN/device state |

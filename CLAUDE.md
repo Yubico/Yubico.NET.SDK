@@ -127,9 +127,9 @@ Common patterns (skill files have full reference):
 
 ```bash
 dotnet toolchain.cs build
-dotnet toolchain.cs test --project WebAuthn --smoke
-dotnet toolchain.cs test --project Piv --filter "FullyQualifiedName~Sign"
-dotnet toolchain.cs pack --include-docs
+dotnet toolchain.cs -- test --project WebAuthn --smoke
+dotnet toolchain.cs -- test --project Piv --filter "FullyQualifiedName~Sign"
+dotnet toolchain.cs -- pack --include-docs
 ```
 
 ## Architecture

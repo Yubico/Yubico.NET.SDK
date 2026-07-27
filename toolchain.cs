@@ -10,12 +10,13 @@
  * .NET 10 build automation script using Bullseye task runner.
  *
  * USAGE:
- *   dotnet toolchain.cs [target] [options]
- *   dotnet toolchain.cs -- [target] [options]   (use -- if options conflict with dotnet)
+ *   dotnet toolchain.cs [target]
+ *   dotnet toolchain.cs -- [target] [options]   (required before script long options)
  *
- * NOTE: Use -- separator when passing --help or if options aren't working:
- *   dotnet toolchain.cs -- --help               (--help requires --)
- *   dotnet toolchain.cs -- build --project Piv  (when in doubt, use --)
+ * NOTE: The -- separator passes arguments to the script instead of dotnet.
+ *       It is required before every script long option, including --project:
+ *   dotnet toolchain.cs -- --help
+ *   dotnet toolchain.cs -- build --project Piv
  *
  * TARGETS:
  *   clean          - Remove artifacts directory
@@ -53,17 +54,17 @@
  *
  * EXAMPLES:
  *   dotnet toolchain.cs build
- *   dotnet toolchain.cs build --project Piv
+ *   dotnet toolchain.cs -- build --project Piv
  *   dotnet toolchain.cs test
  *   dotnet toolchain.cs docs-qa
- *   dotnet toolchain.cs test --filter "FullyQualifiedName~MyTestClass"
- *   dotnet toolchain.cs test --project Piv --filter "Method~Sign"
+ *   dotnet toolchain.cs -- test --filter "FullyQualifiedName~MyTestClass"
+ *   dotnet toolchain.cs -- test --project Piv --filter "Method~Sign"
  *   dotnet toolchain.cs -- resilience --fast
- *   dotnet toolchain.cs benchmark --benchmark-args "--list flat"
+ *   dotnet toolchain.cs -- benchmark --benchmark-args "--list flat"
  *   dotnet toolchain.cs -- test --integration --project Piv --smoke   (quick integration smoke test)
  *   dotnet toolchain.cs coverage
- *   dotnet toolchain.cs publish --package-version 1.0.0-preview.1
- *   dotnet toolchain.cs publish-remote --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json --nuget-api-key $TOKEN
+ *   dotnet toolchain.cs -- publish --package-version 1.0.0-preview.1
+ *   dotnet toolchain.cs -- publish-remote --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json --nuget-api-key $TOKEN
  *   dotnet toolchain.cs -- --help
  *
  * TEST TRAIT FILTERS:
@@ -225,7 +226,7 @@ Target("test", () =>
     if (includeIntegration && string.IsNullOrEmpty(projectFilter))
     {
         PrintColored("Error: --integration requires --project to specify which module to test.", ConsoleColor.Red);
-        Console.WriteLine("Example: dotnet toolchain.cs test --integration --project Piv");
+        Console.WriteLine("Example: dotnet toolchain.cs -- test --integration --project Piv");
         Console.WriteLine("\nAvailable integration test projects:");
         PrintProjectList(integrationTestProjects);
         throw new InvalidOperationException("--integration requires --project");
@@ -724,12 +725,13 @@ Yubico.YubiKit Toolchain Script
 .NET 10 build automation script using Bullseye task runner.
 
 USAGE:
-  dotnet toolchain.cs [target] [options]
-  dotnet toolchain.cs -- [target] [options]   (use -- if options conflict with dotnet)
+  dotnet toolchain.cs [target]
+  dotnet toolchain.cs -- [target] [options]   (required before script long options)
 
-NOTE: The -- separator passes arguments to the script instead of dotnet:
-  dotnet toolchain.cs -- --help               Required for --help
-  dotnet toolchain.cs -- build --project Piv  Use when in doubt
+ NOTE: The -- separator passes arguments to the script instead of dotnet.
+       It is required before every script long option, including --project:
+   dotnet toolchain.cs -- --help
+   dotnet toolchain.cs -- build --project Piv
 
 TARGETS:
   clean          - Remove artifacts directory
@@ -768,18 +770,18 @@ OPTIONS:
 
 EXAMPLES:
   dotnet toolchain.cs build
-  dotnet toolchain.cs build --project Piv
+  dotnet toolchain.cs -- build --project Piv
   dotnet toolchain.cs test
   dotnet toolchain.cs docs-qa
   dotnet toolchain.cs -- docs-inventory
-  dotnet toolchain.cs test --filter ""FullyQualifiedName~MyTestClass""
-  dotnet toolchain.cs test --project Piv --filter ""Method~Sign""
+  dotnet toolchain.cs -- test --filter ""FullyQualifiedName~MyTestClass""
+  dotnet toolchain.cs -- test --project Piv --filter ""Method~Sign""
   dotnet toolchain.cs -- resilience --fast
-  dotnet toolchain.cs benchmark --benchmark-args ""--list flat""
+  dotnet toolchain.cs -- benchmark --benchmark-args ""--list flat""
   dotnet toolchain.cs -- test --integration --project Piv --smoke
   dotnet toolchain.cs coverage
-  dotnet toolchain.cs publish --package-version 1.0.0-preview.1
-  dotnet toolchain.cs publish-remote --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json --nuget-api-key $TOKEN
+  dotnet toolchain.cs -- publish --package-version 1.0.0-preview.1
+  dotnet toolchain.cs -- publish-remote --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json --nuget-api-key $TOKEN
   dotnet toolchain.cs -- publish-remote --dry-run --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json --nuget-api-key fake
   dotnet toolchain.cs -- --help
 

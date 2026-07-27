@@ -267,14 +267,14 @@ If a test requires:
 - Include complete test code (no placeholders)
 
 **Step 2: Run test to confirm failure**
-Run: `dotnet toolchain.cs test --filter "FullyQualifiedName~TestName"`
+Run: `dotnet toolchain.cs -- test --filter "FullyQualifiedName~TestName"`
 Expected: FAIL (describe expected failure)
 
 **Step 3: Minimal implementation**
 - Include complete implementation code
 
 **Step 4: Re-run test to confirm pass**
-Run: `dotnet toolchain.cs test --filter "FullyQualifiedName~TestName"`
+Run: `dotnet toolchain.cs -- test --filter "FullyQualifiedName~TestName"`
 Expected: PASS
 
 **Step 5: Commit**
@@ -750,7 +750,7 @@ Run these commands and verify expected results:
 dotnet toolchain.cs build   # Must exit 0
 
 # Run unit tests (hardware tests may fail - document expected failures)
-dotnet toolchain.cs test -- --filter "Category!=Integration"  # Unit tests must pass
+dotnet toolchain.cs -- test --filter "Category!=Integration"  # Unit tests must pass
 
 # Verify expected file changes
 grep -rn "NewClass" src/  # Should find 3 files
@@ -805,7 +805,7 @@ For complex refactors (3+ phases), use this proven structure:
 
 - [ ] N.X-1: **Test verification**
   ```bash
-  dotnet toolchain.cs test --filter "FullyQualifiedName~Module"
+  dotnet toolchain.cs -- test --filter "FullyQualifiedName~Module"
   ```
   All tests must pass.
 

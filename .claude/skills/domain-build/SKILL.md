@@ -64,14 +64,14 @@ dotnet toolchain.cs build
 
 ```bash
 # Partial match on project name
-dotnet toolchain.cs build --project Piv
-dotnet toolchain.cs build --project Fido2
+dotnet toolchain.cs -- build --project Piv
+dotnet toolchain.cs -- build --project Fido2
 ```
 
 ### Clean Build from Scratch
 
 ```bash
-dotnet toolchain.cs build --clean
+dotnet toolchain.cs -- build --clean
 ```
 
 ### Create Packages
@@ -81,10 +81,10 @@ dotnet toolchain.cs build --clean
 dotnet toolchain.cs pack
 
 # Custom version
-dotnet toolchain.cs publish --package-version 1.0.0-preview.1
+dotnet toolchain.cs -- publish --package-version 1.0.0-preview.1
 
 # Dry run to verify
-dotnet toolchain.cs publish --dry-run
+dotnet toolchain.cs -- publish --dry-run
 ```
 
 ## Project Discovery
@@ -106,13 +106,13 @@ dotnet toolchain.cs -- --help
 
 ## The `--` Separator
 
-Use `--` when arguments might conflict with dotnet's own options:
+Use `--` before every script long option so the .NET file runner passes it to the script:
 
 ```bash
 # REQUIRED for --help
 dotnet toolchain.cs -- --help
 
-# Optional but safer when using multiple options
+# Required before script long options, including --project
 dotnet toolchain.cs -- build --project Piv --clean
 ```
 
@@ -137,14 +137,14 @@ If no match is found, the script lists available projects.
 ```bash
 # Clean and rebuild
 dotnet toolchain.cs clean
-dotnet toolchain.cs build --clean
+dotnet toolchain.cs -- build --clean
 ```
 
 ### Package Issues
 
 ```bash
 # Dry run to verify
-dotnet toolchain.cs publish --dry-run
+dotnet toolchain.cs -- publish --dry-run
 
 # Clean and repack
 dotnet toolchain.cs clean

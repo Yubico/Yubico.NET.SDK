@@ -11,28 +11,29 @@ This project uses a .NET 10 C# script for build automation with Bullseye task ru
 
 Run targets with:
 ```bash
-dotnet toolchain.cs [target] [options]
+dotnet toolchain.cs [target]
+dotnet toolchain.cs -- [target] [options]
 ```
 
 ### When to Use `--` Separator
 
-The `--` separator tells `dotnet run` to pass arguments to the script instead of interpreting them:
+The `--` separator tells the .NET file runner to pass arguments to the script instead of interpreting them. It is required before every script long option, including `--project`; otherwise the runner can reject the command because it sees both `--project` and the script file.
 
 ```bash
-# These work WITHOUT -- (target names and most options)
+# These work WITHOUT -- (target names only)
 dotnet toolchain.cs build
-dotnet toolchain.cs test --project Piv
-dotnet toolchain.cs build --clean
 
-# These REQUIRE -- (options that dotnet run might intercept)
+# These REQUIRE -- (every script long option)
 dotnet toolchain.cs -- --help          # --help conflicts with dotnet's help
 dotnet toolchain.cs -- -h              # Same issue
+dotnet toolchain.cs -- test --project Piv
+dotnet toolchain.cs -- build --clean
 
-# When in doubt, use -- before any options
+# Put -- before the target whenever the script receives a long option
 dotnet toolchain.cs -- build --project Piv --clean
 ```
 
-**Rule of thumb:** If your command isn't working as expected, try adding `--` before the arguments.
+**Rule:** Use `dotnet toolchain.cs -- <target> <script-long-options>` for any script `--option`. Target-only commands may omit the separator.
 
 ### Available Targets
 
@@ -59,7 +60,7 @@ dotnet toolchain.cs -- build --project Piv --clean
 - `--dry-run` - Show what would be published without actually publishing
 - `--clean` - Run `dotnet clean` before build
 - `--filter <expression>` - Test filter expression (e.g., `"FullyQualifiedName~MyTest"`)
-- `--project <name>` - Build/test specific project only (partial match, e.g., `Piv`)
+- `--project <name>` - Build/test specific project only (partial match, e.g., `Piv`; requires the preceding `--` separator)
 - `--integration` - Include integration tests (requires `--project`)
 - `--smoke` - Smoke test mode: skip `Slow` and `RequiresUserPresence` tests (fast integration runs)
 - `-h, --help` - Show help message (use `dotnet toolchain.cs -- --help`)
@@ -77,7 +78,7 @@ dotnet toolchain.cs clean
 dotnet toolchain.cs build
 
 # Build specific project (partial match)
-dotnet toolchain.cs build --project Piv
+dotnet toolchain.cs -- build --project Piv
 
 # Run tests
 dotnet toolchain.cs test
@@ -89,22 +90,22 @@ dotnet toolchain.cs docs-qa
 dotnet toolchain.cs -- docs-inventory
 
 # Run tests for specific project with filter
-dotnet toolchain.cs test --project Piv --filter "Method~Sign"
+dotnet toolchain.cs -- test --project Piv --filter "Method~Sign"
 
 # Run tests with code coverage (xUnit v2 unit test projects only)
 dotnet toolchain.cs coverage
 
 # Run integration tests for a specific module
-dotnet toolchain.cs test --integration --project Piv
+dotnet toolchain.cs -- test --integration --project Piv
 
 # Quick smoke test (skips slow RSA keygen and user-presence tests)
 dotnet toolchain.cs -- test --integration --project Piv --smoke
 
 # Create and publish packages with custom version
-dotnet toolchain.cs publish --package-version 1.0.0-preview.2
+dotnet toolchain.cs -- publish --package-version 1.0.0-preview.2
 
 # Dry run to see what would be published
-dotnet toolchain.cs publish --dry-run
+dotnet toolchain.cs -- publish --dry-run
 
 # Full clean build (delete artifacts, then build)
 dotnet toolchain.cs clean build
@@ -192,8 +193,8 @@ If you invoke `dotnet test` on an xUnit v3 project, or use the wrong filter synt
 ```bash
 # ✅ CORRECT - Let the build script handle runner detection
 dotnet toolchain.cs test
-dotnet toolchain.cs test --project Core
-dotnet toolchain.cs test --filter "FullyQualifiedName~MyTest"
+dotnet toolchain.cs -- test --project Core
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~MyTest"
 
 # ❌ WRONG - May fail if project uses xUnit v3
 dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Yubico.YubiKit.Fido2.UnitTests.csproj
@@ -204,10 +205,10 @@ dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Yubico.Yub
 - **Always combine `--project` with `--filter`** to avoid building and running all test projects:
   ```bash
   # ✅ Fast — only builds and runs WebAuthn tests
-  dotnet toolchain.cs test --project WebAuthn --filter "FullyQualifiedName~PreviewSign"
+  dotnet toolchain.cs -- test --project WebAuthn --filter "FullyQualifiedName~PreviewSign"
 
   # ⚠️ Slow — builds ALL test projects, runs filter against each (most find 0 matches)
-  dotnet toolchain.cs test --filter "FullyQualifiedName~PreviewSign"
+  dotnet toolchain.cs -- test --filter "FullyQualifiedName~PreviewSign"
   ```
 - Filter syntax: `FullyQualifiedName~Substring`, `Method~Name`, `Category!=Slow`
 - The toolchain auto-translates VSTest filter expressions to xUnit v3 native options (`--filter-method`, `--filter-trait`, etc.)
@@ -218,5 +219,5 @@ When writing scripts or automation that runs tests:
 
 1. **Always use `dotnet toolchain.cs test`** - it handles the complexity for you
 2. **Never assume** `dotnet test` will work for all projects
-3. **Use `--project`** to filter to specific projects: `dotnet toolchain.cs test --project Fido2`
-4. **Combine `--project` with `--filter`** for targeted test runs: `dotnet toolchain.cs test --project Fido2 --filter "Method~Sign"`
+3. **Use `--project`** to filter to specific projects: `dotnet toolchain.cs -- test --project Fido2`
+4. **Combine `--project` with `--filter`** for targeted test runs: `dotnet toolchain.cs -- test --project Fido2 --filter "Method~Sign"`

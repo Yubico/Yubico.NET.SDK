@@ -171,10 +171,10 @@ dotnet toolchain.cs build
 dotnet toolchain.cs test
 
 # Test specific project
-dotnet toolchain.cs test --project {Feature}
+dotnet toolchain.cs -- test --project {Feature}
 
 # Test with filter
-dotnet toolchain.cs test --filter "FullyQualifiedName~{Platform}"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~{Platform}"
 ```
 
 ---

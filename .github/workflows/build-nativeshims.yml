@@ -271,6 +271,10 @@ jobs:
         working-directory: Yubico.NativeShims
         run: |
           bash tests/check_exports.sh linux-x64/libYubico.NativeShims.so
+      - name: Verify >= 64 KB page alignment of LOAD segments
+        working-directory: Yubico.NativeShims
+        run: |
+          bash tests/check_alignment.sh linux-x64/libYubico.NativeShims.so
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: linux-x64
@@ -437,6 +441,11 @@ jobs:
         run: |
           # nm reads ELF metadata regardless of target arch — works on x86_64 host inspecting aarch64 .so
           bash tests/check_exports.sh linux-arm64/libYubico.NativeShims.so
+      - name: Verify 16 KB/64 KB page alignment of LOAD segments
+        working-directory: Yubico.NativeShims
+        run: |
+          # readelf reads ELF metadata regardless of target arch — works on x86_64 host inspecting aarch64 .so
+          bash tests/check_alignment.sh linux-arm64/libYubico.NativeShims.so
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: linux-arm64

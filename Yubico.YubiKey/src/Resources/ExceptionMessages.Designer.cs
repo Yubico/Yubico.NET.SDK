@@ -447,6 +447,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The YubiKey requires a power cycle (remove and reinsert) before it will accept another PIN verification attempt..
+        /// </summary>
+        internal static string Fido2PowerCycleRequired {
+            get {
+                return ResourceManager.GetString("Fido2PowerCycleRequired", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The YubiKey does not have a PIN set..
         /// </summary>
         internal static string Fido2NoPin {

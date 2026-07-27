@@ -150,7 +150,7 @@ namespace Yubico.YubiKey.Pipelines
             _ = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
-            mockTransform.Received(1).Invoke(Arg.Is<CommandApdu>(c => c.Ins == expectedIns), Arg.Any<Type>(), Arg.Any<Type>());
+            mockTransform.Received(1).Invoke(Arg.Is<CommandApdu>(c => c != null && c.Ins == expectedIns), Arg.Any<Type>(), Arg.Any<Type>());
         }
 
         [Fact]

@@ -921,19 +921,28 @@ namespace Yubico.YubiKey.Fido2
                 {
                     if (TryVerifyPin(
                             keyEntryData.GetCurrentValue(), permissions, relyingPartyId, out int? retriesRemaining,
-                            out _))
+                            out bool? rebootRequired))
                     {
                         return true;
+                    }
+
+                    // PIN_BLOCKED is permanent; it takes precedence over a power cycle.
+                    if (retriesRemaining == 0)
+                    {
+                        throw new SecurityException(ExceptionMessages.Fido2NoMoreRetries);
+                    }
+
+                    // Another PIN submission cannot succeed until the device is power cycled.
+                    if (rebootRequired == true)
+                    {
+                        throw new Fido2Exception(
+                            CtapStatus.PowerCycleRequired,
+                            ExceptionMessages.Fido2PowerCycleRequired);
                     }
 
                     keyEntryData.IsRetry = true;
                     keyEntryData.RetriesRemaining =
                         retriesRemaining!; // If we are retrying, we know this won't be null.
-
-                    if (keyEntryData.RetriesRemaining == 0)
-                    {
-                        throw new SecurityException(ExceptionMessages.Fido2NoMoreRetries);
-                    }
                 }
             }
             finally
@@ -1056,7 +1065,7 @@ namespace Yubico.YubiKey.Fido2
                 return false;
             }
 
-            throw new Fido2Exception(response.StatusMessage);
+            throw new Fido2Exception(GetCtapError(response), response.StatusMessage);
         }
 
         private IYubiKeyCommand<GetPinUvAuthTokenResponse> GetPinToken(

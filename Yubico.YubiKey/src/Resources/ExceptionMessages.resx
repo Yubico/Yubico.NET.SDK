@@ -880,6 +880,9 @@
   <data name="Fido2NoMoreRetries" xml:space="preserve">
     <value>There are no more retries remaining.</value>
   </data>
+  <data name="Fido2PowerCycleRequired" xml:space="preserve">
+    <value>The YubiKey requires a power cycle (remove and reinsert) before it will accept another PIN verification attempt.</value>
+  </data>
   <data name="Fido2NoPin" xml:space="preserve">
     <value>The YubiKey does not have a PIN set.</value>
   </data>

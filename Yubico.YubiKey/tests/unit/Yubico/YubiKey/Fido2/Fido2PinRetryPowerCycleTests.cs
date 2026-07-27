@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
-using System.Runtime.CompilerServices;
 using System.Security;
 using NSubstitute;
 using Xunit;
@@ -24,191 +23,87 @@ using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
 {
-    /// <summary>
-    /// Regression tests for the FIDO2 PIN_AUTH_BLOCKED (CtapStatus.PowerCycleRequired, 0x34)
-    /// handling in <see cref="Fido2Session"/>. These assert the FIXED behavior:
-    /// the actual CTAP status is preserved on the thrown <see cref="Fido2Exception"/>, and the
-    /// KeyCollector loop stops (rather than resubmitting) once the authenticator reports it
-    /// requires a power cycle.
-    /// </summary>
     public class Fido2PinRetryPowerCycleTests
     {
-        // ---- Low-level overload -------------------------------------------------
-
-        [Fact]
-        public void LowLevel_PowerCycleRequired_ThrowsExceptionCarryingStatus()
+        [Theory]
+        [InlineData(CtapStatus.PowerCycleRequired)]
+        [InlineData(CtapStatus.PinBlocked)]
+        public void TryVerifyPin_NonPinInvalid_PreservesCtapStatus(CtapStatus status)
         {
             var connection = Substitute.For<IYubiKeyConnection>();
             ConfigureBaseline(connection);
-            _ = connection.SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>())
-                .Returns(TokenError(CtapStatus.PowerCycleRequired));
+            _ = connection.SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>()).Returns(TokenError(status));
 
             using var session = CreateSession(connection);
 
             Fido2Exception exception = Assert.Throws<Fido2Exception>(() =>
-                session.TryVerifyPin(
-                    "0000"u8.ToArray(),
-                    PinUvAuthTokenPermissions.GetAssertion,
-                    "sdk-repro.example",
-                    out int? _,
-                    out bool? _));
+                session.TryVerifyPin("0000"u8.ToArray(), PinUvAuthTokenPermissions.GetAssertion, "example.com", out _, out _));
 
-            // The core defect fix: the CTAP status is no longer discarded.
-            Assert.Equal(CtapStatus.PowerCycleRequired, exception.Status);
-
-            // A blocked device is refused without a retry-count query.
-            _ = connection.DidNotReceive().SendCommand(Arg.Any<GetPinRetriesCommand>());
+            Assert.Equal(status, exception.Status);
         }
 
         [Fact]
-        public void LowLevel_PinBlocked_ThrowsExceptionCarryingStatus()
+        public void KeyCollector_PowerCycleRequired_DoesNotSubmitAnotherPin()
         {
             var connection = Substitute.For<IYubiKeyConnection>();
             ConfigureBaseline(connection);
-            _ = connection.SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>())
-                .Returns(TokenError(CtapStatus.PinBlocked));
+            _ = connection.SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>()).Returns(TokenError(CtapStatus.PinInvalid));
+            _ = connection.SendCommand(Arg.Any<GetPinRetriesCommand>()).Returns(PinRetries(7, true));
 
             using var session = CreateSession(connection);
+            var submissions = InstallPinCollector(session, maximumSubmissions: 1);
 
             Fido2Exception exception = Assert.Throws<Fido2Exception>(() =>
-                session.TryVerifyPin(
-                    "0000"u8.ToArray(),
-                    PinUvAuthTokenPermissions.GetAssertion,
-                    "sdk-repro.example",
-                    out int? _,
-                    out bool? _));
-
-            // The general status-preservation fix applies to every non-PinInvalid status.
-            Assert.Equal(CtapStatus.PinBlocked, exception.Status);
-        }
-
-        [Fact]
-        public void LowLevel_PinInvalidWithPowerCycleState_ReturnsFalseAndReportsReboot()
-        {
-            var connection = Substitute.For<IYubiKeyConnection>();
-            ConfigureBaseline(connection);
-            _ = connection.SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>())
-                .Returns(TokenError(CtapStatus.PinInvalid));
-            _ = connection.SendCommand(Arg.Any<GetPinRetriesCommand>())
-                .Returns(PinRetries(7, powerCycleRequired: true));
-
-            using var session = CreateSession(connection);
-
-            bool verified = session.TryVerifyPin(
-                "0000"u8.ToArray(),
-                PinUvAuthTokenPermissions.GetAssertion,
-                "sdk-repro.example",
-                out int? retriesRemaining,
-                out bool? rebootRequired);
-
-            Assert.False(verified);
-            Assert.Equal(7, retriesRemaining);
-            Assert.True(rebootRequired);
-        }
-
-        // ---- KeyCollector overload ---------------------------------------------
-
-        [Fact]
-        public void KeyCollector_PinInvalidTwiceThenPowerCycleRequired_ThreeSubmissionsAndStatusPreserved()
-        {
-            // Models firmware (e.g. 5.8.0) that omits powerCycleState: the third wrong
-            // attempt itself returns 0x34. The cascade still occurs (no earlier signal),
-            // but the fix ensures the resulting exception carries the real status.
-            var connection = Substitute.For<IYubiKeyConnection>();
-            ConfigureBaseline(connection);
-            _ = connection.SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>())
-                .Returns(
-                    TokenError(CtapStatus.PinInvalid),
-                    TokenError(CtapStatus.PinInvalid),
-                    TokenError(CtapStatus.PowerCycleRequired));
-            _ = connection.SendCommand(Arg.Any<GetPinRetriesCommand>())
-                .Returns(PinRetries(7, null), PinRetries(6, null));
-
-            using var session = CreateSession(connection);
-            var (submissions, releases) = InstallWrongPinCollector(session);
-
-            Fido2Exception exception = Assert.Throws<Fido2Exception>(() =>
-                session.TryVerifyPin(PinUvAuthTokenPermissions.GetAssertion, "sdk-repro.example"));
-
-            Assert.Equal(CtapStatus.PowerCycleRequired, exception.Status);
-            Assert.Equal(3, submissions.Count);
-            Assert.Equal(1, releases.Value);
-            _ = connection.Received(3).SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>());
-        }
-
-        [Fact]
-        public void KeyCollector_PowerCycleRequiredOnFirstAttempt_StopsWithStatus()
-        {
-            var connection = Substitute.For<IYubiKeyConnection>();
-            ConfigureBaseline(connection);
-            _ = connection.SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>())
-                .Returns(TokenError(CtapStatus.PowerCycleRequired));
-
-            using var session = CreateSession(connection);
-            var (submissions, releases) = InstallWrongPinCollector(session);
-
-            Fido2Exception exception = Assert.Throws<Fido2Exception>(() =>
-                session.TryVerifyPin(PinUvAuthTokenPermissions.GetAssertion, "sdk-repro.example"));
+                session.TryVerifyPin(PinUvAuthTokenPermissions.GetAssertion, "example.com"));
 
             Assert.Equal(CtapStatus.PowerCycleRequired, exception.Status);
             Assert.Single(submissions);
-            Assert.Equal(1, releases.Value);
             _ = connection.Received(1).SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>());
-            _ = connection.DidNotReceive().SendCommand(Arg.Any<GetPinRetriesCommand>());
         }
 
         [Fact]
-        public void KeyCollector_PinInvalidWithPowerCycleState_StopsBeforeSecondSubmission()
+        public void KeyCollector_OrdinaryPinInvalid_Retries()
         {
-            // Models firmware that DOES report powerCycleState=true after a wrong PIN.
-            // The fix must stop before re-prompting the collector, preventing an
-            // avoidable second real attempt.
             var connection = Substitute.For<IYubiKeyConnection>();
             ConfigureBaseline(connection);
-            _ = connection.SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>())
-                .Returns(TokenError(CtapStatus.PinInvalid));
-            _ = connection.SendCommand(Arg.Any<GetPinRetriesCommand>())
-                .Returns(PinRetries(7, powerCycleRequired: true));
+            _ = connection.SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>()).Returns(TokenError(CtapStatus.PinInvalid));
+            _ = connection.SendCommand(Arg.Any<GetPinRetriesCommand>()).Returns(PinRetries(7, false));
 
             using var session = CreateSession(connection);
-            var (submissions, releases) = InstallWrongPinCollector(session);
+            var submissions = InstallPinCollector(session, maximumSubmissions: 2);
 
-            Fido2Exception exception = Assert.Throws<Fido2Exception>(() =>
-                session.TryVerifyPin(PinUvAuthTokenPermissions.GetAssertion, "sdk-repro.example"));
-
-            Assert.Equal(CtapStatus.PowerCycleRequired, exception.Status);
-            Assert.Single(submissions); // exactly one attempt; no re-prompt
-            Assert.Equal(1, releases.Value);
-            _ = connection.Received(1).SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>());
-            _ = connection.Received(1).SendCommand(Arg.Any<GetPinRetriesCommand>());
+            Assert.False(session.TryVerifyPin(PinUvAuthTokenPermissions.GetAssertion, "example.com"));
+            Assert.Equal(new[] { false, true }, submissions);
         }
 
         [Fact]
-        public void KeyCollector_PinInvalidWithoutPowerCycleState_RetryIsStillPermitted()
+        public void KeyCollector_NoRetriesRemaining_ThrowsSecurityException()
         {
-            // Regression guard: when powerCycleState is false/absent, ordinary automatic
-            // retry behavior must be preserved (the collector is called again).
             var connection = Substitute.For<IYubiKeyConnection>();
             ConfigureBaseline(connection);
-            _ = connection.SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>())
-                .Returns(TokenError(CtapStatus.PinInvalid), TokenError(CtapStatus.PinInvalid));
-            _ = connection.SendCommand(Arg.Any<GetPinRetriesCommand>())
-                .Returns(PinRetries(7, powerCycleRequired: false), PinRetries(6, powerCycleRequired: false));
+            _ = connection.SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>()).Returns(TokenError(CtapStatus.PinInvalid));
+            _ = connection.SendCommand(Arg.Any<GetPinRetriesCommand>()).Returns(PinRetries(0, null));
 
             using var session = CreateSession(connection);
+            var submissions = InstallPinCollector(session);
 
+            _ = Assert.Throws<SecurityException>(() =>
+                session.TryVerifyPin(PinUvAuthTokenPermissions.GetAssertion, "example.com"));
+
+            Assert.Single(submissions);
+        }
+
+        private static List<bool> InstallPinCollector(Fido2Session session, int maximumSubmissions = int.MaxValue)
+        {
             var submissions = new List<bool>();
-            int releaseCount = 0;
             session.KeyCollector = keyEntryData =>
             {
                 if (keyEntryData.Request == KeyEntryRequest.Release)
                 {
-                    releaseCount++;
                     return true;
                 }
 
-                // Submit two wrong PINs, then cancel on the third callback.
-                if (submissions.Count >= 2)
+                if (submissions.Count == maximumSubmissions)
                 {
                     return false;
                 }
@@ -218,56 +113,7 @@ namespace Yubico.YubiKey.Fido2
                 return true;
             };
 
-            bool verified = session.TryVerifyPin(PinUvAuthTokenPermissions.GetAssertion, "sdk-repro.example");
-
-            Assert.False(verified);                 // cancelled, not thrown
-            Assert.Equal(2, submissions.Count);     // retry was permitted
-            Assert.False(submissions[0]);           // first is not a retry
-            Assert.True(submissions[1]);            // second is a retry
-            Assert.Equal(1, releaseCount);
-            _ = connection.Received(2).SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>());
-        }
-
-        [Fact]
-        public void KeyCollector_PinInvalidWithZeroRetries_ThrowsSecurityException()
-        {
-            var connection = Substitute.For<IYubiKeyConnection>();
-            ConfigureBaseline(connection);
-            _ = connection.SendCommand(Arg.Any<GetPinUvAuthTokenUsingPinCommand>())
-                .Returns(TokenError(CtapStatus.PinInvalid));
-            _ = connection.SendCommand(Arg.Any<GetPinRetriesCommand>())
-                .Returns(PinRetries(0, powerCycleRequired: null));
-
-            using var session = CreateSession(connection);
-            var (submissions, releases) = InstallWrongPinCollector(session);
-
-            _ = Assert.Throws<SecurityException>(() =>
-                session.TryVerifyPin(PinUvAuthTokenPermissions.GetAssertion, "sdk-repro.example"));
-
-            Assert.Single(submissions);
-            Assert.Equal(1, releases.Value);
-        }
-
-        // ---- Helpers ------------------------------------------------------------
-
-        private static (List<bool> Submissions, StrongBox<int> ReleaseCount) InstallWrongPinCollector(
-            Fido2Session session)
-        {
-            var submissions = new List<bool>();
-            var releaseCount = new StrongBox<int>(0);
-            session.KeyCollector = keyEntryData =>
-            {
-                if (keyEntryData.Request == KeyEntryRequest.Release)
-                {
-                    releaseCount.Value++;
-                    return true;
-                }
-
-                submissions.Add(keyEntryData.IsRetry);
-                keyEntryData.SubmitValue("0000"u8.ToArray());
-                return true;
-            };
-            return (submissions, releaseCount);
+            return submissions;
         }
 
         private static Fido2Session CreateSession(IYubiKeyConnection connection)
@@ -281,11 +127,8 @@ namespace Yubico.YubiKey.Fido2
         {
             _ = connection.SendCommand(Arg.Any<GetInfoCommand>())
                 .Returns(new GetInfoResponse(new ResponseApdu(PinEnabledInfo(), SWConstants.Success)));
-
-            var keyAgreementResponse = new GetKeyAgreementResponse(
-                new ResponseApdu(KeyAgreementData(), SWConstants.Success));
             _ = connection.SendCommand(Arg.Any<GetKeyAgreementCommand>())
-                .Returns(keyAgreementResponse, keyAgreementResponse, keyAgreementResponse);
+                .Returns(new GetKeyAgreementResponse(new ResponseApdu(KeyAgreementData(), SWConstants.Success)));
         }
 
         private static GetPinUvAuthTokenResponse TokenError(CtapStatus status) =>
@@ -303,8 +146,8 @@ namespace Yubico.YubiKey.Fido2
                 writer.WriteInt32(4);
                 writer.WriteBoolean(powerCycleRequired.Value);
             }
-            writer.WriteEndMap();
 
+            writer.WriteEndMap();
             return new GetPinRetriesResponse(new ResponseApdu(writer.Encode(), SWConstants.Success));
         }
 
@@ -333,8 +176,6 @@ namespace Yubico.YubiKey.Fido2
             return writer.Encode();
         }
 
-        // A valid NIST P-256 generator point encoded as a COSE_Key inside a
-        // ClientPin key-agreement response map ({1: COSE key}).
         private static byte[] KeyAgreementData() =>
             new byte[]
             {

@@ -454,7 +454,7 @@ namespace Yubico.YubiKey {
                 return ResourceManager.GetString("Fido2PowerCycleRequired", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The YubiKey does not have a PIN set..
         /// </summary>

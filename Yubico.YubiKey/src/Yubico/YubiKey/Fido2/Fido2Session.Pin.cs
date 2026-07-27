@@ -926,19 +926,13 @@ namespace Yubico.YubiKey.Fido2
                         return true;
                     }
 
-                    // A retry count of zero means the PIN is permanently blocked
-                    // (CTAP2_ERR_PIN_BLOCKED); a power cycle will not help, so report
-                    // that first.
+                    // PIN_BLOCKED is permanent; it takes precedence over a power cycle.
                     if (retriesRemaining == 0)
                     {
                         throw new SecurityException(ExceptionMessages.Fido2NoMoreRetries);
                     }
 
-                    // The authenticator reported it must be power cycled (removed and
-                    // reinserted) before it will accept another PIN attempt (CTAP
-                    // getPINRetries powerCycleState). Re-prompting the KeyCollector
-                    // cannot succeed and would consume real retry attempts, so stop
-                    // and surface the actionable status instead of looping.
+                    // Another PIN submission cannot succeed until the device is power cycled.
                     if (rebootRequired == true)
                     {
                         throw new Fido2Exception(
@@ -1071,10 +1065,6 @@ namespace Yubico.YubiKey.Fido2
                 return false;
             }
 
-            // Preserve the CTAP status the authenticator actually returned (e.g.
-            // CtapStatus.PowerCycleRequired / CTAP2_ERR_PIN_AUTH_BLOCKED 0x34) so
-            // callers can classify the failure via Fido2Exception.Status. Using
-            // the message-only constructor here would discard it.
             throw new Fido2Exception(GetCtapError(response), response.StatusMessage);
         }
 

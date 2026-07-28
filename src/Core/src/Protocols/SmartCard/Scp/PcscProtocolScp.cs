@@ -24,6 +24,17 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 ///     calls: exchanges are serialized on the SAME gate as the wrapped protocol (SCP MAC chaining makes
 ///     interleaving doubly fatal — each MAC depends on the previous command's MAC).
 /// </summary>
+/// <remarks>
+///     <para>
+///         <c>ISmartCardProtocol.WithScpAsync</c> (see <see cref="ScpExtensions" />) is the only supported way to
+///         obtain an instance. The constructor is internal: an SCP wrapper must adopt the exchange gate of the concrete
+///         <see cref="PcscProtocol" /> it decorates, because the SCP processor chain drives that protocol's
+///         connection directly instead of going through its public methods. Any other construction path could
+///         hand the wrapper a foreign gate, letting plain and encrypted traffic interleave on the wire.
+///         <c>WithScpAsync</c> owns that pairing — it establishes the SCP session on the base protocol's gate and
+///         then wraps the same protocol instance.
+///     </para>
+/// </remarks>
 public class PcscProtocolScp : ISmartCardProtocol
 {
     private readonly ISmartCardProtocol _baseProtocol;
@@ -33,12 +44,18 @@ public class PcscProtocolScp : ISmartCardProtocol
     private bool _disposed;
 
     /// <summary>
-    ///     Creates a new SCP protocol adapter.
+    ///     Creates a new SCP protocol adapter. Internal by design — see the type-level remarks:
+    ///     <c>ISmartCardProtocol.WithScpAsync</c> is the only supported construction path, because it is what
+    ///     guarantees the wrapper shares the exchange gate of the protocol whose connection the SCP processor drives.
     /// </summary>
-    /// <param name="baseProtocol">The underlying base protocol</param>
+    /// <param name="baseProtocol">The underlying base protocol; must be a concrete <see cref="PcscProtocol" /></param>
     /// <param name="scpProcessor">The SCP-wrapped APDU processor</param>
     /// <param name="dataEncryptor">The data encryptor for this SCP session (may be null)</param>
-    public PcscProtocolScp(
+    /// <exception cref="ArgumentException">
+    ///     Thrown when <paramref name="baseProtocol" /> is not a <see cref="PcscProtocol" />, since no shared gate
+    ///     could be adopted.
+    /// </exception>
+    internal PcscProtocolScp(
         ISmartCardProtocol baseProtocol,
         IApduProcessor scpProcessor,
         DataEncryptor dataEncryptor)

@@ -42,7 +42,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
     {
         // Channel initialization transmits, so it must hold the gate like any exchange.
         _exchangeGate.RunExclusiveAsync(
-                exchangeToken => EnsureChannelInitializedUnderGateAsync(exchangeToken),
+                EnsureChannelInitializedUnderGateAsync,
                 CancellationToken.None)
             .GetAwaiter()
             .GetResult();
@@ -125,7 +125,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
 
         // The lazy channel initialization transmits, so it runs under the gate like any exchange.
         await _exchangeGate.RunExclusiveAsync(
-                exchangeToken => EnsureChannelInitializedUnderGateAsync(exchangeToken),
+                EnsureChannelInitializedUnderGateAsync,
                 cancellationToken)
             .ConfigureAwait(false);
 

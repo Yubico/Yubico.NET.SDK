@@ -35,7 +35,7 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 ///         then wraps the same protocol instance.
 ///     </para>
 /// </remarks>
-public class PcscProtocolScp : ISmartCardProtocol
+public sealed class PcscProtocolScp : ISmartCardProtocol
 {
     private readonly ISmartCardProtocol _baseProtocol;
     private readonly DataEncryptor _dataEncryptor;

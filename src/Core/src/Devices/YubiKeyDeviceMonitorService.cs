@@ -97,7 +97,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     // Monitoring lifecycle fields
     private Task? _monitoringTask;
 
-    private int _disposed;
+    private volatile int _disposed;
 
     /// <summary>
     /// Test seam: invoked after <see cref="_publishGate"/> is acquired and before
@@ -255,13 +255,8 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 Logger.LogWarning("Previous monitoring loop terminated unexpectedly; restarting device monitoring");
                 TeardownListeners();
                 var deadGeneration = _current;
-                if (deadGeneration is not null)
-                {
-                    deadGeneration.Cts.Cancel();
-                    deadGeneration.Signal.Complete();
-                    // The loop was observed completed, so disposing its CTS is safe.
-                    deadGeneration.Cts.Dispose();
-                }
+                deadGeneration?.Cts.Cancel();
+                deadGeneration?.Signal.Complete();
 
                 _monitoringTask = null;
             }
@@ -393,7 +388,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     /// <inheritdoc/>
     public void StopMonitoring()
     {
-        var (taskToAwait, ctsToDispose) = StopMonitoringCore(disposing: false);
+        var taskToAwait = StopMonitoringCore(disposing: false);
         if (taskToAwait is null)
         {
             return;
@@ -413,20 +408,18 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
         if (!loopStopped)
         {
-            // Abandon the stuck loop (e.g. a rescan blocked in native I/O) rather
-            // than dispose the CTS out from under it while it may still run.
+            // Abandon the stuck loop (e.g. a rescan blocked in native I/O). Its
+            // generation is already retired, so it can no longer publish.
             Logger.LogWarning(
                 "Device monitoring loop did not stop within {Timeout}; abandoning it",
                 _shutdownTimeout);
             return;
         }
 
-        ctsToDispose?.Dispose();
-
         Logger.LogInformation("Device monitoring stopped");
     }
 
-    private (Task? TaskToAwait, CancellationTokenSource? CtsToDispose) StopMonitoringCore(bool disposing)
+    private Task? StopMonitoringCore(bool disposing)
     {
         lock (_monitorLock)
         {
@@ -444,7 +437,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                     TeardownListeners();
                 }
 
-                return (null, null); // Not monitoring, idempotent
+                return null; // Not monitoring, idempotent
             }
 
             var taskToAwait = _monitoringTask;
@@ -468,7 +461,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             // Teardown listeners under lock
             TeardownListeners();
 
-            return (taskToAwait, generation?.Cts);
+            return taskToAwait;
         }
     }
 
@@ -722,9 +715,8 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             return;
         }
 
-        var (taskToAwait, ctsToDispose) = StopMonitoringCore(disposing: true);
+        var taskToAwait = StopMonitoringCore(disposing: true);
 
-        var loopStopped = true;
         if (taskToAwait is not null)
         {
             try
@@ -733,7 +725,6 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             }
             catch (TimeoutException)
             {
-                loopStopped = false;
                 Logger.LogWarning(
                     "Device monitoring loop did not stop within {Timeout} during dispose; abandoning it",
                     _shutdownTimeout);
@@ -742,11 +733,6 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             {
                 // Faulted or canceled means the loop has completed.
             }
-        }
-
-        if (loopStopped)
-        {
-            ctsToDispose?.Dispose();
         }
 
         // Bounded drain of any in-flight publication - the gate itself is the
@@ -789,7 +775,13 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         /// <summary>Capacity-one wake-up signal for this generation's loop.</summary>
         public DeviceMonitorSignal Signal { get; } = new();
 
-        /// <summary>Cancellation source for this generation's loop.</summary>
+        /// <summary>
+        ///     Cancellation source for this generation's loop. Never disposed, like the gates:
+        ///     an abandoned generation is unreachable garbage. It holds no timer (nothing calls
+        ///     <c>CancelAfter</c>) and every linked source derived from it is disposed by its own
+        ///     <c>using</c>, so disposal would reclaim nothing while reintroducing the question
+        ///     "is it safe to dispose this yet?" that the epoch model exists to eliminate.
+        /// </summary>
         public CancellationTokenSource Cts { get; } = new();
     }
 }

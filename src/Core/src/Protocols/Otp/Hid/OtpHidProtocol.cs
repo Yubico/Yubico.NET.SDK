@@ -58,7 +58,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     {
         // Initialization touches the wire, so it must hold the gate like any exchange.
         _exchangeGate.RunExclusiveAsync(
-                exchangeToken => EnsureInitializedUnderGateAsync(exchangeToken),
+                EnsureInitializedUnderGateAsync,
                 CancellationToken.None)
             .GetAwaiter()
             .GetResult();

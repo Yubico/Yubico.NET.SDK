@@ -31,12 +31,14 @@ Read:
 - Reorganize existing migration guidance into clearer sections.
 - Collapse duplicate changelog-derived guidance into canonical guide text.
 - Add or update a release-readiness section in `docs/migration/v1-to-v2.md`.
+- Normalize the `Common Migration Recipes` section for consistency when source-backed examples already exist: scenario heading, `V1` snippet, `V2` snippet, and `Migration notes` bullets.
 - Add manual-review items when gaps are visible.
 - Improve map entries only when evidence already exists in the map, context files, or source paths.
 
 ## Forbidden Work
 
 - Do not create new authoritative mappings without evidence.
+- Do not invent recipe examples. A recipe needs both v1 and v2 source evidence plus a precise map entry; otherwise record the gap as manual-review.
 - Do not remove manual-review warnings merely because they are inconvenient.
 - Do not advance `last_analyzed_commit` unless this run also analyzed and handled the supplied range.
 - Do not rewrite the guide into marketing copy; keep it operational for migrating developers.

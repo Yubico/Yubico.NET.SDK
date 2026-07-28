@@ -587,3 +587,52 @@ Remediate all seven PR #528 audit findings with structural concurrency and nativ
 - Subtractions landed alongside, each verified dead before removal: `DeviceConnectionRegistry.Register` (sync-over-async, no production caller); both discovery caches made non-nullable after tracing that every write is behind a successful-read guard, correcting a comment that falsely claimed null recorded a failed read; the two `CleanupListeners` booleans, which at all four call sites duplicated the null check they were ANDed against; `ProtocolDeviceInfo.ActiveCompletionObserverCount` and its interlocked bookkeeping, whose only observer was its own assertions — single-flight is pinned by the connect-count assertion and the one-completion-path property by the completion-log assertions in the same test. A non-generic `AsyncExchangeGate.RunExclusiveAsync` overload replaced three faked return values, and three private gate-held helpers gained an `UnderGate` suffix.
 - Doc corrections: `docs/architecture/event-driven-device-discovery.md` claimed a `Channel<DeviceMonitorRescanRequest>` with queue draining. Neither exists — the implementation uses a capacity-one `Channel<bool>` with `FullMode = DropWrite`, consumed one occurrence per wake-up. The doc now describes that and the generation model. `src/Core/CLAUDE.md` and `src/Core/README.md` record the epoch model and the disposal gate.
 - Hardware policy recorded (owner decision): allow-listed serials are dedicated test keys, so state mutation, PIV reset, and key generation on them are authorized without per-run approval — the allow list's `Environment.Exit(-1)` hard-fail is the boundary and no second config gate was added. User Presence, UV, touch, and insert/remove timing remain human-coordinated, because the gate is presence and timing rather than destruction. Written into `docs/TESTING.md` (new Hardware Authorization section) and `src/Tests.Shared/README.md`.
+
+### Hardware verification and final gates (epoch-model work)
+
+- Hardware: two allow-listed test keys connected throughout. `MonitorService_Enabled_Tests` 2/2;
+  `ManagementHidConcurrencyTests` 2/2 (HidFido and HidOtp); `PivConnectionConcurrencyTests` 1/1;
+  `PivDiscoveryContentionTests` 2/2, including the RSA-4096 keygen contention case that runs
+  ~3 minutes and proves `FindAllAsync` does not wait for a busy card. Zero skips in all four.
+- Blocked gate, pre-existing, NOT caused by this work: `PivMultiKeyContentionTests` skips both cases
+  (`GetSmartCardStatesOrSkip(2)` finds one SmartCard-capable authorized key, not two), and four
+  `CompositeDiscoveryIntegrationTests` fail. Both were reproduced identically at `e0516ba6`, before
+  any epoch-model commit, so neither is a regression. Root cause is composite merging with two
+  identical keys: PC/SC exposes both readers (`Yubico YubiKey OTP+FIDO+CCID` and `... 02`) and both
+  serials are read, but interfaces are misgrouped nondeterministically across runs — one observed
+  grouping was `ykphysical:103 = HidFido|HidOtp`, `ykphysical:125 = HidOtp|SmartCard`, with two
+  orphaned single-interface devices. The interface count is right, the attribution is not. The four
+  `CompositeDiscoveryIntegrationTests` additionally hard-assert `Assert.Single`, so they can only pass
+  with exactly one key connected. This is a discovery/merge defect, out of scope for a concurrency
+  plan, and is left for the polling-migration follow-up rather than fixed opportunistically here.
+- Final gates: full solution build 0 errors (1 pre-existing CS7022 in the NuGet-generated
+  `Tests.TestProject` entry point); full unit suite 12/12 projects with Core at 668 total, 665
+  succeeded, 3 platform skips, 0 failed; `resilience --fast` 67/67; `git diff --check` clean.
+- ISC-76 finally met for formatting proper: `dotnet format --verify-no-changes` now reports **zero
+  errors**. The previously recorded FINALNEWLINE diagnostic in `src/Tests.Shared/Infrastructure/
+  TestCategories.cs` was traced to this branch (the file was clean at the merge base and picked up a
+  trailing newline in `e0516ba6`) and fixed. The command's exit code is still non-zero, but now solely
+  because of the two pre-existing IL2026/IL3050 trim warnings in the untouched `Tests.TestProject`.
+- Simplification review of the changed set produced three accepted items: primary constructors
+  restored on the registered-connection wrappers (about sixty lines of the diff had been mechanical
+  `inner` -> `_inner` renaming that hid the one real change); `MonitorGeneration.Cts` no longer
+  disposed, which deleted the tuple return from `StopMonitoringCore`, the `loopStopped` local, and
+  three comments that existed only to answer "is it safe to dispose this yet?"; and `PcscProtocolScp`
+  sealed, since an internal constructor already made external derivation impossible.
+- Cross-vendor review (OpenAI reviewer; author Anthropic) took three rounds and earned its keep:
+  - Round 1 `NEEDS WORK`, warning: the documented contract claimed the manager's repository disposal
+    "silences any later emission". It does not — `UpdateCache` calls `ThrowIfDisposed` and the subject
+    throws once disposed. A genuine claim-vs-delivery gap. Fixed at the publish site rather than by
+    adding a manager/repository synchronization boundary, which would have re-added exactly the kind
+    of coordination this plan removed.
+  - Round 2 `NEEDS WORK`, warning: the resulting catch was too broad. `UpdateCache` invokes subscribers
+    synchronously, so a subscriber touching its own disposed state throws the same type and would have
+    been silently misattributed to shutdown. Narrowed to `when (_disposed == 1)`.
+  - Round 3 `PASS`, zero findings.
+- Test-writing lesson recorded twice in this work, in different forms: the first draft of the
+  late-publication test used one device and passed against the unfixed code, because a stalled
+  publication is already past `ThrowIfDisposed` and the throw comes from a *later* `OnNext` in the same
+  `UpdateCache` call. Two devices were needed to make it RED. Earlier, the first draft of the disposal
+  fake blocked on every call and hid the early-return defect the same way. A test that fails only for
+  the reason you already knew about is weaker than it looks — and one that passes on the first try
+  against unfixed code is worthless, not reassuring.

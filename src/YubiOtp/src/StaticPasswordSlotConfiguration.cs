@@ -132,6 +132,18 @@ public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
     {
         ArgumentNullException.ThrowIfNull(password);
 
+        if (password.Length == 0)
+        {
+            throw new ArgumentException("Password must not be empty.", nameof(password));
+        }
+
+        if (password.Length > YubiOtpConstants.ScanCodesSize)
+        {
+            throw new ArgumentException(
+                $"Password must not exceed {YubiOtpConstants.ScanCodesSize} characters.",
+                nameof(password));
+        }
+
         var translator = HidCodeTranslator.GetInstance(keyboardLayout);
         // Validate before allocating so unsupported characters cannot strand a partially populated sensitive buffer.
         foreach (char character in password)

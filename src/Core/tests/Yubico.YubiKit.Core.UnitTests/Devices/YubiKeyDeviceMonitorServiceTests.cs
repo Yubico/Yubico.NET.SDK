@@ -1073,6 +1073,59 @@ public class YubiKeyDeviceMonitorServiceTests
     }
 
     [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task DisposeAsync_LatePublication_AfterRepositoryDisposed_IsDiscardedNotThrown()
+    {
+        // Arrange - reproduces the manager's shutdown order: the monitor's bounded
+        // drain times out on a publication blocked in a subscriber, DisposeAsync
+        // returns, and the manager then disposes the repository. The blocked
+        // publication resumes afterwards against a disposed repository.
+        var (service, repository, findYubiKeys, _, _) = CreateService(shutdownTimeout: TimeSpan.FromMilliseconds(250));
+
+        // Two devices, so UpdateCache emits twice. Blocking on the FIRST emission
+        // leaves a second OnNext still to come after the repository is disposed -
+        // that is the actual window, not the initial ThrowIfDisposed which has
+        // already passed by the time a subscriber can block.
+        findYubiKeys.SetDevices(
+        [
+            new FakeYubiKey("device-a", ConnectionType.SmartCard),
+            new FakeYubiKey("device-b", ConnectionType.SmartCard)
+        ]);
+
+        using var entered = new ManualResetEventSlim();
+        using var release = new ManualResetEventSlim();
+        var blockOnce = 1;
+        using var subscription = repository.DeviceChanges.Subscribe(_ =>
+        {
+            if (Interlocked.Exchange(ref blockOnce, 0) == 1)
+            {
+                entered.Set();
+                release.Wait(TestContext.Current.CancellationToken);
+            }
+        });
+
+        var rescanToken = TestContext.Current.CancellationToken;
+        var rescan = Task.Run(() => service.RescanAsync(rescanToken), rescanToken);
+        Assert.True(
+            entered.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken),
+            "Publication never reached the subscriber");
+
+        await service.DisposeAsync().AsTask()
+            .WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+        // The manager disposes the repository immediately after the monitor.
+        repository.Dispose();
+
+        // Act - release the blocked publication into the disposed repository.
+        release.Set();
+
+        // Assert - it is discarded, not thrown. The type contract promises no device
+        // event escapes a disposed manager; UpdateCache and the subject both throw
+        // once disposed, so the publish path must absorb that rather than surface it.
+        await rescan.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
     public async Task RescanAsync_AfterDispose_ThrowsObjectDisposedException()
     {
         // Arrange

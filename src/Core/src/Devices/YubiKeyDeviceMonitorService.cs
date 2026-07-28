@@ -37,13 +37,17 @@ namespace Yubico.YubiKit.Core.Devices;
 /// never-disposed <see cref="_publishGate"/> and is admitted only if its
 /// generation is still current and the service is not disposed; superseded
 /// snapshots are discarded. Lifecycle operations swap <see cref="_current"/>
-/// under <see cref="_publishLock"/> and never take the publication gate, so a
-/// stalled publication can never block start/stop/dispose, and an abandoned
-/// generation is unreachable garbage that can no longer publish stale truth.
+/// under <see cref="_publishLock"/>; <see cref="StartMonitoring"/> and
+/// <see cref="StopMonitoring"/> never touch the publication gate at all, and
+/// <see cref="DisposeAsync"/> only attempts a bounded drain of it. A stalled
+/// publication therefore cannot block start or stop, and can delay dispose by
+/// no more than the shutdown timeout. An abandoned generation is unreachable
+/// garbage that can no longer publish stale truth.
 /// A publication already admitted when disposal times out its bounded drain may
-/// complete and emit device events after <see cref="DisposeAsync"/> returns;
-/// the manager disposes the repository afterwards, which silences any later
-/// emission. This is a documented contract, not an accident.
+/// complete after <see cref="DisposeAsync"/> returns. If the manager has
+/// disposed the repository by then, the publication is discarded rather than
+/// emitted, so no device event escapes a disposed manager. This is a documented
+/// contract, not an accident.
 /// </para>
 /// </remarks>
 internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
@@ -223,7 +227,22 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 }
             }
 
-            _repository.UpdateCache(devices);
+            try
+            {
+                _repository.UpdateCache(devices);
+            }
+            catch (ObjectDisposedException)
+            {
+                // The shutdown race the type-level contract describes: this publication
+                // was admitted before disposal, outlived DisposeAsync's bounded drain,
+                // and resumed after the manager disposed the repository. Discarding it
+                // here is what makes "the repository silences any later emission" true -
+                // UpdateCache and the underlying subject both throw once disposed.
+                // Nothing is lost: the repository is being torn down.
+                Logger.LogDebug(
+                    "Repository disposed while publishing from monitor generation {GenerationId}; discarding late snapshot",
+                    generation.Id);
+            }
         }
         finally
         {

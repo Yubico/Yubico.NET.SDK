@@ -22,128 +22,91 @@ namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
 ///     Transparent connection decorators that release a <see cref="DeviceConnectionRegistry" /> ownership lease
-///     exactly once when the wrapped connection is disposed. Pure passthrough otherwise — behavior of the
-///     inner connection is unchanged.
+///     exactly once when the wrapped connection is disposed. Disposal runs through a <see cref="DisposalGate" />,
+///     so the inner connection is torn down exactly once, the lease is released only afterwards, and every
+///     disposal call — sync or async, concurrent or repeated — returns only once teardown has finished. Pure
+///     passthrough otherwise — behavior of the inner connection is unchanged.
 /// </summary>
-internal sealed class RegisteredSmartCardConnection(
-    ISmartCardConnection inner,
-    IDisposable registration) : ISmartCardConnection
+internal sealed class RegisteredSmartCardConnection : ISmartCardConnection
 {
-    public ConnectionType Type => inner.Type;
+    private readonly DisposalGate _disposal;
+    private readonly ISmartCardConnection _inner;
 
-    public Transport Transport => inner.Transport;
+    public RegisteredSmartCardConnection(ISmartCardConnection inner, IDisposable registration)
+    {
+        _inner = inner;
+        _disposal = new DisposalGate(registration);
+    }
+
+    public ConnectionType Type => _inner.Type;
+
+    public Transport Transport => _inner.Transport;
 
     public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         ReadOnlyMemory<byte> command,
         CancellationToken cancellationToken = default) =>
-        inner.TransmitAndReceiveAsync(command, cancellationToken);
+        _inner.TransmitAndReceiveAsync(command, cancellationToken);
 
     public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
-        inner.BeginTransaction(cancellationToken);
+        _inner.BeginTransaction(cancellationToken);
 
-    public bool SupportsExtendedApdu() => inner.SupportsExtendedApdu();
+    public bool SupportsExtendedApdu() => _inner.SupportsExtendedApdu();
 
-    public void Dispose()
-    {
-        try
-        {
-            inner.Dispose();
-        }
-        finally
-        {
-            registration.Dispose();
-        }
-    }
+    public void Dispose() => _disposal.Dispose(_inner.Dispose);
 
-    public async ValueTask DisposeAsync()
-    {
-        try
-        {
-            await inner.DisposeAsync().ConfigureAwait(false);
-        }
-        finally
-        {
-            registration.Dispose();
-        }
-    }
+    public ValueTask DisposeAsync() => _disposal.DisposeAsync(_inner.DisposeAsync);
 }
 
 /// <inheritdoc cref="RegisteredSmartCardConnection" />
-internal sealed class RegisteredFidoHidConnection(
-    IFidoHidConnection inner,
-    IDisposable registration) : IFidoHidConnection
+internal sealed class RegisteredFidoHidConnection : IFidoHidConnection
 {
-    public ConnectionType Type => inner.Type;
+    private readonly DisposalGate _disposal;
+    private readonly IFidoHidConnection _inner;
 
-    public int PacketSize => inner.PacketSize;
+    public RegisteredFidoHidConnection(IFidoHidConnection inner, IDisposable registration)
+    {
+        _inner = inner;
+        _disposal = new DisposalGate(registration);
+    }
+
+    public ConnectionType Type => _inner.Type;
+
+    public int PacketSize => _inner.PacketSize;
 
     public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default) =>
-        inner.SendAsync(packet, cancellationToken);
+        _inner.SendAsync(packet, cancellationToken);
 
     public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
-        inner.ReceiveAsync(cancellationToken);
+        _inner.ReceiveAsync(cancellationToken);
 
-    public void Dispose()
-    {
-        try
-        {
-            inner.Dispose();
-        }
-        finally
-        {
-            registration.Dispose();
-        }
-    }
+    public void Dispose() => _disposal.Dispose(_inner.Dispose);
 
-    public async ValueTask DisposeAsync()
-    {
-        try
-        {
-            await inner.DisposeAsync().ConfigureAwait(false);
-        }
-        finally
-        {
-            registration.Dispose();
-        }
-    }
+    public ValueTask DisposeAsync() => _disposal.DisposeAsync(_inner.DisposeAsync);
 }
 
 /// <inheritdoc cref="RegisteredSmartCardConnection" />
-internal sealed class RegisteredOtpHidConnection(
-    IOtpHidConnection inner,
-    IDisposable registration) : IOtpHidConnection
+internal sealed class RegisteredOtpHidConnection : IOtpHidConnection
 {
-    public ConnectionType Type => inner.Type;
+    private readonly DisposalGate _disposal;
+    private readonly IOtpHidConnection _inner;
 
-    public int FeatureReportSize => inner.FeatureReportSize;
+    public RegisteredOtpHidConnection(IOtpHidConnection inner, IDisposable registration)
+    {
+        _inner = inner;
+        _disposal = new DisposalGate(registration);
+    }
+
+    public ConnectionType Type => _inner.Type;
+
+    public int FeatureReportSize => _inner.FeatureReportSize;
 
     public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default) =>
-        inner.SendAsync(report, cancellationToken);
+        _inner.SendAsync(report, cancellationToken);
 
     public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
-        inner.ReceiveAsync(cancellationToken);
+        _inner.ReceiveAsync(cancellationToken);
 
-    public void Dispose()
-    {
-        try
-        {
-            inner.Dispose();
-        }
-        finally
-        {
-            registration.Dispose();
-        }
-    }
+    public void Dispose() => _disposal.Dispose(_inner.Dispose);
 
-    public async ValueTask DisposeAsync()
-    {
-        try
-        {
-            await inner.DisposeAsync().ConfigureAwait(false);
-        }
-        finally
-        {
-            registration.Dispose();
-        }
-    }
+    public ValueTask DisposeAsync() => _disposal.DisposeAsync(_inner.DisposeAsync);
 }

@@ -1052,7 +1052,8 @@ public class YubiKeyDeviceMonitorServiceTests
         // Run the rescan off the test thread: the fake completes synchronously, so
         // the publication (and the blocking subscriber) would otherwise run inline
         // on the test thread and deadlock against entered/release.
-        var rescan = Task.Run(() => service.RescanAsync(TestContext.Current.CancellationToken));
+        var rescanToken = TestContext.Current.CancellationToken;
+        var rescan = Task.Run(() => service.RescanAsync(rescanToken), rescanToken);
         Assert.True(
             entered.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken),
             "Publication never reached the subscriber");

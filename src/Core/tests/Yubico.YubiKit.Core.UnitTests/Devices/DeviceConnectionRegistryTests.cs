@@ -15,7 +15,9 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
@@ -103,6 +105,191 @@ public class DeviceConnectionRegistryTests
         Assert.True(inner.Disposed);
     }
 
+    // Blocking waits below are deliberate: "a losing caller must not return early" can only be observed by
+    // blocking, and sync-over-async disposal is precisely what these tests pin.
+#pragma warning disable xUnit1031
+
+    // ---------------------------------------------------------------------------------------------------
+    // One-shot disposal with shared completion (DisposalGate).
+    //
+    // Invariants under test:
+    //   I1  the inner connection is disposed exactly once, however many callers race;
+    //   I2  the registry lease is released exactly once;
+    //   I3  the lease is never released before inner teardown completes;
+    //   I4  a losing caller (sync or async) does not return before the winner's teardown finishes;
+    //   I5  a synchronous loser blocking on an asynchronous winner does not deadlock;
+    //   I6  teardown failure releases the lease anyway, and every caller observes the same exception.
+    // ---------------------------------------------------------------------------------------------------
+
+    /// <summary>I1, I2, I3, I4 — SmartCard wrapper.</summary>
+    [Fact]
+    public async Task RegisteredSmartCardConnection_SyncDisposeRacingAsyncDispose_DisposesInnerOnce()
+    {
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var inner = new FakeSmartCardConnection { DisposeGate = gate };
+        var lease = new CountingLease();
+        var wrapped = new RegisteredSmartCardConnection(inner, lease);
+
+        var asyncDispose = Task.Run(async () => await wrapped.DisposeAsync(), TestContext.Current.CancellationToken);
+        Assert.True(inner.DisposeEntered.Wait(EnterTimeout, TestContext.Current.CancellationToken));
+
+        var syncDispose = Task.Run(wrapped.Dispose, TestContext.Current.CancellationToken);
+
+        Assert.False(syncDispose.Wait(LoserProbe, TestContext.Current.CancellationToken)); // I4: the loser must not return while teardown runs
+        Assert.Equal(0, lease.ReleaseCount); // I3: lease still held while inner teardown is in flight
+
+        gate.SetResult();
+        await asyncDispose;
+        await syncDispose;
+
+        Assert.Equal(1, inner.DisposeCount); // I1
+        Assert.Equal(1, lease.ReleaseCount); // I2
+    }
+
+    /// <summary>I1, I2, I3, I4 — FIDO HID wrapper.</summary>
+    [Fact]
+    public async Task RegisteredFidoHidConnection_SyncDisposeRacingAsyncDispose_DisposesInnerOnce()
+    {
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var inner = new FakeFidoHidConnection { DisposeGate = gate };
+        var lease = new CountingLease();
+        var wrapped = new RegisteredFidoHidConnection(inner, lease);
+
+        var asyncDispose = Task.Run(async () => await wrapped.DisposeAsync(), TestContext.Current.CancellationToken);
+        Assert.True(inner.DisposeEntered.Wait(EnterTimeout, TestContext.Current.CancellationToken));
+
+        var syncDispose = Task.Run(wrapped.Dispose, TestContext.Current.CancellationToken);
+
+        Assert.False(syncDispose.Wait(LoserProbe, TestContext.Current.CancellationToken));
+        Assert.Equal(0, lease.ReleaseCount);
+
+        gate.SetResult();
+        await asyncDispose;
+        await syncDispose;
+
+        Assert.Equal(1, inner.DisposeCount);
+        Assert.Equal(1, lease.ReleaseCount);
+    }
+
+    /// <summary>I1, I2, I3, I4 — OTP HID wrapper.</summary>
+    [Fact]
+    public async Task RegisteredOtpHidConnection_SyncDisposeRacingAsyncDispose_DisposesInnerOnce()
+    {
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var inner = new FakeOtpHidConnection { DisposeGate = gate };
+        var lease = new CountingLease();
+        var wrapped = new RegisteredOtpHidConnection(inner, lease);
+
+        var asyncDispose = Task.Run(async () => await wrapped.DisposeAsync(), TestContext.Current.CancellationToken);
+        Assert.True(inner.DisposeEntered.Wait(EnterTimeout, TestContext.Current.CancellationToken));
+
+        var syncDispose = Task.Run(wrapped.Dispose, TestContext.Current.CancellationToken);
+
+        Assert.False(syncDispose.Wait(LoserProbe, TestContext.Current.CancellationToken));
+        Assert.Equal(0, lease.ReleaseCount);
+
+        gate.SetResult();
+        await asyncDispose;
+        await syncDispose;
+
+        Assert.Equal(1, inner.DisposeCount);
+        Assert.Equal(1, lease.ReleaseCount);
+    }
+
+    /// <summary>
+    ///     I4, I5 — a synchronous <c>Dispose</c> loser blocks on an asynchronous winner's completion without
+    ///     deadlocking, and observes a fully finished teardown when it returns. This is the case that makes an
+    ///     early-returning caller unable to reopen a PC/SC handle that is still being torn down.
+    /// </summary>
+    [Fact]
+    public async Task RegisteredSmartCardConnection_SyncDisposeLoser_WaitsForAsyncWinnerTeardown()
+    {
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var inner = new FakeSmartCardConnection { DisposeGate = gate };
+        var lease = new CountingLease();
+        var wrapped = new RegisteredSmartCardConnection(inner, lease);
+
+        var asyncDispose = Task.Run(async () => await wrapped.DisposeAsync(), TestContext.Current.CancellationToken);
+        Assert.True(inner.DisposeEntered.Wait(EnterTimeout, TestContext.Current.CancellationToken));
+
+        var syncLoserSawTeardownComplete = false;
+        var syncLoserSawLeaseReleased = false;
+        var syncDispose = Task.Run(
+            () =>
+            {
+                wrapped.Dispose();
+                syncLoserSawTeardownComplete = inner.TeardownCompleted;
+                syncLoserSawLeaseReleased = lease.ReleaseCount == 1;
+            },
+            TestContext.Current.CancellationToken);
+
+        Assert.False(syncDispose.Wait(LoserProbe, TestContext.Current.CancellationToken));
+        Assert.False(inner.TeardownCompleted);
+
+        gate.SetResult();
+        Assert.True(syncDispose.Wait(DeadlockTimeout, TestContext.Current.CancellationToken)); // I5: no deadlock on the sync-over-async wait
+        await syncDispose;
+        await asyncDispose;
+
+        Assert.True(syncLoserSawTeardownComplete);
+        Assert.True(syncLoserSawLeaseReleased);
+        Assert.Equal(1, inner.DisposeCount);
+        Assert.Equal(1, lease.ReleaseCount);
+    }
+
+    /// <summary>I1, I2 — repeated sequential disposal is a no-op after the first.</summary>
+    [Fact]
+    public async Task RegisteredSmartCardConnection_RepeatedDispose_DisposesInnerOnce()
+    {
+        var inner = new FakeSmartCardConnection();
+        var lease = new CountingLease();
+        var wrapped = new RegisteredSmartCardConnection(inner, lease);
+
+        wrapped.Dispose();
+        wrapped.Dispose();
+        await wrapped.DisposeAsync();
+
+        Assert.Equal(1, inner.DisposeCount);
+        Assert.Equal(1, lease.ReleaseCount);
+    }
+
+    /// <summary>I6 — teardown failure still releases the lease, and every caller sees the same exception.</summary>
+    [Fact]
+    public async Task RegisteredSmartCardConnection_InnerDisposeThrows_ReleasesLeaseAndSharesException()
+    {
+        var inner = new FakeSmartCardConnection { ThrowOnDispose = true };
+        var lease = new CountingLease();
+        var wrapped = new RegisteredSmartCardConnection(inner, lease);
+
+        var winner = Assert.Throws<InvalidOperationException>(wrapped.Dispose);
+        var syncLoser = Assert.Throws<InvalidOperationException>(wrapped.Dispose);
+        var asyncLoser = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await wrapped.DisposeAsync());
+
+        Assert.Same(winner, syncLoser);
+        Assert.Same(winner, asyncLoser);
+        Assert.Equal(1, inner.DisposeCount);
+        Assert.Equal(1, lease.ReleaseCount);
+    }
+
+#pragma warning restore xUnit1031
+
+    private static readonly TimeSpan EnterTimeout = TimeSpan.FromSeconds(5);
+
+    private static readonly TimeSpan DeadlockTimeout = TimeSpan.FromSeconds(5);
+
+    /// <summary>How long a losing caller is observed for; it must still be blocked when this elapses.</summary>
+    private static readonly TimeSpan LoserProbe = TimeSpan.FromMilliseconds(250);
+
+    private sealed class CountingLease : IDisposable
+    {
+        private int _releaseCount;
+
+        public int ReleaseCount => Volatile.Read(ref _releaseCount);
+
+        public void Dispose() => Interlocked.Increment(ref _releaseCount);
+    }
+
     private sealed class RecordingYubiKey(string deviceId, ConnectionType available) : IYubiKey, IDiscoveryConnectionProvider
     {
         public int ConnectCalls { get; private set; }
@@ -127,12 +314,62 @@ public class DeviceConnectionRegistryTests
         }
     }
 
-    private sealed class FakeSmartCardConnection : ISmartCardConnection
+    /// <summary>
+    ///     Records how many times disposal ran, and can be held inside teardown via <see cref="DisposeGate" />
+    ///     so a test can observe the window in which the winner's teardown is still in flight.
+    /// </summary>
+    private abstract class FakeDisposableConnection
     {
-        public bool Disposed { get; private set; }
+        private int _disposeCount;
+        private int _teardownCompleted;
+
+        public ManualResetEventSlim DisposeEntered { get; } = new();
+
+        /// <summary>
+        ///     When set, the FIRST teardown blocks on this until the test releases it. Only the first, so that a
+        ///     second caller reaching the inner connection at all is immediately visible as a defect rather than
+        ///     being hidden behind the same wait.
+        /// </summary>
+        public TaskCompletionSource? DisposeGate { get; init; }
 
         public bool ThrowOnDispose { get; init; }
 
+        public int DisposeCount => Volatile.Read(ref _disposeCount);
+
+        public bool Disposed => DisposeCount > 0;
+
+        public bool TeardownCompleted => Volatile.Read(ref _teardownCompleted) > 0;
+
+        public void Dispose()
+        {
+            var ordinal = Interlocked.Increment(ref _disposeCount);
+            DisposeEntered.Set();
+            if (ordinal == 1)
+                DisposeGate?.Task.GetAwaiter().GetResult();
+
+            Finish();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            var ordinal = Interlocked.Increment(ref _disposeCount);
+            DisposeEntered.Set();
+            if (ordinal == 1 && DisposeGate is not null)
+                await DisposeGate.Task.ConfigureAwait(false);
+
+            Finish();
+        }
+
+        private void Finish()
+        {
+            _ = Interlocked.Exchange(ref _teardownCompleted, 1);
+            if (ThrowOnDispose)
+                throw new InvalidOperationException("Inner dispose failure.");
+        }
+    }
+
+    private sealed class FakeSmartCardConnection : FakeDisposableConnection, ISmartCardConnection
+    {
         public int TransmitCalls { get; private set; }
 
         public ConnectionType Type => ConnectionType.SmartCard;
@@ -150,18 +387,31 @@ public class DeviceConnectionRegistryTests
             throw new NotSupportedException();
 
         public bool SupportsExtendedApdu() => true;
+    }
 
-        public void Dispose()
-        {
-            Disposed = true;
-            if (ThrowOnDispose)
-                throw new InvalidOperationException("Inner dispose failure.");
-        }
+    private sealed class FakeFidoHidConnection : FakeDisposableConnection, IFidoHidConnection
+    {
+        public ConnectionType Type => ConnectionType.HidFido;
 
-        public ValueTask DisposeAsync()
-        {
-            Dispose();
-            return ValueTask.CompletedTask;
-        }
+        public int PacketSize => 64;
+
+        public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
+        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(ReadOnlyMemory<byte>.Empty);
+    }
+
+    private sealed class FakeOtpHidConnection : FakeDisposableConnection, IOtpHidConnection
+    {
+        public ConnectionType Type => ConnectionType.HidOtp;
+
+        public int FeatureReportSize => 8;
+
+        public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
+        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(ReadOnlyMemory<byte>.Empty);
     }
 }

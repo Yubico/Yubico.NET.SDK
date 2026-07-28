@@ -231,7 +231,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             {
                 _repository.UpdateCache(devices);
             }
-            catch (ObjectDisposedException)
+            catch (ObjectDisposedException) when (_disposed == 1)
             {
                 // The shutdown race the type-level contract describes: this publication
                 // was admitted before disposal, outlived DisposeAsync's bounded drain,
@@ -239,6 +239,12 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 // here is what makes "the repository silences any later emission" true -
                 // UpdateCache and the underlying subject both throw once disposed.
                 // Nothing is lost: the repository is being torn down.
+                //
+                // The _disposed guard matters: UpdateCache invokes DeviceChanges
+                // subscribers synchronously, so a subscriber touching its own disposed
+                // state throws the same exception type. Outside monitor disposal that is
+                // a subscriber bug, and it must keep surfacing through the normal scan
+                // failure path rather than being misattributed to shutdown.
                 Logger.LogDebug(
                     "Repository disposed while publishing from monitor generation {GenerationId}; discarding late snapshot",
                     generation.Id);

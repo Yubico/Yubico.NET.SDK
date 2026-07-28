@@ -1126,6 +1126,27 @@ public class YubiKeyDeviceMonitorServiceTests
     }
 
     [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task Publish_SubscriberThrowsObjectDisposed_WhileNotDisposing_StillSurfaces()
+    {
+        // Arrange - UpdateCache invokes subscribers synchronously, so a subscriber
+        // touching its own disposed state throws the same exception type the shutdown
+        // race produces. Outside monitor disposal that is a subscriber bug and must
+        // keep surfacing, not be absorbed by the late-publication guard.
+        var (service, repository, findYubiKeys, _, _) = CreateService();
+        findYubiKeys.SetDevices([new FakeYubiKey("device-a", ConnectionType.SmartCard)]);
+
+        using var subscription = repository.DeviceChanges.Subscribe(
+            _ => throw new ObjectDisposedException("SubscriberOwnedResource"));
+
+        // Act + Assert - the monitor is not disposed, so the exception propagates.
+        _ = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => service.RescanAsync(TestContext.Current.CancellationToken));
+
+        await service.DisposeAsync();
+    }
+
+    [Fact]
     public async Task RescanAsync_AfterDispose_ThrowsObjectDisposedException()
     {
         // Arrange

@@ -71,23 +71,24 @@ public class FindYubiKeysFaultInjectionTests
     private const string TripleOtpB = "hidB-otp3";
 
     [Fact]
-    public async Task FindAllAsync_ScriptedIdentityFailureOrphans_SameInstanceHealsWhenRetrySucceeds_Pin()
+    public async Task FindAllAsync_ScriptedIdentityFailure_DeducedIntoAnchoredKey_AndRereadOnNextScan_Pin()
     {
-        // Phase 0 finding 2 (convergence PIN): a failed identity read orphans its interface on scan 1;
-        // scan 2 on the SAME FindYubiKeys instance retries the failed read (only successful reads are
-        // cached) and heals to complete grouping, without re-reading the already-cached interfaces.
+        // Phase-2 updated pin (was: "failed read orphans on scan 1" pre-deduction). With the tier-4
+        // pigeonhole deduction, a failed identity read whose interface uniquely fills the single missing
+        // slot of exactly one serial-anchored key is attributed there ALREADY on scan 1 — the orphan
+        // window closes without waiting for the cache. The cache contract is unchanged and still pinned:
+        // failures are not cached, so the failed interface is re-read on the next scan (now with serial
+        // evidence), while already-cached interfaces are not re-read.
         await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
         var (find, factory, _, _) = CreateTwoDualKeyRig();
         factory.FailReads(OtpB);
 
         var scan1 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
-        Assert.Equal(3, scan1.Count);
-        var keyA1 = Assert.IsType<CompositeYubiKey>(Assert.Single(scan1, d => d is CompositeYubiKey));
-        Assert.Equal("ykphysical:111", keyA1.DeviceId);
-        Assert.Equal(Dual, keyA1.AvailableConnections);
-        Assert.Single(scan1, d => d.AvailableConnections == ConnectionType.SmartCard); // key B's CCID fragment
-        Assert.Single(scan1, d => d.AvailableConnections == ConnectionType.HidOtp); // orphaned failed read
+        Assert.Equal(2, scan1.Count);
+        Assert.All(scan1, d => Assert.Equal(Dual, d.AvailableConnections));
+        var keyB1 = Assert.IsType<CompositeYubiKey>(Assert.Single(scan1, d => d.DeviceId == "ykphysical:222"));
+        Assert.Contains(keyB1.MemberDeviceIds, id => id.EndsWith(OtpB, StringComparison.Ordinal));
 
         var otpAConnectsAfterScan1 = factory.ConnectCalls(OtpA);
         var otpBConnectsAfterScan1 = factory.ConnectCalls(OtpB);
@@ -100,7 +101,7 @@ public class FindYubiKeysFaultInjectionTests
         Assert.Contains(scan2, d => d.DeviceId == "ykphysical:111");
         Assert.Contains(scan2, d => d.DeviceId == "ykphysical:222");
 
-        // Cache behavior: the healed interface was re-read; a previously cached interface was not.
+        // Cache behavior: the failed interface was re-read; a previously cached interface was not.
         Assert.True(
             factory.ConnectCalls(OtpB) > otpBConnectsAfterScan1,
             "The failed identity read must be retried on the next scan (failures are not cached).");
@@ -176,13 +177,15 @@ public class FindYubiKeysFaultInjectionTests
     }
 
     [Fact]
-    public async Task FindAllAsync_PcscReaderRenameWithFailingReread_OrphansConservativelyWithoutStaleServe_Pin()
+    public async Task FindAllAsync_PcscReaderRenameWithFailingReread_RereadsAndDeducesWithoutStaleServe_Pin()
     {
-        // Phase 0 finding 4, failure arm (PIN): when the re-read under the renamed reader FAILS, the
-        // renamed CCID must be orphaned conservatively — the scan-1 serial cached under the OLD reader
-        // name must NOT be served for the new name (that would be stale-identity misattribution: the
-        // rename is indistinguishable from new hardware). Investigated per plan directive: the cache
-        // behaves correctly under rename (miss + re-read + conservative split) — pinned, not a defect.
+        // Phase 0 finding 4, failure arm (Phase-2 updated pin — was: "orphans conservatively"
+        // pre-deduction). When the re-read under the renamed reader FAILS, the scan-1 serial cached
+        // under the OLD reader name must NOT be served for the new name: the rename is a cache MISS and
+        // the re-read is attempted (proven by the connect-count assertion below). With the tier-4
+        // deduction the null-serial renamed CCID then uniquely fills key A's only missing slot and is
+        // attributed there — reached via deduction over the current scan's evidence, never via a stale
+        // cache entry keyed to a vanished DeviceId.
         await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
         var (find, factory, pcsc, _) = CreateTwoDualKeyRig();
 
@@ -194,14 +197,10 @@ public class FindYubiKeysFaultInjectionTests
 
         var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
-        // Had the stale scan-1 serial been served for the renamed reader, key A would still assemble as
-        // ykphysical:111 with two members. Instead: key B intact, key A conservatively split.
-        Assert.Equal(3, scan2.Count);
-        var keyB = Assert.IsType<CompositeYubiKey>(Assert.Single(scan2, d => d is CompositeYubiKey));
-        Assert.Equal("ykphysical:222", keyB.DeviceId);
-        Assert.Equal(Dual, keyB.AvailableConnections);
-        Assert.Single(scan2, d => d.AvailableConnections == ConnectionType.SmartCard); // renamed, unread CCID
-        Assert.Single(scan2, d => d.AvailableConnections == ConnectionType.HidOtp); // key A's cached OTP fragment
+        Assert.Equal(2, scan2.Count);
+        Assert.All(scan2, d => Assert.Equal(Dual, d.AvailableConnections));
+        var keyA = Assert.IsType<CompositeYubiKey>(Assert.Single(scan2, d => d.DeviceId == "ykphysical:111"));
+        Assert.Contains(keyA.MemberDeviceIds, id => id.EndsWith(ReaderARenamed, StringComparison.Ordinal));
         Assert.True(
             factory.ConnectCalls(ReaderARenamed) > 0,
             "The renamed reader must be re-read (cache keyed by DeviceId cannot carry identity across renames).");
@@ -209,22 +208,72 @@ public class FindYubiKeysFaultInjectionTests
 
     [Fact]
     [Trait("Category", "RuntimeResilience")]
-    public async Task FindAllAsync_SixIdentityReadsAgainstFourWorkerAdmission_TwoSkipWithoutConnecting()
+    public async Task FindAllAsync_SixIdentityReadsAgainstFourWorkerAdmission_WaitForSlotsInsteadOfSkipping()
     {
-        // Phase 0 findings 1 & 5, deterministic reproduction (item 3 of the Phase-1 PRD): on a two-key
-        // same-PID 0x0407 rig, one scan issues SIX identity reads against the FOUR-worker discovery
-        // admission (DiscoveryWorkerAdmission). While four reads occupy the workers, the remaining two
-        // fail the nonblocking TryAcquire and throw DiscoveryReadSkippedException
-        // (ProtocolDeviceInfo.StartSharedRead), which DiscoveryIdentityReader logs as "aborted: interface
-        // gained a live connection" and degrades to null — orphaning those interfaces. The two scan-1
-        // aborts in the Phase-0 shared-mode diagnostics (6 interfaces, 4 workers) match this exactly:
-        // the "aborted" failures are discovery SELF-contention on the worker-admission gate — the log
-        // message's "gained a live connection" wording misattributes the cause — not sessions and not
-        // PC/SC sharing violations. Deterministic here because the four admitted connects block until
-        // released, so the fifth and sixth reads always find the gate saturated, whatever the order.
-        // PIN for Phase 2 (scheduling tune: exempt/serialize identity reads): the assertion pins the
-        // CURRENT contract — exactly four interfaces reach a connect, and the scan degrades to a
-        // conservative six-way split rather than stalling or crashing.
+        // Phase-2 RED→GREEN vector for the admission fix (Phase 0 findings 1 & 5; Phase-1 ledger hook a).
+        // On a two-key same-PID 0x0407 rig, one scan issues SIX identity reads against the FOUR-worker
+        // discovery admission. Pre-change code skipped the two excess reads via the nonblocking
+        // TryAcquire (DiscoveryReadSkippedException, logged as "aborted") — orphaning their interfaces.
+        // DESIRED: identity reads WAIT for a worker slot (bounded by their 2s read budget), so once the
+        // first four reads finish, the remaining two run and the scan groups both keys completely.
+        // PREDICTED RED REASON (pre-change): only 4 of 6 interfaces ever reach a connect; the scan
+        // returns orphaned fragments instead of two complete composites.
+        // Choreography keeps it deterministic: the first four connects are gated open (holding all four
+        // workers) until the test observes them, then released — pre-change the fifth/sixth reads have
+        // deterministically skipped by then; post-change they are waiting and connect next.
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+
+        var (find, factory) = CreateTwoTripleKeyRig();
+        factory.GateReads(TripleReaderA, serial: 111);
+        factory.GateReads(TripleFidoA, serial: 111);
+        factory.GateReads(TripleOtpA, serial: 111);
+        factory.GateReads(TripleReaderB, serial: 222);
+        factory.GateReads(TripleFidoB, serial: 222);
+        factory.GateReads(TripleOtpB, serial: 222);
+
+        IReadOnlyList<IYubiKey> result;
+        bool allSixConnected;
+        try
+        {
+            var scanTask = find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+
+            Assert.True(
+                await TryWaitForAsync(() => factory.TotalConnectCalls >= 4, TimeSpan.FromSeconds(5)),
+                "The first four identity reads never reached a connect; cannot stage admission saturation.");
+            factory.ReleaseAllGatedReads();
+
+            allSixConnected = await TryWaitForAsync(() => factory.TotalConnectCalls >= 6, TimeSpan.FromSeconds(3));
+            factory.ReleaseAllGatedReads();
+
+            result = await scanTask;
+        }
+        finally
+        {
+            factory.ReleaseAllGatedReads();
+            await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        }
+
+        Assert.True(
+            allSixConnected,
+            $"Identity reads must WAIT for a worker slot, not skip: only {factory.TotalConnectCalls} of 6 " +
+            "interfaces ever reached a connect (admission saturation skipped the rest).");
+        Assert.Equal(2, result.Count);
+        Assert.All(result, d => Assert.Equal(Triple, d.AvailableConnections));
+        Assert.Contains(result, d => d.DeviceId == "ykphysical:111");
+        Assert.Contains(result, d => d.DeviceId == "ykphysical:222");
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task FindAllAsync_SaturatedWorkersBeyondBudget_IdentityDegradesToNull_BoundPreserved()
+    {
+        // Phase-2 bound-preservation vector: the admission bound must survive the waiting change. Six
+        // identity reads, four workers, and every admitted connect hangs (a hung native call). The two
+        // waiting reads must NOT connect while the bound is saturated (at most four concurrent native
+        // reads — hung calls cannot multiply workers), and when their 2s budget expires while still
+        // waiting, they degrade to null exactly like any failed best-effort read: the scan completes
+        // with a conservative six-way split rather than stalling. Once the hung connects fail and free
+        // the workers, the two waiting reads run in the background (waiting, never skipped).
         await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
 
         var (find, factory) = CreateTwoTripleKeyRig();
@@ -232,25 +281,46 @@ public class FindYubiKeysFaultInjectionTests
             factory.BlockReads(name);
 
         IReadOnlyList<IYubiKey> result;
+        int connectsAtScanEnd;
+        bool allSixEventuallyConnected;
         try
         {
             result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+            connectsAtScanEnd = factory.TotalConnectCalls;
         }
         finally
         {
             factory.FailAllBlockedReads();
+            allSixEventuallyConnected = await TryWaitForAsync(
+                () => factory.TotalConnectCalls >= 6,
+                TimeSpan.FromSeconds(5));
             await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
         }
 
         Assert.Equal(6, result.Count);
         Assert.DoesNotContain(result, d => d is CompositeYubiKey);
-        Assert.All(result, d => Assert.NotEqual(Triple, d.AvailableConnections));
-        Assert.Equal(4, factory.TotalConnectCalls);
+        Assert.Equal(4, connectsAtScanEnd); // bound preserved: hung native calls never multiply workers
+        Assert.True(
+            allSixEventuallyConnected,
+            "The excess identity reads must wait for a slot (not skip): they never connected after workers freed.");
     }
 
     // ---------------------------------------------------------------------------------------------
     // Rig construction
     // ---------------------------------------------------------------------------------------------
+
+    private static async Task<bool> TryWaitForAsync(Func<bool> condition, TimeSpan timeout)
+    {
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        while (clock.Elapsed < timeout)
+        {
+            if (condition())
+                return true;
+            await Task.Delay(TimeSpan.FromMilliseconds(10), TestContext.Current.CancellationToken);
+        }
+
+        return condition();
+    }
 
     private static (FindYubiKeys Find, ScriptedIdentityFactory Factory, MutableFindPcscDevices Pcsc, MutableFindHidDevices Hid)
         CreateTwoDualKeyRig()
@@ -338,7 +408,8 @@ public class FindYubiKeysFaultInjectionTests
     {
         Succeed,
         Fail,
-        Block
+        Block,
+        Gated
     }
 
     /// <summary>
@@ -353,6 +424,8 @@ public class FindYubiKeysFaultInjectionTests
         private readonly ConcurrentDictionary<string, (ReadOutcome Outcome, int Serial)> _scripts = new();
         private readonly ConcurrentDictionary<string, int> _connectCalls = new();
         private readonly ConcurrentBag<TaskCompletionSource<IConnection>> _blocked = [];
+        private readonly ConcurrentQueue<(int Serial, TaskCompletionSource<IConnection> Pending)> _gated = new();
+        private volatile bool _failAllBlocked;
 
         public int TotalConnectCalls => _connectCalls.Values.Sum();
 
@@ -364,8 +437,19 @@ public class FindYubiKeysFaultInjectionTests
 
         public void BlockReads(string name) => _scripts[name] = (ReadOutcome.Block, 0);
 
+        public void GateReads(string name, int serial) => _scripts[name] = (ReadOutcome.Gated, serial);
+
+        /// <summary>Completes every currently pending gated connect with its scripted identity connection.</summary>
+        public void ReleaseAllGatedReads()
+        {
+            while (_gated.TryDequeue(out var gated))
+                gated.Pending.TrySetResult(CreateIdentityConnection(gated.Serial));
+        }
+
+        /// <summary>Fails all pending blocked connects; later blocked connects fail immediately (sticky).</summary>
         public void FailAllBlockedReads()
         {
+            _failAllBlocked = true;
             foreach (var blocked in _blocked)
                 blocked.TrySetException(new InvalidOperationException("Expected blocked-read cleanup failure."));
         }
@@ -395,7 +479,17 @@ public class FindYubiKeysFaultInjectionTests
                 case ReadOutcome.Fail:
                     return Task.FromException<IConnection>(
                         new InvalidOperationException($"Scripted identity-read failure for '{name}'."));
+                case ReadOutcome.Gated:
+                    var pending = new TaskCompletionSource<IConnection>(TaskCreationOptions.RunContinuationsAsynchronously);
+                    _gated.Enqueue((script.Serial, pending));
+                    return pending.Task;
                 default:
+                    if (_failAllBlocked)
+                    {
+                        return Task.FromException<IConnection>(
+                            new InvalidOperationException("Expected blocked-read cleanup failure."));
+                    }
+
                     var blocked = new TaskCompletionSource<IConnection>(TaskCreationOptions.RunContinuationsAsynchronously);
                     _blocked.Add(blocked);
                     return blocked.Task;

@@ -57,16 +57,21 @@ public class CompositeDeviceMergerTests
     }
 
     [Fact]
-    public void Merge_SeriallessMultiInterfaceSamePid_MergesByPid()
+    public void Merge_PartialSeriallessSamePid_TwoHidNoCcid_StaysConservativelySplit()
     {
-        // The Phase 37.5 fix: a serial-less key exposing several interfaces of one PID merges by PID.
+        // Phase-2 generalized guard (composite-merge remediation PLAN.md, verified premise 4b): two HID
+        // interfaces of a full-triple PID with no CCID and no serials are byte-indistinguishable from the
+        // disjoint interfaces of TWO same-model keys, so the merger keeps them conservatively split until
+        // the observed set equals the PID's expected set (or serial/topology evidence arrives). This
+        // replaces the pre-Phase-2 behavior ("Phase 37.5": merge any same-PID interfaces when the PID
+        // count is 1), which could fuse two physical keys.
         var merged = CompositeDeviceMerger.Merge([
             Usb("hid:fido", ConnectionType.HidFido, FullKeyPid),
             Usb("hid:otp", ConnectionType.HidOtp, FullKeyPid)
         ]);
 
-        var composite = Assert.IsType<CompositeYubiKey>(Assert.Single(merged));
-        Assert.Equal(ConnectionType.HidFido | ConnectionType.HidOtp, composite.AvailableConnections);
+        Assert.Equal(2, merged.Count);
+        Assert.DoesNotContain(merged, d => d is CompositeYubiKey);
     }
 
     [Fact]

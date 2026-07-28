@@ -1,8 +1,8 @@
 ---
-task: Composite-merge remediation — Phase 1 (RED test harness, tests only)
+task: Composite-merge remediation — Phases 1 (RED harness) + 2 (core fixes)
 branch: yubikit-composite-merge
 phase: execute
-date: 2026-07-28
+date: 2026-07-28 (Phase 1), 2026-07-29 (Phase 2)
 plan: docs/plans/composite-merge-remediation/PLAN.md
 ---
 
@@ -168,3 +168,123 @@ they are the Phase-2/Phase-4 RED→GREEN acceptance vectors on hardware.
 4. **Self-contention hypothesis refined**: the plan's "abandoned-read lease" interleaving is masked
    by single-flight joining and is not independently representable; the reproducible mechanism is
    worker-admission saturation (item 4). No production seam needed for Phase 2's RED vectors.
+## Evidence Ledger — Phase 2 (2026-07-29)
+
+Four scoped changes, each proved per the evidence rule. Production diff confined to
+`src/Core/src/Devices/`: `CompositeDeviceMerger.cs` (changes 1–2), `ProtocolDeviceInfo.cs` +
+`DiscoveryIdentityReader.cs` + `DiscoveryReadSkippedException.cs` (change 3). Test diffs:
+`FindYubiKeysFaultInjectionTests.cs` (admission vectors + two deduction-updated pins),
+`CompositeDeviceMergerTests.cs` (one superseded legacy pin).
+
+### Change 1 — Generalized tier-3 guard
+
+`CanMergeByPidWithoutSerial` now merges a PID-unique group without serial evidence ONLY when the
+observed connection set exactly equals `ExpectedConnectionsForPid(pid)`; the bespoke triple-shape
+check is gone. Partial observations fall to the serial/deduction path.
+
+- **RED** (Phase-1 D1, verbatim): `Cross-key transient shape B (premise 4b): the merger fused key
+  A's FIDO and key B's OTP (both 0x0407, no CCID, no serials) into 1 composite(s):
+  ykphysical:pid:0407=[fido-keyA|otp-keyB]. observed != expected must route to the serial path;
+  null serials must stay standalone.`
+- **GREEN**: merger vector class `total: 21, failed: 0, succeeded: 21`.
+- **Survival**: shape-A epistemic-bound pin (observed == expected still merges), all PID-class
+  pins, reconfiguration pins — all green in the same run.
+- **Superseded legacy pin (flagged)**: pre-existing
+  `CompositeDeviceMergerTests.Merge_SeriallessMultiInterfaceSamePid_MergesByPid` pinned exactly the
+  unguarded premise-4(b) shape (two HID, no CCID, PID-merge) — the defect the plan's guard fixes
+  ("This FIXES the previously unguarded 0x0407 two-HID-no-CCID shape"). Updated in place to
+  `Merge_PartialSeriallessSamePid_TwoHidNoCcid_StaysConservativelySplit` with a comment recording
+  the supersession.
+
+### Change 2 — Pigeonhole deduction with type-count closure
+
+New `MergeSamePidBySerialWithDeduction` (merger stays pure/static): within one same-PID group,
+serial evidence anchors keys; a null-serial orphan is attributed only when exactly ONE anchored key
+is missing the orphan's connection type AND, for every type in the PID's expected set, the visible
+same-PID interface count does not exceed the anchored-candidate count. Ambiguity stays standalone.
+Serial disambiguation now runs per PID class (a physical key has exactly one PID at a time), which
+also removes the previous cross-PID same-serial grouping — flagged as a deliberate refinement.
+
+- **RED** (Phase-1 D2, verbatim): `Pigeonhole deduction (0x0407 pair, 5/6 serials): the null-serial
+  OTP orphan uniquely fills key B's only missing slot but was left standalone; got 3 devices:
+  ykphysical:111=[ccid-a|fido-a|otp-a]; ykphysical:222=[ccid-b|fido-b]; otp-b(HidOtp).`
+- **RED** (Phase-1 D3, verbatim): `Pigeonhole deduction (0x0403 pair, 3/4 serials): the null-serial
+  FIDO orphan uniquely fills key B's only missing slot but was left standalone; got 3 devices:
+  ykphysical:111=[fido-a|otp-a]; otp-b(HidOtp); fido-b(HidFido).`
+- **GREEN**: same 21/21 run.
+- **Survival**: deduction-ambiguity pin (2 orphans / 2 candidates stays split — closure catches
+  it), serial-less pair pins (no anchors → no deduction), epistemic masquerade pin — all green.
+- **Updated pins (deduction changes their scenario by design)**: two FindYubiKeys pins had frozen
+  pre-deduction "orphan conservatively" outcomes that the unique-candidate deduction now heals in
+  scan 1: `…ScriptedIdentityFailureOrphans_SameInstanceHeals…` →
+  `…ScriptedIdentityFailure_DeducedIntoAnchoredKey_AndRereadOnNextScan_Pin` (cache contract —
+  failure not cached, re-read next scan, cached interface untouched — still asserted), and
+  `…RenameWithFailingReread_OrphansConservatively…` →
+  `…RenameWithFailingReread_RereadsAndDeducesWithoutStaleServe_Pin` (no-stale-serve still proven
+  via the mandatory re-read connect count; attribution now reached via deduction over current-scan
+  evidence). Both updated pins declared here as pins.
+
+### Change 3 — Identity reads wait for worker admission + skip-cause discriminator
+
+`ProtocolDeviceInfo.ReadBoundedAsync` gained `waitForWorkerSlot` (default false):
+`DiscoveryIdentityReader` passes true, so identity reads await `DiscoveryWorkerAdmission.AcquireAsync`
+(new; async semaphore wait) instead of nonblocking-skipping; the caller's existing 2s budget bounds
+the wait. The metadata path is UNCHANGED (nonblocking `TryAcquire`, skip on saturation), and the
+admission bound itself is preserved — at most four concurrent native reads, hung calls cannot
+multiply workers. `DiscoveryReadSkippedException` now carries `DiscoveryReadSkipCause`
+(`NoDiscoveryProvider` / `InterfaceLeaseHeld` / `WorkerAdmissionSaturated`), the message includes
+it, and `DiscoveryIdentityReader` logs `skipped ({Cause})` — the misattributing "aborted: interface
+gained a live connection" wording is gone. Phase-1 hooks (a) and (b): RESOLVED.
+
+- **RED** (captured against stashed pre-change production, verbatim):
+  - `Identity reads must WAIT for a worker slot, not skip: only 4 of 6 interfaces ever reached a
+    connect (admission saturation skipped the rest).`
+    (`FindAllAsync_SixIdentityReadsAgainstFourWorkerAdmission_WaitForSlotsInsteadOfSkipping`)
+  - `The excess identity reads must wait for a slot (not skip): they never connected after workers
+    freed.` (`FindAllAsync_SaturatedWorkersBeyondBudget_IdentityDegradesToNull_BoundPreserved`)
+- **GREEN**: fault-injection class `total: 6, failed: 0, succeeded: 6` — three consecutive runs.
+- **Bound preserved** (new vector, same run): with all four workers hung, exactly 4 connects at
+  scan end (never 5+), waiting reads degrade to null on budget exhaustion (conservative six-way
+  split, no stall), and connect after the workers free (waiting, never skipped).
+- **Diagnostics delta (binding proof)** — Phase-0 harness rebuilt against the fixed Core,
+  `dotnet run -c Release -- fresh 20` (fresh instance per scan, no caches, live rig):
+
+  | Failure reason (identity reads) | Before (Phase 0, diag-fresh.log) | After (diag-fresh-after.log) |
+  |---|---|---|
+  | "aborted"/skipped (admission self-contention) | 68 | 0 |
+  | Budget timeout | 2 | 0 |
+  | Transient failure (retry path) | 1 | 0 |
+  | Total reads degraded to serial-unknown | 69 | **0** |
+  | Distinct groupings across 20 scans | multiple, heavy orphaning | **1** (both keys complete, 20/20) |
+  | Scan latency | — | 187–1135 ms |
+
+  Caveat: the before-log includes an 11-scan 3-key window plus a 2-key window (both failing); the
+  after-run is the 2-key rig (103/125; the Phase-0 production key was detached before this run).
+  The after-state is zero failures and one stable grouping across all 20 fresh-process scans.
+
+### Change 4 — In-scan retry: NOT NEEDED (superseded by admission wait)
+
+Disposition recorded per the "no machinery without a RED" rule. Post-change-3 failure classes:
+(1) admission contention — eliminated (reads wait; diagnostics show 0 remaining aborts);
+(2) transient PC/SC failures — already covered by DiscoveryIdentityReader's existing 3-attempt
+in-scan retry loop (150ms/300ms backoff); (3) budget timeout (busy card) — deliberately NOT
+retried per existing design (retrying extends the stall); (4) `InterfaceLeaseHeld` (live session)
+— retry is pointless by design (the cache covers steady-state sessions). No failure class remains
+that a same-scan retry would fix, and the 20-scan diagnostics delta shows nothing left to retry.
+No RED vector exists → no code added. The plan's item (b) (metadata phase overlapping identity
+leases within a scan) is structurally impossible — the phases are sequentially awaited in
+`FindAllAsync` — and item (a)'s JOIN semantics already exist via ProtocolDeviceInfo single-flight.
+
+### Phase-2 verification summary
+
+| Gate | Result |
+|---|---|
+| Merger vectors | `total: 21, failed: 0` (all Phase-1 REDs → GREEN; all pins survive) |
+| Fault-injection vectors | `total: 6, failed: 0` × 3 consecutive runs |
+| Full Core unit suite | `total: 695, failed: 0, succeeded: 692, skipped: 3` (pre-existing platform skips; zero intended REDs remain) |
+| `resilience --fast` | Succeeded (RuntimeResilience category green) |
+| Rig integration (2-key, fresh manager per test) | `Total tests: 5, Passed: 5` × 2 runs — zero-orphans, completeness, and stability flipped RED→GREEN on hardware |
+| `dotnet format --verify-no-changes` | exit 0 (only pre-existing IL2026/IL3050 in Tests.TestProject) |
+
+Phase-1 hooks: (a) admission wait — RESOLVED (change 3); (b) skip-cause discriminator — RESOLVED
+(change 3); shape-A disposition — closed in Phase 1 (pin, survives change 1 by construction).

@@ -63,12 +63,13 @@ internal static class ProtocolDeviceInfo
         ConnectionType connection,
         TimeSpan budget,
         ILogger logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool waitForWorkerSlot = false)
     {
         var key = new ReadKey(DeviceConnectionRegistry.ResolveInterfaceId(device, connection), connection);
         var sharedRead = InFlightReads.GetOrAdd(
             key,
-            _ => new SharedRead(key, device, connection, logger));
+            _ => new SharedRead(key, device, connection, logger, waitForWorkerSlot));
 
         try
         {
@@ -101,14 +102,15 @@ internal static class ProtocolDeviceInfo
             ReadKey key,
             IYubiKey device,
             ConnectionType connection,
-            ILogger logger)
+            ILogger logger,
+            bool waitForWorkerSlot)
         {
             _key = key;
             _deviceId = device.DeviceId;
             _connection = connection;
             _logger = logger;
             _task = new Lazy<Task<DeviceInfo>>(
-                () => StartAndObserve(device),
+                () => StartAndObserve(device, waitForWorkerSlot),
                 LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
@@ -116,9 +118,9 @@ internal static class ProtocolDeviceInfo
 
         public void RecordAbandonment() => Interlocked.Increment(ref _abandonedWaiterCount);
 
-        private Task<DeviceInfo> StartAndObserve(IYubiKey device)
+        private Task<DeviceInfo> StartAndObserve(IYubiKey device, bool waitForWorkerSlot)
         {
-            var task = StartSharedRead(device, _connection);
+            var task = StartSharedRead(device, _connection, waitForWorkerSlot);
             _ = task.ContinueWith(
                 Complete,
                 CancellationToken.None,
@@ -147,29 +149,33 @@ internal static class ProtocolDeviceInfo
         }
     }
 
-    private static Task<DeviceInfo> StartSharedRead(IYubiKey device, ConnectionType connection)
+    private static Task<DeviceInfo> StartSharedRead(IYubiKey device, ConnectionType connection, bool waitForWorkerSlot)
     {
+        if (waitForWorkerSlot)
+        {
+            // Identity reads WAIT for a bounded worker slot instead of skipping: with N same-PID keys, a
+            // scan legitimately issues more identity reads than there are workers, and skipping the
+            // excess orphans their interfaces (the Phase-0 "aborted" scan-1 failures were exactly this
+            // self-contention on the admission gate). The caller's wall-clock budget in ReadBoundedAsync
+            // bounds the wait, and the admission bound itself is preserved: at most
+            // MaximumConcurrentWorkers native reads run concurrently, so a hung native call still cannot
+            // multiply workers.
+            return StartQueuedSharedRead(device, connection);
+        }
+
         var interfaceId = DeviceConnectionRegistry.ResolveInterfaceId(device, connection);
         if (!DiscoveryWorkerAdmission.TryAcquire(out var admission))
-            return Task.FromException<DeviceInfo>(new DiscoveryReadSkippedException(interfaceId));
+        {
+            return Task.FromException<DeviceInfo>(
+                new DiscoveryReadSkippedException(interfaceId, DiscoveryReadSkipCause.WorkerAdmissionSaturated));
+        }
 
         try
         {
             // A bounded dedicated worker starts provider/native code only after this caller can install
-            // WaitAsync. Saturation skips instead of queuing or allocating another worker.
-            return Task.Factory.StartNew(
-                    async () =>
-                    {
-                        using (admission)
-                        {
-                            return await ConnectAndReadAsync(device, connection, CancellationToken.None)
-                                .ConfigureAwait(false);
-                        }
-                    },
-                    CancellationToken.None,
-                    TaskCreationOptions.DenyChildAttach | TaskCreationOptions.LongRunning,
-                    TaskScheduler.Default)
-                .Unwrap();
+            // WaitAsync. Saturation skips instead of queuing or allocating another worker (best-effort
+            // metadata path).
+            return StartWorker(device, connection, admission);
         }
         catch
         {
@@ -178,6 +184,37 @@ internal static class ProtocolDeviceInfo
         }
     }
 
+    private static async Task<DeviceInfo> StartQueuedSharedRead(IYubiKey device, ConnectionType connection)
+    {
+        var admission = await DiscoveryWorkerAdmission.AcquireAsync().ConfigureAwait(false);
+        try
+        {
+            return await StartWorker(device, connection, admission).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Safe double-dispose when the worker's own `using` already released the slot: Admission
+            // disposal is idempotent. This guards only synchronous StartNew failures.
+            admission.Dispose();
+            throw;
+        }
+    }
+
+    private static Task<DeviceInfo> StartWorker(IYubiKey device, ConnectionType connection, IDisposable admission) =>
+        Task.Factory.StartNew(
+                async () =>
+                {
+                    using (admission)
+                    {
+                        return await ConnectAndReadAsync(device, connection, CancellationToken.None)
+                            .ConfigureAwait(false);
+                    }
+                },
+                CancellationToken.None,
+                TaskCreationOptions.DenyChildAttach | TaskCreationOptions.LongRunning,
+                TaskScheduler.Default)
+            .Unwrap();
+
     private static async Task<DeviceInfo> ConnectAndReadAsync(
         IYubiKey device,
         ConnectionType connection,
@@ -185,11 +222,11 @@ internal static class ProtocolDeviceInfo
     {
         var interfaceId = DeviceConnectionRegistry.ResolveInterfaceId(device, connection);
         if (device is not IDiscoveryConnectionProvider provider)
-            throw new DiscoveryReadSkippedException(interfaceId);
+            throw new DiscoveryReadSkippedException(interfaceId, DiscoveryReadSkipCause.NoDiscoveryProvider);
 
         using var discoveryLease = DeviceConnectionRegistry.TryAcquireDiscovery(interfaceId);
         if (discoveryLease is null)
-            throw new DiscoveryReadSkippedException(interfaceId);
+            throw new DiscoveryReadSkippedException(interfaceId, DiscoveryReadSkipCause.InterfaceLeaseHeld);
 
         var conn = await provider.ConnectForDiscoveryAsync(connection, cancellationToken).ConfigureAwait(false);
         return await ReadAsync(conn, cancellationToken).ConfigureAwait(false);
@@ -265,6 +302,16 @@ internal static class DiscoveryWorkerAdmission
 
         admission = new Admission();
         return true;
+    }
+
+    /// <summary>
+    ///     Waits (asynchronously, unbounded) for a worker slot. Used by identity reads, whose callers bound
+    ///     their own wait via the read budget; the slot count still bounds concurrent native work.
+    /// </summary>
+    public static async Task<IDisposable> AcquireAsync(CancellationToken cancellationToken = default)
+    {
+        await Slots.WaitAsync(cancellationToken).ConfigureAwait(false);
+        return new Admission();
     }
 
     private sealed class Admission : IDisposable

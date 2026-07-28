@@ -41,11 +41,16 @@ internal readonly record struct DeviceInterfaceDescriptor(
 ///     correlating by USB Product ID (the Rust reference model).
 /// </summary>
 /// <remarks>
-///     Primary key is the USB Product ID. USB interfaces sharing a known PID that is present on exactly one
-///     physical key (PID count == 1) merge with no serial required. When a PID is present on more than one
-///     physical key (PID count > 1), or when <c>forceSerialMerge</c> is set (an unparsed USB CCID
-///     reader forced the scan onto the serial path), USB interfaces are merged by serial instead, with
-///     conservative no-collapse for null serials. NFC and null-PID interfaces stand alone.
+///     Primary key is the USB Product ID, applied as a deterministic evidence hierarchy. USB interfaces
+///     sharing a known PID that is present on exactly one physical key (PID count == 1) merge with no serial
+///     required, but only when the observed connection set exactly equals the PID's expected interface set
+///     (the generalized guard); partial observations fall through to the serial path. When a PID is present
+///     on more than one physical key (PID count > 1), or when the guard refuses, interfaces are grouped by
+///     serial evidence within their PID class, remaining null-serial orphans are attributed by pigeonhole
+///     deduction (unique candidate + type-count closure), and anything still ambiguous stays conservatively
+///     standalone. When <c>forceSerialMerge</c> is set (an unparsed USB CCID reader forced the scan onto the
+///     serial path), USB interfaces are merged by serial only, with conservative no-collapse for null
+///     serials. NFC and null-PID interfaces stand alone.
 /// </remarks>
 internal static class CompositeDeviceMerger
 {
@@ -76,12 +81,15 @@ internal static class CompositeDeviceMerger
             if (CanMergeByPidWithoutSerial(group))
                 AddMerged(group, $"ykphysical:pid:{group.Key:X4}", result);
             else
-                MergeUsbBySerial(group, result);
+                MergeSamePidBySerialWithDeduction(group.Key, [.. group], result);
         }
 
-        // USB interfaces with a known PID present on more than one physical key: disambiguate by serial.
+        // USB interfaces with a known PID present on more than one physical key: disambiguate by serial
+        // within each PID class (a physical key has exactly one PID at a time, so serial evidence never
+        // needs to correlate across PID classes), then attribute remaining orphans by pigeonhole deduction.
         var ambiguous = usb.Where(d => d.Pid is { } pid && pidCounts.GetValueOrDefault(pid) > 1);
-        MergeUsbBySerial(ambiguous, result);
+        foreach (var group in ambiguous.GroupBy(d => d.Pid!.Value).OrderBy(g => g.Key))
+            MergeSamePidBySerialWithDeduction(group.Key, [.. group], result);
 
         // USB interfaces without a known PID (e.g. unparsed CCID outside the force-serial path), NFC, and
         // other non-USB interfaces stand alone (conservative).
@@ -112,27 +120,106 @@ internal static class CompositeDeviceMerger
         return perPidPerConnection.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Values.Max());
     }
 
+    /// <summary>
+    ///     Tier-3 generalized guard: a PID-unique group may merge without serial evidence only when the
+    ///     observed connection set exactly equals the PID's expected interface set. Any partial observation
+    ///     (observed != expected) falls through to serial evidence / pigeonhole deduction / conservative
+    ///     standalone. Note the documented epistemic bound: complementary partial observations from two
+    ///     same-PID keys that together equal the expected set are indistinguishable from one fully-visible
+    ///     key and DO merge here; the misattribution is bounded to the partial-visibility window and heals
+    ///     on the first scan with complete visibility, serial evidence, or topology evidence.
+    /// </summary>
     private static bool CanMergeByPidWithoutSerial(IGrouping<ushort, DeviceInterfaceDescriptor> group)
     {
-        var descriptors = group.ToList();
-        if (descriptors.Count < 2)
-            return true;
-
-        var observed = descriptors.Aggregate(
+        var observed = group.Aggregate(
             ConnectionType.Unknown,
             static (current, descriptor) => current | descriptor.Connection);
-        var expected = ReaderNamePidParser.ExpectedConnectionsForPid(group.Key);
-
-        // A full OTP+FIDO+CCID PID observed as CCID plus exactly one HID interface is ambiguous: the missing
-        // HID interface could mean partial enumeration of one key or disjoint interfaces from two same-model
-        // keys. Keep the observations separate unless serial evidence exists.
-        var hasSmartCard = observed.SupportsConnection(ConnectionType.SmartCard);
-        var hidCount = descriptors.Count(d => d.Connection is ConnectionType.HidFido or ConnectionType.HidOtp);
-        return !(expected == (ConnectionType.SmartCard | ConnectionType.HidFido | ConnectionType.HidOtp)
-            && hasSmartCard
-            && hidCount == 1
-            && observed != expected);
+        return observed == ReaderNamePidParser.ExpectedConnectionsForPid(group.Key);
     }
+
+    /// <summary>
+    ///     Tier 2 + tier 4 for one same-PID group: serial evidence groups anchored interfaces; then
+    ///     pigeonhole deduction attributes a null-serial orphan to a serial-anchored key when (a) exactly
+    ///     ONE anchored key is missing the orphan's connection type and (b) type-count closure holds — for
+    ///     every interface type in the PID's expected set, the count of visible same-PID interfaces of that
+    ///     type does not exceed the number of anchored candidate keys. Any ambiguity (two candidates, or
+    ///     counts exceeding candidates) leaves the orphan conservatively standalone.
+    /// </summary>
+    private static void MergeSamePidBySerialWithDeduction(
+        ushort pid,
+        IReadOnlyList<DeviceInterfaceDescriptor> descriptors,
+        List<IYubiKey> result)
+    {
+        var anchored = descriptors
+            .Where(d => d.Serial is not null)
+            .GroupBy(d => d.Serial!.Value)
+            .OrderBy(g => g.Key)
+            .Select(g => (Serial: g.Key, Members: g.ToList()))
+            .ToList();
+        var orphans = descriptors.Where(d => d.Serial is null).ToList();
+
+        var attributed = new Dictionary<int, List<DeviceInterfaceDescriptor>>();
+        var standalone = new List<DeviceInterfaceDescriptor>();
+
+        var expected = ReaderNamePidParser.ExpectedConnectionsForPid(pid);
+        var deducible = anchored.Count > 0 && orphans.Count > 0 && TypeCountClosureHolds(expected, descriptors, anchored.Count);
+
+        foreach (var orphan in orphans)
+        {
+            var candidates = deducible && expected.SupportsConnection(orphan.Connection)
+                ? anchored.Where(candidate => !ObservedConnections(candidate.Members).SupportsConnection(orphan.Connection)).ToList()
+                : [];
+
+            if (candidates.Count == 1)
+            {
+                var extras = attributed.TryGetValue(candidates[0].Serial, out var existing)
+                    ? existing
+                    : attributed[candidates[0].Serial] = [];
+                extras.Add(orphan);
+            }
+            else
+            {
+                standalone.Add(orphan);
+            }
+        }
+
+        foreach (var (serial, members) in anchored)
+        {
+            IEnumerable<DeviceInterfaceDescriptor> allMembers = attributed.TryGetValue(serial, out var extras)
+                ? [.. members, .. extras]
+                : members;
+            AddMerged(allMembers, $"ykphysical:{serial}", result);
+        }
+
+        // Unattributed null serials do not collapse (conservative standalone).
+        result.AddRange(standalone.Select(d => d.Device));
+    }
+
+    private static bool TypeCountClosureHolds(
+        ConnectionType expected,
+        IReadOnlyList<DeviceInterfaceDescriptor> descriptors,
+        int candidateKeyCount)
+    {
+        ReadOnlySpan<ConnectionType> concreteTypes =
+            [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp];
+
+        foreach (var type in concreteTypes)
+        {
+            if (!expected.SupportsConnection(type))
+                continue;
+
+            var visible = descriptors.Count(d => d.Connection == type);
+            if (visible > candidateKeyCount)
+                return false;
+        }
+
+        return true;
+    }
+
+    private static ConnectionType ObservedConnections(IReadOnlyList<DeviceInterfaceDescriptor> descriptors) =>
+        descriptors.Aggregate(
+            ConnectionType.Unknown,
+            static (current, descriptor) => current | descriptor.Connection);
 
     private static void MergeUsbBySerial(IEnumerable<DeviceInterfaceDescriptor> usbDescriptors, List<IYubiKey> result)
     {

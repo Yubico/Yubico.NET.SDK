@@ -58,4 +58,19 @@ internal sealed class AsyncExchangeGate
             _gate.Release();
         }
     }
+
+    /// <summary>
+    ///     Result-free overload of <see cref="RunExclusiveAsync{T}" />, for exchanges whose only purpose is
+    ///     their side effect (lazy initialization, for example). Same entry-only cancellation semantics.
+    /// </summary>
+    public Task RunExclusiveAsync(
+        Func<CancellationToken, Task> exchange,
+        CancellationToken cancellationToken = default) =>
+        RunExclusiveAsync<object?>(
+            async exchangeToken =>
+            {
+                await exchange(exchangeToken).ConfigureAwait(false);
+                return null;
+            },
+            cancellationToken);
 }

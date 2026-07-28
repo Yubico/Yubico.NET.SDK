@@ -89,12 +89,6 @@ internal static class DeviceConnectionRegistry
     public static IDisposable? TryAcquireDiscovery(string deviceId) =>
         GetOwnership(deviceId).TryAcquireDiscovery();
 
-    /// <summary>
-    ///     Test and compatibility helper for representing an already-open normal connection.
-    /// </summary>
-    public static IDisposable Register(string deviceId) =>
-        AcquireSessionAsync(deviceId).AsTask().GetAwaiter().GetResult();
-
     private static InterfaceOwnership GetOwnership(string deviceId) =>
         Interfaces.GetOrAdd(deviceId, static _ => new InterfaceOwnership());
 

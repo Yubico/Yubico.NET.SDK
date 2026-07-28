@@ -58,11 +58,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     {
         // Initialization touches the wire, so it must hold the gate like any exchange.
         _exchangeGate.RunExclusiveAsync(
-                async exchangeToken =>
-                {
-                    await EnsureInitializedAsync(exchangeToken).ConfigureAwait(false);
-                    return true;
-                },
+                exchangeToken => EnsureInitializedUnderGateAsync(exchangeToken),
                 CancellationToken.None)
             .GetAwaiter()
             .GetResult();
@@ -75,7 +71,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     /// the exchange gate (or single-threaded initialization) — on NEO it issues a slot command via the
     /// ungated core.
     /// </summary>
-    private async Task EnsureInitializedAsync(CancellationToken cancellationToken)
+    private async Task EnsureInitializedUnderGateAsync(CancellationToken cancellationToken)
     {
         if (_initialized)
             return;
@@ -95,7 +91,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
             Array.Fill(scanMap, (byte)'c');
             try
             {
-                await SendAndReceiveCoreAsync(0x12, scanMap, cancellationToken).ConfigureAwait(false);
+                await SendAndReceiveCoreUnderGateAsync(0x12, scanMap, cancellationToken).ConfigureAwait(false);
             }
             catch
             {
@@ -122,8 +118,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         return await _exchangeGate.RunExclusiveAsync(
                 async exchangeToken =>
                 {
-                    await EnsureInitializedAsync(exchangeToken).ConfigureAwait(false);
-                    return await SendAndReceiveCoreAsync(slot, data, exchangeToken).ConfigureAwait(false);
+                    await EnsureInitializedUnderGateAsync(exchangeToken).ConfigureAwait(false);
+                    return await SendAndReceiveCoreUnderGateAsync(slot, data, exchangeToken).ConfigureAwait(false);
                 },
                 cancellationToken)
             .ConfigureAwait(false);
@@ -133,7 +129,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     /// Performs one slot command exchange (frame write + response read) without entering the gate.
     /// Callers must already hold the gate.
     /// </summary>
-    private async Task<ReadOnlyMemory<byte>> SendAndReceiveCoreAsync(
+    private async Task<ReadOnlyMemory<byte>> SendAndReceiveCoreUnderGateAsync(
         byte slot,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken)
@@ -330,7 +326,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         var featureReport = await _exchangeGate.RunExclusiveAsync(
                 async exchangeToken =>
                 {
-                    await EnsureInitializedAsync(exchangeToken).ConfigureAwait(false);
+                    await EnsureInitializedUnderGateAsync(exchangeToken).ConfigureAwait(false);
                     return await ReadFeatureReportAsync(exchangeToken).ConfigureAwait(false);
                 },
                 cancellationToken)

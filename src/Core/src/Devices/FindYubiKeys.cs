@@ -41,8 +41,9 @@ public class FindYubiKeys(
     private static readonly TimeSpan MetadataReadBudget = TimeSpan.FromSeconds(3);
 
     // Serial-disambiguation identity cache (PID-count>1 / force-serial path), keyed by per-interface DeviceId.
-    // Presence means the interface's identity was read; null value = read failed or serial-disabled.
-    private readonly ConcurrentDictionary<string, DeviceInfo?> _identityCache = new();
+    // Only successful reads are cached, so presence means the interface's identity was read successfully;
+    // a failed or serial-disabled read is simply absent and is retried on the next scan.
+    private readonly ConcurrentDictionary<string, DeviceInfo> _identityCache = new();
 
     // Best-effort metadata cache, keyed by the merged device's stable interface-set key (NOT the composite
     // DeviceId, which can flip between pid- and serial-forms). Evicted when any member interface disappears.
@@ -162,8 +163,8 @@ public class FindYubiKeys(
             .ConfigureAwait(false);
 
         // Cache only successful reads so a transient failure is retried on the next scan (not poisoned).
-        if (info is not null)
-            _identityCache[iface.Device.DeviceId] = info;
+        if (info is { } identity)
+            _identityCache[iface.Device.DeviceId] = identity;
 
         return info;
     }
@@ -196,10 +197,10 @@ public class FindYubiKeys(
                 .TryReadAsync(composite, MetadataReadBudget, Logger, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (info is not null)
+            if (info is { } metadata)
             {
-                _metadataCache[key] = new MetadataCacheEntry(info, composite.MemberDeviceIds);
-                composite.DeviceInfo = info;
+                _metadataCache[key] = new MetadataCacheEntry(metadata, composite.MemberDeviceIds);
+                composite.DeviceInfo = metadata;
             }
         });
 
@@ -243,5 +244,6 @@ public class FindYubiKeys(
             new(Device, Connection, IsUsb, Pid, info?.SerialNumber, info);
     }
 
-    private readonly record struct MetadataCacheEntry(DeviceInfo? Info, IReadOnlyList<string> MemberIds);
+    // Only successful metadata reads are cached, so Info is always present.
+    private readonly record struct MetadataCacheEntry(DeviceInfo Info, IReadOnlyList<string> MemberIds);
 }

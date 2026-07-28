@@ -304,11 +304,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 // manual rescans keep working and a later start swaps it out.
                 generation.Cts.Cancel();
                 generation.Signal.Complete();
-                CleanupListeners(
-                    hidListener,
-                    hidListener is not null,
-                    smartCardListener,
-                    smartCardListener is not null);
+                CleanupListeners(hidListener, smartCardListener);
                 throw;
             }
 
@@ -356,7 +352,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 "HID device-change listener failed to start; HID changes will be detected on the interval rescan");
         }
 
-        CleanupListeners(listener, listener is not null, smartCardListener: null, smartCardStartAttempted: false);
+        CleanupListeners(listener, smartCardListener: null);
         return null;
     }
 
@@ -390,7 +386,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 "SmartCard device-change listener failed to start; SmartCard changes will be detected on the interval rescan");
         }
 
-        CleanupListeners(hidListener: null, hidStartAttempted: false, listener, smartCardStartAttempted: listener is not null);
+        CleanupListeners(hidListener: null, listener);
         return null;
     }
 
@@ -673,25 +669,23 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         _hidListener = null;
         _smartCardListener = null;
 
-        CleanupListeners(hidListener, hidListener is not null, smartCardListener, smartCardListener is not null);
+        CleanupListeners(hidListener, smartCardListener);
 
         Logger.LogDebug("Device listeners torn down");
     }
 
     private static void CleanupListeners(
         HidDeviceListener? hidListener,
-        bool hidStartAttempted,
-        ISmartCardDeviceListener? smartCardListener,
-        bool smartCardStartAttempted)
+        ISmartCardDeviceListener? smartCardListener)
     {
         if (hidListener is not null)
             BestEffort(() => hidListener.DeviceEvent = null, "clear HID listener callback");
         if (smartCardListener is not null)
             BestEffort(() => smartCardListener.DeviceEvent = null, "clear SmartCard listener callback");
 
-        if (hidStartAttempted && hidListener is not null)
+        if (hidListener is not null)
             BestEffort(hidListener.Stop, "stop HID listener");
-        if (smartCardStartAttempted && smartCardListener is not null)
+        if (smartCardListener is not null)
             BestEffort(smartCardListener.Stop, "stop SmartCard listener");
 
         if (hidListener is not null)

@@ -218,7 +218,6 @@ public class DiscoverySingleFlightTests
         var device = new ControllableConnectYubiKey(cancelConnectWithCaller: false);
         var firstCallerLogger = new CompletionRecordingLogger();
         var laterWaiterLogger = new CompletionRecordingLogger();
-        var initialObserverCount = ProtocolDeviceInfo.ActiveCompletionObserverCount;
 
         try
         {
@@ -241,7 +240,6 @@ public class DiscoverySingleFlightTests
 
             Assert.All(exceptions, exception => Assert.IsType<TimeoutException>(exception));
             Assert.Equal(1, device.ConnectCalls);
-            Assert.Equal(initialObserverCount + 1, ProtocolDeviceInfo.ActiveCompletionObserverCount);
         }
         finally
         {
@@ -256,7 +254,6 @@ public class DiscoverySingleFlightTests
         Assert.Contains(device.DeviceId, completion, StringComparison.Ordinal);
         Assert.Contains(nameof(ConnectionType.SmartCard), completion, StringComparison.Ordinal);
         Assert.Empty(laterWaiterLogger.CompletionMessages);
-        Assert.Equal(initialObserverCount, ProtocolDeviceInfo.ActiveCompletionObserverCount);
     }
 
     [Fact]

@@ -35,9 +35,6 @@ namespace Yubico.YubiKit.Core.Devices;
 internal static class ProtocolDeviceInfo
 {
     private static readonly ConcurrentDictionary<ReadKey, SharedRead> InFlightReads = new();
-    private static int _activeCompletionObserverCount;
-
-    internal static int ActiveCompletionObserverCount => Volatile.Read(ref _activeCompletionObserverCount);
 
     /// <summary>
     ///     Opens a short-lived connection over the given interface and reads <see cref="DeviceInfo" />,
@@ -122,46 +119,30 @@ internal static class ProtocolDeviceInfo
         private Task<DeviceInfo> StartAndObserve(IYubiKey device)
         {
             var task = StartSharedRead(device, _connection);
-            _ = Interlocked.Increment(ref _activeCompletionObserverCount);
-            try
-            {
-                _ = task.ContinueWith(
-                    Complete,
-                    CancellationToken.None,
-                    TaskContinuationOptions.ExecuteSynchronously,
-                    TaskScheduler.Default);
-            }
-            catch
-            {
-                _ = Interlocked.Decrement(ref _activeCompletionObserverCount);
-                throw;
-            }
+            _ = task.ContinueWith(
+                Complete,
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
 
             return task;
         }
 
         private void Complete(Task<DeviceInfo> task)
         {
-            try
-            {
-                var exception = task.Exception?.GetBaseException();
-                _ = InFlightReads.TryRemove(KeyValuePair.Create(_key, this));
+            var exception = task.Exception?.GetBaseException();
+            _ = InFlightReads.TryRemove(KeyValuePair.Create(_key, this));
 
-                var abandonedWaiterCount = Volatile.Read(ref _abandonedWaiterCount);
-                if (abandonedWaiterCount > 0)
-                {
-                    _logger.LogDebug(
-                        exception,
-                        "Abandoned discovery device-info read for {DeviceId} over {Connection} finished in the background (status: {Status}, abandoned waiters: {AbandonedWaiterCount}).",
-                        _deviceId,
-                        _connection,
-                        task.Status,
-                        abandonedWaiterCount);
-                }
-            }
-            finally
+            var abandonedWaiterCount = Volatile.Read(ref _abandonedWaiterCount);
+            if (abandonedWaiterCount > 0)
             {
-                _ = Interlocked.Decrement(ref _activeCompletionObserverCount);
+                _logger.LogDebug(
+                    exception,
+                    "Abandoned discovery device-info read for {DeviceId} over {Connection} finished in the background (status: {Status}, abandoned waiters: {AbandonedWaiterCount}).",
+                    _deviceId,
+                    _connection,
+                    task.Status,
+                    abandonedWaiterCount);
             }
         }
     }

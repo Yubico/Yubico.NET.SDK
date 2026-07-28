@@ -28,13 +28,13 @@ public class DeviceConnectionRegistryTests
     private static string NewId() => $"test:{Guid.NewGuid():N}";
 
     [Fact]
-    public void Register_RefCountsPerDeviceId_AndDisposeIsIdempotent()
+    public async Task AcquireSession_RefCountsPerDeviceId_AndDisposeIsIdempotent()
     {
         var id = NewId();
         Assert.False(DeviceConnectionRegistry.IsInUse(id));
 
-        var first = DeviceConnectionRegistry.Register(id);
-        var second = DeviceConnectionRegistry.Register(id);
+        var first = await DeviceConnectionRegistry.AcquireSessionAsync(id, TestContext.Current.CancellationToken);
+        var second = await DeviceConnectionRegistry.AcquireSessionAsync(id, TestContext.Current.CancellationToken);
         Assert.True(DeviceConnectionRegistry.IsInUse(id));
 
         first.Dispose();
@@ -55,7 +55,8 @@ public class DeviceConnectionRegistryTests
     public async Task IdentityRead_DeviceInUse_SkipsWithoutConnecting()
     {
         var device = new RecordingYubiKey(NewId(), ConnectionType.SmartCard);
-        using var registration = DeviceConnectionRegistry.Register(device.DeviceId);
+        using var registration = await DeviceConnectionRegistry.AcquireSessionAsync(
+            device.DeviceId, TestContext.Current.CancellationToken);
 
         var info = await DiscoveryIdentityReader.TryReadAsync(
             device, ConnectionType.SmartCard, NullLogger.Instance, TestContext.Current.CancellationToken);
@@ -74,7 +75,8 @@ public class DeviceConnectionRegistryTests
         var smartCardMember = new RecordingYubiKey(NewId(), ConnectionType.SmartCard);
         var otpMember = new RecordingYubiKey(NewId(), ConnectionType.HidOtp);
         var composite = new CompositeYubiKey(NewId(), [smartCardMember, otpMember], deviceInfo: null);
-        using var registration = DeviceConnectionRegistry.Register(smartCardMember.DeviceId);
+        using var registration = await DeviceConnectionRegistry.AcquireSessionAsync(
+            smartCardMember.DeviceId, TestContext.Current.CancellationToken);
 
         var info = await CompositeMetadataReader.TryReadAsync(
             composite, TimeSpan.FromSeconds(5), NullLogger.Instance, TestContext.Current.CancellationToken);
@@ -89,7 +91,8 @@ public class DeviceConnectionRegistryTests
     {
         var id = NewId();
         var throwingInner = new FakeSmartCardConnection { ThrowOnDispose = true };
-        var wrapped = new RegisteredSmartCardConnection(throwingInner, DeviceConnectionRegistry.Register(id));
+        var lease = await DeviceConnectionRegistry.AcquireSessionAsync(id, TestContext.Current.CancellationToken);
+        var wrapped = new RegisteredSmartCardConnection(throwingInner, lease);
         Assert.True(DeviceConnectionRegistry.IsInUse(id));
 
         Assert.Throws<InvalidOperationException>(wrapped.Dispose);
@@ -97,7 +100,9 @@ public class DeviceConnectionRegistryTests
 
         var asyncId = NewId();
         var inner = new FakeSmartCardConnection();
-        var asyncWrapped = new RegisteredSmartCardConnection(inner, DeviceConnectionRegistry.Register(asyncId));
+        var asyncLease = await DeviceConnectionRegistry.AcquireSessionAsync(
+            asyncId, TestContext.Current.CancellationToken);
+        var asyncWrapped = new RegisteredSmartCardConnection(inner, asyncLease);
         Assert.True(DeviceConnectionRegistry.IsInUse(asyncId));
 
         await asyncWrapped.DisposeAsync();

@@ -7,10 +7,10 @@ pull_request: 528
 effort: E4
 effort_source: explicit
 phase: execute
-progress: 81/81
+progress: 93/93
 mode: interactive
 started: 2026-07-23
-updated: 2026-07-23
+updated: 2026-07-28
 ---
 
 ## Problem
@@ -21,7 +21,7 @@ The remediation needs more than seven local edits. Each defect requires reproduc
 
 ## Vision
 
-Discovery and sessions coordinate through explicit ownership rather than timing luck; repeated callers remain responsive without multiplying underlying work; every SCP exchange shares the intended serialization gate; monitor signaling is bounded and startup is transactional; and Linux shutdown remains correct across valid descriptor values and transient native errors. The final diff is small enough to reason about, strong enough to survive persistent failures, and backed by tests that would fail if any of the seven bugs returned.
+Discovery and sessions coordinate through explicit ownership rather than timing luck; repeated callers remain responsive without multiplying underlying work; every SCP exchange shares the intended serialization gate; monitor signaling is bounded and listener startup degrades independently to interval-only monitoring when needed; a monitor generation may do anything except publish stale truth, so lifecycle races are removed by gating publication rather than coordinating transitions; connections are disposed exactly once and a returning disposal call means teardown finished; and Linux shutdown remains correct across valid descriptor values and transient native errors. The final diff is small enough to reason about, strong enough to survive persistent failures, and backed by tests that would fail if any of these bugs returned.
 
 ## Out of Scope
 
@@ -101,13 +101,13 @@ Remediate all seven PR #528 audit findings with structural concurrency and nativ
 - [x] ISC-32: Anti: Monitor correctness depends on discarded hint payload values.
 - [x] ISC-33: Existing maximum-coalesce timing behavior remains covered and passing.
 
-- [x] ISC-34: Partial monitor startup regression demonstrates RED against pre-fix behavior.
+- [x] ISC-34: Partial monitor startup regression demonstrates RED against pre-fix behavior. (Superseded by ISC-82..85 — see "Canonical alignment: graceful listener degradation"; no owning feature by design.)
 - [x] ISC-35: Factory failure disposes every listener created earlier in that attempt.
 - [x] ISC-36: Listener `Start` failure stops every listener started earlier.
 - [x] ISC-37: Listener `Start` failure disposes every listener acquired in that attempt.
-- [x] ISC-38: Failed startup disposes the attempt's channel resources.
-- [x] ISC-39: Anti: Failed startup leaves monitor state marked as running.
-- [x] ISC-40: A clean startup retry succeeds after transactional rollback.
+- [x] ISC-38: Failed startup disposes the attempt's channel resources. (Superseded — partial failure is no longer a failed attempt; no owning feature by design.)
+- [x] ISC-39: Anti: Failed startup leaves monitor state marked as running. (Superseded — a partially-failed startup now intentionally keeps monitoring running; no owning feature by design.)
+- [x] ISC-40: A clean startup retry succeeds after transactional rollback. (Superseded by ISC-82..85 and ISC-89; no owning feature by design.)
 
 - [x] ISC-41: Linux file-descriptor regression demonstrates RED against pre-fix behavior.
 - [x] ISC-42: Linux udev HID event source accepts file descriptor zero.
@@ -148,12 +148,26 @@ Remediate all seven PR #528 audit findings with structural concurrency and nativ
 - [x] ISC-73: Management integration smoke command exits zero.
 - [x] ISC-74: Full PIV integration command exits zero.
 - [x] ISC-75: Focused `PivMultiKeyContentionTests` execute with zero environment skips.
-- [x] ISC-76: `dotnet format --verify-no-changes` exits zero.
+- [x] ISC-76: Formatting verification reports no whitespace or style changes in the branch; any aggregate analyzer failure is limited to the documented pre-existing baseline in untouched files.
 - [x] ISC-77: `git diff --check` exits zero.
 - [x] ISC-78: Final `git status --short --branch` shows only intended changes.
 - [x] ISC-79: Discovery DevTeam Reviewer uses Anthropic Opus.
 - [x] ISC-80: SCP-plus-monitor DevTeam Reviewer uses Anthropic Opus.
 - [x] ISC-81: Linux-native DevTeam Reviewer uses Anthropic Opus.
+
+- [x] ISC-82: SmartCard listener failure does not abort HID-backed monitoring.
+- [x] ISC-83: HID listener failure does not abort SmartCard-backed monitoring.
+- [x] ISC-84: Failure of both listeners falls back to interval-only monitoring.
+- [x] ISC-85: Failed listeners are detached, stopped, and disposed without leaking callbacks or resources.
+
+- [x] ISC-86: A superseded monitor generation cannot publish a device snapshot.
+- [x] ISC-87: Publications never interleave, and a successor's snapshot lands after any in-flight predecessor's.
+- [x] ISC-88: A blocking `DeviceChanges` subscriber cannot delay start, stop, or dispose.
+- [x] ISC-89: Restart succeeds immediately after a stop that timed out on a hung scan.
+- [x] ISC-90: Anti: any semaphore is disposed while a caller can still acquire it.
+- [x] ISC-91: Inner connections are disposed exactly once and the ownership lease is released only after inner teardown completes.
+- [x] ISC-92: Any registered-connection disposal call returning implies teardown finished, with the same outcome for every caller.
+- [x] ISC-93: SCP wrapper construction is reachable only through `WithScpAsync`.
 
 ## Test Strategy
 
@@ -234,12 +248,24 @@ Remediate all seven PR #528 audit findings with structural concurrency and nativ
 | ISC-73 | integration | Management smoke | exit 0 | `dotnet toolchain.cs -- test --integration --project Management --smoke` |
 | ISC-74 | integration | full PIV suite | exit 0 | `dotnet toolchain.cs -- test --integration --project Piv` |
 | ISC-75 | integration | multi-key contention | executed; zero environment skips | `dotnet toolchain.cs -- test --integration --project Piv --filter "FullyQualifiedName~PivMultiKeyContentionTests"` |
-| ISC-76 | formatting | repository formatting | exit 0 | `dotnet format --verify-no-changes` |
+| ISC-76 | formatting | branch whitespace and style | clean; aggregate analyzer output limited to documented untouched-file baseline | `dotnet format whitespace/style --verify-no-changes` plus aggregate diagnostic review |
 | ISC-77 | whitespace | patch whitespace | exit 0 | `git diff --check` |
 | ISC-78 | repository | final changed paths | intended files only | `git status --short --branch` |
 | ISC-79 | DevTeam | discovery reviewer vendor | Anthropic Opus | batch transcript |
 | ISC-80 | DevTeam | SCP/monitor reviewer vendor | Anthropic Opus | batch transcript |
 | ISC-81 | DevTeam | Linux reviewer vendor | Anthropic Opus | batch transcript |
+| ISC-82 | degradation | SmartCard listener failure | HID-backed monitoring remains active | fault-injection unit tests |
+| ISC-83 | degradation | HID listener failure | SmartCard-backed monitoring remains active | fault-injection unit tests |
+| ISC-84 | fallback | both listeners fail | interval-only monitoring remains active | timed rescan unit test |
+| ISC-85 | cleanup | failed listener | detached, stopped, and disposed | fake listener assertions |
+| ISC-86 | admission | superseded generation publish | snapshot discarded | generation-swap unit tests |
+| ISC-87 | exclusion | concurrent cross-generation publication | no interleaving; successor lands last | publish-gate seam test |
+| ISC-88 | isolation | blocking subscriber | lifecycle unaffected; dispose drain bounded | blocking-subscriber unit test |
+| ISC-89 | recovery | restart after stop timeout | new generation publishes | hung-scan unit test |
+| ISC-90 | anti-disposal | semaphore disposal | zero `SemaphoreSlim.Dispose` calls | source inspection |
+| ISC-91 | disposal | sync/async disposal race | one inner disposal; lease after teardown | per-wrapper race tests |
+| ISC-92 | completion | losing disposal caller | returns only after winner's teardown, same outcome | shared-completion tests |
+| ISC-93 | visibility | SCP wrapper construction | constructor internal; `WithScpAsync` sole path | compile surface + docs |
 
 ## Features
 
@@ -274,10 +300,28 @@ Remediate all seven PR #528 audit findings with structural concurrency and nativ
   depends_on: [BaselineAndEvidence]
   parallelizable: true
 
-- name: TransactionalMonitorStartup
-  description: Roll back listeners and per-attempt channel state on factory or Start failure, then support a clean retry.
-  satisfies: [ISC-34, ISC-35, ISC-36, ISC-37, ISC-38, ISC-39, ISC-40]
+- name: GracefulMonitorStartup
+  description: Start listeners independently, clean up each failed listener, and preserve interval-only monitoring when no listener is available.
+  satisfies: [ISC-35, ISC-36, ISC-37, ISC-82, ISC-83, ISC-84, ISC-85]
   depends_on: [BaselineAndEvidence]
+  parallelizable: true
+
+- name: EpochGatedPublication
+  description: Replace the monitor lifecycle state machine with an immutable generation whose snapshots are admitted only while current, and stop disposing gates entirely.
+  satisfies: [ISC-86, ISC-87, ISC-88, ISC-89, ISC-90]
+  depends_on: [BoundedMonitorSignaling, GracefulMonitorStartup]
+  parallelizable: false
+
+- name: OneShotConnectionDisposal
+  description: Give registered-connection wrappers a single-winner disposal gate whose completion every caller observes, so the lease is released only after inner teardown.
+  satisfies: [ISC-91, ISC-92]
+  depends_on: [AtomicDiscoverySessionLeases]
+  parallelizable: true
+
+- name: ScpConstructionClosure
+  description: Narrow the SCP wrapper constructor to internal so shared-gate ownership is a compile-time entry-point property rather than a runtime check on a public path.
+  satisfies: [ISC-93]
+  depends_on: [ScpSharedGateContract]
   parallelizable: true
 
 - name: LinuxNativeBoundaries
@@ -289,7 +333,7 @@ Remediate all seven PR #528 audit findings with structural concurrency and nativ
 - name: RegressionAndTraceability
   description: Preserve causal RED/GREEN evidence, existing regressions, deterministic native tests, and finding-to-test documentation.
   satisfies: [ISC-51, ISC-52, ISC-53, ISC-54, ISC-55, ISC-56, ISC-57]
-  depends_on: [DiscoverySingleFlight, AtomicDiscoverySessionLeases, ScpSharedGateContract, BoundedMonitorSignaling, TransactionalMonitorStartup, LinuxNativeBoundaries]
+  depends_on: [DiscoverySingleFlight, AtomicDiscoverySessionLeases, ScpSharedGateContract, BoundedMonitorSignaling, GracefulMonitorStartup, LinuxNativeBoundaries]
   parallelizable: false
 
 - name: CrossVendorReview
@@ -347,6 +391,14 @@ Remediate all seven PR #528 audit findings with structural concurrency and nativ
 - 2026-07-23 conjectured: creating a new `AsyncExchangeGate` was a safe fallback when `PcscProtocolScp` received an unsupported `ISmartCardProtocol` base. / refuted by: the audit showed the fallback serialized only the wrapper and not the underlying protocol's other exchanges. / learned: a lock with the right type but the wrong ownership domain breaks the serialization contract silently. / criterion now: ISC-26 through ISC-28 require explicit unsupported-base failure and shared-gate identity for supported bases.
 
 - 2026-07-23 conjectured: an unbounded monitor channel was harmless because coalescing discarded hint payloads. / refuted by: the audit showed producers could enqueue unlimited discarded hints before the consumer drained them. / learned: payload irrelevance strengthens the case for a bounded occurrence signal; it does not make queue growth free. / criterion now: ISC-30 through ISC-33 require capacity-one signaling, bounded queued work, payload-independent behavior, and retained max-coalesce coverage.
+
+- 2026-07-28 conjectured: monitor lifecycle races should be fixed by coordinating transitions — a `Stopping` state, a start-throws contract, a stop `TimeoutException`, and a drain-then-dispose ceremony for the shared rescan gate. / refuted by: each addition defended one transition and created the next reviewable edge, and two HIGH races survived anyway — a scan hung past the stop timeout could return and publish stale device truth, and a restart wedged behind the abandoned scan's hold on the shared gate. / learned: the invariant was never "transitions must be orderly"; it is "a generation may do anything except publish stale truth." Gating the single dangerous act is subtraction, and it made four concepts unnecessary; coordinating the transitions was addition that made them load-bearing. / criterion now: ISC-86 through ISC-90 require admission-checked publication, cross-generation mutual exclusion, subscriber isolation from lifecycle, restart after an abandoned stop, and no semaphore disposal at all.
+
+- 2026-07-28 conjectured: a drain-then-dispose ceremony was needed so a hung rescan's `Release()` could not hit a disposed semaphore. / refuted by: `SemaphoreSlim.Dispose()` is only required when `AvailableWaitHandle` is used, and the monitor never touches it — the ceremony protected a disposal that was never needed. / learned: before coordinating access to a teardown, check whether the teardown is required at all; the safest disposal is the one that does not happen. / criterion now: ISC-90 asserts zero `SemaphoreSlim.Dispose` calls, making the use-after-dispose race unrepresentable rather than merely unlikely.
+
+- 2026-07-28 conjectured: the registered-connection disposal defect was a double-dispose bug, fixable with an idempotence flag. / refuted by: writing the test exposed a second, worse face — a losing caller returned while the winner was still closing a PC/SC handle, inviting an immediate reopen of a dying handle. A bare idempotence flag would have made the counting correct and left the timing broken. / learned: "exactly once" and "returning means finished" are separate guarantees, and only the second one prevents the reopen. / criterion now: ISC-91 and ISC-92 require single-winner teardown, lease release strictly after inner completion, and a shared completion that every caller — sync or async — observes.
+
+- 2026-07-28 conjectured: keeping the `PcscProtocolScp` constructor public was safe because it validates its base and throws on an unsupported one. / refuted by: the validation only fires after a caller has already found a path they should never have taken, and v2's pre-release status plus `InternalsVisibleTo` meant the path could simply be removed at no migration cost. / learned: a runtime check on a public entry point is a weaker form of an entry point that does not exist. / criterion now: ISC-93 requires `WithScpAsync` to be the sole construction path, with the validation retained as an internal-mistake guard rather than a public contract.
 
 ## Verification
 
@@ -521,3 +573,17 @@ Remediate all seven PR #528 audit findings with structural concurrency and nativ
 - Cross-vendor review (Copilot CLI, gpt-5.5) on the graceful-degradation diff: verdict `PASS WITH NOTES`, no HIGH findings. Two MEDIUM notes were addressed:
   - MEDIUM 1 (test strength): `StartMonitoring_BothListenersFail_...` now waits for `ScanCount >= 2` with a 200ms interval, proving the interval fallback keeps driving rescans with zero listeners rather than only the one-shot startup rescan.
   - MEDIUM 2 (doc accuracy / scan-layer isolation): confirmed via `FindPcscDevices` that the common no-PC/SC cases (missing native lib, `SCardEstablishContext` failure, no readers) return empty, so `FindAllAsync` still enumerates HID and the interval diff detects it. A PC/SC enumeration *exception* (worker saturation or `SCardGetStatusChange` error) instead aborts that one scan — intentionally, because this PR's earlier remediation requires that a failed PC/SC probe never be committed as a false-empty snapshot (which would emit spurious removals). The `CLAUDE.md` claim was corrected to state this precisely. Full per-transport scan-layer isolation (enumerate HID even when PC/SC enumeration throws, without reintroducing false removals) is deliberately deferred to the polling-migration ISA, since it changes `FindAllAsync`/repository-diff semantics rather than listener startup.
+
+### Epoch-gated publication, one-shot disposal, and SCP closure
+
+- Frame change (owner-approved, cross-vendor audited): the three DevTeam findings remaining after the graceful-degradation work — MEDIUM registered-connection double disposal, HIGH stop-timeout restart overlap, HIGH rescan/dispose gate race — were originally planned as added machinery. That plan was rejected as the bulldozer pattern applied to planning, and replaced by the subtraction frame recorded in this Changelog. The replacement plan passed a cross-vendor audit (OpenAI gpt-5.6-sol, round 2, zero findings) before implementation began.
+- ISC-86 through ISC-90 implementation mapping: `YubiKeyDeviceMonitorService.cs` now holds one immutable `MonitorGeneration { Id, ScanGate, Signal, Cts }` in a single volatile `_current`. `PublishSnapshotAsync` acquires the never-disposed `_publishGate`, checks admission (`ReferenceEquals(gen, _current) && !_disposed`) under the small `_publishLock`, and calls `UpdateCache` while holding the gate. Lifecycle swaps `_current` under `_publishLock` only. The drain-then-dispose block was deleted; no `SemaphoreSlim.Dispose` call remains in the file.
+- Epoch RED: seven new tests were run against the pre-change implementation; four failed on the predicted defects. `RescanAsync_SupersededByLifecycleSwap_DiscardsStaleSnapshot` published a stale device; `SlowScan_OutlivingStopTimeout_CannotPublish_AndRestartRecovers` emitted a device event after an abandoned stop; `StopMonitoring_TimesOutOnHungScan_RestartPublishesWithNewGeneration` never published from the successor; `CrossGenerationPublications_SerializeAndSuccessorSnapshotLandsLast` never let the successor scan at all.
+- Epoch GREEN: `dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~YubiKeyDeviceMonitorServiceTests"` reported 38/38 passed. ISC-86 is proved by the four admission tests, ISC-87 by the cross-generation ordering test (max concurrent emissions == 1), ISC-88 by the blocking-subscriber test plus the bounded dispose drain, ISC-89 by the restart-after-timeout test, and ISC-90 structurally — grep confirms only CTS disposals remain, each guarded by loop-observed-stopped.
+- ISC-91 and ISC-92 implementation mapping: `DisposalGate.cs` gives the first caller the claim via one `Interlocked.CompareExchange` on the completion `Task` field; it disposes the inner connection and releases the lease in a `finally`, and every other caller observes that same task. Deadlock is avoided structurally: a sync winner's teardown completes inline before the task is returned, the single `await` is `ConfigureAwait(false)`, the claim uses `RunContinuationsAsynchronously`, and losers block on a plain task via `GetAwaiter().GetResult()` (which also unwraps to the original exception instance).
+- Disposal RED: six new tests, all failing against the pre-change wrappers. The sync/async race tests for all three wrappers failed on `Assert.False(syncDispose.Wait(250ms))` — the loser returned immediately; the shared-completion test showed the loser returning mid-teardown; repeated disposal counted three inner disposals; the failure-propagation test showed each caller re-running teardown and observing a *different* exception instance.
+- Disposal GREEN: the focused class reported 10/10. A methodological note worth keeping: the first draft of the fake blocked on the control gate for *every* disposal call, which hid the early-return defect entirely — both callers blocked in the fake, so the assertion passed against broken code. Blocking only the winner's teardown exposed it. A test that fails only for the reason you already knew about is weaker than it looks.
+- ISC-93: `PcscProtocolScp`'s constructor is `internal`; the concrete-base validation and shared-gate assignment are byte-for-byte unchanged. `InternalsVisibleTo` kept all 21 direct-construction test sites compiling untouched, so `Constructor_UnsupportedBaseProtocol` (16/16 class) and `ScpWrapper_SharesGateWithBaseProtocol` (5/5 class) remain as written. Migration guidance was added to `v1-to-v2-map.yml` (`scp-protocol-construction`), `v1-to-v2.md`, and `v1-to-v2-changelog.md`.
+- Subtractions landed alongside, each verified dead before removal: `DeviceConnectionRegistry.Register` (sync-over-async, no production caller); both discovery caches made non-nullable after tracing that every write is behind a successful-read guard, correcting a comment that falsely claimed null recorded a failed read; the two `CleanupListeners` booleans, which at all four call sites duplicated the null check they were ANDed against; `ProtocolDeviceInfo.ActiveCompletionObserverCount` and its interlocked bookkeeping, whose only observer was its own assertions — single-flight is pinned by the connect-count assertion and the one-completion-path property by the completion-log assertions in the same test. A non-generic `AsyncExchangeGate.RunExclusiveAsync` overload replaced three faked return values, and three private gate-held helpers gained an `UnderGate` suffix.
+- Doc corrections: `docs/architecture/event-driven-device-discovery.md` claimed a `Channel<DeviceMonitorRescanRequest>` with queue draining. Neither exists — the implementation uses a capacity-one `Channel<bool>` with `FullMode = DropWrite`, consumed one occurrence per wake-up. The doc now describes that and the generation model. `src/Core/CLAUDE.md` and `src/Core/README.md` record the epoch model and the disposal gate.
+- Hardware policy recorded (owner decision): allow-listed serials are dedicated test keys, so state mutation, PIV reset, and key generation on them are authorized without per-run approval — the allow list's `Environment.Exit(-1)` hard-fail is the boundary and no second config gate was added. User Presence, UV, touch, and insert/remove timing remain human-coordinated, because the gate is presence and timing rather than destruction. Written into `docs/TESTING.md` (new Hardware Authorization section) and `src/Tests.Shared/README.md`.

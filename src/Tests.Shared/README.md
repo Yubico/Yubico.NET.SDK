@@ -71,6 +71,18 @@ Behavior:
 
 This prevents accidentally running destructive or stateful tests on production YubiKeys.
 
+### Allow-listed keys are dedicated test keys
+
+The keys listed in `AllowedSerialNumbers` are dedicated test hardware, not production keys.
+State mutation, PIV reset, and key generation on them are authorized and need no per-run
+approval. The allow list itself is the safety boundary — a key that is not on it hard-fails
+before any hardware operation runs, so there is no second gate to add.
+
+What still requires a human is timing and presence, not destruction: User Presence and touch
+ceremonies, User Verification, and insert/remove sequences cannot be driven unattended. Mark
+those with the `RequiresUserPresence` and `Slow` traits so `--smoke` excludes them, and
+coordinate them with a person at the keyboard.
+
 ## Attribute-Based Testing
 
 The current integration-test shape is standard xUnit `[Theory]` plus one or more `[WithYubiKey]` data attributes:
@@ -228,8 +240,10 @@ Do not run raw `dotnet test` directly.
 
 ## Hardware Safety Rules
 
-- Keep destructive tests opt-in and clearly marked.
-- Do not run User Presence, UV, touch, insert/remove, reset, or persistent-state tests without human coordination.
+- Allow-listed keys are dedicated test keys: state mutation, PIV reset, and key generation on
+  them are authorized without per-run approval. The allow list is the boundary.
+- Do not run User Presence, UV, touch, or insert/remove tests without human coordination — those
+  need a person present, regardless of which key is connected.
 - Add `Slow` and `RequiresUserPresence` traits where applicable so `--smoke` can exclude them.
 - Never commit real production serial numbers.
 

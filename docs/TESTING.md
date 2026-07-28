@@ -152,6 +152,25 @@ Name!=SkipMe                   Exclude tests named 'SkipMe'
 4. Use `--filter` for test filtering
 5. When in doubt, run `dotnet toolchain.cs test` without filters first
 
+## Hardware Authorization
+
+Integration tests only ever touch devices whose serial number is in the gitignored
+`YubiKeyTests:AllowedSerialNumbers` list; anything else hard-fails with `Environment.Exit(-1)`
+before a single hardware operation runs. Those listed keys are **dedicated test keys**.
+
+That makes the authorization boundary simple, and worth stating plainly so it is not
+re-litigated per run:
+
+| Operation class | Authorized unattended? |
+|---|---|
+| State mutation, PIV reset, key generation on an allow-listed key | Yes — no per-run approval needed |
+| User Presence / touch ceremonies | No — human must be present |
+| User Verification, PIN, bio enrollment | No — human must approve and know device state |
+| Insert / remove / power-cycle timing | No — human must coordinate |
+
+The distinction is presence and timing, not destruction. There is no additional config gate:
+the allow list is the boundary, and adding a second one would only obscure it.
+
 ## FIDO2/WebAuthn Hardware Coordination
 
 FIDO2 and WebAuthn tests often need User Presence (touch), User Verification (PIN/bio), credential creation, or reset timing. These checks are not unattended agent gates.
@@ -163,7 +182,8 @@ Use these lanes:
 | Read-only smoke | `GetInfo`, construction/unit tests | Yes | Use `dotnet toolchain.cs test` or integration `--smoke` |
 | User Presence | `MakeCredential`, `GetAssertion`, `previewSign` ceremonies | No by default | Mark with `Category=RequiresUserPresence`; run only with a human present |
 | User Verification / PIN | PIN token, UV-required/preferred, bio enrollment | No by default | Requires explicit human approval and known device/PIN state |
-| Reset/destructive | FIDO2 reset, persistent credential deletion | No | Human-approved destructive run only |
+| Destructive state change | Persistent credential deletion, PIV reset, key generation | Yes on an allow-listed test key | See [Hardware Authorization](#hardware-authorization); destruction alone is not the gate |
+| FIDO2 reset | `authenticatorReset` | No | Needs the power-cycle window plus touch — timing, not destruction, is why |
 | Insert/remove/touch timing | Reset power-cycle window, physical insertion/removal | No | Human-coordinated timing only |
 
 Agent-safe FIDO2/WebAuthn integration commands must skip User Presence:

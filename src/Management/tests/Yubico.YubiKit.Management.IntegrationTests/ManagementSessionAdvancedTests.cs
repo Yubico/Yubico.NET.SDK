@@ -429,15 +429,19 @@ public class ManagementSessionAdvancedTests
 
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
         {
+            // The attribute is a device FILTER, not a transport pin, so without preferredConnection
+            // below all three rows ran over SmartCard and this test's premise — consistency ACROSS
+            // transports — was never actually exercised. Assert the transport so it cannot regress
+            // to that silently.
+            Assert.Equal(state.ConnectionType, mgmt.Transport);
+
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
 
             // Device info should be consistent regardless of transport
             Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
             Assert.Equal(state.FirmwareVersion, deviceInfo.FirmwareVersion);
             Assert.Equal(state.FormFactor, deviceInfo.FormFactor);
-
-            // Log which transport was used for this test iteration
-            Assert.NotEqual(ConnectionType.Unknown, state.ConnectionType);
-        });
+        },
+        preferredConnection: state.ConnectionType);
     }
 }

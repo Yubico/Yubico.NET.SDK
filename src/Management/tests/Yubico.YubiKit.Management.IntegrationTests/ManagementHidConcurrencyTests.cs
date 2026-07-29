@@ -47,6 +47,12 @@ public class ManagementHidConcurrencyTests
         YubiKeyTestState state) =>
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
         {
+            // The attribute above is a device FILTER, not a transport pin: a composite key exposing
+            // SmartCard satisfies a HID request. Without an explicit preferredConnection this test ran
+            // over SmartCard on every composite key and proved nothing about HID. Assert the transport
+            // so the test cannot silently stop testing what its name claims.
+            Assert.Equal(state.ConnectionType, mgmt.Transport);
+
             const int iterations = 5;
 
             for (var i = 0; i < iterations; i++)
@@ -63,5 +69,6 @@ public class ManagementHidConcurrencyTests
                     Assert.Equal(state.FormFactor, info.FormFactor);
                 });
             }
-        });
+        },
+        preferredConnection: state.ConnectionType);
 }

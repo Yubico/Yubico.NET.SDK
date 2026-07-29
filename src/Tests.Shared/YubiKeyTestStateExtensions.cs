@@ -41,6 +41,17 @@ public static class YubiKeyTestStateExtensions
         /// </param>
         /// <param name="configuration">Optional configuration </param>
         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
+        /// <param name="preferredConnection">
+        ///     Pins the session to a specific transport. <c>null</c> uses Management's default order
+        ///     (SmartCard, then HID FIDO, then HID OTP).
+        ///     <para>
+        ///         Pass this whenever a test's meaning depends on WHICH transport it runs over.
+        ///         <c>[WithYubiKey(ConnectionType = X)]</c> does NOT pin the transport — it is a device
+        ///         FILTER, and a composite key exposing SmartCard matches a HID request. Without this
+        ///         parameter such a test silently runs over SmartCard on any composite key and quietly
+        ///         proves nothing about HID.
+        ///     </para>
+        /// </param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <example>
         ///     <code>
@@ -59,13 +70,18 @@ public static class YubiKeyTestStateExtensions
             Func<ManagementSession, DeviceInfo, Task> action,
             ProtocolConfiguration? configuration = null,
             ScpKeyParameters? scpKeyParams = null,
+            ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(action);
 
             await using var session = await state.Device
-                .CreateManagementSessionAsync(scpKeyParams, configuration, cancellationToken: cancellationToken)
+                .CreateManagementSessionAsync(
+                    scpKeyParams,
+                    configuration,
+                    preferredConnection,
+                    cancellationToken)
                 .ConfigureAwait(false);
             await action(session, state.DeviceInfo).ConfigureAwait(false);
         }
@@ -97,6 +113,7 @@ public static class YubiKeyTestStateExtensions
             Action<ManagementSession, DeviceInfo> action,
             ProtocolConfiguration? configuration = null,
             ScpKeyParameters? scpKeyParams = null,
+            ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(state);
@@ -110,6 +127,7 @@ public static class YubiKeyTestStateExtensions
                 },
                 configuration,
                 scpKeyParams,
+                preferredConnection,
                 cancellationToken).ConfigureAwait(false);
         }
 

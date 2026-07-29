@@ -65,8 +65,27 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
                 $"Supported types: ISmartCardConnection, IFidoHidConnection, IOtpHidConnection.")
         };
 
+        Transport = connection switch
+        {
+            ISmartCardConnection => ConnectionType.SmartCard,
+            IFidoHidConnection => ConnectionType.HidFido,
+            _ => ConnectionType.HidOtp
+        };
+
         Protocol = _protocol;
     }
+
+    /// <summary>
+    ///     The transport this session actually runs over.
+    /// </summary>
+    /// <remarks>
+    ///     Management runs over SmartCard, HID FIDO, or HID OTP, and the transport is chosen by a default
+    ///     order or a caller override — so the same call site can land on different transports depending on
+    ///     what else holds the device. Capabilities differ: <see cref="ResetDeviceAsync" /> and SCP are
+    ///     SmartCard-only. This reports what was actually opened, not what was requested, so callers and
+    ///     diagnostics can tell the difference without inspecting the protocol.
+    /// </remarks>
+    public ConnectionType Transport { get; }
 
     public static async Task<ManagementSession> CreateAsync(
         IConnection connection,

@@ -27,6 +27,21 @@ public class DeviceConnectionRegistryTests
 {
     private static string NewId() => $"test:{Guid.NewGuid():N}";
 
+    /// <summary>
+    ///     Pins lease ACQUISITION only: two session leases on one interface both succeed, the count is
+    ///     shared, and dispose is idempotent.
+    /// </summary>
+    /// <remarks>
+    ///     This does NOT establish that two concurrent applet sessions on one interface are supported.
+    ///     Acquisition succeeding and coexistence being safe are different claims, and conflating them is
+    ///     what let the CCID contention defect go unnoticed: on the SmartCard interface a second session
+    ///     issues its own applet SELECT, which deselects the first applet and leaves the earlier session
+    ///     answering SW=0x6D00. Measured — see docs/plans/session-contention/phase1-findings.md.
+    ///     <para>
+    ///         Same-applet nesting IS safe (hardware-verified, experiment 3), so the ownership contract is
+    ///         keyed by applet rather than being exclusive per interface.
+    ///     </para>
+    /// </remarks>
     [Fact]
     public async Task AcquireSession_RefCountsPerDeviceId_AndDisposeIsIdempotent()
     {

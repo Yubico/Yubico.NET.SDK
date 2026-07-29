@@ -27,9 +27,9 @@ harness, which restores unconditionally.
 
 | # | Case | Tier | Status | Test |
 |---|---|---|---|---|
-| A1 | PIV session + `GetDeviceInfoAsync` — **the footgun** | P1 | open | — |
-| A2 | PIV + OATH concurrently on one CCID (two applets) | P2 | open | — |
-| A3 | PIV + PIV nested (same applet) — decides applet-keyed vs exclusive lease | P2 | open | — |
+| A1 | PIV session + `GetDeviceInfoAsync` — **the footgun** | P1 | investigating | Phase 1 exp 1 — CONFIRMED, `SW=0x6D00`, 4/4 |
+| A2 | PIV + OATH concurrently on one CCID (two applets) | P2 | investigating | Phase 1 exp 2 — CONFIRMED, `SW=0x6D00` |
+| A3 | PIV + PIV nested (same applet) — decides applet-keyed vs exclusive lease | P2 | **safe** | Phase 1 exp 3 — SAFE 4/4; lease must be applet-keyed |
 | A4 | Management(CCID) + Management(HidOtp) via `preferredConnection`, both writing config | P2 | open | — |
 | A5 | Management(CCID) + FIDO2(HidFido) — different interfaces, expected safe | P2 | open | — |
 | A6 | Sessions on two **different** keys — must remain fully parallel | P1 | open | — |
@@ -39,7 +39,7 @@ harness, which restores unconditionally.
 | # | Case | Tier | Status | Test |
 |---|---|---|---|---|
 | B1 | CCID-only key (HID disabled) — no safe fallback; must fail naming the holder | P2 | open | — |
-| B2 | HID-only key (no CCID) | P2 | open | — |
+| B2 | HID-only key (no CCID) | P2 | open | Phase 1 exp 4 shows Management answers over both HID transports |
 | B3 | NFC (CCID, no HID at all) | P2 | open | — |
 | B4 | `preferredConnection = SmartCard` conflicts with a held CCID — must fail loudly | P2 | open | — |
 | B5 | SCP requested + CCID held — must **not** downgrade to plaintext HID | P2 | open | — |
@@ -49,7 +49,7 @@ harness, which restores unconditionally.
 | # | Case | Tier | Status | Test |
 |---|---|---|---|---|
 | C1 | Discovery vs session, same interface | P1 | open | — |
-| C2 | Discovery vs session, **different** interface of the same key — design claim, never hardware-verified | P2 | open | — |
+| C2 | Discovery vs session, **different** interface of the same key — design claim, never hardware-verified | P2 | partial | Phase 1 exp 4 — a *session* on another interface is safe; discovery not yet the actor |
 
 ## D. Lifecycle and timing
 

@@ -143,13 +143,13 @@ public class CompositeDeviceMergerTests
     [Fact]
     public void Merge_ForceSerial_MergesAllUsbBySerial_RejoiningUnparsedCcid()
     {
-        // Reader-name drift: unparsed CCID (null PID) + HID sibling, both with serial 103, forceSerial=true.
+        // Reader-name drift: unparsed CCID (null PID) + HID sibling, both serial 103, PID correlation untrusted.
         var merged = CompositeDeviceMerger.Merge(
             [
                 Usb("pcsc:cc", ConnectionType.SmartCard, null, serial: 103),
                 Usb("hid:otp", ConnectionType.HidOtp, FullKeyPid, serial: 103)
             ],
-            forceSerialMerge: true);
+            pidCorrelationUntrusted: true);
 
         var composite = Assert.IsType<CompositeYubiKey>(Assert.Single(merged));
         Assert.Equal(ConnectionType.SmartCard | ConnectionType.HidOtp, composite.AvailableConnections);

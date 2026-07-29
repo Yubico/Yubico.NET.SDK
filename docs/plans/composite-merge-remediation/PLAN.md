@@ -50,7 +50,7 @@ nondeterministic; and the merger's deliberate conservatism — "null serial does
    unit-vectorable. `FindYubiKeys` takes `IFindPcscDevices`/`IFindHidDevices`/`IYubiKeyFactory` via
    constructor — fully fake-able (precedent: `FindYubiKeysPidMergeTests.cs`).
 4. **Existing guard gap (pre-existing defect, found during this design)**:
-   `CanMergeByPidWithoutSerial` (`CompositeDeviceMerger.cs:115-135`) protects only the full-triple
+   `CanMergeByPidWithoutSerial` (`CompositeDeviceMerger.cs:167`) protects only the full-triple
    PID and only the CCID+1-HID shape. Unguarded transient cross-key merges are representable today:
    (a) two 2-interface-PID keys (e.g. both 0x0403) each with one interface enumerated → merged
    cross-key; (b) two 0x0407 keys with one's FIDO + other's OTP enumerated, no CCID →

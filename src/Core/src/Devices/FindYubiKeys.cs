@@ -44,20 +44,11 @@ public class FindYubiKeys : IFindYubiKeys
         IFindPcscDevices findPcscService,
         IFindHidDevices findHidService,
         IYubiKeyFactory yubiKeyFactory)
-        : this(findPcscService, findHidService, yubiKeyFactory, topologyResolver: null)
-    {
-    }
-
-    internal FindYubiKeys(
-        IFindPcscDevices findPcscService,
-        IFindHidDevices findHidService,
-        IYubiKeyFactory yubiKeyFactory,
-        IDeviceTopologyResolver? topologyResolver)
     {
         this.findPcscService = findPcscService;
         this.findHidService = findHidService;
         this.yubiKeyFactory = yubiKeyFactory;
-        _topologyResolver = topologyResolver ?? DeviceTopologyResolver.Create();
+        _topologyResolver = DeviceTopologyResolver.Create();
     }
 
     // Hard total wall-clock budget for one best-effort metadata read (shared across that device's
@@ -97,9 +88,9 @@ public class FindYubiKeys : IFindYubiKeys
 
             // Reader-name drift: if any USB CCID reader name failed to parse to a known PID, PID correlation
             // is untrustworthy this scan; degrade to serial-based merge for all USB interfaces (ISC-11).
-            var forceSerial = interfaces.Any(i =>
+            var pidCorrelationUntrusted = interfaces.Any(i =>
                 i is { IsUsb: true, Connection: ConnectionType.SmartCard, Pid: null });
-            if (forceSerial)
+            if (pidCorrelationUntrusted)
             {
                 Logger.LogWarning(
                     "A USB CCID reader name did not parse to a known YubiKey PID; falling back to serial-based " +
@@ -112,7 +103,7 @@ public class FindYubiKeys : IFindYubiKeys
             var descriptors = await Task.WhenAll(interfaces.Select(async iface =>
             {
                 var needsSerial = iface.IsUsb &&
-                    (forceSerial
+                    (pidCorrelationUntrusted
                         || (iface.Pid is { } pid && pidCounts.GetValueOrDefault(pid) > 1)
                         || NeedsSerialForAmbiguousPartialPid(interfaces, iface));
 
@@ -123,7 +114,7 @@ public class FindYubiKeys : IFindYubiKeys
                 return iface.ToDescriptor(info);
             })).ConfigureAwait(false);
 
-            var merged = CompositeDeviceMerger.Merge(descriptors, forceSerial);
+            var merged = CompositeDeviceMerger.Merge(descriptors, pidCorrelationUntrusted);
             await PopulateMetadataAsync(merged, interfaces, cancellationToken).ConfigureAwait(false);
 
             return [.. merged.Where(d => type.Matches(d.AvailableConnections))];
@@ -188,10 +179,16 @@ public class FindYubiKeys : IFindYubiKeys
         IReadOnlyList<InterfaceCandidate> interfaces,
         InterfaceCandidate iface)
     {
-        if (iface.Pid is not (0x0116 or 0x0407))
+        // Only an all-three-interface PID (OTP+FIDO+CCID) can present the ambiguous partial shape this
+        // guard covers; ask the PID table for that rather than hardcoding which PIDs qualify.
+        if (iface.Pid is not { } pid)
             return false;
 
-        var samePid = interfaces.Where(i => i.IsUsb && i.Pid == iface.Pid).ToList();
+        var expected = ReaderNamePidParser.ExpectedConnectionsForPid(pid);
+        if (expected != ConnectionTypeExtensions.ConcreteConnections)
+            return false;
+
+        var samePid = interfaces.Where(i => i.IsUsb && i.Pid == pid).ToList();
         if (samePid.Count != 2)
             return false;
 
@@ -199,8 +196,7 @@ public class FindYubiKeys : IFindYubiKeys
             ConnectionType.Unknown,
             static (current, candidate) => current | candidate.Connection);
 
-        return observed.SupportsConnection(ConnectionType.SmartCard)
-            && observed != ReaderNamePidParser.ExpectedConnectionsForPid(iface.Pid.Value);
+        return observed.SupportsConnection(ConnectionType.SmartCard) && observed != expected;
     }
 
     private async Task<DeviceInfo?> ReadIdentityAsync(InterfaceCandidate iface, CancellationToken cancellationToken)

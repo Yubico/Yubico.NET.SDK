@@ -78,6 +78,8 @@ Hardware invariants: `Core.IntegrationTests/Devices/CompositeDiscoveryIntegratio
 
 ### G2: the epistemic bound
 
+Implemented by `CompositeDeviceMerger.CanMergeByPidWithoutSerial`.
+
 When two same-PID keys are only **partially visible** and their visible interfaces **complement**
 each other, the descriptors are mathematically indistinguishable from one fully-visible key.
 Example: two OTP+FIDO keys where only key A's OTP and key B's FIDO have enumerated — the observed
@@ -148,6 +150,8 @@ across later periods of use. An interface that is in use from the moment of plug
 becomes idle is never attributed by serial — on Windows, topology attributes it anyway.
 
 ### G9: topology-read failure
+
+Implemented by `CompositeDeviceMerger.MergeUsbByTopology` over keys supplied by `IDeviceTopologyResolver`.
 
 Topology evidence is optional by contract. The Windows resolver returns a key it actually read, or
 nothing — it never infers one. When it returns nothing, those interfaces fall through to tiers 2–5

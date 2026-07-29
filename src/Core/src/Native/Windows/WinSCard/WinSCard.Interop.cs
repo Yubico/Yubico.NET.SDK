@@ -19,14 +19,14 @@ namespace Yubico.YubiKit.Core.Native.Windows.WinSCard;
 
 /// <summary>
 ///     Windows-only WinSCard entry points that the cross-platform <c>Yubico.NativeShims</c> layer does not
-///     expose. Bound directly against <c>winscard.dll</c> (the Cfgmgr32 precedent in this folder), so these
-///     methods must only ever be called on Windows — .NET resolves the import lazily on first call, so
-///     merely referencing this type on macOS/Linux loads nothing.
+///     expose. Bound directly against <see cref="Libraries.WinSCard" /> instead of through the shim,
+///     following the same direct-import pattern as Cfgmgr32 and HidD in this folder: a shared
+///     <see cref="Libraries" /> constant plus <c>DllImportSearchPath.System32</c>. These methods must only
+///     ever be called on Windows — .NET resolves the import lazily on first call, so merely referencing
+///     this type on macOS/Linux loads nothing.
 /// </summary>
 internal static partial class NativeMethods
 {
-    private const string WinSCardDll = "winscard.dll";
-
     /// <summary>
     ///     Maps a PC/SC reader name to the device instance ID of the reader's devnode (Windows 8+).
     /// </summary>
@@ -36,7 +36,7 @@ internal static partial class NativeMethods
     ///     <see cref="ErrorCode" />); <c>SCARD_E_UNKNOWN_READER</c> and
     ///     <c>SCARD_E_READER_UNAVAILABLE</c> are ordinary outcomes mid-hotplug, not faults.
     /// </remarks>
-    [LibraryImport(WinSCardDll, EntryPoint = "SCardGetReaderDeviceInstanceIdW",
+    [LibraryImport(Libraries.WinSCard, EntryPoint = "SCardGetReaderDeviceInstanceIdW",
         StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial uint SCardGetReaderDeviceInstanceId(

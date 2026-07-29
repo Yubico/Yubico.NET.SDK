@@ -320,7 +320,7 @@ directly; both yield the same Container ID for one physical key, which is the gr
 
 ### Merger tier 1
 
-`MergeUsbByTopology` runs FIRST in `Merge` (before the `forceSerialMerge` branch and before PID/serial
+`MergeUsbByTopology` runs FIRST in `Merge` (before the `pidCorrelationUntrusted` branch and before PID/serial
 logic), groups USB interfaces sharing a topology key as `ykphysical:topology:{key}`, and returns the
 keyless interfaces to the existing tiers untouched. PID counts are computed over the remaining set, so
 a topology-resolved key no longer inflates another key's PID ambiguity. Merger remains pure/static —
@@ -382,9 +382,18 @@ input interface id appears exactly once across all returned devices.
    one file. Instead it is a direct `winscard.dll` import in
    `src/Core/src/Native/Windows/WinSCard/WinSCard.Interop.cs`, following the existing Cfgmgr32
    precedent in `Native/Windows/` (`DllImportSearchPath.System32`, lazy per-call binding).
+   *Amended by the simplification pass:* the Cfgmgr32 precedent was cited but only half-followed —
+   the library name was a local literal, where `Cfgmgr32.Interop.cs` and `HidD.Interop.cs` both use
+   the shared `Libraries` constants. It now uses `Libraries.WinSCard`, so the precedent claim holds
+   in full.
 2. **`FindYubiKeys` constructor.** `FindYubiKeys` is public and `IDeviceTopologyResolver` is
    internal, so the resolver could not be added to the public constructor. The 3-arg public ctor is
    unchanged (source/binary compatible) and delegates to a new internal 4-arg ctor used for injection.
+   *Superseded by the simplification pass:* the internal 4-arg ctor was never actually used for
+   injection — all nine call sites, production and test, passed three arguments, and topology was
+   instead covered at the two layers below it (merger vectors carrying pre-built topology keys, and
+   the keyless `WindowsDeviceTopologyResolverTests`). The unused seam has been removed; the public
+   3-arg ctor is unchanged. Re-add it if Phase 4 Tier 2 needs resolver injection at this level.
 3. **Tier-2/tier-3 ordering nuance (pre-existing, not introduced here).** For a PID-unique group whose
    observed set equals the expected set, tier 3 merges before serial evidence is consulted, so the
    composite's DeviceId takes the `ykphysical:pid:XXXX` form rather than `ykphysical:{serial}`. The

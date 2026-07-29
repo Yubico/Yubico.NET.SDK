@@ -409,6 +409,160 @@ public class CompositeDeviceMergerVectorTests
     }
 
     // ---------------------------------------------------------------------------------------------
+    // Phase 3 — Tier 1 topology evidence (PLAN.md "Solution design", evidence hierarchy tier 1).
+    // ---------------------------------------------------------------------------------------------
+
+    [Fact]
+    public void Merge_SeriallessPairWithDistinctTopologyKeys_GroupsIntoTwoCompleteKeys()
+    {
+        // Phase-3 headline RED→GREEN (PLAN.md guarantee matrix, "Serial-less multi-interface pair"):
+        // two same-PID 0x0407 keys, NO serials, full visibility, each interface carrying its physical
+        // device's topology key (Windows Container ID). Tier 1 groups them into two complete keys with no
+        // serial read at all — the only complete answer for serial-less hardware.
+        // PREDICTED RED (tier-2..5 only, i.e. no topology input): conservative six-way split.
+        var result = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, topologyKey: "container-A"),
+            Descriptor("fido-a", ConnectionType.HidFido, 0x0407, topologyKey: "container-A"),
+            Descriptor("otp-a", ConnectionType.HidOtp, 0x0407, topologyKey: "container-A"),
+            Descriptor("ccid-b", ConnectionType.SmartCard, 0x0407, topologyKey: "container-B"),
+            Descriptor("fido-b", ConnectionType.HidFido, 0x0407, topologyKey: "container-B"),
+            Descriptor("otp-b", ConnectionType.HidOtp, 0x0407, topologyKey: "container-B")
+        ]);
+
+        Assert.True(
+            result.Count == 2,
+            $"Topology tier must group the serial-less pair into two complete keys; got {result.Count} " +
+            $"device(s): {Describe(result)}.");
+        var keyA = Assert.IsType<CompositeYubiKey>(
+            Assert.Single(result, d => d.DeviceId == "ykphysical:topology:container-A"));
+        var keyB = Assert.IsType<CompositeYubiKey>(
+            Assert.Single(result, d => d.DeviceId == "ykphysical:topology:container-B"));
+        Assert.Equal(Triple, keyA.AvailableConnections);
+        Assert.Equal(Triple, keyB.AvailableConnections);
+        Assert.Equal(["ccid-a", "fido-a", "otp-a"], keyA.MemberDeviceIds);
+        Assert.Equal(["ccid-b", "fido-b", "otp-b"], keyB.MemberDeviceIds);
+    }
+
+    [Fact]
+    public void Merge_ComplementaryPartialsWithTopologyKeys_SplitByTopology_NotMergedByPid()
+    {
+        // Topology CLOSES the epistemic bound (PLAN.md: "on Windows this holds under partial visibility
+        // too whenever topology evidence is readable"). This is byte-identical to the shape-A
+        // epistemic-bound pin — two 0x0403 keys, one complementary interface each, no serials, observed
+        // == expected — which tiers 2..5 must merge. With topology evidence the two interfaces are known
+        // to belong to different physical devices and MUST stay split.
+        // PREDICTED RED (tier-2..5 only): one cross-key composite ykphysical:pid:0403.
+        var result = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("otp-keyA", ConnectionType.HidOtp, 0x0403, topologyKey: "container-A"),
+            Descriptor("fido-keyB", ConnectionType.HidFido, 0x0403, topologyKey: "container-B")
+        ]);
+
+        Assert.True(
+            result.Count == 2,
+            "Topology evidence must split complementary partials from two physical keys; got " +
+            $"{result.Count} device(s): {Describe(result)}.");
+        Assert.DoesNotContain(result, d => d is CompositeYubiKey);
+        Assert.Equal(["fido-keyB", "otp-keyA"], result.Select(d => d.DeviceId).Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public void Merge_TopologyAbsentForAllInterfaces_IsByteIdenticalToPreTopologyBehavior_Pin()
+    {
+        // Degradation pin: with no topology evidence anywhere (macOS/Linux always; Windows on topology
+        // read failure), results must be byte-identical to the tier-2..5 behavior. Same inputs as the
+        // serial-less pair pin and the shape-A epistemic-bound pin, asserted against the same
+        // expectations. This is the pinned "degrades to exactly the macOS/Linux semantics" contract.
+        var seriallessPair = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407),
+            Descriptor("fido-a", ConnectionType.HidFido, 0x0407),
+            Descriptor("otp-a", ConnectionType.HidOtp, 0x0407),
+            Descriptor("ccid-b", ConnectionType.SmartCard, 0x0407),
+            Descriptor("fido-b", ConnectionType.HidFido, 0x0407),
+            Descriptor("otp-b", ConnectionType.HidOtp, 0x0407)
+        ]);
+
+        Assert.Equal(6, seriallessPair.Count);
+        Assert.DoesNotContain(seriallessPair, d => d is CompositeYubiKey);
+
+        var complementaryPartials = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("otp-keyA", ConnectionType.HidOtp, 0x0403),
+            Descriptor("fido-keyB", ConnectionType.HidFido, 0x0403)
+        ]);
+
+        var bounded = Assert.IsType<CompositeYubiKey>(Assert.Single(complementaryPartials));
+        Assert.Equal("ykphysical:pid:0403", bounded.DeviceId);
+    }
+
+    [Fact]
+    public void Merge_PartialTopology_KeyedInterfacesGroup_UnkeyedFallThroughUnguessed_Pin()
+    {
+        // Mixed/partial topology (the Windows "CCID resolves, HID doesn't" case): interfaces WITH keys
+        // group by topology; interfaces WITHOUT keys must never be guessed into a topology group — they
+        // fall through to the unchanged tiers. Here key A's CCID+FIDO carry a container id while its OTP
+        // does not; the OTP is the only 0x0403-PID... it is a 0x0407 interface whose PID group is now
+        // topology-free and observed(OTP) != expected(triple), so it stands alone conservatively.
+        var result = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, topologyKey: "container-A"),
+            Descriptor("fido-a", ConnectionType.HidFido, 0x0407, topologyKey: "container-A"),
+            Descriptor("otp-unresolved", ConnectionType.HidOtp, 0x0407)
+        ]);
+
+        Assert.Equal(2, result.Count);
+        var keyA = Assert.IsType<CompositeYubiKey>(
+            Assert.Single(result, d => d.DeviceId == "ykphysical:topology:container-A"));
+        Assert.Equal(ConnectionType.SmartCard | ConnectionType.HidFido, keyA.AvailableConnections);
+        Assert.DoesNotContain("otp-unresolved", keyA.MemberDeviceIds);
+        var unkeyed = Assert.Single(result, d => d is not CompositeYubiKey);
+        Assert.Equal("otp-unresolved", unkeyed.DeviceId);
+    }
+
+    [Fact]
+    public void Merge_MixedTopologyAndSerialEvidence_IsDeterministicAndConserving_Pin()
+    {
+        // Mixed evidence: key A resolved by topology (tier 1), keys B and C are a same-PID 0x0403 pair
+        // that only serial evidence can separate (tier 2 — PID count is 2, so no PID merge), plus an NFC
+        // interface standing alone. Conservation: every input interface appears exactly once across the
+        // returned devices, and no interface is attributed twice.
+        var descriptors = new[]
+        {
+            Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, topologyKey: "container-A"),
+            Descriptor("fido-a", ConnectionType.HidFido, 0x0407, topologyKey: "container-A"),
+            Descriptor("otp-a", ConnectionType.HidOtp, 0x0407, topologyKey: "container-A"),
+            Descriptor("otp-b", ConnectionType.HidOtp, 0x0403, serial: 222),
+            Descriptor("fido-b", ConnectionType.HidFido, 0x0403, serial: 222),
+            Descriptor("otp-c", ConnectionType.HidOtp, 0x0403, serial: 333),
+            Descriptor("fido-c", ConnectionType.HidFido, 0x0403, serial: 333),
+            Descriptor("nfc-reader", ConnectionType.SmartCard, pid: null, isUsb: false)
+        };
+
+        var result = CompositeDeviceMerger.Merge(descriptors);
+
+        Assert.Equal(4, result.Count);
+        var keyA = Assert.IsType<CompositeYubiKey>(
+            Assert.Single(result, d => d.DeviceId == "ykphysical:topology:container-A"));
+        Assert.Equal(Triple, keyA.AvailableConnections);
+        var keyB = Assert.IsType<CompositeYubiKey>(Assert.Single(result, d => d.DeviceId == "ykphysical:222"));
+        Assert.Equal(ConnectionType.HidOtp | ConnectionType.HidFido, keyB.AvailableConnections);
+        var keyC = Assert.IsType<CompositeYubiKey>(Assert.Single(result, d => d.DeviceId == "ykphysical:333"));
+        Assert.Equal(ConnectionType.HidOtp | ConnectionType.HidFido, keyC.AvailableConnections);
+        Assert.Single(result, d => d.DeviceId == "nfc-reader");
+
+        // Conservation: each input interface id appears exactly once across all returned devices.
+        var attributed = result
+            .SelectMany(d => d is CompositeYubiKey composite ? composite.MemberDeviceIds : [d.DeviceId])
+            .ToList();
+        Assert.Equal(descriptors.Length, attributed.Count);
+        Assert.Equal(
+            descriptors.Select(d => d.Device.DeviceId).Order(StringComparer.Ordinal),
+            attributed.Order(StringComparer.Ordinal));
+    }
+
+    // ---------------------------------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------------------------------
 
@@ -417,8 +571,9 @@ public class CompositeDeviceMergerVectorTests
         ConnectionType connection,
         ushort? pid,
         int? serial = null,
-        bool isUsb = true) =>
-        new(new StubYubiKey(deviceId, connection), connection, isUsb, pid, serial, DeviceInfo: null);
+        bool isUsb = true,
+        string? topologyKey = null) =>
+        new(new StubYubiKey(deviceId, connection), connection, isUsb, pid, serial, DeviceInfo: null, topologyKey);
 
     private static string Describe(IReadOnlyList<IYubiKey> result) =>
         string.Join("; ", result.Select(d => d is CompositeYubiKey c

@@ -28,13 +28,19 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <param name="Pid">The known Yubico USB Product ID for this interface (CCID parsed from the reader name, HID from the descriptor), or <c>null</c> when unknown/unparsed.</param>
 /// <param name="Serial">The application serial number (populated only for interfaces that took the serial-disambiguation path), or <c>null</c>.</param>
 /// <param name="DeviceInfo">The device info read during serial disambiguation, when available.</param>
+/// <param name="TopologyKey">
+///     Optional platform topology evidence identifying the physical USB device that owns this interface
+///     (Windows Container ID). <c>null</c> whenever topology evidence is unavailable — always on macOS and
+///     Linux, and on Windows when the topology read fails. See <see cref="IDeviceTopologyResolver" />.
+/// </param>
 internal readonly record struct DeviceInterfaceDescriptor(
     IYubiKey Device,
     ConnectionType Connection,
     bool IsUsb,
     ushort? Pid,
     int? Serial,
-    DeviceInfo? DeviceInfo);
+    DeviceInfo? DeviceInfo,
+    string? TopologyKey = null);
 
 /// <summary>
 ///     Deterministic, side-effect-free merge of per-interface descriptors into physical YubiKey devices,
@@ -62,16 +68,22 @@ internal static class CompositeDeviceMerger
 
         var result = new List<IYubiKey>();
 
+        // Tier 1 — topology evidence (strongest, when available). Interfaces carrying a topology key are
+        // grouped by the physical USB device that owns them and are removed from all later tiers; every
+        // interface without a key falls through to the unchanged serial / PID / deduction / conservative
+        // tiers. Absent topology therefore degrades to exactly the macOS/Linux semantics.
+        var usbRemaining = MergeUsbByTopology(descriptors.Where(d => d.IsUsb), result);
+
         if (forceSerialMerge)
         {
-            // Reader-name drift: correlate all USB interfaces by serial (Phase 37 behavior) so an unparsed
-            // CCID rejoins its HID siblings. Non-USB interfaces still stand alone.
-            MergeUsbBySerial(descriptors.Where(d => d.IsUsb), result);
+            // Reader-name drift: correlate remaining USB interfaces by serial (Phase 37 behavior) so an
+            // unparsed CCID rejoins its HID siblings. Non-USB interfaces still stand alone.
+            MergeUsbBySerial(usbRemaining, result);
             result.AddRange(descriptors.Where(d => !d.IsUsb).Select(d => d.Device));
             return result;
         }
 
-        var usb = descriptors.Where(d => d.IsUsb).ToList();
+        var usb = usbRemaining;
         var pidCounts = ComputePidCounts(usb);
 
         // USB interfaces with a known PID present on exactly one physical key: merge by PID (no serial).
@@ -118,6 +130,29 @@ internal static class CompositeDeviceMerger
         }
 
         return perPidPerConnection.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Values.Max());
+    }
+
+    /// <summary>
+    ///     Tier 1 — topology evidence. Groups USB interfaces sharing a topology key (the physical USB
+    ///     device that owns them) and returns the interfaces WITHOUT a key, which flow to the later tiers
+    ///     untouched. Topology outranks serial and PID because it identifies the physical device directly
+    ///     rather than inferring it, and it is the only tier that can group serial-less multi-interface keys.
+    /// </summary>
+    private static List<DeviceInterfaceDescriptor> MergeUsbByTopology(
+        IEnumerable<DeviceInterfaceDescriptor> usbDescriptors,
+        List<IYubiKey> result)
+    {
+        var descriptors = usbDescriptors.ToList();
+        var withTopology = descriptors.Where(d => !string.IsNullOrEmpty(d.TopologyKey)).ToList();
+        if (withTopology.Count == 0)
+            return descriptors;
+
+        foreach (var group in withTopology
+                     .GroupBy(d => d.TopologyKey!, StringComparer.Ordinal)
+                     .OrderBy(g => g.Key, StringComparer.Ordinal))
+            AddMerged(group, $"ykphysical:topology:{group.Key}", result);
+
+        return [.. descriptors.Where(d => string.IsNullOrEmpty(d.TopologyKey))];
     }
 
     /// <summary>

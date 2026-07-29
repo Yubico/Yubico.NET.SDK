@@ -288,3 +288,109 @@ leases within a scan) is structurally impossible — the phases are sequentially
 
 Phase-1 hooks: (a) admission wait — RESOLVED (change 3); (b) skip-cause discriminator — RESOLVED
 (change 3); shape-A disposition — closed in Phase 1 (pin, survives change 1 by construction).
+## Evidence Ledger — Phase 3 (2026-07-29)
+
+Tier 1 (topology evidence) added as an OPTIONAL input to the merger. Production diff:
+`src/Core/src/Devices/` — new `IDeviceTopologyResolver.cs` (interface + `NullDeviceTopologyResolver`
++ platform factory), `WindowsDeviceTopologyResolver.cs` (logic over a scripted-able native seam),
+`WindowsTopologyNativeOps.cs` (real Windows ops); modified `CompositeDeviceMerger.cs` (tier-1
+grouping + `DeviceInterfaceDescriptor.TopologyKey`) and `FindYubiKeys.cs` (best-effort population,
+internal ctor overload for injection). `src/Core/src/Native/Windows/WinSCard/WinSCard.Interop.cs` —
+new `SCardGetReaderDeviceInstanceIdW` P/Invoke.
+
+**Evidence scope (explicit):** all Phase-3 evidence is SEAM-LEVEL. No Windows hardware is available
+here, so the P/Invoke marshalling, the real `SCardGetReaderDeviceInstanceIdW` return codes, and real
+Container-ID values are **unproven until Phase 4 Tier 2 (lab Windows)**. What IS proven: the full
+resolver decision tree including every documented failure-mode degradation, the merger's tier-1
+grouping semantics, and — on real hardware — that macOS behavior is unchanged.
+
+### Seam design
+
+`IDeviceTopologyResolver.TryGetTopologyKey(IDevice, ConnectionType, out string?)` returns a key or
+`false`; it never guesses. `DeviceTopologyResolver.Create()` selects `WindowsDeviceTopologyResolver`
+on Windows and `NullDeviceTopologyResolver` elsewhere via `SdkPlatformInfo`, so the Windows type —
+and therefore any Windows-only native entry point — is never constructed on macOS/Linux. The Windows
+resolver is a thin composition over `IWindowsTopologyNativeOps` (three operations: reader-name →
+device-instance-id, instance-id → ContainerId, device-path → ContainerId), which is what the tests
+script. CCID resolves WinSCard → devnode → ContainerId; HID resolves its device interface path
+directly; both yield the same Container ID for one physical key, which is the grouping contract.
+
+### Merger tier 1
+
+`MergeUsbByTopology` runs FIRST in `Merge` (before the `forceSerialMerge` branch and before PID/serial
+logic), groups USB interfaces sharing a topology key as `ykphysical:topology:{key}`, and returns the
+keyless interfaces to the existing tiers untouched. PID counts are computed over the remaining set, so
+a topology-resolved key no longer inflates another key's PID ambiguity. Merger remains pure/static —
+keys arrive on descriptors, no I/O.
+
+### RED→GREEN vectors (RED captured with tier 1 disabled in-place; tiers 2–5 intact)
+
+**T1 — Serial-less pair with distinct topology keys** (the plan's headline case,
+`Merge_SeriallessPairWithDistinctTopologyKeys_GroupsIntoTwoCompleteKeys`):
+
+> Topology tier must group the serial-less pair into two complete keys; got 6 device(s): ccid-a(SmartCard); fido-a(HidFido); otp-a(HidOtp); ccid-b(SmartCard); fido-b(HidFido); otp-b(HidOtp).
+
+GREEN: two composites `ykphysical:topology:container-A/B`, each the full triple, correct members.
+
+**T2 — Topology closes the epistemic bound**
+(`Merge_ComplementaryPartialsWithTopologyKeys_SplitByTopology_NotMergedByPid`):
+
+> Topology evidence must split complementary partials from two physical keys; got 1 device(s): ykphysical:pid:0403=[fido-keyB|otp-keyA].
+
+GREEN: two standalone devices. This input is byte-identical to the shape-A epistemic-bound pin, which
+still merges without topology — so the pair jointly pins "bound on macOS/Linux, closed on Windows".
+
+**T3 — Partial topology is safe**
+(`Merge_PartialTopology_KeyedInterfacesGroup_UnkeyedFallThroughUnguessed_Pin`): RED with tier 1
+disabled (`Assert.Equal() Failure: Expected: 2, Actual: 1`); GREEN: keyed CCID+FIDO group by
+container, the unkeyed OTP stands alone and is never guessed into the group.
+
+**T4 — Mixed evidence + conservation**
+(`Merge_MixedTopologyAndSerialEvidence_IsDeterministicAndConserving_Pin`): RED with tier 1 disabled
+(no `ykphysical:topology:container-A` in the result); GREEN: topology key A + serial-anchored 0x0403
+pair (222/333, PID-ambiguous so genuinely tier 2) + standalone NFC reader = 4 devices, and every
+input interface id appears exactly once across all returned devices.
+
+### Declared pins
+
+| Pin | Contract |
+|---|---|
+| `Merge_TopologyAbsentForAllInterfaces_IsByteIdenticalToPreTopologyBehavior_Pin` | With no topology anywhere, the serial-less pair still splits 6-way and the complementary partials still merge as `ykphysical:pid:0403` — byte-identical tier-2..5 behavior (the "degrades to exactly macOS/Linux semantics" contract) |
+| `WindowsDeviceTopologyResolverTests` (13 vectors) | Scripted success (CCID + both HID types); CCID and HID of one key share one key; reader-instance-id lookup failure; reader API throws (`EntryPointNotFoundException`, i.e. pre-Win8/absent API); `CR_NO_SUCH_DEVNODE` via `PlatformApiException` (stale devnode mid-hotplug); ContainerId property missing; all-zero ContainerId rejected (would otherwise fuse unrelated interfaces); mixed CCID-resolves/HID-doesn't; empty reader name short-circuits without a native call; `NullDeviceTopologyResolver` always unknown; factory returns the null resolver off-Windows |
+| Phase-1/2 vectors | All still green: 26 merger vectors, 6 fault-injection vectors |
+
+### Verification
+
+| Gate | Result |
+|---|---|
+| Merger vectors | `total: 26, failed: 0` (21 prior + 5 topology) |
+| Windows resolver seam | `total: 13, failed: 0` (runs keyless on macOS) |
+| Full Core unit suite | `total: 713, failed: 0, succeeded: 710, skipped: 3` (was 695; +18 new) |
+| `resilience --fast` | Succeeded |
+| Rig integration (macOS, 2-key) | `Total tests: 5, Passed: 5` — proves the no-topology degradation path on real hardware |
+| `dotnet format --verify-no-changes` | exit 0 (only pre-existing IL2026/IL3050) |
+
+### Deviations
+
+1. **WinSCard P/Invoke placement.** The PRD said add it to `Native/Desktop/SCard/SCard.Interop.cs`.
+   That file routes EVERY entry point through the cross-platform `Yubico.NativeShims` C shim, which
+   does not export `SCardGetReaderDeviceInstanceId`; adding it there would require changing and
+   rebuilding native shim C source (out of scope, unverifiable here) or mixing two loading models in
+   one file. Instead it is a direct `winscard.dll` import in
+   `src/Core/src/Native/Windows/WinSCard/WinSCard.Interop.cs`, following the existing Cfgmgr32
+   precedent in `Native/Windows/` (`DllImportSearchPath.System32`, lazy per-call binding).
+2. **`FindYubiKeys` constructor.** `FindYubiKeys` is public and `IDeviceTopologyResolver` is
+   internal, so the resolver could not be added to the public constructor. The 3-arg public ctor is
+   unchanged (source/binary compatible) and delegates to a new internal 4-arg ctor used for injection.
+3. **Tier-2/tier-3 ordering nuance (pre-existing, not introduced here).** For a PID-unique group whose
+   observed set equals the expected set, tier 3 merges before serial evidence is consulted, so the
+   composite's DeviceId takes the `ykphysical:pid:XXXX` form rather than `ykphysical:{serial}`. The
+   GROUPING is identical either way (PID count 1 means one key), so this is cosmetic, but it differs
+   from the plan's stated tier order and is recorded here for Phase 5's guarantees doc.
+4. **Git incident (resolved, no work lost).** An earlier `git stash push -- <paths>` in this phase
+   included untracked pathspecs and failed silently; the follow-up `git stash pop` therefore popped a
+   PRE-EXISTING unrelated stash (`WIP on webauthn/phase-9.2-rust-port`, 95+/121- on
+   `Plans/handoff.md`), landing foreign changes in the worktree. Detected via `git status`, traced to
+   dangling commit `ee66c142` with `git fsck --unreachable`, restored with `git stash store`, and the
+   worktree file reverted. `git stash list` now holds it again at `stash@{0}`. RED evidence for this
+   phase was instead captured by disabling tier 1 in place — no stash involved.

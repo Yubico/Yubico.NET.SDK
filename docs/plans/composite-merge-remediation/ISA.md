@@ -468,3 +468,40 @@ total, 710 passed, 3 pre-existing platform skips, 0 failed); `resilience --fast`
 `dotnet format --verify-no-changes` 0 errors; `git diff --check` clean. Hardware: all five
 `CompositeDiscoveryIntegrationTests` invariants green, and `PivMultiKeyContentionTests` runs 2/2
 instead of skipping — the symptom that opened the effort.
+
+## Evidence Ledger — Simplification pass (2026-07-29)
+
+A behavior-preserving Simplify pass over the composite-merge code, run as an Engineer/Reviewer loop
+with a cross-vendor reviewer (`openai/gpt-5.6-terra`, verdict PASS WITH NOTES, four LOW findings,
+zero HIGH or MEDIUM). Five subtractions plus one consolidation, all covered by the existing suite;
+no test was renamed, so every guarantees-doc citation still resolves.
+
+The pass also closed an evidence gap it did not create. `NoInterfaceTypeOutnumbersCandidateKeys`
+(formerly `TypeCountClosureHolds`), added in Phase 2, was load-bearing but unpinned: all five
+existing scenarios that reach the deduction tier evaluate closure `true`, so the guard never changed
+an outcome and could have been deleted with the suite still green.
+
+### Defect vector — RED for the predicted reason
+
+`Merge_TwoSameTypeOrphansExceedAnchoredKeys_StayStandaloneInsteadOfDoubleAttribution_Pin`
+
+Shape: one anchored 0x0407 key (CCID, serial 111) and two null-serial OTP orphans — key A showing
+CCID+OTP, key B showing only OTP, with neither OTP interface yielding a serial. Both orphans
+"uniquely fill" the single anchored key's missing OTP slot, so unique-candidate deduction alone
+attributes BOTH to key 111.
+
+RED evidence, with the guard stubbed to `return true`:
+
+```
+failed Merge_TwoSameTypeOrphansExceedAnchoredKeys_StayStandaloneInsteadOfDoubleAttribution_Pin
+  Type-count closure: two null-serial OTP orphans were both attributed to the single anchored key,
+  producing a composite holding two OTP interfaces from different physical keys:
+  ykphysical:111=[ccid-a|otp-a|otp-b].
+```
+
+That is the predicted failure mode exactly: one device fusing two physical keys' OTP interfaces.
+With the guard restored the vector passes, and both orphans stay conservatively standalone.
+
+The assertion inspects composite MEMBERS rather than `AvailableConnections`, and must: the bad
+composite reports `SmartCard|HidOtp`, because a flags union cannot express "two OTP interfaces".
+The defect is invisible at the flags level, which is why it survived Phase 1's harness.

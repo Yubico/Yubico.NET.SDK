@@ -562,6 +562,39 @@ public class CompositeDeviceMergerVectorTests
             attributed.Order(StringComparer.Ordinal));
     }
 
+    [Fact]
+    public void Merge_TwoSameTypeOrphansExceedAnchoredKeys_StayStandaloneInsteadOfDoubleAttribution_Pin()
+    {
+        // Type-count closure (tier 4 precondition, NoInterfaceTypeOutnumbersCandidateKeys). One anchored
+        // 0x0407 key (CCID, serial 111) and TWO null-serial OTP orphans: key A shows CCID+OTP, key B shows
+        // only OTP, and neither OTP interface yielded a serial. Both orphans "uniquely fill" the single
+        // anchored key's missing OTP slot, so unique-candidate deduction alone would attribute BOTH to key
+        // 111 — fusing two physical keys' OTP interfaces into one device. Closure refuses: 2 OTP interfaces
+        // are visible but only 1 anchored key can own one, so no orphan is attributable and both stay
+        // standalone (three devices, conservative).
+        //
+        // Why this needs member-level assertions: the bad composite would report AvailableConnections as
+        // SmartCard|HidOtp — the duplicate OTP interface is INVISIBLE in the flags. Only member inspection
+        // distinguishes the correct result from the wrong one.
+        var result = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, serial: 111),
+            Descriptor("otp-a", ConnectionType.HidOtp, 0x0407), // identity read failed: null serial
+            Descriptor("otp-b", ConnectionType.HidOtp, 0x0407) // different physical key, also null serial
+        ]);
+
+        var duplicated = result
+            .OfType<CompositeYubiKey>()
+            .Where(c => c.Members.GroupBy(m => m.AvailableConnections).Any(g => g.Count() > 1))
+            .ToList();
+        Assert.True(
+            duplicated.Count == 0,
+            "Type-count closure: two null-serial OTP orphans were both attributed to the single anchored " +
+            $"key, producing a composite holding two OTP interfaces from different physical keys: {Describe(result)}.");
+        Assert.Equal(3, result.Count);
+        Assert.All(result, d => Assert.IsNotType<CompositeYubiKey>(d));
+    }
+
     // ---------------------------------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------------------------------

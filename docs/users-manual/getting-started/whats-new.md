@@ -18,6 +18,22 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.17.x Releases
 
+### 1.17.2
+
+Release date: July 29th, 2026
+
+Bug Fixes:
+
+- Fixed an issue where a FIDO2 PIN retry loop could continue after a power-cycle and the `PIN_AUTH_BLOCKED` status was not preserved. The blocked status is now retained and the retry loop stops correctly on power-cycle. ([#537](https://github.com/Yubico/Yubico.NET.SDK/pull/537))
+
+- Fixed an issue where the Yubico.NativeShims Linux shared libraries were not aligned to 64 KB pages, preventing them from loading on Android 15+ devices (which require 16 KB page support) and on aarch64 Linux distributions that use 64 KB kernel pages. All LOAD segments are now aligned to 64 KB, which is compatible with 4 KB, 16 KB, and 64 KB page systems. ([#536](https://github.com/Yubico/Yubico.NET.SDK/pull/536))
+
+Dependencies:
+
+- Several dependencies across the Yubico.Core project, GitHub Actions workflows, and Docker-based documentation image have been updated to newer versions. ([#514](https://github.com/Yubico/Yubico.NET.SDK/pull/514), [#529](https://github.com/Yubico/Yubico.NET.SDK/pull/529), [#530](https://github.com/Yubico/Yubico.NET.SDK/pull/530), [#534](https://github.com/Yubico/Yubico.NET.SDK/pull/534), [#539](https://github.com/Yubico/Yubico.NET.SDK/pull/539), [#540](https://github.com/Yubico/Yubico.NET.SDK/pull/540), [#541](https://github.com/Yubico/Yubico.NET.SDK/pull/541))
+
+_________
+
 ### 1.17.1
 
 Release date: June 29th, 2026

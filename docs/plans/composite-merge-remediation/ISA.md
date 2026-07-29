@@ -394,3 +394,29 @@ input interface id appears exactly once across all returned devices.
    dangling commit `ee66c142` with `git fsck --unreachable`, restored with `git stash store`, and the
    worktree file reverted. `git stash list` now holds it again at `stash@{0}`. RED evidence for this
    phase was instead captured by disabling tier 1 in place — no stash involved.
+## Evidence Ledger — Phase 4 Tier 1 (hardware, two allow-listed test keys)
+
+Rig: keys 103 and 125, both fw 5.8.0, PID 0x0407. Mutation authorized per
+`docs/TESTING.md` "Hardware Authorization" (dedicated test keys). The harness saves
+`UsbEnabled` up front and restores it in a `finally` with a verify-and-retry loop; both keys ended
+the run at the baseline `0x173F` with the baseline grouping.
+
+| Check | Result |
+|---|---|
+| Baseline grouping | `ykphysical:103={HidFido,HidOtp,SmartCard}` + `ykphysical:125={...}` — 2 devices, zero orphans |
+| CASE 1: disable OTP on 103 (`0x173F`→`0x173E`) | Re-enumerated as **PID 0x0406** (FIDO+CCID). Grouping `ykphysical:pid:0406={HidFido,SmartCard}` + `ykphysical:pid:0407={HidFido,HidOtp,SmartCard}` — both keys complete, zero orphans, **zero serial reads needed** (each PID now has count 1, so tier 3 merges directly) |
+| CASE 2: OTP-only on 103 (`0x173F`→`0x0001`) | Re-enumerated as a **single HID OTP interface**, correctly surfaced as a standalone device (`hid:...:0006=HidOtp`) with **no composite wrapper**, while key 125 kept its full triple. Single-interface PID class confirmed on hardware |
+| Restore | Verified `UsbEnabled=0x173F`, grouping identical to baseline |
+
+**Finding — CCID cannot be disabled while FIDO remains on fw 5.8.0.** The plan's original CASE 2
+premise ("disable CCID → PID 0x0403 OTP+FIDO") is **not reachable on this firmware**: FIDO2/U2F is
+also exposed over CCID from 5.8.0 onward, so masking the CCID-exclusive applications
+(OpenPgp|Piv|Oath|HsmAuth, `0x173F`→`0x1607`) left the key enumerating as 0x0407 with CCID intact —
+measured, not assumed. The reachable single-interface reconfiguration is OTP-only (0x0401), which
+is what CASE 2 now exercises. Consequence for the plan: the 0x0403 PID class remains covered by
+unit vectors only (it is reachable on older firmware), and the guarantees doc must not imply that
+CCID is independently switchable on 5.8.0+.
+
+**Confirms:** reconfiguration transitions follow re-enumerated PID truth; one-key reconfiguration
+makes same-PID ambiguity disappear entirely (PID counts drop to 1); single-interface keys are
+never wrapped in a composite; an untouched key is unaffected by its neighbour's reconfiguration.

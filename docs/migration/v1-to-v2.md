@@ -31,6 +31,16 @@ Review code that assumes:
 
 V1 low-level HID listeners used `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived` and `Removed` events (`EventHandler<HidDeviceEventArgs>`) carrying the affected `IHidDevice`. V1 YubiKey-level monitoring used `YubiKeyDeviceListener.Arrived`/`Removed` and the `YubiKeyDevice.FindAll()` cache. In v2, the low-level `Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent` callback is `Action<HidDeviceRescanHint>?`: a diagnostic rescan hint with `HidDeviceChangeKind` plus optional platform identifier/path. It is not authoritative physical-device state. Applications that need real YubiKey arrivals and removals should use `YubiKeyManager.DeviceChanges`, which is emitted after the device repository rescans and diffs the discovered device set.
 
+### Secure Channel (SCP) Protocol Construction
+
+In v2, SCP is applied to a smart card protocol with the `ISmartCardProtocol.WithScpAsync(scpKeyParameters, cancellationToken)` extension method, which establishes the SCP session and returns the SCP-wrapped protocol:
+
+```csharp
+var scpProtocol = await protocol.WithScpAsync(scp03KeyParams, cancellationToken);
+```
+
+The returned `Yubico.YubiKit.Core.Protocols.SmartCard.Scp.PcscProtocolScp` type is public, but its constructor is internal: `new PcscProtocolScp(...)` is not a supported caller pattern. The wrapper has to run on the same exchange gate as the concrete `PcscProtocol` whose connection its SCP processor drives, otherwise plain and encrypted exchanges could interleave on the wire, and `WithScpAsync` is what guarantees that pairing. Most applications never construct this directly at all — pass SCP key parameters to the applet's `Create{Applet}SessionAsync(...)` entry point instead.
+
 ## Session Lifecycle
 
 V2 application sessions are applet-specific and commonly own connection/protocol state. Prefer the v2 session factory or constructor pattern documented by each applet package rather than carrying v1 session setup forward mechanically.

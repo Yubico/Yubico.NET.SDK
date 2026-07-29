@@ -64,14 +64,14 @@ See [`../CLAUDE.md`](../CLAUDE.md#critical-warnings-for-configuration-tests) for
 
 ```bash
 # Run all Management tests
-dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Management"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Management"
 
 # Run unit tests only
-dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Management.UnitTests"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Management.UnitTests"
 
 # Run integration tests only (requires YubiKey)
-dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Management.IntegrationTests"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Management.IntegrationTests"
 
 # Run specific test class
-dotnet toolchain.cs test --filter "FullyQualifiedName~ManagementIntegrationTests"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~ManagementIntegrationTests"
 ```

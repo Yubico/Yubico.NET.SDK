@@ -31,7 +31,7 @@ namespace Yubico.YubiKit.Core.Devices;
 internal class HidYubiKey(
     IHidDevice hidDevice,
     ILogger<HidYubiKey> logger)
-    : IYubiKey
+    : IYubiKey, IDiscoveryConnectionProvider
 {
     public string DeviceId { get; } =
         $"hid:{hidDevice.ReaderName}:{hidDevice.DescriptorInfo.Usage:X4}";
@@ -41,27 +41,58 @@ internal class HidYubiKey(
     /// </summary>
     public ConnectionType AvailableConnections => ConnectionTypeMapper.ToConnectionType(hidDevice.InterfaceType);
 
-    public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+    public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection
     {
         cancellationToken.ThrowIfCancellationRequested();
-
-        if (typeof(TConnection) == typeof(IFidoHidConnection))
+        if (typeof(TConnection) != typeof(IFidoHidConnection)
+            && typeof(TConnection) != typeof(IOtpHidConnection))
         {
-            var connection = CreateFidoConnection();
-            return Task.FromResult(connection as TConnection ??
-                   throw new InvalidOperationException("Connection is not of the expected type."));
+            throw new NotSupportedException(
+                $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
         }
 
-        if (typeof(TConnection) == typeof(IOtpHidConnection))
+        var ownership = await DeviceConnectionRegistry
+            .AcquireSessionAsync(DeviceId, cancellationToken)
+            .ConfigureAwait(false);
+        try
         {
-            var connection = CreateOtpConnection();
-            return Task.FromResult(connection as TConnection ??
-                   throw new InvalidOperationException("Connection is not of the expected type."));
-        }
+            if (typeof(TConnection) == typeof(IFidoHidConnection))
+            {
+                var registered = new RegisteredFidoHidConnection(CreateFidoConnection(), ownership);
+                return registered as TConnection ??
+                       throw new InvalidOperationException("Connection is not of the expected type.");
+            }
 
-        throw new NotSupportedException(
-            $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
+            if (typeof(TConnection) == typeof(IOtpHidConnection))
+            {
+                var registered = new RegisteredOtpHidConnection(CreateOtpConnection(), ownership);
+                return registered as TConnection ??
+                       throw new InvalidOperationException("Connection is not of the expected type.");
+            }
+            throw new InvalidOperationException("Connection type validation did not select a HID implementation.");
+        }
+        catch
+        {
+            ownership.Dispose();
+            throw;
+        }
+    }
+
+    Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+        ConnectionType connection,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        IConnection result = connection switch
+        {
+            ConnectionType.HidFido => CreateFidoConnection(),
+            ConnectionType.HidOtp => CreateOtpConnection(),
+            _ => throw new NotSupportedException(
+                $"Connection type {connection} is not supported by this YubiKey device.")
+        };
+
+        return Task.FromResult(result);
     }
 
     private IFidoHidConnection CreateFidoConnection()

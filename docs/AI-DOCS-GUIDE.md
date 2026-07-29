@@ -463,7 +463,7 @@ Write one minimal test showing what should happen.
 **MANDATORY. Never skip.**
 
 ```bash
-dotnet toolchain.cs test --filter "FullyQualifiedName~MyTest"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~MyTest"
 ```
 
 ### GREEN - Minimal Code

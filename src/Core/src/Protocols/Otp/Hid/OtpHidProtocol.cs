@@ -19,6 +19,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
 
@@ -27,9 +28,19 @@ namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
 /// Uses 8-byte feature reports with CRC validation.
 /// Based on the Java yubikit-android OtpProtocol implementation.
 /// </summary>
+/// <remarks>
+///     Concurrency: a slot command is a 70-byte frame written as ten sequenced feature reports
+///     followed by a polled multi-report read — a foreign report written mid-frame corrupts the frame.
+///     This class serializes full logical exchanges (including lazy initialization) through an
+///     internal gate: concurrent calls are safe but execute sequentially. Cancellation tokens cancel
+///     only the wait for a turn; an exchange in flight runs to completion. The initialization path
+///     itself issues a slot command on NEO (firmware 3.x), so it runs inside the caller's gated
+///     exchange via the ungated core methods — it must never call the public gated methods.
+/// </remarks>
 internal sealed class OtpHidProtocol : IOtpHidProtocol
 {
     private readonly IOtpHidConnection _connection;
+    private readonly AsyncExchangeGate _exchangeGate = new();
     private readonly ILogger<OtpHidProtocol> _logger;
     private FirmwareVersion? _firmwareVersion;
     private bool _initialized;
@@ -45,23 +56,31 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
 
     public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
     {
-        EnsureInitialized();
+        // Initialization touches the wire, so it must hold the gate like any exchange.
+        _exchangeGate.RunExclusiveAsync(
+                EnsureInitializedUnderGateAsync,
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
         _logger.LogDebug("OTP protocol configured, firmware version: {Version}", _firmwareVersion);
     }
 
     /// <summary>
-    /// Ensures the protocol is initialized by reading the initial status.
+    /// Ensures the protocol is initialized by reading the initial status. Must be called from within
+    /// the exchange gate (or single-threaded initialization) — on NEO it issues a slot command via the
+    /// ungated core.
     /// </summary>
-    private void EnsureInitialized()
+    private async Task EnsureInitializedUnderGateAsync(CancellationToken cancellationToken)
     {
         if (_initialized)
             return;
 
         // Read initial feature report to get version
-        var featureReport = ReadFeatureReport();
+        var featureReport = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
 
         // Extract version from feature report bytes 1-3
-        _firmwareVersion = new FirmwareVersion(featureReport[1], featureReport[2], featureReport[3]);
+        _firmwareVersion = new FirmwareVersion(featureReport.Span[1], featureReport.Span[2], featureReport.Span[3]);
 
         // Handle NEO quirk: if major version is 3, may have cached pgmSeq in arbitrator
         if (_firmwareVersion.Major == 3)
@@ -72,7 +91,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
             Array.Fill(scanMap, (byte)'c');
             try
             {
-                SendAndReceiveAsync(0x12, scanMap, CancellationToken.None).GetAwaiter().GetResult();
+                await SendAndReceiveCoreUnderGateAsync(0x12, scanMap, cancellationToken).ConfigureAwait(false);
             }
             catch
             {
@@ -91,21 +110,32 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        // Auto-initialize if not already done
-        if (!_initialized)
-        {
-            _logger.LogDebug("Auto-initializing OTP protocol for SendAndReceiveAsync");
-            EnsureInitialized();
-        }
-
-        // Pad data to slot data size (64 bytes)
-        byte[] payload;
         if (data.Length > OtpConstants.SlotDataSize)
         {
             throw new ArgumentException($"Payload too large for HID frame! Max {OtpConstants.SlotDataSize} bytes.", nameof(data));
         }
 
-        payload = new byte[OtpConstants.SlotDataSize];
+        return await _exchangeGate.RunExclusiveAsync(
+                async exchangeToken =>
+                {
+                    await EnsureInitializedUnderGateAsync(exchangeToken).ConfigureAwait(false);
+                    return await SendAndReceiveCoreUnderGateAsync(slot, data, exchangeToken).ConfigureAwait(false);
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Performs one slot command exchange (frame write + response read) without entering the gate.
+    /// Callers must already hold the gate.
+    /// </summary>
+    private async Task<ReadOnlyMemory<byte>> SendAndReceiveCoreUnderGateAsync(
+        byte slot,
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken)
+    {
+        // Pad data to slot data size (64 bytes)
+        var payload = new byte[OtpConstants.SlotDataSize];
         data.Span.CopyTo(payload);
 
         _logger.LogTrace("Sending OTP slot command 0x{Slot:X2} with {Length} bytes payload", slot, data.Length);
@@ -293,25 +323,17 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        // Auto-initialize if not already done to get version
-        if (!_initialized)
-        {
-            EnsureInitialized();
-        }
+        var featureReport = await _exchangeGate.RunExclusiveAsync(
+                async exchangeToken =>
+                {
+                    await EnsureInitializedUnderGateAsync(exchangeToken).ConfigureAwait(false);
+                    return await ReadFeatureReportAsync(exchangeToken).ConfigureAwait(false);
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
 
-        var featureReport = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
         // Return bytes 1-6 (skip first and last byte)
         return featureReport.Slice(1, 6);
-    }
-
-    /// <summary>
-    /// Reads a single 8-byte feature report synchronously.
-    /// </summary>
-    private byte[] ReadFeatureReport()
-    {
-        var report = _connection.ReceiveAsync(CancellationToken.None).GetAwaiter().GetResult();
-        _logger.LogTrace("Read feature report ({ByteCount} bytes)", report.Span.Length);
-        return report.ToArray();
     }
 
     /// <summary>

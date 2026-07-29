@@ -26,3 +26,8 @@
 - Added `hid-listener-rescan-hints` migration guidance for the change from v1 `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived`/`Removed` events (`EventHandler<HidDeviceEventArgs>`) to the v2 low-level `HidDeviceListener.DeviceEvent` callback carrying `HidDeviceRescanHint` diagnostics.
 - Clarified that v2 HID listener hints are rescan triggers only; public `YubiKeyManager.DeviceChanges` remains repository-diffed Added/Removed truth.
 
+## 2026-07-28 - SCP protocol construction closure
+
+- Added `scp-protocol-construction` migration guidance: the v2 SCP wrapper `Yubico.YubiKit.Core.Protocols.SmartCard.Scp.PcscProtocolScp` keeps a public type surface, but its constructor is now internal, so `await protocol.WithScpAsync(scpKeyParameters, cancellationToken)` is the only supported construction path.
+- Recorded the reason in the migration guide rather than as a bare API note: the wrapper must adopt the exchange gate of the concrete `PcscProtocol` whose connection its SCP processor drives, otherwise plain and encrypted exchanges could interleave on the wire.
+- Noted that applet callers normally reach SCP through key parameters passed to `Create{Applet}SessionAsync(...)` instead of wrapping a protocol by hand.

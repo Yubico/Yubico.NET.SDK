@@ -14,34 +14,68 @@
 
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 /// <summary>
 ///     Decorator that wraps an ISmartCardProtocol with SCP (Secure Channel Protocol) functionality.
-///     All APDU transmissions are encrypted and MACed through the SCP processor.
+///     All APDU transmissions are encrypted and MACed through the SCP processor. Safe for concurrent
+///     calls: exchanges are serialized on the SAME gate as the wrapped protocol (SCP MAC chaining makes
+///     interleaving doubly fatal — each MAC depends on the previous command's MAC).
 /// </summary>
-public class PcscProtocolScp : ISmartCardProtocol
+/// <remarks>
+///     <para>
+///         <c>ISmartCardProtocol.WithScpAsync</c> (see <see cref="ScpExtensions" />) is the only supported way to
+///         obtain an instance. The constructor is internal: an SCP wrapper must adopt the exchange gate of the concrete
+///         <see cref="PcscProtocol" /> it decorates, because the SCP processor chain drives that protocol's
+///         connection directly instead of going through its public methods. Any other construction path could
+///         hand the wrapper a foreign gate, letting plain and encrypted traffic interleave on the wire.
+///         <c>WithScpAsync</c> owns that pairing — it establishes the SCP session on the base protocol's gate and
+///         then wraps the same protocol instance.
+///     </para>
+/// </remarks>
+public sealed class PcscProtocolScp : ISmartCardProtocol
 {
     private readonly ISmartCardProtocol _baseProtocol;
     private readonly DataEncryptor _dataEncryptor;
+    private readonly AsyncExchangeGate _exchangeGate;
     private readonly IApduProcessor _scpProcessor;
     private bool _disposed;
 
     /// <summary>
-    ///     Creates a new SCP protocol adapter.
+    ///     Creates a new SCP protocol adapter. Internal by design — see the type-level remarks:
+    ///     <c>ISmartCardProtocol.WithScpAsync</c> is the only supported construction path, because it is what
+    ///     guarantees the wrapper shares the exchange gate of the protocol whose connection the SCP processor drives.
     /// </summary>
-    /// <param name="baseProtocol">The underlying base protocol</param>
+    /// <param name="baseProtocol">The underlying base protocol; must be a concrete <see cref="PcscProtocol" /></param>
     /// <param name="scpProcessor">The SCP-wrapped APDU processor</param>
     /// <param name="dataEncryptor">The data encryptor for this SCP session (may be null)</param>
-    public PcscProtocolScp(
+    /// <exception cref="ArgumentException">
+    ///     Thrown when <paramref name="baseProtocol" /> is not a <see cref="PcscProtocol" />, since no shared gate
+    ///     could be adopted.
+    /// </exception>
+    internal PcscProtocolScp(
         ISmartCardProtocol baseProtocol,
         IApduProcessor scpProcessor,
         DataEncryptor dataEncryptor)
     {
+        ArgumentNullException.ThrowIfNull(baseProtocol);
+        if (baseProtocol is not PcscProtocol pcscProtocol)
+        {
+            throw new ArgumentException(
+                $"SCP requires a {nameof(PcscProtocol)} base so encrypted and plain exchanges share one gate.",
+                nameof(baseProtocol));
+        }
+
         _baseProtocol = baseProtocol;
         _scpProcessor = scpProcessor;
         _dataEncryptor = dataEncryptor;
+
+        // The SCP processor chain bypasses the base protocol's public methods and drives the same
+        // connection directly, so exchanges MUST share the base protocol's gate — otherwise gated
+        // plain traffic and SCP traffic could interleave on the wire.
+        _exchangeGate = pcscProtocol.ExchangeGate;
     }
 
     /// <summary>
@@ -57,7 +91,9 @@ public class PcscProtocolScp : ISmartCardProtocol
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        var response = await _scpProcessor.TransmitAsync(command, true, cancellationToken)
+        var response = await _exchangeGate.RunExclusiveAsync(
+                exchangeToken => _scpProcessor.TransmitAsync(command, true, exchangeToken),
+                cancellationToken)
             .ConfigureAwait(false);
 
         if (throwOnError && !response.IsOK())
@@ -79,7 +115,9 @@ public class PcscProtocolScp : ISmartCardProtocol
         const byte P2_SELECT = 0x00;
 
         var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };
-        var response = await _scpProcessor.TransmitAsync(selectCommand, false, cancellationToken)
+        var response = await _exchangeGate.RunExclusiveAsync(
+                exchangeToken => _scpProcessor.TransmitAsync(selectCommand, false, exchangeToken),
+                cancellationToken)
             .ConfigureAwait(false);
 
         return response.IsOK()

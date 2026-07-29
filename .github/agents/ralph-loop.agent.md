@@ -45,8 +45,8 @@ copilot --agent ralph-loop -p "Execute the progress file at docs/ralph-loop/feat
 ```bash
 # ✅ CORRECT - Always use build script
 dotnet toolchain.cs build                    # Build entire solution
-dotnet toolchain.cs build --project Piv      # Build specific project (partial match)
-dotnet toolchain.cs build --clean            # Clean rebuild
+dotnet toolchain.cs -- build --project Piv   # Build specific project (partial match)
+dotnet toolchain.cs -- build --clean         # Clean rebuild
 
 # ❌ WRONG - Never use directly
 dotnet build                             # FORBIDDEN
@@ -58,11 +58,11 @@ dotnet restore                           # FORBIDDEN
 ```bash
 # ✅ CORRECT - Handles xUnit v2/v3 automatically
 dotnet toolchain.cs test                                           # All tests
-dotnet toolchain.cs test --project Fido2                           # Module tests (partial match)
-dotnet toolchain.cs test --filter "FullyQualifiedName~MyTest"      # Filter by full name
-dotnet toolchain.cs test --filter "Name=ExactMethodName"           # Exact method match
-dotnet toolchain.cs test --filter "ClassName~Integration"          # Filter by class name
-dotnet toolchain.cs test --project Piv --filter "Method~Sign"      # Combine project + filter
+dotnet toolchain.cs -- test --project Fido2                        # Module tests (partial match)
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~MyTest"   # Filter by full name
+dotnet toolchain.cs -- test --filter "Name=ExactMethodName"        # Exact method match
+dotnet toolchain.cs -- test --filter "ClassName~Integration"       # Filter by class name
+dotnet toolchain.cs -- test --project Piv --filter "Method~Sign"   # Combine project + filter
 
 # ❌ WRONG - Fails on xUnit v3 projects
 dotnet test                              # FORBIDDEN
@@ -131,7 +131,7 @@ For each task in a progress file:
 ```bash
 # Create test asserting desired behavior
 # Run to verify it fails
-dotnet toolchain.cs test --filter "FullyQualifiedName~NewTestClass"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~NewTestClass"
 # Expected: FAILURE (test fails or doesn't compile)
 ```
 
@@ -139,7 +139,7 @@ dotnet toolchain.cs test --filter "FullyQualifiedName~NewTestClass"
 
 ```bash
 # Write minimal code to make test pass
-dotnet toolchain.cs test --filter "FullyQualifiedName~NewTestClass"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~NewTestClass"
 # Expected: SUCCESS
 ```
 
@@ -266,7 +266,7 @@ When encountering specific situations, read the corresponding skill file for det
 
 ```bash
 # Clean and rebuild
-dotnet toolchain.cs build --clean
+dotnet toolchain.cs -- build --clean
 
 # Check specific errors
 dotnet toolchain.cs build 2>&1 | grep -A5 "error CS"
@@ -276,7 +276,7 @@ dotnet toolchain.cs build 2>&1 | grep -A5 "error CS"
 
 ```bash
 # Run failing test in isolation
-dotnet toolchain.cs test --filter "FullyQualifiedName~FailingTest"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~FailingTest"
 
 # Check for static state pollution (common with static classes)
 # Add cleanup in test: await YubiKeyManager.ShutdownAsync();

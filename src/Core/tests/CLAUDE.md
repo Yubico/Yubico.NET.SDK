@@ -77,14 +77,14 @@ public class MyIntegrationTests : IntegrationTestBase
 
 ```bash
 # Run all Core tests
-dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Core"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Core"
 
 # Run unit tests only
-dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Core.UnitTests"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Core.UnitTests"
 
 # Run integration tests only (requires YubiKey)
-dotnet toolchain.cs test --filter "FullyQualifiedName~Yubico.YubiKit.Core.IntegrationTests"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Core.IntegrationTests"
 
 # Run specific test class
-dotnet toolchain.cs test --filter "FullyQualifiedName~PcscProtocolTests"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~PcscProtocolTests"
 ```

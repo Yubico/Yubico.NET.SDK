@@ -105,6 +105,10 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<LinuxUdevHidEventSource>();
 
+    // eventfd writes are nonblocking. Four total attempts tolerate a short interruption burst
+    // while guaranteeing Stop cannot hot-loop forever under persistent EINTR.
+    private const int MaxShutdownWriteAttempts = 4;
+
     private LinuxUdevSafeHandle? _udevHandle;
     private LinuxUdevMonitorSafeHandle? _monitorHandle;
     private LinuxEventFdSafeHandle? _shutdownEventHandle;
@@ -157,7 +161,7 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
         }
 
         var monitorFd = UdevNativeMethods.udev_monitor_get_fd(_monitorHandle);
-        if (monitorFd == IntPtr.Zero || monitorFd.ToInt32() < 0)
+        if (!IsValidFileDescriptor(monitorFd))
         {
             Logger.LogWarning("Failed to get udev monitor fd");
             return false;
@@ -171,7 +175,7 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
         }
 
         var pollFds = new LibcNativeMethods.PollFd[2];
-        pollFds[0].fd = monitorFd.ToInt32();
+        pollFds[0].fd = monitorFd;
         pollFds[0].events = (short)(LibcNativeMethods.POLLIN | LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP);
         pollFds[1].fd = shutdownFd;
         pollFds[1].events = (short)(LibcNativeMethods.POLLIN | LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP);
@@ -257,15 +261,23 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
         try
         {
             var signal = BitConverter.GetBytes(1UL);
-            var result = LibcNativeMethods.write(handle, signal, signal.Length);
-            if (result < 0)
-            {
-                var error = Marshal.GetLastWin32Error();
-                if (error != LibcNativeMethods.EAGAIN)
+            WriteShutdownSignal(
+                () => LibcNativeMethods.write(handle, signal, signal.Length),
+                Marshal.GetLastWin32Error,
+                (result, error) =>
                 {
-                    Logger.LogDebug("Failed to signal Linux HID listener shutdown fd: {Error}", error);
-                }
-            }
+                    if (result < 0)
+                    {
+                        Logger.LogDebug("Failed to signal Linux HID listener shutdown fd: {Error}", error);
+                    }
+                    else
+                    {
+                        Logger.LogDebug(
+                            "Failed to signal Linux HID listener shutdown fd: wrote {BytesWritten} bytes instead of {ExpectedBytes}",
+                            result,
+                            sizeof(ulong));
+                    }
+                });
         }
         catch (ObjectDisposedException)
         {
@@ -325,6 +337,48 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
         return syspath.EndsWith(hidrawDirectorySuffix, StringComparison.Ordinal)
             ? syspath[..^hidrawDirectorySuffix.Length]
             : syspath;
+    }
+
+    internal static bool IsValidFileDescriptor(int fileDescriptor) => fileDescriptor >= 0;
+
+    internal static void WriteShutdownSignal(
+        Func<int> write,
+        Func<int> getLastError,
+        Action<int, int> reportFailure)
+    {
+        for (var attempt = 1; attempt <= MaxShutdownWriteAttempts; attempt++)
+        {
+            var result = write();
+            if (result == sizeof(ulong))
+            {
+                return;
+            }
+
+            if (result >= 0)
+            {
+                reportFailure(result, 0);
+                return;
+            }
+
+            var error = getLastError();
+            if (error == LibcNativeMethods.EINTR)
+            {
+                if (attempt < MaxShutdownWriteAttempts)
+                {
+                    continue;
+                }
+
+                reportFailure(result, error);
+                return;
+            }
+
+            if (error != LibcNativeMethods.EAGAIN)
+            {
+                reportFailure(result, error);
+            }
+
+            return;
+        }
     }
 
     private void DrainShutdownEvent()

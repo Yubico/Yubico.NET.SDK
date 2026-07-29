@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using Yubico.YubiKit.Core.Abstractions;
 
 namespace Yubico.YubiKit.Core.Devices;
@@ -22,10 +23,12 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </summary>
 /// <remarks>
 ///     Distinct from <see cref="DiscoveryIdentityReader"/>: this is decoupled from merge correctness. It makes
-///     a single bounded pass over the device's available transports in preference order (CCID → OTP HID →
-///     FIDO HID) with a hard per-read timeout and NO retries, so a locked or slow CCID cannot stall discovery —
-///     it simply falls through to a HID transport, and total failure returns <c>null</c>. The merge never
-///     depends on the result. Transport preference is CCID → OTP HID → FIDO HID, matching the Rust reference.
+///     a single pass over the device's available transports in preference order (CCID → OTP HID → FIDO HID)
+///     with NO retries and a hard total wall-clock budget shared across all transports, so a busy or slow
+///     interface cannot stall discovery — a read that exceeds the remaining budget is abandoned, not aborted
+///     (see <see cref="ProtocolDeviceInfo.ReadBoundedAsync" />), and the reader falls through to the next
+///     transport if budget remains. Total failure returns <c>null</c>; the merge never depends on the result.
+///     Transport preference is CCID → OTP HID → FIDO HID, matching the Rust reference.
 /// </remarks>
 internal static class CompositeMetadataReader
 {
@@ -34,26 +37,45 @@ internal static class CompositeMetadataReader
 
     public static async Task<DeviceInfo?> TryReadAsync(
         IYubiKey device,
-        TimeSpan perReadTimeout,
+        TimeSpan totalBudget,
         ILogger logger,
         CancellationToken cancellationToken)
     {
+        var clock = Stopwatch.StartNew();
+
         foreach (var connection in PreferredOrder)
         {
             if (!device.SupportsConnection(connection))
                 continue;
 
-            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            timeoutCts.CancelAfter(perReadTimeout);
+            if (DeviceConnectionRegistry.IsInterfaceInUse(device, connection))
+            {
+                // Never disturb an interface this process is using (a discovery SELECT on a second shared
+                // CCID handle would deselect the session's applet). Other interfaces of the same physical
+                // key are independent USB interfaces and remain safe to read.
+                logger.LogDebug(
+                    "Metadata read for {DeviceId} over {Connection} skipped: interface has a live connection in this process; trying next transport.",
+                    device.DeviceId,
+                    connection);
+                continue;
+            }
+
+            var remaining = totalBudget - clock.Elapsed;
+            if (remaining <= TimeSpan.Zero)
+            {
+                logger.LogDebug(
+                    "Metadata read budget exhausted for {DeviceId}; skipping remaining transports.",
+                    device.DeviceId);
+                return null;
+            }
 
             try
             {
-                var conn = await DiscoveryIdentityReader
-                    .ConnectAsync(device, connection, timeoutCts.Token)
+                return await ProtocolDeviceInfo
+                    .ReadBoundedAsync(device, connection, remaining, logger, cancellationToken)
                     .ConfigureAwait(false);
-                return await ProtocolDeviceInfo.ReadAsync(conn, timeoutCts.Token).ConfigureAwait(false);
             }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            catch (OperationCanceledException)
             {
                 throw;
             }

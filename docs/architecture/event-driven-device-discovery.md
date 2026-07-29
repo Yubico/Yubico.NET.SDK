@@ -44,11 +44,12 @@
 │    └─ HidDeviceListener: Windows/macOS/Linux OS notifications                        │
 │             │                                                                        │
 │             ▼                                                                        │
-│  Channel<DeviceMonitorRescanRequest> (single reader)                                 │
+│  DeviceMonitorSignal: capacity-one occurrence (single reader)                        │
 │             │                                                                        │
 │             ▼                                                                        │
 │  Event coalescing loop                                                               │
 │    ├─ initial RescanCoreAsync() at monitor startup                                   │
+│    ├─ consumes exactly one signal occurrence per wake-up                             │
 │    ├─ listener hints wait for a 200ms quiet period                                   │
 │    ├─ each new hint re-arms the quiet period                                         │
 │    ├─ MaxCoalesceInterval = 5 × ThrottleInterval caps a hint storm                   │
@@ -143,8 +144,8 @@ Why different patterns?
 ```
 YubiKey/OS ──device notification──► Platform listener
 Platform listener ──rescan callback/hint──► YubiKeyDeviceMonitorService
-YubiKeyDeviceMonitorService ──TryWrite──► Channel<DeviceMonitorRescanRequest>
-Single reader ──drain queued requests──► 200ms quiet period (re-arms on new hints)
+YubiKeyDeviceMonitorService ──TrySignal──► DeviceMonitorSignal (capacity-one occurrence)
+Single reader ──consume one occurrence──► 200ms quiet period (re-arms on new hints)
 Single reader ──cap reached or quiet period elapsed──► RescanCoreAsync()
 RescanCoreAsync() ──FindAllAsync snapshot──► YubiKeyDeviceRepository.UpdateCache()
 YubiKeyDeviceRepository ──diff──► DeviceChanges (DeviceAction.Added/Removed)
@@ -152,6 +153,47 @@ Application subscription ◄──DeviceEvent── YubiKeyManager.DeviceChanges
 ```
 
 ---
+
+## Rescan Signalling: an Occurrence, Not a Queue
+
+Listener hints are **not** queued and there is no `DeviceMonitorRescanRequest` payload type.
+`DeviceMonitorSignal` wraps a `Channel<bool>` bounded to capacity **1** with
+`FullMode = DropWrite`, `SingleReader = true`. Consequences:
+
+- A hint arriving while one is already pending is **silently dropped**, not buffered.
+  "At least one rescan happened after your hint" is the only guarantee — and the only one
+  that matters, because device truth is the full `FindAllAsync` snapshot diffed by the
+  repository, never the hint payload.
+- The loop consumes **exactly one occurrence per wake-up** (`TryConsume`) before evaluating
+  the debounce / max-coalesce deadline, so a continuously refilled signal cannot starve the
+  `MaxCoalesceInterval` check.
+- `Complete()` closes the writer. A reader observing completion (`DeviceMonitorWaitResult.Completed`)
+  exits the loop; a late listener callback signalling a completed signal is logged at trace and ignored.
+- Hint details (`HidDeviceRescanHint`) are logged at ingress for diagnostics only. They never
+  reach the loop and are never public device truth.
+
+## Generation (Epoch) Model
+
+Monitor lifecycle is an **epoch model**, not a state machine. Each `StartMonitoring` builds an
+immutable `MonitorGeneration` bundling `{ Id, ScanGate, Signal, Cts }`, held in a single field
+`_current`. The loop and every `RescanAsync` capture that reference once; a generation's identity
+*is* that reference, so a torn gate/generation pair is not representable.
+
+- **Publication is gated, not coordinated.** All publications, from any generation, are mutually
+  exclusive under the monitor service's single never-disposed `_publishGate`, held across the
+  admission check and `UpdateCache`.
+- **Admission is the linearization point.** Under the small `_publishLock`, a snapshot is applied
+  only if its generation is still `_current` and the service is not disposed. A superseded
+  generation can never publish — including a scan hung in native I/O that returns long after its
+  generation was retired.
+- **Lifecycle never blocks on subscribers.** `StartMonitoring` / `StopMonitoring` / `DisposeAsync`
+  take only `_publishLock`, never `_publishGate`, so a device-event handler blocking inside
+  `UpdateCache` cannot wedge start, stop, or dispose.
+- **Nothing is disposed that anyone can still acquire.** Scan gates live inside their generation and
+  are never disposed; abandoned generations are simply unreachable garbage. `DisposeAsync` drains
+  `_publishGate` with the shutdown bound and, on timeout, warns and abandons — a publication already
+  in flight may therefore complete after `DisposeAsync` returns. The manager disposes the repository
+  afterwards, which silences any later emission. This is a documented contract, not an accident.
 
 ## Key Improvements
 
@@ -163,7 +205,7 @@ Application subscription ◄──DeviceEvent── YubiKeyManager.DeviceChanges
 | **HID Windows** | ❌ Not implemented | ✅ CM_Register_Notification |
 | **HID macOS** | Full enumeration | ✅ IOHIDManager callbacks |
 | **HID Linux** | udev_enumerate | ✅ udev_monitor + poll() |
-| **Event Coalescing** | None | Single-reader queue + 200ms quiet period capped at `MaxCoalesceInterval` |
+| **Event Coalescing** | None | Capacity-one occurrence signal + 200ms quiet period capped at `MaxCoalesceInterval` |
 | **Cancellation** | Unreliable | Responsive (eventfd/run-loop stop/PCSC timeout) |
 
 ---

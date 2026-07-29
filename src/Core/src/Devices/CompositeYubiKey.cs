@@ -30,7 +30,7 @@ namespace Yubico.YubiKit.Core.Devices;
 ///     the requested connection. Member devices are not <see cref="IDisposable" /> and are not owned in a
 ///     disposable sense, mirroring <see cref="PcscYubiKey" /> and <c>HidYubiKey</c>.
 /// </remarks>
-internal sealed class CompositeYubiKey : IYubiKey
+internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
 {
     private readonly IReadOnlyList<IYubiKey> _members;
 
@@ -59,6 +59,9 @@ internal sealed class CompositeYubiKey : IYubiKey
     /// <summary>Sorted member interface DeviceIds — a stable key for the physical interface set across rescans.</summary>
     internal IReadOnlyList<string> MemberDeviceIds { get; }
 
+    /// <summary>The per-interface member devices this composite routes connects to.</summary>
+    internal IReadOnlyList<IYubiKey> Members => _members;
+
     /// <summary>
     ///     Read-only device metadata read during discovery (used internally; not part of the public contract
     ///     yet). May be populated after construction by the best-effort metadata pass.
@@ -84,6 +87,26 @@ internal sealed class CompositeYubiKey : IYubiKey
 
         throw new NotSupportedException(
             $"Connection type {typeof(TConnection).Name} ({requested}) is not available on this physical YubiKey " +
+            $"(available connections: {AvailableConnections}).");
+    }
+
+    async Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+        ConnectionType connection,
+        CancellationToken cancellationToken)
+    {
+        foreach (var member in _members)
+        {
+            if (!member.AvailableConnections.SupportsConnection(connection))
+                continue;
+
+            if (member is IDiscoveryConnectionProvider provider)
+                return await provider.ConnectForDiscoveryAsync(connection, cancellationToken).ConfigureAwait(false);
+
+            throw new DiscoveryReadSkippedException(member.DeviceId);
+        }
+
+        throw new NotSupportedException(
+            $"Connection type {connection} is not available on this physical YubiKey " +
             $"(available connections: {AvailableConnections}).");
     }
 

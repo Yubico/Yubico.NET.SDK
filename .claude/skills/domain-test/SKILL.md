@@ -57,22 +57,22 @@ dotnet toolchain.cs test
 ### Run Tests for Specific Project
 
 ```bash
-dotnet toolchain.cs test --project Piv
-dotnet toolchain.cs test --project Fido2
-dotnet toolchain.cs test --project SecurityDomain
+dotnet toolchain.cs -- test --project Piv
+dotnet toolchain.cs -- test --project Fido2
+dotnet toolchain.cs -- test --project SecurityDomain
 ```
 
 ### Run Specific Test(s) with Filter
 
 ```bash
 # Single test method
-dotnet toolchain.cs test --filter "FullyQualifiedName~MyTestMethod"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~MyTestMethod"
 
 # All tests in a class
-dotnet toolchain.cs test --filter "ClassName~SignatureTests"
+dotnet toolchain.cs -- test --filter "ClassName~SignatureTests"
 
 # Combine project and filter
-dotnet toolchain.cs test --project Piv --filter "Method~Sign"
+dotnet toolchain.cs -- test --project Piv --filter "Method~Sign"
 ```
 
 ### Run Tests with Coverage
@@ -111,10 +111,10 @@ Tests are categorized using `TestCategories` constants from `Yubico.YubiKit.Test
 
 ```bash
 # Run tests without user presence requirement
-dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"
+dotnet toolchain.cs -- test --filter "Category!=RequiresUserPresence"
 
 # Run only fast unit tests (no hardware, no user presence, not slow)
-dotnet toolchain.cs test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
+dotnet toolchain.cs -- test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
 ```
 
 **When writing new tests**, apply traits using constants:
@@ -184,10 +184,10 @@ If no match is found, the script lists available projects.
 
 ```bash
 # Run with project filter to see details
-dotnet toolchain.cs test --project <project>
+dotnet toolchain.cs -- test --project <project>
 
 # Run specific failing test
-dotnet toolchain.cs test --filter "Name=FailingTestMethod"
+dotnet toolchain.cs -- test --filter "Name=FailingTestMethod"
 ```
 
 ### Build Required First

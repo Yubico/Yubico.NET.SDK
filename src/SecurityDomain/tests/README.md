@@ -19,7 +19,7 @@ dotnet toolchain.cs -- test --project SecurityDomain --filter "FullyQualifiedNam
 dotnet toolchain.cs -- test --integration --project SecurityDomain --smoke --filter "FullyQualifiedName~Yubico.YubiKit.SecurityDomain.IntegrationTests"
 
 # All Security Domain tests
-dotnet toolchain.cs test --project SecurityDomain
+dotnet toolchain.cs -- test --project SecurityDomain
 ```
 
 ## Integration Test Setup

@@ -24,7 +24,7 @@ internal class PcscYubiKey(
     IPcscDevice pcscDevice,
     ISmartCardConnectionFactory connectionFactory,
     ILogger<PcscYubiKey> logger)
-    : IYubiKey
+    : IYubiKey, IDiscoveryConnectionProvider
 {
     private readonly string _readerName = pcscDevice.ReaderName;
 
@@ -50,9 +50,30 @@ internal class PcscYubiKey(
             throw new NotSupportedException(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
 
-        var connection = await CreateConnection(cancellationToken).ConfigureAwait(false);
-        return connection as TConnection ??
-               throw new InvalidOperationException("Connection is not of the expected type.");
+        var ownership = await DeviceConnectionRegistry
+            .AcquireSessionAsync(DeviceId, cancellationToken)
+            .ConfigureAwait(false);
+        try
+        {
+            var connection = await CreateConnection(cancellationToken).ConfigureAwait(false);
+            return new RegisteredSmartCardConnection(connection, ownership) as TConnection ??
+                   throw new InvalidOperationException("Connection is not of the expected type.");
+        }
+        catch
+        {
+            ownership.Dispose();
+            throw;
+        }
+    }
+
+    async Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+        ConnectionType connection,
+        CancellationToken cancellationToken)
+    {
+        if (connection != ConnectionType.SmartCard)
+            throw new NotSupportedException($"Connection type {connection} is not supported by this YubiKey device.");
+
+        return await CreateConnection(cancellationToken).ConfigureAwait(false);
     }
 
 }

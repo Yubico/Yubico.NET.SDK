@@ -29,16 +29,16 @@ If you use the wrong command or filter syntax, tests will fail with confusing er
 dotnet toolchain.cs test
 
 # Run tests for a specific module (partial match)
-dotnet toolchain.cs test --project Core
-dotnet toolchain.cs test --project Fido2
-dotnet toolchain.cs test --project Piv
+dotnet toolchain.cs -- test --project Core
+dotnet toolchain.cs -- test --project Fido2
+dotnet toolchain.cs -- test --project Piv
 
 # Run tests with a filter
-dotnet toolchain.cs test --filter "FullyQualifiedName~MyTestClass"
-dotnet toolchain.cs test --filter "Method~Sign"
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~MyTestClass"
+dotnet toolchain.cs -- test --filter "Method~Sign"
 
 # Combine project and filter
-dotnet toolchain.cs test --project Piv --filter "Method~Sign"
+dotnet toolchain.cs -- test --project Piv --filter "Method~Sign"
 ```
 
 ## Integration Test Strategy
@@ -87,7 +87,7 @@ dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Yubico.Yub
 dotnet test --filter "FullyQualifiedName~MyTest"
 
 # CORRECT - Always use the build script
-dotnet toolchain.cs test --project Fido2 --filter "FullyQualifiedName~MyTest"
+dotnet toolchain.cs -- test --project Fido2 --filter "FullyQualifiedName~MyTest"
 ```
 
 ## How Detection Works
@@ -127,7 +127,7 @@ When running filtered tests **outside** the build script (ad-hoc debugging), syn
 - `3.x.x` → xUnit v3 syntax
 - `2.x.x` → xUnit v2 syntax
 
-**Recommendation:** Use `dotnet toolchain.cs test --filter "..."` which handles this automatically.
+**Recommendation:** Use `dotnet toolchain.cs -- test --filter "..."` which handles this automatically.
 
 ### xUnit v3 Focused Filters
 
@@ -152,6 +152,25 @@ Name!=SkipMe                   Exclude tests named 'SkipMe'
 4. Use `--filter` for test filtering
 5. When in doubt, run `dotnet toolchain.cs test` without filters first
 
+## Hardware Authorization
+
+Integration tests only ever touch devices whose serial number is in the gitignored
+`YubiKeyTests:AllowedSerialNumbers` list; anything else hard-fails with `Environment.Exit(-1)`
+before a single hardware operation runs. Those listed keys are **dedicated test keys**.
+
+That makes the authorization boundary simple, and worth stating plainly so it is not
+re-litigated per run:
+
+| Operation class | Authorized unattended? |
+|---|---|
+| State mutation, PIV reset, key generation on an allow-listed key | Yes — no per-run approval needed |
+| User Presence / touch ceremonies | No — human must be present |
+| User Verification, PIN, bio enrollment | No — human must approve and know device state |
+| Insert / remove / power-cycle timing | No — human must coordinate |
+
+The distinction is presence and timing, not destruction. There is no additional config gate:
+the allow list is the boundary, and adding a second one would only obscure it.
+
 ## FIDO2/WebAuthn Hardware Coordination
 
 FIDO2 and WebAuthn tests often need User Presence (touch), User Verification (PIN/bio), credential creation, or reset timing. These checks are not unattended agent gates.
@@ -163,7 +182,8 @@ Use these lanes:
 | Read-only smoke | `GetInfo`, construction/unit tests | Yes | Use `dotnet toolchain.cs test` or integration `--smoke` |
 | User Presence | `MakeCredential`, `GetAssertion`, `previewSign` ceremonies | No by default | Mark with `Category=RequiresUserPresence`; run only with a human present |
 | User Verification / PIN | PIN token, UV-required/preferred, bio enrollment | No by default | Requires explicit human approval and known device/PIN state |
-| Reset/destructive | FIDO2 reset, persistent credential deletion | No | Human-approved destructive run only |
+| Destructive state change | Persistent credential deletion, PIV reset, key generation | Yes on an allow-listed test key | See [Hardware Authorization](#hardware-authorization); destruction alone is not the gate |
+| FIDO2 reset | `authenticatorReset` | No | Needs the power-cycle window plus touch — timing, not destruction, is why |
 | Insert/remove/touch timing | Reset power-cycle window, physical insertion/removal | No | Human-coordinated timing only |
 
 Agent-safe FIDO2/WebAuthn integration commands must skip User Presence:
@@ -366,16 +386,16 @@ public class MyTests
 
 ```bash
 # Skip tests requiring user interaction (for CI/agents)
-dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"
+dotnet toolchain.cs -- test --filter "Category!=RequiresUserPresence"
 
 # Skip slow tests
-dotnet toolchain.cs test --filter "Category!=Slow"
+dotnet toolchain.cs -- test --filter "Category!=Slow"
 
 # Skip hardware tests (run only unit tests)
-dotnet toolchain.cs test --filter "Category!=RequiresHardware"
+dotnet toolchain.cs -- test --filter "Category!=RequiresHardware"
 
 # Run only fast unit tests (no hardware, no user presence, not slow)
-dotnet toolchain.cs test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
+dotnet toolchain.cs -- test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
 ```
 
 ### When to Apply Each Trait
@@ -412,7 +432,7 @@ dotnet toolchain.cs test --filter "Category!=RequiresHardware&Category!=Requires
 
 **Agents should skip `RequiresUserPresence` tests** when running test suites:
 ```bash
-dotnet toolchain.cs test --filter "Category!=RequiresUserPresence"
+dotnet toolchain.cs -- test --filter "Category!=RequiresUserPresence"
 ```
 
 ---

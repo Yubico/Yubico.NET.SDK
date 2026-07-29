@@ -115,11 +115,11 @@ When the engine detects a progress file, it injects these instructions automatic
 
 ```
 1. RED: Write failing test asserting the task's behavior
-   Run: `dotnet toolchain.cs test --filter "FullyQualifiedName~{TestClass}"`
+   Run: `dotnet toolchain.cs -- test --filter "FullyQualifiedName~{TestClass}"`
    Expect: FAILURE
 
 2. GREEN: Write minimal code to pass
-   Run: `dotnet toolchain.cs test --filter "FullyQualifiedName~{TestClass}"`
+   Run: `dotnet toolchain.cs -- test --filter "FullyQualifiedName~{TestClass}"`
    Expect: SUCCESS
 
 3. REFACTOR: Clean up, check security, add docs
@@ -147,7 +147,7 @@ When the engine detects a progress file, it injects these instructions automatic
 |--------|---------|
 | Build | `dotnet toolchain.cs build` |
 | Test | `dotnet toolchain.cs test` |
-| Test filtered | `dotnet toolchain.cs test --filter "..."` |
+| Test filtered | `dotnet toolchain.cs -- test --filter "..."` |
 
 **NEVER use `dotnet build` or `dotnet test` directly** - they fail on mixed xUnit v2/v3.
 

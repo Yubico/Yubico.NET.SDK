@@ -61,11 +61,13 @@ public static class ScpExtensions
                     nameof(protocol));
 
 
-            var (scpProcessor, encryptor) = await ScpInitializer.InitializeScpAsync(
-                    pcscProtocol.GetBaseProcessor(),
-                    pcscProtocol.GetBaseCommandProcessor(),
-                    pcscProtocol.InsSendRemaining,
-                    keyParams,
+            var (scpProcessor, encryptor) = await pcscProtocol.ExchangeGate.RunExclusiveAsync(
+                    exchangeToken => ScpInitializer.InitializeScpAsync(
+                        pcscProtocol.GetBaseProcessor(),
+                        pcscProtocol.GetBaseCommandProcessor(),
+                        pcscProtocol.InsSendRemaining,
+                        keyParams,
+                        exchangeToken),
                     cancellationToken)
                 .ConfigureAwait(false);
 

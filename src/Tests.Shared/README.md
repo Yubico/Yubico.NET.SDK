@@ -238,6 +238,16 @@ dotnet toolchain.cs -- test --integration --project SecurityDomain --smoke --fil
 
 Do not run raw `dotnet test` directly.
 
+## Multi-Key Discovery Expectations
+
+Tests that connect two or more keys of the same model should read
+[Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md) first. Some
+conservative outcomes are documented platform bounds with pinning tests rather than bugs - notably
+that serial-less multi-interface keys cannot be grouped on macOS or Linux, and that partially
+enumerated same-PID keys can transiently share a composite. Assertions like `Assert.Single` on a
+discovery result only hold on a single-key rig; prefer key-count-agnostic invariants
+(conservation, completeness per PID, stability across scans).
+
 ## Hardware Safety Rules
 
 - Allow-listed keys are dedicated test keys: state mutation, PIV reset, and key generation on

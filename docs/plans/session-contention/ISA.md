@@ -104,3 +104,50 @@ firmware 5.8.0, PID 0x0407).
 These require dedicated hardware on those platforms and are tracked as followups, alongside the
 existing Windows topology Tier 2 gap from the composite-merge effort. Coverage claims in this
 document are macOS-scoped unless stated otherwise.
+
+---
+
+## Phase 0 — Harness unblocked (2026-07-30)
+
+### Defect: transport-specific tests were not using their transport
+
+`[WithYubiKey(ConnectionType = X)]` is a device **filter**, not a transport pin — a composite key
+exposing SmartCard satisfies a HID request — and `WithManagementAsync` had no way to pin one. Two
+integration tests therefore ran entirely over SmartCard while claiming to exercise HID, and passed.
+
+**RED, for the predicted reason** (transport asserted, no pin):
+
+```
+Expected: HidFido   Actual: SmartCard
+Expected: HidOtp    Actual: SmartCard
+```
+
+GREEN with `preferredConnection` threaded through: `ManagementHidConcurrencyTests` 2/2 over its
+named transports, `GetDeviceInfo_AllTransports_ReturnsConsistentData` 3/3 over three genuinely
+distinct transports.
+
+This satisfies **ISC-6** and is a prerequisite for every Phase 1 Management experiment — without
+it those experiments would have silently measured SmartCard three times.
+
+`ManagementSession.Transport` was added as the instrument. It is derived from the connection the
+constructor already switches on, not threaded down from transport resolution, so no new plumbing
+exists. It reports what was actually opened rather than what was requested.
+
+### Performance baseline (ISC-5)
+
+Captured at `7f39d85f`, rig `ykphysical:103` + `ykphysical:125`, 20 iterations, macOS.
+Phase 3 must be compared against this before any performance claim.
+
+| Measurement | min | p50 | p95 | mean |
+|---|---|---|---|---|
+| Discovery scan (fresh finder) | 154.9 ms | 186.8 ms | 427.8 ms | 212.9 ms |
+| Session open — SmartCard | 9.5 ms | 10.8 ms | 24.2 ms | 12.5 ms |
+| Session open — HidFido | 19.8 ms | 20.4 ms | 24.1 ms | 21.1 ms |
+| Session open — HidOtp | 222.0 ms | 253.2 ms | 397.4 ms | 273.4 ms |
+
+Harness: `/var/folders/.../opencode/perf-baseline/` (`dotnet run -c Release -- 20 <label>`).
+
+Incidental observation, not a goal of this effort: opening a Management session over HID OTP costs
+roughly **25x** SmartCard and **13x** HID FIDO. Recorded because the transport fallback chain can
+land a caller on HID OTP without the caller knowing, which makes that cost invisible at the call
+site.

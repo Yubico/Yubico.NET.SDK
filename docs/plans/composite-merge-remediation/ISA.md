@@ -1,9 +1,12 @@
 ---
-task: Composite-merge remediation — Phases 1 (RED harness) + 2 (core fixes)
+task: Composite-merge remediation — deterministic same-PID composite grouping + discovery guarantees
 branch: yubikit-composite-merge
-phase: execute
-date: 2026-07-28 (Phase 1), 2026-07-29 (Phase 2)
+phase: complete
+progress: 5/5 phases (Phase 4 Tier 2 hardware validation deferred — needs Windows/Linux boxes)
+date: 2026-07-28 (Phases 0-1), 2026-07-29 (Phases 2-5)
 plan: docs/plans/composite-merge-remediation/PLAN.md
+guarantees: docs/architecture/device-discovery-guarantees.md
+audit: converged, 2 cycles, github-copilot/gpt-5.5 (5 findings, all accepted)
 ---
 
 # ISA — Composite-Merge Remediation
@@ -420,3 +423,39 @@ CCID is independently switchable on 5.8.0+.
 **Confirms:** reconfiguration transitions follow re-enumerated PID truth; one-key reconfiguration
 makes same-PID ambiguity disappear entirely (PID counts drop to 1); single-interface keys are
 never wrapped in a composite; an untouched key is unaffected by its neighbour's reconfiguration.
+
+## Phase 5 — Guarantees document (2026-07-29)
+
+Delivered `docs/architecture/device-discovery-guarantees.md`: nine guarantees (G1-G9) scoped per
+platform, each citing the test that pins it. All 23 cited test names were mechanically verified to
+resolve against the suite before commit — a guarantee with an unresolvable citation is not a
+guarantee, and the document states that rule in its own opening.
+
+Linked from `src/Core/CLAUDE.md` (read before touching the merger/resolver — several
+conservative-looking outcomes are documented bounds, not defects), `src/Core/README.md` (the
+evidence-hierarchy bullet), and `src/Tests.Shared/README.md` (warning that `Assert.Single` on a
+discovery result only holds on a single-key rig — the assumption that broke four integration tests
+the moment a second key was attached).
+
+Recorded bounds, so they are not later mistaken for bugs: the G2 epistemic bound with its healing
+condition, blast radius, and two rejected alternatives; G4's macOS/Linux platform bound for
+serial-less multi-interface keys, with the platform research behind it; G3's conditional
+convergence; G8's in-use contract; G9's safe degradation.
+
+## Effort closure
+
+| Phase | Status |
+|---|---|
+| 0 Diagnostics | done — 96% of identity-read failures were admission saturation, not lease contention |
+| 1 RED harness | done — 3 defect vectors RED for predicted reasons, 18 pins, integration invariants generalized |
+| 2 Core fixes | done — guard + deduction + admission wait; 69 → 0 degraded reads, 20/20 identical groupings |
+| 3 Windows topology | done at seam level — 4 vectors RED→GREEN, 13 failure-mode pins |
+| 4 Tier 1 hardware | done — reconfiguration matrix passed, config restored and verified |
+| 4 Tier 2 hardware | **deferred** — needs Windows and Linux boxes; serial-less multi-interface pair if the lab has one; a 0x011x-era key; an NFC reader |
+| 5 Guarantees doc | done — 9 guarantees, 23 verified citations, linked from three entry points |
+
+Final gates at `2e5e3242`: full solution build 0 errors; all 12 unit-test projects green (Core 713
+total, 710 passed, 3 pre-existing platform skips, 0 failed); `resilience --fast` 69/69;
+`dotnet format --verify-no-changes` 0 errors; `git diff --check` clean. Hardware: all five
+`CompositeDiscoveryIntegrationTests` invariants green, and `PivMultiKeyContentionTests` runs 2/2
+instead of skipping — the symptom that opened the effort.

@@ -48,29 +48,27 @@ internal static class DeviceConnectionRegistry
 
     /// <summary>
     ///     Whether the interface of <paramref name="device" /> that would serve <paramref name="connection" />
-    ///     is in use. Resolves composite members the same way <see cref="CompositeYubiKey.ConnectAsync{T}" />
-    ///     routes connects, so the check matches the interface a read would actually open.
+    ///     is in use. Composite members are resolved through
+    ///     <see cref="CompositeYubiKey.TryResolveMember" />, the same routing a connect uses, so the check
+    ///     matches the interface a read would actually open.
     /// </summary>
     public static bool IsInterfaceInUse(IYubiKey device, ConnectionType connection) =>
         IsInUse(ResolveInterfaceId(device, connection));
 
     /// <summary>
-    ///     The per-interface DeviceId that a connect for <paramref name="connection" /> would register:
-    ///     the FIRST composite member supporting the connection (mirroring
-    ///     <see cref="CompositeYubiKey.ConnectAsync{T}" /> routing) or the device's own id.
+    ///     The per-interface DeviceId that a connect for <paramref name="connection" /> would register: the
+    ///     composite member selected by <see cref="CompositeYubiKey.TryResolveMember" />, or the device's
+    ///     own id when it is not a composite or exposes no member for the connection. Sharing that resolver
+    ///     with the connect path is what makes this agreement compiler-enforced rather than a convention.
     /// </summary>
     public static string ResolveInterfaceId(IYubiKey device, ConnectionType connection)
     {
         if (device is not CompositeYubiKey composite)
             return device.DeviceId;
 
-        foreach (var member in composite.Members)
-        {
-            if (member.AvailableConnections.SupportsConnection(connection))
-                return member.DeviceId;
-        }
-
-        return device.DeviceId;
+        return composite.TryResolveMember(connection, out var member)
+            ? member.DeviceId
+            : device.DeviceId;
     }
 
     /// <summary>

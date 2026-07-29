@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics.CodeAnalysis;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -79,11 +80,8 @@ internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
             throw new NotSupportedException(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
 
-        foreach (var member in _members)
-        {
-            if (member.AvailableConnections.SupportsConnection(requested))
-                return member.ConnectAsync<TConnection>(cancellationToken);
-        }
+        if (TryResolveMember(requested, out var member))
+            return member.ConnectAsync<TConnection>(cancellationToken);
 
         throw new NotSupportedException(
             $"Connection type {typeof(TConnection).Name} ({requested}) is not available on this physical YubiKey " +
@@ -94,11 +92,8 @@ internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
         ConnectionType connection,
         CancellationToken cancellationToken)
     {
-        foreach (var member in _members)
+        if (TryResolveMember(connection, out var member))
         {
-            if (!member.AvailableConnections.SupportsConnection(connection))
-                continue;
-
             if (member is IDiscoveryConnectionProvider provider)
                 return await provider.ConnectForDiscoveryAsync(connection, cancellationToken).ConfigureAwait(false);
 
@@ -108,6 +103,33 @@ internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
         throw new NotSupportedException(
             $"Connection type {connection} is not available on this physical YubiKey " +
             $"(available connections: {AvailableConnections}).");
+    }
+
+    /// <summary>
+    ///     The single member-routing rule for this composite: the FIRST member (in construction order)
+    ///     whose <see cref="IYubiKey.AvailableConnections" /> supports <paramref name="connection" />.
+    /// </summary>
+    /// <remarks>
+    ///     Every consumer that needs to know which physical interface serves a connection must route
+    ///     through here — <see cref="ConnectAsync{TConnection}" />, discovery connects, and
+    ///     <see cref="DeviceConnectionRegistry.ResolveInterfaceId" />. Callers differ only in what they do
+    ///     with the answer. Sharing the selection is what keeps the ownership registry keyed to the same
+    ///     interface a connect actually opens; if they diverged, session/discovery exclusion would
+    ///     silently stop working.
+    /// </remarks>
+    internal bool TryResolveMember(ConnectionType connection, [NotNullWhen(true)] out IYubiKey? member)
+    {
+        foreach (var candidate in _members)
+        {
+            if (candidate.AvailableConnections.SupportsConnection(connection))
+            {
+                member = candidate;
+                return true;
+            }
+        }
+
+        member = null;
+        return false;
     }
 
     private static ConnectionType RequestedConnectionType<TConnection>()

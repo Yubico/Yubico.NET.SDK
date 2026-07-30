@@ -202,7 +202,7 @@ metadata types (`DeviceInfo`, `FormFactor`, `DeviceCapabilities`, `DeviceFlags`,
 `VersionQualifierType`) are Core-owned (`Yubico.YubiKit.Core.Devices`); mutating operations stay in
 Management. Applet session extensions choose a transport via a documented default order plus an optional
 `preferredConnection` override, with held-transport fallback on the default path. Full reference:
-[Physical Device Model](../../docs/architecture/physical-device-model.md).
+[Physical Device Model](../../docs/architecture/physical-device-model.md). What grouping of a physical key's interfaces does and does not guarantee - per platform, with every guarantee pinned to a named test - is in [Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md). Read it before changing `CompositeDeviceMerger`, `FindYubiKeys`, or the topology resolver: the merge tiers are an evidence hierarchy that never guesses, and several conservative-looking outcomes are documented bounds with pinning tests, not defects.
 
 ### ConnectionType Semantics
 

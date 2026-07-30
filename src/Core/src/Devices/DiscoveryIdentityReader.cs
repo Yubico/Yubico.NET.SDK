@@ -60,21 +60,24 @@ internal static class DiscoveryIdentityReader
             try
             {
                 return await ProtocolDeviceInfo
-                    .ReadBoundedAsync(device, connection, PerAttemptBudget, logger, cancellationToken)
+                    .ReadBoundedAsync(device, connection, PerAttemptBudget, logger, cancellationToken, waitForWorkerSlot: true)
                     .ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
                 throw;
             }
-            catch (DiscoveryReadSkippedException)
+            catch (DiscoveryReadSkippedException e)
             {
-                // A session opened the interface while the read was starting (TOCTOU window behind the
-                // pre-connect check above). Same degradation as the pre-connect skip; retrying is pointless.
+                // With identity reads waiting for worker slots, the remaining skip causes are a session
+                // owning the interface (TOCTOU window behind the pre-connect check above — same degradation
+                // as the pre-connect skip; retrying is pointless) or a device without the discovery-only
+                // connection path. The cause is logged verbatim so diagnostics can tell them apart.
                 logger.LogDebug(
-                    "Discovery identity read for {DeviceId} over {Connection} aborted: interface gained a live connection; treating serial as unknown.",
+                    "Discovery identity read for {DeviceId} over {Connection} skipped ({Cause}); treating serial as unknown.",
                     device.DeviceId,
-                    connection);
+                    connection,
+                    e.Cause);
                 return null;
             }
             catch (TimeoutException)

@@ -19,7 +19,15 @@ See also: [event-driven device discovery](./event-driven-device-discovery.md) an
 
 `IYubiKey` (defined in `src/Core/src/Abstractions/IYubiKey.cs`) is intentionally small:
 
-- `string DeviceId` — a stable identifier for the physical device.
+- `string DeviceId` — a human-readable identifier for the device, suitable for logging and correlation
+  within a scan. For a single-interface device this is the platform interface path (reader name / HID
+  path) and is stable while the device stays plugged. For a **merged multi-interface device it is not
+  stable**: it names the evidence tier that resolved the merge (`ykphysical:topology:*`,
+  `ykphysical:{serial}`, `ykphysical:pid:*`) and therefore changes when the surrounding evidence changes
+  even though the key never moved — unplugging one of two same-model keys flips the untouched survivor's
+  id from the serial form to the PID form. Do not use it as a physical-identity key across rescans; the
+  SDK's own change detection keys on the device's interface set instead
+  (`CompositeYubiKey.PhysicalIdentityKeyFor`).
 - `ConnectionType AvailableConnections` — the concrete interfaces this device exposes, any combination of
   `SmartCard`, `HidFido`, and `HidOtp`. It never contains the `Hid` group flag or `All`.
 - `bool SupportsConnection(ConnectionType)` — whether a given interface is present on this device. The

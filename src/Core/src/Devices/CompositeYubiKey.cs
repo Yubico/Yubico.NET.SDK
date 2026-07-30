@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -46,6 +47,7 @@ internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
         _members = members;
         DeviceInfo = deviceInfo;
         MemberDeviceIds = [.. members.Select(m => m.DeviceId).OrderBy(id => id, StringComparer.Ordinal)];
+        PhysicalIdentityKey = EncodeInterfaceIds(MemberDeviceIds);
 
         var combined = ConnectionType.Unknown;
         foreach (var member in members)
@@ -59,6 +61,44 @@ internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
 
     /// <summary>Sorted member interface DeviceIds — a stable key for the physical interface set across rescans.</summary>
     internal IReadOnlyList<string> MemberDeviceIds { get; }
+
+    /// <summary>
+    ///     This composite's stable physical identity: a collision-free key over its sorted member
+    ///     interface ids. See <see cref="PhysicalIdentityKeyFor" /> for why this exists and why
+    ///     <see cref="DeviceId" /> cannot serve the same purpose.
+    /// </summary>
+    internal string PhysicalIdentityKey { get; }
+
+    /// <summary>
+    ///     The stable physical identity of any discovered key: the set of interface paths it occupies
+    ///     (reader names / HID device paths). Use this — never <see cref="DeviceId" /> — whenever a key
+    ///     must be recognized as "the same physical device" across rescans.
+    /// </summary>
+    /// <remarks>
+    ///     A composite's <see cref="DeviceId" /> names the EVIDENCE TIER that resolved the merge
+    ///     (<c>ykphysical:topology:*</c>, <c>ykphysical:{serial}</c>, <c>ykphysical:pid:*</c>), so it flips
+    ///     when the available evidence changes even though the physical key never moved: unplugging one of
+    ///     two same-PID keys drops the PID count to one, and the untouched survivor's id flips from the
+    ///     serial form to the PID form. That makes it a good diagnostic label and a wrong identity key.
+    ///     The interface set does not flip, which mirrors canonical yubikit, where device identity is a
+    ///     stable physical descriptor (Python's <c>reader_name or hid_path or fido_path</c> fingerprint)
+    ///     rather than a value derived from how the device was resolved.
+    /// </remarks>
+    internal static string PhysicalIdentityKeyFor(IYubiKey device) =>
+        device is CompositeYubiKey composite
+            ? composite.PhysicalIdentityKey
+            : EncodeInterfaceIds([device.DeviceId]);
+
+    // Length-prefixing each id makes the boundaries unambiguous even if a reader name or device path
+    // contains delimiter characters, so the encoding is prefix-free and two different interface sets can
+    // never produce the same key.
+    private static string EncodeInterfaceIds(IReadOnlyList<string> sortedInterfaceIds)
+    {
+        var builder = new StringBuilder();
+        foreach (var id in sortedInterfaceIds)
+            builder.Append(id.Length).Append(':').Append(id);
+        return builder.ToString();
+    }
 
     /// <summary>The per-interface member devices this composite routes connects to.</summary>
     internal IReadOnlyList<IYubiKey> Members => _members;

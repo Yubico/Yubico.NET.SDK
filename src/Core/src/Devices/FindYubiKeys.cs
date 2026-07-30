@@ -61,8 +61,9 @@ public class FindYubiKeys : IFindYubiKeys
     // a failed or serial-disabled read is simply absent and is retried on the next scan.
     private readonly ConcurrentDictionary<string, DeviceInfo> _identityCache = new();
 
-    // Best-effort metadata cache, keyed by the merged device's stable interface-set key (NOT the composite
-    // DeviceId, which can flip between pid- and serial-forms). Evicted when any member interface disappears.
+    // Best-effort metadata cache, keyed by the merged device's stable interface-set key
+    // (CompositeYubiKey.PhysicalIdentityKey, NOT the composite DeviceId, which can flip between pid- and
+    // serial-forms). Evicted when any member interface disappears.
     private readonly ConcurrentDictionary<string, MetadataCacheEntry> _metadataCache = new();
 
     // Serializes discovery so two concurrent scans do not open connections to the same interface at once.
@@ -232,7 +233,7 @@ public class FindYubiKeys : IFindYubiKeys
         // the merge result which is already computed).
         var reads = composites.Select(async composite =>
         {
-            var key = MetadataKey(composite);
+            var key = composite.PhysicalIdentityKey;
             if (_metadataCache.TryGetValue(key, out var cached))
             {
                 composite.DeviceInfo = cached.Info;
@@ -251,16 +252,6 @@ public class FindYubiKeys : IFindYubiKeys
         });
 
         await Task.WhenAll(reads).ConfigureAwait(false);
-    }
-
-    // Collision-free key over the (already sorted) member ids: length-prefixing each part makes the
-    // boundaries unambiguous even if a reader name / device path contains delimiter characters.
-    private static string MetadataKey(CompositeYubiKey composite)
-    {
-        var builder = new StringBuilder();
-        foreach (var id in composite.MemberDeviceIds)
-            builder.Append(id.Length).Append(':').Append(id);
-        return builder.ToString();
     }
 
     private void EvictAbsentIdentities(IReadOnlyList<InterfaceCandidate> interfaces)

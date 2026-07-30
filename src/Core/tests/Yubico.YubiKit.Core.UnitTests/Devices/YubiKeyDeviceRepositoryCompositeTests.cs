@@ -96,6 +96,110 @@ public class YubiKeyDeviceRepositoryCompositeTests
         Assert.Same(second, events[1].Device);
     }
 
+    [Fact]
+    public void Merge_SurvivingKeyAfterSiblingRemoval_FlipsDeviceIdTierButNotMemberIds()
+    {
+        // Documents the tier flip this file's diff-stability tests exist to absorb. Two same-PID keys are
+        // resolved by serial evidence; with only one key left the PID tier resolves it instead. The
+        // composite DeviceId therefore encodes WHICH EVIDENCE resolved the key, and changes when the
+        // evidence changes even though the physical key never moved. The member interface ids do not.
+        var both = CompositeDeviceMerger.Merge([.. KeyInterfaces("a", 103), .. KeyInterfaces("b", 125)]);
+        var survivorWhileSiblingPresent = Assert.IsType<CompositeYubiKey>(
+            Assert.Single(both, d => d.DeviceId == "ykphysical:103"));
+
+        var alone = CompositeDeviceMerger.Merge(KeyInterfaces("a", null));
+        var survivorAlone = Assert.IsType<CompositeYubiKey>(Assert.Single(alone));
+
+        Assert.NotEqual(survivorWhileSiblingPresent.DeviceId, survivorAlone.DeviceId);
+        Assert.Equal("ykphysical:pid:0407", survivorAlone.DeviceId);
+        Assert.Equal(survivorWhileSiblingPresent.MemberDeviceIds, survivorAlone.MemberDeviceIds);
+    }
+
+    [Fact]
+    public void UpdateCache_SiblingSamePidKeyRemoved_SurvivorEmitsNoRemovedOrAdded()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        repository.UpdateCache(CompositeDeviceMerger.Merge([.. KeyInterfaces("a", 103), .. KeyInterfaces("b", 125)]));
+
+        var events = new List<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+
+        // Key B unplugged. Key A did not move — same three interfaces, same interface paths — but its
+        // composite DeviceId flips from the serial tier to the PID tier.
+        repository.UpdateCache(CompositeDeviceMerger.Merge(KeyInterfaces("a", null)));
+
+        var evt = Assert.Single(events);
+        Assert.Equal(DeviceAction.Removed, evt.Action);
+        Assert.Equal("ykphysical:125", evt.Device.DeviceId);
+    }
+
+    [Fact]
+    public void UpdateCache_SiblingSamePidKeyArrives_IncumbentEmitsNoRemovedOrAdded()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        repository.UpdateCache(CompositeDeviceMerger.Merge(KeyInterfaces("a", null)));
+
+        var events = new List<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+
+        // Key B plugged in. Key A did not move, but its DeviceId flips back from the PID tier to the
+        // serial tier.
+        repository.UpdateCache(CompositeDeviceMerger.Merge([.. KeyInterfaces("a", 103), .. KeyInterfaces("b", 125)]));
+
+        var evt = Assert.Single(events);
+        Assert.Equal(DeviceAction.Added, evt.Action);
+        Assert.Equal("ykphysical:125", evt.Device.DeviceId);
+    }
+
+    // INVARIANT PIN (not fix evidence): a genuinely removed physical key still emits Removed.
+    [Fact]
+    public void UpdateCache_CompositeKeyUnplugged_EmitsRemoved()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        var key = Composite("ykphysical:pid:0407", "pcsc:a", "hid-fido:a");
+        repository.UpdateCache([key]);
+
+        var events = new List<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+
+        repository.UpdateCache([]);
+
+        var evt = Assert.Single(events);
+        Assert.Equal(DeviceAction.Removed, evt.Action);
+        Assert.Same(key, evt.Device);
+    }
+
+    // INVARIANT PIN (not fix evidence): a genuinely added physical key still emits Added.
+    [Fact]
+    public void UpdateCache_CompositeKeyPluggedIn_EmitsAdded()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        repository.UpdateCache([]);
+
+        var events = new List<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+
+        var key = Composite("ykphysical:pid:0407", "pcsc:a", "hid-fido:a");
+        repository.UpdateCache([key]);
+
+        var evt = Assert.Single(events);
+        Assert.Equal(DeviceAction.Added, evt.Action);
+        Assert.Same(key, evt.Device);
+    }
+
+    private const ushort FullKeyPid = 0x0407; // OTP + FIDO + CCID
+
+    /// <summary>The three USB interfaces of one full-triple physical key, tagged so ids are per-key.</summary>
+    private static DeviceInterfaceDescriptor[] KeyInterfaces(string tag, int? serial) =>
+    [
+        Usb($"pcsc:{tag}", ConnectionType.SmartCard, serial),
+        Usb($"hid-fido:{tag}", ConnectionType.HidFido, serial),
+        Usb($"hid-otp:{tag}", ConnectionType.HidOtp, serial)
+    ];
+
+    private static DeviceInterfaceDescriptor Usb(string id, ConnectionType connection, int? serial) =>
+        new(new FakeYubiKey(id, connection), connection, IsUsb: true, FullKeyPid, serial, null);
+
     private static CompositeYubiKey Composite(string deviceId, string smartCardId, string hidFidoId) =>
         new(
             deviceId,

@@ -45,9 +45,11 @@ namespace Yubico.YubiKit.Core.Devices;
 ///     </para>
 ///     <para>
 ///         LIMITATION: in-process only. A different process holding the card can still interfere; that is
-///         outside what this registry can see. Keyed by DeviceId string, which is stable across scans while
-///         the device stays plugged (reader name / HID path based), so registrations made through devices
-///         from one scan are visible to readers created in later scans. Idle coordinator entries are retained
+///         outside what this registry can see. Keyed by the PER-INTERFACE DeviceId (reader name / HID path
+///         based), which is stable across scans while the device stays plugged, so registrations made through
+///         devices from one scan are visible to readers created in later scans. A composite's own DeviceId is
+///         never used as a key here — <see cref="ResolveInterfaceId" /> always resolves to a member — because
+///         it names the evidence tier that resolved the merge and is not stable across scans. Idle coordinator entries are retained
 ///         for the process lifetime: this is bounded by unique interface IDs observed and avoids unsafe
 ///         remove/recreate races between lease acquisition and dictionary eviction.
 ///     </para>

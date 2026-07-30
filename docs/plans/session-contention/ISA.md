@@ -286,3 +286,44 @@ Commit `00a9e26f` is superseded. Most of its 17 tests express requirements that 
 to acquisition time with *less* setup, because there is no wire to fake. The `DeviceConnectionRegistry`
 plumbing survives. What dies is the sniffing decorator and the reconciliation logic — exactly the
 parts review could not pass.
+
+### The usage pattern the pivot requires (and what canonical does)
+
+Forbidding two concurrent sessions is only acceptable if using two applets stays ergonomic. The
+canonical answer is **sequential ownership transfer with connection reuse**, not reconnect.
+
+Rust gives every applet session `pub fn into_connection(self) -> C` — verified on all six
+(`piv`, `oath`, `management`, `openpgp`, `hsmauth`, `securitydomain`):
+
+```rust
+let piv  = PivSession::new(conn)?;
+// ... use piv ...
+let conn = piv.into_connection();    // hand the connection back
+let oath = OathSession::new(conn)?;  // give it to the next applet
+```
+
+One connection, successive applets, no re-enumeration and no reconnect. Ownership moves; the
+physical handle never closes.
+
+Python reaches the same outcome differently: constructing the next session on the same connection
+closes the previous one automatically, so the sequence is implicit.
+
+**C# already has the pieces, and already needed them.**
+
+1. Every session's `CreateAsync` accepts a caller-owned `ISmartCardConnection`
+   (`PivSession.cs:124`), so the caller *can* own the connection.
+2. But disposing a session disposes the connection (`PcscProtocol.cs:93`), which prevents reuse —
+   this is the gap.
+3. The SDK **already solved it, privately**: `src/Tests.Shared/SharedSmartCardConnection.cs` is a
+   non-owning wrapper that forwards everything and ignores `Dispose`, added because integration
+   helpers needed several sessions over one physical connection. The pattern exists, is proven, and
+   is visible only to the test assembly.
+
+That third point is the finding. The SDK hit this exact need, built the answer, and left it in test
+infrastructure. The pivot should promote it: give callers a supported way to run successive applet
+sessions over one connection, so "one session at a time per interface" costs an explicit handoff
+rather than a reconnect.
+
+Deferred to the implementation phase: whether that surface is a non-owning connection wrapper, an
+ownership flag on `CreateAsync`, or a scoped multi-applet helper. All three are additive and none
+changes the enforcement rule.

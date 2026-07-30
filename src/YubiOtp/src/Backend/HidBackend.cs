@@ -14,25 +14,35 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 
-namespace Yubico.YubiKit.YubiOtp;
+namespace Yubico.YubiKit.YubiOtp.Backend;
 
 /// <summary>
 /// Backend implementation for YubiOTP operations over OTP HID (8-byte feature reports).
 /// Delegates to <see cref="IOtpHidProtocol"/> and validates CRC on responses.
 /// </summary>
-internal sealed class OtpHidBackend : IYubiOtpBackend
+internal sealed class HidBackend : IYubiOtpBackend
 {
     private static readonly ILogger Logger =
-        YubiKitLogging.LoggerFactory.CreateLogger<OtpHidBackend>();
+        YubiKitLogging.LoggerFactory.CreateLogger<HidBackend>();
 
     private readonly IOtpHidProtocol _protocol;
 
-    public OtpHidBackend(IOtpHidProtocol protocol)
+    public HidBackend(IOtpHidProtocol protocol)
     {
         ArgumentNullException.ThrowIfNull(protocol);
         _protocol = protocol;
+    }
+
+    public async ValueTask<YubiOtpInitialization> InitializeAsync(CancellationToken cancellationToken)
+    {
+        var status = await _protocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
+        var firmwareVersion = _protocol.FirmwareVersion
+                              ?? new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);
+
+        return new YubiOtpInitialization(firmwareVersion, status);
     }
 
     public async ValueTask<ReadOnlyMemory<byte>> WriteUpdateAsync(
@@ -40,7 +50,7 @@ internal sealed class OtpHidBackend : IYubiOtpBackend
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken)
     {
-        Logger.LogDebug("OtpHidBackend WriteUpdate: slot={Slot}", slot);
+        Logger.LogDebug("HidBackend WriteUpdate: slot={Slot}", slot);
 
         var response = await _protocol.SendAndReceiveAsync((byte)slot, data, cancellationToken)
             .ConfigureAwait(false);
@@ -60,7 +70,7 @@ internal sealed class OtpHidBackend : IYubiOtpBackend
         int expectedLength,
         CancellationToken cancellationToken)
     {
-        Logger.LogDebug("OtpHidBackend SendAndReceive: slot={Slot}, expectedLength={Length}", slot, expectedLength);
+        Logger.LogDebug("HidBackend SendAndReceive: slot={Slot}, expectedLength={Length}", slot, expectedLength);
 
         var response = await _protocol.SendAndReceiveAsync((byte)slot, data, cancellationToken)
             .ConfigureAwait(false);

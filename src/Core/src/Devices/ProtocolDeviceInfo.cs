@@ -15,12 +15,10 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
-using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Core.Transports.Hid;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Devices;
 
@@ -234,50 +232,35 @@ internal static class ProtocolDeviceInfo
 
     public static async Task<DeviceInfo> ReadAsync(IConnection connection, CancellationToken cancellationToken)
     {
-        switch (connection)
+        IProtocol protocol;
+        try
         {
-            case ISmartCardConnection smartCard:
-                {
-                    var protocol = PcscProtocolFactory<ISmartCardConnection>.Create().Create(smartCard);
-                    try
-                    {
-                        await protocol.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
-                        return await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        protocol.Dispose();
-                    }
-                }
-            case IFidoHidConnection fido:
-                {
-                    var protocol = FidoProtocolFactory.Create().Create(fido);
-                    try
-                    {
-                        // Initializes the HID channel; the application id is unused for HID.
-                        await protocol.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
-                        return await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        protocol.Dispose();
-                    }
-                }
-            case IOtpHidConnection otp:
-                {
-                    var protocol = OtpProtocolFactory.Create().Create(otp);
-                    try
-                    {
-                        return await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        protocol.Dispose();
-                    }
-                }
-            default:
-                throw new NotSupportedException(
-                    $"Connection type {connection.GetType().Name} is not supported for reading device info.");
+            protocol = ProtocolFactory.Create(connection);
+        }
+        catch
+        {
+            // Preserve the ownership contract: if we can't build a protocol to adopt the connection,
+            // dispose the connection here rather than leaking it.
+            await connection.DisposeAsync().ConfigureAwait(false);
+            throw;
+        }
+
+        try
+        {
+            if (protocol is ISmartCardProtocol smartCard)
+            {
+                await smartCard.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
+            }
+            else if (protocol is IFidoHidProtocol fidoHid)
+            {
+                await fidoHid.InitializeAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            return await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            protocol.Dispose();
         }
     }
 }

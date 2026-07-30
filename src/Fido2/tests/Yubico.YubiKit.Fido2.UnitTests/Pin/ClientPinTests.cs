@@ -15,7 +15,6 @@
 using NSubstitute;
 using System.Formats.Cbor;
 using System.Text;
-using Xunit;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 

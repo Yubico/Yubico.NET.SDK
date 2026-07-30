@@ -7,8 +7,6 @@ using System.Buffers.Binary;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.Hid;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
@@ -40,14 +38,23 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
 
     public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
     {
-        // Channel initialization transmits, so it must hold the gate like any exchange.
-        _exchangeGate.RunExclusiveAsync(
-                EnsureChannelInitializedUnderGateAsync,
-                CancellationToken.None)
-            .GetAwaiter()
-            .GetResult();
+        InitializeAsync().GetAwaiter().GetResult();
 
         _logger.LogDebug("HID protocol configured for firmware version {Version}", version);
+    }
+
+    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        await _exchangeGate.RunExclusiveAsync(
+                async exchangeToken =>
+                {
+                    await EnsureChannelInitializedAsync(exchangeToken).ConfigureAwait(false);
+                    return true;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public async Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
@@ -63,7 +70,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         var response = await _exchangeGate.RunExclusiveAsync(
                 async exchangeToken =>
                 {
-                    await EnsureChannelInitializedUnderGateAsync(exchangeToken).ConfigureAwait(false);
+                    await EnsureChannelInitializedAsync(exchangeToken).ConfigureAwait(false);
                     return await TransmitCommand(
                             _channelId!.Value,
                             command,
@@ -78,73 +85,12 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         return response;
     }
 
-    public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-        ApduCommand command,
-        CancellationToken cancellationToken = default)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
-        _logger.LogTrace("Transmitting APDU over HID: {Command}", command);
-
-        // For Management application, use CTAPHID_MSG (0x03) to send raw APDUs
-        // Serialize the APDU command
-        var apduBytes = SerializeApdu(command);
-
-        // Send via CTAP HID MSG command
-        var response = await _exchangeGate.RunExclusiveAsync(
-                async exchangeToken =>
-                {
-                    await EnsureChannelInitializedUnderGateAsync(exchangeToken).ConfigureAwait(false);
-                    return await TransmitCommand(
-                            _channelId!.Value,
-                            CtapConstants.CtapHidMsg,
-                            apduBytes,
-                            exchangeToken)
-                        .ConfigureAwait(false);
-                },
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        // Parse response APDU
-        var apduResponse = ParseApduResponse(response);
-
-        if (!apduResponse.IsOK())
-            throw ApduException.FromResponse(apduResponse, command, "HID APDU command failed");
-
-        _logger.LogTrace("Received APDU response: {Length} bytes, SW=0x{SW:X4}",
-            apduResponse.Data.Length, apduResponse.SW);
-
-        return apduResponse.Data;
-    }
-
-    public async Task<ReadOnlyMemory<byte>> SelectAsync(
-        ReadOnlyMemory<byte> applicationId,
-        CancellationToken cancellationToken = default)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
-        // The lazy channel initialization transmits, so it runs under the gate like any exchange.
-        await _exchangeGate.RunExclusiveAsync(
-                EnsureChannelInitializedUnderGateAsync,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        _logger.LogTrace("HID SelectAsync called for application ID, returning version string");
-
-        // For HID, the Management application doesn't require SELECT - it's directly accessible.
-        // Return version string based on firmware version obtained during CTAPHID_INIT
-        var version = _firmwareVersion ?? new FirmwareVersion(5, 0, 0);
-        var versionString = System.Text.Encoding.UTF8.GetBytes(
-            $"YubiKey {version.Major}.{version.Minor}.{version.Patch}");
-        return versionString;
-    }
-
     /// <summary>
     /// Initializes the CTAP HID channel if not already done. Must be called from within the
     /// exchange gate (or single-threaded initialization) — the INIT handshake is itself an
     /// exchange that must not interleave with other traffic.
     /// </summary>
-    private async Task EnsureChannelInitializedUnderGateAsync(CancellationToken cancellationToken)
+    private async Task EnsureChannelInitializedAsync(CancellationToken cancellationToken)
     {
         if (IsChannelInitialized)
             return;
@@ -404,46 +350,6 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
     /// </summary>
     private static int GetPacketLength(ReadOnlySpan<byte> packet) =>
         (packet[5] << 8) | packet[6];
-
-    /// <summary>
-    /// Serializes an APDU command to bytes.
-    /// </summary>
-    private static byte[] SerializeApdu(ApduCommand command)
-    {
-        // Calculate total length: 4 (header) + data + Lc/Le bytes
-        var hasData = command.Data.Length > 0;
-        var length = 4 + (hasData ? 1 + command.Data.Length : 0) + 1; // +1 for Le=0
-
-        var buffer = new byte[length];
-        var offset = 0;
-
-        // CLA, INS, P1, P2
-        buffer[offset++] = command.Cla;
-        buffer[offset++] = command.Ins;
-        buffer[offset++] = command.P1;
-        buffer[offset++] = command.P2;
-
-        // Lc and Data
-        if (hasData)
-        {
-            buffer[offset++] = (byte)command.Data.Length;
-            command.Data.Span.CopyTo(buffer.AsSpan(offset));
-            offset += command.Data.Length;
-        }
-
-        // Le = 0 (expect up to 256 bytes response)
-        buffer[offset] = 0x00;
-
-        return buffer;
-    }
-
-    /// <summary>
-    /// Parses an APDU response from bytes.
-    /// </summary>
-    private static ApduResponse ParseApduResponse(ReadOnlyMemory<byte> response)
-    {
-        return new ApduResponse(response);
-    }
 
     public void Dispose()
     {

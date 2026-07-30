@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console.Cli;
-using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;

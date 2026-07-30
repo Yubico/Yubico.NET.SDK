@@ -85,11 +85,12 @@ await using var otpConnection = await device.ConnectAsync<IOtpHidConnection>();
 
 ```csharp
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 // Create protocol from connection
-var protocol = PcscProtocolFactory<ISmartCardConnection>.Create().Create(smartCardConnection);
+using ISmartCardProtocol protocol = ProtocolFactory.Create(smartCardConnection);
 
 // Select an application (e.g., PIV)
 await protocol.SelectAsync(ApplicationIds.Piv, cancellationToken);
@@ -107,16 +108,15 @@ var command = new ApduCommand
     Data = applicationId
 };
 
-var responseData = await protocol.TransmitAndReceiveAsync(command, cancellationToken);
+var responseData = await protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
 ```
 
 ### Secure Channel Protocol (SCP)
 
 ```csharp
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
-using Yubico.YubiKit.Core.Sessions;
 
-// Establish SCP03 session
+// Core supplies the key-parameter types consumed by SCP-capable session factories.
 var staticKeys = new StaticKeys(
     keyRef: 0x01,
     encKey: encKeyBytes,
@@ -125,14 +125,13 @@ var staticKeys = new StaticKeys(
 );
 
 var scp03Params = new Scp03KeyParameters(keyRef, staticKeys);
-var scpProtocol = await protocol.WithScpAsync(scp03Params, cancellationToken);
-
-// Now all commands are encrypted/authenticated
-await scpProtocol.SelectAsync(ApplicationIds.SecurityDomain, cancellationToken);
 
 // Always zero sensitive key material
 staticKeys.Dispose();
 ```
+
+SCP establishment is an internal `PcscProtocol` capability. Session factories own protocol
+configuration, channel establishment, and cleanup; `PcscProtocolScp` cannot be constructed by consumers.
 
 ### TLV Processing
 
@@ -284,7 +283,6 @@ if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_7_2))
 - **[Yubico.YubiKit.Management](../Management/)** - Device information and capability queries
 - **[Yubico.YubiKit.Piv](../Piv/)** - PIV smart card operations
 - **[Yubico.YubiKit.Fido2](../Fido2/)** - FIDO2/WebAuthn authentication
-- **[Yubico.YubiKit.SecurityDomain](../SecurityDomain/)** - SCP key management
 
 ## Developer Documentation
 

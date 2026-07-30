@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Tests.Shared;
@@ -21,6 +20,17 @@ namespace Yubico.YubiKit.OpenPgp.UnitTests;
 
 public sealed class OpenPgpSessionWireTests
 {
+    [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    {
+        var connection = new RecordingSmartCardConnection();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            OpenPgpSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(1, connection.DisposeCount);
+    }
+
     [Fact]
     public async Task CreateAsync_TransmitsSelectVersionAndApplicationRelatedData()
     {

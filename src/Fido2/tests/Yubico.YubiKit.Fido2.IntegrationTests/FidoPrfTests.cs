@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Xunit;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.Fido2.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Fido2.Pin;

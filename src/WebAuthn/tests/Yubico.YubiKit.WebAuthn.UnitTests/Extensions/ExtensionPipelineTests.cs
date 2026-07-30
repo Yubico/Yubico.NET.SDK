@@ -14,14 +14,12 @@
 
 using System.Formats.Cbor;
 using System.Security.Cryptography;
-using Xunit;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
-using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 using Yubico.YubiKit.WebAuthn.Preferences;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions;

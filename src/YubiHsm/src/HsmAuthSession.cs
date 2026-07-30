@@ -16,11 +16,13 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.YubiHsm.Backend;
 
 namespace Yubico.YubiKit.YubiHsm;
 
@@ -44,7 +46,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     internal const byte InsGetChallenge = 0x04;
     internal const byte InsList = 0x05;
     internal const byte InsReset = 0x06;
-    internal const byte InsGetVersion = 0x07;
     internal const byte InsPutManagementKey = 0x08;
     internal const byte InsGetManagementKeyRetries = 0x09;
     internal const byte InsGetPublicKey = 0x0A;
@@ -90,12 +91,15 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
     private readonly ISmartCardConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
-    private ISmartCardProtocol? _protocol;
+    private ISmartCardProtocol _protocol = null!;
+    private IHsmAuthBackend _backend = null!;
 
     private HsmAuthSession(
         ISmartCardConnection connection,
         ScpKeyParameters? scpKeyParams = null)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         _connection = connection;
         _scpKeyParams = scpKeyParams;
     }
@@ -116,10 +120,20 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         FirmwareVersion? firmwareVersion = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         var session = new HsmAuthSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, firmwareVersion, cancellationToken)
-            .ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, firmwareVersion, cancellationToken)
+                .ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     private async Task InitializeAsync(
@@ -130,45 +144,28 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         if (IsInitialized)
             return;
 
-        var smartCardProtocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create()
-            .Create(_connection);
+        var protocol = ProtocolFactory.Create(_connection);
+        Protocol = protocol;
+        IHsmAuthBackend backend = new HsmAuthBackend(protocol);
 
-        var selectResponse = await smartCardProtocol
-            .SelectAsync(ApplicationIds.YubiHsmAuth, cancellationToken)
-            .ConfigureAwait(false);
+        var initializationFirmwareVersion = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var resolvedFirmwareVersion = firmwareVersion ?? initializationFirmwareVersion;
 
-        // Parse firmware version from SELECT response TAG_VERSION TLV if not explicitly provided.
-        var resolvedFirmwareVersion = firmwareVersion
-            ?? ParseVersionFromSelectResponse(selectResponse)
-            ?? FeatureHsmAuth.Version;
-
-        await InitializeCoreAsync(
-                smartCardProtocol,
+        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+                protocol,
                 resolvedFirmwareVersion,
                 configuration,
                 _scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _protocol = Protocol as ISmartCardProtocol;
-        if (_protocol is null)
-            throw new InvalidOperationException("Protocol initialization failed.");
-    }
+        if (!ReferenceEquals(protocol, effectiveProtocol))
+        {
+            backend = new HsmAuthBackend(effectiveProtocol);
+        }
 
-    private static FirmwareVersion? ParseVersionFromSelectResponse(ReadOnlyMemory<byte> response)
-    {
-        if (response.IsEmpty)
-            return null;
-
-        if (!TlvHelper.TryFindValue(TagVersion, response.Span, out var versionData))
-            return null;
-
-        if (versionData.Length != 3)
-            return null;
-
-        var span = versionData.Span;
-        return new FirmwareVersion(span[0], span[1], span[2]);
+        _protocol = effectiveProtocol;
+        _backend = backend;
     }
 
     /// <summary>
@@ -243,7 +240,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ThrowIfDisposed();
 
         var command = new ApduCommand { Ins = InsList };
-        var response = await _protocol!.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+        var response = await _backend.SendAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         var credentials = new List<HsmAuthCredential>();
@@ -450,7 +447,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ThrowIfDisposed();
 
         var command = new ApduCommand { Ins = InsGetManagementKeyRetries };
-        var response = await _protocol!.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+        var response = await _backend.SendAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         var data = response.Data.Span;
@@ -497,18 +494,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ThrowIfDisposed();
 
         var command = new ApduCommand { Ins = InsReset, P1 = ResetP1, P2 = ResetP2 };
-        await _protocol!.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+        await _backend.SendAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         // Re-SELECT the applet using the existing protocol to refresh cached state.
         // Do NOT create a new protocol here — that would abandon the current one without
         // disposing it, leaking the PCSC transaction and causing SW=0x6985 on next operation.
-        var selectResponse = await _protocol!
-            .SelectAsync(ApplicationIds.YubiHsmAuth, cancellationToken)
-            .ConfigureAwait(false);
-
-        var resolvedFirmwareVersion = ParseVersionFromSelectResponse(selectResponse)
-            ?? FeatureHsmAuth.Version;
+        var resolvedFirmwareVersion = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         FirmwareVersion = resolvedFirmwareVersion;
     }
@@ -596,7 +588,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
 
             var command = new ApduCommand { Ins = InsGetChallenge, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
+            var response = await _backend.SendAsync(
                     command, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
@@ -711,7 +703,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var data = TlvHelper.EncodeAndDisposeList(new Tlv(TagLabel, labelBytes));
 
         var command = new ApduCommand { Ins = InsGetPublicKey, Data = data };
-        var response = await _protocol!.TransmitAndReceiveAsync(
+        var response = await _backend.SendAsync(
                 command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
@@ -832,7 +824,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         string operationName,
         CancellationToken cancellationToken)
     {
-        var response = await _protocol!.TransmitAndReceiveAsync(
+        var response = await _backend.SendAsync(
                 command, throwOnError: false, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 

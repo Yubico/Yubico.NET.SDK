@@ -13,10 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.OpenPgp;
 
@@ -55,8 +52,8 @@ public sealed partial class OpenPgpSession
         // Step 6: Re-initialize — re-SELECT and refresh cached state
         _logger.LogDebug("Re-initializing session after reset");
 
-        await _protocol!.SelectAsync(ApplicationIds.OpenPgp, cancellationToken)
-            .ConfigureAwait(false);
+        var initialization = await _backend!.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        FirmwareVersion = initialization.FirmwareVersion;
 
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);

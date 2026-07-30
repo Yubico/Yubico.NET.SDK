@@ -17,8 +17,6 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
-using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Sessions;
 
@@ -38,17 +36,17 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         Logger = YubiKitLogging.CreateLogger(GetType().FullName ?? GetType().Name);
     }
 
-    protected async Task InitializeCoreAsync(
+    protected async Task<IProtocol> InitializeProtocolAsync(
         IProtocol protocol,
         FirmwareVersion firmwareVersion,
         ProtocolConfiguration? configuration = null,
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
-        if (IsInitialized)
-            return;
-
         ArgumentNullException.ThrowIfNull(protocol);
+
+        if (IsInitialized)
+            return Protocol ?? protocol;
 
         protocol.Configure(firmwareVersion, configuration);
 
@@ -57,11 +55,14 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 
         if (scpKeyParams is not null)
         {
-            if (effectiveProtocol is not ISmartCardProtocol smartCardProtocol)
-                throw new NotSupportedException("SCP is only supported on SmartCard protocols.");
+            if (effectiveProtocol is not PcscProtocol pcscProtocol)
+            {
+                throw new NotSupportedException(
+                    "SCP is only supported on PC/SC SmartCard protocols created by Core.");
+            }
 
-            effectiveProtocol = await smartCardProtocol
-                .WithScpAsync(scpKeyParams, cancellationToken)
+            effectiveProtocol = await pcscProtocol
+                .InitializeScpAsync(scpKeyParams, cancellationToken)
                 .ConfigureAwait(false);
 
             isAuthenticated = true;
@@ -72,6 +73,31 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         FirmwareVersion = firmwareVersion;
         IsAuthenticated = isAuthenticated;
         IsInitialized = true;
+
+        return effectiveProtocol;
+    }
+
+    /// <summary>
+    ///     Releases resources owned by a session whose asynchronous factory failed. Disposal failures
+    ///     are logged and suppressed so the initialization exception remains the primary failure.
+    /// </summary>
+    protected void DisposeAfterInitializationFailure()
+    {
+        try
+        {
+            Dispose();
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                Logger.LogWarning(ex, "Failed to dispose session resources after initialization failed");
+            }
+            catch
+            {
+                // Initialization is already failing. Logging must not replace that original exception.
+            }
+        }
     }
 
     public bool IsSupported(Feature feature) =>
@@ -106,19 +132,25 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         if (_disposed)
             return;
 
+        _disposed = true;
+
         if (disposing)
         {
-            Protocol?.Dispose();
+            var protocol = Protocol;
             Protocol = null;
+            protocol?.Dispose();
         }
-
-        _disposed = true;
     }
 
     protected virtual ValueTask DisposeAsyncCore()
     {
-        Protocol?.Dispose();
+        if (_disposed)
+            return ValueTask.CompletedTask;
+
+        _disposed = true;
+        var protocol = Protocol;
         Protocol = null;
+        protocol?.Dispose();
         return ValueTask.CompletedTask;
     }
 }

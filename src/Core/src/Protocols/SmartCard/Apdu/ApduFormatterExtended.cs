@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Buffers.Binary;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 

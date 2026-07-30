@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
-using Yubico.YubiKit.Fido2.Cbor;
 
 namespace Yubico.YubiKit.Fido2.Credentials;
 

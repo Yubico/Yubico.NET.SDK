@@ -15,12 +15,9 @@
 using NSubstitute;
 using System.Reflection;
 using System.Security.Cryptography;
-using Xunit;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -28,6 +25,17 @@ namespace Yubico.YubiKit.Piv.UnitTests;
 
 public class PivSessionTests
 {
+    [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    {
+        var connection = new RecordingSmartCardConnection();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(1, connection.DisposeCount);
+    }
+
     [Fact]
     public async Task CreateAsync_WithValidConnection_ReturnsInitializedSession()
     {

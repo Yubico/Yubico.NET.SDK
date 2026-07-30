@@ -15,7 +15,6 @@
 using NSubstitute;
 using System.Formats.Cbor;
 using System.Security.Cryptography;
-using Xunit;
 using Yubico.YubiKit.Fido2.LargeBlobs;
 using Yubico.YubiKit.Fido2.Pin;
 

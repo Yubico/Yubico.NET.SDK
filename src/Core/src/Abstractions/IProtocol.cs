@@ -14,10 +14,32 @@
 
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Abstractions;
 
+/// <summary>
+///     Base contract for a configured transport protocol over a single opened YubiKey connection.
+/// </summary>
+/// <remarks>
+///     <para>
+///         A protocol owns the connection it was created from. Disposing the protocol disposes that
+///         connection; callers should not dispose both independently.
+///     </para>
+///     <para>
+///         Sessions configure the protocol after applet probing has resolved firmware. Call
+///         <see cref="Configure" /> before normal applet operations and before establishing decorators
+///         such as SCP.
+///     </para>
+///     <para>
+///         Implementations serialize full logical exchanges internally. Concurrent callers are safe, but
+///         work executes sequentially because YubiKey transports maintain chained APDU, CTAP HID, OTP HID,
+///         or SCP state across packets.
+///     </para>
+///     <para>
+///         Application sessions keep the effective protocol for the session lifetime and dispose it when
+///         the session is disposed. Applet backends borrow the protocol; they do not own it.
+///     </para>
+/// </remarks>
 public interface IProtocol : IDisposable
 {
     void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null);

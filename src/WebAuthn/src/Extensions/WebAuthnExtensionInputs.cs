@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Fido2.Extensions;
-using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
-using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions;
 

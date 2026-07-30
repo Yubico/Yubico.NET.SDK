@@ -14,7 +14,6 @@
 
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Tests.Shared;
@@ -34,6 +33,11 @@ public sealed class RecordingSmartCardConnection(params byte[][] responses) : IS
     ///     Gets the commands transmitted through this connection, in order.
     /// </summary>
     public List<byte[]> TransmittedCommands { get; } = [];
+
+    /// <summary>
+    ///     Gets the number of times the connection was disposed.
+    /// </summary>
+    public int DisposeCount { get; private set; }
 
     public Transport Transport { get; } = Transport.Usb;
 
@@ -60,9 +64,14 @@ public sealed class RecordingSmartCardConnection(params byte[][] responses) : IS
 
     public void Dispose()
     {
+        DisposeCount++;
     }
 
-    public ValueTask DisposeAsync() => default;
+    public ValueTask DisposeAsync()
+    {
+        DisposeCount++;
+        return default;
+    }
 
     private sealed class NullDisposable : IDisposable
     {

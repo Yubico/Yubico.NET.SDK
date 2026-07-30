@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Xunit;
 using Yubico.YubiKit.Fido2.LargeBlobs;
 
 namespace Yubico.YubiKit.Fido2.UnitTests.LargeBlobs;

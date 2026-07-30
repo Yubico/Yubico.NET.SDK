@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Text;
-using Xunit;
 using Yubico.YubiKit.Core.Cryptography;
 
 namespace Yubico.YubiKit.Core.UnitTests.Cryptography;

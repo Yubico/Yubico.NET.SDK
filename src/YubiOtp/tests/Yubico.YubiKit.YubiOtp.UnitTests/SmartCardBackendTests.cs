@@ -16,7 +16,7 @@ using NSubstitute;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.YubiOtp.Backend;
 
 namespace Yubico.YubiKit.YubiOtp.UnitTests;
 

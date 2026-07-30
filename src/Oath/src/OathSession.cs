@@ -17,11 +17,13 @@ using System.Buffers.Binary;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Oath.Backend;
 
 namespace Yubico.YubiKit.Oath;
 
@@ -34,9 +36,11 @@ public sealed class OathSession : ApplicationSession, IOathSession
     private static readonly Feature FeatureScp03 = new("SCP03 for OATH", 5, 6, 3);
 
     private readonly ILogger _logger;
+    private readonly ISmartCardConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
 
     private ISmartCardProtocol _protocol = null!;
+    private IOathBackend _backend = null!;
     private byte[] _salt = [];
     private byte[] _challenge = [];
 
@@ -53,15 +57,11 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ISmartCardConnection connection,
         ScpKeyParameters? scpKeyParams = null)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        _connection = connection;
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
-
-        _protocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create()
-            .Create(connection) as ISmartCardProtocol
-            ?? throw new InvalidOperationException("Failed to create SmartCard protocol.");
-
-        Protocol = _protocol;
     }
 
     /// <summary>
@@ -73,9 +73,19 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         var session = new OathSession(connection, scpKeyParams);
-        await session.InitializeAsync(CreateOathProtocolConfiguration(configuration), cancellationToken).ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(CreateOathProtocolConfiguration(configuration), cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     private static ProtocolConfiguration CreateOathProtocolConfiguration(ProtocolConfiguration? configuration) =>
@@ -88,11 +98,12 @@ public sealed class OathSession : ApplicationSession, IOathSession
         if (IsInitialized)
             return;
 
-        var selectResponse = await _protocol
-            .SelectAsync(ApplicationIds.Oath, cancellationToken)
-            .ConfigureAwait(false);
+        var protocol = ProtocolFactory.Create(_connection);
+        Protocol = protocol;
+        IOathBackend backend = new OathBackend(protocol);
 
-        ParseSelectResponse(selectResponse.Span);
+        var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        ApplyInitialization(initialization);
 
         if (_scpKeyParams is not null)
         {
@@ -104,44 +115,34 @@ public sealed class OathSession : ApplicationSession, IOathSession
             }
         }
 
-        await InitializeCoreAsync(
-                _protocol,
+        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+                protocol,
                 FirmwareVersion,
                 configuration,
                 _scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _protocol = Protocol as ISmartCardProtocol
-            ?? throw new InvalidOperationException("Protocol is not an ISmartCardProtocol after initialization.");
+        if (!ReferenceEquals(protocol, effectiveProtocol))
+        {
+            backend = new OathBackend(effectiveProtocol);
+        }
+
+        _protocol = effectiveProtocol;
+        _backend = backend;
 
         _logger.LogDebug("OATH session initialized, DeviceId={DeviceId}, IsLocked={IsLocked}", DeviceId, IsLocked);
     }
 
-    private void ParseSelectResponse(ReadOnlySpan<byte> data)
+    private void ApplyInitialization(OathInitialization initialization)
     {
-        using var tlvs = TlvHelper.DecodeList(data);
+        FirmwareVersion = initialization.FirmwareVersion;
 
-        foreach (var tlv in tlvs)
-        {
-            switch (tlv.Tag)
-            {
-                case OathConstants.TagVersion:
-                    var versionBytes = tlv.Value.Span;
-                    FirmwareVersion = new FirmwareVersion(versionBytes[0], versionBytes[1], versionBytes[2]);
-                    break;
+        CryptographicOperations.ZeroMemory(_salt);
+        _salt = initialization.Salt;
 
-                case OathConstants.TagName:
-                    CryptographicOperations.ZeroMemory(_salt);
-                    _salt = tlv.Value.ToArray();
-                    break;
-
-                case OathConstants.TagChallenge:
-                    CryptographicOperations.ZeroMemory(_challenge);
-                    _challenge = tlv.Value.ToArray();
-                    break;
-            }
-        }
+        CryptographicOperations.ZeroMemory(_challenge);
+        _challenge = initialization.Challenge;
 
         DeviceId = ComputeDeviceId(_salt);
         IsLocked = _challenge.Length > 0;
@@ -160,9 +161,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ThrowIfDisposed();
 
         var command = new ApduCommand(0x00, OathConstants.InsList, 0x00, 0x00);
-        var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
+        var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
         var responseData = response.Data;
 
         if (responseData.Length == 0)
@@ -224,8 +223,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
                     requireTouch,
                     credentialData.OathType == OathType.Hotp ? credentialData.Counter : 0);
                 var command = new ApduCommand(0x00, OathConstants.InsPut, 0x00, 0x00, data);
-                await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+                await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -305,8 +303,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         var command = new ApduCommand(0x00, OathConstants.InsDelete, 0x00, 0x00, nameTlv.AsMemory());
-        await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+        await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -330,8 +327,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         try
         {
             var command = new ApduCommand(0x00, OathConstants.InsRename, 0x00, 0x00, data);
-            await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+            await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             return new Credential(
                 DeviceId,
@@ -364,8 +360,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         try
         {
             var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x00, data);
-            var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+            var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
             foreach (var tlv in responseTlvs)
@@ -413,8 +408,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         {
             // P2=0x01 requests truncated response
             var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x01, data);
-            var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+            var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
             foreach (var tlv in responseTlvs)
@@ -448,9 +442,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         // P2=0x01 requests truncated responses
         var command = new ApduCommand(0x00, OathConstants.InsCalculateAll, 0x00, 0x01, challengeTlv.AsMemory());
-        var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
+        var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
         var responseData = response.Data;
 
         var result = new Dictionary<Credential, Code?>();
@@ -503,15 +495,11 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ThrowIfDisposed();
 
         var command = new ApduCommand(0x00, OathConstants.InsReset, 0xDE, 0xAD);
-        await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+        await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         // Re-select and re-parse to get new state
-        var selectResponse = await _protocol
-            .SelectAsync(ApplicationIds.Oath, cancellationToken)
-            .ConfigureAwait(false);
-
-        ParseSelectResponse(selectResponse.Span);
+        var initialization = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        ApplyInitialization(initialization);
 
         _logger.LogInformation("OATH application reset, new DeviceId={DeviceId}", DeviceId);
     }
@@ -553,8 +541,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             try
             {
                 var command = new ApduCommand(0x00, OathConstants.InsValidate, 0x00, 0x00, data);
-                var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+                var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 // Verify device's response
                 byte[] expectedResponse = HMACSHA1.HashData(key.Span, clientChallenge);
@@ -632,8 +619,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             try
             {
                 var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, data);
-                await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+                await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -658,8 +644,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         // Send SET CODE with empty key TLV to clear the access key
         using var keyTlv = new Tlv(OathConstants.TagKey, ReadOnlySpan<byte>.Empty);
         var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, keyTlv.AsMemory());
-        await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+        await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     protected override void Dispose(bool disposing)

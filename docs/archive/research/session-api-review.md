@@ -90,7 +90,7 @@ private async Task InitializeAsync(ProtocolConfiguration? configuration, Cancell
 
     if (_scpKeyParams is not null && _protocol is ISmartCardProtocol sc)
     {
-        _protocol = await sc.WithScpAsync(_scpKeyParams, ct);  // Step 3: SCP
+        _protocol = await sc.InitializeScpAsync(_scpKeyParams, ct);  // Step 3: SCP
         _backend = new SmartCardBackend(_protocol, _version);   // Step 4: Recreate backend
     }
 }
@@ -106,7 +106,7 @@ private async Task InitializeAsync(ProtocolConfiguration? configuration, Cancell
 
     if (_scpKeyParams is not null)
     {
-        _protocol = await protocol.WithScpAsync(_scpKeyParams, ct); // Step 3: SCP
+        _protocol = await protocol.InitializeScpAsync(_scpKeyParams, ct); // Step 3: SCP
         IsAuthenticated = true;                                      // Step 4: Track state
     }
 }
@@ -450,7 +450,7 @@ public abstract class YubiKitSession<TProtocol> : IDisposable
         Logger = loggerFactory.CreateLogger(GetType());
     }
 
-    protected async Task InitializeCoreAsync(
+    protected async Task InitializeProtocolAsync(
         TProtocol protocol,
         ProtocolConfiguration? config,
         ScpKeyParameters? scpParams,
@@ -472,7 +472,7 @@ public abstract class YubiKitSession<TProtocol> : IDisposable
         // 5. Establish SCP if requested
         if (scpParams is not null && protocol is ISmartCardProtocol sc)
         {
-            Protocol = (TProtocol)(object)await sc.WithScpAsync(scpParams, ct);
+            Protocol = (TProtocol)(object)await sc.InitializeScpAsync(scpParams, ct);
             IsAuthenticated = true;
         }
         else

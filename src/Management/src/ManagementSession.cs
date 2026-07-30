@@ -14,18 +14,15 @@
 
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
-using System.Text;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Core.Transports.Hid;
-using Yubico.YubiKit.Core.Transports.SmartCard;
-using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Management.Backend;
 
 namespace Yubico.YubiKit.Management;
 
@@ -41,10 +38,11 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         new("Device Reset", 5, 6, 0);
 
     private readonly ILogger _logger;
+    private readonly IConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
 
-    private IProtocol _protocol;
-    private IManagementBackend _backend;
+    private IProtocol _protocol = null!;
+    private IManagementBackend _backend = null!;
 
     private FirmwareVersion? _version;
 
@@ -52,20 +50,11 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         IConnection connection,
         ScpKeyParameters? scpKeyParams = null)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        _connection = connection;
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
-
-        (_protocol, _backend) = connection switch
-        {
-            ISmartCardConnection sc => CreateSmartCardBackend(sc),
-            IFidoHidConnection fido => CreateFidoBackend(fido),
-            IOtpHidConnection otp => CreateOtpBackend(otp),
-            _ => throw new NotSupportedException(
-                $"The connection type {connection.GetType().Name} is not supported by ManagementSession. " +
-                $"Supported types: ISmartCardConnection, IFidoHidConnection, IOtpHidConnection.")
-        };
-
-        Protocol = _protocol;
     }
 
     public static async Task<ManagementSession> CreateAsync(
@@ -74,9 +63,19 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         var session = new ManagementSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     private async Task InitializeAsync(
@@ -86,24 +85,29 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         if (IsInitialized)
             return;
 
-        _version = await GetVersionAsync(cancellationToken).ConfigureAwait(false);
+        var protocol = ProtocolFactory.Create(_connection);
+        Protocol = protocol;
+        var backend = CreateBackend(protocol);
+        _protocol = protocol;
+        _backend = backend;
 
-        await InitializeCoreAsync(
-                _protocol,
+        _version = await ResolveFirmwareVersionAsync(backend, protocol, cancellationToken).ConfigureAwait(false);
+
+        var effectiveProtocol = await InitializeProtocolAsync(
+                protocol,
                 _version,
                 configuration,
                 _scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _protocol = Protocol ?? throw new InvalidOperationException();
-
-        if (IsAuthenticated)
+        if (!ReferenceEquals(protocol, effectiveProtocol))
         {
-            // Recreate backend with SCP-wrapped protocol
-            _backend = new SmartCardBackend(
-                _protocol as ISmartCardProtocol ?? throw new InvalidOperationException());
+            backend = CreateBackend(effectiveProtocol);
         }
+
+        _protocol = effectiveProtocol;
+        _backend = backend;
 
         _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
     }
@@ -154,90 +158,35 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         return _backend.DeviceResetAsync(cancellationToken).AsTask();
     }
 
-    private async Task<FirmwareVersion> GetVersionAsync(CancellationToken cancellationToken)
+    private async Task<FirmwareVersion> ResolveFirmwareVersionAsync(
+        IManagementBackend backend,
+        IProtocol protocol,
+        CancellationToken cancellationToken)
     {
-        var defaultVersion = await GetVersionFromManagementHeader(cancellationToken).ConfigureAwait(false);
+        var probedVersion = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            var deviceInfo = await GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);
+            var deviceInfo = await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
             return deviceInfo.FirmwareVersion;
         }
-        catch (Exception e)
+        catch (Exception e) when (e is not OperationCanceledException)
         {
             _logger.LogDebug(e,
                 "Could not get version from DeviceInfo, fallback to versionHeader in Management.Select");
         }
 
-        return defaultVersion
+        return probedVersion
             ?? throw new InvalidOperationException("Could not determine firmware version from device");
     }
 
-    private async Task<FirmwareVersion?> GetVersionFromManagementHeader(CancellationToken cancellationToken)
-    {
-        var versionBytes = await SelectAsync(cancellationToken).ConfigureAwait(false);
-
-        var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
-        var versionString = deviceText.Split(' ').Last();
-        var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
-
-        return versionParts.Length == 3
-            ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
-            : null;
-    }
-
-    private Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken)
-    {
-        return _protocol switch
+    private static IManagementBackend CreateBackend(IProtocol protocol) =>
+        protocol switch
         {
-            ISmartCardProtocol sc => sc.SelectAsync(ApplicationIds.Management, cancellationToken),
-            IFidoHidProtocol fido => fido.SelectAsync(ApplicationIds.Management, cancellationToken),
-            IOtpHidProtocol otp => GetOtpVersionAsync(otp, cancellationToken),
-            _ => throw new NotSupportedException("No supported protocol available")
+            ISmartCardProtocol smartCard => new SmartCardBackend(smartCard),
+            IFidoHidProtocol fidoHid => new FidoHidBackend(fidoHid),
+            IOtpHidProtocol otpHid => new OtpBackend(otpHid),
+            _ => throw new NotSupportedException(
+                $"The protocol type {protocol.GetType().Name} is not supported by ManagementSession.")
         };
-    }
-
-    private static async Task<ReadOnlyMemory<byte>> GetOtpVersionAsync(
-        IOtpHidProtocol otpProtocol,
-        CancellationToken cancellationToken)
-    {
-        // For OTP, read status bytes (first 3 bytes are version)
-        var status = await otpProtocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
-        var version = otpProtocol.FirmwareVersion ?? new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);
-        var versionString = Encoding.UTF8.GetBytes($"YubiKey {version.Major}.{version.Minor}.{version.Patch}");
-        return versionString;
-    }
-
-    private static (IProtocol protocol, IManagementBackend backend) CreateSmartCardBackend(
-        ISmartCardConnection connection)
-    {
-        var protocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create()
-            .Create(connection);
-
-        var backend = new SmartCardBackend(protocol as ISmartCardProtocol ?? throw new InvalidOperationException());
-        return (protocol, backend);
-    }
-
-    private static (IProtocol protocol, IManagementBackend backend) CreateFidoBackend(
-        IFidoHidConnection connection)
-    {
-        var protocol = FidoProtocolFactory
-            .Create()
-            .Create(connection);
-
-        var backend = new FidoHidBackend(protocol);
-        return (protocol, backend);
-    }
-
-    private static (IProtocol protocol, IManagementBackend backend) CreateOtpBackend(
-        IOtpHidConnection connection)
-    {
-        var protocol = OtpProtocolFactory
-            .Create()
-            .Create(connection);
-
-        var backend = new OtpBackend(protocol);
-        return (protocol, backend);
-    }
 
 }

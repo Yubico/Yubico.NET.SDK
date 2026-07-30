@@ -14,7 +14,6 @@
 
 using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
 

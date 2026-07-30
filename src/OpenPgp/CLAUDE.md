@@ -15,7 +15,7 @@ OpenPGP implements the OpenPGP card application (v3.4 specification) for YubiKey
 ## Architecture
 
 ### Transport
-SmartCard-only (`ISmartCardConnection`). OpenPGP spec is SmartCard/CCID only. No backend abstraction needed.
+SmartCard-only (`ISmartCardConnection`). OpenPGP spec is SmartCard/CCID only. Applet SELECT and APDU send mechanics are routed through the module-local `OpenPgpBackend`; OpenPGP APDU construction stays in `OpenPgpSession`.
 
 ### Session Structure
 `OpenPgpSession` is a `sealed partial class` split across 7 files:
@@ -31,7 +31,7 @@ SmartCard-only (`ISmartCardConnection`). OpenPGP spec is SmartCard/CCID only. No
 | `OpenPgpSession.Reset.cs` | Factory reset sequence |
 
 ### Shared Session State
-- `ISmartCardProtocol _protocol` — send APDUs
+- `OpenPgpBackend _backend` — selected SmartCard APDU send/select wrapper; protocol disposal remains owned by `ApplicationSession`
 - `FirmwareVersion _version` — firmware for feature gating
 - `ApplicationRelatedData _appData` — cached card state (refreshable)
 - `Kdf? _kdf` — active KDF configuration (lazy-loaded)

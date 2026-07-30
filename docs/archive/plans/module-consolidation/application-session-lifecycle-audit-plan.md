@@ -135,7 +135,7 @@ Backends:
 FIDO2 SCP handoff may currently create a stale disposed reference:
 
 1. `FidoSession` creates `SmartCardFidoBackend(baseProtocol)`.
-2. `InitializeCoreAsync()` wraps `baseProtocol` into `PcscProtocolScp`.
+2. `InitializeProtocolAsync()` wraps `baseProtocol` into `PcscProtocolScp`.
 3. `FidoSession` disposes the old backend.
 4. `SmartCardFidoBackend.Dispose()` disposes `baseProtocol`.
 5. New backend wraps `PcscProtocolScp`, whose base protocol may now be disposed.

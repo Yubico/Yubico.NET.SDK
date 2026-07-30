@@ -5,7 +5,6 @@ using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.SecurityDomain.IntegrationTests.Helpers;
 using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;

@@ -17,13 +17,37 @@ namespace Yubico.YubiKit.Management.UnitTests;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Management.Backend;
 
 public class ManagementSessionTests
 {
+    [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    {
+        var connection = new FailingSmartCardConnection();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            ManagementSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(1, connection.DisposeCount);
+    }
+
+    [Fact]
+    public async Task CreateAsync_CancellationDuringInitialization_DisposesProtocolExactlyOnce()
+    {
+        var connection = new FailingSmartCardConnection();
+        using var cancellationSource = new CancellationTokenSource();
+        cancellationSource.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            ManagementSession.CreateAsync(connection, cancellationToken: cancellationSource.Token));
+
+        Assert.Equal(1, connection.DisposeCount);
+    }
+
     [Fact]
     public void IManagementSession_InheritsIAsyncDisposable()
     {
@@ -82,6 +106,9 @@ public class ManagementSessionTests
         public ReadOnlyMemory<byte> CapturedConfig { get; private set; }
         public bool SawNonZeroConfig { get; private set; }
 
+        public ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken = default) =>
+            ValueTask.FromResult<FirmwareVersion?>(new FirmwareVersion(5, 0, 0));
+
         public ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken = default)
         {
             CapturedConfig = config;
@@ -97,6 +124,43 @@ public class ManagementSessionTests
 
         public void Dispose()
         {
+        }
+    }
+
+    private sealed class FailingSmartCardConnection : ISmartCardConnection
+    {
+        public int DisposeCount { get; private set; }
+        public Transport Transport => Transport.Usb;
+        public ConnectionType Type => ConnectionType.SmartCard;
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+            ReadOnlyMemory<byte> command,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            throw new InvalidOperationException("session-init probe failure");
+        }
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
+            NullDisposable.Instance;
+
+        public bool SupportsExtendedApdu() => false;
+
+        public void Dispose() => DisposeCount++;
+
+        public ValueTask DisposeAsync()
+        {
+            DisposeCount++;
+            return default;
+        }
+
+        private sealed class NullDisposable : IDisposable
+        {
+            public static NullDisposable Instance { get; } = new();
+
+            public void Dispose()
+            {
+            }
         }
     }
 }

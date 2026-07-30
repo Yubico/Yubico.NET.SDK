@@ -14,7 +14,6 @@
 
 using System.Formats.Cbor;
 using System.Security.Cryptography;
-using Xunit;
 using Yubico.YubiKit.Fido2.Credentials;
 
 namespace Yubico.YubiKit.Fido2.UnitTests.Credentials;

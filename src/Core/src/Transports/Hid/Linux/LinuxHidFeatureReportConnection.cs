@@ -17,7 +17,6 @@ using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Native.Linux.Libc;
-using Yubico.YubiKit.Core.Transports.Hid;
 using LibcNativeMethods = Yubico.YubiKit.Core.Native.Linux.Libc.NativeMethods;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Linux;

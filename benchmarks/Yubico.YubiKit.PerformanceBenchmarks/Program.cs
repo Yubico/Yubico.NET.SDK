@@ -12,6 +12,7 @@ using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Validators;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
@@ -149,7 +150,7 @@ public class SmartCardManagementBenchmarks : YubiKeyHardwareBenchmarkBase
     public async Task<int> SelectManagementOverSmartCard()
     {
         var connection = await Device.ConnectAsync<ISmartCardConnection>().ConfigureAwait(false);
-        using var protocol = PcscProtocolFactory<ISmartCardConnection>.Create().Create(connection);
+        using var protocol = ProtocolFactory.Create(connection);
         var response = await protocol.SelectAsync(ApplicationIds.Management).ConfigureAwait(false);
         return response.Length;
     }

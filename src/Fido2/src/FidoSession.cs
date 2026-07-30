@@ -17,6 +17,7 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -113,8 +114,16 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         ArgumentNullException.ThrowIfNull(connection);
 
         var session = new FidoSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     private async Task InitializeAsync(
@@ -124,18 +133,10 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         if (IsInitialized)
             return;
 
-        // Create backend based on connection type
-        var (backend, protocol) = _connection switch
-        {
-            ISmartCardConnection sc => await CreateSmartCardBackendAsync(sc, cancellationToken)
-                .ConfigureAwait(false),
-            IFidoHidConnection fido => CreateHidBackend(fido),
-            _ => throw new NotSupportedException(
-                $"Connection type {_connection.GetType().Name} is not supported. " +
-                "Use ISmartCardConnection or IFidoHidConnection.")
-        };
-
-        _backend = backend;
+        var protocol = ProtocolFactory.Create(_connection);
+        Protocol = protocol;
+        var backend = CreateBackend(protocol);
+        await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         // Get firmware version from authenticator info
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
@@ -147,7 +148,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         }
 
         // Initialize base class
-        await InitializeCoreAsync(
+        var effectiveProtocol = await InitializeProtocolAsync(
                 protocol,
                 firmwareVersion,
                 configuration,
@@ -155,11 +156,12 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
                 cancellationToken)
             .ConfigureAwait(false);
 
-        // If SCP was established, recreate backend with wrapped protocol
-        if (IsAuthenticated && Protocol is ISmartCardProtocol scpProtocol)
+        if (!ReferenceEquals(protocol, effectiveProtocol))
         {
-            _backend = new SmartCardBackend(scpProtocol);
+            backend = CreateBackend(effectiveProtocol);
         }
+
+        _backend = backend;
 
         _logger.LogDebug(
             "FIDO session initialized. Firmware: {Version}, Versions: [{Versions}]",
@@ -367,44 +369,15 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         }
     }
 
-    private static async Task<(IFidoBackend backend, IProtocol protocol)> CreateSmartCardBackendAsync(
-        ISmartCardConnection connection,
-        CancellationToken cancellationToken)
-    {
-        var protocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create()
-            .Create(connection);
-
-        var smartCardProtocol = protocol as ISmartCardProtocol
-            ?? throw new InvalidOperationException("Failed to create SmartCard protocol.");
-
-        try
+    private static IFidoBackend CreateBackend(IProtocol protocol) =>
+        protocol switch
         {
-            // Select the FIDO2 application
-            await smartCardProtocol.SelectAsync(ApplicationIds.Fido2, cancellationToken)
-                .ConfigureAwait(false);
-        }
-        catch (ApduException ex)
-        {
-            throw new NotSupportedException(
-                "FIDO2 over SmartCard is not supported because the authenticator did not expose the FIDO2 AID.",
-                ex);
-        }
-
-        var backend = new SmartCardBackend(smartCardProtocol);
-        return (backend, protocol);
-    }
-
-    private static (IFidoBackend backend, IProtocol protocol) CreateHidBackend(
-        IFidoHidConnection connection)
-    {
-        var protocol = FidoProtocolFactory
-            .Create()
-            .Create(connection);
-
-        var backend = new HidBackend(protocol);
-        return (backend, protocol);
-    }
+            ISmartCardProtocol smartCard => new SmartCardBackend(smartCard),
+            IFidoHidProtocol fidoHid => new HidBackend(fidoHid),
+            _ => throw new NotSupportedException(
+                $"Protocol type {protocol.GetType().Name} is not supported. " +
+                "Use ISmartCardConnection or IFidoHidConnection.")
+        };
 
     internal static void EnsureSmartCardTransportSupported(
         Transport transport,

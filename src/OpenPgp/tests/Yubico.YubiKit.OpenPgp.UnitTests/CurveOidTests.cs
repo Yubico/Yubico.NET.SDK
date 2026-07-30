@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
-
 namespace Yubico.YubiKit.OpenPgp.UnitTests;
 
 public class CurveOidTests

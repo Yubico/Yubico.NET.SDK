@@ -158,7 +158,7 @@ flowchart TD
 
 **Teaching notes:**
 - **Two-phase init pattern (memorize this):** private ctor stores connection →
-  static `CreateAsync(...)` does async selection + `InitializeCoreAsync(...)`.
+  static `CreateAsync(...)` does async selection + `InitializeProtocolAsync(...)`.
 - **Deliberately flat command model:** there are **no** `SignCommand`/`VerifyPinCommand`
   classes. Session methods build the `ApduCommand` inline. (FIDO2 is the exception — it
   builds CBOR via `CtapRequestBuilder`.)

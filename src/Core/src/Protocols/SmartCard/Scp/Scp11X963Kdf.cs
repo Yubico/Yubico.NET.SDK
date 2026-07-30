@@ -14,7 +14,6 @@
 
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Cryptography;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;

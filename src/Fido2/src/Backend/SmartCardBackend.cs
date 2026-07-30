@@ -14,10 +14,8 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Fido2.Ctap;
 
 namespace Yubico.YubiKit.Fido2.Backend;
@@ -42,10 +40,19 @@ internal sealed class SmartCardBackend : IFidoBackend
     /// <summary>
     /// Initializes the backend by selecting the FIDO2 application.
     /// </summary>
-    public async Task SelectAsync(CancellationToken cancellationToken = default)
+    public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Selecting FIDO2 application via SmartCard");
-        await _protocol.SelectAsync(ApplicationIds.Fido2, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            _logger.LogDebug("Selecting FIDO2 application via SmartCard");
+            await _protocol.SelectAsync(ApplicationIds.Fido2, cancellationToken).ConfigureAwait(false);
+        }
+        catch (ApduException ex)
+        {
+            throw new NotSupportedException(
+                "FIDO2 over SmartCard is not supported because the authenticator did not expose the FIDO2 AID.",
+                ex);
+        }
     }
 
     public async Task<ReadOnlyMemory<byte>> SendCborAsync(

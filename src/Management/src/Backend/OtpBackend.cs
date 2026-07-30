@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 
-namespace Yubico.YubiKit.Management;
+namespace Yubico.YubiKit.Management.Backend;
+
 
 /// <summary>
 /// Backend implementation for Management operations over OTP HID (8-byte feature reports).
@@ -24,6 +25,12 @@ namespace Yubico.YubiKit.Management;
 internal sealed class OtpBackend(IOtpHidProtocol otpProtocol) : IManagementBackend
 {
     private readonly IOtpHidProtocol _otpProtocol = otpProtocol ?? throw new ArgumentNullException(nameof(otpProtocol));
+
+    public async ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken)
+    {
+        var status = await _otpProtocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
+        return _otpProtocol.FirmwareVersion ?? new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);
+    }
 
     public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
     {

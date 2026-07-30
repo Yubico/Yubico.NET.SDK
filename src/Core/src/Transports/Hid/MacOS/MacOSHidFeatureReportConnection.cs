@@ -16,7 +16,6 @@ using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;
-using Yubico.YubiKit.Core.Transports.Hid;
 using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.NativeMethods;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;

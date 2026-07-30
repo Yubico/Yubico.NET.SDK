@@ -19,7 +19,7 @@ Use this checklist when introducing a new `Yubico.YubiKit.<Module>` session pack
 ## Session implementation
 
 - [ ] Session derives from `ApplicationSession`
-- [ ] Initialization uses `ApplicationSession.InitializeCoreAsync(...)`
+- [ ] Initialization uses `ApplicationSession.InitializeProtocolAsync(...)`
 - [ ] Protocol created via protocol factory `.Create()` (no logger factory threading)
 - [ ] Session state owned by base (`Protocol`, `FirmwareVersion`, `IsInitialized`, `IsAuthenticated`)
 - [ ] Disposal works via base; derived does not null/dispose protocol out-of-band

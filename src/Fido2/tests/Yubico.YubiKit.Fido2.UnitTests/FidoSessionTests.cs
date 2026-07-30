@@ -3,6 +3,7 @@ using NSubstitute;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Fido2.UnitTests;
 
@@ -25,6 +26,21 @@ public class FidoSessionTests
         // Act & Assert
         await Assert.ThrowsAsync<NotSupportedException>(
             () => FidoSession.CreateAsync(unsupportedConnection, cancellationToken: TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    {
+        var connection = Substitute.For<ISmartCardConnection>();
+        connection.Transport.Returns(Transport.Usb);
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<ReadOnlyMemory<byte>>(
+                new InvalidOperationException("session-init probe failure")));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            FidoSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        connection.Received(1).Dispose();
     }
 
     [Fact]

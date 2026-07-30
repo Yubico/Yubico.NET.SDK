@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Text;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Sessions;
 
-namespace Yubico.YubiKit.Management;
+namespace Yubico.YubiKit.Management.Backend;
 
 /// <summary>
 /// Backend implementation for Management operations over SmartCard (CCID/NFC).
@@ -29,6 +31,14 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
     private const byte InsSetDeviceInfo = 0x1C;
     private const byte InsSetMode = 0x16;
     private const byte InsDeviceReset = 0x1F;
+
+    public async ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken)
+    {
+        var versionBytes = await _protocol.SelectAsync(ApplicationIds.Management, cancellationToken)
+            .ConfigureAwait(false);
+
+        return ParseVersionHeader(versionBytes.Span);
+    }
 
     public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
     {
@@ -76,5 +86,16 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
     public void Dispose()
     {
         // Backend doesn't own the protocol - ManagementSession handles disposal
+    }
+
+    private static FirmwareVersion? ParseVersionHeader(ReadOnlySpan<byte> versionBytes)
+    {
+        var deviceText = Encoding.UTF8.GetString(versionBytes);
+        var versionString = deviceText.Split(' ').Last();
+        var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
+
+        return versionParts.Length == 3
+            ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
+            : null;
     }
 }

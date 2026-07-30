@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Piv.Backend;
@@ -81,7 +82,7 @@ internal static class PivBioProtocol
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>Temporary PIN if requestTemporaryPin is true, otherwise null. WARNING: Caller MUST zero this immediately after use!</returns>
     /// <exception cref="NotSupportedException">Thrown if biometrics are not supported or configured.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if biometric verification fails.</exception>
+    /// <exception cref="InvalidPinException">Thrown if biometric verification fails, with the remaining retry count.</exception>
     internal static async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(
         IPivBackend backend,
         ILogger logger,
@@ -115,7 +116,9 @@ internal static class PivBioProtocol
 
         if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
         {
-            throw new InvalidOperationException($"Biometric verification failed. {retriesRemaining} retries remaining.");
+            throw new InvalidPinException(
+                retriesRemaining,
+                $"Biometric verification failed. {retriesRemaining} retries remaining.");
         }
 
         if (!response.IsOK())
@@ -138,6 +141,10 @@ internal static class PivBioProtocol
         var tempPin = new byte[response.Data.Length];
         response.Data.CopyTo(tempPin);
 
+        // The original GET DATA response buffer also carries the temporary PIN in the clear; the
+        // caller only owns/zeroes `tempPin` (the copy above), so this method must zero the source.
+        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.Data).Span);
+
         logger.LogDebug("PIV: Biometric verification succeeded, temporary PIN retrieved (length={Length})", tempPin.Length);
         logger.LogWarning("PIV: Caller MUST zero temporary PIN immediately after use!");
 
@@ -147,7 +154,7 @@ internal static class PivBioProtocol
     /// <summary>
     /// Verifies the temporary PIN obtained from biometric verification.
     /// </summary>
-    /// <param name="temporaryPin">The temporary PIN returned from VerifyUvAsync. WILL BE ZEROED after use.</param>
+    /// <param name="temporaryPin">The temporary PIN returned from VerifyUvAsync. This method does NOT zero it — the caller owns and must zero this buffer after use.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <exception cref="InvalidPinException">Thrown if the temporary PIN is invalid.</exception>
     internal static async Task VerifyTemporaryPinAsync(

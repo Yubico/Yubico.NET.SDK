@@ -53,6 +53,9 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// <inheritdoc />
     public bool IsLocked { get; private set; }
 
+    /// <inheritdoc />
+    public bool IsPasswordProtected { get; private set; }
+
     private OathSession(
         ISmartCardConnection connection,
         ScpKeyParameters? scpKeyParams = null)
@@ -146,6 +149,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         DeviceId = ComputeDeviceId(_salt);
         IsLocked = _challenge.Length > 0;
+        IsPasswordProtected = IsLocked;
     }
 
     internal static string ComputeDeviceId(ReadOnlySpan<byte> salt)
@@ -155,13 +159,30 @@ public sealed class OathSession : ApplicationSession, IOathSession
         return Convert.ToBase64String(hash[..16]).TrimEnd('=');
     }
 
+    /// <summary>
+    ///     Sends a command through the backend, translating a "security status not satisfied"
+    ///     APDU failure into a dedicated <see cref="OathException" /> with
+    ///     <see cref="OathFailureReason.Locked" /> so callers do not need to interpret raw status words.
+    /// </summary>
+    private async Task<ApduResponse> SendAsync(ApduCommand command, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+        catch (ApduException ex) when (ex.SW == SWConstants.SecurityStatusNotSatisfied)
+        {
+            throw new OathException(OathFailureReason.Locked, ex.SW, ex);
+        }
+    }
+
     /// <inheritdoc />
     public async Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
 
         var command = new ApduCommand(0x00, OathConstants.InsList, 0x00, 0x00);
-        var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var response = await SendAsync(command, cancellationToken).ConfigureAwait(false);
         var responseData = response.Data;
 
         if (responseData.Length == 0)
@@ -223,7 +244,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
                     requireTouch,
                     credentialData.OathType == OathType.Hotp ? credentialData.Counter : 0);
                 var command = new ApduCommand(0x00, OathConstants.InsPut, 0x00, 0x00, data);
-                await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+                await SendAsync(command, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -303,7 +324,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         var command = new ApduCommand(0x00, OathConstants.InsDelete, 0x00, 0x00, nameTlv.AsMemory());
-        await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+        await SendAsync(command, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -327,7 +348,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         try
         {
             var command = new ApduCommand(0x00, OathConstants.InsRename, 0x00, 0x00, data);
-            await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await SendAsync(command, cancellationToken).ConfigureAwait(false);
 
             return new Credential(
                 DeviceId,
@@ -360,7 +381,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         try
         {
             var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x00, data);
-            var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var response = await SendAsync(command, cancellationToken).ConfigureAwait(false);
 
             using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
             foreach (var tlv in responseTlvs)
@@ -408,7 +429,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         {
             // P2=0x01 requests truncated response
             var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x01, data);
-            var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var response = await SendAsync(command, cancellationToken).ConfigureAwait(false);
 
             using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
             foreach (var tlv in responseTlvs)
@@ -442,7 +463,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         // P2=0x01 requests truncated responses
         var command = new ApduCommand(0x00, OathConstants.InsCalculateAll, 0x00, 0x01, challengeTlv.AsMemory());
-        var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var response = await SendAsync(command, cancellationToken).ConfigureAwait(false);
         var responseData = response.Data;
 
         var result = new Dictionary<Credential, Code?>();
@@ -495,7 +516,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ThrowIfDisposed();
 
         var command = new ApduCommand(0x00, OathConstants.InsReset, 0xDE, 0xAD);
-        await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+        await SendAsync(command, cancellationToken).ConfigureAwait(false);
 
         // Re-select and re-parse to get new state
         var initialization = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
@@ -541,7 +562,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             try
             {
                 var command = new ApduCommand(0x00, OathConstants.InsValidate, 0x00, 0x00, data);
-                var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+                var response = await SendAsync(command, cancellationToken).ConfigureAwait(false);
 
                 // Verify device's response
                 byte[] expectedResponse = HMACSHA1.HashData(key.Span, clientChallenge);
@@ -563,7 +584,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
                         throw new BadResponseException("No TAG_RESPONSE in VALIDATE response.");
 
                     if (!CryptographicOperations.FixedTimeEquals(expectedResponse, deviceResponse))
-                        throw new InvalidOperationException("Device mutual authentication failed.");
+                        throw new OathException(OathFailureReason.WrongPassword);
 
                     IsLocked = false;
                     CryptographicOperations.ZeroMemory(_challenge);
@@ -575,6 +596,14 @@ public sealed class OathSession : ApplicationSession, IOathSession
                     if (deviceResponse is not null)
                         CryptographicOperations.ZeroMemory(deviceResponse);
                 }
+            }
+            catch (ApduException ex) when (
+                ex.SW == SWConstants.ReferenceDataUnusable ||
+                ex.SW == SWConstants.InvalidCommandDataParameter)
+            {
+                // The device rejected the VALIDATE command itself because the supplied
+                // (wrong) key produced a client response it did not recognize.
+                throw new OathException(OathFailureReason.WrongPassword, ex.SW, ex);
             }
             finally
             {
@@ -619,7 +648,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
             try
             {
                 var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, data);
-                await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+                await SendAsync(command, cancellationToken).ConfigureAwait(false);
+                IsPasswordProtected = true;
             }
             finally
             {
@@ -644,7 +674,77 @@ public sealed class OathSession : ApplicationSession, IOathSession
         // Send SET CODE with empty key TLV to clear the access key
         using var keyTlv = new Tlv(OathConstants.TagKey, ReadOnlySpan<byte>.Empty);
         var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, keyTlv.AsMemory());
-        await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+        await SendAsync(command, cancellationToken).ConfigureAwait(false);
+        IsPasswordProtected = false;
+    }
+
+    /// <inheritdoc />
+    public async Task<T> AuthenticateAndRetryAsync<T>(
+        Func<CancellationToken, Task<T>> operation,
+        Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(operation);
+        ArgumentNullException.ThrowIfNull(passwordProvider);
+
+        try
+        {
+            return await operation(cancellationToken).ConfigureAwait(false);
+        }
+        catch (OathException ex) when (ex.Reason == OathFailureReason.Locked)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            ReadOnlyMemory<byte> password = await passwordProvider(cancellationToken).ConfigureAwait(false);
+            byte[] key = DeriveKey(password);
+            await AuthenticateWithDerivedKeyAsync(key, cancellationToken).ConfigureAwait(false);
+
+            return await operation(cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    ///     Validates an already-derived access key and unconditionally zeroes it once the attempt
+    ///     completes, whether validation succeeds or fails (e.g. with
+    ///     <see cref="OathFailureReason.WrongPassword" />).
+    /// </summary>
+    /// <remarks>
+    ///     Extracted from <see cref="AuthenticateAndRetryAsync{T}" /> and kept <c>internal</c> rather
+    ///     than a private local step so the zeroing guarantee on the wrong-password failure branch —
+    ///     not just the success branch — can be exercised directly by unit tests with a caller-owned
+    ///     key array. Not part of the public API.
+    /// </remarks>
+    internal async Task AuthenticateWithDerivedKeyAsync(byte[] key, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+
+        try
+        {
+            await ValidateAsync(key, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task AuthenticateAndRetryAsync(
+        Func<CancellationToken, Task> operation,
+        Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+
+        _ = await AuthenticateAndRetryAsync(
+            async ct =>
+            {
+                await operation(ct).ConfigureAwait(false);
+                return true;
+            },
+            passwordProvider,
+            cancellationToken).ConfigureAwait(false);
     }
 
     protected override void Dispose(bool disposing)
@@ -657,5 +757,4 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         base.Dispose(disposing);
     }
-
 }

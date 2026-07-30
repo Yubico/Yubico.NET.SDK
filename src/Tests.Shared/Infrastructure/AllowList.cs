@@ -68,6 +68,12 @@ public sealed class AllowList
     /// <summary>
     ///     Gets whether devices without serial numbers are allowed for testing.
     /// </summary>
+    /// <remarks>
+    ///     This should only be <see langword="true"/> when testing YubiKey Security Key series
+    ///     devices (FIDO-only editions that report no serial number). It authorizes ANY device
+    ///     with an unreadable serial, which risks running destructive tests against a production
+    ///     key. See <see cref="IAllowListProvider.AllowUnknownSerials"/>.
+    /// </remarks>
     public bool AllowUnknownSerials { get; }
 
     /// <summary>

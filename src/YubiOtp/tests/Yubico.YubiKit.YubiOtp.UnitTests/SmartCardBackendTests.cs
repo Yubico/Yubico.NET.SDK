@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using NSubstitute;
+using System.Linq;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -228,6 +229,88 @@ public class SmartCardBackendTests
 
         await _protocol.Received(1).TransmitAndReceiveAsync(
             Arg.Is<ApduCommand>(a => a.P1 == (byte)ConfigSlot.ChalHmac2),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    // ISC-30: valid-length challenge-response keys must reach the wire unmodified.
+
+    [Fact]
+    public async Task WriteUpdateAsync_HmacSha1ValidKey_PreservesExactKeyBytesThroughEncoding()
+    {
+        byte[] hmacKey = Enumerable.Range(1, 20).Select(i => (byte)i).ToArray();
+        using var config = new HmacSha1SlotConfiguration(hmacKey);
+        byte[] configBytes = config.GetConfig();
+
+        var response = MakeStatusResponse(progSeq: 1);
+        _protocol.TransmitAndReceiveAsync(
+                Arg.Any<ApduCommand>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var backend = CreateBackend(initialProgSeq: 0);
+        await backend.WriteUpdateAsync(ConfigSlot.Config1, configBytes, CancellationToken.None);
+
+        await _protocol.Received(1).TransmitAndReceiveAsync(
+            Arg.Is<ApduCommand>(a => a.Data.ToArray().SequenceEqual(configBytes)),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
+
+        // The exact key bytes (not a hash, not padding) must appear at their wire offsets.
+        Assert.Equal(hmacKey[..16], configBytes[22..38]);
+        Assert.Equal(hmacKey[16..20], configBytes[16..20]);
+    }
+
+    [Fact]
+    public async Task WriteUpdateAsync_YubicoOtpChallengeResponseValidKey_PreservesExactKeyBytesThroughEncoding()
+    {
+        byte[] aesKey = Enumerable.Range(100, 16).Select(i => (byte)i).ToArray();
+        using var config = new YubicoOtpChallengeResponseSlotConfiguration(aesKey);
+        byte[] configBytes = config.GetConfig();
+
+        var response = MakeStatusResponse(progSeq: 1);
+        _protocol.TransmitAndReceiveAsync(
+                Arg.Any<ApduCommand>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var backend = CreateBackend(initialProgSeq: 0);
+        await backend.WriteUpdateAsync(ConfigSlot.Config2, configBytes, CancellationToken.None);
+
+        await _protocol.Received(1).TransmitAndReceiveAsync(
+            Arg.Is<ApduCommand>(a =>
+                a.P1 == (byte)ConfigSlot.Config2 &&
+                a.Data.ToArray().SequenceEqual(configBytes)),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
+
+        Assert.Equal(aesKey, configBytes[22..38]);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_YubicoOtpChallenge_TransmitsExactChallengeBytesUnpadded()
+    {
+        byte[] challenge = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66];
+        byte[] responseData = new byte[18]; // 16 bytes + SW
+        responseData[^2] = 0x90;
+        responseData[^1] = 0x00;
+        var response = new ApduResponse(responseData);
+
+        _protocol.TransmitAndReceiveAsync(
+                Arg.Any<ApduCommand>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var backend = CreateBackend();
+        await backend.SendAndReceiveAsync(ConfigSlot.ChalYubico1, challenge, 16, CancellationToken.None);
+
+        await _protocol.Received(1).TransmitAndReceiveAsync(
+            Arg.Is<ApduCommand>(a =>
+                a.P1 == (byte)ConfigSlot.ChalYubico1 &&
+                a.Data.ToArray().SequenceEqual(challenge)),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>());
     }

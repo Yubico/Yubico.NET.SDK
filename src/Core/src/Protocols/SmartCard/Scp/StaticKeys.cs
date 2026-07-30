@@ -14,6 +14,7 @@
 
 using System.Buffers.Binary;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
@@ -105,34 +106,42 @@ public sealed class StaticKeys : IDisposable
     /// <exception cref="ArgumentException">Thrown if context is not 16 bytes.</exception>
     internal SessionKeys Derive(ReadOnlySpan<byte> context)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
-        if (context.Length != ContextLength)
-            throw new ArgumentException($"Context must be {ContextLength} bytes", nameof(context));
-
         Span<byte> senc = stackalloc byte[ContextLength];
         Span<byte> smac = stackalloc byte[ContextLength];
         Span<byte> srmac = stackalloc byte[ContextLength];
 
-        // Derive S-ENC from ENC
-        DeriveKey(_enc, DerivationTypeSEnc, context, SessionKeyLengthBits, senc);
+        return Derive(context, senc, smac, srmac);
+    }
 
-        // Derive S-MAC and S-RMAC from MAC
-        DeriveKey(_mac, DerivationTypeSMac, context, SessionKeyLengthBits, smac);
-        DeriveKey(_mac, DerivationTypeSRMac, context, SessionKeyLengthBits, srmac);
-
-        // DEK is NOT derived - it's passed through as-is (used for PUTKEY operations)
-        // This matches the Java implementation
-
+    internal SessionKeys Derive(
+        ReadOnlySpan<byte> context,
+        Span<byte> senc,
+        Span<byte> smac,
+        Span<byte> srmac)
+    {
         try
         {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
+            if (context.Length != ContextLength)
+                throw new ArgumentException($"Context must be {ContextLength} bytes", nameof(context));
+
+            // Derive S-ENC from ENC
+            DeriveKey(_enc, DerivationTypeSEnc, context, SessionKeyLengthBits, senc);
+
+            // Derive S-MAC and S-RMAC from MAC
+            DeriveKey(_mac, DerivationTypeSMac, context, SessionKeyLengthBits, smac);
+            DeriveKey(_mac, DerivationTypeSRMac, context, SessionKeyLengthBits, srmac);
+
+            // DEK is NOT derived - it's passed through as-is (used for PUTKEY operations)
+            // This matches the Java implementation
+
             return _dek is not null
                 ? new SessionKeys(senc, smac, srmac, _dek)
                 : new SessionKeys(senc, smac, srmac);
         }
         finally
         {
-            // Zero the stack-allocated key material
             CryptographicOperations.ZeroMemory(senc);
             CryptographicOperations.ZeroMemory(smac);
             CryptographicOperations.ZeroMemory(srmac);
@@ -163,12 +172,13 @@ public sealed class StaticKeys : IDisposable
         derivationData[DerivationDataPrefixLength + 4] = DerivationDataCounter;
         context.CopyTo(derivationData[(DerivationDataPrefixLength + 5)..]);
 
-        using var cmac = new AesCmac(key);
-        cmac.AppendData(derivationData);
-        var mac = cmac.GetHashAndReset();
-
+        using ICmacPrimitives cmac = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+        cmac.CmacInit(key);
+        cmac.CmacUpdate(derivationData);
+        var mac = new byte[16];
         try
         {
+            cmac.CmacFinal(mac);
             mac.AsSpan(0, lengthBits / 8).CopyTo(output);
         }
         finally

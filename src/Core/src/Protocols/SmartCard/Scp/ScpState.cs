@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
@@ -150,15 +151,28 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
 
     public byte[] Mac(ReadOnlySpan<byte> data)
     {
+        byte[]? newMacChain = null;
         try
         {
-            using var mac = new AesCmac(keys.Smac);
-            mac.AppendData(_macChain);
-            mac.AppendData(data);
+            ICmacPrimitives mac = CryptographyProviders.CmacPrimitivesCreator(
+                CmacBlockCipherAlgorithm.Aes128);
+            try
+            {
+                mac.CmacInit(keys.Smac);
+                mac.CmacUpdate(_macChain);
+                mac.CmacUpdate(data);
+
+                newMacChain = new byte[16];
+                mac.CmacFinal(newMacChain);
+            }
+            finally
+            {
+                mac.Dispose();
+            }
 
             var previousMacChain = _macChain;
-            var newMacChain = mac.GetHashAndReset();
             _macChain = newMacChain;
+            newMacChain = null;
             CryptographicOperations.ZeroMemory(previousMacChain);
             return _macChain[..8].ToArray();
         }
@@ -166,12 +180,18 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
         {
             throw new NotSupportedException("Cryptography provider does not support AESCMAC", e);
         }
+        finally
+        {
+            if (newMacChain is not null)
+                CryptographicOperations.ZeroMemory(newMacChain);
+        }
     }
 
     public byte[] Unmac(ReadOnlySpan<byte> data, short sw)
     {
         var msgLength = data.Length - 8 + 2;
         byte[]? rentedMsg = null;
+        Span<byte> computedMac = stackalloc byte[16];
 
         try
         {
@@ -182,11 +202,12 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
             data[..^8].CopyTo(msg);
             BinaryPrimitives.WriteInt16BigEndian(msg[(data.Length - 8)..], sw);
 
-            using var mac = new AesCmac(keys.Srmac);
-            mac.AppendData(_macChain);
-            mac.AppendData(msg);
-            Span<byte> computedMac = stackalloc byte[16];
-            mac.GetHashAndReset().AsSpan().CopyTo(computedMac);
+            using ICmacPrimitives mac = CryptographyProviders.CmacPrimitivesCreator(
+                CmacBlockCipherAlgorithm.Aes128);
+            mac.CmacInit(keys.Srmac);
+            mac.CmacUpdate(_macChain);
+            mac.CmacUpdate(msg);
+            mac.CmacFinal(computedMac);
 
             var receivedMac = data[^8..];
 
@@ -205,6 +226,7 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
         }
         finally
         {
+            CryptographicOperations.ZeroMemory(computedMac);
             if (rentedMsg is not null)
             {
                 CryptographicOperations.ZeroMemory(rentedMsg);

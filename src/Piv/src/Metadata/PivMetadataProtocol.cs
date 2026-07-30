@@ -390,6 +390,47 @@ internal static class PivMetadataProtocol
     }
 
     /// <summary>
+    /// Blocks the PUK by repeatedly calling RESET RETRY with empty credentials until blocked.
+    /// </summary>
+    /// <remarks>
+    /// Shared by <see cref="PivSession.ResetAsync"/> and PIN-only mode setup (enabling a PIN-only
+    /// mode requires the PUK to be blocked, since it can no longer be used to unblock a PIN that
+    /// is protected by a management key the PUK holder may not know).
+    /// </remarks>
+    internal static async Task BlockPukAsync(
+        IPivBackend backend,
+        ILogger logger,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogDebug("PIV: Blocking PUK");
+
+        // PUK blocking uses INS_RESET_RETRY (0x2C) with P2=0x80 (PIN_P2, not PUK_P2!)
+        // Data is 16 bytes: 8-byte empty PUK + 8-byte empty PIN (both all 0xFF)
+        byte[] emptyPukPin = PivPinUtilities.EncodePinPair(ReadOnlySpan<char>.Empty, ReadOnlySpan<char>.Empty);
+        try
+        {
+            int retriesRemaining = 1; // Start with 1 to enter loop
+            while (retriesRemaining > 0)
+            {
+                var pukCommand = new ApduCommand(0x00, 0x2C, 0x00, 0x80, emptyPukPin);
+                var response = await backend.SendAsync(pukCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+                retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
+                if (retriesRemaining < 0)
+                {
+                    throw ApduException.FromStatusWord(response.SW, "Failed to block PUK");
+                }
+            }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(emptyPukPin);
+        }
+
+        logger.LogDebug("PIV: PUK blocked");
+    }
+
+    /// <summary>
     /// Sets the PIN and PUK retry limits.
     /// </summary>
     /// <remarks>

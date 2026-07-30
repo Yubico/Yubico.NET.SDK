@@ -218,32 +218,31 @@ public abstract class SlotConfiguration : IDisposable
     }
 
     /// <summary>
-    /// Processes an HMAC key for wire format storage: keys longer than 20 bytes are
-    /// shortened via SHA-1; keys shorter are zero-padded. The result is split into
-    /// <paramref name="key"/> (16 bytes) and <paramref name="uid"/> (4 bytes).
+    /// Validates and splits an exact-length HMAC key for wire format storage.
+    /// The key is split into <paramref name="key"/> (16 bytes) and <paramref name="uid"/> (4 bytes).
     /// </summary>
-    /// <param name="hmacKey">The raw HMAC key (must not be empty).</param>
-    /// <param name="key">Destination for the first 16 bytes of the processed key.</param>
-    /// <param name="uid">Destination for bytes 16-19 of the processed key (written to first 4 bytes).</param>
+    /// <param name="hmacKey">
+    /// The raw HMAC key. Must be exactly <see cref="YubiOtpConstants.HmacKeySize"/> (20) bytes.
+    /// </param>
+    /// <param name="key">Destination for the first 16 bytes of the key.</param>
+    /// <param name="uid">Destination for bytes 16-19 of the key (written to first 4 bytes).</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="hmacKey"/> is not exactly
+    /// <see cref="YubiOtpConstants.HmacKeySize"/> bytes. No device I/O is performed when this
+    /// is thrown, and the key is never hashed or padded to fit.
+    /// </exception>
     protected static void ProcessHmacKey(ReadOnlySpan<byte> hmacKey, Span<byte> key, Span<byte> uid)
     {
-        Span<byte> processedKey = stackalloc byte[YubiOtpConstants.HmacKeySize];
-
-        if (hmacKey.Length > YubiOtpConstants.HmacKeySize)
+        if (hmacKey.Length != YubiOtpConstants.HmacKeySize)
         {
-            SHA1.HashData(hmacKey, processedKey);
-        }
-        else
-        {
-            hmacKey.CopyTo(processedKey);
-            // Remaining bytes are already zero from stackalloc
+            throw new ArgumentException(
+                $"HMAC key must be exactly {YubiOtpConstants.HmacKeySize} bytes, got {hmacKey.Length}.",
+                nameof(hmacKey));
         }
 
         // Split: first 16 bytes -> key, next 4 bytes -> uid[0..4]
-        processedKey[..YubiOtpConstants.KeySize].CopyTo(key);
-        processedKey[YubiOtpConstants.KeySize..].CopyTo(uid);
-
-        CryptographicOperations.ZeroMemory(processedKey);
+        hmacKey[..YubiOtpConstants.KeySize].CopyTo(key);
+        hmacKey[YubiOtpConstants.KeySize..].CopyTo(uid);
     }
 
     protected void ThrowIfDisposed() =>

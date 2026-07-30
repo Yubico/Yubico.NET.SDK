@@ -34,6 +34,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 {
     private static readonly Feature FeatureSerial = new("Serial Number Read", 2, 2, 0);
     private static readonly Feature FeatureHmacSha1 = new("HMAC-SHA1 Challenge-Response", 2, 2, 0);
+    private static readonly Feature FeatureYubicoOtpChallengeResponse = new("Yubico OTP Challenge-Response", 2, 2, 0);
     private static readonly Feature FeatureUpdate = new("Slot Update", 2, 3, 0);
     private static readonly Feature FeatureSwap = new("Slot Swap", 2, 3, 0);
     private static readonly Feature FeatureNdef = new("NDEF Configuration", 3, 0, 0);
@@ -358,6 +359,38 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         {
             CryptographicOperations.ZeroMemory(paddedChallenge);
         }
+    }
+
+    public Task<ReadOnlyMemory<byte>> CalculateYubicoOtpAsync(
+        Slot slot,
+        ReadOnlyMemory<byte> challenge,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        EnsureSupports(FeatureYubicoOtpChallengeResponse);
+
+        if (challenge.Length != YubiOtpConstants.YubicoOtpChallengeSize)
+        {
+            throw new ArgumentException(
+                $"Challenge must be exactly {YubiOtpConstants.YubicoOtpChallengeSize} bytes, got {challenge.Length}.",
+                nameof(challenge));
+        }
+
+        var configSlot = slot.Map(SlotOperation.ChallengeYubicoOtp);
+        return CalculateYubicoOtpCoreAsync(configSlot, challenge, cancellationToken);
+    }
+
+    private async Task<ReadOnlyMemory<byte>> CalculateYubicoOtpCoreAsync(
+        ConfigSlot configSlot,
+        ReadOnlyMemory<byte> challenge,
+        CancellationToken cancellationToken)
+    {
+        return await _backend.SendAndReceiveAsync(
+                configSlot,
+                challenge,
+                YubiOtpConstants.YubicoOtpResponseSize,
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>

@@ -41,61 +41,138 @@ internal static class Scp11X963Kdf
 
         byte[] sharedInfo = [.. keyUsage.Span, .. keyType.Span, .. keyLen.Span];
         byte[] keyAgreementData = [.. oceAuthenticateData.Span, .. ePkSdEcka.Span];
-        var keyMaterial = GetSharedSecret(eSkOceEcka, skOceEcka, pkSdEcka, ePkSdEcka);
-
         const int keyCount = 5;
         const int keySizeBytes = 16; // 128 bits
-        var derivedKeyMaterial = X963Kdf.DeriveKeyMaterial(
-            keyMaterial,
-            sharedInfo,
-            keyCount * keySizeBytes);
+        byte[]? keyMaterial = null;
+        byte[]? derivedKeyMaterial = null;
+        byte[]? oceReceipt = null;
+        try
+        {
+            keyMaterial = GetSharedSecret(eSkOceEcka, skOceEcka, pkSdEcka, ePkSdEcka);
+            derivedKeyMaterial = X963Kdf.DeriveKeyMaterial(
+                keyMaterial,
+                sharedInfo,
+                keyCount * keySizeBytes);
 
-        var keys = new List<byte[]>();
-        for (var i = 0; i < 5; i++)
-            keys.Add(derivedKeyMaterial.AsSpan(i * 16, 16).ToArray());
+            oceReceipt = GenerateOceReceiptAesCmac(derivedKeyMaterial.AsSpan(0, keySizeBytes), keyAgreementData);
+            if (!CryptographicOperations.FixedTimeEquals(sdReceipt.Span, oceReceipt))
+                throw new BadResponseException("Receipt does not match");
 
-        CryptographicOperations.ZeroMemory(derivedKeyMaterial);
-
-        // 5 keys were derived: one for verification of receipt, 4 keys to use
-        var receiptVerificationKey = keys[0];
-        var oceReceipt = GenerateOceReceiptAesCmac(receiptVerificationKey, keyAgreementData);
-
-        return CryptographicOperations.FixedTimeEquals(sdReceipt.Span, oceReceipt)
-            ? new SessionKeys(keys[1], keys[2], keys[3], keys[4])
-            : throw new BadResponseException("Receipt does not match");
+            return new SessionKeys(
+                derivedKeyMaterial.AsSpan(keySizeBytes, keySizeBytes),
+                derivedKeyMaterial.AsSpan(keySizeBytes * 2, keySizeBytes),
+                derivedKeyMaterial.AsSpan(keySizeBytes * 3, keySizeBytes),
+                derivedKeyMaterial.AsSpan(keySizeBytes * 4, keySizeBytes));
+        }
+        finally
+        {
+            if (keyMaterial is not null)
+                CryptographicOperations.ZeroMemory(keyMaterial);
+            if (derivedKeyMaterial is not null)
+                CryptographicOperations.ZeroMemory(derivedKeyMaterial);
+            if (oceReceipt is not null)
+                CryptographicOperations.ZeroMemory(oceReceipt);
+        }
     }
 
-    internal static Span<byte> GetSharedSecret(
+    internal static byte[] GetSharedSecret(
         ECDiffieHellman ePkOceEcka, // host ephemeral key
         ECDiffieHellman skOceEcka, // host private key
         ECDiffieHellmanPublicKey pkSdEcka, // Yubikey Public Key
         ReadOnlyMemory<byte> epkSdEckaTlvBytes
-    )
+    ) => GetSharedSecret(
+        ePkOceEcka,
+        skOceEcka,
+        pkSdEcka,
+        epkSdEckaTlvBytes,
+        static key => key.ExportParameters(true),
+        static parameters => ECDiffieHellman.Create(parameters));
+
+    internal static byte[] GetSharedSecret(
+        ECDiffieHellman ePkOceEcka,
+        ECDiffieHellman skOceEcka,
+        ECDiffieHellmanPublicKey pkSdEcka,
+        ReadOnlyMemory<byte> epkSdEckaTlvBytes,
+        Func<ECDiffieHellman, ECParameters> privateKeyExporter) => GetSharedSecret(
+        ePkOceEcka,
+        skOceEcka,
+        pkSdEcka,
+        epkSdEckaTlvBytes,
+        privateKeyExporter,
+        static parameters => ECDiffieHellman.Create(parameters));
+
+    internal static byte[] GetSharedSecret(
+        ECDiffieHellman ePkOceEcka,
+        ECDiffieHellman skOceEcka,
+        ECDiffieHellmanPublicKey pkSdEcka,
+        ReadOnlyMemory<byte> epkSdEckaTlvBytes,
+        Func<ECParameters, ECDiffieHellman> ephemeralSdKeyFactory) => GetSharedSecret(
+        ePkOceEcka,
+        skOceEcka,
+        pkSdEcka,
+        epkSdEckaTlvBytes,
+        static key => key.ExportParameters(true),
+        ephemeralSdKeyFactory);
+
+    private static byte[] GetSharedSecret(
+        ECDiffieHellman ePkOceEcka,
+        ECDiffieHellman skOceEcka,
+        ECDiffieHellmanPublicKey pkSdEcka,
+        ReadOnlyMemory<byte> epkSdEckaTlvBytes,
+        Func<ECDiffieHellman, ECParameters> privateKeyExporter,
+        Func<ECParameters, ECDiffieHellman> ephemeralSdKeyFactory)
     {
-        var ePkSdEcka = CreateECDiffieHellmanPublicKey(epkSdEckaTlvBytes);
+        using ECDiffieHellman ePkSdEckaOwner = ephemeralSdKeyFactory(
+            ParseECDiffieHellmanParameters(epkSdEckaTlvBytes));
+        using ECDiffieHellmanPublicKey ePkSdEcka = ePkSdEckaOwner.PublicKey;
+        IEcdhPrimitives ecdh = CryptographyProviders.EcdhPrimitivesCreator();
+        ECParameters ephemeralParameters = default;
+        ECParameters staticParameters = default;
 
-        // Key agreement 1: ephemeral OCE private key with ephemeral SD public key
-        var ka1 = ePkOceEcka.DeriveRawSecretAgreement(ePkSdEcka);
+        byte[]? ka1 = null;
+        byte[]? ka2 = null;
+        try
+        {
+            ephemeralParameters = privateKeyExporter(ePkOceEcka);
+            staticParameters = privateKeyExporter(skOceEcka);
 
-        // Key agreement 2: static/ephemeral OCE private key with static SD public key
-        var ka2 = skOceEcka.DeriveRawSecretAgreement(pkSdEcka);
+            if (ephemeralParameters.D is null)
+                throw new CryptographicException("The ephemeral ECDH key has no private value.");
+            if (staticParameters.D is null)
+                throw new CryptographicException("The static ECDH key has no private value.");
 
-        const int expectedLength = 32; // 256 bits
-        if (ka1.Length != expectedLength || ka2.Length != expectedLength)
-            throw new InvalidOperationException("Derived key agreement material has unexpected length");
+            // Key agreement 1: ephemeral OCE private key with ephemeral SD public key.
+            // ephemeralParameters carries the local key's own matching Q/D pair; the SD's
+            // ephemeral public key is the remote party.
+            ka1 = ecdh.ComputeSharedSecret(ephemeralParameters, ePkSdEcka.ExportParameters());
 
-        using var buffer = new DisposableArrayPoolBuffer(expectedLength * 2);
-        var keyMaterial = buffer.Span;
-        ka1.AsSpan().CopyTo(keyMaterial);
-        ka2.AsSpan().CopyTo(keyMaterial[ka1.Length..]);
+            // Key agreement 2: static/ephemeral OCE private key with static SD public key.
+            ka2 = ecdh.ComputeSharedSecret(staticParameters, pkSdEcka.ExportParameters());
 
-        CryptographicOperations.ZeroMemory(ka1);
-        CryptographicOperations.ZeroMemory(ka2);
+            const int expectedLength = 32; // 256 bits
+            if (ka1.Length != expectedLength || ka2.Length != expectedLength)
+                throw new InvalidOperationException("Derived key agreement material has unexpected length");
 
-        return keyMaterial.ToArray();
+            using var buffer = new DisposableArrayPoolBuffer(expectedLength * 2);
+            var keyMaterial = buffer.Span;
+            ka1.AsSpan().CopyTo(keyMaterial);
+            ka2.AsSpan().CopyTo(keyMaterial[ka1.Length..]);
+            return keyMaterial.ToArray();
+        }
+        finally
+        {
+            if (ephemeralParameters.D is not null)
+                CryptographicOperations.ZeroMemory(ephemeralParameters.D);
+            if (staticParameters.D is not null)
+                CryptographicOperations.ZeroMemory(staticParameters.D);
+            if (ka1 is not null)
+                CryptographicOperations.ZeroMemory(ka1);
+            if (ka2 is not null)
+                CryptographicOperations.ZeroMemory(ka2);
+        }
     }
 
-    private static ECDiffieHellmanPublicKey CreateECDiffieHellmanPublicKey(ReadOnlyMemory<byte> ePkSdEckaTlv)
+    private static ECParameters ParseECDiffieHellmanParameters(ReadOnlyMemory<byte> ePkSdEckaTlv)
     {
         var ePkSdEckaEncodedPoint = TlvHelper.GetValue(0x5F49, ePkSdEckaTlv.Span);
         var ePkSdEcka = new ECParameters
@@ -108,7 +185,7 @@ internal static class Scp11X963Kdf
             }
         };
 
-        return ECDiffieHellman.Create(ePkSdEcka).PublicKey;
+        return ePkSdEcka;
     }
 
     internal static Span<byte> GetKeyAgreementData(
@@ -128,6 +205,15 @@ internal static class Scp11X963Kdf
 
     internal static byte[] GenerateOceReceiptAesCmac(ReadOnlySpan<byte> receiptVerificationKey,
         ReadOnlySpan<byte> keyAgreementData)
+        => GenerateOceReceiptAesCmac(
+            receiptVerificationKey,
+            keyAgreementData,
+            static length => new byte[length]);
+
+    internal static byte[] GenerateOceReceiptAesCmac(
+        ReadOnlySpan<byte> receiptVerificationKey,
+        ReadOnlySpan<byte> keyAgreementData,
+        Func<int, byte[]> receiptBufferFactory)
     {
         // var useOpenSsl = false; // Try AesCmac instead of OpenSSL
         // if (useOpenSsl)
@@ -142,10 +228,31 @@ internal static class Scp11X963Kdf
         //     return oceReceipt.ToArray();
         // }
 
-        using var
-            mac = new AesCmac(
-                receiptVerificationKey); // When we have made a successful SCP11 connection with legacy code, we can try this again.
-        mac.AppendData(keyAgreementData);
-        return mac.GetHashAndReset();
+        byte[]? receipt = receiptBufferFactory(16);
+        try
+        {
+            ICmacPrimitives mac = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            try
+            {
+                mac.CmacInit(receiptVerificationKey);
+                mac.CmacUpdate(keyAgreementData);
+                mac.CmacFinal(receipt);
+            }
+            finally
+            {
+                mac.Dispose();
+            }
+
+            byte[] result = receipt;
+            receipt = null;
+            return result;
+        }
+        finally
+        {
+            if (receipt is not null)
+            {
+                CryptographicOperations.ZeroMemory(receipt);
+            }
+        }
     }
 }

@@ -17,6 +17,7 @@ using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Piv.DataObjects;
 
 namespace Yubico.YubiKit.Piv;
 
@@ -53,6 +54,12 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// WARNING: This permanently destroys all PIV data, keys, and certificates.
     /// The operation requires that biometrics are not configured.
     /// </para>
+    /// <para>
+    /// A successful reset clears management-key authentication and refreshes
+    /// <see cref="ManagementKeyType"/> from post-reset metadata. If metadata is unavailable, the
+    /// session uses AES-192 only for a reliable firmware version 5.7 or later and conservatively
+    /// falls back to Triple-DES for sentinel or older versions. Unexpected metadata errors propagate.
+    /// </para>
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidOperationException">Biometrics are configured - cannot reset.</exception>
@@ -67,6 +74,7 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// <para>
     /// The management key is NOT zeroed by this method - caller is responsible for secure disposal.
     /// Authentication enables key generation, import, certificate storage, and management operations.
+    /// A failed authentication attempt clears any previously recorded management authentication state.
     /// </para>
     /// </remarks>
     /// <param name="managementKey">Management key bytes (24 bytes for 3DES, 16/24/32 for AES).</param>
@@ -429,13 +437,167 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// <param name="cancellationToken">Cancellation token.</param>
     Task PutObjectAsync(int objectId, ReadOnlyMemory<byte>? data, CancellationToken cancellationToken = default);
 
+    // Typed data objects
+
+    /// <summary>
+    /// Get the typed CHUID (CardHolder Unique Identifier) object.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The CHUID, or <see cref="PivCardholderUniqueId.Empty"/> if not present.</returns>
+    /// <exception cref="ApduException">The stored object is not encoded as a valid CHUID.</exception>
+    Task<PivCardholderUniqueId> GetCardholderUniqueIdAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Set the typed CHUID (CardHolder Unique Identifier) object.
+    /// </summary>
+    /// <remarks>Requires management key authentication.</remarks>
+    /// <param name="cardholderUniqueId">The CHUID to store.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task SetCardholderUniqueIdAsync(PivCardholderUniqueId cardholderUniqueId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get the typed CCC (Card Capability Container) object.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The CCC, or <see cref="PivCardCapabilityContainer.Empty"/> if not present.</returns>
+    /// <exception cref="ApduException">The stored object is not encoded as a valid CCC.</exception>
+    Task<PivCardCapabilityContainer> GetCardCapabilityContainerAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Set the typed CCC (Card Capability Container) object.
+    /// </summary>
+    /// <remarks>Requires management key authentication.</remarks>
+    /// <param name="cardCapabilityContainer">The CCC to store.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task SetCardCapabilityContainerAsync(PivCardCapabilityContainer cardCapabilityContainer, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get the typed ADMIN DATA object, which records PIN-only mode state.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The ADMIN DATA, or <see cref="PivAdminData.Empty"/> if not present.</returns>
+    /// <exception cref="ApduException">The stored object is not encoded as valid ADMIN DATA.</exception>
+    Task<PivAdminData> GetAdminDataAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Set the typed ADMIN DATA object.
+    /// </summary>
+    /// <remarks>
+    /// Requires management key authentication. Most callers should use
+    /// <see cref="SetPinOnlyModeAsync"/> instead of writing ADMIN DATA directly.
+    /// </remarks>
+    /// <param name="adminData">The ADMIN DATA to store.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task SetAdminDataAsync(PivAdminData adminData, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get the typed Key History object.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The Key History, or <see cref="PivKeyHistory.Empty"/> if not present.</returns>
+    /// <exception cref="ApduException">The stored object is not encoded as a valid Key History.</exception>
+    Task<PivKeyHistory> GetKeyHistoryAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Set the typed Key History object.
+    /// </summary>
+    /// <remarks>Requires management key authentication.</remarks>
+    /// <param name="keyHistory">The Key History to store.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task SetKeyHistoryAsync(PivKeyHistory keyHistory, CancellationToken cancellationToken = default);
+
+    // PIN-only mode
+
+    /// <summary>
+    /// Detect whether the management key is currently PIN-protected and/or PIN-derived, based on
+    /// the contents of the ADMIN DATA object.
+    /// </summary>
+    /// <remarks>
+    /// This does not authenticate the management key; it only inspects ADMIN DATA. If ADMIN DATA
+    /// is present but not encoded as expected (for example, overwritten by another application),
+    /// both <see cref="PivPinOnlyMode.PinProtectedUnavailable"/> and
+    /// <see cref="PivPinOnlyMode.PinDerivedUnavailable"/> are set.
+    /// </remarks>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The detected PIN-only mode.</returns>
+    Task<PivPinOnlyMode> GetPinOnlyModeAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Attempt to authenticate the management key using PIN-protected and/or PIN-derived data
+    /// already stored on the YubiKey.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This tries the PIN-protected management key stored in the PRINTED object first, verifying
+    /// the PIN and retrying the read once if PRINTED is PIN-gated, then attempts to derive a
+    /// management key from the given PIN and the salt stored in ADMIN DATA. A successful PIN
+    /// verification is reused between both paths. The session's authenticated state is updated
+    /// for whichever mode(s) succeed.
+    /// </para>
+    /// <para>
+    /// If a later PIN-derived candidate fails after PIN-protected authentication succeeded, the
+    /// PIN-protected key is reauthenticated before that success is returned. If restoration fails,
+    /// the method returns <see cref="PivPinOnlyMode.None"/> and leaves the session unauthenticated.
+    /// </para>
+    /// <para>
+    /// The PIN-derived candidate key is discarded and zeroed after each attempt; it is never
+    /// retained by the session.
+    /// </para>
+    /// </remarks>
+    /// <param name="pin">PIN as UTF-8 bytes, used if PRINTED is PIN-gated or PIN-derived data is present.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The PIN-only mode(s) successfully authenticated. <see cref="PivPinOnlyMode.None"/> if neither succeeded.</returns>
+    /// <exception cref="InvalidPinException">PIN verification is required and the supplied PIN is incorrect.</exception>
+    Task<PivPinOnlyMode> RecoverPinOnlyModeAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Enable or disable PIN-protected management key mode.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Requires the management key to already be authenticated (<see cref="AuthenticateAsync"/>).
+    /// Only <see cref="PivPinOnlyMode.None"/> (disable) and <see cref="PivPinOnlyMode.PinProtected"/>
+    /// (enable) are supported; PIN-derived management keys are a deprecated, weaker mechanism and
+    /// cannot be enabled through this method (existing PIN-derived state can still be detected via
+    /// <see cref="GetPinOnlyModeAsync"/> and recovered via <see cref="RecoverPinOnlyModeAsync"/>).
+    /// </para>
+    /// <para>
+    /// Enabling PIN-protected mode first authenticates <paramref name="managementKey"/> as the
+    /// active key for <see cref="ManagementKeyType"/>, then verifies the PIN, stores the key in the
+    /// PRINTED object, blocks the PUK, and updates ADMIN DATA. Disabling first resets the management
+    /// key to the type-appropriate well-known default, then clears PRINTED and ADMIN DATA in that
+    /// order. Disabling is a no-op if neither PIN-protected nor PIN-derived mode is currently set.
+    /// </para>
+    /// <para><paramref name="managementKey"/> is NOT zeroed by this method - caller is responsible for secure disposal.</para>
+    /// </remarks>
+    /// <param name="pinOnlyMode"><see cref="PivPinOnlyMode.None"/> to disable, or <see cref="PivPinOnlyMode.PinProtected"/> to enable.</param>
+    /// <param name="pin">PIN as UTF-8 bytes. Required (and verified) when enabling PIN-protected mode; ignored when disabling.</param>
+    /// <param name="managementKey">
+    /// The active management key to authenticate and protect. Required when enabling PIN-protected mode;
+    /// its length must match <see cref="ManagementKeyType"/>. Ignored when disabling.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="InvalidOperationException">The management key is not authenticated.</exception>
+    /// <exception cref="ArgumentException"><paramref name="pinOnlyMode"/> requests an unsupported mode, or the management-key length does not match <see cref="ManagementKeyType"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="managementKey"/> is required but not supplied.</exception>
+    /// <exception cref="InvalidPinException">The supplied PIN is incorrect.</exception>
+    Task SetPinOnlyModeAsync(
+        PivPinOnlyMode pinOnlyMode,
+        ReadOnlyMemory<byte> pin,
+        ReadOnlyMemory<byte>? managementKey = null,
+        CancellationToken cancellationToken = default);
+
     // Management key
 
     /// <summary>
     /// Set new management key.
     /// </summary>
     /// <remarks>
-    /// Requires current management key authentication. New key is NOT zeroed by this method.
+    /// Requires current management key authentication. After success, <see cref="ManagementKeyType"/>
+    /// reflects <paramref name="keyType"/> and management authentication remains active for the newly
+    /// installed key in the card session. The session does not retain key bytes. New key is NOT zeroed
+    /// by this method. If the device reports that the security status is not satisfied, the session
+    /// clears its recorded management authentication state; other command failures preserve it.
     /// </remarks>
     /// <param name="keyType">Management key algorithm.</param>
     /// <param name="newKey">New management key bytes.</param>

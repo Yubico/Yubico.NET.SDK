@@ -35,6 +35,13 @@ if (APPLE OR UNIX)
         set(BACKEND "pcsc")
         # RELRO + NOW = full read-only relocations (exploit mitigation)
         add_link_options("-Wl,-z,relro,-z,now,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/exports.gnu")
+        # 64 KB max page size: aligns LOAD segments so the shim is loadable on systems
+        # with larger memory pages. Required for Android 15+ 16 KB-page devices (Google
+        # Play, Nov 2025) AND for aarch64 Linux distros that use 64 KB kernel pages
+        # (e.g. RHEL/Fedora). 64 KB is a superset alignment: it satisfies 4 KB, 16 KB and
+        # 64 KB page sizes. x86_64 defaults to 4 KB; aarch64 already defaults to 64 KB, so
+        # this is a no-op there and never lowers it. https://developer.android.com/guide/practices/page-sizes
+        add_link_options("-Wl,-z,max-page-size=65536")
     endif()
 
     # --- macOS / Linux: security hardening (GCC/Clang) ---

@@ -301,21 +301,11 @@ public class DeviceConnectionRegistryTests
     /// <summary>How long a losing caller is observed for; it must still be blocked when this elapses.</summary>
     private static readonly TimeSpan LoserProbe = TimeSpan.FromMilliseconds(250);
 
-    /// <summary>
-    ///     Lease double for the disposal tests: counts releases only. These tests never transmit, so applet
-    ///     selection is not exercised here — see <c>SmartCardAppletOwnershipTests</c> for that contract.
-    /// </summary>
-    private sealed class CountingLease : ISessionLease
+    private sealed class CountingLease : IDisposable
     {
         private int _releaseCount;
 
         public int ReleaseCount => Volatile.Read(ref _releaseCount);
-
-        public void SelectApplet(ReadOnlyMemory<byte> applicationId) =>
-            throw new NotSupportedException("This lease double is for disposal tests and never selects an applet.");
-
-        public void AbandonAppletSelect() =>
-            throw new NotSupportedException("This lease double is for disposal tests and never selects an applet.");
 
         public void Dispose() => Interlocked.Increment(ref _releaseCount);
     }

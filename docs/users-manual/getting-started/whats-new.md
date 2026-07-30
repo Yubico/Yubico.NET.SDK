@@ -20,7 +20,7 @@ Here you can find all of the updates and release notes for published versions of
 
 ### 1.17.2
 
-Release date: July 29th, 2026
+Release date: July 31st, 2026
 
 Bug Fixes:
 

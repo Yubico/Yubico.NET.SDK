@@ -454,3 +454,52 @@ Hardware validation of the three-line motivating sequence (ISC-1) still requires
 is no-hardware evidence: the refusals are in-process facts, which is exactly why they are testable without a
 YubiKey — but that the SDK now *routes* Management over HID does not by itself re-prove that the PIV session
 survives. Phase 1 experiment 4 measured that; a post-change integration run should confirm it end to end.
+---
+
+## Status at handoff (2026-07-30)
+
+### Complete
+
+| Phase | Outcome |
+|---|---|
+| 0 Harness | `preferredConnection` pin + `ManagementSession.Transport`; two false-positive tests fixed (RED: "Expected HidFido, Actual SmartCard") |
+| 1 Investigation | 4 hardware experiments, predictions recorded first; findings in `phase1-findings.md` |
+| 2 Fable | Declared two of its own prior recommendations dead; canonical comparison settled the layer question |
+| 3 Fix | Wire-sniffer reverted (`b0ce52a0`); ownership + CCID exclusivity (`d463e83a`) |
+| 4 DeviceId | Phantom events fixed (`1e0560af`) |
+
+**ISC-1 achieved on hardware.** The three-line sequence completes; it was `SW=0x6D00`. Cross-applet
+is refused with the victim session intact.
+
+Gates at `1e0560af`: build 0 errors/0 warnings · Core 729 total, 0 failed, 3 pre-existing skips ·
+resilience 69/69 · full suite 12/12 · format 0 errors · hardware: discovery 5/5, PIV two-key 2/2.
+
+### Remaining
+
+- **Phase 5 — documentation.** Guarantees-doc sufficiency (the `ce07f721` regression: serial
+  conditionality, `pidCorrelationUntrusted`, the flags-union caveat), consumer surface on
+  `FindAllAsync`, `docs/` index, staleness + L4 SVG re-render, register row→test-ID mapping, and the
+  **ownership contract with its migration note** — the breaking change is currently recorded only in
+  a commit message.
+- **Phase 6 — Fable `/CodeAudit`**, scoped to `Devices/`, `Transports/`, applet transport resolution.
+
+### Deferred, with reasons
+
+- **Cross-vendor review of Phases 3–4.** Both were engineered and self-verified but not reviewed.
+  Terra reviewed the *superseded* wire-sniffer, not this design. **Do not merge without it.**
+- **Hardware confirmation of the DeviceId tier flip.** The mechanism is pinned by a merger-level test
+  showing the id flips while interface paths stay byte-identical, and the fix is pinned by a
+  repository test that went RED for the predicted reason. Physical confirmation needs either
+  unplugging a key or reconfiguring one to a different PID via the reconfiguration harness — planned,
+  not run.
+- **Linux and Windows.** Every hardware result here is macOS on firmware 5.8.0, two keys, one PID
+  class. Nothing about the ownership model is macOS-specific, but PC/SC sharing semantics and HID
+  open behaviour differ per platform and are unverified.
+- **Windows topology Tier 2**, carried from the composite-merge effort.
+- **A `claude`-CLI entry for Fable** in `NAMED_MODEL_ALIASES` — its Copilot-only chain went dark when
+  quota ran out, though the CLI transport worked.
+
+### Register status
+
+Resolved: A1, A2, A3, A5, B4, B5, C1, C2 (partial), E1, E2. Unresolved: A4, B1–B3, D1–D3, F1.
+F2/F3 remain platform gaps.

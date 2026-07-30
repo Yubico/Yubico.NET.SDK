@@ -65,7 +65,6 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
     // ── Fields ────────────────────────────────────────────────────────
 
-    private readonly ISmartCardConnection _connection;
     private readonly ILogger _logger;
     private ISmartCardProtocol? _protocol;
     private ApplicationRelatedData _appData = null!;
@@ -74,8 +73,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     // ── Constructor (private — use CreateAsync) ───────────────────────
 
     private OpenPgpSession(ISmartCardConnection connection)
+        : base(connection)
     {
-        _connection = connection;
         _logger = Logger;
     }
 
@@ -95,10 +94,20 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
+        // A session that fails to initialize must not keep its claim on the connection: the connection
+        // outlives it, and the next session over it would otherwise be refused forever.
         var session = new OpenPgpSession(connection);
-        await session.InitializeAsync(configuration, scpKeyParams, cancellationToken)
-            .ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, scpKeyParams, cancellationToken)
+                .ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            await session.DisposeAsync().ConfigureAwait(false);
+            throw;
+        }
     }
 
     // ── Initialization ────────────────────────────────────────────────
@@ -113,7 +122,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
         var smartCardProtocol = PcscProtocolFactory<ISmartCardConnection>
             .Create()
-            .Create(_connection);
+            .Create((ISmartCardConnection)Connection);
 
         // SELECT OpenPGP AID — handle terminated state (0x6285/0x6985)
         try

@@ -228,8 +228,11 @@ internal static class ProtocolDeviceInfo
         if (discoveryLease is null)
             throw new DiscoveryReadSkippedException(interfaceId, DiscoveryReadSkipCause.InterfaceLeaseHeld);
 
+        // Discovery creates this connection, so discovery disposes it. Protocols are pure users of the
+        // connection they are handed, so the protocol disposal inside ReadAsync does not release the handle.
         var conn = await provider.ConnectForDiscoveryAsync(connection, cancellationToken).ConfigureAwait(false);
-        return await ReadAsync(conn, cancellationToken).ConfigureAwait(false);
+        await using (conn.ConfigureAwait(false))
+            return await ReadAsync(conn, cancellationToken).ConfigureAwait(false);
     }
 
     public static async Task<DeviceInfo> ReadAsync(IConnection connection, CancellationToken cancellationToken)

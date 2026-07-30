@@ -444,11 +444,9 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         await WriteFeatureReportAsync(buffer, cancellationToken).ConfigureAwait(false);
     }
 
-    public void Dispose()
-    {
-        if (_disposed) return;
-
-        _connection.Dispose();
-        _disposed = true;
-    }
+    /// <summary>
+    ///     Releases this protocol. The connection is NOT disposed: a protocol is a user of the connection it
+    ///     was handed, never its owner. Whoever created the connection disposes it.
+    /// </summary>
+    public void Dispose() => _disposed = true;
 }

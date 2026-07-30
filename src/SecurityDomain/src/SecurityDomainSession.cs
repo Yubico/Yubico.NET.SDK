@@ -74,7 +74,6 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
     private const int ResetAttemptLimit = 65;
     private static readonly byte[] ResetAttemptPayload = new byte[8];
-    private readonly ISmartCardConnection _connection;
     private readonly ILogger _logger;
 
     private readonly ScpKeyParameters? _scpKeyParams;
@@ -89,8 +88,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     private SecurityDomainSession(
         ISmartCardConnection connection,
         ScpKeyParameters? scpKeyParams = null)
+        : base(connection)
     {
-        _connection = connection;
         _logger = Logger;
         _scpKeyParams = scpKeyParams;
     }
@@ -120,9 +119,19 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         FirmwareVersion? firmwareVersion = null,
         CancellationToken cancellationToken = default)
     {
+        // A session that fails to initialize must not keep its claim on the connection: the connection
+        // outlives it, and the next session over it would otherwise be refused forever.
         var session = new SecurityDomainSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, firmwareVersion, cancellationToken).ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, firmwareVersion, cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            await session.DisposeAsync().ConfigureAwait(false);
+            throw;
+        }
     }
 
     /// <summary>
@@ -141,7 +150,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
         var smartCardProtocol = PcscProtocolFactory<ISmartCardConnection>
             .Create()
-            .Create(_connection);
+            .Create((ISmartCardConnection)Connection);
         await smartCardProtocol
             .SelectAsync(ApplicationIds.SecurityDomain, cancellationToken)
             .ConfigureAwait(false);
@@ -929,7 +938,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             command[4] = (byte)ResetAttemptPayload.Length;
             ResetAttemptPayload.CopyTo(command[5..]);
 
-            var response = await _connection
+            var response = await ((ISmartCardConnection)Connection)
                 .TransmitAndReceiveAsync(rented.AsMemory(0, commandLength), cancellationToken)
                 .ConfigureAwait(false);
 

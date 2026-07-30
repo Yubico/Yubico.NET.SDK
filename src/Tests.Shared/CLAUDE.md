@@ -17,7 +17,6 @@ Tests.Shared provides the foundation for all YubiKit integration tests. It imple
 - `Infrastructure/AllowList.cs` - Security layer preventing unauthorized testing
 - `YubiKeyTestState.cs` - Device wrapper implementing `IXunitSerializable`
 - `YubiKeyTestStateExtensions.cs` - Application-specific session helpers
-- `SharedSmartCardConnection.cs` - Non-owning SmartCard connection wrapper for multi-session integration helpers
 - `RecordingSmartCardConnection.cs` - xUnit-free SmartCard APDU recorder for byte-level unit tests
 
 ## Critical Design Patterns
@@ -212,7 +211,9 @@ public static async Task WithOathAsync(
 
 ### Sharing a SmartCard Connection Across Sessions
 
-Use `SharedSmartCardConnection` when an integration helper must create more than one session over the same physical connection, such as reset-then-test flows. The wrapper forwards all SmartCard operations but ignores `Dispose()` and `DisposeAsync()`, so the `WithConnectionAsync` owner remains responsible for the real connection lifetime.
+Pass the connection straight through. A session is a user of the connection it is handed, so disposing a reset session leaves the connection open for the test session that follows; the `WithConnectionAsync` owner disposes it. This used to need a non-owning `SharedSmartCardConnection` wrapper, which is gone — non-owning is the default now.
+
+One live session per connection: dispose the reset session before creating the test session, or the second construction throws `ConnectionInUseException`. Scope the reset session to its own `using` block.
 
 ### Recording SmartCard APDUs In Unit Tests
 

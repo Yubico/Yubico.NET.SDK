@@ -327,3 +327,130 @@ rather than a reconnect.
 Deferred to the implementation phase: whether that surface is a non-owning connection wrapper, an
 ownership flag on `CreateAsync`, or a scoped multi-applet helper. All three are additive and none
 changes the enforcement rule.
+
+---
+
+## Phase 4 — Enforcement moved to acquisition (2026-07-30)
+
+Implements the Phase 3 DECISION. Enforcement is at binding time in three places, none of which looks at the
+wire, so the Two Generals problem that killed `00a9e26f` cannot arise: nothing here mirrors card state.
+
+### What changed
+
+| # | Change | Where |
+|---|---|---|
+| 1 | Protocols no longer dispose their connection | `PcscProtocol`, `FidoHidProtocol`, `OtpHidProtocol` |
+| 2 | Discovery disposes the connection it created | `ProtocolDeviceInfo.ConnectAndReadAsync` |
+| 3 | The interface lease belongs to the CONNECTION, and CCID is exclusive | `DeviceConnectionRegistry.AcquireConnectionAsync(id, exclusive)`, `PcscYubiKey` (`true`) / `HidYubiKey` (`false`) |
+| 4 | One live session per connection | `ConnectionSessionGuard`, attached in the `ApplicationSession` constructor |
+| 5 | An in-process refusal counts as a held transport | `YubiKeyConnectionExtensions.IsHeldTransportError` |
+| 6 | Convenience entry points own the connection they open | `ApplicationSession.OwnConnection()`, called at 8 `Create<App>SessionAsync` sites |
+| 7 | A failed `CreateAsync` releases its claim | 8 session factories |
+
+`SmartCardAppletConflictException` did not come back. One exception type, `ConnectionInUseException`, covers
+both refusals — they are the same fact at two scopes.
+
+### Deleted
+
+`SharedSmartCardConnection` and its 4 usages (non-owning is now the default), the false `src/Core/CLAUDE.md`
+gotcha "PcscProtocol disposes its underlying connection", 5 duplicated `_connection` fields (subsumed by
+`ApplicationSession.Connection`), and — from the reverted design — SELECT sniffing, applet-keyed registry
+state, and the claim/reconcile lifecycle. Net: no new subsystem, one new 85-line guard, one exception type.
+
+### RED, each for its predicted reason
+
+Recorded verbatim before the corresponding change. Full set: `dotnet toolchain.cs -- test --project Core
+--filter "FullyQualifiedName~ConnectionOwnershipContractTests"` at the pre-change tree.
+
+```
+failed ConnectionOwnershipContractTests.ConnectAsync_SecondConnectionToHeldCcidInterface_IsRefused
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.Devices.ConnectionInUseException)
+
+failed ConnectionOwnershipContractTests.Session_SecondLiveSessionOnOneConnection_IsRefused
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.Devices.ConnectionInUseException)
+
+failed ConnectionOwnershipContractTests.Session_Dispose_DoesNotDisposeACallerCreatedConnection
+  Assert.Equal() Failure: Values differ
+  Expected: 0
+  Actual:   1
+
+failed ConnectionOwnershipContractTests.PcscProtocol_Dispose_DoesNotDisposeTheConnection
+  Assert.Equal() Failure: Values differ
+  Expected: 0
+  Actual:   1
+
+failed ConnectionOwnershipContractTests.SuccessiveSessions_OverOneConnection_BothReachTheWire
+  System.ObjectDisposedException : Cannot access a disposed object.
+  Object name: 'RecordingSmartCardConnection'.
+    at PcscProtocol.SelectAsync(...)
+    at ProbeSession.CreateAsync(...)          <- the SECOND session
+
+failed ConnectionOwnershipContractTests.Session_AfterFirstDisposed_SecondSessionOnSameConnectionSucceeds
+  System.ObjectDisposedException : Cannot access a disposed object.   (same cause)
+
+failed IYubiKeyExtensionsTransportTests.CreateManagementSessionAsync_CcidHeldInProcess_FallsBackToHidFido
+  Assert.Equal() Failure: Collections differ
+                        ↓ (pos 1)
+  Expected: [SmartCard, HidFido]
+  Actual:   [SmartCard]
+
+failed OathSessionTests.CreateAsync_InitializationFails_LeavesTheConnectionUsableByTheNextSession
+  ConnectionInUseException : This connection already has a live OathSession. ...
+    at ConnectionSessionGuard.Attach   <- ghost holder left by the failed first attempt
+```
+
+The last one is a defect introduced by change 4 and caught by its own pin before it shipped: the guard is
+attached in the constructor, so a factory that throws after construction must dispose what it built.
+
+### Invariant pins (passed before AND after — not fix evidence)
+
+`ConnectAsync_AfterFirstConnectionDisposed_SecondSucceeds` ·
+`ConnectAsync_HidInterface_AllowsConcurrentConnections` ·
+`ConnectAsync_CcidHeld_SameKeysHidInterfaceStillConnects` ·
+`ConnectAsync_DifferentInterfaces_CreatePhysicalConnectionsConcurrently` ·
+`CreateOathSessionAsync_DisposingSession_DisposesTheConnectionItOpened` ·
+`CreateManagementSessionAsync_CcidHeldInProcess_ExplicitOverrideDoesNotFallBack` ·
+`CreateManagementSessionAsync_CcidHeldInProcess_NoOtherTransport_Throws` ·
+`IdentityRead_DeviceInUse_SkipsWithoutConnecting` ·
+`MetadataRead_CompositeWithInUseSmartCardMember_SkipsItButTriesOtpTransport` ·
+`Coordinator_CanceledWaiterDecrementsCount_AndRemainingConnectionHasPriority`
+
+### Tests retargeted, and why
+
+Four tests asserted the ownership bug as if it were the contract. None was bulk-edited to pass; each was
+re-pointed at the requirement it was actually reaching for.
+
+| Test | Was | Now |
+|---|---|---|
+| `PcscProtocolTests.Dispose_Twice_DisposesConnectionOnce` | disposal reaches the connection | `Dispose_Twice_IsIdempotent_AndDoesNotDisposeConnection` — the idempotency claim survives, the ownership claim does not |
+| `PcscProtocolScpTests.Dispose_DisposesBaseProtocol` | proved base disposal by watching the CONNECTION die | `Dispose_DisposesBaseProtocol_ButNotTheConnection` — asserts the base protocol directly |
+| `PcscProtocolScpTests.Dispose_Twice_DisposesBaseProtocolAndScpProcessorOnce` | connection disposed once | `..._DisposesScpProcessorOnce_AndNeverTheConnection` |
+| `DeviceConnectionRegistryTests.AcquireSession_RefCountsPerDeviceId_AndDisposeIsIdempotent` | ref-counting for every interface | split: `AcquireConnection_NonExclusiveInterface_RefCounts_AndDisposeIsIdempotent` (HID, still a real requirement) and `AcquireConnection_ExclusiveInterface_SecondAcquisitionIsRefused` (CCID) |
+
+The fourth is the one Phase 3 flagged for reclassification. The pin was wrong, not just the code: it read
+"acquisition is ref-counted" as "coexistence is supported", and that conflation is what let the defect through.
+
+### Not done, deliberately
+
+- **`into_connection`-style ownership transfer as public API.** Not needed: with non-owning disposal the
+  handoff is just "dispose session A, construct session B on the same connection." Adding a method would
+  add a concept for a lifetime C# already expresses.
+- **Same-applet nesting.** Phase 1 measured it hardware-safe and Phase 3 chose to forbid it anyway — two
+  PIV sessions on one interface share security state, so one verifying a PIN silently elevates the other.
+  Widening later is non-breaking; withdrawing later is not.
+- **Cross-process contention.** Unchanged and still out of scope; it surfaces as a PC/SC sharing violation.
+- **A finalizer backstop for the ownership change.** It would hide the mistake it exists to catch.
+
+### Verification
+
+Build 0 errors · Core 724 total / 0 failed / 3 pre-existing skips (baseline 714, +10 new) · full unit suite
+1807 total / 0 failed · resilience 69/69 · `dotnet format --verify-no-changes` 0 errors.
+
+### Residual
+
+Hardware validation of the three-line motivating sequence (ISC-1) still requires the rig. Everything above
+is no-hardware evidence: the refusals are in-process facts, which is exactly why they are testable without a
+YubiKey — but that the SDK now *routes* Management over HID does not by itself re-prove that the PIV session
+survives. Phase 1 experiment 4 measured that; a post-change integration run should confirm it end to end.

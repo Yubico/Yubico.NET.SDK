@@ -445,12 +445,15 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         return new ApduResponse(response);
     }
 
+    /// <summary>
+    ///     Releases this protocol. The connection is NOT disposed: a protocol is a user of the connection it
+    ///     was handed, never its owner. Whoever created the connection disposes it.
+    /// </summary>
     public void Dispose()
     {
         if (_disposed) return;
 
         _channelId = null;
-        _connection.Dispose();
         _disposed = true;
     }
 }

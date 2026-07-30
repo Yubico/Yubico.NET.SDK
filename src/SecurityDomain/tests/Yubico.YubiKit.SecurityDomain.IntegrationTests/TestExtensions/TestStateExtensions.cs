@@ -38,13 +38,11 @@ public static class TestStateExtensions
             CancellationToken cancellationToken = default) =>
             state.WithConnectionAsync(async connection =>
             {
-                var sharedConnection = new SharedSmartCardConnection(connection);
-
                 if (resetBeforeUse)
                 {
                     using var resetSession = await state.Device
                         .CreateSecurityDomainSessionAsync(
-                            sharedConnection,
+                            connection,
                             configuration: configuration,
                             firmwareVersion: state.FirmwareVersion,
                             cancellationToken: cancellationToken)
@@ -55,7 +53,7 @@ public static class TestStateExtensions
 
                 using var session = await state.Device
                     .CreateSecurityDomainSessionAsync(
-                        sharedConnection,
+                        connection,
                         scpKeyParams,
                         configuration,
                         firmwareVersion: state.FirmwareVersion,
@@ -132,13 +130,11 @@ public static class TestStateExtensions
 
             return state.WithConnectionAsync(async connection =>
             {
-                var sharedConnection = new SharedSmartCardConnection(connection);
-
                 if (resetBeforeUse)
                 {
                     using var resetSession = await state.Device
                         .CreateSecurityDomainSessionAsync(
-                            sharedConnection,
+                            connection,
                             configuration: configuration,
                             firmwareVersion: state.FirmwareVersion,
                             cancellationToken: cancellationToken)
@@ -148,7 +144,7 @@ public static class TestStateExtensions
                 }
 
                 using var session = await factory(
-                    sharedConnection,
+                    connection,
                     configuration,
                     scpKeyParams,
                     state.FirmwareVersion,

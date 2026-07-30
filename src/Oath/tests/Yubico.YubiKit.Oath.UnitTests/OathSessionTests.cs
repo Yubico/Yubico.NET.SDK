@@ -15,6 +15,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
@@ -307,11 +308,112 @@ public class OathSessionTests
         Assert.Equal(0x00, putCommand[^1]);
     }
 
+    // ------------------------------------------------------------------------------------------------
+    // Connection ownership. Two halves of one rule: whoever CREATED the connection disposes it.
+    // ------------------------------------------------------------------------------------------------
+
+    /// <summary>
+    ///     INVARIANT PIN (must hold before and after the ownership change). The convenience entry point opens
+    ///     a connection the caller never sees, so disposing the session it returned must close that connection.
+    ///     If this ever regresses, every <c>CreateOathSessionAsync</c> call leaks a PC/SC handle and the
+    ///     interface stays locked for the process lifetime.
+    /// </summary>
+    [Fact]
+    public async Task CreateOathSessionAsync_DisposingSession_DisposesTheConnectionItOpened()
+    {
+        var connection = new DisposeCountingConnection(SelectResponse());
+        var device = new SingleConnectionYubiKey(connection);
+
+        var session = await device.CreateOathSessionAsync(
+            cancellationToken: TestContext.Current.CancellationToken);
+        await session.DisposeAsync();
+
+        Assert.Equal(1, connection.DisposeCount);
+    }
+
+    /// <summary>
+    ///     The other half: a caller who opened the connection keeps it. This is what makes successive applet
+    ///     sessions over one connection possible, which is the ergonomic price of one-session-per-connection.
+    /// </summary>
+    [Fact]
+    public async Task CreateAsync_DisposingSession_LeavesACallerCreatedConnectionOpen()
+    {
+        var connection = new DisposeCountingConnection(SelectResponse());
+
+        var session = await OathSession.CreateAsync(
+            connection, cancellationToken: TestContext.Current.CancellationToken);
+        await session.DisposeAsync();
+
+        Assert.Equal(0, connection.DisposeCount);
+    }
+
+    /// <summary>
+    ///     A session that fails to initialize must release its claim on the connection. The connection
+    ///     outlives the failure and belongs to the caller, so a retry — or a different applet — must not be
+    ///     refused by a ghost holder that no reference points at any more.
+    /// </summary>
+    [Fact]
+    public async Task CreateAsync_InitializationFails_LeavesTheConnectionUsableByTheNextSession()
+    {
+        // First SELECT is refused (6A82 = file not found), second succeeds.
+        var connection = new DisposeCountingConnection([0x6A, 0x82], SelectResponse());
+
+        _ = await Assert.ThrowsAnyAsync<Exception>(() => OathSession.CreateAsync(
+            connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        await using var retry = await OathSession.CreateAsync(
+            connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.True(retry.IsInitialized);
+    }
+
     private static byte[] SelectResponse() =>
     [
         0x79, 0x03, 0x05, 0x07, 0x00,
         0x71, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x90, 0x00
     ];
+
+    /// <summary>Like <see cref="RecordingSmartCardConnection" />, but disposal is observable.</summary>
+    private sealed class DisposeCountingConnection(params byte[][] responses) : ISmartCardConnection
+    {
+        private readonly Queue<byte[]> _responses = new(responses);
+        private int _disposeCount;
+
+        public int DisposeCount => Volatile.Read(ref _disposeCount);
+
+        public Transport Transport => Transport.Usb;
+
+        public ConnectionType Type => ConnectionType.SmartCard;
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+            ReadOnlyMemory<byte> command,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult((ReadOnlyMemory<byte>)_responses.Dequeue());
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public bool SupportsExtendedApdu() => false;
+
+        public void Dispose() => Interlocked.Increment(ref _disposeCount);
+
+        public ValueTask DisposeAsync()
+        {
+            Dispose();
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    private sealed class SingleConnectionYubiKey(ISmartCardConnection connection) : IYubiKey
+    {
+        public string DeviceId => "oath-ownership-probe";
+
+        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
+
+        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+            where TConnection : class, IConnection =>
+            Task.FromResult((connection as TConnection)!);
+    }
 
 }

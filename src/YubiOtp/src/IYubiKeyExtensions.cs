@@ -100,12 +100,17 @@ public static class IYubiKeyExtensions
             return await yubiKey.ConnectSessionTransportAsync(
                     candidates,
                     "YubiOTP",
-                    async (connection, _, ct) => await YubiOtpSession.CreateAsync(
-                        connection,
-                        configuration,
-                        scpKeyParams,
-                        ct)
-                    .ConfigureAwait(false),
+                    async (connection, _, ct) =>
+                    {
+                        var session = await YubiOtpSession
+                            .CreateAsync(connection, configuration, scpKeyParams, ct)
+                            .ConfigureAwait(false);
+
+                        // This entry point opened the connection, so the session it returns is the only thing
+                        // that can close it. A caller-created connection is never owned this way.
+                        session.OwnConnection();
+                        return session;
+                    },
                     cancellationToken)
                 .ConfigureAwait(false);
         }

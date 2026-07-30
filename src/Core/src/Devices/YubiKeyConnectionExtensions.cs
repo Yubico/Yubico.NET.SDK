@@ -297,15 +297,22 @@ public static class YubiKeyConnectionExtensions
         };
 
     /// <summary>
-    ///     Returns <see langword="true" /> when <paramref name="exception" /> indicates the smart card is held
-    ///     by another process — a PC/SC <c>SCARD_E_SHARING_VIOLATION</c> or <c>SCARD_E_SERVER_TOO_BUSY</c>
-    ///     carried by an <see cref="SCardException" />. <see cref="SCardException" /> stores the PC/SC status in
-    ///     <see cref="System.Exception.HResult" /> (as <c>(int)errorCode</c>), so the round-trip compares
-    ///     <c>(uint)HResult</c>. Detection is intentionally narrow: no other exception type or status code
-    ///     counts as held.
+    ///     Returns <see langword="true" /> when <paramref name="exception" /> indicates the smart card is
+    ///     already held, by another process or by this one.
     /// </summary>
+    /// <remarks>
+    ///     Another process shows up as a PC/SC <c>SCARD_E_SHARING_VIOLATION</c> or
+    ///     <c>SCARD_E_SERVER_TOO_BUSY</c> carried by an <see cref="SCardException" />, which stores the PC/SC
+    ///     status in <see cref="System.Exception.HResult" /> (as <c>(int)errorCode</c>), hence the
+    ///     <c>(uint)HResult</c> round-trip. This process shows up as a <see cref="ConnectionInUseException" />
+    ///     from the interface lease. Both mean the same thing to a caller choosing a transport — CCID is
+    ///     unavailable, try the next one — and the in-process case is the common one: it is what a live PIV or
+    ///     OATH session looks like to an internal <c>GetDeviceInfoAsync</c>. Detection stays narrow: no other
+    ///     exception type or status code counts as held.
+    /// </remarks>
     private static bool IsHeldTransportError(Exception exception) =>
-        exception is SCardException scardException
-        && (uint)scardException.HResult is ErrorCode.SCARD_E_SHARING_VIOLATION
-            or ErrorCode.SCARD_E_SERVER_TOO_BUSY;
+        exception is ConnectionInUseException
+        || (exception is SCardException scardException
+            && (uint)scardException.HResult is ErrorCode.SCARD_E_SHARING_VIOLATION
+                or ErrorCode.SCARD_E_SERVER_TOO_BUSY);
 }

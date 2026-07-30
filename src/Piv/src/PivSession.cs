@@ -50,7 +50,6 @@ public sealed class PivSession : ApplicationSession, IPivSession
     private const byte P2Pin = 0x80;
     private const byte P2Puk = 0x81;
 
-    private readonly IConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
     private ISmartCardProtocol? _protocol;
     private bool _isAuthenticated;
@@ -106,8 +105,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// <param name="connection">The connection to use for PIV operations.</param>
     /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
     public PivSession(IConnection connection, ScpKeyParameters? scpKeyParams)
+        : base(connection)
     {
-        _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         _scpKeyParams = scpKeyParams;
     }
 
@@ -129,9 +128,19 @@ public sealed class PivSession : ApplicationSession, IPivSession
     {
         ArgumentNullException.ThrowIfNull(connection);
 
+        // A session that fails to initialize must not keep its claim on the connection: the connection
+        // outlives it, and the next session over it would otherwise be refused forever.
         var session = new PivSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            await session.DisposeAsync().ConfigureAwait(false);
+            throw;
+        }
     }
 
     private async Task InitializeAsync(
@@ -144,7 +153,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         // Create SmartCard protocol 
         var protocol = PcscProtocolFactory<ISmartCardConnection>
             .Create()
-            .Create((ISmartCardConnection)_connection);
+            .Create((ISmartCardConnection)Connection);
 
         var smartCardProtocol = protocol as ISmartCardProtocol
             ?? throw new InvalidOperationException("Failed to create SmartCard protocol.");

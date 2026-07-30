@@ -93,8 +93,8 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     private YubiOtpSession(
         IConnection connection,
         ScpKeyParameters? scpKeyParams = null)
+        : base(connection)
     {
-        ArgumentNullException.ThrowIfNull(connection);
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
 
@@ -119,9 +119,19 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
+        // A session that fails to initialize must not keep its claim on the connection: the connection
+        // outlives it, and the next session over it would otherwise be refused forever.
         var session = new YubiOtpSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            await session.DisposeAsync().ConfigureAwait(false);
+            throw;
+        }
     }
 
     private async Task InitializeAsync(

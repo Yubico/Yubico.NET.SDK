@@ -42,12 +42,17 @@ public static class IYubiKeyExtensions
                 .ConfigureAwait(false);
             try
             {
-                return await OpenPgpSession.CreateAsync(
+                var session = await OpenPgpSession.CreateAsync(
                         connection,
                         configuration,
                         scpKeyParams,
                         cancellationToken)
                     .ConfigureAwait(false);
+
+                // This entry point created the connection, so the session it returns is the only thing that
+                // can close it. A caller-created connection is never owned this way.
+                session.OwnConnection();
+                return session;
             }
             catch
             {

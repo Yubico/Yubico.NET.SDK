@@ -19,15 +19,29 @@ namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
 ///     Process-wide ownership coordinator per interface device, keyed by <see cref="IYubiKey.DeviceId" />.
-///     Normal connections share session ownership; discovery takes a nonblocking exclusive lease. This makes
-///     the session/discovery exclusion atomic instead of relying on count/check/recheck timing.
+///     Connections hold the lease; discovery takes a nonblocking exclusive lease. This makes the
+///     connection/discovery exclusion atomic instead of relying on count/check/recheck timing.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Session ownership is acquired before physical connection creation and is released if creation
-///         fails or when the wrapping connection is disposed. Discovery holds its exclusive lease across
-///         physical connect, device-info exchange, and connection disposal. Waiting sessions have priority
-///         over a later discovery attempt so repeated scans cannot starve a session.
+///         The lease belongs to the CONNECTION, not to a session: it is acquired before physical connection
+///         creation and released if creation fails or when that connection is disposed. Sessions come and go
+///         over a connection without touching it.
+///     </para>
+///     <para>
+///         A CCID (SmartCard) interface admits exactly ONE live connection, because the card holds one
+///         selected applet on the basic channel and a second connection's SELECT would deselect the first
+///         holder's applet — measured, SW=0x6D00, see docs/plans/session-contention/phase1-findings.md. A
+///         second acquisition is refused immediately with <see cref="ConnectionInUseException" />; it never
+///         waits, because waiting for an unbounded session to end is worse than a clear error. HID interfaces
+///         have no applet-selection state and are shared: both HID transports answer correctly while a PIV
+///         session holds CCID (same source, experiment 4), and that is exactly the route Management takes when
+///         CCID is held.
+///     </para>
+///     <para>
+///         Discovery holds its exclusive lease across physical connect, device-info exchange, and connection
+///         disposal. Waiting connections have priority over a later discovery attempt so repeated scans cannot
+///         starve a session.
 ///     </para>
 ///     <para>
 ///         LIMITATION: in-process only. A different process holding the card can still interfere; that is
@@ -44,7 +58,7 @@ internal static class DeviceConnectionRegistry
 
     /// <summary>Whether this process currently holds at least one live connection to the interface.</summary>
     public static bool IsInUse(string deviceId) =>
-        Interfaces.TryGetValue(deviceId, out var ownership) && ownership.HasSessions;
+        Interfaces.TryGetValue(deviceId, out var ownership) && ownership.HasConnections;
 
     /// <summary>
     ///     Whether the interface of <paramref name="device" /> that would serve <paramref name="connection" />
@@ -72,17 +86,27 @@ internal static class DeviceConnectionRegistry
     }
 
     /// <summary>
-    ///     Acquires shared session ownership before physical connection creation. Waits while discovery owns
-    ///     the interface; cancellation applies only while waiting.
+    ///     Acquires the interface lease for a connection, before physical connection creation. Waits while
+    ///     discovery owns the interface; cancellation applies only while waiting.
     /// </summary>
-    public static ValueTask<IDisposable> AcquireSessionAsync(
+    /// <param name="deviceId">The per-interface device id.</param>
+    /// <param name="exclusive">
+    ///     <see langword="true" /> for a CCID (SmartCard) interface, which admits one live connection and
+    ///     refuses a second; <see langword="false" /> for HID, where concurrent connections are safe.
+    /// </param>
+    /// <param name="cancellationToken">Cancels the wait for an active discovery read only.</param>
+    /// <exception cref="ConnectionInUseException">
+    ///     <paramref name="exclusive" /> and the interface already has a live connection.
+    /// </exception>
+    public static ValueTask<IDisposable> AcquireConnectionAsync(
         string deviceId,
+        bool exclusive,
         CancellationToken cancellationToken = default) =>
-        GetOwnership(deviceId).AcquireSessionAsync(cancellationToken);
+        GetOwnership(deviceId).AcquireConnectionAsync(deviceId, exclusive, cancellationToken);
 
     /// <summary>
     ///     Attempts to acquire exclusive discovery ownership without waiting. Returns <c>null</c> while any
-    ///     session owns or is already waiting for the interface.
+    ///     connection owns or is already waiting for the interface.
     /// </summary>
     public static IDisposable? TryAcquireDiscovery(string deviceId) =>
         GetOwnership(deviceId).TryAcquireDiscovery();
@@ -92,39 +116,39 @@ internal static class DeviceConnectionRegistry
 
     private enum LeaseKind
     {
-        Session,
+        Connection,
         Discovery
     }
 
     private sealed class InterfaceOwnership
     {
         private readonly Lock _sync = new();
-        private int _sessionCount;
-        private int _waitingSessions;
+        private int _connectionCount;
+        private int _waitingConnections;
         private bool _discoveryActive;
         private TaskCompletionSource? _discoveryReleased;
 
-        public bool HasSessions
+        public bool HasConnections
         {
             get
             {
                 lock (_sync)
-                    return _sessionCount > 0;
+                    return _connectionCount > 0;
             }
         }
 
-        public async ValueTask<IDisposable> AcquireSessionAsync(CancellationToken cancellationToken)
+        public async ValueTask<IDisposable> AcquireConnectionAsync(
+            string deviceId,
+            bool exclusive,
+            CancellationToken cancellationToken)
         {
-            Task? discoveryReleased = null;
+            Task discoveryReleased;
             lock (_sync)
             {
                 if (!_discoveryActive)
-                {
-                    _sessionCount++;
-                    return new Registration(this, LeaseKind.Session);
-                }
+                    return Claim(deviceId, exclusive);
 
-                _waitingSessions++;
+                _waitingConnections++;
                 discoveryReleased = _discoveryReleased?.Task
                     ?? throw new InvalidOperationException("Discovery ownership has no release signal.");
             }
@@ -136,26 +160,40 @@ internal static class DeviceConnectionRegistry
             catch
             {
                 lock (_sync)
-                    _waitingSessions--;
+                    _waitingConnections--;
                 throw;
             }
 
             lock (_sync)
             {
-                _waitingSessions--;
+                _waitingConnections--;
                 if (_discoveryActive)
-                    throw new InvalidOperationException("Discovery ownership was reacquired ahead of a waiting session.");
+                    throw new InvalidOperationException("Discovery ownership was reacquired ahead of a waiting connection.");
 
-                _sessionCount++;
-                return new Registration(this, LeaseKind.Session);
+                return Claim(deviceId, exclusive);
             }
+        }
+
+        /// <summary>Takes the lease, or refuses when the interface is exclusive and already held.</summary>
+        private IDisposable Claim(string deviceId, bool exclusive)
+        {
+            if (exclusive && _connectionCount > 0)
+                throw new ConnectionInUseException(
+                    $"The SmartCard interface '{deviceId}' already has a live connection in this process. " +
+                    "A YubiKey's CCID interface holds one selected application at a time, so a second " +
+                    "connection would deselect the first holder's application and destroy its security " +
+                    "state. Dispose the existing connection first, or run both applications as successive " +
+                    "sessions over that one connection.");
+
+            _connectionCount++;
+            return new Registration(this, LeaseKind.Connection);
         }
 
         public IDisposable? TryAcquireDiscovery()
         {
             lock (_sync)
             {
-                if (_discoveryActive || _sessionCount > 0 || _waitingSessions > 0)
+                if (_discoveryActive || _connectionCount > 0 || _waitingConnections > 0)
                     return null;
 
                 _discoveryActive = true;
@@ -169,12 +207,12 @@ internal static class DeviceConnectionRegistry
             TaskCompletionSource? releaseSignal = null;
             lock (_sync)
             {
-                if (kind == LeaseKind.Session)
+                if (kind == LeaseKind.Connection)
                 {
-                    if (_sessionCount <= 0)
-                        throw new InvalidOperationException("Session ownership was released without a matching acquisition.");
+                    if (_connectionCount <= 0)
+                        throw new InvalidOperationException("Connection ownership was released without a matching acquisition.");
 
-                    _sessionCount--;
+                    _connectionCount--;
                     return;
                 }
 

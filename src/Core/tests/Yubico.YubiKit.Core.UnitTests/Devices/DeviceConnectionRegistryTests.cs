@@ -28,28 +28,27 @@ public class DeviceConnectionRegistryTests
     private static string NewId() => $"test:{Guid.NewGuid():N}";
 
     /// <summary>
-    ///     Pins lease ACQUISITION only: two session leases on one interface both succeed, the count is
+    ///     A NON-exclusive (HID) interface ref-counts its connection leases: two both succeed, the count is
     ///     shared, and dispose is idempotent.
     /// </summary>
     /// <remarks>
-    ///     This does NOT establish that two concurrent applet sessions on one interface are supported.
-    ///     Acquisition succeeding and coexistence being safe are different claims, and conflating them is
-    ///     what let the CCID contention defect go unnoticed: on the SmartCard interface a second session
+    ///     This test used to cover every interface, and that was the bug in the pin, not just in the code.
+    ///     Acquisition succeeding and coexistence being safe are different claims, and conflating them is what
+    ///     let the CCID contention defect go unnoticed: on a SmartCard interface a second connection's session
     ///     issues its own applet SELECT, which deselects the first applet and leaves the earlier session
-    ///     answering SW=0x6D00. Measured — see docs/plans/session-contention/phase1-findings.md.
-    ///     <para>
-    ///         Same-applet nesting IS safe (hardware-verified, experiment 3), so the ownership contract is
-    ///         keyed by applet rather than being exclusive per interface.
-    ///     </para>
+    ///     answering SW=0x6D00 (measured, docs/plans/session-contention/phase1-findings.md). CCID is now
+    ///     exclusive — see <see cref="AcquireConnection_ExclusiveInterface_SecondAcquisitionIsRefused" />.
+    ///     HID has no applet-selection state, so ref-counting is correct there and is retained deliberately:
+    ///     Management over HID must stay available while a PIV session holds CCID.
     /// </remarks>
     [Fact]
-    public async Task AcquireSession_RefCountsPerDeviceId_AndDisposeIsIdempotent()
+    public async Task AcquireConnection_NonExclusiveInterface_RefCounts_AndDisposeIsIdempotent()
     {
         var id = NewId();
         Assert.False(DeviceConnectionRegistry.IsInUse(id));
 
-        var first = await DeviceConnectionRegistry.AcquireSessionAsync(id, TestContext.Current.CancellationToken);
-        var second = await DeviceConnectionRegistry.AcquireSessionAsync(id, TestContext.Current.CancellationToken);
+        var first = await DeviceConnectionRegistry.AcquireConnectionAsync(id, exclusive: false, TestContext.Current.CancellationToken);
+        var second = await DeviceConnectionRegistry.AcquireConnectionAsync(id, exclusive: false, TestContext.Current.CancellationToken);
         Assert.True(DeviceConnectionRegistry.IsInUse(id));
 
         first.Dispose();
@@ -63,6 +62,31 @@ public class DeviceConnectionRegistryTests
     }
 
     /// <summary>
+    ///     An exclusive (CCID) interface admits one live connection and refuses the second immediately —
+    ///     refuse, never queue: waiting for an unbounded session to finish is worse than a clear error, and
+    ///     the caller usually has another transport. Releasing the holder makes the interface available again.
+    /// </summary>
+    [Fact]
+    public async Task AcquireConnection_ExclusiveInterface_SecondAcquisitionIsRefused()
+    {
+        var id = NewId();
+
+        var held = await DeviceConnectionRegistry.AcquireConnectionAsync(
+            id, exclusive: true, TestContext.Current.CancellationToken);
+
+        var refusal = await Assert.ThrowsAsync<ConnectionInUseException>(async () =>
+            await DeviceConnectionRegistry.AcquireConnectionAsync(
+                id, exclusive: true, TestContext.Current.CancellationToken));
+        Assert.Contains(id, refusal.Message, StringComparison.Ordinal);
+
+        held.Dispose();
+
+        using var next = await DeviceConnectionRegistry.AcquireConnectionAsync(
+            id, exclusive: true, TestContext.Current.CancellationToken);
+        Assert.True(DeviceConnectionRegistry.IsInUse(id));
+    }
+
+    /// <summary>
     ///     An identity read against an interface this process holds a live connection to must be skipped
     ///     entirely (no connection opened — a discovery SELECT would clobber the session's applet state).
     /// </summary>
@@ -70,8 +94,8 @@ public class DeviceConnectionRegistryTests
     public async Task IdentityRead_DeviceInUse_SkipsWithoutConnecting()
     {
         var device = new RecordingYubiKey(NewId(), ConnectionType.SmartCard);
-        using var registration = await DeviceConnectionRegistry.AcquireSessionAsync(
-            device.DeviceId, TestContext.Current.CancellationToken);
+        using var registration = await DeviceConnectionRegistry.AcquireConnectionAsync(
+            device.DeviceId, exclusive: true, TestContext.Current.CancellationToken);
 
         var info = await DiscoveryIdentityReader.TryReadAsync(
             device, ConnectionType.SmartCard, NullLogger.Instance, TestContext.Current.CancellationToken);
@@ -90,8 +114,8 @@ public class DeviceConnectionRegistryTests
         var smartCardMember = new RecordingYubiKey(NewId(), ConnectionType.SmartCard);
         var otpMember = new RecordingYubiKey(NewId(), ConnectionType.HidOtp);
         var composite = new CompositeYubiKey(NewId(), [smartCardMember, otpMember], deviceInfo: null);
-        using var registration = await DeviceConnectionRegistry.AcquireSessionAsync(
-            smartCardMember.DeviceId, TestContext.Current.CancellationToken);
+        using var registration = await DeviceConnectionRegistry.AcquireConnectionAsync(
+            smartCardMember.DeviceId, exclusive: true, TestContext.Current.CancellationToken);
 
         var info = await CompositeMetadataReader.TryReadAsync(
             composite, TimeSpan.FromSeconds(5), NullLogger.Instance, TestContext.Current.CancellationToken);
@@ -106,7 +130,7 @@ public class DeviceConnectionRegistryTests
     {
         var id = NewId();
         var throwingInner = new FakeSmartCardConnection { ThrowOnDispose = true };
-        var lease = await DeviceConnectionRegistry.AcquireSessionAsync(id, TestContext.Current.CancellationToken);
+        var lease = await DeviceConnectionRegistry.AcquireConnectionAsync(id, exclusive: false, TestContext.Current.CancellationToken);
         var wrapped = new RegisteredSmartCardConnection(throwingInner, lease);
         Assert.True(DeviceConnectionRegistry.IsInUse(id));
 
@@ -115,8 +139,8 @@ public class DeviceConnectionRegistryTests
 
         var asyncId = NewId();
         var inner = new FakeSmartCardConnection();
-        var asyncLease = await DeviceConnectionRegistry.AcquireSessionAsync(
-            asyncId, TestContext.Current.CancellationToken);
+        var asyncLease = await DeviceConnectionRegistry.AcquireConnectionAsync(
+            asyncId, exclusive: false, TestContext.Current.CancellationToken);
         var asyncWrapped = new RegisteredSmartCardConnection(inner, asyncLease);
         Assert.True(DeviceConnectionRegistry.IsInUse(asyncId));
 

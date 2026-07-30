@@ -37,12 +37,10 @@ public static class HsmAuthTestStateExtensions
             CancellationToken cancellationToken = default) =>
             state.WithConnectionAsync(async connection =>
             {
-                var sharedConnection = new SharedSmartCardConnection(connection);
-
                 if (resetBeforeUse)
                 {
                     await using var resetSession = await HsmAuthSession.CreateAsync(
-                            sharedConnection,
+                            connection,
                             configuration,
                             cancellationToken: cancellationToken)
                         .ConfigureAwait(false);
@@ -51,7 +49,7 @@ public static class HsmAuthTestStateExtensions
                 }
 
                 await using var session = await HsmAuthSession.CreateAsync(
-                        sharedConnection,
+                        connection,
                         configuration,
                         scpKeyParams,
                         cancellationToken: cancellationToken)

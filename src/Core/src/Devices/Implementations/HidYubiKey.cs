@@ -52,8 +52,10 @@ internal class HidYubiKey(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
         }
 
+        // Shared: HID has no applet-selection state, so concurrent connections to one HID interface are
+        // safe and are the route Management takes while CCID is held.
         var ownership = await DeviceConnectionRegistry
-            .AcquireSessionAsync(DeviceId, cancellationToken)
+            .AcquireConnectionAsync(DeviceId, exclusive: false, cancellationToken)
             .ConfigureAwait(false);
         try
         {

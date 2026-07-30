@@ -151,6 +151,53 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }
 
+    // Session contention: the motivating case. A PIV session holds the CCID interface, so this process's own
+    // SmartCard connect is refused (ConnectionInUseException, not an SCardException — the holder is us). The
+    // default path must route around it to HID rather than throw: measured, both HID transports answer
+    // correctly while PIV holds CCID and the PIV session survives (phase1-findings.md, experiment 4). The SDK
+    // must not be the thing that throws in its own motivating case.
+    [Fact]
+    public async Task CreateManagementSessionAsync_CcidHeldInProcess_FallsBackToHidFido()
+    {
+        var hid = new FailingFidoConnection();
+        var device = new FallbackProbeYubiKey(ConnectionType.SmartCard | ConnectionType.HidFido)
+            .Throws(ConnectionType.SmartCard, new ConnectionInUseException("pcsc:test-reader is in use."))
+            .Returns(ConnectionType.HidFido, hid);
+
+        _ = await Record.ExceptionAsync(() => device.CreateManagementSessionAsync(cancellationToken: Ct));
+
+        Assert.Equal([ConnectionType.SmartCard, ConnectionType.HidFido], device.Attempts);
+    }
+
+    // The same in-process refusal on an EXPLICIT override is honoured, not routed around. Silently opening a
+    // different transport than the caller named would be a lie; an override never falls back.
+    [Fact]
+    public async Task CreateManagementSessionAsync_CcidHeldInProcess_ExplicitOverrideDoesNotFallBack()
+    {
+        var device = new FallbackProbeYubiKey(ConnectionType.SmartCard | ConnectionType.HidFido)
+            .Throws(ConnectionType.SmartCard, new ConnectionInUseException("pcsc:test-reader is in use."))
+            .Returns(ConnectionType.HidFido, new FailingFidoConnection());
+
+        _ = await Assert.ThrowsAsync<ConnectionInUseException>(() =>
+            device.CreateManagementSessionAsync(preferredConnection: ConnectionType.SmartCard, cancellationToken: Ct));
+
+        Assert.Equal([ConnectionType.SmartCard], device.Attempts);
+    }
+
+    // No safe route left: CCID is held in-process and the device exposes nothing else. Throwing is correct
+    // here — routing around is a preference, not a promise.
+    [Fact]
+    public async Task CreateManagementSessionAsync_CcidHeldInProcess_NoOtherTransport_Throws()
+    {
+        var device = new FallbackProbeYubiKey(ConnectionType.SmartCard)
+            .Throws(ConnectionType.SmartCard, new ConnectionInUseException("pcsc:test-reader is in use."));
+
+        _ = await Assert.ThrowsAsync<ConnectionInUseException>(
+            () => device.CreateManagementSessionAsync(cancellationToken: Ct));
+
+        Assert.Equal([ConnectionType.SmartCard], device.Attempts);
+    }
+
     // SCARD_E_SHARING_VIOLATION (0x8010000B): SCardException stores it in HResult; the literal avoids needing
     // Core's internal ErrorCode constants from this test assembly.
     private static SCardException HeldSmartCard() => new("held by another process", 0x8010000BL);

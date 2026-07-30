@@ -234,7 +234,7 @@ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
 - Creates connection (managed by session)
 - Creates session
 - **Caller owns session** - must dispose
-- Session owns connection - disposes it when session disposes
+- The connection was opened by this entry point, so the session owns it and disposes it when the session disposes. A connection you opened yourself and passed to `ManagementSession.CreateAsync` stays yours.
 
 **Tradeoffs:**
 - ✅ Reuse session for multiple operations (more efficient)

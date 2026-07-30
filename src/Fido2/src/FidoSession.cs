@@ -80,7 +80,6 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
     private static readonly Feature FeatureFido2UsbSmartCard = new("FIDO2 over USB SmartCard", 5, 8, 0);
 
-    private readonly IConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
     private readonly ILogger _logger;
 
@@ -88,8 +87,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     private bool _disposed;
 
     private FidoSession(IConnection connection, ScpKeyParameters? scpKeyParams = null)
+        : base(connection)
     {
-        _connection = connection;
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
     }
@@ -112,9 +111,19 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     {
         ArgumentNullException.ThrowIfNull(connection);
 
+        // A session that fails to initialize must not keep its claim on the connection: the connection
+        // outlives it, and the next session over it would otherwise be refused forever.
         var session = new FidoSession(connection, scpKeyParams);
-        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
-        return session;
+        try
+        {
+            await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            await session.DisposeAsync().ConfigureAwait(false);
+            throw;
+        }
     }
 
     private async Task InitializeAsync(
@@ -125,13 +134,13 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
             return;
 
         // Create backend based on connection type
-        var (backend, protocol) = _connection switch
+        var (backend, protocol) = Connection switch
         {
             ISmartCardConnection sc => await CreateSmartCardBackendAsync(sc, cancellationToken)
                 .ConfigureAwait(false),
             IFidoHidConnection fido => CreateHidBackend(fido),
             _ => throw new NotSupportedException(
-                $"Connection type {_connection.GetType().Name} is not supported. " +
+                $"Connection type {Connection.GetType().Name} is not supported. " +
                 "Use ISmartCardConnection or IFidoHidConnection.")
         };
 
@@ -141,7 +150,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
         var firmwareVersion = info.FirmwareVersion ?? new FirmwareVersion();
 
-        if (_connection is ISmartCardConnection smartCardConnection)
+        if (Connection is ISmartCardConnection smartCardConnection)
         {
             EnsureSmartCardTransportSupported(smartCardConnection.Transport, firmwareVersion);
         }

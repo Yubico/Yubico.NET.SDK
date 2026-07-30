@@ -32,7 +32,7 @@ public class ApplicationSessionScpTests
     [Fact]
     public async Task InitializeCore_WithScpOnNonSmartCardProtocol_ThrowsNotSupported()
     {
-        var session = new TestSession();
+        var session = new TestSession(new InertConnection());
         using var protocol = new NonSmartCardProtocol();
         using var scp = Scp03KeyParameters.Default;
 
@@ -51,7 +51,7 @@ public class ApplicationSessionScpTests
     [Fact]
     public async Task InitializeCore_WithoutScpOnNonSmartCardProtocol_Succeeds()
     {
-        var session = new TestSession();
+        var session = new TestSession(new InertConnection());
         using var protocol = new NonSmartCardProtocol();
 
         await session.RunInitializeAsync(
@@ -64,7 +64,7 @@ public class ApplicationSessionScpTests
         Assert.False(session.IsAuthenticated);
     }
 
-    private sealed class TestSession : ApplicationSession
+    private sealed class TestSession(IConnection connection) : ApplicationSession(connection)
     {
         public Task RunInitializeAsync(
             IProtocol protocol,
@@ -72,6 +72,19 @@ public class ApplicationSessionScpTests
             ScpKeyParameters? scpKeyParams,
             CancellationToken cancellationToken) =>
             InitializeCoreAsync(protocol, firmwareVersion, configuration: null, scpKeyParams, cancellationToken);
+    }
+
+    // The session base binds to a connection at construction; these tests are about the SCP guard, so the
+    // connection only has to exist and be distinct per session.
+    private sealed class InertConnection : IConnection
+    {
+        public ConnectionType Type => ConnectionType.SmartCard;
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 
     // A protocol that is deliberately NOT an ISmartCardProtocol (mirrors a HID FIDO/OTP protocol for the

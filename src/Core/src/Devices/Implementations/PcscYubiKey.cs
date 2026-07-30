@@ -50,8 +50,10 @@ internal class PcscYubiKey(
             throw new NotSupportedException(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
 
+        // Exclusive: one live connection per CCID interface. The lease is held by the connection returned
+        // below and released when that connection is disposed.
         var ownership = await DeviceConnectionRegistry
-            .AcquireSessionAsync(DeviceId, cancellationToken)
+            .AcquireConnectionAsync(DeviceId, exclusive: true, cancellationToken)
             .ConfigureAwait(false);
         try
         {

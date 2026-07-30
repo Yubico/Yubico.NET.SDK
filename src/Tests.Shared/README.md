@@ -11,7 +11,6 @@ The test infrastructure provides:
 - **Declarative device filtering** - filters by firmware, form factor, connection type, capabilities, FIPS state, and custom predicates.
 - **Parameterized testing** - standard xUnit `[Theory]` tests receive `YubiKeyTestState` values from `[WithYubiKey]`.
 - **Fluent session helpers** - extension methods create application sessions with consistent disposal.
-- **Shared connection helpers** - `SharedSmartCardConnection` lets reset/setup helpers share one physical SmartCard connection safely.
 - **Byte-level unit-test recorder** - `RecordingSmartCardConnection` captures SmartCard APDUs and returns queued responses for focused unit tests.
 
 ## Quick Start
@@ -117,11 +116,6 @@ Test method
 - Performs authorized device discovery.
 - Applies allow-list and filter criteria.
 - Caches authorized devices lazily for the test run.
-
-**SharedSmartCardConnection**
-
-- Non-owning wrapper for sharing one `ISmartCardConnection` across multiple sessions in a single integration helper.
-- Useful for reset-then-test flows where the setup session must not dispose the physical connection before the test session starts.
 
 **RecordingSmartCardConnection**
 

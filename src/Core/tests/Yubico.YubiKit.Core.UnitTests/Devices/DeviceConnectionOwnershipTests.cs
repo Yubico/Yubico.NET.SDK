@@ -80,7 +80,7 @@ public class DeviceConnectionOwnershipTests
     }
 
     [Fact]
-    public async Task Coordinator_CanceledWaiterDecrementsCount_AndRemainingSessionHasPriority()
+    public async Task Coordinator_CanceledWaiterDecrementsCount_AndRemainingConnectionHasPriority()
     {
         var deviceId = $"test:waiter-priority:{Guid.NewGuid():N}";
         using var discovery = DeviceConnectionRegistry.TryAcquireDiscovery(deviceId);
@@ -88,10 +88,10 @@ public class DeviceConnectionOwnershipTests
 
         using var canceledWaiterToken = new CancellationTokenSource();
         var canceledWaiter = DeviceConnectionRegistry
-            .AcquireSessionAsync(deviceId, canceledWaiterToken.Token)
+            .AcquireConnectionAsync(deviceId, exclusive: true, canceledWaiterToken.Token)
             .AsTask();
         var remainingWaiter = DeviceConnectionRegistry
-            .AcquireSessionAsync(deviceId, TestContext.Current.CancellationToken)
+            .AcquireConnectionAsync(deviceId, exclusive: true, TestContext.Current.CancellationToken)
             .AsTask();
 
         canceledWaiterToken.Cancel();

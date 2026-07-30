@@ -30,4 +30,19 @@
     <InternalsVisibleTo Include="Yubico.YubiKit.Management" />
   </ItemGroup>
 
+  <!--
+    Applet modules whose IYubiKey.Create<App>SessionAsync entry points open a connection the caller never
+    sees, and so must hand its ownership to the session they return (ApplicationSession.OwnConnection).
+    Internal rather than public: transferring connection ownership is not something an SDK consumer needs,
+    and every consumer-facing path already has a clear owner.
+  -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Yubico.YubiKit.Oath" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.OpenPgp" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Piv" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.SecurityDomain" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.YubiHsm" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.YubiOtp" />
+  </ItemGroup>
+
 </Project>

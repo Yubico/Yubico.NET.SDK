@@ -25,18 +25,48 @@ namespace Yubico.YubiKit.Core.Sessions;
 public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 {
     private bool _disposed;
+    private int _released;
+    private bool _ownsConnection;
 
     protected ILogger Logger { get; }
     protected IProtocol? Protocol { get; set; }
+
+    /// <summary>
+    ///     The connection this session runs over. The session is a USER of it, not its owner: disposing the
+    ///     session leaves a caller-created connection open and reusable by the next session.
+    /// </summary>
+    protected IConnection Connection { get; }
 
     public FirmwareVersion FirmwareVersion { get; protected set; } = new();
     public bool IsInitialized { get; protected set; }
     public bool IsAuthenticated { get; protected set; }
 
-    protected ApplicationSession()
+    /// <summary>
+    ///     Binds the session to its connection. Throws if that connection already has a live session — one
+    ///     connection hosts one session at a time, checked here because this runs before any wire operation.
+    /// </summary>
+    /// <param name="connection">The connection the session will run over.</param>
+    /// <exception cref="ConnectionInUseException">The connection already has a live session.</exception>
+    protected ApplicationSession(IConnection connection)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         Logger = YubiKitLogging.CreateLogger(GetType().FullName ?? GetType().Name);
+        Connection = connection;
+        ConnectionSessionGuard.Attach(connection, this);
     }
+
+    /// <summary>
+    ///     Transfers ownership of <see cref="Connection" /> to this session, so disposing the session also
+    ///     disposes the connection.
+    /// </summary>
+    /// <remarks>
+    ///     Only the code that CREATED the connection may call this, and only the convenience
+    ///     <c>IYubiKey.Create&lt;App&gt;SessionAsync</c> entry points do: they open a connection the caller
+    ///     never sees, so the session they return is the only thing that can close it. A caller who opened the
+    ///     connection keeps ownership and this is never called.
+    /// </remarks>
+    internal void OwnConnection() => _ownsConnection = true;
 
     protected async Task InitializeCoreAsync(
         IProtocol protocol,
@@ -112,13 +142,45 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
             Protocol = null;
         }
 
+        // Unconditional: DisposeAsync's Dispose(disposing: false) leg must release too, and releasing twice
+        // is a no-op.
+        ReleaseConnection();
         _disposed = true;
     }
 
-    protected virtual ValueTask DisposeAsyncCore()
+    protected virtual async ValueTask DisposeAsyncCore()
     {
         Protocol?.Dispose();
         Protocol = null;
-        return ValueTask.CompletedTask;
+        await ReleaseConnectionAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>Detaches from the connection, and disposes it only if this session was given ownership.</summary>
+    private void ReleaseConnection()
+    {
+        if (!TryClaimRelease())
+            return;
+
+        if (_ownsConnection)
+            Connection.Dispose();
+    }
+
+    /// <inheritdoc cref="ReleaseConnection" />
+    private async ValueTask ReleaseConnectionAsync()
+    {
+        if (!TryClaimRelease())
+            return;
+
+        if (_ownsConnection)
+            await Connection.DisposeAsync().ConfigureAwait(false);
+    }
+
+    private bool TryClaimRelease()
+    {
+        if (Interlocked.Exchange(ref _released, 1) != 0)
+            return false;
+
+        ConnectionSessionGuard.Detach(Connection, this);
+        return true;
     }
 }

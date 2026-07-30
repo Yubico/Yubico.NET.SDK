@@ -149,16 +149,64 @@ Override semantics, validated before any connect:
 - A concrete transport that is not valid for the applet (even if the device exposes it) → `ArgumentException`.
 - A valid transport the device does not expose → `NotSupportedException`.
 
-**Held-transport fallback** (default path only): if no override is given and the SmartCard transport fails
-to connect because another process holds the card (PC/SC `SCARD_E_SHARING_VIOLATION` /
-`SCARD_E_SERVER_TOO_BUSY` — e.g. GnuPG `scdaemon` holding the CCID), the session falls back to the next
-supported transport in the default order. An explicit override never falls back. The SDK never kills another
-process to free a transport.
+**Held-transport fallback** (default path only): if no override is given and the SmartCard transport cannot
+be opened because the CCID interface is already held, the session falls back to the next supported transport
+in the default order. Two things count as held, and they mean the same thing to the caller:
+
+- **Another process** — PC/SC `SCARD_E_SHARING_VIOLATION` / `SCARD_E_SERVER_TOO_BUSY`, e.g. GnuPG
+  `scdaemon` holding the CCID.
+- **This process** — `ConnectionInUseException`, because a CCID interface admits one live connection and
+  something in this process (a PIV or OATH session, say) already has it.
+
+The in-process case is the common one and it is why the fallback exists: an internal `GetDeviceInfoAsync`
+must not step on a session the caller opened three lines earlier. Both HID transports answer Management
+correctly while a PIV session holds CCID, and the PIV session survives — hardware-measured.
+
+An explicit override never falls back: `preferredConnection` is an instruction, and quietly opening a
+different transport would be a lie, so the held error surfaces. The SDK never kills another process, and
+never revokes an existing in-process holder, to free a transport.
 
 ```csharp
-// If the CCID is held by another process, this transparently falls back to HID FIDO/OTP.
+// If the CCID is held — by another process or by a session in this one — this transparently
+// falls back to HID FIDO/OTP.
 await using var resilient = await device.CreateManagementSessionAsync();
 ```
+
+## One Connection Per CCID Interface, One Session Per Connection
+
+A YubiKey's CCID interface holds exactly one selected application. Selecting another deselects the first and
+destroys its security state — measured: after a second applet is selected, the first session's next command
+returns `SW=0x6D00` (*instruction not supported*), and nothing at the intervening call site reports a problem.
+
+The SDK refuses that at acquisition, before any command reaches the card, so the error lands on the call that
+would have caused the damage rather than on the victim's next operation:
+
+| Acquisition | Rule | On violation |
+| --- | --- | --- |
+| Second connection to a live CCID interface | Refused | `ConnectionInUseException` naming the interface |
+| Second session on a live connection | Refused | `ConnectionInUseException` naming the current session |
+| HID interfaces | Shared | — (no applet-selection state) |
+
+Both refusals are per *live* holder, not per lifetime. Successive use is the supported pattern, and it does
+not require reconnecting — a session never disposes a connection it did not create:
+
+```csharp
+await using var connection = await device.ConnectAsync<ISmartCardConnection>();
+
+await using (var piv = await PivSession.CreateAsync(connection))
+    await piv.VerifyPinAsync(pin);
+
+// Same connection, next application. The PIV session's disposal released it, not closed it.
+await using var oath = await OathSession.CreateAsync(connection);
+```
+
+This mirrors canonical yubikit: Rust's applet sessions take the connection by value and hand it back with
+`into_connection`, making a second concurrent session a compile error; Python's base `Session` binds itself
+to the connection at construction. Neither inspects the wire.
+
+**Who disposes what:** whoever created the connection. The `device.Create<App>SessionAsync()` convenience
+methods open a connection the caller never sees, so the session they return owns and disposes it — those
+call sites are unchanged. A connection you opened yourself stays yours.
 
 ## SCP Note
 

@@ -126,8 +126,13 @@ public class PcscProtocolScpTests
         Assert.NotNull(adapter);
     }
 
+    /// <summary>
+    ///     Disposing the SCP wrapper disposes the base protocol it decorates — and stops there. The connection
+    ///     belongs to whoever created it. This test previously proved base disposal by observing the CONNECTION
+    ///     becoming unusable, which only worked because the protocol wrongly owned it.
+    /// </summary>
     [Fact]
-    public void Dispose_DisposesBaseProtocol()
+    public void Dispose_DisposesBaseProtocol_ButNotTheConnection()
     {
         // Arrange
         var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -136,12 +141,11 @@ public class PcscProtocolScpTests
         // Act
         adapter.Dispose();
 
-        // Assert - Base connection should be disposed
-        Assert.Throws<ObjectDisposedException>(() =>
-        {
-            _fakeConnection.TransmitAndReceiveAsync(new byte[] { 0x00 }, TestContext.Current.CancellationToken)
-                .GetAwaiter().GetResult();
-        });
+        // Assert - the base protocol is disposed...
+        Assert.Throws<ObjectDisposedException>(() => baseProtocol.Configure(new FirmwareVersion(5, 7, 2)));
+
+        // ...and the connection is untouched and still usable.
+        Assert.Equal(0, _fakeConnection.DisposeCount);
     }
 
     [Fact]
@@ -160,7 +164,7 @@ public class PcscProtocolScpTests
     }
 
     [Fact]
-    public void Dispose_Twice_DisposesBaseProtocolAndScpProcessorOnce()
+    public void Dispose_Twice_DisposesScpProcessorOnce_AndNeverTheConnection()
     {
         // Arrange
         var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -172,7 +176,7 @@ public class PcscProtocolScpTests
         adapter.Dispose();
 
         // Assert
-        Assert.Equal(1, _fakeConnection.DisposeCount);
+        Assert.Equal(0, _fakeConnection.DisposeCount);
         Assert.Equal(1, scpProcessor.DisposeCount);
     }
 

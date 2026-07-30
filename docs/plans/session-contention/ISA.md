@@ -203,3 +203,86 @@ to a third implementation loop. Note the abort criteria: "three DevTeam loops on
 convergence" — we are at two.
 
 Work is committed as WIP on the branch and must not be merged until this is settled.
+
+---
+
+## Phase 3 — DECISION: the enforcement layer was wrong (2026-07-30)
+
+### Canonical evidence
+
+**Rust** (`crates/yubikit/src`, authoritative for protocol behaviour). All six applet sessions take
+the connection **by value**:
+
+```rust
+pub fn new(connection: C) -> Result<Self, (PivError, C)>
+```
+
+Verified across `piv`, `oath`, `management`, `openpgp`, `hsmauth`, `securitydomain`. **Zero** take
+`&mut`. The session owns the connection, so a second session on it is a compile error. The error arm
+returns the connection, making ownership transfer explicit and recoverable.
+
+**Python** (`packages/yubikit/yubikit/core/__init__.py`, base `Session`):
+
+```python
+def __init__(self, connection):
+    existing = getattr(connection, "_session", None)
+    if existing is not None:
+        existing.close()
+    setattr(connection, "_session", self)
+```
+
+One session per connection, enforced at construction. A second session does not corrupt the first —
+it deterministically **closes** it.
+
+Both enforce at **session-to-connection binding, before any wire operation**. Neither sniffs
+SELECTs. Neither reconciles anything. Neither can have the indeterminate-outcome problem, because
+the second session never reaches the wire.
+
+### Why our approach could not converge
+
+Enforcing at transmit time requires a registry that mirrors the **card's** selection state, and card
+state after an indeterminate transmit is unknowable in principle — the Two Generals problem. All
+three candidates in the previous section were mitigations of unknowability, not solutions. The
+unresolved HIGH was not the last bug; it was a proof that the layer was wrong.
+
+Moving enforcement to acquisition changes what the registry **means**: from *"what applet is the card
+in"* (unknowable) to *"which in-process holder has leased this interface"* (a pure in-process fact,
+always knowable). Card state becomes irrelevant rather than untracked, because every session begins
+with its own SELECT — a new holder re-establishes ground truth regardless of what a crashed
+predecessor left behind. Candidate 2's `Unknown` state becomes the implicit default *between* leases,
+so the concept evaporates instead of being added.
+
+### Decision
+
+**One lease per CCID interface**, acquired at session construction, released on dispose. Conflicting
+acquisition throws. Every acquisition is followed by the session's own SELECT (already true today).
+Internal convenience APIs route around a held lease where a safe transport exists.
+
+Three sub-decisions:
+
+1. **Refuse the newcomer; do not copy Python's close-the-predecessor.** Python's choice is safe there
+   because the caller explicitly passed the same connection twice. In C# the newcomer is an
+   *invisible internal call* (`GetDeviceInfoAsync` opens its own connection), so closing the
+   predecessor would trade silent corruption for silent revocation, and under concurrency would turn
+   a design error into a race. Refusal also puts the exception on the call that *would have caused*
+   the damage rather than on the innocent operation three lines later. This matches .NET convention —
+   `FileShare` violations throw at open.
+2. **Forbid same-applet nesting**, despite Phase 1 measuring it hardware-safe. Hardware-safe is not
+   software-safe: two PIV sessions on one interface share security state, so one verifying a PIN
+   silently elevates the other. Forbidding now and widening later is non-breaking; shipping nesting
+   and withdrawing it later is not.
+3. **`GetDeviceInfoAsync` must prefer a non-conflicting transport** when CCID is leased, and throw
+   only when no route exists. Phase 1 experiment 4 proved both HID transports work while PIV holds
+   CCID. The SDK should not be the thing that throws in its own motivating case.
+
+### What this deletes
+
+Dropping applet-awareness from the lease removes, not adds: SELECT sniffing and APDU parsing, the
+applet-keyed registry state, the claim/reconcile lifecycle, the guarded restore, the
+sole-holder-may-switch rule (YubiOTP's Management→OTP is one lease — no rule needed), and the
+`Unknown` state discussion. `SmartCardAppletConflictException` survives in simplified form.
+
+Commit `00a9e26f` is superseded. Most of its 17 tests express requirements that survive and retarget
+to acquisition time with *less* setup, because there is no wire to fake. The `DeviceConnectionRegistry`
+plumbing survives. What dies is the sniffing decorator and the reconciliation logic — exactly the
+parts review could not pass.

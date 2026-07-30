@@ -33,6 +33,13 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
 
     public void EnqueueResponse(ReadOnlyMemory<byte> response) => _responses.Enqueue(response);
 
+    /// <summary>
+    ///     Fault/interleave injection seam: runs once the command has reached the wire and before its
+    ///     response is produced. Throw from it to model a transport fault or cancellation mid-exchange, or
+    ///     use it to run other work while this exchange is in flight.
+    /// </summary>
+    public Func<ReadOnlyMemory<byte>, Task>? OnTransmit { get; set; }
+
 
     public Transport Transport { get; set; } = Transport.Usb;
 
@@ -53,6 +60,11 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
         cancellationToken.ThrowIfCancellationRequested();
 
         TransmittedCommands.Add(command.ToArray());
+
+        if (OnTransmit is { } onTransmit)
+        {
+            await onTransmit(command).ConfigureAwait(false);
+        }
 
         return _responses.Count == 0
             ? throw new InvalidOperationException("No response enqueued for transmission")

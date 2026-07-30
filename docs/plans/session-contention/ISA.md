@@ -151,3 +151,55 @@ Incidental observation, not a goal of this effort: opening a Management session 
 roughly **25x** SmartCard and **13x** HID FIDO. Recorded because the transport fallback chain can
 land a caller on HID OTP without the caller knowing, which makes that cost invisible at the call
 site.
+
+---
+
+## Phase 3 — IN PROGRESS, blocked on a design decision (2026-07-30)
+
+The CCID applet-ownership rule is implemented and green (Core 731, 0 failed; resilience 69/69;
+format clean), but **cross-vendor review has not passed** and the code must not be merged as-is.
+
+Implemented: same applet ref-counts; different applet while another holder exists throws
+`SmartCardAppletConflictException`; a sole holder may switch its own applet (required by
+`YubiOtpSession`, which legitimately SELECTs Management then OTP on one connection). Enforcement
+sniffs the SELECT off the wire in `RegisteredSmartCardConnection` and claims before transmitting,
+so a conflicting SELECT never reaches the card.
+
+Review loop 1 (`gpt-5.6-terra`) → NEEDS WORK, 2 HIGH. Both addressed structurally: lease lifecycle
+state moved entirely under the interface lock (the `_disposed` field was deleted rather than
+re-guarded, so the bug class is not representable), and the pre-transmit claim is reconciled on
+throw, cancellation, and non-success status word.
+
+Review loop 2 → NEEDS WORK. Assessment of its findings:
+
+| Finding | Reviewer | My assessment |
+|---|---|---|
+| Concurrent SELECTs on ONE lease overwrite the single `UnconfirmedSelect` slot | HIGH | **Over-rated.** Requires driving one connection from multiple threads, which `src/Core/CLAUDE.md` explicitly forbids: `PcscProtocol._exchangeGate` serializes exchanges, and there is one connection per session. Out of contract — but worth a guard or a documented precondition. |
+| Phantom claim across TWO leases with in-flight SELECTs | HIGH | **Real**, but the impact is conservative: a stale applet name with zero holders, which the next claim overwrites, or a false refusal. Availability, not corruption. MEDIUM by impact. |
+| Reconciliation assumes a thrown/cancelled transmit means the card did not act | UNRESOLVED | **Correct, and it is the real problem.** See below. |
+
+### The open design question
+
+A cancellation or transport fault can occur **after** the command reached the card and changed its
+selection. The code cannot distinguish that from "never arrived", so abandoning the claim is an
+optimistic guess that can leave the registry naming an applet the card does not have.
+
+The asymmetry that matters: if the registry **under**-reports what is selected, a conflicting SELECT
+gets through and a victim session is silently destroyed — the original defect. If it **over**-reports,
+callers get false refusals — annoying, safe. So the safe direction under uncertainty is pessimistic,
+and the current code is optimistic.
+
+Candidate resolutions, none yet chosen:
+
+1. **Keep the claim on indeterminate outcomes** (pessimistic). Simple, but a failed session's claim
+   could block others until its lease is disposed.
+2. **A third `Unknown` applet state** — next SELECT is always permitted and re-establishes truth, but
+   no ref-count join is allowed while unknown. Honest, but it adds a concept, which Simplify resists.
+3. **Re-read the selection from the card** to reconcile. Costs an APDU on a failure path and may
+   itself fail.
+
+This is a genuine design fork, not an implementation defect, so it goes back to planning rather than
+to a third implementation loop. Note the abort criteria: "three DevTeam loops on one phase without
+convergence" — we are at two.
+
+Work is committed as WIP on the branch and must not be merged until this is settled.

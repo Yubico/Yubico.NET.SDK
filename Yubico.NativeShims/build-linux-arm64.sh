@@ -36,8 +36,11 @@ echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://ap
 sudo apt-get update -qq
 sudo apt-get install cmake -yq
 
-# Install VCPKG
-git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
+# Install VCPKG from the last revision validated by this build.
+VCPKG_COMMIT=827a2e1203bc19941126c657166da44f2623acc4
+git clone https://github.com/Microsoft/vcpkg.git "$VCPKG_INSTALLATION_ROOT"
+git -C "$VCPKG_INSTALLATION_ROOT" checkout --detach "$VCPKG_COMMIT"
+"$VCPKG_INSTALLATION_ROOT/bootstrap-vcpkg.sh"
 
 # Install arm64 version of libpcsclite
 # security.ubuntu.com only hosts amd64/i386, not arm64

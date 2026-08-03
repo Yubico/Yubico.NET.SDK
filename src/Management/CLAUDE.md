@@ -538,30 +538,22 @@ public async Task BAD_TEST_DisableCapabilities(YubiKeyTestState state) =>
 
 ### Safe Configuration Testing
 
-If you **must** test configuration changes:
+The problem with capability changes is **blast radius across the suite**, not destruction as such. An allow-listed device is a dedicated test device and destructive operations against it are expected — see [docs/TESTING.md](../../docs/TESTING.md#hardware-authorization), which is canonical: *"the allow list is the boundary, and adding a second one would only obscure it."* Do **not** gate these behind an extra environment variable.
 
-1. **Use a dedicated test device** not in the shared allowlist
-2. **Document the test** clearly as destructive
-3. **Reset configuration** at test end (if possible)
-4. **Skip by default** with `[SkippableFact]` or environment check
-5. **Test in isolation** - never in CI or shared environments
+What makes `SetDeviceConfigAsync` special is that it reboots the device and can disable applications other tests depend on. So the rule is restore-what-you-changed, not don't-run-it:
+
+1. **Restore configuration** in a `finally` — always, including on failure
+2. **Document the test** clearly as configuration-mutating
+3. **Account for the reboot** — the device disappears and re-enumerates
+4. **Avoid lock codes** in tests; a set lock code can make the change unrecoverable
 
 ```csharp
 // ✅ Safe pattern for configuration testing
-[SkippableFact]
-public async Task DESTRUCTIVE_ConfigurationChange_DedicatedDevice()
+[Theory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
+public async Task ConfigurationChange_AppliesAndRestores(YubiKeyTestState state)
 {
-    // Check environment variable to explicitly enable
-    Skip.IfNot(Environment.GetEnvironmentVariable("YUBIKIT_ALLOW_DESTRUCTIVE_TESTS") == "1",
-        "Destructive tests disabled. Set YUBIKIT_ALLOW_DESTRUCTIVE_TESTS=1 to enable.");
-    
-    // Use specific device, not from shared allowlist
-    var dedicatedSerial = 12345678; // Document this requirement
-    var devices = await YubiKeyManager.FindAllAsync(forceRescan: true);
-    var device = devices.SingleOrDefault(device => device.SerialNumber == dedicatedSerial);
-    Skip.If(device == null, $"Dedicated test device {dedicatedSerial} not found");
-    
-    using var connection = await device.ConnectAsync<ISmartCardConnection>();
+    using var connection = await state.Device.ConnectAsync<ISmartCardConnection>();
     using var mgmt = await ManagementSession.CreateAsync(connection);
     
     // Save original config

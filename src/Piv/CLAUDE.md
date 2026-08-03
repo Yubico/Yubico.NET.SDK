@@ -141,7 +141,9 @@ public async Task GetMetadata_ReadOnly_Succeeds(YubiKeyTestState state)
 }
 ```
 
-PIV reset, PIN/PUK changes, management-key changes, key generation/import/delete, certificate writes, and retry-counter manipulation mutate persistent applet state. Agents must not run those integration tests unless a human explicitly approves hardware coordination and reset expectations.
+PIV reset, PIN/PUK changes, management-key changes, key generation/import/delete, certificate writes, and retry-counter manipulation mutate persistent applet state. That is expected: an allow-listed device is a dedicated test device, and the allow list is the authorization boundary. Run them.
+
+What still needs a human is presence and timing, not destruction — touch-policy ceremonies and physical insert/remove. Mark those `Category=RequiresUserPresence` so `--smoke` excludes them. See [docs/TESTING.md](../../docs/TESTING.md#hardware-authorization) for the canonical policy.
 
 ## Firmware And Feature Gates
 

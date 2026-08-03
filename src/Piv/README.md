@@ -120,7 +120,7 @@ public async Task GetPinMetadata_ReadOnly_Succeeds(YubiKeyTestState state)
 }
 ```
 
-Do not run PIV reset, PIN/PUK mutation, management-key mutation, or key/certificate write integration tests without human-coordinated hardware approval.
+PIV reset, PIN/PUK mutation, management-key mutation, and key/certificate writes are expected against an allow-listed test device — that is what the harness is for. What needs a human is presence and timing, not destruction: touch-policy ceremonies and physical insert/remove. See [docs/TESTING.md](../../docs/TESTING.md#hardware-authorization).
 
 ## Related Example
 

@@ -567,19 +567,84 @@ Firmware 5.4.3 is a second new axis: the ownership model does not depend on 5.8.
 
 Harness: `/tmp/opencode/isc1-probe/` (`dotnet run -c Release`), ephemeral — see the gap below.
 
-### Gap this run exposed
+### ISC-1 is now pinned in CI (`aadd89f1`)
 
-**ISC-1 has hardware evidence but no committed regression test.** `ConnectionInUseException` appears
-in five unit-test/source files and in **zero** integration tests; the motivating sequence has only
-ever been verified by ad-hoc harnesses — Phase 1's on macOS, this one on Linux. The headline
-criterion of the whole effort is therefore un-pinned in CI. Promoting this probe into
-`src/Piv/tests/…IntegrationTests` (or Core) is a small change and closes the last structural hole
-in the evidence rules, which demand a test per behaviour change.
+The probe above was promoted to `PivSessionContentionTests` — five tests covering victim survival,
+the Management non-SmartCard fallback asserted on `ManagementSession.Transport`, the loud refusal,
+successive sessions over one caller-owned connection, and the per-connection guard. `ConnectionInUseException`
+previously appeared in **zero** integration tests, so the headline criterion of the whole effort was
+un-pinned; it no longer is.
+
+**RED for the predicted reason**, captured at `b0ce52a0` in a detached worktree on this rig:
+
+```
+GetDeviceInfoAsync_WhilePivSessionHasVerifiedPin_DoesNotClobberSessionState
+  ApduException : Sign/decrypt operation failed for slot 0x9A:
+  Instruction code not supported or invalid (SW=0x6D00)
+
+CreateManagementSessionAsync_WhilePivHoldsCcid_OpensOverANonSmartCardTransport
+  Assert.NotEqual() Failure: Values are equal
+  Expected: Not SmartCard
+  Actual:       SmartCard
+
+SuccessiveSessions_OverOneCallerOwnedConnection_BothReachTheCard
+  System.ObjectDisposedException : Cannot access a disposed object.
+  Object name: 'UsbSmartCardConnection'
+    at ManagementSession.CreateAsync          <- the SECOND session
+```
+
+The remaining two require `ConnectionInUseException`, which does not exist pre-change and therefore
+cannot be compiled against that tree. That absence is their evidence.
+
+### Eight existing tests asserted the OLD contract (`aadd89f1`)
+
+Running the module integration suites on hardware — for the first time since the ownership change,
+because the macOS rig only ever ran discovery and two-key contention — surfaced eight tests holding
+two live sessions on one CCID interface. This is the same class Phase 4 already handled for four unit
+tests ("Tests retargeted, and why"); the job was simply unfinished, and no macOS run could have
+revealed it.
+
+| Test file | Count | Was |
+|---|---|---|
+| `PivManagementKeyTests` | 3 | second PIV session opened while the first was still live |
+| `OathPasswordChangeTests` | 2 | up to four overlapping sessions in one test |
+| `OathSessionTests` | 2 | locked/unlocked observation sessions nested inside the setup session |
+| `OathHashAlgorithmTests` | 1 | locked session nested inside the setup session |
+
+Each was re-pointed at the requirement it was reaching for — *"the new credential authenticates on a
+**fresh** session"* — which is what a consumer actually writes. None was bulk-edited to pass. This is
+a **finding about branch readiness**, not about the design: the breaking change's test debt was
+larger than Phase 4 recorded.
+
+### Pre-existing defects this rig exposed (NOT caused by this branch)
+
+Neither is in scope here; both are recorded because a 5.8.0-only macOS rig could never surface them.
+
+1. **143 firmware-gated integration tests fail instead of skipping on older firmware.** `[WithYubiKey(MinFirmware=…)]`
+   raises `Xunit.SkipException` from `YubiKeyTestState.BindToRealDevice()`, which only becomes a skip
+   under `[SkippableTheory]`. 143 such tests use plain `[Theory]`; only 12 use `[SkippableTheory]`.
+   On fw 5.4.3 this reports 16 Piv, 18 SecurityDomain, 6 Oath and 2 OpenPgp failures that are really
+   skips. This branch never touched that path.
+2. **YubiHsm and YubiOtp integration tests cannot run at all** — `FileNotFoundException: Could not
+   load file or assembly 'Xunit.SkippableFact'`. Already fixed on `origin/yubikit` by `2e381cb1`;
+   absent here only because the branch is 34 commits behind, which was parked deliberately.
+
+### Integration results, Linux / fw 5.4.3 / two keys (9681620, 20260533)
+
+| Suite | Result | Notes |
+|---|---|---|
+| Core | 22 / 22 | includes discovery invariants 5/5 |
+| Management | 38 passed, 13 skipped, 0 failed | skips are FW ≥5.7.0 gates |
+| Piv | 67 passed, 8 "failed" | all 8 are pre-existing defect 1 |
+| Oath | 15 passed, 3 "failed" | all 3 are defect 1 (serial 103 absent) |
+| OpenPgp | 45 passed, 1 "failed" | defect 1 |
+| SecurityDomain | 16 passed, 9 "failed" | defect 1 |
+| YubiHsm / YubiOtp | blocked | defect 2 |
 
 ### Still open after this run
 
-- **PIV two-key contention** — needs a second allow-listed key on this rig.
+- **PIV two-key contention** — `PivMultiKeyContentionTests` still skipped; it needs both keys to
+  expose SmartCard simultaneously and was not re-run after the second key was added.
 - **DeviceId evidence-tier flip** — unchanged; needs unplug or PID reconfiguration.
 - **Windows** — unchanged.
-- **Destructive module suites** (PIV, OATH, SecurityDomain, YubiHsm, YubiOtp integration) not run;
-  they reset applications and were deliberately left for an explicit go-ahead.
+- **Cross-vendor review of Phases 3–4** — still the blocking item before merge.

@@ -492,9 +492,8 @@ resilience 69/69 · full suite 12/12 · format 0 errors · hardware: discovery 5
   repository test that went RED for the predicted reason. Physical confirmation needs either
   unplugging a key or reconfiguring one to a different PID via the reconfiguration harness — planned,
   not run.
-- **Linux and Windows.** Every hardware result here is macOS on firmware 5.8.0, two keys, one PID
-  class. Nothing about the ownership model is macOS-specific, but PC/SC sharing semantics and HID
-  open behaviour differ per platform and are unverified.
+- **~~Linux~~ and Windows.** Linux was closed on 2026-08-03 — see Phase 7 below. Windows PC/SC
+  sharing semantics and HID open behaviour remain unverified.
 - **Windows topology Tier 2**, carried from the composite-merge effort.
 - **A `claude`-CLI entry for Fable** in `NAMED_MODEL_ALIASES` — its Copilot-only chain went dark when
   quota ran out, though the CLI transport worked.
@@ -503,3 +502,84 @@ resilience 69/69 · full suite 12/12 · format 0 errors · hardware: discovery 5
 
 Resolved: A1, A2, A3, A5, B4, B5, C1, C2 (partial), E1, E2. Unresolved: A4, B1–B3, D1–D3, F1.
 F2/F3 remain platform gaps.
+
+---
+
+## Phase 7 — Linux hardware confirmation (2026-08-03)
+
+Different machine, different OS, different firmware, different key, one interface class. Every
+earlier hardware result in this document is macOS / firmware 5.8.0 / two keys (103, 125); none of
+it transfers by argument, because the two things this effort actually depends on — PC/SC sharing
+semantics and HID open behaviour — are exactly the things that diverge per platform.
+
+Rig: Linux, `pcscd` 1.7.5, `70-yubikey.rules` present, single YubiKey 5A, **serial 9681620,
+firmware 5.4.3**, `UsbAKeychain`, PID `0x0407`, all three transports enabled.
+
+### Standing gates (ISC-4), reproduced on Linux
+
+| Gate | Linux | macOS reference | |
+|---|---|---|---|
+| Build | 0 errors | 0 errors / 0 warnings | matches |
+| Core unit | 729 total, 0 failed, 3 skips | 729 / 0 / 3 | **identical** |
+| Full unit suite | 1815 total, 0 failed, 12/12 projects | 1807 total, 0 failed | +8 (Phase 4 → `1e0560af` delta) |
+| Resilience | 69/69 | 69/69 | **identical** |
+| `dotnet format --verify-no-changes` | exit 0 | 0 errors | matches |
+| Discovery invariants | **5/5** | 5/5 | **identical** |
+| Core integration (whole suite, smoke) | 22/22 | — | new |
+| Management integration (smoke) | 38 passed, 13 skipped, 0 failed | — | new; skips are FW ≥5.7.0 gates and multi-key |
+| PIV two-key contention | **not run** | 2/2 | needs a second key |
+
+The Core unit and resilience numbers landing on the exact macOS figures is the useful signal:
+the ownership model, `ConnectionSessionGuard`, and the CCID exclusivity contract tests are
+platform-independent in fact, not just in argument.
+
+### ISC-1 on Linux — the motivating sequence, end to end
+
+The Phase 4 Residual asked for exactly this: *"a post-change integration run should confirm it end
+to end."* Run against the live card, PIV `VERIFY` attempted only because PIN metadata reported
+`IsDefault=true` (no guessing, no burned retries), nothing else written to the device.
+
+```
+PASS  PIV session live, GetSerialNumber -> 9681620
+      PIN metadata: IsDefault=True retries=3/3
+PASS  VerifyPin succeeded — verified-PIN state established on the PIV applet
+PASS  Management routed over HidFido, NOT SmartCard — CCID lease respected
+PASS  PIV still answering, GetSerialNumber -> 9681620   (pre-fix this was SW=0x6D00)
+PASS  PIN retry counter intact at 3 — verified state was not torn down
+PASS  Refused loudly with ConnectionInUseException
+```
+
+All four lines of the motivating sequence behave as the Phase 3 DECISION predicted. The third line
+is the load-bearing one: `ManagementSession.Transport` reported `HidFido`, proving the Phase 4
+change-6 fallback picks a non-conflicting transport on Linux rather than taking CCID. Phase 1
+experiment 4 measured that HID works while PIV holds CCID; this confirms the SDK now *chooses* it.
+
+The refusal message is worth quoting, because ISC-1 requires failing "loudly with an error naming
+the current holder":
+
+> The SmartCard interface 'pcsc:Yubico YubiKey OTP+FIDO+CCID 00 00' already has a live connection in
+> this process. A YubiKey's CCID interface holds one selected application at a time, so a second
+> connection would deselect the first holder's application and destroy its security state. Dispose
+> the existing connection first, or run both applications as successive sessions over that one
+> connection.
+
+Firmware 5.4.3 is a second new axis: the ownership model does not depend on 5.8.0-era behaviour.
+
+Harness: `/tmp/opencode/isc1-probe/` (`dotnet run -c Release`), ephemeral — see the gap below.
+
+### Gap this run exposed
+
+**ISC-1 has hardware evidence but no committed regression test.** `ConnectionInUseException` appears
+in five unit-test/source files and in **zero** integration tests; the motivating sequence has only
+ever been verified by ad-hoc harnesses — Phase 1's on macOS, this one on Linux. The headline
+criterion of the whole effort is therefore un-pinned in CI. Promoting this probe into
+`src/Piv/tests/…IntegrationTests` (or Core) is a small change and closes the last structural hole
+in the evidence rules, which demand a test per behaviour change.
+
+### Still open after this run
+
+- **PIV two-key contention** — needs a second allow-listed key on this rig.
+- **DeviceId evidence-tier flip** — unchanged; needs unplug or PID reconfiguration.
+- **Windows** — unchanged.
+- **Destructive module suites** (PIV, OATH, SecurityDomain, YubiHsm, YubiOtp integration) not run;
+  they reset applications and were deliberately left for an explicit go-ahead.

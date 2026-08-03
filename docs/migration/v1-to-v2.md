@@ -335,11 +335,98 @@ Migration notes:
 - Programming a slot overwrites persistent device state. Prefer slot 2 for examples and tests unless a human explicitly chooses otherwise.
 - Review touch, access-code, short-challenge, update, and NDEF behavior manually before migrating production slot code.
 
+### PIV: Enable PIN-Only Management Key Mode
+
+V1 set PIN-only mode through the session, collecting the PIN and management key via `KeyCollector`:
+
+```csharp
+using Yubico.YubiKey.Piv;
+
+using var piv = new PivSession(device);
+piv.KeyCollector = keyCollector;
+
+piv.SetPinOnlyMode(PivPinOnlyMode.PinProtected, PivAlgorithm.Aes192);
+```
+
+V2 requires the management key to already be authenticated, and takes the PIN and management key explicitly:
+
+```csharp
+using System.Security.Cryptography;
+using Yubico.YubiKit.Piv;
+
+await using var piv = await device.CreatePivSessionAsync(
+    cancellationToken: cancellationToken);
+
+byte[] managementKey = GetManagementKeyBytes();
+byte[] pin = GetPinBytes();
+try
+{
+    await piv.AuthenticateAsync(managementKey, cancellationToken);
+    await piv.SetPinOnlyModeAsync(
+        PivPinOnlyMode.PinProtected,
+        pin,
+        managementKey,
+        cancellationToken);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(managementKey);
+    CryptographicOperations.ZeroMemory(pin);
+}
+```
+
+Migration notes:
+
+- Only `PivPinOnlyMode.PinProtected` can be newly enabled in v2. V1's `PinDerived` mode is a deprecated, weaker mechanism; v2 can still detect and recover an existing PIN-derived configuration (`GetPinOnlyModeAsync`/`RecoverPinOnlyModeAsync`) but cannot enable a new one.
+- The caller must authenticate the management key explicitly before calling `SetPinOnlyModeAsync`; v1's `KeyCollector` handled this implicitly.
+- Enabling blocks the PUK and is state-mutating; treat this as a human-reviewed migration like other PIV write operations.
+
+### OATH: Check Password Protection and Retry a Locked Operation
+
+V1 exposed a persistent `IsPasswordProtected` flag and relied on `KeyCollector` for transparent retry:
+
+```csharp
+using Yubico.YubiKey.Oath;
+
+using var oath = new OathSession(device);
+oath.KeyCollector = keyCollector;
+
+if (oath.IsPasswordProtected)
+{
+    var codes = oath.CalculateAllCredentials();
+}
+```
+
+V2 exposes the same persistent signal and an explicit, module-appropriate retry helper instead of a global `KeyCollector`:
+
+```csharp
+using Yubico.YubiKit.Oath;
+
+await using var oath = await device.CreateOathSessionAsync(
+    cancellationToken: cancellationToken);
+
+if (oath.IsPasswordProtected)
+{
+    var codes = await oath.AuthenticateAndRetryAsync(
+        ct => oath.CalculateAllAsync(cancellationToken: ct),
+        ct => GetPasswordBytesAsync(ct),
+        cancellationToken);
+}
+```
+
+Migration notes:
+
+- `IsPasswordProtected` reflects whether the device has a password configured at all, independent of `IsLocked`'s per-session unlock state.
+- `AuthenticateAndRetryAsync` retries the wrapped operation exactly once after a successful `ValidateAsync`; it is not an unbounded retry loop like v1's `KeyCollector`.
+- Catch the dedicated `OathException` and branch on `OathException.Reason` (`Locked` or `WrongPassword`) instead of v1's `SecurityException`.
+
 ## Application Sections
 
 ### PIV
 
 Use `Yubico.YubiKit.Piv` for PIV operations. Review authentication, PIN/PUK handling, key import/generation, certificate management, and APDU-level customization manually because lifecycle and security-sensitive buffer handling can differ between v1 and v2.
+
+PIN-only management-key mode (`IPivSession.GetPinOnlyModeAsync`/`SetPinOnlyModeAsync`/`RecoverPinOnlyModeAsync`) and typed CHUID/CCC/AdminData/KeyHistory data objects (`Yubico.YubiKit.Piv.DataObjects`) were restored after an initial v2 gap; see `piv-pin-only-mode` and `piv-typed-data-objects` in `v1-to-v2-map.yml`. Enabling a new PIN-derived (as opposed to PIN-protected) management key is not supported in v2.
 
 ### FIDO2
 
@@ -349,21 +436,31 @@ Use `Yubico.YubiKit.Fido2` for FIDO2/WebAuthn operations. Review transport selec
 
 Use `Yubico.YubiKit.Oath` for TOTP/HOTP credential management and code calculation. Review credential naming, secret handling, password flows, and time-source assumptions manually.
 
+`IOathSession.IsPasswordProtected` (device-password state independent of session unlock state), `AuthenticateAndRetryAsync` (module-appropriate authenticate-and-retry), and the dedicated `OathException`/`OathFailureReason` type were restored after an initial v2 gap; see `oath-password-protection-state`, `oath-authenticate-and-retry`, and `oath-exception` in `v1-to-v2-map.yml`.
+
 ### YubiOTP
 
 Use `Yubico.YubiKit.YubiOtp` for Yubico OTP configuration and slot operations. Review slot numbering, configuration flags, and write/update behavior manually.
+
+A keyboard-layout-aware `StaticPasswordSlotConfiguration(string, KeyboardLayout)` constructor and Yubico-OTP-algorithm challenge-response (`YubicoOtpChallengeResponseSlotConfiguration`/`CalculateYubicoOtpAsync`) were restored after an initial v2 gap; see `yubiotp-static-password-keyboard` and `yubiotp-yubico-otp-challenge-response` in `v1-to-v2-map.yml`. HMAC-SHA1 and Yubico OTP key inputs of invalid length now fail before any device I/O instead of being silently hashed or padded.
 
 ### OpenPGP
 
 Use `Yubico.YubiKit.OpenPgp` for OpenPGP card operations. Review key slots, PIN policy, management key behavior, and command-level assumptions manually.
 
+PIN verification failures throw a dedicated `OpenPgpInvalidPinException` with a typed `RetriesRemaining`; see `openpgp-exception` in `v1-to-v2-map.yml`.
+
 ### Security Domain
 
 Use `Yubico.YubiKit.SecurityDomain` for SCP03 and security domain key management. Treat all secure channel, cryptographic key, and diversification migrations as manual until a specific high-confidence mapping exists.
 
+Secure-channel handshake/authentication failures (during session creation or post-reset reinitialization) throw a dedicated `SecureChannelException` that preserves the original failure as `InnerException`; see `securitydomain-exception` in `v1-to-v2-map.yml`. Per-operation failures after a channel is open are unchanged.
+
 ### YubiHSM
 
 Use `Yubico.YubiKit.YubiHsm` for YubiHSM 2 workflows. Review connector/session creation, authentication, object identifiers, capabilities, and command behavior manually.
+
+A dedicated `HsmAuthRetryException.RetriesRemaining` and an `HsmAuthSession.OnTouchRequired` callback were restored after an initial v2 gap; see `yubihsm-retry-exception` and `yubihsm-touch-notify` in `v1-to-v2-map.yml`. `HsmAuthCredential.Counter` was hardware-verified and renamed to `RetriesRemaining` to match v1's "retries remaining before deletion" semantics; see `yubihsm-credential-retries-remaining-rename`.
 
 ## Manual Low-Level Command Cases
 

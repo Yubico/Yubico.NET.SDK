@@ -314,6 +314,152 @@ mappings:
       - yubikit:src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs
     notes: Slot programming is persistent and requires manual review for slot number, access-code, touch, short-challenge, update, and NDEF behavior; v1 ShortPress/LongPress map semantically to v2 Slot.One/Slot.Two.
     last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
+  - id: piv-pin-only-mode
+    status: assisted
+    confidence: high
+    migration_kind: behavior
+    v1: PivSession.GetPinOnlyMode() / PivSession.SetPinOnlyMode(PivPinOnlyMode, PivAlgorithm) / PivSession.TryRecoverPinOnlyMode()
+    v2: IPivSession.GetPinOnlyModeAsync(...) / IPivSession.SetPinOnlyModeAsync(...) / IPivSession.RecoverPinOnlyModeAsync(...)
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Piv/PivSession.Pinonly.cs
+      - yubikit:src/Piv/src/IPivSession.cs
+      - yubikit:src/Piv/src/Authentication/PivPinOnlyProtocol.cs
+      - yubikit:src/Piv/src/PivPinOnlyMode.cs
+      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+    notes: PIV PIN-only mode was absent from the initial v2 snapshot (see historical `docs/migration/v1-to-v2-gaps.md` finding 3) and was restored by the `yubikit-gaps` remediation effort. V2 narrows the enable/disable surface to `PivPinOnlyMode.PinProtected` only; PIN-derived mode remains detectable via `GetPinOnlyModeAsync` and recoverable via `RecoverPinOnlyModeAsync`, but cannot be newly enabled (v1's `PinDerived` is a deprecated, weaker mechanism kept only for backwards compatibility). `SetPinOnlyModeAsync` requires the caller to have already authenticated the management key and pass it again explicitly; PIN-derived candidate key material is zeroed internally after each recovery attempt. Review any v1 code enabling `PivPinOnlyMode.PinDerived` manually, since v2 has no enable path for it.
+    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: piv-typed-data-objects
+    status: assisted
+    confidence: high
+    migration_kind: type
+    v1: Yubico.YubiKey.Piv.Objects.CardholderUniqueId / CardCapabilityContainer / AdminData / KeyHistory
+    v2: Yubico.YubiKit.Piv.DataObjects.PivCardholderUniqueId / PivCardCapabilityContainer / PivAdminData / PivKeyHistory
+    evidence:
+      - yubikit:src/Piv/src/DataObjects/PivCardholderUniqueId.cs
+      - yubikit:src/Piv/src/DataObjects/PivCardCapabilityContainer.cs
+      - yubikit:src/Piv/src/DataObjects/PivAdminData.cs
+      - yubikit:src/Piv/src/DataObjects/PivKeyHistory.cs
+      - yubikit:src/Piv/src/IPivSession.cs
+      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+    notes: Typed PIV data objects were absent from the initial v2 snapshot (historical gap 10; v2's `PivDataObject.cs` was only tag constants) and were restored by the `yubikit-gaps` remediation effort with golden-vector round-trip tests. V2 exposes them as `readonly record struct` types read/written through `IPivSession.Get{Chuid,CardCapabilityContainer,AdminData,KeyHistory}Async`/`Set*Async`, replacing v1's mutable `PivDataObject`-derived classes with `Encode()`/`Decode()`/`TryDecode()`. Field names and encode/decode call shape are not guaranteed one-to-one; review call sites that read or write CHUID/CCC/AdminData/KeyHistory fields directly.
+    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: oath-password-protection-state
+    status: assisted
+    confidence: high
+    migration_kind: member
+    v1: OathSession.IsPasswordProtected
+    v2: IOathSession.IsPasswordProtected
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Oath/OathSession.cs
+      - yubikit:src/Oath/src/IOathSession.cs
+      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+    notes: V2 initially only exposed `IsLocked` (which becomes false after `ValidateAsync` even though the device stays password-protected), losing the v1 signal for "does the device have a password at all" (historical gap 11). The `yubikit-gaps` remediation effort restored a dedicated `IsPasswordProtected` property on `IOathSession` that stays true for the life of the session as long as a password is configured, independent of `IsLocked`'s per-session unlock state.
+    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: oath-authenticate-and-retry
+    status: manual
+    confidence: medium
+    migration_kind: behavior
+    v1: OathSession.KeyCollector-driven automatic authenticate-and-retry on AuthenticationRequired
+    v2: IOathSession.AuthenticateAndRetryAsync(operation, passwordProvider, cancellationToken)
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Oath/OathSession.cs
+      - yubikit:src/Oath/src/IOathSession.cs
+      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+    notes: V1's global `KeyCollector` transparently retried locked-applet operations after collecting a password; the initial v2 snapshot let a locked-device error surface as a raw `ApduException` with no retry helper (historical gap 11). The `yubikit-gaps` remediation effort added `AuthenticateAndRetryAsync`, a module-appropriate (not global-`KeyCollector`) retry wrapper that runs the supplied operation, and on an `OathException` with `Reason == OathFailureReason.Locked` collects a password via the caller-supplied provider, derives and validates the access key, zeroes the derived key, and retries the operation exactly once. Review each v1 KeyCollector-driven OATH call site manually; the retry shape (one retry, explicit password provider callback) differs from v1's unbounded KeyCollector loop.
+    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: oath-exception
+    status: assisted
+    confidence: high
+    migration_kind: behavior
+    v1: SecurityException with status-word-to-message mapping on wrong/locked OATH password
+    v2: OathException with OathFailureReason (Locked, WrongPassword) and StatusWord
+    evidence:
+      - yubikit:src/Oath/src/OathException.cs
+      - yubikit:src/Oath/src/IOathSession.cs
+      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+    notes: The initial v2 snapshot threw generic `ArgumentException`/`InvalidOperationException`/`BadResponseException` for wrong-password or locked-applet failures with no dedicated exception type (historical gap 11). The `yubikit-gaps` remediation effort added `OathException`, a dedicated public exception with a typed `Reason` (`OathFailureReason.Locked` or `WrongPassword`) and an optional `StatusWord`, thrown by `ValidateAsync` and by operations that fail because the applet is locked. Update `catch` clauses that targeted v1's `SecurityException` to catch `OathException` and branch on `Reason` instead of parsing the message.
+    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: yubiotp-static-password-keyboard
+    status: assisted
+    confidence: high
+    migration_kind: member
+    v1: OtpSession.ConfigureStaticPassword(slot).SetPassword(ReadOnlyMemory<char>).WithKeyboard(KeyboardLayout).Execute()
+    v2: new StaticPasswordSlotConfiguration(string password, KeyboardLayout keyboardLayout)
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Otp/Operations/ConfigureStaticPassword.cs
+      - yubikit:src/YubiOtp/src/StaticPasswordSlotConfiguration.cs
+      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+    notes: The initial v2 snapshot's `StaticPasswordSlotConfiguration` only accepted raw scan-code bytes, losing v1's human-readable-string-plus-keyboard-layout entry point (historical gap 12). The `yubikit-gaps` remediation effort added a `StaticPasswordSlotConfiguration(string password, KeyboardLayout keyboardLayout)` constructor that translates each character to a HID scan code via the existing Core `HidCodeTranslator`, validates every character against the layout before allocating the scan-code buffer, and zeroes the intermediate scan-code array after copying it into the configuration. Password/scan-code generation helpers and NDEF read-back from v1 are not restored; review those manually if used.
+    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: yubiotp-yubico-otp-challenge-response
+    status: manual
+    confidence: medium
+    migration_kind: member
+    v1: OtpSession.ConfigureChallengeResponse(slot).UseYubiOtp(true).UseKey(...).Execute() / OtpSession.CalculateChallengeResponse(slot).UseYubiOtp(true).UseChallenge(...).GetDataBytes()
+    v2: new YubicoOtpChallengeResponseSlotConfiguration(aesKey) with YubiOtpSession.PutConfigurationAsync(...) / YubiOtpSession.CalculateYubicoOtpAsync(slot, challenge, cancellationToken)
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Otp/Operations/ConfigureChallengeResponse.cs
+      - yubikit:src/YubiOtp/src/YubicoOtpChallengeResponseSlotConfiguration.cs
+      - yubikit:src/YubiOtp/src/IYubiOtpSession.cs
+      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+    notes: The initial v2 snapshot's `YubiOtpSession` only exposed `CalculateHmacSha1Async`, with no Yubico-OTP-algorithm (AES-128) challenge-response path at all (historical gap 12). The `yubikit-gaps` remediation effort added `YubicoOtpChallengeResponseSlotConfiguration`, which requires an exact 16-byte AES key (validated before any device I/O), plus `CalculateYubicoOtpAsync` on `IYubiOtpSession`. Slot programming is persistent state; review slot number, touch requirement (`RequireTouch(...)`), and access-code behavior manually before migrating production slot code.
+    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: yubihsm-retry-exception
+    status: assisted
+    confidence: high
+    migration_kind: behavior
+    v1: YubiHsmAuthSession.TryAddCredential / TryDeleteCredential / TryChangeManagementKey / TryGetAes128SessionKeys / TryGetEccP256SessionKeys with out int? retriesRemaining
+    v2: HsmAuthRetryException.RetriesRemaining thrown from the corresponding single-attempt *Async methods
+    evidence:
+      - yubikit:src/YubiHsm/src/HsmAuthRetryException.cs
+      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+    notes: The initial v2 snapshot had no `Try*` retry-loop family and embedded the retry count only in an exception's string message (historical gap 13). The `yubikit-gaps` remediation effort added `HsmAuthRetryException` (derives from `ApduException`, so existing `catch (ApduException)` still observes it), thrown uniformly by every retry-counted management-key- or credential-password-gated operation with a typed `RetriesRemaining` property. There is still no automatic retry loop; callers must catch `HsmAuthRetryException` and decide whether to prompt and retry themselves.
+    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: yubihsm-touch-notify
+    status: assisted
+    confidence: high
+    migration_kind: behavior
+    v1: YubiHsmAuthSession touch-required notification during CalculateSessionKeys* (interactive KeyCollector-adjacent callback)
+    v2: HsmAuthSession.OnTouchRequired (TouchNotificationCallback delegate property)
+    evidence:
+      - yubikit:src/YubiHsm/src/TouchNotification.cs
+      - yubikit:src/YubiHsm/src/HsmAuthSession.cs
+      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+    notes: The initial v2 snapshot had no in-flight "please touch now" signal (historical gap 13). The `yubikit-gaps` remediation effort added `HsmAuthSession.OnTouchRequired`, a settable `TouchNotificationCallback?` invoked before a CALCULATE session-key exchange when the target credential's touch requirement is known to be set or cannot be determined. It intentionally receives no credential label or algorithm (to avoid leaking which credential is in use), must not block, and must not call back into the session.
+    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: yubihsm-credential-retries-remaining-rename
+    status: automatic
+    confidence: high
+    migration_kind: member
+    v1: HsmAuthAuthenticationInfo/credential list trailing byte documented as "retries remaining before deletion"
+    v2: HsmAuthCredential.RetriesRemaining (renamed from an earlier v2-only Counter member)
+    evidence:
+      - yubikit:src/YubiHsm/src/HsmAuthCredential.cs
+      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+    notes: An earlier v2-only `HsmAuthCredential.Counter` member was documented as a usage counter, the opposite meaning from v1's "retries remaining before deletion" for the same wire byte (historical gap 13, flagged as needing hardware verification). The `yubikit-gaps` remediation effort hardware-verified against a live YubiKey 5.8 that the byte decrements on failed credential-password authentication (observed 8 to 7 after one deliberate failure) and renamed the member to `RetriesRemaining` to match v1's semantics and the verified behavior. Behavior on successful authentication was not separately hardware-verified.
+    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: securitydomain-exception
+    status: assisted
+    confidence: high
+    migration_kind: behavior
+    v1: SecureChannelException (SCP03/SCP11 handshake and authentication failures)
+    v2: Yubico.YubiKit.SecurityDomain.SecureChannelException
+    evidence:
+      - yubikit:src/SecurityDomain/src/SecureChannelException.cs
+      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+    notes: The initial v2 snapshot had zero dedicated SecurityDomain exception types; SCP handshake failures surfaced as a generic `ApduException`, `BadResponseException`, or `NotSupportedException` (historical gap 9, cross-cutting exception-hierarchy shrinkage). The `yubikit-gaps` remediation effort added a dedicated `SecureChannelException`, thrown only for failures while establishing a secure channel during `SecurityDomainSession.CreateAsync` or the post-reset reinitialization inside `ResetAsync`; it always preserves the original failure as `InnerException` and the status word (when present) as `StatusWord`. Per-operation failures after a channel is already open (`GetDataAsync`, `PutKeyAsync`, `DeleteKeyAsync`, etc.) are unchanged and still surface their original exception type directly.
+    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: openpgp-exception
+    status: assisted
+    confidence: high
+    migration_kind: behavior
+    v1: OpenPGP PIN verification failures (status-word-derived retry reporting, no dedicated exception type)
+    v2: Yubico.YubiKit.OpenPgp.OpenPgpInvalidPinException.RetriesRemaining
+    evidence:
+      - yubikit:src/OpenPgp/src/OpenPgpInvalidPinException.cs
+      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+    notes: The initial v2 snapshot had zero dedicated OpenPGP exception types (historical gap 9). The `yubikit-gaps` remediation effort added `OpenPgpInvalidPinException` (derives from `ApduException`), thrown by `IOpenPgpSession.VerifyPinAsync`/`VerifyAdminAsync` for every PIN rejection shape observed across firmware (standard SW 0x63Cx, SW 0x6982 on some 5.8.0-alpha firmware, and SW 0x6983 for an already-blocked PIN), exposing a typed nullable `RetriesRemaining` instead of requiring callers to parse the message or separately call `GetPinStatusAsync`.
+    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
 manual_review:
   - device discovery call sites
   - low-level HID listener DeviceEvent callback signatures

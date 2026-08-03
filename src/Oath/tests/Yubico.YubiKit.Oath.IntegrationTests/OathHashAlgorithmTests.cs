@@ -178,49 +178,61 @@ public class OathHashAlgorithmTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
-    public async Task LockedSession_ValidateWithWrongKey_Throws(YubiKeyTestState state) =>
+    public async Task LockedSession_ValidateWithWrongKey_Throws(YubiKeyTestState state)
+    {
+        const string password = "locked-test-password";
+
+        // Reset the applet and set an access key to lock the OATH application.
         await state.WithOathSessionAsync(async session =>
         {
-            // Set an access key to lock the OATH application
-            string password = "locked-test-password";
             byte[] key = session.DeriveKey(Encoding.UTF8.GetBytes(password));
-
             try
             {
                 await session.SetKeyAsync(key, NewToken());
-
-                // Open a new session -- it should be locked because a key is set
-                await using var lockedSession = await state.Device
-                    .CreateOathSessionAsync(cancellationToken: NewToken());
-
-                Assert.True(lockedSession.IsLocked);
-
-                // Validate with the wrong key should fail
-                byte[] wrongKey = session.DeriveKey(Encoding.UTF8.GetBytes("wrong-password"));
-                try
-                {
-                    await Assert.ThrowsAnyAsync<Exception>(async () =>
-                        await lockedSession.ValidateAsync(wrongKey, NewToken()));
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(wrongKey);
-                }
-
-                // Validate with the correct key should succeed and unlock
-                await lockedSession.ValidateAsync(key, NewToken());
-                Assert.False(lockedSession.IsLocked);
-
-                // After unlocking, operations should work
-                var credentials = await lockedSession.ListCredentialsAsync(NewToken());
-                Assert.NotNull(credentials);
             }
             finally
             {
                 CryptographicOperations.ZeroMemory(key);
-
-                // Clean up: unset the key so other tests are unaffected
-                await session.UnsetKeyAsync(NewToken());
             }
         }, cancellationToken: NewToken());
+
+        // A FRESH session is what observes the lock — the session that set the key is already
+        // authenticated and would report nothing useful. It is disposed above rather than held
+        // open alongside this one: two live sessions on one CCID interface are refused.
+        await using var lockedSession = await state.Device
+            .CreateOathSessionAsync(cancellationToken: NewToken());
+
+        byte[] correctKey = lockedSession.DeriveKey(Encoding.UTF8.GetBytes(password));
+        try
+        {
+            Assert.True(lockedSession.IsLocked);
+
+            // Validate with the wrong key should fail
+            byte[] wrongKey = lockedSession.DeriveKey(Encoding.UTF8.GetBytes("wrong-password"));
+            try
+            {
+                await Assert.ThrowsAnyAsync<Exception>(async () =>
+                    await lockedSession.ValidateAsync(wrongKey, NewToken()));
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(wrongKey);
+            }
+
+            // Validate with the correct key should succeed and unlock
+            await lockedSession.ValidateAsync(correctKey, NewToken());
+            Assert.False(lockedSession.IsLocked);
+
+            // After unlocking, operations should work
+            var credentials = await lockedSession.ListCredentialsAsync(NewToken());
+            Assert.NotNull(credentials);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(correctKey);
+
+            // Clean up: unset the key so other tests are unaffected
+            await lockedSession.UnsetKeyAsync(NewToken());
+        }
+    }
 }

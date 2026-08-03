@@ -139,52 +139,53 @@ public class OathSessionTests
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
-    public async Task AccessKeyLifecycle_SetValidateUnset_Succeeds(YubiKeyTestState state) =>
+    public async Task AccessKeyLifecycle_SetValidateUnset_Succeeds(YubiKeyTestState state)
+    {
+        const string password = "test-password-123";
+
+        // Reset the applet, confirm it starts unlocked, and set an access key.
         await state.WithOathSessionAsync(async session =>
         {
-            // After reset, device should not be locked
             Assert.False(session.IsLocked);
 
-            // Derive and set an access key
-            string password = "test-password-123";
             byte[] key = session.DeriveKey(Encoding.UTF8.GetBytes(password));
-
             try
             {
                 await session.SetKeyAsync(key, NewToken());
-
-                // Create a new session to verify the key is required
-                await using var lockedSession = await state.Device
-                    .CreateOathSessionAsync(cancellationToken: NewToken());
-
-                Assert.True(lockedSession.IsLocked);
-
-                // Validate with the correct key
-                byte[] validateKey = lockedSession.DeriveKey(Encoding.UTF8.GetBytes(password));
-                try
-                {
-                    await lockedSession.ValidateAsync(validateKey, NewToken());
-                    Assert.False(lockedSession.IsLocked);
-                }
-                finally
-                {
-                    System.Security.Cryptography.CryptographicOperations.ZeroMemory(validateKey);
-                }
-
-                // Unset the key (using original unlocked session)
-                await session.UnsetKeyAsync(NewToken());
-
-                // Verify device is no longer locked
-                await using var unlockedSession = await state.Device
-                    .CreateOathSessionAsync(cancellationToken: NewToken());
-
-                Assert.False(unlockedSession.IsLocked);
             }
             finally
             {
                 System.Security.Cryptography.CryptographicOperations.ZeroMemory(key);
             }
         }, cancellationToken: NewToken());
+
+        // Fresh session — the key is required, and unsetting it needs a validated session, because
+        // the one that set the key is gone. Scoped so it releases the interface before the next opens.
+        await using (var lockedSession = await state.Device
+                         .CreateOathSessionAsync(cancellationToken: NewToken()))
+        {
+            Assert.True(lockedSession.IsLocked);
+
+            byte[] validateKey = lockedSession.DeriveKey(Encoding.UTF8.GetBytes(password));
+            try
+            {
+                await lockedSession.ValidateAsync(validateKey, NewToken());
+                Assert.False(lockedSession.IsLocked);
+
+                await lockedSession.UnsetKeyAsync(NewToken());
+            }
+            finally
+            {
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(validateKey);
+            }
+        }
+
+        // Verify device is no longer locked
+        await using var unlockedSession = await state.Device
+            .CreateOathSessionAsync(cancellationToken: NewToken());
+
+        Assert.False(unlockedSession.IsLocked);
+    }
 
     [Theory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.1")]

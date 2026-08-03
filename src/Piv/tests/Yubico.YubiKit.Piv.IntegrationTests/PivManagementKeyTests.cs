@@ -46,10 +46,6 @@ public class PivManagementKeyTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task SetManagementKeyAsync_ChangesToNewKey(YubiKeyTestState state)
     {
-        await using var session = await state.Device.CreatePivSessionAsync();
-        await session.ResetAsync();
-        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-
         // Use appropriate key type based on firmware
         var newKeyType = state.FirmwareVersion >= new FirmwareVersion(5, 7, 0)
             ? PivManagementKeyType.Aes192
@@ -62,23 +58,31 @@ public class PivManagementKeyTests
 
         try
         {
-            // Change the management key
-            await session.SetManagementKeyAsync(newKeyType, newKey);
+            await using (var session = await state.Device.CreatePivSessionAsync())
+            {
+                await session.ResetAsync();
+                await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+                await session.SetManagementKeyAsync(newKeyType, newKey);
+            }
 
-            // Create new session to verify the change
-            await using var session2 = await state.Device.CreatePivSessionAsync();
+            // Successive, not nested: the mutating session above has released the CCID interface.
+            // The requirement is that the new key authenticates on a FRESH session, which is what
+            // a consumer would do. Two live PIV sessions on one interface are refused by design —
+            // they would share the card's security state.
+            await using var verification = await state.Device.CreatePivSessionAsync();
 
             // Old key should fail
             await Assert.ThrowsAsync<ApduException>(
-                () => session2.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion)));
+                () => verification.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion)));
 
             // New key should work
-            await session2.AuthenticateAsync(newKey);
-            Assert.True(session2.IsAuthenticated);
+            await verification.AuthenticateAsync(newKey);
+            Assert.True(verification.IsAuthenticated);
         }
         finally
         {
-            await session.ResetAsync();
+            await using var cleanup = await state.Device.CreatePivSessionAsync();
+            await cleanup.ResetAsync();
         }
     }
 
@@ -86,10 +90,6 @@ public class PivManagementKeyTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.2")]
     public async Task SetManagementKeyAsync_AES256_Succeeds(YubiKeyTestState state)
     {
-        await using var session = await state.Device.CreatePivSessionAsync();
-        await session.ResetAsync();
-        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-
         // AES256 = 32 bytes
         var aes256Key = new byte[]
         {
@@ -101,22 +101,29 @@ public class PivManagementKeyTests
 
         try
         {
-            // Change to AES256
-            await session.SetManagementKeyAsync(PivManagementKeyType.Aes256, aes256Key);
+            await using (var session = await state.Device.CreatePivSessionAsync())
+            {
+                await session.ResetAsync();
+                await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
-            // Verify via metadata
-            var metadata = await session.GetManagementKeyMetadataAsync();
-            Assert.Equal(PivManagementKeyType.Aes256, metadata.KeyType);
-            Assert.False(metadata.IsDefault);
+                // Change to AES256
+                await session.SetManagementKeyAsync(PivManagementKeyType.Aes256, aes256Key);
 
-            // Verify can authenticate with new key
-            await using var session2 = await state.Device.CreatePivSessionAsync();
-            await session2.AuthenticateAsync(aes256Key);
-            Assert.True(session2.IsAuthenticated);
+                // Verify via metadata
+                var metadata = await session.GetManagementKeyMetadataAsync();
+                Assert.Equal(PivManagementKeyType.Aes256, metadata.KeyType);
+                Assert.False(metadata.IsDefault);
+            }
+
+            // Successive, not nested — see SetManagementKeyAsync_ChangesToNewKey.
+            await using var verification = await state.Device.CreatePivSessionAsync();
+            await verification.AuthenticateAsync(aes256Key);
+            Assert.True(verification.IsAuthenticated);
         }
         finally
         {
-            await session.ResetAsync();
+            await using var cleanup = await state.Device.CreatePivSessionAsync();
+            await cleanup.ResetAsync();
         }
     }
 
@@ -124,10 +131,6 @@ public class PivManagementKeyTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.2")]
     public async Task SetManagementKeyAsync_AES128_Succeeds(YubiKeyTestState state)
     {
-        await using var session = await state.Device.CreatePivSessionAsync();
-        await session.ResetAsync();
-        await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-
         // AES128 = 16 bytes
         var aes128Key = new byte[]
         {
@@ -137,22 +140,29 @@ public class PivManagementKeyTests
 
         try
         {
-            // Change to AES128
-            await session.SetManagementKeyAsync(PivManagementKeyType.Aes128, aes128Key);
+            await using (var session = await state.Device.CreatePivSessionAsync())
+            {
+                await session.ResetAsync();
+                await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
-            // Verify via metadata
-            var metadata = await session.GetManagementKeyMetadataAsync();
-            Assert.Equal(PivManagementKeyType.Aes128, metadata.KeyType);
-            Assert.False(metadata.IsDefault);
+                // Change to AES128
+                await session.SetManagementKeyAsync(PivManagementKeyType.Aes128, aes128Key);
 
-            // Verify can authenticate with new key
-            await using var session2 = await state.Device.CreatePivSessionAsync();
-            await session2.AuthenticateAsync(aes128Key);
-            Assert.True(session2.IsAuthenticated);
+                // Verify via metadata
+                var metadata = await session.GetManagementKeyMetadataAsync();
+                Assert.Equal(PivManagementKeyType.Aes128, metadata.KeyType);
+                Assert.False(metadata.IsDefault);
+            }
+
+            // Successive, not nested — see SetManagementKeyAsync_ChangesToNewKey.
+            await using var verification = await state.Device.CreatePivSessionAsync();
+            await verification.AuthenticateAsync(aes128Key);
+            Assert.True(verification.IsAuthenticated);
         }
         finally
         {
-            await session.ResetAsync();
+            await using var cleanup = await state.Device.CreatePivSessionAsync();
+            await cleanup.ResetAsync();
         }
     }
 }

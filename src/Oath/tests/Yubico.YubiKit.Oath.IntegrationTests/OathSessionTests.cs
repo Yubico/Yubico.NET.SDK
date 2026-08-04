@@ -58,7 +58,7 @@ public class OathSessionTests
             Counter = counter
         };
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0", CustomFilter = typeof(BetaSerial103Filter))]
     public async Task ManagementPreflight_Serial103_ReportsFirmware(YubiKeyTestState state) =>
         await state.WithManagementAsync(async (mgmt, _) =>
@@ -71,7 +71,7 @@ public class OathSessionTests
                 $"Expected beta firmware 5.8.x or later, got {deviceInfo.FirmwareVersion}.");
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0", CustomFilter = typeof(BetaSerial103Filter))]
     public async Task OathSession_Create_ReadsSelectMetadataWithoutReset(YubiKeyTestState state)
     {
@@ -83,7 +83,7 @@ public class OathSessionTests
         Assert.NotNull(session.FirmwareVersion);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.3", CustomFilter = typeof(BetaSerial103Filter))]
     public async Task OathSession_CreateWithScp03_ReadsSelectMetadataWithoutReset(YubiKeyTestState state)
     {
@@ -98,7 +98,7 @@ public class OathSessionTests
         Assert.NotNull(session.FirmwareVersion);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task CredentialLifecycle_PutListCalculateDelete_Succeeds(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -137,7 +137,7 @@ public class OathSessionTests
             Assert.Empty(credentials);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task AccessKeyLifecycle_SetValidateUnset_Succeeds(YubiKeyTestState state)
     {
@@ -187,7 +187,7 @@ public class OathSessionTests
         Assert.False(unlockedSession.IsLocked);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.1")]
     public async Task RenameCredential_ChangesNameAndIssuer(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -216,7 +216,7 @@ public class OathSessionTests
             Assert.Equal("renamed@example.com", credentials[0].Name);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task CalculateAll_WithMultipleCredentials_ReturnsAllCodes(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -243,7 +243,7 @@ public class OathSessionTests
             }
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task CalculateAll_WithHotpCredential_ReturnsNullCode(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -268,7 +268,7 @@ public class OathSessionTests
             Assert.NotNull(totpEntry.Value);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task HotpCredential_PutAndCalculate_Succeeds(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -295,7 +295,7 @@ public class OathSessionTests
             Assert.NotEqual(code1.Value, code2.Value);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task Reset_ClearsAllCredentials(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -321,7 +321,7 @@ public class OathSessionTests
             Assert.False(session.IsLocked);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task TouchRequiredCredential_CalculateAll_ReturnsNullCode(YubiKeyTestState state) =>

@@ -30,7 +30,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Extension", "minPinLength")]
 public class FidoMinPinLengthTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_WithMinPinLength_ReturnsMinPinLength(YubiKeyTestState state) =>
@@ -105,7 +105,7 @@ public class FidoMinPinLengthTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_IncludesMinPinLength(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>

@@ -18,7 +18,7 @@ public class OpenPgpAdvancedTests
 
     // ── X25519 Key Generation ───────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task GenerateEcKey_X25519_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
@@ -38,7 +38,7 @@ public class OpenPgpAdvancedTests
 
     // ── KDF Setup (Iterated-Salted-S2K) ─────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task SetKdf_IterSaltedS2k_ThenVerifyPin_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
@@ -108,7 +108,7 @@ public class OpenPgpAdvancedTests
 
     // ── RSA 3072 Key Generation ─────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task GenerateRsaKey_3072_Succeeds(YubiKeyTestState state) =>
@@ -129,7 +129,7 @@ public class OpenPgpAdvancedTests
 
     // ── RSA 4096 Key Generation ─────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task GenerateRsaKey_4096_Succeeds(YubiKeyTestState state) =>
@@ -150,7 +150,7 @@ public class OpenPgpAdvancedTests
 
     // ── Ed25519 Key Generation and Sign ─────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task GenerateEcKey_Ed25519_ThenSign_ProducesSignature(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(

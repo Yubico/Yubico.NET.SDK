@@ -44,7 +44,7 @@ public class ManagementSessionAdvancedTests
     ///     Basic example: Runs on ALL authorized devices.
     ///     Test executes once per device in the allow list.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey]
     public async Task GetDeviceInfo_AllDevices_ReturnsValidData(YubiKeyTestState state) =>
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>

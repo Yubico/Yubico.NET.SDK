@@ -18,7 +18,7 @@ For Management-specific test patterns, device filtering, and test state utilitie
 Management tests use the most powerful device filtering system in the SDK via `[WithYubiKey]` attribute:
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(
     MinFirmware = "5.3.0",                     // Only firmware >= 5.3.0
     FormFactor = FormFactor.UsbAKeychain,      // Only USB-A keychains
@@ -37,7 +37,7 @@ public async Task MyTest(YubiKeyTestState state)
 Use `WithManagementAsync` for automatic session management:
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.0.0")]
 public async Task MyTest(YubiKeyTestState state) =>
     await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>

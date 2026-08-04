@@ -48,7 +48,7 @@ Add your test device serial numbers to `appsettings.json`:
 ### Basic Pattern
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.4.3")]
 public async Task MyTest(YubiKeyTestState state) =>
     await state.WithSecurityDomainSessionAsync(
@@ -65,7 +65,7 @@ public async Task MyTest(YubiKeyTestState state) =>
 ### Testing with DI Factory
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.4.3")]
 public async Task DIFactory_Test(YubiKeyTestState state) =>
     await state.WithSecurityDomainSessionFromDIAsync(

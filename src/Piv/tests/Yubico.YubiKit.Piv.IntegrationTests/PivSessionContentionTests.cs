@@ -86,7 +86,7 @@ public class PivSessionContentionTests
     ///     the verified-PIN state — so the next PIN-gated sign failed with SW=0x6D00.
     ///     Post-fix the call must route around the held CCID interface and leave the victim session intact.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetDeviceInfoAsync_WhilePivSessionHasVerifiedPin_DoesNotClobberSessionState(
         YubiKeyTestState state)
@@ -116,7 +116,7 @@ public class PivSessionContentionTests
     ///     or throw. Asserting <see cref="ManagementSession.Transport" /> — what was actually opened, not
     ///     what was requested — is what stops this from silently passing over SmartCard.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task CreateManagementSessionAsync_WhilePivHoldsCcid_OpensOverANonSmartCardTransport(
         YubiKeyTestState state)
@@ -146,7 +146,7 @@ public class PivSessionContentionTests
     ///     never silently deselect. A direct second CCID connection has nowhere to go, so it is refused at
     ///     acquisition — before anything reaches the wire.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ConnectAsync_SecondSmartCardConnection_WhilePivSessionOpen_IsRefused(
         YubiKeyTestState state)
@@ -175,7 +175,7 @@ public class PivSessionContentionTests
     ///     it — dispose session A, construct session B on the same handle, no reconnect and no
     ///     re-enumeration. Disposing a session must therefore NOT dispose a caller-created connection.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task SuccessiveSessions_OverOneCallerOwnedConnection_BothReachTheCard(
         YubiKeyTestState state)
@@ -210,7 +210,7 @@ public class PivSessionContentionTests
     ///     The guard is per-connection, not per-process: two live sessions over ONE connection are refused
     ///     even when they are the same applet, because they would share the card's security state.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task SecondSession_OnOneLiveConnection_IsRefused(YubiKeyTestState state)
     {

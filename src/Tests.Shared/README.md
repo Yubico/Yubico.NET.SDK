@@ -21,7 +21,7 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 public class MyIntegrationTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey]
     public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestState state)
     {
@@ -32,7 +32,7 @@ public class MyIntegrationTests
         });
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.7.0")]
     public async Task ModernFeatures_RequireFirmware570(YubiKeyTestState state)
     {
@@ -128,7 +128,7 @@ Test method
 ### Basic Test
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey]
 public async Task GetDeviceInfo_AllDevices_ReturnsValidData(YubiKeyTestState state)
 {
@@ -145,7 +145,7 @@ public async Task GetDeviceInfo_AllDevices_ReturnsValidData(YubiKeyTestState sta
 ### Filtered Test
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.7.2", Capability = DeviceCapabilities.SecurityDomain)]
 public async Task Scp11_ModernDevice_ReturnsKeyInfo(YubiKeyTestState state)
 {
@@ -169,7 +169,7 @@ public sealed class ProductionKeysOnly : IYubiKeyFilter
     public string GetDescription() => "Production keys";
 }
 
-[Theory]
+[SkippableTheory]
 [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
 public async Task RunsOnlyOnProductionKeyRange(YubiKeyTestState state)
 {

@@ -131,7 +131,7 @@ Unit tests should use fake SmartCard protocol/connection seams where possible to
 Integration tests must use `[Theory]` plus `[WithYubiKey]` from `Tests.Shared`:
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(Capability = DeviceCapabilities.Piv)]
 public async Task GetMetadata_ReadOnly_Succeeds(YubiKeyTestState state)
 {

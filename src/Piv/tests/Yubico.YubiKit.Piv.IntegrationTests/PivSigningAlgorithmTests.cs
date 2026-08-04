@@ -114,7 +114,7 @@ public class PivSigningAlgorithmTests
         return padded;
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task SignRsa2048_WithSha1Hash_ProducesValidSignature(YubiKeyTestState state)
     {
@@ -149,7 +149,7 @@ public class PivSigningAlgorithmTests
 #pragma warning restore CA5350
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task SignRsa2048_WithSha384Hash_ProducesValidSignature(YubiKeyTestState state)
     {
@@ -180,7 +180,7 @@ public class PivSigningAlgorithmTests
         Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA384, RSASignaturePadding.Pkcs1));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task SignRsa2048_WithSha512Hash_ProducesValidSignature(YubiKeyTestState state)
     {
@@ -215,7 +215,7 @@ public class PivSigningAlgorithmTests
     /// Verifies DecryptAsync with OAEP SHA-1 padding. The existing PivDecryptTests cover
     /// PKCS#1 v1.5 and OAEP SHA-256; this covers the SHA-1 MGF1 variant.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task DecryptRsa2048_OaepSha1_ReturnsExactPlaintext(YubiKeyTestState state)
     {
@@ -245,7 +245,7 @@ public class PivSigningAlgorithmTests
     /// ECC P-256 signing with SHA-384 hash (truncated to 32 bytes by the PIV layer).
     /// Verifies that the signature is valid when verified with the correct hash size.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task SignEccP256_WithSha256Hash_ProducesValidSignature(YubiKeyTestState state)
     {
@@ -277,7 +277,7 @@ public class PivSigningAlgorithmTests
     /// <summary>
     /// ECC P-384 signing with SHA-384 hash. P-384 naturally pairs with SHA-384 (48-byte hash).
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.0.0")]
     public async Task SignEccP384_WithSha384Hash_ProducesValidSignature(YubiKeyTestState state)
     {

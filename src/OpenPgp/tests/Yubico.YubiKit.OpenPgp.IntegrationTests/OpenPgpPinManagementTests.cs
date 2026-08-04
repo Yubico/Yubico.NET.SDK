@@ -17,7 +17,7 @@ public class OpenPgpPinManagementTests
 
     // ── PIN Reset via Reset Code ────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ResetPin_ViaResetCode_RestoresAccess(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
@@ -57,7 +57,7 @@ public class OpenPgpPinManagementTests
 
     // ── PIN Unverification ──────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.0")]
     public async Task UnverifyPin_ClearsVerificationState(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
@@ -88,7 +88,7 @@ public class OpenPgpPinManagementTests
 
     // ── Signature PIN Policy ────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task SetSignaturePinPolicy_ChangesPolicy(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
@@ -116,7 +116,7 @@ public class OpenPgpPinManagementTests
 
     // ── Admin Requirement Validation ────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task GenerateKey_WithoutAdminAuth_Fails(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
@@ -131,7 +131,7 @@ public class OpenPgpPinManagementTests
 
     // ── Reset PIN via Admin PIN ─────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ResetPin_ViaAdminPin_RestoresAccess(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(

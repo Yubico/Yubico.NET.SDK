@@ -110,7 +110,7 @@ Unit tests should prefer fake SmartCard protocol or connection seams that assert
 Integration tests use `Tests.Shared` with standard xUnit `[Theory]` and `[WithYubiKey]`:
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(Capability = DeviceCapabilities.Piv)]
 public async Task GetPinMetadata_ReadOnly_Succeeds(YubiKeyTestState state)
 {

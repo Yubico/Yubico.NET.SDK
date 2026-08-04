@@ -36,7 +36,7 @@ public class FidoGetAssertionTests
     /// <summary>
     /// Tests that GetAssertion returns a valid signature after creating a credential.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetAssertion_AfterMakeCredential_ReturnsValidSignature(YubiKeyTestState state) =>
@@ -132,7 +132,7 @@ public class FidoGetAssertionTests
     /// <summary>
     /// Tests that GetAssertion with a resident key returns the user handle.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetAssertion_ResidentKey_ReturnsUserHandle(YubiKeyTestState state) =>
@@ -228,7 +228,7 @@ public class FidoGetAssertionTests
     /// <summary>
     /// Tests that GetAssertion throws NoCredentials when no matching credential exists.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetAssertion_NoCredentials_ThrowsNoCredentials(YubiKeyTestState state) =>

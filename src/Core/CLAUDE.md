@@ -273,7 +273,7 @@ Integration tests inherit from `IntegrationTestBase`:
 ```csharp
 public class MyTests : IntegrationTestBase
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey]
     public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state)
     {

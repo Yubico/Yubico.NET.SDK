@@ -201,18 +201,18 @@ dotnet toolchain.cs -- test --integration --project Fido2 --filter "Category=Req
 dotnet toolchain.cs -- test --integration --project WebAuthn --filter "Category=RequiresUserPresence"
 ```
 
-## xUnit v3 Known Limitations
+## Hardware Test Infrastructure Limitations
 
 ### `[WithYubiKey]` + `[InlineData]` Incompatibility
 
 The `[WithYubiKey]` attribute (used for integration tests requiring physical YubiKeys) is **incompatible** with `[InlineData]` parameterized tests.
 
-**Problem:** When you combine `[WithYubiKey]` with `[Theory]` and `[InlineData]`, xUnit v3 fails to properly inject the `YubiKeyTestState` parameter alongside inline data parameters.
+**Problem:** `[WithYubiKey]` is a custom xUnit v2 `DataAttribute` that supplies the complete argument row. Combining it with `[InlineData]` creates separate, incomplete rows rather than merging the arguments.
 
 ```csharp
 // ❌ WRONG - Does not work
 [WithYubiKey(MinFirmware = "5.7.0")]
-[Theory]
+[SkippableTheory]
 [InlineData(PivAlgorithm.Rsa3072)]
 [InlineData(PivAlgorithm.Rsa4096)]
 public async Task SignAsync_LargeRsa_Works(PivAlgorithm algorithm, YubiKeyTestState state)
@@ -221,9 +221,11 @@ public async Task SignAsync_LargeRsa_Works(PivAlgorithm algorithm, YubiKeyTestSt
 }
 
 // ✅ CORRECT - Use separate tests
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.7.0")]
 public async Task SignAsync_Rsa3072_Works(YubiKeyTestState state) { /* ... */ }
 
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.7.0")]
 public async Task SignAsync_Rsa4096_Works(YubiKeyTestState state) { /* ... */ }
 ```
@@ -253,14 +255,17 @@ Use the `ConnectionType` property to filter which transports your test runs on:
 
 ```csharp
 // Run on all transports (default)
+[SkippableTheory]
 [WithYubiKey]
 public async Task MyTest(YubiKeyTestState state) { }
 
 // Run only on CCID (SmartCard) connections
+[SkippableTheory]
 [WithYubiKey(ConnectionType = ConnectionType.Ccid)]
 public async Task SmartCardOnly(YubiKeyTestState state) { }
 
 // Run only on HidFido connections
+[SkippableTheory]
 [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
 public async Task FidoOnly(YubiKeyTestState state) { }
 ```
@@ -278,6 +283,7 @@ Passed MyTest(state: YubiKey(SN:12345678,FW:5.7.2,UsbAKeychain,HidFido))
 The `WithManagementAsync` helper automatically uses the correct transport from `state.ConnectionType`:
 
 ```csharp
+[SkippableTheory]
 [WithYubiKey]
 public async Task MyTest(YubiKeyTestState state)
 {
@@ -296,6 +302,7 @@ Test different transports explicitly using `ConnectionType` filtering:
 
 ```csharp
 // This test runs ONLY on CCID connections
+[SkippableTheory]
 [WithYubiKey(ConnectionType = ConnectionType.Ccid)]
 public async Task SmartCard_Operations(YubiKeyTestState state)
 {
@@ -307,6 +314,7 @@ public async Task SmartCard_Operations(YubiKeyTestState state)
 }
 
 // This test runs on ALL available transports
+[SkippableTheory]
 [WithYubiKey]
 public async Task AllTransports_Consistency(YubiKeyTestState state)
 {

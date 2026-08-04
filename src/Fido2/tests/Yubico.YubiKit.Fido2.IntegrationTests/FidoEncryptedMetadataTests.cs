@@ -34,7 +34,7 @@ public class FidoEncryptedMetadataTests
     /// Tests that encIdentifier can be decrypted with PPUAT and yields the same
     /// plaintext across two separate sessions with different PPUATs.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido, MinFirmware = "5.7.0")]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task DecryptIdentifier_TwoSessions_SamePlaintext(YubiKeyTestState state)
@@ -61,7 +61,7 @@ public class FidoEncryptedMetadataTests
             "Decrypted identifiers should match across sessions");
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido, MinFirmware = "5.8.0")]
     [Trait("RequiresFirmware", "5.8+")]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
@@ -79,7 +79,7 @@ public class FidoEncryptedMetadataTests
             "Encrypted credential store state should contain at least IV");
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido, MinFirmware = "5.8.0")]
     [Trait("RequiresFirmware", "5.8+")]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
@@ -120,7 +120,7 @@ public class FidoEncryptedMetadataTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido, MinFirmware = "5.7.0")]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task DecryptIdentifier_WrongPpuat_ReturnsGarbage(YubiKeyTestState state) =>

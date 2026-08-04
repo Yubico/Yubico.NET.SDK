@@ -31,7 +31,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Extension", "hmac-secret")]
 public class FidoHmacSecretTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReportsHmacSecretSupport(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -52,7 +52,7 @@ public class FidoHmacSecretTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_WithHmacSecretEnabled_ReturnsHmacSecretExtension(YubiKeyTestState state) =>
@@ -123,7 +123,7 @@ public class FidoHmacSecretTests
             Assert.True(result.GetCredentialId().Length > 0, "Credential ID should not be empty");
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetAssertion_WithHmacSecret_ReturnsDerivedSecret(YubiKeyTestState state) =>
@@ -242,7 +242,7 @@ public class FidoHmacSecretTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetAssertion_WithSameSalt_ReturnsSameSecret(YubiKeyTestState state) =>

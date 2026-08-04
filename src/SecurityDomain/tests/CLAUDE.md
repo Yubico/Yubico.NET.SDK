@@ -123,7 +123,7 @@ The `ResetAsync()` method (in `SecurityDomainSession.cs:685`):
 ### Standard Integration Test
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.4.3")]
 public async Task TestName_Condition_ExpectedResult(YubiKeyTestState state) =>
     await state.WithSecurityDomainSessionAsync(
@@ -139,7 +139,7 @@ public async Task TestName_Condition_ExpectedResult(YubiKeyTestState state) =>
 ### DI Integration Test
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.4.3")]
 public async Task Factory_Condition_ExpectedResult(YubiKeyTestState state) =>
     await state.WithSecurityDomainSessionFromDIAsync(
@@ -155,7 +155,7 @@ public async Task Factory_Condition_ExpectedResult(YubiKeyTestState state) =>
 ### Multi-Session Test (Key Import)
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.4.3")]
 public async Task KeyImport_MultiSession_Test(YubiKeyTestState state)
 {

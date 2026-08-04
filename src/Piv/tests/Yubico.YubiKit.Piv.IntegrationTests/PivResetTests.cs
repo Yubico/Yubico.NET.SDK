@@ -40,7 +40,7 @@ public class PivResetTests
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ResetAsync_RestoresToDefaults(YubiKeyTestState state)
     {
@@ -62,7 +62,7 @@ public class PivResetTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task ResetAsync_PinMetadataShowsDefault(YubiKeyTestState state)
     {
@@ -76,7 +76,7 @@ public class PivResetTests
         Assert.Equal(3, pinMetadata.RetriesRemaining);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task ResetAsync_ClearsAllSlots(YubiKeyTestState state)
     {

@@ -53,7 +53,7 @@ public class PivConnectionConcurrencyTests
     ///     state errors); with it, every iteration must succeed and the object read must return exactly
     ///     the stored bytes.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ConcurrentSignAndObjectRead_OnOneSession_AllOperationsSucceed(
         YubiKeyTestState state)

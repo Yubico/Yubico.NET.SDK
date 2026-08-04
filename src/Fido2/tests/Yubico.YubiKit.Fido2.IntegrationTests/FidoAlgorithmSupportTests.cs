@@ -32,19 +32,19 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Category", "Integration")]
 public class FidoAlgorithmSupportTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_ES256_ReturnsES256Credential(YubiKeyTestState state) =>
         await TestAlgorithmAsync(state, CoseAlgorithmIdentifier.ES256);
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_EdDSA_ReturnsEdDSACredential(YubiKeyTestState state) =>
         await TestAlgorithmAsync(state, CoseAlgorithmIdentifier.EdDSA, skipIfUnsupported: true);
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_ES384_ReturnsES384Credential(YubiKeyTestState state) =>

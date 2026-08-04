@@ -109,7 +109,7 @@ Located in [`SecurityDomainSession.cs`](src/SecurityDomainSession.cs), the reset
 
 ```csharp
 // Standard pattern: reset enabled (clean slate for each test)
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.7.2")]
 public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state) =>
     await state.WithSecurityDomainSessionAsync(
@@ -123,7 +123,7 @@ public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state) =>
         cancellationToken: CancellationTokenSource.Token);
 
 // When testing reset itself
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.4.3")]
 public async Task ResetAsync_ReinitializesSession(YubiKeyTestState state) =>
     await state.WithSecurityDomainSessionAsync(

@@ -34,7 +34,7 @@ public class FidoGetInfoTests
     /// <summary>
     /// Tests that GetInfo returns valid FIDO2 version strings.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsValidVersions(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -53,7 +53,7 @@ public class FidoGetInfoTests
     /// <summary>
     /// Tests that GetInfo returns a valid 16-byte AAGUID.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsValidAaguid(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -69,7 +69,7 @@ public class FidoGetInfoTests
     /// <summary>
     /// Tests that GetInfo returns expected options for YubiKey.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsExpectedOptions(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -100,7 +100,7 @@ public class FidoGetInfoTests
     /// <summary>
     /// Tests that GetInfo returns PIN/UV auth protocol versions.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsPinUvAuthProtocols(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -118,7 +118,7 @@ public class FidoGetInfoTests
     /// <summary>
     /// Tests that GetInfo returns supported algorithms including ES256.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsSupportedAlgorithms(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -136,7 +136,7 @@ public class FidoGetInfoTests
     /// <summary>
     /// Tests that GetInfo returns extensions list.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsExtensions(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -156,7 +156,7 @@ public class FidoGetInfoTests
     /// <summary>
     /// Tests that GetInfo returns firmware version.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsFirmwareVersion(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -175,7 +175,7 @@ public class FidoGetInfoTests
     /// <summary>
     /// Tests that GetInfo returns max message size.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsMaxMsgSize(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>

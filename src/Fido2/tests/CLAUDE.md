@@ -41,7 +41,7 @@ FIDO2 tests must be aware of transport differences:
 FIDO2 operations require user presence (touch) and user verification (PIN/bio):
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(RequireUsb = true)] // FIDO2 needs HID or NFC
 public async Task MakeCredential_TouchRequired_Succeeds(YubiKeyTestState state)
 {
@@ -88,7 +88,7 @@ var options = new MakeCredentialOptions
 Integration tests should reset FIDO2 application to known state:
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey]
 public async Task TestWithCleanState(YubiKeyTestState state)
 {

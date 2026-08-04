@@ -26,7 +26,7 @@ public class HsmAuthAsymmetricTests
 
     // ─── Put Asymmetric Credential ──────────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.0")]
     public async Task PutCredentialAsymmetric_ThenList_ShowsEcP256(YubiKeyTestState state) =>
         await state.WithHsmAuthSessionAsync(
@@ -61,7 +61,7 @@ public class HsmAuthAsymmetricTests
 
     // ─── Get Challenge ──────────────────────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.0")]
     public async Task GetChallenge_WithAsymmetricCredential_ReturnsEpk(YubiKeyTestState state) =>
         await state.WithHsmAuthSessionAsync(
@@ -88,7 +88,7 @@ public class HsmAuthAsymmetricTests
 
     // ─── Calculate Session Keys Asymmetric ──────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.0")]
     public async Task CalculateSessionKeysAsymmetric_WithDummyCryptogram_ThrowsApduException(YubiKeyTestState state) =>
         await state.WithHsmAuthSessionAsync(
@@ -171,7 +171,7 @@ public class HsmAuthAsymmetricTests
 
     // ─── Put Asymmetric with Touch ──────────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.0")]
     [Trait("Category", "RequiresUserPresence")]
     public async Task PutCredentialAsymmetric_WithTouch_ShowsTouchRequired(YubiKeyTestState state) =>

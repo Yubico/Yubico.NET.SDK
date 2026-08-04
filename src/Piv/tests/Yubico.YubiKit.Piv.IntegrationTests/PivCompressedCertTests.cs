@@ -43,7 +43,7 @@ public class PivCompressedCertTests
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task StoreCertificateAsync_Compressed_RoundTripsCorrectly(YubiKeyTestState state)
     {

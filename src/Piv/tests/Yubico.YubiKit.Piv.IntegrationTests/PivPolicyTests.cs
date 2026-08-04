@@ -44,7 +44,7 @@ public class PivPolicyTests
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task GenerateKey_PinPolicyNever_CanSignWithoutPin(YubiKeyTestState state)
     {
@@ -79,7 +79,7 @@ public class PivPolicyTests
         Assert.True(ecdsa.VerifyHash(hash, signature.Span, DSASignatureFormat.Rfc3279DerSequence));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task GenerateKey_PinPolicyAlways_RequiresPinForEachSign(YubiKeyTestState state)
     {

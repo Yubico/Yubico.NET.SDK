@@ -67,7 +67,7 @@ public class OathPasswordChangeTests
     ///     Sets a password, changes it to a new password, then verifies the new password
     ///     works for unlocking the OATH application.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task PasswordChange_SetThenChange_NewPasswordUnlocks(YubiKeyTestState state)
     {
@@ -140,7 +140,7 @@ public class OathPasswordChangeTests
     ///     Verifies that setting and then removing a password restores
     ///     the OATH application to an unlocked state.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task PasswordRemoval_SetThenUnset_RestoresUnlockedState(YubiKeyTestState state)
     {

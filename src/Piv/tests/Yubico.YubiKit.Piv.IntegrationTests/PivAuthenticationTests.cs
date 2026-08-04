@@ -47,7 +47,7 @@ public class PivAuthenticationTests
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task AuthenticateAsync_WithDefaultKey_Succeeds(YubiKeyTestState state)
     {
@@ -59,7 +59,7 @@ public class PivAuthenticationTests
         Assert.True(session.IsAuthenticated);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task AuthenticateAsync_WithWrongKey_ThrowsApduException(YubiKeyTestState state)
     {
@@ -76,7 +76,7 @@ public class PivAuthenticationTests
         Assert.False(session.IsAuthenticated);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task VerifyPinAsync_WithCorrectPin_Succeeds(YubiKeyTestState state)
     {
@@ -90,7 +90,7 @@ public class PivAuthenticationTests
         Assert.Equal(3, attempts);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task VerifyPinAsync_WithWrongPin_ThrowsInvalidPinException(YubiKeyTestState state)
     {
@@ -106,7 +106,7 @@ public class PivAuthenticationTests
         Assert.True(ex.RetriesRemaining < 3); // One attempt used
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetPinAttemptsAsync_ReturnsCorrectCount(YubiKeyTestState state)
     {
@@ -118,7 +118,7 @@ public class PivAuthenticationTests
         Assert.Equal(3, attempts); // Default after reset
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ChangePinAsync_WithCorrectOldPin_Succeeds(YubiKeyTestState state)
     {

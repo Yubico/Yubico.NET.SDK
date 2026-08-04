@@ -25,7 +25,7 @@ public class SecurityDomainSession_Scp11Tests
     /// <summary>
     ///     Verifies that GenerateEcKeyAsync generates a valid P256 EC key pair and returns the public key.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11b_GenerateEcKeyAsync_GeneratesValidKeyAndAuthenticates(YubiKeyTestState state)
     {
@@ -78,7 +78,7 @@ public class SecurityDomainSession_Scp11Tests
             }, cancellationToken: CancellationTokenSource.Token);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11a_WithAllowList_AllowsApprovedSerials(YubiKeyTestState state)
     {
@@ -113,7 +113,7 @@ public class SecurityDomainSession_Scp11Tests
             }, scpKeyParams: keyParams, cancellationToken: CancellationTokenSource.Token);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11b_Import_Succeeds(YubiKeyTestState state)
     {
@@ -141,7 +141,7 @@ public class SecurityDomainSession_Scp11Tests
             scpKeyParams: keyParameters);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11b_EstablishSecureConnection_Succeeds(YubiKeyTestState state)
     {
@@ -180,7 +180,7 @@ public class SecurityDomainSession_Scp11Tests
         }
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11b_GetCertificates_IsNotEmpty(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionAsync(true,
@@ -196,7 +196,7 @@ public class SecurityDomainSession_Scp11Tests
     /// <summary>
     ///     Verifies that StoreCertificatesAsync successfully stores certificates that can be retrieved.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11b_StoreCertificates_CanBeRetrieved(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionAsync(true,

@@ -44,7 +44,7 @@ public class PivKeyOperationsTests
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GenerateKeyAsync_EccP256_ReturnsPublicKey(YubiKeyTestState state)
     {
@@ -60,7 +60,7 @@ public class PivKeyOperationsTests
         Assert.IsType<ECPublicKey>(publicKey);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task GenerateKeyAsync_Ed25519_ReturnsPublicKey(YubiKeyTestState state)
     {
@@ -76,7 +76,7 @@ public class PivKeyOperationsTests
         Assert.IsType<Curve25519PublicKey>(publicKey);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.0")]
     public async Task AttestKeyAsync_GeneratedKey_ReturnsCertificate(YubiKeyTestState state)
     {
@@ -92,7 +92,7 @@ public class PivKeyOperationsTests
         Assert.False(string.IsNullOrEmpty(attestation.Issuer));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task MoveKeyAsync_MovesToNewSlot_KeyRemainsFunctional(YubiKeyTestState state)
     {
@@ -123,7 +123,7 @@ public class PivKeyOperationsTests
         Assert.True(ecdsa.VerifyHash(hash, signature.Span, DSASignatureFormat.Rfc3279DerSequence));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ImportKeyAsync_EccP256_CanSign(YubiKeyTestState state)
     {
@@ -156,7 +156,7 @@ public class PivKeyOperationsTests
         Assert.True(softwareKey.VerifyHash(hash, signature.Span, DSASignatureFormat.Rfc3279DerSequence));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task DeleteKeyAsync_RemovesKey_SlotBecomesEmpty(YubiKeyTestState state)
     {
@@ -179,7 +179,7 @@ public class PivKeyOperationsTests
         Assert.Null(metadataAfter);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task PutObjectAsync_GetObjectAsync_RoundTrip(YubiKeyTestState state)
     {
@@ -215,7 +215,7 @@ public class PivKeyOperationsTests
         }
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task GetSerialNumberAsync_ReturnsDeviceSerial(YubiKeyTestState state)
     {

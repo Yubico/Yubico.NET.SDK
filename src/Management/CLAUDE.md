@@ -41,7 +41,7 @@ This module showcases the most **powerful test filtering system** in the SDK. Un
 /// - Transport requirements (USB/NFC)
 /// - FIPS status filtering
 /// </summary>
-[Theory]
+[SkippableTheory]
 [WithYubiKey(
     MinFirmware = "5.3.0",        // Only firmware >= 5.3.0
     FormFactor = FormFactor.UsbAKeychain,  // Only USB-A keychains
@@ -63,12 +63,12 @@ Tests execute **once per matching device**:
 ```csharp
 // appsettings.json has: [12345678, 23456789, 34567890]
 // Test runs 3 times (once per device)
-[Theory]
+[SkippableTheory]
 [WithYubiKey]
 public async Task AllDevices_Test(YubiKeyTestState state) { }
 
 // If only device 12345678 is USB-C, test runs once
-[Theory]
+[SkippableTheory]
 [WithYubiKey(FormFactor = FormFactor.UsbCKeychain)]
 public async Task UsbC_Test(YubiKeyTestState state) { }
 ```
@@ -78,7 +78,7 @@ public async Task UsbC_Test(YubiKeyTestState state) { }
 Use multiple `[WithYubiKey]` attributes to test across different configurations:
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
 [WithYubiKey(FormFactor = FormFactor.UsbCKeychain)]
 [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
@@ -358,7 +358,7 @@ extension(YubiKeyTestState state)
 Usage pattern:
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.0.0")]
 public async Task MyTest(YubiKeyTestState state) =>
     await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
@@ -376,7 +376,7 @@ public async Task MyTest(YubiKeyTestState state) =>
 ### 1. Read-Only Device Information Tests
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey]
 public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestState state) =>
     await state.WithManagementAsync(async (mgmt, cachedInfo) =>
@@ -392,7 +392,7 @@ public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestState state) =>
 ### 2. Firmware Version-Specific Tests
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.7.0")]
 public async Task ModernFeature_Firmware57Plus_Works(YubiKeyTestState state) =>
     await state.WithManagementAsync(async (mgmt, cachedInfo) =>
@@ -409,7 +409,7 @@ public async Task ModernFeature_Firmware57Plus_Works(YubiKeyTestState state) =>
 ### 3. Form Factor-Specific Tests
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
 public async Task BiometricFeatures_BioKeys_Present(YubiKeyTestState state)
 {
@@ -429,7 +429,7 @@ public async Task BiometricFeatures_BioKeys_Present(YubiKeyTestState state)
 ### 4. Capability-Specific Tests
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(Capability = DeviceCapabilities.Piv)]
 public async Task PivCapability_EnabledDevices_Accessible(YubiKeyTestState state)
 {
@@ -450,7 +450,7 @@ public async Task PivCapability_EnabledDevices_Accessible(YubiKeyTestState state
 ### 5. FIPS Testing
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(FipsCapable = DeviceCapabilities.Piv)]
 public async Task FipsCapable_PivDevices_HasSupport(YubiKeyTestState state)
 {
@@ -463,7 +463,7 @@ public async Task FipsCapable_PivDevices_HasSupport(YubiKeyTestState state)
     });
 }
 
-[Theory]
+[SkippableTheory]
 [WithYubiKey(FipsApproved = DeviceCapabilities.Piv)]
 public async Task FipsApproved_PivDevices_InFipsMode(YubiKeyTestState state)
 {
@@ -480,7 +480,7 @@ public async Task FipsApproved_PivDevices_InFipsMode(YubiKeyTestState state)
 ### 6. Multi-Criteria Filtering
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(
     MinFirmware = "5.0.0",
     RequireUsb = true,
@@ -511,7 +511,7 @@ public async Task AdvancedFiltering_ModernUsbPiv_Works(YubiKeyTestState state)
 
 ```csharp
 // ❌ NEVER DO THIS - Breaks other tests
-[Theory]
+[SkippableTheory]
 [WithYubiKey]
 public async Task BAD_TEST_DisableCapabilities(YubiKeyTestState state) =>
     await state.WithManagementAsync(async (mgmt, cachedInfo) =>
@@ -549,7 +549,7 @@ What makes `SetDeviceConfigAsync` special is that it reboots the device and can 
 
 ```csharp
 // ✅ Safe pattern for configuration testing
-[Theory]
+[SkippableTheory]
 [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
 public async Task ConfigurationChange_AppliesAndRestores(YubiKeyTestState state)
 {

@@ -119,7 +119,7 @@ public class FidoTransportTests
     /// and used for assertion via the allow list pattern. This validates the
     /// server-side credential flow where the credential ID is stored externally.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task NonDiscoverableCredential_WithAllowList_AssertionSucceeds(YubiKeyTestState state) =>

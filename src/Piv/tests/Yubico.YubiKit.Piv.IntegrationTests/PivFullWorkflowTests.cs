@@ -44,7 +44,7 @@ public class PivFullWorkflowTests
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task CompleteWorkflow_GenerateKeySignVerify(YubiKeyTestState state)
     {
@@ -83,7 +83,7 @@ public class PivFullWorkflowTests
         Assert.True(ecdsa.VerifyHash(hash, signature.Span, DSASignatureFormat.Rfc3279DerSequence));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task CompleteWorkflow_ECDHKeyAgreement(YubiKeyTestState state)
     {
@@ -129,7 +129,7 @@ public class PivFullWorkflowTests
         Assert.NotEmpty(peerSecret);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task CompleteWorkflow_MoveKeyBetweenSlots(YubiKeyTestState state)
     {
@@ -160,7 +160,7 @@ public class PivFullWorkflowTests
         Assert.NotEmpty(signature.ToArray());
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.0")]
     public async Task CompleteWorkflow_AttestGeneratedKey(YubiKeyTestState state)
     {

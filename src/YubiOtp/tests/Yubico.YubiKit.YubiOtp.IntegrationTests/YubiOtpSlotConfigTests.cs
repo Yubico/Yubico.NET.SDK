@@ -30,7 +30,7 @@ public class YubiOtpSlotConfigTests
     ///     Programs slot 2 with a static password configuration using keyboard scan codes,
     ///     verifies the slot is configured, then deletes it and verifies cleanup.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     public async Task PutConfiguration_StaticPassword_ConfiguresAndDeletesSlot(YubiKeyTestState state)
     {
@@ -65,7 +65,7 @@ public class YubiOtpSlotConfigTests
     ///     Programs slot 2 with a classic Yubico OTP configuration using a public ID,
     ///     private ID, and AES key. Verifies the slot is configured, then cleans up.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     public async Task PutConfiguration_YubicoOtp_ConfiguresAndDeletesSlot(YubiKeyTestState state)
     {
@@ -107,7 +107,7 @@ public class YubiOtpSlotConfigTests
     ///     Programs slot 2 with an HOTP (counter-based OTP) configuration.
     ///     Verifies the slot is configured, then cleans up.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     public async Task PutConfiguration_Hotp_ConfiguresAndDeletesSlot(YubiKeyTestState state)
     {
@@ -143,7 +143,7 @@ public class YubiOtpSlotConfigTests
     ///     Programs slot 2 with an HOTP configuration using 8 digits mode.
     ///     Verifies the slot is configured with the 8-digit option, then cleans up.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     public async Task PutConfiguration_Hotp8Digits_ConfiguresAndDeletesSlot(YubiKeyTestState state)
     {

@@ -34,7 +34,7 @@ public class OathHashAlgorithmTests
         0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30
     ];
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task TotpCredential_Sha256_CalculatesCode(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -62,7 +62,7 @@ public class OathHashAlgorithmTests
             Assert.Equal(6, code.Value.Length);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task TotpCredential_Sha512_CalculatesCode(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -88,7 +88,7 @@ public class OathHashAlgorithmTests
             Assert.Equal(6, code.Value.Length);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task TotpCredential_NonDefaultPeriod60s_CalculatesCode(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -119,7 +119,7 @@ public class OathHashAlgorithmTests
             Assert.Equal(60, code.ValidTo - code.ValidFrom);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task TotpCredential_8Digits_ReturnsEightCharacterCode(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -145,7 +145,7 @@ public class OathHashAlgorithmTests
             Assert.Equal(8, code.Value.Length);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task TotpCredential_Sha256With8Digits_CombinedSettings(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -176,7 +176,7 @@ public class OathHashAlgorithmTests
             Assert.Equal(60, code.ValidTo - code.ValidFrom);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task LockedSession_ValidateWithWrongKey_Throws(YubiKeyTestState state)
     {

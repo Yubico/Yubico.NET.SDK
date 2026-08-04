@@ -32,7 +32,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Feature", "AuthenticatorConfig")]
 public class FidoAuthenticatorConfigTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task ToggleAlwaysUv_TogglesAlwaysUvOption(YubiKeyTestState state) =>
@@ -107,7 +107,7 @@ public class FidoAuthenticatorConfigTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     [Trait(TestCategories.Category, TestCategories.PermanentDeviceState)]
@@ -185,7 +185,7 @@ public class FidoAuthenticatorConfigTests
     /// blocked, change PIN to clear the flag, verify tokens work again.
     /// Matches the python-fido2 test_force_pin_change pattern.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task SetMinPinLength_ForceChangePin_FullCycle(YubiKeyTestState state) =>

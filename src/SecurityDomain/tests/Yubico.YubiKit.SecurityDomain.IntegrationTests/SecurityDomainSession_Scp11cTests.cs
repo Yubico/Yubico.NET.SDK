@@ -41,7 +41,7 @@ public class SecurityDomainSession_Scp11cTests
     ///     Generates an SCP11c key pair on the device, loads OCE certificates and keys,
     ///     then authenticates using SCP11c key parameters.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11c_GenerateAndAuthenticate_Succeeds(YubiKeyTestState state)
     {

@@ -53,7 +53,7 @@ public class PivDiscoveryContentionTests
     ///     that budget, so the scan queues behind the RSA-4096 keygen for its full duration — backing up
     ///     the monitor pipeline behind FindYubiKeys' scan lock.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task FindAllAsync_WhileCardBusyWithRsa4096Keygen_CompletesWithoutWaitingForKeygen(
@@ -109,7 +109,7 @@ public class PivDiscoveryContentionTests
     ///     security state (verified PIN). Enumerating devices must not break an already-open, authenticated
     ///     applet session: a PIN-gated sign that succeeded before the scan must still succeed after it.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task FindAllAsync_WhilePivSessionHasVerifiedPin_DoesNotClobberSessionState(
         YubiKeyTestState state)

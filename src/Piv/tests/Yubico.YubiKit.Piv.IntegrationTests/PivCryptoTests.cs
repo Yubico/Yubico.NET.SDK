@@ -44,7 +44,7 @@ public class PivCryptoTests
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task SignOrDecryptAsync_EccP256Sign_ProducesValidSignature(YubiKeyTestState state)
     {
@@ -71,7 +71,7 @@ public class PivCryptoTests
         Assert.True(ecdsa.VerifyHash(dataToSign, signature.Span, DSASignatureFormat.Rfc3279DerSequence));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task CalculateSecretAsync_ECDH_ProducesMatchingSharedSecret(YubiKeyTestState state)
     {
@@ -101,7 +101,7 @@ public class PivCryptoTests
         Assert.Equal(softwareSecret, sharedSecret.ToArray());
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task SignOrDecryptAsync_Ed25519_ProducesSignature(YubiKeyTestState state)
     {
@@ -131,7 +131,7 @@ public class PivCryptoTests
         // This test verifies signature format only.
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.0.0")]
     public async Task SignOrDecryptAsync_EccP384Sign_ProducesValidSignature(YubiKeyTestState state)
     {
@@ -159,7 +159,7 @@ public class PivCryptoTests
         Assert.True(ecdsa.VerifyHash(dataToSign, signature.Span, DSASignatureFormat.Rfc3279DerSequence));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task CalculateSecretAsync_X25519_ProducesSharedSecret(YubiKeyTestState state)
     {
@@ -219,7 +219,7 @@ public class PivCryptoTests
         return paddedData;
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task SignOrDecryptAsync_Rsa2048Sign_ProducesValidSignature(YubiKeyTestState state)
     {
@@ -252,7 +252,7 @@ public class PivCryptoTests
         Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task SignOrDecryptAsync_Rsa1024Sign_ProducesValidSignature(YubiKeyTestState state)
     {
@@ -284,7 +284,7 @@ public class PivCryptoTests
         Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task SignOrDecryptAsync_Rsa3072Sign_ProducesValidSignature(YubiKeyTestState state)
@@ -317,7 +317,7 @@ public class PivCryptoTests
         Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task SignOrDecryptAsync_Rsa4096Sign_ProducesValidSignature(YubiKeyTestState state)
@@ -350,7 +350,7 @@ public class PivCryptoTests
         Assert.True(rsa.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task SignOrDecryptAsync_Rsa2048Decrypt_DecryptsCorrectly(YubiKeyTestState state)
     {

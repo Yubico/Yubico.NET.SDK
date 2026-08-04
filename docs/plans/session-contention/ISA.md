@@ -729,3 +729,23 @@ p95, and mean are equal or faster on every transport.
 
 Harnesses and raw logs are ephemeral under `/tmp/opencode/perf-{before,current}`; all statistics and
 methodology needed to reproduce them are captured above.
+
+### Final two-key gate — 2/2 on Linux
+
+After replacing the filtered personal key with allow-listed test key 20260533, the infrastructure
+discovered both intended devices with all required interfaces:
+
+- 9681620 — YubiKey 5A, UsbAKeychain, firmware 5.4.3
+- 20260533 — YubiKey 5C, UsbCKeychain, firmware 5.4.3
+
+`PivMultiKeyContentionTests` passed **2/2**:
+
+1. `FindAllAsync_WithOpenSessionOnOneKey_IdentifiesOtherKeysAndPreservesSession` — an authenticated,
+   PIN-verified PIV session survived a cold multi-device discovery scan while the free key remained
+   fully identifiable.
+2. `ConcurrentPivSessions_OnTwoKeys_OperateIndependently` — two sessions on distinct physical keys
+   each completed 10 PIN-gated EccP256 signatures in parallel without cross-wiring registry entries,
+   connections, or exchange gates.
+
+This reproduces the macOS 2/2 gate on Linux with different keys and older firmware. The Phase 8
+single-key limitation is closed.

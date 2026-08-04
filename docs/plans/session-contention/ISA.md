@@ -616,7 +616,7 @@ Each was re-pointed at the requirement it was reaching for — *"the new credent
 a **finding about branch readiness**, not about the design: the breaking change's test debt was
 larger than Phase 4 recorded.
 
-### Pre-existing defects this rig exposed (NOT caused by this branch)
+### Pre-existing defects this rig exposed (NOT caused by this branch; fixed in Phase 8)
 
 Neither is in scope here; both are recorded because a 5.8.0-only macOS rig could never surface them.
 
@@ -648,3 +648,84 @@ Neither is in scope here; both are recorded because a 5.8.0-only macOS rig could
 - **DeviceId evidence-tier flip** — unchanged; needs unplug or PID reconfiguration.
 - **Windows** — unchanged.
 - **Cross-vendor review of Phases 3–4** — still the blocking item before merge.
+
+---
+
+## Phase 8 — Hardware-test harness repair and Linux performance delta (2026-08-04)
+
+### Dynamic skips are now a mechanically enforced contract
+
+The Phase 7 count understated the defect. There were 143 firmware-gated cases using plain
+`[Theory]`, but firmware is only one way a filter can miss. The actual invariant is broader:
+**every** `[WithYubiKey]` test can have no matching device (firmware, form factor, capability,
+transport, custom filter, or simply no hardware). The exact inventory was 260 methods in 58 files
+using `[Theory]`, versus 61 already using `[SkippableTheory]`.
+
+The repair:
+
+- All 260 declarations now use `[SkippableTheory]`: **321 skippable, 0 plain**.
+- YubiHsm and YubiOtp integration projects directly reference `Xunit.SkippableFact`; the reference
+  on `Tests.Shared` is intentionally `PrivateAssets=all` and cannot supply the runtime assembly.
+- Active documentation and XML examples now teach `[SkippableTheory]`, including the canonical
+  `WithYubiKeyAttribute` docs and `docs/TESTING.md`.
+- `dotnet toolchain.cs test-infrastructure-qa` scans integration declarations and project package
+  references. Both `build` and `test` depend on it, so the defect cannot silently return.
+
+**RED:** the new guard reported exactly `260` declaration violations and `2` missing package
+references. **GREEN:** 0 violations; a fw 5.7-only PIV test on this 5.4.3 rig reports `1 skipped,
+0 failed` with process exit 0.
+
+### One additional false transport test
+
+`YubiOtpSessionIntegrationTests.CalculateHmacSha1_WithKnownKey_ReturnsExpectedResponse` requested
+`ConnectionType.HidOtp` through `[WithYubiKey]` but opened `CreateYubiOtpSessionAsync()` with the
+default transport order, so it ran over SmartCard while claiming HID coverage — the same test-harness
+mistake Phase 0 found in Management. RED was `SW=0x6985` through `SmartCardBackend`; pinning
+`preferredConnection: state.ConnectionType` is GREEN over HidOtp.
+
+### Linux hardware matrix after the repair
+
+One allow-listed key was available for this pass: serial 9681620, fw 5.4.3. The second connected
+device identified itself as **24070033**, the personal SSH key removed from the allow list in
+`8af1207f`; it was correctly filtered and no test operated on it. Consequently the two-key gate
+remains unverified in this pass.
+
+| Suite | Result |
+|---|---|
+| Core | 22 passed, 0 failed |
+| Management | 38 passed, 13 skipped, 0 failed |
+| Piv | 65 passed, 10 skipped, 0 failed |
+| Oath | 15 passed, 3 skipped, 0 failed |
+| OpenPgp | 45 passed, 1 skipped, 0 failed |
+| SecurityDomain | 16 passed, 9 skipped, 0 failed |
+| YubiHsm | 6 passed, 5 skipped, 0 failed |
+| YubiOtp | 10 passed, 0 failed |
+| Fido2 | 24 passed, 5 skipped, 0 failed |
+| WebAuthn | 1 skipped, 0 failed |
+
+Management's HID OTP concurrency test timed out once in the first whole-suite pass, then passed 10
+focused runs (50 concurrent-call iterations) and the final sequential whole-suite run. Two module
+suites run in parallel also produced transport contention; that evidence was discarded — hardware
+suites must run sequentially against one physical key.
+
+### ISC-5 — before/after on the same Linux rig
+
+The macOS baseline at `7f39d85f` cannot serve as a before/after comparison on Linux. The original
+pre-change tree (`b0ce52a0`) and the current branch were therefore measured on the same machine,
+same connected devices, same serial-9681620 target, 20 iterations each. Fresh `FindYubiKeys` per
+discovery scan; Management session creation pinned per transport; native/JIT warmup before timing.
+
+| Measurement | Pre-change min / p50 / p95 / mean (ms) | Current min / p50 / p95 / mean (ms) | Delta at p50 / p95 / mean |
+|---|---:|---:|---:|
+| Discovery scan | 116.5 / 127.1 / 137.4 / 126.9 | 115.9 / 127.7 / 139.0 / 128.9 | +0.5% / +1.2% / +1.6% |
+| Session open — SmartCard | 28.0 / 38.5 / 42.3 / 38.1 | 30.3 / 34.9 / 40.9 / 35.4 | **-9.4% / -3.3% / -7.1%** |
+| Session open — HidFido | 61.4 / 62.0 / 62.5 / 62.0 | 61.2 / 62.0 / 62.3 / 61.9 | 0.0% / -0.3% / -0.2% |
+| Session open — HidOtp | 12.7 / 14.5 / 22.3 / 165.0 | 12.0 / 14.0 / 21.3 / 164.4 | -3.4% / -4.5% / -0.4% |
+
+Both HidOtp runs contain one approximately 3-second outlier, which inflates the mean equally while
+leaving p95 near 22 ms. That is a baseline transport characteristic, not a branch delta. **ISC-5
+passes: no material performance regression.** Discovery moves by at most 1.6%; session-open p50,
+p95, and mean are equal or faster on every transport.
+
+Harnesses and raw logs are ephemeral under `/tmp/opencode/perf-{before,current}`; all statistics and
+methodology needed to reproduce them are captured above.

@@ -43,7 +43,8 @@ namespace Yubico.YubiKit.Piv.IntegrationTests;
 ///         which is the path a consumer actually writes. Both must hold.
 ///     </para>
 ///     <para>
-///         Human-coordinated: these mutate PIV state (reset, key generation) on the key they use.
+///         Hardware-only: these mutate PIV state on dedicated allow-listed test keys but require no touch,
+///         insertion, removal, or user presence during execution.
 ///     </para>
 /// </remarks>
 public class PivSessionContentionTests
@@ -142,7 +143,7 @@ public class PivSessionContentionTests
     }
 
     /// <summary>
-    ///     ISC-1's other half: where no safe route exists the SDK must fail loudly and name the holder,
+    ///     ISC-1's other half: where no safe route exists the SDK must fail loudly and name the contended interface,
     ///     never silently deselect. A direct second CCID connection has nowhere to go, so it is refused at
     ///     acquisition — before anything reaches the wire.
     /// </summary>
@@ -159,9 +160,9 @@ public class PivSessionContentionTests
             await using var second = await state.Device.ConnectAsync<ISmartCardConnection>();
         });
 
-        // "Fails loudly with an error naming the current holder" is the criterion, so the message is
-        // part of the contract, not incidental.
-        Assert.Contains("SmartCard", exception.Message, StringComparison.Ordinal);
+        // Interface-scope acquisition knows the concrete member interface, not which applet/session holds it.
+        // Pin the non-empty PC/SC identity rather than accepting the constant word "SmartCard" as evidence.
+        Assert.Matches("(?i)'pcsc:[^']+'", exception.Message);
 
         // The refusal must be non-destructive: the victim keeps its verified-PIN state.
         var digest = SHA256.HashData("refused acquisition"u8);

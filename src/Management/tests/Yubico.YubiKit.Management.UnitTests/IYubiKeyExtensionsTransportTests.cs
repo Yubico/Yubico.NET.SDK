@@ -17,6 +17,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
@@ -167,6 +168,21 @@ public class IYubiKeyExtensionsTransportTests
         _ = await Record.ExceptionAsync(() => device.CreateManagementSessionAsync(cancellationToken: Ct));
 
         Assert.Equal([ConnectionType.SmartCard, ConnectionType.HidFido], device.Attempts);
+    }
+
+    [Fact]
+    public async Task CreateManagementSessionAsync_ScpRequestedAndCcidHeld_DoesNotFallBackToPlaintextHid()
+    {
+        var device = new FallbackProbeYubiKey(ConnectionType.SmartCard | ConnectionType.HidFido)
+            .Throws(ConnectionType.SmartCard, new ConnectionInUseException("pcsc:test-reader is in use."))
+            .Returns(ConnectionType.HidFido, new FailingFidoConnection());
+
+        _ = await Assert.ThrowsAsync<ConnectionInUseException>(() =>
+            device.CreateManagementSessionAsync(
+                scpKeyParams: Scp03KeyParameters.Default,
+                cancellationToken: Ct));
+
+        Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }
 
     // The same in-process refusal on an EXPLICIT override is honoured, not routed around. Silently opening a

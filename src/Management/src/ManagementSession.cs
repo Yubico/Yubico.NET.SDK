@@ -51,7 +51,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     private ManagementSession(
         IConnection connection,
         ScpKeyParameters? scpKeyParams = null)
-        : base(connection)
+        : base(EnsureSupportedConnection(connection))
     {
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
@@ -74,6 +74,17 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         };
 
         Protocol = _protocol;
+    }
+
+    private static IConnection EnsureSupportedConnection(IConnection connection)
+    {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        return connection is ISmartCardConnection or IFidoHidConnection or IOtpHidConnection
+            ? connection
+            : throw new NotSupportedException(
+                $"The connection type {connection.GetType().Name} is not supported by ManagementSession. " +
+                "Supported types: ISmartCardConnection, IFidoHidConnection, IOtpHidConnection.");
     }
 
     /// <summary>

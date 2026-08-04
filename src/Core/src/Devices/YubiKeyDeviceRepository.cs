@@ -114,10 +114,9 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
                     existing.AvailableConnections,
                     updated.AvailableConnections);
             }
-            else
-            {
-                _deviceCache[identityKey] = updated;
-            }
+
+            // Otherwise retain the object whose DeviceId was published in Added, so a later Removed event
+            // remains correlated for this uninterrupted physical-presence lifetime.
         }
 
         _hasData = true;

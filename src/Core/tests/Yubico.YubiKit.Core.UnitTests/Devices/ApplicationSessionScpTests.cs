@@ -64,14 +64,32 @@ public class ApplicationSessionScpTests
         Assert.False(session.IsAuthenticated);
     }
 
+    [Fact]
+    public async Task DisposeAsync_InvokesDerivedManagedCleanup()
+    {
+        var session = new TestSession(new InertConnection());
+
+        await session.DisposeAsync();
+
+        Assert.True(session.ManagedCleanupInvoked);
+    }
+
     private sealed class TestSession(IConnection connection) : ApplicationSession(connection)
     {
+        public bool ManagedCleanupInvoked { get; private set; }
+
         public Task RunInitializeAsync(
             IProtocol protocol,
             FirmwareVersion firmwareVersion,
             ScpKeyParameters? scpKeyParams,
             CancellationToken cancellationToken) =>
             InitializeCoreAsync(protocol, firmwareVersion, configuration: null, scpKeyParams, cancellationToken);
+
+        protected override void Dispose(bool disposing)
+        {
+            ManagedCleanupInvoked |= disposing;
+            base.Dispose(disposing);
+        }
     }
 
     // The session base binds to a connection at construction; these tests are about the SCP guard, so the

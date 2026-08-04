@@ -19,11 +19,25 @@ using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Utilities;
 
 public class ManagementSessionTests
 {
+    [Fact]
+    public async Task CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached()
+    {
+        var connection = new UnsupportedConnection();
+
+        _ = await Assert.ThrowsAsync<NotSupportedException>(
+            () => ManagementSession.CreateAsync(
+                connection,
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        await using var probe = new ProbeSession(connection);
+    }
+
     [Fact]
     public void IManagementSession_InheritsIAsyncDisposable()
     {
@@ -62,6 +76,18 @@ public class ManagementSessionTests
         Assert.True(backend.CapturedConfig.Span.ToArray().All(static b => b == 0));
     }
 
+    [Fact]
+    public async Task SmartCardBackend_DeviceResetAsync_SendsDeviceResetApdu()
+    {
+        var protocol = new RecordingSmartCardProtocol();
+        var backend = new SmartCardBackend(protocol);
+
+        await backend.DeviceResetAsync(TestContext.Current.CancellationToken);
+
+        var command = Assert.Single(protocol.Commands);
+        Assert.Equal(0x1F, command.Ins);
+    }
+
     private static ManagementSession CreateSessionForBackend(IManagementBackend backend)
     {
         var session = (ManagementSession)RuntimeHelpers.GetUninitializedObject(typeof(ManagementSession));
@@ -94,6 +120,46 @@ public class ManagementSessionTests
 
         public ValueTask DeviceResetAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
+
+        public void Dispose()
+        {
+        }
+    }
+
+    private sealed class UnsupportedConnection : IConnection
+    {
+        public ConnectionType Type => ConnectionType.Unknown;
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    private sealed class ProbeSession(IConnection connection) : ApplicationSession(connection);
+
+    private sealed class RecordingSmartCardProtocol : ISmartCardProtocol
+    {
+        public List<ApduCommand> Commands { get; } = [];
+
+        public Task<ApduResponse> TransmitAndReceiveAsync(
+            ApduCommand command,
+            bool throwOnError = true,
+            CancellationToken cancellationToken = default)
+        {
+            Commands.Add(command);
+            return Task.FromResult(new ApduResponse([], unchecked((short)0x9000)));
+        }
+
+        public Task<ReadOnlyMemory<byte>> SelectAsync(
+            ReadOnlyMemory<byte> applicationId,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
+        {
+        }
 
         public void Dispose()
         {

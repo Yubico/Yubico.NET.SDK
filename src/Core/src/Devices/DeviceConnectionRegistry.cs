@@ -29,14 +29,13 @@ namespace Yubico.YubiKit.Core.Devices;
 ///         over a connection without touching it.
 ///     </para>
 ///     <para>
-///         A CCID (SmartCard) interface admits exactly ONE live connection, because the card holds one
-///         selected applet on the basic channel and a second connection's SELECT would deselect the first
-///         holder's applet — measured, SW=0x6D00, see docs/plans/session-contention/phase1-findings.md. A
-///         second acquisition is refused immediately with <see cref="ConnectionInUseException" />; it never
-///         waits, because waiting for an unbounded session to end is worse than a clear error. HID interfaces
-///         have no applet-selection state and are shared: both HID transports answer correctly while a PIV
-///         session holds CCID (same source, experiment 4), and that is exactly the route Management takes when
-///         CCID is held.
+///         CCID (SmartCard) and OTP HID interfaces admit exactly ONE live connection. CCID holds one selected
+///         applet on the basic channel, so a second connection's SELECT would deselect the first holder's applet
+///         — measured, SW=0x6D00, see docs/plans/session-contention/phase1-findings.md. An OTP HID logical
+///         exchange spans multiple feature reports, which separate protocol instances must not interleave.
+///         A second acquisition is refused immediately with <see cref="ConnectionInUseException" />; it never
+///         waits, because waiting for an unbounded session to end is worse than a clear error. FIDO HID remains
+///         shared and is the route Management takes while CCID is held.
 ///     </para>
 ///     <para>
 ///         Discovery holds its exclusive lease across physical connect, device-info exchange, and connection
@@ -93,8 +92,8 @@ internal static class DeviceConnectionRegistry
     /// </summary>
     /// <param name="deviceId">The per-interface device id.</param>
     /// <param name="exclusive">
-    ///     <see langword="true" /> for a CCID (SmartCard) interface, which admits one live connection and
-    ///     refuses a second; <see langword="false" /> for HID, where concurrent connections are safe.
+    ///     <see langword="true" /> for an interface that admits one live connection and refuses a second
+    ///     (CCID or OTP HID); <see langword="false" /> for a shared interface (FIDO HID).
     /// </param>
     /// <param name="cancellationToken">Cancels the wait for an active discovery read only.</param>
     /// <exception cref="ConnectionInUseException">
@@ -181,11 +180,9 @@ internal static class DeviceConnectionRegistry
         {
             if (exclusive && _connectionCount > 0)
                 throw new ConnectionInUseException(
-                    $"The SmartCard interface '{deviceId}' already has a live connection in this process. " +
-                    "A YubiKey's CCID interface holds one selected application at a time, so a second " +
-                    "connection would deselect the first holder's application and destroy its security " +
-                    "state. Dispose the existing connection first, or run both applications as successive " +
-                    "sessions over that one connection.");
+                    $"The exclusive interface '{deviceId}' already has a live connection in this process. " +
+                    "Concurrent connections could change shared application state or interleave a multi-report " +
+                    "exchange. Dispose the existing connection first, then open the next connection.");
 
             _connectionCount++;
             return new Registration(this, LeaseKind.Connection);

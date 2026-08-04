@@ -347,6 +347,21 @@ public class OathSessionTests
         Assert.Equal(0, connection.DisposeCount);
     }
 
+    [Fact]
+    public async Task DisposeAsync_ZeroesSessionSalt()
+    {
+        var connection = new DisposeCountingConnection(SelectResponse());
+        var session = await OathSession.CreateAsync(
+            connection, cancellationToken: TestContext.Current.CancellationToken);
+        ReadOnlyMemory<byte> salt = session.Salt;
+
+        Assert.Contains(salt.ToArray(), value => value != 0);
+
+        await session.DisposeAsync();
+
+        Assert.All(salt.ToArray(), value => Assert.Equal(0, value));
+    }
+
     /// <summary>
     ///     A session that fails to initialize must release its claim on the connection. The connection
     ///     outlives the failure and belongs to the caller, so a retry — or a different applet — must not be

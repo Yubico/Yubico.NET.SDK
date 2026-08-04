@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Two acquisitions raise this, and both are the same fact at different scopes:
+///         Three acquisitions raise this, and all are the same fact at different scopes:
 ///     </para>
 ///     <list type="bullet">
 ///         <item>
@@ -29,15 +29,20 @@ namespace Yubico.YubiKit.Core.Devices;
 ///             without either caller being told.
 ///         </item>
 ///         <item>
+///             Opening a second connection to an OTP HID interface that already has a live one. One logical
+///             OTP exchange spans multiple feature reports, so separate protocol instances must not interleave
+///             their reports on the same interface.
+///         </item>
+///         <item>
 ///             Creating a second session on a connection that already hosts a live one. Same mechanism,
 ///             one level down: the new session's SELECT runs on the same card channel.
 ///         </item>
 ///     </list>
 ///     <para>
-///         Both are refused at acquisition, before any command reaches the card, so the exception lands on
+///         All three are refused at acquisition, before any command reaches the device, so the exception lands on
 ///         the call that would have caused the damage rather than on the victim's next operation. Dispose the
-///         current holder first; a connection may host any number of sessions in sequence, and an interface
-///         any number of connections in sequence.
+///         current holder first; a connection may host any number of sessions in sequence, and an exclusive
+///         interface any number of connections in sequence.
 ///     </para>
 ///     <para>
 ///         In-process only. A different process holding the card surfaces as a PC/SC sharing violation

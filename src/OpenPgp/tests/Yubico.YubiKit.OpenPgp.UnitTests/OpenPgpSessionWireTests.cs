@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Reflection;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Utilities;
@@ -108,6 +109,38 @@ public sealed class OpenPgpSessionWireTests
         Assert.Equal(0x00, command[2]);
         Assert.Equal(0x81, command[3]); // User PIN for signing
         Assert.Equal("123456"u8.ToArray(), CommandData(command).ToArray());
+    }
+
+    [Fact]
+    public async Task DisposeAsync_ZeroesCachedKdfSalt()
+    {
+        using var configuredKdf = new KdfIterSaltedS2k
+        {
+            HashAlgorithm = KdfHashAlgorithm.Sha256,
+            IterationCount = 32,
+            SaltUser = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 },
+        };
+        var connection = CreateInitializedConnection(
+            [.. configuredKdf.ToBytes(), 0x90, 0x00],
+            OkResponse());
+        var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.VerifyPinAsync(
+            "123456"u8.ToArray(),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var cachedKdf = Assert.IsType<KdfIterSaltedS2k>(
+            typeof(OpenPgpSession)
+                .GetField("_kdf", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(session));
+        ReadOnlyMemory<byte> salt = cachedKdf.SaltUser;
+        Assert.Contains(salt.ToArray(), value => value != 0);
+
+        await session.DisposeAsync();
+
+        Assert.All(salt.ToArray(), value => Assert.Equal(0, value));
     }
 
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>

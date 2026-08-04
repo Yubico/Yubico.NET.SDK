@@ -82,6 +82,22 @@ public class SecurityDomainSessionTests
     }
 
     [Fact]
+    public async Task DisposeAsync_ClearsManagedSessionState()
+    {
+        var connection = CreateMockConnection();
+        var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.True(session.IsInitialized);
+
+        await session.DisposeAsync();
+
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+    }
+
+    [Fact]
     public async Task CreateAsync_WithConnectionAndConfiguration_Succeeds()
     {
         // Arrange

@@ -15,16 +15,16 @@
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-///     One-shot disposal with shared completion. The first caller wins and runs teardown — inner disposal,
-///     then <paramref name="lease" /> release in a <c>finally</c> — while every concurrent or later caller
-///     observes that same completion: async callers await it, sync callers block on it. Any disposal call
-///     returning therefore implies teardown actually finished, and all callers see the same outcome.
+///     One-shot disposal with shared completion. The first caller wins and runs teardown, then releases the
+///     optional <paramref name="lease" /> in a <c>finally</c>. Every concurrent or later caller observes that
+///     same completion: async callers await it, sync callers block on it. Any disposal call returning therefore
+///     implies teardown actually finished, and all callers see the same outcome.
 /// </summary>
 /// <remarks>
-///     The lease is never released before inner teardown completes, even when inner teardown fails, so a
-///     caller cannot reopen an interface whose physical handle is still being torn down.
+///     When supplied, the lease is never released before inner teardown completes, even when inner teardown
+///     fails, so a caller cannot reopen an interface whose physical handle is still being torn down.
 /// </remarks>
-internal sealed class DisposalGate(IDisposable lease)
+internal sealed class DisposalGate(IDisposable? lease = null)
 {
     private Task? _completion;
 
@@ -60,7 +60,7 @@ internal sealed class DisposalGate(IDisposable lease)
             }
             finally
             {
-                lease.Dispose();
+                lease?.Dispose();
             }
 
             claim.SetResult();

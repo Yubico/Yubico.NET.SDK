@@ -28,9 +28,9 @@ namespace Yubico.YubiKit.Core.Devices;
 ///     Reads <see cref="DeviceInfo"/> over an already-open connection by building the matching Core protocol.
 /// </summary>
 /// <remarks>
-///     Takes ownership of the supplied connection: it builds a protocol over the connection and disposes the
-///     protocol (which disposes the connection) before returning. The caller must not dispose the connection
-///     separately. Shared by discovery's serial-disambiguation read and the composite metadata read.
+///     Borrows the supplied connection. It builds and disposes the matching protocol before returning, but
+///     protocol disposal does not dispose the connection. The caller retains ownership and must dispose the
+///     connection. Shared by discovery's serial-disambiguation read and the composite metadata read.
 /// </remarks>
 internal static class ProtocolDeviceInfo
 {
@@ -47,8 +47,8 @@ internal static class ProtocolDeviceInfo
     ///         generation) cannot observe cancellation. On budget exhaustion the read is therefore
     ///         <em>abandoned, not aborted</em> — this method throws <see cref="TimeoutException" /> so the
     ///         scan can proceed, while the abandoned task keeps running in the background and disposes its
-    ///         protocol/connection through the normal <see cref="ReadAsync" /> control flow when the native
-    ///         call eventually returns.
+    ///         protocol through <see cref="ReadAsync" /> and its discovery-owned connection through
+    ///         <c>ConnectAndReadAsync</c> when the native call eventually returns.
     ///     </para>
     ///     <para>
     ///         External cancellation via <paramref name="cancellationToken" /> likewise abandons only that

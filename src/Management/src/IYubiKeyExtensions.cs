@@ -89,7 +89,11 @@ public static class IYubiKeyExtensions
         /// </summary>
         /// <param name="scpKeyParams">
         ///     Optional SCP (Secure Channel Protocol) key parameters necessary to establish
-        ///     a secure session with the YubiKey device.
+        ///     a secure session with the YubiKey device. SCP requires <see cref="ConnectionType.SmartCard" />.
+        ///     Supplying SCP with an explicit <see cref="ConnectionType.HidFido" /> or
+        ///     <see cref="ConnectionType.HidOtp" /> override throws <see cref="NotSupportedException" />.
+        ///     When SCP is supplied without an override, SmartCard is forced; if CCID is held, creation fails
+        ///     rather than falling back to a plaintext HID session.
         /// </param>
         /// <param name="configuration"></param>
         /// <param name="preferredConnection">

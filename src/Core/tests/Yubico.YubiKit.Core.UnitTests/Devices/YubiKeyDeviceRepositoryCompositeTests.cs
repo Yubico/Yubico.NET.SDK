@@ -151,6 +151,27 @@ public class YubiKeyDeviceRepositoryCompositeTests
         Assert.Equal("ykphysical:125", evt.Device.DeviceId);
     }
 
+    [Fact]
+    public void UpdateCache_TierFlipThenFinalRemoval_RemovalUsesPreviouslyAddedDeviceId()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        var events = new List<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+
+        repository.UpdateCache(CompositeDeviceMerger.Merge([.. KeyInterfaces("a", 103), .. KeyInterfaces("b", 125)]));
+        repository.UpdateCache(CompositeDeviceMerger.Merge(KeyInterfaces("a", null)));
+        repository.UpdateCache([]);
+
+        var added = Assert.Single(events, e =>
+            e.Action == DeviceAction.Added && e.Device.DeviceId == "ykphysical:103");
+        var removed = Assert.Single(events, e =>
+            e.Action == DeviceAction.Removed &&
+            e.Device is CompositeYubiKey composite &&
+            composite.MemberDeviceIds.Contains("pcsc:a"));
+
+        Assert.Equal(added.Device.DeviceId, removed.Device.DeviceId);
+    }
+
     // INVARIANT PIN (not fix evidence): a genuinely removed physical key still emits Removed.
     [Fact]
     public void UpdateCache_CompositeKeyUnplugged_EmitsRemoved()

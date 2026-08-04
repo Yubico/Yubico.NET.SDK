@@ -45,7 +45,7 @@ public class ConnectionOwnershipContractTests
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     // ------------------------------------------------------------------------------------------------
-    // Rule 1 — one live connection per CCID interface.
+    // Rule 1 — one live connection per stateful or multi-report interface.
     // ------------------------------------------------------------------------------------------------
 
     /// <summary>
@@ -63,7 +63,7 @@ public class ConnectionOwnershipContractTests
         var refusal = await Assert.ThrowsAsync<ConnectionInUseException>(
             () => device.ConnectAsync<ISmartCardConnection>(Ct));
 
-        Assert.Contains(device.DeviceId, refusal.Message, StringComparison.Ordinal);
+        AssertExclusiveInterfaceRefusal(refusal, device.DeviceId);
         Assert.Equal(1, factory.CreateCalls); // refused before a second physical handle was opened
     }
 
@@ -85,21 +85,58 @@ public class ConnectionOwnershipContractTests
         Assert.Equal(2, factory.CreateCalls);
     }
 
+    [Fact]
+    public async Task ConnectAsync_SecondConnectionToHeldOtpHidInterface_IsRefusedBeforePhysicalOpen()
+    {
+        var hidDevice = new FakeHidDevice(
+            $"ownership-otp-{Guid.NewGuid():N}",
+            HidInterfaceType.Otp);
+        var device = CreateHidDevice(hidDevice);
+
+        await using var first = await device.ConnectAsync<IOtpHidConnection>(Ct);
+
+        var refusal = await Assert.ThrowsAsync<ConnectionInUseException>(
+            () => device.ConnectAsync<IOtpHidConnection>(Ct));
+
+        AssertExclusiveInterfaceRefusal(refusal, device.DeviceId);
+        Assert.Equal(1, hidDevice.FeatureReportConnectCalls);
+    }
+
+    [Fact]
+    public async Task ConnectAsync_OtpHidConnectionDisposed_InterfaceReopens()
+    {
+        var hidDevice = new FakeHidDevice(
+            $"ownership-otp-{Guid.NewGuid():N}",
+            HidInterfaceType.Otp);
+        var device = CreateHidDevice(hidDevice);
+
+        var first = await device.ConnectAsync<IOtpHidConnection>(Ct);
+        await first.DisposeAsync();
+
+        await using var second = await device.ConnectAsync<IOtpHidConnection>(Ct);
+
+        Assert.Equal(2, hidDevice.FeatureReportConnectCalls);
+    }
+
     /// <summary>
-    ///     INVARIANT PIN (must pass before and after). HID interfaces are NOT exclusive. The applet-selection
-    ///     hazard does not exist there — Management over HID answers correctly while PIV holds CCID, measured,
-    ///     experiment 4 — so making HID exclusive would forbid something the hardware supports.
+    ///     INVARIANT PIN (must pass before and after). FIDO HID remains shared. The applet-selection hazard
+    ///     does not exist there — Management over FIDO HID answers correctly while PIV holds CCID, measured,
+    ///     experiment 4 — so making FIDO HID exclusive would forbid something the hardware supports.
     /// </summary>
     [Fact]
     public async Task ConnectAsync_HidInterface_AllowsConcurrentConnections()
     {
-        var device = CreateFidoHidDevice();
+        var hidDevice = new FakeHidDevice(
+            $"ownership-fido-{Guid.NewGuid():N}",
+            HidInterfaceType.Fido);
+        var device = CreateHidDevice(hidDevice);
 
         await using var first = await device.ConnectAsync<IFidoHidConnection>(Ct);
         await using var second = await device.ConnectAsync<IFidoHidConnection>(Ct);
 
         Assert.NotNull(first);
         Assert.NotNull(second);
+        Assert.Equal(2, hidDevice.IoReportConnectCalls);
     }
 
     /// <summary>
@@ -111,7 +148,9 @@ public class ConnectionOwnershipContractTests
     public async Task ConnectAsync_CcidHeld_SameKeysHidInterfaceStillConnects()
     {
         var smartCard = CreateSmartCardDevice(new CountingFactory());
-        var hid = CreateFidoHidDevice();
+        var hid = CreateHidDevice(new FakeHidDevice(
+            $"ownership-fido-{Guid.NewGuid():N}",
+            HidInterfaceType.Fido));
 
         await using var ccid = await smartCard.ConnectAsync<ISmartCardConnection>(Ct);
         await using var fido = await hid.ConnectAsync<IFidoHidConnection>(Ct);
@@ -214,14 +253,21 @@ public class ConnectionOwnershipContractTests
     // Fakes
     // ------------------------------------------------------------------------------------------------
 
+    private static void AssertExclusiveInterfaceRefusal(ConnectionInUseException refusal, string deviceId)
+    {
+        Assert.Contains($"exclusive interface '{deviceId}'", refusal.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("SmartCard", refusal.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("CCID", refusal.Message, StringComparison.Ordinal);
+    }
+
     private static PcscYubiKey CreateSmartCardDevice(ISmartCardConnectionFactory factory) =>
         new(
             new PcscDevice { ReaderName = $"ownership-reader-{Guid.NewGuid():N}", Atr = null },
             factory,
             NullLogger<PcscYubiKey>.Instance);
 
-    private static HidYubiKey CreateFidoHidDevice() =>
-        new(new FakeHidDevice($"ownership-hid-{Guid.NewGuid():N}"), NullLogger<HidYubiKey>.Instance);
+    private static HidYubiKey CreateHidDevice(IHidDevice hidDevice) =>
+        new(hidDevice, NullLogger<HidYubiKey>.Instance);
 
     private sealed class CountingFactory : ISmartCardConnectionFactory
     {
@@ -238,28 +284,42 @@ public class ConnectionOwnershipContractTests
         }
     }
 
-    private sealed class FakeHidDevice(string name) : IHidDevice
+    private sealed class FakeHidDevice(string name, HidInterfaceType interfaceType) : IHidDevice
     {
+        private int _featureReportConnectCalls;
+        private int _ioReportConnectCalls;
+
         public string ReaderName { get; } = name;
 
         public HidDescriptorInfo DescriptorInfo { get; } = new()
         {
             VendorId = 0x1050,
             ProductId = 0x0407,
-            UsagePage = 0xF1D0,
-            Usage = 0x01
+            UsagePage = interfaceType == HidInterfaceType.Fido ? (ushort)0xF1D0 : (ushort)0x0001,
+            Usage = interfaceType == HidInterfaceType.Fido ? (ushort)0x0001 : (ushort)0x0006
         };
 
-        public HidInterfaceType InterfaceType => HidInterfaceType.Fido;
+        public HidInterfaceType InterfaceType { get; } = interfaceType;
 
-        public IHidConnection ConnectToFeatureReports() => new InertHidConnection();
+        public int FeatureReportConnectCalls => Volatile.Read(ref _featureReportConnectCalls);
+        public int IoReportConnectCalls => Volatile.Read(ref _ioReportConnectCalls);
 
-        public IHidConnection ConnectToIOReports() => new InertHidConnection();
+        public IHidConnection ConnectToFeatureReports()
+        {
+            _ = Interlocked.Increment(ref _featureReportConnectCalls);
+            return new InertHidConnection(ConnectionType.HidOtp);
+        }
+
+        public IHidConnection ConnectToIOReports()
+        {
+            _ = Interlocked.Increment(ref _ioReportConnectCalls);
+            return new InertHidConnection(ConnectionType.HidFido);
+        }
     }
 
-    private sealed class InertHidConnection : IHidConnection
+    private sealed class InertHidConnection(ConnectionType type) : IHidConnection
     {
-        public ConnectionType Type => ConnectionType.HidFido;
+        public ConnectionType Type { get; } = type;
 
         public int InputReportSize => 64;
 

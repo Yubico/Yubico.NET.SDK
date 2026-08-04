@@ -24,6 +24,7 @@ namespace Yubico.YubiKit.Core.Sessions;
 
 public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 {
+    private readonly DisposalGate _disposalGate = new();
     private bool _disposed;
     private int _released;
     private bool _ownsConnection;
@@ -120,15 +121,27 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 
     public void Dispose()
     {
-        Dispose(true);
+        _disposalGate.Dispose(() => Dispose(disposing: true));
         GC.SuppressFinalize(this);
     }
 
     public async ValueTask DisposeAsync()
     {
-        await DisposeAsyncCore().ConfigureAwait(false);
-        Dispose(disposing: false);
+        await _disposalGate.DisposeAsync(DisposeSessionAsync).ConfigureAwait(false);
         GC.SuppressFinalize(this);
+    }
+
+    private async ValueTask DisposeSessionAsync()
+    {
+        try
+        {
+            await DisposeAsyncCore().ConfigureAwait(false);
+        }
+        finally
+        {
+            // Managed state and sensitive buffers must be cleared even if asynchronous connection teardown fails.
+            Dispose(disposing: true);
+        }
     }
 
     protected virtual void Dispose(bool disposing)
@@ -136,23 +149,43 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         if (_disposed)
             return;
 
-        if (disposing)
+        try
         {
-            Protocol?.Dispose();
-            Protocol = null;
+            try
+            {
+                if (disposing)
+                    DisposeProtocol();
+            }
+            finally
+            {
+                // Protocol failure must not retain the session guard or an owned connection.
+                ReleaseConnection();
+            }
         }
-
-        // Unconditional: DisposeAsync's Dispose(disposing: false) leg must release too, and releasing twice
-        // is a no-op.
-        ReleaseConnection();
-        _disposed = true;
+        finally
+        {
+            // A failed teardown is still terminal; DisposalGate shares that failed completion with every caller.
+            _disposed = true;
+        }
     }
 
     protected virtual async ValueTask DisposeAsyncCore()
     {
-        Protocol?.Dispose();
+        try
+        {
+            DisposeProtocol();
+        }
+        finally
+        {
+            await ReleaseConnectionAsync().ConfigureAwait(false);
+        }
+    }
+
+    private void DisposeProtocol()
+    {
+        IProtocol? protocol = Protocol;
         Protocol = null;
-        await ReleaseConnectionAsync().ConfigureAwait(false);
+        protocol?.Dispose();
     }
 
     /// <summary>Detaches from the connection, and disposes it only if this session was given ownership.</summary>

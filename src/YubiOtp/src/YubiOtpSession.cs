@@ -93,7 +93,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     private YubiOtpSession(
         IConnection connection,
         ScpKeyParameters? scpKeyParams = null)
-        : base(connection)
+        : base(EnsureSupportedConnection(connection))
     {
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
@@ -108,6 +108,17 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         };
 
         Protocol = _protocol;
+    }
+
+    private static IConnection EnsureSupportedConnection(IConnection connection)
+    {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        return connection is ISmartCardConnection or IOtpHidConnection
+            ? connection
+            : throw new NotSupportedException(
+                $"Connection type {connection.GetType().Name} is not supported by YubiOtpSession. " +
+                "Supported types: ISmartCardConnection, IOtpHidConnection.");
     }
 
     /// <summary>

@@ -13,11 +13,27 @@
 // limitations under the License.
 
 using System.Text;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 
 namespace Yubico.YubiKit.YubiOtp.UnitTests;
 
 public class YubiOtpSessionTests
 {
+    [Fact]
+    public async Task CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached()
+    {
+        var connection = new UnsupportedConnection();
+
+        _ = await Assert.ThrowsAsync<NotSupportedException>(
+            () => YubiOtpSession.CreateAsync(
+                connection,
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        await using var probe = new ProbeSession(connection);
+    }
+
     public class NdefUriEncoding
     {
         [Fact]
@@ -251,4 +267,17 @@ public class YubiOtpSessionTests
             Assert.Equal(expected, result);
         }
     }
+
+    private sealed class UnsupportedConnection : IConnection
+    {
+        public ConnectionType Type => ConnectionType.Unknown;
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    private sealed class ProbeSession(IConnection connection) : ApplicationSession(connection);
 }

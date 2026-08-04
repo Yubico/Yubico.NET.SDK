@@ -96,3 +96,24 @@ Updated as phases complete. Empty until Phase 1 populates it.
 | P2 | 12 | 0 | 0 | 0 | 12 |
 | P3 | 3 | 0 | 0 | 2 | 1 |
 | **In scope** | **20** | **0** | **0** | **2** | **18** |
+
+## Planned strengthening — two-key long-operation liveness
+
+This is not a merge blocker for the ownership fix; A6's correctness/isolation requirement is covered
+by `PivMultiKeyContentionTests`. Add the stronger liveness test when **two allow-listed YubiKeys with
+firmware 5.7.0+** are available:
+
+`Rsa4096Keygen_OnOneKey_DoesNotDelayPivOperationsOnAnotherKey`
+
+1. Reset and authenticate PIV on both keys; provision a PIN-gated EccP256 signing key on key B.
+2. Start `GenerateKeyAsync(..., PivAlgorithm.Rsa4096)` on key A and wait 500 ms.
+3. Assert RSA generation is still in flight, so the test proves genuine overlap rather than sequencing.
+4. Run a PIN-gated signature on key B with a bounded deadline (4 seconds, matching the existing
+   discovery-vs-RSA-4096 gate).
+5. Assert key B completes within the bound and returns a valid signature, then drain and validate key
+   A's RSA generation.
+6. Repeat with the key roles reversed, so reader ordering cannot hide cross-key coupling.
+
+This strengthens A6 from repeated parallel correctness (10 EccP256 signatures per key) to liveness
+while another physical card is occupied by a tens-of-seconds on-card operation. RSA-4096 is required:
+RSA-2048 on the current firmware-5.4.3 rig may complete too quickly to guarantee overlap.

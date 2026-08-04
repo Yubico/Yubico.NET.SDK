@@ -749,3 +749,21 @@ discovered both intended devices with all required interfaces:
 
 This reproduces the macOS 2/2 gate on Linux with different keys and older firmware. The Phase 8
 single-key limitation is closed.
+
+### Deferred strengthening — RSA-4096 cross-key liveness (non-blocking)
+
+The 2/2 gate proves cross-key correctness and registry isolation through 10 parallel EccP256
+signatures per key. It does not yet prove that a tens-of-seconds operation on one physical card
+cannot delay work on another. When **two allow-listed firmware-5.7.0+ keys** are available, add:
+
+`Rsa4096Keygen_OnOneKey_DoesNotDelayPivOperationsOnAnotherKey`
+
+The test starts RSA-4096 generation on key A, waits 500 ms and asserts it is still running, then
+requires a pre-provisioned PIN-gated EccP256 signature on key B to complete within four seconds.
+It drains and validates key A's generation, then repeats with the key roles reversed. The existing
+`FindAllAsync_WhileCardBusyWithRsa4096Keygen_CompletesWithoutWaitingForKeygen` supplies the same
+long-operation and four-second-bound precedent, but covers discovery on one key rather than liveness
+across two keys.
+
+This is deliberate strengthening, not a merge criterion for the current ownership fix. The present
+5.4.3 keys cannot run RSA-4096, and RSA-2048 may complete before overlap can be established.

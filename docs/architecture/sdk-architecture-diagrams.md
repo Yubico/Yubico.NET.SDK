@@ -157,6 +157,9 @@ flowchart TD
 ```
 
 **Teaching notes:**
+- `ApplicationSession` holds and disposes its `IProtocol`, but that does not imply ownership of the
+  underlying `IConnection`. A direct `Session.CreateAsync(connection)` borrows the caller's connection;
+  only a convenience API that opened a hidden connection calls internal `OwnConnection()`.
 - **Two-phase init pattern (memorize this):** private ctor stores connection →
   static `CreateAsync(...)` does async selection + `InitializeCoreAsync(...)`.
 - **Deliberately flat command model:** there are **no** `SignCommand`/`VerifyPinCommand`
@@ -297,7 +300,7 @@ flowchart TD
     Hid["HidYubiKey<br/>FIDO or OTP"]
     Comp["CompositeYubiKey<br/>≥2 merged interfaces"]
 
-    Result(["IReadOnlyList&lt;IYubiKey&gt;<br/>one per physical key"])
+    Result(["IReadOnlyList&lt;IYubiKey&gt;<br/>one per physical key normally;<br/>conservative splits when ambiguous"])
 
     Start --> Mgr
     Mgr --> Repo
@@ -333,17 +336,27 @@ flowchart TD
         S["PIV·OATH·OpenPGP·SD·HSM: SmartCard only"]
     end
 
-    FB{"SmartCard held by<br/>another process?<br/>(SHARING_VIOLATION)"}
+    FB{"SmartCard held by<br/>this or another process?<br/>(in-process refusal / PC/SC sharing violation)"}
     Fallback["fall back to next in order<br/><i>(default path only — override never falls back)</i>"]
-    Conn["open IConnection → session ready"]
+    Lease{"interface lease"}
+    Refuse["ConnectionInUseException<br/>before physical open"]
+    Conn["open IConnection"]
+    Session["ApplicationSession<br/>holds/disposes IProtocol<br/>borrows caller connection"]
+    Own{"convenience API opened<br/>hidden connection?"}
+    Ready["session ready"]
 
     Dev --> Q
     Q -->|yes, multi| Throw
     Q -->|typed| Typed
     Typed --> Applet
     Applet --> FB
-    FB -->|yes| Fallback --> Conn
-    FB -->|no| Conn
+    FB -->|yes| Fallback --> Lease
+    FB -->|no| Lease
+    Lease -->|CCID or OTP HID held| Refuse
+    Lease -->|CCID / OTP HID exclusive<br/>FIDO HID shared| Conn
+    Conn --> Session --> Own
+    Own -->|yes: internal OwnConnection| Ready
+    Own -->|no: caller disposes connection| Ready
 ```
 
 **Teaching notes:**
@@ -352,6 +365,10 @@ flowchart TD
   `CompositeYubiKey`.
 - **Merge logic** is conservative: interfaces merge by USB Product ID; NFC is never merged
   with USB; ambiguity → surface as separate rows rather than mis-merge.
+- **Connection ownership:** CCID and OTP HID admit one live connection; FIDO HID remains shared.
+  OTP exchanges span multiple feature reports, so separate protocol instances cannot share that
+  interface safely. One live session is allowed per connection. A direct session factory borrows
+  the caller's connection; only convenience entry points own the hidden connection they create.
 - **Monitoring:** `StartMonitoring()` gives an `IObservable<DeviceEvent> DeviceChanges`
   (System.Reactive) for hot-plug — good "advanced" slide if time allows.
 
@@ -366,7 +383,7 @@ If your audience remembers only six names, make it these:
 | `YubiKeyManager` | discovery | static entry point — how you find keys |
 | `IYubiKey` | device model | one physical key; `ConnectAsync<T>()` |
 | `IConnection` | transport | base for SmartCard / FIDO-HID / OTP-HID connections |
-| `ApplicationSession` | session base | firmware, init, auth, protocol ownership — the pattern |
+| `ApplicationSession` | session base | firmware, init, auth, protocol lifetime, optional hidden-connection ownership |
 | `ISmartCardProtocol` | protocol | the APDU send/receive contract |
 | `ApduCommand` / `ApduResponse` | pipeline | the record structs that flow through the decorator chain |
 

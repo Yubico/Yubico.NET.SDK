@@ -29,8 +29,9 @@ This package is automatically included when you install any application-specific
 
 An `IYubiKey` represents **one physical YubiKey** (which may expose several interfaces — CCID, HID FIDO,
 HID OTP — at once), not a single transport handle. See [Physical Device Model](../../docs/architecture/physical-device-model.md).
-HID interface enumeration is implemented on macOS and Linux; on Windows, HID discovery is not yet
-implemented, so a YubiKey currently surfaces only its PC/SC (CCID) interface there.
+HID interface enumeration is implemented on macOS, Linux, and Windows. Exact composite-grouping
+guarantees and conservative split cases are documented in
+[Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md).
 
 ```csharp
 using Yubico.YubiKit.Core;
@@ -194,7 +195,9 @@ ApduResponse
 ### Concurrency
 
 - **Sessions/protocols are safe for concurrent calls, executed sequentially.** SmartCard (APDU/SCP), FIDO HID, and OTP HID protocols serialize full logical exchanges internally, so concurrent operations on one session never interleave packets on the wire. Cancellation tokens cancel only the wait for a turn — an exchange in flight runs to completion.
-- **Discovery never disturbs open sessions.** Per-interface connection leases and a nonblocking exclusive discovery lease make ownership atomic: a connection owns the interface before physical connect, discovery skips interfaces with a live connection, and a connect cannot cross a Management metadata read already in progress. A CCID interface admits one live connection at a time; HID interfaces are shared.
+- **Discovery never disturbs open sessions.** Per-interface connection leases and a nonblocking exclusive discovery lease make ownership atomic: a connection owns the interface before physical connect, discovery skips interfaces with a live connection, and a connect cannot cross a Management metadata read already in progress. CCID and OTP HID each admit one live connection at a time; FIDO HID remains shared. OTP is exclusive because one logical OTP frame spans multiple feature reports.
+- **One live session per connection.** A second session is refused before any wire operation. Sequential reuse is supported: dispose session A, then create session B over the same caller-owned connection.
+- **Connection ownership follows creation.** A direct `Session.CreateAsync(connection)` borrows the connection and does not dispose it. A `device.Create<App>SessionAsync()` convenience method owns its hidden connection and closes it with the returned session. Always use `await using`; leaking a caller-created connection can retain an exclusive CCID or OTP HID lease and block later opens. There is no finalizer backstop.
 - **Discovery work is bounded independently from caller waits.** Each caller has its own timeout/cancellation, while repeated scans share at most one underlying read per stable interface and connection type. Completion removes the single-flight entry for later retry; a permanently hung native call remains one operation rather than accumulating one operation per scan.
 - **Monitor hints are bounded occurrence signals.** Concurrent HID/SmartCard callbacks share one capacity-one wake-up signal; storms cannot build a payload queue, while quiet-period debounce, maximum coalescing, and periodic fallback scans remain intact. HID and SmartCard listeners start independently as best-effort latency accelerators; unavailable listeners are cleaned up without aborting monitoring, which can fall back to interval-only rescans.
 - **A monitor generation may do anything except publish stale truth.** Monitor lifecycle is an epoch model, not a state machine: each `StartMonitoring` creates an immutable generation that the loop, manual rescans, and listener callbacks capture once. Every device-snapshot publication is mutually exclusive under one never-disposed gate and is admitted only if its generation is still current, so a scan hung in native I/O can return long after its generation was retired and simply be discarded. Start, stop, and dispose take only a small state lock, so a blocking `DeviceChanges` subscriber cannot wedge them, and restart after an abandoned stop always succeeds. Dispose drains in-flight publication with a bounded timeout; a publication that outlives the bound may complete afterwards, which the manager's repository disposal silences.
@@ -291,5 +294,5 @@ if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_7_2))
 For in-depth patterns, test infrastructure, and implementation details, see [CLAUDE.md](CLAUDE.md).
 
 For the physical-device model (one `IYubiKey` per physical key, metadata ownership, applet transport
-selection, and migration from per-interface handles), see
+selection, session/connection ownership, and migration from per-interface handles), see
 [Physical Device Model](../../docs/architecture/physical-device-model.md).

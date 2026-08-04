@@ -130,7 +130,7 @@ public static class IYubiKeyExtensions
         public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken ct = default)
         {
             // 'yubiKey' parameter is implicitly the extension target
-            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: ct);
+            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: ct);
             return await mgmtSession.GetDeviceInfoAsync(ct);
         }
     }
@@ -156,8 +156,8 @@ The extension class provides three levels of abstraction:
 var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken);
 
 // Equivalent manual code:
-using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
-using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
+await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+await using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
 var deviceInfo = await mgmt.GetDeviceInfoAsync(cancellationToken);
 ```
 
@@ -194,8 +194,8 @@ await yubiKey.SetDeviceConfigAsync(
     cancellationToken: cancellationToken);
 
 // Equivalent manual code:
-using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
-using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
+await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+await using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
 await mgmt.SetDeviceConfigAsync(config, reboot, lockCode, null, cancellationToken);
 ```
 
@@ -217,7 +217,7 @@ await mgmt.SetDeviceConfigAsync(config, reboot, lockCode, null, cancellationToke
 
 ```csharp
 // Manual session management for multiple operations
-using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
+await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
     configuration: customProtocolConfig,       // Optional protocol config
     scpKeyParams: Scp03KeyParameters.Default,  // Optional SCP
     cancellationToken: cancellationToken);
@@ -235,6 +235,7 @@ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
 - Creates session
 - **Caller owns session** - must dispose
 - The connection was opened by this entry point, so the session owns it and disposes it when the session disposes. A connection you opened yourself and passed to `ManagementSession.CreateAsync` stays yours.
+- Use `await using`; a missing disposal can retain an exclusive CCID or OTP HID lease and block later opens.
 
 **Tradeoffs:**
 - ✅ Reuse session for multiple operations (more efficient)
@@ -262,7 +263,7 @@ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
 
 ```csharp
 // DON'T DO THIS - unnecessary complexity
-using var mgmtSession = await yubiKey.CreateManagementSessionAsync();
+await using var mgmtSession = await yubiKey.CreateManagementSessionAsync();
 var info = await mgmtSession.GetDeviceInfoAsync();
 // (end of method, session disposed)
 
@@ -310,6 +311,17 @@ All three extension methods follow the same pattern internally:
 The difference is **who manages the session lifecycle**:
 - High-level extensions: Method manages lifecycle (automatic)
 - Low-level extension: Caller manages lifecycle (manual)
+
+Direct `ManagementSession.CreateAsync(connection)` validates that `connection` is SmartCard, FIDO
+HID, or OTP HID before the `ApplicationSession` base attaches its one-session guard. It borrows the
+connection and never disposes it. The creator must dispose the connection with `await using`; there
+is no finalizer backstop. One live session per connection is allowed, and sequential reuse after
+session disposal is supported.
+
+CCID and OTP HID connections are exclusive; FIDO HID remains shared. OTP exchanges span multiple
+feature reports, so independent protocol instances cannot safely share that interface. Management's
+default order still tries `SmartCard -> HidFido -> HidOtp`, but a held OTP interface refuses the
+final acquisition.
 
 ### Testing Considerations
 
@@ -787,7 +799,7 @@ internal interface IManagementBackend : IDisposable
 ### Key Design Decisions
 
 1. **Backend is stateless**: Doesn't own the protocol or connection
-2. **ManagementSession owns disposal**: Backend.Dispose() is a no-op
+2. **ManagementSession owns protocol/backend disposal**: Backend.Dispose() is a no-op; a caller-created connection remains caller-owned
 3. **SCP wrapping works**: Backend can be recreated with SCP-wrapped protocol without disposing connection
 4. **Zero branching**: All public methods delegate to `_backend.ReadConfigAsync()` etc.
 

@@ -35,6 +35,15 @@ Discovery resolves same-PID keys using an **evidence hierarchy**, strongest firs
 The hierarchy never guesses. When evidence runs out, interfaces are published separately, which is
 incomplete but never wrong.
 
+Serial reads are conditional and on demand; discovery does **not** open every interface on every
+scan. It requests serial evidence only when PID correlation is untrusted, more than one physical key
+shares a PID, or a partial-PID shape is ambiguous. Only successful reads are cached, keyed by the
+stable interface `DeviceId`; failures and null serials are retried on later scans. This is pinned by
+`FindAllAsync_ScriptedIdentityFailure_DeducedIntoAnchoredKey_AndRereadOnNextScan_Pin`,
+`FindAllAsync_InterfaceDisappearance_EvictsIdentityCacheEntries_Pin`, and
+`FindAllAsync_PcscReaderRenameBetweenScans_OldEntryMissesAndSuccessfulRereadHeals_Pin` in
+`src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs`.
+
 ## Guarantee matrix
 
 | # | Guarantee | Windows | macOS | Linux |
@@ -48,6 +57,12 @@ incomplete but never wrong.
 | G7 | Conservation: every enumerated interface appears exactly once | yes | yes | yes |
 | G8 | Interfaces held in use since plug-in | attributed once idle and readable — see [G8](#g8-in-use-interfaces) | same | same |
 | G9 | Topology-read failure degrades safely | yes — becomes macOS semantics | n/a | n/a |
+
+`AvailableConnections` is the union of the concrete interfaces observed for the published device;
+`CompositeYubiKeyTests.AvailableConnections_IsUnionOfMembers` pins that structural rule. It is
+transport availability only. It does not prove that every applet or capability is enabled over every
+interface, nor that interfaces or operations are safe to use concurrently. Applet capability and
+connection-ownership rules remain separate contracts.
 
 "with topology evidence" is the normal Windows case. Topology reads can fail (stale devnode during
 hotplug, `CR_NO_SUCH_DEVNODE`, missing ContainerId, API unavailable before Windows 8); when they
@@ -158,6 +173,18 @@ nothing — it never infers one. When it returns nothing, those interfaces fall 
 unchanged, so Windows degrades to exactly the macOS/Linux semantics rather than to a guess. Partial
 topology is safe as well: keyed interfaces group, unkeyed interfaces fall through, and no unkeyed
 interface is ever pulled into a keyed group.
+
+### Untrusted PID correlation
+
+If one enumerated USB CCID reader name cannot be parsed to a known YubiKey PID,
+`FindYubiKeys` sets `pidCorrelationUntrusted` for the **entire USB portion of that scan**. Topology
+evidence still groups first. Every remaining USB interface is then eligible only for serial grouping:
+interfaces with the same successfully read serial may merge, while failed or null serial reads stay
+standalone. PID completeness and pigeonhole deduction are not used for those remaining interfaces,
+because a reader-name drift on one CCID means the PID evidence cannot safely be assumed consistent
+for the scan. `CompositeDeviceMergerTests.Merge_ForceSerial_MergesAllUsbBySerial_RejoiningUnparsedCcid`
+pins the successful-serial path, while `Merge_NullPidUsb_NotForceSerial_StandsAlone` pins the
+conservative standalone behavior outside it.
 
 ## Firmware note: CCID is not independently switchable on 5.8.0+
 

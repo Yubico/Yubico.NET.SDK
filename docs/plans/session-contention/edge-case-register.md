@@ -17,9 +17,9 @@ stated in/out reasoning is something you can disagree with line by line.
 Status values: `open` · `investigating` · `covered` · `bounded` (documented bound + pinning test)
 · `platform-gap` (needs hardware we do not have) · `out`
 
-Rig: macOS, two same-PID keys (103, 125), both firmware 5.8.0, PID 0x0407 (OTP+FIDO+CCID).
-CCID-only and HID-only configurations are **synthesized** on key 125 via the reconfiguration
-harness, which restores unconditionally.
+Hardware evidence spans macOS (two same-PID firmware-5.8.0 keys, serials 103 and 125) and Linux
+(firmware-5.4.3 keys 9681620 and 20260533). Windows remains unavailable. Test names below are exact
+repository method names; paths are relative to the repository root.
 
 ---
 
@@ -27,52 +27,52 @@ harness, which restores unconditionally.
 
 | # | Case | Tier | Status | Test |
 |---|---|---|---|---|
-| A1 | PIV session + `GetDeviceInfoAsync` — **the footgun** | P1 | investigating | Phase 1 exp 1 — CONFIRMED, `SW=0x6D00`, 4/4 |
-| A2 | PIV + OATH concurrently on one CCID (two applets) | P2 | investigating | Phase 1 exp 2 — CONFIRMED, `SW=0x6D00` |
-| A3 | PIV + PIV nested (same applet) — decides applet-keyed vs exclusive lease | P2 | **safe** | Phase 1 exp 3 — SAFE 4/4; lease must be applet-keyed |
-| A4 | Management(CCID) + Management(HidOtp) via `preferredConnection`, both writing config | P2 | open | — |
-| A5 | Management(CCID) + FIDO2(HidFido) — different interfaces, expected safe | P2 | open | — |
-| A6 | Sessions on two **different** keys — must remain fully parallel | P1 | open | — |
+| A1 | PIV session + `GetDeviceInfoAsync` — **the footgun** | P1 | covered | `src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs`: `GetDeviceInfoAsync_WhilePivSessionHasVerifiedPin_DoesNotClobberSessionState`, `CreateManagementSessionAsync_WhilePivHoldsCcid_OpensOverANonSmartCardTransport`; Phase 1 pre-fix hardware result `SW=0x6D00` |
+| A2 | PIV + OATH concurrently on one CCID (two applets) | P2 | covered | `src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs`: `ConnectAsync_SecondConnectionToHeldCcidInterface_IsRefused`, `Session_SecondLiveSessionOnOneConnection_IsRefused`; generic refusal is applet-independent |
+| A3 | PIV + PIV nested (same applet) | P2 | covered | `ConnectionOwnershipContractTests.Session_SecondLiveSessionOnOneConnection_IsRefused`; `PivSessionContentionTests.SecondSession_OnOneLiveConnection_IsRefused`. Phase 1 measured nesting hardware-safe, but shared security state makes deliberate refusal the contract |
+| A4 | Management(CCID) + Management(HidOtp), both writing configuration | P2 | bounded | SDK coordinates per-interface wire ownership, not semantic concurrent configuration writes across CCID and HID OTP. Callers must serialize configuration writes. Admission of distinct interfaces is pinned by `ConnectionOwnershipContractTests.ConnectAsync_CcidHeld_SameKeysHidInterfaceStillConnects`; no destructive concurrency test is run |
+| A5 | Management(CCID) + FIDO2(HidFido) on distinct interfaces | P2 | covered | `ConnectionOwnershipContractTests.ConnectAsync_CcidHeld_SameKeysHidInterfaceStillConnects` and `ConnectAsync_HidInterface_AllowsConcurrentConnections` |
+| A6 | Sessions on two **different** keys remain independent | P1 | covered | `src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMultiKeyContentionTests.cs`: current macOS run 3/3 on firmware-5.8.0 serials 103/125, including `FindAllAsync_WithOpenSessionOnOneKey_IdentifiesOtherKeysAndPreservesSession`, `ConcurrentPivSessions_OnTwoKeys_OperateIndependently`, and `Rsa4096Keygen_OnOneKey_DoesNotDelayPivOperationsOnAnotherKey` |
 
 ## B. Transport availability
 
 | # | Case | Tier | Status | Test |
 |---|---|---|---|---|
-| B1 | CCID-only key (HID disabled) — no safe fallback; must fail naming the holder | P2 | open | — |
-| B2 | HID-only key (no CCID) | P2 | open | Phase 1 exp 4 shows Management answers over both HID transports |
-| B3 | NFC (CCID, no HID at all) | P2 | open | — |
-| B4 | `preferredConnection = SmartCard` conflicts with a held CCID — must fail loudly | P2 | open | — |
-| B5 | SCP requested + CCID held — must **not** downgrade to plaintext HID | P2 | open | — |
+| B1 | CCID-only key — no safe fallback; fail naming held interface | P2 | covered | `src/Management/tests/Yubico.YubiKit.Management.UnitTests/IYubiKeyExtensionsTransportTests.cs`: `CreateManagementSessionAsync_CcidHeldInProcess_NoOtherTransport_Throws`; `PivSessionContentionTests.ConnectAsync_SecondSmartCardConnection_WhilePivSessionOpen_IsRefused` |
+| B2 | HID-only key (no CCID) | P2 | covered | `IYubiKeyExtensionsTransportTests.CreateManagementSessionAsync_DefaultNoSmartCard_FallsBackToHidFido`, `CreateManagementSessionAsync_DefaultOnlyHidOtp_FallsBackToHidOtp`; Phase 1 hardware experiment 4 |
+| B3 | NFC (CCID, no HID fallback) | P2 | covered | Same PC/SC/CCID ownership path as B1: `ConnectionOwnershipContractTests.ConnectAsync_SecondConnectionToHeldCcidInterface_IsRefused`; NFC exposes no HID route, so no fallback exists |
+| B4 | `preferredConnection = SmartCard` conflicts with held CCID | P2 | covered | `IYubiKeyExtensionsTransportTests.CreateManagementSessionAsync_CcidHeldInProcess_ExplicitOverrideDoesNotFallBack` |
+| B5 | SCP requested + CCID held — no plaintext HID downgrade | P2 | covered | `IYubiKeyExtensionsTransportTests.CreateManagementSessionAsync_ScpRequestedAndCcidHeld_DoesNotFallBackToPlaintextHid` |
 
 ## C. Discovery × session — already solved, must not regress
 
 | # | Case | Tier | Status | Test |
 |---|---|---|---|---|
-| C1 | Discovery vs session, same interface | P1 | open | — |
-| C2 | Discovery vs session, **different** interface of the same key — design claim, never hardware-verified | P2 | partial | Phase 1 exp 4 — a *session* on another interface is safe; discovery not yet the actor |
+| C1 | Discovery vs session, same interface | P1 | covered | `src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionRegistryTests.cs`: `IdentityRead_DeviceInUse_SkipsWithoutConnecting` |
+| C2 | Discovery vs session, different member interface of same key | P2 | covered | `DeviceConnectionRegistryTests.MetadataRead_CompositeWithInUseSmartCardMember_SkipsItButTriesOtpTransport`. Discovery skips any held member, including exclusive OTP HID, while trying free members |
 
 ## D. Lifecycle and timing
 
 | # | Case | Tier | Status | Test |
 |---|---|---|---|---|
-| D1 | Session disposed while another waits on the same interface | P2 | open | — |
-| D2 | Session opened while a scan is in flight | P2 | open | — |
+| D1 | Exclusive interface released, then acquired by another caller | P2 | bounded | There is no waiter for an already-held exclusive connection: second acquisition refuses immediately. Success after disposal is pinned for CCID and OTP HID by `ConnectionOwnershipContractTests.ConnectAsync_AfterFirstConnectionDisposed_SecondSucceeds` and `ConnectAsync_OtpHidConnectionDisposed_InterfaceReopens` |
+| D2 | Session opened while a scan is in flight | P2 | covered | `src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionOwnershipTests.cs`: `ConnectAsync_OwnsInterfaceBeforePhysicalConnectionCreation`, `ConnectAsync_SessionStartingImmediatelyBeforeDiscoverySelect_CannotCrossOwnership` |
 | D3 | Hotplug during an open session | P3 | open | — |
 
 ## E. Device identity
 
 | # | Case | Tier | Status | Test |
 |---|---|---|---|---|
-| E1 | Tier flip on inserting a second same-PID key — phantom `Removed`+`Added` | P1 | open | — |
-| E2 | Tier flip on removing one of two same-PID keys | P1 | open | — |
+| E1 | Tier flip on inserting a second same-PID key — no phantom incumbent event | P1 | covered | Deterministic repository pin only: `src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceRepositoryCompositeTests.cs`: `UpdateCache_SiblingSamePidKeyArrives_IncumbentEmitsNoRemovedOrAdded`; no physical hotplug claim |
+| E2 | Tier flip on sibling removal and final removal correlation | P1 | covered | Deterministic repository pins only: `YubiKeyDeviceRepositoryCompositeTests.UpdateCache_SiblingSamePidKeyRemoved_SurvivorEmitsNoRemovedOrAdded`, `UpdateCache_TierFlipThenFinalRemoval_RemovalUsesPreviouslyAddedDeviceId`; no physical hotplug claim |
 
 ## F. Platform
 
 | # | Case | Tier | Status | Test |
 |---|---|---|---|---|
-| F1 | macOS seizes HID FIDO IO reports on double-open (`IOHIDDeviceOpen` options `0x01`) | P3 | open | — |
-| F2 | Windows / Linux share HID rather than seizing | P3 | platform-gap | — |
-| F3 | Windows PC/SC sharing semantics under in-process contention | P3 | platform-gap | — |
+| F1 | macOS physical HID FIDO double-open (`IOHIDDeviceOpen` options `0x01`) | P3 | platform-gap | Requires a human-coordinated macOS hardware double-open run; classified as a platform gap rather than a product-contract blocker |
+| F2 | Platform-divergent HID sharing semantics | P3 | platform-gap | Linux hardware gates are broader: FIDO HID is shared and OTP HID is SDK-exclusive. Windows behavior remains unverified |
+| F3 | Windows PC/SC sharing semantics under contention | P3 | platform-gap | Requires Windows hardware; seam-level in-process ownership is platform-independent, but native PC/SC behavior is unverified |
 
 ---
 
@@ -88,32 +88,32 @@ harness, which restores unconditionally.
 
 ## Coverage summary
 
-Updated as phases complete. Empty until Phase 1 populates it.
-
 | Tier | Total | Covered | Bounded | Platform gap | Open |
 |---|---|---|---|---|---|
-| P1 | 5 | 0 | 0 | 0 | 5 |
-| P2 | 12 | 0 | 0 | 0 | 12 |
-| P3 | 3 | 0 | 0 | 2 | 1 |
-| **In scope** | **20** | **0** | **0** | **2** | **18** |
+| P1 | 5 | 5 | 0 | 0 | 0 |
+| P2 | 12 | 10 | 2 | 0 | 0 |
+| P3 | 4 | 0 | 0 | 3 | 1 |
+| **In scope** | **21** | **15** | **2** | **3** | **1** |
 
-## Planned strengthening — two-key long-operation liveness
+ISC-2 passes: every P1/P2 row is covered or has a documented bound and pinning test. P3 remains
+explicitly non-blocking: D3 is open for a human-coordinated/fake follow-up, and F1-F3 require unavailable
+platform hardware.
 
-This is not a merge blocker for the ownership fix; A6's correctness/isolation requirement is covered
-by `PivMultiKeyContentionTests`. Add the stronger liveness test when **two allow-listed YubiKeys with
-firmware 5.7.0+** are available:
+## Completed strengthening — two-key long-operation liveness
+
+This was not a merge blocker for the ownership fix, but two allow-listed firmware-5.7.0+ YubiKeys are
+now available and the stronger liveness test is implemented and executed:
 
 `Rsa4096Keygen_OnOneKey_DoesNotDelayPivOperationsOnAnotherKey`
 
-1. Reset and authenticate PIV on both keys; provision a PIN-gated EccP256 signing key on key B.
-2. Start `GenerateKeyAsync(..., PivAlgorithm.Rsa4096)` on key A and wait 500 ms.
-3. Assert RSA generation is still in flight, so the test proves genuine overlap rather than sequencing.
-4. Run a PIN-gated signature on key B with a bounded deadline (4 seconds, matching the existing
-   discovery-vs-RSA-4096 gate).
-5. Assert key B completes within the bound and returns a valid signature, then drain and validate key
-   A's RSA generation.
-6. Repeat with the key roles reversed, so reader ordering cannot hide cross-key coupling.
+The test resets and authenticates PIV on both keys, provisions PIN-gated EccP256 signing keys, starts
+RSA-4096 generation on key A, and verifies after 500 ms that generation remains in flight. The key-B
+signature must complete within four seconds and before key A finishes. The test then drains and validates
+key A, repeats with the roles reversed, and then attempts both PIV resets while preserving any primary
+test failure.
 
 This strengthens A6 from repeated parallel correctness (10 EccP256 signatures per key) to liveness
-while another physical card is occupied by a tens-of-seconds on-card operation. RSA-4096 is required:
-RSA-2048 on the current firmware-5.4.3 rig may complete too quickly to guarantee overlap.
+while another physical card is occupied by a tens-of-seconds on-card operation. The current post-review
+macOS class run passed 3/3 with firmware-5.8.0 serials 103 and 125; RSA liveness took 3 minutes 20 seconds.
+Both directions met the four-second bound while the counterpart RSA task remained incomplete; RSA-4096
+was then drained and validated, and both PIV applications were reset independently.

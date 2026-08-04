@@ -19,17 +19,18 @@ See also: [event-driven device discovery](./event-driven-device-discovery.md) an
 
 `IYubiKey` (defined in `src/Core/src/Abstractions/IYubiKey.cs`) is intentionally small:
 
-- `string DeviceId` — a human-readable identifier for the device, suitable for logging and correlation
-  within a scan. For a single-interface device this is the platform interface path (reader name / HID
-  path) and is stable while the device stays plugged. For a **merged multi-interface device it is not
-  stable**: it names the evidence tier that resolved the merge (`ykphysical:topology:*`,
-  `ykphysical:{serial}`, `ykphysical:pid:*`) and therefore changes when the surrounding evidence changes
-  even though the key never moved — unplugging one of two same-model keys flips the untouched survivor's
-  id from the serial form to the PID form. Do not use it as a physical-identity key across rescans; the
-  SDK's own change detection keys on the device's interface set instead
-  (`CompositeYubiKey.PhysicalIdentityKeyFor`).
+- `string DeviceId` — a human-readable correlation identifier. Once a device object is published through
+  `YubiKeyManager`, its `DeviceId` remains stable for that uninterrupted physical presence while its
+  physical interface identity and `AvailableConnections` remain unchanged. The repository retains the
+  originally published object across evidence-tier flips so its eventual `Removed` event correlates with
+  the earlier `Added` event. A fresh direct scan object can still have an evidence-tier-derived ID
+  (`ykphysical:topology:*`, `ykphysical:{serial}`, or `ykphysical:pid:*`) different from an earlier scan;
+  do not treat independently created scan objects as durable identity records. The repository correlates
+  physical presence by interface set (`CompositeYubiKey.PhysicalIdentityKeyFor`).
 - `ConnectionType AvailableConnections` — the concrete interfaces this device exposes, any combination of
   `SmartCard`, `HidFido`, and `HidOtp`. It never contains the `Hid` group flag or `All`.
+  This is the union of observed transport interfaces, not proof that every applet is enabled on every
+  interface or that every combination is safe to use concurrently.
 - `bool SupportsConnection(ConnectionType)` — whether a given interface is present on this device. The
   concrete values (`SmartCard`, `HidFido`, `HidOtp`) test a specific openable interface; the `Hid` group
   flag returns true when either HID interface is present; `Unknown`, `All`, and mixed/combined values
@@ -77,6 +78,16 @@ intentionally degrades to conservative **no-merge** in ambiguous cases — for e
 name cannot be parsed for its Product ID, or when a serial number needed to disambiguate same-Product-ID
 keys cannot be read. In those cases interfaces are left unmerged rather than risk wrongly collapsing two
 distinct keys, so one physical key can surface as more than one row.
+
+`FindAllAsync(forceRescan: false)` returns the repository cache after its first populated scan;
+`forceRescan: true` performs discovery and reconciles the result into that cache. Successful identity and
+metadata reads are cached while their member interfaces remain present. Retaining the originally published
+object preserves `DeviceId` event correlation, but also means a newly constructed equivalent object's
+refreshed cached metadata/member instances are not substituted when the physical interface set and
+`AvailableConnections` are unchanged. Request fresh Management data explicitly when current device
+configuration matters. `DeviceChanges` is emitted from repository diffs after a full rescan, not directly
+from native listener hints. These APIs inherit the conservative grouping bounds in
+[Device Discovery Guarantees](device-discovery-guarantees.md); they do not strengthen them.
 
 ### Platform Support For HID Discovery
 
@@ -193,7 +204,8 @@ would have caused the damage rather than on the victim's next operation:
 | --- | --- | --- |
 | Second connection to a live CCID interface | Refused | `ConnectionInUseException` naming the interface |
 | Second session on a live connection | Refused | `ConnectionInUseException` naming the current session |
-| HID interfaces | Shared | — (no applet-selection state) |
+| HID FIDO interface | Shared | — (CTAPHID channels provide protocol separation) |
+| HID OTP interface | Exclusive | `ConnectionInUseException` naming the interface |
 
 Both refusals are per *live* holder, not per lifetime. Successive use is the supported pattern, and it does
 not require reconnecting — a session never disposes a connection it did not create:
@@ -213,8 +225,18 @@ This mirrors canonical yubikit: Rust's applet sessions take the connection by va
 to the connection at construction. Neither inspects the wire.
 
 **Who disposes what:** whoever created the connection. The `device.Create<App>SessionAsync()` convenience
-methods open a connection the caller never sees, so the session they return owns and disposes it — those
-call sites are unchanged. A connection you opened yourself stays yours.
+methods open a connection the caller never sees, so the session they return owns and disposes it through the
+internal `ApplicationSession.OwnConnection()` path. A direct `Session.CreateAsync(connection)` borrows the
+caller-created connection and does not dispose it. Use `await using` for both connections and sessions.
+Missing connection disposal can retain an exclusive CCID or OTP HID lease for the connection lifetime
+(potentially the process lifetime), blocking later opens; there is intentionally no finalizer backstop,
+because deterministic disposal is the only point at which native-handle teardown and lease release can be
+ordered reliably.
+
+OTP HID is exclusive because one OTP protocol exchange spans multiple feature reports; two independent
+protocol instances on the same interface could interleave one logical frame. FIDO HID remains shared.
+Management's default order may still fall through `SmartCard -> HidFido -> HidOtp`, but if another
+connection already holds HID OTP, that final acquisition is refused rather than shared.
 
 ## SCP Note
 
@@ -245,3 +267,6 @@ Practical steps:
 3. Where you need a specific transport, pass `preferredConnection`; otherwise rely on the documented default
    order (and held-transport fallback).
 4. Update metadata type references to `Yubico.YubiKit.Core.Devices`.
+5. Dispose every connection at the scope that created it. If you create a connection and pass it to
+   `Session.CreateAsync(connection)`, keep the connection in its own `await using`; the session will not
+   close it. Dispose one session before constructing the next on that connection.

@@ -2,7 +2,7 @@
 task: Session-vs-session contention on multi-interface YubiKey applets
 branch: yubikit-session-contention
 base: cb9ca41f (composite-merge HEAD; becomes yubikit via PR #543)
-phase: investigate
+phase: phase-6-complete-rsa-liveness-verified
 date: 2026-07-30
 ---
 
@@ -43,14 +43,14 @@ to sessions.
 
 | ISC | Criterion | Verified by |
 |---|---|---|
-| ISC-1 | The three-line sequence cannot silently destroy session state. It either succeeds, or fails loudly with an error naming the current holder. | Hardware integration test |
+| ISC-1 | The three-line sequence cannot silently destroy session state. It either routes over a non-conflicting interface, or fails before wire I/O with an error naming the contended interface; the separate per-connection guard names the live session. | Hardware integration test + acquisition contract tests |
 | ISC-2 | Every P1/P2 row of the edge-case register is covered by a passing test, or is a documented bound with a pinning test that asserts the bounded behaviour. | Register → test-ID mapping, mechanically checked |
 | ISC-3 | The session-vs-session boundary is a **named concept** enforced in one place, not a test convention. | The convention comment is deleted and replaced by a contract test |
-| ISC-4 | No regression: 5 hardware discovery invariants, `PivMultiKeyContentionTests` 2/2, resilience 69/69, full Core suite, `dotnet format` clean. | Standing gates, every phase |
+| ISC-4 | No regression: 5 hardware discovery invariants, `PivMultiKeyContentionTests` 3/3 including RSA-4096 liveness, resilience 69/69, full Core suite, and whitespace/style/error-severity analyzer formatting checks clean. | Standing gates, every phase |
 | ISC-5 | No material performance regression in scan latency or session-open latency against a baseline captured before any change. | `merge-diag` before/after |
-| ISC-6 | Management transport tests genuinely exercise the transport they name. | A HID-pinned session must throw `NotSupportedException` from `ResetDeviceAsync`; SmartCard must not |
+| ISC-6 | Management transport tests genuinely exercise the transport they name. | A HID-FIDO-pinned session rejects `ResetDeviceAsync` with `NotSupportedException`; the SmartCard backend emits reset APDU INS `0x1F` |
 | ISC-7 | Every production behaviour change is backed by a test that failed **for its predicted reason** before the change. | RED output recorded verbatim in this ISA |
-| ISC-8 | `DeviceId` has one stated contract, and no component contradicts it. | `YubiKeyDeviceRepository` and `FindYubiKeys` agree; contract documented |
+| ISC-8 | Identity contracts are explicit per API scope: repository-published `DeviceId` is stable for one uninterrupted presence, while fresh direct scans may derive different evidence-tier IDs. | Repository tier-flip/final-removal unit pins plus `FindAllAsync`/`DeviceChanges` documentation; no physical hotplug claim |
 
 ## Non-goals
 
@@ -94,16 +94,11 @@ that reading separately.
 
 ## Residual — not covered by this effort
 
-All hardware evidence here is **macOS**, on a two-key same-PID rig (serials 103 and 125, both
-firmware 5.8.0, PID 0x0407).
-
-- **Linux** — udev and PC/SC paths unverified.
-- **Windows** — PC/SC sharing semantics, and the platform-divergent HID open behaviour
-  (macOS seizes HID FIDO IO reports; Windows and Linux share) unverified.
-
-These require dedicated hardware on those platforms and are tracked as followups, alongside the
-existing Windows topology Tier 2 gap from the composite-merge effort. Coverage claims in this
-document are macOS-scoped unless stated otherwise.
+Hardware evidence now spans macOS (firmware 5.8.0, two-key same-PID rig) and Linux (firmware 5.4.3,
+one- and two-key runs). Linux is complete for the standing gates recorded below. Windows PC/SC
+sharing, Windows HID behavior, and physical validation of Windows topology correlation remain
+platform gaps. The macOS physical HID FIDO double-open case also remains a human-coordinated
+platform gap. Cross-process contention is unchanged and out of scope.
 
 ---
 
@@ -341,7 +336,7 @@ wire, so the Two Generals problem that killed `00a9e26f` cannot arise: nothing h
 |---|---|---|
 | 1 | Protocols no longer dispose their connection | `PcscProtocol`, `FidoHidProtocol`, `OtpHidProtocol` |
 | 2 | Discovery disposes the connection it created | `ProtocolDeviceInfo.ConnectAndReadAsync` |
-| 3 | The interface lease belongs to the CONNECTION, and CCID is exclusive | `DeviceConnectionRegistry.AcquireConnectionAsync(id, exclusive)`, `PcscYubiKey` (`true`) / `HidYubiKey` (`false`) |
+| 3 | The interface lease belongs to the CONNECTION; CCID and OTP HID are exclusive, while FIDO HID remains shared | `DeviceConnectionRegistry.AcquireConnectionAsync(id, exclusive)`, `PcscYubiKey` (`true`) / `HidYubiKey` (`IOtpHidConnection` true, `IFidoHidConnection` false) |
 | 4 | One live session per connection | `ConnectionSessionGuard`, attached in the `ApplicationSession` constructor |
 | 5 | An in-process refusal counts as a held transport | `YubiKeyConnectionExtensions.IsHeldTransportError` |
 | 6 | Convenience entry points own the connection they open | `ApplicationSession.OwnConnection()`, called at 8 `Create<App>SessionAsync` sites |
@@ -456,7 +451,7 @@ YubiKey — but that the SDK now *routes* Management over HID does not by itself
 survives. Phase 1 experiment 4 measured that; a post-change integration run should confirm it end to end.
 ---
 
-## Status at handoff (2026-07-30)
+## Status at handoff (2026-07-30, historical snapshot)
 
 ### Complete
 
@@ -474,7 +469,7 @@ is refused with the victim session intact.
 Gates at `1e0560af`: build 0 errors/0 warnings · Core 729 total, 0 failed, 3 pre-existing skips ·
 resilience 69/69 · full suite 12/12 · format 0 errors · hardware: discovery 5/5, PIV two-key 2/2.
 
-### Remaining
+### Remaining at that handoff (subsequently reconciled below)
 
 - **Phase 5 — documentation.** Guarantees-doc sufficiency (the `ce07f721` regression: serial
   conditionality, `pidCorrelationUntrusted`, the flags-union caveat), consumer surface on
@@ -498,10 +493,10 @@ resilience 69/69 · full suite 12/12 · format 0 errors · hardware: discovery 5
 - **A `claude`-CLI entry for Fable** in `NAMED_MODEL_ALIASES` — its Copilot-only chain went dark when
   quota ran out, though the CLI transport worked.
 
-### Register status
+### Register status at that handoff
 
-Resolved: A1, A2, A3, A5, B4, B5, C1, C2 (partial), E1, E2. Unresolved: A4, B1–B3, D1–D3, F1.
-F2/F3 remain platform gaps.
+This snapshot is superseded by the Phase 5 row-to-evidence reconciliation and the current
+`edge-case-register.md`. It is retained only as history.
 
 ---
 
@@ -554,8 +549,8 @@ is the load-bearing one: `ManagementSession.Transport` reported `HidFido`, provi
 change-6 fallback picks a non-conflicting transport on Linux rather than taking CCID. Phase 1
 experiment 4 measured that HID works while PIV holds CCID; this confirms the SDK now *chooses* it.
 
-The refusal message is worth quoting, because ISC-1 requires failing "loudly with an error naming
-the current holder":
+The refusal message at that historical run named the contended `pcsc:` interface. It did not and could
+not name the applet/session holder; the wording was generalized later for CCID and OTP HID:
 
 > The SmartCard interface 'pcsc:Yubico YubiKey OTP+FIDO+CCID 00 00' already has a live connection in
 > this process. A YubiKey's CCID interface holds one selected application at a time, so a second
@@ -705,8 +700,9 @@ remains unverified in this pass.
 
 Management's HID OTP concurrency test timed out once in the first whole-suite pass, then passed 10
 focused runs (50 concurrent-call iterations) and the final sequential whole-suite run. Two module
-suites run in parallel also produced transport contention; that evidence was discarded — hardware
-suites must run sequentially against one physical key.
+suites run in parallel also produced transport contention. The runs were not valid module-result
+counts because hardware suites must run sequentially against one physical key, but the contention
+signal was retained and later helped confirm the separate-protocol OTP gate gap closed in Phase 5.
 
 ### ISC-5 — before/after on the same Linux rig
 
@@ -767,3 +763,375 @@ across two keys.
 
 This is deliberate strengthening, not a merge criterion for the current ownership fix. The present
 5.4.3 keys cannot run RSA-4096, and RSA-2048 may complete before overlap can be established.
+
+---
+
+## Phase 5 — Documentation and cross-vendor reconciliation (2026-08-04)
+
+Phase 5 reconciles the public contract against the current code, exact standing tests, macOS/Linux
+hardware evidence, and the confirmed cross-vendor review. The bulk of the phase is documentation,
+but it also contains two production corrections found during reconciliation: OTP HID became exclusive,
+and Management/YubiOTP reject unsupported connection types before the base session guard attaches.
+Calling this phase documentation-only would hide behavior changes and violate ISC-7.
+
+### Additional production corrections and authentic RED
+
+The RED tests were reapplied to detached `d6d0cc3e` production code and executed through the repository
+toolchain; these are reproduced failures, not inferred or invented provenance.
+
+```text
+dotnet toolchain.cs -- test --project Core --filter
+  "FullyQualifiedName~ConnectAsync_SecondConnectionToHeldOtpHidInterface_IsRefusedBeforePhysicalOpen"
+
+failed ConnectAsync_SecondConnectionToHeldOtpHidInterface_IsRefusedBeforePhysicalOpen
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.Devices.ConnectionInUseException)
+```
+
+This is the defect RED for OTP exclusivity. `ConnectAsync_OtpHidConnectionDisposed_InterfaceReopens`
+is the lifecycle pin and is not misreported as defect evidence. The implementation makes only
+`IOtpHidConnection` exclusive; the pre-existing FIDO double-open pin remains shared.
+
+```text
+dotnet toolchain.cs -- test --project Management --filter
+  "FullyQualifiedName~CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached"
+
+failed ManagementSessionTests.CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached
+  ConnectionInUseException : This connection already has a live ManagementSession.
+    at ConnectionSessionGuard.Attach
+    at ProbeSession..ctor
+
+dotnet toolchain.cs -- test --project YubiOtp --filter
+  "FullyQualifiedName~CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached"
+
+failed YubiOtpSessionTests.CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached
+  ConnectionInUseException : This connection already has a live YubiOtpSession.
+    at ConnectionSessionGuard.Attach
+    at ProbeSession..ctor
+```
+
+These failures prove the rejected constructor had already attached a ghost holder. Moving supported-type
+validation into the base-constructor argument prevents attachment rather than trying to clean up an object
+whose constructor never completed.
+
+Focused GREEN on the current tree: the OTP refusal test passed 1/1, the Management ghost-holder test
+passed 1/1, and the YubiOTP ghost-holder test passed 1/1 using the same three commands above.
+
+### Cross-vendor finding dispositions
+
+1. **ISC-1 wording corrected.** Interface-scope acquisition knows the contended interface, not the
+   applet or call site currently using it. `ConnectionInUseException` therefore names the interface.
+   The lower per-connection `ConnectionSessionGuard` does know and name the live session. The previous
+   phrase "naming the current holder" overclaimed what interface refusal can know; the criterion and
+   consumer docs now state the two scopes separately.
+2. **Connection leaks are contract-significant.** The interface lease belongs to the connection and is
+   released only by deterministic connection disposal. Missing disposal can retain an exclusive CCID or
+   OTP HID lease for the connection lifetime, potentially the process lifetime, and block later opens.
+   Migration guidance now says: whoever creates the connection disposes it; direct
+   `Session.CreateAsync(connection)` borrows it; `device.Create<App>SessionAsync()` owns its hidden
+   connection; use `await using`; keep only one live session per connection and reuse sequentially.
+3. **No finalizer backstop.** This is a deliberate ownership choice, not a dismissal of leak risk. A
+   finalizer cannot provide the deterministic ordering required between native-handle teardown and lease
+   release, and would make ownership mistakes appear to work nondeterministically. The public contract
+   requires explicit disposal instead.
+4. **Phase 7 and Phase 8 integration counts are not directly comparable coverage metrics.** They were
+   produced under different available hardware and filters; Phase 8 also repaired dynamic-skip declarations
+   and package references. `test-infrastructure-qa` proves declaration/package correctness. Named standing
+   tests and hardware gates carry behavioral evidence. No exact cause beyond those confirmed differences is
+   inferred from raw pass/skip totals.
+5. **The HID OTP timeout and parallel-suite contention were not discarded.** Together they were evidence
+   of the now-confirmed per-protocol gate gap: separate OTP protocol instances could interleave one logical
+   multi-feature-report frame on a shared interface. OTP HID acquisition is now SDK-exclusive and pinned by
+   `ConnectionOwnershipContractTests.ConnectAsync_SecondConnectionToHeldOtpHidInterface_IsRefusedBeforePhysicalOpen`
+   and `ConnectAsync_OtpHidConnectionDisposed_InterfaceReopens`. FIDO HID remains shared.
+
+### Discovery and identity contract
+
+- Serial reads are conditional/on-demand; successful reads are cached by stable interface identity,
+  while failed and null reads are retried. Discovery does not read every interface on every scan.
+- One unparsed USB CCID marks PID correlation untrusted for all remaining USB interfaces in that scan.
+  Topology still groups first; only successful equal serials group afterwards; null serials remain
+  standalone.
+- `AvailableConnections` is the union of observed interfaces, not proof that every capability is enabled
+  over every interface or that concurrent semantic operations are safe.
+- The repository retains the originally published object while physical interface identity and
+  `AvailableConnections` remain unchanged. Its `DeviceId` is therefore stable for one uninterrupted
+  published presence and correlates `Added` with final `Removed`, even across evidence-tier flips. A fresh
+  direct scan object can still carry a different evidence-tier-derived ID.
+- `FindAllAsync` and `DeviceChanges` now document the common one-key/one-object result, conservative split
+  bounds, force-rescan/cache behavior, and no guarantees beyond
+  `docs/architecture/device-discovery-guarantees.md`.
+
+Retaining the originally published object has one consumer-visible tradeoff: an equivalent fresh object's
+updated metadata/member instances are not substituted while identity and connection flags remain unchanged.
+Consumers needing current configuration must query Management data explicitly rather than treating a
+repository object refresh as a metadata refresh.
+
+The repository tier-flip/final-removal behavior is pinned by deterministic repository tests. No physical
+insert/remove or evidence-tier-flip run was performed on the current macOS rig, and none is claimed.
+
+### Ownership and transport contract
+
+- CCID and OTP HID admit one live connection. FIDO HID remains shared.
+- OTP exclusivity protects one logical OTP frame spanning multiple feature reports.
+- Management may still try `SmartCard -> HidFido -> HidOtp` on its default path. A held OTP HID interface
+  refuses that final acquisition; explicit overrides never fall back.
+- Unsupported Management and YubiOTP `IConnection` types are validated before the base session guard
+  attaches, pinned by `ManagementSessionTests.CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached`
+  and `YubiOtpSessionTests.CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached`.
+- SCP with a held CCID never downgrades to plaintext HID, pinned by
+  `IYubiKeyExtensionsTransportTests.CreateManagementSessionAsync_ScpRequestedAndCcidHeld_DoesNotFallBackToPlaintextHid`.
+
+### Edge register disposition
+
+The register now has 21 in-scope rows and exact file/method evidence:
+
+| Tier | Total | Covered | Bounded | Platform gap | Open |
+|---|---:|---:|---:|---:|---:|
+| P1 | 5 | 5 | 0 | 0 | 0 |
+| P2 | 12 | 10 | 2 | 0 | 0 |
+| P3 | 4 | 0 | 0 | 3 | 1 |
+| **Total** | **21** | **15** | **2** | **3** | **1** |
+
+The two bounded P2 rows are A4 (wire ownership is coordinated per interface; callers serialize
+semantic configuration writes across CCID and OTP HID) and D1 (exclusive acquisitions do not wait;
+the newcomer is refused immediately and succeeds after disposal). D3 remains open P3 for a
+human-coordinated/fake hotplug follow-up. F1 is a platform gap because it specifically requires macOS
+hardware; F2 and F3 require unavailable platform evidence. ISC-2 passes.
+
+### Deferred and parked work
+
+- Base reconciliation remains parked; this phase does not merge/rebase the branch.
+- Windows PC/SC/HID/topology hardware validation remains deferred.
+- RSA-4096 cross-key liveness strengthening is complete on firmware-5.8.0 serials 103 and 125; see the
+  final hardware section below.
+- Linux standing and two-key gates are complete as recorded in Phases 7-8.
+
+### ISC status
+
+| ISC | Status | Evidence |
+|---|---|---|
+| ISC-1 | pass | `PivSessionContentionTests` hardware path plus interface/session acquisition pins; wording corrected to the knowledge available at each scope |
+| ISC-2 | pass | 21-row register: every P1/P2 covered or bounded with a pin |
+| ISC-3 | pass | `DeviceConnectionRegistry` and `ConnectionSessionGuard` are named enforcement points; no wire-sniff convention |
+| ISC-4 | hardware-blocked | Current macOS PIV session contention is 5/5 and multi-key contention is 3/3, but discovery is 2/5 because both OTP HID interfaces fail native open with `IOHIDDeviceOpen=0xE00002E2`; no rerun-until-green or weakened assertion |
+| ISC-5 | pass | Same-rig Linux before/after delta shows no material scan/session-open regression |
+| ISC-6 | pass | `ResetDeviceAsync_WithHidFidoPinnedSession_ThrowsNotSupportedException` passed on hardware with `Transport=HidFido`; `SmartCardBackend_DeviceResetAsync_SendsDeviceResetApdu` passed and pinned INS `0x1F` without resetting hardware |
+| ISC-7 | pass | RED evidence is recorded for behavior changes, including reproduced OTP refusal and Management/YubiOTP ghost-holder failures; invariant pins are identified separately |
+| ISC-8 | pass | Repository-published identity stability is unit-pinned and documented separately from fresh direct-scan IDs; no physical hotplug/tier-flip evidence claimed |
+
+**Phase 5 status: complete.** Architecture Mermaid source and rendered artifacts are refreshed by the
+repository render script; public XML docs and human/AI module guidance now expose discovery bounds,
+connection ownership, session reuse, and the CCID/OTP-exclusive versus FIDO-shared split.
+
+---
+
+## Phase 6 — Final cross-vendor CodeAudit dispositions (2026-08-04)
+
+The initial final CodeAudit used the router-selected **Anthropic** cross-vendor auditor. Its confirmed
+HIGH and MEDIUM findings were addressed below; LOW findings remain deferred or accepted unless the
+substantive fix naturally removed them. A follow-up review then found two residual lifecycle defects in
+the initial async-disposal correction; their RED/GREEN remediation is recorded separately below.
+
+### HIGH and MEDIUM findings
+
+| Finding | Disposition | Fix and evidence |
+|---|---|---|
+| H1 — async session disposal skipped derived managed cleanup | **Superseded by follow-up below** | The initial fix invoked `Dispose(disposing: true)` after awaited teardown and covered the successful path, but a throwing `DisposeAsyncCore` still bypassed derived managed cleanup. The follow-up replaces this with guaranteed cleanup inside the shared one-shot lifecycle. |
+| M2 — `ProtocolDeviceInfo` documented false connection ownership | **Fixed** | Remarks now state the actual borrowed-connection contract: only the protocol is disposed; the caller retains and must dispose the connection. |
+| M3 — `FidoSession` hid `DisposeAsync` and forced synchronous teardown | **Fixed** | The hidden method is removed. `FidoSession.DisposeAsyncCore` now clears its backend and delegates to the base async path. RED observed synchronous `Dispose` instead of `DisposeAsync`; GREEN proves one async connection disposal, zero synchronous disposals, and idempotence. |
+| M4 — PIV hardware assertion proved only a constant word | **Fixed and executed** | The assertion requires a non-empty quoted `pcsc:` member identity. `PivSessionContentionTests` passed 5/5 on the current macOS rig, including `ConnectAsync_SecondSmartCardConnection_WhilePivSessionOpen_IsRefused`. |
+| M5 — Management SCP transport XML docs were incomplete | **Fixed** | `CreateManagementSessionAsync` now documents SmartCard-only SCP, `NotSupportedException` for explicit HID overrides, forced SmartCard selection without an override, and no plaintext HID fallback when CCID is held. Existing transport-routing tests remain green. |
+
+### Focused verification
+
+TDD RED was captured first for all new disposal tests. After the minimal fixes, focused class runs
+passed **94/94** unit tests: Core 3, Oath 17, OpenPGP 5, SecurityDomain 26, Fido2 10, Piv 17, and
+Management 16. Hardware integration tests were intentionally not run.
+
+### Follow-up review — one-shot shared-completion disposal
+
+The follow-up review confirmed two remaining findings:
+
+1. **HIGH — failed async teardown skipped managed cleanup.** If `DisposeAsyncCore()` threw while
+   disposing an owned connection, control never reached `Dispose(disposing: true)`. OATH/OpenPGP
+   secret zeroing and SecurityDomain/FIDO terminal-state cleanup could therefore be skipped.
+2. **MEDIUM — virtual cleanup was re-enterable.** Repeated, mixed, or concurrent `Dispose()` and
+   `DisposeAsync()` calls could enter derived cleanup more than once. The base `_disposed` boolean
+   prevented repeated base work only after virtual dispatch had already re-entered the override, and it
+   did not provide a shared completion for concurrent callers.
+
+The RED command was:
+
+```text
+dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~ApplicationSessionDisposalTests"
+```
+
+All **5/5** tests failed for the predicted causal reasons: repeated sync, repeated async, and mixed
+disposal observed cleanup count `2` instead of `1`; the concurrent sync loser returned before the
+blocked async winner completed; and only the first caller observed the owned-connection async failure,
+while later callers returned successfully and managed cleanup had not run on the failing path.
+
+The minimal correction reuses Core's existing `DisposalGate`. Its lease parameter is now optional,
+without changing registered-connection behavior. Each `ApplicationSession` owns one gate. A synchronous
+winner invokes `Dispose(disposing: true)` once. An asynchronous winner awaits `DisposeAsyncCore()` and
+runs `Dispose(disposing: true)` in `finally`, preserving the original async teardown exception when
+managed cleanup succeeds. Every later or concurrent sync/async caller observes the same completion and
+same exception without re-entering virtual cleanup. `ReleaseConnection` remains independently
+idempotent as defense in depth, and `FidoSession` continues to override `DisposeAsyncCore` rather than
+hiding `DisposeAsync`.
+
+A final mechanical-hardening RED extended the same Core class from five to seven tests. The focused run
+reported **2 failed, 5 passed**: synchronous owned-connection failure left `ThrowIfDisposed` non-terminal,
+and a throwing protocol was disposed twice when async cleanup entered the managed `finally` path. The base
+managed cleanup now publishes `_disposed` from `finally`, so a failed synchronous teardown is terminal,
+and both sync/async paths capture and clear `Protocol` before invoking `Dispose()`. The first teardown
+exception therefore remains the gate's shared outcome and protocol disposal is never retried.
+
+The final reviewer RED extended the Core class from seven to eight tests. The focused run reported
+**1 failed, 7 passed** because synchronous protocol failure prevented `ReleaseConnection`: the owned
+connection disposal count remained `0`, and the live session guard would still refuse a successor.
+`Dispose(bool)` now nests release in `finally` beneath terminal-state publication. When release succeeds,
+the original protocol exception remains observable through the shared gate; the owned connection is
+disposed once, the guard is detached, and a subsequent probe session can attach to the deliberately
+reusable tracking fake.
+
+The final async analogue RED extended the Core class from eight to nine tests. The focused run reported
+**1 failed, 8 passed** because protocol failure skipped `ReleaseConnectionAsync`; outer managed cleanup
+then disposed the owned connection synchronously (`Dispose == 1`, `DisposeAsync == 0`).
+`DisposeAsyncCore` now awaits `ReleaseConnectionAsync` in `finally`. On successful release, the original
+protocol exception remains the shared outcome, protocol disposal runs once, owned connection disposal is
+asynchronous exactly once, outer managed cleanup observes the already-released state, terminal state is
+published, and a subsequent probe session can attach.
+
+Focused GREEN evidence totals **82/82** unique unit tests:
+
+| Command | Result |
+|---|---:|
+| `dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~ApplicationSessionDisposalTests"` | 9/9 |
+| `dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~DeviceConnectionRegistryTests"` | 11/11 |
+| `dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~ApplicationSessionScpTests"` | 3/3 |
+| `dotnet toolchain.cs -- test --project Oath --filter "FullyQualifiedName~OathSessionTests"` | 17/17 |
+| `dotnet toolchain.cs -- test --project OpenPgp --filter "FullyQualifiedName~OpenPgpSessionWireTests"` | 5/5 |
+| `dotnet toolchain.cs -- test --project SecurityDomain --filter "FullyQualifiedName~SecurityDomainSessionTests"` | 26/26 |
+| `dotnet toolchain.cs -- test --project Fido2 --filter "FullyQualifiedName~FidoSessionTests"` | 11/11 |
+
+Core owns the throwing-cleanup contract and counter-based concurrency matrix. The existing OATH and
+OpenPGP real-secret tests continue to prove their actual buffers are zeroed, so duplicate module-local
+fault-injection scaffolding was not added. FIDO adds the applet-specific failure regression: an owned
+connection's async exception is shared by repeated callers, async disposal is attempted once, and the
+session is terminal afterward.
+
+### LOW finding dispositions
+
+- **L6 — registry asymmetry:** harmless and released today; deferred unless a future correctness case
+  warrants changing it.
+- **L7 — duplicate switch defaults:** minor cleanup only; deferred.
+- **L8 — valid-type constructor throw:** currently unreachable; left documented as LOW.
+- **L9 — broad `ConnectionInUseException` fallback on a fresh connection:** currently unreachable;
+  deferred.
+- **L10 — metadata freeze:** accepted and already documented as the repository-object contract.
+
+### Completed full gates after disposal remediation
+
+The formerly deferred full gates were subsequently completed on this working tree:
+
+| Command | Result |
+|---|---|
+| `dotnet toolchain.cs build` | exit 0; 0 errors; 1 existing `CA2254` warning in `src/Cli.Shared/src/Logging/StaticLoggerExtensions.cs` |
+| `dotnet toolchain.cs test` | 1841 passed, 0 failed, 3 skipped |
+| `dotnet toolchain.cs -- resilience --fast` | 69/69 passed |
+| `dotnet format whitespace --verify-no-changes` | exit 0; clean |
+| `dotnet format style --verify-no-changes` | exit 0; clean |
+| `dotnet format analyzers --verify-no-changes --severity error` | exit 0; clean |
+| `git diff --check` | exit 0; clean |
+
+**Phase 6 status: complete.** Follow-up HIGH/MEDIUM disposal findings are remediated, focused tests and
+full gates are green with the one recorded pre-existing analyzer warning, and no LOW-only cleanup was
+taken. No merge, rebase, commit, or push is part of this work.
+
+---
+
+## Historical pre-review macOS gate — RSA-4096 cross-key liveness (2026-08-04)
+
+Two allow-listed firmware-5.8.0 devices were attached and selected by the test infrastructure:
+
+- serial 125 — `HidFido, SmartCard`, `UsbAKeychain`
+- serial 103 — `HidFido, SmartCard`, `UsbAKeychain`
+
+The exact matching command was:
+
+```text
+dotnet toolchain.cs -- test --integration --project Piv --filter
+  "FullyQualifiedName~Rsa4096Keygen_OnOneKey_DoesNotDelayPivOperationsOnAnotherKey"
+```
+
+Result: **1/1 passed in each of two matching runs**. The first test run took **1 minute 39 seconds**
+(toolchain **1 minute 46 seconds**); the final run after adding the hardware trait took **2 minutes
+20 seconds** (toolchain **2 minutes 26 seconds**). In each direction it established overlap after
+500 ms, completed a PIN-gated EccP256 signature on the other key within the four-second bound, asserted
+that RSA-4096 generation was still incomplete after the signature, then drained and validated the RSA
+public key. It repeated with the serial roles reversed. At that point cleanup reset both dedicated PIV
+applications sequentially; the independent-attempt remediation and current rerun are recorded below.
+
+The standard passing-test console logger does not print `ITestOutputHelper`'s per-direction stopwatch
+lines, so no finer timing is claimed than the mechanically observed four-second bounds and complete
+test duration. The important liveness evidence is ordering, not an absolute speed claim: each responsive
+operation completed while the other physical card's generation remained in flight.
+
+### Independent-review remediation and current hardware gates
+
+The follow-up review found that the prior headline hardware evidence predated OTP HID exclusivity and the
+final disposal/lease-release changes. The current code was therefore exercised sequentially against
+allow-listed serials 125 and 103, both firmware 5.8.0, without touch, insertion, removal, or user presence.
+
+| Exact filter | Current result |
+|---|---|
+| `Management --filter "FullyQualifiedName~ResetDeviceAsync_WithHidFidoPinnedSession_ThrowsNotSupportedException"` | 1/1 passed; session asserted `Transport=HidFido`, reset rejected in 858 ms |
+| `Piv --filter "FullyQualifiedName~PivSessionContentionTests"` | 5/5 passed in 6.21 s; includes revised M4 `pcsc:` identity assertion |
+| `Core --filter "FullyQualifiedName~CompositeDiscoveryIntegrationTests"` | 2 passed / 3 failed in 3.63 s; concrete native OTP HID blocker below |
+| `Piv --filter "FullyQualifiedName~PivMultiKeyContentionTests"` | 3/3 passed in 3m27s; RSA liveness 3m20s, complete toolchain 3m33s |
+
+The discovery failures were not rerun until green. Both OTP keyboard interfaces failed
+`IOHIDDeviceOpen` with `0xE00002E2`, so discovery conservatively returned two standalone `HidOtp` rows
+plus `ykphysical:125` and `ykphysical:103` with `HidFido, SmartCard`. Conservation and consecutive-scan
+stability passed; zero-orphans, completeness-per-PID, and typed-transport-connect failed for that exact
+reason. Process inspection found no testhost/vstest runner. IORegistry showed Yubico HID clients from
+WindowServer and Wispr Flow; that identifies live native clients but does not prove which client caused
+the exclusive-open refusal. A fresh process running only
+`ConnectAsync_TypedTransports_OnEveryReturnedDevice_Succeed` failed on its first OTP open, and independent
+`ykman --device 103 otp info` and `ykman --device 125 otp info` processes both reported `Failed opening
+device`. This rules out progressive connection retention from earlier tests in the class and reproduces
+the unavailable native OTP interface outside the SDK process; it does not identify which external client
+holds the interface. With user approval, Wispr Flow was then terminated completely and the five-test class
+was rerun once; it remained 2 passed / 3 failed with the same `IOHIDDeviceOpen=0xE00002E2` result and
+standalone OTP rows. Wispr Flow was reopened afterward. The failed independent `ykman` probes and unchanged
+result without Wispr Flow rule out this branch's in-process lease registry and Wispr Flow as the holder;
+WindowServer remained the observed native keyboard client. No assertion was weakened, and ISC-4 remains
+blocked rather than treating the platform condition as a passing gate.
+
+The RSA cleanup now attempts both PIV resets independently. If the test body fails, that original
+exception remains the thrown outcome; any cleanup failure is attached to its `Data` and written to test
+output. If the body passes, one cleanup failure is thrown directly and two are aggregated. The current
+3/3 hardware run exercised the success path and restored both PIV applications.
+
+Diagnostic TDD for exclusive interfaces produced authentic RED on both CCID and OTP HID refusal tests:
+the old message began `The SmartCard interface ...` and did not contain the required
+`exclusive interface '<deviceId>'`. After generalizing the registry message and public XML docs, the
+same focused Core command passed 2/2. ISC-6 added invariant coverage rather than a production fix: the
+SmartCard reset-APDU unit pin passed 1/1 and the HID-FIDO-pinned hardware test passed 1/1.
+
+Formatting remediation normalized the two previously failing files,
+`WithYubiKeyAttribute.cs` and `YubiOtpSessionIntegrationTests.cs`, through the repository formatter.
+Whole-workspace whitespace, style, and error-severity analyzer verification are clean:
+
+```text
+dotnet format whitespace --verify-no-changes
+dotnet format style --verify-no-changes
+dotnet format analyzers --verify-no-changes --severity error
+```
+
+The unqualified `dotnet format --verify-no-changes` no longer reports final-newline or style errors, but
+still exits nonzero on two unchanged trim/AOT warnings (`IL2026`, `IL3050`) in
+`src/Tests.TestProject/Program.cs:21`. They are unrelated to this task and were not suppressed or edited.
+Final documentation QA validated 55 active files, and `git diff --check` exited clean.

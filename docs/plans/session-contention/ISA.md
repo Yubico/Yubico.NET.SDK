@@ -914,7 +914,7 @@ hardware; F2 and F3 require unavailable platform evidence. ISC-2 passes.
 | ISC-1 | pass | `PivSessionContentionTests` hardware path plus interface/session acquisition pins; wording corrected to the knowledge available at each scope |
 | ISC-2 | pass | 21-row register: every P1/P2 covered or bounded with a pin |
 | ISC-3 | pass | `DeviceConnectionRegistry` and `ConnectionSessionGuard` are named enforcement points; no wire-sniff convention |
-| ISC-4 | hardware-blocked | Current macOS PIV session contention is 5/5 and multi-key contention is 3/3, but discovery is 2/5 because both OTP HID interfaces fail native open with `IOHIDDeviceOpen=0xE00002E2`; no rerun-until-green or weakened assertion |
+| ISC-4 | pass | macOS discovery is now 5/5 after USB re-enumeration cleared a wedged host IOKit HID state (the earlier 2/5 was not an SDK defect); PIV session contention 5/5, multi-key 7/7 smoke, YubiOtp 10/10, Management green, build 0 errors, formatting clean. Unblocking OTP HID exposed and fixed a leaked-connection defect in `YubiOtpSlotConfigTests` |
 | ISC-5 | pass | Same-rig Linux before/after delta shows no material scan/session-open regression |
 | ISC-6 | pass | `ResetDeviceAsync_WithHidFidoPinnedSession_ThrowsNotSupportedException` passed on hardware with `Transport=HidFido`; `SmartCardBackend_DeviceResetAsync_SendsDeviceResetApdu` passed and pinned INS `0x1F` without resetting hardware |
 | ISC-7 | pass | RED evidence is recorded for behavior changes, including reproduced OTP refusal and Management/YubiOTP ghost-holder failures; invariant pins are identified separately |
@@ -1089,7 +1089,7 @@ allow-listed serials 125 and 103, both firmware 5.8.0, without touch, insertion,
 |---|---|
 | `Management --filter "FullyQualifiedName~ResetDeviceAsync_WithHidFidoPinnedSession_ThrowsNotSupportedException"` | 1/1 passed; session asserted `Transport=HidFido`, reset rejected in 858 ms |
 | `Piv --filter "FullyQualifiedName~PivSessionContentionTests"` | 5/5 passed in 6.21 s; includes revised M4 `pcsc:` identity assertion |
-| `Core --filter "FullyQualifiedName~CompositeDiscoveryIntegrationTests"` | 2 passed / 3 failed in 3.63 s; concrete native OTP HID blocker below |
+| `Core --filter "FullyQualifiedName~CompositeDiscoveryIntegrationTests"` | Superseded: was 2 passed / 3 failed in 3.63 s; now 5/5 after USB re-enumeration. See "OTP HID unblocked" below |
 | `Piv --filter "FullyQualifiedName~PivMultiKeyContentionTests"` | 3/3 passed in 3m27s; RSA liveness 3m20s, complete toolchain 3m33s |
 
 The discovery failures were not rerun until green. Both OTP keyboard interfaces failed
@@ -1109,6 +1109,69 @@ standalone OTP rows. Wispr Flow was reopened afterward. The failed independent `
 result without Wispr Flow rule out this branch's in-process lease registry and Wispr Flow as the holder;
 WindowServer remained the observed native keyboard client. No assertion was weakened, and ISC-4 remains
 blocked rather than treating the platform condition as a passing gate.
+
+### OTP HID unblocked: ISC-4 now green, and the Wispr Flow line above is falsified
+
+A later session with the operator physically present resolved this. The keys were unplugged and replugged
+(a third, non-allow-listed production key was briefly attached and removed before any test ran). With no
+SDK change, `ykman --device 103 otp info` and `ykman --device 125 otp info` both succeeded, and
+`Core --filter "FullyQualifiedName~CompositeDiscoveryIntegrationTests"` passed **5/5 in 1.58 s**, including
+`ConnectAsync_TypedTransports_OnEveryReturnedDevice_Succeed`. **ISC-4 is verified on macOS.**
+
+The recorded hypothesis above is falsified, and the falsifying evidence is explicit: Wispr Flow was
+**running** (PID 29856) during the green run, and had been **terminated** during the red runs. It cannot be
+the holder; if anything the correlation is inverted. Supporting facts: `0xE00002E2` decodes to
+`kIOReturnNotPermitted`; the SDK opens OTP HID with `options = 0`, i.e. non-seizing
+(`MacOSHidFeatureReportConnection.cs:117`) — only FIDO seizes with `0x01`
+(`MacOSHidIOReportConnection.cs:150`); no orphaned testhost process existed in either state; and an
+independent non-SDK process (`ykman`) failed and later recovered in lockstep with the SDK. The only
+variable that changed was USB re-enumeration.
+
+Root cause: **wedged host-side IOKit HID state for those two keyboard interfaces, cleared by re-enumeration.
+Not an SDK defect, and not attributable to any identified application.** It remains unidentified which
+client (if any) wedged the interface, so this is a known-recoverable platform hazard, not a closed
+investigation. Operator remedy: replug the key.
+
+### Defect this unmasked: leaked OTP HID connection in YubiOtpSlotConfigTests
+
+Because OTP HID could not be opened at all, every OTP-HID-dependent test had been silently unexercised.
+With the interface working, `YubiOtp` integration went **6 passed / 4 failed**: the first HidOtp test passed
+in 698 ms and every later HidOtp open failed in `< 1 ms` with `ConnectionInUseException` on
+`hid:4367418413:0006`.
+
+This was a genuine test defect that this branch's OTP HID exclusivity exposed, not a product regression.
+All four tests in `YubiOtpSlotConfigTests` created the connection themselves but bound it to a plain local:
+
+```csharp
+var connection = await state.Device.ConnectAsync<IOtpHidConnection>();   // test owns it
+await using var session = await YubiOtpSession.CreateAsync(connection);  // session only borrows it
+```
+
+`Session.CreateAsync(connection)` borrows; only `IYubiKey.Create<App>SessionAsync()` owns. So each test
+leaked the connection and held the exclusive OTP HID lease for the process lifetime — exactly the hazard
+named in gotcha 2 of `src/Core/CLAUDE.md`. It was harmless while OTP HID was shared and became fatal when
+this branch made it exclusive. Fix: `await using var connection = ...` in all four tests; no production
+code and no assertion changed. The product contract is confirmed correct — it refused precisely what it
+promises to refuse.
+
+A repository-wide sweep for the same pattern found no other occurrence. The remaining matches are
+deliberate: `ConnectionOwnershipContractTests` holds a first connection on purpose to pin exclusivity, and
+`CompositeYubiKeyTests` asserts throws.
+
+### Re-verification after the fix (macOS, serials 103 and 125, no touch)
+
+| Exact command | Result |
+|---|---|
+| `test --integration --project Core --smoke --filter "…CompositeDiscoveryIntegrationTests"` | 5/5 in 1.58 s |
+| `test --integration --project YubiOtp --smoke` | 10/10; all four HidOtp slot-config tests green |
+| `test --integration --project Management --smoke` | All passed; newly reachable `Conn=HidOtp` variants green (`ManagementHidConcurrencyTests` 2 s, `GetDeviceInfo_AllTransports` 420 ms) |
+| `test --integration --project Piv --smoke --filter "…PivSessionContentionTests\|…PivMultiKeyContentionTests"` | 7/7 |
+| `build` | 0 errors |
+| `dotnet format whitespace \| style \| analyzers --verify-no-changes --severity error` | Clean |
+
+`Rsa4096Keygen_OnOneKey_DoesNotDelayPivOperationsOnAnotherKey` is `Slow`-tagged
+(`PivMultiKeyContentionTests.cs:193`) and is therefore excluded by `--smoke`; its 3/3 evidence above stands
+from the earlier unfiltered run.
 
 The RSA cleanup now attempts both PIV resets independently. If the test body fails, that original
 exception remains the thrown outcome; any cleanup failure is attached to its `Data` and written to test

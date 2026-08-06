@@ -124,11 +124,26 @@ register has zero open rows and zero platform gaps.
 
 ### Remaining hardware item (operator-coordinated)
 
-1. **E1/E2 — physical DeviceId tier flip. IN PROGRESS ON WINDOWS — do not start a second attempt on macOS.**
-   Needs two same-PID keys inserted/removed. Currently pinned by repository unit tests only; ISA records it
-   as "planned, not run". The Windows rig has two same-PID firmware-5.8.0 keys (103/125), which is the
-   cleaner rig for it — macOS cannot host it while the OTP fault distorts the discovered topology. Pick up
-   its result from the Windows session.
+1. **E1/E2 — physical DeviceId tier flip. MUST RUN PER PLATFORM. Windows run in progress; macOS and Linux
+   runs are still required.** Needs two same-PID keys inserted/removed. Currently pinned by repository unit
+   tests only; ISA records it as "planned, not run".
+
+   **A Windows pass does not transfer.** The merge tiers are platform-divergent by construction:
+   `CompositeDeviceMerger` tier 1 is Windows **Container ID** topology evidence, which
+   `ProtocolDeviceInfo` documents as `null` "always on macOS and Linux", and the merger's own comment
+   states that absent topology "degrades to exactly the macOS/Linux semantics". Windows can therefore
+   produce a `ykphysical:topology:{key}` identity from a code path that does not exist on the other two
+   platforms, while macOS/Linux fall through to the serial/PID tiers. E1/E2 asks what the DeviceId does
+   across a tier flip, so it is measuring precisely the thing that differs.
+
+   If anything the macOS/Linux run matters **more**: it exercises the degraded path where a phantom
+   incumbent add/remove is most plausible, and `docs/architecture/device-discovery-guarantees.md:202-206`
+   already records macOS/Linux HID-to-HID topology as unimplemented and the Windows topology tier as
+   validated only at seam level.
+
+   Sequencing note: macOS cannot host a clean run while the OTP fault distorts the discovered interface
+   set, so do the macOS run after the OTP blocker is resolved — not before, and do not substitute the
+   Windows result for it.
 
 ### Canonical-verification queue (no hardware needed)
 

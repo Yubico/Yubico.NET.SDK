@@ -94,11 +94,14 @@ that reading separately.
 
 ## Residual — not covered by this effort
 
-Hardware evidence now spans macOS (firmware 5.8.0, two-key same-PID rig) and Linux (firmware 5.4.3,
-one- and two-key runs). Linux is complete for the standing gates recorded below. Windows PC/SC
-sharing, Windows HID behavior, and physical validation of Windows topology correlation remain
-platform gaps. The macOS physical HID FIDO double-open case also remains a human-coordinated
-platform gap. Cross-process contention is unchanged and out of scope.
+Hardware evidence now spans macOS (firmware 5.8.0, two-key same-PID rig), Linux (firmware 5.4.3,
+one- and two-key runs), and Windows 11 (firmware 5.8.0, two-key same-PID rig, serials 103 and 125).
+Windows PC/SC sharing under contention (F3), Windows HID sharing (F2), and Windows typed-transport
+connect are now verified on hardware — see Phase 11, which also found and fixed a real Windows OTP HID
+open defect. The macOS physical HID FIDO double-open case is closed (Phase 9). Cross-process contention
+is unchanged and out of scope. One residual Windows characterization, not a defect: the CCID-held
+Management fallback routes through FIDO HID, which Windows admits only to an elevated process, so that
+specific fallback requires Administrator on Windows (Phase 11).
 
 ---
 
@@ -1428,3 +1431,99 @@ terminal), and `sudo` inherits that context rather than bypassing it. The test i
 rather than negative.
 
 The cause remains unresolved, with the exclusions listed in addendum 1 unchanged.
+
+---
+
+## Phase 11 — Windows verification, and a real Windows OTP HID defect fixed (2026-08-06)
+
+The last two register rows, F2 and F3, were platform gaps solely because no Windows rig had run them.
+This phase closes both on Windows 11 hardware (firmware 5.8.0, two same-PID keys, serials 103 and 125),
+generalizes F4 from a macOS bound to a cross-platform one, and fixes a genuine Windows-only defect the
+verification surfaced. All runs used the `dotnet toolchain.cs` runner.
+
+### A prerequisite the platform imposes: FIDO HID needs elevation on Windows
+
+The first F3 run was **non-elevated** and produced two failures, both `UnauthorizedAccessException` opening
+the FIDO HID interface:
+
+```
+Access denied opening HID device '\\?\HID#VID_1050&PID_0407&MI_01#...'.
+Windows denied access to the HID interface. ...
+```
+
+This is not an SDK defect. When a PIV session holds the CCID interface, `GetDeviceInfoAsync` /
+`CreateManagementSessionAsync` fall back off SmartCard along the documented order `SmartCard → HidFido →
+HidOtp`. FIDO HID uses INPUT/OUTPUT reports (`ReadFile`/`WriteFile`), and Windows restricts read/write on
+the FIDO top-level collection to elevated processes. So on Windows this specific CCID-held Management
+fallback requires Administrator. Re-run under an elevated shell, F3 passed **5/5**, including
+`ConnectAsync_SecondSmartCardConnection_WhilePivSessionOpen_IsRefused`, whose message assertion confirms
+the Windows PC/SC identity is surfaced as `pcsc:...` under contention exactly as on macOS/Linux. This is
+recorded as a Windows characterization, not a code change: weakening or reordering the documented fallback
+to dodge elevation was explicitly not done.
+
+### F2 — Windows HID sharing, and F4 is cross-platform, not macOS-specific
+
+`FidoHidSharingIntegrationTests` passed **3/3** elevated. The load-bearing result is that
+`SendOnFirst_ReceiveOnSecond_RevealsReportMisrouting` **passed on Windows too**: a CTAPHID_INIT sent on the
+first FIDO handle was read back on the second. The handoff hypothesis was that Windows might demultiplex
+(making the test fail, a good outcome). It does not. Windows behaves like macOS — two FIDO handles are
+admitted but input reports are not routed per handle. **F4 is therefore a cross-platform bound**, not a
+macOS quirk: drive CTAP over one FIDO connection at a time on every platform. The test was left asserting
+misrouting; it was not "fixed" to stay green.
+
+### Defect: Windows OTP HID feature connection opened the keyboard collection read/write
+
+`CompositeDiscoveryIntegrationTests` failed 1/5 on `ConnectAsync_TypedTransports_OnEveryReturnedDevice_Succeed`,
+and this one **was** an SDK defect — reproducible even elevated:
+
+```
+Access denied opening HID device '\\?\HID#VID_1050&PID_0407&MI_00#...\KBD'. ...
+   at HidDDevice.OpenHandleWithAccess(...)          # GENERIC_READ | GENERIC_WRITE
+   at HidDDevice.OpenReadWriteHandle()
+   at HidDDevice.OpenReportConnection()
+   at HidDDevice.OpenFeatureConnection()
+   at WindowsHidFeatureReportConnection..ctor(...)
+   at HidYubiKey.CreateOtpConnection()
+```
+
+The YubiKey OTP interface is a **keyboard** top-level collection (`MI_00 ... \KBD`). The OTP protocol over
+Windows uses only HID **feature reports** — `WindowsHidFeatureReportConnection` calls exclusively
+`HidD_GetFeature`/`HidD_SetFeature`, which are IOCTLs and succeed on a **zero-access** handle. But
+`HidDDevice.OpenFeatureConnection()` routed through `OpenReportConnection()` →
+`OpenReadWriteHandle()`, opening with `GENERIC_READ | GENERIC_WRITE`. Windows refuses read/write on the
+system keyboard collection even for an elevated process (anti-keylogger restriction), so OTP HID could not
+be opened at all on Windows — which would make this branch's central "OTP HID is exclusive" contract
+untestable and OTP-over-HID unusable on the platform.
+
+**RED, for the predicted reason.** The failure was an access-denied on the read/write open of the keyboard
+collection, while the constructor's metadata probe — which opens the *same* device path with
+`DESIRED_ACCESS.NONE` (line 191) — had already succeeded. That is direct proof a zero-access handle opens on
+that path and a read/write handle does not, isolating the desired-access flag as the cause rather than
+sharing, elevation, or enumeration.
+
+**Fix.** `src/Core/src/Native/Windows/HidD/HidDDevice.cs`: split the two report-open paths by the access
+they actually need. `OpenIOConnection()` (FIDO input/output reports) keeps `GENERIC_READ | GENERIC_WRITE`;
+`OpenFeatureConnection()` (OTP feature reports) now opens with `DESIRED_ACCESS.NONE`. Feature-report IOCTLs
+need no read/write access, so this is sufficient and it sidesteps the keyboard restriction. This matches the
+legacy Yubico .NET SDK, which likewise opens the feature connection with zero desired access.
+
+### GREEN and standing gates after the fix (Windows, elevated, serials 103/125)
+
+| Gate | Result |
+|---|---|
+| `toolchain.cs build` | 0 errors |
+| `CompositeDiscoveryIntegrationTests` | 5/5 (was 4/5) |
+| `PivSessionContentionTests` (F3) | 5/5 |
+| `FidoHidSharingIntegrationTests` (F2) | 3/3 |
+| `YubiOtp` integration `--smoke` | 10/10, incl. `CalculateHmacSha1_WithKnownKey...` over **HidOtp** — proves OTP feature reports work end-to-end on Windows now |
+| `resilience --fast` | 69/69 |
+| full Core unit suite | 740/740 (2 skipped) |
+| `dotnet format whitespace \| analyzers --severity error` | clean |
+
+`dotnet format style --verify-no-changes --severity error` still exits 2, but only on pre-existing native
+P/Invoke naming (`IDE1006` on `kern_return_t`, `udev_device_get_parent`, `udev_device_get_syspath` in
+`Native/MacOS` and `Native/Linux`) — not the changed file. The fix touches only `HidDDevice.cs`, which is
+clean.
+
+This satisfies ISC-7 for the fix (RED for the predicted reason, then GREEN) and leaves ISC-4's standing
+gates green on a third platform. The register's last two platform gaps are closed.

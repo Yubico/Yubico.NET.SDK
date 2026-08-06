@@ -17,9 +17,9 @@ stated in/out reasoning is something you can disagree with line by line.
 Status values: `open` · `investigating` · `covered` · `bounded` (documented bound + pinning test)
 · `platform-gap` (needs hardware we do not have) · `out`
 
-Hardware evidence spans macOS (two same-PID firmware-5.8.0 keys, serials 103 and 125) and Linux
-(firmware-5.4.3 keys 9681620 and 20260533). Windows remains unavailable. Test names below are exact
-repository method names; paths are relative to the repository root.
+Hardware evidence spans macOS (two same-PID firmware-5.8.0 keys, serials 103 and 125), Linux
+(firmware-5.4.3 keys 9681620 and 20260533), and Windows 11 (the same firmware-5.8.0 serials 103 and 125).
+Test names below are exact repository method names; paths are relative to the repository root.
 
 ---
 
@@ -71,9 +71,10 @@ repository method names; paths are relative to the repository root.
 | # | Case | Tier | Status | Test |
 |---|---|---|---|---|
 | F1 | macOS physical HID FIDO double-open (`IOHIDDeviceOpen` options `0x01`) | P3 | covered | Closed on macOS hardware and it found a real defect. Seizing made the platform refuse the second open with `kIOReturnExclusiveAccess` (`0xE00002C5`) while the lease admitted it, so the shared-FIDO contract was false. Fixed by opening non-seizing, matching both canonical implementations. Pinned by `src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/FidoHidSharingIntegrationTests.cs`: `ConnectAsync_SecondConcurrentFidoHidConnection_IsAdmitted` (regression pin) with `ConnectAsync_SingleFidoHidConnection_CompletesCtapHidInit` as the baseline |
-| F4 | Two FIDO HID handles do not demultiplex input reports | P2 | bounded | Discovered while closing F1. Shared FIDO admits a second connection but the transport does not route input reports per handle: on macOS, CTAPHID_INIT sent on one handle is readable on the other. Bound: drive CTAP over one FIDO connection at a time. Pinned by `FidoHidSharingIntegrationTests.SendOnFirst_ReceiveOnSecond_RevealsReportMisrouting`, which passes precisely because the report is misrouted and will fail if the transport ever demultiplexes |
-| F2 | Platform-divergent HID sharing semantics | P3 | platform-gap | Linux hardware gates are broader: FIDO HID is shared and OTP HID is SDK-exclusive. Windows behavior remains unverified |
-| F3 | Windows PC/SC sharing semantics under contention | P3 | platform-gap | Requires Windows hardware; seam-level in-process ownership is platform-independent, but native PC/SC behavior is unverified |
+| F4 | Two FIDO HID handles do not demultiplex input reports | P2 | bounded | Discovered while closing F1; confirmed cross-platform in Phase 11. Shared FIDO admits a second connection but the transport does not route input reports per handle: on both macOS and Windows, CTAPHID_INIT sent on one handle is readable on the other. Bound: drive CTAP over one FIDO connection at a time on every platform. Pinned by `FidoHidSharingIntegrationTests.SendOnFirst_ReceiveOnSecond_RevealsReportMisrouting`, which passes precisely because the report is misrouted and will fail if the transport ever demultiplexes |
+| F2 | Platform-divergent HID sharing semantics | P3 | covered | Verified on all three platforms. Linux and macOS: FIDO HID shared, OTP HID SDK-exclusive. Windows (Phase 11, elevated, serials 103/125): `FidoHidSharingIntegrationTests` 3/3 — FIDO HID admits a second connection and, like macOS, does not demultiplex (see F4). OTP HID is openable on Windows after the Phase 11 feature-report open fix (row F5) |
+| F3 | Windows PC/SC sharing semantics under contention | P3 | covered | Closed on Windows hardware (Phase 11). `PivSessionContentionTests` 5/5 elevated, including `ConnectAsync_SecondSmartCardConnection_WhilePivSessionOpen_IsRefused`, whose message assertion confirms the Windows PC/SC identity surfaces as `pcsc:...` under contention. Characterization, not a defect: the CCID-held Management fallback routes through FIDO HID, which Windows admits only to an elevated process, so that fallback requires Administrator on Windows |
+| F5 | Windows OTP HID feature connection opened the keyboard collection read/write | P2 | covered | Found and fixed in Phase 11. The OTP interface is a keyboard top-level collection and the OTP protocol uses only HID feature-report IOCTLs (`HidD_GetFeature`/`SetFeature`), which succeed on a zero-access handle; but `HidDDevice.OpenFeatureConnection()` opened it `GENERIC_READ | GENERIC_WRITE`, which Windows refuses on the system keyboard even when elevated, so OTP HID could not be opened at all. Fix in `src/Core/src/Native/Windows/HidD/HidDDevice.cs`: open the feature connection with `DESIRED_ACCESS.NONE` (IO/FIDO connection stays read/write), matching the legacy Yubico .NET SDK. Pinned by `CompositeDiscoveryIntegrationTests.ConnectAsync_TypedTransports_OnEveryReturnedDevice_Succeed` (was RED with access-denied, now 5/5) and end-to-end by `YubiOtpSessionIntegrationTests.CalculateHmacSha1_WithKnownKey_ReturnsExpectedResponse` over HidOtp |
 
 ---
 
@@ -92,18 +93,21 @@ repository method names; paths are relative to the repository root.
 | Tier | Total | Covered | Bounded | Platform gap | Open |
 |---|---|---|---|---|---|
 | P1 | 5 | 5 | 0 | 0 | 0 |
-| P2 | 13 | 10 | 3 | 0 | 0 |
-| P3 | 4 | 2 | 0 | 2 | 0 |
-| **In scope** | **22** | **17** | **3** | **2** | **0** |
+| P2 | 14 | 11 | 3 | 0 | 0 |
+| P3 | 4 | 4 | 0 | 0 | 0 |
+| **In scope** | **23** | **20** | **3** | **0** | **0** |
 
-ISC-2 passes: every P1/P2 row is covered or has a documented bound and pinning test. **No open rows
-remain.** D3 was closed by an operator-coordinated hotplug run on macOS hardware. The only residual items
-are F2 and F3, which require Windows hardware this effort does not have.
+ISC-2 passes: every P1/P2 row is covered or has a documented bound and pinning test. **No open rows and
+no platform gaps remain.** D3 was closed by an operator-coordinated hotplug run on macOS hardware. F2 and
+F3 were closed on Windows hardware in Phase 11, which also generalized F4 from a macOS bound to a
+cross-platform one and added F5 — a real Windows OTP HID open defect, found by the verification and fixed.
 
 F1 moved from platform gap to covered on macOS hardware, and closing it produced a production fix plus one
-new bounded row (F4). F2's claim of platform-divergent HID sharing now has direct evidence rather than
-inference: Linux shared FIDO HID with no change, while macOS refused the second open until the seizing
-open was corrected.
+new bounded row (F4). F2's claim of platform-divergent HID sharing now has direct evidence on all three
+platforms: Linux and macOS shared FIDO HID, and Windows admits a second FIDO connection while (like macOS)
+not demultiplexing input reports. F5 is the second production fix this cross-platform verification produced:
+OTP HID feature reports must open the keyboard collection with zero desired access, because Windows refuses
+read/write on the system keyboard even for an elevated process.
 
 ## Completed strengthening — two-key long-operation liveness
 

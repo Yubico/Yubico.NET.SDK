@@ -17,7 +17,7 @@ YubiHSM Auth, and device management.
 ## Install (prerelease)
 
 ```bash
-dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.1
+dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.2
 ```
 
 Alpha packages are distributed from a public, anonymous feed — no authentication

@@ -1,4 +1,4 @@
-# Yubico .NET SDK v2 — `2.0.0-alpha.1`
+# Yubico .NET SDK v2 — `2.0.0-alpha.2`
 
 > ## ⚠️ ALPHA — NOT FOR PRODUCTION
 >
@@ -17,7 +17,7 @@ Add the alpha feed (keep nuget.org enabled so transitive dependencies such as
 
 ```bash
 dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
-dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.1
+dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.2
 ```
 
 ### Optional: bootstrap script
@@ -27,13 +27,13 @@ run it** — do not pipe it straight into your shell:
 
 ```bash
 # macOS / Linux
-curl -fsSLO https://github.com/Yubico/Yubico.NET.SDK/releases/download/v2.0.0-alpha.1/install-yubikit-alpha.sh
+curl -fsSLO https://github.com/Yubico/Yubico.NET.SDK/releases/download/v2.0.0-alpha.2/install-yubikit-alpha.sh
 # review install-yubikit-alpha.sh, then:
 bash install-yubikit-alpha.sh
 ```
 ```powershell
 # Windows
-iwr https://github.com/Yubico/Yubico.NET.SDK/releases/download/v2.0.0-alpha.1/install-yubikit-alpha.ps1 -OutFile install-yubikit-alpha.ps1
+iwr https://github.com/Yubico/Yubico.NET.SDK/releases/download/v2.0.0-alpha.2/install-yubikit-alpha.ps1 -OutFile install-yubikit-alpha.ps1
 # review install-yubikit-alpha.ps1, then:
 ./install-yubikit-alpha.ps1
 ```
@@ -44,7 +44,7 @@ prompt), so download-and-run is the supported path.
 ## Packages (10)
 
 `Yubico.YubiKit.Core`, `.Management`, `.Piv`, `.Fido2`, `.WebAuthn`, `.Oath`,
-`.YubiOtp`, `.OpenPgp`, `.SecurityDomain`, `.YubiHsm` — all `2.0.0-alpha.1`.
+`.YubiOtp`, `.OpenPgp`, `.SecurityDomain`, `.YubiHsm` — all `2.0.0-alpha.2`.
 
 ## Updates
 

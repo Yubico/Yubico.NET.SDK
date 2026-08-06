@@ -6,7 +6,7 @@ name: Publish Alpha NuGet Feed (2.0)
 #
 # The feed is regenerated fresh each run and deployed as a full mirror
 # (keep_files: false), so gh-pages always exactly reflects the current alpha
-# packages. With a single pinned version (2.0.0-alpha.1) this is deterministic
+# packages. With a single pinned version (2.0.0-alpha.2) this is deterministic
 # and self-healing. To retain multiple coexisting versions later, the feed must
 # be generated against the previously published feed state (not a fresh init).
 
@@ -48,7 +48,7 @@ jobs:
         run: dotnet toolchain.cs build
 
       - name: Pack NuGet packages
-        run: dotnet toolchain.cs pack --package-version 2.0.0-alpha.1
+        run: dotnet toolchain.cs pack --package-version 2.0.0-alpha.2
 
       - name: Attest build provenance for packages
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
@@ -59,7 +59,7 @@ jobs:
         run: dotnet tool install -g sleet
 
       - name: Generate static feed
-        # Single pinned version (2.0.0-alpha.1): always generate a fresh, complete
+        # Single pinned version (2.0.0-alpha.2): always generate a fresh, complete
         # feed. Combined with keep_files:false below, gh-pages is an authoritative
         # mirror of publish/ — deterministic and self-healing, no stale catalog.
         run: |

@@ -64,7 +64,7 @@ jobs:
         run: dotnet toolchain.cs -- resilience --fast
 
       - name: Pack NuGet packages
-        run: dotnet toolchain.cs pack --package-version 2.0.0-alpha.1
+        run: dotnet toolchain.cs pack --package-version 2.0.0-alpha.2
 
       - name: Attest build provenance for packages
         if: github.event_name == 'push'

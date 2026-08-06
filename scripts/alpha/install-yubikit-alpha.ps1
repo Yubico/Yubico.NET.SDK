@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 
 $FeedUrl = 'https://yubico.github.io/Yubico.NET.SDK/alpha/index.json'
 $SrcName = 'yubikit-alpha'
-$Version = '2.0.0-alpha.1'
+$Version = '2.0.0-alpha.2'
 
 Write-Host '============================================================'
 Write-Host ' Yubico .NET SDK v2 - ALPHA'

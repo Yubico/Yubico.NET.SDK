@@ -16,7 +16,7 @@ var app = new CommandApp();
 app.Configure(config =>
 {
     config.SetApplicationName("yk");
-    config.SetApplicationVersion("2.0.0-alpha.1");
+    config.SetApplicationVersion("2.0.0-alpha.2");
     config.SetInterceptor(new YkCommandInterceptor());
 
     // ── Management ───────────────────────────────────────────────────────────

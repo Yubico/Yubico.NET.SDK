@@ -5,7 +5,7 @@ set -euo pipefail
 
 FEED_URL="https://yubico.github.io/Yubico.NET.SDK/alpha/index.json"
 SRC_NAME="yubikit-alpha"
-VERSION="2.0.0-alpha.1"
+VERSION="2.0.0-alpha.2"
 
 cat <<'BANNER'
 ============================================================

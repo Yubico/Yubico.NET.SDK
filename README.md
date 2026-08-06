@@ -2,7 +2,7 @@
 
 > ## ⚠️ v2 ALPHA — NOT FOR PRODUCTION
 >
-> The v2 SDK (`2.0.0-alpha.1`, `yubikit` branch) is a **pre-release alpha**. It is
+> The v2 SDK (`2.0.0-alpha.2`, `yubikit` branch) is a **pre-release alpha**. It is
 > **subject to change** and has **not yet completed Yubico's formal security audit**.
 > **No security guarantees** are made until that audit is complete. Package names and
 > namespaces may change. Provided for **evaluation and hackathon use only**.
@@ -32,7 +32,7 @@ YubiKey is a hardware authentication device that supports multiple protocols and
 
 ## Installation
 
-> **Alpha:** `2.0.0-alpha.1` is distributed from a public, anonymous prerelease
+> **Alpha:** `2.0.0-alpha.2` is distributed from a public, anonymous prerelease
 > feed (not nuget.org). Add the feed first, then install the explicit alpha version.
 > Keep nuget.org enabled so transitive dependencies (e.g. `Yubico.NativeShims`)
 > resolve. Full details in the [release notes](scripts/alpha/RELEASE_NOTES.md).
@@ -42,13 +42,13 @@ YubiKey is a hardware authentication device that supports multiple protocols and
 dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
 
 # 2. Core library (required)
-dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.1
+dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.2
 
 # 3. Application modules (install as needed)
-dotnet add package Yubico.YubiKit.Piv --version 2.0.0-alpha.1
-dotnet add package Yubico.YubiKit.Fido2 --version 2.0.0-alpha.1
-dotnet add package Yubico.YubiKit.Oath --version 2.0.0-alpha.1
-dotnet add package Yubico.YubiKit.Management --version 2.0.0-alpha.1
+dotnet add package Yubico.YubiKit.Piv --version 2.0.0-alpha.2
+dotnet add package Yubico.YubiKit.Fido2 --version 2.0.0-alpha.2
+dotnet add package Yubico.YubiKit.Oath --version 2.0.0-alpha.2
+dotnet add package Yubico.YubiKit.Management --version 2.0.0-alpha.2
 ```
 
 ## Quick Start

@@ -13,6 +13,12 @@ Write-Host ' by Yubico. No security guarantees. Package names/namespaces'
 Write-Host ' may change. Evaluation / hackathon use only.'
 Write-Host '============================================================'
 
+# Confirmation. If not interactive (e.g. piped `iwr | iex`), refuse rather than
+# consuming the piped script as input. Download and run instead.
+if ([System.Console]::IsInputRedirected) {
+    Write-Error 'Run this script from a terminal (download it first), not via a pipe (iwr | iex).'
+    exit 1
+}
 $reply = Read-Host 'Add the alpha feed and continue? [y/N]'
 if ($reply -ne 'y' -and $reply -ne 'Y') { Write-Host 'Aborted.'; exit 1 }
 

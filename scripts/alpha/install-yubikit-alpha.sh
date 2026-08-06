@@ -16,6 +16,13 @@ cat <<'BANNER'
 ============================================================
 BANNER
 
+# Confirmation. If not attached to a terminal (e.g. piped `curl | bash`), refuse
+# rather than silently consuming the piped script as input. Download and run instead.
+if [ ! -t 0 ]; then
+  echo "ERROR: run this script from a terminal (download it first), not via a pipe." >&2
+  echo "  curl -fsSLO <url> && bash install-yubikit-alpha.sh" >&2
+  exit 1
+fi
 read -r -p "Add the alpha feed and continue? [y/N] " reply
 case "$reply" in
   [yY]) ;;
@@ -39,6 +46,8 @@ if command -v gh >/dev/null 2>&1; then
     else
       echo "WARNING: provenance verification failed or unavailable for this alpha. Continuing."
     fi
+  else
+    echo "WARNING: could not download package for provenance check. Continuing."
   fi
   rm -rf "$tmp"
 else

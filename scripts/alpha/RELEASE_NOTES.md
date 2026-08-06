@@ -20,19 +20,26 @@ dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json
 dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.1 --prerelease
 ```
 
-Or use the bootstrap script:
+### Optional: bootstrap script
+
+Prefer the manual command above. If you want the script, **download, review, then
+run it** — do not pipe it straight into your shell:
 
 ```bash
 # macOS / Linux
-curl -fsSL https://github.com/Yubico/Yubico.NET.SDK/releases/download/v2.0.0-alpha.1/install-yubikit-alpha.sh | bash
+curl -fsSLO https://github.com/Yubico/Yubico.NET.SDK/releases/download/v2.0.0-alpha.1/install-yubikit-alpha.sh
+# review install-yubikit-alpha.sh, then:
+bash install-yubikit-alpha.sh
 ```
 ```powershell
 # Windows
-iwr https://github.com/Yubico/Yubico.NET.SDK/releases/download/v2.0.0-alpha.1/install-yubikit-alpha.ps1 | iex
+iwr https://github.com/Yubico/Yubico.NET.SDK/releases/download/v2.0.0-alpha.1/install-yubikit-alpha.ps1 -OutFile install-yubikit-alpha.ps1
+# review install-yubikit-alpha.ps1, then:
+./install-yubikit-alpha.ps1
 ```
 
-Piping a remote script to your shell is itself a trust decision — the non-piped
-`dotnet nuget add source` command above is the manual, inspectable equivalent.
+The scripts refuse to run when piped (they require a terminal for the confirmation
+prompt), so download-and-run is the supported path.
 
 ## Packages (10)
 

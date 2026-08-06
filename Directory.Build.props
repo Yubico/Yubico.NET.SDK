@@ -48,11 +48,12 @@
         <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts</PackageOutputPath>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-        <!-- Alpha disclaimer (single source of truth). Surfaced via PackageReadmeFile
-             (package page) and PackageReleaseNotes (plain-text fallback). Remove when
-             the SDK exits alpha and completes the formal security audit. -->
+        <!-- Alpha disclaimer surfaced in package metadata via PackageReadmeFile
+             (package page) and PackageReleaseNotes (plain-text fallback). The
+             canonical long-form text lives in PACKAGE_README.md; keep these aligned.
+             Remove when the SDK exits alpha and completes the formal security audit. -->
         <PackageReadmeFile>PACKAGE_README.md</PackageReadmeFile>
-        <PackageReleaseNotes>ALPHA - NOT FOR PRODUCTION. Pre-release, subject to change, and not yet security-audited by Yubico. No security guarantees. Package names/namespaces may change. Evaluation / hackathon use only.</PackageReleaseNotes>
+        <PackageReleaseNotes>ALPHA - NOT FOR PRODUCTION. Pre-release, unsigned, subject to change, and not yet security-audited by Yubico. No security guarantees. Package names/namespaces may change. Evaluation / hackathon use only.</PackageReleaseNotes>
     </PropertyGroup>
 
     <!-- Ship the shared alpha PACKAGE_README.md in every packable package's root. -->

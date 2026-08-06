@@ -4,10 +4,11 @@ name: Publish Alpha NuGet Feed (2.0)
 # gh-pages branch (served at https://yubico.github.io/Yubico.NET.SDK/alpha/).
 # Runs only on pushes to yubikit.
 #
-# The feed is rebuilt from the packages produced by this run. With a single pinned
-# version (2.0.0-alpha.1) each run simply refreshes that version. If multiple alpha
-# versions must coexist, seed feed-output from the live published feed before pushing
-# (see "Seed from published feed" step) so prior versions are retained in the catalog.
+# The feed is regenerated fresh each run and deployed as a full mirror
+# (keep_files: false), so gh-pages always exactly reflects the current alpha
+# packages. With a single pinned version (2.0.0-alpha.1) this is deterministic
+# and self-healing. To retain multiple coexisting versions later, the feed must
+# be generated against the previously published feed state (not a fresh init).
 
 on:
   push:
@@ -57,25 +58,13 @@ jobs:
       - name: Install Sleet
         run: dotnet tool install -g sleet
 
-      - name: Restore existing feed from gh-pages
-        # Seed feed-output from the current gh-pages content so previously-published
-        # alpha versions are retained when the catalog is regenerated. Best-effort:
-        # on the first publish the gh-pages branch may not exist yet.
-        continue-on-error: true
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
-        with:
-          ref: gh-pages
-          path: gh-pages-existing
-
       - name: Generate static feed
+        # Single pinned version (2.0.0-alpha.1): always generate a fresh, complete
+        # feed. Combined with keep_files:false below, gh-pages is an authoritative
+        # mirror of publish/ — deterministic and self-healing, no stale catalog.
         run: |
           export PATH="$PATH:$HOME/.dotnet/tools"
-          mkdir -p "$GITHUB_WORKSPACE/feed-output/alpha"
-          if [ -f "$GITHUB_WORKSPACE/gh-pages-existing/alpha/index.json" ]; then
-            cp -R "$GITHUB_WORKSPACE/gh-pages-existing/alpha/." "$GITHUB_WORKSPACE/feed-output/alpha/"
-          else
-            sleet init --config scripts/alpha/sleet.json --source alpha
-          fi
+          sleet init --config scripts/alpha/sleet.json --source alpha
           sleet push artifacts/packages --config scripts/alpha/sleet.json --source alpha --force
 
       - name: Assemble gh-pages content
@@ -83,6 +72,8 @@ jobs:
           mkdir -p publish/alpha
           touch publish/.nojekyll
           cp -R "$GITHUB_WORKSPACE/feed-output/alpha/." publish/alpha/
+          # Preserve the landing page (full-mirror deploy replaces gh-pages contents).
+          cp scripts/alpha/index.html publish/index.html
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
@@ -90,4 +81,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./publish
           publish_branch: gh-pages
-          keep_files: true
+          keep_files: false

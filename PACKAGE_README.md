@@ -6,6 +6,7 @@
 > change** and has **not yet completed Yubico's formal security audit**.
 >
 > - **No security guarantees** are made until that audit is complete.
+> - Packages are **unsigned**.
 > - **Package names and namespaces may change** before the stable release.
 > - Provided for **evaluation and hackathon use only**.
 

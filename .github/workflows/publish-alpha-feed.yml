@@ -1,0 +1,85 @@
+name: Publish Alpha NuGet Feed (2.0)
+
+# Builds, packs, attests, and publishes the anonymous static NuGet feed to
+# GitHub Pages (served at https://yubico.github.io/Yubico.NET.SDK/alpha/).
+# Runs only on pushes to yubikit.
+#
+# Uses the modern GitHub Pages deployment (upload-pages-artifact + deploy-pages),
+# which uploads the feed verbatim with no Jekyll processing. The feed is
+# regenerated fresh each run and deployed as a full replacement, so Pages always
+# exactly reflects the current alpha packages. With a single pinned version
+# (2.0.0-alpha.2) this is deterministic and self-healing.
+
+on:
+  push:
+    branches: [ yubikit ]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write        # provenance attestation + Pages deploy
+  attestations: write
+  pages: write           # deploy to Pages
+
+jobs:
+  publish-feed:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_NOLOGO: 1
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    steps:
+      - name: Check out source
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Install PC/SC dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends pcscd libpcsclite-dev libudev-dev
+
+      - name: Build
+        run: dotnet toolchain.cs build
+
+      - name: Pack NuGet packages
+        run: dotnet toolchain.cs pack --package-version 2.0.0-alpha.2
+
+      - name: Attest build provenance for packages
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
+        with:
+          subject-path: 'artifacts/packages/*.nupkg'
+
+      - name: Install Sleet
+        run: dotnet tool install -g sleet
+
+      - name: Generate static feed
+        run: |
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          sleet init --config scripts/alpha/sleet.json --source alpha
+          sleet push artifacts/packages --config scripts/alpha/sleet.json --source alpha --force
+
+      - name: Assemble Pages content
+        run: |
+          mkdir -p publish/alpha
+          cp -R "$GITHUB_WORKSPACE/feed-output/alpha/." publish/alpha/
+          cp scripts/alpha/index.html publish/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with:
+          path: ./publish
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

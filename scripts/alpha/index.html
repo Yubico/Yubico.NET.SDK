@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yubico .NET SDK v2 — Alpha NuGet Feed</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 46rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.5; }
+    code { background: #f3f3f3; padding: .15rem .35rem; border-radius: 4px; }
+    pre { background: #f3f3f3; padding: 1rem; border-radius: 6px; overflow-x: auto; }
+    .warn { background: #fff4e5; border-left: 4px solid #e69500; padding: 1rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Yubico .NET SDK v2 — Alpha NuGet Feed</h1>
+  <div class="warn">
+    <strong>⚠️ ALPHA — NOT FOR PRODUCTION.</strong> Pre-release, subject to change, and
+    not yet security-audited by Yubico. No security guarantees. Package names and
+    namespaces may change. Evaluation / hackathon use only.
+  </div>
+  <p>Anonymous, public NuGet v3 feed. No authentication required.</p>
+  <h2>Add the feed</h2>
+  <pre>dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha</pre>
+  <h2>Install a package</h2>
+  <pre>dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.2</pre>
+  <p>Transitive dependencies (e.g. <code>Yubico.NativeShims</code>) resolve from
+     nuget.org, so keep nuget.org enabled alongside this feed.</p>
+  <p><a href="https://github.com/Yubico/Yubico.NET.SDK">Project on GitHub</a></p>
+</body>
+</html>

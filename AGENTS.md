@@ -14,7 +14,7 @@
 - `--integration` requires `--project`: `dotnet toolchain.cs -- test --integration --project Piv --smoke`.
 - `--smoke` skips `Slow` and `RequiresUserPresence`; agents should not run touch/insert/remove tests unless a human explicitly coordinates hardware.
 - Use `dotnet toolchain.cs -- --help` when arguments act strangely; every script long option, including `--project`, requires the preceding `--` separator.
-- CI runs `dotnet toolchain.cs build`, `dotnet toolchain.cs test`, then `dotnet toolchain.cs -- pack --package-version 2.0.0-preview.<run>`.
+- CI runs `dotnet toolchain.cs build`, `dotnet toolchain.cs test`, then `dotnet toolchain.cs -- pack --package-version 2.0.0-alpha.2`.
 - Run `dotnet format` or `dotnet format --verify-no-changes` before claiming formatting is clean.
 
 ## Project Shape

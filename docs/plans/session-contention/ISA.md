@@ -1127,10 +1127,14 @@ the holder; if anything the correlation is inverted. Supporting facts: `0xE00002
 independent non-SDK process (`ykman`) failed and later recovered in lockstep with the SDK. The only
 variable that changed was USB re-enumeration.
 
-Root cause: **wedged host-side IOKit HID state for those two keyboard interfaces, cleared by re-enumeration.
-Not an SDK defect, and not attributable to any identified application.** It remains unidentified which
-client (if any) wedged the interface, so this is a known-recoverable platform hazard, not a closed
-investigation. Operator remedy: replug the key.
+Root cause at the time: **wedged host-side IOKit HID state for those two keyboard interfaces, cleared by
+re-enumeration. Not an SDK defect.** Operator remedy: replug the key.
+
+> **CORRECTION (2026-08-06, Phase 10).** The "cleared by re-enumeration" conclusion above is WRONG, and the
+> statement that Wispr Flow was exonerated is unsupported. Later the same day, repeated physical replugs
+> stopped clearing the condition, and IORegistry named a concrete holder. Do not rely on the paragraph
+> above; see "Phase 10 — OTP HID holder identified" below. The SDK-is-not-at-fault part still holds and is
+> now better evidenced, but the mechanism and the exoneration were both wrong.
 
 ### Defect this unmasked: leaked OTP HID connection in YubiOtpSlotConfigTests
 
@@ -1279,3 +1283,78 @@ The unqualified `dotnet format --verify-no-changes` no longer reports final-newl
 still exits nonzero on two unchanged trim/AOT warnings (`IL2026`, `IL3050`) in
 `src/Tests.TestProject/Program.cs:21`. They are unrelated to this task and were not suppressed or edited.
 Final documentation QA validated 55 active files, and `git diff --check` exited clean.
+
+---
+
+## Phase 10 — D3 closed on hardware, and the OTP HID holder identified (2026-08-06)
+
+### D3 closed: hotplug does not strand the exclusive CCID lease
+
+D3 was the register's last `open` row. It was executed with the operator physically removing both
+allow-listed keys mid-session.
+
+The risk this effort owns is not that the operation fails when the card is pulled — obviously it does. It
+is that the CCID lease could be **stranded**. The lease is released in the connection's disposal path with
+no finalizer backstop, so if removal made disposal hang or throw before the release, the interface would
+stay marked in-use for the process lifetime and every later open would be refused with
+`ConnectionInUseException` — on a key the user had already plugged back in.
+
+`PivHotplugContentionTests.PivSession_KeyRemovedMidSession_FailsBoundedAndDoesNotStrandTheCcidLease`
+passed in 1m47s on serials 103/125. It establishes three things: the in-flight PIV call failed within a
+bounded window rather than hanging, disposal completed with the card absent, and a subsequent connect
+attempt reported something other than `ConnectionInUseException`. The test self-fails with an explicit
+"this run proves nothing" message if no removal is observed, so a pass always corresponds to a real
+unplug. A first attempt did exactly that and was discarded rather than recorded.
+
+Not captured: the concrete exception type raised at the moment of removal. The test asserts only that a
+bounded failure occurred, and the type is surfaced only on the failure path. Capturing it would need
+another operator-coordinated run; the test was left exactly as verified rather than edited afterwards.
+
+### Phase 10 correction: the OTP HID root cause recorded in Phase 9 was wrong
+
+Phase 9 recorded that the OTP HID condition was wedged host IOKit state cleared by USB re-enumeration, and
+that Wispr Flow had been falsified as a suspect. Both claims are now contradicted by direct evidence.
+
+| Claim in Phase 9 | Later evidence |
+|---|---|
+| Re-enumeration clears it | Three successive physical replugs did NOT clear it; OTP stayed dead on both keys |
+| No identified holder | IORegistry shows `IOUserClientCreator = "pid 29876, Wispr Flow"` holding an `IOHIDLibUserClient` directly on the OTP keyboard interface (`PrimaryUsagePage = 1`, `PrimaryUsage = 6`), alongside the normal `pid 402, WindowServer` event-service client |
+| Wispr Flow exonerated | The exoneration rested on presence/absence correlation across two runs. That is weaker than a named IORegistry client, and is withdrawn |
+
+Current state is deterministic rather than intermittent: CCID reads succeed on both keys while every OTP
+open fails, `ykman` included. `Karabiner-DriverKit-VirtualHIDDevice` is also resident and is a second
+plausible keyboard grabber, so attribution between the two is not yet settled.
+
+What survives from Phase 9 is the part that was independently evidenced: **this is not an SDK defect.** No
+testhost process exists when the condition holds, an independent non-SDK process fails identically, and the
+SDK opens OTP non-seizing. The mechanism and the exoneration were wrong; the SDK verdict was not.
+
+The decisive next step is to quit Wispr Flow, confirm its `IOHIDLibUserClient` disappears from IORegistry,
+and re-probe. That was deliberately not done unilaterally because it is the operator's dictation tool.
+
+### Consequence for ISC-4
+
+The Phase 9 ISC-4 pass (discovery 5/5) is real but carries an unstated precondition: it requires the OTP
+keyboard interface to be openable. While a keyboard grabber holds that interface, discovery returns
+standalone `HidOtp` rows and the suite reverts to 2 passed / 3 failed. ISC-4 should be read as **passing on
+an uncontended host**, not as unconditionally green. This is an environmental precondition, not a code
+regression, and it is recorded here rather than left implicit in a green row.
+
+### An operator hypothesis, tested and not reproduced
+
+The operator reported a long-standing pattern that running `git commit` breaks the next integration run.
+The mechanism exists on this machine and is worth recording: `~/.gnupg/scdaemon.conf` sets `disable-ccid`,
+which routes scdaemon through **PC/SC** — the same channel the CCID tests use — and
+`~/.gnupg/gpg-agent.conf` sets `enable-ssh-support`, making gpg-agent the SSH agent. In any repository with
+an SSH remote or signed commits, a git operation can wake scdaemon and contend for the card.
+
+It does not reproduce in this repository. Measured directly around a real commit:
+
+| Probe | Before commit | After commit |
+|---|---|---|
+| CCID 103 / 125 | `PIV version 5.8.0` | `PIV version 5.8.0` |
+| `scdaemon` process | absent | absent |
+
+Consistent with `commit.gpgsign=false` locally and globally and an HTTPS remote, so nothing in this repo's
+git path reaches gpg-agent. Recorded as a real hazard for differently configured repositories, and as not
+the cause of the failures seen here.

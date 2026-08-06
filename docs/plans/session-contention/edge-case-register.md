@@ -57,7 +57,7 @@ repository method names; paths are relative to the repository root.
 |---|---|---|---|---|
 | D1 | Exclusive interface released, then acquired by another caller | P2 | bounded | There is no waiter for an already-held exclusive connection: second acquisition refuses immediately. Success after disposal is pinned for CCID and OTP HID by `ConnectionOwnershipContractTests.ConnectAsync_AfterFirstConnectionDisposed_SecondSucceeds` and `ConnectAsync_OtpHidConnectionDisposed_InterfaceReopens` |
 | D2 | Session opened while a scan is in flight | P2 | covered | `src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionOwnershipTests.cs`: `ConnectAsync_OwnsInterfaceBeforePhysicalConnectionCreation`, `ConnectAsync_SessionStartingImmediatelyBeforeDiscoverySelect_CannotCrossOwnership` |
-| D3 | Hotplug during an open session | P3 | open | — |
+| D3 | Hotplug during an open session | P3 | covered | Confirmed on macOS hardware with an operator-coordinated removal. `src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs`: `PivSession_KeyRemovedMidSession_FailsBoundedAndDoesNotStrandTheCcidLease` — the PIV call failed within bounds instead of hanging, disposal completed with the card absent, and reopening did NOT report `ConnectionInUseException`, so removal does not strand the exclusive CCID lease. The test self-fails if no removal occurs, so a passing run always means a real unplug happened |
 
 ## E. Device identity
 
@@ -93,11 +93,12 @@ repository method names; paths are relative to the repository root.
 |---|---|---|---|---|---|
 | P1 | 5 | 5 | 0 | 0 | 0 |
 | P2 | 13 | 10 | 3 | 0 | 0 |
-| P3 | 4 | 1 | 0 | 2 | 1 |
-| **In scope** | **22** | **16** | **3** | **2** | **1** |
+| P3 | 4 | 2 | 0 | 2 | 0 |
+| **In scope** | **22** | **17** | **3** | **2** | **0** |
 
-ISC-2 passes: every P1/P2 row is covered or has a documented bound and pinning test. D3 remains the only
-open row, awaiting a human-coordinated hotplug run. F2 and F3 still require Windows hardware.
+ISC-2 passes: every P1/P2 row is covered or has a documented bound and pinning test. **No open rows
+remain.** D3 was closed by an operator-coordinated hotplug run on macOS hardware. The only residual items
+are F2 and F3, which require Windows hardware this effort does not have.
 
 F1 moved from platform gap to covered on macOS hardware, and closing it produced a production fix plus one
 new bounded row (F4). F2's claim of platform-divergent HID sharing now has direct evidence rather than

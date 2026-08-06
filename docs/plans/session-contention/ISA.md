@@ -1173,6 +1173,87 @@ deliberate: `ConnectionOwnershipContractTests` holds a first connection on purpo
 (`PivMultiKeyContentionTests.cs:193`) and is therefore excluded by `--smoke`; its 3/3 evidence above stands
 from the earlier unfiltered run.
 
+---
+
+## Phase 9 — F1 closed on macOS hardware, and it was a real defect (2026-08-06)
+
+Register row F1 (macOS physical HID FIDO double-open) had been accepted as a platform gap for want of a
+human-coordinated hardware run. With the operator present it was executed, and the documented contract
+did not survive it.
+
+### The defect
+
+`DeviceConnectionRegistry` admits a second FIDO HID connection by design — "FIDO HID remains shared" — and
+`ConnectionOwnershipContractTests.ConnectAsync_HidInterface_AllowsConcurrentConnections` pinned that. But
+that pin uses fakes, so it only ever proved the in-process lease admits the second connection. On hardware
+the second open failed:
+
+```text
+IOHIDDeviceOpen = 0xE00002C5   (kIOReturnExclusiveAccess)
+  at MacOSHidIOReportConnection.SetupConnection() … MacOSHidIOReportConnection.cs:153
+```
+
+Cause was our own code: `MacOSHidIOReportConnection.cs:150` opened FIDO with `0x01`
+(`kIOHIDOptionsTypeSeizeDevice`). The lease therefore admitted a connection the platform then rejected, and
+the shared-FIDO contract was false on macOS while every fake-based test stayed green. The OTP feature-report
+path in the same tree already opened with `0`, so FIDO was also inconsistent with its sibling.
+
+### Canonical adjudication
+
+Both canonical implementations open macOS HID non-seizing, so this was a C# deviation rather than a design
+choice to defend:
+
+| Source | macOS FIDO HID open | Evidence |
+|---|---|---|
+| Rust yubikit (`ykrust-auto` @ `9fe08d9a`) | non-seizing | `crates/yubikit/Cargo.toml:54-55` enables hidapi `macos-shared-device`, which calls `hid_darwin_set_open_exclusive(0)`; hidapi `mac/hid.c` maps `0` to `kIOHIDOptionsTypeNone` and defaults to seize "for backward compatibility" |
+| python-fido2 | non-seizing | `fido2/hid/macos.py:292` — `iokit.IOHIDDeviceOpen(self.handle, 0)` |
+| C# (before this fix) | **seizing** | `MacOSHidIOReportConnection.cs:150` — `IOHIDDeviceOpen(handle, 0x01)` |
+
+Fix: open with `kIOHIDOptionsTypeNone`. One constant, canonical-aligned, uniform across platforms, and it
+also stops the SDK locking other processes out of the key.
+
+### Second finding: shared admission is not shared I/O (new row F4)
+
+With the fix the second open succeeds, but the two-handle transaction test still failed — the FIRST
+connection could not read its own response. A single-connection baseline
+(`ConnectAsync_SingleFidoHidConnection_CompletesCtapHidInit`) passes, which rules out the probe itself. A
+targeted diagnostic then established the mechanism: sending CTAPHID_INIT on handle one and reading on
+handle two **passes**. Input reports are delivered to whichever handle's RunLoop runs; two handles do not
+demultiplex.
+
+So "FIDO HID is shared" is an admission guarantee only. That is all the Management-over-HID fallback needs,
+but a caller driving CTAP on two handles concurrently can receive the peer's frames. Recorded as bounded row
+F4 and corrected in `src/Core/CLAUDE.md`, `src/Core/README.md`, and
+`docs/architecture/physical-device-model.md`. The misrouting pin passes *because* the behavior is wrong and
+will fail if the transport ever demultiplexes.
+
+### Incidental defect: Core integration tests could not use the allow list
+
+`src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/appsettings.json` carried an **empty**
+`AllowedSerialNumbers`, and its local `PreserveNewest` copy shadowed the canonical list that
+`Tests.Shared` publishes with `CopyToOutputDirectory=Always`. Any `[WithYubiKey]` test in that project
+therefore hit `AllowList`'s `Environment.Exit(-1)` and aborted the run — which is why the project's existing
+tests enumerate through `YubiKeyManager` and bypass the authorization boundary. The empty file and its
+csproj entry were removed so Core inherits the shared 11-serial list, verified in the build output. The
+pre-existing decision to leave `CompositeDiscoveryIntegrationTests` un-gated is unchanged and still tracked.
+
+### Evidence
+
+| Command | Result |
+|---|---|
+| `test --integration --project Core --smoke --filter "…FidoHidSharingIntegrationTests"` | 3/3 |
+| `test --integration --project Fido2 --smoke` | 29/29, three consecutive runs |
+| `toolchain.cs test` (full unit) | 12/12 projects, 0 failed |
+| `toolchain.cs -- resilience --fast` | passed |
+| `toolchain.cs build` | 0 errors |
+
+One caveat recorded rather than smoothed over: the first Fido2 integration run after the seize change
+reported 27/29. Those two failures were not captured before the rerun and remain unidentified; three
+consecutive 29/29 runs followed. Treat FIDO stability on macOS as observed-good, not proven.
+
+Row F1 is now `covered`; F2's platform-divergence claim gains direct evidence (Linux shared FIDO with no
+change; macOS refused until corrected). D3 remains the only open row.
+
 The RSA cleanup now attempts both PIV resets independently. If the test body fails, that original
 exception remains the thrown outcome; any cleanup failure is attached to its `Data` and written to test
 output. If the body passes, one cleanup failure is thrown directly and two are aggregated. The current

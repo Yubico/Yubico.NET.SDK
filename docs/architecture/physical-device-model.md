@@ -238,6 +238,18 @@ protocol instances on the same interface could interleave one logical frame. FID
 Management's default order may still fall through `SmartCard -> HidFido -> HidOtp`, but if another
 connection already holds HID OTP, that final acquisition is refused rather than shared.
 
+Shared FIDO HID is an admission guarantee, not a concurrency guarantee. A second FIDO connection to the
+same interface is accepted — the Management-over-HID fallback relies on that — but the transport does not
+demultiplex input reports between two handles. Measured on macOS hardware: sending CTAPHID_INIT on one
+handle and reading on the other returns that response, so a caller driving CTAP on two handles at once can
+receive the peer's frames. Use one FIDO connection at a time for CTAP traffic.
+
+macOS FIDO HID must be opened with `kIOHIDOptionsTypeNone`, never `kIOHIDOptionsTypeSeizeDevice`. Seizing
+makes the platform refuse the second open with `kIOReturnExclusiveAccess` (`0xE00002C5`), which would make
+the shared-admission contract false, and it also locks other processes out of the key. Both canonical
+yubikit implementations open non-seizing on macOS: Rust enables hidapi's `macos-shared-device`
+(`hid_darwin_set_open_exclusive(0)`), and python-fido2's macOS backend calls `IOHIDDeviceOpen(handle, 0)`.
+
 ## SCP Note
 
 Secure Channel Protocol is only valid on the SmartCard transport. Supplying `scpKeyParams` while a

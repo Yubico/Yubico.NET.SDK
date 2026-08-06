@@ -70,7 +70,8 @@ repository method names; paths are relative to the repository root.
 
 | # | Case | Tier | Status | Test |
 |---|---|---|---|---|
-| F1 | macOS physical HID FIDO double-open (`IOHIDDeviceOpen` options `0x01`) | P3 | platform-gap | Requires a human-coordinated macOS hardware double-open run; classified as a platform gap rather than a product-contract blocker |
+| F1 | macOS physical HID FIDO double-open (`IOHIDDeviceOpen` options `0x01`) | P3 | covered | Closed on macOS hardware and it found a real defect. Seizing made the platform refuse the second open with `kIOReturnExclusiveAccess` (`0xE00002C5`) while the lease admitted it, so the shared-FIDO contract was false. Fixed by opening non-seizing, matching both canonical implementations. Pinned by `src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/FidoHidSharingIntegrationTests.cs`: `ConnectAsync_SecondConcurrentFidoHidConnection_IsAdmitted` (regression pin) with `ConnectAsync_SingleFidoHidConnection_CompletesCtapHidInit` as the baseline |
+| F4 | Two FIDO HID handles do not demultiplex input reports | P2 | bounded | Discovered while closing F1. Shared FIDO admits a second connection but the transport does not route input reports per handle: on macOS, CTAPHID_INIT sent on one handle is readable on the other. Bound: drive CTAP over one FIDO connection at a time. Pinned by `FidoHidSharingIntegrationTests.SendOnFirst_ReceiveOnSecond_RevealsReportMisrouting`, which passes precisely because the report is misrouted and will fail if the transport ever demultiplexes |
 | F2 | Platform-divergent HID sharing semantics | P3 | platform-gap | Linux hardware gates are broader: FIDO HID is shared and OTP HID is SDK-exclusive. Windows behavior remains unverified |
 | F3 | Windows PC/SC sharing semantics under contention | P3 | platform-gap | Requires Windows hardware; seam-level in-process ownership is platform-independent, but native PC/SC behavior is unverified |
 
@@ -91,13 +92,17 @@ repository method names; paths are relative to the repository root.
 | Tier | Total | Covered | Bounded | Platform gap | Open |
 |---|---|---|---|---|---|
 | P1 | 5 | 5 | 0 | 0 | 0 |
-| P2 | 12 | 10 | 2 | 0 | 0 |
-| P3 | 4 | 0 | 0 | 3 | 1 |
-| **In scope** | **21** | **15** | **2** | **3** | **1** |
+| P2 | 13 | 10 | 3 | 0 | 0 |
+| P3 | 4 | 1 | 0 | 2 | 1 |
+| **In scope** | **22** | **16** | **3** | **2** | **1** |
 
-ISC-2 passes: every P1/P2 row is covered or has a documented bound and pinning test. P3 remains
-explicitly non-blocking: D3 is open for a human-coordinated/fake follow-up, and F1-F3 require unavailable
-platform hardware.
+ISC-2 passes: every P1/P2 row is covered or has a documented bound and pinning test. D3 remains the only
+open row, awaiting a human-coordinated hotplug run. F2 and F3 still require Windows hardware.
+
+F1 moved from platform gap to covered on macOS hardware, and closing it produced a production fix plus one
+new bounded row (F4). F2's claim of platform-divergent HID sharing now has direct evidence rather than
+inference: Linux shared FIDO HID with no change, while macOS refused the second open until the seizing
+open was corrected.
 
 ## Completed strengthening — two-key long-operation liveness
 

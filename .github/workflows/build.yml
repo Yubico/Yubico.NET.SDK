@@ -12,6 +12,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
+      attestations: write
     env:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_NOLOGO: 1
@@ -62,7 +64,13 @@ jobs:
         run: dotnet toolchain.cs -- resilience --fast
 
       - name: Pack NuGet packages
-        run: dotnet toolchain.cs pack --package-version 2.0.0-preview.${{ github.run_number }}
+        run: dotnet toolchain.cs pack --package-version 2.0.0-alpha.1
+
+      - name: Attest build provenance for packages
+        if: github.event_name == 'push'
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
+        with:
+          subject-path: 'artifacts/packages/*.nupkg'
 
       - name: Publish to GitHub Packages
         if: github.event_name == 'push'

@@ -1,4 +1,10 @@
 <Project>
+    <!-- Determine if this is a test project (needed early for packaging conditions below) -->
+    <PropertyGroup>
+        <IsTestProject Condition="$(MSBuildProjectName.Contains('Test'))">true</IsTestProject>
+        <IsPackable Condition="'$(IsTestProject)' == 'true'">false</IsPackable>
+    </PropertyGroup>
+
     <PropertyGroup>
         <!-- Common Language Settings -->
         <LangVersion>14</LangVersion>
@@ -41,7 +47,18 @@
         <!-- Package Output -->
         <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts</PackageOutputPath>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <!-- Alpha disclaimer (single source of truth). Surfaced via PackageReadmeFile
+             (package page) and PackageReleaseNotes (plain-text fallback). Remove when
+             the SDK exits alpha and completes the formal security audit. -->
+        <PackageReadmeFile>PACKAGE_README.md</PackageReadmeFile>
+        <PackageReleaseNotes>ALPHA - NOT FOR PRODUCTION. Pre-release, subject to change, and not yet security-audited by Yubico. No security guarantees. Package names/namespaces may change. Evaluation / hackathon use only.</PackageReleaseNotes>
     </PropertyGroup>
+
+    <!-- Ship the shared alpha PACKAGE_README.md in every packable package's root. -->
+    <ItemGroup Condition="'$(IsTestProject)' != 'true'">
+        <None Include="$(MSBuildThisFileDirectory)PACKAGE_README.md" Pack="true" PackagePath="\" Visible="false"/>
+    </ItemGroup>
 
     <!-- Source Link Package (for all projects) -->
     <ItemGroup>
@@ -50,8 +67,6 @@
 
     <!-- Determine if this is a test project -->
     <PropertyGroup>
-        <IsTestProject Condition="$(MSBuildProjectName.Contains('Test'))">true</IsTestProject>
-        <IsPackable Condition="'$(IsTestProject)' == 'true'">false</IsPackable>
         <!-- Disable XML documentation for test projects -->
         <GenerateDocumentationFile Condition="'$(IsTestProject)' == 'true'">false</GenerateDocumentationFile>
     </PropertyGroup>

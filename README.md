@@ -1,5 +1,12 @@
 # Yubico.NET.SDK
 
+> ## ⚠️ v2 ALPHA — NOT FOR PRODUCTION
+>
+> The v2 SDK (`2.0.0-alpha.1`, `yubikit` branch) is a **pre-release alpha**. It is
+> **subject to change** and has **not yet completed Yubico's formal security audit**.
+> **No security guarantees** are made until that audit is complete. Package names and
+> namespaces may change. Provided for **evaluation and hackathon use only**.
+
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Yubico/Yubico.NET.SDK/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Yubico/Yubico.NET.SDK)
 
 A comprehensive .NET SDK for interacting with YubiKey hardware security devices. This SDK provides high-level APIs for YubiKey's various applications including PIV, FIDO2, OATH, OpenPGP, and more.

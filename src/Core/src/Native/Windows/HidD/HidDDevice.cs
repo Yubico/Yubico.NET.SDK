@@ -48,10 +48,16 @@ internal sealed class HidDDevice : IHidDDevice
     public short FeatureReportByteLength { get; }
 
     public void OpenIOConnection()
-        => OpenReportConnection();
+        => OpenReportConnection(Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_READ |
+                                Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_WRITE);
 
     public void OpenFeatureConnection()
-        => OpenReportConnection();
+        // OTP feature-report I/O uses HidD_GetFeature/HidD_SetFeature, which are IOCTLs that succeed on a
+        // zero-access handle. The OTP interface is a keyboard top-level collection, and Windows refuses
+        // GENERIC_READ/GENERIC_WRITE on the system keyboard even for an elevated process (anti-keylogger
+        // restriction). Opening with no access sidesteps that while still permitting feature-report IOCTLs;
+        // the metadata probe already proves a zero-access handle opens on this same path.
+        => OpenReportConnection(Kernel32.NativeMethods.DESIRED_ACCESS.NONE);
 
     public byte[] GetFeatureReport()
     {
@@ -216,9 +222,9 @@ internal sealed class HidDDevice : IHidDDevice
         }
     }
 
-    private void OpenReportConnection()
+    private void OpenReportConnection(Kernel32.NativeMethods.DESIRED_ACCESS desiredAccess)
     {
-        var handle = OpenReadWriteHandle();
+        var handle = OpenHandleWithAccess(desiredAccess);
         _handle.Dispose();
         _handle = handle;
     }

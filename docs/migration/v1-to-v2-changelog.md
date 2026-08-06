@@ -39,3 +39,11 @@
 - Added two new Common Migration Recipes: PIV PIN-only mode enablement and OATH password-protection-check-plus-retry, each backed by a corresponding `v1-to-v2-map.yml` entry.
 - U2F/CTAP1 restoration, .NET Framework/netstandard targets, legacy pre-5.0 Management mode switching, synchronous facades, and a global cross-applet `KeyCollector` remain explicitly out of scope per `docs/plans/yubikit-gaps-remediation/ISA.md`; these are unchanged manual-review/non-goals, not new gaps.
 - Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `e042280ed7ec03a0250745ff3ff272680e5570b9`.
+
+## 2026-08-06 - No-impact: alpha release packaging (no-op)
+
+- Analyzed range `e042280ed7ec03a0250745ff3ff272680e5570b9..2bf3364889cd479aa9c7a7fe83bfc80a51fdb255` (12 commits, 19 changed files; PR #546 "yubikit-alpha-release" merge plus a GitHub Pages deploy fix).
+- The range is entirely v2-internal release/packaging infrastructure: the version bump from `2.0.0-preview.1`/`2.0.0-preview` to `2.0.0-alpha.2` (`Directory.Packages.props`, `AGENTS.md`, `src/Cli/YkTool/Program.cs`), the new anonymous alpha NuGet feed and its bootstrap scripts (`scripts/alpha/*`, `nuget.config`, `.github/workflows/publish-alpha-feed.yml`), packaging metadata additions (`PACKAGE_README.md`, `Directory.Build.props` `PackageReadmeFile`/`PackageReleaseNotes`), alpha disclaimers in `README.md`/`PACKAGE_README.md`, and a GitHub Pages deploy workflow fix (`.github/workflows/build.yml`, `ecadb876`).
+- No public API, package-identity, namespace, or behavior changes: `api-added.txt`, `api-removed.txt`, and `public-api-candidates.txt` were empty for this range, and `package-changes.txt` showed no package/namespace-shape changes (only a version-number bump, which does not change any v1-to-v2 mapping).
+- No migration guide or map updates were needed; the existing `v1-to-v2.md` and `v1-to-v2-map.yml` guidance is unaffected.
+- Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `2bf3364889cd479aa9c7a7fe83bfc80a51fdb255`.

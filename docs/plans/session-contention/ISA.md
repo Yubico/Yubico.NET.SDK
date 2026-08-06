@@ -1358,3 +1358,49 @@ It does not reproduce in this repository. Measured directly around a real commit
 Consistent with `commit.gpgsign=false` locally and globally and an HTTPS remote, so nothing in this repo's
 git path reaches gpg-agent. Recorded as a real hazard for differently configured repositories, and as not
 the cause of the failures seen here.
+
+### Phase 10 addendum — Wispr Flow exonerated by direct test; OTP cause is UNRESOLVED
+
+The Phase 10 correction above named `pid 29876, Wispr Flow` as the holder of the OTP keyboard interface on
+IORegistry evidence. That attribution is now also withdrawn. With the operator's agreement Wispr Flow was
+quit completely; its processes are gone and no Wispr Flow `IOUserClientCreator` remains anywhere in
+IORegistry. **Every OTP open still fails on both keys, `ykman` included.**
+
+This is the second incorrect attribution in this investigation. Rather than name a third suspect, what is
+established and what is excluded is recorded separately.
+
+**Established:**
+
+- The failure is `IOHIDDeviceOpen = 0xE00002E2` = `kIOReturnNotPermitted`. That is a PERMISSION-class
+  status, not a busy/contended one. It is a materially different failure from the FIDO double-open result
+  earlier in this phase, which was `0xE00002C5` = `kIOReturnExclusiveAccess`. Reasoning that treated the
+  OTP condition as "someone holds the interface" was reasoning from the wrong error class.
+- It is deterministic in the current state: CCID succeeds on both keys while every OTP open fails.
+- It is not an SDK defect. An independent non-SDK process (`ykman`) fails identically, no testhost exists,
+  and the SDK opens OTP non-seizing.
+
+**Excluded by direct evidence:**
+
+| Suspect | How excluded |
+|---|---|
+| This branch's in-process lease registry | `ykman` fails identically with no SDK process running |
+| Orphaned test hosts | Process inspection shows only MSBuild node-reuse workers |
+| Wispr Flow | Quit entirely; no processes and no IORegistry client remain; OTP still fails |
+| Karabiner grabber daemons | Not running (`pgrep karabiner` empty); only the DriverKit extension is resident |
+| USB re-enumeration as a cure | Three successive physical replugs failed to restore OTP |
+
+**Not established:** the actual cause. The leading remaining hypothesis is a macOS Input Monitoring
+(`kTCCServiceListenEvent`) denial against the process that runs the tests, which is consistent both with
+`kIOReturnNotPermitted` and with the keyboard usage page of the OTP interface (`PrimaryUsagePage = 1`,
+`PrimaryUsage = 6`). It is unconfirmed: the user TCC database holds no `kTCCServiceListenEvent` rows, the
+system database needs root, and no TCC denial appears in the unified log. It also does not explain why OTP
+worked earlier in the same session under the same process tree, which is an unexplained contradiction and
+is recorded as such rather than smoothed over.
+
+**Decisive tests, both requiring the operator:** run `sudo ykman --device 103 otp info` — success under
+root implicates permissions and excludes a holder — or grant Input Monitoring to the terminal application
+that runs the tests and re-probe.
+
+**Impact:** OTP-dependent verification (discovery 5/5, YubiOtp 10/10) cannot be reproduced while this
+holds. Those results stand as recorded from the window in which the OTP interface was openable, with the
+precondition now stated explicitly. No SDK change is indicated.

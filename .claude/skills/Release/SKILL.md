@@ -11,7 +11,7 @@ The skill works in two modes:
 - **`/Release`** — full flow from phase 1 (pre-flight) onward
 - **`/Release resume <version>`** — picks up at the current phase using cached state from `~/Releases/<version>/.state.json`. Most commonly used to resume at phase 5 (sign+publish) when phases 1–4 ran on macOS/Linux and the operator switches to Windows for signing, but works at any phase boundary.
 
-The Windows-only constraint (`build/sign.ps1` + smart-card YubiKey + `signtool.exe`) is enforced at phase 5 — the skill detects platform and either runs the full wizard (Windows) or stops with a handoff (macOS/Linux).
+The Windows-only constraint (`build/sign-v2.ps1` + smart-card YubiKey + the .NET Sign CLI, whose Authenticode signing is Windows-only) is enforced at phase 5 — the skill detects platform and either runs the full wizard (Windows) or stops with a handoff (macOS/Linux).
 
 ## Workflow Routing
 
@@ -29,7 +29,7 @@ User: "/Release"
 → Phase 2: detects no Yubico.NativeShims/ changes, skips NativeShims rebuild
 → Phase 3: creates release/1.16.1 from develop, drafts whats-new.md, opens PR to main
 → Phase 4: after PR merged, dispatches build.yml with version=1.16.1, polls until green, tags 1.16.1
-→ Phase 5 (Windows): downloads artifacts to ~/Releases/1.16.1/, runs sign.ps1, publishes to NuGet.org
+→ Phase 5 (Windows): downloads artifacts to ~/Releases/1.16.1/, runs sign-v2.ps1 (Sign CLI), publishes to NuGet.org
 → Phase 6: creates draft GitHub release with signed assets, triggers deploy-docs.yml
 → Phase 7: merges main back to develop, prints Slack #ask-tla announcement ready to copy
 ```
@@ -43,7 +43,7 @@ Operator (on macOS): "/Release"
 
 Operator (on Windows): "/Release resume 1.16.1"
 → Loads cached state, skips phases 1-4
-→ Phase 5: downloads artifacts (NativeShims first if rebuilt), runs sign.ps1, publishes
+→ Phase 5: downloads artifacts (NativeShims first if rebuilt), runs sign-v2.ps1, publishes
 → Phases 6-7 complete normally
 ```
 
@@ -72,7 +72,7 @@ User: "/Release"
 
 ## Hard Constraints
 
-- **Code-signing YubiKey must be unplugged during phases 1–4**: The operator's code-signing YubiKey must NOT be connected to the machine while any build or CI step runs. Integration tests that enumerate YubiKeys can accidentally run PIV/PGP resets against any connected key. The skill gates this: Phase 1 asks the operator to confirm the YubiKey is unplugged. Phase 5 is the ONLY phase where it should be plugged in — `signtool.exe` and `nuget sign` read the PIV certificate safely but cannot coexist with stray test runs. The skill must NEVER run integration tests itself.
+- **Code-signing YubiKey must be unplugged during phases 1–4**: The operator's code-signing YubiKey must NOT be connected to the machine while any build or CI step runs. Integration tests that enumerate YubiKeys can accidentally run PIV/PGP resets against any connected key. The skill gates this: Phase 1 asks the operator to confirm the YubiKey is unplugged. Phase 5 is the ONLY phase where it should be plugged in — the Sign CLI reads the PIV certificate safely but cannot coexist with stray test runs. The skill must NEVER run integration tests itself.
 - **Windows-only sign step**: phase 5 refuses to run on non-Windows
 - **NativeShims ordering**: when rebuilt (from either develop or main), NativeShims signs + publishes to NuGet.org *before* main `build.yml` dispatches. The operator chooses whether to build from develop (immediate) or main (deferred to after PR merge).
 - **Tag only after green CI**: `git tag` runs only after `build.yml` reports success — failed builds mean broken artifacts and a poisoned tag

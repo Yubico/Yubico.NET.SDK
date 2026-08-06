@@ -147,7 +147,15 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
             if (_deviceHandle == IntPtr.Zero) throw new PlatformApiException("Failed to create HID device handle.");
 
-            var result = IOKitNativeMethods.IOHIDDeviceOpen(_deviceHandle, 0x01);
+            // kIOHIDOptionsTypeNone (0), NOT kIOHIDOptionsTypeSeizeDevice (0x01). Seizing makes macOS refuse
+            // a second open with kIOReturnExclusiveAccess (0xE00002C5), which contradicts this SDK's
+            // "FIDO HID is shared" ownership contract: DeviceConnectionRegistry admits a second FIDO
+            // connection, and the platform would then reject it. Both canonical implementations open
+            // non-seizing on macOS — Rust yubikit enables hidapi's `macos-shared-device`
+            // (hid_darwin_set_open_exclusive(0) => kIOHIDOptionsTypeNone), and python-fido2's macOS backend
+            // calls IOHIDDeviceOpen(handle, 0). The OTP feature-report path here already uses 0, so this
+            // also makes the two macOS HID paths consistent.
+            var result = IOKitNativeMethods.IOHIDDeviceOpen(_deviceHandle, 0);
 
             if (result != 0)
                 throw new PlatformApiException(

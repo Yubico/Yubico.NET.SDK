@@ -2,8 +2,12 @@ name: Publish Alpha NuGet Feed (2.0)
 
 # Builds, packs, attests, and publishes the anonymous static NuGet feed to the
 # gh-pages branch (served at https://yubico.github.io/Yubico.NET.SDK/alpha/).
-# Runs only on pushes to yubikit. The feed is regenerated in full each run so
-# GitHub Pages always reflects the latest alpha packages (auto-update for consumers).
+# Runs only on pushes to yubikit.
+#
+# The feed is rebuilt from the packages produced by this run. With a single pinned
+# version (2.0.0-alpha.1) each run simply refreshes that version. If multiple alpha
+# versions must coexist, seed feed-output from the live published feed before pushing
+# (see "Seed from published feed" step) so prior versions are retained in the catalog.
 
 on:
   push:
@@ -53,12 +57,26 @@ jobs:
       - name: Install Sleet
         run: dotnet tool install -g sleet
 
+      - name: Restore existing feed from gh-pages
+        # Seed feed-output from the current gh-pages content so previously-published
+        # alpha versions are retained when the catalog is regenerated. Best-effort:
+        # on the first publish the gh-pages branch may not exist yet.
+        continue-on-error: true
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          ref: gh-pages
+          path: gh-pages-existing
+
       - name: Generate static feed
         run: |
           export PATH="$PATH:$HOME/.dotnet/tools"
           mkdir -p "$GITHUB_WORKSPACE/feed-output/alpha"
-          sleet init --config scripts/alpha/sleet.json --source alpha
-          sleet push artifacts/packages --config scripts/alpha/sleet.json --source alpha
+          if [ -f "$GITHUB_WORKSPACE/gh-pages-existing/alpha/index.json" ]; then
+            cp -R "$GITHUB_WORKSPACE/gh-pages-existing/alpha/." "$GITHUB_WORKSPACE/feed-output/alpha/"
+          else
+            sleet init --config scripts/alpha/sleet.json --source alpha
+          fi
+          sleet push artifacts/packages --config scripts/alpha/sleet.json --source alpha --force
 
       - name: Assemble gh-pages content
         run: |

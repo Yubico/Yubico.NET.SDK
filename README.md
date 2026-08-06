@@ -10,8 +10,6 @@
 > - **Package names and namespaces may change** before the stable release.
 > - Provided for **evaluation only**.
 
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Yubico/Yubico.NET.SDK/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Yubico/Yubico.NET.SDK)
-
 A .NET SDK for YubiKey hardware security devices. It provides APIs for YubiKey
 applications including PIV, FIDO2, WebAuthn, OATH, YubiOTP, OpenPGP, Security
 Domain (SCP03/SCP11), YubiHSM Auth, and device management.

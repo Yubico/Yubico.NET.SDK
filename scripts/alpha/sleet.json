@@ -1,0 +1,12 @@
+{
+  "username": "",
+  "useremail": "",
+  "sources": [
+    {
+      "name": "alpha",
+      "type": "local",
+      "path": "$GITHUB_WORKSPACE$/feed-output/alpha",
+      "baseURI": "https://yubico.github.io/Yubico.NET.SDK/alpha/"
+    }
+  ]
+}

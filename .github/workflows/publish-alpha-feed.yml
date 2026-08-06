@@ -1,0 +1,75 @@
+name: Publish Alpha NuGet Feed (2.0)
+
+# Builds, packs, attests, and publishes the anonymous static NuGet feed to the
+# gh-pages branch (served at https://yubico.github.io/Yubico.NET.SDK/alpha/).
+# Runs only on pushes to yubikit. The feed is regenerated in full each run so
+# GitHub Pages always reflects the latest alpha packages (auto-update for consumers).
+
+on:
+  push:
+    branches: [ yubikit ]
+
+concurrency:
+  group: alpha-feed
+  cancel-in-progress: false
+
+permissions:
+  contents: write        # commit/push to gh-pages
+  id-token: write        # provenance attestation
+  attestations: write
+
+jobs:
+  publish-feed:
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_NOLOGO: 1
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    steps:
+      - name: Check out source
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Install PC/SC dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends pcscd libpcsclite-dev libudev-dev
+
+      - name: Build
+        run: dotnet toolchain.cs build
+
+      - name: Pack NuGet packages
+        run: dotnet toolchain.cs pack --package-version 2.0.0-alpha.1
+
+      - name: Attest build provenance for packages
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
+        with:
+          subject-path: 'artifacts/packages/*.nupkg'
+
+      - name: Install Sleet
+        run: dotnet tool install -g sleet
+
+      - name: Generate static feed
+        run: |
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          mkdir -p "$GITHUB_WORKSPACE/feed-output/alpha"
+          sleet init --config scripts/alpha/sleet.json --source alpha
+          sleet push artifacts/packages --config scripts/alpha/sleet.json --source alpha
+
+      - name: Assemble gh-pages content
+        run: |
+          mkdir -p publish/alpha
+          touch publish/.nojekyll
+          cp -R "$GITHUB_WORKSPACE/feed-output/alpha/." publish/alpha/
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./publish
+          publish_branch: gh-pages
+          keep_files: true

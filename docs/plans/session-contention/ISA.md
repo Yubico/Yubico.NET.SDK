@@ -1600,3 +1600,59 @@ Caveat, same as the Phase 11 READ-FIRST banner: this is an operator-coordinated 
 observation, not independently reviewed. It is lower-risk than the `HidDDevice` fix because Phase 12 changed
 **no production code** — it only observed `DeviceChanges` during physical insert/remove — but the event
 stream was not re-captured by a second party.
+---
+
+## Phase 13 — macOS OTP fault resolved by restart; Input Monitoring falsified (2026-08-06)
+
+A machine restart cleared the macOS OTP HID fault. `ykman --device 103 otp info` and `--device 125` both
+print the slot listing with **no** `WARNING: Failed opening device` line, which is the discriminator
+established in addendum 2.
+
+### The hypothesis this kills
+
+**Input Monitoring (`kTCCServiceListenEvent`) is falsified.** TCC is persistent policy; a denial survives a
+reboot. This did not. The leading hypothesis carried through addenda 1 and 2 is therefore wrong, and it is
+the fourth attribution in this investigation to fail. What the restart establishes is a property, not a
+culprit: the condition lived in **transient kernel or daemon HID state that survived USB re-enumeration but
+not a restart**. That specific shape also explains the three earlier negative results — replug did not clear
+it because re-enumeration does not reset that state, and quitting Wispr Flow did not clear it because the
+state was not owned by that process.
+
+The cause is still not identified, and no further attribution is offered. What is now known with evidence:
+
+| Property | Evidence |
+|---|---|
+| Not an SDK defect | Independent `ykman` failed identically; no testhost present; SDK opens OTP non-seizing |
+| Not a permissions/TCC policy | Cleared by restart with no configuration change |
+| Not a user-space process holding the interface | Wispr Flow quit entirely, client gone from IORegistry, still failed |
+| Not cured by re-enumeration | Three physical replugs failed |
+| Cured by restart | This phase |
+
+Operator remedy is therefore **restart**, not replug. Recorded as a known-recoverable host condition.
+
+### Verification after the restart, and of the merged Windows work
+
+This run also completes the macOS-side verification of the Phase 11 Windows commits, which had been pulled
+but only built. All on serials 103/125, firmware 5.8.0.
+
+| Gate | Result |
+|---|---|
+| `Core --filter "…CompositeDiscoveryIntegrationTests"` | **5/5**, no skipped interfaces, no `IOHIDDeviceOpen` errors |
+| `YubiOtp --smoke` (unit + integration) | **10/10** integration, incl. all four HidOtp slot-config tests and `CalculateHmacSha1` over HidOtp |
+| `Core --filter "…FidoHidSharingIntegrationTests"` | **3/3** — F1 admission pin, baseline, and the F4 misrouting pin all still hold |
+| `toolchain.cs test` (full unit) | 12/12 projects, 0 failed |
+| `toolchain.cs -- resilience --fast` | passed |
+| `Piv --smoke` contention + multi-key | **7/7** |
+| `toolchain.cs build` | 0 errors |
+
+The Phase 11 `HidDDevice` change is Windows-only by file and shows no macOS regression across these gates.
+That is now a measurement rather than the inference recorded at pull time. It does **not** discharge the
+cross-vendor review of Phase 11, which remains a merge gate.
+
+### ISC-4
+
+ISC-4's precondition recorded in Phase 10 stands but is now actionable: discovery 5/5 requires an openable
+OTP interface, and when that fails on macOS the remedy is a restart. Re-measured 5/5 in this phase.
+
+This phase is numbered 13 because Phase 12 was taken concurrently by the Windows E1/E2 session; the two
+were authored in parallel on different machines and both are retained.

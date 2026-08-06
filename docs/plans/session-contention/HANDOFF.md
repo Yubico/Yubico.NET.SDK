@@ -15,8 +15,9 @@ session. They have **not been independently verified**. Specifically:
 
 - The operator confirms only that authorized YubiKeys were reachable during those runs; the operator did
   **not** mechanically re-verify the results.
-- On macOS after pulling, **only `dotnet toolchain.cs build` was run and it succeeded**. The unit suite and
-  hardware gates were **not** completed — the run was stopped deliberately, not because it failed.
+- ~~On macOS after pulling, only `build` was run.~~ **RESOLVED in Phase 12:** the full macOS gate set has
+  now run green against the merged Windows commits — discovery 5/5, YubiOtp 10/10, FIDO sharing 3/3, unit
+  12/12 projects, resilience passed, PIV contention 7/7. No macOS regression from `6289c774`.
 - `6289c774` changes production native interop (`src/Core/src/Native/Windows/HidD/HidDDevice.cs`). It is
   Windows-only by file, so macOS/Linux behaviour should be unaffected, but that is reasoning, not a
   measurement.
@@ -141,9 +142,9 @@ register has zero open rows and zero platform gaps.
    already records macOS/Linux HID-to-HID topology as unimplemented and the Windows topology tier as
    validated only at seam level.
 
-   Sequencing note: macOS cannot host a clean run while the OTP fault distorts the discovered interface
-   set, so do the macOS run after the OTP blocker is resolved — not before, and do not substitute the
-   Windows result for it.
+   Sequencing note: ~~macOS cannot host a clean run while the OTP fault distorts the discovered interface
+   set.~~ **Unblocked in Phase 12** — the OTP fault is cleared by restart and discovery is 5/5, so macOS is
+   now a clean rig for E1/E2. Still do not substitute the Windows result for it.
 
    **Windows result (Phase 12, done).** Operator-coordinated insert/remove of two same-PID firmware-5.8.0
    keys produced 4 events for 4 physical actions with zero phantom incumbent/survivor events and exact
@@ -210,10 +211,11 @@ Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` (macOS pa
   against the terminal. **Does not reproduce on Windows** — Windows OTP HID works after the F5 fix. If OTP
   HID misbehaves again on macOS, first check `ykman --device 103 otp info` for `WARNING: Failed opening
   device` (the warning line is the discriminator, not the exit status).
-  **Status at handoff: still unresolved. The planned macOS restart was NOT performed**, so the one
-  experiment that would discriminate between "transient process state" and "persistent policy" is still
-  outstanding. First action when macOS resumes: reboot, then run that probe with full output before
-  launching anything else.
+  **RESOLVED (Phase 12): a restart clears it.** The probe now returns clean with no warning line, and all
+  OTP-dependent gates pass. This also **falsifies the Input Monitoring hypothesis** — TCC is persistent
+  policy and would have survived the reboot. The condition lived in transient kernel/daemon HID state that
+  survives USB re-enumeration but not a restart, which is why three replugs and quitting Wispr Flow all
+  failed. Cause still unidentified; no further attribution offered. **Operator remedy: restart, not replug.**
   **Phase 11 raises the prior on the Input Monitoring hypothesis.** F5 established that on Windows the OTP
   interface is a *keyboard top-level collection* and the OS refuses read/write on it even when elevated —
   an explicit anti-keylogger restriction. macOS protects the same class of device through Input Monitoring

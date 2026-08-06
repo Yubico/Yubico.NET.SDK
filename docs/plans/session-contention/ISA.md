@@ -1404,3 +1404,27 @@ that runs the tests and re-probe.
 **Impact:** OTP-dependent verification (discovery 5/5, YubiOtp 10/10) cannot be reproduced while this
 holds. Those results stand as recorded from the window in which the OTP interface was openable, with the
 precondition now stated explicitly. No SDK change is indicated.
+
+### Phase 10 addendum 2 — probe methodology corrected, and the root test is not decisive
+
+Two corrections to the investigation method above.
+
+**The `ykman otp info` probe was misused.** `ykman` falls back to CCID when the OTP HID interface cannot be
+opened, so the command can print `Slot 1: empty / Slot 2: empty` and exit successfully while the HID open
+has failed. Intermediate probes in this investigation piped the output through `head -1`/`head -2`, which
+truncated the slot lines and showed only warnings. The correct discriminator is the presence of
+`WARNING: Failed opening device`, not the exit status or the slot output.
+
+This does not change the earlier findings, and the corroboration is worth stating: the run recorded as
+"OTP works" printed **no warnings at all**, and YubiOtp integration passed 10/10 including HidOtp-pinned
+tests, which only pass over a real HID OTP connection. The transition from working to failing is therefore
+a genuine state change on the host, not a measurement artifact.
+
+**Running as root does not fix it, and does not exclude TCC.** `sudo ykman --device 103 otp info` produced
+output identical to the unprivileged run — the same two `Failed opening device` warnings followed by the
+CCID-served slot listing. Root therefore does not restore the HID OTP interface. This is NOT evidence
+against the Input Monitoring hypothesis: macOS TCC is evaluated against the responsible application (the
+terminal), and `sudo` inherits that context rather than bypassing it. The test is inconclusive for TCC
+rather than negative.
+
+The cause remains unresolved, with the exclusions listed in addendum 1 unchanged.

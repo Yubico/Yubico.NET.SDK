@@ -52,7 +52,7 @@ if (Get-Command gh -ErrorAction SilentlyContinue) {
 
 Write-Host ''
 Write-Host "Done. Install a package with, for example:"
-Write-Host "  dotnet add package Yubico.YubiKit.Core --version $Version --prerelease"
+Write-Host "  dotnet add package Yubico.YubiKit.Core --version $Version"
 Write-Host ''
 Write-Host 'Teardown:'
 Write-Host "  dotnet nuget remove source $SrcName"

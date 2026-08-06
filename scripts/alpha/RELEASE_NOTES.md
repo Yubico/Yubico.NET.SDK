@@ -17,7 +17,7 @@ Add the alpha feed (keep nuget.org enabled so transitive dependencies such as
 
 ```bash
 dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
-dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.1 --prerelease
+dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.1
 ```
 
 ### Optional: bootstrap script

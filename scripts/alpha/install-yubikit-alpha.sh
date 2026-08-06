@@ -57,7 +57,7 @@ fi
 cat <<EOF
 
 Done. Install a package with, for example:
-  dotnet add package Yubico.YubiKit.Core --version ${VERSION} --prerelease
+  dotnet add package Yubico.YubiKit.Core --version ${VERSION}
 
 Teardown:
   dotnet nuget remove source ${SRC_NAME}

@@ -33,7 +33,7 @@ YubiKey is a hardware authentication device that supports multiple protocols and
 ## Installation
 
 > **Alpha:** `2.0.0-alpha.1` is distributed from a public, anonymous prerelease
-> feed (not nuget.org). Add the feed first, then install with `--prerelease`.
+> feed (not nuget.org). Add the feed first, then install the explicit alpha version.
 > Keep nuget.org enabled so transitive dependencies (e.g. `Yubico.NativeShims`)
 > resolve. Full details in the [release notes](scripts/alpha/RELEASE_NOTES.md).
 
@@ -42,13 +42,13 @@ YubiKey is a hardware authentication device that supports multiple protocols and
 dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
 
 # 2. Core library (required)
-dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.1 --prerelease
+dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.1
 
 # 3. Application modules (install as needed)
-dotnet add package Yubico.YubiKit.Piv --version 2.0.0-alpha.1 --prerelease
-dotnet add package Yubico.YubiKit.Fido2 --version 2.0.0-alpha.1 --prerelease
-dotnet add package Yubico.YubiKit.Oath --version 2.0.0-alpha.1 --prerelease
-dotnet add package Yubico.YubiKit.Management --version 2.0.0-alpha.1 --prerelease
+dotnet add package Yubico.YubiKit.Piv --version 2.0.0-alpha.1
+dotnet add package Yubico.YubiKit.Fido2 --version 2.0.0-alpha.1
+dotnet add package Yubico.YubiKit.Oath --version 2.0.0-alpha.1
+dotnet add package Yubico.YubiKit.Management --version 2.0.0-alpha.1
 ```
 
 ## Quick Start

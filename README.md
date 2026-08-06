@@ -4,25 +4,19 @@
 >
 > The v2 SDK (`2.0.0-alpha.2`, `yubikit` branch) is a **pre-release alpha**. It is
 > **subject to change** and has **not yet completed Yubico's formal security audit**.
-> **No security guarantees** are made until that audit is complete. Package names and
-> namespaces may change. Provided for **evaluation and hackathon use only**.
+>
+> - **No security guarantees** are made until that audit is complete.
+> - Packages are **unsigned**.
+> - **Package names and namespaces may change** before the stable release.
+> - Provided for **evaluation only**.
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Yubico/Yubico.NET.SDK/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Yubico/Yubico.NET.SDK)
 
-A comprehensive .NET SDK for interacting with YubiKey hardware security devices. This SDK provides high-level APIs for YubiKey's various applications including PIV, FIDO2, OATH, OpenPGP, and more.
+A .NET SDK for YubiKey hardware security devices. It provides APIs for YubiKey
+applications including PIV, FIDO2/WebAuthn, OATH, YubiOTP, OpenPGP, Security
+Domain (SCP03), YubiHSM Auth, and device management.
 
-## Overview
-
-YubiKey is a hardware authentication device that supports multiple protocols and applications for strong authentication, encryption, and digital signatures. This SDK enables .NET developers to integrate YubiKey functionality into their applications with a modern, type-safe API.
-
-**Key Features:**
-- 🔐 **PIV (Personal Identity Verification)** - Smart card functionality for digital signatures and encryption
-- 🔑 **FIDO2/WebAuthn** - Passwordless authentication with modern web standards
-- ⏱️ **OATH** - TOTP/HOTP one-time password generation
-- 🔒 **YubiOTP** - Yubico's proprietary OTP protocol
-- 📧 **OpenPGP** - Email encryption and code signing
-- 🛡️ **Security Domain (SCP03)** - Secure channel protocol for key management
-- 🔧 **Device Management** - Query capabilities, firmware version, and configuration
+See [Project Structure](#project-structure) for the per-module breakdown.
 
 ## Requirements
 

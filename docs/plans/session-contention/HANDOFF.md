@@ -1,9 +1,9 @@
 # Handoff — yubikit-session-contention
 
-**Date:** 2026-08-06
-**Branch:** `yubikit-session-contention` (pushed; local == `origin`)
-**Last commit:** `cebc4037` — docs(isa): correct the OTP probe methodology and record the root test
-**Written for:** resuming on a **Windows** machine
+**Date:** 2026-08-06 (Windows session)
+**Branch:** `yubikit-session-contention`
+**Last commit:** `1031890b` — docs: close F2/F3 on Windows and record the OTP HID feature-open fix
+**Written for:** resuming on any platform; the remaining hardware item wants an operator-coordinated hotplug
 
 > Committed to the repo rather than `Plans/handoff.md` on purpose: `Plans/` is untracked, so a handoff
 > written there never reaches another machine. This file travels with the branch.
@@ -12,16 +12,22 @@
 
 ## Session Summary
 
-Closed the two remaining hardware items in the session-contention edge-case register using authorized macOS
-hardware with the operator present. **F1 (macOS FIDO double-open) turned out to be a real product defect,
-not the accepted platform gap it had been recorded as**, and was fixed against canonical Rust and Python.
-**D3 (hotplug during an open session) was closed** and proved the exclusive CCID lease is not stranded when
-a key is pulled. The register now has **zero open rows**; only the Windows rows remain, which is precisely
-what the next machine can do.
+Closed the last two register rows, **F2 and F3, on Windows 11 hardware** (firmware 5.8.0, two same-PID keys,
+serials 103 and 125). The verification did what it was supposed to — it found a real Windows defect that no
+other platform could surface. The register now has **zero open rows and zero platform gaps**.
 
-A long-running macOS OTP HID fault also ran through the session. It is **not an SDK defect** and is
-**unresolved**; three separate attributions were made and all three were wrong. That story is written up
-honestly in the ISA because the reasoning error is instructive.
+Three outcomes worth carrying forward:
+
+1. **F5 — a real Windows OTP HID defect, found and fixed.** OTP HID could not be opened on Windows at all,
+   even elevated, because the feature-report connection opened the keyboard collection read/write. Fixed to
+   open with zero access. This is the branch's central "OTP HID is exclusive" contract — it was untestable
+   on Windows before this.
+2. **F4 is cross-platform, not macOS-specific.** The handoff hypothesis was that Windows might demultiplex
+   two FIDO handles. It does not — `SendOnFirst_ReceiveOnSecond_RevealsReportMisrouting` passes on Windows
+   too. Drive CTAP over one FIDO connection at a time on every platform.
+3. **A Windows platform characterization, not a defect:** the CCID-held Management fallback routes through
+   FIDO HID, which Windows admits only to an elevated process, so that specific fallback requires
+   Administrator on Windows. Recorded, not worked around.
 
 ---
 
@@ -31,50 +37,47 @@ honestly in the ISA because the reasoning error is instructive.
 
 | Commit | What |
 |---|---|
-| `8ed7905a` | fix(core): harden session and interface ownership |
-| `e977b532` | docs: reconcile session contention contracts |
-| `d82218bf` | test(yubiotp): dispose caller-created OTP HID connections |
-| `0bfcf669` | docs(isa): record ISC-4 pass and correct the OTP HID root cause |
-| `619a4bf5` | **fix(core): open macOS FIDO HID non-seizing so shared FIDO is true** |
-| `1021fcf5` | docs: correct the shared-FIDO contract and record F1 closure |
-| `2a4fdb02` | test(piv): add D3 hotplug pin that the CCID lease is not stranded |
-| `9a698160` | docs: close D3 on hardware and correct the Phase 9 OTP root cause |
-| `32b0c61c` | style(piv): fix final newline in D3 hotplug test |
-| `805af38c` | docs(isa): withdraw the Wispr Flow attribution; OTP cause unresolved |
-| `cebc4037` | docs(isa): correct the OTP probe methodology and record the root test |
+| `6289c774` | **fix(core): open Windows OTP HID feature reports with zero access** |
+| `1031890b` | docs: close F2/F3 on Windows and record the OTP HID feature-open fix |
+
+The fix is one file: `src/Core/src/Native/Windows/HidD/HidDDevice.cs`. `OpenIOConnection` (FIDO
+input/output reports) keeps `GENERIC_READ | GENERIC_WRITE`; `OpenFeatureConnection` (OTP feature reports)
+now opens with `DESIRED_ACCESS.NONE`, matching the legacy Yubico .NET SDK.
 
 ### Uncommitted changes
 
 None in tracked files. Three untracked paths that must **never** be staged: `.claude/worktrees/`,
 `.playwright-mcp/`, `Plans/`.
 
-### Build & test status (macOS, serials 103 + 125)
+### Build & test status (Windows 11, elevated, serials 103 + 125)
 
 | Gate | Result |
 |---|---|
-| `toolchain.cs build` | 0 errors (1 pre-existing `CA2254` in `src/Cli.Shared/src/Logging/StaticLoggerExtensions.cs`) |
-| `toolchain.cs test` (unit) | 12/12 projects, 0 failed |
-| `toolchain.cs -- resilience --fast` | passed |
-| Core `FidoHidSharingIntegrationTests` | 3/3 |
-| Fido2 integration `--smoke` | 29/29, three consecutive runs |
-| Piv `PivSessionContentionTests` + `PivMultiKeyContentionTests` | 7/7 smoke |
-| Piv `PivHotplugContentionTests` (D3) | 1/1, 1m47s, operator-coordinated |
-| `dotnet format whitespace \| style \| analyzers --severity error` | clean |
+| `toolchain.cs build` | 0 errors |
+| Core `CompositeDiscoveryIntegrationTests` | 5/5 (was 4/5 before the fix) |
+| Piv `PivSessionContentionTests` (F3) | 5/5 |
+| Core `FidoHidSharingIntegrationTests` (F2) | 3/3 |
+| YubiOtp integration `--smoke` | 10/10, incl. `CalculateHmacSha1_WithKnownKey...` over **HidOtp** |
+| `toolchain.cs -- resilience --fast` | 69/69 |
+| full Core unit suite | 740/740 (2 skipped) |
 | `docs-qa` | 55 files |
+| `dotnet format whitespace \| analyzers --verify-no-changes --severity error` | clean |
 
-Unqualified `dotnet format --verify-no-changes` exits **2** on pre-existing `IL2026`/`IL3050` in
-`src/Tests.TestProject/Program.cs:21` — not this branch's file. Use the three split subcommands.
+**Windows requires an elevated shell for the HID hardware tests.** Non-elevated, FIDO HID opens fail with
+`UnauthorizedAccessException` (Windows restricts read/write on the FIDO top-level collection to admins), so
+the F3 fallback tests and the F2 tests fail for a platform reason, not a code reason. Run the integration
+tests from an Administrator terminal.
+
+`dotnet format style --verify-no-changes --severity error` exits **2**, but only on **pre-existing** native
+P/Invoke naming (`IDE1006` on `kern_return_t`, `udev_device_get_parent`, `udev_device_get_syspath` in
+`Native/MacOS` and `Native/Linux`) — not this branch's file. Use the split subcommands; whitespace and
+analyzers are clean.
 
 ### Worktree / parallel agent state
 
-One extra worktree, **unrelated to this branch — do not merge into it**:
-
-- Path: `.claude/worktrees/agent-aa7ba443d8eec3e9e`
-- Branch: `worktree-agent-aa7ba443d8eec3e9e` @ `6988dc1d`
-- Content: FIDO2 ARKG-P256 / previewSign port work, ~391 insertions
-- **Dirty**: `CoseArkgP256SeedKey.cs`, `FidoPreviewSignTests.cs` have uncommitted edits
-- Note: it contains its own copy of `MacOSHidIOReportConnection.cs` changes — expect a conflict with
-  `619a4bf5` if these branches ever meet
+Carried over from the prior handoff, still true unless changed: one extra worktree unrelated to this branch
+under `.claude/worktrees/agent-aa7ba443d8eec3e9e` (FIDO2 ARKG-P256 work). Do not merge into it. It carries
+its own `MacOSHidIOReportConnection.cs` edits that conflict with `619a4bf5`.
 
 ---
 
@@ -85,103 +88,78 @@ discovery to coexist without silently destroying each other's state.
 
 | Need | Status | Notes |
 |---|---|---|
-| A PIV session survives an unrelated `GetDeviceInfoAsync` | ✅ Working | The motivating footgun; pinned on hardware |
+| A PIV session survives an unrelated `GetDeviceInfoAsync` | ✅ Working | Pinned on macOS, Linux, and Windows (F3) |
 | Exclusive interfaces refuse a second connection clearly | ✅ Working | CCID + OTP HID, named-interface diagnostics |
-| Shared FIDO HID admits a second connection | ✅ Working | Fixed this session; was broken on macOS |
-| Concurrent CTAP over two FIDO handles | ⚠️ Bounded | Reports are not demultiplexed; drive CTAP one handle at a time (row F4) |
+| Shared FIDO HID admits a second connection | ✅ Working | macOS, Linux, Windows |
+| Concurrent CTAP over two FIDO handles | ⚠️ Bounded | Not demultiplexed on **any** platform; drive one handle at a time (F4) |
 | Sessions on two different keys stay independent | ✅ Working | Incl. RSA-4096 cross-key liveness |
-| Hotplug does not strand an interface lease | ✅ Working | Closed this session (D3) |
-| Correct behaviour on **Windows** | ❌ Unverified | PC/SC sharing + HID open semantics never tested (F2, F3) |
+| Hotplug does not strand an interface lease | ✅ Working | Closed on macOS (D3) |
+| Correct behaviour on **Windows** | ✅ Working | PC/SC + HID verified; one OTP HID defect fixed this session (F5) |
+| CCID-held Management fallback on Windows | ⚠️ Needs elevation | Routes through FIDO HID; Windows admits that only to an admin process |
 | Cross-process contention | ❌ Out of scope | In-process by contract |
 
-**Overall:** 🟢 **Production** on macOS and Linux for the target user's primary workflows; **unverified on
-Windows**, which is the one material gap remaining.
-
-**Critical next step:** Close **F2 and F3** on the Windows machine — Windows PC/SC sharing semantics under
-contention, and Windows HID open behaviour. Everything else on this branch is evidence-complete.
+**Overall:** 🟢 **Production** on macOS, Linux, and Windows for the target user's primary workflows. The
+register has zero open rows and zero platform gaps.
 
 ---
 
 ## What's Next (Prioritized)
 
-### On Windows — the reason this handoff exists
+### Remaining hardware item (operator-coordinated)
 
-1. **F3 — Windows PC/SC sharing semantics under contention.** Run
-   `dotnet toolchain.cs -- test --integration --project Piv --smoke --filter "FullyQualifiedName~PivSessionContentionTests"`.
-   The in-process seam is platform-independent, but native PC/SC behaviour is not. Expect the interesting
-   case to be `ConnectAsync_SecondSmartCardConnection_WhilePivSessionOpen_IsRefused`, whose message asserts
-   a `pcsc:` identity.
-2. **F2 — Windows HID sharing semantics.** Run the three
-   `Core --filter "FullyQualifiedName~FidoHidSharingIntegrationTests"` tests. On macOS the second FIDO open
-   required removing `kIOHIDOptionsTypeSeizeDevice`; Windows uses a different HID stack, so
-   `SendOnFirst_ReceiveOnSecond_RevealsReportMisrouting` may legitimately **fail** there — if it does, that
-   is a *good* result meaning Windows demultiplexes, and row F4 becomes macOS-specific. Record it, do not
-   "fix" the test to keep it green.
-3. **Windows topology Tier 2**, carried over from the composite-merge effort.
-4. **E1/E2 — physical DeviceId tier flip.** Needs two same-PID keys inserted/removed. Currently pinned by
-   repository unit tests only; ISA:485-489 records it as "planned, not run". Deferred on macOS because the
-   OTP fault distorts the discovered topology; a healthy Windows rig is a clean place to do it.
+1. **E1/E2 — physical DeviceId tier flip.** Needs two same-PID keys inserted/removed. Currently pinned by
+   repository unit tests only; ISA records it as "planned, not run". The Windows rig has two same-PID
+   firmware-5.8.0 keys (103/125) plugged in now, which is a clean place to do it. Requires a human to
+   coordinate the insert/remove.
 
 ### Canonical-verification queue (no hardware needed)
 
-Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` at
-`/Users/Dennis.Dyall/Code/y/yubikey-manager-rust-auto`.
+Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` (macOS path
+`/Users/Dennis.Dyall/Code/y/yubikey-manager-rust-auto`).
 
-1. **OTP HID exclusivity — highest value.** It is this branch's central contract and currently rests on our
-   own reasoning, not canonical. F1 showed how badly that can go.
+1. **OTP HID exclusivity vs canonical — highest value.** The branch's central contract; still rests on our
+   own reasoning.
 2. CCID per-interface exclusivity vs canonical.
-3. F4 — does canonical support concurrent CTAP over two FIDO handles, or one-at-a-time like us?
-4. Management transport fallback order `SmartCard -> HidFido -> HidOtp` vs canonical.
+3. F4 — does canonical support concurrent CTAP over two FIDO handles, or one-at-a-time like us? (Now known
+   to be one-at-a-time on all three of our platforms.)
+4. Management transport fallback order `SmartCard -> HidFido -> HidOtp` vs canonical. Note the Windows twist:
+   `HidFido` needs elevation, so the practical Windows fallback from a held CCID is elevation-gated. Worth
+   checking whether canonical prefers OTP HID over FIDO HID on Windows, which would avoid the elevation
+   requirement entirely — a possible future improvement, not a defect.
 5. Composite grouping / DeviceId tier model vs Rust `device.rs`.
-6. Does canonical document macOS keyboard-grabber / Input Monitoring contention on OTP?
 
-### Evidence and process debt
+### Evidence and process debt (carried over)
 
-7. **Reconcile contradictory formatting rows.** ISA:444 and ISA:521 record unqualified
-   `dotnet format --verify-no-changes` as "0 errors"; measured today it exits **2**. Cato flagged this.
-8. **Record an explicit Phase 3–4 cross-vendor review verdict.** ISA:483-484 and ISA:645 mark it as *the*
-   blocking merge item ("Do not merge without it"); ISA:772 asserts it happened but no verdict is recorded.
-9. **Re-run Cato** on `docs/plans/session-contention/ISA.md`. Standing verdict is **fail (round 2)**. Its
-   CRITICAL finding — attributing the OTP failure without ruling out this branch's own rework — is now
-   resolved. Its WARNING (item 7) is not.
+6. **Reconcile contradictory formatting rows.** Earlier ISA rows recorded unqualified
+   `dotnet format --verify-no-changes` as "0 errors"; it actually exits **2** on pre-existing native
+   naming. Cato flagged this.
+7. **Record an explicit Phase 3–4 cross-vendor review verdict.** Marked as a blocking merge item but no
+   verdict is recorded.
+8. **Re-run Cato** on `docs/plans/session-contention/ISA.md`.
    `bun ~/.claude/skills/Cato/Tools/CatoRun.ts <artifact> --current-vendor openai`
-10. Identify the 2 transient `Fido2` integration failures seen once immediately after the seize change;
-    3×29/29 followed but those two were never captured.
-11. Capture the removal-time exception type in D3 (needs one more coordinated unplug).
+9. Identify the 2 transient `Fido2` integration failures seen once on macOS after the seize change.
+10. Capture the removal-time exception type in D3 (needs one more coordinated unplug).
 
 ### Later
 
-12. Review and merge consolidation.
-13. Base reconciliation — 34 commits behind, 14 conflicts, contradictory `IProtocol` ownership docs. Parked
+11. Review and merge consolidation.
+12. Base reconciliation — behind `yubikit`, conflicts, contradictory `IProtocol` ownership docs. Parked
     deliberately; do not merge/rebase `yubikit` without a decision.
-14. Verify/retire the stale defect record at ISA:623-625 (`Xunit.SkippableFact` — YubiOtp ran 10/10 today,
-    so it is at least partly obsolete).
-15. Pre-existing: 143 firmware-gated tests use plain `[Theory]` so they fail instead of skipping on older
-    firmware. Not this branch.
 
 ---
 
 ## Blockers & Known Issues
 
-- **macOS OTP HID fault — unresolved, environment-level, not an SDK defect.** Every OTP HID open fails with
-  `IOHIDDeviceOpen = 0xE00002E2` (`kIOReturnNotPermitted`) while CCID works. Excluded by direct evidence:
-  this branch's lease registry, orphaned testhosts, Wispr Flow (quit entirely — no process, no IORegistry
-  client, still fails), Karabiner daemons, and USB re-enumeration (three replugs). `sudo` does not fix it,
-  but `sudo` does not bypass TCC either, so that test is inconclusive rather than negative. Leading
-  unconfirmed hypothesis: macOS **Input Monitoring** (`kTCCServiceListenEvent`) against the terminal.
-  Unexplained contradiction on record: OTP worked earlier in the same session under the same process tree.
-  A machine restart was pending at handoff — first check afterwards is whether
-  `ykman --device 103 otp info` still prints `WARNING: Failed opening device`.
-- **Probe caveat:** `ykman otp info` falls back to CCID, so it can exit successfully while HID is broken.
-  The discriminator is the warning line, not the exit status. Do not pipe it through `head`.
-- **ISC-4 precondition:** the recorded discovery 5/5 requires an openable OTP interface. Under the fault it
-  reverts to 2 passed / 3 failed. Green, but conditional.
-- **Operator hypothesis worth remembering:** `~/.gnupg/scdaemon.conf` sets `disable-ccid`, routing scdaemon
-  through **PC/SC** — the same channel CCID tests use — and `gpg-agent.conf` sets `enable-ssh-support`. In
-  any repo with an **SSH remote or signed commits**, a git operation can wake scdaemon and contend for the
-  card. Measured as not firing in this repo (`commit.gpgsign=false`, HTTPS remote), but very plausibly real
-  elsewhere. **On Windows this does not apply** in the same form; if integration tests start failing after
-  git operations there, suspect Windows Hello / WebAuthn platform authenticator instead.
+- **Windows FIDO HID needs elevation.** Not a defect. Windows restricts read/write on the FIDO HID
+  top-level collection to elevated processes, so any path that opens a FIDO HID connection — the CCID-held
+  Management fallback, and the F2/F3 integration tests — must run as Administrator on Windows. FIDO2 over
+  its own HID transport for an app is subject to the same OS rule.
+- **macOS OTP HID fault — unresolved, environment-level, not an SDK defect.** (Carried over from the macOS
+  session, unchanged.) Every macOS OTP HID open failed with `IOHIDDeviceOpen = 0xE00002E2`
+  (`kIOReturnNotPermitted`) while CCID worked; leading unconfirmed hypothesis is macOS **Input Monitoring**
+  against the terminal. **Does not reproduce on Windows** — Windows OTP HID works after the F5 fix. If OTP
+  HID misbehaves again on macOS, first check `ykman --device 103 otp info` for `WARNING: Failed opening
+  device` (the warning line is the discriminator, not the exit status).
 
 ---
 
@@ -189,15 +167,15 @@ Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` at
 
 | File | Purpose |
 |---|---|
-| `docs/plans/session-contention/ISA.md` | The evidence ledger. Phases 9, 10 and both addenda are this session |
-| `docs/plans/session-contention/edge-case-register.md` | 22 rows, zero open. F1 covered, F4 new bounded row, D3 covered |
-| `src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs` | The F1 fix — `IOHIDDeviceOpen(handle, 0)`, must stay non-seizing |
-| `src/Core/tests/.../Devices/FidoHidSharingIntegrationTests.cs` | F1 + F4 hardware pins, incl. the misrouting diagnostic |
-| `src/Piv/tests/.../PivHotplugContentionTests.cs` | D3 pin; self-fails if no removal occurs |
+| `docs/plans/session-contention/ISA.md` | The evidence ledger. **Phase 11** is this Windows session |
+| `docs/plans/session-contention/edge-case-register.md` | 23 rows, zero open, zero gaps. F2/F3 covered, F4 cross-platform, **F5 new** |
+| `src/Core/src/Native/Windows/HidD/HidDDevice.cs` | The F5 fix — `OpenFeatureConnection` opens with `DESIRED_ACCESS.NONE` |
+| `src/Core/tests/.../Devices/FidoHidSharingIntegrationTests.cs` | F2/F4 hardware pins incl. the misrouting diagnostic |
+| `src/Core/tests/.../Devices/CompositeDiscoveryIntegrationTests.cs` | Typed-transport connect; pins F5 (was RED on Windows) |
+| `src/Piv/tests/.../PivSessionContentionTests.cs` | F3 pins; the `pcsc:` identity assertion |
 | `src/Core/src/Devices/DeviceConnectionRegistry.cs` | Where exclusive vs shared is enforced |
-| `src/Core/src/Sessions/ApplicationSession.cs`, `src/Core/src/Devices/DisposalGate.cs` | Disposal / lease release |
-| `src/Tests.Shared/appsettings.json` | The allow list. Core's own empty copy was removed this session |
-| `src/Core/CLAUDE.md` | Concurrency model + the corrected shared-FIDO wording |
+| `src/Tests.Shared/appsettings.json` | The allow list (includes 103 and 125) |
+| `src/Core/CLAUDE.md` | Concurrency model + shared-FIDO wording |
 
 ---
 
@@ -210,21 +188,23 @@ git checkout yubikit-session-contention && git pull
 dotnet toolchain.cs build
 dotnet toolchain.cs test
 
-# Windows hardware work (needs authorized keys plugged in BEFORE the runner starts):
+# Windows hardware work — RUN FROM AN ADMINISTRATOR TERMINAL, keys plugged in BEFORE the runner starts:
 dotnet toolchain.cs -- test --integration --project Piv  --smoke --filter "FullyQualifiedName~PivSessionContentionTests"
 dotnet toolchain.cs -- test --integration --project Core --smoke --filter "FullyQualifiedName~FidoHidSharingIntegrationTests"
 dotnet toolchain.cs -- test --integration --project Core --smoke --filter "FullyQualifiedName~CompositeDiscoveryIntegrationTests"
+dotnet toolchain.cs -- test --integration --project YubiOtp --smoke
 
 # Formatting: use the split subcommands, not the unqualified one
 dotnet format whitespace --verify-no-changes
-dotnet format style      --verify-no-changes --severity error
+dotnet format style      --verify-no-changes --severity error   # exits 2 on PRE-EXISTING native naming, not this branch
 dotnet format analyzers  --verify-no-changes --severity error
 ```
 
-**Windows prerequisites:** authorized serials must be in `src/Tests.Shared/appsettings.json` (currently
-includes 103 and 125 — the Windows rig's keys may differ and an empty/mismatched list hard-exits with
-`Environment.Exit(-1)`). Devices must be connected *before* the test runner starts. Do not run
-touch/insert/remove tests unless a human is coordinating.
+**Prerequisites:** authorized serials must be in `src/Tests.Shared/appsettings.json` (includes 103 and 125).
+Devices must be connected *before* the test runner starts. On Windows, run the HID integration tests
+elevated. Do not run touch/insert/remove tests unless a human is coordinating.
 
 **Working rules:** stage only files you changed explicitly; never `git add .`/`-A`/`-a`. Do not merge or
 rebase `yubikit`. Do not weaken an assertion to make a hardware test pass — record the failure instead.
+</content>
+</invoke>

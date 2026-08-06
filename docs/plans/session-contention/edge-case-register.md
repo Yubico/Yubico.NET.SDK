@@ -63,8 +63,8 @@ Test names below are exact repository method names; paths are relative to the re
 
 | # | Case | Tier | Status | Test |
 |---|---|---|---|---|
-| E1 | Tier flip on inserting a second same-PID key — no phantom incumbent event | P1 | covered | Deterministic repository pin only: `src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceRepositoryCompositeTests.cs`: `UpdateCache_SiblingSamePidKeyArrives_IncumbentEmitsNoRemovedOrAdded`; no physical hotplug claim |
-| E2 | Tier flip on sibling removal and final removal correlation | P1 | covered | Deterministic repository pins only: `YubiKeyDeviceRepositoryCompositeTests.UpdateCache_SiblingSamePidKeyRemoved_SurvivorEmitsNoRemovedOrAdded`, `UpdateCache_TierFlipThenFinalRemoval_RemovalUsesPreviouslyAddedDeviceId`; no physical hotplug claim |
+| E1 | Tier flip on inserting a second same-PID key — no phantom incumbent event | P1 | covered | Deterministic repository pin: `src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceRepositoryCompositeTests.cs`: `UpdateCache_SiblingSamePidKeyArrives_IncumbentEmitsNoRemovedOrAdded`. **Windows hardware run (Phase 12, elevated, two same-PID firmware-5.8.0 keys):** inserting the 2nd key emitted exactly **one Added** for the new key and **no** event for the incumbent, whose DeviceId stayed stable. **Platform caveat — a Windows pass does not transfer.** On Windows both keys resolve by the tier-1 **topology** (Container ID) path, which `ProtocolDeviceInfo` documents as `null` on macOS/Linux; those platforms degrade to the serial/PID tiers, so the serial↔PID flip the unit test forces is never exercised on this rig. The degraded-path hardware run on **macOS/Linux is still required** and matters more (that path is where a phantom incumbent event is most plausible); it stays unit-pinned until then |
+| E2 | Tier flip on sibling removal and final removal correlation | P1 | covered | Deterministic repository pins: `YubiKeyDeviceRepositoryCompositeTests.UpdateCache_SiblingSamePidKeyRemoved_SurvivorEmitsNoRemovedOrAdded`, `UpdateCache_TierFlipThenFinalRemoval_RemovalUsesPreviouslyAddedDeviceId`. **Windows hardware run (Phase 12):** removing one sibling emitted exactly **one Removed** for the removed key with **no** event for the survivor; the final removal emitted exactly **one Removed** whose DeviceId equalled the one previously Added. 4 physical actions → 4 events, zero phantom events, exact add/remove correlation. Same platform caveat as E1: this confirmed only the Windows topology-tier path; the serial/PID degraded-path run on **macOS/Linux is still required** |
 
 ## F. Platform
 
@@ -108,6 +108,17 @@ platforms: Linux and macOS shared FIDO HID, and Windows admits a second FIDO con
 not demultiplexing input reports. F5 is the second production fix this cross-platform verification produced:
 OTP HID feature reports must open the keyboard collection with zero desired access, because Windows refuses
 read/write on the system keyboard even for an elevated process.
+
+E1 and E2 gained partial hardware evidence in Phase 12: an operator-coordinated insert/remove of two
+same-PID firmware-5.8.0 keys on Windows produced 4 events for 4 physical actions with zero phantom
+incumbent/survivor events and exact add/remove DeviceId correlation. That run confirmed only the Windows
+tier-1 **topology** (Container ID) path — a code path `ProtocolDeviceInfo` documents as absent on
+macOS/Linux, where discovery degrades to the serial/PID tiers. The serial↔PID flip the E1/E2 unit tests
+force is therefore not exercised on the Windows rig, and its hardware confirmation on **macOS/Linux is
+still required** (and matters more, being the degraded path where a phantom incumbent event is most
+plausible). Until then that flip absorption stays unit-pinned only. E1/E2 keep "covered" status on the
+strength of the deterministic repository pins; the outstanding macOS/Linux runs are hardware corroboration,
+not the sole coverage.
 
 ## Completed strengthening — two-key long-operation liveness
 

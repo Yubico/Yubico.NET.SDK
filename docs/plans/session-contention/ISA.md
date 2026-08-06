@@ -50,7 +50,7 @@ to sessions.
 | ISC-5 | No material performance regression in scan latency or session-open latency against a baseline captured before any change. | `merge-diag` before/after |
 | ISC-6 | Management transport tests genuinely exercise the transport they name. | A HID-FIDO-pinned session rejects `ResetDeviceAsync` with `NotSupportedException`; the SmartCard backend emits reset APDU INS `0x1F` |
 | ISC-7 | Every production behaviour change is backed by a test that failed **for its predicted reason** before the change. | RED output recorded verbatim in this ISA |
-| ISC-8 | Identity contracts are explicit per API scope: repository-published `DeviceId` is stable for one uninterrupted presence, while fresh direct scans may derive different evidence-tier IDs. | Repository tier-flip/final-removal unit pins plus `FindAllAsync`/`DeviceChanges` documentation; no physical hotplug claim |
+| ISC-8 | Identity contracts are explicit per API scope: repository-published `DeviceId` is stable for one uninterrupted presence, while fresh direct scans may derive different evidence-tier IDs. | Repository tier-flip/final-removal unit pins plus `FindAllAsync`/`DeviceChanges` documentation; **Windows topology-tier path hardware-confirmed in Phase 12** by an operator-coordinated insert/remove (4 actions → 4 events, zero phantom events, exact add/remove correlation). Windows resolves same-PID keys by the topology tier, so the serial↔PID flip stays unit-pinned only and its macOS/Linux degraded-path hardware run is still required |
 
 ## Non-goals
 
@@ -489,7 +489,7 @@ resilience 69/69 · full suite 12/12 · format 0 errors · hardware: discovery 5
   showing the id flips while interface paths stay byte-identical, and the fix is pinned by a
   repository test that went RED for the predicted reason. Physical confirmation needs either
   unplugging a key or reconfiguring one to a different PID via the reconfiguration harness — planned,
-  not run.
+  not run. **(Phase 12: Windows topology-tier path confirmed by an operator-coordinated insert/remove — see below; the macOS/Linux serial/PID degraded path is still required.)**
 - **~~Linux~~ and Windows.** Linux was closed on 2026-08-03 — see Phase 7 below. Windows PC/SC
   sharing semantics and HID open behaviour remain unverified.
 - **Windows topology Tier 2**, carried from the composite-merge effort.
@@ -643,8 +643,8 @@ Neither is in scope here; both are recorded because a 5.8.0-only macOS rig could
 
 - **PIV two-key contention** — `PivMultiKeyContentionTests` still skipped; it needs both keys to
   expose SmartCard simultaneously and was not re-run after the second key was added.
-- **DeviceId evidence-tier flip** — unchanged; needs unplug or PID reconfiguration.
-- **Windows** — unchanged.
+- **DeviceId evidence-tier flip** — Windows topology-tier path confirmed on hardware in Phase 12; macOS/Linux serial/PID degraded path still needs an unplug run.
+- **Windows** — unchanged. **(Closed in Phase 11.)**
 - **Cross-vendor review of Phases 3–4** — still the blocking item before merge.
 
 ---
@@ -871,7 +871,11 @@ Consumers needing current configuration must query Management data explicitly ra
 repository object refresh as a metadata refresh.
 
 The repository tier-flip/final-removal behavior is pinned by deterministic repository tests. No physical
-insert/remove or evidence-tier-flip run was performed on the current macOS rig, and none is claimed.
+insert/remove or evidence-tier-flip run was performed on the current macOS rig, and none is claimed. **(A
+physical insert/remove run was later performed on Windows hardware — see Phase 12. It confirmed the
+no-phantom-event and add/remove-correlation contracts on hardware; the serial↔PID flip itself did not
+arise there because Windows resolves same-PID keys by the higher-confidence topology tier, so that flip
+path stays unit-pinned only.)**
 
 ### Ownership and transport contract
 
@@ -921,7 +925,7 @@ hardware; F2 and F3 require unavailable platform evidence. ISC-2 passes.
 | ISC-5 | pass | Same-rig Linux before/after delta shows no material scan/session-open regression |
 | ISC-6 | pass | `ResetDeviceAsync_WithHidFidoPinnedSession_ThrowsNotSupportedException` passed on hardware with `Transport=HidFido`; `SmartCardBackend_DeviceResetAsync_SendsDeviceResetApdu` passed and pinned INS `0x1F` without resetting hardware |
 | ISC-7 | pass | RED evidence is recorded for behavior changes, including reproduced OTP refusal and Management/YubiOTP ghost-holder failures; invariant pins are identified separately |
-| ISC-8 | pass | Repository-published identity stability is unit-pinned and documented separately from fresh direct-scan IDs; no physical hotplug/tier-flip evidence claimed |
+| ISC-8 | pass | Repository-published identity stability is unit-pinned and documented separately from fresh direct-scan IDs. Phase 12 added Windows hardware evidence for the topology-tier path (no phantom incumbent/survivor events, exact add/remove correlation); the serial↔PID flip stays unit-pinned only because Windows resolves same-PID keys by the topology tier, and its macOS/Linux degraded-path hardware run is still required |
 
 **Phase 5 status: complete.** Architecture Mermaid source and rendered artifacts are refreshed by the
 repository render script; public XML docs and human/AI module guidance now expose discovery bounds,
@@ -1527,3 +1531,72 @@ clean.
 
 This satisfies ISC-7 for the fix (RED for the predicted reason, then GREEN) and leaves ISC-4's standing
 gates green on a third platform. The register's last two platform gaps are closed.
+
+## Phase 12 — E1/E2 DeviceId tier flip confirmed on Windows hardware (2026-08-06)
+
+E1 (no phantom incumbent event on inserting a second same-PID key) and E2 (sibling-removal and
+final-removal correlation) were "covered" by deterministic repository unit tests only
+(`YubiKeyDeviceRepositoryCompositeTests`), with an explicit "no physical hotplug claim." This phase adds
+direct hardware evidence via an operator-coordinated insert/remove of two same-PID firmware-5.8.0 keys on
+Windows 11 (elevated), observing `YubiKeyManager.DeviceChanges` live.
+
+### Method
+
+A file-based monitoring harness (`experiment_e1e2_tierflip.cs`, run outside the repo tree) subscribed to
+`YubiKeyManager.DeviceChanges` before `StartMonitoring(1s)` and logged every event with a UTC timestamp,
+`DeviceAction`, `IYubiKey.DeviceId`, and `AvailableConnections`. The operator performed four physical
+actions one at a time; each expected event was confirmed before advancing. The harness is an experiment
+seam, not a committed test — hotplug correlation cannot run unattended in CI.
+
+### Observed event stream — 4 actions, 4 events, zero phantoms
+
+| # | Action | Event | DeviceId |
+|---|---|---|---|
+| 1 | Key A inserted (alone) | Added | `ykphysical:topology:255c4df9-…` |
+| 2 | Key B inserted (E1) | Added | `ykphysical:topology:db4f2653-…` |
+| 3 | Key A removed (E2) | Removed | `ykphysical:topology:255c4df9-…` |
+| 4 | Key B removed (E2, final) | Removed | `ykphysical:topology:db4f2653-…` |
+
+- **E1:** inserting B emitted exactly one `Added` for B; the incumbent A emitted **no** `Removed`/`Added`
+  and kept its DeviceId. No phantom incumbent event.
+- **E2:** removing A emitted exactly one `Removed` for A; the survivor B emitted **no** event and kept its
+  DeviceId. The final removal of B emitted exactly one `Removed` whose DeviceId equalled B's earlier
+  `Added` (event #2 ↔ #4, and #1 ↔ #3) — exact add/remove correlation.
+
+### Finding: Windows resolves same-PID keys by the topology tier, so the serial↔PID flip does not arise
+
+Both keys were resolved to `ykphysical:topology:<uuid>`, i.e. the **topology** evidence tier, not the
+serial or PID tier. The E1/E2 unit tests *force* a serial↔PID flip because their synthetic
+`KeyInterfaces` carry only serial+PID evidence; real Windows hardware exposes USB topology, a
+higher-confidence tier that resolves each key **independently of its sibling**. Consequently each key's
+DeviceId is sibling-independent and stable across the insert/remove of the other key — there is no tier
+flip to absorb on this rig. The behavioral contracts E1/E2 exist to protect (one event per physical
+action, no phantom incumbent/survivor event, correlated add/remove by stable DeviceId) hold exactly.
+
+This is a strengthening of the identity guarantee, not a contradiction: the no-phantom-event outcome the
+unit tests reach *via* diff-stability across a forced flip is reached on Windows *without* a flip at all.
+The serial↔PID flip absorption path itself therefore remains **unit-pinned only** and is not claimed as
+hardware-exercised. ISC-8's identity-stability contract is satisfied on hardware; the register's E1/E2 rows
+and coverage summary are updated accordingly, with the topology-tier caveat recorded explicitly rather than
+overclaiming that the flip path was walked.
+
+### A Windows pass does not transfer — macOS/Linux runs still required
+
+This is important and was flagged in review: E1/E2 is **platform-divergent by construction**, so a Windows
+pass is not a cross-platform pass. `CompositeDeviceMerger` tier 1 is Windows **Container ID** topology
+evidence, which `ProtocolDeviceInfo` documents as `null` "always on macOS and Linux"; the merger's own
+comment states that absent topology "degrades to exactly the macOS/Linux semantics." Windows produced the
+`ykphysical:topology:<uuid>` identities above from a code path the other two platforms lack, while
+macOS/Linux fall through to the serial/PID tiers — precisely the tiers E1/E2's flip question is about.
+
+So the Windows run confirms the topology branch and nothing more. The **macOS/Linux run is still required**
+and arguably matters more: it exercises the degraded serial/PID path where a phantom incumbent add/remove is
+most plausible, and `docs/architecture/device-discovery-guarantees.md:202-206` already records macOS/Linux
+HID-to-HID topology as unimplemented and the Windows topology tier as validated only at seam level.
+Sequencing: the macOS run must wait until the OTP fault is resolved, because that fault distorts the
+discovered interface set. Do not substitute this Windows result for the macOS/Linux runs.
+
+Caveat, same as the Phase 11 READ-FIRST banner: this is an operator-coordinated Windows-session
+observation, not independently reviewed. It is lower-risk than the `HidDDevice` fix because Phase 12 changed
+**no production code** — it only observed `DeviceChanges` during physical insert/remove — but the event
+stream was not re-captured by a second party.

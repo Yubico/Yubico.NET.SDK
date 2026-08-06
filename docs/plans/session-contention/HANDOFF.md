@@ -124,7 +124,7 @@ register has zero open rows and zero platform gaps.
 
 ### Remaining hardware item (operator-coordinated)
 
-1. **E1/E2 — physical DeviceId tier flip. MUST RUN PER PLATFORM. Windows run in progress; macOS and Linux
+1. **E1/E2 — physical DeviceId tier flip. MUST RUN PER PLATFORM. Windows run DONE; macOS and Linux
    runs are still required.** Needs two same-PID keys inserted/removed. Currently pinned by repository unit
    tests only; ISA records it as "planned, not run".
 
@@ -144,6 +144,15 @@ register has zero open rows and zero platform gaps.
    Sequencing note: macOS cannot host a clean run while the OTP fault distorts the discovered interface
    set, so do the macOS run after the OTP blocker is resolved — not before, and do not substitute the
    Windows result for it.
+
+   **Windows result (Phase 12, done).** Operator-coordinated insert/remove of two same-PID firmware-5.8.0
+   keys produced 4 events for 4 physical actions with zero phantom incumbent/survivor events and exact
+   add/remove correlation. Both keys resolved to `ykphysical:topology:<uuid>` — i.e. the tier-1 topology
+   path above — so this run confirms the **topology-tier** branch and, by construction, did **not** exercise
+   the serial/PID degraded path. That degraded path stays unit-pinned only until the macOS/Linux runs.
+   Same caveat as the READ-FIRST banner: this is an operator-coordinated Windows-session observation, not
+   independently reviewed. Lower-risk than the `HidDDevice` fix because Phase 12 changed **no production
+   code** — it only watched `DeviceChanges` — but the event stream was not re-captured by a second party.
 
 ### Canonical-verification queue (no hardware needed)
 

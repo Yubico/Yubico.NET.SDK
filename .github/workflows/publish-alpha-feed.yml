@@ -2,7 +2,9 @@ name: Publish Alpha NuGet Feed (2.0)
 
 # Builds, packs, attests, and publishes the anonymous static NuGet feed to
 # GitHub Pages (served at https://yubico.github.io/Yubico.NET.SDK/alpha/).
-# Runs only on pushes to yubikit.
+# Runs manually only (workflow_dispatch): the feed is republished deliberately,
+# not on every yubikit push. This avoids colliding Pages deployments triggered by
+# unrelated pushes to yubikit (e.g. docs automation).
 #
 # Uses the modern GitHub Pages deployment (upload-pages-artifact + deploy-pages),
 # which uploads the feed verbatim with no Jekyll processing. The feed is
@@ -11,8 +13,6 @@ name: Publish Alpha NuGet Feed (2.0)
 # (2.0.0-alpha.2) this is deterministic and self-healing.
 
 on:
-  push:
-    branches: [ yubikit ]
   workflow_dispatch:
 
 concurrency:

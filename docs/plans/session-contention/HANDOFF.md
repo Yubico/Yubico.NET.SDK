@@ -1,12 +1,29 @@
 # Handoff — yubikit-session-contention
 
-**Date:** 2026-08-06 (Windows session)
+**Date:** 2026-08-06 (Windows session; macOS pull-back note appended same day)
 **Branch:** `yubikit-session-contention`
-**Last commit:** `1031890b` — docs: close F2/F3 on Windows and record the OTP HID feature-open fix
+**Last commit:** `2364910b` — docs: refresh session-contention handoff for the Windows session
 **Written for:** resuming on any platform; the remaining hardware item wants an operator-coordinated hotplug
 
 > Committed to the repo rather than `Plans/handoff.md` on purpose: `Plans/` is untracked, so a handoff
 > written there never reaches another machine. This file travels with the branch.
+
+## ⚠️ Verification status of the Windows work — READ FIRST
+
+The Phase 11 Windows results and the `HidDDevice` fix (`6289c774`) are recorded as reported by the Windows
+session. They have **not been independently verified**. Specifically:
+
+- The operator confirms only that authorized YubiKeys were reachable during those runs; the operator did
+  **not** mechanically re-verify the results.
+- On macOS after pulling, **only `dotnet toolchain.cs build` was run and it succeeded**. The unit suite and
+  hardware gates were **not** completed — the run was stopped deliberately, not because it failed.
+- `6289c774` changes production native interop (`src/Core/src/Native/Windows/HidD/HidDDevice.cs`). It is
+  Windows-only by file, so macOS/Linux behaviour should be unaffected, but that is reasoning, not a
+  measurement.
+
+**Treat Phase 11 as reported-but-unreviewed.** It is queued as the first item in the deferred cross-vendor
+review, alongside the Phase 3–4 review that is already marked "do not merge without it". Do not merge on
+the strength of the Phase 11 numbers alone.
 
 ---
 
@@ -107,10 +124,11 @@ register has zero open rows and zero platform gaps.
 
 ### Remaining hardware item (operator-coordinated)
 
-1. **E1/E2 — physical DeviceId tier flip.** Needs two same-PID keys inserted/removed. Currently pinned by
-   repository unit tests only; ISA records it as "planned, not run". The Windows rig has two same-PID
-   firmware-5.8.0 keys (103/125) plugged in now, which is a clean place to do it. Requires a human to
-   coordinate the insert/remove.
+1. **E1/E2 — physical DeviceId tier flip. IN PROGRESS ON WINDOWS — do not start a second attempt on macOS.**
+   Needs two same-PID keys inserted/removed. Currently pinned by repository unit tests only; ISA records it
+   as "planned, not run". The Windows rig has two same-PID firmware-5.8.0 keys (103/125), which is the
+   cleaner rig for it — macOS cannot host it while the OTP fault distorts the discovered topology. Pick up
+   its result from the Windows session.
 
 ### Canonical-verification queue (no hardware needed)
 
@@ -133,6 +151,14 @@ Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` (macOS pa
 6. **Reconcile contradictory formatting rows.** Earlier ISA rows recorded unqualified
    `dotnet format --verify-no-changes` as "0 errors"; it actually exits **2** on pre-existing native
    naming. Cato flagged this.
+6b. **Cross-vendor review of the Phase 11 Windows work — NEW, and a merge gate.** Review `6289c774`
+   (`HidDDevice.OpenFeatureConnection` → `DESIRED_ACCESS.NONE`) and the Phase 11 evidence in `1031890b`.
+   It is production native interop, it was authored in a session whose results nobody re-verified, and the
+   operator has explicitly deferred it into the cross-vendor review queue. Worth checking specifically:
+   whether a zero-access handle is sufficient for *every* feature-report path (not just the ones exercised),
+   and whether `OpenIOConnection` keeping `GENERIC_READ | GENERIC_WRITE` is right for FIDO given F4.
+   Canonical comparison is cheap here — the commit claims parity with the legacy Yubico .NET SDK, which is
+   a checkable assertion.
 7. **Record an explicit Phase 3–4 cross-vendor review verdict.** Marked as a blocking merge item but no
    verdict is recorded.
 8. **Re-run Cato** on `docs/plans/session-contention/ISA.md`.
@@ -160,6 +186,18 @@ Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` (macOS pa
   against the terminal. **Does not reproduce on Windows** — Windows OTP HID works after the F5 fix. If OTP
   HID misbehaves again on macOS, first check `ykman --device 103 otp info` for `WARNING: Failed opening
   device` (the warning line is the discriminator, not the exit status).
+  **Status at handoff: still unresolved. The planned macOS restart was NOT performed**, so the one
+  experiment that would discriminate between "transient process state" and "persistent policy" is still
+  outstanding. First action when macOS resumes: reboot, then run that probe with full output before
+  launching anything else.
+  **Phase 11 raises the prior on the Input Monitoring hypothesis.** F5 established that on Windows the OTP
+  interface is a *keyboard top-level collection* and the OS refuses read/write on it even when elevated —
+  an explicit anti-keylogger restriction. macOS protects the same class of device through Input Monitoring
+  (`kTCCServiceListenEvent`), and `kIOReturnNotPermitted` is a permission-class status. Two different
+  operating systems restricting the same keyboard collection is corroboration, not proof. Note the shapes
+  differ: Windows was fixed by asking for *less* access, whereas macOS already opens with the minimum
+  (`kIOHIDOptionsTypeNone`), so no equivalent code-side lever is known — which is why the leading
+  hypothesis remains environmental rather than a code defect.
 
 ---
 

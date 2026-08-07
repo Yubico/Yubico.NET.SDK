@@ -1926,7 +1926,7 @@ durable key, and it should be closed before merge consolidation.
 ## Phase 15 — Canonical adjudication of OTP HID exclusivity and the identity model (2026-08-06)
 
 Two canonical questions, both bearing on contracts this branch asserts. Sources: Rust `ykrust-auto`
-@ `9fe08d9a` (`/Users/Dennis.Dyall/Code/y/yubikey-manager-rust-auto`) and the Python `yubikit` /
+@ `9fe08d9a` (local checkout of `yubikey-manager-rust-auto`) and the Python `yubikit` /
 `python-fido2` trees. No hardware involved.
 
 ### Q1 — Is OTP HID exclusivity canonical? **No. It is ours.**
@@ -2343,3 +2343,96 @@ avoid the FIDO elevation requirement entirely. The evidence is weaker than that 
 **Conclusion:** suggestive, not established. Preferring OTP HID before FIDO HID on Windows remains a
 plausible improvement, but canonical does not demonstrate a fallback order because it has none. Recorded
 as a candidate, explicitly not as a defect and not as canonical parity.
+
+---
+
+## Phase 19 — Base reconciliation investigation (A2), read-only (2026-08-06)
+
+Answers the two questions left open after the topology measurement. **No merge was attempted.**
+
+### Q1 — What PR #532 was for, and the precedent it sets
+
+`refactor: yubikit protocol refactor`, merged 2026-07-30, 312 files, +1984/−1588. Stated intent:
+consolidate protocol/applet construction around one set of conventions and clarify protocol ownership;
+"broad but largely mechanical". Substance:
+
+1. A single `Core/Protocols/ProtocolFactory` replaces `PcscProtocolFactory`, `FidoProtocolFactory` and
+   `OtpProtocolFactory`, which are **removed**.
+2. Uniform per-module `Backend/` boundaries; applet sessions slimmed to delegate to backends.
+3. SCP made safe by construction — `ScpExtensions.cs` removed, `PcscProtocolScp` now takes a concrete
+   `PcscProtocol` so the shared-gate requirement is a type constraint rather than a runtime check.
+4. FIDO HID protocol gains a public `InitializeAsync`, and **its APDU passthrough
+   (`SelectAsync` / `TransmitAndReceiveAsync`) is removed** in favour of `SendVendorCommandAsync`.
+   The PR labels this "breaking at the low-level protocol surface".
+5. Repo-wide unused-`using` sweep across ~287 files.
+
+**The precedent matters more than the content.** PR #532 was itself rebased onto a `yubikit` that had
+already absorbed the discovery concurrency work, and its own note records how that was reconciled:
+
+> The reconciliation deliberately **kept `yubikit`'s concurrency foundation** (the single-flight
+> `SharedRead` dedup, `DiscoveryWorkerAdmission`, discovery-lease ownership, and their tests) and layered
+> this PR's structural consolidation on top.
+
+That is exactly the shape this merge needs, decided upstream, by them, on the same axis split. Our
+contention work is the same category as "the concurrency foundation"; #532's structural consolidation
+layers on top of it. This is no longer a judgement call about which branch is "more correct" — upstream
+has already answered it for the analogous case.
+
+### Concrete merge adaptations, enumerated
+
+| # | Change | Our affected code | Nature |
+|---|---|---|---|
+| 1 | `InitializeCoreAsync` → `InitializeProtocolAsync(IProtocol, ...)` | `ApplicationSession` + the G5 omission guard | mechanical relocation |
+| 2 | `PcscProtocolFactory` removed → `ProtocolFactory` | 7 production files: `SecurityDomainSession`, `ProtocolDeviceInfo`, `FidoSession`, `HsmAuthSession`, `PivSession`, `ManagementSession`, `YubiOtpSession` | mechanical, wide |
+| 3 | `ScpExtensions.WithScpAsync` → `PcscProtocol.InitializeScpAsync` | `PcscProtocolScp`, `ScpExtensions` | mechanical |
+| 4 | Sessions delegate to `Backend/` | all 8 sessions, incl. the G5 `Construct` call sites | re-apply G5 to the new factory shape |
+| 5 | **FIDO HID APDU passthrough removed** | `ManagementSession` calls `fido.SelectAsync(ApplicationIds.Management, ...)` | **NOT mechanical — see below** |
+| 6 | Upstream `DisposeAfterInitializationFailure()` vs our `Construct` catch | `ApplicationSession` | converge on one concept |
+
+### The one non-mechanical item
+
+| | `IFidoHidProtocol` surface |
+|---|---|
+| Upstream | `InitializeAsync`, `SendVendorCommandAsync` |
+| Ours | `TransmitAndReceiveAsync`, `SendVendorCommandAsync`, `SelectAsync` |
+
+Upstream removed `SelectAsync` and `TransmitAndReceiveAsync`. Our **Management-over-FIDO fallback** calls
+`fido.SelectAsync(ApplicationIds.Management, ...)`, and that fallback is load-bearing for this effort: it
+is what makes `GetDeviceInfoAsync` succeed over HID while a PIV session holds CCID, which is half of the
+answer to the motivating three-line bug.
+
+So this path must be **reworked**, not ported, onto `InitializeAsync` + `SendVendorCommandAsync`, and it
+needs hardware re-verification afterwards — including on Windows, where FIDO HID additionally requires
+elevation. This is the single largest piece of merge work and the one most likely to change behaviour.
+
+### Q4 — the documentation policy, and what it means for this ISA
+
+`75a1a04b` removed, before the public v2 alpha:
+
+- `docs/archive/**` (192 files) — "whimsically-codenamed plans, agent transcripts, candid internal
+  reviews, redistributed Microsoft Learn PDFs (licensing risk), and a file containing a committed
+  employee email"
+- `docs/plans/**` (7 files) — "active planning notes/handoffs leaking local paths"
+- plus a scratch doc, `.vscode/settings.json`, `GEMINI.md` and `.junie/`
+
+Rationale: "internal working material ... should not be publicly visible now that the yubikit branch is
+spotlighted". Note it explicitly **keeps** `.claude/`, `.github/` and `.agent/`, and observes that every
+removed path was already outside the docs-qa active-doc boundary.
+
+Two distinct issues for this branch, worth separating:
+
+1. **Local paths — trivial.** Exactly **two** lines leak one, `ISA.md:1929` and `HANDOFF.md:171`, both
+   the canonical Rust checkout path. A two-line scrub, not a seven-file deletion.
+2. **Category — the real question.** Even fully scrubbed, `docs/plans/session-contention/` is precisely
+   what `75a1a04b` removed as a class: active planning notes, handoffs, and candid internal review
+   material, including audit verdicts, model names, self-corrections and hardware serials. Merging it
+   reintroduces that category immediately after upstream cleared it for a public release.
+
+The durable content is already elsewhere and does not depend on the ISA surviving: the identity and
+discovery contracts live in `docs/architecture/device-discovery-guarantees.md`, the ownership and
+concurrency rules in `src/Core/CLAUDE.md`, and the reasoning for each production change in its commit
+message. What the ISA uniquely holds is the *process* record.
+
+**Recommendation, for an explicit decision:** scrub the two paths now, and treat retention of
+`docs/plans/session-contention/` as a release-hygiene decision separate from the code merge. Dropping it
+at merge loses no load-bearing contract.

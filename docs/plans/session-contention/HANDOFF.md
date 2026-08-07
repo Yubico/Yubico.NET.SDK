@@ -168,7 +168,7 @@ version) directly on the device record rather than behind a separate read.
 ### Canonical-verification queue (no hardware needed)
 
 Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` (macOS path
-`/Users/Dennis.Dyall/Code/y/yubikey-manager-rust-auto`).
+(local checkout of `yubikey-manager-rust-auto`).
 
 1. ~~OTP HID exclusivity vs canonical.~~ **DONE (Phase 15): it is NOT canonical — it is our own
    strengthening.** Neither Rust nor Python enforces in-process OTP exclusivity. Behaviour stands (the

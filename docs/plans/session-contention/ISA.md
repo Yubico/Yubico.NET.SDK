@@ -89,7 +89,7 @@ contention bug this effort set out to fix:
 |---|---|---|
 | G1 | ~~Cross-vendor review of the Phase 11 Windows work~~ | **DISCHARGED, Phase 16.** `github-copilot/gpt-5.5`, verdict `concerns`. The access split is validated: `DESIRED_ACCESS.NONE` confirmed sufficient across every enumerated reachable feature-report call site, and `OpenIOConnection` correctly keeps read/write for FIDO. Found a real native handle leak on the failing-constructor path (fixed, 3 unit pins). The legacy-SDK parity claim is now known to be **false**, not merely unverifiable: v1 opens the feature connection with `GENERIC_WRITE` |
 | G2 | ~~Record an explicit Phase 3-4 cross-vendor review verdict~~ | **DISCHARGED, Phase 16.** `github-copilot/gpt-5.5`, verdict `concerns`. Cleared: no TOCTOU, no sham guard, no memory/security violation, lease lifecycle sound. One real defect found and **filed rather than fixed** (session guard stranded by a derived-constructor failure on borrowed connections) — see G5 |
-| G5 | **NEW, blocking decision:** fix or accept Finding 2 — `ConnectionSessionGuard` stranded when a derived session constructor throws, permanently poisoning a borrowed connection | Real, verified, warning-severity. Not fixed here because the correct fix touches every session factory and must not detach on `ConnectionInUseException`. Needs its own branch and a full gate re-run. **Decide before merge**: fix now, or ship with it documented |
+| G5 | ~~Fix or accept Finding 2 — `ConnectionSessionGuard` stranded when a derived session constructor throws~~ | **DISCHARGED 2026-08-06, fixed** (`8ef09522`). Binding moved out of the constructor into a new `ApplicationSession.Construct`, making the stranded state unrepresentable rather than cleaned up afterwards. Two cleanup designs were rejected as unsafe first — see Phase 17. All 8 factories converted; hardware gates re-run green |
 | G3 | ~~Re-run Cato on this ISA~~ | **DISCHARGED 2026-08-06.** Ran with the corrected `--current-vendor anthropic`; auditor `openai/github-copilot/gpt-5.5` — the first genuinely cross-vendor audit of this document. Verdict improved `fail` → `concerns`. Two findings fixed (the "all eight ISCs pass" overclaim, and ISC-4's missing uncontended-host precondition); the third, a challenge to dropping Linux E1/E2, is recorded as **contested** rather than actioned because it overrides an operator decision. Commit `8297563d` |
 | G4 | Review and merge consolidation | Final step |
 
@@ -2174,3 +2174,92 @@ belongs with the Finding 2 branch, which touches the same code.
 | 4 | Parity + "probe proves" overclaims | info | **Claims weakened** |
 | 5 | FIDO concurrency caveat absent from public docs | warning | **Fixed** in `IFidoHidConnection` |
 | 6 | No raced test for exclusive acquisition | info | **Accepted gap**, deferred to the Finding 2 branch |
+
+---
+
+## Phase 17 — G5 fixed: binding moved out of the constructor (2026-08-06)
+
+Discharges the last blocking gate. The plan was audited to a `pass` verdict by
+`github-copilot/gpt-5.5` across three rounds before any code was written; the first design was
+returned `fail` on a critical race, which is recorded below because the near-miss is the useful part.
+
+### The fix
+
+`ApplicationSession` bound itself in the base constructor. Derived constructors then do work that can
+throw, and every factory constructed **outside** its `try`, so a constructor failing after the base had
+bound left nothing able to unbind it — the object never finished construction, so no `using`, `finally`
+or factory `catch` could reach it.
+
+RED, for the predicted reason:
+
+```
+ConnectionInUseException : This connection already has a live FailingSession.
+```
+
+The connection was refused by a session that threw in its constructor and does not exist.
+
+Binding now happens in `protected static ApplicationSession.Construct`, after the constructor returns:
+
+```csharp
+var session = create();                                  // may throw: nothing is bound yet
+try { ConnectionSessionGuard.Attach(connection, session); }
+catch { session.Dispose(); throw; }                      // holder untouched
+```
+
+### Two designs rejected as unsafe, for one shared reason
+
+| Design | Why it fails |
+|---|---|
+| Compare the holder before/after construction, clear if changed | Loses a race: another session can bind between the peek and ours. Ours is then refused, the holder has changed, and the cleanup **evicts a live session** |
+| Filter on `ConnectionInUseException`, clear otherwise | `EnsureSupportedConnection` runs as an *argument* to `base(...)`, so it throws **before** binding ever happened. The cleanup would clear a slot we never took |
+
+**The shared reason:** any cleanup keyed on the *connection* cannot know whether *we* bound, because the
+failure destroyed the only reference to our session. Binding where the session reference exists removes
+the question rather than answering it. The first of these was caught by the Cato auditor; the second was
+found while verifying the fallback and was **not** reported by the audit.
+
+### Why binding cannot move later still
+
+A one-line alternative existed: move binding into the shared `InitializeCoreAsync`, which all 8 sessions
+call. It is wrong. Derived `InitializeAsync` implementations issue their applet SELECT **before** calling
+it — `OathSession` calls `SelectAsync(ApplicationIds.Oath, ...)`, `ManagementSession` calls
+`GetVersionAsync(...)` — so binding there would refuse the second session only after the first session's
+state had already been destroyed.
+
+It nearly passed review: **every existing test would have stayed green**, because they all assert
+`ThrowsAsync` on the async factory, which would still throw — just too late to matter.
+
+Verified as a precondition that no session constructor performs wire I/O: `SupportsExtendedApdu()` is
+`smartCardDevice.Kind == PscsConnectionKind.Usb`, and `OtpHidProtocol`'s constructor only assigns fields.
+
+### The omission guard
+
+Binding is no longer automatic, so a future session type that skipped `Construct` would run unguarded —
+fail-open, in the exact area this effort exists to protect. `InitializeCoreAsync` now verifies the session
+is the registered holder and throws otherwise. It immediately caught two existing test doubles
+constructing directly; both were routed through `Construct` as production does, so the pre-existing
+refusal contracts still hold rather than being weakened.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| New unit pins | 5/5 — including a barrier-synchronised concurrent-construction race test and the omission guard |
+| Full unit suite | 12/12 projects |
+| Resilience | pass |
+| Core integration (smoke) | **25/25**, all 5 discovery invariants |
+| Piv integration (smoke) | **75/75**, including `GetDeviceInfoAsync_WhilePivSessionHasVerifiedPin_DoesNotClobberSessionState` and `SecondSession_OnOneLiveConnection_IsRefused` |
+| YubiOtp integration (smoke) | **10/10** |
+| Management integration (smoke) | **40/40** |
+| Build / formatting / docs-qa | clean |
+
+Hardware: serials 103 and 125, macOS. `--smoke` skips `RequiresUserPresence` and `Slow`, so the
+removal-dependent `PivHotplugContentionTests` did not run — no operator was present to unplug. Its D3
+evidence stands from Phase 10 and is unaffected by this change.
+
+### Known merge adaptation
+
+Upstream renames `InitializeCoreAsync` to `InitializeProtocolAsync(IProtocol, ...)`, so the omission guard
+relocates at merge. Upstream also has `DisposeAfterInitializationFailure()`, which addresses the same
+family but only post-construction and with no guard; the merged result should converge on **one**
+init-failure cleanup concept rather than two.

@@ -1745,3 +1745,60 @@ documented where an API consumer would look:
 Tracked as a documentation work item in `HANDOFF.md`. It is not a defect in behaviour and does not gate the
 hardware evidence, but it is a public-API gap on the exact property consumers are most likely to use as a
 durable key, and it should be closed before merge consolidation.
+
+---
+
+## Phase 15 — Canonical adjudication of OTP HID exclusivity and the identity model (2026-08-06)
+
+Two canonical questions, both bearing on contracts this branch asserts. Sources: Rust `ykrust-auto`
+@ `9fe08d9a` (`/Users/Dennis.Dyall/Code/y/yubikey-manager-rust-auto`) and the Python `yubikit` /
+`python-fido2` trees. No hardware involved.
+
+### Q1 — Is OTP HID exclusivity canonical? **No. It is ours.**
+
+| Source | Finding | Evidence |
+|---|---|---|
+| Rust | No in-process exclusivity of any kind | `HidOtpConnection::new` (`crates/yubikit/src/platform/hidapi.rs`) calls `api.open_path` and stores the handle. No mutex, no registry, no already-open check. The only "exclusive" token in that file is `CtapHidCommand::Lock` (0x04), which is CTAPHID channel locking for FIDO and unrelated |
+| Rust (device layer) | No connection registry | `platform/device.rs` and `core.rs` contain no connection-ownership lock; the only `RwLock` is an override for firmware version (a test seam) |
+| Python | No locking | `yubikit/core/otp.py` `OtpConnection` is a bare ABC declaring `receive`/`send`; the macOS backend opens with `IOHIDDeviceOpen(handle, 0)` and adds no exclusivity |
+
+**This SDK's OTP-HID-exclusive rule is a deliberate strengthening beyond canonical, not parity with it.**
+The recorded justification remains sound and is unaffected: one logical OTP exchange spans multiple feature
+reports, so two protocol instances on one interface could interleave a single logical frame. Canonical does
+not need a guard because neither implementation produces two concurrent in-process OTP handles — Rust's
+ownership model makes it unnatural and Python's usage is single-connection — whereas this SDK exposes a
+public `ConnectAsync` that any caller can invoke twice.
+
+What must change is only the **provenance**, not the behaviour: no document should imply canonical mandates
+OTP HID exclusivity. Where this SDK's exclusivity is described, it should be attributed to the interleaving
+hazard and to this effort's own measurements. Contrast with F1, where the seizing FIDO open genuinely
+contradicted canonical and the fix was to converge; here we intentionally diverge, and that is defensible
+because our API surface admits a hazard canonical's does not.
+
+Residual risk accepted: a caller that legitimately wants two OTP HID handles is refused by this SDK and
+would not be by canonical. No such use case is known, and the register's D1 row already bounds the
+behaviour (immediate refusal, success after disposal).
+
+### Q2 — What is canonical's durable device identity? **Serial plus firmware version, not a synthesized id.**
+
+Canonical mints **no** `DeviceId` string. `list_devices` documents the model directly
+(`platform/device.rs:694-695`):
+
+> "When only one device is present per USB Product ID the merge is trivial; multiple devices sharing a PID
+> are matched by firmware version and serial."
+
+The same pair is the correlation key elsewhere: removal-wait logic compares
+`d.info.serial == my_serial && d.info.version == my_version` (`device.rs` ~296, ~313, ~380), and
+`merge_from` prefers the record carrying a serial, then the higher firmware version (~214-217).
+
+Implications for the open documentation gap:
+
+1. The planned guidance — *"use the serial, not the DeviceId, as a durable key"* — is **canonically
+   supported**, not merely our opinion.
+2. Canonical pairs serial **with firmware version**. The identity docs should say whether this SDK
+   considers serial alone sufficient, and if so why the version component is unnecessary here.
+3. This SDK's tiered `ykphysical:*` identity is an **SDK construct with no canonical counterpart**. That is
+   legitimate — .NET consumers want a stable object key, which Rust's ownership model does not require —
+   but it means its stability properties are ours alone to define and document. Phase 14 proved they are
+   surprising (`ykphysical:pid:0407` → `ykphysical:103` on sibling insert), which is exactly why the
+   documentation item is a merge-blocking concern rather than a nicety.

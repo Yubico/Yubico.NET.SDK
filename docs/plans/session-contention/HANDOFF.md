@@ -170,8 +170,11 @@ likely the serial where present, not the DeviceId.
 Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` (macOS path
 `/Users/Dennis.Dyall/Code/y/yubikey-manager-rust-auto`).
 
-1. **OTP HID exclusivity vs canonical — highest value.** The branch's central contract; still rests on our
-   own reasoning.
+1. ~~OTP HID exclusivity vs canonical.~~ **DONE (Phase 15): it is NOT canonical — it is our own
+   strengthening.** Neither Rust nor Python enforces in-process OTP exclusivity. Behaviour stands (the
+   interleaving hazard is real and our public API admits it, unlike theirs); only the provenance was wrong,
+   and `src/Core/CLAUDE.md` now says so. Residual accepted risk: a caller wanting two OTP handles is refused
+   here and would not be by canonical; no such use case is known.
 2. CCID per-interface exclusivity vs canonical.
 3. F4 — does canonical support concurrent CTAP over two FIDO handles, or one-at-a-time like us? (Now known
    to be one-at-a-time on all three of our platforms.)
@@ -179,7 +182,13 @@ Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` (macOS pa
    `HidFido` needs elevation, so the practical Windows fallback from a held CCID is elevation-gated. Worth
    checking whether canonical prefers OTP HID over FIDO HID on Windows, which would avoid the elevation
    requirement entirely — a possible future improvement, not a defect.
-5. Composite grouping / DeviceId tier model vs Rust `device.rs`.
+5. ~~Composite grouping / DeviceId tier model vs Rust `device.rs`.~~ **DONE (Phase 15): canonical mints no
+   DeviceId at all.** It matches physical devices by **serial + firmware version**
+   (`platform/device.rs:694-695`, and removal-wait compares both). Our tiered `ykphysical:*` id is an SDK
+   construct with no canonical counterpart — legitimate for .NET consumers who need a stable object key, but
+   its stability properties are ours alone to define. This confirms the planned doc guidance ("use the
+   serial as the durable key") is canonically supported, and raises the open question of whether we should
+   also carry firmware version as canonical does.
 
 ### Evidence and process debt (carried over)
 

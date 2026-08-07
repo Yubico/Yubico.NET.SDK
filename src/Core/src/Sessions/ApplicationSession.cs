@@ -119,19 +119,20 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
-        if (IsInitialized)
-            return;
-
-        ArgumentNullException.ThrowIfNull(protocol);
-
-        // Binding is not automatic: a session reaching initialization without having gone through
-        // Construct is unguarded, so a second session could run concurrently on this connection and
-        // deselect its applet. Fail loudly rather than proceed without the guarantee.
+        // Checked before the IsInitialized early-return: a derived session that sets IsInitialized
+        // itself would otherwise skip the bind check entirely and run unguarded.
+        // Binding is not automatic, so a session reaching initialization without having gone through
+        // Construct could run concurrently with another on the same connection and deselect its applet.
         if (!ConnectionSessionGuard.IsHolder(Connection, this))
             throw new InvalidOperationException(
                 $"{GetType().Name} was not bound to its connection. Sessions must be created through their " +
                 "CreateAsync factory, which routes construction through ApplicationSession.Construct so the " +
                 "one-live-session-per-connection rule is enforced before any wire operation.");
+
+        if (IsInitialized)
+            return;
+
+        ArgumentNullException.ThrowIfNull(protocol);
 
         protocol.Configure(firmwareVersion, configuration);
 

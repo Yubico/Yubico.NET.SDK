@@ -83,12 +83,20 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
         IOKitNativeMethods.IOHIDDeviceScheduleWithRunLoop(_deviceHandle, runLoop, _loopId);
 
-        var runLoopResult = CFNativeMethods.CFRunLoopRunInMode(_loopId, 6, true);
+        int runLoopResult;
+        try
+        {
+            runLoopResult = CFNativeMethods.CFRunLoopRunInMode(_loopId, 6, true);
+        }
+        finally
+        {
+            // Unschedule on every path. Leaving the device scheduled on a run loop we are no longer
+            // draining leaks the source and lets a later read observe this call's callbacks.
+            IOKitNativeMethods.IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
+        }
 
         if (runLoopResult != CFNativeMethods.kCFRunLoopRunHandledSource)
             throw new PlatformApiException($"RunLoop returned unexpected result: {runLoopResult}");
-
-        IOKitNativeMethods.IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
 
         if (!_reportsQueue.TryDequeue(out report))
             throw new InvalidOperationException(
@@ -199,8 +207,29 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
         reportsQueue.Enqueue(report);
     }
 
-    private static void RemovalCallback(IntPtr context, int result, IntPtr sender) =>
-        CFNativeMethods.CFRunLoopStop(context);
+    /// <summary>
+    ///     Invoked by IOKit when the device is removed.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Deliberately does nothing. It previously called <c>CFRunLoopStop(context)</c>, but the
+    ///         context registered for this callback is <c>_deviceHandle</c> — an <c>IOHIDDeviceRef</c>, not
+    ///         a <c>CFRunLoopRef</c>. Passing it to <c>CFRunLoopStop</c> is undefined behaviour, and it
+    ///         never woke the blocked read either, because the run loop it should stop is the one captured
+    ///         inside <see cref="GetReport" /> and is not reachable from here.
+    ///     </para>
+    ///     <para>
+    ///         Removing the call eliminates the undefined behaviour without changing observable behaviour:
+    ///         a read in progress during removal already ran to its <c>CFRunLoopRunInMode</c> timeout, and
+    ///         still does. Waking the read promptly on removal is a real improvement, but it needs the
+    ///         scheduled run loop plumbed through as the callback context and hardware unplug testing to
+    ///         verify, so it is left as follow-up rather than changed blind.
+    ///     </para>
+    /// </remarks>
+    private static void RemovalCallback(IntPtr context, int result, IntPtr sender)
+    {
+        // Intentionally empty — see remarks.
+    }
 
     private void Dispose(bool disposing)
     {

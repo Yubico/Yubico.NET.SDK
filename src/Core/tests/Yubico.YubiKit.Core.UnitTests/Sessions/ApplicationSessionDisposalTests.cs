@@ -154,7 +154,7 @@ public class ApplicationSessionDisposalTests
         var expected = new InvalidOperationException("protocol teardown failed");
         var protocol = new ThrowingProtocol(expected);
         var connection = new TrackingConnection();
-        var session = new ProbeSession(connection, ownsConnection: true, protocol: protocol);
+        var session = ProbeSession.Create(connection, ownsConnection: true, protocol: protocol);
 
         Exception? exception = Record.Exception(session.Dispose);
 
@@ -165,7 +165,7 @@ public class ApplicationSessionDisposalTests
 
         // TrackingConnection deliberately remains usable after counting Dispose so this probe isolates
         // ConnectionSessionGuard detachment rather than modeling a real native handle after disposal.
-        using var subsequent = new ProbeSession(connection);
+        using var subsequent = ProbeSession.Create(connection);
         subsequent.AssertNotDisposed();
     }
 
@@ -175,7 +175,7 @@ public class ApplicationSessionDisposalTests
         var expected = new InvalidOperationException("protocol teardown failed");
         var protocol = new ThrowingProtocol(expected);
         var connection = new TrackingConnection();
-        var session = new ProbeSession(connection, ownsConnection: true, protocol: protocol);
+        var session = ProbeSession.Create(connection, ownsConnection: true, protocol: protocol);
 
         Exception? exception = await Record.ExceptionAsync(async () => await session.DisposeAsync());
 
@@ -187,7 +187,7 @@ public class ApplicationSessionDisposalTests
 
         // TrackingConnection deliberately remains usable after counting disposal so successful construction
         // proves the first session detached from ConnectionSessionGuard.
-        using var subsequent = new ProbeSession(connection);
+        using var subsequent = ProbeSession.Create(connection);
         subsequent.AssertNotDisposed();
     }
 
@@ -213,6 +213,19 @@ public class ApplicationSessionDisposalTests
             if (ownsConnection)
                 OwnConnection();
         }
+
+        /// <summary>
+        ///     Binds like a production factory. Tests that assert detachment MUST use this: a directly
+        ///     constructed session is never bound, so a later construction would succeed whether or not
+        ///     detachment happened, and the assertion would prove nothing.
+        /// </summary>
+        public static ProbeSession Create(
+            IConnection connection,
+            bool ownsConnection = false,
+            IProtocol? protocol = null)
+            => Construct(
+                connection,
+                () => new ProbeSession(connection, ownsConnection: ownsConnection, protocol: protocol));
 
         public int AsyncCleanupCount => Volatile.Read(ref _asyncCleanupCount);
 

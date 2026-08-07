@@ -198,19 +198,21 @@ Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` (macOS pa
    2026-04-02 and therefore present when those phases ran — so the rows were inaccurate when written, not
    merely outdated. The real gate is the split severity-scoped form, which is clean. There is no `format`
    target in `toolchain.cs`; these are manual invocations.
-6b. **Cross-vendor review of the Phase 11 Windows work — a merge gate.** Review `6289c774`
-   (`HidDDevice.OpenFeatureConnection` → `DESIRED_ACCESS.NONE`) and the Phase 11 evidence in `1031890b`.
-   It is production native interop, it was authored in a session whose results nobody re-verified, and the
-   operator has explicitly deferred it into the cross-vendor review queue. Worth checking specifically:
-   whether a zero-access handle is sufficient for *every* feature-report path (not just the ones exercised),
-   and whether `OpenIOConnection` keeping `GENERIC_READ | GENERIC_WRITE` is right for FIDO given F4.
-   Canonical comparison is cheap here — the commit claims parity with the legacy Yubico .NET SDK, which is
-   a checkable assertion.
-7. **Record an explicit Phase 3–4 cross-vendor review verdict.** Marked as a blocking merge item but no
-   verdict is recorded.
-8. **Re-run Cato** on `docs/plans/session-contention/ISA.md`. Standing verdict is `fail` (round 2); its
-   CRITICAL finding is resolved and its WARNING is now item 6 above, so a clean verdict should be reachable.
-   `bun ~/.claude/skills/Cato/Tools/CatoRun.ts <artifact> --current-vendor openai`
+6b. ~~Cross-vendor review of the Phase 11 Windows work.~~ **DONE 2026-08-06 (gate G1).**
+   `github-copilot/gpt-5.5`, verdict `concerns`. The access split is validated — `DESIRED_ACCESS.NONE` is
+   sufficient across every enumerated reachable feature-report call site, and `OpenIOConnection` correctly
+   keeps read/write for FIDO. Found a real native handle leak on the failing-constructor path in BOTH Windows
+   HID connections, fixed with 3 unit pins (`bbf07e8e`). The legacy-SDK parity claim is now known **false**:
+   v1 uses `GENERIC_WRITE`. Windows hardware re-verification is still owed.
+7. ~~Record an explicit Phase 3-4 cross-vendor review verdict.~~ **DONE 2026-08-06 (gate G2).**
+   `github-copilot/gpt-5.5`, verdict `concerns`. Cleared: no TOCTOU (check-and-claim is atomic under the
+   interface lock), no sham guard, no memory/security violation, lease lifecycle sound. One real defect found
+   and filed as **G5** (session guard stranded by a derived-constructor failure on borrowed connections); two
+   findings rejected because the review prompt overstated ISC-1.
+8. ~~Re-run Cato on the ISA.~~ **DONE 2026-08-06 (gate G3).** Ran with the corrected `--current-vendor
+   anthropic`; auditor `openai/github-copilot/gpt-5.5`, the first genuinely cross-vendor audit of the
+   document. `fail` → `concerns`. Two findings fixed, one (dropping Linux E1/E2) recorded as contested.
+   Commit `8297563d`.
 9. ~~Verify/retire the stale `Xunit.SkippableFact` record.~~ **DONE 2026-08-06.** Resolved on this branch by
    the Phase 8 repair, re-verified on macOS: YubiHsm integration **11/11**, YubiOtp **10/10**, no
    `FileNotFoundException`. The "34 commits behind" clause no longer applies to that item.

@@ -87,19 +87,79 @@ contention bug this effort set out to fix:
 
 | # | Gate | Why it blocks |
 |---|---|---|
-| G1 | ~~Cross-vendor review of the Phase 11 Windows work~~ | **DISCHARGED, Phase 16.** `github-copilot/gpt-5.5`, verdict `concerns`. The access split is validated: `DESIRED_ACCESS.NONE` confirmed sufficient across every enumerated reachable feature-report call site, and `OpenIOConnection` correctly keeps read/write for FIDO. Found a real native handle leak on the failing-constructor path (fixed, 3 unit pins); the legacy-SDK parity claim proved unverifiable and was weakened |
+| G1 | ~~Cross-vendor review of the Phase 11 Windows work~~ | **DISCHARGED, Phase 16.** `github-copilot/gpt-5.5`, verdict `concerns`. The access split is validated: `DESIRED_ACCESS.NONE` confirmed sufficient across every enumerated reachable feature-report call site, and `OpenIOConnection` correctly keeps read/write for FIDO. Found a real native handle leak on the failing-constructor path (fixed, 3 unit pins). The legacy-SDK parity claim is now known to be **false**, not merely unverifiable: v1 opens the feature connection with `GENERIC_WRITE` |
 | G2 | ~~Record an explicit Phase 3-4 cross-vendor review verdict~~ | **DISCHARGED, Phase 16.** `github-copilot/gpt-5.5`, verdict `concerns`. Cleared: no TOCTOU, no sham guard, no memory/security violation, lease lifecycle sound. One real defect found and **filed rather than fixed** (session guard stranded by a derived-constructor failure on borrowed connections) — see G5 |
 | G5 | **NEW, blocking decision:** fix or accept Finding 2 — `ConnectionSessionGuard` stranded when a derived session constructor throws, permanently poisoning a borrowed connection | Real, verified, warning-severity. Not fixed here because the correct fix touches every session factory and must not detach on `ConnectionInUseException`. Needs its own branch and a full gate re-run. **Decide before merge**: fix now, or ship with it documented |
-| G3 | Re-run Cato on this ISA | Prior verdicts are void as cross-vendor evidence (all four were same-vendor — see Phase 16). Must use `--current-vendor anthropic`, not `openai` |
+| G3 | ~~Re-run Cato on this ISA~~ | **DISCHARGED 2026-08-06.** Ran with the corrected `--current-vendor anthropic`; auditor `openai/github-copilot/gpt-5.5` — the first genuinely cross-vendor audit of this document. Verdict improved `fail` → `concerns`. Two findings fixed (the "all eight ISCs pass" overclaim, and ISC-4's missing uncontended-host precondition); the third, a challenge to dropping Linux E1/E2, is recorded as **contested** rather than actioned because it overrides an operator decision. Commit `8297563d` |
 | G4 | Review and merge consolidation | Final step |
 
 ### Deferred, with a recorded decision
 
 | Item | Decision |
 |---|---|
-| Base reconciliation — 34 commits behind `yubikit`, 14 conflicts | **Parked deliberately.** The two branches carry contradictory `IProtocol` ownership documentation; resolving that is its own effort and must not be smuggled into this merge. Needs an explicit decision before merge |
+| Base reconciliation — **53 commits behind** `yubikit` (49 ours, 104 overlapping files) | **Parked deliberately**, but the topology is now measured rather than guessed — see "Base divergence" below. Needs an explicit decision before merge |
 | Hoist `DeviceInfo` properties (serial first) onto `IYubiKey`, especially composite | New branch/issue. Compare against Rust `LocalYubiKeyDevice`. Out of scope here |
 | 143 firmware-gated `[Theory]` tests fail instead of skipping on old firmware | Pre-existing, not this branch. Believed already resolved; needs one confirming run, then delete the entry |
+
+### Base divergence, measured (2026-08-06)
+
+The previously recorded "34 commits behind, 14 conflicts" was stale and the conflict count was never
+verified. Measured against merge-base `46269ffd`:
+
+| | Count |
+|---|---|
+| Commits on `origin/yubikit` not in this branch | **53** |
+| Commits here not upstream | **49** |
+| Files changed on both sides | **104** |
+
+**The two branches worked on different axes of the same problem**, which is why they are largely
+composable rather than competing:
+
+| File | Ours | Upstream | Verdict |
+|---|---|---|---|
+| `DeviceConnectionRegistry.cs` | +74/-37 | **untouched** | clean — our contention work is uncontested |
+| `ConnectionSessionGuard.cs`, `ConnectionInUseException.cs` | new files | absent | clean — introduced here |
+| `AsyncExchangeGate.cs` | untouched | untouched | clean |
+| `IApplicationSession.cs` | untouched | untouched | clean |
+| `ApplicationSession.cs` | +106/-11 | +47/-15 | **the one genuinely contested file** |
+| 8 applet session files | changed | changed | mechanical adaptation |
+
+Ours is *connection* contention (exclusivity leases, one session per connection). Upstream's is
+*protocol* ownership (`InitializeCoreAsync` → `InitializeProtocolAsync(IProtocol)`, plus a new
+`DisposeAfterInitializationFailure()`). Different concerns in one file.
+
+**An earlier reading of this divergence was wrong and is corrected here.** Upstream's parameterless
+`protected ApplicationSession()` initially looked like upstream having *removed* the connection
+parameter. It did not: the parameterless form is the **base** state at `46269ffd`, and *this branch*
+added `(IConnection connection)`. Upstream never touched the constructor.
+
+#### Which branch is more correct, on the contention axis
+
+Upstream's `DeviceConnectionRegistry` documentation still reads:
+
+> "Normal connections share session ownership; discovery takes a nonblocking exclusive lease."
+
+That is verbatim the root-cause state this ISA opens with — discovery excluded from everything,
+sessions excluded from nothing. A search of `origin/yubikit` for any session-contention concept
+(`ConnectionInUse`, "one session at a time", "exclusive interface") returns **nothing**.
+
+**The three-line PIV-PIN-destruction sequence still reproduces on `origin/yubikit`.** This branch is
+the only place it is fixed, with measured hardware evidence (`SW=0x6D00`). On the contention axis this
+branch is strictly more correct and strictly additive; on the protocol axis upstream is ahead. The
+merge should take **both**, not choose.
+
+#### Known merge adaptations
+
+1. The 8 applet factories call `InitializeCoreAsync`; upstream renames and reshapes it to
+   `InitializeProtocolAsync(IProtocol, ...)` returning `IProtocol`. Mechanical, but touches all 8.
+2. Upstream's `DisposeAfterInitializationFailure()` addresses the same family as G5 — cleanup after a
+   failed async factory — but only post-construction and with no guard, so it does **not** solve
+   constructor-throw stranding. The merged result must end with **one** init-failure cleanup concept,
+   not two competing ones.
+3. Upstream `75a1a04b` ("remove internal working material before public v2 alpha") **deletes
+   `docs/plans/**`** — 7 files, ~51k lines — because they leak local paths. This ISA lives there and
+   does leak local paths. Whether it is scrubbed, archived, or dropped at merge is an open question,
+   tracked as A2 Q4.
 
 ### Dropped, so they are not silently reopened
 
@@ -1598,14 +1658,33 @@ they actually need. `OpenIOConnection()` (FIDO input/output reports) keeps `GENE
 `OpenFeatureConnection()` (OTP feature reports) now opens with `DESIRED_ACCESS.NONE`. Feature-report IOCTLs
 need no read/write access, so this is sufficient and it sidesteps the keyboard restriction.
 
-> **Claim weakened after cross-vendor review (Phase 16).** This paragraph originally ended: "This matches the
-> legacy Yubico .NET SDK, which likewise opens the feature connection with zero desired access." The GPT-5.5
-> reviewer could not verify that from this repository, and neither can we — the legacy SDK is not vendored
-> here, so the assertion rests on the authoring session's recollection and is **not independently checked**.
-> It is retained only as provenance, not as evidence. The load-bearing evidence for `DESIRED_ACCESS.NONE` is
-> the Win32 contract for `HidD_GetFeature`/`HidD_SetFeature` plus the Windows hardware run below; the review
-> separately confirmed by enumeration that every reachable feature-report call site in this repository uses
-> those IOCTLs and never `ReadFile`/`WriteFile`.
+> **Claim RETRACTED — it is false (2026-08-06).** This paragraph originally ended: "This matches the legacy
+> Yubico .NET SDK, which likewise opens the feature connection with zero desired access." The Phase 16 GPT-5.5
+> reviewer could not verify it from this repository. A v1 checkout at `netsdk-ref/Yubico.NET.SDK` settles it —
+> **against us**:
+>
+> ```csharp
+> // v1 Yubico.Core/src/Yubico/PlatformInterop/Windows/HidD/HidDDevice.cs
+> public HidDDevice(string devicePath)
+>     _handle = OpenHandleWithAccess(DESIRED_ACCESS.NONE);            // line 38 — metadata probe
+> public void OpenIOConnection()
+>     _handle = OpenHandleWithAccess(GENERIC_READ | GENERIC_WRITE);   // line 51
+> public void OpenFeatureConnection()
+>     _handle = OpenHandleWithAccess(DESIRED_ACCESS.GENERIC_WRITE);   // line 56  <- NOT NONE
+> ```
+>
+> v1 opens the feature connection with **`GENERIC_WRITE`**. Our `NONE` is a **divergence, not parity**. The
+> `NONE` at v1 line 38 is the constructor metadata probe, filling exactly the same role as ours — the likely
+> origin of the misreading, and the same overclaim shape the reviewer caught in the "probe proves sufficiency"
+> comment.
+>
+> The fix is **not** being reverted on this evidence. `NONE` passed Windows hardware 10/10 including
+> `CalculateHmacSha1`, which exercises `HidD_SetFeature`, and the review confirmed by enumeration that every
+> reachable feature-report call site uses those IOCTLs and never `ReadFile`/`WriteFile`. Our open-then-dispose
+> ordering is also safer than v1's dispose-then-open, which is left holding a disposed handle if the reopen
+> fails. But the honest counterweight is that `GENERIC_WRITE` has years of field exposure across countless
+> Windows configurations while `NONE` has one run, on one machine, on one firmware. Choosing between them is
+> deferred to canonical Rust/Python and Windows HID research (Phase C, item C1).
 
 ### GREEN and standing gates after the fix (Windows, elevated, serials 103/125)
 

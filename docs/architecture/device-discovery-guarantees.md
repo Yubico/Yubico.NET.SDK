@@ -38,11 +38,91 @@ incomplete but never wrong.
 Serial reads are conditional and on demand; discovery does **not** open every interface on every
 scan. It requests serial evidence only when PID correlation is untrusted, more than one physical key
 shares a PID, or a partial-PID shape is ambiguous. Only successful reads are cached, keyed by the
-stable interface `DeviceId`; failures and null serials are retried on later scans. This is pinned by
+stable **interface identifier** (`hid:*`, `pcsc:*` — not the physical `ykphysical:*` identifier discussed
+in [Device identity](#device-identity-what-deviceid-does-and-does-not-promise), which is a different
+concept); failures and null serials are retried on later scans. This is pinned by
 `FindAllAsync_ScriptedIdentityFailure_DeducedIntoAnchoredKey_AndRereadOnNextScan_Pin`,
 `FindAllAsync_InterfaceDisappearance_EvictsIdentityCacheEntries_Pin`, and
 `FindAllAsync_PcscReaderRenameBetweenScans_OldEntryMissesAndSuccessfulRereadHeals_Pin` in
 `src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs`.
+
+## Device identity: what `DeviceId` does and does not promise
+
+The merge hierarchy above decides *which interfaces form one key*. It also decides *what that key is
+called*, and the two are the same decision — which is why the identifier is evidence-dependent rather than
+intrinsic. This section is the consumer-facing contract; `IYubiKey.DeviceId` carries the same statement in
+XML docs.
+
+### Two different identifiers, easily confused
+
+| Identifier | Example | Names | Used by |
+|---|---|---|---|
+| **Interface identifier** | `hid:4367418413:0006`, `pcsc:Yubico YubiKey OTP+FIDO+CCID` | one USB interface | connection registry, identity cache |
+| **Physical identifier** (`IYubiKey.DeviceId`) | `ykphysical:103` | one physical key | discovery results, `DeviceChanges` |
+
+The interface identifier is stable for as long as the interface exists. The physical identifier is not, in
+the way described below. Where this document says "stable interface `DeviceId`" it means the former.
+
+### Shape follows evidence tier
+
+| Tier used | `DeviceId` shape | Available on |
+|---|---|---|
+| 1 — topology (Container ID) | `ykphysical:topology:{key}` | Windows only |
+| 2 — serial | `ykphysical:{serial}` | all platforms |
+| 3/4 — PID uniqueness / pigeonhole | `ykphysical:pid:{PID:X4}` | all platforms |
+| 5 — conservative standalone | the interface identifier, published alone | all platforms |
+
+macOS and Linux have no Container ID, so they never mint tier-1 identifiers and degrade to serial, then
+PID. The same rig therefore yields different identifier shapes on different operating systems.
+
+**The shape is an implementation detail. Do not parse it.**
+
+### The same key can present different identifiers
+
+Because the identifier reflects the evidence used, it changes when the available evidence changes — even
+though the device did not. Measured on macOS hardware:
+
+| Rig | Identifier for key 103 | Why |
+|---|---|---|
+| 103 alone | `ykphysical:pid:0407` | its PID is unique on the bus; no serial evidence needed |
+| 103 + a same-PID sibling | `ykphysical:103` | serial evidence is now required to tell the two apart |
+
+Inserting an unrelated second key therefore changes how the first one is named. Discovery absorbs this
+without emitting spurious add/remove events for the incumbent, which is the guarantee that matters to
+subscribers, but the identifier itself is not invariant.
+
+### A live repository and a fresh scan can disagree
+
+When an evidence-only tier change occurs, the repository keeps publishing the object it already handed to
+subscribers rather than replacing it. A concurrent, independent scan computes the identifier from current
+evidence and may return a different one. Both are correct: one preserves continuity for existing
+subscribers, the other reports present truth. Observed simultaneously on macOS — live repository
+`ykphysical:pid:0407`, fresh scan `ykphysical:103`.
+
+### Use the serial as the durable key
+
+For persistence, audit logs, allow lists, or anything surviving a process restart, use
+`DeviceInfo.SerialNumber`, not `DeviceId`. Caveats:
+
+- YubiKeys expose **no USB `iSerialNumber` descriptor**. The serial lives inside the key and is read by
+  opening an interface, so obtaining it costs a connection and a Management exchange — it is not free the
+  way `DeviceId` is.
+- It is `null` on devices that do not report one (for example Security Key series, or when serial
+  visibility is disabled). A null serial cannot be a durable key; such devices are only distinguishable by
+  topology evidence, which exists on Windows alone (see G4 in the guarantee matrix).
+- Discovery itself reads serials only on demand, for the reasons given above.
+
+### Firmware version is deliberately not part of identity
+
+It adds no uniqueness — the serial is already unique — and it is not dependable as a discriminator:
+
+- It can differ per applet on one physical key. This SDK carries an explicit workaround taking the higher
+  of the Management and OTP values on NEO (`src/YubiOtp/src/YubiOtpSession.cs`).
+- Canonical yubikit sometimes *guesses* it (`version = Version(3, 0, 0); // Guess NEO`).
+- Canonical uses it only as a tie-breaker for which metadata record to retain once serials already match,
+  never as a match key.
+
+This SDK's merger contains no firmware-version logic, and none should be added for identity purposes.
 
 ## Guarantee matrix
 

@@ -1779,7 +1779,7 @@ Residual risk accepted: a caller that legitimately wants two OTP HID handles is 
 would not be by canonical. No such use case is known, and the register's D1 row already bounds the
 behaviour (immediate refusal, success after disposal).
 
-### Q2 — What is canonical's durable device identity? **Serial plus firmware version, not a synthesized id.**
+### Q2 — What is canonical's durable device identity? **The serial. Not a synthesized id, and not the firmware version.**
 
 Canonical mints **no** `DeviceId` string. `list_devices` documents the model directly
 (`platform/device.rs:694-695`):
@@ -1795,8 +1795,36 @@ Implications for the open documentation gap:
 
 1. The planned guidance — *"use the serial, not the DeviceId, as a durable key"* — is **canonically
    supported**, not merely our opinion.
-2. Canonical pairs serial **with firmware version**. The identity docs should say whether this SDK
-   considers serial alone sufficient, and if so why the version component is unnecessary here.
+2. ~~Canonical pairs serial with firmware version.~~ **CORRECTED — see the correction below. Version is a
+   tie-breaker, not a match key, and is excluded from this SDK's identity documentation.**
+#### Correction to Q2 — firmware version is a tie-breaker, not a match key
+
+The Q2 heading originally read "serial plus firmware version" on the strength of the `list_devices` doc
+comment quoted above. The code does not support that reading, and the overstatement is corrected here
+rather than left to propagate into the API documentation.
+
+`merge_from` consults the version only **after serials have already matched**, to decide which metadata
+record to retain:
+
+```rust
+// Prefer the info with a serial number, or with a higher firmware version.
+if self.info.serial.is_none() && other.info.serial.is_some()
+    || self.info.serial == other.info.serial && other.info.version > self.info.version
+```
+
+That is record selection, not identity. Three further reasons version is unsuitable as an identity
+component, and why this SDK excludes it:
+
+| Evidence | Implication |
+|---|---|
+| `src/YubiOtp/src/YubiOtpSession.cs` NEO workaround takes the higher of the Management and OTP versions | The version differs per applet on one physical key |
+| Rust `management.rs:1462` — `version = Version(3, 0, 0); // Guess NEO` | Canonical sometimes guesses it |
+| `CompositeDeviceMerger` contains no version logic | Grouping already works on three platforms without it |
+
+The serial is already unique, and YubiKey 5 firmware cannot be updated in the field, so a version component
+would add no uniqueness and no refresh signal — only a composite key that can vary by which interface
+answered. The identity documentation states explicitly that firmware version is not part of identity.
+
 3. This SDK's tiered `ykphysical:*` identity is an **SDK construct with no canonical counterpart**. That is
    legitimate — .NET consumers want a stable object key, which Rust's ownership model does not require —
    but it means its stability properties are ours alone to define and document. Phase 14 proved they are

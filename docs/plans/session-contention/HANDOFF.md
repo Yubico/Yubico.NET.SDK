@@ -131,39 +131,39 @@ register has zero open rows and zero platform gaps.
    retention contract demonstrated on hardware. **A Linux run is nice-to-have, not required** — Linux also
    has no Container ID, so it exercises the same degraded tiers macOS just covered.
 
-### Documentation gap — DeviceId / serial identity contract (added 2026-08-06, Phase 14 fallout)
+### Documentation gap — DeviceId / serial identity contract — **DONE (2026-08-06)**
 
-**Review and document the Serial + DeviceId matching logic and its per-platform constraints.** Phase 14
-made this urgent by demonstrating that one physical key legitimately carries different DeviceIds depending
-on circumstances a consumer does not control.
+All six defects closed, docs-only, no code or API change:
 
-Concrete problems to fix:
+1. `IYubiKey.DeviceId` now has full XML documentation — session-scoped, not durable, not parseable, with
+   the measured evidence that one key can present two identifiers.
+2. New "Device identity" section in `docs/architecture/device-discovery-guarantees.md` — tier→shape table
+   per platform, the Phase 14 flip, live-vs-fresh divergence, and the serial-as-durable-key guidance.
+3. Terminology disambiguated: interface identifier (`hid:*`, `pcsc:*`) vs physical identifier
+   (`ykphysical:*`), with the old "stable interface `DeviceId`" line corrected and cross-linked.
+4. Serial semantics documented, including the access cost (a connection plus a Management exchange) and
+   null-serial devices.
+5. Phase 15 Q2 corrected in the ISA: firmware version is a tie-breaker in canonical, not a match key, and
+   is explicitly excluded from this SDK's identity.
+6. Follow-up recorded below.
 
-1. **`IYubiKey.DeviceId` has no XML documentation at all.** `src/Core/src/Abstractions/IYubiKey.cs:28` is a
-   bare `string DeviceId { get; }` on a public interface. Every other consumer-facing contract in this
-   effort got documented; this one — the identity consumers will key dictionaries and caches on — did not.
-2. **DeviceId is not stable for a physical key, and nothing says so.** Measured on macOS in Phase 14: key
-   103 alone is `ykphysical:pid:0407` (PID tier); insert a same-PID sibling and it becomes
-   `ykphysical:103` (serial tier). The value changes because the *evidence available* changed, not because
-   the device did.
-3. **Platform divergence is undocumented at the API surface.** Windows can mint `ykphysical:topology:<key>`
-   from Container ID evidence; macOS and Linux have no Container ID and degrade to serial, then PID. The
-   same rig therefore yields different identity shapes per OS. This is described inside
-   `device-discovery-guarantees.md` for people reading the merger, but not where an API consumer looks.
-4. **Fresh-scan identity ≠ retained published identity.** Phase 14 observed the live repository publishing
-   `ykphysical:pid:0407` while a simultaneous independent scan reported `ykphysical:103`. Both are correct
-   by design. Nothing warns a consumer that these can disagree.
-5. **Terminology collision.** `device-discovery-guarantees.md:41` promises a "stable interface `DeviceId`",
-   which is the per-interface id (`hid:...`, `pcsc:...`) — a different thing from the physical
-   `ykphysical:*` id that Phase 14 watched change. The two need distinct names or an explicit disambiguation.
-6. **Serial semantics need the same treatment.** YubiKeys expose no USB `iSerialNumber`; the serial is read
-   by opening an interface, is conditional and on-demand, and can be absent (Security Key series). State
-   plainly what a null serial means for identity and what the allow list does with it.
+**No new unit tests were added, deliberately.** The behaviour and all three identifier shapes are already
+pinned across `CompositeDeviceMergerTests`, `CompositeDeviceMergerVectorTests`,
+`YubiKeyDeviceRepositoryCompositeTests`, `FindYubiKeysPidMergeTests` and `FindYubiKeysFaultInjectionTests`,
+plus hardware runs in Phases 12 and 14. A further test would restate existing assertions and give false
+confidence, since the real risk here is prose drifting from code — which no unit test detects.
 
-Deliverable: XML docs on `DeviceId` (and the serial accessors) stating what is guaranteed — and explicitly
-what is **not** — plus a short consumer-facing section covering the tier model per platform. Guidance
-should answer "what may I use as a durable key for this physical YubiKey?", for which the honest answer is
-likely the serial where present, not the DeviceId.
+### Future work item — hoist DeviceInfo properties onto IYubiKey (separate branch/issue)
+
+Out of scope for this branch, agreed with the operator. The identity documentation has to tell consumers
+"use `DeviceInfo.SerialNumber` as your durable key", while that property is not reachable from `IYubiKey`
+and costs a connection plus a Management exchange to obtain. That is a real usability tension the docs can
+only describe, not fix.
+
+Scope for the future effort: surface selected `DeviceInfo` properties (serial first) on `IYubiKey`,
+particularly for the composite device, where the operator notes the Rust composite device model is more
+comprehensive than ours. Worth comparing against Rust `LocalYubiKeyDevice`, which carries `info` (serial,
+version) directly on the device record rather than behind a separate read.
 
 ### Canonical-verification queue (no hardware needed)
 

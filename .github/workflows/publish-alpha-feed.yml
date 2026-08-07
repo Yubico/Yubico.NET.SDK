@@ -53,7 +53,9 @@ jobs:
         run: dotnet toolchain.cs build
 
       - name: Pack NuGet packages
-        run: dotnet toolchain.cs pack --package-version 2.0.0-alpha.2
+        # --embed-symbols: the Sleet/GitHub Pages feed is static and cannot serve
+        # .snupkg symbol packages, so embed the PDB inside each .nupkg instead.
+        run: dotnet toolchain.cs pack --package-version 2.0.0-alpha.2 --embed-symbols
 
       - name: Attest build provenance for packages
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0

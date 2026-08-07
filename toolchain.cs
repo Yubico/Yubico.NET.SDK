@@ -43,6 +43,7 @@
  *   --nuget-feed-url <url>         Remote NuGet feed URL (required for publish-remote)
  *   --nuget-api-key <key>          API key for remote NuGet feed (required for publish-remote)
  *   --include-docs                 Include XML documentation in packages
+ *   --embed-symbols                Embed PDB in .nupkg instead of a separate .snupkg (for the static alpha feed)
  *   --dry-run                      Show what would be published without publishing
  *   --clean                        Run dotnet clean before build
  *   --filter <expression>          Test filter expression (e.g., "FullyQualifiedName~MyTest")
@@ -119,6 +120,7 @@ var nugetFeedPath = GetArgument("--nuget-feed-path") ?? Path.Combine(repoRoot, "
 var nugetFeedUrl  = GetArgument("--nuget-feed-url");
 var nugetApiKey   = GetArgument("--nuget-api-key") ?? Environment.GetEnvironmentVariable("NUGET_API_KEY");
 var includeDocs = HasFlag("--include-docs");
+var embedSymbols = HasFlag("--embed-symbols");
 var dryRun = HasFlag("--dry-run");
 var shouldClean = HasFlag("--clean");
 var testFilter = GetArgument("--filter");
@@ -413,10 +415,18 @@ Target("pack", DependsOn("build"), () =>
     var versionArg = string.IsNullOrEmpty(packageVersion) ? "" : $"/p:Version={packageVersion}";
     var docsArg = includeDocs ? "" : "/p:GenerateDocumentationFile=false";
 
+    // --embed-symbols: embed the portable PDB inside the .nupkg instead of emitting a
+    // separate .snupkg. Used for the ad hoc Sleet/GitHub Pages alpha feed, which is a
+    // static file feed and cannot serve .snupkg symbol packages. Requires a recompile
+    // (no --no-build) so DebugType takes effect. Default packing keeps the standard
+    // .snupkg for real symbol-server releases.
+    var symbolsArg = embedSymbols ? "/p:DebugType=embedded /p:IncludeSymbols=false" : "";
+    var noBuildArg = embedSymbols ? "" : "--no-build";
+
     foreach (var project in packableProjects)
     {
         Console.WriteLine($"\nPacking: {Path.GetFileNameWithoutExtension(project)}");
-        Run("dotnet", $"pack {project} -c {configuration} --no-build -o {packagesDir} {versionArg} {docsArg}");
+        Run("dotnet", $"pack {project} -c {configuration} {noBuildArg} -o {packagesDir} {versionArg} {docsArg} {symbolsArg}");
         PrintInfo($"Packed {Path.GetFileNameWithoutExtension(project)}");
     }
 
@@ -496,7 +506,7 @@ if (args.Contains("--help") || args.Contains("-h"))
 var bullseyeArgs = FilterBullseyeArgs(args,
     optionsWithValues: ["--project", "--filter", "--package-version", "--nuget-feed-name", "--nuget-feed-path",
                         "--nuget-feed-url", "--nuget-api-key", "--benchmark-args"],
-    flags: ["--integration", "--include-docs", "--dry-run", "--clean", "--smoke", "--fast"]);
+    flags: ["--integration", "--include-docs", "--embed-symbols", "--dry-run", "--clean", "--smoke", "--fast"]);
 await RunTargetsAndExitAsync(bullseyeArgs);
 
 // ─── Helper functions ──────────────────────────────────────────────────────────

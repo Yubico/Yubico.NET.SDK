@@ -121,7 +121,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     {
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = new SecurityDomainSession(connection, scpKeyParams);
+        var session = Construct(connection, () => new SecurityDomainSession(connection, scpKeyParams));
         try
         {
             await session.InitializeAsync(configuration, firmwareVersion, cancellationToken).ConfigureAwait(false);

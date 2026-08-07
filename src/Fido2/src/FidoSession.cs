@@ -113,7 +113,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = new FidoSession(connection, scpKeyParams);
+        var session = Construct(connection, () => new FidoSession(connection, scpKeyParams));
         try
         {
             await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);

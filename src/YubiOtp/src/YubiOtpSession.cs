@@ -132,7 +132,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     {
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = new YubiOtpSession(connection, scpKeyParams);
+        var session = Construct(connection, () => new YubiOtpSession(connection, scpKeyParams));
         try
         {
             await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);

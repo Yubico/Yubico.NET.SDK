@@ -76,7 +76,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = new OathSession(connection, scpKeyParams);
+        var session = Construct(connection, () => new OathSession(connection, scpKeyParams));
         try
         {
             await session.InitializeAsync(CreateOathProtocolConfiguration(configuration), cancellationToken)

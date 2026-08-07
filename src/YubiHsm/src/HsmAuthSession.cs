@@ -117,7 +117,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     {
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = new HsmAuthSession(connection, scpKeyParams);
+        var session = Construct(connection, () => new HsmAuthSession(connection, scpKeyParams));
         try
         {
             await session.InitializeAsync(configuration, firmwareVersion, cancellationToken)

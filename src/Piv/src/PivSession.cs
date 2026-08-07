@@ -130,7 +130,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = new PivSession(connection, scpKeyParams);
+        var session = Construct(connection, () => new PivSession(connection, scpKeyParams));
         try
         {
             await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);

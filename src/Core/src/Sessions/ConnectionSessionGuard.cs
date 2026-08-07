@@ -66,6 +66,25 @@ internal static class ConnectionSessionGuard
     }
 
     /// <summary>
+    ///     Whether <paramref name="session" /> is the live session recorded for <paramref name="connection" />.
+    /// </summary>
+    /// <remarks>
+    ///     Used to catch a session that never went through <see cref="ApplicationSession.Construct{TSession}" />.
+    ///     Because binding is no longer automatic in the constructor, an unbound session would otherwise run
+    ///     completely unguarded — a silent loss of the one-session-per-connection rule.
+    /// </remarks>
+    public static bool IsHolder(IConnection connection, object session)
+    {
+        if (!Slots.TryGetValue(connection, out var slot))
+            return false;
+
+        lock (slot)
+        {
+            return ReferenceEquals(slot.Session, session);
+        }
+    }
+
+    /// <summary>
     ///     Releases <paramref name="session" />'s claim, if it still holds one. Idempotent, and a no-op when a
     ///     different session now holds the connection.
     /// </summary>

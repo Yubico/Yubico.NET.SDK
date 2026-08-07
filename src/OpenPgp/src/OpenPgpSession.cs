@@ -96,7 +96,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     {
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = new OpenPgpSession(connection);
+        var session = Construct(connection, () => new OpenPgpSession(connection));
         try
         {
             await session.InitializeAsync(configuration, scpKeyParams, cancellationToken)

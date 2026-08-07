@@ -43,18 +43,61 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     public bool IsAuthenticated { get; protected set; }
 
     /// <summary>
-    ///     Binds the session to its connection. Throws if that connection already has a live session — one
-    ///     connection hosts one session at a time, checked here because this runs before any wire operation.
+    ///     Records the connection this session will run over. Does NOT bind the session to it — see
+    ///     <see cref="Construct{TSession}" />, which binds once construction has actually succeeded.
     /// </summary>
     /// <param name="connection">The connection the session will run over.</param>
-    /// <exception cref="ConnectionInUseException">The connection already has a live session.</exception>
     protected ApplicationSession(IConnection connection)
     {
         ArgumentNullException.ThrowIfNull(connection);
 
         Logger = YubiKitLogging.CreateLogger(GetType().FullName ?? GetType().Name);
         Connection = connection;
-        ConnectionSessionGuard.Attach(connection, this);
+    }
+
+    /// <summary>
+    ///     Constructs a session and binds it to its connection, enforcing one live session per connection.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Binding deliberately happens here rather than in the constructor. A constructor that binds and
+    ///         then throws leaves nothing to unbind it: the object never finishes construction, so no
+    ///         <c>using</c>, <c>finally</c> or factory <c>catch</c> can reach it, and the connection is
+    ///         refused forever by a session that does not exist. Binding after <paramref name="create" />
+    ///         returns makes that state unrepresentable.
+    ///     </para>
+    ///     <para>
+    ///         It must NOT move later still — into initialization — because derived
+    ///         <c>InitializeAsync</c> implementations issue their applet SELECT before calling
+    ///         <see cref="InitializeCoreAsync" />. Binding there would refuse the second session only after
+    ///         the first session's state had already been destroyed, which is the damage this guard exists to
+    ///         prevent. Construction performs no wire I/O, so here is the last safe point.
+    ///     </para>
+    ///     <para>
+    ///         On refusal the constructed session is disposed and the exception propagates. Disposal cannot
+    ///         disturb the incumbent: <see cref="ConnectionSessionGuard.Detach" /> only clears the slot when
+    ///         the disposing session is the recorded holder, and this one never became it.
+    ///     </para>
+    /// </remarks>
+    /// <exception cref="ConnectionInUseException">The connection already has a live session.</exception>
+    protected static TSession Construct<TSession>(IConnection connection, Func<TSession> create)
+        where TSession : ApplicationSession
+    {
+        ArgumentNullException.ThrowIfNull(connection);
+        ArgumentNullException.ThrowIfNull(create);
+
+        var session = create();
+        try
+        {
+            ConnectionSessionGuard.Attach(connection, session);
+        }
+        catch
+        {
+            session.Dispose();
+            throw;
+        }
+
+        return session;
     }
 
     /// <summary>
@@ -80,6 +123,15 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
             return;
 
         ArgumentNullException.ThrowIfNull(protocol);
+
+        // Binding is not automatic: a session reaching initialization without having gone through
+        // Construct is unguarded, so a second session could run concurrently on this connection and
+        // deselect its applet. Fail loudly rather than proceed without the guarantee.
+        if (!ConnectionSessionGuard.IsHolder(Connection, this))
+            throw new InvalidOperationException(
+                $"{GetType().Name} was not bound to its connection. Sessions must be created through their " +
+                "CreateAsync factory, which routes construction through ApplicationSession.Construct so the " +
+                "one-live-session-per-connection rule is enforced before any wire operation.");
 
         protocol.Configure(firmwareVersion, configuration);
 

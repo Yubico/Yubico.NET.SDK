@@ -107,7 +107,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     {
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = new ManagementSession(connection, scpKeyParams);
+        var session = Construct(connection, () => new ManagementSession(connection, scpKeyParams));
         try
         {
             await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);

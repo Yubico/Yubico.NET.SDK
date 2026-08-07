@@ -32,7 +32,7 @@ public class ApplicationSessionScpTests
     [Fact]
     public async Task InitializeCore_WithScpOnNonSmartCardProtocol_ThrowsNotSupported()
     {
-        var session = new TestSession(new InertConnection());
+        var session = TestSession.Create(new InertConnection());
         using var protocol = new NonSmartCardProtocol();
         using var scp = Scp03KeyParameters.Default;
 
@@ -51,7 +51,7 @@ public class ApplicationSessionScpTests
     [Fact]
     public async Task InitializeCore_WithoutScpOnNonSmartCardProtocol_Succeeds()
     {
-        var session = new TestSession(new InertConnection());
+        var session = TestSession.Create(new InertConnection());
         using var protocol = new NonSmartCardProtocol();
 
         await session.RunInitializeAsync(
@@ -67,7 +67,7 @@ public class ApplicationSessionScpTests
     [Fact]
     public async Task DisposeAsync_InvokesDerivedManagedCleanup()
     {
-        var session = new TestSession(new InertConnection());
+        var session = TestSession.Create(new InertConnection());
 
         await session.DisposeAsync();
 
@@ -77,6 +77,10 @@ public class ApplicationSessionScpTests
     private sealed class TestSession(IConnection connection) : ApplicationSession(connection)
     {
         public bool ManagedCleanupInvoked { get; private set; }
+
+        // Mirrors a production factory: binding happens in Construct, not in the constructor.
+        public static TestSession Create(IConnection connection)
+            => Construct(connection, () => new TestSession(connection));
 
         public Task RunInitializeAsync(
             IProtocol protocol,

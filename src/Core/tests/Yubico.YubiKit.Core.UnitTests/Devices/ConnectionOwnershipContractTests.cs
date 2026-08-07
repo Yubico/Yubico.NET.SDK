@@ -398,7 +398,7 @@ public class ConnectionOwnershipContractTests
             ISmartCardConnection connection,
             CancellationToken cancellationToken)
         {
-            var session = new ProbeSession(connection);
+            var session = Construct(connection, () => new ProbeSession(connection));
             try
             {
                 await session.SelectAsync(cancellationToken);

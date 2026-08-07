@@ -1727,3 +1727,21 @@ only. Events 4-7 are the deliberate, uncontended sequence and carry the findings
 E1/E2 now have hardware confirmation on **both** the Windows topology tier and the macOS serial/PID
 degraded tier. A Linux run remains nice-to-have rather than required: Linux shares the macOS property of
 having no Container ID, so it exercises the same degraded tiers now covered here.
+
+### Phase 14 follow-up — the identity contract is undocumented at the API surface
+
+Phase 14's most consumer-relevant consequence is not the invariant it confirmed but the contract it exposed
+as unwritten. One physical key was observed carrying `ykphysical:pid:0407` and `ykphysical:103` in the same
+session, differing only by what else was plugged in, and the live repository simultaneously published a
+different identity from an independent fresh scan. Both behaviours are correct and deliberate. Neither is
+documented where an API consumer would look:
+
+- `IYubiKey.DeviceId` (`src/Core/src/Abstractions/IYubiKey.cs:28`) carries **no XML documentation**.
+- The per-platform tier model (Windows topology → serial → PID; macOS/Linux serial → PID) is described in
+  `docs/architecture/device-discovery-guarantees.md` for merger maintainers, not at the API surface.
+- `device-discovery-guarantees.md:41` promises a "stable interface `DeviceId`", which is the per-interface
+  id and a different concept from the physical `ykphysical:*` id — a terminology collision worth resolving.
+
+Tracked as a documentation work item in `HANDOFF.md`. It is not a defect in behaviour and does not gate the
+hardware evidence, but it is a public-API gap on the exact property consumers are most likely to use as a
+durable key, and it should be closed before merge consolidation.

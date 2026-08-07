@@ -2263,3 +2263,83 @@ Upstream renames `InitializeCoreAsync` to `InitializeProtocolAsync(IProtocol, ..
 relocates at merge. Upstream also has `DisposeAfterInitializationFailure()`, which addresses the same
 family but only post-construction and with no guard; the merged result should converge on **one**
 init-failure cleanup concept rather than two.
+
+---
+
+## Phase 18 — Canonical verification of four open questions (2026-08-06)
+
+No hardware. Rust `ykrust-auto` @ `9fe08d9a`, Python `yubikey-manager`, v1 at `netsdk-ref`, plus
+Microsoft's HID documentation. Two findings go against this SDK, one supports it, one is weaker than
+the hypothesis that prompted it.
+
+### C1 — Windows feature-report access: our `NONE` is a lone divergence
+
+| Source | Metadata / enumeration probe | Actual OTP feature connection |
+|---|---|---|
+| Python `ykman/hid/windows.py` | `0` (line 343) | **`GENERIC_WRITE`** (`WinHidOtpConnection.__init__`, line 194) |
+| v1 .NET `HidD/HidDDevice.cs` | `NONE` (line 38) | **`GENERIC_WRITE`** (line 56) |
+| Rust | delegates to `hidapi` | abstains — no SDK-level opinion |
+| **This SDK** | `NONE` | **`NONE`** |
+
+Two independent shipping implementations use the **same two-tier pattern**: zero access to probe,
+`GENERIC_WRITE` to connect. This SDK is the only one that connects with zero access.
+
+Microsoft's `HidD_SetFeature` documentation specifies only "an open handle to a top-level collection"
+and states **no required access mask**, so there is no documented guarantee that zero access is
+sufficient — our evidence for it is one hardware run, on one machine, on one firmware.
+
+Critically, `GENERIC_WRITE` still omits `GENERIC_READ`, which is what triggers the Windows keyboard
+anti-keylogger refusal that caused the original defect. So it fixes the original bug equally well while
+matching both canonical sources.
+
+**No code change made yet.** The change is Windows-only and cannot be verified from macOS; it is queued
+for the Windows machine as a decision item.
+
+### C2 — CCID exclusivity IS canonically motivated (supports this SDK)
+
+Rust `platform/pcsc.rs`, `PcscConnection::open()`:
+
+> 1. Try exclusive access (unless `YKMAN_NO_EXLUSIVE` env var is set).
+> 2. Fall back to shared access.
+> 3. If both fail, try killing `scdaemon` or `yubikey-agent` and retry.
+
+Canonical does not merely tolerate exclusive CCID access — it **prefers it by default and terminates
+competing daemons to obtain it**. The mechanism differs (cross-process PC/SC `ShareMode::Exclusive`
+versus our in-process registry lease) but the intent is identical: one owner of the CCID interface at a
+time.
+
+This produces a notable asymmetry with Phase 15, worth stating plainly because the two rules have been
+treated as one:
+
+| Rule | Canonical provenance |
+|---|---|
+| CCID interface exclusive | **Canonically motivated** — Rust defaults to exclusive and kills blockers |
+| OTP HID exclusive | **Our own strengthening** — neither Rust nor Python enforces it (Phase 15) |
+
+### C3 — FIDO one-at-a-time matches canonical practice
+
+Neither Rust nor Python opens two concurrent host-side FIDO handles; a connection type is opened, used,
+and closed. The `Lock = 0x04` found in Rust's `hidapi.rs` is **`CTAPHID_LOCK`**, a CTAP protocol command
+for device-side channel arbitration — not a host handle policy, and not evidence that two handles may be
+driven concurrently.
+
+Our documented contract — admission permits a second FIDO handle, but CTAP must be driven over one at a
+time (F4) — is consistent with canonical practice. No change needed.
+
+### C4 — downgraded: the hypothesis is only weakly supported
+
+The queued hypothesis was that canonical might prefer OTP HID over FIDO HID, which on Windows would
+avoid the FIDO elevation requirement entirely. The evidence is weaker than that framing implied:
+
+- Python has **no session-transport fallback chain at all**. `_PidGroup.connect(key, conn_type)` takes an
+  explicit connection type; the caller chooses. Our `SmartCard → HidFido → HidOtp` fallback is an SDK
+  construct with no canonical counterpart, in the same category as our tiered `DeviceId`.
+- Python's **enumeration** order (`_CONNECTION_LIST_MAPPING`) is SmartCard → **OTP** → FIDO, so OTP does
+  precede FIDO — but for listing devices, not for choosing a session transport.
+- Python does handle Windows elevation explicitly: `scan_devices()` supplements enumeration via
+  `hid.windows.list_paths()` when `IsUserAnAdmin()` is false, which confirms elevation is a real
+  constraint canonical works around.
+
+**Conclusion:** suggestive, not established. Preferring OTP HID before FIDO HID on Windows remains a
+plausible improvement, but canonical does not demonstrate a fallback order because it has none. Recorded
+as a candidate, explicitly not as a defect and not as canonical parity.

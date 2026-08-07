@@ -175,13 +175,22 @@ Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` (macOS pa
    interleaving hazard is real and our public API admits it, unlike theirs); only the provenance was wrong,
    and `src/Core/CLAUDE.md` now says so. Residual accepted risk: a caller wanting two OTP handles is refused
    here and would not be by canonical; no such use case is known.
-2. CCID per-interface exclusivity vs canonical.
-3. F4 — does canonical support concurrent CTAP over two FIDO handles, or one-at-a-time like us? (Now known
-   to be one-at-a-time on all three of our platforms.)
-4. Management transport fallback order `SmartCard -> HidFido -> HidOtp` vs canonical. Note the Windows twist:
-   `HidFido` needs elevation, so the practical Windows fallback from a held CCID is elevation-gated. Worth
-   checking whether canonical prefers OTP HID over FIDO HID on Windows, which would avoid the elevation
-   requirement entirely — a possible future improvement, not a defect.
+2. ~~CCID per-interface exclusivity vs canonical.~~ **DONE (Phase 18): it IS canonically motivated.**
+   Rust `platform/pcsc.rs` `PcscConnection::open()` tries `ShareMode::Exclusive` first, falls back to shared,
+   and kills `scdaemon`/`yubikey-agent` to get it. Mechanism differs (cross-process PC/SC vs our in-process
+   lease), intent identical. Note the asymmetry with item 1: CCID exclusivity is canonical, OTP HID
+   exclusivity is ours. `src/Core/CLAUDE.md` no longer conflates them.
+3. ~~F4 — does canonical support concurrent CTAP over two FIDO handles?~~ **DONE (Phase 18): no, one at a
+   time, same as us.** Neither Rust nor Python opens two concurrent host-side FIDO handles. The `Lock = 0x04`
+   in Rust's `hidapi.rs` is `CTAPHID_LOCK`, device-side channel arbitration, not a host handle policy. Our
+   documented contract already matches; no change needed.
+4. ~~Management transport fallback order vs canonical.~~ **DONE (Phase 18), but DOWNGRADED.** Python has
+   **no fallback chain at all** — `_PidGroup.connect(key, conn_type)` takes an explicit type. Our
+   `SmartCard -> HidFido -> HidOtp` order is an SDK construct with no canonical counterpart. Python's
+   *enumeration* order does put OTP before FIDO, and it explicitly works around Windows elevation in
+   `scan_devices()` via `hid.windows.list_paths()` when not admin. So "prefer OTP over FIDO on Windows to
+   avoid elevation" is **suggestive, not established** — a candidate improvement, not a defect, and not
+   canonical parity.
 5. ~~Composite grouping / DeviceId tier model vs Rust `device.rs`.~~ **DONE (Phase 15): canonical mints no
    DeviceId at all.** It matches physical devices by **serial + firmware version**
    (`platform/device.rs:694-695`, and removal-wait compares both). Our tiered `ykphysical:*` id is an SDK

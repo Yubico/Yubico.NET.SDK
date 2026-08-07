@@ -557,3 +557,5 @@ TestResults/
 codebase_ast/
 
 docs/ralph-loop/
+# Personal editor settings (leak local paths / preferences)
+.vscode/settings.json

@@ -2,8 +2,9 @@
 task: Session-vs-session contention on multi-interface YubiKey applets
 branch: yubikit-session-contention
 base: cb9ca41f (composite-merge HEAD; becomes yubikit via PR #543)
-phase: phase-6-complete-rsa-liveness-verified
+phase: phase-15-complete-all-isc-pass-pending-review-gates
 date: 2026-07-30
+last-updated: 2026-08-06
 ---
 
 # ISA — Session Contention
@@ -50,7 +51,7 @@ to sessions.
 | ISC-5 | No material performance regression in scan latency or session-open latency against a baseline captured before any change. | `merge-diag` before/after |
 | ISC-6 | Management transport tests genuinely exercise the transport they name. | A HID-FIDO-pinned session rejects `ResetDeviceAsync` with `NotSupportedException`; the SmartCard backend emits reset APDU INS `0x1F` |
 | ISC-7 | Every production behaviour change is backed by a test that failed **for its predicted reason** before the change. | RED output recorded verbatim in this ISA |
-| ISC-8 | Identity contracts are explicit per API scope: repository-published `DeviceId` is stable for one uninterrupted presence, while fresh direct scans may derive different evidence-tier IDs. | Repository tier-flip/final-removal unit pins plus `FindAllAsync`/`DeviceChanges` documentation; **Windows topology-tier path hardware-confirmed in Phase 12** by an operator-coordinated insert/remove (4 actions → 4 events, zero phantom events, exact add/remove correlation). Windows resolves same-PID keys by the topology tier, so the serial↔PID flip stays unit-pinned only and its macOS/Linux degraded-path hardware run is still required |
+| ISC-8 | Identity contracts are explicit per API scope: repository-published `DeviceId` is stable for one uninterrupted presence, while fresh direct scans may derive different evidence-tier IDs. | Repository tier-flip/final-removal unit pins plus `FindAllAsync`/`DeviceChanges` documentation; **Windows topology-tier path hardware-confirmed in Phase 12** by an operator-coordinated insert/remove (4 actions → 4 events, zero phantom events, exact add/remove correlation). Windows resolves same-PID keys by the topology tier, so the serial↔PID flip needed a degraded-path run to reach hardware — **supplied on macOS in Phase 14** (7 actions → 7 events, zero phantoms, the real `ykphysical:pid:0407` → `ykphysical:103` flip observed on hardware). Linux was dropped by decision: it also lacks a Container ID, so it exercises the same degraded tiers |
 
 ## Non-goals
 
@@ -58,6 +59,56 @@ to sessions.
 - Logical-channel multiplexing. If two applet sessions genuinely need to coexist on one CCID
   interface, that is a separate design effort. Until someone demonstrates the need, a named loud
   error is the correct answer.
+
+## Status and remaining work (as of 2026-08-06, `d0f672c3`)
+
+**All eight ISCs pass.** The edge-case register is 23 rows with zero open rows and zero platform
+gaps. Every remaining item below is a **review or process gate, not an unmet criterion** — no
+outstanding item is expected to change production code, with the single exception of whatever the
+Phase 11 cross-vendor review turns up.
+
+Three production defects were found and fixed along the way, all of them real and none of them the
+contention bug this effort set out to fix:
+
+| Defect | Fix | Platform |
+|---|---|---|
+| FIDO HID opened with `kIOHIDOptionsTypeSeizeDevice`, so a second open failed `0xE00002C5` | `IOHIDDeviceOpen(handle, 0)`, matching Rust and python-fido2 | macOS |
+| OTP HID feature connection opened the keyboard collection read/write | `DESIRED_ACCESS.NONE` (`6289c774`) | Windows |
+| `YubiOtpSlotConfigTests` leaked OTP HID connections | disposal fix (`d82218bf`) | all |
+
+### Merge gates — blocking
+
+| # | Gate | Why it blocks |
+|---|---|---|
+| G1 | Cross-vendor review of the Phase 11 Windows work: `6289c774` (`HidDDevice.OpenFeatureConnection` → `DESIRED_ACCESS.NONE`) and the evidence in `1031890b` | Production native interop authored in a session whose results were never independently re-verified. Check whether a zero-access handle suffices for *every* feature-report path, not only those exercised, and whether `OpenIOConnection` retaining `GENERIC_READ \| GENERIC_WRITE` is right for FIDO given F4. The commit claims parity with the legacy Yubico .NET SDK — a checkable assertion |
+| G2 | Record an explicit Phase 3–4 cross-vendor review verdict | Already marked blocking; no verdict was ever written down |
+| G3 | Re-run Cato on this ISA | Standing verdict is `fail` (round 2). Both findings are now resolved — the CRITICAL empirically, the WARNING by the formatting correction — so a clean verdict should be reachable |
+| G4 | Review and merge consolidation | Final step |
+
+### Deferred, with a recorded decision
+
+| Item | Decision |
+|---|---|
+| Base reconciliation — 34 commits behind `yubikit`, 14 conflicts | **Parked deliberately.** The two branches carry contradictory `IProtocol` ownership documentation; resolving that is its own effort and must not be smuggled into this merge. Needs an explicit decision before merge |
+| Hoist `DeviceInfo` properties (serial first) onto `IYubiKey`, especially composite | New branch/issue. Compare against Rust `LocalYubiKeyDevice`. Out of scope here |
+| 143 firmware-gated `[Theory]` tests fail instead of skipping on old firmware | Pre-existing, not this branch. Believed already resolved; needs one confirming run, then delete the entry |
+
+### Dropped, so they are not silently reopened
+
+Linux E1/E2 (redundant — Linux has no Container ID either, so Phase 14's macOS run covers the same
+degraded tiers) · D3 removal-time exception type (the test does not assert on it) · the 2 transient
+Fido2 failures (unreproducible across 3×29/29; recorded honestly as "observed-good, not proven") ·
+the dirty worktree `agent-aa7ba443d8eec3e9e` (a different effort).
+
+### Known unresolved, and left that way
+
+The macOS OTP HID fault of Phase 13 was cleared by **restart, not replug**. Input Monitoring/TCC was
+falsified as the cause (a persistent policy would survive a reboot), as were Wispr Flow, Karabiner,
+orphaned test hosts, and re-enumeration. **No cause was identified, and no attribution is offered.**
+The operational discriminator is the presence of `WARNING: Failed opening device`; never pipe
+`ykman otp info` through `head`, which lets it fall back to CCID and exit 0 while HID is still broken.
+
+---
 - Reworking `AsyncExchangeGate`, `DisposalGate`, single-flight reads, or worker admission. These
   are different layers and are load-bearing for reasons unrelated to this problem.
 - The composite merge algorithm. Landed separately in PR #543.
@@ -942,13 +993,13 @@ hardware; F2 and F3 require unavailable platform evidence. ISC-2 passes.
 | ISC | Status | Evidence |
 |---|---|---|
 | ISC-1 | pass | `PivSessionContentionTests` hardware path plus interface/session acquisition pins; wording corrected to the knowledge available at each scope |
-| ISC-2 | pass | 21-row register: every P1/P2 covered or bounded with a pin |
+| ISC-2 | pass | Register now **23 rows** (F4, F5 added after this phase): every P1/P2 covered or bounded with a pin; zero open rows, zero platform gaps |
 | ISC-3 | pass | `DeviceConnectionRegistry` and `ConnectionSessionGuard` are named enforcement points; no wire-sniff convention |
 | ISC-4 | pass | macOS discovery is now 5/5 after USB re-enumeration cleared a wedged host IOKit HID state (the earlier 2/5 was not an SDK defect); PIV session contention 5/5, multi-key 7/7 smoke, YubiOtp 10/10, Management green, build 0 errors, formatting clean. Unblocking OTP HID exposed and fixed a leaked-connection defect in `YubiOtpSlotConfigTests` |
 | ISC-5 | pass | Same-rig Linux before/after delta shows no material scan/session-open regression |
 | ISC-6 | pass | `ResetDeviceAsync_WithHidFidoPinnedSession_ThrowsNotSupportedException` passed on hardware with `Transport=HidFido`; `SmartCardBackend_DeviceResetAsync_SendsDeviceResetApdu` passed and pinned INS `0x1F` without resetting hardware |
 | ISC-7 | pass | RED evidence is recorded for behavior changes, including reproduced OTP refusal and Management/YubiOTP ghost-holder failures; invariant pins are identified separately |
-| ISC-8 | pass | Repository-published identity stability is unit-pinned and documented separately from fresh direct-scan IDs. Phase 12 added Windows hardware evidence for the topology-tier path (no phantom incumbent/survivor events, exact add/remove correlation); the serial↔PID flip stays unit-pinned only because Windows resolves same-PID keys by the topology tier, and its macOS/Linux degraded-path hardware run is still required |
+| ISC-8 | pass | Repository-published identity stability is unit-pinned, documented separately from fresh direct-scan IDs, and the `DeviceId`/serial contract is now written up in `docs/architecture/device-discovery-guarantees.md` (Phase 15). Hardware-confirmed on both paths: Phase 12 Windows topology tier (4 actions → 4 events) and Phase 14 macOS degraded path (7 actions → 7 events, real serial↔PID flip observed). No unit-pinned-only gap remains |
 
 **Phase 5 status: complete.** Architecture Mermaid source and rendered artifacts are refreshed by the
 repository render script; public XML docs and human/AI module guidance now expose discovery bounds,

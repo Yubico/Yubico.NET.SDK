@@ -5,26 +5,152 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Yubico .NET SDK v2 — Alpha NuGet Feed</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 46rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.5; }
+    :root {
+      --yubico-green: #84BD00;
+      --yubico-dark: #1A1A1A;
+      --hazard-amber: #F2A900;
+    }
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 46rem;
+      margin: 0 auto 3rem;
+      padding: 0 1rem;
+      line-height: 1.5;
+      color: #222;
+    }
     code { background: #f3f3f3; padding: .15rem .35rem; border-radius: 4px; }
     pre { background: #f3f3f3; padding: 1rem; border-radius: 6px; overflow-x: auto; }
-    .warn { background: #fff4e5; border-left: 4px solid #e69500; padding: 1rem; border-radius: 4px; }
+    a { color: var(--yubico-green); }
+
+    .hazard-stripe {
+      height: 6px;
+      margin: 0 -1rem 2rem;
+      background: repeating-linear-gradient(
+        45deg,
+        var(--hazard-amber), var(--hazard-amber) 12px,
+        var(--yubico-dark) 12px, var(--yubico-dark) 24px
+      );
+    }
+    header {
+      background: var(--yubico-dark);
+      color: #fff;
+      margin: 0 -1rem 2rem;
+      padding: 2rem 1rem 1.5rem;
+    }
+    header h1 { margin: 0 0 .25rem; }
+    header p { margin: 0; color: #ccc; }
+    header .accent { color: var(--yubico-green); }
+
+    .warn {
+      background: #fff8e6;
+      border-left: 4px solid var(--hazard-amber);
+      padding: 1rem;
+      border-radius: 4px;
+    }
+    .wip-badge {
+      display: inline-block;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      color: var(--yubico-dark);
+      background: var(--hazard-amber);
+      padding: .1rem .4rem;
+      border-radius: 3px;
+      vertical-align: middle;
+      margin-left: .4rem;
+    }
+
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid #eee; }
+    th { background: var(--yubico-green); color: #fff; }
+    td code, th code { background: transparent; padding: 0; }
+    #packages-status { color: #666; font-size: .9rem; }
+
+    footer { margin-top: 3rem; color: #888; font-size: .85rem; }
   </style>
 </head>
 <body>
-  <h1>Yubico .NET SDK v2 — Alpha NuGet Feed</h1>
+  <div class="hazard-stripe"></div>
+  <header>
+    <h1><span class="accent">Yubico .NET SDK v2</span> — Alpha NuGet Feed</h1>
+    <p>Anonymous, public NuGet v3 feed. No authentication required.</p>
+  </header>
+
   <div class="warn">
     <strong>⚠️ ALPHA — NOT FOR PRODUCTION.</strong> Pre-release, subject to change, and
     not yet security-audited by Yubico. No security guarantees. Package names and
     namespaces may change. Evaluation / hackathon use only.
   </div>
-  <p>Anonymous, public NuGet v3 feed. No authentication required.</p>
+
+  <h2>What is this</h2>
+  <p>
+    The Yubico .NET SDK v2 provides modern, type-safe .NET APIs for YubiKey hardware
+    security devices, including PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, Security
+    Domain, YubiHSM Auth, and device management. v2 is a <strong>ground-up redesign</strong>,
+    not an incremental update to v1 — expect API and namespace changes across the board.
+  </p>
+
   <h2>Add the feed</h2>
   <pre>dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha</pre>
-  <h2>Install a package</h2>
-  <pre>dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.2</pre>
   <p>Transitive dependencies (e.g. <code>Yubico.NativeShims</code>) resolve from
      nuget.org, so keep nuget.org enabled alongside this feed.</p>
-  <p><a href="https://github.com/Yubico/Yubico.NET.SDK">Project on GitHub</a></p>
+
+  <h2>Packages</h2>
+  <p id="packages-status">Loading current package list from the feed…</p>
+  <table id="packages-table" style="display:none">
+    <thead>
+      <tr><th>Package</th><th>Version</th><th>Install</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Quickstart</h2>
+  <pre>dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.2
+dotnet build</pre>
+
+  <h2>Where to go next</h2>
+  <ul>
+    <li><a href="https://github.com/Yubico/Yubico.NET.SDK">Project on GitHub</a></li>
+    <li><a href="alpha/RELEASE_NOTES.md">Alpha release notes</a></li>
+    <li>v1 → v2 migration guide <span class="wip-badge">WIP</span> — coming soon</li>
+  </ul>
+
+  <footer>
+    Yubico .NET SDK — <a href="https://github.com/Yubico/Yubico.NET.SDK">github.com/Yubico/Yubico.NET.SDK</a>
+  </footer>
+
+  <script>
+    (async () => {
+      const statusEl = document.getElementById('packages-status');
+      const tableEl = document.getElementById('packages-table');
+      try {
+        const res = await fetch('alpha/sleet.packageindex.json');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const packages = data.packages || {};
+        const rows = Object.keys(packages).sort().map((id) => {
+          const versions = packages[id] || [];
+          const latest = versions[versions.length - 1] || 'unknown';
+          return { id, latest };
+        });
+        if (rows.length === 0) throw new Error('no packages found');
+
+        const tbody = tableEl.querySelector('tbody');
+        for (const { id, latest } of rows) {
+          const tr = document.createElement('tr');
+          tr.innerHTML =
+            '<td><code>' + id + '</code></td>' +
+            '<td>' + latest + '</td>' +
+            '<td><code>dotnet add package ' + id + ' --version ' + latest + '</code></td>';
+          tbody.appendChild(tr);
+        }
+        tableEl.style.display = '';
+        statusEl.remove();
+      } catch (err) {
+        statusEl.textContent = 'Could not load the live package list (' + err.message + '). ' +
+          'See the feed directly: sleet.packageindex.json';
+      }
+    })();
+  </script>
 </body>
 </html>

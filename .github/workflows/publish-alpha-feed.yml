@@ -76,6 +76,7 @@ jobs:
           mkdir -p publish/alpha
           cp -R "$GITHUB_WORKSPACE/feed-output/alpha/." publish/alpha/
           cp scripts/alpha/index.html publish/index.html
+          cp scripts/alpha/RELEASE_NOTES.md publish/alpha/RELEASE_NOTES.md
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1

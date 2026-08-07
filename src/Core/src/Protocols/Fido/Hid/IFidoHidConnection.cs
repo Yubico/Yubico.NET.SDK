@@ -20,6 +20,20 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 /// A FIDO HID connection to a YubiKey using CTAP HID protocol (64-byte packets).
 /// Used for FIDO2/U2F and Management over FIDO interface.
 /// </summary>
+/// <remarks>
+///     <para>
+///         Unlike the CCID and OTP HID interfaces, the FIDO HID interface is <b>shared</b>: a second
+///         connection to it is admitted rather than refused, which is what the Management-over-HID
+///         fallback depends on.
+///     </para>
+///     <para>
+///         <b>Admission is not a concurrency guarantee.</b> Two open FIDO HID handles do not
+///         demultiplex: a request sent on one handle can be answered on the other, because the input
+///         report is delivered to whichever handle reads first. Each connection has its own exchange
+///         gate, so nothing serializes traffic between two handles. Drive CTAP over <b>one</b> FIDO
+///         connection at a time; if two are open, do not use them concurrently.
+///     </para>
+/// </remarks>
 public interface IFidoHidConnection : IConnection
 {
     /// <summary>

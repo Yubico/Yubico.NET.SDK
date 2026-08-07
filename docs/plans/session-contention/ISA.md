@@ -2,7 +2,7 @@
 task: Session-vs-session contention on multi-interface YubiKey applets
 branch: yubikit-session-contention
 base: cb9ca41f (composite-merge HEAD; becomes yubikit via PR #543)
-phase: phase-15-complete-all-isc-pass-pending-review-gates
+phase: phase-16-cross-vendor-review-G1-G2-discharged
 date: 2026-07-30
 last-updated: 2026-08-06
 ---
@@ -63,9 +63,13 @@ to sessions.
 ## Status and remaining work (as of 2026-08-06, `d0f672c3`)
 
 **All eight ISCs pass.** The edge-case register is 23 rows with zero open rows and zero platform
-gaps. Every remaining item below is a **review or process gate, not an unmet criterion** — no
-outstanding item is expected to change production code, with the single exception of whatever the
-Phase 11 cross-vendor review turns up.
+gaps.
+
+**Updated after Phase 16.** The cross-vendor review of the production code (G1, G2) is now complete and
+found two real defects, so the earlier claim that no remaining item was expected to change production code
+did not survive contact with an opposite-family reviewer. One defect is fixed (Windows HID constructor
+handle leak); one is filed and is now the blocking decision **G5**. Note also that all four prior Cato
+audits were accidentally **same-vendor** and cannot be cited as cross-vendor evidence — see Phase 16.
 
 Three production defects were found and fixed along the way, all of them real and none of them the
 contention bug this effort set out to fix:
@@ -80,9 +84,10 @@ contention bug this effort set out to fix:
 
 | # | Gate | Why it blocks |
 |---|---|---|
-| G1 | Cross-vendor review of the Phase 11 Windows work: `6289c774` (`HidDDevice.OpenFeatureConnection` → `DESIRED_ACCESS.NONE`) and the evidence in `1031890b` | Production native interop authored in a session whose results were never independently re-verified. Check whether a zero-access handle suffices for *every* feature-report path, not only those exercised, and whether `OpenIOConnection` retaining `GENERIC_READ \| GENERIC_WRITE` is right for FIDO given F4. The commit claims parity with the legacy Yubico .NET SDK — a checkable assertion |
-| G2 | Record an explicit Phase 3–4 cross-vendor review verdict | Already marked blocking; no verdict was ever written down |
-| G3 | Re-run Cato on this ISA | Standing verdict is `fail` (round 2). Both findings are now resolved — the CRITICAL empirically, the WARNING by the formatting correction — so a clean verdict should be reachable |
+| G1 | ~~Cross-vendor review of the Phase 11 Windows work~~ | **DISCHARGED, Phase 16.** `github-copilot/gpt-5.5`, verdict `concerns`. The access split is validated: `DESIRED_ACCESS.NONE` confirmed sufficient across every enumerated reachable feature-report call site, and `OpenIOConnection` correctly keeps read/write for FIDO. Found a real native handle leak on the failing-constructor path (fixed, 3 unit pins); the legacy-SDK parity claim proved unverifiable and was weakened |
+| G2 | ~~Record an explicit Phase 3-4 cross-vendor review verdict~~ | **DISCHARGED, Phase 16.** `github-copilot/gpt-5.5`, verdict `concerns`. Cleared: no TOCTOU, no sham guard, no memory/security violation, lease lifecycle sound. One real defect found and **filed rather than fixed** (session guard stranded by a derived-constructor failure on borrowed connections) — see G5 |
+| G5 | **NEW, blocking decision:** fix or accept Finding 2 — `ConnectionSessionGuard` stranded when a derived session constructor throws, permanently poisoning a borrowed connection | Real, verified, warning-severity. Not fixed here because the correct fix touches every session factory and must not detach on `ConnectionInUseException`. Needs its own branch and a full gate re-run. **Decide before merge**: fix now, or ship with it documented |
+| G3 | Re-run Cato on this ISA | Prior verdicts are void as cross-vendor evidence (all four were same-vendor — see Phase 16). Must use `--current-vendor anthropic`, not `openai` |
 | G4 | Review and merge consolidation | Final step |
 
 ### Deferred, with a recorded decision
@@ -1582,8 +1587,16 @@ sharing, elevation, or enumeration.
 **Fix.** `src/Core/src/Native/Windows/HidD/HidDDevice.cs`: split the two report-open paths by the access
 they actually need. `OpenIOConnection()` (FIDO input/output reports) keeps `GENERIC_READ | GENERIC_WRITE`;
 `OpenFeatureConnection()` (OTP feature reports) now opens with `DESIRED_ACCESS.NONE`. Feature-report IOCTLs
-need no read/write access, so this is sufficient and it sidesteps the keyboard restriction. This matches the
-legacy Yubico .NET SDK, which likewise opens the feature connection with zero desired access.
+need no read/write access, so this is sufficient and it sidesteps the keyboard restriction.
+
+> **Claim weakened after cross-vendor review (Phase 16).** This paragraph originally ended: "This matches the
+> legacy Yubico .NET SDK, which likewise opens the feature connection with zero desired access." The GPT-5.5
+> reviewer could not verify that from this repository, and neither can we — the legacy SDK is not vendored
+> here, so the assertion rests on the authoring session's recollection and is **not independently checked**.
+> It is retained only as provenance, not as evidence. The load-bearing evidence for `DESIRED_ACCESS.NONE` is
+> the Win32 contract for `HidD_GetFeature`/`HidD_SetFeature` plus the Windows hardware run below; the review
+> separately confirmed by enumeration that every reachable feature-report call site in this repository uses
+> those IOCTLs and never `ReadFile`/`WriteFile`.
 
 ### GREEN and standing gates after the fix (Windows, elevated, serials 103/125)
 
@@ -1904,3 +1917,172 @@ answered. The identity documentation states explicitly that firmware version is 
    but it means its stability properties are ours alone to define and document. Phase 14 proved they are
    surprising (`ykphysical:pid:0407` → `ykphysical:103` on sibling insert), which is exactly why the
    documentation item is a merge-blocking concern rather than a nicety.
+
+---
+
+## Phase 16 — Cross-vendor review of the production code (2026-08-06)
+
+This phase discharges merge gates **G1** and **G2**. It also invalidates a methodological assumption that
+had held since Phase 5.
+
+### The prior "cross-vendor" audits were same-vendor
+
+`~/.claude/MEMORY/VERIFICATION/cato-findings.jsonl` records four Cato runs against this ISA on 2026-08-04.
+Every one names the same auditor:
+
+```
+anthropic/google-vertex/claude-opus-5@default [premium]
+```
+
+That is the same vendor — and the same model — as the authoring harness. The cause is the recorded
+invocation flag `--current-vendor openai`, which declares the *author* to be OpenAI and therefore routes the
+audit to Anthropic. The ISA was authored by Claude, so the correct flag is `--current-vendor anthropic`.
+Cato's own rule is "never silently run same-vendor review"; the flag defeated it.
+
+**Consequence:** until this phase, no part of this effort had received a genuine opposite-family review. The
+four prior verdicts remain useful — they found real problems — but they cannot be cited as cross-vendor
+evidence. Gates G1 and G2 were therefore the first true outside look at the production code.
+
+### Method
+
+| Gate | Target | Reviewer | Verdict |
+|---|---|---|---|
+| G1 | `6289c774` — Windows `HidDDevice` feature-report access split | `github-copilot/gpt-5.5`, read-only `Reviewer` subagent | **concerns** |
+| G2 | Phase 3-4 enforcement core (35 files, +771/-216 in `src/*/src/`) | `github-copilot/gpt-5.5`, read-only `Reviewer` subagent | **concerns** |
+
+Codex CLI and the premium `openai/gpt-5.6-terra` tier were both unavailable (OpenAI account quota
+exhausted), so both reviews ran through GitHub Copilot, which is a tier below the strongest available
+OpenAI model. Reviewers were told the branch is 34 commits behind `yubikit` so base drift would not be
+misreported, and were given the two documented non-goals.
+
+### What the review cleared
+
+These were checked and found sound — recorded because a clean result is evidence too:
+
+- **No TOCTOU in the registry.** Check-and-claim is atomic under `InterfaceOwnership._sync`
+  (`DeviceConnectionRegistry.cs:147-150`, `179-188`). The exclusive lease is taken before physical connect.
+- **No sham guard.** `IsInterfaceInUse` is only a pre-skip optimization for discovery; the enforcement is
+  the `TryAcquire*` claim, so the pre-check being advisory is not a hole.
+- **No security or memory-rule violation** introduced by the diff. The changed enforcement files handle no
+  PIN/PUK/key/SCP material; the `SequenceEqual` uses found in `DeviceInfo.cs` compare non-secret version
+  bytes.
+- **`DESIRED_ACCESS.NONE` is sufficient for every reachable feature-report path.** The reviewer enumerated
+  the call sites (`WindowsHidFeatureReportConnection.GetReport`/`SetReport`, `HidYubiKey.CreateOtpConnection`
+  and its discovery provider, `OtpHidConnection`, `OtpHidProtocol`, `ProtocolDeviceInfo`,
+  `DeviceInfoReader.ReadOtpPageAsync`, `ManagementSession` OTP version, `Management.OtpBackend`,
+  `YubiOtp.OtpHidBackend`) and confirmed all use `HidD_GetFeature`/`HidD_SetFeature`, never
+  `ReadFile`/`WriteFile`.
+- **`OpenIOConnection` correctly keeps `GENERIC_READ | GENERIC_WRITE`** — the FIDO path genuinely uses
+  `ReadFile`/`WriteFile`. Access level is unrelated to the F4 demultiplexing problem.
+- **Lease lifecycle is otherwise well covered**: connect/wrap failure disposes the lease, registered
+  disposal releases it in a `finally`, and `DisposalGate` makes double dispose idempotent.
+
+### Finding 1 — native handle leak on a failing constructor (REAL, FIXED)
+
+`WindowsHidFeatureReportConnection` and `WindowsHidIOReportConnection` both did:
+
+```csharp
+_hidDDevice = new HidDDevice(path);   // opens a native handle
+_hidDDevice.OpenFeatureConnection();  // throws -> constructor never completes
+```
+
+A constructor that acquires a resource and then throws leaves nothing for the caller to dispose: the object
+never finishes construction, so no `using`, `finally`, or factory `catch` can reach it. The native handle
+leaks for the process lifetime. This sits directly on the path `6289c774` modified.
+
+**Fix.** Both types gained an internal seam taking an already-constructed `IHidDDevice`, with the report-open
+wrapped so a failure disposes the device and rethrows.
+
+**RED, for the predicted reason** (`catch` blocks temporarily removed, both tests present):
+
+```
+failed ... IOReportConnection_WhenIOOpenThrows_DisposesTheDevice (9ms)
+  the device handle leaked: the failing constructor never disposed it
+failed ... FeatureReportConnection_WhenFeatureOpenThrows_DisposesTheDevice (0ms)
+  the device handle leaked: the failing constructor never disposed it
+```
+
+GREEN after restoring the fix: 3/3, including a success-path test asserting the device is **not** disposed,
+so the leak fix cannot silently become a use-after-dispose. The device is faked, so these run on every
+platform; **Windows hardware re-verification is still owed** and is queued for the Windows machine.
+
+### Finding 2 — session guard stranded by a failing derived constructor (REAL, FILED NOT FIXED)
+
+`ApplicationSession`'s base constructor calls `ConnectionSessionGuard.Attach(connection, this)`
+(`ApplicationSession.cs:57`). Derived constructors then do work that can throw, and the factories construct
+**outside** their `try`:
+
+```csharp
+var session = new ManagementSession(connection, scpKeyParams);  // outside the try
+try { await session.InitializeAsync(...); return session; }
+catch { await session.DisposeAsync(); throw; }
+```
+
+If the derived constructor throws after `base(...)` has attached, no session object exists to dispose, so
+`Detach` never runs. Reachable throw sites confirmed by reading the code:
+`PcscProtocol.cs:51` calls `_connection.SupportsExtendedApdu()` during construction — a method on the
+**public** `ISmartCardConnection` interface, so caller-provided implementations may throw — and
+`ManagementSession.cs:258` contains an explicit `?? throw new InvalidOperationException()`.
+
+**Blast radius, scoped by reading both paths rather than assuming the worst:**
+
+| Path | Outcome |
+|---|---|
+| Owned (`IYubiKey.Create<App>SessionAsync`) | **Safe.** `YubiKeyConnectionExtensions.cs:243` disposes the connection on any failure, releasing the interface lease; the `ConditionalWeakTable` entry dies with the connection |
+| Borrowed (`Session.CreateAsync(callerConnection)`) | **Defective.** The caller keeps the connection alive, so the slot retains a dead half-constructed session and that connection is permanently refused with "This connection already has a live `<X>`Session" when no session exists |
+
+Severity **warning, not critical**: it strands the per-connection guard, never the interface lease, and in
+the most likely trigger (device removed mid-construction) the connection is already unusable, so poisoning
+it costs little. It bites when the connection stays healthy — a caller-supplied `ISmartCardConnection` whose
+`SupportsExtendedApdu()` throws transiently.
+
+**Filed, not fixed.** The correct fix touches every session factory (Management, YubiOtp, Oath, Piv, Fido2,
+OpenPgp, SecurityDomain, YubiHsm) and must skip detaching when the throw is `ConnectionInUseException` —
+in that case another session legitimately holds the slot and clearing it would be a worse bug. That is a
+change to the enforcement core deserving its own branch and a full gate re-run, not a late edit at a merge
+gate. **This is now a merge-blocking decision item, not a silent deferral.**
+
+### Finding 3 — two findings rejected, and the prompt was at fault
+
+The reviewer reported that `ConnectionInUseException` fails to name both the contended interface *and* the
+live session, at `DeviceConnectionRegistry.cs:179` and `ConnectionSessionGuard.cs:58`.
+
+**Rejected.** Phase 6 already adjudicated exactly this: the registry cannot know which applet holds an
+interface, so interface scope names the interface and the connection-scoped guard names the session. The
+review prompt asserted the exception "is supposed to name the contended interface AND the live session
+holding it", which overstates ISC-1 — the prompt, not the code, was wrong. Recorded because an audit finding
+caused by a bad prompt is a failure mode worth naming: a reviewer will faithfully validate a false premise.
+
+### Finding 4 — claims weakened (no code change)
+
+- **Legacy-SDK parity is unverifiable here.** See the correction note in Phase 11. Retained as provenance,
+  not evidence.
+- **"The metadata probe proves a zero-access handle is sufficient" was an overclaim.** The probe exercises
+  `CreateFile` + `HidD_GetPreparsedData`/`HidP_GetCaps` only, never `HidD_GetFeature`/`HidD_SetFeature`. The
+  conclusion holds; the stated proof did not reach it. The comment in `HidDDevice.OpenFeatureConnection` now
+  states the scope of its own evidence.
+
+### Finding 5 — FIDO "admission is not concurrency" was missing from public docs (FIXED)
+
+The caveat existed in `src/Core/CLAUDE.md` but a search of public XML documentation returned nothing, so no
+SDK consumer could learn it. `IFidoHidConnection` now documents that the interface is shared, that admission
+is not a concurrency guarantee, that two handles do not demultiplex, and that CTAP must be driven over one
+connection at a time.
+
+### Finding 6 — test gap accepted, not closed
+
+Exclusive acquisition is pinned sequentially but never raced, so a regression separating "check count" from
+"increment count" could pass the suite while admitting two exclusive holders. The atomicity was verified by
+reading the lock, not by a racing test. Recorded as a known gap; a barrier-based parallel acquisition test
+belongs with the Finding 2 branch, which touches the same code.
+
+### Dispositions
+
+| # | Finding | Severity | Disposition |
+|---|---|---|---|
+| 1 | Windows HID constructor handle leak | warning | **Fixed** + 3 unit pins; Windows hardware re-run owed |
+| 2 | Session guard stranded on derived-ctor failure (borrowed only) | warning | **Filed** — merge-blocking decision, own branch |
+| 3 | `ConnectionInUseException` naming | warning | **Rejected** — bad prompt premise; Phase 6 adjudicated |
+| 4 | Parity + "probe proves" overclaims | info | **Claims weakened** |
+| 5 | FIDO concurrency caveat absent from public docs | warning | **Fixed** in `IFidoHidConnection` |
+| 6 | No raced test for exclusive acquisition | info | **Accepted gap**, deferred to the Finding 2 branch |

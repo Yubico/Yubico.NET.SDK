@@ -55,8 +55,13 @@ internal sealed class HidDDevice : IHidDDevice
         // OTP feature-report I/O uses HidD_GetFeature/HidD_SetFeature, which are IOCTLs that succeed on a
         // zero-access handle. The OTP interface is a keyboard top-level collection, and Windows refuses
         // GENERIC_READ/GENERIC_WRITE on the system keyboard even for an elevated process (anti-keylogger
-        // restriction). Opening with no access sidesteps that while still permitting feature-report IOCTLs;
-        // the metadata probe already proves a zero-access handle opens on this same path.
+        // restriction). Opening with no access sidesteps that while still permitting feature-report IOCTLs.
+        //
+        // Scope of the evidence, stated precisely: the constructor's metadata probe shows only that this same
+        // path OPENS with zero access (CreateFile + HidD_GetPreparsedData/HidP_GetCaps). It does not exercise
+        // HidD_GetFeature/HidD_SetFeature, so it is supporting evidence, not proof that feature I/O succeeds.
+        // Sufficiency for feature I/O rests on the Win32 contract for these IOCTLs plus the Windows hardware
+        // run recorded in docs/plans/session-contention/ISA.md (YubiOtp integration 10/10, fw 5.8.0).
         => OpenReportConnection(Kernel32.NativeMethods.DESIRED_ACCESS.NONE);
 
     public byte[] GetFeatureReport()

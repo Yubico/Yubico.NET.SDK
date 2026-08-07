@@ -2436,3 +2436,68 @@ message. What the ISA uniquely holds is the *process* record.
 **Recommendation, for an explicit decision:** scrub the two paths now, and treat retention of
 `docs/plans/session-contention/` as a release-hygiene decision separate from the code merge. Dropping it
 at merge loses no load-bearing contract.
+
+---
+
+## Phase 20 — Deep same-lineage code audit (2026-08-06)
+
+`CodeAudit` with the `fable` alias → `github-copilot/claude-fable-5`. Deliberately **same-vendor**: the
+router permits a named alias to resolve within the author's own family, and the point here was depth in
+our own lineage *after* two cross-vendor correctness passes, not more breadth. The prompt explicitly told
+it not to re-run a correctness pass and to hunt structural decay, duplication, dead code, and tests that
+look like pins but constrain nothing.
+
+It found things the GPT-5.5 reviews did not, including **two defects in the G5 change itself**.
+
+### Fixed (`d464b9e8`)
+
+| Finding | Why it mattered |
+|---|---|
+| Bind check sat *after* the `IsInitialized` early-return | A derived session setting `IsInitialized` itself would skip the AC6 guard and run unbound |
+| **The two disposal tests stopped proving detachment** | They construct with `new`; since G5 moved binding out of the constructor, nothing was bound, so the later construction succeeded whether or not `Detach` ran. **A regression G5 introduced that the suite could not catch.** Both now bind through `Construct`; verified by neutering `Detach` and watching both go RED |
+| `GetReport` skipped `IOHIDDeviceUnscheduleFromRunLoop` on throw | Left the device scheduled on a run loop nobody drains |
+| `RemovalCallback` called `CFRunLoopStop` on an `IOHIDDeviceRef` | Undefined behaviour. It also never woke the blocked read, because the run loop it should stop is captured inside `GetReport` and unreachable from the callback |
+
+The removal callback was **emptied rather than corrected**. That removes the undefined behaviour with no
+observable change — a read during removal already ran to its timeout and still does. Waking it promptly
+requires plumbing the scheduled run loop through as the callback context and unplug testing to verify, so
+it was not changed blind with no operator present.
+
+### Verified, recorded, NOT fixed — for prioritisation
+
+Each was confirmed by reading the code. None is fixed here: they are pre-existing, span modules beyond
+this effort's scope, or need a decision.
+
+| # | Finding | Severity | Note |
+|---|---|---|---|
+| 1 | **Protocol leaked on failed init in 4 of 8 sessions.** `OpenPgp`, `SecurityDomain`, `YubiHsm`, `Fido2` build the protocol locally in `InitializeAsync` but assign base `Protocol` only inside `InitializeCoreAsync`. If SELECT throws first, the factory catch disposes a session whose `Protocol` is null, leaking the protocol and its exchange gate. `Piv` guards explicitly; `Management`/`Oath`/`YubiOtp` assign in the constructor | warning | **Three patterns for one contract** — the drift `Construct` was meant to end, one layer below it |
+| 2 | `CreateAsync` boilerplate duplicated verbatim 8× | info | Candidate: lift `ConstructAndInitializeAsync` into the base |
+| 3 | `PivSession`'s constructor is public; the other seven are private | warning | Bypasses `Construct`; the AC6 guard catches it only at init. Making it private is a **breaking API change** — needs a decision |
+| 4 | `ManagementSession:206` swallows `OperationCanceledException` during version probe; `YubiOtpSession:219` filters it out | warning | A cancelled `CreateAsync` can return a "successfully" initialized session |
+| 5 | Post-dispose behaviour diverges across the eight; `Piv` and `Management` let calls flow into a disposed protocol | warning | Add `ThrowIfDisposed()` at entry |
+| 6 | macOS `_loopId` and `_deviceHandle` are never `CFRelease`d | warning | Two CF objects leaked per connection; matters for long-lived monitors reopening FIDO |
+| 7 | macOS constructor is not failure-safe | warning | Exactly the bug we fixed on **Windows** in G1; the macOS twin never got it |
+| 8 | Monitor restart path duplicates `StopMonitoringCore`'s retirement | warning | A second "retire a generation" mechanism — precisely the re-merge `src/Core/CLAUDE.md` warns against — and untested |
+| 9 | `StartMonitoring` with a *different* interval is silently ignored; the idempotence test only pins the same-interval case | warning | Looks like a pin, does not constrain the interesting case |
+| 10 | `CompositeDeviceMergerVectorTests` evidence ledger is inverted: `Merge_Defect_*` tests with "PREDICTED RED" comments now pass GREEN | warning | A real future regression turning them RED reads as "expected, ignore" |
+| 11 | "A serial never appears under two PIDs" is prose-only; nothing asserts output-`DeviceId` uniqueness | warning | Two devices could share `ykphysical:{serial}` |
+
+Items 1, 4 and 5 are the highest-value of these: all three are real defects on failure or lifecycle
+paths, and none is caused by this effort.
+
+### What the audit found clean
+
+Worth recording, because a clean result from a deep reader is evidence too: `DisposalGate` (CAS claim,
+lease-in-finally, shared-exception completion, invariants genuinely pinned); the `DeviceConnectionRegistry`
+core (waiter priority, cancellation decrement, atomicity all pinned); the **monitor epoch separation** —
+its three primitives each still do one job, admission is the sole safety point, lock ordering strict, and
+the type-level remarks were checked line by line with no staleness found; the non-seizing FIDO constraint
+(`kIOHIDOptionsTypeSeizeDevice` appears nowhere); the Windows failing-constructor fix including its
+must-not-dispose success-path guard; the merger's tier ordering and conservation invariant; and the
+`Construct` helper itself.
+
+### Limits
+
+No hardware runs and no build/test execution by the auditor; the macOS findings were verified statically
+by us against source. `MacOSHidFeatureReportConnection.cs` was only skimmed — the same CF-lifetime pattern
+likely applies. Integration suites were not assessed for pin quality, only unit tests.

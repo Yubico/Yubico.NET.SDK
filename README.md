@@ -27,7 +27,9 @@ See [Project Structure](#project-structure) for the per-module breakdown.
 > **Alpha:** the prerelease packages are distributed from a public, anonymous
 > feed (not nuget.org). Add the feed first, then install with `--prerelease` to
 > get the latest alpha. Keep nuget.org enabled so transitive dependencies (e.g.
-> `Yubico.NativeShims`) resolve. Full details in the [release notes](scripts/alpha/RELEASE_NOTES.md).
+> `Yubico.NativeShims`) resolve. See the [feed website](https://yubico.github.io/Yubico.NET.SDK/)
+> for the current package list, or the [release notes](scripts/alpha/RELEASE_NOTES.md)
+> for full details.
 
 ```bash
 # 1. Add the anonymous alpha feed (one time)

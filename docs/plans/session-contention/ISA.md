@@ -62,8 +62,11 @@ to sessions.
 
 ## Status and remaining work (as of 2026-08-06, `d0f672c3`)
 
-**All eight ISCs pass.** The edge-case register is 23 rows with zero open rows and zero platform
-gaps.
+**All eight ISCs pass, but the effort is NOT merge-ready.** A real production defect (**G5**) is open and
+awaiting a fix-or-accept decision, and ISC pass status does not override it: the ISCs were written before
+that defect was known, and none of them asks the question it fails. Read "all eight ISCs pass" as "the
+criteria we set are met", not as "nothing is wrong". The edge-case register is 23 rows with zero open rows
+and zero platform gaps.
 
 **Updated after Phase 16.** The cross-vendor review of the production code (G1, G2) is now complete and
 found two real defects, so the earlier claim that no remaining item was expected to change production code
@@ -100,8 +103,14 @@ contention bug this effort set out to fix:
 
 ### Dropped, so they are not silently reopened
 
-Linux E1/E2 (redundant — Linux has no Container ID either, so Phase 14's macOS run covers the same
-degraded tiers) · D3 removal-time exception type (the test does not assert on it) · the 2 transient
+Linux E1/E2 (operator decision: Linux has no Container ID either, so Phase 14's macOS run exercises the
+same degraded tiers) — **but this justification is contested.** The Phase 16 Cato auditor argued the tier
+*model* being identical does not make the platform behaviour feeding it identical: udev path stability,
+serial availability, permission failures, timing, and interface-removal sequencing all differ on Linux, and
+this same ISA elsewhere insists PC/SC and HID behaviour diverge enough to require per-platform runs — which
+undercuts using "no Container ID" alone as an equivalence argument. The rebuttal is reasonable and is
+recorded rather than dismissed; the residual risk is a Linux-only phantom-event or identity-retention issue
+that no current evidence would catch. Re-opening this is a live option for the operator · D3 removal-time exception type (the test does not assert on it) · the 2 transient
 Fido2 failures (unreproducible across 3×29/29; recorded honestly as "observed-good, not proven") ·
 the dirty worktree `agent-aa7ba443d8eec3e9e` (a different effort).
 
@@ -1000,7 +1009,7 @@ hardware; F2 and F3 require unavailable platform evidence. ISC-2 passes.
 | ISC-1 | pass | `PivSessionContentionTests` hardware path plus interface/session acquisition pins; wording corrected to the knowledge available at each scope |
 | ISC-2 | pass | Register now **23 rows** (F4, F5 added after this phase): every P1/P2 covered or bounded with a pin; zero open rows, zero platform gaps |
 | ISC-3 | pass | `DeviceConnectionRegistry` and `ConnectionSessionGuard` are named enforcement points; no wire-sniff convention |
-| ISC-4 | pass | macOS discovery is now 5/5 after USB re-enumeration cleared a wedged host IOKit HID state (the earlier 2/5 was not an SDK defect); PIV session contention 5/5, multi-key 7/7 smoke, YubiOtp 10/10, Management green, build 0 errors, formatting clean. Unblocking OTP HID exposed and fixed a leaked-connection defect in `YubiOtpSlotConfigTests` |
+| ISC-4 | pass (on an uncontended host — see below) | macOS discovery is now 5/5 after USB re-enumeration cleared a wedged host IOKit HID state (the earlier 2/5 was not an SDK defect); PIV session contention 5/5, multi-key 7/7 smoke, YubiOtp 10/10, Management green, build 0 errors, formatting clean. Unblocking OTP HID exposed and fixed a leaked-connection defect in `YubiOtpSlotConfigTests`. **Precondition, carried up from Phase 10/13 so the pass label is not overread:** the OTP-dependent gates require the OTP keyboard interface to be openable. The unresolved macOS host fault of Phase 13 can make them unreproducible on a wedged host until a restart clears it; that is a host condition, not an SDK regression, but it means "ISC-4 pass" asserts an uncontended rig |
 | ISC-5 | pass | Same-rig Linux before/after delta shows no material scan/session-open regression |
 | ISC-6 | pass | `ResetDeviceAsync_WithHidFidoPinnedSession_ThrowsNotSupportedException` passed on hardware with `Transport=HidFido`; `SmartCardBackend_DeviceResetAsync_SendsDeviceResetApdu` passed and pinned INS `0x1F` without resetting hardware |
 | ISC-7 | pass | RED evidence is recorded for behavior changes, including reproduced OTP refusal and Management/YubiOTP ghost-holder failures; invariant pins are identified separately |

@@ -1,4 +1,4 @@
-# Yubico .NET SDK v2 — `2.0.0-alpha.2`
+# Yubico .NET SDK v2 — Alpha
 
 > ## ⚠️ ALPHA — NOT FOR PRODUCTION
 >
@@ -17,34 +17,18 @@ Add the alpha feed (keep nuget.org enabled so transitive dependencies such as
 
 ```bash
 dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
-dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.2
+dotnet add package Yubico.YubiKit.Core --prerelease
 ```
 
-### Optional: bootstrap script
-
-Prefer the manual command above. If you want the script, **download, review, then
-run it** — do not pipe it straight into your shell:
-
-```bash
-# macOS / Linux
-curl -fsSLO https://github.com/Yubico/Yubico.NET.SDK/releases/download/v2.0.0-alpha.2/install-yubikit-alpha.sh
-# review install-yubikit-alpha.sh, then:
-bash install-yubikit-alpha.sh
-```
-```powershell
-# Windows
-iwr https://github.com/Yubico/Yubico.NET.SDK/releases/download/v2.0.0-alpha.2/install-yubikit-alpha.ps1 -OutFile install-yubikit-alpha.ps1
-# review install-yubikit-alpha.ps1, then:
-./install-yubikit-alpha.ps1
-```
-
-The scripts refuse to run when piped (they require a terminal for the confirmation
-prompt), so download-and-run is the supported path.
+The feed publishes a new alpha version on every push to `yubikit`, so
+`--prerelease` always resolves the latest build. See the
+[feed website](https://yubico.github.io/Yubico.NET.SDK/) for the current
+package list and versions.
 
 ## Packages (10)
 
 `Yubico.YubiKit.Core`, `.Management`, `.Piv`, `.Fido2`, `.WebAuthn`, `.Oath`,
-`.YubiOtp`, `.OpenPgp`, `.SecurityDomain`, `.YubiHsm` — all `2.0.0-alpha.2`.
+`.YubiOtp`, `.OpenPgp`, `.SecurityDomain`, `.YubiHsm`.
 
 ## Updates
 

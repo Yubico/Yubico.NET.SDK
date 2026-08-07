@@ -2,7 +2,7 @@
 
 > ## ⚠️ v2 ALPHA — NOT FOR PRODUCTION
 >
-> The v2 SDK (`2.0.0-alpha.2`, `yubikit` branch) is a **pre-release alpha**. It is
+> The v2 SDK (`yubikit` branch) is a **pre-release alpha**. It is
 > **subject to change** and has **not yet completed Yubico's formal security audit**.
 >
 > - **No security guarantees** are made until that audit is complete.
@@ -47,9 +47,6 @@ dotnet add package Yubico.YubiKit.YubiOtp --prerelease
 dotnet add package Yubico.YubiKit.OpenPgp --prerelease
 dotnet add package Yubico.YubiKit.SecurityDomain --prerelease
 dotnet add package Yubico.YubiKit.Management --prerelease
-
-# Or pin an explicit version instead of --prerelease:
-dotnet add package Yubico.YubiKit.Core --version 2.0.0-alpha.2
 ```
 
 ## Quick Start

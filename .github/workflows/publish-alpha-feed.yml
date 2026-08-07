@@ -2,22 +2,28 @@ name: Publish Alpha NuGet Feed (2.0)
 
 # Builds, packs, attests, and publishes the anonymous static NuGet feed to
 # GitHub Pages (served at https://yubico.github.io/Yubico.NET.SDK/alpha/).
-# Runs manually only (workflow_dispatch): the feed is republished deliberately,
-# not on every yubikit push. This avoids colliding Pages deployments triggered by
-# unrelated pushes to yubikit (e.g. docs automation).
+# Runs on every push to yubikit (typically a PR merge) and on manual dispatch.
+# Each run publishes a new monotonic alpha version (2.0.0-alpha.<run_number>),
+# so consumers installing with --prerelease immediately get the latest build.
+#
+# Pages is deployed via GitHub Actions (Settings -> Pages -> Source: GitHub
+# Actions), not a branch build, so these deployments are the single source of
+# truth for the live site. cancel-in-progress lets a newer push supersede an
+# in-flight deploy instead of queuing behind it.
 #
 # Uses the modern GitHub Pages deployment (upload-pages-artifact + deploy-pages),
 # which uploads the feed verbatim with no Jekyll processing. The feed is
 # regenerated fresh each run and deployed as a full replacement, so Pages always
-# exactly reflects the current alpha packages. With a single pinned version
-# (2.0.0-alpha.2) this is deterministic and self-healing.
+# exactly reflects the current alpha packages.
 
 on:
+  push:
+    branches: [ yubikit ]
   workflow_dispatch:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -55,7 +61,8 @@ jobs:
       - name: Pack NuGet packages
         # --embed-symbols: the Sleet/GitHub Pages feed is static and cannot serve
         # .snupkg symbol packages, so embed the PDB inside each .nupkg instead.
-        run: dotnet toolchain.cs pack --package-version 2.0.0-alpha.2 --embed-symbols
+        # Version is monotonic per run so --prerelease consumers always get newer.
+        run: dotnet toolchain.cs pack --package-version 2.0.0-alpha.${{ github.run_number }} --embed-symbols
 
       - name: Attest build provenance for packages
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0

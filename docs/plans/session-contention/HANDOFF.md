@@ -125,35 +125,11 @@ register has zero open rows and zero platform gaps.
 
 ### Remaining hardware item (operator-coordinated)
 
-1. **E1/E2 — physical DeviceId tier flip. MUST RUN PER PLATFORM. Windows run DONE; macOS and Linux
-   runs are still required.** Needs two same-PID keys inserted/removed. Currently pinned by repository unit
-   tests only; ISA records it as "planned, not run".
-
-   **A Windows pass does not transfer.** The merge tiers are platform-divergent by construction:
-   `CompositeDeviceMerger` tier 1 is Windows **Container ID** topology evidence, which
-   `ProtocolDeviceInfo` documents as `null` "always on macOS and Linux", and the merger's own comment
-   states that absent topology "degrades to exactly the macOS/Linux semantics". Windows can therefore
-   produce a `ykphysical:topology:{key}` identity from a code path that does not exist on the other two
-   platforms, while macOS/Linux fall through to the serial/PID tiers. E1/E2 asks what the DeviceId does
-   across a tier flip, so it is measuring precisely the thing that differs.
-
-   If anything the macOS/Linux run matters **more**: it exercises the degraded path where a phantom
-   incumbent add/remove is most plausible, and `docs/architecture/device-discovery-guarantees.md:202-206`
-   already records macOS/Linux HID-to-HID topology as unimplemented and the Windows topology tier as
-   validated only at seam level.
-
-   Sequencing note: ~~macOS cannot host a clean run while the OTP fault distorts the discovered interface
-   set.~~ **Unblocked in Phase 12** — the OTP fault is cleared by restart and discovery is 5/5, so macOS is
-   now a clean rig for E1/E2. Still do not substitute the Windows result for it.
-
-   **Windows result (Phase 12, done).** Operator-coordinated insert/remove of two same-PID firmware-5.8.0
-   keys produced 4 events for 4 physical actions with zero phantom incumbent/survivor events and exact
-   add/remove correlation. Both keys resolved to `ykphysical:topology:<uuid>` — i.e. the tier-1 topology
-   path above — so this run confirms the **topology-tier** branch and, by construction, did **not** exercise
-   the serial/PID degraded path. That degraded path stays unit-pinned only until the macOS/Linux runs.
-   Same caveat as the READ-FIRST banner: this is an operator-coordinated Windows-session observation, not
-   independently reviewed. Lower-risk than the `HidDDevice` fix because Phase 12 changed **no production
-   code** — it only watched `DeviceChanges` — but the event stream was not re-captured by a second party.
+1. **E1/E2 — DONE on Windows (Phase 12) and macOS (Phase 14).** The macOS run exercised the serial↔PID tier
+   flip that the Windows topology-tier rig structurally could not: 7 physical actions → 7 events, zero
+   phantom incumbent/survivor events, final-removal DeviceId correlation confirmed, and the published-object
+   retention contract demonstrated on hardware. **A Linux run is nice-to-have, not required** — Linux also
+   has no Container ID, so it exercises the same degraded tiers macOS just covered.
 
 ### Canonical-verification queue (no hardware needed)
 

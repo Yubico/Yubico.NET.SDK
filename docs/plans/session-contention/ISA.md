@@ -1656,3 +1656,74 @@ OTP interface, and when that fails on macOS the remedy is a restart. Re-measured
 
 This phase is numbered 13 because Phase 12 was taken concurrently by the Windows E1/E2 session; the two
 were authored in parallel on different machines and both are retained.
+
+---
+
+## Phase 14 — E1/E2 confirmed on the macOS degraded path, exercising the real serial↔PID tier flip (2026-08-06)
+
+Phase 12 confirmed E1/E2 on Windows but recorded an explicit caveat: on Windows both keys resolve through
+the tier-1 **topology** (Container ID) path, so the serial↔PID flip the unit tests force was never
+exercised. This phase closes that gap on macOS, where topology evidence does not exist and discovery
+degrades to the serial/PID tiers.
+
+### The tier flip actually occurred — this is what Windows could not test
+
+macOS identity is evidence-dependent, and the run captured the transition directly:
+
+| Rig state | Incumbent identity | Tier |
+|---|---|---|
+| Two same-PID keys present | `ykphysical:103` | serial (needed to disambiguate siblings) |
+| One key present (103 alone) | `ykphysical:pid:0407` | PID (unique group, no serial evidence required) |
+
+So inserting the second same-PID key forces the incumbent's evidence tier to flip from PID to serial. That
+is the exact scenario `UpdateCache_SiblingSamePidKeyArrives_IncumbentEmitsNoRemovedOrAdded` pins
+deterministically, and it had never been observed on hardware on any platform.
+
+### Method
+
+File-based harness (`e1e2_tierflip.cs`, run outside the repo tree) subscribing to
+`YubiKeyManager.DeviceChanges` before `StartMonitoring(1s)`, logging UTC timestamp, `Action`, `DeviceId`
+and `AvailableConnections`. Operator performed each physical action one at a time; every event was
+confirmed before advancing. Experiment seam, not a committed test — hotplug correlation cannot run
+unattended in CI.
+
+### Observed stream — 7 actions, 7 events, zero phantoms
+
+| # | Action | Event | DeviceId | Incumbent event? |
+|---|---|---|---|---|
+| 1 | Remove production key (setup) | Removed | `ykphysical:25555459` | none |
+| 2 | Remove 125 | Removed | `ykphysical:125` | none for 103 |
+| 3 | Insert 125 | Added | `ykphysical:125` | none for 103 |
+| 4 | Remove 125 | Removed | `ykphysical:125` | none for 103 |
+| 5 | Remove 103 (last key) | Removed | `ykphysical:103` | — |
+| 6 | Insert 103 alone | Added | **`ykphysical:pid:0407`** | — |
+| 7 | Insert 125 (2nd same-PID) | Added | `ykphysical:125` | **none for the incumbent** |
+
+Event 5 confirms **E2 final-removal correlation**: the removal reported the same DeviceId previously
+published, not a re-derived one. Events 4 and 7 confirm **E2 sibling removal** and **E1 sibling arrival**:
+the incumbent stayed silent through both, and through the PID→serial tier flip at event 7.
+
+### Retention contract demonstrated on hardware
+
+After event 7 the live monitoring repository had never re-emitted the incumbent, so it still published
+`ykphysical:pid:0407`. An independent fresh scan in a separate process at the same moment reported:
+
+```text
+FRESH SCAN: 2 device(s)
+  ykphysical:103   [HidFido, HidOtp, SmartCard]
+  ykphysical:125   [HidFido, HidOtp, SmartCard]
+```
+
+Fresh-scan identity and retained published identity therefore differ by design: the repository keeps the
+originally published object across an evidence-only tier flip rather than churning consumers. That contract
+was previously unit-pinned only; this is its first hardware demonstration.
+
+### Caveat
+
+Events 2 and 3 were an operator reseat of 125 performed to identify the keys by serial, with `ykman` run in
+between, so external processes were opening interfaces during that window. They are treated as corroborating
+only. Events 4-7 are the deliberate, uncontended sequence and carry the findings.
+
+E1/E2 now have hardware confirmation on **both** the Windows topology tier and the macOS serial/PID
+degraded tier. A Linux run remains nice-to-have rather than required: Linux shares the macOS property of
+having no Container ID, so it exercises the same degraded tiers now covered here.

@@ -23,13 +23,31 @@ internal sealed class WindowsHidIOReportConnection : IHidConnection
     private bool _disposed;
 
     internal WindowsHidIOReportConnection(string path)
+        : this(new HidDDevice(path))
     {
-        _hidDDevice = new HidDDevice(path);
-        _hidDDevice.OpenIOConnection();
+    }
 
-        // HidD report lengths include the report ID byte; IHidConnection sizes are payload-only.
-        InputReportSize = _hidDDevice.InputReportByteLength - 1;
-        OutputReportSize = _hidDDevice.OutputReportByteLength - 1;
+    /// <remarks>
+    ///     Takes an already-constructed device so the open can be made failure-safe: if the open throws, this
+    ///     constructor never completes, so nothing else can dispose the device and its native handle would leak.
+    ///     The seam also lets the failure path be unit-tested without Windows hardware.
+    /// </remarks>
+    internal WindowsHidIOReportConnection(IHidDDevice hidDDevice)
+    {
+        _hidDDevice = hidDDevice;
+        try
+        {
+            _hidDDevice.OpenIOConnection();
+
+            // HidD report lengths include the report ID byte; IHidConnection sizes are payload-only.
+            InputReportSize = _hidDDevice.InputReportByteLength - 1;
+            OutputReportSize = _hidDDevice.OutputReportByteLength - 1;
+        }
+        catch
+        {
+            _hidDDevice.Dispose();
+            throw;
+        }
     }
 
     public int InputReportSize { get; }

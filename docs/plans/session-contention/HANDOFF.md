@@ -192,10 +192,13 @@ Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` (macOS pa
 
 ### Evidence and process debt (carried over)
 
-6. **Reconcile contradictory formatting rows.** Earlier ISA rows recorded unqualified
-   `dotnet format --verify-no-changes` as "0 errors"; it actually exits **2** on pre-existing native
-   naming. Cato flagged this.
-6b. **Cross-vendor review of the Phase 11 Windows work — NEW, and a merge gate.** Review `6289c774`
+6. ~~Reconcile contradictory formatting rows.~~ **DONE 2026-08-06.** Both rows claiming
+   `dotnet format --verify-no-changes` = `exit 0` are corrected. The unqualified command exits **2** on
+   pre-existing `IL2026`/`IL3050` trim-AOT warnings in `src/Tests.TestProject/Program.cs`, a file added
+   2026-04-02 and therefore present when those phases ran — so the rows were inaccurate when written, not
+   merely outdated. The real gate is the split severity-scoped form, which is clean. There is no `format`
+   target in `toolchain.cs`; these are manual invocations.
+6b. **Cross-vendor review of the Phase 11 Windows work — a merge gate.** Review `6289c774`
    (`HidDDevice.OpenFeatureConnection` → `DESIRED_ACCESS.NONE`) and the Phase 11 evidence in `1031890b`.
    It is production native interop, it was authored in a session whose results nobody re-verified, and the
    operator has explicitly deferred it into the cross-vendor review queue. Worth checking specifically:
@@ -205,10 +208,27 @@ Use skill `_YUBIKIT_CANONICAL_SOURCE`. Rust `ykrust-auto` @ `9fe08d9a` (macOS pa
    a checkable assertion.
 7. **Record an explicit Phase 3–4 cross-vendor review verdict.** Marked as a blocking merge item but no
    verdict is recorded.
-8. **Re-run Cato** on `docs/plans/session-contention/ISA.md`.
+8. **Re-run Cato** on `docs/plans/session-contention/ISA.md`. Standing verdict is `fail` (round 2); its
+   CRITICAL finding is resolved and its WARNING is now item 6 above, so a clean verdict should be reachable.
    `bun ~/.claude/skills/Cato/Tools/CatoRun.ts <artifact> --current-vendor openai`
-9. Identify the 2 transient `Fido2` integration failures seen once on macOS after the seize change.
-10. Capture the removal-time exception type in D3 (needs one more coordinated unplug).
+9. ~~Verify/retire the stale `Xunit.SkippableFact` record.~~ **DONE 2026-08-06.** Resolved on this branch by
+   the Phase 8 repair, re-verified on macOS: YubiHsm integration **11/11**, YubiOtp **10/10**, no
+   `FileNotFoundException`. The "34 commits behind" clause no longer applies to that item.
+
+### Dropped by operator decision (2026-08-06)
+
+Recorded so they are not silently reopened:
+
+- **Linux E1/E2** — redundant; Linux has no Container ID either, so it exercises the same degraded tiers
+  macOS covered in Phase 14.
+- **Capture the D3 removal-time exception type** — another coordinated unplug for a detail the test does
+  not assert on.
+- **Chase the 2 transient Fido2 failures** — unreproducible across 3×29/29 and already recorded honestly as
+  "observed-good, not proven".
+- **Dirty worktree `agent-aa7ba443d8eec3e9e`** — a different effort; the future conflict with `619a4bf5` is
+  already noted.
+- **143 firmware-gated `[Theory]` tests** — pre-existing and not this branch. The operator believes it is
+  already resolved; worth a one-command confirmation, then delete the entry.
 
 ### Later
 

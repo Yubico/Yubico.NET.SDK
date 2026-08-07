@@ -444,7 +444,14 @@ The fourth is the one Phase 3 flagged for reclassification. The pin was wrong, n
 ### Verification
 
 Build 0 errors · Core 724 total / 0 failed / 3 pre-existing skips (baseline 714, +10 new) · full unit suite
-1807 total / 0 failed · resilience 69/69 · `dotnet format --verify-no-changes` 0 errors.
+1807 total / 0 failed · resilience 69/69 · formatting clean.
+
+> **Correction (2026-08-06).** This line originally read "`dotnet format --verify-no-changes` 0 errors".
+> That command does **not** exit 0 on this repository and could not have done so here: it reports
+> `IL2026`/`IL3050` trim-AOT warnings from `src/Tests.TestProject/Program.cs`, a file added 2026-04-02 and
+> therefore present when this phase ran. The formatting that was actually clean is the split, severity-
+> scoped form used throughout this effort (`whitespace`, `style --severity error`,
+> `analyzers --severity error`). See the consolidated note in Phase 6.
 
 ### Residual
 
@@ -521,8 +528,17 @@ firmware 5.4.3**, `UsbAKeychain`, PID `0x0407`, all three transports enabled.
 | Core unit | 729 total, 0 failed, 3 skips | 729 / 0 / 3 | **identical** |
 | Full unit suite | 1815 total, 0 failed, 12/12 projects | 1807 total, 0 failed | +8 (Phase 4 → `1e0560af` delta) |
 | Resilience | 69/69 | 69/69 | **identical** |
-| `dotnet format --verify-no-changes` | exit 0 | 0 errors | matches |
+| Formatting (split, severity-scoped) [^fmt] | clean | clean | matches |
 | Discovery invariants | **5/5** | 5/5 | **identical** |
+
+[^fmt]: This row originally recorded `dotnet format --verify-no-changes` as `exit 0` on both platforms.
+    Corrected 2026-08-06: the unqualified command exits **2** on this repository because of pre-existing
+    `IL2026`/`IL3050` trim-AOT warnings in `src/Tests.TestProject/Program.cs` (added 2026-04-02, so present
+    when this phase ran, and unrelated to this branch). The gate this effort actually uses, and which is
+    clean, is the split severity-scoped form: `dotnet format whitespace --verify-no-changes`,
+    `dotnet format style --verify-no-changes --severity error`, and
+    `dotnet format analyzers --verify-no-changes --severity error`. There is no `format` target in
+    `toolchain.cs`, so these are manual invocations.
 | Core integration (whole suite, smoke) | 22/22 | — | new |
 | Management integration (smoke) | 38 passed, 13 skipped, 0 failed | — | new; skips are FW ≥5.7.0 gates and multi-key |
 | PIV two-key contention | **not run** | 2/2 | needs a second key |
@@ -623,9 +639,16 @@ Neither is in scope here; both are recorded because a 5.8.0-only macOS rig could
    under `[SkippableTheory]`. 143 such tests use plain `[Theory]`; only 12 use `[SkippableTheory]`.
    On fw 5.4.3 this reports 16 Piv, 18 SecurityDomain, 6 Oath and 2 OpenPgp failures that are really
    skips. This branch never touched that path.
-2. **YubiHsm and YubiOtp integration tests cannot run at all** — `FileNotFoundException: Could not
-   load file or assembly 'Xunit.SkippableFact'`. Already fixed on `origin/yubikit` by `2e381cb1`;
-   absent here only because the branch is 34 commits behind, which was parked deliberately.
+2. ~~**YubiHsm and YubiOtp integration tests cannot run at all**~~ — `FileNotFoundException: Could not
+   load file or assembly 'Xunit.SkippableFact'`. The original note said this was fixed only on
+   `origin/yubikit` by `2e381cb1` and absent here because the branch is 34 commits behind.
+   **RESOLVED ON THIS BRANCH and re-verified 2026-08-06.** Phase 8's repair added the direct package
+   reference to both projects — `Xunit.SkippableFact` is present in
+   `src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/*.csproj:14` and the YubiOtp equivalent, and
+   the `Tests.Shared` reference remains `PrivateAssets=all` by design. Measured on macOS: YubiHsm
+   integration **11/11 passed**, YubiOtp integration **10/10 passed**, no `FileNotFoundException`. Both
+   projects also pass `test-infrastructure-qa`, which `build` and `test` depend on, so the defect cannot
+   silently return. The "34 commits behind" clause no longer applies to this item.
 
 ### Integration results, Linux / fw 5.4.3 / two keys (9681620, 20260533)
 

@@ -64,11 +64,12 @@ to sessions.
   are different layers and are load-bearing for reasons unrelated to this problem.
 - The composite merge algorithm. Landed separately in PR #543.
 
-## Status and remaining work (as of 2026-08-07, `3edfbbfb`)
+## Status and remaining work (as of 2026-08-08, `e24ec390`)
 
-**All eight ISCs pass, all four blocking defect gates are discharged, and base reconciliation is done.
-The only remaining gate is G4 — review and merge consolidation.** The branch is **63 commits ahead of
-`origin/yubikit` and 0 behind**: upstream is fully absorbed, not partially merged. The edge-case register
+**All eight ISCs pass, all four blocking defect gates are discharged, base reconciliation is done, and
+the Fable follow-up findings #5-#11 are now closed (Phase 22).** The only remaining gate is G4 — review
+and merge consolidation, which additionally awaits the two Windows items. The branch is **68 commits
+ahead of `origin/yubikit` and 0 behind**: upstream is fully absorbed, not partially merged. The edge-case register
 is 23 rows with zero open rows and zero platform gaps.
 
 **Read "all eight ISCs pass" as "the criteria we set are met", not as "nothing is wrong".** That caveat is
@@ -90,12 +91,15 @@ accidentally **same-vendor** and cannot be cited as cross-vendor evidence — se
 Carried from the Phase 20 Fable audit. Findings #1, #2 and #4 were closed by the Phase 21 merge; #3 was
 closed by `e03d01bb`. These remain, re-verified against the post-merge tree on 2026-08-07:
 
-| # | Finding | Verified state at `3edfbbfb` |
+| # | Finding | Disposition |
 |---|---|---|
-| 5 | Post-dispose behaviour diverges across the eight sessions | **Still open.** `Oath` uses `ThrowIfDisposed` (12 sites); `Piv` and `Fido2` rely on `EnsureInitialized` only; **`Management` has neither**, so calls can flow into a disposed protocol |
-| 6 | macOS CF objects never released | **Still open, and broader than Phase 20 recorded.** `CFRelease` appears **zero** times in *both* `MacOSHidIOReportConnection.cs` and `MacOSHidFeatureReportConnection.cs`. Phase 20 skimmed the second file and inferred; it is now confirmed |
-| 7 | macOS constructor is not failure-safe | **Still open, both files.** `MacOSHidFeatureReportConnection` calls `SetupConnection()` bare in the constructor. This is exactly the bug fixed on **Windows** in G1; the macOS twin never got it |
-| 8–11 | Monitor duplicate retirement · `StartMonitoring` interval ignored · inverted merger evidence ledger · `DeviceId` uniqueness prose-only | **Not re-verified post-merge** |
+| 5 | Post-dispose behaviour diverges across the eight sessions | **CLOSED, Phase 22** (`9926ba2e`). Management now calls the pre-existing `ApplicationSession.ThrowIfDisposed` first in all three public methods. The wider divergence across the other seven sessions is real but recorded as a separate normalization concern, not this branch's |
+| 6 | macOS CF objects never released | **CLOSED, Phase 22** (`47f21233`). Both the `IOHIDDeviceCreate` handle and the run-loop mode `CFStringRef` are now released. The CFStringRef leaked on the **success** path too — every FIDO connection created one and nothing gave it back |
+| 7 | macOS constructor is not failure-safe | **CLOSED, Phase 22** (`47f21233`), and it was worse than recorded: both types declare finalizers, so a constructor failing at device creation produced a finalizable object whose disposal passed a **NULL `IOHIDDeviceRef`** to IOKit on the finalizer thread. Reproduced by a pin before fixing |
+| 8 | Monitor duplicate retirement | **CLOSED, Phase 22** (`eda9b14b`, `e24ec390`). The restart branch cancelled and completed the dead generation but never swapped it out of `_current`, so it stayed current across listener teardown and startup and could still pass admission. One `RetireCurrentGeneration` now serves both callers |
+| 9 | `StartMonitoring` interval silently ignored | **CLOSED, Phase 22.** Pinned by generation identity and stated on the interface as a deliberate contract |
+| 10 | Inverted merger evidence ledger | **CLOSED, Phase 22.** `Merge_Defect_*` renamed to `Merge_Regression_*`; ledger and the two Phase-3 topology vectors rewritten. No production change |
+| 11 | `DeviceId` uniqueness prose-only | **CLOSED, Phase 22, and it found a real defect.** One serial under two PIDs produced two correctly-partitioned composites sharing a `DeviceId`. Fixed by qualifying such ids as `ykphysical:pid:{PID}:{serial}`; the identity-stability trade is recorded as an owner decision at the call site |
 
 Note the merge moved these files: `Native/MacOS/` → `src/Core/src/Transports/Hid/MacOS/`.
 
@@ -2698,3 +2702,64 @@ than carried forward on the strength of the Phase 20 reading. Two came back **wo
 
 Files moved in the merge: `src/Core/src/Native/MacOS/` → `src/Core/src/Transports/Hid/MacOS/`. Any
 follow-up issue must cite the new paths.
+
+---
+
+## Phase 22 — Fable findings #5–#11 closed (2026-08-08)
+
+The operator's Phase 21 decision was to keep this branch's scope closed and file #5–#11 as follow-up.
+That was reversed on 2026-08-08 after re-verification showed #7 was not a leak but a **process-integrity
+bug on the finalizer thread**, and that #8–#11 — recorded as "not re-verified" — were all open. Leaving
+the macOS twin of a bug this branch already fixed on Windows (G1) open in the same alpha was the
+deciding argument.
+
+### Method
+
+Every fix was RED-first, and the seam that made the macOS failure paths reachable was landed separately
+as a **proven no-op** (`4976ab57`) before any test depended on it — the full unit suite passing unchanged
+is the behaviour-preservation evidence. This ordering was adopted because a cross-vendor audit of the
+plan flagged that introducing the seam and the tests together would let the refactor silently alter the
+very paths the tests were meant to expose.
+
+### What the RED runs showed
+
+| Pin | RED output |
+|---|---|
+| `IOReportConnection_WhenCreateThrows_NeverRegistersCallbacksOnANullDeviceHandle` | *a NULL IOHIDDeviceRef was passed to IOKit callback registration on the finalizer thread* |
+| `GetDeviceInfoAsync_AfterDispose_ThrowsObjectDisposed` | `ArgumentNullException: Value cannot be null. (Parameter 'protocol')` |
+| `SetDeviceConfigAsync_AfterDispose` / `ResetDeviceAsync_AfterDispose` | `NullReferenceException` |
+| `RestartAfterLoopDeath_RetiresTheDeadGenerationFromCurrent` | `Assert.NotSame() Failure: Values are the same instance` |
+| `Merge_AnyVector_ProducesPairwiseDistinctDeviceIds(0x0407, 0x0403)` | 2 devices, 1 distinct `DeviceId` — `ykphysical:500=[ccid-second\|otp-second]; ykphysical:500=[ccid-first\|otp-first]` |
+
+The Management pins are the clearest statement of #5: a disposed session did not report disposal, it
+reported a null protocol.
+
+#11 is the one that found new production truth. The uniqueness invariant had never been asserted, and
+asserting it immediately produced a real defect.
+
+### Correction to Phase 13 — replug *does* clear the macOS OTP HID fault
+
+Phase 13 recorded "restart, not replug" as the remedy for the wedged macOS OTP HID state. That is
+**wrong, or at least not always true**. On 2026-08-08 the fault reappeared (`IOHIDDeviceGetReport =
+0xE00002E2`, OTP interfaces orphaned, Core integration 23/25). It was proven pre-existing by checking
+out `7b90d97b` and reproducing the identical failure with none of Phase 22's changes present, and proven
+host-level by `ykman --device <serial> otp info` emitting `WARNING: Failed opening device` without
+involving this SDK. A **replug cleared it**: `ykman` went clean and Core integration returned to 25/25.
+Try a replug first; it is much cheaper than a restart.
+
+### Gates at `e24ec390`
+
+Build 0 errors · unit **12/12 projects** · `resilience --fast` green · formatting clean across all three
+severity-scoped passes. Hardware: Core integration **25/25**, Piv **76/76**.
+
+Cross-vendor review, `github-copilot/gpt-5.5`: Phase A **`pass`, zero warning or critical findings**.
+Phase B returned **`concerns`** with three findings, all accepted and fixed in `e24ec390` — retirement
+ordering relative to listener teardown, an orphaned XML summary, and the DeviceId identity trade, which
+is now written up as an explicit owner decision at the call site rather than left implied.
+
+### Carried forward
+
+- The two Windows items remain owed and still gate G4.
+- Whether a key caught mid-reconfiguration should be held back as unattributed rather than given a
+  PID-qualified id is open for review; the trade is documented at `CompositeDeviceMerger.MintPhysicalDeviceId`.
+- Post-dispose guard style is still not uniform across the other seven sessions.

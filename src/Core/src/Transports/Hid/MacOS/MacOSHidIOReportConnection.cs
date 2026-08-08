@@ -55,22 +55,33 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
         _entryId = entryId;
         _lifetime = lifetime;
 
-        _loopId = _lifetime.CreateRunLoopMode($"fido2-loopid-{entryId}");
-
         _readBuffer = new byte[64];
-        _readHandle = GCHandle.Alloc(_readBuffer, GCHandleType.Pinned);
-
         _reportsQueue = new ConcurrentQueue<byte[]>();
-        _pinnedReportsQueue = GCHandle.Alloc(_reportsQueue);
 
         _reportDelegate = ReportCallback;
         _removalDelegate = RemovalCallback;
 
-        SetupConnection();
+        // Everything from here acquires something that must be handed back. A throw past this point would
+        // otherwise strand a CFStringRef, two GCHandles, and an IOHIDDeviceRef with no owner: the object
+        // never finishes construction, so the caller has nothing to dispose.
+        try
+        {
+            _loopId = _lifetime.CreateRunLoopMode($"fido2-loopid-{entryId}");
 
-        InputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
-        OutputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
+            _readHandle = GCHandle.Alloc(_readBuffer, GCHandleType.Pinned);
+            _pinnedReportsQueue = GCHandle.Alloc(_reportsQueue);
 
+            SetupConnection();
+
+            InputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
+            OutputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
+        }
+        catch
+        {
+            Dispose(false);
+            GC.SuppressFinalize(this);
+            throw;
+        }
     }
 
     public int InputReportSize { get; }
@@ -209,28 +220,40 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
     private void Dispose(bool disposing)
     {
+        // Set first: this runs from the failing-constructor path as well as from Dispose and the finalizer,
+        // and every CoreFoundation object below must be released exactly once. Over-releasing corrupts a
+        // retain count just as surely as never releasing leaks.
         if (_disposed) return;
+        _disposed = true;
 
-        _lifetime.RegisterInputReportCallback(
-            _deviceHandle,
-            _readBuffer,
-            _readBuffer.Length,
-            IntPtr.Zero,
-            IntPtr.Zero);
+        // Guard the handle. A constructor that failed at device creation leaves this zero, and the finalizer
+        // still runs on the partially-constructed object. Handing a NULL IOHIDDeviceRef to IOKit is undefined
+        // behaviour on the finalizer thread, not a harmless no-op.
+        if (_deviceHandle != IntPtr.Zero)
+        {
+            _lifetime.RegisterInputReportCallback(
+                _deviceHandle,
+                _readBuffer,
+                _readBuffer.Length,
+                IntPtr.Zero,
+                IntPtr.Zero);
 
-        _lifetime.RegisterRemovalCallback(_deviceHandle, IntPtr.Zero, IntPtr.Zero);
+            _lifetime.RegisterRemovalCallback(_deviceHandle, IntPtr.Zero, IntPtr.Zero);
+
+            _lifetime.CloseDevice(_deviceHandle);
+
+            // IOHIDDeviceCreate returns a retained CoreFoundation object. Closing it is not releasing it.
+            _lifetime.ReleaseCFObject(_deviceHandle);
+            _deviceHandle = IntPtr.Zero;
+        }
 
         if (_readHandle.IsAllocated) _readHandle.Free();
 
         if (_pinnedReportsQueue.IsAllocated) _pinnedReportsQueue.Free();
 
-        if (_deviceHandle != IntPtr.Zero)
-        {
-            _lifetime.CloseDevice(_deviceHandle);
-            _deviceHandle = IntPtr.Zero;
-        }
-
-        _disposed = true;
+        // CFStringCreateWithCString also returns a retained object, and this one leaked on the success path
+        // too: every FIDO connection created one and no path ever gave it back.
+        if (_loopId != IntPtr.Zero) _lifetime.ReleaseCFObject(_loopId);
     }
 
     ~MacOSHidIOReportConnection()

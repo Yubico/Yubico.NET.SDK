@@ -43,10 +43,23 @@ internal sealed class MacOSHidFeatureReportConnection : IHidConnection
     {
         _entryId = entryId;
         _lifetime = lifetime;
-        SetupConnection();
 
-        InputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
-        OutputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
+        // A constructor that acquires a native resource and then throws leaves nothing for the caller to
+        // dispose: the object never finishes construction, so no using, finally, or factory catch can reach
+        // it. Release here or the IOHIDDeviceRef leaks for the process lifetime.
+        try
+        {
+            SetupConnection();
+
+            InputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
+            OutputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
+        }
+        catch
+        {
+            Dispose(false);
+            GC.SuppressFinalize(this);
+            throw;
+        }
     }
 
     public int InputReportSize { get; }
@@ -116,15 +129,20 @@ internal sealed class MacOSHidFeatureReportConnection : IHidConnection
 
     private void Dispose(bool disposing)
     {
+        // Set first: this runs from the failing-constructor path as well as from Dispose and the finalizer,
+        // and every CoreFoundation object below must be released exactly once. Over-releasing corrupts a
+        // retain count just as surely as never releasing leaks.
         if (_disposed) return;
+        _disposed = true;
 
         if (_deviceHandle != IntPtr.Zero)
         {
             _lifetime.CloseDevice(_deviceHandle);
+
+            // IOHIDDeviceCreate returns a retained CoreFoundation object. Closing it is not releasing it.
+            _lifetime.ReleaseCFObject(_deviceHandle);
             _deviceHandle = IntPtr.Zero;
         }
-
-        _disposed = true;
     }
 
     ~MacOSHidFeatureReportConnection()

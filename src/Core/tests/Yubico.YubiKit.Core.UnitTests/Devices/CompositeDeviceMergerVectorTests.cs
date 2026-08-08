@@ -18,8 +18,8 @@ using Yubico.YubiKit.Core.Devices;
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
-///     Phase 1 unit-vector harness for <see cref="CompositeDeviceMerger.Merge" /> (composite-merge
-///     remediation plan, docs/plans/composite-merge-remediation/PLAN.md).
+///     Unit-vector harness for <see cref="CompositeDeviceMerger.Merge" />. The merge tiers these vectors
+///     exercise are specified in docs/architecture/device-discovery-guarantees.md.
 /// </summary>
 /// <remarks>
 ///     <para>

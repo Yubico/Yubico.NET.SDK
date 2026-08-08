@@ -22,8 +22,8 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
 /// <summary>
-///     Key-count-agnostic composite-discovery invariants (Phase 1 of the composite-merge remediation plan,
-///     docs/plans/composite-merge-remediation/PLAN.md). Requires one or more allow-listed composite USB
+///     Key-count-agnostic composite-discovery invariants; the guarantees under test are specified in
+///     docs/architecture/device-discovery-guarantees.md. Requires one or more allow-listed composite USB
 ///     YubiKeys; no touch / user-presence required. The invariants hold for any number of keys, so
 ///     single-key rigs keep passing while multi-key rigs exercise the same contracts.
 /// </summary>

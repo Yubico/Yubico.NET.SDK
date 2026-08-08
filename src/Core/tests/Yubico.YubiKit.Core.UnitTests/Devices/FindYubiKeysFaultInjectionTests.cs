@@ -25,8 +25,8 @@ using Yubico.YubiKit.Core.Utilities;
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
-///     Phase 1 fault-injection harness for <see cref="FindYubiKeys" /> (composite-merge remediation plan,
-///     docs/plans/composite-merge-remediation/PLAN.md): scripted identity-read outcomes per interface via
+///     Fault-injection harness for <see cref="FindYubiKeys" /> (see
+///     docs/architecture/device-discovery-guarantees.md): scripted identity-read outcomes per interface via
 ///     constructor fakes, exercising the identity cache (convergence, eviction, reader-rename behavior) and
 ///     deterministically reproducing the Phase-0 scan-1 "aborted" identity-read failures.
 /// </summary>

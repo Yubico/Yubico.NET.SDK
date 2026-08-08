@@ -99,7 +99,9 @@ two members of the same connection type, invisible in `AvailableConnections` and
 connect time) and they do **not** both mint the id. Instead, the *winner rule* applies: the PID group
 whose serial-anchored census exactly matches its PID's expected interface set keeps `ykphysical:{serial}`;
 every other contested interface publishes standalone. Zero or multiple complete groups is ambiguity, and
-ambiguity fragments conservatively — the next scan converges. The reasoning is recorded at
+ambiguity fragments conservatively — the next scan converges. Completeness is a heuristic and can pick the
+stale enumeration when a scan catches it still fully enumerated; both groups are the same physical key, so
+the consequence is bounded to one scan of stale membership and self-corrects. The reasoning is recorded at
 `CompositeDeviceMerger.ResolveContestedSerials`, and the rule is pinned by the `Merge_ContestedSerial_*`
 vectors plus `Merge_AnyVector_ProducesPairwiseDistinctDeviceIds`.
 

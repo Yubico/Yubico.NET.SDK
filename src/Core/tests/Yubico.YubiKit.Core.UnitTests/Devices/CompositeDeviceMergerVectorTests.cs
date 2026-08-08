@@ -719,6 +719,41 @@ public class CompositeDeviceMergerVectorTests
         Assert.Equal(4, result.Count);
     }
 
+    /// <summary>
+    ///     A contested loser in the group suppresses orphan attribution to clean keys sharing that PID:
+    ///     the loser's interfaces are physically present and unaccounted-for, so an orphan could belong to
+    ///     the mid-transition key rather than the clean candidate.
+    /// </summary>
+    /// <remarks>
+    ///     Deliberate conservatism, not a lost optimization. The type-count closure counts all of the
+    ///     group's descriptors while candidacy is restricted to eligible keys, so deduction goes standalone
+    ///     during a contest and the next scan converges. Without the contested loser present, the same
+    ///     orphan attributes normally (covered by the pigeonhole vectors above).
+    /// </remarks>
+    [Fact]
+    public void Merge_ContestedSerial_LoserSuppressesOrphanAttributionToCleanKeys()
+    {
+        var result = CompositeDeviceMerger.Merge(
+        [
+            // Clean key 111 under 0x0407, missing its OTP; the orphan would attribute to it if alone.
+            Descriptor("ccid-clean", ConnectionType.SmartCard, 0x0407, serial: 111),
+            Descriptor("fido-clean", ConnectionType.HidFido, 0x0407, serial: 111),
+            Descriptor("otp-orphan", ConnectionType.HidOtp, 0x0407), // identity read failed: null serial
+            // Contested serial 500: loses here (incomplete), wins nowhere (0x0403 side incomplete too).
+            Descriptor("otp-contested", ConnectionType.HidOtp, 0x0407, serial: 500),
+            Descriptor("ccid-contested", ConnectionType.SmartCard, 0x0403, serial: 500)
+        ]);
+
+        // The orphan stays standalone: with the contested key's OTP unaccounted-for, attributing it to
+        // key 111 would be a guess between two plausible owners.
+        Assert.Single(result, d => d.DeviceId == "otp-orphan");
+        var clean = Assert.IsType<CompositeYubiKey>(Assert.Single(result, d => d.DeviceId == "ykphysical:111"));
+        Assert.Equal(new[] { "ccid-clean", "fido-clean" }, clean.MemberDeviceIds);
+        Assert.Single(result, d => d.DeviceId == "otp-contested");
+        Assert.Single(result, d => d.DeviceId == "ccid-contested");
+        Assert.Equal(4, result.Count);
+    }
+
     // ---------------------------------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------------------------------

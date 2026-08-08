@@ -215,10 +215,14 @@ internal static class CompositeDeviceMerger
     ///     <para>
     ///         One serial under two PIDs is one physical key mid-reconfiguration, observed through a stale
     ///         enumeration and a fresh one. Completeness against <see
-    ///         cref="ReaderNamePidParser.ExpectedConnectionsForPid" /> identifies the live enumeration
-    ///         without guessing: the stale one is dying interface-by-interface and its census is failing,
-    ///         while the fresh one converges on its PID's full set. When completeness cannot decide - no
-    ///         group complete, or more than one - every contested interface publishes standalone and the
+    ///         cref="ReaderNamePidParser.ExpectedConnectionsForPid" /> is a heuristic for the live
+    ///         enumeration: the stale one is dying interface-by-interface and its census is usually already
+    ///         failing, while the fresh one converges on its PID's full set. It can pick wrong - a scan can
+    ///         catch the stale set still fully enumerated while the fresh set is mid-arrival - and the
+    ///         consequence is bounded and accepted: both groups are the same physical key, so the id lands
+    ///         on the right key either way, at worst with one scan of stale membership whose dead members
+    ///         fail loudly at connect time; the next scan corrects. When completeness cannot decide at all -
+    ///         no group complete, or more than one - every contested interface publishes standalone and the
     ///         next scan converges. Any tie-break beyond completeness (newest PID, enumeration order) would
     ///         be guessing with a different name.
     ///     </para>
@@ -301,6 +305,13 @@ internal static class CompositeDeviceMerger
         var standalone = new List<DeviceInterfaceDescriptor>();
 
         var expected = ReaderNamePidParser.ExpectedConnectionsForPid(pid);
+
+        // The type-count closure deliberately runs over ALL descriptors (including contested losers'
+        // members) while candidacy is restricted to eligible keys. A contested loser's interfaces are
+        // physically present and unaccounted-for; an orphan in this group could belong to that
+        // mid-transition key rather than to a clean candidate. Counting them makes deduction strictly more
+        // conservative while a contest is in progress - orphans stay standalone and the next scan
+        // converges. Pinned by Merge_ContestedSerial_LoserSuppressesOrphanAttributionToCleanKeys.
         var canAttributeOrphans = eligible.Count > 0
             && orphans.Count > 0
             && NoInterfaceTypeOutnumbersCandidateKeys(expected, descriptors, eligible.Count);

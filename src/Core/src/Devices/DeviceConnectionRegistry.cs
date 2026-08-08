@@ -31,7 +31,7 @@ namespace Yubico.YubiKit.Core.Devices;
 ///     <para>
 ///         CCID (SmartCard) and OTP HID interfaces admit exactly ONE live connection. CCID holds one selected
 ///         applet on the basic channel, so a second connection's SELECT would deselect the first holder's applet
-///         — measured, SW=0x6D00, see docs/plans/session-contention/phase1-findings.md. An OTP HID logical
+///         — measured, SW=0x6D00, see docs/architecture/connection-ownership-and-contention.md. An OTP HID logical
 ///         exchange spans multiple feature reports, which separate protocol instances must not interleave.
 ///         A second acquisition is refused immediately with <see cref="ConnectionInUseException" />; it never
 ///         waits, because waiting for an unbounded session to end is worse than a clear error. FIDO HID remains

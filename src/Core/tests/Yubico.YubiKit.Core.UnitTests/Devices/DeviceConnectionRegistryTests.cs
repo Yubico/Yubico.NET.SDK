@@ -36,7 +36,7 @@ public class DeviceConnectionRegistryTests
     ///     Acquisition succeeding and coexistence being safe are different claims, and conflating them is what
     ///     let the CCID contention defect go unnoticed: on a SmartCard interface a second connection's session
     ///     issues its own applet SELECT, which deselects the first applet and leaves the earlier session
-    ///     answering SW=0x6D00 (measured, docs/plans/session-contention/phase1-findings.md). CCID is now
+    ///     answering SW=0x6D00 (measured, docs/architecture/connection-ownership-and-contention.md). CCID is now
     ///     exclusive — see <see cref="AcquireConnection_ExclusiveInterface_SecondAcquisitionIsRefused" />.
     ///     HID has no applet-selection state, so ref-counting is correct there and is retained deliberately:
     ///     Management over HID must stay available while a PIV session holds CCID.

@@ -32,7 +32,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 ///         Two rules, one fact at two scopes. A CCID interface admits ONE live connection, and a connection
 ///         admits ONE live session. Both are refused before any command reaches the card, because a YubiKey's
 ///         CCID interface holds exactly one selected applet and a second applet SELECT deselects the first —
-///         measured, SW=0x6D00, see docs/plans/session-contention/phase1-findings.md.
+///         measured, SW=0x6D00, see docs/architecture/connection-ownership-and-contention.md.
 ///     </para>
 ///     <para>
 ///         The third rule is ownership: a protocol/session is a pure USER of the connection it is handed.

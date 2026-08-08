@@ -8,8 +8,9 @@ guarantee — if you cannot find the citation, treat the behavior as unspecified
 Scope: grouping multiple USB interfaces (CCID/smart card, HID FIDO, HID OTP) of one physical
 YubiKey into one `IYubiKey`, as performed by `FindYubiKeys.FindAllAsync` and
 `CompositeDeviceMerger`. See [Physical Device Model](physical-device-model.md) for the device model
-itself and [Event-Driven Device Discovery](event-driven-device-discovery.md) for the monitoring
-loop.
+itself, [Event-Driven Device Discovery](event-driven-device-discovery.md) for the monitoring
+loop, and [Connection Ownership and Contention](connection-ownership-and-contention.md) for who may
+hold which interface and what discovery does when one is already held.
 
 ## The core problem: same-PID keys
 

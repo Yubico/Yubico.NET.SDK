@@ -28,7 +28,7 @@ namespace Yubico.YubiKit.Piv.IntegrationTests;
 /// <remarks>
 ///     <para>
 ///         This is the motivating defect of the session-contention effort
-///         (<c>docs/plans/session-contention/ISA.md</c>, ISC-1). Four lines of ordinary public API,
+///         (<c>docs/architecture/connection-ownership-and-contention.md</c>). Four lines of ordinary public API,
 ///         default settings, one process:
 ///     </para>
 ///     <code>

@@ -82,7 +82,7 @@ internal sealed class HidDDevice : IHidDDevice
     ///         same path OPENS with zero access (CreateFile + HidD_GetPreparsedData/HidP_GetCaps). It does not
     ///         exercise HidD_GetFeature/HidD_SetFeature, so it is supporting evidence, not proof that feature
     ///         I/O succeeds. Sufficiency for feature I/O rests on the Win32 contract for these IOCTLs plus the
-    ///         Windows hardware run recorded in docs/plans/session-contention/ISA.md (YubiOtp integration
+    ///         Windows hardware run recorded in docs/architecture/connection-ownership-and-contention.md (YubiOtp integration
     ///         10/10, fw 5.8.0).
     ///     </para>
     ///     <para>

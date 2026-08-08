@@ -2550,3 +2550,91 @@ must-not-dispose success-path guard; the merger's tier ordering and conservation
 No hardware runs and no build/test execution by the auditor; the macOS findings were verified statically
 by us against source. `MacOSHidFeatureReportConnection.cs` was only skimmed — the same CF-lifetime pattern
 likely applies. Integration suites were not assessed for pin quality, only unit tests.
+
+---
+
+## Phase 21 — Base reconciliation executed (2026-08-07)
+
+Merged `origin/yubikit` (`d34eef08`), then closed two follow-ups. Discharges **A2** and **A3**.
+
+### The merge
+
+Predicted by dry run and confirmed: 104 overlapping files but only **23 real conflicts** — 11 production,
+12 tests. `ConnectionSessionGuard`, `DeviceConnectionRegistry`, `MacOSHidIOReportConnection` and
+`HidDDevice` auto-merged clean, so G5, the registry and both native fixes survived untouched.
+
+Resolution was driven by intent, not text. The branches worked orthogonal axes — ours *connection*
+contention, upstream's *protocol* ownership — so the merge takes both.
+
+| Conflict | Resolution |
+|---|---|
+| `PcscProtocol`, `FidoHidProtocol` | **ours** for `Dispose` (non-owning); **theirs** for structure. Upstream's dead APDU-passthrough helpers deleted with it |
+| `ApplicationSession` | **composed**: our `Construct` + AC6 check + disposal machinery, upstream's `InitializeProtocolAsync` |
+| 8 applet sessions | **theirs** for `ProtocolFactory`/`Backend/`, **ours** for `Construct` binding |
+| Init-failure cleanup | **theirs** — `DisposeAfterInitializationFailure` preserves the primary exception |
+| `ProtocolDeviceInfo` | **ours** — restored the documented borrow contract |
+| Applet unit tests | scenarios **theirs**, assertions **ours** (inverted) |
+
+### The landmine, and why it was guarded before the merge
+
+Upstream still calls `_connection.Dispose()` in **all three** protocols. This branch removed it: the
+interface lease belongs to the connection, so a protocol disposing one it was handed releases that lease
+out from under its owner. `FidoHidProtocol`'s upstream side is a **+16/−110 rewrite**, so taking theirs
+was the path of least resistance and would have silently reintroduced the defect.
+
+`ProtocolConnectionOwnershipTests` was therefore written and committed **before** the merge (`f5cce73c`),
+verified in both directions — 2/2 green as-is, both RED when upstream's disposal is reinstated. The
+resolution was guarded rather than merely careful. `OtpHidProtocol` auto-merged correctly because
+upstream never touched its `Dispose`.
+
+### Three defects the merge introduced, caught by tests not by reading
+
+1. **`ProtocolDeviceInfo` became self-contradictory.** Its type remarks say it *borrows* and the caller
+   disposes; upstream's body disposed the connection on protocol-creation failure, correct only while
+   protocol disposal cascaded. Restored to the documented contract.
+2. **Upstream's applet tests encoded upstream's ownership.** Six modules asserted the connection IS
+   disposed after a failed `CreateAsync` — true only in their model. Inverted and renamed; the scenarios
+   were kept because they are real coverage this branch lacked. One over-broad edit briefly corrupted an
+   *owned*-path Oath test that legitimately expects disposal; caught and restored.
+3. **`ManagementSession.Transport` was silently lost.** Upstream has no `Transport` concept, so the
+   assignment is ours alone and sat in a region upstream restructured. **Caught by PIV hardware
+   contention tests** seeing `Unknown` where `SmartCard` was expected — nothing else would have.
+
+A fourth interaction surfaced: `DisposeAfterInitializationFailure` suppresses cleanup failures, but our
+`DisposalGate` makes a failed teardown **terminal and shared**, so a later dispose replays it. Upstream's
+test could use `using`; ours cannot. Adapted, with the reason recorded at the call site.
+
+### Cross-vendor review
+
+The `_connection`-collapse decision was taken to RubberDuck (`github-copilot/gpt-5.5`) before applying it
+across eight files; it confirmed the direction and recommended a derived typed view over a second field.
+DevTeam review of the finished resolutions, same reviewer, returned **`pass` with zero findings**, and
+independently verified a nuance not explicitly checked: `ConnectAndReadAsync` still disposes
+discovery-*created* connections while `ReadAsync` borrows.
+
+### Follow-ups closed by the merge itself
+
+| Fable finding | Status |
+|---|---|
+| #1 protocol leaked on failed init in 4 of 8 sessions | **Resolved by upstream's `Backend/` restructure.** All eight now assign `Protocol` on the line immediately after `ProtocolFactory.Create`, before any wire I/O, so an applet-SELECT failure can no longer strand it |
+| #2 `CreateAsync` boilerplate drift (three patterns) | **Resolved** — all eight are now identical |
+
+No code was written for either; verified rather than assumed.
+
+### PivSession constructor (`e03d01bb`)
+
+`public` → `internal`, the last session of eight exposing a constructor that bypassed `Construct`.
+Breaking, deliberately. `InternalsVisibleTo` granted to the Piv unit tests, mirroring Core, so the six
+tests asserting uninitialised defaults keep working.
+
+### Gates
+
+Build 0 errors · unit **12/12 projects** · resilience · formatting (three severity-scoped passes) ·
+docs-qa 54 files. Hardware, serials 103 and 125: Core integration **25/25** including all five discovery
+invariants, Piv **76/76** including the PIN-clobber and refusal tests, YubiOtp **10/10**, Management
+**40/40**. Ownership pins 7/7 and G5 construction pins 5/5 green.
+
+### Still owed to the Windows machine
+
+FIDO `InitializeAsync` + `FirmwareVersion` equivalence with the old SELECT parse, and the HID
+constructor-leak re-verify.

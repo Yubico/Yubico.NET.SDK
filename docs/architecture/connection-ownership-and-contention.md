@@ -33,6 +33,39 @@ at *acquisition* rather than at the wire.
 Pinned by `PivSessionContentionTests` (hardware) and `ConnectionOwnershipContractTests` /
 `DeviceConnectionRegistryTests` (unit).
 
+### What the measurement actually showed
+
+Four experiments on a firmware-5.8.0 key (PID 0x0407, macOS), each with its prediction recorded
+before the run. The details matter because three of them contradict the obvious reading:
+
+| Experiment | Result | Repeats |
+|---|---|---|
+| PIV session + verified PIN, then `GetDeviceInfoAsync` | **destroys it** — `SW=0x6D00` | 4/4 |
+| PIV session + verified PIN, then an **OATH** session | **destroys it** — `SW=0x6D00` | 1/1 |
+| PIV session + verified PIN, then a **second PIV** session | **safe** — the sign still succeeds | 4/4 |
+| Management over HID while PIV holds CCID | **safe** — PIV survives untouched | 1/1 |
+
+1. **It is worse than "the PIN is lost."** `0x6D00` is *instruction not supported*, not `0x6982`
+   *security status not satisfied*. The applet is not merely deauthenticated, it is **entirely
+   deselected** — the card no longer recognises PIV instructions at all. Any message or comment
+   describing this as losing the verified PIN understates it.
+2. **The damage is invisible at the call site.** `GetDeviceInfoAsync` itself returns **OK**. Nothing
+   tells the caller anything was disturbed; the failure only surfaces on the victim session's *next*
+   operation.
+3. **It is broad, not specific to `GetDeviceInfoAsync`.** Any second applet session over CCID does
+   it — OATH was confirmed by the same mechanism. Teaching one convenience method to avoid a held
+   CCID would fix the common case (the SDK stepping on its own session) and leave the general case
+   open.
+4. **Re-selecting the *same* applet was safe on this firmware.** A second PIV session did not disturb
+   the first's verified PIN. That result killed an earlier design that would have keyed the lease by
+   interface alone on the assumption nesting was unnecessary — the hardware said the device supports
+   something that design would have forbidden. The shipped design refuses the second *connection*
+   before this ever comes up, so the nesting case is unreachable through the public API today; the
+   measurement is retained because it is the reason the enforcement level was chosen deliberately
+   rather than by default.
+5. **The HID fallback is hardware-validated, not merely plausible.** Management answers correctly
+   over both HID OTP and HID FIDO while PIV holds CCID.
+
 ## Ownership: a protocol never owns its connection
 
 **Whoever creates a connection disposes it.** Protocols and sessions are pure users.
@@ -146,6 +179,30 @@ never falls back.
 
 **There is no waiter for an already-held exclusive connection.** A second acquisition refuses
 immediately rather than queueing. This is a documented bound, not an oversight.
+
+### How this coverage was audited
+
+The invariants above came from an enumerated register rather than an assertion of thoroughness —
+"99% of edge cases" is not a computable number, but an enumerated list with stated in/out reasoning
+is something a reviewer can disagree with line by line. Cases were tiered:
+
+| Tier | Meaning | Policy |
+|---|---|---|
+| **P1** | Happens in normal use | Must be covered by a test |
+| **P2** | Happens in real deployments | Must be covered by a test, or a documented bound with a pinning test |
+| **P3** | Rare but real | Covered where verifiable on the available rig, else recorded as a platform gap |
+| **P4** | Extreme | Explicitly out, with reasoning |
+
+Final state: **23 rows in scope — 20 covered, 3 documented bounds, 0 open, 0 platform gaps.** The
+three bounds are the ones listed under [Bounds and known gaps](#bounds-and-known-gaps).
+
+Hardware evidence spans macOS (two same-PID firmware-5.8.0 keys), Linux (firmware 5.4.3), and
+Windows 11 (the same firmware-5.8.0 keys). Cross-platform verification was not ceremonial — it
+produced two production fixes that single-platform testing had missed: the macOS seizing-open defect
+and the Windows OTP HID zero-access requirement.
+
+If you add a case, add its tier and either a test or an explicit bound. A row with neither is not
+coverage.
 
 ## Bounds and known gaps
 

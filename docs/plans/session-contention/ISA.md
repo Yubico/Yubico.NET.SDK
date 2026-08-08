@@ -2386,24 +2386,49 @@ has already answered it for the analogous case.
 | 2 | `PcscProtocolFactory` removed → `ProtocolFactory` | 7 production files: `SecurityDomainSession`, `ProtocolDeviceInfo`, `FidoSession`, `HsmAuthSession`, `PivSession`, `ManagementSession`, `YubiOtpSession` | mechanical, wide |
 | 3 | `ScpExtensions.WithScpAsync` → `PcscProtocol.InitializeScpAsync` | `PcscProtocolScp`, `ScpExtensions` | mechanical |
 | 4 | Sessions delegate to `Backend/` | all 8 sessions, incl. the G5 `Construct` call sites | re-apply G5 to the new factory shape |
-| 5 | **FIDO HID APDU passthrough removed** | `ManagementSession` calls `fido.SelectAsync(ApplicationIds.Management, ...)` | **NOT mechanical — see below** |
+| 5 | FIDO HID APDU passthrough removed | `ManagementSession` calls `fido.SelectAsync(ApplicationIds.Management, ...)` | mechanical, once mapped — see below |
 | 6 | Upstream `DisposeAfterInitializationFailure()` vs our `Construct` catch | `ApplicationSession` | converge on one concept |
 
-### The one non-mechanical item
+### Correction (2026-08-06): item 5 is a direct swap, not a rework
+
+The original version of this section called item 5 non-mechanical and estimated it as "the single largest
+piece of merge work... most likely to change behaviour." That overstated it. Checked against upstream's
+actual `FidoHidBackend`:
+
+```csharp
+// upstream Management/src/Backend/FidoHidBackend.cs
+public async ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken)
+{
+    await _hidProtocol.InitializeAsync(cancellationToken).ConfigureAwait(false);
+    return _hidProtocol.FirmwareVersion;
+}
+```
 
 | | `IFidoHidProtocol` surface |
 |---|---|
 | Upstream | `InitializeAsync`, `SendVendorCommandAsync` |
 | Ours | `TransmitAndReceiveAsync`, `SendVendorCommandAsync`, `SelectAsync` |
 
-Upstream removed `SelectAsync` and `TransmitAndReceiveAsync`. Our **Management-over-FIDO fallback** calls
-`fido.SelectAsync(ApplicationIds.Management, ...)`, and that fallback is load-bearing for this effort: it
-is what makes `GetDeviceInfoAsync` succeed over HID while a PIV session holds CCID, which is half of the
-answer to the motivating three-line bug.
+Upstream did not drop the capability our `SelectAsync` call provides — it renamed and reshaped it.
+There is no real APDU `SELECT` over CTAP HID; `SelectAsync` was always a fiction to fit the
+transport-agnostic shape shared with `ISmartCardProtocol`/`IOtpHidProtocol`. Upstream's
+`InitializeAsync` performs the same underlying work our call triggers — the CTAPHID_INIT channel
+handshake, nonce verification, and firmware-version extraction — and exposes the result as the
+`FirmwareVersion` property instead of a byte buffer to parse.
 
-So this path must be **reworked**, not ported, onto `InitializeAsync` + `SendVendorCommandAsync`, and it
-needs hardware re-verification afterwards — including on Windows, where FIDO HID additionally requires
-elevation. This is the single largest piece of merge work and the one most likely to change behaviour.
+The merge adaptation is a direct swap:
+
+| Ours | Upstream |
+|---|---|
+| `fido.SelectAsync(ApplicationIds.Management, ct)` → parse version bytes | `fido.InitializeAsync(ct)`, then read `fido.FirmwareVersion` |
+
+The **Management-over-FIDO fallback decision logic** (CCID held → try `HidFido` → `GetDeviceInfoAsync`
+succeeds) is unaffected — it never depended on `SelectAsync`'s shape, only on FIDO being a working
+transport for Management. What genuinely needs hardware re-verification, on both macOS and Windows, is
+narrower than "the fallback": confirm `InitializeAsync` + `FirmwareVersion` yields the same version data
+our current SELECT-based parse extracts. Windows elevation for FIDO HID remains a real, separate
+constraint (Phase 11) unrelated to this API shape change.
+
 
 ### Q4 — the documentation policy, and what it means for this ISA
 

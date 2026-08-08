@@ -15,7 +15,7 @@
 - `--smoke` skips `Slow` and `RequiresUserPresence`; agents should not run touch/insert/remove tests unless a human explicitly coordinates hardware.
 - Use `dotnet toolchain.cs -- --help` when arguments act strangely; every script long option, including `--project`, requires the preceding `--` separator.
 - CI runs `dotnet toolchain.cs build`, `dotnet toolchain.cs test`, then `dotnet toolchain.cs -- pack --package-version 2.0.0-alpha.2`.
-- Run `dotnet format` or `dotnet format --verify-no-changes` before claiming formatting is clean.
+- Scope `dotnet format` to your staged files via `--include`, never the whole solution — see `CLAUDE.md` Pre-Commit Checklist for the exact command.
 
 ## Project Shape
 - Modules live under `src/` with directory names stripped of the `Yubico.YubiKit.` prefix; assembly, namespace, and package names keep the prefix.

@@ -23,7 +23,7 @@
 
 1. Update `.editorconfig` (or add a scoped file) with the new rule or severity.
 2. If the change introduces a new analyzer package, add the dependency in `Directory.Build.targets`.
-3. Run `dotnet format` to apply any required code fixes.
+3. Run `dotnet format` (unscoped, across the whole solution) to apply the resulting fixes everywhere — this is the one case where full-solution formatting is expected, since a rule/editorconfig change affects every file. For routine feature work, scope `dotnet format` to your staged files instead (see `CLAUDE.md` Pre-Commit Checklist).
 4. Capture the resulting changes and update this guide or other docs if the workflow shifts.
 
 ## Continuous Integration Expectations

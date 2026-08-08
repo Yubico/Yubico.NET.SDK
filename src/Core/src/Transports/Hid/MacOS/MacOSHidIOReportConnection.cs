@@ -247,6 +247,12 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
             _deviceHandle = IntPtr.Zero;
         }
 
+        // Free the GCHandles only AFTER the device is unregistered and closed above, never before.
+        // _pinnedReportsQueue is the context IOKit hands back to ReportCallback, which dereferences it; a
+        // callback in flight against a freed handle is a use-after-free at the native boundary rather than
+        // a managed exception. Ordering is the whole mitigation here — the device is only scheduled on a
+        // run loop for the duration of GetReport, so outside that window no callback can be dispatched, and
+        // by the time these run the device is closed. Do not hoist these above the block above.
         if (_readHandle.IsAllocated) _readHandle.Free();
 
         if (_pinnedReportsQueue.IsAllocated) _pinnedReportsQueue.Free();

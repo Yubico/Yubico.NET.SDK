@@ -470,9 +470,18 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     /// <paramref name="disposing"/> clears the slot outright. Every other caller installs a fresh
     /// generation so manual rescans keep working after a plain stop or a restart.
     /// </para>
+    /// <para>
+    /// <b>Precondition: the caller must hold <see cref="_monitorLock"/>.</b> This reads
+    /// <see cref="_current"/> before taking <see cref="_publishLock"/> to write it, which is only safe
+    /// because every write to <see cref="_current"/> after construction happens under
+    /// <see cref="_monitorLock"/>. Without that, the read and the write could straddle a concurrent swap
+    /// and this would retire one generation while replacing a different one.
+    /// </para>
     /// </remarks>
     private void RetireCurrentGeneration(bool disposing)
     {
+        Debug.Assert(_monitorLock.IsHeldByCurrentThread, "RetireCurrentGeneration requires _monitorLock");
+
         var generation = _current;
 
         generation?.Cts.Cancel();

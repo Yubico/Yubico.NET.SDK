@@ -70,8 +70,21 @@ the way described below. Where this document says "stable interface `DeviceId`" 
 |---|---|---|
 | 1 — topology (Container ID) | `ykphysical:topology:{key}` | Windows only |
 | 2 — serial | `ykphysical:{serial}` | all platforms |
+| 2 — serial, seen under more than one PID in the same scan | `ykphysical:pid:{PID:X4}:{serial}` | all platforms |
 | 3/4 — PID uniqueness / pigeonhole | `ykphysical:pid:{PID:X4}` | all platforms |
 | 5 — conservative standalone | the interface identifier, published alone | all platforms |
+
+The PID-qualified serial shape exists only to prevent a **duplicate** `DeviceId`. Interfaces are grouped
+per PID, so one serial appearing under two PIDs in a single scan would otherwise mint the same
+`ykphysical:{serial}` twice and return two devices sharing an identifier — strictly worse than an unstable
+one, because a consumer keying on it would silently conflate them.
+
+That input is not supposed to be physically possible: a key has one PID at a time. It becomes possible
+around a reconfiguration, where a scan can catch a stale interface under the old PID alongside a fresh one
+under the new. A serial↔PID flip has been observed on macOS hardware. So a key caught mid-transition is
+reported with the qualified shape for that scan and reverts to `ykphysical:{serial}` once it settles, which
+surfaces as ordinary remove/add churn. This is a deliberate trade and the reasoning is recorded at
+`CompositeDeviceMerger.MintPhysicalDeviceId`.
 
 macOS and Linux have no Container ID, so they never mint tier-1 identifiers and degrade to serial, then
 PID. The same rig therefore yields different identifier shapes on different operating systems.

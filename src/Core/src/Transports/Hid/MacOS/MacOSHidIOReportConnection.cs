@@ -15,7 +15,6 @@
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;
@@ -31,6 +30,7 @@ namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 internal sealed class MacOSHidIOReportConnection : IHidConnection
 {
     private readonly long _entryId;
+    private readonly IIOKitDeviceLifetime _lifetime;
     private readonly nint _loopId;
     private readonly byte[] _readBuffer;
     private readonly IOKitNativeMethods.IOHIDCallback _removalDelegate;
@@ -43,11 +43,19 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
     private GCHandle _readHandle;
 
     public MacOSHidIOReportConnection(long entryId)
+        : this(entryId, IOKitDeviceLifetime.Instance)
+    {
+    }
+
+    /// <summary>
+    ///     Test seam. Lets the constructor-failure and disposal paths be exercised without macOS hardware.
+    /// </summary>
+    internal MacOSHidIOReportConnection(long entryId, IIOKitDeviceLifetime lifetime)
     {
         _entryId = entryId;
+        _lifetime = lifetime;
 
-        var cstr = Encoding.UTF8.GetBytes($"fido2-loopid-{entryId}");
-        _loopId = CFNativeMethods.CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
+        _loopId = _lifetime.CreateRunLoopMode($"fido2-loopid-{entryId}");
 
         _readBuffer = new byte[64];
         _readHandle = GCHandle.Alloc(_readBuffer, GCHandleType.Pinned);
@@ -60,8 +68,8 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
         SetupConnection();
 
-        InputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
-        OutputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
+        InputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
+        OutputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
 
     }
 
@@ -141,50 +149,19 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
     private void SetupConnection()
     {
-        var deviceEntry = 0;
-        try
-        {
-            var matchingDictionary = IOKitNativeMethods.IORegistryEntryIDMatching((ulong)_entryId);
-            deviceEntry = IOKitNativeMethods.IOServiceGetMatchingService(0, matchingDictionary);
+        _deviceHandle = _lifetime.CreateDevice(_entryId);
+        _lifetime.OpenDevice(_deviceHandle);
 
-            if (deviceEntry == 0)
-                throw new PlatformApiException("Failed to find matching device entry in IO registry.");
+        var reportCallback = Marshal.GetFunctionPointerForDelegate(_reportDelegate);
+        _lifetime.RegisterInputReportCallback(
+            _deviceHandle,
+            _readBuffer,
+            _readBuffer.Length,
+            reportCallback,
+            GCHandle.ToIntPtr(_pinnedReportsQueue));
 
-            _deviceHandle = IOKitNativeMethods.IOHIDDeviceCreate(IntPtr.Zero, deviceEntry);
-
-            if (_deviceHandle == IntPtr.Zero) throw new PlatformApiException("Failed to create HID device handle.");
-
-            // kIOHIDOptionsTypeNone (0), NOT kIOHIDOptionsTypeSeizeDevice (0x01). Seizing makes macOS refuse
-            // a second open with kIOReturnExclusiveAccess (0xE00002C5), which contradicts this SDK's
-            // "FIDO HID is shared" ownership contract: DeviceConnectionRegistry admits a second FIDO
-            // connection, and the platform would then reject it. Both canonical implementations open
-            // non-seizing on macOS — Rust yubikit enables hidapi's `macos-shared-device`
-            // (hid_darwin_set_open_exclusive(0) => kIOHIDOptionsTypeNone), and python-fido2's macOS backend
-            // calls IOHIDDeviceOpen(handle, 0). The OTP feature-report path here already uses 0, so this
-            // also makes the two macOS HID paths consistent.
-            var result = IOKitNativeMethods.IOHIDDeviceOpen(_deviceHandle, 0);
-
-            if (result != 0)
-                throw new PlatformApiException(
-                    nameof(IOKitNativeMethods.IOHIDDeviceOpen),
-                    result,
-                    "Failed to open HID device.");
-
-            var reportCallback = Marshal.GetFunctionPointerForDelegate(_reportDelegate);
-            IOKitNativeMethods.IOHIDDeviceRegisterInputReportCallback(
-                _deviceHandle,
-                _readBuffer,
-                _readBuffer.Length,
-                reportCallback,
-                GCHandle.ToIntPtr(_pinnedReportsQueue));
-
-            var callback = Marshal.GetFunctionPointerForDelegate(_removalDelegate);
-            IOKitNativeMethods.IOHIDDeviceRegisterRemovalCallback(_deviceHandle, callback, _deviceHandle);
-        }
-        finally
-        {
-            if (deviceEntry != 0) _ = IOKitNativeMethods.IOObjectRelease(deviceEntry);
-        }
+        var callback = Marshal.GetFunctionPointerForDelegate(_removalDelegate);
+        _lifetime.RegisterRemovalCallback(_deviceHandle, callback, _deviceHandle);
     }
 
     private static void ReportCallback(
@@ -234,14 +211,14 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
     {
         if (_disposed) return;
 
-        IOKitNativeMethods.IOHIDDeviceRegisterInputReportCallback(
+        _lifetime.RegisterInputReportCallback(
             _deviceHandle,
             _readBuffer,
             _readBuffer.Length,
             IntPtr.Zero,
             IntPtr.Zero);
 
-        IOKitNativeMethods.IOHIDDeviceRegisterRemovalCallback(_deviceHandle, IntPtr.Zero, IntPtr.Zero);
+        _lifetime.RegisterRemovalCallback(_deviceHandle, IntPtr.Zero, IntPtr.Zero);
 
         if (_readHandle.IsAllocated) _readHandle.Free();
 
@@ -249,7 +226,7 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
         if (_deviceHandle != IntPtr.Zero)
         {
-            _ = IOKitNativeMethods.IOHIDDeviceClose(_deviceHandle, 0);
+            _lifetime.CloseDevice(_deviceHandle);
             _deviceHandle = IntPtr.Zero;
         }
 

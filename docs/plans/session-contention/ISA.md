@@ -1,10 +1,11 @@
 ---
 task: Session-vs-session contention on multi-interface YubiKey applets
 branch: yubikit-session-contention
-base: cb9ca41f (composite-merge HEAD; becomes yubikit via PR #543)
-phase: phase-16-cross-vendor-review-G1-G2-discharged
+base: origin/yubikit, merged into this branch at d34eef08 (Phase 21); originally cb9ca41f
+head: 3edfbbfb (63 ahead of origin/yubikit, 0 behind)
+phase: phase-21-base-reconciliation-executed
 date: 2026-07-30
-last-updated: 2026-08-06
+last-updated: 2026-08-07
 ---
 
 # ISA — Session Contention
@@ -59,20 +60,44 @@ to sessions.
 - Logical-channel multiplexing. If two applet sessions genuinely need to coexist on one CCID
   interface, that is a separate design effort. Until someone demonstrates the need, a named loud
   error is the correct answer.
+- Reworking `AsyncExchangeGate`, `DisposalGate`, single-flight reads, or worker admission. These
+  are different layers and are load-bearing for reasons unrelated to this problem.
+- The composite merge algorithm. Landed separately in PR #543.
 
-## Status and remaining work (as of 2026-08-06, `d0f672c3`)
+## Status and remaining work (as of 2026-08-07, `3edfbbfb`)
 
-**All eight ISCs pass, but the effort is NOT merge-ready.** A real production defect (**G5**) is open and
-awaiting a fix-or-accept decision, and ISC pass status does not override it: the ISCs were written before
-that defect was known, and none of them asks the question it fails. Read "all eight ISCs pass" as "the
-criteria we set are met", not as "nothing is wrong". The edge-case register is 23 rows with zero open rows
-and zero platform gaps.
+**All eight ISCs pass, all four blocking defect gates are discharged, and base reconciliation is done.
+The only remaining gate is G4 — review and merge consolidation.** The branch is **63 commits ahead of
+`origin/yubikit` and 0 behind**: upstream is fully absorbed, not partially merged. The edge-case register
+is 23 rows with zero open rows and zero platform gaps.
 
-**Updated after Phase 16.** The cross-vendor review of the production code (G1, G2) is now complete and
-found two real defects, so the earlier claim that no remaining item was expected to change production code
-did not survive contact with an opposite-family reviewer. One defect is fixed (Windows HID constructor
-handle leak); one is filed and is now the blocking decision **G5**. Note also that all four prior Cato
-audits were accidentally **same-vendor** and cannot be cited as cross-vendor evidence — see Phase 16.
+**Read "all eight ISCs pass" as "the criteria we set are met", not as "nothing is wrong".** That caveat is
+retained deliberately, because it has now been vindicated three separate times. The ISCs were written
+before G5 was known and none of them asked the question it failed (Phase 16). The Fable audit then found
+two defects *inside the G5 fix itself*, one of which was a regression G5 introduced that the suite could
+not catch (Phase 20). The merge then introduced three more defects that were caught by tests and hardware
+rather than by reading (Phase 21). A passing criteria set has not once been sufficient evidence on this
+effort.
+
+**History of this section, so the trail is legible.** After Phase 16 the cross-vendor review of the
+production code (G1, G2) found two real defects, retiring the earlier claim that no remaining item was
+expected to change production code. One was fixed (Windows HID constructor handle leak); the other became
+the blocking decision G5, discharged in Phase 17. Note also that all four prior Cato audits were
+accidentally **same-vendor** and cannot be cited as cross-vendor evidence — see Phase 16.
+
+### Known-open defects, none blocking, none caused by this effort
+
+Carried from the Phase 20 Fable audit. Findings #1, #2 and #4 were closed by the Phase 21 merge; #3 was
+closed by `e03d01bb`. These remain, re-verified against the post-merge tree on 2026-08-07:
+
+| # | Finding | Verified state at `3edfbbfb` |
+|---|---|---|
+| 5 | Post-dispose behaviour diverges across the eight sessions | **Still open.** `Oath` uses `ThrowIfDisposed` (12 sites); `Piv` and `Fido2` rely on `EnsureInitialized` only; **`Management` has neither**, so calls can flow into a disposed protocol |
+| 6 | macOS CF objects never released | **Still open, and broader than Phase 20 recorded.** `CFRelease` appears **zero** times in *both* `MacOSHidIOReportConnection.cs` and `MacOSHidFeatureReportConnection.cs`. Phase 20 skimmed the second file and inferred; it is now confirmed |
+| 7 | macOS constructor is not failure-safe | **Still open, both files.** `MacOSHidFeatureReportConnection` calls `SetupConnection()` bare in the constructor. This is exactly the bug fixed on **Windows** in G1; the macOS twin never got it |
+| 8–11 | Monitor duplicate retirement · `StartMonitoring` interval ignored · inverted merger evidence ledger · `DeviceId` uniqueness prose-only | **Not re-verified post-merge** |
+
+Note the merge moved these files: `Native/MacOS/` → `src/Core/src/Transports/Hid/MacOS/`.
 
 Three production defects were found and fixed along the way, all of them real and none of them the
 contention bug this effort set out to fix:
@@ -91,17 +116,27 @@ contention bug this effort set out to fix:
 | G2 | ~~Record an explicit Phase 3-4 cross-vendor review verdict~~ | **DISCHARGED, Phase 16.** `github-copilot/gpt-5.5`, verdict `concerns`. Cleared: no TOCTOU, no sham guard, no memory/security violation, lease lifecycle sound. One real defect found and **filed rather than fixed** (session guard stranded by a derived-constructor failure on borrowed connections) — see G5 |
 | G5 | ~~Fix or accept Finding 2 — `ConnectionSessionGuard` stranded when a derived session constructor throws~~ | **DISCHARGED 2026-08-06, fixed** (`8ef09522`). Binding moved out of the constructor into a new `ApplicationSession.Construct`, making the stranded state unrepresentable rather than cleaned up afterwards. Two cleanup designs were rejected as unsafe first — see Phase 17. All 8 factories converted; hardware gates re-run green |
 | G3 | ~~Re-run Cato on this ISA~~ | **DISCHARGED 2026-08-06.** Ran with the corrected `--current-vendor anthropic`; auditor `openai/github-copilot/gpt-5.5` — the first genuinely cross-vendor audit of this document. Verdict improved `fail` → `concerns`. Two findings fixed (the "all eight ISCs pass" overclaim, and ISC-4's missing uncontended-host precondition); the third, a challenge to dropping Linux E1/E2, is recorded as **contested** rather than actioned because it overrides an operator decision. Commit `8297563d` |
-| G4 | Review and merge consolidation | Final step |
+| G4 | **Review and merge consolidation** | **THE ONLY OPEN GATE.** Everything it needs is now in place: base reconciliation executed (Phase 21, `d34eef08`), reviewed cross-vendor by `github-copilot/gpt-5.5` with verdict `pass` and zero findings, and all standing gates green on hardware at `3edfbbfb`. Two items are still owed to the Windows machine — see "Deferred" below — and should be discharged before or alongside this gate, since one of them touches the load-bearing Management-over-FIDO fallback |
 
 ### Deferred, with a recorded decision
 
 | Item | Decision |
 |---|---|
-| Base reconciliation — **53 commits behind** `yubikit` (49 ours, 104 overlapping files) | **Parked deliberately**, but the topology is now measured rather than guessed — see "Base divergence" below. Needs an explicit decision before merge |
+| ~~Base reconciliation — **53 commits behind** `yubikit`~~ | **DONE, Phase 21 (`d34eef08`).** No longer deferred and no longer a merge risk: the branch is 63 ahead / **0 behind**. 23 real conflicts, not the 104 overlapping files the topology suggested |
+| **Owed to the Windows machine** — FIDO `InitializeAsync` + `FirmwareVersion` equivalence with the old SELECT parse, and the HID constructor-leak re-verify (`bbf07e8e`) | Cannot be run from macOS. The FIDO item is the higher-value of the two: it touches the CCID-held Management fallback, which routes over FIDO HID. Should be discharged before or alongside G4 |
+| Fable findings #5, #6, #7 (post-dispose divergence; macOS CF leaks; macOS constructor not failure-safe) | **Real, verified open, deliberately not fixed here.** All three are pre-existing and none is caused by this effort. #6 and #7 are the macOS twins of the Windows bug fixed in G1, so there is a reasonable argument for folding them in; the operator's decision on 2026-08-07 was to keep this branch's scope closed and file them as follow-up |
+| Retention of `docs/plans/**` at merge | **Open question, decide at G4.** Upstream `75a1a04b` deletes the directory (7 files, ~51k lines) as internal working material before the public v2 alpha. This ISA lives there. The local-path leaks were scrubbed in `888daf6b`, so the remaining question is editorial, not hygiene |
 | Hoist `DeviceInfo` properties (serial first) onto `IYubiKey`, especially composite | New branch/issue. Compare against Rust `LocalYubiKeyDevice`. Out of scope here |
-| 143 firmware-gated `[Theory]` tests fail instead of skipping on old firmware | Pre-existing, not this branch. Believed already resolved; needs one confirming run, then delete the entry |
+| 143 firmware-gated `[Theory]` tests fail instead of skipping on old firmware | Pre-existing, not this branch. Believed already resolved by the Phase 8 repair; needs one confirming run, then delete the entry |
 
-### Base divergence, measured (2026-08-06)
+### Base divergence, measured (2026-08-06) — SUPERSEDED by Phase 21, retained as the pre-merge analysis
+
+> **This section is history.** The merge it plans was executed on 2026-08-07 (`d34eef08`); the branch is now
+> 0 behind. It is kept rather than deleted because it is the reasoning that made the merge cheap, and
+> because its predictions can now be scored against the outcome: the "genuinely contested file" call was
+> right, the orthogonal-axes read was right, and all three "known merge adaptations" below materialised
+> exactly as written. The one number that was wrong was pessimistic — 104 overlapping files produced only
+> **23 real conflicts**.
 
 The previously recorded "34 commits behind, 14 conflicts" was stale and the conflict count was never
 verified. Measured against merge-base `46269ffd`:
@@ -183,9 +218,6 @@ The operational discriminator is the presence of `WARNING: Failed opening device
 `ykman otp info` through `head`, which lets it fall back to CCID and exit 0 while HID is still broken.
 
 ---
-- Reworking `AsyncExchangeGate`, `DisposalGate`, single-flight reads, or worker admission. These
-  are different layers and are load-bearing for reasons unrelated to this problem.
-- The composite merge algorithm. Landed separately in PR #543.
 
 ## Abort criteria
 
@@ -1922,9 +1954,19 @@ documented where an API consumer would look:
 - `device-discovery-guarantees.md:41` promises a "stable interface `DeviceId`", which is the per-interface
   id and a different concept from the physical `ykphysical:*` id — a terminology collision worth resolving.
 
-Tracked as a documentation work item in `HANDOFF.md`. It is not a defect in behaviour and does not gate the
-hardware evidence, but it is a public-API gap on the exact property consumers are most likely to use as a
-durable key, and it should be closed before merge consolidation.
+It is not a defect in behaviour and does not gate the hardware evidence, but it is a public-API gap on the
+exact property consumers are most likely to use as a durable key.
+
+> **CLOSED 2026-08-06, docs-only.** All six defects above were fixed without code or API change:
+> `IYubiKey.DeviceId` gained full XML documentation (session-scoped, not durable, not parseable); a "Device
+> identity" section was added to `docs/architecture/device-discovery-guarantees.md` with the per-platform
+> tier→shape table; the interface-vs-physical identifier terminology collision was resolved and
+> cross-linked; and serial semantics including access cost were documented. No unit tests were added
+> deliberately — all three identifier shapes are already pinned across five merger/repository test classes
+> plus Phase 12 and 14 hardware, so a further test would restate existing assertions while the real risk
+> here is prose drifting from code, which no unit test detects. The remaining usability tension — the docs
+> must say "use `DeviceInfo.SerialNumber` as your durable key" while that property is not reachable from
+> `IYubiKey` — is the separate hoist-onto-`IYubiKey` work item, deferred to its own branch.
 
 ---
 
@@ -2555,7 +2597,7 @@ likely applies. Integration suites were not assessed for pin quality, only unit 
 
 ## Phase 21 — Base reconciliation executed (2026-08-07)
 
-Merged `origin/yubikit` (`d34eef08`), then closed two follow-ups. Discharges **A2** and **A3**.
+Merged `origin/yubikit` (`d34eef08`), then closed three follow-ups. Discharges **A2** and **A3**.
 
 ### The merge
 
@@ -2618,8 +2660,11 @@ discovery-*created* connections while `ReadAsync` borrows.
 |---|---|
 | #1 protocol leaked on failed init in 4 of 8 sessions | **Resolved by upstream's `Backend/` restructure.** All eight now assign `Protocol` on the line immediately after `ProtocolFactory.Create`, before any wire I/O, so an applet-SELECT failure can no longer strand it |
 | #2 `CreateAsync` boilerplate drift (three patterns) | **Resolved** — all eight are now identical |
+| #4 `ManagementSession` swallowed `OperationCanceledException` during the version probe | **Resolved by upstream `16c3fe47`, not by us.** `ManagementSession.cs:207` now reads `catch (Exception e) when (e is not OperationCanceledException)`, so cancellation propagates instead of yielding a "successfully" initialized session. `YubiOtpSession`'s probe was restructured away entirely |
 
-No code was written for either; verified rather than assumed.
+No code was written for any of the three; they were verified against the post-merge tree rather than
+assumed. **#4 is credited to upstream deliberately** — it was found on our side but fixed on theirs, and
+recording it as ours would misattribute the fix.
 
 ### PivSession constructor (`e03d01bb`)
 
@@ -2637,4 +2682,19 @@ invariants, Piv **76/76** including the PIN-clobber and refusal tests, YubiOtp *
 ### Still owed to the Windows machine
 
 FIDO `InitializeAsync` + `FirmwareVersion` equivalence with the old SELECT parse, and the HID
-constructor-leak re-verify.
+constructor-leak re-verify (`bbf07e8e`).
+
+### Post-merge re-verification of the surviving Fable findings (2026-08-07)
+
+The merge closed three findings on its own, so the rest were re-checked against the merged tree rather
+than carried forward on the strength of the Phase 20 reading. Two came back **worse than recorded**:
+
+- **#6 and #7 apply to *both* macOS HID connection files.** Phase 20 explicitly noted that
+  `MacOSHidFeatureReportConnection.cs` was only skimmed and that the pattern "likely applies". It does:
+  `CFRelease` appears zero times in either file, and the Feature-report constructor calls
+  `SetupConnection()` bare with no failure-safety. The inference was correct and is now measured.
+- **#5 is confirmed**, with `Management` the worst case — it has neither `ThrowIfDisposed` nor
+  `EnsureInitialized`.
+
+Files moved in the merge: `src/Core/src/Native/MacOS/` → `src/Core/src/Transports/Hid/MacOS/`. Any
+follow-up issue must cite the new paths.

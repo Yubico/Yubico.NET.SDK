@@ -278,8 +278,12 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 // means the loop terminated unexpectedly; tear down the stale
                 // session state so monitoring can restart cleanly.
                 Logger.LogWarning("Previous monitoring loop terminated unexpectedly; restarting device monitoring");
-                TeardownListeners();
+
+                // Retire BEFORE tearing listeners down. Teardown can block on listener Stop/Dispose, and
+                // until retirement completes the dead generation is still current, so a manual rescan
+                // holding it would pass admission for the whole of that teardown.
                 RetireCurrentGeneration(disposing: false);
+                TeardownListeners();
 
                 _monitoringTask = null;
             }

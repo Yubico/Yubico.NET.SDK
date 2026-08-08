@@ -187,13 +187,6 @@ internal static class CompositeDeviceMerger
     }
 
     /// <summary>
-    ///     Tier 2 + tier 4 for one same-PID group: serial evidence groups anchored interfaces; then
-    ///     pigeonhole deduction attributes a null-serial orphan to a serial-anchored key when (a) exactly
-    ///     ONE anchored key is missing the orphan's connection type and (b) no interface type outnumbers
-    ///     the candidate keys (see <see cref="NoInterfaceTypeOutnumbersCandidateKeys" />). Any ambiguity
-    ///     leaves the orphan conservatively standalone.
-    /// </summary>
-    /// <summary>
     ///     Serials that appear under more than one PID among the given USB interfaces.
     /// </summary>
     private static HashSet<int> FindSerialsSpanningMultiplePids(
@@ -210,17 +203,42 @@ internal static class CompositeDeviceMerger
     ///     The DeviceId for a serial-anchored physical key.
     /// </summary>
     /// <remarks>
-    ///     Plain <c>ykphysical:{serial}</c> in every normal case. When the same serial has been seen under
-    ///     more than one PID the id is qualified with the PID, because two per-PID groups would otherwise
-    ///     mint the same id and produce two devices sharing a DeviceId. That would break the discovery
-    ///     contract's promise that the id is a durable per-key key, and it is the caller-visible half of the
-    ///     invariant pinned by <c>Merge_AnyVector_ProducesPairwiseDistinctDeviceIds</c>.
+    ///     <para>
+    ///         Plain <c>ykphysical:{serial}</c> in every normal case. When the same serial has been seen
+    ///         under more than one PID the id is qualified with the PID, because two per-PID groups would
+    ///         otherwise mint the same id and produce two devices sharing a DeviceId. That would break the
+    ///         discovery contract's promise that the id is a durable per-key key, and it is the
+    ///         caller-visible half of the invariant pinned by
+    ///         <c>Merge_AnyVector_ProducesPairwiseDistinctDeviceIds</c>.
+    ///     </para>
+    ///     <para>
+    ///         <b>Known trade, accepted by owner decision.</b> Because the qualification is decided per
+    ///         scan, a key caught mid-reconfiguration is reported as <c>ykphysical:pid:{PID}:{serial}</c>
+    ///         for that scan and reverts to <c>ykphysical:{serial}</c> once the transition settles. So this
+    ///         exchanges a duplicate-id defect for transient id instability in exactly the same rare window.
+    ///         That is the better of the two — a duplicate id is silently wrong for every consumer using the
+    ///         id as a key, whereas the instability is confined to a scan in which the key genuinely is in
+    ///         flux, and surfaces as ordinary remove/add churn.
+    ///     </para>
+    ///     <para>
+    ///         Open for review: the more conservative alternative is to leave contradictory interfaces
+    ///         unattributed until the transition settles, which matches this merger's "never guess" evidence
+    ///         hierarchy and avoids minting a composite at all. Not taken here because it is a wider
+    ///         behavioural change than the id collision warrants.
+    ///     </para>
     /// </remarks>
     private static string MintPhysicalDeviceId(ushort pid, int serial, HashSet<int> crossPidSerials) =>
         crossPidSerials.Contains(serial)
             ? $"ykphysical:pid:{pid:X4}:{serial}"
             : $"ykphysical:{serial}";
 
+    /// <summary>
+    ///     Tier 2 + tier 4 for one same-PID group: serial evidence groups anchored interfaces; then
+    ///     pigeonhole deduction attributes a null-serial orphan to a serial-anchored key when (a) exactly
+    ///     ONE anchored key is missing the orphan's connection type and (b) no interface type outnumbers
+    ///     the candidate keys (see <see cref="NoInterfaceTypeOutnumbersCandidateKeys" />). Any ambiguity
+    ///     leaves the orphan conservatively standalone.
+    /// </summary>
     private static void MergeSamePidBySerialWithDeduction(
         ushort pid,
         IReadOnlyList<DeviceInterfaceDescriptor> descriptors,

@@ -1234,6 +1234,30 @@ public class YubiKeyDeviceMonitorServiceTests
     }
 
     /// <summary>
+    ///     Listener events must invalidate the finder's transport-scoped identity cache — the wiring half
+    ///     of the same-slot-swap fix. The eviction behaviour itself is pinned in
+    ///     <c>FindYubiKeysFaultInjectionTests</c>; this pins that production composition actually delivers
+    ///     the signal, per transport, before the rescan the event triggers.
+    /// </summary>
+    [Fact]
+    public async Task ListenerEvents_NotifyTheFinderOfTransportActivity_PerTransport()
+    {
+        var (service, repository, findYubiKeys, hidListener, smartCardListener) = CreateService();
+
+        service.StartMonitoring(TimeSpan.FromHours(1));
+
+        hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Removed));
+        Assert.Equal([ConnectionType.Hid], findYubiKeys.TransportActivity);
+
+        smartCardListener.Raise();
+        Assert.Equal([ConnectionType.Hid, ConnectionType.SmartCard], findYubiKeys.TransportActivity);
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+    }
+
+    /// <summary>
     ///     Restart after an unexpected loop death must retire the dead generation completely — cancelled,
     ///     signalled, and no longer reachable through <c>_current</c>.
     /// </summary>
@@ -1423,6 +1447,16 @@ public class YubiKeyDeviceMonitorServiceTests
         private int _activeScans;
         private int _maxConcurrentScans;
         private int _scanCount;
+
+        public List<ConnectionType> TransportActivity { get; } = [];
+
+        public void NotifyTransportActivity(ConnectionType transport)
+        {
+            lock (_syncLock)
+            {
+                TransportActivity.Add(transport);
+            }
+        }
 
         public TimeSpan ScanDelay { get; set; }
 

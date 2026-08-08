@@ -1685,6 +1685,11 @@ need no read/write access, so this is sufficient and it sidesteps the keyboard r
 > fails. But the honest counterweight is that `GENERIC_WRITE` has years of field exposure across countless
 > Windows configurations while `NONE` has one run, on one machine, on one firmware. Choosing between them is
 > deferred to canonical Rust/Python and Windows HID research (Phase C, item C1).
+>
+> **Resolved (2026-08-07), see Phase 18 C1 below.** `GENERIC_WRITE` is not, in fact, the canonical
+> consensus this counterweight implied. Rust's actual dependency (`hidapi`) falls back to zero access for
+> exactly this device class and states in its own source comment that feature reports still work there.
+> `NONE` is confirmed, not switched.
 
 ### GREEN and standing gates after the fix (Windows, elevated, serials 103/125)
 
@@ -2272,28 +2277,47 @@ No hardware. Rust `ykrust-auto` @ `9fe08d9a`, Python `yubikey-manager`, v1 at `n
 Microsoft's HID documentation. Two findings go against this SDK, one supports it, one is weaker than
 the hypothesis that prompted it.
 
-### C1 — Windows feature-report access: our `NONE` is a lone divergence
+### C1 — Windows feature-report access: RESOLVED, `NONE` confirmed rather than switched (2026-08-07)
+
+**This section originally concluded our `NONE` was "a lone divergence" and queued a switch to
+`GENERIC_WRITE` as a decision item. That conclusion was wrong** because it treated Rust as abstaining
+without checking what its dependency, `hidapi`, actually does at runtime. It is not neutral, and it does
+not agree with Python/v1.
 
 | Source | Metadata / enumeration probe | Actual OTP feature connection |
 |---|---|---|
-| Python `ykman/hid/windows.py` | `0` (line 343) | **`GENERIC_WRITE`** (`WinHidOtpConnection.__init__`, line 194) |
-| v1 .NET `HidD/HidDDevice.cs` | `NONE` (line 38) | **`GENERIC_WRITE`** (line 56) |
-| Rust | delegates to `hidapi` | abstains — no SDK-level opinion |
+| Python `ykman/hid/windows.py` | `0` (line 343) | `GENERIC_WRITE` unconditionally (`WinHidOtpConnection.__init__`, line 194) |
+| v1 .NET `HidD/HidDDevice.cs` | `NONE` (line 38) | `GENERIC_WRITE` unconditionally (line 56) |
+| Rust → `hidapi` (`windows/hid.c`, `hid_open_path`) | `open_device(path, FALSE)` → `0` | Tries `GENERIC_READ \| GENERIC_WRITE` first; **falls back to `0` (NONE)** if that fails |
 | **This SDK** | `NONE` | **`NONE`** |
 
-Two independent shipping implementations use the **same two-tier pattern**: zero access to probe,
-`GENERIC_WRITE` to connect. This SDK is the only one that connects with zero access.
+hidapi's own source comment, at the exact point it falls back, states the rationale directly:
 
-Microsoft's `HidD_SetFeature` documentation specifies only "an open handle to a top-level collection"
-and states **no required access mask**, so there is no documented guarantee that zero access is
-sufficient — our evidence for it is one hardware run, on one machine, on one firmware.
+> "System devices, such as keyboards and mice, cannot be opened in read-write mode, because the system
+> takes exclusive control over them. This is to prevent keyloggers. However, feature reports can still
+> be sent and received. Retry opening the device, but without read/write access."
 
-Critically, `GENERIC_WRITE` still omits `GENERIC_READ`, which is what triggers the Windows keyboard
-anti-keylogger refusal that caused the original defect. So it fixes the original bug equally well while
-matching both canonical sources.
+So this is not a 2-vs-1 disagreement in Python/v1's favour, as first thought. It is 2-vs-1 the other way:
+Python and v1 independently chose `GENERIC_WRITE`-only, but Rust's actual runtime dependency for this
+exact device class (keyboard-collection HID, feature reports) falls back to zero access and says so in
+writing — matching what this SDK already ships, not what Python/v1 ship.
 
-**No code change made yet.** The change is Windows-only and cannot be verified from macOS; it is queued
-for the Windows machine as a decision item.
+**The mechanism, confirmed across every source including our own hardware evidence (Phase 11, F5): it is
+`GENERIC_READ` that triggers the anti-keylogger refusal, not the presence or absence of `GENERIC_WRITE`.**
+All three approaches — `GENERIC_WRITE`-only, `0`, and hidapi's `READ|WRITE`-then-fallback-to-`0` — succeed
+by avoiding `GENERIC_READ`. They are not evidence of one converged "correct" non-zero value; they are three
+independently-valid ways of avoiding the one bit that actually causes the failure.
+
+Microsoft's `CreateFile` documentation is explicit that `dwDesiredAccess = 0` is documented **only** for
+metadata/attribute queries — "the application can query certain metadata... without accessing that file
+or device, even if GENERIC_READ access would have been denied" — with no stated guarantee for I/O like
+`HidD_SetFeature`/`HidD_GetFeature`. So neither `NONE` nor `GENERIC_WRITE` carries a formal Microsoft
+guarantee; the evidence for either is empirical.
+
+**Decision: `NONE` is confirmed, not changed.** It is validated by hidapi's explicit runtime logic and
+comment for exactly this device class, and separately by our own Windows hardware run (10/10 including
+`HidD_SetFeature` via `CalculateHmacSha1`, fw 5.8.0, serials 103/125). No code change. The "switch to
+`GENERIC_WRITE`" decision item is closed.
 
 ### C2 — CCID exclusivity IS canonically motivated (supports this SDK)
 

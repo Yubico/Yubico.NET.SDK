@@ -24,50 +24,25 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 ///     calls: exchanges are serialized on the SAME gate as the wrapped protocol (SCP MAC chaining makes
 ///     interleaving doubly fatal — each MAC depends on the previous command's MAC).
 /// </summary>
-/// <remarks>
-///     <para>
-///         <c>ISmartCardProtocol.WithScpAsync</c> (see <see cref="ScpExtensions" />) is the only supported way to
-///         obtain an instance. The constructor is internal: an SCP wrapper must adopt the exchange gate of the concrete
-///         <see cref="PcscProtocol" /> it decorates, because the SCP processor chain drives that protocol's
-///         connection directly instead of going through its public methods. Any other construction path could
-///         hand the wrapper a foreign gate, letting plain and encrypted traffic interleave on the wire.
-///         <c>WithScpAsync</c> owns that pairing — it establishes the SCP session on the base protocol's gate and
-///         then wraps the same protocol instance.
-///     </para>
-/// </remarks>
 public sealed class PcscProtocolScp : ISmartCardProtocol
 {
-    private readonly ISmartCardProtocol _baseProtocol;
+    private readonly PcscProtocol _baseProtocol;
     private readonly DataEncryptor _dataEncryptor;
     private readonly AsyncExchangeGate _exchangeGate;
     private readonly IApduProcessor _scpProcessor;
     private bool _disposed;
 
     /// <summary>
-    ///     Creates a new SCP protocol adapter. Internal by design — see the type-level remarks:
-    ///     <c>ISmartCardProtocol.WithScpAsync</c> is the only supported construction path, because it is what
-    ///     guarantees the wrapper shares the exchange gate of the protocol whose connection the SCP processor drives.
+    ///     Creates a new SCP protocol adapter.
     /// </summary>
-    /// <param name="baseProtocol">The underlying base protocol; must be a concrete <see cref="PcscProtocol" /></param>
+    /// <param name="baseProtocol">The underlying base protocol</param>
     /// <param name="scpProcessor">The SCP-wrapped APDU processor</param>
     /// <param name="dataEncryptor">The data encryptor for this SCP session (may be null)</param>
-    /// <exception cref="ArgumentException">
-    ///     Thrown when <paramref name="baseProtocol" /> is not a <see cref="PcscProtocol" />, since no shared gate
-    ///     could be adopted.
-    /// </exception>
     internal PcscProtocolScp(
-        ISmartCardProtocol baseProtocol,
+        PcscProtocol baseProtocol,
         IApduProcessor scpProcessor,
         DataEncryptor dataEncryptor)
     {
-        ArgumentNullException.ThrowIfNull(baseProtocol);
-        if (baseProtocol is not PcscProtocol pcscProtocol)
-        {
-            throw new ArgumentException(
-                $"SCP requires a {nameof(PcscProtocol)} base so encrypted and plain exchanges share one gate.",
-                nameof(baseProtocol));
-        }
-
         _baseProtocol = baseProtocol;
         _scpProcessor = scpProcessor;
         _dataEncryptor = dataEncryptor;
@@ -75,7 +50,7 @@ public sealed class PcscProtocolScp : ISmartCardProtocol
         // The SCP processor chain bypasses the base protocol's public methods and drives the same
         // connection directly, so exchanges MUST share the base protocol's gate — otherwise gated
         // plain traffic and SCP traffic could interleave on the wire.
-        _exchangeGate = pcscProtocol.ExchangeGate;
+        _exchangeGate = baseProtocol.ExchangeGate;
     }
 
     /// <summary>
@@ -139,9 +114,15 @@ public sealed class PcscProtocolScp : ISmartCardProtocol
         if (_disposed)
             return;
 
-        (_scpProcessor as IDisposable)?.Dispose();
-        _baseProtocol.Dispose();
         _disposed = true;
+        try
+        {
+            (_scpProcessor as IDisposable)?.Dispose();
+        }
+        finally
+        {
+            _baseProtocol.Dispose();
+        }
     }
 
 }

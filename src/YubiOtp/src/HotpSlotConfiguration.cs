@@ -27,8 +27,8 @@ namespace Yubico.YubiKit.YubiOtp;
 /// <item><c>uid[0..4]</c> — bytes 16–19 of the HMAC key</item>
 /// <item><c>uid[4..6]</c> — initial moving factor / 0x10000 (big-endian)</item>
 /// </list>
-/// Keys longer than 20 bytes are shortened via SHA-1.
-/// Keys shorter than 20 bytes are zero-padded.
+/// The key must be exactly 20 bytes. Keys of any other length are rejected
+/// before any device I/O is attempted; they are never hashed or padded to fit.
 /// </remarks>
 public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
 {
@@ -36,22 +36,19 @@ public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
     /// Initializes a new HOTP slot configuration.
     /// </summary>
     /// <param name="hmacKey">
-    /// The HMAC secret key. Keys longer than 20 bytes are shortened via SHA-1.
-    /// Keys shorter than 20 bytes are zero-padded.
+    /// The HMAC secret key. Must be exactly <see cref="YubiOtpConstants.HmacKeySize"/> (20) bytes.
     /// </param>
     /// <param name="imf">
-    /// Initial moving factor. Must be 0 or a multiple of 0x10000, and at most 0xFFFF0000.
+    /// Initial moving factor. Must be 0 or a positive multiple of 0x10000. Because this
+    /// parameter is a signed <see cref="int"/>, the largest representable value is
+    /// 0x7FFF0000 (2,147,450,880) — not the wire format's theoretical 0xFFFF0000 maximum,
+    /// which would require an unsigned value wider than 31 bits.
     /// </param>
     /// <exception cref="ArgumentException">
-    /// Thrown when the key is empty, or IMF is not a valid multiple of 0x10000.
+    /// Thrown when the key is not exactly 20 bytes, or IMF is negative or not a multiple of 0x10000.
     /// </exception>
     public HotpSlotConfiguration(ReadOnlySpan<byte> hmacKey, int imf = 0)
     {
-        if (hmacKey.IsEmpty)
-        {
-            throw new ArgumentException("HMAC key must not be empty.", nameof(hmacKey));
-        }
-
         if (imf != 0 && (imf % 0x10000 != 0 || imf < 0))
         {
             throw new ArgumentException(

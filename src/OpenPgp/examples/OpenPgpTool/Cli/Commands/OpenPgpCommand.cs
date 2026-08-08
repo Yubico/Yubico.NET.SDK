@@ -1,11 +1,9 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
-using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Buffers;
 using System.Text;
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Utilities;

@@ -39,6 +39,10 @@ public static class IYubiKeyExtensions
         ///     The returned session owns the underlying connection and will dispose it when the session is disposed.
         ///     Always use a <c>using</c> statement or call <see cref="SecurityDomainSession.Dispose" /> when finished.
         /// </remarks>
+        /// <exception cref="SecureChannelException">
+        ///     <paramref name="scpKeyParams" /> was supplied and establishing the SCP secure channel failed.
+        ///     The original failure is available as <see cref="Exception.InnerException" />.
+        /// </exception>
         public async Task<SecurityDomainSession> CreateSecurityDomainSessionAsync(
             ScpKeyParameters? scpKeyParams = null,
             ProtocolConfiguration? configuration = null,

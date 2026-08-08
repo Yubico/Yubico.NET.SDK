@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Text;
-using Xunit;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Extensions;
 

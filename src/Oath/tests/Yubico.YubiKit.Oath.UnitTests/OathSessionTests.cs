@@ -26,6 +26,20 @@ namespace Yubico.YubiKit.Oath.UnitTests;
 public class OathSessionTests
 {
     [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
+    {
+        var connection = new RecordingSmartCardConnection();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        // Borrowed: the session did not create this connection, so disposal is the caller's.
+        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        Assert.Equal(0, connection.DisposeCount);
+    }
+
+    [Fact]
     public void ComputeDeviceId_WithKnownSalt_ReturnsExpectedBase64()
     {
         // A known salt value
@@ -328,6 +342,8 @@ public class OathSessionTests
             cancellationToken: TestContext.Current.CancellationToken);
         await session.DisposeAsync();
 
+        // OWNED: CreateOathSessionAsync opened this connection, so the session it returns is the
+        // only thing that can close it. This is the other half of the borrow/own split.
         Assert.Equal(1, connection.DisposeCount);
     }
 

@@ -15,7 +15,6 @@
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.OpenPgp;
 
@@ -224,11 +223,17 @@ public sealed partial class OpenPgpSession
                 // Standard wrong-PIN SW: 0x63Cx where x = remaining retries
                 var remaining = SWConstants.ExtractRetryCount(response.SW) ?? -1;
 
-                // Some firmware (including 5.8.0-alpha) returns 0x6982 (Security Status
-                // Not Satisfied) for wrong PIN instead of 0x63Cx. Per Python canonical:
-                // query GET DATA for PW_STATUS_BYTES to get remaining attempts.
-                if (remaining < 0 && response.SW == SWConstants.SecurityStatusNotSatisfied)
+                if (remaining < 0 && response.SW == SWConstants.AuthenticationMethodBlocked)
                 {
+                    // The PIN/PUK is already permanently blocked (0 retries remaining).
+                    // No status query is needed; 0x6983 unambiguously means zero.
+                    remaining = 0;
+                }
+                else if (remaining < 0 && response.SW == SWConstants.SecurityStatusNotSatisfied)
+                {
+                    // Some firmware (including 5.8.0-alpha) returns 0x6982 (Security Status
+                    // Not Satisfied) for wrong PIN instead of 0x63Cx. Per Python canonical:
+                    // query GET DATA for PW_STATUS_BYTES to get remaining attempts.
                     try
                     {
                         var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
@@ -238,15 +243,22 @@ public sealed partial class OpenPgpSession
                                 ? status.AttemptsAdmin
                                 : status.AttemptsReset;
                     }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
                     catch
                     {
-                        // If status query fails, fall back to no-retry message
+                        // If status query fails, the retry count is genuinely unknown.
                     }
                 }
 
-                throw new ApduException(
-                    remaining >= 0
-                        ? $"PIN verification failed ({remaining} attempts remaining)"
+                int? retriesRemaining = remaining >= 0 ? remaining : null;
+
+                throw new OpenPgpInvalidPinException(
+                    retriesRemaining,
+                    retriesRemaining is { } r
+                        ? $"PIN verification failed ({r} attempt(s) remaining)"
                         : "PIN verification failed")
                 {
                     SW = response.SW,

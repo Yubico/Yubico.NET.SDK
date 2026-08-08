@@ -18,7 +18,6 @@ using System.Buffers.Binary;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.Hid;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;

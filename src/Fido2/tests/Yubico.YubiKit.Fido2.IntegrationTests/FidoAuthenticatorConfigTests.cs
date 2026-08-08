@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Xunit;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2.Config;
 using Yubico.YubiKit.Fido2.IntegrationTests.TestExtensions;

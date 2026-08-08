@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
@@ -68,7 +67,7 @@ internal sealed class SessionKeys : IDisposable
 
     /// <summary>
     ///     Gets the data encryption key (DEK), if available.
-    ///     Only needed for SecurityDomainSession.PutKey operations.
+    ///     Only needed when encrypting key material for secure PUT KEY operations.
     /// </summary>
     public ReadOnlySpan<byte> Dek => _dek;
 

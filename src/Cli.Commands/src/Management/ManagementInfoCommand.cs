@@ -6,7 +6,6 @@ using Spectre.Console.Cli;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Cli.Commands.Management;
 

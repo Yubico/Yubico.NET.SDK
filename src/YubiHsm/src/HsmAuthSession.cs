@@ -12,15 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.YubiHsm.Backend;
 
 namespace Yubico.YubiKit.YubiHsm;
 
@@ -44,7 +47,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     internal const byte InsGetChallenge = 0x04;
     internal const byte InsList = 0x05;
     internal const byte InsReset = 0x06;
-    internal const byte InsGetVersion = 0x07;
     internal const byte InsPutManagementKey = 0x08;
     internal const byte InsGetManagementKeyRetries = 0x09;
     internal const byte InsGetPublicKey = 0x0A;
@@ -89,13 +91,32 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     internal const int Pbkdf2DerivedKeyLength = 32;
 
     private readonly ScpKeyParameters? _scpKeyParams;
-    private ISmartCardProtocol? _protocol;
+    private ISmartCardProtocol _protocol = null!;
+    private IHsmAuthBackend _backend = null!;
+
+    /// <summary>
+    ///     Gets or sets a callback invoked when a session-key calculation may require the user
+    ///     to physically touch the YubiKey. See <see cref="TouchNotificationCallback" /> for
+    ///     threading, reentrancy, and firing-condition details.
+    /// </summary>
+    /// <remarks>
+    ///     Each session-key calculation snapshots the callback before querying the credential
+    ///     list. Changes made while that query is in flight apply only to later calculations.
+    /// </remarks>
+    /// <example>
+    ///     <code>
+    /// session.OnTouchRequired = () => Console.WriteLine("Touch your YubiKey now...");
+    /// </code>
+    /// </example>
+    public TouchNotificationCallback? OnTouchRequired { get; set; }
 
     private HsmAuthSession(
         ISmartCardConnection connection,
         ScpKeyParameters? scpKeyParams = null)
         : base(connection)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         _scpKeyParams = scpKeyParams;
     }
 
@@ -115,6 +136,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         FirmwareVersion? firmwareVersion = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
         var session = Construct(connection, () => new HsmAuthSession(connection, scpKeyParams));
@@ -126,7 +149,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         catch
         {
-            await session.DisposeAsync().ConfigureAwait(false);
+            session.DisposeAfterInitializationFailure();
             throw;
         }
     }
@@ -139,45 +162,28 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         if (IsInitialized)
             return;
 
-        var smartCardProtocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create()
-            .Create((ISmartCardConnection)Connection);
+        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
+        Protocol = protocol;
+        IHsmAuthBackend backend = new HsmAuthBackend(protocol);
 
-        var selectResponse = await smartCardProtocol
-            .SelectAsync(ApplicationIds.YubiHsmAuth, cancellationToken)
-            .ConfigureAwait(false);
+        var initializationFirmwareVersion = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var resolvedFirmwareVersion = firmwareVersion ?? initializationFirmwareVersion;
 
-        // Parse firmware version from SELECT response TAG_VERSION TLV if not explicitly provided.
-        var resolvedFirmwareVersion = firmwareVersion
-            ?? ParseVersionFromSelectResponse(selectResponse)
-            ?? FeatureHsmAuth.Version;
-
-        await InitializeCoreAsync(
-                smartCardProtocol,
+        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+                protocol,
                 resolvedFirmwareVersion,
                 configuration,
                 _scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _protocol = Protocol as ISmartCardProtocol;
-        if (_protocol is null)
-            throw new InvalidOperationException("Protocol initialization failed.");
-    }
+        if (!ReferenceEquals(protocol, effectiveProtocol))
+        {
+            backend = new HsmAuthBackend(effectiveProtocol);
+        }
 
-    private static FirmwareVersion? ParseVersionFromSelectResponse(ReadOnlyMemory<byte> response)
-    {
-        if (response.IsEmpty)
-            return null;
-
-        if (!TlvHelper.TryFindValue(TagVersion, response.Span, out var versionData))
-            return null;
-
-        if (versionData.Length != 3)
-            return null;
-
-        var span = versionData.Span;
-        return new FirmwareVersion(span[0], span[1], span[2]);
+        _protocol = effectiveProtocol;
+        _backend = backend;
     }
 
     /// <summary>
@@ -252,7 +258,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ThrowIfDisposed();
 
         var command = new ApduCommand { Ins = InsList };
-        var response = await _protocol!.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+        var response = await _backend.SendAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         var credentials = new List<HsmAuthCredential>();
@@ -277,11 +283,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 0x01 => true,
                 _ => null
             };
-            var labelBytes = value[2..^1]; // Everything except algorithm, touch, and counter
-            var counter = value[^1];
+            var labelBytes = value[2..^1]; // Everything except algorithm, touch, and retries-remaining
+            var retriesRemaining = value[^1];
             var label = Encoding.UTF8.GetString(labelBytes);
 
-            credentials.Add(new HsmAuthCredential(label, algorithm, counter, touchRequired));
+            credentials.Add(new HsmAuthCredential(label, algorithm, retriesRemaining, touchRequired));
         }
 
         return credentials;
@@ -412,6 +418,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ThrowIfDisposed();
         var labelBytes = ValidateAndEncodeLabel(label);
 
+        await NotifyTouchIfRequiredAsync(label, cancellationToken).ConfigureAwait(false);
+
         byte[]? credPwBytes = null;
         Memory<byte> data = default;
         try
@@ -459,7 +467,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ThrowIfDisposed();
 
         var command = new ApduCommand { Ins = InsGetManagementKeyRetries };
-        var response = await _protocol!.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+        var response = await _backend.SendAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         var data = response.Data.Span;
@@ -506,18 +514,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ThrowIfDisposed();
 
         var command = new ApduCommand { Ins = InsReset, P1 = ResetP1, P2 = ResetP2 };
-        await _protocol!.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+        await _backend.SendAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         // Re-SELECT the applet using the existing protocol to refresh cached state.
         // Do NOT create a new protocol here — that would abandon the current one without
         // disposing it, leaking the PCSC transaction and causing SW=0x6985 on next operation.
-        var selectResponse = await _protocol!
-            .SelectAsync(ApplicationIds.YubiHsmAuth, cancellationToken)
-            .ConfigureAwait(false);
-
-        var resolvedFirmwareVersion = ParseVersionFromSelectResponse(selectResponse)
-            ?? FeatureHsmAuth.Version;
+        var resolvedFirmwareVersion = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         FirmwareVersion = resolvedFirmwareVersion;
     }
@@ -534,6 +537,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ThrowIfDisposed();
         EnsureSupports(FeatureAsymmetric);
         var labelBytes = ValidateAndEncodeLabel(label);
+
+        await NotifyTouchIfRequiredAsync(label, cancellationToken).ConfigureAwait(false);
 
         byte[]? credPwBytes = null;
         Memory<byte> data = default;
@@ -605,7 +610,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
 
             var command = new ApduCommand { Ins = InsGetChallenge, Data = data };
-            var response = await _protocol!.TransmitAndReceiveAsync(
+            var response = await _backend.SendAsync(
                     command, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
@@ -720,7 +725,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var data = TlvHelper.EncodeAndDisposeList(new Tlv(TagLabel, labelBytes));
 
         var command = new ApduCommand { Ins = InsGetPublicKey, Data = data };
-        var response = await _protocol!.TransmitAndReceiveAsync(
+        var response = await _backend.SendAsync(
                 command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
@@ -841,7 +846,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         string operationName,
         CancellationToken cancellationToken)
     {
-        var response = await _protocol!.TransmitAndReceiveAsync(
+        var response = await _backend.SendAsync(
                 command, throwOnError: false, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
@@ -850,6 +855,50 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             throw ApduException.FromResponse(response, command, $"{operationName} failed");
 
         return response;
+    }
+
+    /// <summary>
+    ///     Notifies <see cref="OnTouchRequired" /> before a CALCULATE session-key exchange when
+    ///     the target credential's touch requirement is set or cannot be determined.
+    /// </summary>
+    /// <remarks>
+    ///     Short-circuits with no device I/O when no callback is registered, so callers who do
+    ///     not opt in observe no behavior or performance change.
+    /// </remarks>
+    private async Task NotifyTouchIfRequiredAsync(string label, CancellationToken cancellationToken)
+    {
+        TouchNotificationCallback? callback = OnTouchRequired;
+        if (callback is null)
+            return;
+
+        // The try/catch below guards only the credential-list query. callback.Invoke() is
+        // called unconditionally outside of it so a throwing caller callback propagates normally
+        // to the caller instead of being caught by the query's error handling, misdiagnosed as a
+        // query failure, and invoked a second time.
+        IReadOnlyList<HsmAuthCredential> credentials;
+        try
+        {
+            credentials = await ListCredentialsAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            Logger.LogDebug(
+                ex, "YubiHSM Auth: failed to query credential list for touch policy, notifying conservatively");
+            callback.Invoke();
+            return;
+        }
+
+        var credential = credentials.FirstOrDefault(
+            c => string.Equals(c.Label, label, StringComparison.Ordinal));
+
+        // Unknown touch semantics (null) are treated conservatively: notify so the caller
+        // can prompt the user before the blocking CALCULATE exchange. A missing credential
+        // means the subsequent CALCULATE call will fail for an unrelated reason, so no
+        // notification is warranted.
+        if (credential is { TouchRequired: not false })
+        {
+            callback.Invoke();
+        }
     }
 
     private static void ValidateManagementKey(ReadOnlySpan<byte> managementKey)
@@ -876,7 +925,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         if (retries is null)
             return;
 
-        throw new ApduException(
+        throw new HsmAuthRetryException(
+            retries.Value,
             $"{errorContext}, {retries} attempt(s) remaining (SW=0x{response.SW:X4})")
         {
             SW = response.SW,

@@ -14,12 +14,12 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Piv.Backend;
 
 namespace Yubico.YubiKit.Piv.Cryptography;
 
@@ -46,16 +46,16 @@ internal static class PivCryptographicOperations
     /// </para>
     /// </remarks>
     internal static Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         PivSlot slot,
         PivAlgorithm algorithm,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default) =>
-        SignOrDecryptCoreAsync(protocol, logger, slot, algorithm, data, cancellationToken);
+        SignOrDecryptCoreAsync(backend, logger, slot, algorithm, data, cancellationToken);
 
     private static async Task<ReadOnlyMemory<byte>> SignOrDecryptCoreAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         PivSlot slot,
         PivAlgorithm algorithm,
@@ -101,7 +101,7 @@ internal static class PivCryptographicOperations
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
             var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, commandData);
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -128,7 +128,7 @@ internal static class PivCryptographicOperations
 
     /// <inheritdoc/>
     internal static async Task<ReadOnlyMemory<byte>> DecryptAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         Func<PivSlot, CancellationToken, Task<PivSlotMetadata?>> getSlotMetadataAsync,
         Func<PivSlot, CancellationToken, Task> notifyTouchIfRequiredAsync,
@@ -166,7 +166,7 @@ internal static class PivCryptographicOperations
 
         // Perform the raw RSA private key operation on the YubiKey
         await notifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
-        var rawDecrypted = await SignOrDecryptCoreAsync(protocol, logger, slot, algorithm, cipherText, cancellationToken).ConfigureAwait(false);
+        var rawDecrypted = await SignOrDecryptCoreAsync(backend, logger, slot, algorithm, cipherText, cancellationToken).ConfigureAwait(false);
 
         // Strip padding using a dummy RSA key — same technique as Python yubikey-manager's _unpad_message.
         // We generate a temporary RSA key of the same size, use textbook RSA (encrypt with public key)
@@ -179,7 +179,9 @@ internal static class PivCryptographicOperations
 
         // rawBytes and reEncrypted are sensitive — zeroed in finally regardless of outcome.
         // The try starts before ModPow so rawBytes is zeroed even if ModPow throws.
-        var rawBytes = rawDecrypted.Span.ToArray();
+        // CopyAndZeroSource also zeroes rawDecrypted's own backing array immediately, since it is a
+        // second, separate unzeroed copy of the raw RSA output once rawBytes has been derived from it.
+        var rawBytes = CopyAndZeroSource(rawDecrypted);
         byte[]? reEncrypted = null;
         try
         {
@@ -255,7 +257,7 @@ internal static class PivCryptographicOperations
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The shared secret (x-coordinate for NIST curves, point for Curve25519).</returns>
     internal static async Task<ReadOnlyMemory<byte>> CalculateSecretAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         PivSlot slot,
         IPublicKey peerPublicKey,
@@ -309,7 +311,7 @@ internal static class PivCryptographicOperations
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
             var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, data);
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -390,22 +392,46 @@ internal static class PivCryptographicOperations
 
     private static ReadOnlyMemory<byte> ParseCryptoResponse(ReadOnlyMemory<byte> data)
     {
-        // Parse outer TLV (0x7C - Dynamic Auth Template)
-        using var outer = Tlv.Create(data.Span);
-        if (outer.Tag != 0x7C)
+        try
         {
-            throw new ApduException("Invalid crypto response format");
-        }
+            // Parse outer TLV (0x7C - Dynamic Auth Template)
+            using var outer = Tlv.Create(data.Span);
+            if (outer.Tag != 0x7C)
+            {
+                throw new ApduException("Invalid crypto response format");
+            }
 
-        // Parse inner TLV (0x82 - Response data)
-        using var inner = Tlv.Create(outer.Value.Span);
-        if (inner.Tag != 0x82)
+            // Parse inner TLV (0x82 - Response data)
+            using var inner = Tlv.Create(outer.Value.Span);
+            if (inner.Tag != 0x82)
+            {
+                throw new ApduException("Invalid crypto response - expected TAG 0x82");
+            }
+
+            // Copy the value before the Tlv objects are disposed
+            return inner.Value.ToArray();
+        }
+        finally
         {
-            throw new ApduException("Invalid crypto response - expected TAG 0x82");
+            // `data` is the raw AUTHENTICATE response payload, which for DecryptAsync/CalculateSecretAsync
+            // carries the device's raw decrypted plaintext / ECDH shared secret in the clear. Zero it
+            // unconditionally once the needed value has been copied out above - matching the approach
+            // already applied to PivDataObjectProtocol.GetObjectAsync's equivalent response buffer.
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(data).Span);
         }
+    }
 
-        // Copy the value before the Tlv objects are disposed
-        return inner.Value.ToArray();
+    /// <summary>
+    /// Copies <paramref name="source"/> into a fresh array and zeroes <paramref name="source"/>'s
+    /// backing buffer, since <paramref name="source"/> (the raw RSA decryption output returned by
+    /// <see cref="SignOrDecryptCoreAsync"/>) would otherwise be left as an unzeroed second copy of
+    /// the clear-text plaintext once the caller starts working from its own copy.
+    /// </summary>
+    internal static byte[] CopyAndZeroSource(ReadOnlyMemory<byte> source)
+    {
+        var copy = source.ToArray();
+        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(source).Span);
+        return copy;
     }
 
     private static byte[] EncodePeerPublicKey(IPublicKey publicKey)

@@ -25,8 +25,8 @@ namespace Yubico.YubiKit.YubiOtp;
 /// <item>Bytes 0–15 are stored in the <c>key</c> field (16 bytes)</item>
 /// <item>Bytes 16–19 are stored in <c>uid[0..4]</c> (4 bytes)</item>
 /// </list>
-/// Keys longer than 20 bytes are shortened via SHA-1 hashing.
-/// Keys shorter than 20 bytes are zero-padded.
+/// The key must be exactly 20 bytes. Keys of any other length are rejected
+/// before any device I/O is attempted; they are never hashed or padded to fit.
 /// </remarks>
 public sealed class HmacSha1SlotConfiguration : SlotConfiguration
 {
@@ -34,17 +34,13 @@ public sealed class HmacSha1SlotConfiguration : SlotConfiguration
     /// Initializes a new HMAC-SHA1 challenge-response configuration.
     /// </summary>
     /// <param name="hmacKey">
-    /// The HMAC-SHA1 secret key. Keys longer than 20 bytes are shortened via SHA-1.
-    /// Keys shorter than 20 bytes are zero-padded.
+    /// The HMAC-SHA1 secret key. Must be exactly <see cref="YubiOtpConstants.HmacKeySize"/> (20) bytes.
     /// </param>
-    /// <exception cref="ArgumentException">Thrown when the key is empty.</exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown when the key is not exactly 20 bytes.
+    /// </exception>
     public HmacSha1SlotConfiguration(ReadOnlySpan<byte> hmacKey)
     {
-        if (hmacKey.IsEmpty)
-        {
-            throw new ArgumentException("HMAC key must not be empty.", nameof(hmacKey));
-        }
-
         ProcessHmacKey(hmacKey, _key, _uid);
 
         _tktFlags |= TicketFlag.ChalResp;

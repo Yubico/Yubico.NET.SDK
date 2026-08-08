@@ -14,7 +14,6 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -230,6 +229,9 @@ internal static class YubiKeyTestInfrastructure
                     }
                     else if (deviceInfo is not null && AllowList.AllowUnknownSerials)
                     {
+                        // AllowUnknownSerials=true authorizes ANY device with no readable serial,
+                        // e.g. YubiKey Security Key series (FIDO-only). It should stay false otherwise —
+                        // see IAllowListProvider.AllowUnknownSerials for why this is a destructive-test risk.
                         var testDevice = new YubiKeyTestState(device, deviceInfo.Value, device.AvailableConnections);
                         authorizedDevices.Add(testDevice);
                         YubiKeyDeviceCache.AddDevice(testDevice);

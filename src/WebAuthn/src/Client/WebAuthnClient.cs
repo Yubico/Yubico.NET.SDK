@@ -31,7 +31,6 @@ using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Client.Validation;
 using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions;
-using Fido2AttestationStatement = Yubico.YubiKit.Fido2.Credentials.AttestationStatement;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 

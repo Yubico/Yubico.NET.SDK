@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Transports.Hid;
-
 namespace Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 
 // Keyboard Mapping for de_DE.

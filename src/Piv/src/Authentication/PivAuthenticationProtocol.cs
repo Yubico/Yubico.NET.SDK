@@ -13,14 +13,11 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using System;
 using System.Buffers;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Piv.Backend;
 
 namespace Yubico.YubiKit.Piv.Authentication;
 
@@ -29,7 +26,7 @@ namespace Yubico.YubiKit.Piv.Authentication;
 internal static class PivAuthenticationProtocol
 {
     /// <summary>
-    /// Gets the factory default PIV management key (3DES).
+    /// Gets the well-known 24-byte factory-default PIV management key value.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -37,7 +34,9 @@ internal static class PivAuthenticationProtocol
     /// You SHOULD change this key after initial device setup to protect against unauthorized management operations.
     /// </para>
     /// <para>
-    /// The default key is: 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 (24 bytes, 3DES).
+    /// The default key is: 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08.
+    /// These 24 bytes are used with Triple-DES and AES-192 defaults; the session's management-key
+    /// type determines the algorithm.
     /// </para>
     /// </remarks>
     /// <example>
@@ -60,7 +59,7 @@ internal static class PivAuthenticationProtocol
     /// <summary>
     /// Authenticates the session using the PIV management key.
     /// </summary>
-    /// <param name="managementKey">The management key bytes. Must be 24 bytes (3DES).</param>
+    /// <param name="managementKey">The management key bytes. Length must match <paramref name="managementKeyType"/>.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <exception cref="ArgumentException">Thrown if the management key is the wrong length.</exception>
     /// <exception cref="ApduException">Thrown if authentication fails.</exception>
@@ -70,11 +69,11 @@ internal static class PivAuthenticationProtocol
     /// without transmitting it. The key is automatically zeroed after use for security.
     /// </para>
     /// <para>
-    /// Default management key (3DES): 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08
+    /// Default management key bytes (Triple-DES or AES-192): 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08
     /// </para>
     /// </remarks>
     internal static async Task AuthenticateAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         PivManagementKeyType managementKeyType,
         ReadOnlyMemory<byte> managementKey,
@@ -119,7 +118,7 @@ internal static class PivAuthenticationProtocol
             // Send: 7C 02 80 00 (empty witness request)
             byte[] witnessRequest = [TagDynAuth, 0x02, TagAuthWitness, 0x00];
             var witnessCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, witnessRequest);
-            var witnessResponse = await protocol.TransmitAndReceiveAsync(witnessCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var witnessResponse = await backend.SendAsync(witnessCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!witnessResponse.IsOK())
             {
@@ -151,7 +150,7 @@ internal static class PivAuthenticationProtocol
                 responseBuffer = ArrayPool<byte>.Shared.Rent(responseSize);
                 int bytesWritten = BuildAuthResponse(decryptedWitness.AsSpan(0, challengeLength), challenge.AsSpan(0, challengeLength), responseBuffer.AsSpan(0, responseSize));
                 var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseBuffer.AsMemory(0, bytesWritten));
-                var challengeResponse = await protocol.TransmitAndReceiveAsync(challengeCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+                var challengeResponse = await backend.SendAsync(challengeCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
                 if (!challengeResponse.IsOK())
                 {
@@ -445,7 +444,7 @@ internal static class PivAuthenticationProtocol
     /// </para>
     /// </remarks>
     internal static async Task VerifyPinAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
@@ -465,7 +464,7 @@ internal static class PivAuthenticationProtocol
             Array.Fill(paddedPin, (byte)0xFF, pin.Length, 8 - pin.Length);
 
             var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, paddedPin.AsMemory(0, 8));
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (response.IsOK())
             {
@@ -502,7 +501,7 @@ internal static class PivAuthenticationProtocol
     /// This method performs an empty PIN verify as fallback for older firmware.
     /// </remarks>
     internal static async Task<int> GetPinAttemptsAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         bool metadataSupported,
         Func<CancellationToken, Task<PivPinMetadata>> getPinMetadataAsync,
@@ -526,7 +525,7 @@ internal static class PivAuthenticationProtocol
 
         // Fallback: empty PIN verify to get retry count
         var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
         {
@@ -555,7 +554,7 @@ internal static class PivAuthenticationProtocol
     /// Both PINs are automatically zeroed after use for security.
     /// </remarks>
     internal static async Task ChangePinAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         ReadOnlyMemory<byte> currentPin,
         ReadOnlyMemory<byte> newPin,
@@ -584,7 +583,7 @@ internal static class PivAuthenticationProtocol
             Array.Fill(pinData, (byte)0xFF, 8 + newPin.Length, 8 - newPin.Length);
 
             var command = new ApduCommand(0x00, 0x24, 0x00, 0x80, pinData.AsMemory(0, 16));
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (response.IsOK())
             {

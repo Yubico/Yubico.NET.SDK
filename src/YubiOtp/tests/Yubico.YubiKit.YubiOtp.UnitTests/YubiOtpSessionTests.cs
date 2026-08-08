@@ -12,10 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using NSubstitute;
+using System.Reflection;
 using System.Text;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.YubiOtp.Backend;
 
 namespace Yubico.YubiKit.YubiOtp.UnitTests;
 
@@ -32,6 +38,141 @@ public class YubiOtpSessionTests
                 cancellationToken: TestContext.Current.CancellationToken));
 
         await using var probe = new ProbeSession(connection);
+    }
+
+    [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
+    {
+        var connection = Substitute.For<IOtpHidConnection>();
+        connection.Type.Returns(ConnectionType.HidOtp);
+        connection.FeatureReportSize.Returns(8);
+        connection.SendAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new InvalidOperationException("session-init probe failure")));
+        connection.ReceiveAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<ReadOnlyMemory<byte>>(
+                new InvalidOperationException("session-init probe failure")));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            YubiOtpSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        // Borrowed: a failed CreateAsync must not dispose a connection it did not create.
+        connection.DidNotReceive().Dispose();
+    }
+
+    [Fact]
+    public async Task CreateAsync_SmartCardBackendRebinding_PreservesProgrammingSequence()
+    {
+        var connection = Substitute.For<ISmartCardConnection>();
+        connection.Type.Returns(ConnectionType.SmartCard);
+        connection.Transport.Returns(Transport.Usb);
+        byte[] managementResponse = [.. "YubiKey 5.7.0"u8, 0x90, 0x00];
+        byte[] otpResponse = [5, 7, 0, 9, 0, 0, 0x90, 0x00];
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(
+                Task.FromResult((ReadOnlyMemory<byte>)managementResponse),
+                Task.FromResult((ReadOnlyMemory<byte>)otpResponse));
+
+        using var session = await YubiOtpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var backend = Assert.IsType<SmartCardBackend>(
+            typeof(YubiOtpSession)
+                .GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(session));
+        var programmingSequence = (byte)typeof(SmartCardBackend)
+            .GetField("_lastProgSeq", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(backend)!;
+
+        Assert.Equal(9, programmingSequence);
+    }
+
+    /// <summary>
+    /// Creates an initialized YubiOtpSession backed by a fake (substitute) SmartCard
+    /// connection, with the SELECT/init sequence already consumed.
+    /// </summary>
+    private static async Task<(ISmartCardConnection Connection, YubiOtpSession Session)> CreateFakeSessionAsync()
+    {
+        var connection = Substitute.For<ISmartCardConnection>();
+        connection.Type.Returns(ConnectionType.SmartCard);
+        connection.Transport.Returns(Transport.Usb);
+        byte[] managementResponse = [.. "YubiKey 5.7.0"u8, 0x90, 0x00];
+        byte[] otpResponse = [5, 7, 0, 9, 0, 0, 0x90, 0x00];
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(
+                Task.FromResult((ReadOnlyMemory<byte>)managementResponse),
+                Task.FromResult((ReadOnlyMemory<byte>)otpResponse));
+
+        var session = await YubiOtpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        connection.ClearReceivedCalls();
+
+        return (connection, session);
+    }
+
+    public class KeyLengthPreflightValidation
+    {
+        [Fact]
+        public async Task CalculateYubicoOtpAsync_ChallengeTooShort_ThrowsBeforeAnyDeviceIO()
+        {
+            var (connection, session) = await CreateFakeSessionAsync();
+            using var _ = session;
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
+                session.CalculateYubicoOtpAsync(Slot.One, new byte[5], TestContext.Current.CancellationToken));
+            Assert.Equal("challenge", ex.ParamName);
+
+            await connection.DidNotReceive().TransmitAndReceiveAsync(
+                Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task CalculateYubicoOtpAsync_ChallengeTooLong_ThrowsBeforeAnyDeviceIO()
+        {
+            var (connection, session) = await CreateFakeSessionAsync();
+            using var _ = session;
+
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                session.CalculateYubicoOtpAsync(Slot.One, new byte[7], TestContext.Current.CancellationToken));
+
+            await connection.DidNotReceive().TransmitAndReceiveAsync(
+                Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task CalculateYubicoOtpAsync_ExactLengthChallenge_ProceedsToDeviceIO()
+        {
+            var (connection, session) = await CreateFakeSessionAsync();
+            using var _ = session;
+
+            byte[] challengeResponse = new byte[18]; // 16 bytes + SW
+            challengeResponse[^2] = 0x90;
+            connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult((ReadOnlyMemory<byte>)challengeResponse));
+
+            var result = await session.CalculateYubicoOtpAsync(Slot.One, new byte[6], TestContext.Current.CancellationToken);
+
+            Assert.Equal(16, result.Length);
+            await connection.Received(1).TransmitAndReceiveAsync(
+                Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        }
+
+        // NOTE: HmacSha1SlotConfiguration/YubicoOtpChallengeResponseSlotConfiguration key-length
+        // validation used to have sham "NeverInitiatesDeviceIO" tests here that constructed a
+        // SlotConfiguration standalone (never wired to any session/connection) and asserted an
+        // unrelated fake connection received no calls -- trivially true regardless of whether
+        // pre-flight validation exists. They were removed because:
+        //   1. The constructors validate key length before any SlotConfiguration instance can
+        //      exist, so an invalid-length key can never reach PutConfigurationAsync (or any
+        //      session/backend) in the first place -- there is no "through the session" path to
+        //      exercise here, unlike CalculateYubicoOtpAsync's challenge validation above.
+        //   2. Genuine, session-independent constructor-validation coverage already exists in
+        //      SlotConfigurationTests.cs (e.g. HmacSha1_ShortKey_Throws/YubicoOtp equivalents).
+        // ISC-29/ISC-29.1 (invalid-length key inputs fail before device I/O) remain proven above
+        // by CalculateYubicoOtpAsync_ChallengeTooShort/TooLong_ThrowsBeforeAnyDeviceIO, which
+        // genuinely exercises the session -> backend -> fake-connection path.
     }
 
     public class NdefUriEncoding
@@ -260,6 +401,8 @@ public class YubiOtpSessionTests
         [InlineData(Slot.Two, SlotOperation.Ndef, ConfigSlot.Ndef2)]
         [InlineData(Slot.One, SlotOperation.ChallengeHmac, ConfigSlot.ChalHmac1)]
         [InlineData(Slot.Two, SlotOperation.ChallengeHmac, ConfigSlot.ChalHmac2)]
+        [InlineData(Slot.One, SlotOperation.ChallengeYubicoOtp, ConfigSlot.ChalYubico1)]
+        [InlineData(Slot.Two, SlotOperation.ChallengeYubicoOtp, ConfigSlot.ChalYubico2)]
         public void Map_ValidSlotAndOperation_ReturnsCorrectConfigSlot(
             Slot slot, SlotOperation operation, ConfigSlot expected)
         {

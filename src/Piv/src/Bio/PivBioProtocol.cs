@@ -14,10 +14,10 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Piv.Backend;
 
 namespace Yubico.YubiKit.Piv.Bio;
 
@@ -32,14 +32,14 @@ internal static class PivBioProtocol
     /// <returns>Biometric metadata including number of configured fingerprints.</returns>
     /// <exception cref="NotSupportedException">Thrown if the YubiKey does not support biometrics or biometrics are not configured.</exception>
     internal static async Task<PivBioMetadata> GetBioMetadataAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Getting biometric metadata");
 
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x96, ReadOnlyMemory<byte>.Empty);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // SW 0x6A82 means object/feature not found (not configured)
         // SW 0x6D00 means instruction not supported (non-Bio key)
@@ -82,9 +82,9 @@ internal static class PivBioProtocol
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>Temporary PIN if requestTemporaryPin is true, otherwise null. WARNING: Caller MUST zero this immediately after use!</returns>
     /// <exception cref="NotSupportedException">Thrown if biometrics are not supported or configured.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if biometric verification fails.</exception>
+    /// <exception cref="InvalidPinException">Thrown if biometric verification fails, with the remaining retry count.</exception>
     internal static async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         bool requestTemporaryPin = false,
         bool checkOnly = false,
@@ -106,7 +106,7 @@ internal static class PivBioProtocol
         }
 
         var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // SW 0x6A82 or 0x6D00 means biometrics not supported/configured
         if (response.SW == 0x6A82 || response.SW == 0x6D00)
@@ -116,7 +116,9 @@ internal static class PivBioProtocol
 
         if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
         {
-            throw new InvalidOperationException($"Biometric verification failed. {retriesRemaining} retries remaining.");
+            throw new InvalidPinException(
+                retriesRemaining,
+                $"Biometric verification failed. {retriesRemaining} retries remaining.");
         }
 
         if (!response.IsOK())
@@ -139,6 +141,10 @@ internal static class PivBioProtocol
         var tempPin = new byte[response.Data.Length];
         response.Data.CopyTo(tempPin);
 
+        // The original GET DATA response buffer also carries the temporary PIN in the clear; the
+        // caller only owns/zeroes `tempPin` (the copy above), so this method must zero the source.
+        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.Data).Span);
+
         logger.LogDebug("PIV: Biometric verification succeeded, temporary PIN retrieved (length={Length})", tempPin.Length);
         logger.LogWarning("PIV: Caller MUST zero temporary PIN immediately after use!");
 
@@ -148,11 +154,11 @@ internal static class PivBioProtocol
     /// <summary>
     /// Verifies the temporary PIN obtained from biometric verification.
     /// </summary>
-    /// <param name="temporaryPin">The temporary PIN returned from VerifyUvAsync. WILL BE ZEROED after use.</param>
+    /// <param name="temporaryPin">The temporary PIN returned from VerifyUvAsync. This method does NOT zero it — the caller owns and must zero this buffer after use.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <exception cref="InvalidPinException">Thrown if the temporary PIN is invalid.</exception>
     internal static async Task VerifyTemporaryPinAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         ReadOnlyMemory<byte> temporaryPin,
         CancellationToken cancellationToken = default)
@@ -173,7 +179,7 @@ internal static class PivBioProtocol
             temporaryPin.Span.CopyTo(commandData.AsSpan(2));
 
             var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData.AsMemory(0, 2 + temporaryPin.Length));
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
             {

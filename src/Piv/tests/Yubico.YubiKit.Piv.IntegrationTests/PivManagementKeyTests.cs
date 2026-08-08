@@ -12,12 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Xunit;
-using Yubico.YubiKit.Core.Abstractions;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
-using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
@@ -25,7 +22,7 @@ namespace Yubico.YubiKit.Piv.IntegrationTests;
 
 public class PivManagementKeyTests
 {
-    private static readonly byte[] DefaultTripleDesManagementKey = new byte[]
+    private static readonly byte[] DefaultManagementKey = new byte[]
     {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -40,7 +37,7 @@ public class PivManagementKeyTests
     };
 
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
-        version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
+        version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultManagementKey;
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
@@ -163,6 +160,71 @@ public class PivManagementKeyTests
         {
             await using var cleanup = await state.Device.CreatePivSessionAsync();
             await cleanup.ResetAsync();
+        }
+    }
+
+    /// <summary>
+    /// Destructively verifies same-session management-key state across SET and RESET transitions.
+    /// </summary>
+    /// <remarks>
+    /// This test resets the PIV application before use and again from a fresh cleanup session.
+    /// Run only on an explicitly authorized test YubiKey.
+    /// </remarks>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.2")]
+    public async Task SetManagementKeyAsync_SameSessionStateTracksSuccessfulSetAndReset(YubiKeyTestState state)
+    {
+        byte[] aes128Key =
+        [
+            0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+            0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27
+        ];
+        PivSession? session = null;
+
+        try
+        {
+            session = await state.Device.CreatePivSessionAsync();
+            await session.ResetAsync();
+            await session.AuthenticateAsync(DefaultManagementKey);
+
+            await session.SetManagementKeyAsync(PivManagementKeyType.Aes128, aes128Key);
+
+            Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
+            Assert.True(session.IsAuthenticated);
+
+            // Key generation is management-key privileged and proves SET left the new key
+            // authenticated in this same physical card session without reauthentication.
+            _ = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+
+            await session.ResetAsync();
+
+            var resetMetadata = await session.GetManagementKeyMetadataAsync();
+            var expectedResetType = state.FirmwareVersion >= new FirmwareVersion(5, 7, 0)
+                ? PivManagementKeyType.Aes192
+                : PivManagementKeyType.TripleDes;
+            Assert.False(session.IsAuthenticated);
+            Assert.Equal(expectedResetType, session.ManagementKeyType);
+            Assert.Equal(resetMetadata.KeyType, session.ManagementKeyType);
+
+            await session.AuthenticateAsync(DefaultManagementKey);
+            Assert.True(session.IsAuthenticated);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(aes128Key);
+            try
+            {
+                if (session is not null)
+                {
+                    await session.DisposeAsync();
+                }
+            }
+            finally
+            {
+                // Cleanup must not depend on the possibly-failed session state or changed key.
+                await using var cleanupSession = await state.Device.CreatePivSessionAsync();
+                await cleanupSession.ResetAsync();
+            }
         }
     }
 }

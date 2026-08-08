@@ -1,7 +1,6 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
-using Yubico.YubiKit.Oath.Examples.OathTool.Cli;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts;
 

@@ -14,8 +14,6 @@
 
 using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.Fido.Hid;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Fido2.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;

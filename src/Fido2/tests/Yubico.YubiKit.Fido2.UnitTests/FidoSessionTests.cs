@@ -31,6 +31,24 @@ public class FidoSessionTests
     }
 
     [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
+    {
+        var connection = Substitute.For<ISmartCardConnection>();
+        connection.Transport.Returns(Transport.Usb);
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<ReadOnlyMemory<byte>>(
+                new InvalidOperationException("session-init probe failure")));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            FidoSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        // Borrowed: the session did not create this connection, so disposal is the caller's.
+        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        connection.DidNotReceive().Dispose();
+    }
+
+    [Fact]
     public void EnsureSmartCardTransportSupported_UsbBefore58_ThrowsNotSupportedException()
     {
         var exception = Assert.Throws<NotSupportedException>(() =>

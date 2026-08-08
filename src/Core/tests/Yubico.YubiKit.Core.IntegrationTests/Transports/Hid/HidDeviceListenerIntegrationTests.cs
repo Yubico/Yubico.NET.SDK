@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Xunit.Abstractions;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.Hid;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Transports.Hid;

@@ -18,7 +18,6 @@ using System.Buffers;
 using System.Globalization;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 namespace Yubico.YubiKit.Core.Transports.SmartCard;
 

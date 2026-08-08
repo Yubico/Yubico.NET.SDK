@@ -47,6 +47,9 @@ finally
 }
 ```
 
+`PivSession.DefaultManagementKey` exposes the well-known 24-byte default value used by both
+Triple-DES and AES-192 defaults. Use `session.ManagementKeyType` to select the algorithm.
+
 ### Generate a Key
 
 ```csharp
@@ -99,6 +102,12 @@ await session.SetPinAttemptsAsync(
 ## Security Notes
 
 - PINs, PUKs, management keys, and private-key material are sensitive; zero caller-owned buffers after use.
+- Enabling PIN-protected management-key mode re-authenticates the supplied key before PIN verification or persistent mutation.
+- Disabling PIN-only mode restores the type-appropriate default key before deleting PRINTED, then ADMIN DATA, so failures leave a recoverable boundary.
+- Mixed PIN-only recovery restores a successful PIN-protected authentication after a stale derived candidate fails, or returns no success mode if restoration fails.
+- Successful management-key changes update `ManagementKeyType` and preserve card-session authentication without retaining key bytes. A `SecurityStatusNotSatisfied` response clears recorded authentication; unrelated SET failures preserve the prior authentication state and key type.
+- Any failed management-key authentication attempt clears a previously recorded authenticated state.
+- Initialization and reset refresh the default key type; unavailable metadata uses AES-192 only for reliable firmware 5.7+ and Triple-DES for major-zero/older versions, while unexpected reset refresh errors still propagate.
 - Prefer `Span<byte>`, `Memory<byte>`, and `ReadOnlyMemory<byte>` over strings for secrets.
 - Do not log PINs, PUKs, keys, plaintexts, or sensitive APDU payloads.
 - Reset, PIN/PUK changes, management-key changes, key generation/import/delete, and certificate writes mutate persistent applet state.

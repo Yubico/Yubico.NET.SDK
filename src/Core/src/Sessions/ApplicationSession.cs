@@ -17,8 +17,6 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
-using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Sessions;
 
@@ -69,7 +67,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     ///     <para>
     ///         It must NOT move later still — into initialization — because derived
     ///         <c>InitializeAsync</c> implementations issue their applet SELECT before calling
-    ///         <see cref="InitializeCoreAsync" />. Binding there would refuse the second session only after
+    ///         <see cref="InitializeProtocolAsync" />. Binding there would refuse the second session only after
     ///         the first session's state had already been destroyed, which is the damage this guard exists to
     ///         prevent. Construction performs no wire I/O, so here is the last safe point.
     ///     </para>
@@ -112,7 +110,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     /// </remarks>
     internal void OwnConnection() => _ownsConnection = true;
 
-    protected async Task InitializeCoreAsync(
+    protected async Task<IProtocol> InitializeProtocolAsync(
         IProtocol protocol,
         FirmwareVersion firmwareVersion,
         ProtocolConfiguration? configuration = null,
@@ -129,10 +127,10 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
                 "CreateAsync factory, which routes construction through ApplicationSession.Construct so the " +
                 "one-live-session-per-connection rule is enforced before any wire operation.");
 
-        if (IsInitialized)
-            return;
-
         ArgumentNullException.ThrowIfNull(protocol);
+
+        if (IsInitialized)
+            return Protocol ?? protocol;
 
         protocol.Configure(firmwareVersion, configuration);
 
@@ -141,11 +139,14 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 
         if (scpKeyParams is not null)
         {
-            if (effectiveProtocol is not ISmartCardProtocol smartCardProtocol)
-                throw new NotSupportedException("SCP is only supported on SmartCard protocols.");
+            if (effectiveProtocol is not PcscProtocol pcscProtocol)
+            {
+                throw new NotSupportedException(
+                    "SCP is only supported on PC/SC SmartCard protocols created by Core.");
+            }
 
-            effectiveProtocol = await smartCardProtocol
-                .WithScpAsync(scpKeyParams, cancellationToken)
+            effectiveProtocol = await pcscProtocol
+                .InitializeScpAsync(scpKeyParams, cancellationToken)
                 .ConfigureAwait(false);
 
             isAuthenticated = true;
@@ -156,6 +157,31 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         FirmwareVersion = firmwareVersion;
         IsAuthenticated = isAuthenticated;
         IsInitialized = true;
+
+        return effectiveProtocol;
+    }
+
+    /// <summary>
+    ///     Releases resources owned by a session whose asynchronous factory failed. Disposal failures
+    ///     are logged and suppressed so the initialization exception remains the primary failure.
+    /// </summary>
+    protected void DisposeAfterInitializationFailure()
+    {
+        try
+        {
+            Dispose();
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                Logger.LogWarning(ex, "Failed to dispose session resources after initialization failed");
+            }
+            catch
+            {
+                // Initialization is already failing. Logging must not replace that original exception.
+            }
+        }
     }
 
     public bool IsSupported(Feature feature) =>

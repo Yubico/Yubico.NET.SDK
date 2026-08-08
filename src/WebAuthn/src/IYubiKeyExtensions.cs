@@ -16,7 +16,6 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.WebAuthn.Client;
 

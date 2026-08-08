@@ -33,9 +33,32 @@ public interface IOathSession : IApplicationSession
     ReadOnlyMemory<byte> Salt { get; }
 
     /// <summary>
-    ///     Gets whether the OATH applet is password-protected and requires validation.
+    ///     Gets whether the <b>current session</b> is locked and must call <see cref="ValidateAsync" />
+    ///     before protected operations can be performed.
     /// </summary>
+    /// <remarks>
+    ///     This reflects only the current session's unlock state, not whether the device has a
+    ///     password configured at all: it starts <see langword="true" /> when the device has a
+    ///     password configured, and becomes <see langword="false" /> once <see cref="ValidateAsync" />
+    ///     succeeds — even though the device remains password-protected for the next session. To
+    ///     check whether the device has a password configured, independent of this session's unlock
+    ///     state, use <see cref="IsPasswordProtected" /> instead.
+    /// </remarks>
     bool IsLocked { get; }
+
+    /// <summary>
+    ///     Gets whether the OATH applet has a password configured, independent of whether the
+    ///     current session has already been unlocked via <see cref="ValidateAsync" />.
+    /// </summary>
+    /// <remarks>
+    ///     Unlike <see cref="IsLocked" />, which becomes <see langword="false" /> once the current
+    ///     session successfully validates, this property stays <see langword="true" /> for the
+    ///     lifetime of the session as long as a password is configured on the device. Use this to
+    ///     distinguish "no password configured" from "password already unlocked this session" —
+    ///     for example, to decide whether a "remove password" UI action should be shown, or whether
+    ///     a key-change flow needs to prompt for the current password.
+    /// </remarks>
+    bool IsPasswordProtected { get; }
 
     /// <summary>
     ///     Lists all credentials stored on the device.
@@ -108,4 +131,47 @@ public interface IOathSession : IApplicationSession
     ///     Removes the access key from the OATH applet.
     /// </summary>
     Task UnsetKeyAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Runs <paramref name="operation" />, and if it fails because the OATH applet is locked,
+    ///     collects a password via <paramref name="passwordProvider" />, validates it, and retries
+    ///     <paramref name="operation" /> exactly once.
+    /// </summary>
+    /// <typeparam name="T">The result type produced by <paramref name="operation" />.</typeparam>
+    /// <param name="operation">
+    ///     The operation to run. Receives the same <paramref name="cancellationToken" /> passed to this method.
+    /// </param>
+    /// <param name="passwordProvider">
+    ///     Invoked only if <paramref name="operation" /> fails with an <see cref="OathException" /> whose
+    ///     <see cref="OathException.Reason" /> is <see cref="OathFailureReason.Locked" />. Must return the raw
+    ///     (not yet PBKDF2-derived) password bytes; this method derives the access key internally via
+    ///     <see cref="DeriveKey" /> and zeroes the derived key after the authentication attempt completes.
+    ///     The caller remains responsible for the lifetime of the bytes it returns.
+    /// </param>
+    /// <param name="cancellationToken">
+    ///     Propagated to <paramref name="operation" />, <paramref name="passwordProvider" />, and the
+    ///     internal <see cref="ValidateAsync" /> call. Checked before authenticating so a cancellation
+    ///     requested between the locked failure and the retry stops promptly.
+    /// </param>
+    /// <returns>The result of the (possibly retried) <paramref name="operation" /> call.</returns>
+    /// <exception cref="OathException">
+    ///     <paramref name="passwordProvider" /> supplied a password that failed validation
+    ///     (<see cref="OathFailureReason.WrongPassword" />), or <paramref name="operation" /> failed
+    ///     again after a successful authentication.
+    /// </exception>
+    Task<T> AuthenticateAndRetryAsync<T>(
+        Func<CancellationToken, Task<T>> operation,
+        Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Runs <paramref name="operation" />, and if it fails because the OATH applet is locked,
+    ///     collects a password via <paramref name="passwordProvider" />, validates it, and retries
+    ///     <paramref name="operation" /> exactly once.
+    /// </summary>
+    /// <remarks>See the generic overload for full parameter and exception documentation.</remarks>
+    Task AuthenticateAndRetryAsync(
+        Func<CancellationToken, Task> operation,
+        Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
+        CancellationToken cancellationToken = default);
 }

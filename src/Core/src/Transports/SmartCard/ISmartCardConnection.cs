@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Abstractions;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 namespace Yubico.YubiKit.Core.Transports.SmartCard;
 

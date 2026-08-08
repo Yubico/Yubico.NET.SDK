@@ -14,7 +14,6 @@
 
 using System.Buffers;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 

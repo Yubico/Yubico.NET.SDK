@@ -1,7 +1,6 @@
 using NSubstitute;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Fido2.Backend;
 
 namespace Yubico.YubiKit.Fido2.UnitTests;
@@ -64,5 +63,19 @@ public class FidoBackendLifecycleTests
             0x10,
             Arg.Any<ReadOnlyMemory<byte>>(),
             TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task HidBackend_InitializeAsync_InitializesBorrowedProtocol()
+    {
+        // Arrange
+        var protocol = Substitute.For<IFidoHidProtocol>();
+        var backend = new HidBackend(protocol);
+
+        // Act
+        await backend.InitializeAsync(TestContext.Current.CancellationToken);
+
+        // Assert
+        await protocol.Received(1).InitializeAsync(TestContext.Current.CancellationToken);
     }
 }

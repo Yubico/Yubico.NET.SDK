@@ -1,11 +1,8 @@
 // Copyright (c) Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
-using System;
-using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Piv;
 

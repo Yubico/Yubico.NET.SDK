@@ -13,10 +13,11 @@
 // limitations under the License.
 
 using System.Buffers;
-using Yubico.YubiKit.Core;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Piv.Backend;
 
 namespace Yubico.YubiKit.Piv.DataObjects;
 
@@ -31,13 +32,13 @@ internal static class PivDataObjectProtocol
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The object data, or empty if the object doesn't exist.</returns>
     internal static async Task<ReadOnlyMemory<byte>> GetObjectAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         int objectId,
         CancellationToken cancellationToken = default)
     {
         // INS 0xCB (GET DATA)
         var command = new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, EncodeObjectId(objectId));
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (response.SW == 0x6A82) // File not found
         {
@@ -68,13 +69,28 @@ internal static class PivDataObjectProtocol
         // Check for TAG 0x53 (Discretionary data)
         if (span[0] != 0x53)
         {
-            // Not wrapped, return as-is
+            // Not wrapped: `data` IS the returned value (no copy is made), so it cannot be zeroed
+            // here - the caller owns it as their deliverable, same reasoning as PutObjectAsync
+            // cannot zero the value it's asked to transmit before the caller is done with it.
             return data;
         }
 
-        // Use Tlv to parse the wrapper, copy value before disposing
-        using var wrapper = Tlv.Create(span);
-        return wrapper.Value.ToArray();
+        // Use Tlv to parse the wrapper, copy value before disposing.
+        try
+        {
+            using var wrapper = Tlv.Create(span);
+            return wrapper.Value.ToArray();
+        }
+        finally
+        {
+            // `data` is the raw GET DATA response payload (may carry a clear-text PIN-protected
+            // management key, e.g. when reading the PRINTED object for PIN-only mode). Once Tlv.Create
+            // has copied everything it needs out of it (above), the original buffer is no longer
+            // needed. Zeroing is harmless for the many non-secret objects (certs, CHUID, CCC, ADMIN
+            // DATA) read through this same path - unconditional, matching the approach already
+            // applied to PutObjectAsync's write-side buffer.
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(data).Span);
+        }
     }
 
     /// <summary>
@@ -84,7 +100,7 @@ internal static class PivDataObjectProtocol
     /// <param name="data">The data to write, or null to delete the object.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     internal static async Task PutObjectAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         bool isAuthenticated,
         int objectId,
         ReadOnlyMemory<byte>? data,
@@ -122,13 +138,24 @@ internal static class PivDataObjectProtocol
         }
 
         // INS 0xDB (PUT DATA)
-        var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, writer.WrittenMemory);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-
-        if (!response.IsOK())
+        try
         {
-            throw ApduException.FromStatusWord(response.SW,
-                $"Failed to write data object 0x{objectId:X6}");
+            var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, writer.WrittenMemory);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsOK())
+            {
+                throw ApduException.FromStatusWord(response.SW,
+                    $"Failed to write data object 0x{objectId:X6}");
+            }
+        }
+        finally
+        {
+            // The written buffer may carry sensitive material (e.g. a PIN-protected management key
+            // stored via PIN-only mode). Zeroing is harmless for the many non-secret callers
+            // (certificates, CHUID, CCC, ADMIN DATA) so this always runs, matching ApduCommand's
+            // documented "caller zeroes the underlying buffer after transmission" contract.
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(writer.WrittenMemory).Span);
         }
     }
 

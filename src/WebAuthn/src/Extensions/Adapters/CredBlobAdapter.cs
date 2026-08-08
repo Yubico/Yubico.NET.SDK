@@ -14,7 +14,6 @@
 
 using System.Formats.Cbor;
 using Yubico.YubiKit.Fido2.Extensions;
-using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
 

@@ -1,6 +1,4 @@
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 internal sealed class AesCmac : IDisposable
@@ -88,14 +86,16 @@ internal sealed class AesCmac : IDisposable
         }
     }
 
-    public byte[] GetHashAndReset()
+    public byte[] GetHashAndReset() => GetHashAndReset(static length => new byte[length]);
+
+    internal byte[] GetHashAndReset(Func<int, byte[]> resultBufferFactory)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
+        Span<byte> lastBlock = stackalloc byte[BlockSize];
+        byte[]? result = null;
         try
         {
-            Span<byte> lastBlock = stackalloc byte[BlockSize];
-
             if (_bufferOffset == BlockSize)
             {
                 XorBlocks(_buffer, _subkey1, _cbcState, lastBlock);
@@ -107,23 +107,43 @@ internal sealed class AesCmac : IDisposable
                 XorBlocks(lastBlock, _subkey2, _cbcState, lastBlock);
             }
 
-            var result = new byte[BlockSize];
+            result = resultBufferFactory(BlockSize);
             var bytesWritten = _aes.EncryptEcb(lastBlock, result, PaddingMode.None);
             if (bytesWritten != BlockSize)
                 throw new CryptographicException($"Final encryption failed: {bytesWritten} bytes");
 
             _bufferOffset = 0;
-            return result;
+            byte[] completedResult = result;
+            result = null;
+            return completedResult;
         }
         finally
         {
+            CryptographicOperations.ZeroMemory(lastBlock);
+            if (result is not null)
+                CryptographicOperations.ZeroMemory(result);
             CryptographicOperations.ZeroMemory(_buffer);
             CryptographicOperations.ZeroMemory(_cbcState);
         }
     }
 
     public bool VerifyAndReset(ReadOnlySpan<byte> expectedMac) =>
-        CryptographicOperations.FixedTimeEquals(GetHashAndReset(), expectedMac);
+        VerifyAndReset(expectedMac, static length => new byte[length]);
+
+    internal bool VerifyAndReset(ReadOnlySpan<byte> expectedMac, Func<int, byte[]> resultBufferFactory)
+    {
+        byte[]? computedMac = null;
+        try
+        {
+            computedMac = GetHashAndReset(resultBufferFactory);
+            return CryptographicOperations.FixedTimeEquals(computedMac, expectedMac);
+        }
+        finally
+        {
+            if (computedMac is not null)
+                CryptographicOperations.ZeroMemory(computedMac);
+        }
+    }
 
     private void GenerateSubkeys()
     {
@@ -138,6 +158,7 @@ internal sealed class AesCmac : IDisposable
         }
         finally
         {
+            CryptographicOperations.ZeroMemory(zero);
             CryptographicOperations.ZeroMemory(l);
         }
     }
@@ -158,11 +179,18 @@ internal sealed class AesCmac : IDisposable
     private void ProcessBlock(ReadOnlySpan<byte> block)
     {
         Span<byte> temp = stackalloc byte[BlockSize];
-        XorBlocks(block, _cbcState, temp);
+        try
+        {
+            XorBlocks(block, _cbcState, temp);
 
-        var bytesWritten = _aes.EncryptEcb(temp, _cbcState, PaddingMode.None);
-        if (bytesWritten != BlockSize)
-            throw new CryptographicException($"Block encryption failed: {bytesWritten} bytes");
+            var bytesWritten = _aes.EncryptEcb(temp, _cbcState, PaddingMode.None);
+            if (bytesWritten != BlockSize)
+                throw new CryptographicException($"Block encryption failed: {bytesWritten} bytes");
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(temp);
+        }
     }
 
     // XOR helpers

@@ -760,12 +760,8 @@ private async Task InitializeAsync(
     // 2. Configure protocol with version info
     Protocol!.Configure(FirmwareVersion, configuration);
 
-    // 3. Optionally establish SCP
-    if (_scpKeyParams is not null && Protocol is ISmartCardProtocol sc)
-    {
-        Protocol = await sc.WithScpAsync(_scpKeyParams, cancellationToken);
-        IsAuthenticated = true;
-    }
+    // 3. Optionally establish SCP through ApplicationSession.InitializeProtocolAsync(...)
+    //    when the effective protocol is Core's PC/SC SmartCard implementation.
 
     IsInitialized = true;
 }

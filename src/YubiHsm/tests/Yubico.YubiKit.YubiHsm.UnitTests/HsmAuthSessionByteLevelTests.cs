@@ -14,13 +14,26 @@
 
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 public class HsmAuthSessionByteLevelTests
 {
+    [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
+    {
+        var connection = new RecordingSmartCardConnection();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            HsmAuthSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        // Borrowed: the session did not create this connection, so disposal is the caller's.
+        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        Assert.Equal(0, connection.DisposeCount);
+    }
+
     [Fact]
     public async Task PutCredentialSymmetricAsync_TransmitsOrderedCredentialTlvs()
     {
@@ -88,7 +101,7 @@ public class HsmAuthSessionByteLevelTests
     }
 
     [Fact]
-    public async Task DeleteCredentialAsync_WhenManagementKeyRetryFailure_ThrowsRetryAwareApduException()
+    public async Task DeleteCredentialAsync_WhenManagementKeyRetryFailure_ThrowsHsmAuthRetryException()
     {
         // SW 63C2 is the YubiHSM Auth retry-counter failure response with 2 attempts left.
         var connection = CreateInitializedConnection([0x63, 0xC2]);
@@ -97,12 +110,13 @@ public class HsmAuthSessionByteLevelTests
             firmwareVersion: new FirmwareVersion(5, 4, 3),
             cancellationToken: TestContext.Current.CancellationToken);
 
-        var exception = await Assert.ThrowsAsync<ApduException>(() => session.DeleteCredentialAsync(
+        var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.DeleteCredentialAsync(
             Sequence(0x10, 16),
             "cred",
             TestContext.Current.CancellationToken));
 
         Assert.Equal(unchecked((short)0x63C2), exception.SW);
+        Assert.Equal(2, exception.RetriesRemaining);
         Assert.Equal((byte)0x02, exception.Ins.GetValueOrDefault());
         Assert.Contains("2 attempt(s) remaining", exception.Message);
         var command = LastCommand(connection);

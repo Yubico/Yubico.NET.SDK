@@ -15,6 +15,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
@@ -390,7 +391,7 @@ public class ConnectionOwnershipContractTests
         private ProbeSession(ISmartCardConnection connection)
             : base(connection)
         {
-            _protocol = (ISmartCardProtocol)PcscProtocolFactory<ISmartCardConnection>.Create().Create(connection);
+            _protocol = ProtocolFactory.Create(connection);
             Protocol = _protocol;
         }
 
@@ -402,7 +403,7 @@ public class ConnectionOwnershipContractTests
             try
             {
                 await session.SelectAsync(cancellationToken);
-                await session.InitializeCoreAsync(
+                await session.InitializeProtocolAsync(
                     session._protocol,
                     new FirmwareVersion(5, 7, 2),
                     cancellationToken: cancellationToken);

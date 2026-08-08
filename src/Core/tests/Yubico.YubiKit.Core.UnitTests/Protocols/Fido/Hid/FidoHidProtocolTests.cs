@@ -36,6 +36,41 @@ public class FidoHidProtocolTests
     }
 
     [Fact]
+    public async Task InitializeAsync_PerformsCtapHidInit()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+
+        await protocol.InitializeAsync(TestContext.Current.CancellationToken);
+
+        Assert.True(protocol.IsChannelInitialized);
+        Assert.Equal(1, connection.InitRequestCount);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_PopulatesFirmwareVersionFromCtapHidInit()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+
+        await protocol.InitializeAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(new FirmwareVersion(5, 8, 0), protocol.FirmwareVersion);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_WhenAlreadyInitialized_DoesNotSendSecondInit()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+
+        await protocol.InitializeAsync(TestContext.Current.CancellationToken);
+        await protocol.InitializeAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, connection.InitRequestCount);
+    }
+
+    [Fact]
     public async Task SendVendorCommandAsync_ResponseWithWrongContinuationSequence_ThrowsInvalidOperationException()
     {
         var connection = new FakeFidoHidConnection();
@@ -242,6 +277,8 @@ public class FidoHidProtocolTests
 
         public ConnectionType Type => ConnectionType.HidFido;
 
+        public int InitRequestCount { get; private set; }
+
         public void QueueResponsePackets(params byte[][] packets)
         {
             foreach (var packet in packets)
@@ -255,6 +292,7 @@ public class FidoHidProtocolTests
             cancellationToken.ThrowIfCancellationRequested();
             if ((packet.Span[4] & ~CtapConstants.InitPacketMask) == CtapConstants.CtapHidInit)
             {
+                InitRequestCount++;
                 _lastInitRequest = packet.ToArray();
             }
 

@@ -18,6 +18,39 @@ public class SecurityDomainSessionTests
     private const byte SW1Success = 0x90;
     private const byte SW2Success = 0x00;
 
+    [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
+    {
+        var connection = new RecordingSmartCardConnection();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            SecurityDomainSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        // Borrowed: the session did not create this connection, so disposal is the caller's.
+        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        Assert.Equal(0, connection.DisposeCount);
+    }
+
+    [Fact]
+    public async Task CreateAsync_Success_RetainsProtocolUntilOneSessionDisposal()
+    {
+        var connection = CreateMockConnection();
+        var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        connection.DidNotReceive().Dispose();
+
+        session.Dispose();
+        session.Dispose();
+
+        // Borrowed: the session did not create this connection, so disposal is the caller's.
+        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        connection.DidNotReceive().Dispose();
+    }
+
     /// <summary>
     ///     Creates a mock connection that returns success for SELECT APDU.
     /// </summary>

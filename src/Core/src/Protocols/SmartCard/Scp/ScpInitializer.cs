@@ -120,13 +120,15 @@ internal static class ScpInitializer
 
         try
         {
-            var scpProcessor = new ScpProcessor(commandProcessor, state);
-
-            // Send EXTERNAL AUTHENTICATE with host cryptogram.
-            // Dispose scpProcessor (and its ScpState session keys) on any failure —
-            // otherwise session keys leak to the GC finalizer (T10).
+            // Construct the SCP processor, send EXTERNAL AUTHENTICATE with the host cryptogram, then
+            // request the data encryptor. Dispose state (and its session keys) on ANY failure in this
+            // block — including SCP processor construction, EXTERNAL AUTHENTICATE, or a missing-DEK
+            // failure from GetDataEncryptor() — otherwise session keys leak to the GC finalizer (T10).
+            // Disposing state directly (rather than a possibly-not-yet-constructed scpProcessor) mirrors
+            // InitScp11Async and stays correct even if the guarded block's first statement throws.
             try
             {
+                var scpProcessor = new ScpProcessor(commandProcessor, state);
                 var authCommand = new ApduCommand(
                     CLA_SECURE_MESSAGING,
                     INS_EXTERNAL_AUTHENTICATE,
@@ -138,17 +140,18 @@ internal static class ScpInitializer
                     .ConfigureAwait(false);
                 if (authResponse.SW != SWConstants.Success)
                     throw ApduException.FromResponse(authResponse, authCommand, "SCP03 EXTERNAL AUTHENTICATE failed");
+
+                var dataEncryptor = state.GetDataEncryptor();
+                return (
+                    new ChainedResponseReceiver(initializationProcessor.FirmwareVersion, scpProcessor,
+                        insSendRemaining),
+                    dataEncryptor);
             }
             catch
             {
-                scpProcessor.Dispose();
+                state.Dispose();
                 throw;
             }
-
-            var dataEncryptor = state.GetDataEncryptor();
-            return (
-                new ChainedResponseReceiver(initializationProcessor.FirmwareVersion, scpProcessor, insSendRemaining),
-                dataEncryptor);
         }
         finally
         {
@@ -175,13 +178,24 @@ internal static class ScpInitializer
                 cancellationToken)
             .ConfigureAwait(false);
 
-        var scpProcessor = CreateSecureProcessor(
-            commandProcessor,
-            state,
-            initializationProcessor.FirmwareVersion,
-            insSendRemaining);
+        // Dispose state (and its live session keys) on any post-init failure — otherwise
+        // session keys leak to the GC finalizer, mirroring the SCP03 EXTERNAL AUTHENTICATE
+        // failure-cleanup discipline above (T10).
+        try
+        {
+            var scpProcessor = CreateSecureProcessor(
+                commandProcessor,
+                state,
+                initializationProcessor.FirmwareVersion,
+                insSendRemaining);
 
-        var dataEncryptor = state.GetDataEncryptor();
-        return (scpProcessor, dataEncryptor);
+            var dataEncryptor = state.GetDataEncryptor();
+            return (scpProcessor, dataEncryptor);
+        }
+        catch
+        {
+            state.Dispose();
+            throw;
+        }
     }
 }

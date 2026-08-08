@@ -20,11 +20,13 @@ using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.SecurityDomain.Backend;
 
 namespace Yubico.YubiKit.SecurityDomain;
 
@@ -78,6 +80,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
     private readonly ScpKeyParameters? _scpKeyParams;
     private ISmartCardProtocol? _protocol;
+    private ISecurityDomainBackend? _backend;
     private bool _hasExplicitFirmwareVersion;
 
     /// <summary>
@@ -112,6 +115,12 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <summary>
     ///     Factory helper that creates and initializes a Security Domain session.
     /// </summary>
+    /// <exception cref="SecureChannelException">
+    ///     <paramref name="scpKeyParams" /> was supplied and establishing the SCP secure channel failed
+    ///     (for example, a wrong SCP03 key, an SCP11 receipt/authentication mismatch, a rejected SCP11
+    ///     certificate, or SCP unsupported by the connected firmware/transport). The original failure is
+    ///     available as <see cref="Exception.InnerException" />.
+    /// </exception>
     public static async Task<SecurityDomainSession> CreateAsync(
         ISmartCardConnection connection,
         ProtocolConfiguration? configuration = null,
@@ -119,6 +128,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         FirmwareVersion? firmwareVersion = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
         var session = Construct(connection, () => new SecurityDomainSession(connection, scpKeyParams));
@@ -129,7 +140,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         }
         catch
         {
-            await session.DisposeAsync().ConfigureAwait(false);
+            session.DisposeAfterInitializationFailure();
             throw;
         }
     }
@@ -148,29 +159,48 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         if (IsInitialized)
             return;
 
-        var smartCardProtocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create()
-            .Create((ISmartCardConnection)Connection);
-        await smartCardProtocol
-            .SelectAsync(ApplicationIds.SecurityDomain, cancellationToken)
-            .ConfigureAwait(false);
+        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
+        Protocol = protocol;
+        ISecurityDomainBackend backend = new SecurityDomainBackend(protocol);
+        await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         // Security Domain is available on firmware 5.3.0 and newer.
         // If the caller already knows the firmware, they can provide it and enable feature gating.
         _hasExplicitFirmwareVersion = firmwareVersion is not null;
         var resolvedFirmwareVersion = firmwareVersion ?? FirmwareVersion.V5_3_0;
 
-        await InitializeCoreAsync(
-                smartCardProtocol,
-                resolvedFirmwareVersion,
-                configuration,
-                _scpKeyParams,
-                cancellationToken)
-            .ConfigureAwait(false);
+        ISmartCardProtocol effectiveProtocol;
+        try
+        {
+            effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+                    protocol,
+                    resolvedFirmwareVersion,
+                    configuration,
+                    _scpKeyParams,
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (_scpKeyParams is not null &&
+            ex is ApduException or BadResponseException or NotSupportedException)
+        {
+            // Only the SCP handshake/authentication path can throw these exception types while
+            // _scpKeyParams is set (protocol.Configure(...) above does not transmit APDUs). Wrap as
+            // SecureChannelException so callers can distinguish "secure channel could not be
+            // established" from a generic post-handshake Security Domain operation failure.
+            throw new SecureChannelException(ex);
+        }
 
-        _protocol = Protocol as ISmartCardProtocol;
-        if (_protocol is null)
-            throw new InvalidOperationException();
+        if (!ReferenceEquals(protocol, effectiveProtocol))
+        {
+            backend = new SecurityDomainBackend(effectiveProtocol);
+        }
+
+        _protocol = effectiveProtocol;
+        _backend = backend;
     }
 
     /// <summary>
@@ -791,6 +821,10 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     Performs a factory reset by blocking all registered key references and reinitializing the session.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <exception cref="SecureChannelException">
+    ///     This session was created with SCP key parameters and reinitializing the secure channel after
+    ///     the reset failed. The original failure is available as <see cref="Exception.InnerException" />.
+    /// </exception>
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
         await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -818,28 +852,32 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         Protocol?.Dispose();
         Protocol = null;
         _protocol = null;
+        _backend = null;
         IsAuthenticated = false;
         IsInitialized = false;
 
         await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
-    [MemberNotNull(nameof(_protocol))]
-    private void EnsureInitializedProtocol()
+    [MemberNotNull(nameof(_protocol), nameof(_backend))]
+    private void EnsureInitializedBackend()
     {
         if (!IsInitialized)
             throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");
 
         if (_protocol is null)
             throw new InvalidOperationException("Security Domain protocol not available.");
+
+        if (_backend is null)
+            throw new InvalidOperationException("Security Domain backend not available.");
     }
 
     private async Task<ReadOnlyMemory<byte>> TransmitAndGetResponseDataAsync(
         ApduCommand command,
         CancellationToken cancellationToken)
     {
-        EnsureInitializedProtocol();
-        var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+        EnsureInitializedBackend();
+        var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
         return response.Data;
     }
 
@@ -967,6 +1005,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         base.Dispose(disposing);
 
         _protocol = null;
+        _backend = null;
         Protocol = null;
         IsAuthenticated = false;
         IsInitialized = false;

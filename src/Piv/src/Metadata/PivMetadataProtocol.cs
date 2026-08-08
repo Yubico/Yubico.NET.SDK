@@ -14,11 +14,9 @@
 
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Piv.Backend;
 
 namespace Yubico.YubiKit.Piv.Metadata;
 
@@ -27,14 +25,14 @@ namespace Yubico.YubiKit.Piv.Metadata;
 internal static class PivMetadataProtocol
 {
     internal static async Task<PivPinMetadata> GetPinMetadataAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Getting PIN metadata");
 
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
         if (response.SW == 0x6D00)
@@ -95,7 +93,7 @@ internal static class PivMetadataProtocol
     /// Gets metadata about a key slot (requires firmware 5.3+).
     /// </summary>
     internal static async Task<PivSlotMetadata?> GetSlotMetadataAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         PivSlot slot,
         CancellationToken cancellationToken = default)
@@ -104,7 +102,7 @@ internal static class PivMetadataProtocol
 
         // INS 0xF7 (GET METADATA), P2 = slot
         var command = new ApduCommand(0x00, 0xF7, 0x00, (byte)slot, ReadOnlyMemory<byte>.Empty);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
         if (response.SW == 0x6D00)
@@ -156,7 +154,7 @@ internal static class PivMetadataProtocol
     /// Sets the management key (requires authentication with old key).
     /// </summary>
     internal static async Task<PivManagementKeyType> SetManagementKeyAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         bool isAuthenticated,
         PivManagementKeyType keyType,
@@ -203,7 +201,7 @@ internal static class PivMetadataProtocol
             // P2 = touch policy: 0xFF (no touch), 0xFE (touch required), 0xFD (cached touch)
             byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
             var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, data);
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -222,7 +220,7 @@ internal static class PivMetadataProtocol
     /// Gets metadata about the PIV PUK.
     /// </summary>
     internal static async Task<PivPukMetadata> GetPukMetadataAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
@@ -230,7 +228,7 @@ internal static class PivMetadataProtocol
 
         // INS 0xF7 (GET METADATA), P2 = 0x81 (PUK slot)
         var command = new ApduCommand(0x00, 0xF7, 0x00, 0x81, ReadOnlyMemory<byte>.Empty);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
         if (response.SW == 0x6D00)
@@ -262,7 +260,7 @@ internal static class PivMetadataProtocol
     }
 
     internal static async Task<PivManagementKeyMetadata> GetManagementKeyMetadataAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
@@ -273,7 +271,7 @@ internal static class PivMetadataProtocol
         const byte SlotCardManagement = 0x9B;
 
         var command = new ApduCommand(0x00, InsGetMetadata, 0x00, SlotCardManagement, ReadOnlyMemory<byte>.Empty);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
         if (response.SW == 0x6D00)
@@ -317,7 +315,7 @@ internal static class PivMetadataProtocol
     /// Changes the PUK from old PUK to new PUK.
     /// </summary>
     internal static async Task ChangePukAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         ReadOnlyMemory<byte> oldPuk,
         ReadOnlyMemory<byte> newPuk,
@@ -331,7 +329,7 @@ internal static class PivMetadataProtocol
         {
             // INS 0x24 (CHANGE REFERENCE DATA), P2=0x81 (PUK reference)
             var command = new ApduCommand(0x00, 0x24, 0x00, 0x81, pukPair);
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -353,7 +351,7 @@ internal static class PivMetadataProtocol
     /// Unblocks the PIN using the PUK and sets a new PIN.
     /// </summary>
     internal static async Task UnblockPinAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         ReadOnlyMemory<byte> puk,
         ReadOnlyMemory<byte> newPin,
@@ -367,7 +365,7 @@ internal static class PivMetadataProtocol
         {
             // INS 0x2C (RESET RETRY COUNTER), P2=0x80 (PIN reference)
             var command = new ApduCommand(0x00, 0x2C, 0x00, 0x80, pukPinPair);
-            var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
             {
@@ -392,13 +390,54 @@ internal static class PivMetadataProtocol
     }
 
     /// <summary>
+    /// Blocks the PUK by repeatedly calling RESET RETRY with empty credentials until blocked.
+    /// </summary>
+    /// <remarks>
+    /// Shared by <see cref="PivSession.ResetAsync"/> and PIN-only mode setup (enabling a PIN-only
+    /// mode requires the PUK to be blocked, since it can no longer be used to unblock a PIN that
+    /// is protected by a management key the PUK holder may not know).
+    /// </remarks>
+    internal static async Task BlockPukAsync(
+        IPivBackend backend,
+        ILogger logger,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogDebug("PIV: Blocking PUK");
+
+        // PUK blocking uses INS_RESET_RETRY (0x2C) with P2=0x80 (PIN_P2, not PUK_P2!)
+        // Data is 16 bytes: 8-byte empty PUK + 8-byte empty PIN (both all 0xFF)
+        byte[] emptyPukPin = PivPinUtilities.EncodePinPair(ReadOnlySpan<char>.Empty, ReadOnlySpan<char>.Empty);
+        try
+        {
+            int retriesRemaining = 1; // Start with 1 to enter loop
+            while (retriesRemaining > 0)
+            {
+                var pukCommand = new ApduCommand(0x00, 0x2C, 0x00, 0x80, emptyPukPin);
+                var response = await backend.SendAsync(pukCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+                retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
+                if (retriesRemaining < 0)
+                {
+                    throw ApduException.FromStatusWord(response.SW, "Failed to block PUK");
+                }
+            }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(emptyPukPin);
+        }
+
+        logger.LogDebug("PIV: PUK blocked");
+    }
+
+    /// <summary>
     /// Sets the PIN and PUK retry limits.
     /// </summary>
     /// <remarks>
     /// Requires management key authentication. This command also resets PIN and PUK to defaults.
     /// </remarks>
     internal static async Task SetPinAttemptsAsync(
-        ISmartCardProtocol protocol,
+        IPivBackend backend,
         ILogger logger,
         bool isAuthenticated,
         int pinAttempts,
@@ -424,7 +463,7 @@ internal static class PivMetadataProtocol
 
         // INS 0xFA (SET PIN RETRIES), P1=PIN retries, P2=PUK retries, no data
         var command = new ApduCommand(0x00, 0xFA, (byte)pinAttempts, (byte)pukAttempts);
-        var response = await protocol.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
         {

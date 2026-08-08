@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using NSubstitute;
-using Xunit;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Piv.UnitTests;

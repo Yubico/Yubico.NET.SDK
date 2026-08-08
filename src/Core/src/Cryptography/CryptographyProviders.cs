@@ -282,39 +282,6 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// </remarks>
         public static Func<Aes> AesCreator { get; set; } = Aes.Create;
 
-        // /// <summary>
-        // /// This property is a delegate (function pointer). This method will return
-        // /// an instance of <see cref="IAesGcmPrimitives"/>.
-        // /// </summary>
-        // /// <remarks>
-        // /// <para>
-        // /// When an SDK operation needs to perform AES-GCM encrypt or decrypt, it
-        // /// will do so using an implementation of the <see cref="IAesGcmPrimitives"/>
-        // /// interface. However, when it needs an instance, it will this delegate
-        // /// to build an object, rather than build it itself.
-        // /// </para>
-        // /// <para>
-        // /// For example:
-        // /// <code language="csharp">
-        // ///    IAesGcmPrimitives aesGcm = CryptographyProviders.AesGcmPrimitivesCreator();
-        // /// </code>
-        // /// </para>
-        // /// <para>
-        // /// If you want to replace the implementation, you will likely do something
-        // /// like this in your application. The body of the delegate is responsible
-        // /// for creating an instance of AES-GCM based on an implementation of
-        // /// your own choosing.
-        // /// <code language="csharp">
-        // ///     CryptographyProviders.AesGcmPrimitivesCreator = () =>
-        // ///     {
-        // ///         Handle aesHandle = GetHandle();
-        // ///         return AesGcmImpl.GetAesGcmObject(aesHandle);
-        // ///     }
-        // /// </code>
-        // /// </para>
-        // /// </remarks>
-        // public static Func<IAesGcmPrimitives> AesGcmPrimitivesCreator { get; set; } = AesGcmPrimitives.Create;
-
         /// <summary>
         /// This property is a delegate (function pointer). The method loaded
         /// will return an instance of ARKG-P256 cryptographic primitives.
@@ -342,50 +309,10 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// </remarks>
         internal static Func<IArkgPrimitives> ArkgPrimitivesCreator { get; set; } = ArkgPrimitives.Create;
 
-        // /// <summary>
-        // /// This property is a delegate (function pointer). This method will return
-        // /// an instance of <see cref="IEcdhPrimitives"/>.
-        // /// </summary>
-        // /// <remarks>
-        // /// <para>
-        // /// When an SDK operation needs to perform compute the ECDH shared secret,
-        // /// it will do so using an implementation of the <see cref="IEcdhPrimitives" />
-        // /// interface. However, when it needs an instance, it will as this delegate
-        // /// to build an object, rather than build it itself.
-        // /// </para>
-        // /// <para>
-        // /// If you want to replace the implementation, you will likely do something
-        // /// like this in your application. The body of the delegate is responsible
-        // /// for creating an instance of ECDH based on an implementation of your own
-        // /// choosing.
-        // /// <code language="csharp">
-        // ///     CryptographyProviders.EcdhPrimitivesCreator = () =>
-        // ///     {
-        // ///         Handle ecdhHandle = GetHandle();
-        // ///         return EcdhImpl.GetEcdhObject(ecdhHandle);
-        // ///     }
-        // /// </code>
-        // /// </para>
-        // /// </remarks>
-        // public static Func<IEcdhPrimitives> EcdhPrimitivesCreator { get; set; } = EcdhPrimitives.Create;
+        internal static Func<IEcdhPrimitives> EcdhPrimitivesCreator { get; set; } = EcdhPrimitives.Create;
 
-        // /// <summary>
-        // /// This property is a delegate (function pointer). This method will return
-        // /// an instance of <see cref="ICmacPrimitives"/>, built to use the
-        // /// specified algorithm.
-        // /// </summary>
-        // /// <remarks>
-        // /// Note that ICmacPrimitives implements IDisposable, so either call
-        // /// Dispose when done with it, or use the <c>using</c> keyword.
-        // /// <para>
-        // /// For example,
-        // /// <code language="csharp">
-        // ///    using ICmacPrimitives cmacObj =
-        // ///        CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
-        // /// </code>
-        // /// </para>
-        // /// </remarks>
-        // public static Func<CmacBlockCipherAlgorithm, ICmacPrimitives> CmacPrimitivesCreator { get; set; } = CmacPrimitives.Create;
+        internal static Func<CmacBlockCipherAlgorithm, ICmacPrimitives> CmacPrimitivesCreator { get; set; } =
+            CmacPrimitives.Create;
 
         // /// <summary>
         // /// This property is a delegate (function pointer). This method will return

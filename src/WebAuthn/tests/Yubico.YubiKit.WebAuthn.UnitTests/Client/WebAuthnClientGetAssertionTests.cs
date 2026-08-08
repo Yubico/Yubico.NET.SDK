@@ -15,8 +15,6 @@
 using NSubstitute;
 using System.Formats.Cbor;
 using System.Security.Cryptography;
-using Xunit;
-using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;

@@ -17,7 +17,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.OpenPgp.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -91,9 +90,12 @@ public class OpenPgpSessionTests
             resetBeforeUse: true,
             action: async session =>
             {
-                var ex = await Assert.ThrowsAsync<ApduException>(
+                var exception = await Assert.ThrowsAsync<OpenPgpInvalidPinException>(
                     () => session.VerifyPinAsync(Encoding.UTF8.GetBytes("999999")));
-                Assert.Contains("attempts remaining", ex.Message);
+                Assert.Equal(2, exception.RetriesRemaining);
+                short?[] allowedStatusWords =
+                    [unchecked((short)0x63C2), SWConstants.SecurityStatusNotSatisfied];
+                Assert.Contains(exception.SW, allowedStatusWords);
             });
 
     [SkippableTheory]

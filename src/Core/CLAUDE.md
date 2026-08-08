@@ -110,16 +110,16 @@ protocol.Configure(firmwareVersion, new ProtocolConfiguration { ForceShortApdus 
 
 ### Secure Channel Protocol (SCP)
 
-SCP wraps the base protocol with encryption/authentication:
+Core owns SCP key-parameter types, handshake processing, and the secure PC/SC protocol decorator.
+Applet session factories accept the key parameters and establish the channel through the internal
+`PcscProtocol.InitializeScpAsync` capability; consumers cannot construct the decorator directly.
 
 ```csharp
 // SCP03 - Symmetric keys
 var scp03Params = new Scp03KeyParameters(keyRef, staticKeys);
-var scpProtocol = await protocol.WithScpAsync(scp03Params, cancellationToken);
 
 // SCP11b - Public key only (YubiKey authenticates to host)
 var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey);
-var scpProtocol = await protocol.WithScpAsync(scp11Params, cancellationToken);
 
 // SCP11a/c - Mutual authentication with certificates
 var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey, ocePrivateKey, oceKeyRef, certChain);
@@ -298,10 +298,10 @@ public class MyTests : IntegrationTestBase
 ```csharp
 // From connection
 using var connection = await connectionFactory.CreateAsync(reader, ct);
-var protocol = PcscProtocolFactory<ISmartCardConnection>.Create().Create(connection);
+using ISmartCardProtocol protocol = ProtocolFactory.Create(connection);
 
 // Select application
-await protocol.SelectAsync(ApplicationIds.SecurityDomain, ct);
+await protocol.SelectAsync(ApplicationIds.Piv, ct);
 
 // Configure for firmware
 protocol.Configure(firmwareVersion);
@@ -397,6 +397,5 @@ Behavior added by the discovery/session concurrency hardening (see `AsyncExchang
 ## Related Modules
 
 - **Yubico.YubiKit.Management** - Uses Core for device info queries
-- **Yubico.YubiKit.SecurityDomain** - Uses Core's SCP implementation
 - **Yubico.YubiKit.Fido2** - Uses Core's HID and cryptography
 - **Yubico.YubiKit.Piv** - Uses Core's SmartCard protocol

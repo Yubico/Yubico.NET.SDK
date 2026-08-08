@@ -16,7 +16,6 @@ using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 

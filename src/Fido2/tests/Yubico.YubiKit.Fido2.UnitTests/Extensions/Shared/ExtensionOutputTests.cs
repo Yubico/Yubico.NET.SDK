@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
-using Xunit;
 using Yubico.YubiKit.Fido2.Extensions;
 
 namespace Yubico.YubiKit.Fido2.UnitTests.Extensions;

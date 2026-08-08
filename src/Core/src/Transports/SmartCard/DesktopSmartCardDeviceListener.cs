@@ -15,7 +15,6 @@
 using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 namespace Yubico.YubiKit.Core.Transports.SmartCard;
 

@@ -15,15 +15,16 @@
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.YubiOtp.Backend;
 
 namespace Yubico.YubiKit.YubiOtp;
 
@@ -35,6 +36,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 {
     private static readonly Feature FeatureSerial = new("Serial Number Read", 2, 2, 0);
     private static readonly Feature FeatureHmacSha1 = new("HMAC-SHA1 Challenge-Response", 2, 2, 0);
+    private static readonly Feature FeatureYubicoOtpChallengeResponse = new("Yubico OTP Challenge-Response", 2, 2, 0);
     private static readonly Feature FeatureUpdate = new("Slot Update", 2, 3, 0);
     private static readonly Feature FeatureSwap = new("Slot Swap", 2, 3, 0);
     private static readonly Feature FeatureNdef = new("NDEF Configuration", 3, 0, 0);
@@ -86,8 +88,8 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     private readonly ILogger _logger;
     private readonly ScpKeyParameters? _scpKeyParams;
 
-    private IProtocol _protocol;
-    private IYubiOtpBackend _backend;
+    private IProtocol _protocol = null!;
+    private IYubiOtpBackend _backend = null!;
     private ReadOnlyMemory<byte> _status;
 
     private YubiOtpSession(
@@ -95,19 +97,9 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         ScpKeyParameters? scpKeyParams = null)
         : base(EnsureSupportedConnection(connection))
     {
+        ArgumentNullException.ThrowIfNull(connection);
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
-
-        (_protocol, _backend) = connection switch
-        {
-            ISmartCardConnection sc => CreateSmartCardBackend(sc),
-            IOtpHidConnection otp => CreateOtpBackend(otp),
-            _ => throw new NotSupportedException(
-                $"Connection type {connection.GetType().Name} is not supported by YubiOtpSession. " +
-                "Supported types: ISmartCardConnection, IOtpHidConnection.")
-        };
-
-        Protocol = _protocol;
     }
 
     private static IConnection EnsureSupportedConnection(IConnection connection)
@@ -130,6 +122,8 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
         var session = Construct(connection, () => new YubiOtpSession(connection, scpKeyParams));
@@ -140,7 +134,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
         catch
         {
-            await session.DisposeAsync().ConfigureAwait(false);
+            session.DisposeAfterInitializationFailure();
             throw;
         }
     }
@@ -154,95 +148,34 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             return;
         }
 
-        FirmwareVersion version;
+        var protocol = ProtocolFactory.Create(Connection);
+        Protocol = protocol;
+        var backend = CreateBackend(protocol);
 
-        if (_protocol is ISmartCardProtocol scProtocol)
-        {
-            version = await InitializeSmartCardAsync(scProtocol, cancellationToken).ConfigureAwait(false);
-        }
-        else if (_protocol is IOtpHidProtocol otpProtocol)
-        {
-            _status = await otpProtocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
-            version = otpProtocol.FirmwareVersion
-                      ?? new FirmwareVersion(_status.Span[0], _status.Span[1], _status.Span[2]);
-        }
-        else
-        {
-            throw new InvalidOperationException("Unsupported protocol type.");
-        }
+        var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        _status = initialization.Status;
 
-        await InitializeCoreAsync(
-                _protocol,
-                version,
+        var effectiveProtocol = await InitializeProtocolAsync(
+                protocol,
+                initialization.FirmwareVersion,
                 configuration,
                 _scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _protocol = Protocol ?? throw new InvalidOperationException();
-
-        if (_protocol is ISmartCardProtocol scProtocolFinal)
+        if (effectiveProtocol is ISmartCardProtocol smartCardProtocol)
         {
-            // Always recreate SmartCard backend after initialization so _lastProgSeq
-            // reflects the current device state (read from OTP SELECT response).
-            // When SCP is used, _protocol has been replaced with the SCP-wrapped protocol.
-            _backend = new SmartCardBackend(
-                scProtocolFinal,
+            // Rebinding must carry forward the programming sequence read during SELECT.
+            backend = new SmartCardBackend(
+                smartCardProtocol,
                 FirmwareVersion,
                 GetProgSeq());
         }
 
+        _protocol = effectiveProtocol;
+        _backend = backend;
+
         _logger.LogDebug("YubiOTP session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
-    }
-
-    private async Task<FirmwareVersion> InitializeSmartCardAsync(
-        ISmartCardProtocol scProtocol,
-        CancellationToken cancellationToken)
-    {
-        FirmwareVersion? managementVersion = null;
-
-        // For NFC transport, SELECT management first for reliable version on NEO
-        try
-        {
-            var mgmtResponse = await scProtocol
-                .SelectAsync(ApplicationIds.Management, cancellationToken)
-                .ConfigureAwait(false);
-
-            var deviceText = Encoding.UTF8.GetString(mgmtResponse.Span);
-            var versionString = deviceText.Split(' ').Last();
-            var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
-            if (versionParts.Length == 3)
-            {
-                managementVersion = new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2]);
-            }
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            _logger.LogDebug(ex, "Could not get version from Management SELECT, continuing with OTP SELECT.");
-        }
-
-        // SELECT OTP application
-        var otpResponse = await scProtocol
-            .SelectAsync(ApplicationIds.Otp, cancellationToken)
-            .ConfigureAwait(false);
-
-        _status = otpResponse;
-
-        if (_status.Length < YubiOtpConstants.StatusBytesLength)
-        {
-            throw new BadResponseException(
-                $"OTP SELECT returned {_status.Length} bytes, expected at least {YubiOtpConstants.StatusBytesLength}.");
-        }
-
-        var otpVersion = new FirmwareVersion(_status.Span[0], _status.Span[1], _status.Span[2]);
-
-        // NEO workaround: use the higher of the two versions
-        if (managementVersion is not null && otpVersion.Major == 3)
-        {
-            return managementVersion > otpVersion ? managementVersion : otpVersion;
-        }
-
-        return managementVersion ?? otpVersion;
     }
 
     public Task<int> GetSerialAsync(CancellationToken cancellationToken = default)
@@ -442,6 +375,38 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
     }
 
+    public Task<ReadOnlyMemory<byte>> CalculateYubicoOtpAsync(
+        Slot slot,
+        ReadOnlyMemory<byte> challenge,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        EnsureSupports(FeatureYubicoOtpChallengeResponse);
+
+        if (challenge.Length != YubiOtpConstants.YubicoOtpChallengeSize)
+        {
+            throw new ArgumentException(
+                $"Challenge must be exactly {YubiOtpConstants.YubicoOtpChallengeSize} bytes, got {challenge.Length}.",
+                nameof(challenge));
+        }
+
+        var configSlot = slot.Map(SlotOperation.ChallengeYubicoOtp);
+        return CalculateYubicoOtpCoreAsync(configSlot, challenge, cancellationToken);
+    }
+
+    private async Task<ReadOnlyMemory<byte>> CalculateYubicoOtpCoreAsync(
+        ConfigSlot configSlot,
+        ReadOnlyMemory<byte> challenge,
+        CancellationToken cancellationToken)
+    {
+        return await _backend.SendAndReceiveAsync(
+                configSlot,
+                challenge,
+                YubiOtpConstants.YubicoOtpResponseSize,
+                cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     /// <summary>
     /// Pads the HMAC challenge to 64 bytes. The pad byte must differ from the last byte
     /// of the challenge to allow the YubiKey to detect the actual data length.
@@ -615,30 +580,14 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         return 0;
     }
 
-    private static (IProtocol protocol, IYubiOtpBackend backend) CreateSmartCardBackend(
-        ISmartCardConnection connection)
-    {
-        var protocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create()
-            .Create(connection);
-
-        // Initial prog_seq and firmware version will be set after SELECT
-        var backend = new SmartCardBackend(
-            protocol as ISmartCardProtocol ?? throw new InvalidOperationException(),
-            new FirmwareVersion(),
-            0);
-
-        return (protocol, backend);
-    }
-
-    private static (IProtocol protocol, IYubiOtpBackend backend) CreateOtpBackend(
-        IOtpHidConnection connection)
-    {
-        var protocol = OtpProtocolFactory
-            .Create()
-            .Create(connection);
-
-        var backend = new OtpHidBackend(protocol);
-        return (protocol, backend);
-    }
+    private static IYubiOtpBackend CreateBackend(IProtocol protocol) =>
+        protocol switch
+        {
+            // Initial prog_seq and firmware version will be set after SELECT.
+            ISmartCardProtocol smartCard => new SmartCardBackend(smartCard, new FirmwareVersion(), 0),
+            IOtpHidProtocol otpHid => new HidBackend(otpHid),
+            _ => throw new NotSupportedException(
+                $"Protocol type {protocol.GetType().Name} is not supported by YubiOtpSession. " +
+                "Supported protocols: SmartCard and OTP HID.")
+        };
 }

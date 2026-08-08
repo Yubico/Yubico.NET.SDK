@@ -117,4 +117,7 @@ public static class PivDataObject
 
     /// <summary>Attestation certificate (slot F9). Yubico-specific, not standard PIV.</summary>
     public const int Attestation = 0x5FFF01;
+
+    /// <summary>Yubico Admin Data. Records PIN-only mode state. Yubico-specific, not standard PIV.</summary>
+    public const int AdminData = 0x5FFF00;
 }

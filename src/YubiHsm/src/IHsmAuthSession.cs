@@ -40,6 +40,10 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="credentialPassword">The credential password (string, padded to 16 bytes).</param>
     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="HsmAuthRetryException">
+    ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
+    ///     reports the remaining management key attempts.
+    /// </exception>
     Task PutCredentialSymmetricAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
@@ -58,6 +62,10 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="credentialPassword">The credential password (string, padded to 16 bytes).</param>
     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="HsmAuthRetryException">
+    ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
+    ///     reports the remaining management key attempts.
+    /// </exception>
     Task PutCredentialDerivedAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
@@ -72,6 +80,10 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="managementKey">The 16-byte management key for authorization.</param>
     /// <param name="label">The label of the credential to delete.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="HsmAuthRetryException">
+    ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
+    ///     reports the remaining management key attempts.
+    /// </exception>
     Task DeleteCredentialAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
@@ -86,6 +98,10 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="cardCryptogram">Optional card cryptogram for mutual authentication.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Session keys that must be disposed after use.</returns>
+    /// <exception cref="HsmAuthRetryException">
+    ///     The credential password is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
+    ///     reports the remaining credential password attempts.
+    /// </exception>
     Task<SessionKeys> CalculateSessionKeysSymmetricAsync(
         string label,
         ReadOnlyMemory<byte> context,
@@ -106,6 +122,10 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="currentManagementKey">The current 16-byte management key.</param>
     /// <param name="newManagementKey">The new 16-byte management key.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="HsmAuthRetryException">
+    ///     The current management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
+    ///     reports the remaining management key attempts.
+    /// </exception>
     Task PutManagementKeyAsync(
         ReadOnlyMemory<byte> currentManagementKey,
         ReadOnlyMemory<byte> newManagementKey,
@@ -133,6 +153,10 @@ public interface IHsmAuthSession : IApplicationSession
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Session keys that must be disposed after use.</returns>
+    /// <exception cref="HsmAuthRetryException">
+    ///     The credential password is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
+    ///     reports the remaining credential password attempts.
+    /// </exception>
     Task<SessionKeys> CalculateSessionKeysAsymmetricAsync(
         string label,
         ReadOnlyMemory<byte> context,
@@ -167,6 +191,10 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="credentialPassword">The credential password (string, padded to 16 bytes).</param>
     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="HsmAuthRetryException">
+    ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
+    ///     reports the remaining management key attempts.
+    /// </exception>
     Task PutCredentialAsymmetricAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
@@ -185,6 +213,10 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="credentialPassword">The credential password (string, padded to 16 bytes).</param>
     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="HsmAuthRetryException">
+    ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
+    ///     reports the remaining management key attempts.
+    /// </exception>
     Task GenerateCredentialAsymmetricAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
@@ -211,6 +243,10 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="currentPassword">The current credential password.</param>
     /// <param name="newPassword">The new credential password.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="HsmAuthRetryException">
+    ///     The current credential password is incorrect.
+    ///     <see cref="HsmAuthRetryException.RetriesRemaining" /> reports the remaining attempts.
+    /// </exception>
     Task ChangeCredentialPasswordAsync(
         string label,
         string currentPassword,
@@ -225,6 +261,10 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="label">The credential label.</param>
     /// <param name="newPassword">The new credential password.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="HsmAuthRetryException">
+    ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
+    ///     reports the remaining management key attempts.
+    /// </exception>
     Task ChangeCredentialPasswordAdminAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,

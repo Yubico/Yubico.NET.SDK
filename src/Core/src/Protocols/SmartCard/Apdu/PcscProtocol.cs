@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 ///     a smart card is a stateful sequential peer, so interleaved APDUs from two operations would corrupt
 ///     each other's chained state.
 /// </summary>
-internal class PcscProtocol : ISmartCardProtocol
+internal partial class PcscProtocol : ISmartCardProtocol
 {
     private const byte INS_SELECT = 0xA4;
     private const byte P1_SELECT = 0x04;

@@ -14,7 +14,6 @@
 
 using System.Buffers;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Utilities;
 

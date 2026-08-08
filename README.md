@@ -1,21 +1,20 @@
 # Yubico.NET.SDK
 
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Yubico/Yubico.NET.SDK/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Yubico/Yubico.NET.SDK)
+> ## ⚠️ v2 ALPHA — NOT FOR PRODUCTION
+>
+> The v2 SDK (`yubikit` branch) is a **pre-release alpha**. It is
+> **subject to change** and has **not yet completed Yubico's formal security audit**.
+>
+> - **No security guarantees** are made until that audit is complete.
+> - Packages are **unsigned**.
+> - **Package names and namespaces may change** before the stable release.
+> - Provided for **evaluation only**.
 
-A comprehensive .NET SDK for interacting with YubiKey hardware security devices. This SDK provides high-level APIs for YubiKey's various applications including PIV, FIDO2, OATH, OpenPGP, and more.
+A .NET SDK for YubiKey hardware security devices. It provides APIs for YubiKey
+applications including PIV, FIDO2, WebAuthn, OATH, YubiOTP, OpenPGP, Security
+Domain (SCP03/SCP11), YubiHSM Auth, and device management.
 
-## Overview
-
-YubiKey is a hardware authentication device that supports multiple protocols and applications for strong authentication, encryption, and digital signatures. This SDK enables .NET developers to integrate YubiKey functionality into their applications with a modern, type-safe API.
-
-**Key Features:**
-- 🔐 **PIV (Personal Identity Verification)** - Smart card functionality for digital signatures and encryption
-- 🔑 **FIDO2/WebAuthn** - Passwordless authentication with modern web standards
-- ⏱️ **OATH** - TOTP/HOTP one-time password generation
-- 🔒 **YubiOTP** - Yubico's proprietary OTP protocol
-- 📧 **OpenPGP** - Email encryption and code signing
-- 🛡️ **Security Domain (SCP03)** - Secure channel protocol for key management
-- 🔧 **Device Management** - Query capabilities, firmware version, and configuration
+See [Project Structure](#project-structure) for the per-module breakdown.
 
 ## Requirements
 
@@ -25,17 +24,29 @@ YubiKey is a hardware authentication device that supports multiple protocols and
 
 ## Installation
 
-Install packages from NuGet for the specific YubiKey applications you need:
+> **Alpha:** the prerelease packages are distributed from a public, anonymous
+> feed (not nuget.org). Add the feed first, then install with `--prerelease` to
+> get the latest alpha. Keep nuget.org enabled so transitive dependencies (e.g.
+> `Yubico.NativeShims`) resolve. See the [feed website](https://yubico.github.io/Yubico.NET.SDK/)
+> for the current package list, or the [release notes](scripts/alpha/RELEASE_NOTES.md)
+> for full details.
 
 ```bash
-# Core library (required)
-dotnet add package Yubico.YubiKit.Core
+# 1. Add the anonymous alpha feed (one time)
+dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
 
-# Application modules (install as needed)
-dotnet add package Yubico.YubiKit.Piv
-dotnet add package Yubico.YubiKit.Fido2
-dotnet add package Yubico.YubiKit.Oath
-dotnet add package Yubico.YubiKit.Management
+# 2. Core library (required)
+dotnet add package Yubico.YubiKit.Core --prerelease
+
+# 3. Application modules (install as needed)
+dotnet add package Yubico.YubiKit.Piv --prerelease
+dotnet add package Yubico.YubiKit.Fido2 --prerelease
+dotnet add package Yubico.YubiKit.WebAuthn --prerelease
+dotnet add package Yubico.YubiKit.Oath --prerelease
+dotnet add package Yubico.YubiKit.YubiOtp --prerelease
+dotnet add package Yubico.YubiKit.OpenPgp --prerelease
+dotnet add package Yubico.YubiKit.SecurityDomain --prerelease
+dotnet add package Yubico.YubiKit.Management --prerelease
 ```
 
 ## Quick Start
@@ -89,10 +100,11 @@ Console.WriteLine(string.Join(", ", info.Versions));
 - **Yubico.YubiKit.Management** - Device information and capability queries
 - **Yubico.YubiKit.Piv** - PIV smart card operations
 - **Yubico.YubiKit.Fido2** - FIDO2/WebAuthn authentication
+- **Yubico.YubiKit.WebAuthn** - WebAuthn API over FIDO2
 - **Yubico.YubiKit.Oath** - TOTP/HOTP one-time passwords
 - **Yubico.YubiKit.YubiOtp** - Yubico OTP configuration
 - **Yubico.YubiKit.OpenPgp** - OpenPGP card implementation
-- **Yubico.YubiKit.SecurityDomain** - Secure channel (SCP03) and key management
+- **Yubico.YubiKit.SecurityDomain** - Secure channel (SCP03/SCP11) and key management
 - **Yubico.YubiKit.YubiHsm** - YubiHSM Auth applet operations on YubiKey
 
 ## Documentation

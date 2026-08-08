@@ -15,7 +15,6 @@
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;

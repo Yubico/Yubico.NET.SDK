@@ -18,22 +18,32 @@ using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
-using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.UnitTests.Cryptography;
 using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
 
 namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
 
 /// <summary>
-///     Tests firmware version validation in ScpExtensions.WithScpAsync.
+///     Tests firmware validation in the internal PC/SC SCP initialization capability.
 ///     Verifies that appropriate NotSupportedException is thrown for unsupported firmware versions.
 /// </summary>
-public class ScpExtensionsTests
+/// <remarks>
+///     Shares <see cref="CryptographyProvidersCollection"/> because the SCP11b "proceeds past the firmware
+///     check" tests reach <c>ScpState.Scp11InitAsync</c>, which calls
+///     <c>CryptographyProviders.EcdhPrimitivesCreator().GenerateKeyPair(...)</c> before any APDU is
+///     transmitted (SCP11b skips the SCP11a/c-only PERFORM SECURITY OPERATION step). Without this,
+///     these tests could race against
+///     <see cref="Yubico.YubiKit.Core.UnitTests.Cryptography.CryptographyProviderExtensionTests"/>,
+///     which temporarily swaps that same static.
+/// </remarks>
+[Collection(CryptographyProvidersCollection.Name)]
+public class PcscProtocolScpInitializationTests
 {
     private readonly FakeSmartCardConnection _fakeConnection = new();
     private readonly NullLogger<PcscProtocol> _logger = NullLogger<PcscProtocol>.Instance;
 
     [Fact]
-    public async Task WithScpAsync_Scp03_FirmwareBelow530_ThrowsNotSupportedException()
+    public async Task InitializeScpAsync_Scp03_FirmwareBelow530_ThrowsNotSupportedException()
     {
         // Arrange
         var protocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -41,14 +51,14 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<NotSupportedException>(async () =>
-            await protocol.WithScpAsync(Scp03KeyParameters.Default, TestContext.Current.CancellationToken));
+            await protocol.InitializeScpAsync(Scp03KeyParameters.Default, TestContext.Current.CancellationToken));
 
         Assert.Contains("SCP03", ex.Message);
         Assert.Contains("5.3.0", ex.Message);
     }
 
     [Fact]
-    public async Task WithScpAsync_Scp03_FirmwareExactly530_Proceeds()
+    public async Task InitializeScpAsync_Scp03_FirmwareExactly530_Proceeds()
     {
         // Arrange
         var protocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -58,14 +68,14 @@ public class ScpExtensionsTests
         // Should proceed to initialization (will fail because fake connection doesn't respond,
         // but we're only testing that firmware check passes)
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(Scp03KeyParameters.Default, TestContext.Current.CancellationToken));
+            await protocol.InitializeScpAsync(Scp03KeyParameters.Default, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware
         Assert.IsNotType<NotSupportedException>(ex);
     }
 
     [Fact]
-    public async Task WithScpAsync_Scp03_FirmwareAbove530_Proceeds()
+    public async Task InitializeScpAsync_Scp03_FirmwareAbove530_Proceeds()
     {
         // Arrange
         var protocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -76,14 +86,14 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
+            await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware
         Assert.IsNotType<NotSupportedException>(ex);
     }
 
     [Fact]
-    public async Task WithScpAsync_Scp11_FirmwareBelow572_ThrowsNotSupportedException()
+    public async Task InitializeScpAsync_Scp11_FirmwareBelow572_ThrowsNotSupportedException()
     {
         // Arrange
         var protocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -97,14 +107,14 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<NotSupportedException>(async () =>
-            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
+            await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         Assert.Contains("SCP11", ex.Message);
         Assert.Contains("5.7.2", ex.Message);
     }
 
     [Fact]
-    public async Task WithScpAsync_Scp11_FirmwareExactly572_Proceeds()
+    public async Task InitializeScpAsync_Scp11_FirmwareExactly572_Proceeds()
     {
         // Arrange
         var protocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -120,14 +130,14 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
+            await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware
         Assert.IsNotType<NotSupportedException>(ex);
     }
 
     [Fact]
-    public async Task WithScpAsync_Scp11_FirmwareAbove572_Proceeds()
+    public async Task InitializeScpAsync_Scp11_FirmwareAbove572_Proceeds()
     {
         // Arrange
         var protocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -143,14 +153,14 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
+            await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware
         Assert.IsNotType<NotSupportedException>(ex);
     }
 
     [Fact]
-    public async Task WithScpAsync_Scp03_UnknownFirmware_Proceeds()
+    public async Task InitializeScpAsync_Scp03_UnknownFirmware_Proceeds()
     {
         // Arrange
         var protocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -162,7 +172,7 @@ public class ScpExtensionsTests
         // Act & Assert
         // Should proceed to initialization (will fail, but not due to firmware check)
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
+            await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware requirements
         if (ex is NotSupportedException notSupported)
@@ -172,7 +182,7 @@ public class ScpExtensionsTests
     }
 
     [Fact]
-    public async Task WithScpAsync_Scp03_AlphaBetaFirmware_Proceeds()
+    public async Task InitializeScpAsync_Scp03_AlphaBetaFirmware_Proceeds()
     {
         // Arrange
         var protocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -183,13 +193,13 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
+            await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         Assert.IsNotType<NotSupportedException>(ex);
     }
 
     [Fact]
-    public async Task WithScpAsync_Scp11_UnknownFirmware_Proceeds()
+    public async Task InitializeScpAsync_Scp11_UnknownFirmware_Proceeds()
     {
         // Arrange
         var protocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -205,7 +215,7 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
+            await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware requirements
         if (ex is NotSupportedException notSupported) Assert.DoesNotContain("5.7.2", notSupported.Message);

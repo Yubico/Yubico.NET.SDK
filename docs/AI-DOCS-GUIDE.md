@@ -24,7 +24,6 @@ CLAUDE.md (root)        ← Primary AI context, references docs/*
 <module>/CLAUDE.md      ← Module-specific AI context, references root
     ↓
 .github/copilot-instructions.md    ← Entry point for Copilot
-.junie/guidelines.md               ← Entry point for Junie
 .agent/rules/                      ← Entry point for Cursor
 ```
 

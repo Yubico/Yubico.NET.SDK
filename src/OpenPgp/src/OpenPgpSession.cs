@@ -14,10 +14,12 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.OpenPgp.Backend;
 
 namespace Yubico.YubiKit.OpenPgp;
 
@@ -66,7 +68,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     // ── Fields ────────────────────────────────────────────────────────
 
     private readonly ILogger _logger;
-    private ISmartCardProtocol? _protocol;
+    private IOpenPgpBackend? _backend;
     private ApplicationRelatedData _appData = null!;
     private Kdf? _kdf;
 
@@ -94,6 +96,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
         var session = Construct(connection, () => new OpenPgpSession(connection));
@@ -105,7 +109,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         }
         catch
         {
-            await session.DisposeAsync().ConfigureAwait(false);
+            session.DisposeAfterInitializationFailure();
             throw;
         }
     }
@@ -120,44 +124,27 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         if (IsInitialized)
             return;
 
-        var smartCardProtocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create()
-            .Create((ISmartCardConnection)Connection);
+        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
+        Protocol = protocol;
+        IOpenPgpBackend backend = new OpenPgpBackend(protocol);
 
-        // SELECT OpenPGP AID — handle terminated state (0x6285/0x6985)
-        try
-        {
-            await smartCardProtocol
-                .SelectAsync(ApplicationIds.OpenPgp, cancellationToken)
-                .ConfigureAwait(false);
-        }
-        catch (ApduException ex) when (ex.SW is SWConstants.FileTerminated or SWConstants.ConditionsNotSatisfied)
-        {
-            _logger.LogDebug("OpenPGP applet in terminated state, sending ACTIVATE");
-            await smartCardProtocol.TransmitAndReceiveAsync(
-                    new ApduCommand(0x00, (int)Ins.Activate, 0x00, 0x00),
-                    cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+        var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var firmwareVersion = initialization.FirmwareVersion;
 
-            await smartCardProtocol
-                .SelectAsync(ApplicationIds.OpenPgp, cancellationToken)
-                .ConfigureAwait(false);
-        }
-
-        // GET VERSION — BCD decode; fall back to 1.0.0 for very old keys
-        var firmwareVersion = await GetVersionAsync(smartCardProtocol, cancellationToken)
-            .ConfigureAwait(false);
-
-        await InitializeCoreAsync(
-                smartCardProtocol,
+        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+                protocol,
                 firmwareVersion,
                 configuration,
                 scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _protocol = Protocol as ISmartCardProtocol
-                    ?? throw new InvalidOperationException("Protocol is not an ISmartCardProtocol.");
+        if (!ReferenceEquals(protocol, effectiveProtocol))
+        {
+            backend = new OpenPgpBackend(effectiveProtocol);
+        }
+
+        _backend = backend;
 
         // Cache ApplicationRelatedData for feature detection and KDF state
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
@@ -166,35 +153,6 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         _logger.LogInformation(
             "OpenPGP session initialized (firmware {Version}, serial {Serial})",
             firmwareVersion, _appData.Aid.Serial);
-    }
-
-    private static async Task<FirmwareVersion> GetVersionAsync(
-        ISmartCardProtocol protocol,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            var response = await protocol.TransmitAndReceiveAsync(
-                    new ApduCommand(0x00, (int)Ins.GetVersion, 0x00, 0x00),
-                    throwOnError: false,
-                    cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            if (response.IsOK() && response.Data.Length >= 3)
-            {
-                var data = response.Data.Span;
-                return new FirmwareVersion(
-                    (byte)BcdHelper.DecodeByte(data[0]),
-                    (byte)BcdHelper.DecodeByte(data[1]),
-                    (byte)BcdHelper.DecodeByte(data[2]));
-            }
-        }
-        catch (ApduException)
-        {
-            // CONDITIONS_NOT_SATISFIED on very old firmware
-        }
-
-        return new FirmwareVersion(1, 0, 0);
     }
 
     // ── Data Access ───────────────────────────────────────────────────
@@ -311,8 +269,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         ApduCommand command,
         CancellationToken cancellationToken)
     {
-        EnsureInitializedProtocol();
-        await _protocol!.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+        EnsureInitializedBackend();
+        await _backend!.SendAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -323,8 +281,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         ApduCommand command,
         CancellationToken cancellationToken)
     {
-        EnsureInitializedProtocol();
-        return await _protocol!.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken)
+        EnsureInitializedBackend();
+        return await _backend!.SendAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -335,16 +293,16 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         ApduCommand command,
         CancellationToken cancellationToken)
     {
-        EnsureInitializedProtocol();
-        return await _protocol!.TransmitAndReceiveAsync(
+        EnsureInitializedBackend();
+        return await _backend!.SendAsync(
                 command, throwOnError: false, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
     }
 
-    private void EnsureInitializedProtocol()
+    private void EnsureInitializedBackend()
     {
         ThrowIfDisposed();
-        if (_protocol is null)
+        if (_backend is null)
             throw new InvalidOperationException("Session is not initialized.");
     }
 
@@ -378,7 +336,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         if (!disposing)
             return;
 
-        _protocol = null;
+        _backend = null;
         _kdf?.Dispose();
         _kdf = null;
         base.Dispose(disposing);

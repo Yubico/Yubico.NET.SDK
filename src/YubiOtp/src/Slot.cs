@@ -42,6 +42,8 @@ public static class SlotExtensions
             (Slot.Two, SlotOperation.Ndef) => ConfigSlot.Ndef2,
             (Slot.One, SlotOperation.ChallengeHmac) => ConfigSlot.ChalHmac1,
             (Slot.Two, SlotOperation.ChallengeHmac) => ConfigSlot.ChalHmac2,
+            (Slot.One, SlotOperation.ChallengeYubicoOtp) => ConfigSlot.ChalYubico1,
+            (Slot.Two, SlotOperation.ChallengeYubicoOtp) => ConfigSlot.ChalYubico2,
             _ => throw new ArgumentOutOfRangeException(nameof(slot), slot, "Invalid slot or operation.")
         };
 }
@@ -54,5 +56,6 @@ public enum SlotOperation
     Configure,
     Update,
     Ndef,
-    ChallengeHmac
+    ChallengeHmac,
+    ChallengeYubicoOtp
 }

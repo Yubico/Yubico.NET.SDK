@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 

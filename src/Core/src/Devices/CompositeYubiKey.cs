@@ -16,7 +16,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 

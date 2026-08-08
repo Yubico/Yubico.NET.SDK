@@ -3,7 +3,6 @@
 
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.YubiHsm.IntegrationTests.TestExtensions;

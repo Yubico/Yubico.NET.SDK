@@ -23,6 +23,20 @@ namespace Yubico.YubiKit.OpenPgp.UnitTests;
 public sealed class OpenPgpSessionWireTests
 {
     [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
+    {
+        var connection = new RecordingSmartCardConnection();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            OpenPgpSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+
+        // Borrowed: the session did not create this connection, so disposal is the caller's.
+        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        Assert.Equal(0, connection.DisposeCount);
+    }
+
+    [Fact]
     public async Task CreateAsync_TransmitsSelectVersionAndApplicationRelatedData()
     {
         var connection = CreateInitializedConnection();

@@ -100,13 +100,16 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// Initializes a new PivSession with the specified connection.
     /// </summary>
     /// <remarks>
-    /// This constructor should typically not be used directly. Use 
-    /// <see cref="CreateAsync(ISmartCardConnection, ProtocolConfiguration?, ScpKeyParameters?, CancellationToken)"/> 
-    /// to create initialized sessions.
+    ///     Not public: construction must go through
+    ///     <see cref="CreateAsync(ISmartCardConnection, ProtocolConfiguration?, ScpKeyParameters?, CancellationToken)" />,
+    ///     which routes through <c>ApplicationSession.Construct</c> so the session is bound to its
+    ///     connection and the one-live-session-per-connection rule is enforced. PivSession was the only
+    ///     one of the eight applet sessions exposing a public constructor, and that door let a caller
+    ///     create an unbound session that bypassed the guard.
     /// </remarks>
     /// <param name="connection">The connection to use for PIV operations.</param>
     /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
-    public PivSession(IConnection connection, ScpKeyParameters? scpKeyParams)
+    internal PivSession(IConnection connection, ScpKeyParameters? scpKeyParams)
         : base(connection)
     {
         _scpKeyParams = scpKeyParams;

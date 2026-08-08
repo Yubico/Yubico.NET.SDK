@@ -65,6 +65,12 @@ Documented bound: without monitoring running there are no listener events, and s
 degrades to scan-observed absence. Consumers driving `FindAllAsync` directly across a physical swap
 they orchestrated themselves should force a rescan after replugging.
 
+Hardware evidence and its limit: an operator-coordinated port swap of two same-model keys (the
+reader-name-reuse shape behind the substitution hazard) re-published both under their correct serial
+identities with monitoring running. A hand-timed swap necessarily spans scan intervals, so scan-observed
+absence also fires; the between-scan timing that only the event-driven eviction catches is covered
+deterministically by the fault-injection vectors above.
+
 ## Device identity: what `DeviceId` does and does not promise
 
 The merge hierarchy above decides *which interfaces form one key*. It also decides *what that key is
@@ -104,6 +110,13 @@ stale enumeration when a scan catches it still fully enumerated; both groups are
 the consequence is bounded to one scan of stale membership and self-corrects. The reasoning is recorded at
 `CompositeDeviceMerger.ResolveContestedSerials`, and the rule is pinned by the `Merge_ContestedSerial_*`
 vectors plus `Merge_AnyVector_ProducesPairwiseDistinctDeviceIds`.
+
+Hardware evidence and its limit: a 37,000-scan loop across two real reconfiguration reboots (three keys,
+macOS) observed zero invariant violations, and every intermediate enumeration state was the documented
+conservative behavior; `ReconfigurationDiscoveryInvariantTests` automates that run. On rigs where the
+stale enumeration dies before the fresh one arrives the transitions are sequential and the contested
+branch itself is not entered, so that branch's direct coverage is the unit vectors — deliberately, since
+its trigger is an enumeration-timing race no test can force on demand.
 
 macOS and Linux have no Container ID, so they never mint tier-1 identifiers and degrade to serial, then
 PID. The same rig therefore yields different identifier shapes on different operating systems.
@@ -195,7 +208,7 @@ Hardware invariants: `Core.IntegrationTests/Devices/CompositeDiscoveryIntegratio
 | G3 | `Merge_Regression_TwoTripleKeysFiveOfSixSerialsKnown_OrphanIsAttributedByPigeonhole`, `Merge_Regression_TwoDualKeysThreeOfFourSerialsKnown_OrphanIsAttributedByPigeonhole`, `Merge_TwoTripleKeysBothMissingSameInterfaceTypeSerial_StaysConservativelySplit_Pin`, `Merge_TwoSameTypeOrphansExceedAnchoredKeys_StayStandaloneInsteadOfDoubleAttribution_Pin`, plus cache convergence/eviction vectors in `FindYubiKeysFaultInjectionTests` |
 | G4 (Windows yes) | `Merge_SeriallessPairWithDistinctTopologyKeys_GroupsIntoTwoCompleteKeys` |
 | G4 (mac/Linux no) | `Merge_TwoSamePidTripleKeysNoSerialsFullVisibility_ConservativeSplit_Pin`, `Merge_TwoSamePidDualKeysNoSerialsFullVisibility_ConservativeSplit_Pin` |
-| G5 | `Merge_ReconfiguredKeyReenumeratedUnderNewPid_GroupsByCurrentPidTruth_Pin`, `Merge_OneOfTwoKeysReconfigured_DifferentPidsNoSerials_TriviallyDistinguishable_Pin`; hardware: Phase 4 Tier 1 reconfiguration matrix (ISA) |
+| G5 | `Merge_ReconfiguredKeyReenumeratedUnderNewPid_GroupsByCurrentPidTruth_Pin`, `Merge_OneOfTwoKeysReconfigured_DifferentPidsNoSerials_TriviallyDistinguishable_Pin`; hardware: `ReconfigurationDiscoveryInvariantTests.UsbReconfigurationReboot_DiscoveryIdentityInvariantsHoldThroughTheTransition` (Slow — drives a real PID-changing reboot and asserts the identity invariants on every scan across the transition, self-restoring) |
 | G6 | `Merge_SingleInterfacePid_StandsAloneWithoutCompositeWrapper_Pin`; hardware: Phase 4 Tier 1 CASE 2 |
 | G7 | `Merge_MixedTopologyAndSerialEvidence_IsDeterministicAndConserving_Pin`, `FindAllAsync_Conservation_EveryEnumeratedUsbInterfaceAppearsExactlyOnce` |
 | G8 | Cache convergence / eviction / reader-rename vectors in `FindYubiKeysFaultInjectionTests` |

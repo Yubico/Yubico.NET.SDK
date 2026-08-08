@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Reflection;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.Hid;
@@ -1203,6 +1204,89 @@ public class YubiKeyDeviceMonitorServiceTests
 
 
     /// <summary>
+    ///     A second <c>StartMonitoring</c> with a <em>different</em> interval is ignored, not applied and not
+    ///     rejected. The same-interval idempotence test cannot see this: it passes whether the argument is
+    ///     honoured or discarded, so it constrains nothing about the interesting case.
+    /// </summary>
+    /// <remarks>
+    ///     Pinned by generation identity. Applying a new interval would require retiring the running
+    ///     generation and installing a successor, so an unchanged generation is proof the call was a no-op
+    ///     rather than a silent restart.
+    /// </remarks>
+    [Fact]
+    public async Task StartMonitoring_WhileRunningWithDifferentInterval_IsIgnoredNotApplied()
+    {
+        var (service, repository, _, hidListener, _) = CreateService();
+
+        service.StartMonitoring(TimeSpan.FromHours(1));
+        var generation = CurrentGenerationOf(service);
+        var startCountAfterFirst = hidListener.StartCount;
+
+        service.StartMonitoring(TimeSpan.FromMilliseconds(5));
+
+        Assert.Same(generation, CurrentGenerationOf(service));
+        Assert.Equal(startCountAfterFirst, hidListener.StartCount);
+        Assert.True(service.IsMonitoring);
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+    }
+
+    /// <summary>
+    ///     Restart after an unexpected loop death must retire the dead generation completely — cancelled,
+    ///     signalled, and no longer reachable through <c>_current</c>.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Cancelling alone is not retirement. Admission in <c>PublishSnapshotAsync</c> compares against
+    ///         <c>_current</c>, and <c>RescanAsync</c> waits on the caller's token rather than the
+    ///         generation's, so a dead generation still sitting in <c>_current</c> can publish stale truth.
+    ///         The restart branch used to leave it there across listener teardown and startup.
+    ///     </para>
+    ///     <para>
+    ///         The HID listener's <c>Start</c> hook is the observation point: it runs after retirement and
+    ///         before the successor is installed, which is exactly the interval that used to be unguarded.
+    ///     </para>
+    /// </remarks>
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task RestartAfterLoopDeath_RetiresTheDeadGenerationFromCurrent()
+    {
+        var (service, repository, _, hidListener, _) = CreateService();
+
+        service.StartMonitoring(TimeSpan.FromHours(1));
+        var deadGeneration = CurrentGenerationOf(service);
+        Assert.NotNull(deadGeneration);
+
+        // MonitoringLoopAsync swallows every exception, so no in-process failure can leave a completed
+        // task behind. Substituting one is the only way to reach the restart branch at all — which is
+        // itself why the branch had zero coverage.
+        typeof(YubiKeyDeviceMonitorService)
+            .GetField("_monitoringTask", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .SetValue(service, Task.CompletedTask);
+
+        object? currentDuringListenerStartup = null;
+        hidListener.OnStart = () => currentDuringListenerStartup = CurrentGenerationOf(service);
+
+        service.StartMonitoring(TimeSpan.FromHours(1));
+
+        Assert.NotNull(currentDuringListenerStartup);
+        Assert.NotSame(deadGeneration, currentDuringListenerStartup);
+        Assert.NotSame(deadGeneration, CurrentGenerationOf(service));
+        Assert.True(service.IsMonitoring);
+
+        service.StopMonitoring();
+        await service.DisposeAsync();
+        repository.Dispose();
+    }
+
+    private static object? CurrentGenerationOf(YubiKeyDeviceMonitorService service) =>
+        typeof(YubiKeyDeviceMonitorService)
+            .GetField("_current", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(service);
+
+    /// <summary>
     /// Fake IFindYubiKeys for testing.
     /// </summary>
     private static (
@@ -1256,10 +1340,17 @@ public class YubiKeyDeviceMonitorServiceTests
 
         public Action<HidDeviceRescanHint>? CapturedDeviceEvent { get; private set; }
 
+        /// <summary>
+        ///     Runs inside <c>StartMonitoring</c>, after generation retirement and before the successor is
+        ///     installed. The only seam that can observe that interval from outside.
+        /// </summary>
+        public Action? OnStart { get; set; }
+
         public override void Start()
         {
             StartCount++;
             CapturedDeviceEvent = DeviceEvent;
+            OnStart?.Invoke();
             if (ThrowOnStart)
                 throw new InvalidOperationException("Expected HID start failure.");
 

@@ -27,9 +27,10 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 ///     </para>
 ///     <list type="bullet">
 ///         <item>
-///             <b>DEFECT vectors</b> (names containing <c>Defect</c>) assert the Phase-2 DESIRED behavior and
-///             are EXPECTED RED against the current merger, failing for the predicted reason stated in the
-///             assertion message. They become fix evidence only via RED→GREEN in Phase 2.
+///             <b>REGRESSION vectors</b> (names containing <c>Regression</c>) were written RED against the
+///             pre-Phase-2 merger and went GREEN when the generalized guard and pigeonhole deduction
+///             landed. They are now regression pins: a failure here is a real defect, not the expected
+///             state. Each records the behavior it used to exhibit under "WAS", for history.
 ///         </item>
 ///         <item>
 ///             <b>PIN vectors</b> (names containing <c>Pin</c>) assert current expected-conservative or
@@ -147,18 +148,19 @@ public class CompositeDeviceMergerVectorTests
     }
 
     // ---------------------------------------------------------------------------------------------
-    // 1b. DEFECT vectors — expected RED against the current merger, for the predicted reason.
+    // 1b. REGRESSION vectors — RED before Phase 2, GREEN since. A failure here is a real regression.
     // ---------------------------------------------------------------------------------------------
 
     [Fact]
-    public void Merge_Defect_CrossKeyShapeB_TwoTripleKeysDisjointHidNoCcidNoSerials_MustStayStandalone()
+    public void Merge_Regression_CrossKeyShapeB_TwoTripleKeysDisjointHidNoCcidNoSerials_MustStayStandalone()
     {
         // Verified premise 4(b) of PLAN.md: two 0x0407 keys, key A's FIDO + key B's OTP enumerated, no
         // CCID, no serials. observed (FIDO|OTP) != expected (triple), but hasSmartCard == false bypasses
         // the bespoke triple guard in CanMergeByPidWithoutSerial — the merger fuses the two keys.
-        // DESIRED (Phase 2 generalized guard): PID-unique alone is insufficient when observed != expected;
-        // the descriptors must fall back to the serial path and, with null serials, stay standalone.
-        // PREDICTED RED REASON: a composite spanning both keys exists.
+        // REQUIRED (Phase 2 generalized guard, now implemented): PID-unique alone is insufficient when
+        // observed != expected; the descriptors fall back to the serial path and, with null serials, stay
+        // standalone.
+        // WAS: a composite spanning both keys existed. A failure here means that has returned.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("fido-keyA", ConnectionType.HidFido, 0x0407),
@@ -175,14 +177,14 @@ public class CompositeDeviceMergerVectorTests
     }
 
     [Fact]
-    public void Merge_Defect_TwoTripleKeysFiveOfSixSerialsKnown_OrphanIsAttributedByPigeonhole()
+    public void Merge_Regression_TwoTripleKeysFiveOfSixSerialsKnown_OrphanIsAttributedByPigeonhole()
     {
         // Pigeonhole deduction (Solution design tier 4): both 0x0407 keys fully enumerated; serials known
         // for 5 of 6 interfaces. The null-serial OTP orphan's connection type exactly fills the single
         // missing slot of exactly ONE incomplete same-PID composite (key B), and type-count closure holds
         // (2 OTP interfaces visible, 2 candidate keys).
-        // DESIRED (Phase 2): the orphan is attributed to key B; result is two complete physical keys.
-        // PREDICTED RED REASON: the current merger leaves the orphan standalone (3 devices, not 2).
+        // REQUIRED (Phase 2, now implemented): the orphan is attributed to key B; two complete physical keys.
+        // WAS: the merger left the orphan standalone (3 devices, not 2). A failure here means that has returned.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, serial: 111),
@@ -201,14 +203,14 @@ public class CompositeDeviceMergerVectorTests
     }
 
     [Fact]
-    public void Merge_Defect_TwoDualKeysThreeOfFourSerialsKnown_OrphanIsAttributedByPigeonhole()
+    public void Merge_Regression_TwoDualKeysThreeOfFourSerialsKnown_OrphanIsAttributedByPigeonhole()
     {
         // Pigeonhole deduction, 0x0403 pair: both keys fully enumerated (4 interfaces), serials known for
         // 3 of 4. Key A is complete; key B is anchored by its serial-bearing OTP. The null-serial FIDO
         // orphan's type exactly fills key B's only missing slot; type-count closure holds (2 FIDO visible,
         // 2 candidate keys).
-        // DESIRED (Phase 2): orphan attributed to key B; two complete OTP+FIDO keys.
-        // PREDICTED RED REASON: the current merger leaves the orphan standalone (3 devices, not 2).
+        // REQUIRED (Phase 2, now implemented): orphan attributed to key B; two complete OTP+FIDO keys.
+        // WAS: the merger left the orphan standalone (3 devices, not 2). A failure here means that has returned.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("otp-a", ConnectionType.HidOtp, 0x0403, serial: 111),
@@ -419,7 +421,8 @@ public class CompositeDeviceMergerVectorTests
         // two same-PID 0x0407 keys, NO serials, full visibility, each interface carrying its physical
         // device's topology key (Windows Container ID). Tier 1 groups them into two complete keys with no
         // serial read at all — the only complete answer for serial-less hardware.
-        // PREDICTED RED (tier-2..5 only, i.e. no topology input): conservative six-way split.
+        // WAS (tier-2..5 only, i.e. no topology input): conservative six-way split. Tier 1 now resolves it;
+        // a six-way split here means topology attribution has regressed.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, topologyKey: "container-A"),
@@ -452,7 +455,8 @@ public class CompositeDeviceMergerVectorTests
         // epistemic-bound pin — two 0x0403 keys, one complementary interface each, no serials, observed
         // == expected — which tiers 2..5 must merge. With topology evidence the two interfaces are known
         // to belong to different physical devices and MUST stay split.
-        // PREDICTED RED (tier-2..5 only): one cross-key composite ykphysical:pid:0403.
+        // WAS (tier-2..5 only): one cross-key composite ykphysical:pid:0403. Tier 1 now separates them;
+        // a cross-key composite here means topology attribution has regressed.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("otp-keyA", ConnectionType.HidOtp, 0x0403, topologyKey: "container-A"),
@@ -598,6 +602,44 @@ public class CompositeDeviceMergerVectorTests
     // ---------------------------------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------------------------------
+
+    /// <summary>
+    ///     Output <c>DeviceId</c>s must be pairwise distinct. Two devices sharing an id would make the id
+    ///     useless as the durable key the discovery contract tells consumers to rely on.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         This was previously prose only. <c>CompositeDeviceMerger</c> mints <c>ykphysical:{serial}</c>
+    ///         inside a per-PID group, and the comment justifying that ("a physical key has exactly one PID at
+    ///         a time, so serial evidence never needs to correlate across PID classes") is a claim about the
+    ///         physical world enforced by nothing in code. The existing invariants do not cover it:
+    ///         conservation constrains <em>input</em> interface ids, and the cross-scan test compares two
+    ///         scans' id sets. Neither rejects a duplicate within one result.
+    ///     </para>
+    ///     <para>
+    ///         The theory feeds the same serial through two PID classes — the one shape that reaches the
+    ///         duplicate-minting path.
+    ///     </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(0x0407, 0x0403)]
+    [InlineData(0x0407, 0x0407)]
+    public void Merge_AnyVector_ProducesPairwiseDistinctDeviceIds(ushort firstPid, ushort secondPid)
+    {
+        const int sharedSerial = 500;
+
+        var result = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("ccid-first", ConnectionType.SmartCard, firstPid, sharedSerial),
+            Descriptor("otp-first", ConnectionType.HidOtp, firstPid, sharedSerial),
+            Descriptor("ccid-second", ConnectionType.SmartCard, secondPid, sharedSerial),
+            Descriptor("otp-second", ConnectionType.HidOtp, secondPid, sharedSerial)
+        ]);
+
+        var ids = result.Select(d => d.DeviceId).ToList();
+
+        Assert.Equal(ids.Count, ids.Distinct(StringComparer.Ordinal).Count());
+    }
 
     private static DeviceInterfaceDescriptor Descriptor(
         string deviceId,

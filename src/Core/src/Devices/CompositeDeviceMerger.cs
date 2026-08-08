@@ -86,6 +86,14 @@ internal static class CompositeDeviceMerger
 
         var pidCounts = ComputePidCounts(usbRemaining);
 
+        // Serials observed under more than one PID. Normally empty: a physical key has exactly one PID at a
+        // time, so the same serial should never span PID classes. It is not impossible in practice — a
+        // reconfiguration changes a key's PID, and a scan overlapping that transition can enumerate a stale
+        // interface under the old PID alongside a fresh one under the new one. Grouping stays per-PID
+        // (correct: those really are different enumerations), but the minted DeviceId must not collide, so
+        // any serial in this set is qualified with its PID. See MintPhysicalDeviceId.
+        var crossPidSerials = FindSerialsSpanningMultiplePids(usbRemaining);
+
         // USB interfaces with a known PID present on exactly one physical key: merge by PID (no serial).
         var mergeableByPid = usbRemaining.Where(d => d.Pid is { } pid && pidCounts.GetValueOrDefault(pid) == 1);
         foreach (var group in mergeableByPid.GroupBy(d => d.Pid!.Value).OrderBy(g => g.Key))
@@ -93,15 +101,14 @@ internal static class CompositeDeviceMerger
             if (CanMergeByPidWithoutSerial(group))
                 AddGroupedDevice(group, $"ykphysical:pid:{group.Key:X4}", result);
             else
-                MergeSamePidBySerialWithDeduction(group.Key, [.. group], result);
+                MergeSamePidBySerialWithDeduction(group.Key, [.. group], result, crossPidSerials);
         }
 
         // USB interfaces with a known PID present on more than one physical key: disambiguate by serial
-        // within each PID class (a physical key has exactly one PID at a time, so serial evidence never
-        // needs to correlate across PID classes), then attribute remaining orphans by pigeonhole deduction.
+        // within each PID class, then attribute remaining orphans by pigeonhole deduction.
         var ambiguous = usbRemaining.Where(d => d.Pid is { } pid && pidCounts.GetValueOrDefault(pid) > 1);
         foreach (var group in ambiguous.GroupBy(d => d.Pid!.Value).OrderBy(g => g.Key))
-            MergeSamePidBySerialWithDeduction(group.Key, [.. group], result);
+            MergeSamePidBySerialWithDeduction(group.Key, [.. group], result, crossPidSerials);
 
         // USB interfaces without a known PID (e.g. unparsed CCID outside the serial-only path), NFC, and
         // other non-USB interfaces stand alone (conservative).
@@ -186,10 +193,39 @@ internal static class CompositeDeviceMerger
     ///     the candidate keys (see <see cref="NoInterfaceTypeOutnumbersCandidateKeys" />). Any ambiguity
     ///     leaves the orphan conservatively standalone.
     /// </summary>
+    /// <summary>
+    ///     Serials that appear under more than one PID among the given USB interfaces.
+    /// </summary>
+    private static HashSet<int> FindSerialsSpanningMultiplePids(
+        IReadOnlyList<DeviceInterfaceDescriptor> usbDescriptors) =>
+    [
+        .. usbDescriptors
+            .Where(d => d.Serial is not null && d.Pid is not null)
+            .GroupBy(d => d.Serial!.Value)
+            .Where(g => g.Select(d => d.Pid!.Value).Distinct().Count() > 1)
+            .Select(g => g.Key)
+    ];
+
+    /// <summary>
+    ///     The DeviceId for a serial-anchored physical key.
+    /// </summary>
+    /// <remarks>
+    ///     Plain <c>ykphysical:{serial}</c> in every normal case. When the same serial has been seen under
+    ///     more than one PID the id is qualified with the PID, because two per-PID groups would otherwise
+    ///     mint the same id and produce two devices sharing a DeviceId. That would break the discovery
+    ///     contract's promise that the id is a durable per-key key, and it is the caller-visible half of the
+    ///     invariant pinned by <c>Merge_AnyVector_ProducesPairwiseDistinctDeviceIds</c>.
+    /// </remarks>
+    private static string MintPhysicalDeviceId(ushort pid, int serial, HashSet<int> crossPidSerials) =>
+        crossPidSerials.Contains(serial)
+            ? $"ykphysical:pid:{pid:X4}:{serial}"
+            : $"ykphysical:{serial}";
+
     private static void MergeSamePidBySerialWithDeduction(
         ushort pid,
         IReadOnlyList<DeviceInterfaceDescriptor> descriptors,
-        List<IYubiKey> result)
+        List<IYubiKey> result,
+        HashSet<int> crossPidSerials)
     {
         var anchored = descriptors
             .Where(d => d.Serial is not null)
@@ -231,7 +267,7 @@ internal static class CompositeDeviceMerger
             IEnumerable<DeviceInterfaceDescriptor> allMembers = attributed.TryGetValue(serial, out var extras)
                 ? [.. members, .. extras]
                 : members;
-            AddGroupedDevice(allMembers, $"ykphysical:{serial}", result);
+            AddGroupedDevice(allMembers, MintPhysicalDeviceId(pid, serial, crossPidSerials), result);
         }
 
         // Unattributed null serials do not collapse (conservative standalone).

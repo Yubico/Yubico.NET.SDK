@@ -41,9 +41,19 @@ internal interface IYubiKeyDeviceMonitorService : IAsyncDisposable
     /// </summary>
     /// <param name="interval">The polling interval between scans when no events occur.</param>
     /// <remarks>
+    /// <para>
     /// Monitoring is event-driven with interval-based fallback. When device events
     /// occur (via HID or SmartCard listeners), a rescan is triggered immediately
     /// with coalescing to avoid redundant scans.
+    /// </para>
+    /// <para>
+    /// Calling this while monitoring is already running is a no-op, <b>including when
+    /// <paramref name="interval"/> differs from the running one</b>. The new interval is
+    /// ignored rather than applied, and no error is raised. Stop monitoring and start it
+    /// again to change the interval. This is a deliberate contract, not an oversight: a
+    /// silent partial application would be worse than either extreme, and throwing would
+    /// make an idempotent start unsafe to call defensively.
+    /// </para>
     /// </remarks>
     void StartMonitoring(TimeSpan interval);
 

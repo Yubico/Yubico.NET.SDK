@@ -47,6 +47,24 @@ concept); failures and null serials are retried on later scans. This is pinned b
 `FindAllAsync_PcscReaderRenameBetweenScans_OldEntryMissesAndSuccessfulRereadHeals_Pin` in
 `src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs`.
 
+A cached identity is evidence about specific hardware in a specific configuration, and it expires with
+either. **Hardware**: scan-time eviction only catches interfaces observed absent, and a same-slot swap
+completing between scans reuses the slot-derived interface identifier — the old key's serial would be
+attributed to its same-model successor (key substitution). A physical swap cannot happen without the OS
+observing removal and arrival, so the device monitor forwards every listener event to
+`IFindYubiKeys.NotifyTransportActivity` at ingress, which discards that transport's cached identities
+before the rescan the event triggers. Eviction is per transport (HID activity does not discard PC/SC
+evidence, and vice versa). **Configuration**: each entry records the PID observed at read time, and a
+hit under a different PID is a miss. Pinned by
+`FindAllAsync_SameSlotSwapWithTransportActivity_RereadsInsteadOfServingTheOldKeysSerial`,
+`NotifyTransportActivity_HidOnly_LeavesPcscIdentityCacheIntact`, and
+`FindAllAsync_PidChangeOnSameInterfaceId_IsACacheMissNotAHit`; the monitor wiring by
+`ListenerEvents_NotifyTheFinderOfTransportActivity_PerTransport`.
+
+Documented bound: without monitoring running there are no listener events, and staleness detection
+degrades to scan-observed absence. Consumers driving `FindAllAsync` directly across a physical swap
+they orchestrated themselves should force a rescan after replugging.
+
 ## Device identity: what `DeviceId` does and does not promise
 
 The merge hierarchy above decides *which interfaces form one key*. It also decides *what that key is
@@ -70,21 +88,20 @@ the way described below. Where this document says "stable interface `DeviceId`" 
 |---|---|---|
 | 1 — topology (Container ID) | `ykphysical:topology:{key}` | Windows only |
 | 2 — serial | `ykphysical:{serial}` | all platforms |
-| 2 — serial, seen under more than one PID in the same scan | `ykphysical:pid:{PID:X4}:{serial}` | all platforms |
 | 3/4 — PID uniqueness / pigeonhole | `ykphysical:pid:{PID:X4}` | all platforms |
 | 5 — conservative standalone | the interface identifier, published alone | all platforms |
 
-The PID-qualified serial shape exists only to prevent a **duplicate** `DeviceId`. Interfaces are grouped
-per PID, so one serial appearing under two PIDs in a single scan would otherwise mint the same
-`ykphysical:{serial}` twice and return two devices sharing an identifier — strictly worse than an unstable
-one, because a consumer keying on it would silently conflate them.
-
-That input is not supposed to be physically possible: a key has one PID at a time. It becomes possible
-around a reconfiguration, where a scan can catch a stale interface under the old PID alongside a fresh one
-under the new. A serial↔PID flip has been observed on macOS hardware. So a key caught mid-transition is
-reported with the qualified shape for that scan and reverts to `ykphysical:{serial}` once it settles, which
-surfaces as ordinary remove/add churn. This is a deliberate trade and the reasoning is recorded at
-`CompositeDeviceMerger.MintPhysicalDeviceId`.
+**At most one `ykphysical:{serial}` object exists per serial per scan.** A serial observed under more
+than one PID in a single scan is one physical key caught mid-reconfiguration — serial is globally unique
+per key, and PID changes with configuration — enumerated once staly and once fresh. A serial↔PID flip has
+been observed on macOS hardware. Those enumerations are **not merged into one composite** (it would hold
+two members of the same connection type, invisible in `AvailableConnections` and resolved arbitrarily at
+connect time) and they do **not** both mint the id. Instead, the *winner rule* applies: the PID group
+whose serial-anchored census exactly matches its PID's expected interface set keeps `ykphysical:{serial}`;
+every other contested interface publishes standalone. Zero or multiple complete groups is ambiguity, and
+ambiguity fragments conservatively — the next scan converges. The reasoning is recorded at
+`CompositeDeviceMerger.ResolveContestedSerials`, and the rule is pinned by the `Merge_ContestedSerial_*`
+vectors plus `Merge_AnyVector_ProducesPairwiseDistinctDeviceIds`.
 
 macOS and Linux have no Container ID, so they never mint tier-1 identifiers and degrade to serial, then
 PID. The same rig therefore yields different identifier shapes on different operating systems.
@@ -170,10 +187,10 @@ Hardware invariants: `Core.IntegrationTests/Devices/CompositeDiscoveryIntegratio
 
 | Guarantee | Pinned by |
 |---|---|
-| G1 | `Merge_Defect_CrossKeyShapeB_TwoTripleKeysDisjointHidNoCcidNoSerials_MustStayStandalone`, `Merge_TwoSamePidTripleKeysAllSerialsKnown_GroupsBySerial_Pin`, `Merge_TwoSamePidDualKeysAllSerialsKnown_GroupsBySerial_Pin` |
+| G1 | `Merge_Regression_CrossKeyShapeB_TwoTripleKeysDisjointHidNoCcidNoSerials_MustStayStandalone`, `Merge_TwoSamePidTripleKeysAllSerialsKnown_GroupsBySerial_Pin`, `Merge_TwoSamePidDualKeysAllSerialsKnown_GroupsBySerial_Pin` |
 | G2 (bound) | `Merge_EpistemicBound_ComplementaryPartials_TwoDualKeysOneInterfaceEach_MergeIsRepresentable_Pin`, `Merge_ComplementaryPartialMasquerade_MisattributionIsRepresentableAndBounded_Pin` |
 | G2 (Windows closes it) | `Merge_ComplementaryPartialsWithTopologyKeys_SplitByTopology_NotMergedByPid` |
-| G3 | `Merge_Defect_TwoTripleKeysFiveOfSixSerialsKnown_OrphanIsAttributedByPigeonhole`, `Merge_Defect_TwoDualKeysThreeOfFourSerialsKnown_OrphanIsAttributedByPigeonhole`, `Merge_TwoTripleKeysBothMissingSameInterfaceTypeSerial_StaysConservativelySplit_Pin`, `Merge_TwoSameTypeOrphansExceedAnchoredKeys_StayStandaloneInsteadOfDoubleAttribution_Pin`, plus cache convergence/eviction vectors in `FindYubiKeysFaultInjectionTests` |
+| G3 | `Merge_Regression_TwoTripleKeysFiveOfSixSerialsKnown_OrphanIsAttributedByPigeonhole`, `Merge_Regression_TwoDualKeysThreeOfFourSerialsKnown_OrphanIsAttributedByPigeonhole`, `Merge_TwoTripleKeysBothMissingSameInterfaceTypeSerial_StaysConservativelySplit_Pin`, `Merge_TwoSameTypeOrphansExceedAnchoredKeys_StayStandaloneInsteadOfDoubleAttribution_Pin`, plus cache convergence/eviction vectors in `FindYubiKeysFaultInjectionTests` |
 | G4 (Windows yes) | `Merge_SeriallessPairWithDistinctTopologyKeys_GroupsIntoTwoCompleteKeys` |
 | G4 (mac/Linux no) | `Merge_TwoSamePidTripleKeysNoSerialsFullVisibility_ConservativeSplit_Pin`, `Merge_TwoSamePidDualKeysNoSerialsFullVisibility_ConservativeSplit_Pin` |
 | G5 | `Merge_ReconfiguredKeyReenumeratedUnderNewPid_GroupsByCurrentPidTruth_Pin`, `Merge_OneOfTwoKeysReconfigured_DifferentPidsNoSerials_TriviallyDistinguishable_Pin`; hardware: Phase 4 Tier 1 reconfiguration matrix (ISA) |

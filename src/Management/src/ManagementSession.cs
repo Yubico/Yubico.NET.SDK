@@ -147,8 +147,11 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
     }
 
-    public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default) =>
-        DeviceInfoReader.ReadAsync(_protocol, _version, cancellationToken);
+    public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        return DeviceInfoReader.ReadAsync(_protocol, _version, cancellationToken);
+    }
 
     public Task SetDeviceConfigAsync(
         DeviceConfig config,
@@ -157,6 +160,9 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         byte[]? newLockCode = null,
         CancellationToken cancellationToken = default)
     {
+        // Before the feature gate: a disposed session should say so, not report the firmware verdict of a
+        // session that no longer exists.
+        ThrowIfDisposed();
         EnsureSupports(FeatureSetConfig);
         ArgumentNullException.ThrowIfNull(config);
 
@@ -189,6 +195,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
 
     public Task ResetDeviceAsync(CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
         EnsureSupports(FeatureDeviceReset);
         return _backend.DeviceResetAsync(cancellationToken).AsTask();
     }

@@ -600,6 +600,126 @@ public class CompositeDeviceMergerVectorTests
     }
 
     // ---------------------------------------------------------------------------------------------
+    // 5. Cross-PID contested serials — the winner rule.
+    //
+    // A serial observed under more than one PID in a single scan is one physical key caught
+    // mid-reconfiguration (serial is globally unique per key; PID changes with configuration). The
+    // groups must NOT be merged into one composite: the members would then contain two interfaces of
+    // the same connection type, AvailableConnections' flags-union would hide that, and
+    // TryResolveMember's first-match would route sessions to an arbitrary (possibly dying) member.
+    // Instead, at most ONE group may carry the durable ykphysical:{serial} id — the group whose
+    // anchored census exactly matches its PID's expected interface set — and every other contested
+    // group's interfaces publish standalone. Zero or multiple complete groups is ambiguity, and
+    // ambiguity fragments conservatively rather than guessing.
+    // ---------------------------------------------------------------------------------------------
+
+    /// <summary>
+    ///     One complete group wins the durable id; the stale group's interfaces stand alone.
+    /// </summary>
+    /// <remarks>
+    ///     The 0x0403 group (otp+fido) exactly matches its PID's expected set, so it is the live
+    ///     enumeration; the 0x0407 group (ccid+otp, missing fido against the triple) is the stale one. The
+    ///     physical key keeps its durable <c>ykphysical:{serial}</c> identity across the transition, and no
+    ///     composite ever holds two members of one connection type.
+    /// </remarks>
+    [Fact]
+    public void Merge_ContestedSerial_CompleteGroupWinsTheSerialId_StaleGroupStandsAlone()
+    {
+        var result = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("ccid-old", ConnectionType.SmartCard, 0x0407, serial: 500),
+            Descriptor("otp-old", ConnectionType.HidOtp, 0x0407, serial: 500),
+            Descriptor("otp-new", ConnectionType.HidOtp, 0x0403, serial: 500),
+            Descriptor("fido-new", ConnectionType.HidFido, 0x0403, serial: 500)
+        ]);
+
+        var winner = Assert.IsType<CompositeYubiKey>(
+            Assert.Single(result, d => d.DeviceId == "ykphysical:500"));
+        Assert.Equal(new[] { "fido-new", "otp-new" }, winner.MemberDeviceIds);
+        Assert.Single(result, d => d.DeviceId == "ccid-old");
+        Assert.Single(result, d => d.DeviceId == "otp-old");
+        Assert.Equal(3, result.Count);
+    }
+
+    /// <summary>
+    ///     No complete group means no winner: every contested interface stands alone.
+    /// </summary>
+    /// <remarks>
+    ///     Neither census matches its PID's expected set (ccid+otp is missing fido against 0x0407's
+    ///     triple, and contains an unexpected ccid against 0x0403's otp+fido). Picking either group would
+    ///     be a guess, so neither gets the durable id and the next scan converges.
+    /// </remarks>
+    [Fact]
+    public void Merge_ContestedSerial_NoCompleteGroup_AllInterfacesStandAlone()
+    {
+        var result = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("ccid-first", ConnectionType.SmartCard, 0x0407, serial: 500),
+            Descriptor("otp-first", ConnectionType.HidOtp, 0x0407, serial: 500),
+            Descriptor("ccid-second", ConnectionType.SmartCard, 0x0403, serial: 500),
+            Descriptor("otp-second", ConnectionType.HidOtp, 0x0403, serial: 500)
+        ]);
+
+        Assert.Equal(4, result.Count);
+        Assert.All(result, d => Assert.IsNotType<CompositeYubiKey>(d));
+        Assert.DoesNotContain(result, d => d.DeviceId.StartsWith("ykphysical:", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    ///     Two complete groups is ambiguity, not a tie to break: everything stands alone.
+    /// </summary>
+    /// <remarks>
+    ///     Both censuses are complete for their PIDs, so completeness cannot say which enumeration is
+    ///     live. Any tie-break (newest PID, enumeration order) would be guessing with a different name.
+    /// </remarks>
+    [Fact]
+    public void Merge_ContestedSerial_MultipleCompleteGroups_AllInterfacesStandAlone()
+    {
+        var result = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, serial: 500),
+            Descriptor("otp-a", ConnectionType.HidOtp, 0x0407, serial: 500),
+            Descriptor("fido-a", ConnectionType.HidFido, 0x0407, serial: 500),
+            Descriptor("otp-b", ConnectionType.HidOtp, 0x0403, serial: 500),
+            Descriptor("fido-b", ConnectionType.HidFido, 0x0403, serial: 500)
+        ]);
+
+        Assert.Equal(5, result.Count);
+        Assert.All(result, d => Assert.IsNotType<CompositeYubiKey>(d));
+    }
+
+    /// <summary>
+    ///     A contested serial is not a pigeonhole candidate: a null-serial orphan cannot rescue a losing
+    ///     group into completeness, and is published standalone alongside it.
+    /// </summary>
+    /// <remarks>
+    ///     Winner determination uses anchored (serial-bearing) members only. If attributed orphans could
+    ///     complete a contested census, orphan attribution — a deduction — would decide which enumeration
+    ///     gets the durable identity, inverting the evidence hierarchy during the one window where the
+    ///     evidence is least trustworthy.
+    /// </remarks>
+    [Fact]
+    public void Merge_ContestedSerial_OrphanCannotRescueALosingGroup()
+    {
+        var result = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("ccid-old", ConnectionType.SmartCard, 0x0407, serial: 500),
+            Descriptor("otp-old", ConnectionType.HidOtp, 0x0407, serial: 500),
+            Descriptor("fido-orphan", ConnectionType.HidFido, 0x0407), // identity read failed: null serial
+            Descriptor("otp-new", ConnectionType.HidOtp, 0x0403, serial: 500),
+            Descriptor("fido-new", ConnectionType.HidFido, 0x0403, serial: 500)
+        ]);
+
+        var winner = Assert.IsType<CompositeYubiKey>(
+            Assert.Single(result, d => d.DeviceId == "ykphysical:500"));
+        Assert.Equal(new[] { "fido-new", "otp-new" }, winner.MemberDeviceIds);
+        Assert.Single(result, d => d.DeviceId == "ccid-old");
+        Assert.Single(result, d => d.DeviceId == "otp-old");
+        Assert.Single(result, d => d.DeviceId == "fido-orphan");
+        Assert.Equal(4, result.Count);
+    }
+
+    // ---------------------------------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------------------------------
 
@@ -609,12 +729,11 @@ public class CompositeDeviceMergerVectorTests
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         This was previously prose only. <c>CompositeDeviceMerger</c> mints <c>ykphysical:{serial}</c>
-    ///         inside a per-PID group, and the comment justifying that ("a physical key has exactly one PID at
-    ///         a time, so serial evidence never needs to correlate across PID classes") is a claim about the
-    ///         physical world enforced by nothing in code. The existing invariants do not cover it:
-    ///         conservation constrains <em>input</em> interface ids, and the cross-scan test compares two
-    ///         scans' id sets. Neither rejects a duplicate within one result.
+    ///         This invariant was originally prose only, and asserting it found a real defect: per-PID
+    ///         minting produced two composites both named <c>ykphysical:500</c> when one serial appeared
+    ///         under two PIDs. The winner rule (<c>ResolveContestedSerials</c>) now enforces it. This theory
+    ///         is deliberately implementation-blind — it asserts only pairwise distinctness, so it keeps
+    ///         guarding the invariant through any future change to how contested serials are resolved.
     ///     </para>
     ///     <para>
     ///         The theory feeds the same serial through two PID classes — the one shape that reaches the

@@ -86,29 +86,32 @@ internal static class CompositeDeviceMerger
 
         var pidCounts = ComputePidCounts(usbRemaining);
 
-        // Serials observed under more than one PID. Normally empty: a physical key has exactly one PID at a
-        // time, so the same serial should never span PID classes. It is not impossible in practice — a
-        // reconfiguration changes a key's PID, and a scan overlapping that transition can enumerate a stale
-        // interface under the old PID alongside a fresh one under the new one. Grouping stays per-PID
-        // (correct: those really are different enumerations), but the minted DeviceId must not collide, so
-        // any serial in this set is qualified with its PID. See MintPhysicalDeviceId.
-        var crossPidSerials = FindSerialsSpanningMultiplePids(usbRemaining);
+        // Serials observed under more than one PID this scan. Normally empty: a physical key has exactly
+        // one PID at a time, so one serial under two PIDs is ONE key caught mid-reconfiguration (serial is
+        // globally unique per key; PID changes with configuration), enumerated once staly and once fresh.
+        // Those enumerations must not be fused into one composite - it would hold two members of the same
+        // connection type, which AvailableConnections' flags-union hides and TryResolveMember's first-match
+        // would route to arbitrarily - and they must not both mint ykphysical:{serial}. The winner rule
+        // resolves it; see ResolveContestedSerials.
+        var contested = ResolveContestedSerials(usbRemaining);
 
         // USB interfaces with a known PID present on exactly one physical key: merge by PID (no serial).
+        // A group holding a contested serial never takes the no-serial shortcut: the shortcut would discard
+        // the very evidence (the serial) that decides which enumeration keeps the durable identity.
         var mergeableByPid = usbRemaining.Where(d => d.Pid is { } pid && pidCounts.GetValueOrDefault(pid) == 1);
         foreach (var group in mergeableByPid.GroupBy(d => d.Pid!.Value).OrderBy(g => g.Key))
         {
-            if (CanMergeByPidWithoutSerial(group))
+            if (CanMergeByPidWithoutSerial(group) && !group.Any(d => d.Serial is { } s && contested.Serials.Contains(s)))
                 AddGroupedDevice(group, $"ykphysical:pid:{group.Key:X4}", result);
             else
-                MergeSamePidBySerialWithDeduction(group.Key, [.. group], result, crossPidSerials);
+                MergeSamePidBySerialWithDeduction(group.Key, [.. group], result, contested);
         }
 
         // USB interfaces with a known PID present on more than one physical key: disambiguate by serial
         // within each PID class, then attribute remaining orphans by pigeonhole deduction.
         var ambiguous = usbRemaining.Where(d => d.Pid is { } pid && pidCounts.GetValueOrDefault(pid) > 1);
         foreach (var group in ambiguous.GroupBy(d => d.Pid!.Value).OrderBy(g => g.Key))
-            MergeSamePidBySerialWithDeduction(group.Key, [.. group], result, crossPidSerials);
+            MergeSamePidBySerialWithDeduction(group.Key, [.. group], result, contested);
 
         // USB interfaces without a known PID (e.g. unparsed CCID outside the serial-only path), NFC, and
         // other non-USB interfaces stand alone (conservative).
@@ -187,50 +190,80 @@ internal static class CompositeDeviceMerger
     }
 
     /// <summary>
-    ///     Serials that appear under more than one PID among the given USB interfaces.
+    ///     The cross-PID contested-serial verdict for one scan: which serials were observed under more
+    ///     than one PID, and for each, which PID group (if any) won the durable <c>ykphysical:{serial}</c>
+    ///     identity.
     /// </summary>
-    private static HashSet<int> FindSerialsSpanningMultiplePids(
-        IReadOnlyList<DeviceInterfaceDescriptor> usbDescriptors) =>
-    [
-        .. usbDescriptors
-            .Where(d => d.Serial is not null && d.Pid is not null)
-            .GroupBy(d => d.Serial!.Value)
-            .Where(g => g.Select(d => d.Pid!.Value).Distinct().Count() > 1)
-            .Select(g => g.Key)
-    ];
+    private readonly record struct ContestedSerials(
+        HashSet<int> Serials,
+        IReadOnlyDictionary<int, ushort> WinnerPidBySerial)
+    {
+        public static readonly ContestedSerials None = new([], new Dictionary<int, ushort>());
+
+        /// <summary>Whether this (pid, serial) group carries the durable identity.</summary>
+        public bool IsWinner(ushort pid, int serial) =>
+            !Serials.Contains(serial)
+            || (WinnerPidBySerial.TryGetValue(serial, out var winner) && winner == pid);
+    }
 
     /// <summary>
-    ///     The DeviceId for a serial-anchored physical key.
+    ///     Finds serials observed under more than one PID and decides which PID group, if any, keeps the
+    ///     durable <c>ykphysical:{serial}</c> identity: the group whose anchored census exactly matches its
+    ///     PID's expected interface set. Zero or multiple complete groups leaves the serial with no winner.
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         Plain <c>ykphysical:{serial}</c> in every normal case. When the same serial has been seen
-    ///         under more than one PID the id is qualified with the PID, because two per-PID groups would
-    ///         otherwise mint the same id and produce two devices sharing a DeviceId. That would break the
-    ///         discovery contract's promise that the id is a durable per-key key, and it is the
-    ///         caller-visible half of the invariant pinned by
-    ///         <c>Merge_AnyVector_ProducesPairwiseDistinctDeviceIds</c>.
+    ///         One serial under two PIDs is one physical key mid-reconfiguration, observed through a stale
+    ///         enumeration and a fresh one. Completeness against <see
+    ///         cref="ReaderNamePidParser.ExpectedConnectionsForPid" /> identifies the live enumeration
+    ///         without guessing: the stale one is dying interface-by-interface and its census is failing,
+    ///         while the fresh one converges on its PID's full set. When completeness cannot decide - no
+    ///         group complete, or more than one - every contested interface publishes standalone and the
+    ///         next scan converges. Any tie-break beyond completeness (newest PID, enumeration order) would
+    ///         be guessing with a different name.
     ///     </para>
     ///     <para>
-    ///         <b>Known trade, accepted by owner decision.</b> Because the qualification is decided per
-    ///         scan, a key caught mid-reconfiguration is reported as <c>ykphysical:pid:{PID}:{serial}</c>
-    ///         for that scan and reverts to <c>ykphysical:{serial}</c> once the transition settles. So this
-    ///         exchanges a duplicate-id defect for transient id instability in exactly the same rare window.
-    ///         That is the better of the two — a duplicate id is silently wrong for every consumer using the
-    ///         id as a key, whereas the instability is confined to a scan in which the key genuinely is in
-    ///         flux, and surfaces as ordinary remove/add churn.
+    ///         The census deliberately uses <em>anchored</em> members only (interfaces that actually bear
+    ///         the serial). If attributed null-serial orphans could complete a contested census, a
+    ///         deduction would decide which enumeration gets the durable identity - inverting the evidence
+    ///         hierarchy during the one window where the evidence is least trustworthy.
     ///     </para>
     ///     <para>
-    ///         Open for review: the more conservative alternative is to leave contradictory interfaces
-    ///         unattributed until the transition settles, which matches this merger's "never guess" evidence
-    ///         hierarchy and avoids minting a composite at all. Not taken here because it is a wider
-    ///         behavioural change than the id collision warrants.
+    ///         This upholds two invariants together: output <c>DeviceId</c>s are pairwise distinct
+    ///         (pinned by <c>Merge_AnyVector_ProducesPairwiseDistinctDeviceIds</c>), and at most one
+    ///         <c>ykphysical:{serial}</c> object exists per serial per scan, so the id never silently
+    ///         names two objects and never needs a scan-scoped qualified form that would look more durable
+    ///         than it is.
     ///     </para>
     /// </remarks>
-    private static string MintPhysicalDeviceId(ushort pid, int serial, HashSet<int> crossPidSerials) =>
-        crossPidSerials.Contains(serial)
-            ? $"ykphysical:pid:{pid:X4}:{serial}"
-            : $"ykphysical:{serial}";
+    private static ContestedSerials ResolveContestedSerials(
+        IReadOnlyList<DeviceInterfaceDescriptor> usbDescriptors)
+    {
+        var byContestedSerial = usbDescriptors
+            .Where(d => d.Serial is not null && d.Pid is { } pid && ReaderNamePidParser.IsKnownPid(pid))
+            .GroupBy(d => d.Serial!.Value)
+            .Where(g => g.Select(d => d.Pid!.Value).Distinct().Count() > 1)
+            .ToList();
+
+        if (byContestedSerial.Count == 0) return ContestedSerials.None;
+
+        var serials = new HashSet<int>();
+        var winners = new Dictionary<int, ushort>();
+        foreach (var serialGroup in byContestedSerial)
+        {
+            serials.Add(serialGroup.Key);
+
+            var completePids = serialGroup
+                .GroupBy(d => d.Pid!.Value)
+                .Where(pidGroup => ObservedConnections(pidGroup) == ReaderNamePidParser.ExpectedConnectionsForPid(pidGroup.Key))
+                .Select(pidGroup => pidGroup.Key)
+                .ToList();
+
+            if (completePids.Count == 1) winners[serialGroup.Key] = completePids[0];
+        }
+
+        return new ContestedSerials(serials, winners);
+    }
 
     /// <summary>
     ///     Tier 2 + tier 4 for one same-PID group: serial evidence groups anchored interfaces; then
@@ -239,11 +272,16 @@ internal static class CompositeDeviceMerger
     ///     the candidate keys (see <see cref="NoInterfaceTypeOutnumbersCandidateKeys" />). Any ambiguity
     ///     leaves the orphan conservatively standalone.
     /// </summary>
+    /// <remarks>
+    ///     A contested serial that lost (or had no winner) publishes its members standalone and is excluded
+    ///     from pigeonhole candidacy — see <see cref="ResolveContestedSerials" />. A contested winner is
+    ///     complete by construction, so it has no missing slot an orphan could be attributed into.
+    /// </remarks>
     private static void MergeSamePidBySerialWithDeduction(
         ushort pid,
         IReadOnlyList<DeviceInterfaceDescriptor> descriptors,
         List<IYubiKey> result,
-        HashSet<int> crossPidSerials)
+        ContestedSerials contested)
     {
         var anchored = descriptors
             .Where(d => d.Serial is not null)
@@ -253,18 +291,24 @@ internal static class CompositeDeviceMerger
             .ToList();
         var orphans = descriptors.Where(d => d.Serial is null).ToList();
 
+        // Contested serials that did not win in this PID group publish standalone: the durable identity,
+        // if awarded at all, belongs to the complete enumeration in another PID group.
+        var eligible = anchored.Where(a => contested.IsWinner(pid, a.Serial)).ToList();
+        foreach (var loser in anchored.Where(a => !contested.IsWinner(pid, a.Serial)))
+            result.AddRange(loser.Members.Select(m => m.Device));
+
         var attributed = new Dictionary<int, List<DeviceInterfaceDescriptor>>();
         var standalone = new List<DeviceInterfaceDescriptor>();
 
         var expected = ReaderNamePidParser.ExpectedConnectionsForPid(pid);
-        var canAttributeOrphans = anchored.Count > 0
+        var canAttributeOrphans = eligible.Count > 0
             && orphans.Count > 0
-            && NoInterfaceTypeOutnumbersCandidateKeys(expected, descriptors, anchored.Count);
+            && NoInterfaceTypeOutnumbersCandidateKeys(expected, descriptors, eligible.Count);
 
         foreach (var orphan in orphans)
         {
             var candidates = canAttributeOrphans && expected.SupportsConnection(orphan.Connection)
-                ? anchored.Where(candidate => !ObservedConnections(candidate.Members).SupportsConnection(orphan.Connection)).ToList()
+                ? eligible.Where(candidate => !ObservedConnections(candidate.Members).SupportsConnection(orphan.Connection)).ToList()
                 : [];
 
             if (candidates.Count == 1)
@@ -280,12 +324,12 @@ internal static class CompositeDeviceMerger
             }
         }
 
-        foreach (var (serial, members) in anchored)
+        foreach (var (serial, members) in eligible)
         {
             IEnumerable<DeviceInterfaceDescriptor> allMembers = attributed.TryGetValue(serial, out var extras)
                 ? [.. members, .. extras]
                 : members;
-            AddGroupedDevice(allMembers, MintPhysicalDeviceId(pid, serial, crossPidSerials), result);
+            AddGroupedDevice(allMembers, $"ykphysical:{serial}", result);
         }
 
         // Unattributed null serials do not collapse (conservative standalone).
@@ -313,7 +357,7 @@ internal static class CompositeDeviceMerger
         return true;
     }
 
-    private static ConnectionType ObservedConnections(IReadOnlyList<DeviceInterfaceDescriptor> descriptors) =>
+    private static ConnectionType ObservedConnections(IEnumerable<DeviceInterfaceDescriptor> descriptors) =>
         descriptors.Aggregate(
             ConnectionType.Unknown,
             static (current, descriptor) => current | descriptor.Connection);

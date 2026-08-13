@@ -166,12 +166,23 @@ Derive the SHA-256 fingerprint from the certificate, e.g.:
     }
 
     $algo = switch ($fp.Length) { 64 { 'SHA256' } 96 { 'SHA384' } 128 { 'SHA512' } }
-    $hasher = [System.Security.Cryptography.HashAlgorithm]::Create($algo)
+    # HashAlgorithm.Create(string) is obsolete and can return $null on modern
+    # .NET/PowerShell; use the algorithm-specific Create() instead.
+    $hasher = switch ($algo) {
+        'SHA256' { [System.Security.Cryptography.SHA256]::Create() }
+        'SHA384' { [System.Security.Cryptography.SHA384]::Create() }
+        'SHA512' { [System.Security.Cryptography.SHA512]::Create() }
+    }
 
     $match = $null
-    foreach ($c in (Get-ChildItem Cert:\CurrentUser\My)) {
-        $certFp = [BitConverter]::ToString($hasher.ComputeHash($c.RawData)).Replace('-', '')
-        if ($certFp -eq $fp) { $match = $c; break }
+    try {
+        foreach ($c in (Get-ChildItem Cert:\CurrentUser\My)) {
+            $certFp = [BitConverter]::ToString($hasher.ComputeHash($c.RawData)).Replace('-', '')
+            if ($certFp -eq $fp) { $match = $c; break }
+        }
+    }
+    finally {
+        $hasher.Dispose()
     }
 
     if (-not $match) {
@@ -417,7 +428,7 @@ function Invoke-NuGetPackageSigningV2 {
             $Fingerprint = $env:YUBICO_SIGNING_SHA256_FINGERPRINT
         }
         if ([string]::IsNullOrWhiteSpace($Fingerprint)) {
-            throw "Fingerprint is required. Provide via -Fingerprint or YUBICO_SIGNING_SHA256_FINGERPRINT (SHA-256 fingerprint, not the SHA-1 thumbprint)."
+            throw "Fingerprint is required. Provide via -Fingerprint or YUBICO_SIGNING_SHA256_FINGERPRINT (SHA-256, SHA-384, or SHA-512 certificate fingerprint, not the SHA-1 thumbprint)."
         }
 
 
@@ -443,8 +454,9 @@ function Invoke-NuGetPackageSigningV2 {
         Write-Host "`nCertificate Details:" -ForegroundColor Cyan
         Write-Host "  Subject:      $($cert.Subject)"
         Write-Host "  Issuer:       $($cert.Issuer)"
+        $fingerprintAlgo = switch ($Fingerprint.Length) { 64 { 'SHA-256' } 96 { 'SHA-384' } 128 { 'SHA-512' } }
         Write-Host "  Thumbprint:   $($cert.Thumbprint) (SHA-1)"
-        Write-Host "  Fingerprint:  $Fingerprint (SHA-256)"
+        Write-Host "  Fingerprint:  $Fingerprint ($fingerprintAlgo)"
         Write-Host "  Valid From:   $($cert.NotBefore)"
         Write-Host "  Valid To:     $($cert.NotAfter)"
 

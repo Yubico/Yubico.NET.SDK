@@ -157,7 +157,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
         Protocol = protocol;
-        IPivBackend backend = new PivBackend(protocol);
+        var backend = new PivBackend(protocol);
 
         try
         {

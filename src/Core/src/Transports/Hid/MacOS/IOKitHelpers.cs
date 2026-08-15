@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Globalization;
-using System.Text;
 using Yubico.YubiKit.Core.Native;
 using NativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;
 
@@ -77,8 +76,7 @@ internal static class IOKitHelpers
 
         try
         {
-            var cstr = Encoding.UTF8.GetBytes(propertyName);
-            stringRef = NativeMethods.CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
+            stringRef = CoreFoundationString.Create(propertyName);
 
             var propertyRef =
                 Native.MacOS.IOKitFramework.NativeMethods.IOHIDDeviceGetProperty(device, stringRef);

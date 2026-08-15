@@ -124,6 +124,35 @@ public class FidoSessionTests
             () => session.GetInfoAsync(TestContext.Current.CancellationToken));
     }
 
+    [Fact]
+    public async Task DisposeAsync_WhileOwnedConnectionTeardownIsPaused_GetInfoAsyncThrowsObjectDisposedException()
+    {
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00],
+            [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00])
+        {
+            PauseAsyncDisposal = true
+        };
+        var device = new SingleConnectionYubiKey(connection);
+        var session = await device.CreateFidoSessionAsync(
+            preferredConnection: ConnectionType.SmartCard,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Task disposal = session.DisposeAsync().AsTask();
+        await connection.AsyncDisposalStarted.WaitAsync(TestContext.Current.CancellationToken);
+
+        try
+        {
+            _ = await Assert.ThrowsAsync<ObjectDisposedException>(
+                () => session.GetInfoAsync(TestContext.Current.CancellationToken));
+        }
+        finally
+        {
+            connection.ResumeAsyncDisposal();
+            await disposal;
+        }
+    }
+
     private static byte[] MinimalGetInfoResponse()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -139,10 +168,16 @@ public class FidoSessionTests
     private sealed class DisposeTrackingSmartCardConnection(params byte[][] responses) : ISmartCardConnection
     {
         private readonly Queue<byte[]> _responses = new(responses);
+        private readonly TaskCompletionSource _asyncDisposalStarted = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly TaskCompletionSource _resumeAsyncDisposal = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
 
         public int DisposeCount { get; private set; }
         public int DisposeAsyncCount { get; private set; }
         public Exception? DisposeAsyncException { get; init; }
+        public bool PauseAsyncDisposal { get; init; }
+        public Task AsyncDisposalStarted => _asyncDisposalStarted.Task;
         public Transport Transport => Transport.Usb;
         public ConnectionType Type => ConnectionType.SmartCard;
 
@@ -158,13 +193,23 @@ public class FidoSessionTests
 
         public void Dispose() => DisposeCount++;
 
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             DisposeAsyncCount++;
-            return DisposeAsyncException is null
-                ? ValueTask.CompletedTask
-                : new ValueTask(Task.FromException(DisposeAsyncException));
+            _asyncDisposalStarted.TrySetResult();
+
+            if (PauseAsyncDisposal)
+            {
+                await _resumeAsyncDisposal.Task.ConfigureAwait(false);
+            }
+
+            if (DisposeAsyncException is not null)
+            {
+                throw DisposeAsyncException;
+            }
         }
+
+        public void ResumeAsyncDisposal() => _resumeAsyncDisposal.TrySetResult();
     }
 
     private sealed class SingleConnectionYubiKey(ISmartCardConnection connection) : IYubiKey

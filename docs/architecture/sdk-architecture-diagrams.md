@@ -329,16 +329,16 @@ flowchart TD
     Throw["throw if multi-interface"]
     Typed["typed connect:<br/>&lt;ISmartCardConnection&gt; etc."]
 
-    subgraph Applet["Applet default transport order (multi-transport)"]
+    subgraph Applet["Applet transport selection"]
         M["Management: SmartCard → HidFido → HidOtp"]
         O["YubiOTP: SmartCard → HidOtp"]
-        F["FIDO2 / WebAuthn: HidFido → SmartCard"]
+        F["FIDO2 / WebAuthn: select HidFido if exposed,<br/>otherwise SmartCard; no contention fallback"]
         S["PIV·OATH·OpenPGP·SD·HSM: SmartCard only"]
     end
 
-    FB{"SmartCard held by<br/>this or another process?<br/>(in-process refusal / PC/SC sharing violation)"}
+    Attempt["acquire interface lease<br/>and open selected connection"]
+    FB{"eligible held error and another<br/>default candidate remains?<br/>(in-process: any interface;<br/>PC/SC status: SmartCard only)"}
     Fallback["fall back to next in order<br/><i>(default path only — override never falls back)</i>"]
-    Lease{"interface lease"}
     Refuse["ConnectionInUseException<br/>before physical open"]
     Conn["open IConnection"]
     Session["ApplicationSession<br/>holds/disposes IProtocol<br/>borrows caller connection"]
@@ -349,11 +349,11 @@ flowchart TD
     Q -->|yes, multi| Throw
     Q -->|typed| Typed
     Typed --> Applet
-    Applet --> FB
-    FB -->|yes| Fallback --> Lease
-    FB -->|no| Lease
-    Lease -->|CCID or OTP HID held| Refuse
-    Lease -->|CCID / OTP HID exclusive<br/>FIDO HID shared| Conn
+    Applet --> Attempt
+    Attempt -->|held| FB
+    FB -->|yes| Fallback --> Attempt
+    FB -->|no| Refuse
+    Attempt -->|available; CCID / FIDO HID / OTP HID exclusive| Conn
     Conn --> Session --> Own
     Own -->|yes: internal OwnConnection| Ready
     Own -->|no: caller disposes connection| Ready
@@ -365,10 +365,13 @@ flowchart TD
   `CompositeYubiKey`.
 - **Merge logic** is conservative: interfaces merge by USB Product ID; NFC is never merged
   with USB; ambiguity → surface as separate rows rather than mis-merge.
-- **Connection ownership:** CCID and OTP HID admit one live connection; FIDO HID remains shared.
-  OTP exchanges span multiple feature reports, so separate protocol instances cannot share that
-  interface safely. One live session is allowed per connection. A direct session factory borrows
+- **Connection ownership:** CCID, FIDO HID, and OTP HID admit one live connection per physical interface.
+  The transports remain independent, so holding one does not reserve the others. One live session is
+  allowed per connection. A direct session factory borrows
   the caller's connection; only convenience entry points own the hidden connection they create.
+- **Fallback is app-specific:** Management and YubiOTP can advance through their default candidate lists
+  after an eligible held-interface error. FIDO2/WebAuthn select one transport up front and fail if it is
+  held, preventing a second default FIDO session from silently opening over SmartCard.
 - **Monitoring:** `StartMonitoring()` gives an `IObservable<DeviceEvent> DeviceChanges`
   (System.Reactive) for hot-plug — good "advanced" slide if time allows.
 

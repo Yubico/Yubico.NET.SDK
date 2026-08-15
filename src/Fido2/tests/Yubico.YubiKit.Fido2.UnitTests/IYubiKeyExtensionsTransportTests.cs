@@ -155,6 +155,17 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Equal("transport boom", ex.Message);
     }
 
+    [Fact]
+    public async Task CreateFidoSessionAsync_HidFidoHeld_DoesNotOpenSecondSessionOverSmartCard()
+    {
+        var device = new HeldHidProbeYubiKey();
+
+        _ = await Assert.ThrowsAsync<ConnectionInUseException>(
+            () => device.CreateFidoSessionAsync(cancellationToken: Ct));
+
+        Assert.Equal([typeof(IFidoHidConnection)], device.RequestedConnections);
+    }
+
     private sealed class SelectionProbeYubiKey(ConnectionType available) : IYubiKey
     {
         public string DeviceId => "probe";
@@ -178,6 +189,23 @@ public class IYubiKeyExtensionsTransportTests
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection =>
             throw connectException;
+    }
+
+    private sealed class HeldHidProbeYubiKey : IYubiKey
+    {
+        public string DeviceId => "held-hid-probe";
+        public ConnectionType AvailableConnections => ConnectionType.HidFido | ConnectionType.SmartCard;
+        public List<Type> RequestedConnections { get; } = [];
+
+        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+            where TConnection : class, IConnection
+        {
+            RequestedConnections.Add(typeof(TConnection));
+            if (typeof(TConnection) == typeof(IFidoHidConnection))
+                throw new ConnectionInUseException("The FIDO HID interface is already in use.");
+
+            throw new ConnectProbeException();
+        }
     }
 
     private sealed class ConnectProbeException : Exception;

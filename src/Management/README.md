@@ -94,10 +94,9 @@ await using var mgmtOverOtp = await yubiKey.CreateManagementSessionAsync(
     preferredConnection: ConnectionType.HidOtp);
 ```
 
-Management may fall through `SmartCard -> HidFido -> HidOtp` only on the default path. CCID and
-OTP HID are exclusive; FIDO HID remains shared. If another connection holds OTP HID, the final
-fallback attempt is refused. OTP exclusivity prevents independent multi-feature-report frames from
-interleaving.
+Management may fall through `SmartCard -> HidFido -> HidOtp` only on the default path. CCID, FIDO HID,
+and OTP HID are exclusive per interface. If CCID and FIDO are held but OTP is free, fallback reaches
+OTP; if OTP is also held, the final attempt is refused. An explicit preferred transport never falls back.
 
 ### Form Factors
 

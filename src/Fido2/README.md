@@ -297,13 +297,18 @@ Different features require specific firmware versions:
 | USB HID | `IFidoHidConnection` | Primary FIDO2 interface |
 | SmartCard | `ISmartCardConnection` | FIDO2 APDU path when the FIDO2 AID is exposed; NFC is allowed when the current PC/SC connection reports `Transport.Nfc`, while USB SmartCard requires firmware 5.8.0+; prefer HID for ordinary USB FIDO2 coverage |
 
+The physical FIDO HID interface admits one live SDK connection and native HID handle. A second
+explicit `HidFido` session throws `ConnectionInUseException` until the current session is disposed.
+SmartCard remains an independent transport.
+
 ### Transport selection (smart default + override)
 
 On a physical YubiKey that exposes more than one FIDO2-capable transport, `CreateFidoSessionAsync`
 (and `CreateWebAuthnClientAsync`) selects a transport by an app-specific **smart default**, with an
 optional explicit **override** via the `preferredConnection` parameter:
 
-- Default order: **HID FIDO**, then **SmartCard FIDO2**.
+- Default selection: **HID FIDO** when exposed, otherwise **SmartCard FIDO2**. Once selected, a held
+  interface fails rather than switching transports and creating a second FIDO session on the same key.
 - `preferredConnection: ConnectionType.SmartCard` (or `HidFido`) forces a transport. It must be a
   transport FIDO2 can use and that the device exposes; otherwise it throws `ArgumentException`
   (not a valid FIDO2 transport, e.g. `HidOtp`) or `NotSupportedException` (valid but not on this device).

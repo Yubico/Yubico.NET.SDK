@@ -29,13 +29,15 @@ namespace Yubico.YubiKit.Core.Devices;
 ///         over a connection without touching it.
 ///     </para>
 ///     <para>
-///         CCID (SmartCard) and OTP HID interfaces admit exactly ONE live connection. CCID holds one selected
+///         All interfaces (CCID, FIDO HID, OTP HID) admit exactly ONE live connection. CCID holds one selected
 ///         applet on the basic channel, so a second connection's SELECT would deselect the first holder's applet
 ///         — measured, SW=0x6D00, see docs/architecture/connection-ownership-and-contention.md. An OTP HID logical
 ///         exchange spans multiple feature reports, which separate protocol instances must not interleave.
+///         FIDO HID is exclusive to ensure one native handle per interface; Management-over-HID fallback while
+///         CCID is held is achieved through held-transport exception detection in
+///         <see cref="YubiKeyConnectionExtensions" />, not through concurrent connection sharing.
 ///         A second acquisition is refused immediately with <see cref="ConnectionInUseException" />; it never
-///         waits, because waiting for an unbounded session to end is worse than a clear error. FIDO HID remains
-///         shared and is the route Management takes while CCID is held.
+///         waits, because waiting for an unbounded session to end is worse than a clear error.
 ///     </para>
 ///     <para>
 ///         Discovery holds its exclusive lease across physical connect, device-info exchange, and connection
@@ -91,19 +93,14 @@ internal static class DeviceConnectionRegistry
     ///     discovery owns the interface; cancellation applies only while waiting.
     /// </summary>
     /// <param name="deviceId">The per-interface device id.</param>
-    /// <param name="exclusive">
-    ///     <see langword="true" /> for an interface that admits one live connection and refuses a second
-    ///     (CCID or OTP HID); <see langword="false" /> for a shared interface (FIDO HID).
-    /// </param>
     /// <param name="cancellationToken">Cancels the wait for an active discovery read only.</param>
     /// <exception cref="ConnectionInUseException">
-    ///     <paramref name="exclusive" /> and the interface already has a live connection.
+    ///     The interface already has a live connection.
     /// </exception>
     public static ValueTask<IDisposable> AcquireConnectionAsync(
         string deviceId,
-        bool exclusive,
         CancellationToken cancellationToken = default) =>
-        GetOwnership(deviceId).AcquireConnectionAsync(deviceId, exclusive, cancellationToken);
+        GetOwnership(deviceId).AcquireConnectionAsync(deviceId, cancellationToken);
 
     /// <summary>
     ///     Attempts to acquire exclusive discovery ownership without waiting. Returns <c>null</c> while any
@@ -140,14 +137,13 @@ internal static class DeviceConnectionRegistry
 
         public async ValueTask<IDisposable> AcquireConnectionAsync(
             string deviceId,
-            bool exclusive,
             CancellationToken cancellationToken)
         {
             Task discoveryReleased;
             lock (_sync)
             {
                 if (!_discoveryActive)
-                    return Claim(deviceId, exclusive);
+                    return Claim(deviceId);
 
                 _waitingConnections++;
                 discoveryReleased = _discoveryReleased?.Task
@@ -171,14 +167,14 @@ internal static class DeviceConnectionRegistry
                 if (_discoveryActive)
                     throw new InvalidOperationException("Discovery ownership was reacquired ahead of a waiting connection.");
 
-                return Claim(deviceId, exclusive);
+                return Claim(deviceId);
             }
         }
 
-        /// <summary>Takes the lease, or refuses when the interface is exclusive and already held.</summary>
-        private IDisposable Claim(string deviceId, bool exclusive)
+        /// <summary>Takes the lease, or refuses when the interface is already held.</summary>
+        private IDisposable Claim(string deviceId)
         {
-            if (exclusive && _connectionCount > 0)
+            if (_connectionCount > 0)
                 throw new ConnectionInUseException(
                     $"The exclusive interface '{deviceId}' already has a live connection in this process. " +
                     "Concurrent connections could change shared application state or interleave a multi-report " +

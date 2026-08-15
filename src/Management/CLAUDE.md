@@ -318,10 +318,10 @@ connection and never disposes it. The creator must dispose the connection with `
 is no finalizer backstop. One live session per connection is allowed, and sequential reuse after
 session disposal is supported.
 
-CCID and OTP HID connections are exclusive; FIDO HID remains shared. OTP exchanges span multiple
-feature reports, so independent protocol instances cannot safely share that interface. Management's
-default order still tries `SmartCard -> HidFido -> HidOtp`, but a held OTP interface refuses the
-final acquisition.
+CCID, FIDO HID, and OTP HID connections are exclusive per interface. Management's default order still
+tries `SmartCard -> HidFido -> HidOtp`: an in-process `ConnectionInUseException` advances to the next
+candidate, so held CCID and FIDO interfaces can reach free OTP. An explicit preferred transport never
+falls back.
 
 ### Testing Considerations
 

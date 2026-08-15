@@ -95,22 +95,13 @@ Provenance matters here and is easy to conflate. Two of these rules are ours; on
 |---|---|---|
 | **CCID / SmartCard** | Exclusive — a second connection is refused immediately with `ConnectionInUseException` naming the interface | **Canonically motivated.** Rust `platform/pcsc.rs` `PcscConnection::open()` tries `ShareMode::Exclusive` first, falls back to shared, and will kill `scdaemon`/`yubikey-agent` to obtain exclusivity. The mechanism differs — canonical uses cross-process PC/SC share modes, we use an in-process lease — but the intent matches |
 | **OTP HID** | Exclusive | **This SDK's own strengthening. Not canonical parity.** Neither Rust nor Python yubikit enforces in-process OTP exclusivity — `HidOtpConnection::new` just opens the path, and `yubikit/core/otp.py` is a bare ABC. They do not need it because neither produces two concurrent in-process OTP handles, whereas this SDK exposes a public `ConnectAsync` a caller can invoke twice. **Cite the interleaving hazard, not canonical**: one logical OTP frame spans multiple feature reports, and separate protocol instances must not interleave them |
-| **FIDO HID** | Shared — the lease *admits* a second connection | Required by the Management-over-HID fallback when CCID is held |
-
-**Admission is not a promise of concurrent conversations.** FIDO HID admitting a second connection
-does not mean two handles can hold concurrent CTAP conversations. On macOS the input report is
-delivered to whichever handle's run loop runs, so two handles do not demultiplex — pinned on
-hardware by `FidoHidSharingIntegrationTests.SendOnFirst_ReceiveOnSecond_RevealsReportMisrouting`.
-Drive CTAP over one FIDO connection at a time, which is also canonical practice: neither Rust nor
-Python opens two concurrent host-side FIDO handles. `CTAPHID_LOCK` is device-side channel
-arbitration, not a host handle policy.
+| **FIDO HID** | Exclusive | **This SDK's own strengthening.** One physical FIDO HID interface admits one SDK connection and native handle; a second attempt is refused before native open. This matches canonical practice, where neither Rust nor Python opens two concurrent host-side FIDO handles |
 
 ### Platform constraints that interact with these rules
 
-- **macOS FIDO opens must stay non-seizing** (`kIOHIDOptionsTypeNone`). Seizing makes the platform
-  refuse the second open with `kIOReturnExclusiveAccess` (`0xE00002C5`), contradicting the shared-FIDO
-  contract. Both canonical implementations open non-seizing. This was a real defect, found on
-  hardware and fixed.
+- **macOS FIDO opens must stay non-seizing** (`kIOHIDOptionsTypeNone`). In-process ownership is enforced
+  before native open; seizing would impose a separate platform-wide exclusion policy. Both canonical
+  implementations open non-seizing.
 - **Windows OTP HID feature reports must open with `DESIRED_ACCESS.NONE`.** The OTP interface is a
   keyboard top-level collection; Windows refuses `GENERIC_READ | GENERIC_WRITE` on the system
   keyboard even for an administrator. The OTP protocol uses only `HidD_GetFeature`/`SetFeature`,
@@ -151,10 +142,10 @@ discovery lease:
 - Idle coordinator entries are retained for the process lifetime to avoid unsafe eviction races, and
   are bounded by the number of unique interface IDs observed.
 
-`YubiKeyConnectionExtensions.IsHeldTransportError` treats an in-process refusal exactly like a PC/SC
+`YubiKeyConnectionExtensions.IsFallbackEligibleHeldError` treats an in-process refusal exactly like a PC/SC
 sharing violation, so Management's default order can try `SmartCard`, then `HidFido`, then `HidOtp`.
-An already-held OTP interface refuses that final acquisition, and an explicit `preferredConnection`
-never falls back.
+If CCID and FIDO are held but OTP is free, Management reaches OTP. An already-held OTP interface
+refuses that final acquisition, and an explicit `preferredConnection` never falls back.
 
 > **Landmine.** `ManagementSession.Transport` exists only on this branch — upstream has no `Transport`
 > concept. It was silently lost during merge resolution and **only the PIV hardware contention tests
@@ -169,12 +160,12 @@ never falls back.
 | Management routes over a non-SmartCard transport while PIV holds CCID | `PivSessionContentionTests.CreateManagementSessionAsync_WhilePivHoldsCcid_OpensOverANonSmartCardTransport` |
 | A second SmartCard connection is refused while a PIV session is open | `PivSessionContentionTests.ConnectAsync_SecondSmartCardConnection_WhilePivSessionOpen_IsRefused` |
 | CCID-only key with no fallback fails naming the held interface | `IYubiKeyExtensionsTransportTests.CreateManagementSessionAsync_CcidHeldInProcess_NoOtherTransport_Throws` |
-| Exclusive interfaces reopen after disposal (CCID and OTP HID) | `ConnectionOwnershipContractTests.ConnectAsync_AfterFirstConnectionDisposed_SecondSucceeds`, `.ConnectAsync_OtpHidConnectionDisposed_InterfaceReopens` |
+| Exclusive interfaces reopen after disposal (CCID, FIDO HID, and OTP HID) | `ConnectionOwnershipContractTests.ConnectAsync_AfterFirstConnectionDisposed_SecondSucceeds`, `.ConnectAsync_FidoHidConnectionDisposed_InterfaceReopens`, `.ConnectAsync_OtpHidConnectionDisposed_InterfaceReopens` |
 | Ownership cannot be crossed by a session starting during a discovery scan | `DeviceConnectionOwnershipTests.ConnectAsync_SessionStartingImmediatelyBeforeDiscoverySelect_CannotCrossOwnership` |
 | Sessions on two different keys stay independent | `PivMultiKeyContentionTests` |
 | Hotplug mid-session fails bounded and does not strand the CCID lease | `PivHotplugContentionTests.PivSession_KeyRemovedMidSession_FailsBoundedAndDoesNotStrandTheCcidLease` (self-fails if no removal occurs) |
-| A second FIDO HID connection is admitted | `FidoHidSharingIntegrationTests.ConnectAsync_SecondConcurrentFidoHidConnection_IsAdmitted` |
-| Two FIDO handles do not demultiplex | `FidoHidSharingIntegrationTests.SendOnFirst_ReceiveOnSecond_RevealsReportMisrouting` |
+| A second FIDO HID connection is refused | `ConnectionOwnershipContractTests.ConnectAsync_SecondConnectionToHeldFidoHidInterface_IsRefusedBeforePhysicalOpen`, `FidoHidOwnershipIntegrationTests.ConnectAsync_SecondConcurrentFidoHidConnection_IsRefused` |
+| Held CCID and FIDO fall back to OTP | `IYubiKeyExtensionsTransportTests.CreateManagementSessionAsync_CcidAndFidoHeldInProcess_FallsBackToHidOtp` |
 | Protocols never dispose a borrowed connection | `ProtocolConnectionOwnershipTests` |
 
 **There is no waiter for an already-held exclusive connection.** A second acquisition refuses

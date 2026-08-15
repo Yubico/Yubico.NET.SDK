@@ -168,13 +168,18 @@ public static class IYubiKeyExtensions
         /// <returns>Candidate transports suitable for FIDO2 operations.</returns>
         private IReadOnlyList<ConnectionType> ResolveFidoSessionTransports(ConnectionType? preferredConnection)
         {
-            // FIDO2 is dual-transport (HID FIDO or SmartCard FIDO2). The app-specific smart default prefers
-            // HID FIDO, then SmartCard (NFC, or USB on firmware 5.8.0+); an explicit override can force either.
-            // The ordered candidate list drives ConnectSessionTransportAsync, which opens the most-preferred
-            // candidate and falls back when a held SmartCard transport is detected (Phase 38.5).
+            // FIDO2 is dual-transport (HID FIDO or SmartCard FIDO2). The app-specific smart default selects
+            // the first exposed transport: HID FIDO, otherwise SmartCard (NFC, or USB on firmware 5.8.0+).
+            // Return one candidate so a held HID FIDO interface cannot silently create a second FidoSession
+            // over SmartCard on the same physical key. Callers can still force either transport explicitly.
             try
             {
-                return yubiKey.ResolveSessionTransports(preferredConnection, "FIDO2", FidoTransportOrder);
+                var candidates = yubiKey.ResolveSessionTransports(
+                    preferredConnection,
+                    "FIDO2",
+                    FidoTransportOrder);
+
+                return [candidates[0]];
             }
             catch (NotSupportedException) when (preferredConnection is null)
             {

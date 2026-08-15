@@ -52,7 +52,7 @@ internal class PcscYubiKey(
         // Exclusive: one live connection per CCID interface. The lease is held by the connection returned
         // below and released when that connection is disposed.
         var ownership = await DeviceConnectionRegistry
-            .AcquireConnectionAsync(DeviceId, exclusive: true, cancellationToken)
+            .AcquireConnectionAsync(DeviceId, cancellationToken)
             .ConfigureAwait(false);
         try
         {

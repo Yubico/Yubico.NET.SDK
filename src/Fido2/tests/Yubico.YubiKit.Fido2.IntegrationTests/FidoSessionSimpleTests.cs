@@ -154,6 +154,18 @@ public class FidoSessionSimpleTests
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    public async Task CreateFidoSession_SecondExplicitHidFidoSession_IsRefused(YubiKeyTestState state)
+    {
+        await using var first = await state.Device.CreateFidoSessionAsync(
+            preferredConnection: ConnectionType.HidFido);
+
+        _ = await Assert.ThrowsAsync<ConnectionInUseException>(() =>
+            state.Device.CreateFidoSessionAsync(
+                preferredConnection: ConnectionType.HidFido));
+    }
+
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfoAsync_With_YubiKeyExtensionMethod(YubiKeyTestState state)
     {
         var info = await state.Device.GetFidoInfoAsync();

@@ -158,7 +158,8 @@ public static class IYubiKeyExtensions
     // parameterless ConnectAsync() is ambiguous, so a transport is chosen by an app-specific smart default
     // (SmartCard first/richest, then FIDO HID, then OTP HID) or an explicit caller override. The ordered
     // default candidate list resolved here drives ConnectSessionTransportAsync, which opens the most-preferred
-    // candidate and falls back to the next when the SmartCard transport is held by another process (Phase 38.5).
+    // candidate and falls back when an in-process interface lease or SmartCard sharing status shows that a
+    // candidate is held. An explicit caller override supplies one candidate and never falls back.
     private static readonly ConnectionType[] ManagementTransportOrder =
         [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp];
 

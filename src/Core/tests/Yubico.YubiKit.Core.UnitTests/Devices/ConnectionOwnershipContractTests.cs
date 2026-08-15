@@ -120,12 +120,12 @@ public class ConnectionOwnershipContractTests
     }
 
     /// <summary>
-    ///     INVARIANT PIN (must pass before and after). FIDO HID remains shared. The applet-selection hazard
-    ///     does not exist there — Management over FIDO HID answers correctly while PIV holds CCID, measured,
-    ///     experiment 4 — so making FIDO HID exclusive would forbid something the hardware supports.
+    ///     FIDO HID is now exclusive: one physical YubiKey FIDO HID interface admits exactly one SDK
+    ///     connection/native HID handle at a time. A second connection is refused immediately before
+    ///     opening the second native handle.
     /// </summary>
     [Fact]
-    public async Task ConnectAsync_HidInterface_AllowsConcurrentConnections()
+    public async Task ConnectAsync_SecondConnectionToHeldFidoHidInterface_IsRefusedBeforePhysicalOpen()
     {
         var hidDevice = new FakeHidDevice(
             $"ownership-fido-{Guid.NewGuid():N}",
@@ -133,17 +133,39 @@ public class ConnectionOwnershipContractTests
         var device = CreateHidDevice(hidDevice);
 
         await using var first = await device.ConnectAsync<IFidoHidConnection>(Ct);
+
+        var refusal = await Assert.ThrowsAsync<ConnectionInUseException>(
+            () => device.ConnectAsync<IFidoHidConnection>(Ct));
+
+        AssertExclusiveInterfaceRefusal(refusal, device.DeviceId);
+        Assert.Equal(1, hidDevice.IoReportConnectCalls); // refused before second native open
+    }
+
+    /// <summary>
+    ///     Exclusive is not permanent: the FIDO HID interface is reusable the moment the holder is disposed.
+    /// </summary>
+    [Fact]
+    public async Task ConnectAsync_FidoHidConnectionDisposed_InterfaceReopens()
+    {
+        var hidDevice = new FakeHidDevice(
+            $"ownership-fido-{Guid.NewGuid():N}",
+            HidInterfaceType.Fido);
+        var device = CreateHidDevice(hidDevice);
+
+        var first = await device.ConnectAsync<IFidoHidConnection>(Ct);
+        await first.DisposeAsync();
+
         await using var second = await device.ConnectAsync<IFidoHidConnection>(Ct);
 
-        Assert.NotNull(first);
-        Assert.NotNull(second);
         Assert.Equal(2, hidDevice.IoReportConnectCalls);
     }
 
     /// <summary>
-    ///     INVARIANT PIN (must pass before and after). The two interfaces of one physical key are independent:
-    ///     a held CCID interface must not block that key's HID interface, which is the whole basis of the
-    ///     Management-over-HID fallback.
+    ///     INVARIANT PIN (must pass before and after). The independent interfaces of one physical key remain
+    ///     independent: a held CCID interface must not block that key's HID interface. Management-over-HID
+    ///     fallback is achieved through held-transport exception detection in YubiKeyConnectionExtensions,
+    ///     not through concurrent connection sharing. A held FIDO interface triggers fallback to OTP if
+    ///     present.
     /// </summary>
     [Fact]
     public async Task ConnectAsync_CcidHeld_SameKeysHidInterfaceStillConnects()

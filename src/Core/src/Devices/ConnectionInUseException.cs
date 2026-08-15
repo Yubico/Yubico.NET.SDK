@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Three acquisitions raise this, and all are the same fact at different scopes:
+///         Four acquisitions raise this, and all are the same fact at different scopes:
 ///     </para>
 ///     <list type="bullet">
 ///         <item>
@@ -27,6 +27,11 @@ namespace Yubico.YubiKit.Core.Devices;
 ///             A YubiKey's CCID interface holds exactly one selected applet, so a second connection's
 ///             applet SELECT would deselect the first holder's applet and destroy its security state
 ///             without either caller being told.
+///         </item>
+///         <item>
+///             Opening a second connection to a FIDO HID interface that already has a live one. The SDK
+///             permits one native FIDO HID handle per physical interface so reports cannot be consumed by
+///             competing host handles.
 ///         </item>
 ///         <item>
 ///             Opening a second connection to an OTP HID interface that already has a live one. One logical
@@ -39,7 +44,7 @@ namespace Yubico.YubiKit.Core.Devices;
 ///         </item>
 ///     </list>
 ///     <para>
-///         All three are refused at acquisition, before any command reaches the device, so the exception lands on
+///         All four are refused at acquisition, before any command reaches the device, so the exception lands on
 ///         the call that would have caused the damage rather than on the victim's next operation. Dispose the
 ///         current holder first; a connection may host any number of sessions in sequence, and an exclusive
 ///         interface any number of connections in sequence.

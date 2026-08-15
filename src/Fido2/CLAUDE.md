@@ -27,6 +27,10 @@ The FIDO2 module implements CTAP 2.1/2.3 (Client to Authenticator Protocol) for 
 > FIDO GetInfo can report a `0.x` sentinel firmware (for example `0.0.1`) on devices whose real
 > firmware is available through Management; firmware gates use `Feature.IsSupportedByFirmware(...)`
 > so `Major == 0` sentinel firmware is treated as modern.
+> A physical FIDO HID interface admits one live SDK connection and native HID handle. A second
+> explicit `HidFido` session is refused with `ConnectionInUseException` until the current session
+> disposes its owned connection. The default FIDO2/WebAuthn path does not switch to SmartCard when
+> HID FIDO is held; SmartCard remains available through an explicit override or when HID is absent.
 
 ## Architecture Overview
 

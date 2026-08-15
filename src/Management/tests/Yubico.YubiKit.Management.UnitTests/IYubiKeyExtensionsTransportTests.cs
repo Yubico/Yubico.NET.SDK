@@ -171,6 +171,24 @@ public class IYubiKeyExtensionsTransportTests
     }
 
     [Fact]
+    public async Task CreateManagementSessionAsync_CcidAndFidoHeldInProcess_FallsBackToHidOtp()
+    {
+        var otp = new FailingOtpConnection();
+        var device = new FallbackProbeYubiKey(
+                ConnectionType.SmartCard | ConnectionType.HidFido | ConnectionType.HidOtp)
+            .Throws(ConnectionType.SmartCard, new ConnectionInUseException("pcsc:test-reader is in use."))
+            .Throws(ConnectionType.HidFido, new ConnectionInUseException("hid:fido:test is in use."))
+            .Returns(ConnectionType.HidOtp, otp);
+
+        _ = await Record.ExceptionAsync(() => device.CreateManagementSessionAsync(cancellationToken: Ct));
+
+        Assert.Equal(
+            [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp],
+            device.Attempts);
+        Assert.True(otp.Disposed, "the opened OTP connection must be disposed on session-init failure");
+    }
+
+    [Fact]
     public async Task CreateManagementSessionAsync_ScpRequestedAndCcidHeld_DoesNotFallBackToPlaintextHid()
     {
         var device = new FallbackProbeYubiKey(ConnectionType.SmartCard | ConnectionType.HidFido)
@@ -280,6 +298,27 @@ public class IYubiKeyExtensionsTransportTests
         }
 
         public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("session-init probe failure");
+
+        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("session-init probe failure");
+    }
+
+    private sealed class FailingOtpConnection : IOtpHidConnection
+    {
+        public bool Disposed { get; private set; }
+        public ConnectionType Type => ConnectionType.HidOtp;
+        public int FeatureReportSize => 8;
+
+        public void Dispose() => Disposed = true;
+
+        public ValueTask DisposeAsync()
+        {
+            Disposed = true;
+            return ValueTask.CompletedTask;
+        }
+
+        public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default) =>
             throw new InvalidOperationException("session-init probe failure");
 
         public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>

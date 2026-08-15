@@ -131,11 +131,10 @@ internal sealed class IOKitDeviceLifetime : IIOKitDeviceLifetime
 
     public void OpenDevice(nint device)
     {
-        // kIOHIDOptionsTypeNone (0), NOT kIOHIDOptionsTypeSeizeDevice (0x01). Seizing makes macOS refuse
-        // a second open with kIOReturnExclusiveAccess (0xE00002C5), which contradicts this SDK's
-        // "FIDO HID is shared" ownership contract: DeviceConnectionRegistry admits a second FIDO
-        // connection, and the platform would then reject it. Both canonical implementations open
-        // non-seizing on macOS — Rust yubikit enables hidapi's `macos-shared-device`
+        // kIOHIDOptionsTypeNone (0), NOT kIOHIDOptionsTypeSeizeDevice (0x01). SDK exclusivity is enforced
+        // by DeviceConnectionRegistry before native open; seizing would add a platform-wide policy and
+        // prevent other non-seizing clients from opening the interface. Both canonical implementations open
+        // non-seizing on macOS - Rust yubikit enables hidapi's `macos-shared-device`
         // (hid_darwin_set_open_exclusive(0) => kIOHIDOptionsTypeNone), and python-fido2's macOS backend
         // calls IOHIDDeviceOpen(handle, 0). The OTP feature-report path uses 0 as well, so both macOS
         // HID paths stay consistent.
@@ -152,11 +151,7 @@ internal sealed class IOKitDeviceLifetime : IIOKitDeviceLifetime
 
     public void ReleaseCFObject(nint cfObject) => CFNativeMethods.CFRelease(cfObject);
 
-    public nint CreateRunLoopMode(string name)
-    {
-        var cstr = System.Text.Encoding.UTF8.GetBytes(name);
-        return CFNativeMethods.CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
-    }
+    public nint CreateRunLoopMode(string name) => CoreFoundationString.Create(name);
 
     public int GetIntProperty(nint device, string propertyName) =>
         IOKitHelpers.GetIntPropertyValue(device, propertyName);

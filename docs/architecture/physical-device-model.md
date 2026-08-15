@@ -228,25 +228,20 @@ to the connection at construction. Neither inspects the wire.
 methods open a connection the caller never sees, so the session they return owns and disposes it through the
 internal `ApplicationSession.OwnConnection()` path. A direct `Session.CreateAsync(connection)` borrows the
 caller-created connection and does not dispose it. Use `await using` for both connections and sessions.
-Missing connection disposal can retain an exclusive CCID or OTP HID lease for the connection lifetime
+Missing connection disposal can retain an exclusive CCID, FIDO HID, or OTP HID lease for the connection lifetime
 (potentially the process lifetime), blocking later opens; there is intentionally no finalizer backstop,
 because deterministic disposal is the only point at which native-handle teardown and lease release can be
 ordered reliably.
 
 OTP HID is exclusive because one OTP protocol exchange spans multiple feature reports; two independent
-protocol instances on the same interface could interleave one logical frame. FIDO HID remains shared.
-Management's default order may still fall through `SmartCard -> HidFido -> HidOtp`, but if another
-connection already holds HID OTP, that final acquisition is refused rather than shared.
+protocol instances on the same interface could interleave one logical frame. FIDO HID is also exclusive
+per physical interface so the SDK owns at most one native FIDO HID handle at a time. Management's default
+order may still fall through `SmartCard -> HidFido -> HidOtp`: a held candidate advances to the next free
+interface, while an explicit preferred transport never falls back.
 
-Shared FIDO HID is an admission guarantee, not a concurrency guarantee. A second FIDO connection to the
-same interface is accepted — the Management-over-HID fallback relies on that — but the transport does not
-demultiplex input reports between two handles. Measured on macOS hardware: sending CTAPHID_INIT on one
-handle and reading on the other returns that response, so a caller driving CTAP on two handles at once can
-receive the peer's frames. Use one FIDO connection at a time for CTAP traffic.
-
-macOS FIDO HID must be opened with `kIOHIDOptionsTypeNone`, never `kIOHIDOptionsTypeSeizeDevice`. Seizing
-makes the platform refuse the second open with `kIOReturnExclusiveAccess` (`0xE00002C5`), which would make
-the shared-admission contract false, and it also locks other processes out of the key. Both canonical
+macOS FIDO HID must be opened with `kIOHIDOptionsTypeNone`, never `kIOHIDOptionsTypeSeizeDevice`. SDK
+exclusivity is enforced before native open; seizing would add a separate platform-wide exclusion policy
+and lock other processes out of the key. Both canonical
 yubikit implementations open non-seizing on macOS: Rust enables hidapi's `macos-shared-device`
 (`hid_darwin_set_open_exclusive(0)`), and python-fido2's macOS backend calls `IOHIDDeviceOpen(handle, 0)`.
 

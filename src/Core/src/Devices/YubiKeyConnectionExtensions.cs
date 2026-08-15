@@ -144,19 +144,19 @@ public static class YubiKeyConnectionExtensions
 
     /// <summary>
     ///     Opens the first transport in <paramref name="candidates" /> that connects, falling back to the next
-    ///     candidate only when a <see cref="ConnectionType.SmartCard" /> connect fails because another process
-    ///     is holding the card (PC/SC <c>SCARD_E_SHARING_VIOLATION</c> / <c>SCARD_E_SERVER_TOO_BUSY</c>).
+    ///     candidate when this process already owns the interface, or when a SmartCard candidate reports a
+    ///     PC/SC <c>SCARD_E_SHARING_VIOLATION</c> / <c>SCARD_E_SERVER_TOO_BUSY</c> status.
     /// </summary>
     /// <remarks>
     ///     This is the connect half of the resolve→connect seam: callers pass the ordered, validated candidate
     ///     list produced by <see cref="ResolveSessionTransports" /> and receive an opened connection. The
     ///     "default-path-only fallback" and "override-never-falls-back" guarantees are properties of the applet
     ///     entry points (which pass a single-element list for an explicit override, so the loop rethrows on the
-    ///     first failure); this helper simply follows the list it is given. Held-transport fallback is gated to
-    ///     the SmartCard transport: a held-coded error on any other transport propagates unchanged (a held HID
-    ///     transport is out of scope). Any non-held error, and <see cref="OperationCanceledException" />,
-    ///     propagates immediately. The helper does not re-validate device capability; a transport the device
-    ///     does not expose surfaces its own connect error.
+    ///     first failure); this helper simply follows the list it is given. A <see cref="ConnectionInUseException" />
+    ///     can advance from any exclusive interface, while PC/SC held statuses advance only from a SmartCard
+    ///     candidate. Any non-held error, and <see cref="OperationCanceledException" />, propagates immediately.
+    ///     The helper does not re-validate device capability; a transport the device does not expose surfaces
+    ///     its own connect error.
     /// </remarks>
     /// <param name="yubiKey">The physical device.</param>
     /// <param name="candidates">
@@ -186,8 +186,8 @@ public static class YubiKeyConnectionExtensions
 
     /// <summary>
     ///     Opens candidate transports in order and invokes <paramref name="createAsync" /> for the selected
-    ///     connection, falling back past a held SmartCard error raised either while opening the connection or
-    ///     while creating the session over it.
+    ///     connection, falling back past an eligible held-interface error raised either while opening the
+    ///     connection or while creating the session over it.
     /// </summary>
     public static async Task<TResult> ConnectSessionTransportAsync<TResult>(
         this IYubiKey yubiKey,
@@ -220,13 +220,11 @@ public static class YubiKeyConnectionExtensions
                 connection = null;
                 return result;
             }
-            // Fall back ONLY when a held SmartCard transport failed AND a further candidate remains. The
-            // SmartCard gate keeps held-HID out of scope; the index gate makes the last candidate's held
-            // error (and an override's single element) propagate unchanged. Non-held errors and cancellation
-            // never match this filter, so they propagate immediately.
+            // Fall back only for an in-process interface lease refusal, or a PC/SC held status, when a
+            // further candidate remains. The index gate makes the last candidate's held error (and an
+            // override's single element) propagate unchanged. Other failures and cancellation propagate.
             catch (Exception ex) when (
-                transport == ConnectionType.SmartCard
-                && IsHeldTransportError(ex)
+                IsFallbackEligibleHeldError(ex, transport)
                 && i < candidates.Count - 1)
             {
                 if (connection is not null)
@@ -234,7 +232,7 @@ public static class YubiKeyConnectionExtensions
 
                 Logger.LogDebug(
                     ex,
-                    "The {Transport} transport for a {SessionName} session is held by another process; " +
+                    "The {Transport} transport for a {SessionName} session is held; " +
                     "falling back to the next supported transport.",
                     transport,
                     sessionName);
@@ -296,22 +294,23 @@ public static class YubiKeyConnectionExtensions
         };
 
     /// <summary>
-    ///     Returns <see langword="true" /> when <paramref name="exception" /> indicates the smart card is
-    ///     already held, by another process or by this one.
+    ///     Returns <see langword="true" /> when <paramref name="exception" /> is eligible to advance the
+    ///     fallback order for <paramref name="transport" />.
     /// </summary>
     /// <remarks>
     ///     Another process shows up as a PC/SC <c>SCARD_E_SHARING_VIOLATION</c> or
     ///     <c>SCARD_E_SERVER_TOO_BUSY</c> carried by an <see cref="SCardException" />, which stores the PC/SC
     ///     status in <see cref="System.Exception.HResult" /> (as <c>(int)errorCode</c>), hence the
-    ///     <c>(uint)HResult</c> round-trip. This process shows up as a <see cref="ConnectionInUseException" />
-    ///     from the interface lease. Both mean the same thing to a caller choosing a transport — CCID is
-    ///     unavailable, try the next one — and the in-process case is the common one: it is what a live PIV or
-    ///     OATH session looks like to an internal <c>GetDeviceInfoAsync</c>. Detection stays narrow: no other
-    ///     exception type or status code counts as held.
+    ///     <c>(uint)HResult</c> round-trip. Those PC/SC statuses are eligible only for
+    ///     <see cref="ConnectionType.SmartCard" />. This process shows up as a
+    ///     <see cref="ConnectionInUseException" /> from the interface lease; that exception is eligible for
+    ///     every exclusive transport (CCID, FIDO HID, OTP HID). No other exception, transport, or status-code
+    ///     combination advances fallback.
     /// </remarks>
-    private static bool IsHeldTransportError(Exception exception) =>
+    private static bool IsFallbackEligibleHeldError(Exception exception, ConnectionType transport) =>
         exception is ConnectionInUseException
-        || (exception is SCardException scardException
+        || (transport == ConnectionType.SmartCard
+            && exception is SCardException scardException
             && (uint)scardException.HResult is ErrorCode.SCARD_E_SHARING_VIOLATION
                 or ErrorCode.SCARD_E_SERVER_TOO_BUSY);
 }

@@ -85,7 +85,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     private readonly ILogger _logger;
 
     private IFidoBackend? _backend;
-    private bool _disposed;
+    private int _disposed;
 
     private FidoSession(IConnection connection, ScpKeyParameters? scpKeyParams = null)
         : base(connection)
@@ -361,7 +361,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
     private void EnsureInitialized()
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
 
         if (!IsInitialized)
         {
@@ -402,24 +402,21 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     /// <inheritdoc />
     protected override void Dispose(bool disposing)
     {
-        if (_disposed)
-            return;
-
-        if (disposing)
+        if (Interlocked.Exchange(ref _disposed, 1) == 0)
         {
-            _backend = null;
+            if (disposing)
+            {
+                _backend = null;
+            }
         }
 
-        _disposed = true;
         base.Dispose(disposing);
     }
 
     /// <inheritdoc />
     protected override async ValueTask DisposeAsyncCore()
     {
-        if (_disposed)
-            return;
-
+        Interlocked.Exchange(ref _disposed, 1);
         _backend = null;
         await base.DisposeAsyncCore().ConfigureAwait(false);
     }

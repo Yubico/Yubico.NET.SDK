@@ -88,10 +88,10 @@ public class DeviceConnectionOwnershipTests
 
         using var canceledWaiterToken = new CancellationTokenSource();
         var canceledWaiter = DeviceConnectionRegistry
-            .AcquireConnectionAsync(deviceId, exclusive: true, canceledWaiterToken.Token)
+            .AcquireConnectionAsync(deviceId, canceledWaiterToken.Token)
             .AsTask();
         var remainingWaiter = DeviceConnectionRegistry
-            .AcquireConnectionAsync(deviceId, exclusive: true, TestContext.Current.CancellationToken)
+            .AcquireConnectionAsync(deviceId, TestContext.Current.CancellationToken)
             .AsTask();
 
         canceledWaiterToken.Cancel();

@@ -622,6 +622,26 @@ public class PivSessionTests
         Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0xFB);
     }
 
+    [Fact]
+    public async Task SignOrDecryptAutoDetectAsync_AfterDisposal_ThrowsObjectDisposedBeforeFirmwareOrMetadataRead()
+    {
+        var connection = CreateInitializedConnectionWithVersion(VersionResponse());
+        var session = await PivSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        await session.DisposeAsync();
+        int transmissionsBeforeCall = connection.TransmittedCommands.Count;
+
+        var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => session.SignOrDecryptAsync(
+                PivSlot.Authentication,
+                ReadOnlyMemory<byte>.Empty,
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal(typeof(PivSession).FullName, exception.ObjectName);
+        Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
+    }
+
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), VersionResponse(), ManagementKeyMetadataResponse(), .. trailingResponses]);
 

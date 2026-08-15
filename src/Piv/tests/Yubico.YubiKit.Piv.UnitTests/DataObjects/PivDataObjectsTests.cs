@@ -331,6 +331,23 @@ public class PivDataObjectsTests
     }
 
     [Fact]
+    public async Task GetObjectAsync_AfterDisposal_ThrowsObjectDisposedExceptionWithoutTransmitting()
+    {
+        var connection = CreateInitializedConnection();
+        var session = await PivSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        await session.DisposeAsync();
+        int transmissionsBeforeOperation = connection.TransmittedCommands.Count;
+
+        var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => session.GetObjectAsync(PivDataObject.Chuid, TestContext.Current.CancellationToken));
+
+        Assert.Equal(typeof(PivSession).FullName, exception.ObjectName);
+        Assert.Equal(transmissionsBeforeOperation, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
     public async Task SetCardholderUniqueIdAsync_TransmitsSameDataAsRawPutObjectAsync()
     {
         var golden = ChuidGoldenVector();

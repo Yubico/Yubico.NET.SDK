@@ -91,6 +91,143 @@ public class ApplicationSessionDisposalTests
     }
 
     [Fact]
+    public async Task DisposeAsync_OwnedConnectionTeardownPaused_PublishesDisposalStartAndSharesCompletion()
+    {
+        var connection = new TrackingConnection(pauseAsyncDisposal: true);
+        var session = new ProbeSession(connection, ownsConnection: true);
+
+        Task first = session.DisposeAsync().AsTask();
+        Task? second = null;
+
+        try
+        {
+            await connection.AsyncDisposalStarted.WaitAsync(TestContext.Current.CancellationToken);
+            second = session.DisposeAsync().AsTask();
+
+            Assert.Throws<ObjectDisposedException>(session.AssertNotDisposed);
+            Assert.False(first.IsCompleted);
+            Assert.False(second.IsCompleted);
+        }
+        finally
+        {
+            connection.ResumeAsyncDisposal();
+            Task[] startedTasks = second is null ? [first] : [first, second];
+            await Task.WhenAll(startedTasks).WaitAsync(TestContext.Current.CancellationToken);
+        }
+
+        Assert.Equal(1, connection.DisposeAsyncCount);
+        Assert.Equal(1, session.AsyncCleanupCount);
+        Assert.Equal(1, session.ManagedCleanupCount);
+    }
+
+    [Fact]
+    public async Task Dispose_OwnedConnectionTeardownPaused_PublishesDisposalStartAndSharesCompletion()
+    {
+        var connection = new TrackingConnection(pauseDisposal: true);
+        var session = new ProbeSession(connection, ownsConnection: true);
+
+        Task first = Task.Run(session.Dispose, TestContext.Current.CancellationToken);
+        Task? second = null;
+
+        try
+        {
+            await connection.DisposalStarted.WaitAsync(TestContext.Current.CancellationToken);
+            second = session.DisposeAsync().AsTask();
+
+            Assert.Throws<ObjectDisposedException>(session.AssertNotDisposed);
+            Assert.False(first.IsCompleted);
+            Assert.False(second.IsCompleted);
+        }
+        finally
+        {
+            connection.ResumeDisposal();
+            Task[] startedTasks = second is null ? [first] : [first, second];
+            await Task.WhenAll(startedTasks).WaitAsync(TestContext.Current.CancellationToken);
+        }
+
+        Assert.Equal(1, connection.DisposeCount);
+        Assert.Equal(0, connection.DisposeAsyncCount);
+        Assert.Equal(0, session.AsyncCleanupCount);
+        Assert.Equal(1, session.ManagedCleanupCount);
+    }
+
+    [Fact]
+    public async Task DisposeAsync_DerivedCleanupPausedBeforeBase_PublishesDisposalStartAndSharesCompletion()
+    {
+        var session = new ProbeSession(
+            new TrackingConnection(),
+            pauseAsyncBeforeBase: true);
+
+        Task first = session.DisposeAsync().AsTask();
+        Task? second = null;
+
+        try
+        {
+            await session.AsyncBeforeBaseEntered.WaitAsync(TestContext.Current.CancellationToken);
+            second = session.DisposeAsync().AsTask();
+
+            Assert.Throws<ObjectDisposedException>(session.AssertNotDisposed);
+            Assert.False(first.IsCompleted);
+            Assert.False(second.IsCompleted);
+        }
+        finally
+        {
+            session.ResumeAsyncBeforeBase();
+            Task[] startedTasks = second is null ? [first] : [first, second];
+            await Task.WhenAll(startedTasks).WaitAsync(TestContext.Current.CancellationToken);
+        }
+
+        Assert.Equal(1, session.AsyncCleanupCount);
+        Assert.Equal(1, session.ManagedCleanupCount);
+    }
+
+    [Fact]
+    public async Task Dispose_DerivedCleanupPausedBeforeBase_PublishesDisposalStartAndSharesCompletion()
+    {
+        var session = new ProbeSession(
+            new TrackingConnection(),
+            pauseSyncBeforeBase: true);
+
+        Task first = Task.Run(session.Dispose, TestContext.Current.CancellationToken);
+        Task? second = null;
+
+        try
+        {
+            await session.SyncBeforeBaseEntered.WaitAsync(TestContext.Current.CancellationToken);
+            second = session.DisposeAsync().AsTask();
+
+            Assert.Throws<ObjectDisposedException>(session.AssertNotDisposed);
+            Assert.False(first.IsCompleted);
+            Assert.False(second.IsCompleted);
+        }
+        finally
+        {
+            session.ResumeSyncBeforeBase();
+            Task[] startedTasks = second is null ? [first] : [first, second];
+            await Task.WhenAll(startedTasks).WaitAsync(TestContext.Current.CancellationToken);
+        }
+
+        Assert.Equal(0, session.AsyncCleanupCount);
+        Assert.Equal(1, session.ManagedCleanupCount);
+    }
+
+    [Fact]
+    public void CapabilityQueries_AfterDisposal_UseRetainedFirmwareState()
+    {
+        var session = new ProbeSession(
+            new TrackingConnection(),
+            firmwareVersion: new FirmwareVersion(5, 7, 0));
+        var supported = new Feature("supported", 5, 6, 0);
+        var unsupported = new Feature("unsupported", 5, 8, 0);
+        session.Dispose();
+
+        Assert.True(session.IsSupported(supported));
+        session.EnsureSupports(supported);
+        Assert.False(session.IsSupported(unsupported));
+        Assert.Throws<NotSupportedException>(() => session.EnsureSupports(unsupported));
+    }
+
+    [Fact]
     public async Task DisposeAsync_OwnedConnectionFailure_RunsManagedCleanupOnceAndSharesException()
     {
         var expected = new InvalidOperationException("async connection teardown failed");
@@ -195,6 +332,15 @@ public class ApplicationSessionDisposalTests
     {
         private readonly TaskCompletionSource? _asyncCleanupEntered;
         private readonly TaskCompletionSource? _allowAsyncCleanup;
+        private readonly TaskCompletionSource _asyncBeforeBaseEntered = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly TaskCompletionSource _resumeAsyncBeforeBase = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly TaskCompletionSource _syncBeforeBaseEntered = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly ManualResetEventSlim _resumeSyncBeforeBase = new(initialState: false);
+        private readonly bool _pauseAsyncBeforeBase;
+        private readonly bool _pauseSyncBeforeBase;
         private int _asyncCleanupCount;
         private int _managedCleanupCount;
 
@@ -203,12 +349,18 @@ public class ApplicationSessionDisposalTests
             TaskCompletionSource? asyncCleanupEntered = null,
             TaskCompletionSource? allowAsyncCleanup = null,
             bool ownsConnection = false,
-            IProtocol? protocol = null)
+            IProtocol? protocol = null,
+            bool pauseAsyncBeforeBase = false,
+            bool pauseSyncBeforeBase = false,
+            FirmwareVersion? firmwareVersion = null)
             : base(connection)
         {
             _asyncCleanupEntered = asyncCleanupEntered;
             _allowAsyncCleanup = allowAsyncCleanup;
+            _pauseAsyncBeforeBase = pauseAsyncBeforeBase;
+            _pauseSyncBeforeBase = pauseSyncBeforeBase;
             Protocol = protocol;
+            FirmwareVersion = firmwareVersion ?? new FirmwareVersion();
 
             if (ownsConnection)
                 OwnConnection();
@@ -231,11 +383,25 @@ public class ApplicationSessionDisposalTests
 
         public int ManagedCleanupCount => Volatile.Read(ref _managedCleanupCount);
 
+        public Task AsyncBeforeBaseEntered => _asyncBeforeBaseEntered.Task;
+
+        public Task SyncBeforeBaseEntered => _syncBeforeBaseEntered.Task;
+
         public void AssertNotDisposed() => ThrowIfDisposed();
+
+        public void ResumeAsyncBeforeBase() => _resumeAsyncBeforeBase.TrySetResult();
+
+        public void ResumeSyncBeforeBase() => _resumeSyncBeforeBase.Set();
 
         protected override void Dispose(bool disposing)
         {
             _ = Interlocked.Increment(ref _managedCleanupCount);
+            if (_pauseSyncBeforeBase)
+            {
+                _syncBeforeBaseEntered.TrySetResult();
+                _resumeSyncBeforeBase.Wait();
+            }
+
             base.Dispose(disposing);
         }
 
@@ -247,14 +413,29 @@ public class ApplicationSessionDisposalTests
             if (_allowAsyncCleanup is not null)
                 await _allowAsyncCleanup.Task.ConfigureAwait(false);
 
+            if (_pauseAsyncBeforeBase)
+            {
+                _asyncBeforeBaseEntered.TrySetResult();
+                await _resumeAsyncBeforeBase.Task.ConfigureAwait(false);
+            }
+
             await base.DisposeAsyncCore().ConfigureAwait(false);
         }
     }
 
     private sealed class TrackingConnection(
         Exception? asyncDisposeException = null,
-        Exception? disposeException = null) : IConnection
+        Exception? disposeException = null,
+        bool pauseAsyncDisposal = false,
+        bool pauseDisposal = false) : IConnection
     {
+        private readonly TaskCompletionSource _asyncDisposalStarted = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly TaskCompletionSource _resumeAsyncDisposal = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly ManualResetEventSlim _resumeDisposal = new(initialState: false);
+        private readonly TaskCompletionSource _disposalStarted = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
         private int _disposeAsyncCount;
         private int _disposeCount;
 
@@ -264,21 +445,37 @@ public class ApplicationSessionDisposalTests
 
         public ConnectionType Type => ConnectionType.SmartCard;
 
+        public Task AsyncDisposalStarted => _asyncDisposalStarted.Task;
+
+        public Task DisposalStarted => _disposalStarted.Task;
+
         public void Dispose()
         {
             _ = Interlocked.Increment(ref _disposeCount);
+            _disposalStarted.TrySetResult();
+
+            if (pauseDisposal)
+                _resumeDisposal.Wait();
 
             if (disposeException is not null)
                 throw disposeException;
         }
 
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             _ = Interlocked.Increment(ref _disposeAsyncCount);
-            return asyncDisposeException is null
-                ? ValueTask.CompletedTask
-                : new ValueTask(Task.FromException(asyncDisposeException));
+            _asyncDisposalStarted.TrySetResult();
+
+            if (pauseAsyncDisposal)
+                await _resumeAsyncDisposal.Task.ConfigureAwait(false);
+
+            if (asyncDisposeException is not null)
+                throw asyncDisposeException;
         }
+
+        public void ResumeAsyncDisposal() => _resumeAsyncDisposal.TrySetResult();
+
+        public void ResumeDisposal() => _resumeDisposal.Set();
     }
 
     private sealed class ThrowingProtocol(Exception disposeException) : IProtocol

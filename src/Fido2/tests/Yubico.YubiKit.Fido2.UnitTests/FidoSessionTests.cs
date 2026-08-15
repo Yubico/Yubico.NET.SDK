@@ -153,6 +153,30 @@ public class FidoSessionTests
         }
     }
 
+    [Fact]
+    public async Task MakeCredentialAsync_AfterDisposal_InvalidArgumentsThrowObjectDisposedBeforeValidation()
+    {
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00],
+            [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00]);
+        var session = await FidoSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        await session.DisposeAsync();
+        int transmissionsBeforeCall = connection.TransmittedCommands.Count;
+
+        var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => session.MakeCredentialAsync(
+                default,
+                null!,
+                null!,
+                null!,
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(typeof(FidoSession).FullName, exception.ObjectName);
+        Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
+    }
+
     private static byte[] MinimalGetInfoResponse()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -178,13 +202,17 @@ public class FidoSessionTests
         public Exception? DisposeAsyncException { get; init; }
         public bool PauseAsyncDisposal { get; init; }
         public Task AsyncDisposalStarted => _asyncDisposalStarted.Task;
+        public List<byte[]> TransmittedCommands { get; } = [];
         public Transport Transport => Transport.Usb;
         public ConnectionType Type => ConnectionType.SmartCard;
 
         public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
             ReadOnlyMemory<byte> command,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult((ReadOnlyMemory<byte>)_responses.Dequeue());
+            CancellationToken cancellationToken = default)
+        {
+            TransmittedCommands.Add(command.ToArray());
+            return Task.FromResult((ReadOnlyMemory<byte>)_responses.Dequeue());
+        }
 
         public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
             NullDisposable.Instance;

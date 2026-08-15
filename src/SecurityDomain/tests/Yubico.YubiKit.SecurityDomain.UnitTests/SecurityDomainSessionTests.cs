@@ -1,9 +1,12 @@
+using System.Reflection;
 using NSubstitute;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -128,6 +131,88 @@ public class SecurityDomainSessionTests
 
         Assert.False(session.IsInitialized);
         Assert.False(session.IsAuthenticated);
+    }
+
+    [Fact]
+    public async Task Dispose_BaseTeardownThrows_ClearsDerivedStateAndDetachesConnection()
+    {
+        var expected = new InvalidOperationException("protocol dispose failed");
+        var connection = new RecordingSmartCardConnection(OkResponse(), OkResponse());
+        var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        typeof(ApplicationSession)
+            .GetProperty("Protocol", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .SetValue(session, new ThrowingProtocol(expected));
+
+        Exception? exception = Record.Exception(session.Dispose);
+
+        Assert.Same(expected, exception);
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+        Assert.Null(typeof(SecurityDomainSession)
+            .GetField("_protocol", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(session));
+        Assert.Null(typeof(SecurityDomainSession)
+            .GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(session));
+
+        await using var subsequent = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        Assert.NotNull(subsequent);
+    }
+
+    [Fact]
+    public async Task GetKeyInfoAsync_AfterDisposal_ThrowsObjectDisposedException()
+    {
+        var connection = CreateMockConnection();
+        var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        await session.DisposeAsync();
+        int transmissionsBeforeCall = connection.ReceivedCalls().Count();
+
+        var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => session.GetKeyInfoAsync(TestContext.Current.CancellationToken));
+
+        Assert.Equal(typeof(SecurityDomainSession).FullName, exception.ObjectName);
+        Assert.Equal(transmissionsBeforeCall, connection.ReceivedCalls().Count());
+    }
+
+    [Fact]
+    public async Task ResetAsync_AfterDisposal_ThrowsObjectDisposedExceptionWithoutTransmitting()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse());
+        var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        await session.DisposeAsync();
+        int transmissionsBeforeReset = connection.TransmittedCommands.Count;
+
+        var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => session.ResetAsync(TestContext.Current.CancellationToken));
+
+        Assert.Equal(typeof(SecurityDomainSession).FullName, exception.ObjectName);
+        Assert.Equal(transmissionsBeforeReset, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task GetDataAsync_AfterDisposal_InvalidExpectedLengthThrowsObjectDisposedBeforeValidation()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse());
+        var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        await session.DisposeAsync();
+        int transmissionsBeforeCall = connection.TransmittedCommands.Count;
+
+        var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => session.GetDataAsync(0x66, expectedResponseLength: -1, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(typeof(SecurityDomainSession).FullName, exception.ObjectName);
+        Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
     }
 
     [Fact]
@@ -583,5 +668,14 @@ public class SecurityDomainSessionTests
     ];
 
     private static byte[] GetDataCommand(byte tag) => [0x00, 0xCA, 0x00, tag, 0x00];
+
+    private sealed class ThrowingProtocol(Exception exception) : IProtocol
+    {
+        public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
+        {
+        }
+
+        public void Dispose() => throw exception;
+    }
 
 }

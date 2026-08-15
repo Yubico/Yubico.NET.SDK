@@ -121,6 +121,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken)
     {
+        ThrowIfDisposed();
+
         if (IsInitialized)
             return;
 
@@ -161,6 +163,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     public async Task<ApplicationRelatedData> GetApplicationRelatedDataAsync(
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);
         return _appData;
@@ -177,8 +181,11 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     /// <inheritdoc />
     public Task<ReadOnlyMemory<byte>> GetDataAsync(
         DataObject dataObject,
-        CancellationToken cancellationToken = default) =>
-        GetDataCoreAsync(dataObject, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        return GetDataCoreAsync(dataObject, cancellationToken);
+    }
 
     /// <inheritdoc />
     public async Task PutDataAsync(
@@ -186,6 +193,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         var tag = (int)dataObject;
         var command = new ApduCommand
         {
@@ -205,6 +214,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         int length,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
 
         var command = new ApduCommand
@@ -226,6 +237,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     public async Task<int> GetSignatureCounterAsync(
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         var data = await GetDataCoreAsync(DataObject.SecuritySupportTemplate, cancellationToken)
             .ConfigureAwait(false);
         var sst = SecuritySupportTemplate.Parse(data.Span);
@@ -236,6 +249,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     public async Task<PwStatus> GetPinStatusAsync(
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         var data = await GetDataCoreAsync(DataObject.PwStatusBytes, cancellationToken)
             .ConfigureAwait(false);
         return PwStatus.Parse(data.Span);
@@ -333,12 +348,20 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
     protected override void Dispose(bool disposing)
     {
-        if (!disposing)
-            return;
-
-        _backend = null;
-        _kdf?.Dispose();
-        _kdf = null;
-        base.Dispose(disposing);
+        Kdf? kdf = null;
+        try
+        {
+            if (disposing)
+            {
+                kdf = _kdf;
+                _kdf = null;
+                _backend = null;
+                kdf?.Dispose();
+            }
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
     }
 }

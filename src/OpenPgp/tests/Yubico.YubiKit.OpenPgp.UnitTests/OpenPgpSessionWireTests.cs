@@ -157,6 +157,54 @@ public sealed class OpenPgpSessionWireTests
         Assert.All(salt.ToArray(), value => Assert.Equal(0, value));
     }
 
+    [Fact]
+    public async Task Dispose_ThrowingKdfStillRunsBaseTeardownAndDetachesConnection()
+    {
+        var expected = new InvalidOperationException("kdf dispose failed");
+        var connection = new RecordingSmartCardConnection(
+            OkResponse(),
+            VersionResponse(),
+            ApplicationRelatedDataResponse(),
+            OkResponse(),
+            OkResponse(),
+            VersionResponse(),
+            ApplicationRelatedDataResponse());
+        var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        await session.SetKdfAsync(
+            new ThrowingKdf(expected),
+            TestContext.Current.CancellationToken);
+
+        Exception? exception = Record.Exception(session.Dispose);
+
+        Assert.Same(expected, exception);
+        await using var subsequent = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        Assert.NotNull(subsequent);
+    }
+
+    [Fact]
+    public async Task SetFingerprintAsync_AfterDisposal_InvalidLengthThrowsObjectDisposedBeforeValidation()
+    {
+        var connection = CreateInitializedConnection();
+        var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        await session.DisposeAsync();
+        int transmissionsBeforeCall = connection.TransmittedCommands.Count;
+
+        var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => session.SetFingerprintAsync(
+                KeyRef.Sig,
+                ReadOnlyMemory<byte>.Empty,
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal(typeof(OpenPgpSession).FullName, exception.ObjectName);
+        Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
+    }
+
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(), .. trailingResponses]);
 
@@ -166,6 +214,18 @@ public sealed class OpenPgpSessionWireTests
     private static ReadOnlySpan<byte> CommandData(byte[] command) =>
         // Short APDU format: CLA INS P1 P2 Lc Data; the recorder reports SupportsExtendedApdu=false.
         command.AsSpan(5, command[4]);
+
+    private sealed class ThrowingKdf(Exception exception) : Kdf
+    {
+        public override int Algorithm => 0;
+
+        public override byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8Bytes) =>
+            pinUtf8Bytes.ToArray();
+
+        public override byte[] ToBytes() => [];
+
+        public override void Dispose() => throw exception;
+    }
 
     // SW 9000: successful APDU response with no data.
     private static byte[] OkResponse() => [0x90, 0x00];

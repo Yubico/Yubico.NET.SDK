@@ -530,6 +530,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// <inheritdoc />
     public byte[] DeriveKey(ReadOnlyMemory<byte> passwordUtf8)
     {
+        ThrowIfDisposed();
+
         return Rfc2898DeriveBytes.Pbkdf2(
             passwordUtf8.Span,
             _salt,
@@ -737,6 +739,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(operation);
 
         _ = await AuthenticateAndRetryAsync(
@@ -751,12 +754,17 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing)
+        try
         {
-            CryptographicOperations.ZeroMemory(_salt);
-            CryptographicOperations.ZeroMemory(_challenge);
+            if (disposing)
+            {
+                CryptographicOperations.ZeroMemory(_salt);
+                CryptographicOperations.ZeroMemory(_challenge);
+            }
         }
-
-        base.Dispose(disposing);
+        finally
+        {
+            base.Dispose(disposing);
+        }
     }
 }

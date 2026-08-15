@@ -24,6 +24,8 @@ public sealed partial class OpenPgpSession
     /// <inheritdoc />
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         EnsureSupports(FeatureReset);
 
         _logger.LogInformation("Starting OpenPGP factory reset");

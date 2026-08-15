@@ -85,7 +85,6 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     private readonly ILogger _logger;
 
     private IFidoBackend? _backend;
-    private int _disposed;
 
     private FidoSession(IConnection connection, ScpKeyParameters? scpKeyParams = null)
         : base(connection)
@@ -201,6 +200,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         MakeCredentialOptions? options = null,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         ArgumentNullException.ThrowIfNull(rp);
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(pubKeyCredParams);
@@ -258,6 +259,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         GetAssertionOptions? options = null,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         ArgumentException.ThrowIfNullOrEmpty(rpId);
 
         if (clientDataHash.Length != 32)
@@ -361,7 +364,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
     private void EnsureInitialized()
     {
-        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
+        ThrowIfDisposed();
 
         if (!IsInitialized)
         {
@@ -402,22 +405,14 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     /// <inheritdoc />
     protected override void Dispose(bool disposing)
     {
-        if (Interlocked.Exchange(ref _disposed, 1) == 0)
+        try
         {
             if (disposing)
-            {
                 _backend = null;
-            }
         }
-
-        base.Dispose(disposing);
-    }
-
-    /// <inheritdoc />
-    protected override async ValueTask DisposeAsyncCore()
-    {
-        Interlocked.Exchange(ref _disposed, 1);
-        _backend = null;
-        await base.DisposeAsyncCore().ConfigureAwait(false);
+        finally
+        {
+            base.Dispose(disposing);
+        }
     }
 }

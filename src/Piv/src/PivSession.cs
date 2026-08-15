@@ -497,6 +497,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         Logger.LogDebug("PIV: SignOrDecryptAsync auto-detecting algorithm for slot 0x{Slot:X2}", (byte)slot);
 
         if (!IsSupported(PivFeatures.Metadata))
@@ -823,6 +825,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
     private void EnsureInitialized()
     {
+        ThrowIfDisposed();
+
         if (!IsInitialized)
             throw new InvalidOperationException("Session is not initialized. Use PivSession.CreateAsync() to create a session.");
     }
@@ -830,6 +834,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
     [MemberNotNull(nameof(_backend))]
     private void EnsureBackend()
     {
+        ThrowIfDisposed();
+
         if (_backend is null)
         {
             throw new InvalidOperationException("PIV session is not initialized. Call InitializeAsync first.");

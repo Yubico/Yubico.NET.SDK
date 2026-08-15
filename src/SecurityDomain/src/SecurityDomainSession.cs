@@ -156,6 +156,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         FirmwareVersion? firmwareVersion = null,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         if (IsInitialized)
             return;
 
@@ -216,6 +218,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         int expectedResponseLength = 0,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         if (expectedResponseLength < 0)
             throw new ArgumentOutOfRangeException(nameof(expectedResponseLength),
                 "Expected response length cannot be negative.");
@@ -296,6 +300,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     public async Task<ReadOnlyMemory<byte>> GetCardRecognitionDataAsync(
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Getting card recognition data");
 
         var response = await GetDataAsync(TagCardData, cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -317,6 +323,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         KeyReference keyReference,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Getting certificates for Key Reference: {KeyReference}", keyReference);
         using var kidKvnTlv = new Tlv(TagKidKvn, keyReference.AsSpan());
         using var nestedTlvObj = new Tlv(TagControlReference, kidKvnTlv.AsSpan());
@@ -342,6 +350,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         bool includeKlcc,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         if (!includeKloc && !includeKlcc)
             throw new ArgumentException("At least one of kloc and klcc must be true");
 
@@ -406,6 +416,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         IReadOnlyList<X509Certificate2> certificates,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Storing certificate bundle (KeyReference: {KeyReference})", keyReference);
 
         var buffer = new ArrayBufferWriter<byte>();
@@ -458,6 +470,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         int replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(staticKeys);
 
         if (keyReference.Kid != 0x01)
@@ -514,6 +527,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         bool deleteLast = false,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         var (kid, kvn) = SecurityDomainTlvEncoding.NormalizeDeletePolicy(keyReference);
         var payload = SecurityDomainTlvEncoding.EncodeDeleteFilter(kid, kvn);
         var command = new ApduCommand
@@ -543,6 +558,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         byte replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         if (_hasExplicitFirmwareVersion)
             EnsureSupports(FeatureScp11);
 
@@ -609,6 +626,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     public async Task PutKeyAsync(KeyReference keyReference, ECPublicKey publicKey, int replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         var pkParams = publicKey.Parameters;
         if (pkParams.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
             throw new ArgumentException("Public key must be of type NIST P-256");
@@ -636,6 +655,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         int replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         var parameters = privateKey.Parameters;
         if (parameters.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
             throw new ArgumentException("Private key must be of type NIST P-256");
@@ -724,6 +745,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     public async Task StoreAllowListAsync(KeyReference keyReference, IReadOnlyCollection<string> serials,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Storing allow list (KeyReference: {KeyReference})", keyReference);
 
         var buffer = new ArrayBufferWriter<byte>();
@@ -780,6 +803,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <exception cref="InvalidOperationException">Thrown when there was an SCP error, described in the exception message.</exception>
     public async Task StoreDataAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogInformation("Storing data with length:{Length}", data.Length);
 
         var command = new ApduCommand(0x00, 0xE2, 0x90, 0x00, data);
@@ -796,6 +821,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     public async Task StoreCaIssuerAsync(KeyReference keyReference, ReadOnlyMemory<byte> ski,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Storing CA issuer SKI (KeyReference: {KeyReference})", keyReference);
 
         byte klcc = keyReference.Kid switch //
@@ -862,6 +889,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     [MemberNotNull(nameof(_protocol), nameof(_backend))]
     private void EnsureInitializedBackend()
     {
+        ThrowIfDisposed();
+
         if (!IsInitialized)
             throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");
 
@@ -1000,14 +1029,19 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <param name="disposing">Indicates whether managed resources should be disposed.</param>
     protected override void Dispose(bool disposing)
     {
-        if (!disposing) return;
-
-        base.Dispose(disposing);
-
-        _protocol = null;
-        _backend = null;
-        Protocol = null;
-        IsAuthenticated = false;
-        IsInitialized = false;
+        try
+        {
+            if (disposing)
+            {
+                _protocol = null;
+                _backend = null;
+                IsAuthenticated = false;
+                IsInitialized = false;
+            }
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
     }
 }

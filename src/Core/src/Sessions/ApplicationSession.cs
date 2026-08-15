@@ -23,6 +23,9 @@ namespace Yubico.YubiKit.Core.Sessions;
 public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 {
     private readonly DisposalGate _disposalGate = new();
+    // Guards reject calls that begin after disposal starts. Operations already in flight have no lifetime
+    // admission lease and may complete, fail at a later guard, or race teardown.
+    private int _disposalStarted;
     private bool _disposed;
     private int _released;
     private bool _ownsConnection;
@@ -195,17 +198,19 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 
     protected void ThrowIfDisposed()
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposalStarted) != 0, this);
     }
 
     public void Dispose()
     {
+        Interlocked.Exchange(ref _disposalStarted, 1);
         _disposalGate.Dispose(() => Dispose(disposing: true));
         GC.SuppressFinalize(this);
     }
 
     public async ValueTask DisposeAsync()
     {
+        Interlocked.Exchange(ref _disposalStarted, 1);
         await _disposalGate.DisposeAsync(DisposeSessionAsync).ConfigureAwait(false);
         GC.SuppressFinalize(this);
     }

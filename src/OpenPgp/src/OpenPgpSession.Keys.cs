@@ -27,6 +27,8 @@ public sealed partial class OpenPgpSession
         RsaSize size = RsaSize.Rsa2048,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogInformation("Generating RSA {Size} key for {Slot}", (int)size, keyRef);
 
         var attributes = RsaAttributes.Create(size);
@@ -42,6 +44,8 @@ public sealed partial class OpenPgpSession
         CurveOid curve,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         EnsureSupports(FeatureEc);
 
         _logger.LogInformation("Generating EC {Curve} key for {Slot}", curve, keyRef);
@@ -60,6 +64,7 @@ public sealed partial class OpenPgpSession
         AlgorithmAttributes? attributes = null,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(template);
 
         _logger.LogInformation("Importing key into {Slot}", keyRef);
@@ -104,6 +109,8 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogInformation("Deleting key from {Slot}", keyRef);
 
         // Python canonical: delete key by changing algorithm attributes twice.
@@ -129,6 +136,8 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Reading public key from {Slot}", keyRef);
 
         var crtBytes = keyRef.GetCrt();
@@ -146,6 +155,8 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         EnsureSupports(FeatureAttestation);
 
         _logger.LogDebug("Attesting key in {Slot}", keyRef);
@@ -165,6 +176,8 @@ public sealed partial class OpenPgpSession
     public async Task<KeyInformation> GetKeyInformationAsync(
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         // Key information is in the discretionary data objects
         var appData = await GetApplicationRelatedDataAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -175,6 +188,8 @@ public sealed partial class OpenPgpSession
     public async Task<Fingerprints> GetFingerprintsAsync(
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         var appData = await GetApplicationRelatedDataAsync(cancellationToken)
             .ConfigureAwait(false);
         return appData.Discretionary.Fingerprints;
@@ -184,6 +199,8 @@ public sealed partial class OpenPgpSession
     public async Task<GenerationTimes> GetGenerationTimesAsync(
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         var appData = await GetApplicationRelatedDataAsync(cancellationToken)
             .ConfigureAwait(false);
         return appData.Discretionary.GenerationTimes;
@@ -195,6 +212,8 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> fingerprint,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         if (fingerprint.Length != 20)
         {
             throw new ArgumentException("Fingerprint must be exactly 20 bytes.", nameof(fingerprint));
@@ -211,6 +230,8 @@ public sealed partial class OpenPgpSession
         int timestamp,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Setting generation time for {Slot} to {Timestamp}", keyRef, timestamp);
 
         var data = new byte[4];

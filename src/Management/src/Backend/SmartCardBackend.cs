@@ -83,11 +83,6 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
         await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
-    public void Dispose()
-    {
-        // Backend doesn't own the protocol - ManagementSession handles disposal
-    }
-
     private static FirmwareVersion? ParseVersionHeader(ReadOnlySpan<byte> versionBytes)
     {
         var deviceText = Encoding.UTF8.GetString(versionBytes);

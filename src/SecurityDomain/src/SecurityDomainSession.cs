@@ -1024,7 +1024,9 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     }
 
     /// <summary>
-    ///     Disposes the session and releases managed resources associated with the underlying protocol.
+    ///     Drops this session's borrowed protocol and backend references and clears its authentication
+    ///     state, then defers to the base session, which disposes the protocol and detaches from the
+    ///     connection — disposing that connection only when the session owns it.
     /// </summary>
     /// <param name="disposing">Indicates whether managed resources should be disposed.</param>
     protected override void Dispose(bool disposing)

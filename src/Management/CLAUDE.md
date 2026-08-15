@@ -774,32 +774,34 @@ ManagementSession uses the **Backend pattern** to abstract protocol differences 
 ### Internal Structure
 
 ```csharp
-// ManagementSession delegates all operations to a backend
-private readonly IManagementBackend _backend;
+// ManagementSession delegates transport-specific work to a backend
+private IManagementBackend _backend = null!;
 
-// Backend interface defines four operations
-internal interface IManagementBackend : IDisposable
+// Backend abstraction: deliberately NOT IDisposable
+internal interface IManagementBackend
 {
-    ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken cancellationToken);
+    ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken);
     ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken);
     ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken);
     ValueTask DeviceResetAsync(CancellationToken cancellationToken);
 }
 ```
 
+Device-info reads do not go through the backend; `ManagementSession` uses `DeviceInfoReader.ReadAsync(_protocol, ...)` directly.
+
 ### Implementations
 
 - **SmartCardBackend**: Encodes operations as ISO 7816 APDUs (INS: 0x1D, 0x1C, 0x16, 0x1F)
 - **FidoHidBackend**: Encodes operations as CTAP vendor commands (0xC2, 0xC3, 0xC0)
+- **OtpBackend**: Encodes operations as OTP HID slot commands with CRC validation
 
 ### Key Design Decisions
 
-1. **Backend is stateless**: Doesn't own the protocol or connection
-2. **ManagementSession owns protocol/backend disposal**: Backend.Dispose() is a no-op; a caller-created connection remains caller-owned
-3. **SCP wrapping works**: Backend can be recreated with SCP-wrapped protocol without disposing connection
-4. **Zero branching**: All public methods delegate to `_backend.ReadConfigAsync()` etc.
+1. **Backend owns nothing**: it borrows the protocol and holds no disposable state, so it is not `IDisposable`. Ownership rule is Core's — see [Core CLAUDE.md](../Core/CLAUDE.md) gotcha #2 and the `IProtocol` doc comment: the session disposes the protocol, and whoever created the connection disposes it.
+2. **SCP wrapping works**: the backend can be recreated over an SCP-wrapped protocol without disposing anything.
+3. **Zero branching**: all public methods delegate to `_backend`, so no protocol-specific logic leaks into business operations, and the session is testable against a fake `IManagementBackend`.
 
-This matches the Java yubikit-android Backend pattern where Backend doesn't implement Closeable.
+This matches the Java yubikit-android Backend pattern where Backend doesn't implement Closeable. `ManagementBackendLifecycleTests` pins the non-disposable invariant.
 
 ### Why This Matters
 
@@ -813,10 +815,8 @@ else
 
 **After (backend delegation):**
 ```csharp
-result = await _backend.ReadConfigAsync(page, ct);
+await _backend.WriteConfigAsync(config, ct);
 ```
-
-Makes the code testable via `IManagementBackend` mocking and eliminates protocol-specific logic from business operations.
 
 ## TLV Encoding/Decoding
 

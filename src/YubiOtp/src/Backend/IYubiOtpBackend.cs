@@ -24,7 +24,13 @@ internal readonly record struct YubiOtpInitialization(
 /// Internal abstraction for YubiOTP transport-specific operations.
 /// Implementations encode operations for SmartCard (APDU) or OTP HID (feature reports).
 /// </summary>
-internal interface IYubiOtpBackend : IDisposable
+/// <remarks>
+/// Backends are pure users of the protocol they are handed: they own no disposable state and are
+/// deliberately not <see cref="IDisposable" />. The session disposes the protocol through
+/// <c>ApplicationSession</c>, and the connection is released by whoever created it. A backend that
+/// ever needs to own a resource must revisit that ownership chain rather than add a disposal hook here.
+/// </remarks>
+internal interface IYubiOtpBackend
 {
     /// <summary>
     /// Performs transport-specific YubiOTP initialization and returns applet status.

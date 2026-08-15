@@ -32,6 +32,8 @@ Backend has only two primitives:
 - `WriteUpdateAsync` — write config/NDEF/swap/delete, returns status bytes
 - `SendAndReceiveAsync` — challenge-response, serial read, returns data
 
+The backend borrows the protocol and owns no disposable state, so `IYubiOtpBackend` is deliberately not `IDisposable` (`YubiOtpBackendLifecycleTests` pins this). The session disposes the protocol via `ApplicationSession`; whoever created the connection disposes it — see [Core CLAUDE.md](../Core/CLAUDE.md) gotcha #2.
+
 ## Session Initialization
 
 SmartCard path:

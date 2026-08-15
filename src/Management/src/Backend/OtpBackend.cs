@@ -17,7 +17,6 @@ using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 
 namespace Yubico.YubiKit.Management.Backend;
 
-
 /// <summary>
 /// Backend implementation for Management operations over OTP HID (8-byte feature reports).
 /// Encodes operations as OTP slot commands with CRC validation.
@@ -52,14 +51,6 @@ internal sealed class OtpBackend(IOtpHidProtocol otpProtocol) : IManagementBacke
             .ConfigureAwait(false);
     }
 
-    public ValueTask DeviceResetAsync(CancellationToken cancellationToken)
-    {
-        // Device reset is only supported over CCID, not HID
+    public ValueTask DeviceResetAsync(CancellationToken cancellationToken) =>
         throw new NotSupportedException("Device reset is only available over SmartCard (CCID) connections.");
-    }
-
-    public void Dispose()
-    {
-        // Backend doesn't own the protocol - ManagementSession handles disposal
-    }
 }

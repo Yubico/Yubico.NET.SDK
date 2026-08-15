@@ -218,10 +218,6 @@ public class ManagementSessionTests
 
         public ValueTask DeviceResetAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
-
-        public void Dispose()
-        {
-        }
     }
 
     private sealed class UnsupportedConnection : IConnection

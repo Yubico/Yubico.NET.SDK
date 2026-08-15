@@ -197,11 +197,6 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
         _lastProgSeq = newProgSeq;
     }
 
-    public void Dispose()
-    {
-        // Backend doesn't own the protocol - YubiOtpSession handles disposal
-    }
-
     private static FirmwareVersion? ParseManagementVersion(ReadOnlySpan<byte> response)
     {
         var deviceText = Encoding.UTF8.GetString(response);

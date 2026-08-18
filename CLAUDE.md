@@ -572,6 +572,16 @@ If you answered "no" to any of these, don't write the test.
 - Base branch for PRs: **`develop`** (not `main`)
 - Only commit files YOU created or modified in the current session
 - Stage explicitly with `git add path/to/file` — NEVER `git add .` or `git add -A`
+- Use GitHub stacked PRs (`gh stack`) for multi-layer work. Put unrelated work in a **separate stack**; do not piggyback unrelated changes into an existing stack/PR.
+- Keep each stack layer and PR narrow and independently reviewable (one concern per PR, no mixed unrelated diffs).
+
+Minimal stack flow:
+```bash
+gh stack init --base develop <branch>
+gh stack add <branch>
+gh stack submit
+gh stack rebase && gh stack push && gh stack submit
+```
 
 Full rules: `docs/COMMIT_GUIDELINES.md`. Skill: `.claude/skills/git-commit/SKILL.md`.
 

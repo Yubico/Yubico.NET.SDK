@@ -1,5 +1,19 @@
 # Developer Guide
 
+## Stacked PR Workflow
+
+- Use GitHub stacked PRs (`gh stack`) for multi-step work that lands in layers.
+- Unrelated work must start a **new stack**. Do not mix unrelated concerns into an existing stack or PR.
+- Keep every PR focused and independently reviewable: one purpose per PR, minimal diff, clear review boundary.
+
+Minimal flow (trunk is `develop`):
+```bash
+gh stack init --base develop <branch>
+gh stack add <branch>
+gh stack submit
+gh stack rebase && gh stack push && gh stack submit
+```
+
 ## Analyzer and Formatting Workflow
 
 - Roslyn analyzers are enabled via `Directory.Build.props` for every project. The solution defaults to `AnalysisLevel=latest` with `AnalysisMode=AllEnabledByDefault` so new rules surface automatically.

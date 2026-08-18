@@ -1023,22 +1023,16 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         }
     }
 
-    /// <summary>
-    ///     Drops this session's borrowed protocol and backend references and clears its authentication
-    ///     state, then defers to the base session, which disposes the protocol and detaches from the
-    ///     connection — disposing that connection only when the session owns it.
-    /// </summary>
-    /// <param name="disposing">Indicates whether managed resources should be disposed.</param>
     protected override void Dispose(bool disposing)
     {
         try
         {
             if (disposing)
             {
+                // These mirror the effective protocol outside ApplicationSession.Protocol. Clear them even
+                // if base protocol disposal throws so this session cannot retain a disposed secure channel.
                 _protocol = null;
                 _backend = null;
-                IsAuthenticated = false;
-                IsInitialized = false;
             }
         }
         finally

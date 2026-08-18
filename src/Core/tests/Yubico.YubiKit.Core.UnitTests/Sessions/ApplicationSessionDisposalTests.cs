@@ -46,6 +46,30 @@ public class ApplicationSessionDisposalTests
     }
 
     [Fact]
+    public void Dispose_ResetsInitializedAndAuthenticated()
+    {
+        using var session = new ProbeSession(new TrackingConnection());
+        session.SetInitializedAndAuthenticated();
+
+        session.Dispose();
+
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+    }
+
+    [Fact]
+    public async Task DisposeAsync_ResetsInitializedAndAuthenticated()
+    {
+        await using var session = new ProbeSession(new TrackingConnection());
+        session.SetInitializedAndAuthenticated();
+
+        await session.DisposeAsync();
+
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+    }
+
+    [Fact]
     public async Task DisposeAsync_ThenDispose_EntersCleanupExactlyOnce()
     {
         var session = new ProbeSession(new TrackingConnection());
@@ -388,6 +412,12 @@ public class ApplicationSessionDisposalTests
         public Task SyncBeforeBaseEntered => _syncBeforeBaseEntered.Task;
 
         public void AssertNotDisposed() => ThrowIfDisposed();
+
+        public void SetInitializedAndAuthenticated()
+        {
+            IsInitialized = true;
+            IsAuthenticated = true;
+        }
 
         public void ResumeAsyncBeforeBase() => _resumeAsyncBeforeBase.TrySetResult();
 

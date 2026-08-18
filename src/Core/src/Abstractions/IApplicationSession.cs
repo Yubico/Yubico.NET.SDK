@@ -19,7 +19,16 @@ namespace Yubico.YubiKit.Core.Abstractions;
 public interface IApplicationSession : IDisposable, IAsyncDisposable
 {
     FirmwareVersion FirmwareVersion { get; }
+    /// <summary>
+    ///     Gets a value indicating whether the session has initialized its application protocol.
+    ///     Returns <c>false</c> once disposal begins.
+    /// </summary>
     bool IsInitialized { get; }
+
+    /// <summary>
+    ///     Gets a value indicating whether the session has established authentication.
+    ///     Returns <c>false</c> once disposal begins.
+    /// </summary>
     bool IsAuthenticated { get; }
     bool IsSupported(Feature feature);
     void EnsureSupports(Feature feature);

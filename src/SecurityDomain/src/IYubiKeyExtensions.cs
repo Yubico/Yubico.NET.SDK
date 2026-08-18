@@ -37,7 +37,7 @@ public static class IYubiKeyExtensions
         /// <returns>A new <see cref="SecurityDomainSession" /> instance.</returns>
         /// <remarks>
         ///     The returned session owns the underlying connection and will dispose it when the session is disposed.
-        ///     Always use a <c>using</c> statement or call <see cref="SecurityDomainSession.Dispose" /> when finished.
+        ///     Always use a <c>using</c> statement or call <see cref="IDisposable.Dispose" /> when finished.
         /// </remarks>
         /// <exception cref="SecureChannelException">
         ///     <paramref name="scpKeyParams" /> was supplied and establishing the SCP secure channel failed.

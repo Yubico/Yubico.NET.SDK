@@ -402,16 +402,4 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
             "For older USB-connected YubiKeys, use IFidoHidConnection instead.");
     }
 
-    protected override void Dispose(bool disposing)
-    {
-        try
-        {
-            if (disposing)
-                _backend = null;
-        }
-        finally
-        {
-            base.Dispose(disposing);
-        }
-    }
 }

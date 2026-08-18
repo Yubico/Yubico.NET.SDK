@@ -233,6 +233,10 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         if (_disposed)
             return;
 
+        // A disposed session has no usable protocol or authenticated channel, even when teardown fails.
+        IsAuthenticated = false;
+        IsInitialized = false;
+
         try
         {
             try

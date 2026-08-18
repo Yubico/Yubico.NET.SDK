@@ -84,7 +84,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     private readonly ScpKeyParameters? _scpKeyParams;
     private readonly ILogger _logger;
 
-    private IFidoBackend? _backend;
+    private IFidoBackend _backend = null!;
 
     private FidoSession(IConnection connection, ScpKeyParameters? scpKeyParams = null)
         : base(connection)
@@ -173,7 +173,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     public Task<AuthenticatorInfo> GetInfoAsync(CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        return GetInfoCoreAsync(_backend!, cancellationToken);
+        return GetInfoCoreAsync(_backend, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -231,7 +231,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
             _logger.LogDebug("MakeCredential for RP: {RpId}", rp.Id);
 
-            response = await _backend!.SendCborAsync(request, cancellationToken)
+            response = await _backend.SendCborAsync(request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -280,7 +280,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
             _logger.LogDebug("GetAssertion for RP: {RpId}", rpId);
 
-            response = await _backend!.SendCborAsync(request, cancellationToken)
+            response = await _backend.SendCborAsync(request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -308,7 +308,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
         var request = CtapRequestBuilder.Create(CtapCommand.GetNextAssertion).Build();
 
-        var response = await _backend!.SendCborAsync(request, cancellationToken)
+        var response = await _backend.SendCborAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
         return GetAssertionResponse.Decode(response);
@@ -341,7 +341,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
             request = new byte[] { command };
         }
 
-        return await _backend!.SendCborAsync(request, cancellationToken).ConfigureAwait(false);
+        return await _backend.SendCborAsync(request, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -350,7 +350,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        return await _backend!.SendCborAsync(request, cancellationToken).ConfigureAwait(false);
+        return await _backend.SendCborAsync(request, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task<AuthenticatorInfo> GetInfoCoreAsync(

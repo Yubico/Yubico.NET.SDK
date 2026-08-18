@@ -38,6 +38,21 @@ public class SmartCardBackendTests
     }
 
     [Fact]
+    public async Task InitializeAsync_MalformedManagementVersion_UsesOtpStatusVersion()
+    {
+        _protocol.SelectAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(
+                Task.FromResult<ReadOnlyMemory<byte>>("YubiKey 5.4.x"u8.ToArray()),
+                Task.FromResult<ReadOnlyMemory<byte>>(new byte[] { 5, 7, 0, 0, 0, 0 }));
+
+        var backend = CreateBackend();
+
+        YubiOtpInitialization initialization = await backend.InitializeAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(new FirmwareVersion(5, 7, 0), initialization.FirmwareVersion);
+    }
+
+    [Fact]
     public async Task WriteUpdateAsync_SendsCorrectApdu()
     {
         byte[] configData = [0x01, 0x02, 0x03];

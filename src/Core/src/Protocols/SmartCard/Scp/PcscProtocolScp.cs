@@ -24,7 +24,7 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 ///     by the same guard as the wrapped protocol (SCP MAC chaining makes
 ///     interleaving doubly fatal — each MAC depends on the previous command's MAC).
 /// </summary>
-public sealed class PcscProtocolScp : ISmartCardProtocol, IAsyncDisposable
+internal sealed class PcscProtocolScp : ISmartCardProtocol, IAsyncDisposable
 {
     private readonly PcscProtocol _baseProtocol;
     private readonly DataEncryptor _dataEncryptor;

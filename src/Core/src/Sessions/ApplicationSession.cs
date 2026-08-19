@@ -33,7 +33,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     private bool _ownsConnection;
 
     protected ILogger Logger { get; }
-    protected IProtocol? Protocol { get; set; }
+    internal IProtocol? Protocol { get; set; }
     protected bool IsDisposalStarted => Volatile.Read(ref _disposalStarted) != 0;
 
     /// <summary>
@@ -125,7 +125,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     /// </remarks>
     internal void OwnConnection() => _ownsConnection = true;
 
-    protected async Task<IProtocol> InitializeProtocolAsync(
+    internal async Task<IProtocol> InitializeProtocolAsync(
         IProtocol protocol,
         FirmwareVersion firmwareVersion,
         ProtocolConfiguration? configuration = null,

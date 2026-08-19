@@ -43,7 +43,7 @@ namespace Yubico.YubiKit.Core.Abstractions;
 ///         the session is disposed. Applet backends borrow the protocol; they do not own it.
 ///     </para>
 /// </remarks>
-public interface IProtocol : IDisposable
+internal interface IProtocol : IDisposable
 {
     void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null);
 }

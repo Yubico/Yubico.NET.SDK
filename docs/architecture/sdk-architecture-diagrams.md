@@ -160,6 +160,8 @@ flowchart TD
 - `ApplicationSession` holds and disposes its `IProtocol`, but that does not imply ownership of the
   underlying `IConnection`. A direct `Session.CreateAsync(connection)` borrows the caller's connection;
   only a convenience API that opened a hidden connection calls internal `OwnConnection()`.
+- The protocol layer shown here is internal session machinery. Consumers choose applet sessions first,
+  guarded `Raw*Session` types for supported low-level exchanges, or explicitly unguarded raw connections.
 - **Two-phase init pattern (memorize this):** private ctor stores connection →
   static `CreateAsync(...)` does async selection + `InitializeProtocolAsync(...)`.
 - **Deliberately flat command model:** there are **no** `SignCommand`/`VerifyPinCommand`
@@ -394,7 +396,7 @@ If your audience remembers only six names, make it these:
 | `IYubiKey` | device model | one physical key; `ConnectAsync<T>()` |
 | `IConnection` | transport | base for SmartCard / FIDO-HID / OTP-HID connections |
 | `ApplicationSession` | session base | firmware, init, auth, protocol lifetime, optional hidden-connection ownership |
-| `ISmartCardProtocol` | protocol | the APDU send/receive contract |
+| `RawSmartCardSession` | raw session | supported explicit SELECT and APDU exchange path |
 | `ApduCommand` / `ApduResponse` | pipeline | the record structs that flow through the decorator chain |
 
 ---

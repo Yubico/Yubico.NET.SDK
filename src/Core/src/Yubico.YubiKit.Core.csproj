@@ -45,4 +45,14 @@
     <InternalsVisibleTo Include="Yubico.YubiKit.YubiOtp" />
   </ItemGroup>
 
+  <!-- Applet tests that directly exercise their internal protocol-backed implementations. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Fido2.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Management.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Piv.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.SecurityDomain.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.YubiOtp.UnitTests" />
+  </ItemGroup>
+
 </Project>

@@ -139,7 +139,8 @@ dotnet toolchain.cs -- pack --include-docs
 `codemapper .` generates the full surface map. The non-obvious patterns:
 
 - **Device discovery** — `IDeviceRepository` + `DeviceMonitorService` (hosted) + `DeviceListenerService` (background). Events flow as `IObservable<DeviceEvent>` via System.Reactive.
-- **Connection abstraction** — `IConnection` base, `IProtocol` per transport (e.g., `ISmartCardProtocol`). Factories: `ISmartCardConnectionFactory`, `ProtocolFactory`, `IYubiKeyFactory`.
+- **Access tiers** — Applet sessions are the golden path; public `RawSmartCardSession`, `RawFidoHidSession`, and `RawOtpHidSession` provide guarded low-level exchanges; public raw connection I/O is an explicitly unguarded expert escape hatch. `ProtocolFactory` and the `IProtocol` family are internal session machinery. See [Raw Access Tiers](docs/architecture/raw-access-tiers.md).
+- **Connection abstraction** — `IConnection` is the public transport base. Typed raw connections remain public; protocol implementations and factories are internal.
 - **APDU pipeline** — `IApduFormatter` (`Short`/`Extended`) → `IApduProcessor` decorators (`CommandChainingProcessor`, `ChainedResponseProcessor`, `ApduFormatProcessor`). Transparent size-limit + chaining handling.
 - **Application sessions** — `ApplicationSession` base; protocol-specific sessions like `ManagementSession<TConnection>` are generic over connection type.
 - **Device discovery entry point** — static `YubiKeyManager`; Core no longer requires a DI registration.

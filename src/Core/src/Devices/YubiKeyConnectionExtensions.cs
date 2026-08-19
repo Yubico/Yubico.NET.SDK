@@ -15,6 +15,9 @@
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
@@ -26,6 +29,94 @@ namespace Yubico.YubiKit.Core.Devices;
 public static class YubiKeyConnectionExtensions
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger(nameof(YubiKeyConnectionExtensions));
+
+    /// <summary>Opens exactly the SmartCard transport and creates a raw APDU session that owns it.</summary>
+    /// <remarks>No application is selected. The returned session must be disposed.</remarks>
+    public static Task<RawSmartCardSession> CreateRawSmartCardSessionAsync(
+        this IYubiKey yubiKey,
+        CancellationToken cancellationToken = default) =>
+        yubiKey.CreateSessionOverTransportAsync(
+            ConnectionType.SmartCard,
+            async (connection, token) =>
+            {
+                RawSmartCardSession session = await RawSmartCardSession.CreateAsync(
+                        (ISmartCardConnection)connection,
+                        token)
+                    .ConfigureAwait(false);
+                session.OwnConnection();
+                return session;
+            },
+            cancellationToken);
+
+    /// <summary>
+    ///     Opens exactly the SmartCard transport, configures APDU framing, establishes SCP, and returns a raw
+    ///     session that owns the connection.
+    /// </summary>
+    /// <remarks>
+    ///     Configuration is applied before SCP establishment. The caller retains ownership of
+    ///     <paramref name="scpKeyParameters" />.
+    /// </remarks>
+    public static Task<RawSmartCardSession> CreateRawSmartCardSessionAsync(
+        this IYubiKey yubiKey,
+        ScpKeyParameters scpKeyParameters,
+        FirmwareVersion firmwareVersion,
+        ProtocolConfiguration? configuration = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(scpKeyParameters);
+        ArgumentNullException.ThrowIfNull(firmwareVersion);
+        return yubiKey.CreateSessionOverTransportAsync(
+            ConnectionType.SmartCard,
+            async (connection, token) =>
+            {
+                RawSmartCardSession session = await RawSmartCardSession.CreateAsync(
+                        (ISmartCardConnection)connection,
+                        scpKeyParameters,
+                        firmwareVersion,
+                        configuration,
+                        token)
+                    .ConfigureAwait(false);
+                session.OwnConnection();
+                return session;
+            },
+            cancellationToken);
+    }
+
+    /// <summary>Opens exactly the FIDO HID transport and creates a raw CTAP HID session that owns it.</summary>
+    /// <remarks>No fallback transport is attempted. The returned session must be disposed.</remarks>
+    public static Task<RawFidoHidSession> CreateRawFidoHidSessionAsync(
+        this IYubiKey yubiKey,
+        CancellationToken cancellationToken = default) =>
+        yubiKey.CreateSessionOverTransportAsync(
+            ConnectionType.HidFido,
+            async (connection, token) =>
+            {
+                RawFidoHidSession session = await RawFidoHidSession.CreateAsync(
+                        (IFidoHidConnection)connection,
+                        token)
+                    .ConfigureAwait(false);
+                session.OwnConnection();
+                return session;
+            },
+            cancellationToken);
+
+    /// <summary>Opens exactly the OTP HID transport and creates a raw OTP HID session that owns it.</summary>
+    /// <remarks>No fallback transport is attempted. The returned session must be disposed.</remarks>
+    public static Task<RawOtpHidSession> CreateRawOtpHidSessionAsync(
+        this IYubiKey yubiKey,
+        CancellationToken cancellationToken = default) =>
+        yubiKey.CreateSessionOverTransportAsync(
+            ConnectionType.HidOtp,
+            async (connection, token) =>
+            {
+                RawOtpHidSession session = await RawOtpHidSession.CreateAsync(
+                        (IOtpHidConnection)connection,
+                        token)
+                    .ConfigureAwait(false);
+                session.OwnConnection();
+                return session;
+            },
+            cancellationToken);
 
     /// <summary>
     ///     Returns the first connection in <paramref name="preferenceOrder" /> that this device supports, or

@@ -14,7 +14,9 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Buffers;
 using System.Buffers.Binary;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.Hid;
@@ -24,7 +26,7 @@ namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
 
 /// <summary>
 /// Implements OTP HID protocol for communication with YubiKey OTP/Keyboard interface.
-/// Uses 8-byte feature reports with CRC validation.
+/// Uses 8-byte feature reports with outbound CRC generation. Inbound CRC validation remains command-specific.
 /// Based on the Java yubikit-android OtpProtocol implementation.
 /// </summary>
 /// <remarks>
@@ -35,19 +37,25 @@ namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
 ///     The initialization path itself issues a slot command on NEO (firmware 3.x), so it runs inside the caller's guarded
 ///     exchange via the unguarded core methods — it must never call the public guarded methods.
 /// </remarks>
-internal sealed class OtpHidProtocol : IOtpHidProtocol
+internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
 {
     private readonly IOtpHidConnection _connection;
     private readonly ExchangeGuard _exchangeGuard = new();
+    private readonly DisposalGate _disposalGate = new();
     private readonly ILogger<OtpHidProtocol> _logger;
+    private readonly ArrayPool<byte> _bufferPool;
     private FirmwareVersion? _firmwareVersion;
     private bool _initialized;
     private bool _disposed;
 
-    public OtpHidProtocol(IOtpHidConnection connection, ILogger<OtpHidProtocol>? logger = null)
+    public OtpHidProtocol(
+        IOtpHidConnection connection,
+        ILogger<OtpHidProtocol>? logger = null,
+        ArrayPool<byte>? bufferPool = null)
     {
         _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         _logger = logger ?? NullLogger<OtpHidProtocol>.Instance;
+        _bufferPool = bufferPool ?? ArrayPool<byte>.Shared;
     }
 
     public FirmwareVersion? FirmwareVersion => _firmwareVersion;
@@ -95,6 +103,10 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
             {
                 // Expected to fail - the scan map command should be rejected
             }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(scanMap);
+            }
         }
 
         _initialized = true;
@@ -135,13 +147,19 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         // Pad data to slot data size (64 bytes)
         var payload = new byte[OtpConstants.SlotDataSize];
         data.Span.CopyTo(payload);
+        try
+        {
+            _logger.LogTrace("Sending OTP slot command 0x{Slot:X2} with {Length} bytes payload", slot, data.Length);
 
-        _logger.LogTrace("Sending OTP slot command 0x{Slot:X2} with {Length} bytes payload", slot, data.Length);
+            var programmingSequence = await SendFrameAsync(slot, payload, cancellationToken).ConfigureAwait(false);
 
-        var programmingSequence = await SendFrameAsync(slot, payload, cancellationToken).ConfigureAwait(false);
-
-        // Read response using Java-style single polling loop
-        return await ReadFrameJavaStyleAsync(programmingSequence, cancellationToken).ConfigureAwait(false);
+            // Read response using Java-style single polling loop
+            return await ReadFrameJavaStyleAsync(programmingSequence, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(payload);
+        }
     }
 
     /// <summary>
@@ -248,48 +266,62 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
         ReadOnlyMemory<byte> firstReport,
         CancellationToken cancellationToken)
     {
-        using var stream = new MemoryStream();
+        const int maximumResponseLength = (OtpConstants.SequenceMask + 1) * OtpConstants.FeatureReportDataSize;
+        byte[] responseBuffer = _bufferPool.Rent(maximumResponseLength);
         var previousSeq = -1;
+        var responseLength = 0;
 
-        // Process the first report (already has ReadPending set)
-        var report = firstReport;
-
-        while (true)
+        try
         {
-            var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
+            // Process the first report (already has ReadPending set)
+            var report = firstReport;
 
-            // Check if ReadPending is still set
-            if ((statusByte & OtpConstants.ResponsePendingFlag) == 0)
+            while (true)
             {
-                // End of data chain
-                _logger.LogDebug("End of data chain (ReadPending cleared)");
-                break;
+                var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
+
+                // Check if ReadPending is still set
+                if ((statusByte & OtpConstants.ResponsePendingFlag) == 0)
+                {
+                    // End of data chain
+                    _logger.LogDebug("End of data chain (ReadPending cleared)");
+                    break;
+                }
+
+                var packetSeq = statusByte & OtpConstants.SequenceMask;
+
+                // Check for sequence reset (second time seeing seq=0 means end of transmission)
+                if (packetSeq == 0 && previousSeq != -1)
+                {
+                    await ResetStateAsync(cancellationToken).ConfigureAwait(false);
+                    _logger.LogDebug("Transmission complete (seq reset to 0)");
+                    break;
+                }
+
+                if (responseLength > maximumResponseLength - OtpConstants.FeatureReportDataSize)
+                    throw new InvalidOperationException("OTP HID response exceeds the maximum packet sequence range.");
+
+                // Add payload to buffer (7 bytes)
+                report.Span[..OtpConstants.FeatureReportDataSize]
+                    .CopyTo(responseBuffer.AsSpan(responseLength));
+                responseLength += OtpConstants.FeatureReportDataSize;
+                previousSeq = packetSeq;
+
+                _logger.LogTrace("Added packet seq={Seq}, total={Total} bytes", packetSeq, responseLength);
+
+                // Read next report
+                report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            var packetSeq = statusByte & OtpConstants.SequenceMask;
-
-            // Check for sequence reset (second time seeing seq=0 means end of transmission)
-            if (packetSeq == 0 && previousSeq != -1)
-            {
-                await ResetStateAsync(cancellationToken).ConfigureAwait(false);
-                _logger.LogDebug("Transmission complete (seq reset to 0)");
-                break;
-            }
-
-            // Add payload to buffer (7 bytes)
-            stream.Write(report.Span[..OtpConstants.FeatureReportDataSize]);
-            previousSeq = packetSeq;
-
-            _logger.LogTrace("Added packet seq={Seq}, total={Total} bytes", packetSeq, stream.Length);
-
-            // Read next report
-            report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
+            var rawResponse = responseBuffer.AsSpan(0, responseLength).ToArray();
+            _logger.LogDebug("{Length} bytes read over HID", rawResponse.Length);
+            return rawResponse;
         }
-
-        var rawResponse = stream.ToArray();
-        _logger.LogDebug("{Length} bytes read over HID", rawResponse.Length);
-
-        return rawResponse;
+        finally
+        {
+            CryptographicOperations.ZeroMemory(responseBuffer);
+            _bufferPool.Return(responseBuffer);
+        }
     }
 
     /// <summary>
@@ -386,50 +418,60 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
 
         // Format 70-byte frame: [64-byte payload][1-byte slot][2-byte CRC][3-byte filler]
         var frame = new byte[OtpConstants.FrameSize];
-        payload.CopyTo(frame.AsSpan());
-        frame[OtpConstants.SlotDataSize] = slot;
-
-        // Calculate and write CRC (little-endian)
-        var crc = ChecksumUtils.CalculateCrc(payload, payload.Length);
-        BinaryPrimitives.WriteUInt16LittleEndian(frame.AsSpan(OtpConstants.SlotDataSize + 1), crc);
-        // Last 3 bytes are filler (already zero)
-
-        _logger.LogTrace("Prepared 70-byte frame for transmission");
-
-        // Get current programming sequence
-        var statusReport = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
-        var programmingSequence = statusReport.Span[OtpConstants.StatusOffsetProgSeq];
-
-        _logger.LogDebug("Initial programming sequence: {ProgSeq}, statusReport: {ByteCount} bytes",
-            programmingSequence, statusReport.Length);
-
-        // Send frame as 8-byte feature reports
-        var report = new byte[OtpConstants.FeatureReportSize];
-        byte seq = 0;
-        var frameOffset = 0;
-        var sentCount = 0;
-
-        while (frameOffset < OtpConstants.FrameSize)
+        byte[]? report = null;
+        try
         {
-            // Copy 7 bytes of frame data to report
-            var bytesToCopy = Math.Min(OtpConstants.FeatureReportDataSize, OtpConstants.FrameSize - frameOffset);
-            Array.Clear(report, 0, OtpConstants.FeatureReportDataSize);
-            Array.Copy(frame, frameOffset, report, 0, bytesToCopy);
+            payload.CopyTo(frame.AsSpan());
+            frame[OtpConstants.SlotDataSize] = slot;
 
-            // Set sequence with write flag
-            report[OtpConstants.FeatureReportDataSize] = (byte)(OtpConstants.SlotWriteFlag | seq);
-            await AwaitReadyToWriteAsync(cancellationToken).ConfigureAwait(false);
-            _logger.LogTrace("Sending report #{Count} (seq={Seq}): {ByteCount} bytes",
-                sentCount, seq, report.Length);
-            await WriteFeatureReportAsync(report, cancellationToken).ConfigureAwait(false);
-            sentCount++;
+            // Calculate and write CRC (little-endian)
+            var crc = ChecksumUtils.CalculateCrc(payload, payload.Length);
+            BinaryPrimitives.WriteUInt16LittleEndian(frame.AsSpan(OtpConstants.SlotDataSize + 1), crc);
+            // Last 3 bytes are filler (already zero)
 
-            frameOffset += OtpConstants.FeatureReportDataSize;
-            seq++;
+            _logger.LogTrace("Prepared 70-byte frame for transmission");
+
+            // Get current programming sequence
+            var statusReport = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
+            var programmingSequence = statusReport.Span[OtpConstants.StatusOffsetProgSeq];
+
+            _logger.LogDebug("Initial programming sequence: {ProgSeq}, statusReport: {ByteCount} bytes",
+                programmingSequence, statusReport.Length);
+
+            // Send frame as 8-byte feature reports
+            report = new byte[OtpConstants.FeatureReportSize];
+            byte seq = 0;
+            var frameOffset = 0;
+            var sentCount = 0;
+
+            while (frameOffset < OtpConstants.FrameSize)
+            {
+                // Copy 7 bytes of frame data to report
+                var bytesToCopy = Math.Min(OtpConstants.FeatureReportDataSize, OtpConstants.FrameSize - frameOffset);
+                Array.Clear(report, 0, OtpConstants.FeatureReportDataSize);
+                Array.Copy(frame, frameOffset, report, 0, bytesToCopy);
+
+                // Set sequence with write flag
+                report[OtpConstants.FeatureReportDataSize] = (byte)(OtpConstants.SlotWriteFlag | seq);
+                await AwaitReadyToWriteAsync(cancellationToken).ConfigureAwait(false);
+                _logger.LogTrace("Sending report #{Count} (seq={Seq}): {ByteCount} bytes",
+                    sentCount, seq, report.Length);
+                await WriteFeatureReportAsync(report, cancellationToken).ConfigureAwait(false);
+                sentCount++;
+
+                frameOffset += OtpConstants.FeatureReportDataSize;
+                seq++;
+            }
+
+            _logger.LogDebug("Sent {Count} reports, returning programmingSequence={ProgSeq}", sentCount, programmingSequence);
+            return programmingSequence;
         }
-
-        _logger.LogDebug("Sent {Count} reports, returning programmingSequence={ProgSeq}", sentCount, programmingSequence);
-        return programmingSequence;
+        finally
+        {
+            CryptographicOperations.ZeroMemory(frame);
+            if (report is not null)
+                CryptographicOperations.ZeroMemory(report);
+        }
     }
 
     /// <summary>
@@ -438,13 +480,30 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     private async Task ResetStateAsync(CancellationToken cancellationToken)
     {
         var buffer = new byte[OtpConstants.FeatureReportSize];
-        buffer[OtpConstants.FeatureReportSize - 1] = OtpConstants.DummyReportWrite;
-        await WriteFeatureReportAsync(buffer, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            buffer[OtpConstants.FeatureReportSize - 1] = OtpConstants.DummyReportWrite;
+            await WriteFeatureReportAsync(buffer, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(buffer);
+        }
     }
 
     /// <summary>
     ///     Releases this protocol. The connection is NOT disposed: a protocol is a user of the connection it
     ///     was handed, never its owner. Whoever created the connection disposes it.
     /// </summary>
-    public void Dispose() => _disposed = true;
+    public void Dispose() => _disposalGate.Dispose(() =>
+    {
+        _exchangeGuard.CloseAndDrain();
+        _disposed = true;
+    });
+
+    public ValueTask DisposeAsync() => _disposalGate.DisposeAsync(async () =>
+    {
+        await _exchangeGuard.CloseAndDrainAsync().ConfigureAwait(false);
+        _disposed = true;
+    });
 }

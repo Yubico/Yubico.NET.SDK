@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
 ///     <see cref="InvalidOperationException" /> immediately. A token is checked before entry; an exchange already
 ///     in flight runs to completion to avoid stranding the device mid-frame.
 /// </remarks>
-public interface IOtpHidProtocol : IProtocol
+internal interface IOtpHidProtocol : IProtocol
 {
     /// <summary>
     /// Sends a slot command and receives the response.

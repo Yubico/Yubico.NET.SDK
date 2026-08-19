@@ -30,6 +30,12 @@ public interface IOtpHidConnection : IConnection
     /// <summary>
     /// Sends an 8-byte feature report to the YubiKey.
     /// </summary>
+    /// <remarks>
+    ///     This Tier 2 method bypasses <see cref="Sessions.ApplicationSession" />,
+    ///     <c>ConnectionSessionGuard</c>, and <c>ExchangeGuard</c>. The caller owns OTP report
+    ///     framing, sequencing, polling, CRC, concurrency exclusion, and recovery. Do not interleave it with a live
+    ///     session or another raw operation; dispose and reopen when state is uncertain.
+    /// </remarks>
     /// <param name="report">The report data (must be 8 bytes).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default);
@@ -37,6 +43,11 @@ public interface IOtpHidConnection : IConnection
     /// <summary>
     /// Receives an 8-byte feature report from the YubiKey.
     /// </summary>
+    /// <remarks>
+    ///     This Tier 2 method bypasses <see cref="Sessions.ApplicationSession" />,
+    ///     <c>ConnectionSessionGuard</c>, and <c>ExchangeGuard</c>. Pair receives with the
+    ///     caller's own serialized send state. After interruption or interleaving, dispose and reopen the connection.
+    /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The received report (8 bytes).</returns>
     Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default);

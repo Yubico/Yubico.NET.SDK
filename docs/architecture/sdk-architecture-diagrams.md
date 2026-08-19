@@ -324,10 +324,13 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Dev["IYubiKey.ConnectAsync&lt;TConnection&gt;()"]
+    Direct["direct typed<br/>ConnectAsync&lt;TConnection&gt;()"]
+    Default["parameterless ConnectAsync()"]
     Q{"parameterless<br/>ConnectAsync()?"}
     Throw["throw if multi-interface"]
-    Typed["typed connect:<br/>&lt;ISmartCardConnection&gt; etc."]
+    Typed["one typed connect:<br/>&lt;ISmartCardConnection&gt; etc."]
+    AppletEntry["applet session extension"]
+    AppletKind{"application"}
 
     subgraph Applet["Applet transport selection"]
         M["Management: SmartCard → HidFido → HidOtp"]
@@ -336,21 +339,31 @@ flowchart TD
         S["PIV·OATH·OpenPGP·SD·HSM: SmartCard only"]
     end
 
+    Select["ResolveSessionTransport:<br/>select exactly one transport"]
     Attempt["claim all known member interface IDs<br/>and open selected connection"]
     Refuse["ConnectionInUseException<br/>before physical open"]
     Conn["open IConnection"]
+    Caller["direct caller owns/disposes IConnection"]
     Session["ApplicationSession<br/>holds/disposes IProtocol<br/>borrows caller connection"]
     Own{"convenience API opened<br/>hidden connection?"}
     Ready["session ready"]
 
-    Dev --> Q
+    Direct --> Typed
+    Default --> Q
     Q -->|yes, multi| Throw
-    Q -->|typed| Typed
-    Typed --> Applet
-    Applet --> Attempt
+    Q -->|single interface| Typed
+    AppletEntry --> AppletKind
+    AppletKind --> M
+    AppletKind --> O
+    AppletKind --> F
+    AppletKind --> S
+    M & O & F & S --> Select
+    Select --> Typed
+    Typed --> Attempt
     Attempt -->|held| Refuse
     Attempt -->|available| Conn
-    Conn --> Session --> Own
+    Conn -->|direct typed call returns| Caller
+    Conn -->|applet extension continues| Session --> Own
     Own -->|yes: internal OwnConnection| Ready
     Own -->|no: caller disposes connection| Ready
 ```

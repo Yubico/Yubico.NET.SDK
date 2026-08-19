@@ -301,12 +301,17 @@ await mgmt.SetDeviceConfigAsync(config, reboot: true);
 
 ### Implementation Details
 
-All three extension methods follow the same pattern internally:
+Management extensions that create their own session use the same transport/session pipeline internally:
 
-1. **Connection creation**: `await yubiKey.ConnectAsync<ISmartCardConnection>()`
-2. **Session creation**: `await ManagementSession.CreateAsync(connection, ...)`
-3. **Operation**: Call session method
-4. **Disposal**: `using` ensures cleanup even on exceptions
+1. **Transport resolution**: `ResolveSessionTransport` selects exactly one supported transport from
+   `SmartCard -> HidFido -> HidOtp`, or uses an explicit valid override. Supplying SCP parameters without
+   an override forces SmartCard because SCP is not available over HID.
+2. **One-shot connection opening**: `CreateSessionOverTransportAsync` opens exactly one typed connection —
+   `ISmartCardConnection`, `IFidoHidConnection`, or `IOtpHidConnection` — for the selected transport.
+3. **Session creation**: `await ManagementSession.CreateAsync(connection, ...)`
+4. **Operation**: Call the requested session method.
+5. **Disposal**: The high-level operation disposes its session; a returned session owns the hidden connection
+   until its caller disposes that session.
 
 The difference is **who manages the session lifecycle**:
 - High-level extensions: Method manages lifecycle (automatic)

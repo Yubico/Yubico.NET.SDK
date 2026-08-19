@@ -138,12 +138,36 @@ public class RawSmartCardSessionTests
         using var scp = Scp03KeyParameters.Default;
 
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => RawSmartCardSession.CreateAsync(connection, scp, cancellationToken));
+            () => RawSmartCardSession.CreateAsync(
+                connection,
+                scp,
+                new FirmwareVersion(5, 7, 2),
+                cancellationToken: cancellationToken));
 
         Assert.Equal(0, connection.DisposeCount);
         Assert.Equal(0x50, Assert.Single(connection.Commands).Span[1]);
         using StubAppletSession next = StubAppletSession.Create(connection);
         Assert.NotNull(next);
+    }
+
+    [Fact]
+    public async Task CreateAsync_WithScp_ConfiguresBaseProcessorBeforeEstablishment()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        var connection = new RecordingSmartCardConnection();
+        using var scp = Scp03KeyParameters.Default;
+        Task<RawSmartCardSession> creation = RawSmartCardSession.CreateAsync(
+            connection,
+            scp,
+            new FirmwareVersion(5, 7, 2),
+            new ProtocolConfiguration { ForceShortApdus = true },
+            cancellationToken);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => creation);
+
+        ReadOnlyMemory<byte> initializeUpdate = Assert.Single(connection.Commands);
+        Assert.Equal(0x50, initializeUpdate.Span[1]);
+        Assert.Equal(8, initializeUpdate.Span[4]);
     }
 
     [Fact]

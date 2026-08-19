@@ -22,26 +22,54 @@ namespace Yubico.YubiKit.Core.Sessions;
 
 public sealed class RawSmartCardSession : ApplicationSession
 {
+    private readonly bool _usesScp;
     private ISmartCardProtocol SmartCardProtocol =>
         (ISmartCardProtocol)(Protocol ?? throw new ObjectDisposedException(nameof(RawSmartCardSession)));
 
-    private RawSmartCardSession(ISmartCardConnection connection)
+    private RawSmartCardSession(ISmartCardConnection connection, bool usesScp)
         : base(connection)
     {
+        _usesScp = usesScp;
     }
 
     public static Task<RawSmartCardSession> CreateAsync(
         ISmartCardConnection connection,
         CancellationToken cancellationToken = default) =>
-        CreateAsync(connection, scpKeyParameters: null, cancellationToken);
+        CreateCoreAsync(
+            connection,
+            scpKeyParameters: null,
+            new FirmwareVersion(),
+            configuration: null,
+            cancellationToken);
 
-    public static async Task<RawSmartCardSession> CreateAsync(
+    public static Task<RawSmartCardSession> CreateAsync(
         ISmartCardConnection connection,
-        ScpKeyParameters? scpKeyParameters,
+        ScpKeyParameters scpKeyParameters,
+        FirmwareVersion firmwareVersion,
+        ProtocolConfiguration? configuration = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(scpKeyParameters);
+        ArgumentNullException.ThrowIfNull(firmwareVersion);
+        return CreateCoreAsync(
+            connection,
+            scpKeyParameters,
+            firmwareVersion,
+            configuration,
+            cancellationToken);
+    }
+
+    private static async Task<RawSmartCardSession> CreateCoreAsync(
+        ISmartCardConnection connection,
+        ScpKeyParameters? scpKeyParameters,
+        FirmwareVersion firmwareVersion,
+        ProtocolConfiguration? configuration,
+        CancellationToken cancellationToken)
+    {
         cancellationToken.ThrowIfCancellationRequested();
-        RawSmartCardSession session = Construct(connection, () => new RawSmartCardSession(connection));
+        RawSmartCardSession session = Construct(
+            connection,
+            () => new RawSmartCardSession(connection, usesScp: scpKeyParameters is not null));
         ISmartCardProtocol protocol = ProtocolFactory.Create(connection);
         session.Protocol = protocol;
 
@@ -55,7 +83,8 @@ public sealed class RawSmartCardSession : ApplicationSession
             {
                 await session.InitializeProtocolAsync(
                         protocol,
-                        new FirmwareVersion(),
+                        firmwareVersion,
+                        configuration,
                         scpKeyParams: scpKeyParameters,
                         cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
@@ -94,9 +123,12 @@ public sealed class RawSmartCardSession : ApplicationSession
         ProtocolConfiguration? configuration = null)
     {
         ThrowIfDisposed();
-        // A plain protocol configures directly. An SCP wrapper forwards this to its base protocol without
-        // rebuilding secure-channel state. SCP establishment deliberately accepts unknown firmware so a raw
-        // caller can configure framing later when the device version is known.
+        if (_usesScp)
+        {
+            throw new InvalidOperationException(
+                "An SCP raw session must be configured during creation, before SCP is established.");
+        }
+
         SmartCardProtocol.Configure(firmwareVersion, configuration);
         FirmwareVersion = firmwareVersion;
     }

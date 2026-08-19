@@ -24,11 +24,12 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 ///     by the same guard as the wrapped protocol (SCP MAC chaining makes
 ///     interleaving doubly fatal — each MAC depends on the previous command's MAC).
 /// </summary>
-public sealed class PcscProtocolScp : ISmartCardProtocol
+public sealed class PcscProtocolScp : ISmartCardProtocol, IAsyncDisposable
 {
     private readonly PcscProtocol _baseProtocol;
     private readonly DataEncryptor _dataEncryptor;
     private readonly ExchangeGuard _exchangeGuard;
+    private readonly DisposalGate _disposalGate = new();
     private readonly IApduProcessor _scpProcessor;
     private bool _disposed;
 
@@ -103,17 +104,24 @@ public sealed class PcscProtocolScp : ISmartCardProtocol
     public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-
-        // Delegate configuration to base protocol
-        // SCP state is already established and doesn't need reconfiguration
-        _baseProtocol.Configure(version, configuration);
+        throw new InvalidOperationException(
+            "SmartCard protocol configuration must be applied before SCP is established.");
     }
 
-    public void Dispose()
+    public void Dispose() => _disposalGate.Dispose(() =>
     {
-        if (_disposed)
-            return;
+        _exchangeGuard.CloseAndDrain();
+        DisposeAfterDrain();
+    });
 
+    public ValueTask DisposeAsync() => _disposalGate.DisposeAsync(async () =>
+    {
+        await _exchangeGuard.CloseAndDrainAsync().ConfigureAwait(false);
+        DisposeAfterDrain();
+    });
+
+    private void DisposeAfterDrain()
+    {
         _disposed = true;
         try
         {

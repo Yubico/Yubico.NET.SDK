@@ -157,4 +157,97 @@ public class OtpHidProtocolTests
         await Assert.ThrowsAsync<ObjectDisposedException>(
             () => protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
     }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_AfterSuccessfulSends_ZerosSdkOwnedReportsButNotCallerPayload()
+    {
+        var connection = new RetainingOtpHidConnection();
+        QueueStatusOnlyExchange(connection);
+        var protocol = new OtpHidProtocol(connection);
+        byte[] callerPayload = [0x11, 0x22, 0x33];
+
+        _ = await protocol.SendAndReceiveAsync(
+            0x13,
+            callerPayload,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, callerPayload);
+        Assert.Equal(10, connection.SentReportSnapshots.Count);
+        Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, connection.SentReportSnapshots[0][..3]);
+        Assert.All(connection.RetainedSentReports, report =>
+            Assert.All(report.ToArray(), value => Assert.Equal(0, value)));
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenSendThrows_ZerosSdkOwnedReportButNotCallerPayload()
+    {
+        var connection = new RetainingOtpHidConnection();
+        connection.Enqueue(Status(versionMajor: 5));
+        connection.Enqueue(Status(programmingSequence: 1));
+        connection.Enqueue(Status(programmingSequence: 1));
+        connection.ThrowOnNextSend = true;
+        var protocol = new OtpHidProtocol(connection);
+        byte[] callerPayload = [0x11, 0x22, 0x33];
+
+        await Assert.ThrowsAsync<IOException>(() => protocol.SendAndReceiveAsync(
+            0x13,
+            callerPayload,
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, callerPayload);
+        ReadOnlyMemory<byte> retained = Assert.Single(connection.RetainedSentReports);
+        Assert.All(retained.ToArray(), value => Assert.Equal(0, value));
+        Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, Assert.Single(connection.SentReportSnapshots)[..3]);
+    }
+
+    private static void QueueStatusOnlyExchange(RetainingOtpHidConnection connection)
+    {
+        connection.Enqueue(Status(versionMajor: 5));
+        connection.Enqueue(Status(programmingSequence: 1));
+        for (int i = 0; i < 10; i++)
+            connection.Enqueue(Status(programmingSequence: 1));
+        connection.Enqueue(Status(programmingSequence: 2));
+    }
+
+    private static byte[] Status(byte versionMajor = 0, byte programmingSequence = 0) =>
+        [0x00, versionMajor, 0x04, 0x03, programmingSequence, 0x00, 0x00, 0x00];
+
+    private sealed class RetainingOtpHidConnection : IOtpHidConnection
+    {
+        private readonly Queue<ReadOnlyMemory<byte>> _reports = new();
+
+        public int FeatureReportSize => 8;
+        public ConnectionType Type => ConnectionType.HidOtp;
+        public bool ThrowOnNextSend { get; set; }
+        public List<ReadOnlyMemory<byte>> RetainedSentReports { get; } = [];
+        public List<byte[]> SentReportSnapshots { get; } = [];
+
+        public void Enqueue(ReadOnlyMemory<byte> report) => _reports.Enqueue(report);
+
+        public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            RetainedSentReports.Add(report);
+            SentReportSnapshots.Add(report.ToArray());
+            if (ThrowOnNextSend)
+            {
+                ThrowOnNextSend = false;
+                throw new IOException("Scripted send failure.");
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(_reports.Dequeue());
+        }
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
 }

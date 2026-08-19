@@ -15,6 +15,7 @@
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
@@ -31,7 +32,6 @@ public static class YubiKeyConnectionExtensions
 
     public static Task<RawSmartCardSession> CreateRawSmartCardSessionAsync(
         this IYubiKey yubiKey,
-        ScpKeyParameters? scpKeyParameters = null,
         CancellationToken cancellationToken = default) =>
         yubiKey.CreateSessionOverTransportAsync(
             ConnectionType.SmartCard,
@@ -39,13 +39,38 @@ public static class YubiKeyConnectionExtensions
             {
                 RawSmartCardSession session = await RawSmartCardSession.CreateAsync(
                         (ISmartCardConnection)connection,
-                        scpKeyParameters,
                         token)
                     .ConfigureAwait(false);
                 session.OwnConnection();
                 return session;
             },
             cancellationToken);
+
+    public static Task<RawSmartCardSession> CreateRawSmartCardSessionAsync(
+        this IYubiKey yubiKey,
+        ScpKeyParameters scpKeyParameters,
+        FirmwareVersion firmwareVersion,
+        ProtocolConfiguration? configuration = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(scpKeyParameters);
+        ArgumentNullException.ThrowIfNull(firmwareVersion);
+        return yubiKey.CreateSessionOverTransportAsync(
+            ConnectionType.SmartCard,
+            async (connection, token) =>
+            {
+                RawSmartCardSession session = await RawSmartCardSession.CreateAsync(
+                        (ISmartCardConnection)connection,
+                        scpKeyParameters,
+                        firmwareVersion,
+                        configuration,
+                        token)
+                    .ConfigureAwait(false);
+                session.OwnConnection();
+                return session;
+            },
+            cancellationToken);
+    }
 
     public static Task<RawFidoHidSession> CreateRawFidoHidSessionAsync(
         this IYubiKey yubiKey,

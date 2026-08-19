@@ -35,7 +35,10 @@ namespace Yubico.YubiKit.Core.Utilities;
 /// </remarks>
 internal sealed class ExchangeGuard
 {
-    private int _active;
+    private readonly object _stateLock = new();
+    private TaskCompletionSource? _drained;
+    private bool _active;
+    private bool _closing;
 
     /// <summary>
     ///     Runs <paramref name="exchange" /> exclusively; overlapping calls are refused immediately.
@@ -49,11 +52,17 @@ internal sealed class ExchangeGuard
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (Interlocked.CompareExchange(ref _active, 1, 0) != 0)
+        lock (_stateLock)
         {
-            throw new InvalidOperationException(
-                "This session already has an exchange in flight. Sessions support one operation at a time; " +
-                "await each call before issuing the next.");
+            ObjectDisposedException.ThrowIf(_closing, this);
+            if (_active)
+            {
+                throw new InvalidOperationException(
+                    "This session already has an exchange in flight. Sessions support one operation at a time; " +
+                    "await each call before issuing the next.");
+            }
+
+            _active = true;
         }
 
         try
@@ -62,7 +71,14 @@ internal sealed class ExchangeGuard
         }
         finally
         {
-            Volatile.Write(ref _active, 0);
+            TaskCompletionSource? drained;
+            lock (_stateLock)
+            {
+                _active = false;
+                drained = _closing ? _drained : null;
+            }
+
+            drained?.TrySetResult();
         }
     }
 
@@ -80,4 +96,21 @@ internal sealed class ExchangeGuard
                 return null;
             },
             cancellationToken);
+
+    /// <summary>Refuses future admissions and synchronously waits for an admitted exchange to finish.</summary>
+    public void CloseAndDrain() => CloseAndDrainAsync().AsTask().GetAwaiter().GetResult();
+
+    /// <summary>Refuses future admissions and asynchronously waits for an admitted exchange to finish.</summary>
+    public ValueTask CloseAndDrainAsync()
+    {
+        lock (_stateLock)
+        {
+            _closing = true;
+            if (!_active)
+                return ValueTask.CompletedTask;
+
+            _drained ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            return new ValueTask(_drained.Task);
+        }
+    }
 }

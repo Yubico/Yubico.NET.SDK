@@ -25,7 +25,7 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 ///     a smart card is a stateful sequential peer, so interleaved APDUs from two operations would corrupt
 ///     each other's chained state.
 /// </summary>
-internal partial class PcscProtocol : ISmartCardProtocol
+internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
 {
     private const byte INS_SELECT = 0xA4;
     private const byte P1_SELECT = 0x04;
@@ -35,6 +35,7 @@ internal partial class PcscProtocol : ISmartCardProtocol
     private readonly ISmartCardConnection _connection;
     private readonly ILogger<PcscProtocol> _logger;
     private readonly ExchangeGuard _exchangeGuard = new();
+    private readonly DisposalGate _disposalGate = new();
     internal byte InsSendRemaining { get; private set; }
     private IApduProcessor _processor;
     private bool _disposed;
@@ -88,7 +89,17 @@ internal partial class PcscProtocol : ISmartCardProtocol
     ///     Releases this protocol. The connection is NOT disposed: a protocol is a user of the connection it
     ///     was handed, never its owner. Whoever created the connection disposes it.
     /// </summary>
-    public void Dispose() => _disposed = true;
+    public void Dispose() => _disposalGate.Dispose(() =>
+    {
+        _exchangeGuard.CloseAndDrain();
+        _disposed = true;
+    });
+
+    public ValueTask DisposeAsync() => _disposalGate.DisposeAsync(async () =>
+    {
+        await _exchangeGuard.CloseAndDrainAsync().ConfigureAwait(false);
+        _disposed = true;
+    });
 
     public async Task<ApduResponse> TransmitAndReceiveAsync(
         ApduCommand command,

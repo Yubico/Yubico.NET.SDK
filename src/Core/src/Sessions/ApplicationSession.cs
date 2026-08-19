@@ -282,7 +282,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     {
         try
         {
-            DisposeProtocol();
+            await DisposeProtocolAsync().ConfigureAwait(false);
         }
         finally
         {
@@ -295,6 +295,16 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         IProtocol? protocol = Protocol;
         Protocol = null;
         protocol?.Dispose();
+    }
+
+    private async ValueTask DisposeProtocolAsync()
+    {
+        IProtocol? protocol = Protocol;
+        Protocol = null;
+        if (protocol is IAsyncDisposable asyncDisposable)
+            await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+        else
+            protocol?.Dispose();
     }
 
     /// <summary>Detaches from the connection, and disposes it only if this session was given ownership.</summary>

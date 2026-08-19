@@ -24,10 +24,11 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 ///     completion.
 /// </remarks>
 internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidProtocol>? logger = null)
-    : IFidoHidProtocol
+    : IFidoHidProtocol, IAsyncDisposable
 {
     private readonly IFidoHidConnection _connection = connection ?? throw new ArgumentNullException(nameof(connection));
     private readonly ExchangeGuard _exchangeGuard = new();
+    private readonly DisposalGate _disposalGate = new();
     private readonly ILogger<FidoHidProtocol> _logger = logger ?? NullLogger<FidoHidProtocol>.Instance;
     private uint? _channelId;
     private FirmwareVersion? _firmwareVersion;
@@ -109,45 +110,49 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         // Generate 8-byte random nonce
         var nonce = new byte[CtapConstants.NonceSize];
         RandomNumberGenerator.Fill(nonce);
-
-        // Send CTAPHID_INIT to broadcast channel
-        var response = await TransmitCommand(
-                CtapConstants.BroadcastChannelId,
-                CtapConstants.CtapHidInit,
-                nonce.AsMemory(),
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        // Verify nonce echo
-        if (response.Length < 17)  // nonce(8) + channelId(4) + version(1) + firmware(3) + capabilities(1)
+        try
         {
-            _logger.LogError("CTAPHID_INIT response too short: {Length} bytes. Expected at least 17.", response.Length);
-            throw new InvalidOperationException($"CTAPHID_INIT response too short: {response.Length} bytes");
-        }
+            // Send CTAPHID_INIT to broadcast channel
+            var response = await TransmitCommand(
+                    CtapConstants.BroadcastChannelId,
+                    CtapConstants.CtapHidInit,
+                    nonce.AsMemory(),
+                    cancellationToken)
+                .ConfigureAwait(false);
 
-        var receivedNonce = response.Span[..CtapConstants.NonceSize];
-        if (!CryptographicOperations.FixedTimeEquals(nonce, receivedNonce))
+            // Verify nonce echo
+            if (response.Length < 17)  // nonce(8) + channelId(4) + version(1) + firmware(3) + capabilities(1)
+            {
+                _logger.LogError("CTAPHID_INIT response too short: {Length} bytes. Expected at least 17.", response.Length);
+                throw new InvalidOperationException($"CTAPHID_INIT response too short: {response.Length} bytes");
+            }
+
+            var receivedNonce = response.Span[..CtapConstants.NonceSize];
+            if (!CryptographicOperations.FixedTimeEquals(nonce, receivedNonce))
+            {
+                _logger.LogError("CTAPHID_INIT nonce mismatch");
+                throw new InvalidOperationException("CTAPHID_INIT nonce mismatch");
+            }
+
+            // Extract channel ID (bytes 8-11, big-endian)
+            _channelId = BinaryPrimitives.ReadUInt32BigEndian(response.Span[8..12]);
+
+            // Extract firmware version (bytes 13-15) - skip protocol version byte at 12
+            if (response.Length >= 16)
+            {
+                var major = response.Span[13];
+                var minor = response.Span[14];
+                var patch = response.Span[15];
+                _firmwareVersion = new FirmwareVersion(major, minor, patch);
+                _logger.LogDebug("Extracted firmware version from CTAPHID_INIT: {Version}", _firmwareVersion);
+            }
+
+            _logger.LogDebug("Acquired CTAP HID channel: 0x{ChannelId:X8}", _channelId.Value);
+        }
+        finally
         {
-            _logger.LogError("CTAPHID_INIT nonce mismatch. Sent: {SentNonce}, Received: {ReceivedNonce}",
-                Convert.ToHexString(nonce),
-                Convert.ToHexString(receivedNonce));
-            throw new InvalidOperationException("CTAPHID_INIT nonce mismatch");
+            CryptographicOperations.ZeroMemory(nonce);
         }
-
-        // Extract channel ID (bytes 8-11, big-endian)
-        _channelId = BinaryPrimitives.ReadUInt32BigEndian(response.Span[8..12]);
-
-        // Extract firmware version (bytes 13-15) - skip protocol version byte at 12
-        if (response.Length >= 16)
-        {
-            var major = response.Span[13];
-            var minor = response.Span[14];
-            var patch = response.Span[15];
-            _firmwareVersion = new FirmwareVersion(major, minor, patch);
-            _logger.LogDebug("Extracted firmware version from CTAPHID_INIT: {Version}", _firmwareVersion);
-        }
-
-        _logger.LogDebug("Acquired CTAP HID channel: 0x{ChannelId:X8}", _channelId.Value);
     }
 
     /// <summary>
@@ -160,7 +165,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         CancellationToken cancellationToken)
     {
         await SendRequest(channelId, command, data, cancellationToken).ConfigureAwait(false);
-        return await ReceiveResponse(channelId, cancellationToken).ConfigureAwait(false);
+        return await ReceiveResponse(channelId, command, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -181,7 +186,14 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
 
         // Send initialization packet
         var initPacket = ConstructInitPacket(channelId, command, data.Span, data.Length);
-        await _connection.SendAsync(initPacket, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await _connection.SendAsync(initPacket, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(initPacket);
+        }
 
         // Send continuation packets if needed
         if (data.Length > CtapConstants.InitDataSize)
@@ -194,7 +206,14 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
                 var span = remaining.Span;
                 var chunkSize = Math.Min(span.Length, CtapConstants.ContinuationDataSize);
                 var continuationPacket = ConstructContinuationPacket(channelId, sequence, span[..chunkSize]);
-                await _connection.SendAsync(continuationPacket, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await _connection.SendAsync(continuationPacket, cancellationToken).ConfigureAwait(false);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(continuationPacket);
+                }
 
                 remaining = remaining[chunkSize..];
                 sequence++;
@@ -209,6 +228,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
     /// </summary>
     private async Task<ReadOnlyMemory<byte>> ReceiveResponse(
         uint channelId,
+        byte expectedCommand,
         CancellationToken cancellationToken)
     {
         _logger.LogTrace("Receiving CTAP HID response");
@@ -227,6 +247,19 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         var responseLength = GetPacketLength(initPacket.Span);
         if (responseLength > CtapConstants.MaxPayloadSize)
             throw new InvalidOperationException($"Response length {responseLength} exceeds max payload size");
+
+        byte responseCommand = GetPacketCommand(initPacket.Span);
+        if (responseCommand == CtapConstants.CtapHidError)
+        {
+            byte errorCode = responseLength > 0 ? initPacket.Span[CtapConstants.InitHeaderSize] : (byte)0x7F;
+            throw new InvalidOperationException($"CTAP HID error response: 0x{errorCode:X2}");
+        }
+
+        if (responseCommand != expectedCommand)
+        {
+            throw new InvalidOperationException(
+                $"CTAP HID response command 0x{responseCommand:X2} does not match request command 0x{expectedCommand:X2}");
+        }
 
         // Allocate buffer for complete response
         var responseData = new byte[responseLength];
@@ -357,9 +390,18 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
     /// </summary>
     public void Dispose()
     {
-        if (_disposed) return;
+        _disposalGate.Dispose(() =>
+        {
+            _exchangeGuard.CloseAndDrain();
+            _channelId = null;
+            _disposed = true;
+        });
+    }
 
+    public ValueTask DisposeAsync() => _disposalGate.DisposeAsync(async () =>
+    {
+        await _exchangeGuard.CloseAndDrainAsync().ConfigureAwait(false);
         _channelId = null;
         _disposed = true;
-    }
+    });
 }

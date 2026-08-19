@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.Hid;
 
@@ -36,8 +37,16 @@ internal class FidoHidConnection(IHidConnection connection) : IFidoHidConnection
             throw new ArgumentException($"FIDO packet must be exactly {PacketSize} bytes, got {packet.Length}",
                 nameof(packet));
 
-        connection.SetReport(packet.ToArray());
-        return Task.CompletedTask;
+        byte[] report = packet.ToArray();
+        try
+        {
+            connection.SetReport(report);
+            return Task.CompletedTask;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(report);
+        }
     }
 
     public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)

@@ -85,6 +85,28 @@ public class RawOtpHidSessionTests
             cancellationToken)).Length);
     }
 
+    [Fact]
+    public async Task SendAndReceiveAsync_ReturnsRawResponseWithoutCommandSpecificCrcValidation()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        var connection = new ScriptedOtpConnection();
+        connection.Enqueue(Status(versionMajor: 5));
+        connection.Enqueue(Status(programmingSequence: 1));
+        for (int i = 0; i < 10; i++)
+            connection.Enqueue(Status(programmingSequence: 1));
+        connection.Enqueue(new byte[] { 0xAA, 0xBB, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40 });
+        connection.Enqueue(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40 });
+        await using var raw = await RawOtpHidSession.CreateAsync(connection, cancellationToken);
+
+        ReadOnlyMemory<byte> response = await raw.SendAndReceiveAsync(
+            0x13,
+            ReadOnlyMemory<byte>.Empty,
+            cancellationToken);
+
+        Assert.Equal(new byte[] { 0xAA, 0xBB, 0x00, 0x00, 0x00, 0x00, 0x00 }, response.ToArray());
+        Assert.False(ChecksumUtils.CheckCrc(response.Span, length: 4));
+    }
+
     private static void QueueStatusOnlyExchange(ScriptedOtpConnection connection, byte programmingSequence)
     {
         connection.Enqueue(Status(programmingSequence: programmingSequence));

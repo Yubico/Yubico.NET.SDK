@@ -116,15 +116,14 @@ public static class IYubiKeyExtensions
             ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
-            var candidates = yubiKey.ResolveSessionTransports(
+            var transport = yubiKey.ResolveSessionTransport(
                 scpKeyParams is not null && preferredConnection is null ? ConnectionType.SmartCard : preferredConnection,
                 "Management",
                 ManagementTransportOrder);
 
-            return await yubiKey.ConnectSessionTransportAsync(
-                    candidates,
-                    "Management",
-                    async (connection, _, ct) =>
+            return await yubiKey.CreateSessionOverTransportAsync(
+                    transport,
+                    async (connection, ct) =>
                     {
                         var session = await ManagementSession
                             .CreateAsync(connection, configuration, scpKeyParams, cancellationToken: ct)
@@ -156,10 +155,9 @@ public static class IYubiKeyExtensions
 
     // Management can run over SmartCard or HID. On a physical (possibly multi-connection) device the
     // parameterless ConnectAsync() is ambiguous, so a transport is chosen by an app-specific smart default
-    // (SmartCard first/richest, then FIDO HID, then OTP HID) or an explicit caller override. The ordered
-    // default candidate list resolved here drives ConnectSessionTransportAsync, which opens the most-preferred
-    // candidate and falls back when an in-process interface lease or SmartCard sharing status shows that a
-    // candidate is held. An explicit caller override supplies one candidate and never falls back.
+    // (SmartCard first/richest, then FIDO HID, then OTP HID) or an explicit caller override. The default
+    // order selects exactly one transport. Connection and session-creation failures propagate without
+    // trying another interface.
     private static readonly ConnectionType[] ManagementTransportOrder =
         [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp];
 

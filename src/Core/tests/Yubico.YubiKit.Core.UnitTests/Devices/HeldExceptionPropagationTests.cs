@@ -21,10 +21,8 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
-///     Phase 38.5 ISC-9: a held <see cref="SCardException" /> from a SmartCard connect must reach the applet
-///     connect site as a top-level, unwrapped <see cref="SCardException" /> with its held PC/SC HResult
-///     preserved, so <c>IsFallbackEligibleHeldError</c> can detect it for a SmartCard candidate. These pin
-///     the current connect chain
+///     A held <see cref="SCardException" /> from a SmartCard connect must propagate unchanged, without
+///     cross-transport fallback. These tests pin the current connect chain
 ///     (<see cref="CompositeYubiKey" /> and <see cref="PcscYubiKey" />) against a future wrapping regression.
 /// </summary>
 public class HeldExceptionPropagationTests

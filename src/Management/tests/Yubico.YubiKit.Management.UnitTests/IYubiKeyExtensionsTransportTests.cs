@@ -118,27 +118,24 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Null(device.RequestedConnection);
     }
 
-    // Phase 38.5 (ISC-14): held SmartCard falls back to HID FIDO through the public entry point; the opened
-    // fallback connection is disposed when session init fails after connect (no leak), and the surfaced
-    // failure is the post-connect session-init failure, not the SCardException.
+    // A held default SmartCard transport propagates unchanged and no alternate interface is opened.
     [Fact]
-    public async Task CreateManagementSessionAsync_SmartCardHeld_FallsBackToHidFidoAndDisposesOnInitFailure()
+    public async Task CreateManagementSessionAsync_SmartCardHeld_PropagatesWithoutHidFallback()
     {
         var hid = new FailingFidoConnection();
         var device = new FallbackProbeYubiKey(ConnectionType.SmartCard | ConnectionType.HidFido)
             .Throws(ConnectionType.SmartCard, HeldSmartCard())
             .Returns(ConnectionType.HidFido, hid);
 
-        var ex = await Record.ExceptionAsync(() => device.CreateManagementSessionAsync(cancellationToken: Ct));
+        var ex = await Assert.ThrowsAsync<SCardException>(
+            () => device.CreateManagementSessionAsync(cancellationToken: Ct));
 
-        Assert.NotNull(ex);
-        Assert.IsNotType<SCardException>(ex);
-        Assert.True(hid.Disposed, "the opened fallback HID connection must be disposed on session-init failure");
-        Assert.Equal([ConnectionType.SmartCard, ConnectionType.HidFido], device.Attempts);
+        Assert.Equal(unchecked((int)0x8010000B), ex.HResult);
+        Assert.False(hid.Disposed);
+        Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }
 
-    // Phase 38.5 (ISC-7/ISC-14): an explicit override never falls back — a held SmartCard override surfaces
-    // the held SCardException and makes no HID attempt (the applet passes the single-element override list).
+    // A held explicit SmartCard override surfaces unchanged and makes no HID attempt.
     [Fact]
     public async Task CreateManagementSessionAsync_OverrideSmartCardHeld_DoesNotFallBack()
     {
@@ -152,40 +149,19 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }
 
-    // Session contention: the motivating case. A PIV session holds the CCID interface, so this process's own
-    // SmartCard connect is refused (ConnectionInUseException, not an SCardException — the holder is us). The
-    // default path must route around it to HID rather than throw: measured, both HID transports answer
-    // correctly while PIV holds CCID and the PIV session survives (phase1-findings.md, experiment 4). The SDK
-    // must not be the thing that throws in its own motivating case.
+    // In-process ownership refusal propagates from the single selected transport without trying another member.
     [Fact]
-    public async Task CreateManagementSessionAsync_CcidHeldInProcess_FallsBackToHidFido()
+    public async Task CreateManagementSessionAsync_CcidHeldInProcess_PropagatesWithoutFallback()
     {
         var hid = new FailingFidoConnection();
         var device = new FallbackProbeYubiKey(ConnectionType.SmartCard | ConnectionType.HidFido)
             .Throws(ConnectionType.SmartCard, new ConnectionInUseException("pcsc:test-reader is in use."))
             .Returns(ConnectionType.HidFido, hid);
 
-        _ = await Record.ExceptionAsync(() => device.CreateManagementSessionAsync(cancellationToken: Ct));
+        _ = await Assert.ThrowsAsync<ConnectionInUseException>(
+            () => device.CreateManagementSessionAsync(cancellationToken: Ct));
 
-        Assert.Equal([ConnectionType.SmartCard, ConnectionType.HidFido], device.Attempts);
-    }
-
-    [Fact]
-    public async Task CreateManagementSessionAsync_CcidAndFidoHeldInProcess_FallsBackToHidOtp()
-    {
-        var otp = new FailingOtpConnection();
-        var device = new FallbackProbeYubiKey(
-                ConnectionType.SmartCard | ConnectionType.HidFido | ConnectionType.HidOtp)
-            .Throws(ConnectionType.SmartCard, new ConnectionInUseException("pcsc:test-reader is in use."))
-            .Throws(ConnectionType.HidFido, new ConnectionInUseException("hid:fido:test is in use."))
-            .Returns(ConnectionType.HidOtp, otp);
-
-        _ = await Record.ExceptionAsync(() => device.CreateManagementSessionAsync(cancellationToken: Ct));
-
-        Assert.Equal(
-            [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp],
-            device.Attempts);
-        Assert.True(otp.Disposed, "the opened OTP connection must be disposed on session-init failure");
+        Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }
 
     [Fact]
@@ -214,20 +190,6 @@ public class IYubiKeyExtensionsTransportTests
 
         _ = await Assert.ThrowsAsync<ConnectionInUseException>(() =>
             device.CreateManagementSessionAsync(preferredConnection: ConnectionType.SmartCard, cancellationToken: Ct));
-
-        Assert.Equal([ConnectionType.SmartCard], device.Attempts);
-    }
-
-    // No safe route left: CCID is held in-process and the device exposes nothing else. Throwing is correct
-    // here — routing around is a preference, not a promise.
-    [Fact]
-    public async Task CreateManagementSessionAsync_CcidHeldInProcess_NoOtherTransport_Throws()
-    {
-        var device = new FallbackProbeYubiKey(ConnectionType.SmartCard)
-            .Throws(ConnectionType.SmartCard, new ConnectionInUseException("pcsc:test-reader is in use."));
-
-        _ = await Assert.ThrowsAsync<ConnectionInUseException>(
-            () => device.CreateManagementSessionAsync(cancellationToken: Ct));
 
         Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }
@@ -281,8 +243,7 @@ public class IYubiKeyExtensionsTransportTests
         }
     }
 
-    // A HID FIDO connection valid enough to return from connect but that fails every protocol exchange, so
-    // ManagementSession initialization cannot complete; records disposal to prove no leak on the fallback path.
+    // A HID FIDO connection valid enough to return from connect but that fails every protocol exchange.
     private sealed class FailingFidoConnection : IFidoHidConnection
     {
         public bool Disposed { get; private set; }
@@ -298,27 +259,6 @@ public class IYubiKeyExtensionsTransportTests
         }
 
         public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default) =>
-            throw new InvalidOperationException("session-init probe failure");
-
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
-            throw new InvalidOperationException("session-init probe failure");
-    }
-
-    private sealed class FailingOtpConnection : IOtpHidConnection
-    {
-        public bool Disposed { get; private set; }
-        public ConnectionType Type => ConnectionType.HidOtp;
-        public int FeatureReportSize => 8;
-
-        public void Dispose() => Disposed = true;
-
-        public ValueTask DisposeAsync()
-        {
-            Disposed = true;
-            return ValueTask.CompletedTask;
-        }
-
-        public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default) =>
             throw new InvalidOperationException("session-init probe failure");
 
         public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>

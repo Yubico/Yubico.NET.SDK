@@ -91,15 +91,14 @@ public static class IYubiKeyExtensions
             ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
-            var candidates = yubiKey.ResolveSessionTransports(
+            var transport = yubiKey.ResolveSessionTransport(
                 scpKeyParams is not null && preferredConnection is null ? ConnectionType.SmartCard : preferredConnection,
                 "YubiOTP",
                 YubiOtpTransportOrder);
 
-            return await yubiKey.ConnectSessionTransportAsync(
-                    candidates,
-                    "YubiOTP",
-                    async (connection, _, ct) =>
+            return await yubiKey.CreateSessionOverTransportAsync(
+                    transport,
+                    async (connection, ct) =>
                     {
                         var session = await YubiOtpSession
                             .CreateAsync(connection, configuration, scpKeyParams, ct)
@@ -131,9 +130,8 @@ public static class IYubiKeyExtensions
     // YubiOTP is dual-transport (SmartCard or OTP HID). On a physical (possibly multi-connection) device
     // the parameterless ConnectAsync() is ambiguous, so a transport is chosen by an app-specific smart
     // default (SmartCard first, matching the shipped OtpTool example's "prefers SmartCard for richer
-    // protocol support", then OTP HID) or an explicit caller override. The ordered default candidate list
-    // resolved here drives ConnectSessionTransportAsync, which opens the most-preferred candidate and falls
-    // back to OTP HID when the SmartCard transport is held by another process (Phase 38.5).
+    // protocol support", then OTP HID) or an explicit caller override. The default order selects exactly one
+    // transport; connection failures propagate without fallback.
     private static readonly ConnectionType[] YubiOtpTransportOrder =
         [ConnectionType.SmartCard, ConnectionType.HidOtp];
 

@@ -52,6 +52,100 @@ public class DeviceConnectionRegistryTests
         Assert.True(DeviceConnectionRegistry.IsInUse(id));
     }
 
+    [Fact]
+    public async Task AcquireConnection_MultipleInterfaces_DeduplicatesAndReleasesAllMembers()
+    {
+        var firstId = NewId();
+        var secondId = NewId();
+
+        var lease = await DeviceConnectionRegistry.AcquireConnectionAsync(
+            new[] { secondId, firstId, secondId }, TestContext.Current.CancellationToken);
+
+        Assert.True(DeviceConnectionRegistry.IsInUse(firstId));
+        Assert.True(DeviceConnectionRegistry.IsInUse(secondId));
+
+        lease.Dispose();
+        lease.Dispose();
+
+        Assert.False(DeviceConnectionRegistry.IsInUse(firstId));
+        Assert.False(DeviceConnectionRegistry.IsInUse(secondId));
+    }
+
+    [Fact]
+    public async Task AcquireConnection_LaterMemberHeld_RollsBackEarlierClaims()
+    {
+        var prefix = NewId();
+        var firstId = $"{prefix}:a";
+        var secondId = $"{prefix}:b";
+        using var held = await DeviceConnectionRegistry.AcquireConnectionAsync(
+            secondId, TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<ConnectionInUseException>(async () =>
+            await DeviceConnectionRegistry.AcquireConnectionAsync(
+                new[] { secondId, firstId }, TestContext.Current.CancellationToken));
+
+        using var firstClaim = await DeviceConnectionRegistry.AcquireConnectionAsync(
+            firstId, TestContext.Current.CancellationToken);
+        Assert.True(DeviceConnectionRegistry.IsInUse(firstId));
+    }
+
+    [Fact]
+    public async Task AcquireConnection_RacingGroupedClaims_AdmitsExactlyOneWinner()
+    {
+        var ids = new[] { NewId(), NewId(), NewId() };
+
+        static async Task<object> TryAcquireAsync(string[] scope, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await DeviceConnectionRegistry.AcquireConnectionAsync(scope, cancellationToken);
+            }
+            catch (ConnectionInUseException exception)
+            {
+                return exception;
+            }
+        }
+
+        var first = Task.Run(
+            () => TryAcquireAsync(ids, TestContext.Current.CancellationToken),
+            TestContext.Current.CancellationToken);
+        var second = Task.Run(
+            () => TryAcquireAsync(ids, TestContext.Current.CancellationToken),
+            TestContext.Current.CancellationToken);
+        var results = await Task.WhenAll(first, second).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+        var winner = Assert.Single(results.OfType<IDisposable>());
+        Assert.Single(results.OfType<ConnectionInUseException>());
+        winner.Dispose();
+        Assert.All(ids, id => Assert.False(DeviceConnectionRegistry.IsInUse(id)));
+    }
+
+    [Fact]
+    public async Task AcquireConnection_DiscoveryOnMember_CancellationRollsBackAndLiveClaimBlocksAllDiscovery()
+    {
+        var prefix = NewId();
+        var firstId = $"{prefix}:a";
+        var secondId = $"{prefix}:b";
+        using var discovery = DeviceConnectionRegistry.TryAcquireDiscovery(secondId);
+        Assert.NotNull(discovery);
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+
+        var waitingClaim = DeviceConnectionRegistry.AcquireConnectionAsync(
+            new[] { secondId, firstId }, cancellation.Token).AsTask();
+        Assert.Null(DeviceConnectionRegistry.TryAcquireDiscovery(firstId));
+        await cancellation.CancelAsync();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => waitingClaim);
+
+        using (var firstDiscovery = DeviceConnectionRegistry.TryAcquireDiscovery(firstId))
+            Assert.NotNull(firstDiscovery);
+
+        discovery.Dispose();
+        using var connection = await DeviceConnectionRegistry.AcquireConnectionAsync(
+            new[] { secondId, firstId }, TestContext.Current.CancellationToken);
+        Assert.Null(DeviceConnectionRegistry.TryAcquireDiscovery(firstId));
+        Assert.Null(DeviceConnectionRegistry.TryAcquireDiscovery(secondId));
+    }
+
     /// <summary>
     ///     An identity read against an interface this process holds a live connection to must be skipped
     ///     entirely (no connection opened — a discovery SELECT would clobber the session's applet state).
@@ -71,24 +165,23 @@ public class DeviceConnectionRegistryTests
     }
 
     /// <summary>
-    ///     The metadata read must skip only the in-use member interface of a composite and still attempt
-    ///     the remaining free transports (independent USB interfaces are safe to read).
+    ///     A live grouped connection claims every member, so metadata discovery must skip all transports.
     /// </summary>
     [Fact]
-    public async Task MetadataRead_CompositeWithInUseSmartCardMember_SkipsItButTriesOtpTransport()
+    public async Task MetadataRead_CompositeWithLiveConnection_SkipsEveryMember()
     {
         var smartCardMember = new RecordingYubiKey(NewId(), ConnectionType.SmartCard);
         var otpMember = new RecordingYubiKey(NewId(), ConnectionType.HidOtp);
         var composite = new CompositeYubiKey(NewId(), [smartCardMember, otpMember], deviceInfo: null);
         using var registration = await DeviceConnectionRegistry.AcquireConnectionAsync(
-            smartCardMember.DeviceId, TestContext.Current.CancellationToken);
+            composite.MemberDeviceIds, TestContext.Current.CancellationToken);
 
         var info = await CompositeMetadataReader.TryReadAsync(
             composite, TimeSpan.FromSeconds(5), NullLogger.Instance, TestContext.Current.CancellationToken);
 
-        Assert.Null(info); // OTP member's connect fails by design; result degrades to null
+        Assert.Null(info);
         Assert.Equal(0, smartCardMember.ConnectCalls);
-        Assert.Equal(1, otpMember.ConnectCalls);
+        Assert.Equal(0, otpMember.ConnectCalls);
     }
 
     [Fact]

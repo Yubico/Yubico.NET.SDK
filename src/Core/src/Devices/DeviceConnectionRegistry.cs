@@ -17,6 +17,11 @@ using Yubico.YubiKit.Core.Abstractions;
 
 namespace Yubico.YubiKit.Core.Devices;
 
+internal interface IConnectionLeaseScopeProvider
+{
+    void SetConnectionLeaseScope(IReadOnlyList<string> interfaceIds);
+}
+
 /// <summary>
 ///     Process-wide ownership coordinator per interface device, keyed by <see cref="IYubiKey.DeviceId" />.
 ///     Connections hold the lease; discovery takes a nonblocking exclusive lease. This makes the
@@ -103,6 +108,43 @@ internal static class DeviceConnectionRegistry
         GetOwnership(deviceId).AcquireConnectionAsync(deviceId, cancellationToken);
 
     /// <summary>
+    ///     Acquires every known interface lease for one physical YubiKey as a single logical registration.
+    ///     Interface ids are de-duplicated and acquired in ordinal order so racing callers cannot deadlock.
+    /// </summary>
+    public static async ValueTask<IDisposable> AcquireConnectionAsync(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(interfaceIds);
+        if (interfaceIds.Count == 0)
+            throw new ArgumentException("At least one interface id is required.", nameof(interfaceIds));
+
+        var uniqueIds = new HashSet<string>(interfaceIds, StringComparer.Ordinal);
+        var orderedIds = new string[uniqueIds.Count];
+        uniqueIds.CopyTo(orderedIds);
+        Array.Sort(orderedIds, StringComparer.Ordinal);
+
+        var acquired = new List<IDisposable>(orderedIds.Length);
+        try
+        {
+            foreach (var id in orderedIds)
+            {
+                acquired.Add(await GetOwnership(id)
+                    .AcquireConnectionAsync(id, cancellationToken)
+                    .ConfigureAwait(false));
+            }
+
+            return new CompositeRegistration(acquired);
+        }
+        catch
+        {
+            for (var i = acquired.Count - 1; i >= 0; i--)
+                acquired[i].Dispose();
+            throw;
+        }
+    }
+
+    /// <summary>
     ///     Attempts to acquire exclusive discovery ownership without waiting. Returns <c>null</c> while any
     ///     connection owns or is already waiting for the interface.
     /// </summary>
@@ -176,9 +218,9 @@ internal static class DeviceConnectionRegistry
         {
             if (_connectionCount > 0)
                 throw new ConnectionInUseException(
-                    $"The exclusive interface '{deviceId}' already has a live connection in this process. " +
-                    "Concurrent connections could change shared application state or interleave a multi-report " +
-                    "exchange. Dispose the existing connection first, then open the next connection.");
+                    $"This YubiKey already has a live connection in this process (held interface: '{deviceId}'). " +
+                    "A physical YubiKey supports one live connection at a time across all interfaces. " +
+                    "Dispose the existing connection first; connections are reused sequentially, not in parallel.");
 
             _connectionCount++;
             return new Registration(this, LeaseKind.Connection);
@@ -233,6 +275,20 @@ internal static class DeviceConnectionRegistry
                 return;
 
             ownership.Release(kind);
+        }
+    }
+
+    private sealed class CompositeRegistration(IReadOnlyList<IDisposable> registrations) : IDisposable
+    {
+        private int _disposed;
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+                return;
+
+            for (var i = registrations.Count - 1; i >= 0; i--)
+                registrations[i].Dispose();
         }
     }
 }

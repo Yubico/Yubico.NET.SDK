@@ -46,6 +46,8 @@ internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
         _members = members;
         DeviceInfo = deviceInfo;
         MemberDeviceIds = [.. members.Select(m => m.DeviceId).OrderBy(id => id, StringComparer.Ordinal)];
+        foreach (var member in members)
+            SetConnectionLeaseScope(member, MemberDeviceIds);
         PhysicalIdentityKey = EncodeInterfaceIds(MemberDeviceIds);
 
         var combined = ConnectionType.Unknown;
@@ -182,4 +184,11 @@ internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
             return ConnectionType.HidOtp;
         return ConnectionType.Unknown;
     }
+
+    private static void SetConnectionLeaseScope(IYubiKey member, IReadOnlyList<string> interfaceIds)
+    {
+        if (member is IConnectionLeaseScopeProvider provider)
+            provider.SetConnectionLeaseScope(interfaceIds);
+    }
+
 }

@@ -30,8 +30,10 @@ namespace Yubico.YubiKit.Core.Devices;
 internal class HidYubiKey(
     IHidDevice hidDevice,
     ILogger<HidYubiKey> logger)
-    : IYubiKey, IDiscoveryConnectionProvider
+    : IYubiKey, IDiscoveryConnectionProvider, IConnectionLeaseScopeProvider
 {
+    private IReadOnlyList<string>? _connectionLeaseScope;
+
     public string DeviceId { get; } =
         $"hid:{hidDevice.ReaderName}:{hidDevice.DescriptorInfo.Usage:X4}";
 
@@ -39,6 +41,12 @@ internal class HidYubiKey(
     /// The connections this YubiKey HID interface exposes (a single concrete HID connection in this phase).
     /// </summary>
     public ConnectionType AvailableConnections => ConnectionTypeMapper.ToConnectionType(hidDevice.InterfaceType);
+
+    internal IReadOnlyList<string> ConnectionLeaseScope =>
+        Volatile.Read(ref _connectionLeaseScope) ?? [DeviceId];
+
+    void IConnectionLeaseScopeProvider.SetConnectionLeaseScope(IReadOnlyList<string> interfaceIds) =>
+        Interlocked.Exchange(ref _connectionLeaseScope, interfaceIds);
 
     public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection
@@ -58,7 +66,7 @@ internal class HidYubiKey(
         // YubiKeyConnectionExtensions, not through concurrent connection sharing.
         var ownership = await DeviceConnectionRegistry
             .AcquireConnectionAsync(
-                DeviceId,
+                ConnectionLeaseScope,
                 cancellationToken)
             .ConfigureAwait(false);
         try

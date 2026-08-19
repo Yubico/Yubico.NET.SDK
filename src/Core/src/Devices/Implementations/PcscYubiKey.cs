@@ -23,9 +23,10 @@ internal class PcscYubiKey(
     IPcscDevice pcscDevice,
     ISmartCardConnectionFactory connectionFactory,
     ILogger<PcscYubiKey> logger)
-    : IYubiKey, IDiscoveryConnectionProvider
+    : IYubiKey, IDiscoveryConnectionProvider, IConnectionLeaseScopeProvider
 {
     private readonly string _readerName = pcscDevice.ReaderName;
+    private IReadOnlyList<string>? _connectionLeaseScope;
 
     private async Task<ISmartCardConnection> CreateConnection(CancellationToken cancellationToken = default)
     {
@@ -42,6 +43,12 @@ internal class PcscYubiKey(
     public string DeviceId { get; } = $"pcsc:{pcscDevice.ReaderName}";
     public ConnectionType AvailableConnections => ConnectionType.SmartCard;
 
+    internal IReadOnlyList<string> ConnectionLeaseScope =>
+        Volatile.Read(ref _connectionLeaseScope) ?? [DeviceId];
+
+    void IConnectionLeaseScopeProvider.SetConnectionLeaseScope(IReadOnlyList<string> interfaceIds) =>
+        Interlocked.Exchange(ref _connectionLeaseScope, interfaceIds);
+
     public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection
     {
@@ -52,7 +59,7 @@ internal class PcscYubiKey(
         // Exclusive: one live connection per CCID interface. The lease is held by the connection returned
         // below and released when that connection is disposed.
         var ownership = await DeviceConnectionRegistry
-            .AcquireConnectionAsync(DeviceId, cancellationToken)
+            .AcquireConnectionAsync(ConnectionLeaseScope, cancellationToken)
             .ConfigureAwait(false);
         try
         {

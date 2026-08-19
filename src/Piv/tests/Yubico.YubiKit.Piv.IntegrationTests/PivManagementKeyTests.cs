@@ -62,10 +62,9 @@ public class PivManagementKeyTests
                 await session.SetManagementKeyAsync(newKeyType, newKey);
             }
 
-            // Successive, not nested: the mutating session above has released the CCID interface.
-            // The requirement is that the new key authenticates on a FRESH session, which is what
-            // a consumer would do. Two live PIV sessions on one interface are refused by design —
-            // they would share the card's security state.
+            // Successive, not nested: the mutating convenience session above has released its connection
+            // and the physical-key lease. The requirement is that the new key authenticates on a FRESH
+            // session, which is what a consumer would do. Overlapping convenience sessions are refused.
             await using var verification = await state.Device.CreatePivSessionAsync();
 
             // Old key should fail

@@ -148,9 +148,11 @@ public class PivSessionContentionTests
             await using var second = await state.Device.ConnectAsync<ISmartCardConnection>();
         });
 
-        // Interface-scope acquisition knows the concrete member interface, not which applet/session holds it.
-        // Pin the non-empty PC/SC identity rather than accepting the constant word "SmartCard" as evidence.
-        Assert.Matches("(?i)'pcsc:[^']+'", exception.Message);
+        // A grouped connection claims every member in ordinal order, so the reported collision may be
+        // any held member of the physical key rather than the SmartCard route requested by this call.
+        Assert.Matches("held interface: '[^']+'", exception.Message);
+        Assert.Contains("one live connection at a time across all interfaces", exception.Message,
+            StringComparison.Ordinal);
 
         // The refusal must be non-destructive: the victim keeps its verified-PIN state.
         var digest = SHA256.HashData("refused acquisition"u8);
@@ -159,10 +161,10 @@ public class PivSessionContentionTests
     }
 
     /// <summary>
-    ///     The documented migration path for the ownership change. "One session at a time per interface" is
-    ///     only acceptable because a caller who owns the connection can run successive applet sessions over
-    ///     it — dispose session A, construct session B on the same handle, no reconnect and no
-    ///     re-enumeration. Disposing a session must therefore NOT dispose a caller-created connection.
+    ///     The documented migration path for the ownership change. One live connection per physical key and
+    ///     one live session per connection remain practical because a caller-owned connection supports
+    ///     successive applet sessions — dispose session A, construct session B on the same handle, no reconnect
+    ///     and no re-enumeration. Disposing a session must therefore NOT dispose a caller-created connection.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]

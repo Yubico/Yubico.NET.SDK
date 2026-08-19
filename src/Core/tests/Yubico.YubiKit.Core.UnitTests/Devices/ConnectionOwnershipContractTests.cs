@@ -29,10 +29,10 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Two rules, one fact at two scopes. A CCID interface admits ONE live connection, and a connection
-///         admits ONE live session. Both are refused before any command reaches the card, because a YubiKey's
-///         CCID interface holds exactly one selected applet and a second applet SELECT deselects the first —
-///         measured, SW=0x6D00, see docs/architecture/connection-ownership-and-contention.md.
+///         Two rules at two scopes. A grouped physical YubiKey admits ONE live connection across all known
+///         interfaces, and a connection admits ONE live session. Both are refused before any command reaches
+///         the card. The motivating CCID failure was a second applet SELECT deselecting the first — measured,
+///         SW=0x6D00, see docs/architecture/connection-ownership-and-contention.md.
 ///     </para>
 ///     <para>
 ///         The third rule is ownership: a protocol/session is a pure USER of the connection it is handed.
@@ -46,7 +46,7 @@ public class ConnectionOwnershipContractTests
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     // ------------------------------------------------------------------------------------------------
-    // Rule 1 — one live connection per stateful or multi-report interface.
+    // Rule 1 — one live connection per grouped physical key (or standalone interface record).
     // ------------------------------------------------------------------------------------------------
 
     /// <summary>
@@ -120,9 +120,8 @@ public class ConnectionOwnershipContractTests
     }
 
     /// <summary>
-    ///     FIDO HID is now exclusive: one physical YubiKey FIDO HID interface admits exactly one SDK
-    ///     connection/native HID handle at a time. A second connection is refused immediately before
-    ///     opening the second native handle.
+    ///     A standalone FIDO HID record admits one SDK connection/native HID handle at a time. When discovery
+    ///     groups it with other interfaces, that connection claims the complete physical-key lease scope.
     /// </summary>
     [Fact]
     public async Task ConnectAsync_SecondConnectionToHeldFidoHidInterface_IsRefusedBeforePhysicalOpen()
@@ -142,7 +141,7 @@ public class ConnectionOwnershipContractTests
     }
 
     /// <summary>
-    ///     Exclusive is not permanent: the FIDO HID interface is reusable the moment the holder is disposed.
+    ///     Exclusive is not permanent: the lease scope is reusable the moment the holder is disposed.
     /// </summary>
     [Fact]
     public async Task ConnectAsync_FidoHidConnectionDisposed_InterfaceReopens()
@@ -179,7 +178,13 @@ public class ConnectionOwnershipContractTests
         var refusal = await Assert.ThrowsAsync<ConnectionInUseException>(
             () => composite.ConnectAsync<IFidoHidConnection>(Ct));
 
-        Assert.Contains(hid.DeviceId, refusal.Message, StringComparison.Ordinal);
+        Assert.Matches("held interface: '[^']+'", refusal.Message);
+        Assert.True(
+            refusal.Message.Contains(smartCard.DeviceId, StringComparison.Ordinal)
+            || refusal.Message.Contains(hid.DeviceId, StringComparison.Ordinal),
+            "The refusal should identify a held member of the grouped physical key.");
+        Assert.Contains("one live connection at a time across all interfaces", refusal.Message,
+            StringComparison.Ordinal);
         Assert.Equal(0, hidDevice.IoReportConnectCalls);
         _ = await ccid.TransmitAndReceiveAsync(new byte[] { 0x00 }, Ct);
         Assert.Equal(1, factory.CreateCalls);

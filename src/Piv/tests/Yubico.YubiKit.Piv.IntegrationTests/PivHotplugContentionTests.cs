@@ -25,9 +25,9 @@ namespace Yubico.YubiKit.Piv.IntegrationTests;
 /// <remarks>
 ///     <para>
 ///         The risk this effort owns is not that the operation fails — of course it fails, the card is gone.
-///         It is that the CCID interface lease could be STRANDED. The lease is released in the connection's
+///         It is that the grouped physical-key lease could be STRANDED. The lease is released in the connection's
 ///         disposal path, and there is deliberately no finalizer backstop, so if removal made disposal hang
-///         or throw before the release, the interface would stay marked in-use for the process lifetime and
+///         or throw before the release, the physical key would stay marked in-use for the process lifetime and
 ///         every later open would be refused with <c>ConnectionInUseException</c> — on a key the user has
 ///         already plugged back in.
 ///     </para>
@@ -68,7 +68,7 @@ public class PivHotplugContentionTests
         }
         finally
         {
-            // Must complete even though the card vanished; this is what releases the interface lease.
+            // Must complete even though the card vanished; this is what releases the physical-key lease.
             await connection.DisposeAsync();
         }
 
@@ -78,7 +78,7 @@ public class PivHotplugContentionTests
             "Re-run and physically unplug the key while it is executing.");
 
         // The lease must be gone. A second open may fail because the device is absent, but it must never
-        // fail because this process still believes it holds the interface.
+        // fail because this process still believes it holds the physical key.
         var reopen = await Record.ExceptionAsync(async () =>
         {
             await using var second = await state.Device.ConnectAsync<ISmartCardConnection>();
@@ -86,7 +86,7 @@ public class PivHotplugContentionTests
 
         Assert.False(
             reopen is ConnectionInUseException,
-            "The CCID lease was stranded by hotplug removal: reopening reported the interface as still in " +
+            "The physical-key lease was stranded by hotplug removal: reopening reported the key as still in " +
             $"use by this process. Removal failure was: {removalFailure}");
     }
 

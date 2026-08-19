@@ -195,8 +195,8 @@ public class OathHashAlgorithmTests
         }, cancellationToken: NewToken());
 
         // A FRESH session is what observes the lock — the session that set the key is already
-        // authenticated and would report nothing useful. It is disposed above rather than held
-        // open alongside this one: two live sessions on one CCID interface are refused.
+        // authenticated and would report nothing useful. It is disposed above rather than held open
+        // alongside this one: each convenience session owns a connection, and the physical key admits one.
         await using var lockedSession = await state.Device
             .CreateOathSessionAsync(cancellationToken: NewToken());
 

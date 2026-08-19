@@ -69,16 +69,10 @@ public static class YubiKeyConnectionExtensions
     /// </param>
     /// <param name="sessionName">The application/session name, used only for diagnostic messages.</param>
     /// <param name="defaultOrder">
-    ///     The application's ordered default candidate list. It also defines the set of transports that are
-    ///     valid for this session (used to validate an explicit override). Kept explicit at the call site so a
-    ///     later held-transport fallback can iterate the remaining candidates without reshaping callers.
+    ///     The application's ordered defaults. It also defines the transports valid for an explicit override.
     /// </param>
     /// <returns>
-    ///     The ordered, non-empty list of concrete transports to attempt, most-preferred first. For an
-    ///     explicit override this is a single element (an override never falls back). For the default path it
-    ///     is the device-supported subset of <paramref name="defaultOrder" />, in order. Callers open the first
-    ///     element today; the full ordered list is returned so a later held-transport fallback (Phase 38.5) can
-    ///     iterate the remaining candidates without reshaping callers.
+    ///     The explicit override, or the first supported concrete transport in <paramref name="defaultOrder" />.
     /// </returns>
     /// <exception cref="ArgumentException">
     ///     <paramref name="preferredConnection" /> is not exactly one concrete transport (e.g. a group flag,
@@ -145,6 +139,9 @@ public static class YubiKeyConnectionExtensions
     /// <param name="transport">The single concrete transport selected for the session.</param>
     /// <param name="createAsync">Creates the result over the opened connection.</param>
     /// <param name="cancellationToken">A token to cancel connection opening or session creation.</param>
+    /// <returns>The result created over the opened connection.</returns>
+    /// <exception cref="ArgumentException"><paramref name="transport" /> is not one concrete transport.</exception>
+    /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
     public static Task<TResult> CreateSessionOverTransportAsync<TResult>(
         this IYubiKey yubiKey,
         ConnectionType transport,

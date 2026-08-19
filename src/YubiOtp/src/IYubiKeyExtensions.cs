@@ -85,6 +85,7 @@ public static class IYubiKeyExtensions
         /// <see cref="NotSupportedException"/> (transport not available on this device) is thrown.
         /// </param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
+        /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
         public async Task<YubiOtpSession> CreateYubiOtpSessionAsync(
             ScpKeyParameters? scpKeyParams = null,
             ProtocolConfiguration? configuration = null,

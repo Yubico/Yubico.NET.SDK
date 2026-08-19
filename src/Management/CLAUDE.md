@@ -235,7 +235,7 @@ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
 - Creates session
 - **Caller owns session** - must dispose
 - The connection was opened by this entry point, so the session owns it and disposes it when the session disposes. A connection you opened yourself and passed to `ManagementSession.CreateAsync` stays yours.
-- Use `await using`; a missing disposal can retain an exclusive CCID or OTP HID lease and block later opens.
+- Use `await using`; a missing disposal can retain the physical-device lease and block later opens.
 
 **Tradeoffs:**
 - ✅ Reuse session for multiple operations (more efficient)
@@ -318,10 +318,10 @@ connection and never disposes it. The creator must dispose the connection with `
 is no finalizer backstop. One live session per connection is allowed, and sequential reuse after
 session disposal is supported.
 
-CCID, FIDO HID, and OTP HID connections are exclusive per interface. Management's default order still
-tries `SmartCard -> HidFido -> HidOtp`: an in-process `ConnectionInUseException` advances to the next
-candidate, so held CCID and FIDO interfaces can reach free OTP. An explicit preferred transport never
-falls back.
+A grouped physical YubiKey admits one live connection across CCID, FIDO HID, and OTP HID. Management
+selects exactly one transport from `SmartCard -> HidFido -> HidOtp` (or an explicit override) and opens it
+once. `ConnectionInUseException`, PC/SC sharing errors, and initialization failures propagate without
+trying another interface.
 
 ### Testing Considerations
 

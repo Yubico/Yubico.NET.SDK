@@ -34,7 +34,7 @@ public class YubiOtpSlotConfigTests
     public async Task PutConfiguration_StaticPassword_ConfiguresAndDeletesSlot(YubiKeyTestState state)
     {
         // The test creates the connection, so the test disposes it: YubiOtpSession.CreateAsync borrows a
-        // caller-created connection and never closes it. Leaking it would hold the exclusive OTP HID lease
+        // caller-created connection and never closes it. Leaking it would hold the physical-device lease
         // for the process lifetime and fail every later OTP HID open in this run.
         await using var connection = await state.Device.ConnectAsync<IOtpHidConnection>();
         await using var session = await YubiOtpSession.CreateAsync(connection);

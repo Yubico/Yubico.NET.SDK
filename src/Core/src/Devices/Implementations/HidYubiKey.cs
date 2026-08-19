@@ -62,11 +62,7 @@ internal class HidYubiKey(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
         }
 
-        // Both OTP HID and FIDO HID are exclusive: one physical YubiKey HID interface admits exactly one
-        // SDK connection/native HID handle at a time. OTP HID exchanges span multiple feature reports.
-        // FIDO HID is exclusive to ensure one native handle per interface. Management-over-HID fallback
-        // while CCID is held is achieved through held-transport exception detection in
-        // YubiKeyConnectionExtensions, not through concurrent connection sharing.
+        // The connection claims this member's physical-device lease scope and releases it on disposal.
         var ownership = await DeviceConnectionRegistry
             .AcquireConnectionAsync(
                 interfaceIds,

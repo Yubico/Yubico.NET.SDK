@@ -89,6 +89,7 @@ public static class IYubiKeyExtensions
         /// Thrown if <paramref name="preferredConnection"/> is not a single concrete transport or is a
         /// transport FIDO2 cannot use (for example <see cref="ConnectionType.HidOtp"/>).
         /// </exception>
+        /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
         /// <remarks>
         /// <para>
         /// FIDO2 sessions can be created over two transport types:
@@ -100,13 +101,10 @@ public static class IYubiKeyExtensions
         /// <paramref name="preferredConnection"/> = <see cref="ConnectionType.SmartCard"/> to force SmartCard.
         /// </para>
         /// <para>
-        /// SCP (Secure Channel Protocol) is only supported on the SmartCard transport. Supplying
-        /// <paramref name="scpKeyParams"/> while a non-SmartCard transport is selected — including the default
-        /// HID FIDO first choice — causes session initialization to throw <see cref="NotSupportedException"/>
-        /// ("SCP is only supported on SmartCard protocols"). To use SCP on a device that also exposes HID FIDO,
-        /// explicitly select SmartCard via <paramref name="preferredConnection"/>:
-        /// <c>ConnectionType.SmartCard</c>. (This phase does not change SCP semantics; transport selection is
-        /// independent of <paramref name="scpKeyParams"/>.)
+        /// SCP (Secure Channel Protocol) is supported only on SmartCard. Supplying
+        /// <paramref name="scpKeyParams"/> without an explicit override selects SmartCard automatically.
+        /// Explicitly selecting HID FIDO with SCP parameters causes session initialization to throw
+        /// <see cref="NotSupportedException"/> ("SCP is only supported on SmartCard protocols").
         /// </para>
         /// </remarks>
         /// <example>
@@ -161,10 +159,10 @@ public static class IYubiKeyExtensions
             yubiKey.CreateFidoSessionAsync(scpKeyParams, configuration, null, cancellationToken);
 
         /// <summary>
-        /// Resolves the candidate transports for FIDO2.
+        /// Resolves the single transport selected for FIDO2.
         /// </summary>
         /// <param name="preferredConnection">Optional explicit transport override (see CreateFidoSessionAsync).</param>
-        /// <returns>Candidate transports suitable for FIDO2 operations.</returns>
+        /// <returns>The selected FIDO2 transport.</returns>
         private ConnectionType ResolveFidoSessionTransport(ConnectionType? preferredConnection)
         {
             // FIDO2 is dual-transport (HID FIDO or SmartCard FIDO2). The app-specific smart default selects

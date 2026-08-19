@@ -110,6 +110,7 @@ public static class IYubiKeyExtensions
         ///     A <see cref="ManagementSession" /> instance configured for the YubiKey device.
         ///     The session must be disposed by the caller when no longer needed.
         /// </returns>
+        /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
         public async Task<ManagementSession> CreateManagementSessionAsync(
             ScpKeyParameters? scpKeyParams = null,
             ProtocolConfiguration? configuration = null,

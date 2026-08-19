@@ -80,6 +80,10 @@ public interface IYubiKey
     bool SupportsConnection(ConnectionType connectionType) =>
         AvailableConnections.SupportsConnection(connectionType);
 
+    /// <summary>
+    ///     Opens the requested interface after claiming the physical YubiKey's known member interface IDs.
+    /// </summary>
+    /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
     Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection;
 

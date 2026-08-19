@@ -135,11 +135,12 @@ FirmwareVersion firmware = info.FirmwareVersion;
 Management module (`ManagementSession`). Core owns only read-only metadata and the connection/discovery
 machinery.
 
-## Applet Transport Selection: Smart Defaults, Overrides, Fallback
+## Applet Transport Selection: Smart Defaults And Overrides
 
 Applet session-entry extensions keep their ergonomic one-call shape while selecting a transport
 intentionally on a composite device. Each multi-transport applet documents a default order and accepts an
-optional explicit `preferredConnection` override:
+optional explicit `preferredConnection` override. When SCP parameters are supplied without an override,
+the SCP-capable SmartCard transport is selected instead of the normal default:
 
 | Applet | Default order | Override (`preferredConnection`) |
 | --- | --- | --- |
@@ -162,36 +163,17 @@ await using var otpMgmt = await device.CreateManagementSessionAsync(
 
 Override semantics, validated before any connect:
 
-- `preferredConnection == null` → use the applet's documented default order.
-- A concrete, applet-valid, device-supported value → used exactly.
+- Explicit valid `preferredConnection` → use it exactly.
+- Otherwise, non-null `scpKeyParams` → select SmartCard.
+- Otherwise → use the applet's documented default order.
 - Not exactly one concrete transport (a group/combined/`Unknown` value) → `ArgumentException`.
 - A concrete transport that is not valid for the applet (even if the device exposes it) → `ArgumentException`.
 - A valid transport the device does not expose → `NotSupportedException`.
 
-**Held-transport fallback** (default path only): if no override is given and the SmartCard transport cannot
-be opened because the CCID interface is already held, the session falls back to the next supported transport
-in the default order. Two things count as held, and they mean the same thing to the caller:
+The resolver selects exactly one transport. The session entry point opens it once; it does not retry another
+interface after `ConnectionInUseException`, PC/SC sharing errors, cancellation, or initialization failure.
 
-- **Another process** — PC/SC `SCARD_E_SHARING_VIOLATION` / `SCARD_E_SERVER_TOO_BUSY`, e.g. GnuPG
-  `scdaemon` holding the CCID.
-- **This process** — `ConnectionInUseException`, because a CCID interface admits one live connection and
-  something in this process (a PIV or OATH session, say) already has it.
-
-The in-process case is the common one and it is why the fallback exists: an internal `GetDeviceInfoAsync`
-must not step on a session the caller opened three lines earlier. Both HID transports answer Management
-correctly while a PIV session holds CCID, and the PIV session survives — hardware-measured.
-
-An explicit override never falls back: `preferredConnection` is an instruction, and quietly opening a
-different transport would be a lie, so the held error surfaces. The SDK never kills another process, and
-never revokes an existing in-process holder, to free a transport.
-
-```csharp
-// If the CCID is held — by another process or by a session in this one — this transparently
-// falls back to HID FIDO/OTP.
-await using var resilient = await device.CreateManagementSessionAsync();
-```
-
-## One Connection Per CCID Interface, One Session Per Connection
+## One Connection Per Physical Device, One Session Per Connection
 
 A YubiKey's CCID interface holds exactly one selected application. Selecting another deselects the first and
 destroys its security state — measured: after a second applet is selected, the first session's next command
@@ -202,10 +184,8 @@ would have caused the damage rather than on the victim's next operation:
 
 | Acquisition | Rule | On violation |
 | --- | --- | --- |
-| Second connection to a live CCID interface | Refused | `ConnectionInUseException` naming the interface |
+| Second connection to any known interface of a grouped physical key | Refused | `ConnectionInUseException` naming a held member interface |
 | Second session on a live connection | Refused | `ConnectionInUseException` naming the current session |
-| HID FIDO interface | Shared | — (CTAPHID channels provide protocol separation) |
-| HID OTP interface | Exclusive | `ConnectionInUseException` naming the interface |
 
 Both refusals are per *live* holder, not per lifetime. Successive use is the supported pattern, and it does
 not require reconnecting — a session never disposes a connection it did not create:
@@ -228,16 +208,13 @@ to the connection at construction. Neither inspects the wire.
 methods open a connection the caller never sees, so the session they return owns and disposes it through the
 internal `ApplicationSession.OwnConnection()` path. A direct `Session.CreateAsync(connection)` borrows the
 caller-created connection and does not dispose it. Use `await using` for both connections and sessions.
-Missing connection disposal can retain an exclusive CCID, FIDO HID, or OTP HID lease for the connection lifetime
+Missing connection disposal can retain the physical-device lease for the connection lifetime
 (potentially the process lifetime), blocking later opens; there is intentionally no finalizer backstop,
 because deterministic disposal is the only point at which native-handle teardown and lease release can be
 ordered reliably.
 
-OTP HID is exclusive because one OTP protocol exchange spans multiple feature reports; two independent
-protocol instances on the same interface could interleave one logical frame. FIDO HID is also exclusive
-per physical interface so the SDK owns at most one native FIDO HID handle at a time. Management's default
-order may still fall through `SmartCard -> HidFido -> HidOtp`: a held candidate advances to the next free
-interface, while an explicit preferred transport never falls back.
+Opening any grouped member claims all known stable member interface IDs. When conservative discovery cannot
+prove grouping, a standalone record retains a one-element scope; the SDK does not guess associations.
 
 macOS FIDO HID must be opened with `kIOHIDOptionsTypeNone`, never `kIOHIDOptionsTypeSeizeDevice`. SDK
 exclusivity is enforced before native open; seizing would add a separate platform-wide exclusion policy
@@ -247,10 +224,9 @@ yubikit implementations open non-seizing on macOS: Rust enables hidapi's `macos-
 
 ## SCP Note
 
-Secure Channel Protocol is only valid on the SmartCard transport. Supplying `scpKeyParams` while a
-non-SmartCard transport is selected (including the FIDO2/WebAuthn `HidFido`-first default) throws
-`NotSupportedException` during session initialization. To use SCP, select the SmartCard transport explicitly
-with `preferredConnection: ConnectionType.SmartCard`.
+Secure Channel Protocol is valid only on SmartCard. Supplying `scpKeyParams` without an explicit override
+selects SmartCard automatically. Explicitly selecting a non-SmartCard transport with SCP parameters throws
+`NotSupportedException` during session initialization.
 
 ## Migration From The Per-Interface Handle Model
 
@@ -272,7 +248,7 @@ Practical steps:
 2. Replace any scalar connection-type routing with typed `ConnectAsync<TConnection>()` or an applet session
    extension.
 3. Where you need a specific transport, pass `preferredConnection`; otherwise rely on the documented default
-   order (and held-transport fallback).
+   order. Connection failures do not select another interface.
 4. Update metadata type references to `Yubico.YubiKit.Core.Devices`.
 5. Dispose every connection at the scope that created it. If you create a connection and pass it to
    `Session.CreateAsync(connection)`, keep the connection in its own `await using`; the session will not

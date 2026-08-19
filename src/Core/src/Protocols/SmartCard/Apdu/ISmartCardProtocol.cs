@@ -20,12 +20,10 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 ///     Protocol interface for SmartCard communication.
 /// </summary>
 /// <remarks>
-///     Concurrency: implementations serialize logical exchanges internally — concurrent calls are safe
-///     but execute sequentially (a smart card is a stateful sequential peer; parallel APDU streams would
-///     corrupt chained commands, chained responses, and SCP MAC chains). Do not use concurrency for
-///     throughput on a single protocol instance. Cancellation tokens cancel only the wait for a turn;
-///     an exchange already in flight always runs to completion so no partial chained state is left on
-///     the card.
+///     Implementations admit one logical exchange at a time. An overlapping call throws
+///     <see cref="InvalidOperationException" /> immediately because parallel APDU streams would corrupt chained
+///     commands, chained responses, and SCP MAC chains. A token is checked before entry; an exchange already
+///     in flight runs to completion so no partial chained state is left on the card.
 /// </remarks>
 public interface ISmartCardProtocol : IProtocol
 {

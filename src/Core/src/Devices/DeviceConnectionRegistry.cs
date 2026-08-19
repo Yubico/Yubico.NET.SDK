@@ -18,9 +18,8 @@ using Yubico.YubiKit.Core.Abstractions;
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-///     Process-wide ownership coordinator per interface device, keyed by <see cref="IYubiKey.DeviceId" />.
-///     Connections hold the lease; discovery takes a nonblocking exclusive lease. This makes the
-///     connection/discovery exclusion atomic instead of relying on count/check/recheck timing.
+///     Process-wide ownership coordinator keyed by stable member interface IDs. A physical-device connection
+///     claims all known member IDs; discovery takes one nonblocking per-interface lease.
 /// </summary>
 /// <remarks>
 ///     <para>
@@ -29,15 +28,9 @@ namespace Yubico.YubiKit.Core.Devices;
 ///         over a connection without touching it.
 ///     </para>
 ///     <para>
-///         All interfaces (CCID, FIDO HID, OTP HID) admit exactly ONE live connection. CCID holds one selected
-///         applet on the basic channel, so a second connection's SELECT would deselect the first holder's applet
-///         — measured, SW=0x6D00, see docs/architecture/connection-ownership-and-contention.md. An OTP HID logical
-///         exchange spans multiple feature reports, which separate protocol instances must not interleave.
-///         FIDO HID is exclusive to ensure one native handle per interface; Management-over-HID fallback while
-///         CCID is held is achieved through held-transport exception detection in
-///         <see cref="YubiKeyConnectionExtensions" />, not through concurrent connection sharing.
-///         A second acquisition is refused immediately with <see cref="ConnectionInUseException" />; it never
-///         waits, because waiting for an unbounded session to end is worse than a clear error.
+///         A grouped physical YubiKey admits one live connection across CCID, FIDO HID, and OTP HID. A second
+///         acquisition through any known member is refused immediately with
+///         <see cref="ConnectionInUseException" />; it never waits for an unbounded holder to end.
 ///     </para>
 ///     <para>
 ///         Discovery holds its exclusive lease across physical connect, device-info exchange, and connection
@@ -48,9 +41,10 @@ namespace Yubico.YubiKit.Core.Devices;
 ///         LIMITATION: in-process only. A different process holding the card can still interfere; that is
 ///         outside what this registry can see. Keyed by the PER-INTERFACE DeviceId (reader name / HID path
 ///         based), which is stable across scans while the device stays plugged, so registrations made through
-///         devices from one scan are visible to readers created in later scans. A composite's own DeviceId is
-///         never used as a key here — <see cref="ResolveInterfaceId" /> always resolves to a member — because
-///         it names the evidence tier that resolved the merge and is not stable across scans. Idle coordinator entries are retained
+///         devices from one scan are visible to readers created in later scans. For a composite,
+///         <see cref="ResolveInterfaceId" /> resolves the requested connection to a member instead of using
+///         the composite DeviceId, which names the evidence tier and is not stable across scans. Standalone
+///         devices use their own DeviceId. Idle coordinator entries are retained
 ///         for the process lifetime: this is bounded by unique interface IDs observed and avoids unsafe
 ///         remove/recreate races between lease acquisition and dictionary eviction.
 ///     </para>
@@ -73,10 +67,8 @@ internal static class DeviceConnectionRegistry
         IsInUse(ResolveInterfaceId(device, connection));
 
     /// <summary>
-    ///     The per-interface DeviceId that a connect for <paramref name="connection" /> would register: the
-    ///     composite member selected by <see cref="CompositeYubiKey.TryResolveMember" />, or the device's
-    ///     own id when it is not a composite or exposes no member for the connection. Sharing that resolver
-    ///     with the connect path is what makes this agreement compiler-enforced rather than a convention.
+    ///     Resolves the member interface ID serving <paramref name="connection" />. Discovery uses this to
+    ///     coordinate one interface; grouped public connections acquire the complete member lease scope.
     /// </summary>
     public static string ResolveInterfaceId(IYubiKey device, ConnectionType connection)
     {
@@ -104,8 +96,10 @@ internal static class DeviceConnectionRegistry
 
     /// <summary>
     ///     Acquires every known interface lease for one physical YubiKey as a single logical registration.
-    ///     Interface ids are de-duplicated and acquired in ordinal order so racing callers cannot deadlock.
+    ///     Interface ids are de-duplicated and acquired in ordinal order; partial acquisition rolls back in
+    ///     reverse order.
     /// </summary>
+    /// <exception cref="ConnectionInUseException">Any member ID already has a live connection.</exception>
     public static async ValueTask<IDisposable> AcquireConnectionAsync(
         IReadOnlyCollection<string> interfaceIds,
         CancellationToken cancellationToken = default)

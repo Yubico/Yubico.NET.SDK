@@ -70,11 +70,12 @@ public sealed class RawSmartCardSession : ApplicationSession
         RawSmartCardSession session = Construct(
             connection,
             () => new RawSmartCardSession(connection, usesScp: scpKeyParameters is not null));
-        ISmartCardProtocol protocol = ProtocolFactory.Create(connection);
-        session.Protocol = protocol;
 
         try
         {
+            ISmartCardProtocol protocol = ProtocolFactory.Create(connection);
+            session.Protocol = protocol;
+
             if (scpKeyParameters is null)
             {
                 session.IsInitialized = true;

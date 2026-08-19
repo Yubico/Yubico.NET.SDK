@@ -33,9 +33,17 @@ public sealed class RawFidoHidSession : ApplicationSession
     {
         cancellationToken.ThrowIfCancellationRequested();
         RawFidoHidSession session = Construct(connection, () => new RawFidoHidSession(connection));
-        session.Protocol = ProtocolFactory.Create(connection);
-        session.IsInitialized = true;
-        return Task.FromResult(session);
+        try
+        {
+            session.Protocol = ProtocolFactory.Create(connection);
+            session.IsInitialized = true;
+            return Task.FromResult(session);
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(

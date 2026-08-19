@@ -145,32 +145,35 @@ internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        FirmwareVersion = firmwareVersion;
-        var insSendRemainingChanged = ConfigureInsSendRemaining(configuration);
-
-        if (FirmwareVersion.IsAlphaOrBeta)
+        _exchangeGuard.Run(() =>
         {
-            UseExtendedApdus = _connection.SupportsExtendedApdu();
-            MaxApduSize = SmartCardMaxApduSizes.Yk43;
-            ReconfigureProcessor();
-            return;
-        }
+            FirmwareVersion = firmwareVersion;
+            var insSendRemainingChanged = ConfigureInsSendRemaining(configuration);
 
-        if (!FirmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))
-        {
-            if (insSendRemainingChanged)
+            if (FirmwareVersion.IsAlphaOrBeta)
+            {
+                UseExtendedApdus = _connection.SupportsExtendedApdu();
+                MaxApduSize = SmartCardMaxApduSizes.Yk43;
                 ReconfigureProcessor();
+                return;
+            }
 
-            return;
-        }
+            if (!FirmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))
+            {
+                if (insSendRemainingChanged)
+                    ReconfigureProcessor();
 
-        var forceShortApdu = configuration is { ForceShortApdus: true };
-        UseExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu;
-        MaxApduSize = firmwareVersion.IsAtLeast(FirmwareVersion.V4_3_0)
-            ? SmartCardMaxApduSizes.Yk43
-            : SmartCardMaxApduSizes.Yk4;
+                return;
+            }
 
-        ReconfigureProcessor();
+            var forceShortApdu = configuration is { ForceShortApdus: true };
+            UseExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu;
+            MaxApduSize = firmwareVersion.IsAtLeast(FirmwareVersion.V4_3_0)
+                ? SmartCardMaxApduSizes.Yk43
+                : SmartCardMaxApduSizes.Yk4;
+
+            ReconfigureProcessor();
+        });
     }
 
     private bool ConfigureInsSendRemaining(ProtocolConfiguration? configuration)

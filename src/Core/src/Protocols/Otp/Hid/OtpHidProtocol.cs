@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Buffers;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
@@ -42,14 +43,19 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     private readonly ExchangeGuard _exchangeGuard = new();
     private readonly DisposalGate _disposalGate = new();
     private readonly ILogger<OtpHidProtocol> _logger;
+    private readonly ArrayPool<byte> _bufferPool;
     private FirmwareVersion? _firmwareVersion;
     private bool _initialized;
     private bool _disposed;
 
-    public OtpHidProtocol(IOtpHidConnection connection, ILogger<OtpHidProtocol>? logger = null)
+    public OtpHidProtocol(
+        IOtpHidConnection connection,
+        ILogger<OtpHidProtocol>? logger = null,
+        ArrayPool<byte>? bufferPool = null)
     {
         _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         _logger = logger ?? NullLogger<OtpHidProtocol>.Instance;
+        _bufferPool = bufferPool ?? ArrayPool<byte>.Shared;
     }
 
     public FirmwareVersion? FirmwareVersion => _firmwareVersion;
@@ -260,48 +266,62 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         ReadOnlyMemory<byte> firstReport,
         CancellationToken cancellationToken)
     {
-        using var stream = new MemoryStream();
+        const int maximumResponseLength = (OtpConstants.SequenceMask + 1) * OtpConstants.FeatureReportDataSize;
+        byte[] responseBuffer = _bufferPool.Rent(maximumResponseLength);
         var previousSeq = -1;
+        var responseLength = 0;
 
-        // Process the first report (already has ReadPending set)
-        var report = firstReport;
-
-        while (true)
+        try
         {
-            var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
+            // Process the first report (already has ReadPending set)
+            var report = firstReport;
 
-            // Check if ReadPending is still set
-            if ((statusByte & OtpConstants.ResponsePendingFlag) == 0)
+            while (true)
             {
-                // End of data chain
-                _logger.LogDebug("End of data chain (ReadPending cleared)");
-                break;
+                var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
+
+                // Check if ReadPending is still set
+                if ((statusByte & OtpConstants.ResponsePendingFlag) == 0)
+                {
+                    // End of data chain
+                    _logger.LogDebug("End of data chain (ReadPending cleared)");
+                    break;
+                }
+
+                var packetSeq = statusByte & OtpConstants.SequenceMask;
+
+                // Check for sequence reset (second time seeing seq=0 means end of transmission)
+                if (packetSeq == 0 && previousSeq != -1)
+                {
+                    await ResetStateAsync(cancellationToken).ConfigureAwait(false);
+                    _logger.LogDebug("Transmission complete (seq reset to 0)");
+                    break;
+                }
+
+                if (responseLength > maximumResponseLength - OtpConstants.FeatureReportDataSize)
+                    throw new InvalidOperationException("OTP HID response exceeds the maximum packet sequence range.");
+
+                // Add payload to buffer (7 bytes)
+                report.Span[..OtpConstants.FeatureReportDataSize]
+                    .CopyTo(responseBuffer.AsSpan(responseLength));
+                responseLength += OtpConstants.FeatureReportDataSize;
+                previousSeq = packetSeq;
+
+                _logger.LogTrace("Added packet seq={Seq}, total={Total} bytes", packetSeq, responseLength);
+
+                // Read next report
+                report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            var packetSeq = statusByte & OtpConstants.SequenceMask;
-
-            // Check for sequence reset (second time seeing seq=0 means end of transmission)
-            if (packetSeq == 0 && previousSeq != -1)
-            {
-                await ResetStateAsync(cancellationToken).ConfigureAwait(false);
-                _logger.LogDebug("Transmission complete (seq reset to 0)");
-                break;
-            }
-
-            // Add payload to buffer (7 bytes)
-            stream.Write(report.Span[..OtpConstants.FeatureReportDataSize]);
-            previousSeq = packetSeq;
-
-            _logger.LogTrace("Added packet seq={Seq}, total={Total} bytes", packetSeq, stream.Length);
-
-            // Read next report
-            report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
+            var rawResponse = responseBuffer.AsSpan(0, responseLength).ToArray();
+            _logger.LogDebug("{Length} bytes read over HID", rawResponse.Length);
+            return rawResponse;
         }
-
-        var rawResponse = stream.ToArray();
-        _logger.LogDebug("{Length} bytes read over HID", rawResponse.Length);
-
-        return rawResponse;
+        finally
+        {
+            CryptographicOperations.ZeroMemory(responseBuffer);
+            _bufferPool.Return(responseBuffer);
+        }
     }
 
     /// <summary>

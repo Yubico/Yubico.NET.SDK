@@ -50,20 +50,7 @@ internal sealed class ExchangeGuard
         Func<CancellationToken, Task<T>> exchange,
         CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        lock (_stateLock)
-        {
-            ObjectDisposedException.ThrowIf(_closing, this);
-            if (_active)
-            {
-                throw new InvalidOperationException(
-                    "This session already has an exchange in flight. Sessions support one operation at a time; " +
-                    "await each call before issuing the next.");
-            }
-
-            _active = true;
-        }
+        Enter(cancellationToken);
 
         try
         {
@@ -71,14 +58,7 @@ internal sealed class ExchangeGuard
         }
         finally
         {
-            TaskCompletionSource? drained;
-            lock (_stateLock)
-            {
-                _active = false;
-                drained = _closing ? _drained : null;
-            }
-
-            drained?.TrySetResult();
+            Exit();
         }
     }
 
@@ -97,6 +77,20 @@ internal sealed class ExchangeGuard
             },
             cancellationToken);
 
+    /// <summary>Runs a synchronous state mutation under the same close-aware admission as an exchange.</summary>
+    public void Run(Action action)
+    {
+        Enter(CancellationToken.None);
+        try
+        {
+            action();
+        }
+        finally
+        {
+            Exit();
+        }
+    }
+
     /// <summary>Refuses future admissions and synchronously waits for an admitted exchange to finish.</summary>
     public void CloseAndDrain() => CloseAndDrainAsync().AsTask().GetAwaiter().GetResult();
 
@@ -112,5 +106,35 @@ internal sealed class ExchangeGuard
             _drained ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             return new ValueTask(_drained.Task);
         }
+    }
+
+    private void Enter(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        lock (_stateLock)
+        {
+            ObjectDisposedException.ThrowIf(_closing, this);
+            if (_active)
+            {
+                throw new InvalidOperationException(
+                    "This session already has an exchange in flight. Sessions support one operation at a time; " +
+                    "await each call before issuing the next.");
+            }
+
+            _active = true;
+        }
+    }
+
+    private void Exit()
+    {
+        TaskCompletionSource? drained;
+        lock (_stateLock)
+        {
+            _active = false;
+            drained = _closing ? _drained : null;
+        }
+
+        drained?.TrySetResult();
     }
 }

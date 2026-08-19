@@ -90,6 +90,39 @@ public class ExchangeGuardTests
     }
 
     [Fact]
+    public async Task Run_WhileAsyncExchangeIsActive_ThrowsWithoutRunningAction()
+    {
+        var guard = new ExchangeGuard();
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        Task exchange = guard.RunAsync(async _ =>
+        {
+            entered.SetResult();
+            await release.Task;
+        }, TestContext.Current.CancellationToken);
+        await entered.Task;
+        bool actionRan = false;
+
+        Assert.Throws<InvalidOperationException>(() => guard.Run(() => actionRan = true));
+
+        Assert.False(actionRan);
+        release.SetResult();
+        await exchange;
+    }
+
+    [Fact]
+    public void Run_AfterClose_ThrowsWithoutRunningAction()
+    {
+        var guard = new ExchangeGuard();
+        guard.CloseAndDrain();
+        bool actionRan = false;
+
+        Assert.Throws<ObjectDisposedException>(() => guard.Run(() => actionRan = true));
+
+        Assert.False(actionRan);
+    }
+
+    [Fact]
     public async Task CloseAndDrainAsync_RefusesNewAdmissionsAndWaitsForAdmittedExchange()
     {
         var guard = new ExchangeGuard();

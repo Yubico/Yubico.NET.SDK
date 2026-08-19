@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Buffers.Binary;
+using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 
@@ -137,6 +138,25 @@ public class FidoHidProtocolTests
                 TestContext.Current.CancellationToken));
 
         Assert.Contains("command", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Theory]
+    [InlineData(CtapConstants.CtapYubikeyDeviceConfig)]
+    [InlineData(CtapConstants.CtapReadConfig)]
+    [InlineData(CtapConstants.CtapWriteConfig)]
+    [InlineData(CtapConstants.CtapHidPing)]
+    public async Task SendVendorCommandAsync_MatchingResponse_NormalizesInitBitOnBothCommands(byte command)
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+        connection.QueueResponsePackets(CreateInitPacket(0x01020304, command, [0xAA]));
+
+        ReadOnlyMemory<byte> response = await protocol.SendVendorCommandAsync(
+            command,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(new byte[] { 0xAA }, response.ToArray());
     }
 
     [Fact]
@@ -351,6 +371,59 @@ public class FidoHidProtocolTests
         ReadOnlyMemory<byte> retained = Assert.Single(connection.RetainedSentPackets);
         Assert.All(retained.ToArray(), value => Assert.Equal(0, value));
         Assert.Contains((byte)0x11, Assert.Single(connection.SentPacketSnapshots));
+    }
+
+    [Fact]
+    public async Task SendVendorCommandAsync_WhenContinuationValidationFails_ZerosPartialResponseBuffer()
+    {
+        var allocatedBuffers = new List<byte[]>();
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection, responseBufferFactory: length =>
+        {
+            var buffer = new byte[length];
+            allocatedBuffers.Add(buffer);
+            return buffer;
+        });
+        byte[] responsePayload = Enumerable.Range(1, CtapConstants.InitDataSize + 1)
+            .Select(value => (byte)value)
+            .ToArray();
+        connection.QueueResponsePackets(
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, responsePayload),
+            CreateContinuationPacket(0x01020304, sequence: 1, responsePayload.AsSpan(CtapConstants.InitDataSize)));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendVendorCommandAsync(
+            CtapConstants.CtapVendorFirst,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken));
+
+        byte[] partialResponseBuffer = allocatedBuffers[^1];
+        Assert.Equal(responsePayload.Length, partialResponseBuffer.Length);
+        Assert.All(partialResponseBuffer, value => Assert.Equal(0, value));
+    }
+
+    [Fact]
+    public async Task SendVendorCommandAsync_WhenResponseSucceeds_TransfersUnclearedResponseBuffer()
+    {
+        var allocatedBuffers = new List<byte[]>();
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection, responseBufferFactory: length =>
+        {
+            var buffer = new byte[length];
+            allocatedBuffers.Add(buffer);
+            return buffer;
+        });
+        byte[] responsePayload = [0xAA, 0xBB, 0xCC];
+        connection.QueueResponsePackets(
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, responsePayload));
+
+        ReadOnlyMemory<byte> response = await protocol.SendVendorCommandAsync(
+            CtapConstants.CtapVendorFirst,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken);
+
+        Assert.True(MemoryMarshal.TryGetArray(response, out ArraySegment<byte> responseSegment));
+        Assert.Same(allocatedBuffers[^1], responseSegment.Array);
+        Assert.Equal(responsePayload, response.ToArray());
     }
 
     private static byte[] CreateInitPacket(uint channelId, byte command, ReadOnlySpan<byte> payload)

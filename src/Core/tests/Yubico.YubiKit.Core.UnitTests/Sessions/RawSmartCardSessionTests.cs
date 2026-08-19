@@ -97,6 +97,49 @@ public class RawSmartCardSessionTests
     }
 
     [Fact]
+    public async Task Configure_DuringBlockedExchange_ThrowsWithoutChangingConfiguration()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        var connection = new RecordingSmartCardConnection();
+        connection.EnqueueResponse(new byte[] { 0x90, 0x00 });
+        await using var raw = await RawSmartCardSession.CreateAsync(connection, cancellationToken);
+        connection.HoldNextTransmission();
+        Task<ApduResponse> exchange = raw.TransmitAndReceiveAsync(
+            new ApduCommand(0, 1, 0, 0),
+            cancellationToken: cancellationToken);
+        await connection.TransmissionStarted.Task.WaitAsync(cancellationToken);
+        FirmwareVersion firmwareVersionBeforeConfigure = raw.FirmwareVersion;
+
+        Assert.Throws<InvalidOperationException>(() => raw.Configure(
+            new FirmwareVersion(5, 7, 0),
+            new ProtocolConfiguration { ForceShortApdus = true }));
+
+        connection.ReleaseTransmission();
+        Assert.True((await exchange).IsOK());
+        Assert.Equal(firmwareVersionBeforeConfigure, raw.FirmwareVersion);
+    }
+
+    [Fact]
+    public async Task Configure_AfterDisposalBegins_ThrowsObjectDisposedException()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        var connection = new RecordingSmartCardConnection();
+        connection.EnqueueResponse(new byte[] { 0x90, 0x00 });
+        var raw = await RawSmartCardSession.CreateAsync(connection, cancellationToken);
+        connection.HoldNextTransmission();
+        Task<ApduResponse> exchange = raw.TransmitAndReceiveAsync(
+            new ApduCommand(0, 1, 0, 0),
+            cancellationToken: cancellationToken);
+        await connection.TransmissionStarted.Task.WaitAsync(cancellationToken);
+        Task disposal = raw.DisposeAsync().AsTask();
+
+        Assert.Throws<ObjectDisposedException>(() => raw.Configure(new FirmwareVersion(5, 7, 0)));
+
+        connection.ReleaseTransmission();
+        await Task.WhenAll(exchange, disposal);
+    }
+
+    [Fact]
     public async Task Dispose_BorrowedConnection_RemainsOpenForSequentialSession()
     {
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;

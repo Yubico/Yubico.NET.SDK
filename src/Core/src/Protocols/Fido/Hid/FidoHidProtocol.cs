@@ -23,13 +23,17 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 ///     through an internal guard: overlapping calls are refused immediately. An exchange in flight runs to
 ///     completion.
 /// </remarks>
-internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidProtocol>? logger = null)
+internal class FidoHidProtocol(
+    IFidoHidConnection connection,
+    ILogger<FidoHidProtocol>? logger = null,
+    Func<int, byte[]>? responseBufferFactory = null)
     : IFidoHidProtocol, IAsyncDisposable
 {
     private readonly IFidoHidConnection _connection = connection ?? throw new ArgumentNullException(nameof(connection));
     private readonly ExchangeGuard _exchangeGuard = new();
     private readonly DisposalGate _disposalGate = new();
     private readonly ILogger<FidoHidProtocol> _logger = logger ?? NullLogger<FidoHidProtocol>.Instance;
+    private readonly Func<int, byte[]> _responseBufferFactory = responseBufferFactory ?? (static length => new byte[length]);
     private uint? _channelId;
     private FirmwareVersion? _firmwareVersion;
     private bool _disposed;
@@ -255,39 +259,49 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
             throw new InvalidOperationException($"CTAP HID error response: 0x{errorCode:X2}");
         }
 
-        if (responseCommand != expectedCommand)
+        byte normalizedExpectedCommand = (byte)(expectedCommand & ~CtapConstants.InitPacketMask);
+        if (responseCommand != normalizedExpectedCommand)
         {
             throw new InvalidOperationException(
                 $"CTAP HID response command 0x{responseCommand:X2} does not match request command 0x{expectedCommand:X2}");
         }
 
-        // Allocate buffer for complete response
-        var responseData = new byte[responseLength];
-        var initDataLength = Math.Min(responseLength, CtapConstants.InitDataSize);
-
-        initPacket.Span.Slice(CtapConstants.InitHeaderSize, initDataLength)
-            .CopyTo(responseData);
-
-        // Receive continuation packets if needed
-        var bytesReceived = initDataLength;
-        byte expectedSequence = 0;
-        while (bytesReceived < responseLength)
+        byte[] responseData = _responseBufferFactory(responseLength);
+        var ownershipTransferred = false;
+        try
         {
-            var contPacket = await _connection.ReceiveAsync(cancellationToken).ConfigureAwait(false);
-            ValidateContinuationPacket(contPacket.Span, channelId, expectedSequence);
-            var contDataLength = Math.Min(
-                responseLength - bytesReceived,
-                CtapConstants.ContinuationDataSize);
+            var initDataLength = Math.Min(responseLength, CtapConstants.InitDataSize);
 
-            contPacket.Span.Slice(CtapConstants.ContinuationHeaderSize, contDataLength)
-                .CopyTo(responseData.AsSpan(bytesReceived));
+            initPacket.Span.Slice(CtapConstants.InitHeaderSize, initDataLength)
+                .CopyTo(responseData);
 
-            bytesReceived += contDataLength;
-            expectedSequence++;
+            // Receive continuation packets if needed
+            var bytesReceived = initDataLength;
+            byte expectedSequence = 0;
+            while (bytesReceived < responseLength)
+            {
+                var contPacket = await _connection.ReceiveAsync(cancellationToken).ConfigureAwait(false);
+                ValidateContinuationPacket(contPacket.Span, channelId, expectedSequence);
+                var contDataLength = Math.Min(
+                    responseLength - bytesReceived,
+                    CtapConstants.ContinuationDataSize);
+
+                contPacket.Span.Slice(CtapConstants.ContinuationHeaderSize, contDataLength)
+                    .CopyTo(responseData.AsSpan(bytesReceived));
+
+                bytesReceived += contDataLength;
+                expectedSequence++;
+            }
+
+            _logger.LogTrace("Received {Length} bytes in response", responseLength);
+            ownershipTransferred = true;
+            return responseData;
         }
-
-        _logger.LogTrace("Received {Length} bytes in response", responseLength);
-        return responseData;
+        finally
+        {
+            if (!ownershipTransferred)
+                CryptographicOperations.ZeroMemory(responseData);
+        }
     }
 
     /// <summary>

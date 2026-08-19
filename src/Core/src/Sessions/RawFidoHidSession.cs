@@ -19,9 +19,10 @@ namespace Yubico.YubiKit.Core.Sessions;
 
 /// <summary>Provides guarded, application-agnostic CTAP HID logical exchanges.</summary>
 /// <remarks>
-///     The session supplies channel initialization, framing, continuation, keep-alive, and response handling,
-///     but no FIDO2 or WebAuthn operation semantics. It borrows a directly supplied connection. Direct
-///     connection <c>SendAsync</c>/<c>ReceiveAsync</c> calls bypass the session's overlap guard.
+///     The session supplies channel initialization, framing, continuation, keep-alive handling, final-command
+///     correlation, and CTAPHID error rejection, but no FIDO2 or WebAuthn operation semantics. It borrows a
+///     directly supplied connection. Direct connection <c>SendAsync</c>/<c>ReceiveAsync</c> calls bypass the
+///     session's overlap guard.
 /// </remarks>
 public sealed class RawFidoHidSession : ApplicationSession
 {
@@ -54,7 +55,11 @@ public sealed class RawFidoHidSession : ApplicationSession
         }
     }
 
-    /// <summary>Sends one caller-defined CTAP HID command and returns its complete response payload.</summary>
+    /// <summary>Sends one caller-defined CTAP HID command and returns its correlated response payload.</summary>
+    /// <remarks>
+    ///     SDK-owned outgoing packet copies are cleared after use; caller-owned <paramref name="payload" /> is not
+    ///     modified. Returned memory remains live after return and is caller-owned for sensitive-data handling.
+    /// </remarks>
     public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
         byte command,
         ReadOnlyMemory<byte> payload,

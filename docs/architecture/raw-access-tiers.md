@@ -23,8 +23,9 @@ Raw sessions are the supported power-user path:
 - `RawSmartCardSession` supplies APDU formatting, command/response chaining, overlap refusal, explicit
   application selection, and optional SCP.
 - `RawFidoHidSession` supplies CTAP HID channel allocation, packet framing, continuation packets,
-  keep-alive handling, response correlation, and overlap refusal.
-- `RawOtpHidSession` supplies OTP feature-report framing, sequencing, polling, CRC handling, and overlap refusal.
+  keep-alive handling, final-command correlation, CTAPHID error rejection, and overlap refusal.
+- `RawOtpHidSession` supplies OTP feature-report framing, sequencing, polling, outbound CRC generation, and
+  overlap refusal. It cannot validate command-specific inbound CRC without caller-supplied response semantics.
 
 They intentionally do **not** select an applet during creation, apply applet feature gates, or interpret
 application-specific payloads. Bypassing applet checks does not bypass physical transport safety: raw sessions
@@ -62,7 +63,8 @@ ReadOnlyMemory<byte> response = await raw.SendAndReceiveAsync(
 ```
 
 The caller supplies and interprets the CTAP HID command payload. This API does not add FIDO2 or WebAuthn
-request semantics.
+request semantics. A final response command must match the request; `CTAPHID_KEEPALIVE` is accepted only while
+waiting, and `CTAPHID_ERROR` fails the exchange instead of returning an apparently successful payload.
 
 ### OTP HID
 
@@ -77,6 +79,16 @@ ReadOnlyMemory<byte> response = await raw.SendAndReceiveAsync(
 ```
 
 The caller supplies and interprets the OTP command payload. This API does not add slot-configuration semantics.
+Core generates the outbound frame CRC but returns inbound bytes without command-specific CRC validation. When a
+command defines an `expectedLength`, validate its data plus two CRC bytes explicitly:
+
+```csharp
+if (response.Length < expectedLength + 2 ||
+    !ChecksumUtils.CheckCrc(response.Span, expectedLength + 2))
+{
+    throw new InvalidOperationException("OTP response CRC validation failed.");
+}
+```
 
 ### Raw SmartCard With SCP
 
@@ -86,15 +98,18 @@ Load SCP parameters from secure application storage; do not embed or log real ke
 using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();
 await using RawSmartCardSession raw = await yubiKey.CreateRawSmartCardSessionAsync(
     scpParameters,
+    firmwareVersion,
+    new ProtocolConfiguration { ForceShortApdus = true },
     cancellationToken);
 
-raw.Configure(firmwareVersion);
 await raw.SelectAsync(applicationId, cancellationToken);
 ApduResponse response = await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
 ```
 
-The existing Core SCP processor establishes and owns secure-channel session material. The caller retains the
-normal ownership obligations of the supplied key-parameter type and any source key buffers.
+Configuration is applied to the base APDU processor before SCP establishment. An SCP raw session cannot be
+reconfigured afterward because replacing or partially updating the established processor graph would invalidate
+the secure-channel framing assumptions. The existing Core SCP processor owns secure-channel session material.
+The caller retains the normal ownership obligations of the supplied key-parameter type and source key buffers.
 
 ## Tier 2: Raw Connections
 
@@ -116,6 +131,17 @@ interleaved, or otherwise leaves device state uncertain, dispose the connection 
 - `IYubiKey.CreateRaw*SessionAsync(...)` owns its hidden connection and disposes it with the returned session.
 - Overlapping operations on one raw session throw `InvalidOperationException` immediately.
 - Once admitted, a stateful exchange runs to completion so cancellation cannot strand protocol state.
+- Disposal atomically closes admission, waits for an admitted exchange, and only then disposes protocol/SCP state
+  and any convenience-owned connection. New operations are refused as soon as disposal begins.
+- Prefer `DisposeAsync`. Synchronous `Dispose` performs the same drain by blocking and must not be invoked from
+  inside the operation being drained.
+
+## Sensitive Buffers
+
+FIDO and OTP protocols clear SDK-owned outgoing payload copies, frames, and reports in `finally` after each awaited
+send, including failure paths. Caller-owned request memory is never modified. Returned response memory must remain
+valid after the method returns and therefore cannot be cleared by the SDK. The caller owns sensitive response-data
+handling: retain it only as long as required, avoid logging it, and zero any caller-owned mutable copy after use.
 
 ## Migration From ProtocolFactory
 

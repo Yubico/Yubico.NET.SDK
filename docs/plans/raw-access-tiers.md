@@ -29,7 +29,7 @@ Tier 1: Raw sessions
 Tier 2: Raw connections
         ISmartCardConnection, IFidoHidConnection, IOtpHidConnection
         Public expert escape hatch: raw bytes/reports, caller owns all framing,
-        sequencing, response correlation, cancellation recovery, and safety.
+        sequencing, final-command response correlation, cancellation recovery, and safety.
 
 Internal: ProtocolFactory and IProtocol family
           Session implementation machinery, not a user extension surface.
@@ -47,6 +47,7 @@ Raw sessions are application sessions for ownership purposes. They must inherit 
 - A convenience `IYubiKey.CreateRaw*SessionAsync` method owns and disposes the hidden connection.
 - Overlapping operations on one raw session throw `InvalidOperationException` immediately.
 - Once a stateful exchange is admitted, it runs to completion to avoid stranding APDU, CTAP, OTP, or SCP state.
+- Disposal closes admission and drains an admitted exchange before protocol/SCP/owned-connection teardown.
 - Raw connection methods bypass session and exchange guards; document this explicitly.
 
 ## A. Public Raw Sessions
@@ -63,7 +64,8 @@ Required public behavior:
 - Expose explicit application selection.
 - Expose raw `ApduCommand` transmission with `throwOnError` control.
 - Support optional SCP establishment during creation using existing key-parameter abstractions and secure key cleanup.
-- Expose the minimum configuration needed to choose APDU formatting behavior. Prefer an existing public `ProtocolConfiguration` only if the fit audit confirms it is an intentional power-user surface; otherwise expose a smaller raw-session option without duplicating protocol concepts.
+- Expose the minimum configuration needed to choose APDU formatting behavior. SCP creation must receive and apply
+  firmware/configuration before secure-channel establishment; post-establishment reconfiguration is forbidden.
 - Preserve `ApduResponse` data and status words when `throwOnError: false`.
 
 Illustrative API, subject to repository naming and overload conventions:
@@ -73,7 +75,9 @@ public sealed class RawSmartCardSession : ApplicationSession
 {
     public static Task<RawSmartCardSession> CreateAsync(
         ISmartCardConnection connection,
-        ScpKeyParameters? scpKeyParameters = null,
+        ScpKeyParameters scpKeyParameters,
+        FirmwareVersion firmwareVersion,
+        ProtocolConfiguration? configuration = null,
         CancellationToken cancellationToken = default);
 
     public Task<ReadOnlyMemory<byte>> SelectAsync(
@@ -91,7 +95,8 @@ public sealed class RawSmartCardSession : ApplicationSession
 }
 ```
 
-The actual SCP key-parameter base type may differ. Reuse the same accepted SCP abstraction and initialization path as existing SmartCard applet sessions. Do not add a second SCP implementation.
+Reuse the same accepted SCP abstraction and initialization path as existing SmartCard applet sessions. Do not add
+a second SCP implementation or replace the processor graph after secure-channel establishment.
 
 Example use:
 
@@ -140,7 +145,8 @@ Use existing public command types if they are already the intended low-level cur
 Required public behavior:
 
 - Accept exactly one `IOtpHidConnection`.
-- Expose a complete OTP HID logical exchange using existing report framing, sequence/polling behavior, and CRC handling.
+- Expose a complete OTP HID logical exchange using existing report framing, sequence/polling behavior, and outbound
+  CRC generation. Inbound command-specific CRC remains caller-validated with `ChecksumUtils.CheckCrc`.
 - Do not add slot configuration semantics, OTP applet checks, or feature gates.
 - The caller supplies command/slot bytes and payload and interprets the response.
 
@@ -234,6 +240,9 @@ Required tests:
 8. SmartCard `throwOnError: false` returns data and a non-success status word without throwing.
 9. SmartCard raw selection sends exactly the caller's AID and performs no implicit SELECT during creation.
 10. Raw SmartCard SCP path uses the existing SCP processor, verifies representative wire bytes, and zeroes secret/session material on disposal.
+11. Disposal during each convenience-created raw-session exchange refuses new calls and drains before transport or SCP teardown.
+12. FIDO final responses require the requested command; keep-alive remains intermediate-only and CTAPHID error frames fail.
+13. SDK-owned outgoing FIDO/OTP packet and frame copies are zeroed after successful and failed sends without modifying caller memory.
 11. FIDO raw session processes continuation and keep-alive reports through the existing FIDO HID protocol.
 12. OTP raw session performs existing framing and CRC validation.
 13. Public API test confirms raw sessions are public while protocol factory/interfaces are not public.

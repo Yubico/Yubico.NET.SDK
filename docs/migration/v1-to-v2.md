@@ -42,10 +42,13 @@ Advanced callers that intentionally work below applet semantics can establish SC
 using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();
 await using RawSmartCardSession raw = await yubiKey.CreateRawSmartCardSessionAsync(
     scpParameters,
+    firmwareVersion,
+    protocolConfiguration,
     cancellationToken);
 ```
 
-The raw session reuses Core's SCP processor and exchange guard. Do not log real keys or sensitive APDU payloads.
+Raw SCP configuration is applied before channel establishment and cannot be changed afterward. The raw session
+reuses Core's SCP processor and exchange guard. Do not log real keys or sensitive APDU payloads.
 See [Raw Access Tiers](../architecture/raw-access-tiers.md) for ownership and recovery rules.
 
 ## Session Lifecycle

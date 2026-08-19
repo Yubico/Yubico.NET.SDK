@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
 
 /// <summary>
 /// Implements OTP HID protocol for communication with YubiKey OTP/Keyboard interface.
-/// Uses 8-byte feature reports with CRC validation.
+/// Uses 8-byte feature reports with outbound CRC generation. Inbound CRC validation remains command-specific.
 /// Based on the Java yubikit-android OtpProtocol implementation.
 /// </summary>
 /// <remarks>

@@ -227,6 +227,11 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposalStarted) != 0, this);
     }
 
+    /// <summary>Closes operation admission, drains an admitted exchange, and releases session resources.</summary>
+    /// <remarks>
+    ///     This synchronous path blocks while an admitted exchange finishes. Prefer <see cref="DisposeAsync" />
+    ///     for asynchronous callers, and never invoke synchronous disposal from inside the operation being drained.
+    /// </remarks>
     public void Dispose()
     {
         BeginDisposal();
@@ -234,6 +239,9 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    ///     Closes operation admission, asynchronously drains an admitted exchange, and releases session resources.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         BeginDisposal();

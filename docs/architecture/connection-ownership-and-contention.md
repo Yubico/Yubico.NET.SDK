@@ -118,6 +118,11 @@ A token already canceled at entry throws before the guard is claimed. Once claim
 exchange receives `CancellationToken.None` and runs to completion so APDU chaining, CTAP/OTP frames,
 and SCP state cannot be stranded between constituent transmits. The guard resets in `finally`.
 
+Session disposal closes the protocol guard atomically with respect to operation admission. New operations are
+refused immediately; an operation already admitted is drained before protocol state, SCP session keys, or an
+owned connection are disposed. `DisposeAsync` awaits that drain. Synchronous `Dispose` blocks for the same result
+and must not be called from inside the operation being drained.
+
 The guard belongs to one protocol instance (the SCP wrapper shares its base PC/SC guard). Independently
 creating multiple raw protocol instances over one connection does not create a connection-wide guard;
 that lower-level usage is outside the one-application-session-per-connection ownership contract. After
@@ -143,6 +148,7 @@ the deliberate tradeoff for never abandoning a stateful exchange halfway through
 | One live session per connection and sequential session reuse | `SessionConstructionGuardTests`, `ConnectionOwnershipContractTests` |
 | Protocols never dispose borrowed connections | `ProtocolConnectionOwnershipTests` |
 | Overlapping exchanges throw; sequential calls and post-failure reuse succeed | `ExchangeGuardTests`, `PcscProtocolConcurrencyTests`, `FidoHidProtocolConcurrencyTests`, `OtpHidProtocolConcurrencyTests` |
+| Disposal refuses new operations and drains an admitted exchange before protocol/SCP/connection teardown | `ExchangeGuardTests`, `RawSessionYubiKeyExtensionsTests`, `PcscProtocolScpTests` |
 | Held connection and PC/SC sharing failures do not trigger another transport | `SessionTransportTests`, applet `IYubiKeyExtensionsTransportTests` |
 | A refused second ownership attempt does not damage the active PIV session | `PivSessionContentionTests` |
 | Distinct physical keys remain independent | `PivMultiKeyContentionTests` |

@@ -130,6 +130,11 @@ ReadOnlyMemory<byte> otpResponse = await otp.SendAndReceiveAsync(
     cancellationToken);
 ```
 
+FIDO raw sessions correlate the final response command and reject `CTAPHID_ERROR`. OTP raw sessions generate the
+outbound CRC but do not infer command-specific inbound CRC lengths; validate known responses with
+`ChecksumUtils.CheckCrc(otpResponse.Span, expectedLength + 2)`. The caller owns sensitive returned-data handling.
+SDK-owned outgoing HID copies are cleared after each send; caller-owned request memory is not modified.
+
 `ProtocolFactory` and the `IProtocol` family are internal. Migrate old
 `ProtocolFactory.Create(connection)` code to the corresponding `Raw*Session.CreateAsync(connection)` API.
 See [Raw Access Tiers](../../docs/architecture/raw-access-tiers.md) for complete ownership, SCP, and recovery rules.
@@ -162,15 +167,21 @@ For raw SCP APDUs, load key parameters from secure storage and pass them to the 
 using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();
 await using RawSmartCardSession raw = await device.CreateRawSmartCardSessionAsync(
     scpParameters,
+    firmwareVersion,
+    new ProtocolConfiguration { ForceShortApdus = true },
     cancellationToken);
 
-raw.Configure(firmwareVersion);
 await raw.SelectAsync(applicationId, cancellationToken);
 ApduResponse response = await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
 ```
 
 Never embed or log real SCP keys. Dispose the key-parameter object and zero caller-owned key buffers according
-to their documented ownership contract.
+to their documented ownership contract. Raw SCP configuration is fixed before channel establishment and cannot
+be changed afterward.
+
+Disposal first refuses new session operations, then drains any admitted exchange before protocol/SCP state and an
+owned hidden connection are torn down. Prefer `DisposeAsync`; synchronous disposal blocks for the same drain and
+must not be called from inside the operation being drained.
 
 ### TLV Processing
 

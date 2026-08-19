@@ -20,9 +20,10 @@ namespace Yubico.YubiKit.Core.Sessions;
 
 /// <summary>Provides guarded, application-agnostic OTP HID logical exchanges.</summary>
 /// <remarks>
-///     The session supplies feature-report framing, sequencing, polling, and CRC handling, but no OTP applet
-///     or slot-configuration semantics. It borrows a directly supplied connection. Direct connection
-///     <c>SendAsync</c>/<c>ReceiveAsync</c> calls bypass the session's overlap guard.
+///     The session supplies feature-report framing, sequencing, polling, and outbound CRC generation, but no OTP
+///     applet or slot-configuration semantics. Inbound CRC is command-specific and is not validated. It borrows a
+///     directly supplied connection. Direct connection <c>SendAsync</c>/<c>ReceiveAsync</c> calls bypass the
+///     session's overlap guard.
 /// </remarks>
 public sealed class RawOtpHidSession : ApplicationSession
 {
@@ -55,7 +56,13 @@ public sealed class RawOtpHidSession : ApplicationSession
         }
     }
 
-    /// <summary>Sends one caller-defined command or slot byte and returns the complete response payload.</summary>
+    /// <summary>Sends one caller-defined command or slot byte and returns the unvalidated response payload.</summary>
+    /// <remarks>
+    ///     For a command with a known response length, the caller can validate inbound CRC with
+    ///     <see cref="ChecksumUtils.CheckCrc(ReadOnlySpan{byte},int)" /> over <c>expectedLength + 2</c> bytes.
+    ///     SDK-owned outgoing buffers are cleared after use; caller-owned <paramref name="payload" /> is not
+    ///     modified. Returned memory remains live after return and is caller-owned for sensitive-data handling.
+    /// </remarks>
     public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
         byte command,
         ReadOnlyMemory<byte> payload,

@@ -15,7 +15,7 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 ///     <see cref="InvalidOperationException" /> immediately. A token is checked before entry; an exchange already
 ///     in flight runs to completion to avoid stranding the device mid-transaction.
 /// </remarks>
-public interface IFidoHidProtocol : IProtocol
+internal interface IFidoHidProtocol : IProtocol
 {
     /// <summary>
     /// Initializes the CTAP HID channel if it has not already been initialized.

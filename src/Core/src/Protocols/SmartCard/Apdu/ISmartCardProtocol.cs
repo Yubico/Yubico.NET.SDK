@@ -25,7 +25,7 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 ///     commands, chained responses, and SCP MAC chains. A token is checked before entry; an exchange already
 ///     in flight runs to completion so no partial chained state is left on the card.
 /// </remarks>
-public interface ISmartCardProtocol : IProtocol
+internal interface ISmartCardProtocol : IProtocol
 {
     /// <summary>
     /// Transmits an APDU command and returns the response.

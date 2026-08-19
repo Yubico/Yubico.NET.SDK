@@ -20,6 +20,20 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 namespace Yubico.YubiKit.Core.Sessions;
 
+/// <summary>
+///     Base class for applet and raw sessions that attach to one opened YubiKey connection.
+/// </summary>
+/// <remarks>
+///     <para>
+///         One connection admits one live session. A direct session factory borrows its caller's connection;
+///         only an <c>IYubiKey.Create*SessionAsync</c> convenience entry point can transfer ownership of a
+///         hidden connection to the returned session.
+///     </para>
+///     <para>
+///         Protocol construction and initialization are internal SDK seams. External derived classes cannot
+///         inject or replace Core protocol implementations; compose over a public raw session for low-level work.
+///     </para>
+/// </remarks>
 public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 {
     private readonly DisposalGate _disposalGate = new();
@@ -33,7 +47,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     private bool _ownsConnection;
 
     protected ILogger Logger { get; }
-    protected IProtocol? Protocol { get; set; }
+    internal IProtocol? Protocol { get; set; }
     protected bool IsDisposalStarted => Volatile.Read(ref _disposalStarted) != 0;
 
     /// <summary>
@@ -125,7 +139,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     /// </remarks>
     internal void OwnConnection() => _ownsConnection = true;
 
-    protected async Task<IProtocol> InitializeProtocolAsync(
+    internal async Task<IProtocol> InitializeProtocolAsync(
         IProtocol protocol,
         FirmwareVersion firmwareVersion,
         ProtocolConfiguration? configuration = null,
@@ -213,6 +227,11 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposalStarted) != 0, this);
     }
 
+    /// <summary>Closes operation admission, drains an admitted exchange, and releases session resources.</summary>
+    /// <remarks>
+    ///     This synchronous path blocks while an admitted exchange finishes. Prefer <see cref="DisposeAsync" />
+    ///     for asynchronous callers, and never invoke synchronous disposal from inside the operation being drained.
+    /// </remarks>
     public void Dispose()
     {
         BeginDisposal();
@@ -220,6 +239,9 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    ///     Closes operation admission, asynchronously drains an admitted exchange, and releases session resources.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         BeginDisposal();
@@ -282,7 +304,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     {
         try
         {
-            DisposeProtocol();
+            await DisposeProtocolAsync().ConfigureAwait(false);
         }
         finally
         {
@@ -295,6 +317,16 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         IProtocol? protocol = Protocol;
         Protocol = null;
         protocol?.Dispose();
+    }
+
+    private async ValueTask DisposeProtocolAsync()
+    {
+        IProtocol? protocol = Protocol;
+        Protocol = null;
+        if (protocol is IAsyncDisposable asyncDisposable)
+            await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+        else
+            protocol?.Dispose();
     }
 
     /// <summary>Detaches from the connection, and disposes it only if this session was given ownership.</summary>

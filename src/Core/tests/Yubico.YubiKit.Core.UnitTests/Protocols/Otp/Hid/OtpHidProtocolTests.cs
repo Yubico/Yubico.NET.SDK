@@ -1,6 +1,7 @@
 // Copyright 2025 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
 
+using System.Buffers;
 using System.Diagnostics;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
@@ -156,5 +157,166 @@ public class OtpHidProtocolTests
 
         await Assert.ThrowsAsync<ObjectDisposedException>(
             () => protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_AfterSuccessfulSends_ZerosSdkOwnedReportsButNotCallerPayload()
+    {
+        var connection = new RetainingOtpHidConnection();
+        QueueStatusOnlyExchange(connection);
+        var protocol = new OtpHidProtocol(connection);
+        byte[] callerPayload = [0x11, 0x22, 0x33];
+
+        _ = await protocol.SendAndReceiveAsync(
+            0x13,
+            callerPayload,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, callerPayload);
+        Assert.Equal(10, connection.SentReportSnapshots.Count);
+        Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, connection.SentReportSnapshots[0][..3]);
+        Assert.All(connection.RetainedSentReports, report =>
+            Assert.All(report.ToArray(), value => Assert.Equal(0, value)));
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenSendThrows_ZerosSdkOwnedReportButNotCallerPayload()
+    {
+        var connection = new RetainingOtpHidConnection();
+        connection.Enqueue(Status(versionMajor: 5));
+        connection.Enqueue(Status(programmingSequence: 1));
+        connection.Enqueue(Status(programmingSequence: 1));
+        connection.ThrowOnNextSend = true;
+        var protocol = new OtpHidProtocol(connection);
+        byte[] callerPayload = [0x11, 0x22, 0x33];
+
+        await Assert.ThrowsAsync<IOException>(() => protocol.SendAndReceiveAsync(
+            0x13,
+            callerPayload,
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, callerPayload);
+        ReadOnlyMemory<byte> retained = Assert.Single(connection.RetainedSentReports);
+        Assert.All(retained.ToArray(), value => Assert.Equal(0, value));
+        Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, Assert.Single(connection.SentReportSnapshots)[..3]);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_DataResponse_ZerosRentedAccumulationBufferAndPreservesReturnedCopy()
+    {
+        var connection = new RetainingOtpHidConnection();
+        QueueDataExchange(connection, completeResponse: true);
+        var pool = new RetainingArrayPool();
+        var protocol = new OtpHidProtocol(connection, bufferPool: pool);
+
+        ReadOnlyMemory<byte> response = await protocol.SendAndReceiveAsync(
+            0x13,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(Enumerable.Range(1, 14).Select(value => (byte)value), response.ToArray());
+        Assert.NotNull(pool.ReturnedArray);
+        Assert.All(pool.ReturnedArray, value => Assert.Equal(0, value));
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenDataResponseReceiveFails_ZerosRentedAccumulationBuffer()
+    {
+        var connection = new RetainingOtpHidConnection();
+        QueueDataExchange(connection, completeResponse: false);
+        var pool = new RetainingArrayPool();
+        var protocol = new OtpHidProtocol(connection, bufferPool: pool);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendAndReceiveAsync(
+            0x13,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken));
+
+        Assert.NotNull(pool.ReturnedArray);
+        Assert.All(pool.ReturnedArray, value => Assert.Equal(0, value));
+    }
+
+    private static void QueueStatusOnlyExchange(RetainingOtpHidConnection connection)
+    {
+        connection.Enqueue(Status(versionMajor: 5));
+        connection.Enqueue(Status(programmingSequence: 1));
+        for (int i = 0; i < 10; i++)
+            connection.Enqueue(Status(programmingSequence: 1));
+        connection.Enqueue(Status(programmingSequence: 2));
+    }
+
+    private static void QueueDataExchange(RetainingOtpHidConnection connection, bool completeResponse)
+    {
+        connection.Enqueue(Status(versionMajor: 5));
+        connection.Enqueue(Status(programmingSequence: 1));
+        for (int i = 0; i < 10; i++)
+            connection.Enqueue(Status(programmingSequence: 1));
+
+        connection.Enqueue(DataReport(sequence: 0, startValue: 1));
+        if (completeResponse)
+        {
+            connection.Enqueue(DataReport(sequence: 1, startValue: 8));
+            connection.Enqueue(DataReport(sequence: 0, startValue: 0));
+        }
+    }
+
+    private static byte[] DataReport(byte sequence, byte startValue)
+    {
+        var report = new byte[OtpConstants.FeatureReportSize];
+        for (int i = 0; i < OtpConstants.FeatureReportDataSize; i++)
+            report[i] = (byte)(startValue + i);
+        report[OtpConstants.FeatureReportDataSize] = (byte)(OtpConstants.ResponsePendingFlag | sequence);
+        return report;
+    }
+
+    private static byte[] Status(byte versionMajor = 0, byte programmingSequence = 0) =>
+        [0x00, versionMajor, 0x04, 0x03, programmingSequence, 0x00, 0x00, 0x00];
+
+    private sealed class RetainingOtpHidConnection : IOtpHidConnection
+    {
+        private readonly Queue<ReadOnlyMemory<byte>> _reports = new();
+
+        public int FeatureReportSize => 8;
+        public ConnectionType Type => ConnectionType.HidOtp;
+        public bool ThrowOnNextSend { get; set; }
+        public List<ReadOnlyMemory<byte>> RetainedSentReports { get; } = [];
+        public List<byte[]> SentReportSnapshots { get; } = [];
+
+        public void Enqueue(ReadOnlyMemory<byte> report) => _reports.Enqueue(report);
+
+        public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            RetainedSentReports.Add(report);
+            SentReportSnapshots.Add(report.ToArray());
+            if (ThrowOnNextSend)
+            {
+                ThrowOnNextSend = false;
+                throw new IOException("Scripted send failure.");
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(_reports.Dequeue());
+        }
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    private sealed class RetainingArrayPool : ArrayPool<byte>
+    {
+        public byte[]? ReturnedArray { get; private set; }
+
+        public override byte[] Rent(int minimumLength) => new byte[minimumLength];
+
+        public override void Return(byte[] array, bool clearArray = false) => ReturnedArray = array;
     }
 }

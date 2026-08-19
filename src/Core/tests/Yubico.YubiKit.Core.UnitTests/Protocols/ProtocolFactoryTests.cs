@@ -26,27 +26,6 @@ namespace Yubico.YubiKit.Core.UnitTests.Protocols;
 public class ProtocolFactoryTests
 {
     [Fact]
-    public void Create_ExposesBaseDispatcherAndTypedOverloads()
-    {
-        var methods = typeof(ProtocolFactory)
-            .GetMethods()
-            .Where(static method => method.Name == nameof(ProtocolFactory.Create))
-            .ToArray();
-
-        Assert.Equal(4, methods.Length);
-        Assert.All(methods, static method => Assert.Single(method.GetParameters()));
-
-        var signatures = methods.ToDictionary(
-            static method => method.GetParameters()[0].ParameterType,
-            static method => method.ReturnType);
-
-        Assert.Equal(typeof(IProtocol), signatures[typeof(IConnection)]);
-        Assert.Equal(typeof(ISmartCardProtocol), signatures[typeof(ISmartCardConnection)]);
-        Assert.Equal(typeof(IFidoHidProtocol), signatures[typeof(IFidoHidConnection)]);
-        Assert.Equal(typeof(IOtpHidProtocol), signatures[typeof(IOtpHidConnection)]);
-    }
-
-    [Fact]
     public void Create_MapsSupportedConnectionTypes()
     {
         IConnection smartCardConnection = new FakeSmartCardConnection();

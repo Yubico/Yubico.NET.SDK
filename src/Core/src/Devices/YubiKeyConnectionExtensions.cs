@@ -15,6 +15,8 @@
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
@@ -26,6 +28,56 @@ namespace Yubico.YubiKit.Core.Devices;
 public static class YubiKeyConnectionExtensions
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger(nameof(YubiKeyConnectionExtensions));
+
+    public static Task<RawSmartCardSession> CreateRawSmartCardSessionAsync(
+        this IYubiKey yubiKey,
+        ScpKeyParameters? scpKeyParameters = null,
+        CancellationToken cancellationToken = default) =>
+        yubiKey.CreateSessionOverTransportAsync(
+            ConnectionType.SmartCard,
+            async (connection, token) =>
+            {
+                RawSmartCardSession session = await RawSmartCardSession.CreateAsync(
+                        (ISmartCardConnection)connection,
+                        scpKeyParameters,
+                        token)
+                    .ConfigureAwait(false);
+                session.OwnConnection();
+                return session;
+            },
+            cancellationToken);
+
+    public static Task<RawFidoHidSession> CreateRawFidoHidSessionAsync(
+        this IYubiKey yubiKey,
+        CancellationToken cancellationToken = default) =>
+        yubiKey.CreateSessionOverTransportAsync(
+            ConnectionType.HidFido,
+            async (connection, token) =>
+            {
+                RawFidoHidSession session = await RawFidoHidSession.CreateAsync(
+                        (IFidoHidConnection)connection,
+                        token)
+                    .ConfigureAwait(false);
+                session.OwnConnection();
+                return session;
+            },
+            cancellationToken);
+
+    public static Task<RawOtpHidSession> CreateRawOtpHidSessionAsync(
+        this IYubiKey yubiKey,
+        CancellationToken cancellationToken = default) =>
+        yubiKey.CreateSessionOverTransportAsync(
+            ConnectionType.HidOtp,
+            async (connection, token) =>
+            {
+                RawOtpHidSession session = await RawOtpHidSession.CreateAsync(
+                        (IOtpHidConnection)connection,
+                        token)
+                    .ConfigureAwait(false);
+                session.OwnConnection();
+                return session;
+            },
+            cancellationToken);
 
     /// <summary>
     ///     Returns the first connection in <paramref name="preferenceOrder" /> that this device supports, or

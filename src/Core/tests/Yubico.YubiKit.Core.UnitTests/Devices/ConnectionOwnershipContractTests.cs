@@ -189,6 +189,43 @@ public class ConnectionOwnershipContractTests
         Assert.Equal(1, hidDevice.IoReportConnectCalls);
     }
 
+    [Fact]
+    public async Task ConnectAsync_AliasedMembersRegroupedLater_OlderCompositeScopeRemainsStable()
+    {
+        var firstSmartCardFactory = new CountingFactory();
+        var firstSmartCard = CreateSmartCardDevice(firstSmartCardFactory);
+        var firstHidDevice = new FakeHidDevice(
+            $"ownership-fido-{Guid.NewGuid():N}",
+            HidInterfaceType.Fido);
+        var firstHid = CreateHidDevice(firstHidDevice);
+        var olderComposite = new CompositeYubiKey(
+            $"composite:{Guid.NewGuid():N}",
+            [firstSmartCard, firstHid],
+            null);
+
+        var laterHid = CreateHidDevice(new FakeHidDevice(
+            $"ownership-fido-{Guid.NewGuid():N}",
+            HidInterfaceType.Fido));
+        _ = new CompositeYubiKey(
+            $"composite:{Guid.NewGuid():N}",
+            [firstSmartCard, laterHid],
+            null);
+
+        var laterSmartCard = CreateSmartCardDevice(new CountingFactory());
+        _ = new CompositeYubiKey(
+            $"composite:{Guid.NewGuid():N}",
+            [laterSmartCard, firstHid],
+            null);
+
+        await using var ccid = await olderComposite.ConnectAsync<ISmartCardConnection>(Ct);
+
+        _ = await Assert.ThrowsAsync<ConnectionInUseException>(
+            () => olderComposite.ConnectAsync<IFidoHidConnection>(Ct));
+
+        Assert.Equal(0, firstHidDevice.IoReportConnectCalls);
+        Assert.Equal(1, firstSmartCardFactory.CreateCalls);
+    }
+
     // ------------------------------------------------------------------------------------------------
     // Rule 2 — one live session per connection (Python's model, enforced at binding).
     // ------------------------------------------------------------------------------------------------

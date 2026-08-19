@@ -46,8 +46,6 @@ internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
         _members = members;
         DeviceInfo = deviceInfo;
         MemberDeviceIds = [.. members.Select(m => m.DeviceId).OrderBy(id => id, StringComparer.Ordinal)];
-        foreach (var member in members)
-            SetConnectionLeaseScope(member, MemberDeviceIds);
         PhysicalIdentityKey = EncodeInterfaceIds(MemberDeviceIds);
 
         var combined = ConnectionType.Unknown;
@@ -122,7 +120,13 @@ internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
 
         if (TryResolveMember(requested, out var member))
-            return member.ConnectAsync<TConnection>(cancellationToken);
+        {
+            if (member is IScopedConnectionProvider provider)
+                return provider.ConnectWithLeaseScopeAsync<TConnection>(MemberDeviceIds, cancellationToken);
+
+            throw new InvalidOperationException(
+                $"The {member.GetType().Name} member does not support scoped connection acquisition.");
+        }
 
         throw new NotSupportedException(
             $"Connection type {typeof(TConnection).Name} ({requested}) is not available on this physical YubiKey " +
@@ -183,12 +187,6 @@ internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
         if (typeof(TConnection) == typeof(IOtpHidConnection))
             return ConnectionType.HidOtp;
         return ConnectionType.Unknown;
-    }
-
-    private static void SetConnectionLeaseScope(IYubiKey member, IReadOnlyList<string> interfaceIds)
-    {
-        if (member is IConnectionLeaseScopeProvider provider)
-            provider.SetConnectionLeaseScope(interfaceIds);
     }
 
 }

@@ -58,12 +58,19 @@ public class HeldExceptionPropagationTests
         Assert.Equal(unchecked((int)ErrorCode.SCARD_E_SERVER_TOO_BUSY), ex.HResult);
     }
 
-    private sealed class ThrowingMember(ConnectionType available, Exception exception) : IYubiKey
+    private sealed class ThrowingMember(ConnectionType available, Exception exception)
+        : IYubiKey, IScopedConnectionProvider
     {
         public string DeviceId => $"member:{available}";
         public ConnectionType AvailableConnections => available;
 
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+            where TConnection : class, IConnection =>
+            Task.FromException<TConnection>(exception);
+
+        public Task<TConnection> ConnectWithLeaseScopeAsync<TConnection>(
+            IReadOnlyCollection<string> interfaceIds,
+            CancellationToken cancellationToken)
             where TConnection : class, IConnection =>
             Task.FromException<TConnection>(exception);
     }

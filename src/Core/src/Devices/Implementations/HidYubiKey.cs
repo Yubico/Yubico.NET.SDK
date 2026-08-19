@@ -30,10 +30,8 @@ namespace Yubico.YubiKit.Core.Devices;
 internal class HidYubiKey(
     IHidDevice hidDevice,
     ILogger<HidYubiKey> logger)
-    : IYubiKey, IDiscoveryConnectionProvider, IConnectionLeaseScopeProvider
+    : IYubiKey, IDiscoveryConnectionProvider, IScopedConnectionProvider
 {
-    private IReadOnlyList<string>? _connectionLeaseScope;
-
     public string DeviceId { get; } =
         $"hid:{hidDevice.ReaderName}:{hidDevice.DescriptorInfo.Usage:X4}";
 
@@ -42,13 +40,18 @@ internal class HidYubiKey(
     /// </summary>
     public ConnectionType AvailableConnections => ConnectionTypeMapper.ToConnectionType(hidDevice.InterfaceType);
 
-    internal IReadOnlyList<string> ConnectionLeaseScope =>
-        Volatile.Read(ref _connectionLeaseScope) ?? [DeviceId];
+    public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+        where TConnection : class, IConnection
+        => ConnectWithLeaseScopeAsync<TConnection>([DeviceId], cancellationToken);
 
-    void IConnectionLeaseScopeProvider.SetConnectionLeaseScope(IReadOnlyList<string> interfaceIds) =>
-        Interlocked.Exchange(ref _connectionLeaseScope, interfaceIds);
+    Task<TConnection> IScopedConnectionProvider.ConnectWithLeaseScopeAsync<TConnection>(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken) =>
+        ConnectWithLeaseScopeAsync<TConnection>(interfaceIds, cancellationToken);
 
-    public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+    private async Task<TConnection> ConnectWithLeaseScopeAsync<TConnection>(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken)
         where TConnection : class, IConnection
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -66,7 +69,7 @@ internal class HidYubiKey(
         // YubiKeyConnectionExtensions, not through concurrent connection sharing.
         var ownership = await DeviceConnectionRegistry
             .AcquireConnectionAsync(
-                ConnectionLeaseScope,
+                interfaceIds,
                 cancellationToken)
             .ConfigureAwait(false);
         try

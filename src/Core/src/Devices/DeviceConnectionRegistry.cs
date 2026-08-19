@@ -17,11 +17,6 @@ using Yubico.YubiKit.Core.Abstractions;
 
 namespace Yubico.YubiKit.Core.Devices;
 
-internal interface IConnectionLeaseScopeProvider
-{
-    void SetConnectionLeaseScope(IReadOnlyList<string> interfaceIds);
-}
-
 /// <summary>
 ///     Process-wide ownership coordinator per interface device, keyed by <see cref="IYubiKey.DeviceId" />.
 ///     Connections hold the lease; discovery takes a nonblocking exclusive lease. This makes the

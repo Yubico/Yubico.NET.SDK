@@ -23,10 +23,9 @@ internal class PcscYubiKey(
     IPcscDevice pcscDevice,
     ISmartCardConnectionFactory connectionFactory,
     ILogger<PcscYubiKey> logger)
-    : IYubiKey, IDiscoveryConnectionProvider, IConnectionLeaseScopeProvider
+    : IYubiKey, IDiscoveryConnectionProvider, IScopedConnectionProvider
 {
     private readonly string _readerName = pcscDevice.ReaderName;
-    private IReadOnlyList<string>? _connectionLeaseScope;
 
     private async Task<ISmartCardConnection> CreateConnection(CancellationToken cancellationToken = default)
     {
@@ -43,13 +42,18 @@ internal class PcscYubiKey(
     public string DeviceId { get; } = $"pcsc:{pcscDevice.ReaderName}";
     public ConnectionType AvailableConnections => ConnectionType.SmartCard;
 
-    internal IReadOnlyList<string> ConnectionLeaseScope =>
-        Volatile.Read(ref _connectionLeaseScope) ?? [DeviceId];
+    public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+        where TConnection : class, IConnection
+        => ConnectWithLeaseScopeAsync<TConnection>([DeviceId], cancellationToken);
 
-    void IConnectionLeaseScopeProvider.SetConnectionLeaseScope(IReadOnlyList<string> interfaceIds) =>
-        Interlocked.Exchange(ref _connectionLeaseScope, interfaceIds);
+    Task<TConnection> IScopedConnectionProvider.ConnectWithLeaseScopeAsync<TConnection>(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken) =>
+        ConnectWithLeaseScopeAsync<TConnection>(interfaceIds, cancellationToken);
 
-    public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+    private async Task<TConnection> ConnectWithLeaseScopeAsync<TConnection>(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken)
         where TConnection : class, IConnection
     {
         if (typeof(TConnection) != typeof(ISmartCardConnection))
@@ -59,7 +63,7 @@ internal class PcscYubiKey(
         // Exclusive: one live connection per CCID interface. The lease is held by the connection returned
         // below and released when that connection is disposed.
         var ownership = await DeviceConnectionRegistry
-            .AcquireConnectionAsync(ConnectionLeaseScope, cancellationToken)
+            .AcquireConnectionAsync(interfaceIds, cancellationToken)
             .ConfigureAwait(false);
         try
         {

@@ -29,8 +29,9 @@ This package is automatically included when you install any application-specific
 
 An `IYubiKey` represents **one physical YubiKey** (which may expose several interfaces — CCID, HID FIDO,
 HID OTP — at once), not a single transport handle. See [Physical Device Model](../../docs/architecture/physical-device-model.md).
-HID interface enumeration is implemented on macOS and Linux; on Windows, HID discovery is not yet
-implemented, so a YubiKey currently surfaces only its PC/SC (CCID) interface there.
+HID interface enumeration is implemented on macOS, Linux, and Windows. Exact composite-grouping
+guarantees and conservative split cases are documented in
+[Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md).
 
 ```csharp
 using Yubico.YubiKit.Core;
@@ -67,49 +68,76 @@ extensions (e.g. `CreateManagementSessionAsync`) select a transport via a docume
 optional `preferredConnection` override — see [Physical Device Model](../../docs/architecture/physical-device-model.md).
 
 ```csharp
-using Yubico.YubiKit.Core.Protocols.Fido.Hid;
-using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
-// Open SmartCard connection
+// Choose one interface for this connection. Dispose it before opening another
+// interface on the same physical YubiKey.
 await using var smartCardConnection = await device.ConnectAsync<ISmartCardConnection>();
-
-// Open HID FIDO connection
-await using var fidoConnection = await device.ConnectAsync<IFidoHidConnection>();
-
-// Open HID OTP connection
-await using var otpConnection = await device.ConnectAsync<IOtpHidConnection>();
 ```
 
-### Protocol Communication
+### Access Tiers
+
+Use the highest tier that expresses the operation:
+
+1. **Applet sessions (golden path)** provide applet semantics, validation, selection, and firmware gates.
+2. **Raw sessions (supported power-user path)** provide framing, ownership, sequencing, overlap refusal, and
+   optional SmartCard SCP without applet checks.
+3. **Raw connections (expert escape hatch)** expose unguarded byte/report I/O; the caller owns every protocol
+   and recovery concern.
+
+```csharp
+// Tier 0: preferred applet API.
+await using PivSession piv = await device.CreatePivSessionAsync(
+    cancellationToken: cancellationToken);
+PivPinMetadata metadata = await piv.GetPinMetadataAsync(cancellationToken);
+```
+
+Tier 1 SmartCard/APDU:
 
 ```csharp
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
-// Create protocol from connection
-using ISmartCardProtocol protocol = ProtocolFactory.Create(smartCardConnection);
+await using ISmartCardConnection connection =
+    await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
+await using RawSmartCardSession raw =
+    await RawSmartCardSession.CreateAsync(connection, cancellationToken);
 
-// Select an application (e.g., PIV)
-await protocol.SelectAsync(ApplicationIds.Piv, cancellationToken);
-
-// Configure for firmware version
-protocol.Configure(firmwareVersion);
-
-// Send APDU commands
-var command = new ApduCommand
-{
-    Cla = 0x00,
-    Ins = 0xA4,  // SELECT
-    P1 = 0x04,
-    P2 = 0x00,
-    Data = applicationId
-};
-
-var responseData = await protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
+await raw.SelectAsync(applicationId, cancellationToken);
+raw.Configure(firmwareVersion);
+ApduResponse response = await raw.TransmitAndReceiveAsync(
+    new ApduCommand(cla, ins, p1, p2, commandData),
+    throwOnError: false,
+    cancellationToken);
 ```
+
+Tier 1 FIDO HID and OTP HID:
+
+```csharp
+await using (RawFidoHidSession fido = await device.CreateRawFidoHidSessionAsync(cancellationToken))
+{
+    ReadOnlyMemory<byte> ctapResponse = await fido.SendAndReceiveAsync(
+        ctapHidCommand,
+        ctapPayload,
+        cancellationToken);
+}
+
+await using RawOtpHidSession otp = await device.CreateRawOtpHidSessionAsync(cancellationToken);
+ReadOnlyMemory<byte> otpResponse = await otp.SendAndReceiveAsync(
+    commandOrSlot,
+    otpPayload,
+    cancellationToken);
+```
+
+FIDO raw sessions correlate the final response command and reject `CTAPHID_ERROR`. OTP raw sessions generate the
+outbound CRC but do not infer command-specific inbound CRC lengths; validate known responses with
+`ChecksumUtils.CheckCrc(otpResponse.Span, expectedLength + 2)`. The caller owns sensitive returned-data handling.
+SDK-owned outgoing HID copies are cleared after each send; caller-owned request memory is not modified.
+
+`ProtocolFactory` and the `IProtocol` family are internal. Migrate old
+`ProtocolFactory.Create(connection)` code to the corresponding `Raw*Session.CreateAsync(connection)` API.
+See [Raw Access Tiers](../../docs/architecture/raw-access-tiers.md) for complete ownership, SCP, and recovery rules.
 
 ### Secure Channel Protocol (SCP)
 
@@ -132,6 +160,28 @@ staticKeys.Dispose();
 
 SCP establishment is an internal `PcscProtocol` capability. Session factories own protocol
 configuration, channel establishment, and cleanup; `PcscProtocolScp` cannot be constructed by consumers.
+
+For raw SCP APDUs, load key parameters from secure storage and pass them to the raw-session factory:
+
+```csharp
+using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();
+await using RawSmartCardSession raw = await device.CreateRawSmartCardSessionAsync(
+    scpParameters,
+    firmwareVersion,
+    new ProtocolConfiguration { ForceShortApdus = true },
+    cancellationToken);
+
+await raw.SelectAsync(applicationId, cancellationToken);
+ApduResponse response = await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
+```
+
+Never embed or log real SCP keys. Dispose the key-parameter object and zero caller-owned key buffers according
+to their documented ownership contract. Raw SCP configuration is fixed before channel establishment and cannot
+be changed afterward.
+
+Disposal first refuses new session operations, then drains any admitted exchange before protocol/SCP state and an
+owned hidden connection are torn down. Prefer `DisposeAsync`; synchronous disposal blocks for the same drain and
+must not be called from inside the operation being drained.
 
 ### TLV Processing
 
@@ -192,12 +242,15 @@ ApduResponse
 
 ### Concurrency
 
-- **Sessions/protocols are safe for concurrent calls, executed sequentially.** SmartCard (APDU/SCP), FIDO HID, and OTP HID protocols serialize full logical exchanges internally, so concurrent operations on one session never interleave packets on the wire. Cancellation tokens cancel only the wait for a turn — an exchange in flight runs to completion.
-- **Discovery never disturbs open sessions.** Per-interface shared session leases and a nonblocking exclusive discovery lease make ownership atomic: sessions own the interface before physical connect, discovery skips active sessions, and sessions cannot cross a Management metadata read already in progress.
+- **Applet and raw sessions refuse overlap.** SmartCard (APDU/SCP), FIDO HID, and OTP HID sessions admit one full logical exchange at a time. An overlapping operation throws immediately; an exchange already in flight runs to completion without caller cancellation so wire state cannot be stranded.
+- **One connection per grouped physical key.** A connection atomically claims every known member interface ID before native open. Discovery skips claimed members, and a connect waits cancellably for active discovery. Conservative standalone records retain one-element scopes when grouping cannot be proven.
+- **One live session per connection.** A second session is refused before any wire operation. Sequential reuse is supported: dispose session A, then create session B over the same caller-owned connection.
+- **Connection ownership follows creation.** A direct `Session.CreateAsync(connection)` borrows the connection and does not dispose it. A `device.Create<App>SessionAsync()` convenience method owns its hidden connection and closes it with the returned session. Always use `await using`; leaking a caller-created connection can retain the physical-device lease and block later opens. There is no finalizer backstop.
 - **Discovery work is bounded independently from caller waits.** Each caller has its own timeout/cancellation, while repeated scans share at most one underlying read per stable interface and connection type. Completion removes the single-flight entry for later retry; a permanently hung native call remains one operation rather than accumulating one operation per scan.
 - **Monitor hints are bounded occurrence signals.** Concurrent HID/SmartCard callbacks share one capacity-one wake-up signal; storms cannot build a payload queue, while quiet-period debounce, maximum coalescing, and periodic fallback scans remain intact. HID and SmartCard listeners start independently as best-effort latency accelerators; unavailable listeners are cleaned up without aborting monitoring, which can fall back to interval-only rescans.
 - **A monitor generation may do anything except publish stale truth.** Monitor lifecycle is an epoch model, not a state machine: each `StartMonitoring` creates an immutable generation that the loop, manual rescans, and listener callbacks capture once. Every device-snapshot publication is mutually exclusive under one never-disposed gate and is admitted only if its generation is still current, so a scan hung in native I/O can return long after its generation was retired and simply be discarded. Start, stop, and dispose take only a small state lock, so a blocking `DeviceChanges` subscriber cannot wedge them, and restart after an abandoned stop always succeeds. Dispose drains in-flight publication with a bounded timeout; a publication that outlives the bound may complete afterwards, which the manager's repository disposal silences.
 - **Connections are disposed exactly once, and disposal means disposed.** The registered-connection wrappers run teardown through a one-shot gate: the first caller disposes the inner connection and then releases the ownership lease, and every other caller — sync or async, concurrent or later — observes that same completion. Any disposal call returning therefore implies teardown finished, so a caller cannot reopen an interface whose physical handle is still closing.
+- **Raw connection I/O is unguarded.** Tier 2 connection methods bypass session and exchange guards. Never use them concurrently with a live session or another raw operation. After interrupted or interleaved traffic, dispose and reopen the connection before continuing.
 
 - **Composite grouping is an evidence hierarchy, not a guess.** Interfaces of one physical key are grouped by USB topology (Windows), then serial, then PID completeness, then pigeonhole deduction, falling back to publishing an interface on its own rather than guessing. What this guarantees per platform - including two cases it deliberately cannot solve on macOS and Linux - is documented in [Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md).
 
@@ -219,7 +272,9 @@ Platform detection is automatic via `SdkPlatformInfo.OperatingSystem`.
 | `ISmartCardConnection` | SmartCard (PC/SC) transport connection |
 | `IFidoHidConnection` | HID FIDO transport connection |
 | `IOtpHidConnection` | HID OTP transport connection |
-| `PcscProtocol` | ISO 7816-4 APDU protocol implementation |
+| `RawSmartCardSession` | Supported explicit application selection and raw APDU exchange |
+| `RawFidoHidSession` | Supported raw CTAP HID logical exchange |
+| `RawOtpHidSession` | Supported raw OTP HID logical exchange |
 | `ApduCommand` / `ApduResponse` | APDU command/response representations |
 | `ScpProtocol` | Secure Channel Protocol wrapper (SCP03, SCP11) |
 | `TlvHelper` / `TlvBuilder` | TLV parsing and construction utilities |
@@ -289,5 +344,5 @@ if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_7_2))
 For in-depth patterns, test infrastructure, and implementation details, see [CLAUDE.md](CLAUDE.md).
 
 For the physical-device model (one `IYubiKey` per physical key, metadata ownership, applet transport
-selection, and migration from per-interface handles), see
+selection, session/connection ownership, and migration from per-interface handles), see
 [Physical Device Model](../../docs/architecture/physical-device-model.md).

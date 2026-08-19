@@ -20,7 +20,13 @@ namespace Yubico.YubiKit.Management.Backend;
 /// Abstraction for protocol-specific Management operations.
 /// Encapsulates differences between SmartCard (APDU), FIDO (CTAP), and OTP (HID reports).
 /// </summary>
-internal interface IManagementBackend : IDisposable
+/// <remarks>
+/// Backends are pure users of the protocol they are handed: they own no disposable state and are
+/// deliberately not <see cref="IDisposable" />. The session disposes the protocol through
+/// <c>ApplicationSession</c>, and the connection is released by whoever created it. A backend that
+/// ever needs to own a resource must revisit that ownership chain rather than add a disposal hook here.
+/// </remarks>
+internal interface IManagementBackend
 {
     /// <summary>
     /// Performs transport-specific Management initialization and returns the version learned from that probe, if any.

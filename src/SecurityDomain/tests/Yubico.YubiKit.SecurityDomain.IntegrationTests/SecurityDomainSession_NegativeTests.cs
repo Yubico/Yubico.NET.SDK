@@ -34,7 +34,7 @@ public class SecurityDomainSession_NegativeTests
     ///     Verifies that SCP11b authentication fails when using an incorrect (random) public key
     ///     that does not match the key stored on the device.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11b_WithWrongPublicKey_FailsAuthentication(YubiKeyTestState state)
     {
@@ -67,7 +67,7 @@ public class SecurityDomainSession_NegativeTests
     ///     Verifies that SCP03 authentication fails with incorrect (non-default) symmetric keys
     ///     when only the default keys are loaded on the device.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task Scp03_WithWrongKeys_FailsAuthentication(YubiKeyTestState state)
     {

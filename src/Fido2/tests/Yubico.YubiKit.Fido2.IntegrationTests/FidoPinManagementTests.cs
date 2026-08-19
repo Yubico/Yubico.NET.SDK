@@ -39,7 +39,7 @@ public class FidoPinManagementTests
     /// Sets the PIN, changes it to a new value, then verifies the new PIN by obtaining
     /// a PIN token with it.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task ChangePin_WithValidCurrentPin_AllowsAuthWithNewPin(YubiKeyTestState state) =>
@@ -111,7 +111,7 @@ public class FidoPinManagementTests
     /// since PIN/UV auth is provided, but the UV flag behavior depends on the
     /// authenticator's policy.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_WithUvDiscouraged_CreatesCredentialSuccessfully(YubiKeyTestState state) =>

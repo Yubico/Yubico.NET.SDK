@@ -24,6 +24,7 @@
  *   build          - Build the solution (restores only if needed)
  *   test           - Run unit tests with summary output
  *   resilience     - Run fast no-hardware runtime resilience gates
+ *   test-infrastructure-qa - Validate hardware-test declaration invariants
  *   benchmark      - Run performance benchmarks (manual, not CI)
  *   docs-qa        - Validate active documentation hygiene
  *   docs-list-active - Print the exact active documentation set used by docs-qa
@@ -188,7 +189,26 @@ Target("restore", () =>
     PrintInfo("Dependencies restored");
 });
 
-Target("build", () =>
+Target("test-infrastructure-qa", () =>
+{
+    PrintHeader("Validating hardware-test declarations");
+
+    var failures = ValidateHardwareTestDeclarations(integrationTestProjects);
+    if (failures.Count > 0)
+    {
+        foreach (var failure in failures)
+        {
+            PrintColored($"  ✗ {failure}", ConsoleColor.Red);
+        }
+
+        throw new InvalidOperationException(
+            $"Hardware-test declaration validation failed with {failures.Count} issue(s)");
+    }
+
+    PrintInfo("All [WithYubiKey] tests use [SkippableTheory] and declare the required package");
+});
+
+Target("build", DependsOn("test-infrastructure-qa"), () =>
 {
     PrintHeader("Building");
 
@@ -220,7 +240,7 @@ Target("build", () =>
     }
 });
 
-Target("test", () =>
+Target("test", DependsOn("test-infrastructure-qa"), () =>
 {
     // --integration requires --project to prevent accidentally running all integration tests
     if (includeIntegration && string.IsNullOrEmpty(projectFilter))
@@ -747,6 +767,7 @@ TARGETS:
   build          - Build the solution (restores only if needed)
   test           - Run unit tests with summary output
   resilience     - Run fast no-hardware runtime resilience gates
+  test-infrastructure-qa - Validate hardware-test declaration invariants
   benchmark      - Run performance benchmarks (manual, not CI)
   docs-qa        - Validate active documentation hygiene
   docs-list-active - Print the exact active documentation set used by docs-qa
@@ -947,6 +968,109 @@ string[] DiscoverProjects(string subdirectory, string nameFilter, string? additi
         .Select(p => Path.GetRelativePath(repoRoot, p))
         .OrderBy(p => p)
         .ToArray();
+
+List<string> ValidateHardwareTestDeclarations(string[] projects)
+{
+    var failures = new List<string>();
+
+    foreach (var project in projects)
+    {
+        var projectPath = Path.Combine(repoRoot, project);
+        var projectDirectory = Path.GetDirectoryName(projectPath)
+            ?? throw new InvalidOperationException($"Project has no directory: {project}");
+        var sourceFiles = Directory.GetFiles(projectDirectory, "*.cs", SearchOption.AllDirectories)
+            .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}") &&
+                           !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
+            .ToArray();
+        var filesWithYubiKeyTests = sourceFiles
+            .Where(path => File.ReadAllText(path).Contains("[WithYubiKey", StringComparison.Ordinal))
+            .ToArray();
+
+        if (filesWithYubiKeyTests.Length == 0)
+            continue;
+
+        var projectXml = File.ReadAllText(projectPath);
+        if (!projectXml.Contains(
+                "<PackageReference Include=\"Xunit.SkippableFact\"",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            failures.Add($"{project}: projects containing [WithYubiKey] must reference Xunit.SkippableFact directly");
+        }
+
+        foreach (var sourceFile in filesWithYubiKeyTests)
+        {
+            var lines = File.ReadAllLines(sourceFile);
+            var plainTheoryLine = 0;
+            var withYubiKeyLine = 0;
+            var hasWithYubiKey = false;
+            var hasSkippableTheory = false;
+            var readingAttribute = false;
+
+            for (var i = 0; i < lines.Length; i++)
+            {
+                var trimmed = lines[i].Trim();
+                if (readingAttribute)
+                {
+                    hasWithYubiKey |= trimmed.Contains("WithYubiKey", StringComparison.Ordinal);
+                    readingAttribute = !trimmed.Contains(']');
+                    continue;
+                }
+
+                if (trimmed.StartsWith("[", StringComparison.Ordinal))
+                {
+                    plainTheoryLine = trimmed == "[Theory]" ? i + 1 : plainTheoryLine;
+                    hasSkippableTheory |= trimmed == "[SkippableTheory]";
+                    if (trimmed.Contains("WithYubiKey", StringComparison.Ordinal))
+                    {
+                        hasWithYubiKey = true;
+                        withYubiKeyLine = i + 1;
+                    }
+                    readingAttribute = !trimmed.Contains(']');
+                    continue;
+                }
+
+                if ((plainTheoryLine > 0 || hasWithYubiKey || hasSkippableTheory) &&
+                    (trimmed.Length == 0 ||
+                     trimmed.StartsWith("//", StringComparison.Ordinal) ||
+                     trimmed.StartsWith("/*", StringComparison.Ordinal) ||
+                     trimmed.StartsWith("*", StringComparison.Ordinal) ||
+                     trimmed.StartsWith("*/", StringComparison.Ordinal)))
+                {
+                    continue;
+                }
+
+                if (plainTheoryLine > 0 && hasWithYubiKey)
+                {
+                    failures.Add(
+                        $"{Path.GetRelativePath(repoRoot, sourceFile)}:{plainTheoryLine}: [WithYubiKey] must use [SkippableTheory], not [Theory]");
+                }
+                else if (hasWithYubiKey && !hasSkippableTheory)
+                {
+                    failures.Add(
+                        $"{Path.GetRelativePath(repoRoot, sourceFile)}:{withYubiKeyLine}: [WithYubiKey] requires [SkippableTheory]");
+                }
+
+                plainTheoryLine = 0;
+                withYubiKeyLine = 0;
+                hasWithYubiKey = false;
+                hasSkippableTheory = false;
+            }
+
+            if (plainTheoryLine > 0 && hasWithYubiKey)
+            {
+                failures.Add(
+                    $"{Path.GetRelativePath(repoRoot, sourceFile)}:{plainTheoryLine}: [WithYubiKey] must use [SkippableTheory], not [Theory]");
+            }
+            else if (hasWithYubiKey && !hasSkippableTheory)
+            {
+                failures.Add(
+                    $"{Path.GetRelativePath(repoRoot, sourceFile)}:{withYubiKeyLine}: [WithYubiKey] requires [SkippableTheory]");
+            }
+        }
+    }
+
+    return failures;
+}
 
 bool IsPackableProject(string projectPath)
 {

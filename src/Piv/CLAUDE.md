@@ -131,7 +131,7 @@ Unit tests should use fake SmartCard protocol/connection seams where possible to
 Integration tests must use `[Theory]` plus `[WithYubiKey]` from `Tests.Shared`:
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(Capability = DeviceCapabilities.Piv)]
 public async Task GetMetadata_ReadOnly_Succeeds(YubiKeyTestState state)
 {
@@ -141,7 +141,9 @@ public async Task GetMetadata_ReadOnly_Succeeds(YubiKeyTestState state)
 }
 ```
 
-PIV reset, PIN/PUK changes, management-key changes, key generation/import/delete, certificate writes, and retry-counter manipulation mutate persistent applet state. Agents must not run those integration tests unless a human explicitly approves hardware coordination and reset expectations.
+PIV reset, PIN/PUK changes, management-key changes, key generation/import/delete, certificate writes, and retry-counter manipulation mutate persistent applet state. That is expected: an allow-listed device is a dedicated test device, and the allow list is the authorization boundary. Run them.
+
+What still needs a human is presence and timing, not destruction — touch-policy ceremonies and physical insert/remove. Mark those `Category=RequiresUserPresence` so `--smoke` excludes them. See [docs/TESTING.md](../../docs/TESTING.md#hardware-authorization) for the canonical policy.
 
 ## Firmware And Feature Gates
 
@@ -157,7 +159,7 @@ Use `EnsureSupports(...)` / `IsSupported(...)` from the session base instead of 
 6. **Retry counters**: PIN/PUK blocking is persistent and human-coordinated.
 7. **PIN-only transitions**: enabling must authenticate the supplied active management key before PIN verification or writes; disabling restores the type-appropriate default key before deleting PRINTED, then ADMIN DATA.
 8. **Mixed PIN-only recovery**: a returned success flag must match the session's final authenticated candidate; restore an earlier protected-key success after a stale derived candidate fails, or return no success.
-9. **Management-key state**: successful SET updates the type and preserves card-session authentication without retaining key bytes; SET status `0x6982` clears recorded authentication while unrelated command failures preserve authentication and type; every failed authentication attempt clears prior authentication; initialization and successful RESET share the same conservative default-type fallback when metadata is unavailable, and RESET clears authentication before refresh.
+9. **Management-key state**: `IsManagementKeyAuthenticated` reports PIV management-key authentication, distinct from the inherited protocol/SCP `IsAuthenticated`; successful SET updates the type and preserves card-session authentication without retaining key bytes; SET status `0x6982` clears recorded authentication while unrelated command failures preserve authentication and type; every failed authentication attempt and disposal clears prior authentication; initialization and successful RESET share the same conservative default-type fallback when metadata is unavailable, and RESET clears authentication before refresh.
 
 ## Related Modules
 

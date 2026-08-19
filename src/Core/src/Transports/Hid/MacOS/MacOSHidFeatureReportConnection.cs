@@ -27,16 +27,39 @@ namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 internal sealed class MacOSHidFeatureReportConnection : IHidConnection
 {
     private readonly long _entryId;
+    private readonly IIOKitDeviceLifetime _lifetime;
     private nint _deviceHandle;
     private bool _disposed;
 
     public MacOSHidFeatureReportConnection(long entryId)
+        : this(entryId, IOKitDeviceLifetime.Instance)
+    {
+    }
+
+    /// <summary>
+    ///     Test seam. Lets the constructor-failure and disposal paths be exercised without macOS hardware.
+    /// </summary>
+    internal MacOSHidFeatureReportConnection(long entryId, IIOKitDeviceLifetime lifetime)
     {
         _entryId = entryId;
-        SetupConnection();
+        _lifetime = lifetime;
 
-        InputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
-        OutputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
+        // A constructor that acquires a native resource and then throws leaves nothing for the caller to
+        // dispose: the object never finishes construction, so no using, finally, or factory catch can reach
+        // it. Release here or the IOHIDDeviceRef leaks for the process lifetime.
+        try
+        {
+            SetupConnection();
+
+            InputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
+            OutputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
+        }
+        catch
+        {
+            Dispose(false);
+            GC.SuppressFinalize(this);
+            throw;
+        }
     }
 
     public int InputReportSize { get; }
@@ -100,44 +123,26 @@ internal sealed class MacOSHidFeatureReportConnection : IHidConnection
 
     private void SetupConnection()
     {
-        var deviceEntry = 0;
-        try
-        {
-            var matchingDictionary = IOKitNativeMethods.IORegistryEntryIDMatching((ulong)_entryId);
-            deviceEntry = IOKitNativeMethods.IOServiceGetMatchingService(0, matchingDictionary);
-
-            if (deviceEntry == 0)
-                throw new PlatformApiException("Failed to find matching device entry in IO registry.");
-
-            _deviceHandle = IOKitNativeMethods.IOHIDDeviceCreate(IntPtr.Zero, deviceEntry);
-
-            if (_deviceHandle == IntPtr.Zero) throw new PlatformApiException("Failed to create HID device handle.");
-
-            var result = IOKitNativeMethods.IOHIDDeviceOpen(_deviceHandle, 0);
-
-            if (result != 0)
-                throw new PlatformApiException(
-                    nameof(IOKitNativeMethods.IOHIDDeviceOpen),
-                    result,
-                    "Failed to open HID device.");
-        }
-        finally
-        {
-            if (deviceEntry != 0) _ = IOKitNativeMethods.IOObjectRelease(deviceEntry);
-        }
+        _deviceHandle = _lifetime.CreateDevice(_entryId);
+        _lifetime.OpenDevice(_deviceHandle);
     }
 
     private void Dispose(bool disposing)
     {
+        // Set first: this runs from the failing-constructor path as well as from Dispose and the finalizer,
+        // and every CoreFoundation object below must be released exactly once. Over-releasing corrupts a
+        // retain count just as surely as never releasing leaks.
         if (_disposed) return;
+        _disposed = true;
 
         if (_deviceHandle != IntPtr.Zero)
         {
-            _ = IOKitNativeMethods.IOHIDDeviceClose(_deviceHandle, 0);
+            _lifetime.CloseDevice(_deviceHandle);
+
+            // IOHIDDeviceCreate returns a retained CoreFoundation object. Closing it is not releasing it.
+            _lifetime.ReleaseCFObject(_deviceHandle);
             _deviceHandle = IntPtr.Zero;
         }
-
-        _disposed = true;
     }
 
     ~MacOSHidFeatureReportConnection()

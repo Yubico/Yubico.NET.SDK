@@ -81,16 +81,14 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
     private static readonly Feature FeatureFido2UsbSmartCard = new("FIDO2 over USB SmartCard", 5, 8, 0);
 
-    private readonly IConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
     private readonly ILogger _logger;
 
-    private IFidoBackend? _backend;
-    private bool _disposed;
+    private IFidoBackend _backend = null!;
 
     private FidoSession(IConnection connection, ScpKeyParameters? scpKeyParams = null)
+        : base(connection)
     {
-        _connection = connection;
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
     }
@@ -113,7 +111,9 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        var session = new FidoSession(connection, scpKeyParams);
+        // A session that fails to initialize must not keep its claim on the connection: the connection
+        // outlives it, and the next session over it would otherwise be refused forever.
+        var session = Construct(connection, () => new FidoSession(connection, scpKeyParams));
         try
         {
             await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
@@ -133,7 +133,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create(_connection);
+        var protocol = ProtocolFactory.Create(Connection);
         Protocol = protocol;
         var backend = CreateBackend(protocol);
         await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
@@ -142,7 +142,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
         var firmwareVersion = info.FirmwareVersion ?? new FirmwareVersion();
 
-        if (_connection is ISmartCardConnection smartCardConnection)
+        if (Connection is ISmartCardConnection smartCardConnection)
         {
             EnsureSmartCardTransportSupported(smartCardConnection.Transport, firmwareVersion);
         }
@@ -173,7 +173,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     public Task<AuthenticatorInfo> GetInfoAsync(CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        return GetInfoCoreAsync(_backend!, cancellationToken);
+        return GetInfoCoreAsync(_backend, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -200,6 +200,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         MakeCredentialOptions? options = null,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         ArgumentNullException.ThrowIfNull(rp);
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(pubKeyCredParams);
@@ -229,7 +231,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
             _logger.LogDebug("MakeCredential for RP: {RpId}", rp.Id);
 
-            response = await _backend!.SendCborAsync(request, cancellationToken)
+            response = await _backend.SendCborAsync(request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -257,6 +259,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         GetAssertionOptions? options = null,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         ArgumentException.ThrowIfNullOrEmpty(rpId);
 
         if (clientDataHash.Length != 32)
@@ -276,7 +280,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
             _logger.LogDebug("GetAssertion for RP: {RpId}", rpId);
 
-            response = await _backend!.SendCborAsync(request, cancellationToken)
+            response = await _backend.SendCborAsync(request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -304,7 +308,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
         var request = CtapRequestBuilder.Create(CtapCommand.GetNextAssertion).Build();
 
-        var response = await _backend!.SendCborAsync(request, cancellationToken)
+        var response = await _backend.SendCborAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
         return GetAssertionResponse.Decode(response);
@@ -337,7 +341,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
             request = new byte[] { command };
         }
 
-        return await _backend!.SendCborAsync(request, cancellationToken).ConfigureAwait(false);
+        return await _backend.SendCborAsync(request, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -346,7 +350,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
         CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        return await _backend!.SendCborAsync(request, cancellationToken).ConfigureAwait(false);
+        return await _backend.SendCborAsync(request, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task<AuthenticatorInfo> GetInfoCoreAsync(
@@ -360,7 +364,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
     private void EnsureInitialized()
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
 
         if (!IsInitialized)
         {
@@ -398,34 +402,4 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
             "For older USB-connected YubiKeys, use IFidoHidConnection instead.");
     }
 
-    /// <inheritdoc />
-    protected override void Dispose(bool disposing)
-    {
-        if (_disposed)
-            return;
-
-        if (disposing)
-        {
-            _backend = null;
-        }
-
-        _disposed = true;
-        base.Dispose(disposing);
-    }
-
-    /// <inheritdoc />
-    public new ValueTask DisposeAsync()
-    {
-        if (_disposed)
-            return default;
-
-        _backend = null;
-        _disposed = true;
-
-        // Dispose base class synchronously (it doesn't have async dispose)
-        base.Dispose(true);
-        GC.SuppressFinalize(this);
-
-        return default;
-    }
 }

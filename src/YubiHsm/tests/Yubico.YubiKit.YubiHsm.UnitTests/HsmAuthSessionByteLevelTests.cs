@@ -21,14 +21,17 @@ namespace Yubico.YubiKit.YubiHsm.UnitTests;
 public class HsmAuthSessionByteLevelTests
 {
     [Fact]
-    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
     {
         var connection = new RecordingSmartCardConnection();
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             HsmAuthSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
-        Assert.Equal(1, connection.DisposeCount);
+        // Borrowed: the session did not create this connection, so disposal is the caller's.
+        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        Assert.Equal(0, connection.DisposeCount);
     }
 
     [Fact]

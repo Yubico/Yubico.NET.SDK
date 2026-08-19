@@ -398,6 +398,41 @@ public class OathAuthenticationTests
         Assert.False(providerCalled);
     }
 
+    [Fact]
+    public async Task AuthenticateAndRetryAsync_AfterDisposal_ThrowsObjectDisposedBeforeCallbackValidation()
+    {
+        var connection = new RecordingSmartCardConnection(SelectResponseUnprotected());
+        var session = await OathSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        await session.DisposeAsync();
+        int transmissionsBeforeCall = connection.TransmittedCommands.Count;
+
+        var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => session.AuthenticateAndRetryAsync(
+                null!,
+                null!,
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal(typeof(OathSession).FullName, exception.ObjectName);
+        Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task DeriveKey_AfterDisposal_ThrowsObjectDisposedBeforeSaltRead()
+    {
+        var connection = new RecordingSmartCardConnection(SelectResponseUnprotected());
+        var session = await OathSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        await session.DisposeAsync();
+
+        var exception = Assert.Throws<ObjectDisposedException>(
+            () => session.DeriveKey("password"u8.ToArray()));
+
+        Assert.Equal(typeof(OathSession).FullName, exception.ObjectName);
+    }
+
     /// <summary>
     ///     A SmartCard connection fake that simulates OATH SELECT and VALIDATE mutual
     ///     authentication using a real device-side access key, so tests can exercise the

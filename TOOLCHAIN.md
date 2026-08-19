@@ -134,7 +134,7 @@ clean  (standalone — must be specified explicitly)
 
 ## Analyzers and Formatting
 
-- Run `dotnet format` (or `dotnet format --verify-no-changes` in CI) to apply analyzer-driven fixes and ensure the workspace matches the shared `.editorconfig` rules.
+- Scope `dotnet format` to your staged files via `--include` (never the whole solution for routine work) — see `CLAUDE.md` Pre-Commit Checklist for the exact command. In CI, or when a repo-wide `.editorconfig`/analyzer rule changes, run it unscoped with `--verify-no-changes`.
 - Analyzer configuration details live in `docs/DEV-GUIDE.md`; review that guide before introducing new rules or suppressions.
 
 ## Documentation QA

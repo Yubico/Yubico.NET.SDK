@@ -16,7 +16,7 @@ public class OpenPgpKeyImportTests
 
     // ── RSA 2048 Import (CRT format) ────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ImportRsaKey_2048Crt_ThenSign_Succeeds(YubiKeyTestState state)
     {
@@ -60,7 +60,7 @@ public class OpenPgpKeyImportTests
 
     // ── EC P-256 Import ─────────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task ImportEcKey_P256_ThenSign_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
@@ -98,7 +98,7 @@ public class OpenPgpKeyImportTests
 
     // ── EC P-384 Import ─────────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task ImportEcKey_P384_ThenSign_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
@@ -132,7 +132,7 @@ public class OpenPgpKeyImportTests
 
     // ── Ed25519 Import ──────────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task ImportEcKey_Ed25519_KeyInfoShowsImported(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
@@ -166,7 +166,7 @@ public class OpenPgpKeyImportTests
 
     // ── X25519 Import (Decryption slot) ─────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task ImportEcKey_X25519_ToDec_KeyInfoShowsImported(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
@@ -199,7 +199,7 @@ public class OpenPgpKeyImportTests
 
     // ── EC P-256 Import to Auth slot ────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task ImportEcKey_P256_ToAuth_ThenAuthenticate_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(

@@ -118,22 +118,25 @@ public class PcscProtocolScpTests
     }
 
     [Fact]
-    public void Configure_DelegatesToBaseProtocol()
+    public void Configure_AfterScpEstablishment_ThrowsInvalidOperationException()
     {
         // Arrange
         var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
         var adapter = new PcscProtocolScp(baseProtocol, _fakeScpProcessor, null!);
         var firmware = new FirmwareVersion(5, 7, 2);
 
-        // Act - Should not throw
-        adapter.Configure(firmware);
-
-        // Assert - Configuration is applied to base protocol
-        Assert.NotNull(adapter);
+        // Act + Assert
+        var exception = Assert.Throws<InvalidOperationException>(() => adapter.Configure(firmware));
+        Assert.Contains("before", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    ///     Disposing the SCP wrapper disposes the base protocol it decorates — and stops there. The connection
+    ///     belongs to whoever created it. This test previously proved base disposal by observing the CONNECTION
+    ///     becoming unusable, which only worked because the protocol wrongly owned it.
+    /// </summary>
     [Fact]
-    public void Dispose_DisposesBaseProtocol()
+    public void Dispose_DisposesBaseProtocol_ButNotTheConnection()
     {
         // Arrange
         var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -142,12 +145,11 @@ public class PcscProtocolScpTests
         // Act
         adapter.Dispose();
 
-        // Assert - Base connection should be disposed
-        Assert.Throws<ObjectDisposedException>(() =>
-        {
-            _fakeConnection.TransmitAndReceiveAsync(new byte[] { 0x00 }, TestContext.Current.CancellationToken)
-                .GetAwaiter().GetResult();
-        });
+        // Assert - the base protocol is disposed...
+        Assert.Throws<ObjectDisposedException>(() => baseProtocol.Configure(new FirmwareVersion(5, 7, 2)));
+
+        // ...and the connection is untouched and still usable.
+        Assert.Equal(0, _fakeConnection.DisposeCount);
     }
 
     [Fact]
@@ -166,7 +168,33 @@ public class PcscProtocolScpTests
     }
 
     [Fact]
-    public void Dispose_Twice_DisposesBaseProtocolAndScpProcessorOnce()
+    public async Task DisposeAsync_DuringExchange_DrainsBeforeDisposingScpProcessor()
+    {
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
+        var scpProcessor = new BlockingDisposableApduProcessor();
+        var adapter = new PcscProtocolScp(baseProtocol, scpProcessor, null!);
+        Task<ApduResponse> exchange = adapter.TransmitAndReceiveAsync(
+            new ApduCommand(0x00, 0x01, 0x00, 0x00),
+            cancellationToken: TestContext.Current.CancellationToken);
+        await scpProcessor.Started.Task.WaitAsync(TestContext.Current.CancellationToken);
+
+        var asyncDisposable = Assert.IsAssignableFrom<IAsyncDisposable>(adapter);
+        Task disposal = asyncDisposable.DisposeAsync().AsTask();
+
+        Assert.False(disposal.IsCompleted);
+        Assert.Equal(0, scpProcessor.DisposeCount);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => adapter.TransmitAndReceiveAsync(
+            new ApduCommand(0x00, 0x02, 0x00, 0x00),
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        scpProcessor.Release.SetResult();
+        Assert.True((await exchange).IsOK());
+        await disposal;
+        Assert.Equal(1, scpProcessor.DisposeCount);
+    }
+
+    [Fact]
+    public void Dispose_Twice_DisposesScpProcessorOnce_AndNeverTheConnection()
     {
         // Arrange
         var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -178,8 +206,30 @@ public class PcscProtocolScpTests
         adapter.Dispose();
 
         // Assert
-        Assert.Equal(1, _fakeConnection.DisposeCount);
+        Assert.Equal(0, _fakeConnection.DisposeCount);
         Assert.Equal(1, scpProcessor.DisposeCount);
+    }
+
+    private sealed class BlockingDisposableApduProcessor : IApduProcessor, IDisposable
+    {
+        public TaskCompletionSource Started { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource Release { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public int DisposeCount { get; private set; }
+        public IApduFormatter Formatter { get; } = new FakeApduFormatter();
+
+        public async Task<ApduResponse> TransmitAsync(
+            ApduCommand command,
+            bool useScp = true,
+            CancellationToken cancellationToken = default)
+        {
+            Started.SetResult();
+            await Release.Task.WaitAsync(cancellationToken);
+            return new ApduResponse(new byte[] { 0x90, 0x00 });
+        }
+
+        public void Dispose() => DisposeCount++;
     }
 
     [Fact]

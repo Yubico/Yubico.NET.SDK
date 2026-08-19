@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using System.Text.Unicode;
 using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Devices;
@@ -126,6 +128,31 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
             return null;
 
         return new FirmwareVersion(major, minor, patch);
+    }
+
+    /// <summary>
+    ///     Extracts a firmware version from applet SELECT response text.
+    /// </summary>
+    /// <remarks>
+    ///     SELECT response text is untrusted. Malformed or unexpected content returns <c>null</c> so callers
+    ///     can fall back to another version source.
+    /// </remarks>
+    internal static FirmwareVersion? FromSelectResponse(ReadOnlySpan<byte> selectResponse)
+    {
+        if (!Utf8.IsValid(selectResponse))
+            return null;
+
+        string[] tokens = Encoding.UTF8.GetString(selectResponse)
+            .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        for (var i = tokens.Length - 1; i >= 0; i--)
+        {
+            FirmwareVersion? version = FromString(tokens[i]);
+            if (version is not null)
+                return version;
+        }
+
+        return null;
     }
 
     public bool IsAtLeast(FirmwareVersion firmwareVersion)

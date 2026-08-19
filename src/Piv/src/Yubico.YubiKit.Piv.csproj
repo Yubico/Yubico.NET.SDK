@@ -14,4 +14,10 @@
     <ProjectReference Include="..\..\Core\src\Yubico.YubiKit.Core.csproj" />
   </ItemGroup>
 
+  <!-- The PivSession constructor is internal so callers cannot bypass ApplicationSession.Construct;
+       the unit tests still need it to build an uninitialised session and assert its defaults. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Yubico.YubiKit.Piv.UnitTests" />
+  </ItemGroup>
+
 </Project>

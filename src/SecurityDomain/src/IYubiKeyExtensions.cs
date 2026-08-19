@@ -37,7 +37,7 @@ public static class IYubiKeyExtensions
         /// <returns>A new <see cref="SecurityDomainSession" /> instance.</returns>
         /// <remarks>
         ///     The returned session owns the underlying connection and will dispose it when the session is disposed.
-        ///     Always use a <c>using</c> statement or call <see cref="SecurityDomainSession.Dispose" /> when finished.
+        ///     Always use a <c>using</c> statement or call <see cref="IDisposable.Dispose" /> when finished.
         /// </remarks>
         /// <exception cref="SecureChannelException">
         ///     <paramref name="scpKeyParams" /> was supplied and establishing the SCP secure channel failed.
@@ -53,13 +53,18 @@ public static class IYubiKeyExtensions
                 .ConfigureAwait(false);
             try
             {
-                return await SecurityDomainSession.CreateAsync(
+                var session = await SecurityDomainSession.CreateAsync(
                         connection,
                         configuration,
                         scpKeyParams,
                         firmwareVersion,
                         cancellationToken)
                     .ConfigureAwait(false);
+
+                // This entry point created the connection, so the session it returns is the only thing that
+                // can close it. A caller-created connection is never owned this way.
+                session.OwnConnection();
+                return session;
             }
             catch
             {

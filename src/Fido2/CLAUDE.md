@@ -27,6 +27,10 @@ The FIDO2 module implements CTAP 2.1/2.3 (Client to Authenticator Protocol) for 
 > FIDO GetInfo can report a `0.x` sentinel firmware (for example `0.0.1`) on devices whose real
 > firmware is available through Management; firmware gates use `Feature.IsSupportedByFirmware(...)`
 > so `Major == 0` sentinel firmware is treated as modern.
+> A grouped physical YubiKey admits one live SDK connection across all known interfaces. A second
+> session is refused with `ConnectionInUseException` until the current session disposes its owned
+> connection. FIDO2/WebAuthn selects HID FIDO when exposed, otherwise SmartCard, and never switches
+> transport after a connection failure.
 
 ## Architecture Overview
 

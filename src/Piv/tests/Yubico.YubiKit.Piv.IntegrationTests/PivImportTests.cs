@@ -41,7 +41,7 @@ public class PivImportTests
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ImportKeyAsync_Rsa2048_CanSignAndVerify(YubiKeyTestState state)
     {
@@ -95,7 +95,7 @@ public class PivImportTests
         Assert.Equal(256, signature.Length);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task ImportKeyAsync_Rsa3072_ReturnsCorrectAlgorithm(YubiKeyTestState state)
@@ -120,7 +120,7 @@ public class PivImportTests
         Assert.Equal(PivAlgorithm.Rsa3072, metadata.Value.Algorithm);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task ImportKeyAsync_Ed25519_CanSignAndVerify(YubiKeyTestState state)
     {
@@ -150,7 +150,7 @@ public class PivImportTests
         Assert.False(signature.IsEmpty);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task ImportKeyAsync_X25519_ReturnsCorrectAlgorithm(YubiKeyTestState state)
     {

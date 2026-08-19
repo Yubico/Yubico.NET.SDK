@@ -90,7 +90,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     internal static ReadOnlySpan<byte> Pbkdf2Salt => "Yubico"u8;
     internal const int Pbkdf2DerivedKeyLength = 32;
 
-    private readonly ISmartCardConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
     private ISmartCardProtocol _protocol = null!;
     private IHsmAuthBackend _backend = null!;
@@ -114,10 +113,10 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     private HsmAuthSession(
         ISmartCardConnection connection,
         ScpKeyParameters? scpKeyParams = null)
+        : base(connection)
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        _connection = connection;
         _scpKeyParams = scpKeyParams;
     }
 
@@ -139,7 +138,9 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        var session = new HsmAuthSession(connection, scpKeyParams);
+        // A session that fails to initialize must not keep its claim on the connection: the connection
+        // outlives it, and the next session over it would otherwise be refused forever.
+        var session = Construct(connection, () => new HsmAuthSession(connection, scpKeyParams));
         try
         {
             await session.InitializeAsync(configuration, firmwareVersion, cancellationToken)
@@ -161,7 +162,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create(_connection);
+        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
         Protocol = protocol;
         IHsmAuthBackend backend = new HsmAuthBackend(protocol);
 

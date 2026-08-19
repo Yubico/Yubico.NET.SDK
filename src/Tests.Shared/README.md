@@ -11,7 +11,6 @@ The test infrastructure provides:
 - **Declarative device filtering** - filters by firmware, form factor, connection type, capabilities, FIPS state, and custom predicates.
 - **Parameterized testing** - standard xUnit `[Theory]` tests receive `YubiKeyTestState` values from `[WithYubiKey]`.
 - **Fluent session helpers** - extension methods create application sessions with consistent disposal.
-- **Shared connection helpers** - `SharedSmartCardConnection` lets reset/setup helpers share one physical SmartCard connection safely.
 - **Byte-level unit-test recorder** - `RecordingSmartCardConnection` captures SmartCard APDUs and returns queued responses for focused unit tests.
 
 ## Quick Start
@@ -22,7 +21,7 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 public class MyIntegrationTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey]
     public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestState state)
     {
@@ -33,7 +32,7 @@ public class MyIntegrationTests
         });
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.7.0")]
     public async Task ModernFeatures_RequireFirmware570(YubiKeyTestState state)
     {
@@ -118,11 +117,6 @@ Test method
 - Applies allow-list and filter criteria.
 - Caches authorized devices lazily for the test run.
 
-**SharedSmartCardConnection**
-
-- Non-owning wrapper for sharing one `ISmartCardConnection` across multiple sessions in a single integration helper.
-- Useful for reset-then-test flows where the setup session must not dispose the physical connection before the test session starts.
-
 **RecordingSmartCardConnection**
 
 - Unit-test-only `ISmartCardConnection` that records transmitted APDUs and returns queued raw responses.
@@ -134,7 +128,7 @@ Test method
 ### Basic Test
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey]
 public async Task GetDeviceInfo_AllDevices_ReturnsValidData(YubiKeyTestState state)
 {
@@ -151,7 +145,7 @@ public async Task GetDeviceInfo_AllDevices_ReturnsValidData(YubiKeyTestState sta
 ### Filtered Test
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.7.2", Capability = DeviceCapabilities.SecurityDomain)]
 public async Task Scp11_ModernDevice_ReturnsKeyInfo(YubiKeyTestState state)
 {
@@ -175,7 +169,7 @@ public sealed class ProductionKeysOnly : IYubiKeyFilter
     public string GetDescription() => "Production keys";
 }
 
-[Theory]
+[SkippableTheory]
 [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
 public async Task RunsOnlyOnProductionKeyRange(YubiKeyTestState state)
 {

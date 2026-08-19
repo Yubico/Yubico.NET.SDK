@@ -38,7 +38,7 @@ public class HsmAuthSessionTests
 
     // ─── Reset and List ──────────────────────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task ResetAsync_ThenList_ReturnsEmptyList(YubiKeyTestState state) =>
         await state.WithHsmAuthSessionAsync(
@@ -52,7 +52,7 @@ public class HsmAuthSessionTests
 
     // ─── Put Symmetric → List → Delete → List ───────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task PutSymmetric_ListDeleteList_RoundTrip(YubiKeyTestState state) =>
         await state.WithHsmAuthSessionAsync(
@@ -96,7 +96,7 @@ public class HsmAuthSessionTests
 
     // ─── Put Derived → Verify Algorithm ──────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task PutDerived_VerifyAlgorithm_IsAes128(YubiKeyTestState state) =>
         await state.WithHsmAuthSessionAsync(
@@ -118,7 +118,7 @@ public class HsmAuthSessionTests
 
     // ─── Change Management Key Round-Trip ────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task PutManagementKey_RoundTrip_CanUseNewKey(YubiKeyTestState state) =>
         await state.WithHsmAuthSessionAsync(
@@ -164,7 +164,7 @@ public class HsmAuthSessionTests
 
     // ─── Get Retries == 8 After Reset ────────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task GetManagementKeyRetries_AfterReset_Returns8(YubiKeyTestState state) =>
         await state.WithHsmAuthSessionAsync(
@@ -178,7 +178,7 @@ public class HsmAuthSessionTests
 
     // ─── Calculate Session Keys Symmetric → 48 bytes ─────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task CalculateSessionKeysSymmetric_Returns48Bytes(YubiKeyTestState state) =>
         await state.WithHsmAuthSessionAsync(
@@ -223,7 +223,7 @@ public class HsmAuthSessionTests
 
     // ─── Version-Gated: Generate Asymmetric + Get Public Key (5.6.0+) ────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.0")]
     public async Task GenerateAsymmetric_GetPublicKey_Returns65Bytes(YubiKeyTestState state) =>
         await state.WithHsmAuthSessionAsync(
@@ -249,7 +249,7 @@ public class HsmAuthSessionTests
 
     // ─── Version-Gated: Change Credential Password (5.8.0+) ─────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.8.0")]
     public async Task ChangeCredentialPassword_ThenCalculate_Succeeds(YubiKeyTestState state) =>
         await state.WithHsmAuthSessionAsync(
@@ -299,7 +299,7 @@ public class HsmAuthSessionTests
 
     // ─── Touch-Required Tests ────────────────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     [Trait("Category", "RequiresUserPresence")]
     public async Task PutSymmetric_WithTouch_CredentialListShowsTouchRequired(YubiKeyTestState state) =>

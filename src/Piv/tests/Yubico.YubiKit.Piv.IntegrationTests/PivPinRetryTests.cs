@@ -51,7 +51,7 @@ public class PivPinRetryTests
     /// and that both GetPinAttemptsAsync and GetPinMetadataAsync (on 5.3+) reflect the
     /// updated count consistently.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task PinRetries_DecrementAfterEachFailedAttempt_MetadataMatches(YubiKeyTestState state)
     {
@@ -110,7 +110,7 @@ public class PivPinRetryTests
     /// PIN attempts to verify the custom limit is enforced. After 4 wrong attempts,
     /// there should be 1 retry remaining, not the default 3-attempt behavior.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task SetPinAttempts_CustomLimit_EnforcedDuringFailedAttempts(YubiKeyTestState state)
     {
@@ -161,7 +161,7 @@ public class PivPinRetryTests
     /// Verifies that PIN metadata correctly reports IsDefault after reset,
     /// and that changing the PIN causes IsDefault to become false.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task PinMetadata_IsDefault_ReflectsChanges(YubiKeyTestState state)
     {

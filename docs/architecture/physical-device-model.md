@@ -19,9 +19,18 @@ See also: [event-driven device discovery](./event-driven-device-discovery.md) an
 
 `IYubiKey` (defined in `src/Core/src/Abstractions/IYubiKey.cs`) is intentionally small:
 
-- `string DeviceId` — a stable identifier for the physical device.
+- `string DeviceId` — a human-readable correlation identifier. Once a device object is published through
+  `YubiKeyManager`, its `DeviceId` remains stable for that uninterrupted physical presence while its
+  physical interface identity and `AvailableConnections` remain unchanged. The repository retains the
+  originally published object across evidence-tier flips so its eventual `Removed` event correlates with
+  the earlier `Added` event. A fresh direct scan object can still have an evidence-tier-derived ID
+  (`ykphysical:topology:*`, `ykphysical:{serial}`, or `ykphysical:pid:*`) different from an earlier scan;
+  do not treat independently created scan objects as durable identity records. The repository correlates
+  physical presence by interface set (`CompositeYubiKey.PhysicalIdentityKeyFor`).
 - `ConnectionType AvailableConnections` — the concrete interfaces this device exposes, any combination of
   `SmartCard`, `HidFido`, and `HidOtp`. It never contains the `Hid` group flag or `All`.
+  This is the union of observed transport interfaces, not proof that every applet is enabled on every
+  interface or that every combination is safe to use concurrently.
 - `bool SupportsConnection(ConnectionType)` — whether a given interface is present on this device. The
   concrete values (`SmartCard`, `HidFido`, `HidOtp`) test a specific openable interface; the `Hid` group
   flag returns true when either HID interface is present; `Unknown`, `All`, and mixed/combined values
@@ -70,6 +79,16 @@ name cannot be parsed for its Product ID, or when a serial number needed to disa
 keys cannot be read. In those cases interfaces are left unmerged rather than risk wrongly collapsing two
 distinct keys, so one physical key can surface as more than one row.
 
+`FindAllAsync(forceRescan: false)` returns the repository cache after its first populated scan;
+`forceRescan: true` performs discovery and reconciles the result into that cache. Successful identity and
+metadata reads are cached while their member interfaces remain present. Retaining the originally published
+object preserves `DeviceId` event correlation, but also means a newly constructed equivalent object's
+refreshed cached metadata/member instances are not substituted when the physical interface set and
+`AvailableConnections` are unchanged. Request fresh Management data explicitly when current device
+configuration matters. `DeviceChanges` is emitted from repository diffs after a full rescan, not directly
+from native listener hints. These APIs inherit the conservative grouping bounds in
+[Device Discovery Guarantees](device-discovery-guarantees.md); they do not strengthen them.
+
 ### Platform Support For HID Discovery
 
 HID interface enumeration (HID FIDO, HID OTP) is implemented on **macOS, Linux, and Windows**. On Windows,
@@ -88,9 +107,20 @@ using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
-await using var smartCard = await device.ConnectAsync<ISmartCardConnection>();
-await using var fido = await device.ConnectAsync<IFidoHidConnection>();
-await using var otp = await device.ConnectAsync<IOtpHidConnection>();
+await using (var smartCard = await device.ConnectAsync<ISmartCardConnection>())
+{
+    // Use SmartCard, then dispose it before opening another interface.
+}
+
+await using (var fido = await device.ConnectAsync<IFidoHidConnection>())
+{
+    // Use FIDO HID, then dispose it before opening another interface.
+}
+
+await using (var otp = await device.ConnectAsync<IOtpHidConnection>())
+{
+    // Use OTP HID.
+}
 ```
 
 The parameterless `ConnectAsync()` is only for single-interface devices; on a composite device it throws
@@ -116,11 +146,12 @@ FirmwareVersion firmware = info.FirmwareVersion;
 Management module (`ManagementSession`). Core owns only read-only metadata and the connection/discovery
 machinery.
 
-## Applet Transport Selection: Smart Defaults, Overrides, Fallback
+## Applet Transport Selection: Smart Defaults And Overrides
 
 Applet session-entry extensions keep their ergonomic one-call shape while selecting a transport
 intentionally on a composite device. Each multi-transport applet documents a default order and accepts an
-optional explicit `preferredConnection` override:
+optional explicit `preferredConnection` override. When SCP parameters are supplied without an override,
+the SCP-capable SmartCard transport is selected instead of the normal default:
 
 | Applet | Default order | Override (`preferredConnection`) |
 | --- | --- | --- |
@@ -143,29 +174,70 @@ await using var otpMgmt = await device.CreateManagementSessionAsync(
 
 Override semantics, validated before any connect:
 
-- `preferredConnection == null` → use the applet's documented default order.
-- A concrete, applet-valid, device-supported value → used exactly.
+- Explicit valid `preferredConnection` → use it exactly.
+- Otherwise, non-null `scpKeyParams` → select SmartCard.
+- Otherwise → use the applet's documented default order.
 - Not exactly one concrete transport (a group/combined/`Unknown` value) → `ArgumentException`.
 - A concrete transport that is not valid for the applet (even if the device exposes it) → `ArgumentException`.
 - A valid transport the device does not expose → `NotSupportedException`.
 
-**Held-transport fallback** (default path only): if no override is given and the SmartCard transport fails
-to connect because another process holds the card (PC/SC `SCARD_E_SHARING_VIOLATION` /
-`SCARD_E_SERVER_TOO_BUSY` — e.g. GnuPG `scdaemon` holding the CCID), the session falls back to the next
-supported transport in the default order. An explicit override never falls back. The SDK never kills another
-process to free a transport.
+The resolver selects exactly one transport. The session entry point opens it once; it does not retry another
+interface after `ConnectionInUseException`, PC/SC sharing errors, cancellation, or initialization failure.
+
+## One Connection Per Physical Device, One Session Per Connection
+
+A YubiKey's CCID interface holds exactly one selected application. Selecting another deselects the first and
+destroys its security state — measured: after a second applet is selected, the first session's next command
+returns `SW=0x6D00` (*instruction not supported*), and nothing at the intervening call site reports a problem.
+
+The SDK refuses that at acquisition, before any command reaches the card, so the error lands on the call that
+would have caused the damage rather than on the victim's next operation:
+
+| Acquisition | Rule | On violation |
+| --- | --- | --- |
+| Second connection to any known interface of a grouped physical key | Refused | `ConnectionInUseException` naming a held member interface |
+| Second session on a live connection | Refused | `ConnectionInUseException` naming the current session |
+
+Both refusals are per *live* holder, not per lifetime. Successive use is the supported pattern, and it does
+not require reconnecting — a session never disposes a connection it did not create:
 
 ```csharp
-// If the CCID is held by another process, this transparently falls back to HID FIDO/OTP.
-await using var resilient = await device.CreateManagementSessionAsync();
+await using var connection = await device.ConnectAsync<ISmartCardConnection>();
+
+await using (var piv = await PivSession.CreateAsync(connection))
+    await piv.VerifyPinAsync(pin);
+
+// Same connection, next application. The PIV session's disposal released it, not closed it.
+await using var oath = await OathSession.CreateAsync(connection);
 ```
+
+This mirrors canonical yubikit: Rust's applet sessions take the connection by value and hand it back with
+`into_connection`, making a second concurrent session a compile error; Python's base `Session` binds itself
+to the connection at construction. Neither inspects the wire.
+
+**Who disposes what:** whoever created the connection. The `device.Create<App>SessionAsync()` convenience
+methods open a connection the caller never sees, so the session they return owns and disposes it through the
+internal `ApplicationSession.OwnConnection()` path. A direct `Session.CreateAsync(connection)` borrows the
+caller-created connection and does not dispose it. Use `await using` for both connections and sessions.
+Missing connection disposal can retain the physical-device lease for the connection lifetime
+(potentially the process lifetime), blocking later opens; there is intentionally no finalizer backstop,
+because deterministic disposal is the only point at which native-handle teardown and lease release can be
+ordered reliably.
+
+Opening any grouped member claims all known stable member interface IDs. When conservative discovery cannot
+prove grouping, a standalone record retains a one-element scope; the SDK does not guess associations.
+
+macOS FIDO HID must be opened with `kIOHIDOptionsTypeNone`, never `kIOHIDOptionsTypeSeizeDevice`. SDK
+exclusivity is enforced before native open; seizing would add a separate platform-wide exclusion policy
+and lock other processes out of the key. Both canonical
+yubikit implementations open non-seizing on macOS: Rust enables hidapi's `macos-shared-device`
+(`hid_darwin_set_open_exclusive(0)`), and python-fido2's macOS backend calls `IOHIDDeviceOpen(handle, 0)`.
 
 ## SCP Note
 
-Secure Channel Protocol is only valid on the SmartCard transport. Supplying `scpKeyParams` while a
-non-SmartCard transport is selected (including the FIDO2/WebAuthn `HidFido`-first default) throws
-`NotSupportedException` during session initialization. To use SCP, select the SmartCard transport explicitly
-with `preferredConnection: ConnectionType.SmartCard`.
+Secure Channel Protocol is valid only on SmartCard. Supplying `scpKeyParams` without an explicit override
+selects SmartCard automatically. Explicitly selecting a non-SmartCard transport with SCP parameters throws
+`NotSupportedException` during session initialization.
 
 ## Migration From The Per-Interface Handle Model
 
@@ -187,5 +259,8 @@ Practical steps:
 2. Replace any scalar connection-type routing with typed `ConnectAsync<TConnection>()` or an applet session
    extension.
 3. Where you need a specific transport, pass `preferredConnection`; otherwise rely on the documented default
-   order (and held-transport fallback).
+   order. Connection failures do not select another interface.
 4. Update metadata type references to `Yubico.YubiKit.Core.Devices`.
+5. Dispose every connection at the scope that created it. If you create a connection and pass it to
+   `Session.CreateAsync(connection)`, keep the connection in its own `await using`; the session will not
+   close it. Dispose one session before constructing the next on that connection.

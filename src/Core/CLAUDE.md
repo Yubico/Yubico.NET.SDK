@@ -24,7 +24,7 @@ Core is the **foundational library** for the entire SDK. It provides:
 **Key Directories:**
 ```
 src/
-├── Abstractions/        # Shared public contracts: IYubiKey, IConnection, IProtocol
+├── Abstractions/        # Public device/connection contracts; internal protocol contracts
 ├── Devices/             # Physical YubiKey model, discovery, monitoring, metadata
 ├── Sessions/            # ApplicationSession and ApplicationIds
 ├── Transports/          # HID and SmartCard device/connection/listener implementations
@@ -197,11 +197,12 @@ using var connection = await hidFactory.CreateAsync(device, cancellationToken);
 `IYubiKey` represents **one physical YubiKey**, not a single transport handle. A composite USB key exposes
 several interfaces at once (CCID, HID FIDO, HID OTP), and discovery returns one `IYubiKey` for it with those
 interfaces in `AvailableConnections`. Use `SupportsConnection(...)` and the typed `ConnectAsync<TConnection>()`
-to select an interface; the parameterless `ConnectAsync()` throws on a multi-interface device. Read-only
-metadata types (`DeviceInfo`, `FormFactor`, `DeviceCapabilities`, `DeviceFlags`, `VersionQualifier`,
-`VersionQualifierType`) are Core-owned (`Yubico.YubiKit.Core.Devices`); mutating operations stay in
-Management. Applet session extensions choose a transport via a documented default order plus an optional
-`preferredConnection` override, with held-transport fallback on the default path. Full reference:
+to select an interface; the parameterless `ConnectAsync()` throws on a multi-interface device. One grouped
+physical key admits one live connection across all known interfaces. Applet session extensions choose exactly
+one transport via a documented default order plus an optional `preferredConnection` override; connection or
+initialization failure does not try another interface. Read-only metadata types (`DeviceInfo`, `FormFactor`,
+`DeviceCapabilities`, `DeviceFlags`, `VersionQualifier`, `VersionQualifierType`) are Core-owned
+(`Yubico.YubiKit.Core.Devices`); mutating operations stay in Management. Full reference:
 [Physical Device Model](../../docs/architecture/physical-device-model.md). What grouping of a physical key's interfaces does and does not guarantee - per platform, with every guarantee pinned to a named test - is in [Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md). Read it before changing `CompositeDeviceMerger`, `FindYubiKeys`, or the topology resolver: the merge tiers are an evidence hierarchy that never guesses, and several conservative-looking outcomes are documented bounds with pinning tests, not defects.
 
 ### ConnectionType Semantics
@@ -220,7 +221,18 @@ HID listeners expose typed `HidDeviceRescanHint` callbacks. These hints are diag
 - `FirmwareVersion`
 - `IsInitialized`
 - `IsAuthenticated`
-- `Protocol` ownership/disposal
+- `Protocol` lifetime/disposal
+- One-live-session attachment to the borrowed `Connection`
+
+`ApplicationSession` does not dispose a caller-created connection. Only internal convenience entry
+points that created a hidden connection call `OwnConnection()`. Whoever creates a connection must use
+`await using` to dispose it; otherwise the physical-device lease can remain held for the
+connection/process lifetime and block later opens. There is no finalizer backstop. Dispose one session
+before creating the next session over the same connection; sequential reuse is supported.
+
+`IsInitialized` and `IsAuthenticated` become `false` when sync or async disposal is admitted, not
+only after teardown completes. `IsAuthenticated` describes application-protocol authentication (for
+example, SCP); applet-specific authentication is exposed by the concrete applet session.
 
 Prefer using `IsSupported(feature)` / `EnsureSupports(feature)` on `IApplicationSession` rather than duplicating firmware gates in each module.
 
@@ -273,7 +285,7 @@ Integration tests inherit from `IntegrationTestBase`:
 ```csharp
 public class MyTests : IntegrationTestBase
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey]
     public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state)
     {
@@ -286,18 +298,18 @@ public class MyTests : IntegrationTestBase
 
 ## Common Operations
 
-### Creating a Protocol
+### Creating a Raw Session
 
 ```csharp
-// From connection
-using var connection = await connectionFactory.CreateAsync(reader, ct);
-using ISmartCardProtocol protocol = ProtocolFactory.Create(connection);
+// From a caller-owned connection
+await using var connection = await connectionFactory.CreateAsync(reader, ct);
+await using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection, ct);
 
 // Select application
-await protocol.SelectAsync(ApplicationIds.Piv, ct);
+await raw.SelectAsync(ApplicationIds.Piv, ct);
 
 // Configure for firmware
-protocol.Configure(firmwareVersion);
+raw.Configure(firmwareVersion);
 ```
 
 ### Sending APDUs
@@ -312,12 +324,12 @@ var command = new ApduCommand
     P2 = 0x00,
     Data = applicationId
 };
-var responseData = await protocol.TransmitAndReceiveAsync(command, ct);
+var responseData = await raw.TransmitAndReceiveAsync(command, cancellationToken: ct);
 
 // Sensitive command (PIN, key material) — caller zeroes source buffer after transmission
 // ApduCommand is a readonly record struct: it stores a reference, not a clone.
 var command = new ApduCommand(0x00, InsVerify, 0x00, 0x80, pinnedPin.AsMemory(0, 8));
-var response = await protocol.TransmitAndReceiveAsync(command, ct);
+var response = await raw.TransmitAndReceiveAsync(command, cancellationToken: ct);
 CryptographicOperations.ZeroMemory(pinnedPin); // zeroes what command.Data referenced
 ```
 
@@ -367,12 +379,13 @@ if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_7_2))
 
 ## Concurrency Model
 
-Behavior added by the discovery/session concurrency hardening (see `AsyncExchangeGate`, `DeviceConnectionRegistry`):
+Behavior added by the discovery/session concurrency hardening (see `ExchangeGuard`, `DeviceConnectionRegistry`):
 
-- **Protocols serialize logical exchanges.** `PcscProtocol` (+ SCP wrapper), `FidoHidProtocol`, and `OtpHidProtocol` each run full logical exchanges (chained APDUs, multi-packet CTAP transactions, multi-report OTP frames, lazy initialization) through an internal `AsyncExchangeGate`. Concurrent calls on one session/protocol are **safe but sequential** — no throughput gain, no interleaving corruption.
-- **Cancellation gates entry only.** A `CancellationToken` passed to a protocol method cancels the *wait for a turn*; an exchange already in flight always runs to completion (aborting mid-exchange would strand device state for the next caller).
-- **Discovery/session ownership is atomic.** `DeviceConnectionRegistry` coordinates each interface `DeviceId` with shared session leases and a nonblocking exclusive discovery lease. Sessions acquire ownership before physical connect; discovery skips immediately while a session is active, and sessions wait (cancellably) while discovery holds the interface across connect, Management exchange, and disposal. Discovery uses only the internal `IDiscoveryConnectionProvider` path; wrappers/custom `IYubiKey` implementations without it are skipped without calling public `ConnectAsync`. In-process only — cross-process contention is not covered. Idle coordinator entries are retained for the process lifetime to avoid unsafe eviction races and are bounded by unique interface IDs observed.
-- **Discovery reads are time-bounded and single-flight.** Identity reads: 2s/attempt; composite metadata: 3s budget. The budget bounds each caller's wait, while one underlying read per stable interface/`ConnectionType` continues independently. A hung native call is reused by later scans rather than multiplied; completion removes the single-flight entry so faults and cancellations can be retried.
+- **Protocols refuse overlapping logical exchanges.** `PcscProtocol` (+ SCP wrapper), `FidoHidProtocol`, and `OtpHidProtocol` run each full logical exchange through `ExchangeGuard`. A second operation throws `InvalidOperationException` immediately; sequential awaited operations are unchanged. Disposal atomically closes the guard to new admissions, drains an admitted exchange, and only then tears down protocol/SCP state and any owned connection. Prefer async disposal; synchronous disposal blocks for the same drain and must never be called from inside that operation.
+- **Cancellation is checked at entry only.** Once an exchange claims the guard, constituent transmits use `CancellationToken.None` so chained APDU, CTAP/OTP frame, and SCP state cannot be stranded.
+- **The guard is protocol-instance scoped.** An SCP wrapper shares its base PC/SC guard, but independently created raw protocol instances over one connection are not coordinated. The supported contract prevents that shape by admitting one `ApplicationSession` per connection; connection-wide raw protocol ownership is a separate API decision.
+- **Discovery/connection ownership is atomic.** A connection to a grouped physical key claims every known stable member interface ID before native open. A second connection through any member throws `ConnectionInUseException` immediately. Claims are sorted, deduplicated, rolled back on failure, and released only after physical teardown. Standalone records use one-element scopes when discovery cannot prove grouping. Discovery remains per-interface and nonblocking; connections may wait cancellably for active discovery, while waiting connections retain priority. One level down, `ConnectionSessionGuard` allows one live `ApplicationSession` per connection and supports sequential reuse. In-process only — cross-process contention is not covered.
+- **Discovery reads are time-bounded and single-flight.** Identity reads: 2s/attempt; composite metadata: 3s budget. The budget bounds each caller's wait, while one underlying read per stable interface/`ConnectionType` continues independently. A hung native call is reused by later scans rather than multiplied; completion removes the single-flight entry so faults and cancellations can be retried. Cached identity expires with the hardware and the configuration, not only with scan-observed absence: the monitor forwards every listener event to `IFindYubiKeys.NotifyTransportActivity`, which discards that transport's cached identities (a same-slot swap between scans reuses the interface id and would otherwise attribute the departed key's serial to its successor), and each entry records the PID observed at read time so a hit under a different PID is a miss. Without monitoring running there are no listener events and staleness detection degrades to scan-observed absence — see the identity-cache section of `docs/architecture/device-discovery-guarantees.md`.
 - **Monitor lifecycle is an epoch model, not a state machine.** Each `StartMonitoring` builds an immutable `MonitorGeneration` (`{ Id, ScanGate, Signal, Cts }`) held in one field; the loop, manual rescans, and listener callbacks capture that reference once, so a torn gate/generation pair is not representable. Publication is where safety is enforced: all publications from all generations are mutually exclusive under the never-disposed `_publishGate`, held across the admission check and `UpdateCache`, and a snapshot is admitted only if its generation is still current and the service undisposed. Superseded snapshots — including a scan hung in native I/O that returns long after its generation was retired — are discarded. Because publications never interleave, a successor's snapshot is serialized strictly after any in-flight predecessor's, so newer truth always lands last. Lifecycle operations take only the small `_publishLock`, never `_publishGate`, so a blocking `DeviceChanges` subscriber cannot wedge start/stop/dispose, and restart after an abandoned stop always succeeds. Nothing disposes a semaphore anyone can still acquire: scan gates live in their generation and are never disposed, and an abandoned generation is unreachable garbage. `DisposeAsync` drains `_publishGate` with the shutdown bound and, on timeout, warns and abandons — a publication already admitted may then complete after `DisposeAsync` returns, which the manager's subsequent repository disposal silences. That is a documented contract, not an accident. When editing this file, keep the three primitives one-job-each; the design collapsed a four-concept state machine and re-merging their responsibilities is what previously produced the races.
   Safety is not liveness: after abandoning a hung scan, discovery *liveness* is owned by `FindYubiKeys` (its `_scanLock` wait takes the loop's token, so blocked generations do not accumulate) and recovers when the upstream time-bounds release. The epoch model neither causes nor cures a PC/SC enumeration hang.
 - **Registered connections dispose exactly once, and disposal implies disposed.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange; it disposes the inner connection and then releases the registry lease in a `finally`, publishing its completion. Every other caller observes that same completion — async callers await it, sync callers block on it — so any disposal call returning means teardown actually finished and all callers see the same outcome, including the same exception instance. A caller can therefore never reopen an interface whose physical handle is still being torn down.
@@ -380,12 +393,12 @@ Behavior added by the discovery/session concurrency hardening (see `AsyncExchang
 ## Known Gotchas
 
 1. **APDU Size Limits**: YubiKey Neo uses 254-byte max; YubiKey 4+ uses extended APDUs up to 2048 bytes
-2. **Protocol Disposal**: `PcscProtocol` disposes its underlying connection - don't dispose both
+2. **Connection Ownership**: whoever CREATES a connection disposes it with `await using`. Protocols and sessions are pure users — `PcscProtocol`, `FidoHidProtocol`, `OtpHidProtocol`, and direct `Session.CreateAsync(connection)` never dispose a connection they were handed. The one exception is deliberate and internal: an `IYubiKey.Create<App>SessionAsync` convenience entry point opens a connection the caller never sees, so it calls `ApplicationSession.OwnConnection()` to hand that connection's lifetime to the session it returns. A leaked connection can retain the physical-device lease and block later opens; no finalizer releases it
 3. **SCP Key Zeroing**: Always zero SCP keys after use; `StaticKeys` implements `IDisposable`
 4. **TLV Disposal**: `TlvBuilder` and `DisposableTlvList` must be disposed
 5. **Platform-Specific Behavior**: PC/SC APIs behave differently across platforms; test on all three
 6. **Chained Response Assembly**: `INS_SEND_REMAINING` (0xC0) is used by default; some apps use custom values
-7. **Connection Sharing**: Protocols serialize their own exchanges (see Concurrency Model), but raw `IConnection.TransmitAsync` calls bypass that gate — don't drive a shared connection directly from multiple threads
+7. **Access Tiers**: Applet sessions are the golden path. Raw sessions bypass applet checks but retain session ownership and overlap guards. Raw `IConnection` calls bypass both session and exchange guards; do not interleave them, and dispose/reopen after an interrupted exchange. See [Raw Access Tiers](../../docs/architecture/raw-access-tiers.md)
 
 ## Related Modules
 

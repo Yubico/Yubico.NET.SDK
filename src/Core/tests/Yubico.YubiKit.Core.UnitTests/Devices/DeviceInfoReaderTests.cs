@@ -11,7 +11,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 public class DeviceInfoReaderTests
 {
     [Fact]
-    public async Task ProtocolDeviceInfo_ReadAsync_Success_DisposesProtocolExactlyOnce()
+    public async Task ProtocolDeviceInfo_ReadAsync_Success_DoesNotDisposeTheBorrowedConnection()
     {
         var connection = new FakeSmartCardConnection();
         connection.EnqueueResponse(new byte[] { 0x90, 0x00 });
@@ -21,18 +21,20 @@ public class DeviceInfoReaderTests
         var info = await ProtocolDeviceInfo.ReadAsync(connection, TestContext.Current.CancellationToken);
 
         Assert.Equal(0x01020304, info.SerialNumber);
-        Assert.Equal(1, connection.DisposeCount);
+        // Borrows: ProtocolDeviceInfo does not own this connection; the caller disposes it.
+        Assert.Equal(0, connection.DisposeCount);
     }
 
     [Fact]
-    public async Task ProtocolDeviceInfo_ReadAsync_Failure_DisposesProtocolExactlyOnce()
+    public async Task ProtocolDeviceInfo_ReadAsync_Failure_DoesNotDisposeTheBorrowedConnection()
     {
         var connection = new FakeSmartCardConnection();
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             ProtocolDeviceInfo.ReadAsync(connection, TestContext.Current.CancellationToken));
 
-        Assert.Equal(1, connection.DisposeCount);
+        // Borrows: ProtocolDeviceInfo does not own this connection; the caller disposes it.
+        Assert.Equal(0, connection.DisposeCount);
     }
 
     [Fact]

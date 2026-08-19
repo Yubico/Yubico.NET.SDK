@@ -32,7 +32,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Extension", "largeBlob")]
 public class FidoLargeBlobTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task LargeBlob_StoreAndRetrieve_RoundTripsData(YubiKeyTestState state) =>
@@ -135,7 +135,7 @@ public class FidoLargeBlobTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task LargeBlob_DeleteBlob_RemovesData(YubiKeyTestState state) =>

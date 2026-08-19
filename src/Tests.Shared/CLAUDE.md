@@ -17,7 +17,6 @@ Tests.Shared provides the foundation for all YubiKit integration tests. It imple
 - `Infrastructure/AllowList.cs` - Security layer preventing unauthorized testing
 - `YubiKeyTestState.cs` - Device wrapper implementing `IXunitSerializable`
 - `YubiKeyTestStateExtensions.cs` - Application-specific session helpers
-- `SharedSmartCardConnection.cs` - Non-owning SmartCard connection wrapper for multi-session integration helpers
 - `RecordingSmartCardConnection.cs` - xUnit-free SmartCard APDU recorder for byte-level unit tests
 
 ## Critical Design Patterns
@@ -212,7 +211,9 @@ public static async Task WithOathAsync(
 
 ### Sharing a SmartCard Connection Across Sessions
 
-Use `SharedSmartCardConnection` when an integration helper must create more than one session over the same physical connection, such as reset-then-test flows. The wrapper forwards all SmartCard operations but ignores `Dispose()` and `DisposeAsync()`, so the `WithConnectionAsync` owner remains responsible for the real connection lifetime.
+Pass the connection straight through. A session is a user of the connection it is handed, so disposing a reset session leaves the connection open for the test session that follows; the `WithConnectionAsync` owner disposes it. This used to need a non-owning `SharedSmartCardConnection` wrapper, which is gone — non-owning is the default now.
+
+One live session per connection: dispose the reset session before creating the test session, or the second construction throws `ConnectionInUseException`. Scope the reset session to its own `using` block.
 
 ### Recording SmartCard APDUs In Unit Tests
 
@@ -262,6 +263,9 @@ Static cache eliminates per-test cost, making this worthwhile for test suites wi
 
 ## Security Considerations
 
-- **Never commit real serial numbers** - Use environment variables or .gitignored appsettings.json
-- **Use separate test devices** - Never test on production or user devices
-- **Verify allow list is configured** - Tests fail fast if misconfigured
+The allow list **is** the authorization boundary. See [docs/TESTING.md](../../docs/TESTING.md#hardware-authorization) for the canonical policy; this section must not diverge from it.
+
+- **The committed allow list is the mechanism, by design.** `AppSettingsAllowListProvider` reads exactly one source: `appsettings.json` in the output directory. There is no environment-variable override, no `appsettings.Local.json`, and no user secrets. Serials of dedicated team test devices belong in that committed file.
+- **Only dedicated test devices.** Adding a serial authorizes destructive operations against that device — application resets, key overwrites, credential deletion. Never add a personal or production key, including one used for SSH, FIDO2/WebAuthn, PIV certificates, or OATH.
+- **Destruction is not the gate.** Integration tests reset applications and overwrite keys on allow-listed devices; that is what the harness exists for. What requires a human is *presence and timing* — User Presence/touch, UV/PIN ceremonies, FIDO2 reset power-cycle windows, and physical insert/remove. Do not add a second config gate on top of the allow list; it only obscures the real boundary.
+- **Verify the allow list is configured** - Tests fail fast if misconfigured (`Environment.Exit(-1)`).

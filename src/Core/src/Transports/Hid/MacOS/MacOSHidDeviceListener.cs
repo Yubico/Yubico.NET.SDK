@@ -14,7 +14,6 @@
 
 using Microsoft.Extensions.Logging;
 using System.Globalization;
-using System.Text;
 using Yubico.YubiKit.Core.Native.MacOS.CoreFoundation;
 using CFNativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;
 using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.NativeMethods;
@@ -194,11 +193,7 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
             }
 
             // Create the run loop mode string
-            var modeBytes = Encoding.UTF8.GetBytes("kCFRunLoopDefaultMode");
-            _runLoopMode = CFNativeMethods.CFStringCreateWithCString(
-                IntPtr.Zero,
-                [.. modeBytes, 0],
-                0x08000100); // kCFStringEncodingUTF8
+            _runLoopMode = CoreFoundationString.Create("kCFRunLoopDefaultMode");
 
             // Schedule the HID manager with this run loop
             // Deliberately do not open the manager. Matching/removal callbacks do not require it, and

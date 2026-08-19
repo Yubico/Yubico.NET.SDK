@@ -20,11 +20,12 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 /// <summary>
 ///     xUnit data attribute that provides filtered YubiKey devices as test parameters.
-///     Use with [Theory] to run tests on devices matching specified criteria.
+///     Use with [SkippableTheory] to run tests on devices matching specified criteria.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         This attribute works with xUnit's [Theory] to provide YubiKey devices as test data.
+///         This attribute works with [SkippableTheory] to provide YubiKey devices as test data and
+///         report unavailable hardware as a skipped test rather than a failure.
 ///         It automatically discovers, filters, and provides devices based on the specified criteria.
 ///         Multiple [WithYubiKey] attributes can be applied to run tests with different device configurations.
 ///     </para>
@@ -32,7 +33,7 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 ///         Usage:
 ///         <code>
 ///     // Single configuration
-///     [Theory]
+///     [SkippableTheory]
 ///     [WithYubiKey(MinFirmware = "5.7.2")]
 ///     public async Task TestName(YubiKeyTestState device)
 ///     {
@@ -40,7 +41,7 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 ///     }
 /// 
 ///     // Multiple configurations
-///     [Theory]
+///     [SkippableTheory]
 ///     [WithYubiKey(MinFirmware = "5.0")]
 ///     [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
 ///     [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
@@ -127,7 +128,7 @@ public class WithYubiKeyAttribute : DataAttribute, ITraitAttribute
     ///         public string GetDescription() => "Production keys (SN > 10000000)";
     ///     }
     /// 
-    ///     [Theory]
+    ///     [SkippableTheory]
     ///     [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
     ///     public async Task Test(YubiKeyTestState device) { }
     ///         </code>

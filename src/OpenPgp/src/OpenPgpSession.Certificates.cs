@@ -26,6 +26,8 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Getting certificate for {Slot}", keyRef);
 
         if (keyRef == KeyRef.Att)
@@ -60,6 +62,7 @@ public sealed partial class OpenPgpSession
         X509Certificate2 certificate,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(certificate);
 
         _logger.LogInformation("Storing certificate for {Slot}", keyRef);
@@ -84,6 +87,8 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogInformation("Deleting certificate for {Slot}", keyRef);
 
         if (keyRef == KeyRef.Att)

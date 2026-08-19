@@ -155,6 +155,11 @@ public static class YubiKeyManager
     /// <para><strong>Implementation Note:</strong> Device listeners only signal that a change occurred;
     /// they do not pass device objects directly. A full device scan is triggered on each signal
     /// to determine which devices arrived or were removed.</para>
+    /// <para><strong>Physical-device semantics:</strong> A composite key normally appears as one event,
+    /// but ambiguous evidence can conservatively publish one physical key as multiple devices. For an
+    /// uninterrupted presence with unchanged interfaces, the repository retains the object originally
+    /// published in <see cref="DeviceAction.Added"/> so its <see cref="IYubiKey.DeviceId"/> correlates with
+    /// the eventual <see cref="DeviceAction.Removed"/> event.</para>
     /// </remarks>
     /// <seealso cref="StartMonitoring()"/>
     /// <seealso cref="DeviceEvent"/>
@@ -221,6 +226,9 @@ public static class YubiKeyManager
     /// <para>This method returns cached results after the first call. Use the overload with
     /// <c>forceRescan: true</c> to always perform a fresh device scan.</para>
     /// <para>This method scans both SmartCard (PCSC) and HID transports.</para>
+    /// <para>Results normally contain one <see cref="IYubiKey"/> per physical key, but ambiguous discovery
+    /// evidence can conservatively split one key into multiple results. See the device-discovery guarantees
+    /// documentation for the exact platform bounds.</para>
     /// <para><strong>Race Condition Note:</strong> Results may be stale if devices connect or
     /// disconnect during the scan. For real-time tracking, use <see cref="DeviceChanges"/>
     /// with <see cref="StartMonitoring()"/>.</para>
@@ -250,6 +258,14 @@ public static class YubiKeyManager
     ///   <item>While monitoring: Returns cached results (monitoring keeps cache fresh)</item>
     /// </list>
     /// </para>
+    /// <para><strong>Identity:</strong> For an uninterrupted presence with unchanged physical interfaces and
+    /// <see cref="IYubiKey.AvailableConnections"/>, the cached object retains the <see cref="IYubiKey.DeviceId"/>
+    /// that was originally published. A newly constructed object from a fresh scan can have a different
+    /// evidence-tier-derived ID before repository reconciliation; do not use independently obtained scan
+    /// objects as durable physical-identity records.</para>
+    /// <para><strong>Physical-device bounds:</strong> One result per physical key is the common case, not an
+    /// unconditional promise. When topology, serial, and PID evidence cannot safely correlate interfaces,
+    /// discovery publishes conservative splits rather than risk merging different keys.</para>
     /// <para><strong>Race Condition Note:</strong> Results may be stale if devices connect or
     /// disconnect during the scan. For real-time tracking, use <see cref="DeviceChanges"/>
     /// with <see cref="StartMonitoring()"/>.</para>

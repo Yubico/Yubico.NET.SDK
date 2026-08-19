@@ -113,27 +113,24 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Null(device.RequestedConnection);
     }
 
-    // Phase 38.5 (ISC-14): held SmartCard falls back to HID OTP through the public entry point; the opened
-    // fallback connection is disposed when session init fails after connect (no leak), and the surfaced
-    // failure is the post-connect session-init failure, not the SCardException.
+    // A held default SmartCard transport propagates unchanged and no HID OTP connection is opened.
     [Fact]
-    public async Task CreateYubiOtpSessionAsync_SmartCardHeld_FallsBackToHidOtpAndDisposesOnInitFailure()
+    public async Task CreateYubiOtpSessionAsync_SmartCardHeld_PropagatesWithoutHidFallback()
     {
         var hid = new FailingOtpConnection();
         var device = new FallbackProbeYubiKey(ConnectionType.SmartCard | ConnectionType.HidOtp)
             .Throws(ConnectionType.SmartCard, HeldSmartCard())
             .Returns(ConnectionType.HidOtp, hid);
 
-        var ex = await Record.ExceptionAsync(() => device.CreateYubiOtpSessionAsync(cancellationToken: Ct));
+        var ex = await Assert.ThrowsAsync<SCardException>(
+            () => device.CreateYubiOtpSessionAsync(cancellationToken: Ct));
 
-        Assert.NotNull(ex);
-        Assert.IsNotType<SCardException>(ex);
-        Assert.True(hid.Disposed, "the opened fallback HID OTP connection must be disposed on session-init failure");
-        Assert.Equal([ConnectionType.SmartCard, ConnectionType.HidOtp], device.Attempts);
+        Assert.Equal(unchecked((int)0x8010000B), ex.HResult);
+        Assert.False(hid.Disposed);
+        Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }
 
-    // Phase 38.5 (ISC-7/ISC-14): an explicit override never falls back — a held SmartCard override surfaces
-    // the held SCardException and makes no HID OTP attempt (the applet passes the single-element override list).
+    // A held explicit SmartCard override surfaces unchanged and makes no HID OTP attempt.
     [Fact]
     public async Task CreateYubiOtpSessionAsync_OverrideSmartCardHeld_DoesNotFallBack()
     {
@@ -197,7 +194,7 @@ public class IYubiKeyExtensionsTransportTests
     }
 
     // A HID OTP connection valid enough to return from connect but that fails every protocol exchange, so
-    // YubiOtpSession initialization cannot complete; records disposal to prove no leak on the fallback path.
+    // YubiOtpSession initialization cannot complete; records disposal for failed initialization cleanup.
     private sealed class FailingOtpConnection : IOtpHidConnection
     {
         public bool Disposed { get; private set; }

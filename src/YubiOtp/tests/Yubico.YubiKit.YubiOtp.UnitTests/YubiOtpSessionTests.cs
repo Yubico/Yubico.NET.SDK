@@ -16,7 +16,9 @@ using NSubstitute;
 using System.Reflection;
 using System.Text;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.YubiOtp.Backend;
@@ -26,7 +28,20 @@ namespace Yubico.YubiKit.YubiOtp.UnitTests;
 public class YubiOtpSessionTests
 {
     [Fact]
-    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    public async Task CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached()
+    {
+        var connection = new UnsupportedConnection();
+
+        _ = await Assert.ThrowsAsync<NotSupportedException>(
+            () => YubiOtpSession.CreateAsync(
+                connection,
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        await using var probe = new ProbeSession(connection);
+    }
+
+    [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
     {
         var connection = Substitute.For<IOtpHidConnection>();
         connection.Type.Returns(ConnectionType.HidOtp);
@@ -40,7 +55,8 @@ public class YubiOtpSessionTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             YubiOtpSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
-        connection.Received(1).Dispose();
+        // Borrowed: a failed CreateAsync must not dispose a connection it did not create.
+        connection.DidNotReceive().Dispose();
     }
 
     [Fact]
@@ -394,4 +410,17 @@ public class YubiOtpSessionTests
             Assert.Equal(expected, result);
         }
     }
+
+    private sealed class UnsupportedConnection : IConnection
+    {
+        public ConnectionType Type => ConnectionType.Unknown;
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    private sealed class ProbeSession(IConnection connection) : ApplicationSession(connection);
 }

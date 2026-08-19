@@ -22,8 +22,11 @@ namespace Yubico.YubiKit.Core.Abstractions;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         A protocol owns the connection it was created from. Disposing the protocol disposes that
-///         connection; callers should not dispose both independently.
+///         A protocol is a user of the connection it was created from, never its owner. Disposing a
+///         protocol does not dispose that connection: whoever created the connection disposes it. The
+///         one deliberate exception is a decorating protocol such as the SCP wrapper, which owns the
+///         protocol it wraps and disposes it (along with any session key material) — the cascade still
+///         stops before the connection.
 ///     </para>
 ///     <para>
 ///         Sessions configure the protocol after applet probing has resolved firmware. Call
@@ -31,16 +34,16 @@ namespace Yubico.YubiKit.Core.Abstractions;
 ///         such as SCP.
 ///     </para>
 ///     <para>
-///         Implementations serialize full logical exchanges internally. Concurrent callers are safe, but
-///         work executes sequentially because YubiKey transports maintain chained APDU, CTAP HID, OTP HID,
-///         or SCP state across packets.
+///         Implementations admit one logical exchange at a time. An overlapping operation throws
+///         <see cref="InvalidOperationException" /> immediately because YubiKey transports maintain chained
+///         APDU, CTAP HID, OTP HID, or SCP state across packets.
 ///     </para>
 ///     <para>
 ///         Application sessions keep the effective protocol for the session lifetime and dispose it when
 ///         the session is disposed. Applet backends borrow the protocol; they do not own it.
 ///     </para>
 /// </remarks>
-public interface IProtocol : IDisposable
+internal interface IProtocol : IDisposable
 {
     void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null);
 }

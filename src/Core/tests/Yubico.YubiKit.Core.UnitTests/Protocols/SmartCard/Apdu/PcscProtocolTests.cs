@@ -168,8 +168,15 @@ public class PcscProtocolTests
         Assert.Equal((byte)0xC0, protocol.InsSendRemaining);
     }
 
+    /// <summary>
+    ///     Disposal is idempotent and leaves the connection alone. The protocol is a USER of the connection it
+    ///     was handed; whoever created the connection disposes it. This test previously asserted the opposite
+    ///     (that disposal reached the connection), which is the ownership bug the session-contention work
+    ///     removed: it made a session destroy a connection it had not created, so no caller could run two
+    ///     applets over one connection.
+    /// </summary>
     [Fact]
-    public void Dispose_Twice_DisposesConnectionOnce()
+    public void Dispose_Twice_IsIdempotent_AndDoesNotDisposeConnection()
     {
         // Arrange
         var protocol = new PcscProtocol(_fakeConnection, default, _logger);
@@ -179,7 +186,7 @@ public class PcscProtocolTests
         protocol.Dispose();
 
         // Assert
-        Assert.Equal(1, _fakeConnection.DisposeCount);
+        Assert.Equal(0, _fakeConnection.DisposeCount);
     }
 
     [Fact]

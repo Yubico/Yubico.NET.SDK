@@ -31,7 +31,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Extension", "prf")]
 public class FidoPrfTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task Prf_MakeCredential_IndicatesSupport(YubiKeyTestState state) =>
@@ -119,7 +119,7 @@ public class FidoPrfTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task Prf_DeterministicOutputs_SameSaltProducesSameResult(YubiKeyTestState state) =>

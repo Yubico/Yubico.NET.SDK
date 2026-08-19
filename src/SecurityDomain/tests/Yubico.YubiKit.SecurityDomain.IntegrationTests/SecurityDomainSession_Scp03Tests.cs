@@ -18,7 +18,7 @@ public class SecurityDomainSession_Scp03Tests
     ///     Validates that a Security Domain session can be created with SCP03 on devices
     ///     running firmware 5.7.2 or newer.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task CreateAsync_WithScp03_Succeeds(YubiKeyTestState state)
     {
@@ -33,7 +33,7 @@ public class SecurityDomainSession_Scp03Tests
             scpKeyParams: scpParams, cancellationToken: CancellationTokenSource.Token);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task GetKeyInfoAsync_ReturnsDefaultScpKey(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionAsync(true,
@@ -45,7 +45,7 @@ public class SecurityDomainSession_Scp03Tests
                 Assert.Equal(0xFF, keyInfo.First().KeyReference.Kvn);
             }, cancellationToken: CancellationTokenSource.Token);
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task ResetAsync_ReinitializesSession(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionAsync(false,
@@ -63,7 +63,7 @@ public class SecurityDomainSession_Scp03Tests
     ///     Verifies that PutKeyAsync can import SCP03 static keys and that authentication
     ///     works with the new keys, while the old default keys no longer work.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task PutKeyAsync_WithStaticKeys_ImportsAndAuthenticates(YubiKeyTestState state)
     {
@@ -106,7 +106,7 @@ public class SecurityDomainSession_Scp03Tests
         Assert.IsType<ApduException>(ex.InnerException);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task GetCardRecognitionData_Succeeds(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionAsync(true,
@@ -116,7 +116,7 @@ public class SecurityDomainSession_Scp03Tests
                 Assert.True(result.Length > 0);
             }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task GetData_Succeeds(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionAsync(true,
@@ -126,7 +126,7 @@ public class SecurityDomainSession_Scp03Tests
                 Assert.True(result.Length > 0);
             }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task GetData_Unauthenticated_Succeeds(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionAsync(false,
@@ -137,7 +137,7 @@ public class SecurityDomainSession_Scp03Tests
                 Assert.True(result.Length > 0);
             }, cancellationToken: CancellationTokenSource.Token);
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task GetSupportedCaIdentifiers_Succeeds(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionAsync(true,

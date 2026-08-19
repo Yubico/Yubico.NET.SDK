@@ -57,62 +57,66 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
     {
         ThrowIfDisposed();
 
-        var currentIds = _deviceCache.Keys.ToHashSet();
+        // Diffing is keyed by PHYSICAL identity — the set of interface paths a key occupies — and never by
+        // IYubiKey.DeviceId. A composite's DeviceId names the evidence tier that resolved the merge, so it
+        // flips when the surrounding evidence changes even though the key never moved (see
+        // CompositeYubiKey.PhysicalIdentityKeyFor). Diffing on it reported an unmoved key as Removed+Added.
+        var currentKeys = _deviceCache.Keys.ToHashSet();
         var newDeviceMap = new Dictionary<string, IYubiKey>();
 
         foreach (var device in devices)
         {
-            newDeviceMap[device.DeviceId] = device;
+            newDeviceMap[CompositeYubiKey.PhysicalIdentityKeyFor(device)] = device;
         }
 
-        var newIds = newDeviceMap.Keys.ToHashSet();
-        var addedIds = newIds.Except(currentIds).ToList();
-        var removedIds = currentIds.Except(newIds).ToList();
+        var newKeys = newDeviceMap.Keys.ToHashSet();
+        var addedKeys = newKeys.Except(currentKeys).ToList();
+        var removedKeys = currentKeys.Except(newKeys).ToList();
 
         // Handle removed devices first (include the removed device object in event)
-        foreach (var deviceId in removedIds)
+        foreach (var identityKey in removedKeys)
         {
-            if (_deviceCache.TryRemove(deviceId, out var removedDevice))
+            if (_deviceCache.TryRemove(identityKey, out var removedDevice))
             {
                 _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, removedDevice));
-                Logger.LogDebug("Device removed: {DeviceId}", deviceId);
+                Logger.LogDebug("Device removed: {DeviceId}", removedDevice.DeviceId);
             }
         }
 
         // Handle added devices
-        foreach (var deviceId in addedIds)
+        foreach (var identityKey in addedKeys)
         {
-            var device = newDeviceMap[deviceId];
-            _deviceCache[deviceId] = device;
+            var device = newDeviceMap[identityKey];
+            _deviceCache[identityKey] = device;
             _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, device));
-            Logger.LogDebug("Device added: {DeviceId}", deviceId);
+            Logger.LogDebug("Device added: {DeviceId}", device.DeviceId);
         }
 
-        // Update existing devices in cache. The DeviceId is stable physical identity, but a physical
-        // device's available connections can change while it stays present (an interface appears or
-        // disappears). DeviceAction has only Added/Removed, so model a capability change as Removed+Added
-        // rather than overwriting silently (ISC-17).
+        // Update existing devices in cache. A physical device's available connections can change while it
+        // stays present. DeviceAction has only Added/Removed, so model a capability change as Removed+Added
+        // rather than overwriting silently (ISC-17). An interface appearing or disappearing changes the
+        // interface set itself, so it is already reported as Removed+Added by the two loops above; this loop
+        // covers the same interface set reporting different connections.
         var changedCount = 0;
-        foreach (var deviceId in newIds.Intersect(currentIds))
+        foreach (var identityKey in newKeys.Intersect(currentKeys))
         {
-            var updated = newDeviceMap[deviceId];
-            if (_deviceCache.TryGetValue(deviceId, out var existing) &&
-                HasPhysicalIdentityChanged(existing, updated))
+            var updated = newDeviceMap[identityKey];
+            if (_deviceCache.TryGetValue(identityKey, out var existing) &&
+                existing.AvailableConnections != updated.AvailableConnections)
             {
-                _deviceCache[deviceId] = updated;
+                _deviceCache[identityKey] = updated;
                 _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, existing));
                 _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, updated));
                 changedCount++;
                 Logger.LogDebug(
                     "Device connections changed: {DeviceId} ({Old} -> {New})",
-                    deviceId,
+                    updated.DeviceId,
                     existing.AvailableConnections,
                     updated.AvailableConnections);
             }
-            else
-            {
-                _deviceCache[deviceId] = updated;
-            }
+
+            // Otherwise retain the object whose DeviceId was published in Added, so a later Removed event
+            // remains correlated for this uninterrupted physical-presence lifetime.
         }
 
         _hasData = true;
@@ -120,8 +124,8 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
         Logger.LogDebug(
             "Cache updated: {Total} devices, {Added} added, {Removed} removed, {Changed} connection-changed",
             newDeviceMap.Count,
-            addedIds.Count,
-            removedIds.Count,
+            addedKeys.Count,
+            removedKeys.Count,
             changedCount);
     }
 
@@ -134,17 +138,6 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
         _hasData = false;
 
         Logger.LogDebug("Cache cleared");
-    }
-
-    private static bool HasPhysicalIdentityChanged(IYubiKey existing, IYubiKey updated)
-    {
-        if (existing.AvailableConnections != updated.AvailableConnections)
-            return true;
-
-        if (existing is CompositeYubiKey existingComposite && updated is CompositeYubiKey updatedComposite)
-            return !existingComposite.MemberDeviceIds.SequenceEqual(updatedComposite.MemberDeviceIds);
-
-        return false;
     }
 
     private void ThrowIfDisposed()

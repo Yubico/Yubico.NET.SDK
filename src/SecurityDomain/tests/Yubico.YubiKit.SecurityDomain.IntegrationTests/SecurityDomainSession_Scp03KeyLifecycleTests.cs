@@ -33,7 +33,7 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests
     ///     each deletion. Follows the pattern from the Java SDK's testDeleteKey: to delete
     ///     a key you must authenticate with a different key that remains on the device.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task PutKeyAsync_ThenDeleteKeyAsync_ImportsAndRemovesKey(YubiKeyTestState state)
     {
@@ -127,7 +127,7 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests
     ///     Imports a custom SCP03 key set, then replaces (rotates) it with a new key set using the replaceKvn parameter.
     ///     Verifies that the original key no longer works and the replacement key authenticates successfully.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task PutKeyAsync_WithReplaceKvn_RotatesKey(YubiKeyTestState state)
     {

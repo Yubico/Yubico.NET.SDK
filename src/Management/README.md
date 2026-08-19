@@ -27,7 +27,7 @@ using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Core.Devices;
 
 IYubiKey yubiKey = ...;
-using var mgmtSession = await yubiKey.CreateManagementSessionAsync();
+await using var mgmtSession = await yubiKey.CreateManagementSessionAsync();
 DeviceInfo info = await mgmtSession.GetDeviceInfoAsync();
 Console.WriteLine($"Serial: {info.SerialNumber}, Firmware: {info.FirmwareVersion}");
 ```
@@ -94,6 +94,10 @@ await using var mgmtOverOtp = await yubiKey.CreateManagementSessionAsync(
     preferredConnection: ConnectionType.HidOtp);
 ```
 
+Management selects exactly one transport: the explicit override, or the first supported transport in
+`SmartCard -> HidFido -> HidOtp`. A grouped physical YubiKey admits one live connection across all known
+interfaces. Connection and initialization failures propagate without trying another interface.
+
 ### Form Factors
 
 YubiKeys come in different physical form factors:
@@ -137,7 +141,7 @@ await yubiKey.SetDeviceConfigAsync(
     cancellationToken: cancellationToken);
 
 // Manual session management (for multiple operations)
-using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
+await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
     cancellationToken: cancellationToken);
 ```
 
@@ -151,28 +155,40 @@ using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
 using Yubico.YubiKit.Management;
 
 // Using IYubiKey extension (recommended for single operations)
-using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
+await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
     cancellationToken: cancellationToken);
 
 // Or manually over SmartCard (CCID/NFC)
-using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
-using var mgmtSession = await ManagementSession.CreateAsync(
+await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
+await using var mgmtSession = await ManagementSession.CreateAsync(
     connection,
     cancellationToken: cancellationToken);
 
 // Or manually over HID (FIDO interface)
-using var connection = await yubiKey.ConnectAsync<IFidoHidConnection>();
-using var mgmtSession = await ManagementSession.CreateAsync(
+await using var connection = await yubiKey.ConnectAsync<IFidoHidConnection>();
+await using var mgmtSession = await ManagementSession.CreateAsync(
     connection,
     cancellationToken: cancellationToken);
 
 // With SCP03 authentication (SmartCard only)
-using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
-using var mgmtSession = await ManagementSession.CreateAsync(
+await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
+await using var mgmtSession = await ManagementSession.CreateAsync(
     connection,
     scpKeyParams: Scp03KeyParameters.Default,
     cancellationToken: cancellationToken);
 ```
+
+### Connection and session ownership
+
+Whoever creates a connection disposes it. `ManagementSession.CreateAsync(connection)` borrows the
+caller's connection and does **not** dispose it, so keep both lifetimes explicit with `await using`.
+The `yubiKey.CreateManagementSessionAsync()` convenience API is different: it opens a connection the
+caller never sees, and the returned session owns that hidden connection.
+
+Only one live application session may use a connection. Dispose the first session before creating a
+second over the same caller-owned connection; sequential reuse is supported without reconnecting.
+Failing to dispose a caller-created connection can retain the physical-device lease for the
+connection/process lifetime and block later opens. There is no finalizer backstop.
 
 ### Getting Device Information
 

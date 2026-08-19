@@ -29,11 +29,14 @@ public class YubiOtpSlotConfigTests
     ///     Programs slot 2 with a static password configuration using keyboard scan codes,
     ///     verifies the slot is configured, then deletes it and verifies cleanup.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     public async Task PutConfiguration_StaticPassword_ConfiguresAndDeletesSlot(YubiKeyTestState state)
     {
-        var connection = await state.Device.ConnectAsync<IOtpHidConnection>();
+        // The test creates the connection, so the test disposes it: YubiOtpSession.CreateAsync borrows a
+        // caller-created connection and never closes it. Leaking it would hold the physical-device lease
+        // for the process lifetime and fail every later OTP HID open in this run.
+        await using var connection = await state.Device.ConnectAsync<IOtpHidConnection>();
         await using var session = await YubiOtpSession.CreateAsync(connection);
 
         // Simple scan codes representing a static password (US keyboard layout)
@@ -64,11 +67,11 @@ public class YubiOtpSlotConfigTests
     ///     Programs slot 2 with a classic Yubico OTP configuration using a public ID,
     ///     private ID, and AES key. Verifies the slot is configured, then cleans up.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     public async Task PutConfiguration_YubicoOtp_ConfiguresAndDeletesSlot(YubiKeyTestState state)
     {
-        var connection = await state.Device.ConnectAsync<IOtpHidConnection>();
+        await using var connection = await state.Device.ConnectAsync<IOtpHidConnection>();
         await using var session = await YubiOtpSession.CreateAsync(connection);
 
         // Public ID (modhex-encoded, up to 16 bytes)
@@ -106,11 +109,11 @@ public class YubiOtpSlotConfigTests
     ///     Programs slot 2 with an HOTP (counter-based OTP) configuration.
     ///     Verifies the slot is configured, then cleans up.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     public async Task PutConfiguration_Hotp_ConfiguresAndDeletesSlot(YubiKeyTestState state)
     {
-        var connection = await state.Device.ConnectAsync<IOtpHidConnection>();
+        await using var connection = await state.Device.ConnectAsync<IOtpHidConnection>();
         await using var session = await YubiOtpSession.CreateAsync(connection);
 
         // 20-byte HMAC key for HOTP
@@ -142,11 +145,11 @@ public class YubiOtpSlotConfigTests
     ///     Programs slot 2 with an HOTP configuration using 8 digits mode.
     ///     Verifies the slot is configured with the 8-digit option, then cleans up.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     public async Task PutConfiguration_Hotp8Digits_ConfiguresAndDeletesSlot(YubiKeyTestState state)
     {
-        var connection = await state.Device.ConnectAsync<IOtpHidConnection>();
+        await using var connection = await state.Device.ConnectAsync<IOtpHidConnection>();
         await using var session = await YubiOtpSession.CreateAsync(connection);
 
         byte[] hmacKey =

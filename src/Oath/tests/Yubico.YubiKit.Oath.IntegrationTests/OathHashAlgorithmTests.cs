@@ -32,7 +32,7 @@ public class OathHashAlgorithmTests
         0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30
     ];
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task TotpCredential_Sha256_CalculatesCode(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -60,7 +60,7 @@ public class OathHashAlgorithmTests
             Assert.Equal(6, code.Value.Length);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task TotpCredential_Sha512_CalculatesCode(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -86,7 +86,7 @@ public class OathHashAlgorithmTests
             Assert.Equal(6, code.Value.Length);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task TotpCredential_NonDefaultPeriod60s_CalculatesCode(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -117,7 +117,7 @@ public class OathHashAlgorithmTests
             Assert.Equal(60, code.ValidTo - code.ValidFrom);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task TotpCredential_8Digits_ReturnsEightCharacterCode(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -143,7 +143,7 @@ public class OathHashAlgorithmTests
             Assert.Equal(8, code.Value.Length);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
     public async Task TotpCredential_Sha256With8Digits_CombinedSettings(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
@@ -174,51 +174,63 @@ public class OathHashAlgorithmTests
             Assert.Equal(60, code.ValidTo - code.ValidFrom);
         }, cancellationToken: NewToken());
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
-    public async Task LockedSession_ValidateWithWrongKey_Throws(YubiKeyTestState state) =>
+    public async Task LockedSession_ValidateWithWrongKey_Throws(YubiKeyTestState state)
+    {
+        const string password = "locked-test-password";
+
+        // Reset the applet and set an access key to lock the OATH application.
         await state.WithOathSessionAsync(async session =>
         {
-            // Set an access key to lock the OATH application
-            string password = "locked-test-password";
             byte[] key = session.DeriveKey(Encoding.UTF8.GetBytes(password));
-
             try
             {
                 await session.SetKeyAsync(key, NewToken());
-
-                // Open a new session -- it should be locked because a key is set
-                await using var lockedSession = await state.Device
-                    .CreateOathSessionAsync(cancellationToken: NewToken());
-
-                Assert.True(lockedSession.IsLocked);
-
-                // Validate with the wrong key should fail
-                byte[] wrongKey = session.DeriveKey(Encoding.UTF8.GetBytes("wrong-password"));
-                try
-                {
-                    await Assert.ThrowsAnyAsync<Exception>(async () =>
-                        await lockedSession.ValidateAsync(wrongKey, NewToken()));
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(wrongKey);
-                }
-
-                // Validate with the correct key should succeed and unlock
-                await lockedSession.ValidateAsync(key, NewToken());
-                Assert.False(lockedSession.IsLocked);
-
-                // After unlocking, operations should work
-                var credentials = await lockedSession.ListCredentialsAsync(NewToken());
-                Assert.NotNull(credentials);
             }
             finally
             {
                 CryptographicOperations.ZeroMemory(key);
-
-                // Clean up: unset the key so other tests are unaffected
-                await session.UnsetKeyAsync(NewToken());
             }
         }, cancellationToken: NewToken());
+
+        // A FRESH session is what observes the lock — the session that set the key is already
+        // authenticated and would report nothing useful. It is disposed above rather than held
+        // open alongside this one: two live sessions on one CCID interface are refused.
+        await using var lockedSession = await state.Device
+            .CreateOathSessionAsync(cancellationToken: NewToken());
+
+        byte[] correctKey = lockedSession.DeriveKey(Encoding.UTF8.GetBytes(password));
+        try
+        {
+            Assert.True(lockedSession.IsLocked);
+
+            // Validate with the wrong key should fail
+            byte[] wrongKey = lockedSession.DeriveKey(Encoding.UTF8.GetBytes("wrong-password"));
+            try
+            {
+                await Assert.ThrowsAnyAsync<Exception>(async () =>
+                    await lockedSession.ValidateAsync(wrongKey, NewToken()));
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(wrongKey);
+            }
+
+            // Validate with the correct key should succeed and unlock
+            await lockedSession.ValidateAsync(correctKey, NewToken());
+            Assert.False(lockedSession.IsLocked);
+
+            // After unlocking, operations should work
+            var credentials = await lockedSession.ListCredentialsAsync(NewToken());
+            Assert.NotNull(credentials);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(correctKey);
+
+            // Clean up: unset the key so other tests are unaffected
+            await lockedSession.UnsetKeyAsync(NewToken());
+        }
+    }
 }

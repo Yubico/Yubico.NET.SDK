@@ -8,8 +8,9 @@ guarantee — if you cannot find the citation, treat the behavior as unspecified
 Scope: grouping multiple USB interfaces (CCID/smart card, HID FIDO, HID OTP) of one physical
 YubiKey into one `IYubiKey`, as performed by `FindYubiKeys.FindAllAsync` and
 `CompositeDeviceMerger`. See [Physical Device Model](physical-device-model.md) for the device model
-itself and [Event-Driven Device Discovery](event-driven-device-discovery.md) for the monitoring
-loop.
+itself, [Event-Driven Device Discovery](event-driven-device-discovery.md) for the monitoring
+loop, and [Connection Ownership and Contention](connection-ownership-and-contention.md) for who may
+hold which interface and what discovery does when one is already held.
 
 ## The core problem: same-PID keys
 
@@ -35,6 +36,140 @@ Discovery resolves same-PID keys using an **evidence hierarchy**, strongest firs
 The hierarchy never guesses. When evidence runs out, interfaces are published separately, which is
 incomplete but never wrong.
 
+Serial reads are conditional and on demand; discovery does **not** open every interface on every
+scan. It requests serial evidence only when PID correlation is untrusted, more than one physical key
+shares a PID, or a partial-PID shape is ambiguous. Only successful reads are cached, keyed by the
+stable **interface identifier** (`hid:*`, `pcsc:*` — not the physical `ykphysical:*` identifier discussed
+in [Device identity](#device-identity-what-deviceid-does-and-does-not-promise), which is a different
+concept); failures and null serials are retried on later scans. This is pinned by
+`FindAllAsync_ScriptedIdentityFailure_DeducedIntoAnchoredKey_AndRereadOnNextScan_Pin`,
+`FindAllAsync_InterfaceDisappearance_EvictsIdentityCacheEntries_Pin`, and
+`FindAllAsync_PcscReaderRenameBetweenScans_OldEntryMissesAndSuccessfulRereadHeals_Pin` in
+`src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs`.
+
+A cached identity is evidence about specific hardware in a specific configuration, and it expires with
+either. **Hardware**: scan-time eviction only catches interfaces observed absent, and a same-slot swap
+completing between scans reuses the slot-derived interface identifier — the old key's serial would be
+attributed to its same-model successor (key substitution). A physical swap cannot happen without the OS
+observing removal and arrival, so the device monitor forwards every listener event to
+`IFindYubiKeys.NotifyTransportActivity` at ingress, which discards that transport's cached identities
+before the rescan the event triggers. Eviction is per transport (HID activity does not discard PC/SC
+evidence, and vice versa). **Configuration**: each entry records the PID observed at read time, and a
+hit under a different PID is a miss. Pinned by
+`FindAllAsync_SameSlotSwapWithTransportActivity_RereadsInsteadOfServingTheOldKeysSerial`,
+`NotifyTransportActivity_HidOnly_LeavesPcscIdentityCacheIntact`, and
+`FindAllAsync_PidChangeOnSameInterfaceId_IsACacheMissNotAHit`; the monitor wiring by
+`ListenerEvents_NotifyTheFinderOfTransportActivity_PerTransport`.
+
+Documented bound: without monitoring running there are no listener events, and staleness detection
+degrades to scan-observed absence. Consumers driving `FindAllAsync` directly across a physical swap
+they orchestrated themselves should force a rescan after replugging.
+
+Hardware evidence and its limit: an operator-coordinated port swap of two same-model keys (the
+reader-name-reuse shape behind the substitution hazard) re-published both under their correct serial
+identities with monitoring running. A hand-timed swap necessarily spans scan intervals, so scan-observed
+absence also fires; the between-scan timing that only the event-driven eviction catches is covered
+deterministically by the fault-injection vectors above.
+
+## Device identity: what `DeviceId` does and does not promise
+
+The merge hierarchy above decides *which interfaces form one key*. It also decides *what that key is
+called*, and the two are the same decision — which is why the identifier is evidence-dependent rather than
+intrinsic. This section is the consumer-facing contract; `IYubiKey.DeviceId` carries the same statement in
+XML docs.
+
+### Two different identifiers, easily confused
+
+| Identifier | Example | Names | Used by |
+|---|---|---|---|
+| **Interface identifier** | `hid:4367418413:0006`, `pcsc:Yubico YubiKey OTP+FIDO+CCID` | one USB interface | connection registry, identity cache |
+| **Physical identifier** (`IYubiKey.DeviceId`) | `ykphysical:103` | one physical key | discovery results, `DeviceChanges` |
+
+The interface identifier is stable for as long as the interface exists. The physical identifier is not, in
+the way described below. Where this document says "stable interface `DeviceId`" it means the former.
+
+### Shape follows evidence tier
+
+| Tier used | `DeviceId` shape | Available on |
+|---|---|---|
+| 1 — topology (Container ID) | `ykphysical:topology:{key}` | Windows only |
+| 2 — serial | `ykphysical:{serial}` | all platforms |
+| 3/4 — PID uniqueness / pigeonhole | `ykphysical:pid:{PID:X4}` | all platforms |
+| 5 — conservative standalone | the interface identifier, published alone | all platforms |
+
+**At most one `ykphysical:{serial}` object exists per serial per scan.** A serial observed under more
+than one PID in a single scan is one physical key caught mid-reconfiguration — serial is globally unique
+per key, and PID changes with configuration — enumerated once staly and once fresh. A serial↔PID flip has
+been observed on macOS hardware. Those enumerations are **not merged into one composite** (it would hold
+two members of the same connection type, invisible in `AvailableConnections` and resolved arbitrarily at
+connect time) and they do **not** both mint the id. Instead, the *winner rule* applies: the PID group
+whose serial-anchored census exactly matches its PID's expected interface set keeps `ykphysical:{serial}`;
+every other contested interface publishes standalone. Zero or multiple complete groups is ambiguity, and
+ambiguity fragments conservatively — the next scan converges. Completeness is a heuristic and can pick the
+stale enumeration when a scan catches it still fully enumerated; both groups are the same physical key, so
+the consequence is bounded to one scan of stale membership and self-corrects. The reasoning is recorded at
+`CompositeDeviceMerger.ResolveContestedSerials`, and the rule is pinned by the `Merge_ContestedSerial_*`
+vectors plus `Merge_AnyVector_ProducesPairwiseDistinctDeviceIds`.
+
+Hardware evidence and its limit: a 37,000-scan loop across two real reconfiguration reboots (three keys,
+macOS) observed zero invariant violations, and every intermediate enumeration state was the documented
+conservative behavior; `ReconfigurationDiscoveryInvariantTests` automates that run. On rigs where the
+stale enumeration dies before the fresh one arrives the transitions are sequential and the contested
+branch itself is not entered, so that branch's direct coverage is the unit vectors — deliberately, since
+its trigger is an enumeration-timing race no test can force on demand.
+
+macOS and Linux have no Container ID, so they never mint tier-1 identifiers and degrade to serial, then
+PID. The same rig therefore yields different identifier shapes on different operating systems.
+
+**The shape is an implementation detail. Do not parse it.**
+
+### The same key can present different identifiers
+
+Because the identifier reflects the evidence used, it changes when the available evidence changes — even
+though the device did not. Measured on macOS hardware:
+
+| Rig | Identifier for key 103 | Why |
+|---|---|---|
+| 103 alone | `ykphysical:pid:0407` | its PID is unique on the bus; no serial evidence needed |
+| 103 + a same-PID sibling | `ykphysical:103` | serial evidence is now required to tell the two apart |
+
+Inserting an unrelated second key therefore changes how the first one is named. Discovery absorbs this
+without emitting spurious add/remove events for the incumbent, which is the guarantee that matters to
+subscribers, but the identifier itself is not invariant.
+
+### A live repository and a fresh scan can disagree
+
+When an evidence-only tier change occurs, the repository keeps publishing the object it already handed to
+subscribers rather than replacing it. A concurrent, independent scan computes the identifier from current
+evidence and may return a different one. Both are correct: one preserves continuity for existing
+subscribers, the other reports present truth. Observed simultaneously on macOS — live repository
+`ykphysical:pid:0407`, fresh scan `ykphysical:103`.
+
+### Use the serial as the durable key
+
+For persistence, audit logs, allow lists, or anything surviving a process restart, use
+`DeviceInfo.SerialNumber`, not `DeviceId`. Caveats:
+
+- YubiKeys expose **no USB `iSerialNumber` descriptor**. The serial lives inside the key and is read by
+  opening an interface, so obtaining it costs a connection and a Management exchange — it is not free the
+  way `DeviceId` is.
+- It is `null` on devices that do not report one (for example Security Key series, or when serial
+  visibility is disabled). A null serial cannot be a durable key; such devices are only distinguishable by
+  topology evidence, which exists on Windows alone (see G4 in the guarantee matrix).
+- Discovery itself reads serials only on demand, for the reasons given above.
+
+### Firmware version is deliberately not part of identity
+
+It adds no uniqueness — the serial is already unique — and it is not dependable as a discriminator:
+
+- It can differ per applet on one physical key. This SDK carries an explicit workaround taking the higher
+  of the Management and OTP values on NEO (`src/YubiOtp/src/YubiOtpSession.cs`).
+- Canonical yubikit sometimes *guesses* it (`version = Version(3, 0, 0); // Guess NEO`).
+- Canonical uses it only as a tie-breaker for which metadata record to retain once serials already match,
+  never as a match key.
+
+This SDK's merger contains no firmware-version logic, and none should be added for identity purposes.
+
 ## Guarantee matrix
 
 | # | Guarantee | Windows | macOS | Linux |
@@ -49,6 +184,12 @@ incomplete but never wrong.
 | G8 | Interfaces held in use since plug-in | attributed once idle and readable — see [G8](#g8-in-use-interfaces) | same | same |
 | G9 | Topology-read failure degrades safely | yes — becomes macOS semantics | n/a | n/a |
 
+`AvailableConnections` is the union of the concrete interfaces observed for the published device;
+`CompositeYubiKeyTests.AvailableConnections_IsUnionOfMembers` pins that structural rule. It is
+transport availability only. It does not prove that every applet or capability is enabled over every
+interface, nor that interfaces or operations are safe to use concurrently. Applet capability and
+connection-ownership rules remain separate contracts.
+
 "with topology evidence" is the normal Windows case. Topology reads can fail (stale devnode during
 hotplug, `CR_NO_SUCH_DEVNODE`, missing ContainerId, API unavailable before Windows 8); when they
 do, Windows behaves exactly like macOS/Linux — see G9.
@@ -61,13 +202,13 @@ Hardware invariants: `Core.IntegrationTests/Devices/CompositeDiscoveryIntegratio
 
 | Guarantee | Pinned by |
 |---|---|
-| G1 | `Merge_Defect_CrossKeyShapeB_TwoTripleKeysDisjointHidNoCcidNoSerials_MustStayStandalone`, `Merge_TwoSamePidTripleKeysAllSerialsKnown_GroupsBySerial_Pin`, `Merge_TwoSamePidDualKeysAllSerialsKnown_GroupsBySerial_Pin` |
+| G1 | `Merge_Regression_CrossKeyShapeB_TwoTripleKeysDisjointHidNoCcidNoSerials_MustStayStandalone`, `Merge_TwoSamePidTripleKeysAllSerialsKnown_GroupsBySerial_Pin`, `Merge_TwoSamePidDualKeysAllSerialsKnown_GroupsBySerial_Pin` |
 | G2 (bound) | `Merge_EpistemicBound_ComplementaryPartials_TwoDualKeysOneInterfaceEach_MergeIsRepresentable_Pin`, `Merge_ComplementaryPartialMasquerade_MisattributionIsRepresentableAndBounded_Pin` |
 | G2 (Windows closes it) | `Merge_ComplementaryPartialsWithTopologyKeys_SplitByTopology_NotMergedByPid` |
-| G3 | `Merge_Defect_TwoTripleKeysFiveOfSixSerialsKnown_OrphanIsAttributedByPigeonhole`, `Merge_Defect_TwoDualKeysThreeOfFourSerialsKnown_OrphanIsAttributedByPigeonhole`, `Merge_TwoTripleKeysBothMissingSameInterfaceTypeSerial_StaysConservativelySplit_Pin`, `Merge_TwoSameTypeOrphansExceedAnchoredKeys_StayStandaloneInsteadOfDoubleAttribution_Pin`, plus cache convergence/eviction vectors in `FindYubiKeysFaultInjectionTests` |
+| G3 | `Merge_Regression_TwoTripleKeysFiveOfSixSerialsKnown_OrphanIsAttributedByPigeonhole`, `Merge_Regression_TwoDualKeysThreeOfFourSerialsKnown_OrphanIsAttributedByPigeonhole`, `Merge_TwoTripleKeysBothMissingSameInterfaceTypeSerial_StaysConservativelySplit_Pin`, `Merge_TwoSameTypeOrphansExceedAnchoredKeys_StayStandaloneInsteadOfDoubleAttribution_Pin`, plus cache convergence/eviction vectors in `FindYubiKeysFaultInjectionTests` |
 | G4 (Windows yes) | `Merge_SeriallessPairWithDistinctTopologyKeys_GroupsIntoTwoCompleteKeys` |
 | G4 (mac/Linux no) | `Merge_TwoSamePidTripleKeysNoSerialsFullVisibility_ConservativeSplit_Pin`, `Merge_TwoSamePidDualKeysNoSerialsFullVisibility_ConservativeSplit_Pin` |
-| G5 | `Merge_ReconfiguredKeyReenumeratedUnderNewPid_GroupsByCurrentPidTruth_Pin`, `Merge_OneOfTwoKeysReconfigured_DifferentPidsNoSerials_TriviallyDistinguishable_Pin`; hardware: Phase 4 Tier 1 reconfiguration matrix (ISA) |
+| G5 | `Merge_ReconfiguredKeyReenumeratedUnderNewPid_GroupsByCurrentPidTruth_Pin`, `Merge_OneOfTwoKeysReconfigured_DifferentPidsNoSerials_TriviallyDistinguishable_Pin`; hardware: `ReconfigurationDiscoveryInvariantTests.UsbReconfigurationReboot_DiscoveryIdentityInvariantsHoldThroughTheTransition` (Slow — drives a real PID-changing reboot and asserts the identity invariants on every scan across the transition, self-restoring) |
 | G6 | `Merge_SingleInterfacePid_StandsAloneWithoutCompositeWrapper_Pin`; hardware: Phase 4 Tier 1 CASE 2 |
 | G7 | `Merge_MixedTopologyAndSerialEvidence_IsDeterministicAndConserving_Pin`, `FindAllAsync_Conservation_EveryEnumeratedUsbInterfaceAppearsExactlyOnce` |
 | G8 | Cache convergence / eviction / reader-rename vectors in `FindYubiKeysFaultInjectionTests` |
@@ -158,6 +299,18 @@ nothing — it never infers one. When it returns nothing, those interfaces fall 
 unchanged, so Windows degrades to exactly the macOS/Linux semantics rather than to a guess. Partial
 topology is safe as well: keyed interfaces group, unkeyed interfaces fall through, and no unkeyed
 interface is ever pulled into a keyed group.
+
+### Untrusted PID correlation
+
+If one enumerated USB CCID reader name cannot be parsed to a known YubiKey PID,
+`FindYubiKeys` sets `pidCorrelationUntrusted` for the **entire USB portion of that scan**. Topology
+evidence still groups first. Every remaining USB interface is then eligible only for serial grouping:
+interfaces with the same successfully read serial may merge, while failed or null serial reads stay
+standalone. PID completeness and pigeonhole deduction are not used for those remaining interfaces,
+because a reader-name drift on one CCID means the PID evidence cannot safely be assumed consistent
+for the scan. `CompositeDeviceMergerTests.Merge_ForceSerial_MergesAllUsbBySerial_RejoiningUnparsedCcid`
+pins the successful-serial path, while `Merge_NullPidUsb_NotForceSerial_StandsAlone` pins the
+conservative standalone behavior outside it.
 
 ## Firmware note: CCID is not independently switchable on 5.8.0+
 

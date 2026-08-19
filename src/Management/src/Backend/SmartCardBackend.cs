@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
@@ -37,7 +36,7 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
         var versionBytes = await _protocol.SelectAsync(ApplicationIds.Management, cancellationToken)
             .ConfigureAwait(false);
 
-        return ParseVersionHeader(versionBytes.Span);
+        return FirmwareVersion.FromSelectResponse(versionBytes.Span);
     }
 
     public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
@@ -83,19 +82,4 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
         await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
-    public void Dispose()
-    {
-        // Backend doesn't own the protocol - ManagementSession handles disposal
-    }
-
-    private static FirmwareVersion? ParseVersionHeader(ReadOnlySpan<byte> versionBytes)
-    {
-        var deviceText = Encoding.UTF8.GetString(versionBytes);
-        var versionString = deviceText.Split(' ').Last();
-        var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
-
-        return versionParts.Length == 3
-            ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
-            : null;
-    }
 }

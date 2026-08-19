@@ -33,7 +33,7 @@ extension(YubiKeyTestState state)
 **Implementation:**
 - Calls `state.Device.CreateSecurityDomainSessionAsync()` directly
 - Handles SD reset via separate unauthenticated session
-- Uses `SharedSmartCardConnection` to share connection between reset and test sessions
+- Runs the reset session and the test session in sequence over one connection
 
 #### 2. DI Factory Session Creation
 
@@ -75,9 +75,11 @@ extension(YubiKeyTestState state)
 services.AddYubiKeySecurityDomain();
 ```
 
-### SharedSmartCardConnection
+### One connection, successive sessions
 
-Both extensions use `SharedSmartCardConnection` to share a single physical connection between the reset session and test session. This wrapper prevents the reset session from disposing the connection when it completes.
+Both extensions run the reset session and the test session over a single physical connection. No wrapper is needed: a session does not dispose a connection it did not create, so the reset session leaves the connection open for the test session, and `WithConnectionAsync` disposes it at the end.
+
+The reset session is scoped to its own `using` block deliberately. A connection hosts one live session at a time, so the reset session must be disposed before the test session is constructed.
 
 ## Unit vs Integration Test Separation
 
@@ -121,7 +123,7 @@ The `ResetAsync()` method (in `SecurityDomainSession.cs:685`):
 ### Standard Integration Test
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.4.3")]
 public async Task TestName_Condition_ExpectedResult(YubiKeyTestState state) =>
     await state.WithSecurityDomainSessionAsync(
@@ -137,7 +139,7 @@ public async Task TestName_Condition_ExpectedResult(YubiKeyTestState state) =>
 ### DI Integration Test
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.4.3")]
 public async Task Factory_Condition_ExpectedResult(YubiKeyTestState state) =>
     await state.WithSecurityDomainSessionFromDIAsync(
@@ -153,7 +155,7 @@ public async Task Factory_Condition_ExpectedResult(YubiKeyTestState state) =>
 ### Multi-Session Test (Key Import)
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.4.3")]
 public async Task KeyImport_MultiSession_Test(YubiKeyTestState state)
 {

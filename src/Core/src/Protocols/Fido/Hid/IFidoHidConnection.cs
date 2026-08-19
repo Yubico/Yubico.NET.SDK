@@ -20,6 +20,13 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 /// A FIDO HID connection to a YubiKey using CTAP HID protocol (64-byte packets).
 /// Used for FIDO2/U2F and Management over FIDO interface.
 /// </summary>
+/// <remarks>
+///     <para>
+///         The physical FIDO HID interface admits exactly one live SDK connection and native HID handle.
+///         A second connection attempt is refused with <see cref="Devices.ConnectionInUseException" />
+///         before the native interface is opened. Dispose the current connection before reopening it.
+///     </para>
+/// </remarks>
 public interface IFidoHidConnection : IConnection
 {
     /// <summary>
@@ -30,6 +37,12 @@ public interface IFidoHidConnection : IConnection
     /// <summary>
     /// Sends a 64-byte HID packet to the YubiKey.
     /// </summary>
+    /// <remarks>
+    ///     This Tier 2 method bypasses <see cref="Sessions.ApplicationSession" />,
+    ///     <c>ConnectionSessionGuard</c>, and <c>ExchangeGuard</c>. The caller owns CTAP HID
+    ///     framing, sequencing, response correlation, keep-alive handling, concurrency exclusion, and recovery.
+    ///     Do not interleave it with a live session or another raw operation; dispose and reopen when state is uncertain.
+    /// </remarks>
     /// <param name="packet">The packet data (must be 64 bytes).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default);
@@ -37,6 +50,11 @@ public interface IFidoHidConnection : IConnection
     /// <summary>
     /// Receives a 64-byte HID packet from the YubiKey.
     /// </summary>
+    /// <remarks>
+    ///     This Tier 2 method bypasses <see cref="Sessions.ApplicationSession" />,
+    ///     <c>ConnectionSessionGuard</c>, and <c>ExchangeGuard</c>. Pair receives with the
+    ///     caller's own serialized send state. After interruption or interleaving, dispose and reopen the connection.
+    /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The received packet (64 bytes).</returns>
     Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default);

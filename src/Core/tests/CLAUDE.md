@@ -62,7 +62,7 @@ Integration tests inherit from `IntegrationTestBase` and use `[WithYubiKey]` att
 ```csharp
 public class MyIntegrationTests : IntegrationTestBase
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey]
     public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state)
     {

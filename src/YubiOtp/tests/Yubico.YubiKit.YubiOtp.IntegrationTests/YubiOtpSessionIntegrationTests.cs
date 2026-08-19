@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.YubiOtp.IntegrationTests;
 
 public class YubiOtpSessionIntegrationTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task GetSerial_ReturnsPositiveSerialNumber(YubiKeyTestState state)
     {
@@ -32,7 +32,7 @@ public class YubiOtpSessionIntegrationTests
         Assert.True(serial >= 0);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey]
     public async Task GetConfigState_ReturnsValidState(YubiKeyTestState state)
     {
@@ -44,7 +44,7 @@ public class YubiOtpSessionIntegrationTests
         Assert.True(configState.FirmwareVersion.Major >= 0);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task PutConfiguration_HmacSha1_ThenDelete_Succeeds(YubiKeyTestState state)
     {
@@ -69,12 +69,14 @@ public class YubiOtpSessionIntegrationTests
         Assert.False(stateAfterDelete.IsConfigured(Slot.Two));
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     public async Task CalculateHmacSha1_WithKnownKey_ReturnsExpectedResponse(YubiKeyTestState state)
     {
+        // [WithYubiKey] filters the device; it does not select the session transport. Pin HidOtp so
+        // this test cannot silently run over the default SmartCard path while claiming HID coverage.
         await using var session = await state.Device.CreateYubiOtpSessionAsync(
-            preferredConnection: ConnectionType.HidOtp);
+            preferredConnection: state.ConnectionType);
 
         // Program slot 2 with a known HMAC-SHA1 key
         byte[] key = new byte[20];
@@ -98,7 +100,7 @@ public class YubiOtpSessionIntegrationTests
         }
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.3.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task SwapSlots_Succeeds(YubiKeyTestState state)
     {
@@ -113,7 +115,7 @@ public class YubiOtpSessionIntegrationTests
         await session.SwapSlotsAsync();
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "3.0.0")]
     public async Task SetNdefConfiguration_UriType_Succeeds(YubiKeyTestState state)
     {

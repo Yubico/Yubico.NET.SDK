@@ -201,18 +201,18 @@ dotnet toolchain.cs -- test --integration --project Fido2 --filter "Category=Req
 dotnet toolchain.cs -- test --integration --project WebAuthn --filter "Category=RequiresUserPresence"
 ```
 
-## xUnit v3 Known Limitations
+## Hardware Test Infrastructure Limitations
 
 ### `[WithYubiKey]` + `[InlineData]` Incompatibility
 
 The `[WithYubiKey]` attribute (used for integration tests requiring physical YubiKeys) is **incompatible** with `[InlineData]` parameterized tests.
 
-**Problem:** When you combine `[WithYubiKey]` with `[Theory]` and `[InlineData]`, xUnit v3 fails to properly inject the `YubiKeyTestState` parameter alongside inline data parameters.
+**Problem:** `[WithYubiKey]` is a custom xUnit v2 `DataAttribute` that supplies the complete argument row. Combining it with `[InlineData]` creates separate, incomplete rows rather than merging the arguments.
 
 ```csharp
 // ❌ WRONG - Does not work
 [WithYubiKey(MinFirmware = "5.7.0")]
-[Theory]
+[SkippableTheory]
 [InlineData(PivAlgorithm.Rsa3072)]
 [InlineData(PivAlgorithm.Rsa4096)]
 public async Task SignAsync_LargeRsa_Works(PivAlgorithm algorithm, YubiKeyTestState state)
@@ -221,9 +221,11 @@ public async Task SignAsync_LargeRsa_Works(PivAlgorithm algorithm, YubiKeyTestSt
 }
 
 // ✅ CORRECT - Use separate tests
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.7.0")]
 public async Task SignAsync_Rsa3072_Works(YubiKeyTestState state) { /* ... */ }
 
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.7.0")]
 public async Task SignAsync_Rsa4096_Works(YubiKeyTestState state) { /* ... */ }
 ```
@@ -236,95 +238,101 @@ public async Task SignAsync_Rsa4096_Works(YubiKeyTestState state) { /* ... */ }
 
 ### Overview
 
-The test infrastructure supports testing YubiKeys across multiple connection types (transports) automatically. Each physical YubiKey can present multiple transports (CCID, HidFido, HidOtp), and tests run independently on each transport.
+One physical YubiKey can expose several connection types, such as SmartCard, HID FIDO, and HID OTP. The test infrastructure represents those connections on one `YubiKeyTestState`; `[WithYubiKey]` filters devices but does not automatically enumerate one test row per connection.
 
 ### How It Works
 
-When you write a test using `[WithYubiKey]`, the infrastructure:
-1. Discovers all available devices and their transports
-2. Creates a separate `YubiKeyTestState` for each transport
-3. Runs your test once per transport per device
+Each `[WithYubiKey]` attribute:
 
-Example: One YubiKey with CCID and HidFido → test runs twice.
+1. Creates one placeholder test row during discovery.
+2. Binds that row to the first matching authorized device during execution.
+3. Applies `ConnectionType` as a device filter; it does not open that connection or force a session to use it.
+
+With an unfiltered `[WithYubiKey]`, `state.ConnectionType` is the device's complete `AvailableConnections` flag set and can contain several values. With a concrete filter such as `[WithYubiKey(ConnectionType = ConnectionType.HidFido)]`, `state.ConnectionType` records that requested connection type while `state.AvailableConnections` still reports the device's complete set.
+
+To create separate rows for separate connection types, apply one attribute per concrete connection type. Each attribute still binds independently to a matching authorized device.
 
 ### ConnectionType Filtering
 
-Use the `ConnectionType` property to filter which transports your test runs on:
+Use the `ConnectionType` property to require that the bound device exposes a connection type:
 
 ```csharp
-// Run on all transports (default)
+// One device row; state.ConnectionType may contain multiple flags.
+[SkippableTheory]
 [WithYubiKey]
-public async Task MyTest(YubiKeyTestState state) { }
+public async Task DefaultSelection(YubiKeyTestState state) { }
 
-// Run only on CCID (SmartCard) connections
-[WithYubiKey(ConnectionType = ConnectionType.Ccid)]
+// One row whose device must expose SmartCard.
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
 public async Task SmartCardOnly(YubiKeyTestState state) { }
 
-// Run only on HidFido connections
+// Three separate rows, one for each requested connection type.
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
 [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-public async Task FidoOnly(YubiKeyTestState state) { }
+[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
+public async Task EachManagementConnection(YubiKeyTestState state) { }
 ```
+
+The filter alone does not pin Management to that connection. Pin the session explicitly when the test's meaning depends on the connection used.
 
 ### Test Output Format
 
-Test output shows the ConnectionType:
-```
-Passed MyTest(state: YubiKey(SN:12345678,FW:5.7.2,UsbAKeychain,Ccid))
-Passed MyTest(state: YubiKey(SN:12345678,FW:5.7.2,UsbAKeychain,HidFido))
-```
+Test output includes `state.ConnectionType`. An unfiltered row can therefore display a combined flag set, while rows created by concrete `ConnectionType` filters display the requested single value. Multiple output rows come from multiple `[WithYubiKey]` attributes, not automatic per-interface enumeration.
 
-### Automatic Transport Selection
+### Default Management Selection
 
-The `WithManagementAsync` helper automatically uses the correct transport from `state.ConnectionType`:
+`WithManagementAsync` leaves `preferredConnection` as `null` unless the caller supplies it. Management then tries its default order: SmartCard, HID FIDO, and HID OTP. Use this form when the behavior under test is transport-independent:
 
 ```csharp
+[SkippableTheory]
 [WithYubiKey]
-public async Task MyTest(YubiKeyTestState state)
+public async Task GetDeviceInfo_DefaultManagementSelection(YubiKeyTestState state)
 {
     await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
     {
-        // mgmt uses the transport from state.ConnectionType automatically
         var deviceInfo = await mgmt.GetDeviceInfoAsync();
         Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
     });
 }
 ```
 
+Do not pass `preferredConnection: state.ConnectionType` from an unfiltered row. On a composite device, that value is a multi-flag set rather than one valid Management connection type.
+
 ### Transport-Specific Testing
 
-Test different transports explicitly using `ConnectionType` filtering:
+When behavior must be exercised over concrete connections, declare one row per connection, pass the row's concrete `state.ConnectionType` as `preferredConnection`, and assert the session's actual `Transport`:
 
 ```csharp
-// This test runs ONLY on CCID connections
-[WithYubiKey(ConnectionType = ConnectionType.Ccid)]
-public async Task SmartCard_Operations(YubiKeyTestState state)
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+[WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
+public async Task GetDeviceInfo_UsesRequestedManagementConnection(YubiKeyTestState state)
 {
-    Assert.Equal(ConnectionType.Ccid, state.ConnectionType);
-    await state.WithManagementAsync(async (mgmt, _) =>
-    {
-        // CCID-specific testing
-    });
-}
+    Assert.True(state.ConnectionType is
+        ConnectionType.SmartCard or ConnectionType.HidFido or ConnectionType.HidOtp);
 
-// This test runs on ALL available transports
-[WithYubiKey]
-public async Task AllTransports_Consistency(YubiKeyTestState state)
-{
-    // Verifies behavior is consistent across transports
     await state.WithManagementAsync(async (mgmt, _) =>
     {
+        Assert.Equal(state.ConnectionType, mgmt.Transport);
+
         var info = await mgmt.GetDeviceInfoAsync();
         Assert.Equal(state.SerialNumber, info.SerialNumber);
-    });
+    }, preferredConnection: state.ConnectionType);
 }
 ```
 
+An explicit `preferredConnection` is a single-candidate request and does not fall back. If the requested interface is already owned, the test receives the connection error instead of silently exercising a different transport.
+
 ### Best Practices
 
-1. **Default to all transports**: Don't specify `ConnectionType` unless you have a transport-specific reason
-2. **Avoid DeviceId parsing**: Use `ConnectionType` filtering instead of parsing `DeviceId` strings
-3. **Use WithManagementAsync**: Let the infrastructure handle connection management
-4. **Test consistency**: Write tests that verify behavior is consistent across transports when possible
+1. **Use default selection for transport-independent tests**: Apply one unfiltered `[WithYubiKey]` and omit `preferredConnection`.
+2. **Create explicit rows for connection-specific tests**: Apply separate attributes with one concrete `ConnectionType` each.
+3. **Pin and verify concrete connections**: Pass `preferredConnection: state.ConnectionType` and assert `mgmt.Transport` in those rows.
+4. **Do not pin from unfiltered state**: Its `ConnectionType` can be a multi-flag set that is invalid as a preference.
+5. **Avoid DeviceId parsing**: Use `ConnectionType` filters instead of inferring interfaces from identifier strings.
 
 ### Migration from Old Patterns
 
@@ -335,10 +343,18 @@ var fidoDevice = devices.FirstOrDefault(d =>
     d.DeviceId.Contains(":0001") || d.DeviceId.Contains(":F1D0"));
 ```
 
-**New (robust):**
+**New (declarative and transport-specific):**
 ```csharp
-var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
-var fidoDevice = devices.FirstOrDefault();
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+public async Task ManagementOverFido_Works(YubiKeyTestState state)
+{
+    await state.WithManagementAsync(async (mgmt, _) =>
+    {
+        Assert.Equal(ConnectionType.HidFido, mgmt.Transport);
+        // Exercise HID FIDO-specific Management behavior.
+    }, preferredConnection: state.ConnectionType);
+}
 ```
 
 ---

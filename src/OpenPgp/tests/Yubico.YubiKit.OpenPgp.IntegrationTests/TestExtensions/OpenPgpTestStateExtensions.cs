@@ -45,13 +45,11 @@ public static class OpenPgpTestStateExtensions
             CancellationToken cancellationToken = default) =>
             state.WithConnectionAsync(async connection =>
             {
-                var sharedConnection = new SharedSmartCardConnection(connection);
-
                 if (resetBeforeUse)
                 {
                     using var resetSession = await state.Device
                         .CreateOpenPgpSessionAsync(
-                            sharedConnection,
+                            connection,
                             configuration: configuration,
                             cancellationToken: cancellationToken)
                         .ConfigureAwait(false);
@@ -61,7 +59,7 @@ public static class OpenPgpTestStateExtensions
 
                 using var session = await state.Device
                     .CreateOpenPgpSessionAsync(
-                        sharedConnection,
+                        connection,
                         scpKeyParams,
                         configuration,
                         cancellationToken: cancellationToken)

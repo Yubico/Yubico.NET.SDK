@@ -25,8 +25,8 @@ using Yubico.YubiKit.Core.Utilities;
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
-///     Phase 1 fault-injection harness for <see cref="FindYubiKeys" /> (composite-merge remediation plan,
-///     docs/plans/composite-merge-remediation/PLAN.md): scripted identity-read outcomes per interface via
+///     Fault-injection harness for <see cref="FindYubiKeys" /> (see
+///     docs/architecture/device-discovery-guarantees.md): scripted identity-read outcomes per interface via
 ///     constructor fakes, exercising the identity cache (convergence, eviction, reader-rename behavior) and
 ///     deterministically reproducing the Phase-0 scan-1 "aborted" identity-read failures.
 /// </summary>
@@ -204,6 +204,127 @@ public class FindYubiKeysFaultInjectionTests
         Assert.True(
             factory.ConnectCalls(ReaderARenamed) > 0,
             "The renamed reader must be re-read (cache keyed by DeviceId cannot carry identity across renames).");
+    }
+
+    /// <summary>
+    ///     A same-slot swap between scans must not attribute the old key's cached serial to the new key.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         The identity cache is keyed by per-interface DeviceId and evicted only when that interface
+    ///         is observed absent at scan time. A swap that completes <em>between</em> scans — key B
+    ///         unplugged, a same-model key plugged into the same slot — reuses the same PC/SC reader name
+    ///         (slot-derived) and the same HID path, so the interface is never observed absent and
+    ///         scan-time eviction never fires. Without hotplug-driven invalidation, the new key inherits
+    ///         the old key's serial: key substitution, found independently by two consultation runs.
+    ///     </para>
+    ///     <para>
+    ///         The physical swap cannot happen without the OS observing removal and arrival — the same
+    ///         events that trigger rescans — so those events are the invalidation signal.
+    ///         <see cref="IFindYubiKeys.NotifyTransportActivity" /> is what the device monitor calls at
+    ///         event ingress.
+    ///     </para>
+    /// </remarks>
+    [Fact]
+    public async Task FindAllAsync_SameSlotSwapWithTransportActivity_RereadsInsteadOfServingTheOldKeysSerial()
+    {
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        var (find, factory, _, _) = CreateTwoDualKeyRig();
+
+        var scan1 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+        Assert.Equal(2, scan1.Count);
+        Assert.Contains(scan1, d => d.DeviceId == "ykphysical:222");
+
+        // Key B swapped for a same-model key C in the same slot: identical reader name, identical HID
+        // path, different physical hardware. Only the firmware answers differently.
+        factory.SucceedReads(ReaderB, serial: 333);
+        factory.SucceedReads(OtpB, serial: 333);
+        var readerBConnectsBeforeScan2 = factory.ConnectCalls(ReaderB);
+
+        // The swap is physically impossible without removal+arrival events; the monitor forwards them.
+        find.NotifyTransportActivity(ConnectionType.SmartCard);
+        find.NotifyTransportActivity(ConnectionType.Hid);
+
+        var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+
+        Assert.Contains(scan2, d => d.DeviceId == "ykphysical:333");
+        Assert.DoesNotContain(scan2, d => d.DeviceId == "ykphysical:222");
+        Assert.True(
+            factory.ConnectCalls(ReaderB) > readerBConnectsBeforeScan2,
+            "Transport activity must invalidate cached identity: serving the old key's serial for the " +
+            "swapped-in key is key substitution, not a stale cache entry.");
+    }
+
+    /// <summary>
+    ///     Invalidation is scoped per transport: HID activity does not discard PC/SC identity evidence.
+    /// </summary>
+    /// <remarks>
+    ///     The point of caching is to avoid re-reading serials (each read costs I/O and briefly takes an
+    ///     exclusive lease). Evicting both transports on any event would make every hotplug double the
+    ///     next scan's read cost for no correctness gain — a removal observed on HID says nothing about
+    ///     what is in the PC/SC slots.
+    /// </remarks>
+    [Fact]
+    public async Task NotifyTransportActivity_HidOnly_LeavesPcscIdentityCacheIntact()
+    {
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        var (find, factory, _, _) = CreateTwoDualKeyRig();
+
+        var scan1 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+        Assert.Equal(2, scan1.Count);
+        var readerAConnectsAfterScan1 = factory.ConnectCalls(ReaderA);
+        var readerBConnectsAfterScan1 = factory.ConnectCalls(ReaderB);
+        var otpAConnectsAfterScan1 = factory.ConnectCalls(OtpA);
+
+        find.NotifyTransportActivity(ConnectionType.Hid);
+
+        var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, scan2.Count);
+        Assert.Equal(readerAConnectsAfterScan1, factory.ConnectCalls(ReaderA));
+        Assert.Equal(readerBConnectsAfterScan1, factory.ConnectCalls(ReaderB));
+        Assert.True(
+            factory.ConnectCalls(OtpA) > otpAConnectsAfterScan1,
+            "HID activity must invalidate HID-read identity entries.");
+    }
+
+    /// <summary>
+    ///     A cached identity is valid only for the configuration it was read under: a PID change on the
+    ///     same interface id is a cache miss, not a hit.
+    /// </summary>
+    /// <remarks>
+    ///     On the supported platforms a reconfiguration normally changes the per-interface id too (PC/SC
+    ///     reader names and HID paths embed the interface set), which self-evicts. This pins the invariant
+    ///     for any id scheme where that does not hold: the PID is part of the evidence's validity, not
+    ///     incidental metadata.
+    /// </remarks>
+    [Fact]
+    public async Task FindAllAsync_PidChangeOnSameInterfaceId_IsACacheMissNotAHit()
+    {
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        var (find, factory, _, hid) = CreateTwoDualKeyRig();
+
+        var scan1 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+        Assert.Equal(2, scan1.Count);
+        var otpAConnectsAfterScan1 = factory.ConnectCalls(OtpA);
+        var otpBConnectsAfterScan1 = factory.ConnectCalls(OtpB);
+
+        // Both keys reconfigured: the OTP interfaces re-enumerate under PID 0x0407 with unchanged ids.
+        // Two 0x0407 OTP instances force the serial path, so the cache is consulted under the new PID.
+        hid.Devices =
+        [
+            new FakeHidDevice(0x0407, HidInterfaceType.Otp, OtpA),
+            new FakeHidDevice(0x0407, HidInterfaceType.Otp, OtpB)
+        ];
+
+        _ = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+
+        Assert.True(
+            factory.ConnectCalls(OtpA) > otpAConnectsAfterScan1,
+            "An identity cached under PID 0x0405 must not be served for the same interface under 0x0407.");
+        Assert.True(
+            factory.ConnectCalls(OtpB) > otpBConnectsAfterScan1,
+            "An identity cached under PID 0x0405 must not be served for the same interface under 0x0407.");
     }
 
     [Fact]

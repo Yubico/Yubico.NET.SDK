@@ -27,14 +27,17 @@ namespace Yubico.YubiKit.Piv.UnitTests;
 public class PivSessionTests
 {
     [Fact]
-    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
     {
         var connection = new RecordingSmartCardConnection();
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
-        Assert.Equal(1, connection.DisposeCount);
+        // Borrowed: the session did not create this connection, so disposal is the caller's.
+        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        Assert.Equal(0, connection.DisposeCount);
     }
 
     [Fact]
@@ -95,6 +98,30 @@ public class PivSessionTests
         var exception = Record.Exception(() => session.Dispose());
 
         Assert.Null(exception);
+    }
+
+    [Fact]
+    public async Task DisposeAsync_AuthenticatedSession_ClearsManagementKeyAuthentication()
+    {
+        var connection = CreateInitializedConnection();
+        var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
+
+        await session.DisposeAsync();
+
+        Assert.False(session.IsManagementKeyAuthenticated);
+    }
+
+    [Fact]
+    public async Task ManagementKeyAuthenticationStateSetAfterDisposalAdmission_IsNotPublished()
+    {
+        var connection = CreateInitializedConnection();
+        var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.DisposeAsync();
+        MarkAuthenticated(session);
+
+        Assert.False(session.IsManagementKeyAuthenticated);
     }
 
     [Fact]
@@ -395,7 +422,7 @@ public class PivSessionTests
         }
 
         Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
-        Assert.True(session.IsAuthenticated);
+        Assert.True(session.IsManagementKeyAuthenticated);
         Assert.Equal(0xFF, LastCommand(connection)[1]);
     }
 
@@ -420,7 +447,7 @@ public class PivSessionTests
         }
 
         Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
-        Assert.True(session.IsAuthenticated);
+        Assert.True(session.IsManagementKeyAuthenticated);
     }
 
     [Fact]
@@ -445,7 +472,7 @@ public class PivSessionTests
         }
 
         Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
     }
 
     [Fact]
@@ -468,7 +495,7 @@ public class PivSessionTests
             CryptographicOperations.ZeroMemory(managementKey);
         }
 
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
         Assert.Equal(0x87, LastCommand(connection)[1]);
     }
@@ -510,7 +537,7 @@ public class PivSessionTests
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
     }
 
@@ -530,7 +557,7 @@ public class PivSessionTests
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
     }
 
@@ -551,7 +578,7 @@ public class PivSessionTests
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
     }
 
@@ -577,7 +604,7 @@ public class PivSessionTests
             session.ResetAsync(TestContext.Current.CancellationToken));
 
         Assert.True(exception.SW == statusWord);
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
     }
 
@@ -597,7 +624,7 @@ public class PivSessionTests
 
         await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(TestContext.Current.CancellationToken));
 
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
     }
 
@@ -617,6 +644,26 @@ public class PivSessionTests
 
         Assert.True(exception.SW == 0x6A80);
         Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0xFB);
+    }
+
+    [Fact]
+    public async Task SignOrDecryptAutoDetectAsync_AfterDisposal_ThrowsObjectDisposedBeforeFirmwareOrMetadataRead()
+    {
+        var connection = CreateInitializedConnectionWithVersion(VersionResponse());
+        var session = await PivSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        await session.DisposeAsync();
+        int transmissionsBeforeCall = connection.TransmittedCommands.Count;
+
+        var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => session.SignOrDecryptAsync(
+                PivSlot.Authentication,
+                ReadOnlyMemory<byte>.Empty,
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal(typeof(PivSession).FullName, exception.ObjectName);
+        Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
     }
 
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>

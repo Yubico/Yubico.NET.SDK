@@ -110,6 +110,8 @@ Console.WriteLine(string.Join(", ", info.Versions));
 ## Documentation
 
 - **[Developer Guide](docs/)** - Detailed documentation for each module
+- **[Physical Device Model](docs/architecture/physical-device-model.md)** - Discovery, transport selection, and session/connection ownership
+- **[Device Discovery Guarantees](docs/architecture/device-discovery-guarantees.md)** - Exact grouping guarantees, conservative splits, and platform bounds
 - **[API Reference](https://docs.yubico.com/yesdk/)** - Complete API documentation
 - Module examples live under `src/<Module>/examples/`
 

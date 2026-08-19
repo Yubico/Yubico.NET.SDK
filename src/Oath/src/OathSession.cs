@@ -36,7 +36,6 @@ public sealed class OathSession : ApplicationSession, IOathSession
     private static readonly Feature FeatureScp03 = new("SCP03 for OATH", 5, 6, 3);
 
     private readonly ILogger _logger;
-    private readonly ISmartCardConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
 
     private ISmartCardProtocol _protocol = null!;
@@ -59,10 +58,10 @@ public sealed class OathSession : ApplicationSession, IOathSession
     private OathSession(
         ISmartCardConnection connection,
         ScpKeyParameters? scpKeyParams = null)
+        : base(connection)
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        _connection = connection;
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
     }
@@ -78,10 +77,13 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        var session = new OathSession(connection, scpKeyParams);
+        // A session that fails to initialize must not keep its claim on the connection: the connection
+        // outlives it, and the next session over it would otherwise be refused forever.
+        var session = Construct(connection, () => new OathSession(connection, scpKeyParams));
         try
         {
-            await session.InitializeAsync(CreateOathProtocolConfiguration(configuration), cancellationToken).ConfigureAwait(false);
+            await session.InitializeAsync(CreateOathProtocolConfiguration(configuration), cancellationToken)
+                .ConfigureAwait(false);
             return session;
         }
         catch
@@ -101,7 +103,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create(_connection);
+        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
         Protocol = protocol;
         IOathBackend backend = new OathBackend(protocol);
 
@@ -528,6 +530,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// <inheritdoc />
     public byte[] DeriveKey(ReadOnlyMemory<byte> passwordUtf8)
     {
+        ThrowIfDisposed();
+
         return Rfc2898DeriveBytes.Pbkdf2(
             passwordUtf8.Span,
             _salt,
@@ -735,6 +739,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(operation);
 
         _ = await AuthenticateAndRetryAsync(
@@ -749,12 +754,17 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing)
+        try
         {
-            CryptographicOperations.ZeroMemory(_salt);
-            CryptographicOperations.ZeroMemory(_challenge);
+            if (disposing)
+            {
+                CryptographicOperations.ZeroMemory(_salt);
+                CryptographicOperations.ZeroMemory(_challenge);
+            }
         }
-
-        base.Dispose(disposing);
+        finally
+        {
+            base.Dispose(disposing);
+        }
     }
 }

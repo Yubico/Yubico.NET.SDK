@@ -11,13 +11,11 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 /// Supports CTAP HID channel initialization and YubiKey Management vendor commands.
 /// </summary>
 /// <remarks>
-///     Implementations are safe for concurrent calls: full logical exchanges (multi-packet CTAP
-///     requests/responses, including lazy channel initialization) are serialized internally, so
-///     concurrent operations execute sequentially rather than interleaving packets on the wire.
-///     Cancellation tokens cancel only the wait for a turn — an exchange already in flight runs to
-///     completion to avoid stranding the device mid-transaction.
+///     Implementations admit one full logical exchange at a time. An overlapping operation throws
+///     <see cref="InvalidOperationException" /> immediately. A token is checked before entry; an exchange already
+///     in flight runs to completion to avoid stranding the device mid-transaction.
 /// </remarks>
-public interface IFidoHidProtocol : IProtocol
+internal interface IFidoHidProtocol : IProtocol
 {
     /// <summary>
     /// Initializes the CTAP HID channel if it has not already been initialized.

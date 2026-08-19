@@ -25,159 +25,151 @@ namespace Yubico.YubiKit.Oath.IntegrationTests;
 ///     Integration tests for OATH password (access key) change workflows.
 ///     Validates setting a password, changing it, and verifying the new password works.
 /// </summary>
+/// <remarks>
+///     These tests observe lock state from a <em>fresh</em> session, which is the whole point — a
+///     session that already holds the applet cannot tell you what a new caller would see. Each such
+///     session is therefore scoped and disposed before the next one opens: one live session per CCID
+///     interface is the contract, and overlapping them is refused with <c>ConnectionInUseException</c>.
+/// </remarks>
 public class OathPasswordChangeTests
 {
     private static CancellationToken NewToken(int timeoutSeconds = 30) =>
         new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds)).Token;
 
     /// <summary>
+    ///     Runs <paramref name="action" /> against a freshly opened OATH session and disposes it before
+    ///     returning, so the caller can immediately open the next one.
+    /// </summary>
+    private static async Task WithFreshSessionAsync(YubiKeyTestState state, Func<OathSession, Task> action)
+    {
+        await using var session = await state.Device.CreateOathSessionAsync(cancellationToken: NewToken());
+        await action(session);
+    }
+
+    /// <summary>
+    ///     Derives an access key from <paramref name="password" />, hands it to <paramref name="action" />,
+    ///     and zeroes it afterwards.
+    /// </summary>
+    private static async Task WithDerivedKeyAsync(OathSession session, string password, Func<byte[], Task> action)
+    {
+        var key = session.DeriveKey(Encoding.UTF8.GetBytes(password));
+        try
+        {
+            await action(key);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+        }
+    }
+
+    /// <summary>
     ///     Sets a password, changes it to a new password, then verifies the new password
     ///     works for unlocking the OATH application.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
-    public async Task PasswordChange_SetThenChange_NewPasswordUnlocks(YubiKeyTestState state) =>
-        await state.WithOathSessionAsync(async session =>
+    public async Task PasswordChange_SetThenChange_NewPasswordUnlocks(YubiKeyTestState state)
+    {
+        const string originalPassword = "original-password-123";
+        const string newPassword = "changed-password-456";
+
+        try
         {
-            string originalPassword = "original-password-123";
-            string newPassword = "changed-password-456";
+            // Reset the applet and set the initial password.
+            await state.WithOathSessionAsync(
+                session => WithDerivedKeyAsync(session, originalPassword,
+                    key => session.SetKeyAsync(key, NewToken())),
+                cancellationToken: NewToken());
 
-            byte[] originalKey = session.DeriveKey(Encoding.UTF8.GetBytes(originalPassword));
-
-            try
+            // Fresh session: must see the lock, unlock with the original, then rotate the key.
+            await WithFreshSessionAsync(state, async session =>
             {
-                // Set the initial password
-                await session.SetKeyAsync(originalKey, NewToken());
+                Assert.True(session.IsLocked);
 
-                // Verify the device is now locked on a fresh session
-                await using var lockedSession1 = await state.Device
-                    .CreateOathSessionAsync(cancellationToken: NewToken());
-
-                Assert.True(lockedSession1.IsLocked);
-
-                // Unlock with original password
-                byte[] validateKey1 = lockedSession1.DeriveKey(Encoding.UTF8.GetBytes(originalPassword));
-                try
+                await WithDerivedKeyAsync(session, originalPassword, async key =>
                 {
-                    await lockedSession1.ValidateAsync(validateKey1, NewToken());
-                    Assert.False(lockedSession1.IsLocked);
+                    await session.ValidateAsync(key, NewToken());
+                    Assert.False(session.IsLocked);
+                });
 
-                    // Change the password: set a new key on the unlocked session
-                    byte[] newKey = lockedSession1.DeriveKey(Encoding.UTF8.GetBytes(newPassword));
-                    try
-                    {
-                        await lockedSession1.SetKeyAsync(newKey, NewToken());
-                    }
-                    finally
-                    {
-                        CryptographicOperations.ZeroMemory(newKey);
-                    }
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(validateKey1);
-                }
+                await WithDerivedKeyAsync(session, newPassword,
+                    key => session.SetKeyAsync(key, NewToken()));
+            });
 
-                // Verify the NEW password works on a fresh session
-                await using var lockedSession2 = await state.Device
-                    .CreateOathSessionAsync(cancellationToken: NewToken());
-
-                Assert.True(lockedSession2.IsLocked);
-
-                byte[] validateKey2 = lockedSession2.DeriveKey(Encoding.UTF8.GetBytes(newPassword));
-                try
-                {
-                    await lockedSession2.ValidateAsync(validateKey2, NewToken());
-                    Assert.False(lockedSession2.IsLocked);
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(validateKey2);
-                }
-
-                // Verify the OLD password no longer works
-                await using var lockedSession3 = await state.Device
-                    .CreateOathSessionAsync(cancellationToken: NewToken());
-
-                Assert.True(lockedSession3.IsLocked);
-
-                byte[] oldKey = lockedSession3.DeriveKey(Encoding.UTF8.GetBytes(originalPassword));
-                try
-                {
-                    await Assert.ThrowsAnyAsync<Exception>(async () =>
-                        await lockedSession3.ValidateAsync(oldKey, NewToken()));
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(oldKey);
-                }
-            }
-            finally
+            // Fresh session: the NEW password unlocks.
+            await WithFreshSessionAsync(state, async session =>
             {
-                CryptographicOperations.ZeroMemory(originalKey);
+                Assert.True(session.IsLocked);
 
-                // Clean up: remove the password so other tests are unaffected.
-                // The original session was created with reset, so it should still be valid.
-                // We need to unlock with the new password first since we changed it.
-                byte[] cleanupKey = session.DeriveKey(Encoding.UTF8.GetBytes(newPassword));
-                try
+                await WithDerivedKeyAsync(session, newPassword, async key =>
                 {
-                    // The original session may have lost its auth state, so unlock again
-                    // by setting the key to nothing (unset). Since we changed the password
-                    // on a different session, the original session's auth may be stale.
-                    // Best approach: open a new session, validate, then unset.
-                    await using var cleanupSession = await state.Device
-                        .CreateOathSessionAsync(cancellationToken: NewToken());
+                    await session.ValidateAsync(key, NewToken());
+                    Assert.False(session.IsLocked);
+                });
+            });
 
-                    if (cleanupSession.IsLocked)
+            // Fresh session: the OLD password no longer does.
+            await WithFreshSessionAsync(state, async session =>
+            {
+                Assert.True(session.IsLocked);
+
+                await WithDerivedKeyAsync(session, originalPassword, key =>
+                    Assert.ThrowsAnyAsync<Exception>(() => session.ValidateAsync(key, NewToken())));
+            });
+        }
+        finally
+        {
+            // Leave the applet unlocked for whatever runs next.
+            await WithFreshSessionAsync(state, async session =>
+            {
+                await WithDerivedKeyAsync(session, newPassword, async key =>
+                {
+                    if (session.IsLocked)
                     {
-                        await cleanupSession.ValidateAsync(cleanupKey, NewToken());
+                        await session.ValidateAsync(key, NewToken());
                     }
 
-                    await cleanupSession.UnsetKeyAsync(NewToken());
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(cleanupKey);
-                }
-            }
-        }, cancellationToken: NewToken());
+                    await session.UnsetKeyAsync(NewToken());
+                });
+            });
+        }
+    }
 
     /// <summary>
     ///     Verifies that setting and then removing a password restores
     ///     the OATH application to an unlocked state.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
-    public async Task PasswordRemoval_SetThenUnset_RestoresUnlockedState(YubiKeyTestState state) =>
-        await state.WithOathSessionAsync(async session =>
+    public async Task PasswordRemoval_SetThenUnset_RestoresUnlockedState(YubiKeyTestState state)
+    {
+        const string password = "temporary-password-789";
+
+        // Reset the applet and set a password.
+        await state.WithOathSessionAsync(
+            session => WithDerivedKeyAsync(session, password,
+                key => session.SetKeyAsync(key, NewToken())),
+            cancellationToken: NewToken());
+
+        // Fresh session: the lock is visible, and removing the password requires unlocking first —
+        // the session that set the key is gone, so its authenticated state went with it.
+        await WithFreshSessionAsync(state, async session =>
         {
-            string password = "temporary-password-789";
-            byte[] key = session.DeriveKey(Encoding.UTF8.GetBytes(password));
+            Assert.True(session.IsLocked);
 
-            try
+            await WithDerivedKeyAsync(session, password, async key =>
             {
-                // Set a password
-                await session.SetKeyAsync(key, NewToken());
-
-                // Verify it's locked on a fresh session
-                await using var lockedSession = await state.Device
-                    .CreateOathSessionAsync(cancellationToken: NewToken());
-
-                Assert.True(lockedSession.IsLocked);
-
-                // Remove the password from the original (still-authenticated) session
+                await session.ValidateAsync(key, NewToken());
                 await session.UnsetKeyAsync(NewToken());
+            });
+        });
 
-                // Verify the device is now unlocked on a fresh session
-                await using var unlockedSession = await state.Device
-                    .CreateOathSessionAsync(cancellationToken: NewToken());
-
-                Assert.False(unlockedSession.IsLocked);
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(key);
-            }
-        }, cancellationToken: NewToken());
+        // Fresh session: no lock remains.
+        await WithFreshSessionAsync(state, session =>
+        {
+            Assert.False(session.IsLocked);
+            return Task.CompletedTask;
+        });
+    }
 }

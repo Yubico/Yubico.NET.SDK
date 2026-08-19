@@ -20,6 +20,13 @@ public interface ISmartCardConnection : IConnection
 {
     Transport Transport { get; }
 
+    /// <summary>Transmits caller-formatted SmartCard bytes and returns the raw response bytes.</summary>
+    /// <remarks>
+    ///     This Tier 2 method bypasses <see cref="Sessions.ApplicationSession" />, the connection session guard,
+    ///     and the logical exchange guard. The caller owns APDU formatting, chaining, response correlation,
+    ///     concurrency exclusion, cancellation recovery, and state integrity. Do not call it concurrently with
+    ///     a live session or another raw operation. Dispose and reopen the connection when state is uncertain.
+    /// </remarks>
     Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         ReadOnlyMemory<byte> command,
         CancellationToken cancellationToken = default);

@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Category", "Integration")]
 public class FidoEnhancedPinTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task EnhancedPin_CompliantPin_Succeeds(YubiKeyTestState state) =>
@@ -46,7 +46,7 @@ public class FidoEnhancedPinTests
                 "PIN should be configured after SetOrVerifyPinAsync");
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsPinComplexityInfo(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -65,7 +65,7 @@ public class FidoEnhancedPinTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsForcePinChangeOption(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -78,7 +78,7 @@ public class FidoEnhancedPinTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsMaxRpIdsForSetMinPinLength(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -92,7 +92,7 @@ public class FidoEnhancedPinTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task ClientPin_RetrievesPinRetries(YubiKeyTestState state) =>

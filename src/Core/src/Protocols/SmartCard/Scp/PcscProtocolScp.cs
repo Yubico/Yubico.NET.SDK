@@ -20,15 +20,16 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 /// <summary>
 ///     Decorator that wraps an ISmartCardProtocol with SCP (Secure Channel Protocol) functionality.
-///     All APDU transmissions are encrypted and MACed through the SCP processor. Safe for concurrent
-///     calls: exchanges are serialized on the SAME gate as the wrapped protocol (SCP MAC chaining makes
+///     All APDU transmissions are encrypted and MACed through the SCP processor. Overlapping calls are refused
+///     by the same guard as the wrapped protocol (SCP MAC chaining makes
 ///     interleaving doubly fatal — each MAC depends on the previous command's MAC).
 /// </summary>
-public sealed class PcscProtocolScp : ISmartCardProtocol
+internal sealed class PcscProtocolScp : ISmartCardProtocol, IAsyncDisposable
 {
     private readonly PcscProtocol _baseProtocol;
     private readonly DataEncryptor _dataEncryptor;
-    private readonly AsyncExchangeGate _exchangeGate;
+    private readonly ExchangeGuard _exchangeGuard;
+    private readonly DisposalGate _disposalGate = new();
     private readonly IApduProcessor _scpProcessor;
     private bool _disposed;
 
@@ -48,9 +49,9 @@ public sealed class PcscProtocolScp : ISmartCardProtocol
         _dataEncryptor = dataEncryptor;
 
         // The SCP processor chain bypasses the base protocol's public methods and drives the same
-        // connection directly, so exchanges MUST share the base protocol's gate — otherwise gated
+        // connection directly, so exchanges MUST share the base protocol's guard — otherwise guarded
         // plain traffic and SCP traffic could interleave on the wire.
-        _exchangeGate = baseProtocol.ExchangeGate;
+        _exchangeGuard = baseProtocol.ExchangeGuard;
     }
 
     /// <summary>
@@ -66,7 +67,7 @@ public sealed class PcscProtocolScp : ISmartCardProtocol
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        var response = await _exchangeGate.RunExclusiveAsync(
+        var response = await _exchangeGuard.RunAsync(
                 exchangeToken => _scpProcessor.TransmitAsync(command, true, exchangeToken),
                 cancellationToken)
             .ConfigureAwait(false);
@@ -90,7 +91,7 @@ public sealed class PcscProtocolScp : ISmartCardProtocol
         const byte P2_SELECT = 0x00;
 
         var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };
-        var response = await _exchangeGate.RunExclusiveAsync(
+        var response = await _exchangeGuard.RunAsync(
                 exchangeToken => _scpProcessor.TransmitAsync(selectCommand, false, exchangeToken),
                 cancellationToken)
             .ConfigureAwait(false);
@@ -103,17 +104,24 @@ public sealed class PcscProtocolScp : ISmartCardProtocol
     public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-
-        // Delegate configuration to base protocol
-        // SCP state is already established and doesn't need reconfiguration
-        _baseProtocol.Configure(version, configuration);
+        throw new InvalidOperationException(
+            "SmartCard protocol configuration must be applied before SCP is established.");
     }
 
-    public void Dispose()
+    public void Dispose() => _disposalGate.Dispose(() =>
     {
-        if (_disposed)
-            return;
+        _exchangeGuard.CloseAndDrain();
+        DisposeAfterDrain();
+    });
 
+    public ValueTask DisposeAsync() => _disposalGate.DisposeAsync(async () =>
+    {
+        await _exchangeGuard.CloseAndDrainAsync().ConfigureAwait(false);
+        DisposeAfterDrain();
+    });
+
+    private void DisposeAfterDrain()
+    {
         _disposed = true;
         try
         {

@@ -15,7 +15,6 @@
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;
@@ -31,6 +30,7 @@ namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 internal sealed class MacOSHidIOReportConnection : IHidConnection
 {
     private readonly long _entryId;
+    private readonly IIOKitDeviceLifetime _lifetime;
     private readonly nint _loopId;
     private readonly byte[] _readBuffer;
     private readonly IOKitNativeMethods.IOHIDCallback _removalDelegate;
@@ -43,26 +43,45 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
     private GCHandle _readHandle;
 
     public MacOSHidIOReportConnection(long entryId)
+        : this(entryId, IOKitDeviceLifetime.Instance)
+    {
+    }
+
+    /// <summary>
+    ///     Test seam. Lets the constructor-failure and disposal paths be exercised without macOS hardware.
+    /// </summary>
+    internal MacOSHidIOReportConnection(long entryId, IIOKitDeviceLifetime lifetime)
     {
         _entryId = entryId;
-
-        var cstr = Encoding.UTF8.GetBytes($"fido2-loopid-{entryId}");
-        _loopId = CFNativeMethods.CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
+        _lifetime = lifetime;
 
         _readBuffer = new byte[64];
-        _readHandle = GCHandle.Alloc(_readBuffer, GCHandleType.Pinned);
-
         _reportsQueue = new ConcurrentQueue<byte[]>();
-        _pinnedReportsQueue = GCHandle.Alloc(_reportsQueue);
 
         _reportDelegate = ReportCallback;
         _removalDelegate = RemovalCallback;
 
-        SetupConnection();
+        // Everything from here acquires something that must be handed back. A throw past this point would
+        // otherwise strand a CFStringRef, two GCHandles, and an IOHIDDeviceRef with no owner: the object
+        // never finishes construction, so the caller has nothing to dispose.
+        try
+        {
+            _loopId = _lifetime.CreateRunLoopMode($"fido2-loopid-{entryId}");
 
-        InputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
-        OutputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
+            _readHandle = GCHandle.Alloc(_readBuffer, GCHandleType.Pinned);
+            _pinnedReportsQueue = GCHandle.Alloc(_reportsQueue);
 
+            SetupConnection();
+
+            InputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
+            OutputReportSize = _lifetime.GetIntProperty(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
+        }
+        catch
+        {
+            Dispose(false);
+            GC.SuppressFinalize(this);
+            throw;
+        }
     }
 
     public int InputReportSize { get; }
@@ -82,12 +101,20 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
         IOKitNativeMethods.IOHIDDeviceScheduleWithRunLoop(_deviceHandle, runLoop, _loopId);
 
-        var runLoopResult = CFNativeMethods.CFRunLoopRunInMode(_loopId, 6, true);
+        int runLoopResult;
+        try
+        {
+            runLoopResult = CFNativeMethods.CFRunLoopRunInMode(_loopId, 6, true);
+        }
+        finally
+        {
+            // Unschedule on every path. Leaving the device scheduled on a run loop we are no longer
+            // draining leaks the source and lets a later read observe this call's callbacks.
+            IOKitNativeMethods.IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
+        }
 
         if (runLoopResult != CFNativeMethods.kCFRunLoopRunHandledSource)
             throw new PlatformApiException($"RunLoop returned unexpected result: {runLoopResult}");
-
-        IOKitNativeMethods.IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
 
         if (!_reportsQueue.TryDequeue(out report))
             throw new InvalidOperationException(
@@ -133,42 +160,19 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
     private void SetupConnection()
     {
-        var deviceEntry = 0;
-        try
-        {
-            var matchingDictionary = IOKitNativeMethods.IORegistryEntryIDMatching((ulong)_entryId);
-            deviceEntry = IOKitNativeMethods.IOServiceGetMatchingService(0, matchingDictionary);
+        _deviceHandle = _lifetime.CreateDevice(_entryId);
+        _lifetime.OpenDevice(_deviceHandle);
 
-            if (deviceEntry == 0)
-                throw new PlatformApiException("Failed to find matching device entry in IO registry.");
+        var reportCallback = Marshal.GetFunctionPointerForDelegate(_reportDelegate);
+        _lifetime.RegisterInputReportCallback(
+            _deviceHandle,
+            _readBuffer,
+            _readBuffer.Length,
+            reportCallback,
+            GCHandle.ToIntPtr(_pinnedReportsQueue));
 
-            _deviceHandle = IOKitNativeMethods.IOHIDDeviceCreate(IntPtr.Zero, deviceEntry);
-
-            if (_deviceHandle == IntPtr.Zero) throw new PlatformApiException("Failed to create HID device handle.");
-
-            var result = IOKitNativeMethods.IOHIDDeviceOpen(_deviceHandle, 0x01);
-
-            if (result != 0)
-                throw new PlatformApiException(
-                    nameof(IOKitNativeMethods.IOHIDDeviceOpen),
-                    result,
-                    "Failed to open HID device.");
-
-            var reportCallback = Marshal.GetFunctionPointerForDelegate(_reportDelegate);
-            IOKitNativeMethods.IOHIDDeviceRegisterInputReportCallback(
-                _deviceHandle,
-                _readBuffer,
-                _readBuffer.Length,
-                reportCallback,
-                GCHandle.ToIntPtr(_pinnedReportsQueue));
-
-            var callback = Marshal.GetFunctionPointerForDelegate(_removalDelegate);
-            IOKitNativeMethods.IOHIDDeviceRegisterRemovalCallback(_deviceHandle, callback, _deviceHandle);
-        }
-        finally
-        {
-            if (deviceEntry != 0) _ = IOKitNativeMethods.IOObjectRelease(deviceEntry);
-        }
+        var callback = Marshal.GetFunctionPointerForDelegate(_removalDelegate);
+        _lifetime.RegisterRemovalCallback(_deviceHandle, callback, _deviceHandle);
     }
 
     private static void ReportCallback(
@@ -190,33 +194,72 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
         reportsQueue.Enqueue(report);
     }
 
-    private static void RemovalCallback(IntPtr context, int result, IntPtr sender) =>
-        CFNativeMethods.CFRunLoopStop(context);
+    /// <summary>
+    ///     Invoked by IOKit when the device is removed.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Deliberately does nothing. It previously called <c>CFRunLoopStop(context)</c>, but the
+    ///         context registered for this callback is <c>_deviceHandle</c> — an <c>IOHIDDeviceRef</c>, not
+    ///         a <c>CFRunLoopRef</c>. Passing it to <c>CFRunLoopStop</c> is undefined behaviour, and it
+    ///         never woke the blocked read either, because the run loop it should stop is the one captured
+    ///         inside <see cref="GetReport" /> and is not reachable from here.
+    ///     </para>
+    ///     <para>
+    ///         Removing the call eliminates the undefined behaviour without changing observable behaviour:
+    ///         a read in progress during removal already ran to its <c>CFRunLoopRunInMode</c> timeout, and
+    ///         still does. Waking the read promptly on removal is a real improvement, but it needs the
+    ///         scheduled run loop plumbed through as the callback context and hardware unplug testing to
+    ///         verify, so it is left as follow-up rather than changed blind.
+    ///     </para>
+    /// </remarks>
+    private static void RemovalCallback(IntPtr context, int result, IntPtr sender)
+    {
+        // Intentionally empty — see remarks.
+    }
 
     private void Dispose(bool disposing)
     {
+        // Set first: this runs from the failing-constructor path as well as from Dispose and the finalizer,
+        // and every CoreFoundation object below must be released exactly once. Over-releasing corrupts a
+        // retain count just as surely as never releasing leaks.
         if (_disposed) return;
+        _disposed = true;
 
-        IOKitNativeMethods.IOHIDDeviceRegisterInputReportCallback(
-            _deviceHandle,
-            _readBuffer,
-            _readBuffer.Length,
-            IntPtr.Zero,
-            IntPtr.Zero);
+        // Guard the handle. A constructor that failed at device creation leaves this zero, and the finalizer
+        // still runs on the partially-constructed object. Handing a NULL IOHIDDeviceRef to IOKit is undefined
+        // behaviour on the finalizer thread, not a harmless no-op.
+        if (_deviceHandle != IntPtr.Zero)
+        {
+            _lifetime.RegisterInputReportCallback(
+                _deviceHandle,
+                _readBuffer,
+                _readBuffer.Length,
+                IntPtr.Zero,
+                IntPtr.Zero);
 
-        IOKitNativeMethods.IOHIDDeviceRegisterRemovalCallback(_deviceHandle, IntPtr.Zero, IntPtr.Zero);
+            _lifetime.RegisterRemovalCallback(_deviceHandle, IntPtr.Zero, IntPtr.Zero);
 
+            _lifetime.CloseDevice(_deviceHandle);
+
+            // IOHIDDeviceCreate returns a retained CoreFoundation object. Closing it is not releasing it.
+            _lifetime.ReleaseCFObject(_deviceHandle);
+            _deviceHandle = IntPtr.Zero;
+        }
+
+        // Free the GCHandles only AFTER the device is unregistered and closed above, never before.
+        // _pinnedReportsQueue is the context IOKit hands back to ReportCallback, which dereferences it; a
+        // callback in flight against a freed handle is a use-after-free at the native boundary rather than
+        // a managed exception. Ordering is the whole mitigation here — the device is only scheduled on a
+        // run loop for the duration of GetReport, so outside that window no callback can be dispatched, and
+        // by the time these run the device is closed. Do not hoist these above the block above.
         if (_readHandle.IsAllocated) _readHandle.Free();
 
         if (_pinnedReportsQueue.IsAllocated) _pinnedReportsQueue.Free();
 
-        if (_deviceHandle != IntPtr.Zero)
-        {
-            _ = IOKitNativeMethods.IOHIDDeviceClose(_deviceHandle, 0);
-            _deviceHandle = IntPtr.Zero;
-        }
-
-        _disposed = true;
+        // CFStringCreateWithCString also returns a retained object, and this one leaked on the success path
+        // too: every FIDO connection created one and no path ever gave it back.
+        if (_loopId != IntPtr.Zero) _lifetime.ReleaseCFObject(_loopId);
     }
 
     ~MacOSHidIOReportConnection()

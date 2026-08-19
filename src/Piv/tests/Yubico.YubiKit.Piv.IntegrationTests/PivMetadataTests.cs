@@ -38,7 +38,7 @@ public class PivMetadataTests
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task GetPinMetadataAsync_ReturnsValidMetadata(YubiKeyTestState state)
     {
@@ -52,7 +52,7 @@ public class PivMetadataTests
         Assert.Equal(3, metadata.RetriesRemaining);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task GetSlotMetadataAsync_EmptySlot_ReturnsNull(YubiKeyTestState state)
     {
@@ -64,7 +64,7 @@ public class PivMetadataTests
         Assert.Null(metadata);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task GetSlotMetadataAsync_WithKey_ReturnsMetadata(YubiKeyTestState state)
     {
@@ -80,7 +80,7 @@ public class PivMetadataTests
         Assert.True(metadata.Value.IsGenerated);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task GetManagementKeyMetadataAsync_ReturnsValidMetadata(YubiKeyTestState state)
     {
@@ -101,7 +101,7 @@ public class PivMetadataTests
         }
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetBioMetadataAsync_NonBioDevice_ThrowsOrReturnsError(YubiKeyTestState state)
     {

@@ -59,7 +59,7 @@ public class PivPukTests
         }
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ChangePukAsync_WithCorrectOldPuk_Succeeds(YubiKeyTestState state)
     {
@@ -88,7 +88,7 @@ public class PivPukTests
         }
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task UnblockPinAsync_AfterBlockedPin_RestoresAccess(YubiKeyTestState state)
     {
@@ -126,7 +126,7 @@ public class PivPukTests
         }
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task GetPukMetadataAsync_ReturnsValidMetadata(YubiKeyTestState state)
     {
@@ -140,7 +140,7 @@ public class PivPukTests
         Assert.Equal(3, metadata.RetriesRemaining);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task SetPinAttemptsAsync_CustomLimit_EnforcesLimit(YubiKeyTestState state)
     {

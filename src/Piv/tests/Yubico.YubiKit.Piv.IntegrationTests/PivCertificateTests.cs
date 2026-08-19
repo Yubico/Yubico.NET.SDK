@@ -39,7 +39,7 @@ public class PivCertificateTests
     private static byte[] GetDefaultManagementKey(FirmwareVersion version) =>
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task StoreCertificateAsync_GetCertificateAsync_RoundTrip(YubiKeyTestState state)
     {
@@ -58,7 +58,7 @@ public class PivCertificateTests
         Assert.Equal(cert.Thumbprint, retrieved.Thumbprint);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetCertificateAsync_EmptySlot_ReturnsNull(YubiKeyTestState state)
     {
@@ -70,7 +70,7 @@ public class PivCertificateTests
         Assert.Null(cert);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task DeleteCertificateAsync_IsIdempotent(YubiKeyTestState state)
     {
@@ -82,7 +82,7 @@ public class PivCertificateTests
         await session.DeleteCertificateAsync(PivSlot.Authentication);
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetObjectAsync_EmptyObject_ReturnsEmpty(YubiKeyTestState state)
     {

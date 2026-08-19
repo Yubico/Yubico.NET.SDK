@@ -32,6 +32,8 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         EnsureSupports(FeatureUif);
 
         _logger.LogDebug("Getting UIF for {Slot}", keyRef);
@@ -47,6 +49,8 @@ public sealed partial class OpenPgpSession
         Uif uif,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         EnsureSupports(FeatureUif);
 
         _logger.LogInformation("Setting UIF for {Slot} to {Uif}", keyRef, uif);
@@ -60,6 +64,8 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Getting algorithm attributes for {Slot}", keyRef);
 
         // Per Python canonical: read from ApplicationRelatedData (DO 0x6E), not from
@@ -83,6 +89,7 @@ public sealed partial class OpenPgpSession
         AlgorithmAttributes attributes,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(attributes);
 
         _logger.LogInformation("Setting algorithm attributes for {Slot}", keyRef);
@@ -95,6 +102,8 @@ public sealed partial class OpenPgpSession
     public async Task<IReadOnlyList<(KeyRef KeyRef, AlgorithmAttributes Attributes)>>
         GetAlgorithmInformationAsync(CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         EnsureSupports(FeatureAlgorithmInfo);
 
         _logger.LogDebug("Getting algorithm information");
@@ -168,6 +177,8 @@ public sealed partial class OpenPgpSession
     public async Task<Kdf> GetKdfAsync(
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Getting KDF configuration");
 
         return await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
@@ -178,6 +189,7 @@ public sealed partial class OpenPgpSession
         Kdf kdf,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(kdf);
 
         _logger.LogInformation("Setting KDF configuration");

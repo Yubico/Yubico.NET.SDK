@@ -31,7 +31,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Extension", "credBlob")]
 public class FidoCredBlobTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task CredBlob_StoreAndRetrieve_ReturnsStoredData(YubiKeyTestState state) =>
@@ -170,7 +170,7 @@ public class FidoCredBlobTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task CredBlob_MaxLength_StoresSuccessfully(YubiKeyTestState state) =>

@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Category", "FIPS")]
 public class FidoFipsComplianceTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task FipsDevice_SupportsPinUvAuthProtocolV2(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -43,7 +43,7 @@ public class FidoFipsComplianceTests
             Assert.Contains(2, info.PinUvAuthProtocols);
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task FipsApproved_ChecksAlwaysUvOption(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -60,7 +60,7 @@ public class FidoFipsComplianceTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsCertifications(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -78,7 +78,7 @@ public class FidoFipsComplianceTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfo_ReturnsMinPinLength(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>

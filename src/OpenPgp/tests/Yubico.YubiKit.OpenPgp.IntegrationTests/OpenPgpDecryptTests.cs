@@ -16,7 +16,7 @@ public class OpenPgpDecryptTests
 
     // ── RSA PKCS#1 Decrypt ──────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task Decrypt_RsaPkcs1_RecoverPlaintext(YubiKeyTestState state)
     {
@@ -59,7 +59,7 @@ public class OpenPgpDecryptTests
 
     // ── ECDH Decrypt (P-256) ────────────────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task Decrypt_EcdhP256_ProducesSharedSecret(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(

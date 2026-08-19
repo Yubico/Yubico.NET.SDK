@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -59,7 +58,7 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
                 .SelectAsync(ApplicationIds.Management, cancellationToken)
                 .ConfigureAwait(false);
 
-            managementVersion = ParseManagementVersion(mgmtResponse.Span);
+            managementVersion = FirmwareVersion.FromSelectResponse(mgmtResponse.Span);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -197,19 +196,4 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
         _lastProgSeq = newProgSeq;
     }
 
-    public void Dispose()
-    {
-        // Backend doesn't own the protocol - YubiOtpSession handles disposal
-    }
-
-    private static FirmwareVersion? ParseManagementVersion(ReadOnlySpan<byte> response)
-    {
-        var deviceText = Encoding.UTF8.GetString(response);
-        var versionString = deviceText.Split(' ').Last();
-        var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
-
-        return versionParts.Length == 3
-            ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
-            : null;
-    }
 }

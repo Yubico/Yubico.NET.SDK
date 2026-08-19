@@ -21,12 +21,11 @@ using Yubico.YubiKit.Core.Utilities;
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 /// <summary>
-///     APDU protocol over a single smart-card connection. Safe for concurrent calls: logical exchanges
-///     (command chaining + chained-response reads) are serialized on an internal gate, never parallel —
+///     APDU protocol over a single smart-card connection. Overlapping logical exchanges are refused —
 ///     a smart card is a stateful sequential peer, so interleaved APDUs from two operations would corrupt
 ///     each other's chained state.
 /// </summary>
-internal partial class PcscProtocol : ISmartCardProtocol
+internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
 {
     private const byte INS_SELECT = 0xA4;
     private const byte P1_SELECT = 0x04;
@@ -35,7 +34,8 @@ internal partial class PcscProtocol : ISmartCardProtocol
 
     private readonly ISmartCardConnection _connection;
     private readonly ILogger<PcscProtocol> _logger;
-    private readonly AsyncExchangeGate _exchangeGate = new();
+    private readonly ExchangeGuard _exchangeGuard = new();
+    private readonly DisposalGate _disposalGate = new();
     internal byte InsSendRemaining { get; private set; }
     private IApduProcessor _processor;
     private bool _disposed;
@@ -78,21 +78,28 @@ internal partial class PcscProtocol : ISmartCardProtocol
     internal IApduProcessor GetBaseCommandProcessor() => BuildCommandProcessor();
 
     /// <summary>
-    ///     The gate serializing logical exchanges on this protocol's connection. Shared with decorators
-    ///     that drive the same connection through their own processors (e.g. the SCP wrapper), so gated
-    ///     and wrapped traffic can never interleave.
+    ///     The guard refusing overlapping logical exchanges on this protocol's connection. Shared with
+    ///     decorators that drive the same connection through their own processors (e.g. the SCP wrapper), so
+    ///     plain and wrapped traffic can never interleave.
     /// </summary>
-    internal AsyncExchangeGate ExchangeGate => _exchangeGate;
+    internal ExchangeGuard ExchangeGuard => _exchangeGuard;
 
 
-    public void Dispose()
+    /// <summary>
+    ///     Releases this protocol. The connection is NOT disposed: a protocol is a user of the connection it
+    ///     was handed, never its owner. Whoever created the connection disposes it.
+    /// </summary>
+    public void Dispose() => _disposalGate.Dispose(() =>
     {
-        if (_disposed)
-            return;
-
+        _exchangeGuard.CloseAndDrain();
         _disposed = true;
-        _connection.Dispose();
-    }
+    });
+
+    public ValueTask DisposeAsync() => _disposalGate.DisposeAsync(async () =>
+    {
+        await _exchangeGuard.CloseAndDrainAsync().ConfigureAwait(false);
+        _disposed = true;
+    });
 
     public async Task<ApduResponse> TransmitAndReceiveAsync(
         ApduCommand command,
@@ -103,7 +110,7 @@ internal partial class PcscProtocol : ISmartCardProtocol
 
         _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
 
-        var response = await _exchangeGate.RunExclusiveAsync(
+        var response = await _exchangeGuard.RunAsync(
                 exchangeToken => _processor.TransmitAsync(command, false, exchangeToken),
                 cancellationToken)
             .ConfigureAwait(false);
@@ -125,7 +132,7 @@ internal partial class PcscProtocol : ISmartCardProtocol
         _logger.LogTrace("Selecting application ID: {ApplicationId}", Convert.ToHexString(applicationId.Span));
 
         var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };
-        var response = await _exchangeGate.RunExclusiveAsync(
+        var response = await _exchangeGuard.RunAsync(
                 exchangeToken => _processor.TransmitAsync(selectCommand, false, exchangeToken),
                 cancellationToken)
             .ConfigureAwait(false);
@@ -138,32 +145,35 @@ internal partial class PcscProtocol : ISmartCardProtocol
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        FirmwareVersion = firmwareVersion;
-        var insSendRemainingChanged = ConfigureInsSendRemaining(configuration);
-
-        if (FirmwareVersion.IsAlphaOrBeta)
+        _exchangeGuard.Run(() =>
         {
-            UseExtendedApdus = _connection.SupportsExtendedApdu();
-            MaxApduSize = SmartCardMaxApduSizes.Yk43;
-            ReconfigureProcessor();
-            return;
-        }
+            FirmwareVersion = firmwareVersion;
+            var insSendRemainingChanged = ConfigureInsSendRemaining(configuration);
 
-        if (!FirmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))
-        {
-            if (insSendRemainingChanged)
+            if (FirmwareVersion.IsAlphaOrBeta)
+            {
+                UseExtendedApdus = _connection.SupportsExtendedApdu();
+                MaxApduSize = SmartCardMaxApduSizes.Yk43;
                 ReconfigureProcessor();
+                return;
+            }
 
-            return;
-        }
+            if (!FirmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))
+            {
+                if (insSendRemainingChanged)
+                    ReconfigureProcessor();
 
-        var forceShortApdu = configuration is { ForceShortApdus: true };
-        UseExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu;
-        MaxApduSize = firmwareVersion.IsAtLeast(FirmwareVersion.V4_3_0)
-            ? SmartCardMaxApduSizes.Yk43
-            : SmartCardMaxApduSizes.Yk4;
+                return;
+            }
 
-        ReconfigureProcessor();
+            var forceShortApdu = configuration is { ForceShortApdus: true };
+            UseExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu;
+            MaxApduSize = firmwareVersion.IsAtLeast(FirmwareVersion.V4_3_0)
+                ? SmartCardMaxApduSizes.Yk43
+                : SmartCardMaxApduSizes.Yk4;
+
+            ReconfigureProcessor();
+        });
     }
 
     private bool ConfigureInsSendRemaining(ProtocolConfiguration? configuration)

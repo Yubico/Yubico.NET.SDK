@@ -18,22 +18,33 @@ using Yubico.YubiKit.Core.Abstractions;
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-///     Process-wide ownership coordinator per interface device, keyed by <see cref="IYubiKey.DeviceId" />.
-///     Normal connections share session ownership; discovery takes a nonblocking exclusive lease. This makes
-///     the session/discovery exclusion atomic instead of relying on count/check/recheck timing.
+///     Process-wide ownership coordinator keyed by stable member interface IDs. A physical-device connection
+///     claims all known member IDs; discovery takes one nonblocking per-interface lease.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Session ownership is acquired before physical connection creation and is released if creation
-///         fails or when the wrapping connection is disposed. Discovery holds its exclusive lease across
-///         physical connect, device-info exchange, and connection disposal. Waiting sessions have priority
-///         over a later discovery attempt so repeated scans cannot starve a session.
+///         The lease belongs to the CONNECTION, not to a session: it is acquired before physical connection
+///         creation and released if creation fails or when that connection is disposed. Sessions come and go
+///         over a connection without touching it.
+///     </para>
+///     <para>
+///         A grouped physical YubiKey admits one live connection across CCID, FIDO HID, and OTP HID. A second
+///         acquisition through any known member is refused immediately with
+///         <see cref="ConnectionInUseException" />; it never waits for an unbounded holder to end.
+///     </para>
+///     <para>
+///         Discovery holds its exclusive lease across physical connect, device-info exchange, and connection
+///         disposal. Waiting connections have priority over a later discovery attempt so repeated scans cannot
+///         starve a session.
 ///     </para>
 ///     <para>
 ///         LIMITATION: in-process only. A different process holding the card can still interfere; that is
-///         outside what this registry can see. Keyed by DeviceId string, which is stable across scans while
-///         the device stays plugged (reader name / HID path based), so registrations made through devices
-///         from one scan are visible to readers created in later scans. Idle coordinator entries are retained
+///         outside what this registry can see. Keyed by the PER-INTERFACE DeviceId (reader name / HID path
+///         based), which is stable across scans while the device stays plugged, so registrations made through
+///         devices from one scan are visible to readers created in later scans. For a composite,
+///         <see cref="ResolveInterfaceId" /> resolves the requested connection to a member instead of using
+///         the composite DeviceId, which names the evidence tier and is not stable across scans. Standalone
+///         devices use their own DeviceId. Idle coordinator entries are retained
 ///         for the process lifetime: this is bounded by unique interface IDs observed and avoids unsafe
 ///         remove/recreate races between lease acquisition and dictionary eviction.
 ///     </para>
@@ -44,7 +55,7 @@ internal static class DeviceConnectionRegistry
 
     /// <summary>Whether this process currently holds at least one live connection to the interface.</summary>
     public static bool IsInUse(string deviceId) =>
-        Interfaces.TryGetValue(deviceId, out var ownership) && ownership.HasSessions;
+        Interfaces.TryGetValue(deviceId, out var ownership) && ownership.HasConnections;
 
     /// <summary>
     ///     Whether the interface of <paramref name="device" /> that would serve <paramref name="connection" />
@@ -56,10 +67,8 @@ internal static class DeviceConnectionRegistry
         IsInUse(ResolveInterfaceId(device, connection));
 
     /// <summary>
-    ///     The per-interface DeviceId that a connect for <paramref name="connection" /> would register: the
-    ///     composite member selected by <see cref="CompositeYubiKey.TryResolveMember" />, or the device's
-    ///     own id when it is not a composite or exposes no member for the connection. Sharing that resolver
-    ///     with the connect path is what makes this agreement compiler-enforced rather than a convention.
+    ///     Resolves the member interface ID serving <paramref name="connection" />. Discovery uses this to
+    ///     coordinate one interface; grouped public connections acquire the complete member lease scope.
     /// </summary>
     public static string ResolveInterfaceId(IYubiKey device, ConnectionType connection)
     {
@@ -72,17 +81,61 @@ internal static class DeviceConnectionRegistry
     }
 
     /// <summary>
-    ///     Acquires shared session ownership before physical connection creation. Waits while discovery owns
-    ///     the interface; cancellation applies only while waiting.
+    ///     Acquires the interface lease for a connection, before physical connection creation. Waits while
+    ///     discovery owns the interface; cancellation applies only while waiting.
     /// </summary>
-    public static ValueTask<IDisposable> AcquireSessionAsync(
+    /// <param name="deviceId">The per-interface device id.</param>
+    /// <param name="cancellationToken">Cancels the wait for an active discovery read only.</param>
+    /// <exception cref="ConnectionInUseException">
+    ///     The interface already has a live connection.
+    /// </exception>
+    public static ValueTask<IDisposable> AcquireConnectionAsync(
         string deviceId,
         CancellationToken cancellationToken = default) =>
-        GetOwnership(deviceId).AcquireSessionAsync(cancellationToken);
+        GetOwnership(deviceId).AcquireConnectionAsync(deviceId, cancellationToken);
+
+    /// <summary>
+    ///     Acquires every known interface lease for one physical YubiKey as a single logical registration.
+    ///     Interface ids are de-duplicated and acquired in ordinal order; partial acquisition rolls back in
+    ///     reverse order.
+    /// </summary>
+    /// <exception cref="ConnectionInUseException">Any member ID already has a live connection.</exception>
+    public static async ValueTask<IDisposable> AcquireConnectionAsync(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(interfaceIds);
+        if (interfaceIds.Count == 0)
+            throw new ArgumentException("At least one interface id is required.", nameof(interfaceIds));
+
+        var uniqueIds = new HashSet<string>(interfaceIds, StringComparer.Ordinal);
+        var orderedIds = new string[uniqueIds.Count];
+        uniqueIds.CopyTo(orderedIds);
+        Array.Sort(orderedIds, StringComparer.Ordinal);
+
+        var acquired = new List<IDisposable>(orderedIds.Length);
+        try
+        {
+            foreach (var id in orderedIds)
+            {
+                acquired.Add(await GetOwnership(id)
+                    .AcquireConnectionAsync(id, cancellationToken)
+                    .ConfigureAwait(false));
+            }
+
+            return new CompositeRegistration(acquired);
+        }
+        catch
+        {
+            for (var i = acquired.Count - 1; i >= 0; i--)
+                acquired[i].Dispose();
+            throw;
+        }
+    }
 
     /// <summary>
     ///     Attempts to acquire exclusive discovery ownership without waiting. Returns <c>null</c> while any
-    ///     session owns or is already waiting for the interface.
+    ///     connection owns or is already waiting for the interface.
     /// </summary>
     public static IDisposable? TryAcquireDiscovery(string deviceId) =>
         GetOwnership(deviceId).TryAcquireDiscovery();
@@ -92,39 +145,38 @@ internal static class DeviceConnectionRegistry
 
     private enum LeaseKind
     {
-        Session,
+        Connection,
         Discovery
     }
 
     private sealed class InterfaceOwnership
     {
         private readonly Lock _sync = new();
-        private int _sessionCount;
-        private int _waitingSessions;
+        private int _connectionCount;
+        private int _waitingConnections;
         private bool _discoveryActive;
         private TaskCompletionSource? _discoveryReleased;
 
-        public bool HasSessions
+        public bool HasConnections
         {
             get
             {
                 lock (_sync)
-                    return _sessionCount > 0;
+                    return _connectionCount > 0;
             }
         }
 
-        public async ValueTask<IDisposable> AcquireSessionAsync(CancellationToken cancellationToken)
+        public async ValueTask<IDisposable> AcquireConnectionAsync(
+            string deviceId,
+            CancellationToken cancellationToken)
         {
-            Task? discoveryReleased = null;
+            Task discoveryReleased;
             lock (_sync)
             {
                 if (!_discoveryActive)
-                {
-                    _sessionCount++;
-                    return new Registration(this, LeaseKind.Session);
-                }
+                    return Claim(deviceId);
 
-                _waitingSessions++;
+                _waitingConnections++;
                 discoveryReleased = _discoveryReleased?.Task
                     ?? throw new InvalidOperationException("Discovery ownership has no release signal.");
             }
@@ -136,26 +188,38 @@ internal static class DeviceConnectionRegistry
             catch
             {
                 lock (_sync)
-                    _waitingSessions--;
+                    _waitingConnections--;
                 throw;
             }
 
             lock (_sync)
             {
-                _waitingSessions--;
+                _waitingConnections--;
                 if (_discoveryActive)
-                    throw new InvalidOperationException("Discovery ownership was reacquired ahead of a waiting session.");
+                    throw new InvalidOperationException("Discovery ownership was reacquired ahead of a waiting connection.");
 
-                _sessionCount++;
-                return new Registration(this, LeaseKind.Session);
+                return Claim(deviceId);
             }
+        }
+
+        /// <summary>Takes the lease, or refuses when the interface is already held.</summary>
+        private IDisposable Claim(string deviceId)
+        {
+            if (_connectionCount > 0)
+                throw new ConnectionInUseException(
+                    $"This YubiKey already has a live connection in this process (held interface: '{deviceId}'). " +
+                    "A physical YubiKey supports one live connection at a time across all interfaces. " +
+                    "Dispose the existing connection first; connections are reused sequentially, not in parallel.");
+
+            _connectionCount++;
+            return new Registration(this, LeaseKind.Connection);
         }
 
         public IDisposable? TryAcquireDiscovery()
         {
             lock (_sync)
             {
-                if (_discoveryActive || _sessionCount > 0 || _waitingSessions > 0)
+                if (_discoveryActive || _connectionCount > 0 || _waitingConnections > 0)
                     return null;
 
                 _discoveryActive = true;
@@ -169,12 +233,12 @@ internal static class DeviceConnectionRegistry
             TaskCompletionSource? releaseSignal = null;
             lock (_sync)
             {
-                if (kind == LeaseKind.Session)
+                if (kind == LeaseKind.Connection)
                 {
-                    if (_sessionCount <= 0)
-                        throw new InvalidOperationException("Session ownership was released without a matching acquisition.");
+                    if (_connectionCount <= 0)
+                        throw new InvalidOperationException("Connection ownership was released without a matching acquisition.");
 
-                    _sessionCount--;
+                    _connectionCount--;
                     return;
                 }
 
@@ -200,6 +264,20 @@ internal static class DeviceConnectionRegistry
                 return;
 
             ownership.Release(kind);
+        }
+    }
+
+    private sealed class CompositeRegistration(IReadOnlyList<IDisposable> registrations) : IDisposable
+    {
+        private int _disposed;
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+                return;
+
+            for (var i = registrations.Count - 1; i >= 0; i--)
+                registrations[i].Dispose();
         }
     }
 }

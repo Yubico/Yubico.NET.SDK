@@ -17,7 +17,9 @@ namespace Yubico.YubiKit.Management.UnitTests;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Management.Backend;
@@ -25,18 +27,32 @@ using Yubico.YubiKit.Management.Backend;
 public class ManagementSessionTests
 {
     [Fact]
-    public async Task CreateAsync_AppletProbeFailure_DisposesProtocolExactlyOnce()
+    public async Task CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached()
+    {
+        var connection = new UnsupportedConnection();
+
+        _ = await Assert.ThrowsAsync<NotSupportedException>(
+            () => ManagementSession.CreateAsync(
+                connection,
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        await using var probe = new ProbeSession(connection);
+    }
+
+    [Fact]
+    public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
     {
         var connection = new FailingSmartCardConnection();
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             ManagementSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
-        Assert.Equal(1, connection.DisposeCount);
+        // Borrowed: a failed CreateAsync must not dispose a connection it did not create.
+        Assert.Equal(0, connection.DisposeCount);
     }
 
     [Fact]
-    public async Task CreateAsync_CancellationDuringInitialization_DisposesProtocolExactlyOnce()
+    public async Task CreateAsync_CancellationDuringInitialization_DoesNotDisposeTheBorrowedConnection()
     {
         var connection = new FailingSmartCardConnection();
         using var cancellationSource = new CancellationTokenSource();
@@ -45,7 +61,8 @@ public class ManagementSessionTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             ManagementSession.CreateAsync(connection, cancellationToken: cancellationSource.Token));
 
-        Assert.Equal(1, connection.DisposeCount);
+        // Borrowed: a failed CreateAsync must not dispose a connection it did not create.
+        Assert.Equal(0, connection.DisposeCount);
     }
 
     [Fact]
@@ -86,6 +103,86 @@ public class ManagementSessionTests
         Assert.True(backend.CapturedConfig.Span.ToArray().All(static b => b == 0));
     }
 
+    [Fact]
+    public async Task SmartCardBackend_DeviceResetAsync_SendsDeviceResetApdu()
+    {
+        var protocol = new RecordingSmartCardProtocol();
+        var backend = new SmartCardBackend(protocol);
+
+        await backend.DeviceResetAsync(TestContext.Current.CancellationToken);
+
+        var command = Assert.Single(protocol.Commands);
+        Assert.Equal(0x1F, command.Ins);
+    }
+
+    /// <summary>
+    ///     Disposal must be observable. Of the eight application sessions, Management was the only one that
+    ///     guarded its public surface with neither <c>ThrowIfDisposed</c> nor <c>EnsureInitialized</c>, so a
+    ///     call after disposal ran on into a torn-down protocol and surfaced whatever incidental failure that
+    ///     produced — or, worse, none at all.
+    /// </summary>
+    /// <remarks>
+    ///     Firmware is pinned at 5.6.0 so the feature gates in <c>SetDeviceConfigAsync</c> and
+    ///     <c>ResetDeviceAsync</c> are satisfied; the only thing left that can reject the call is the disposal
+    ///     guard, which is what these pin.
+    /// </remarks>
+    [Fact]
+    public async Task GetDeviceInfoAsync_AfterDispose_ThrowsObjectDisposed()
+    {
+        var session = CreateDisposableSession();
+        await session.DisposeAsync();
+
+        _ = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => session.GetDeviceInfoAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task SetDeviceConfigAsync_AfterDispose_ThrowsObjectDisposed()
+    {
+        var session = CreateDisposableSession();
+        await session.DisposeAsync();
+
+        _ = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => session.SetDeviceConfigAsync(
+                new DeviceConfig
+                {
+                    EnabledCapabilities = new Dictionary<Transport, int> { [Transport.Usb] = 1 }
+                },
+                reboot: false,
+                cancellationToken: TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task ResetDeviceAsync_AfterDispose_ThrowsObjectDisposed()
+    {
+        var session = CreateDisposableSession();
+        await session.DisposeAsync();
+
+        _ = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => session.ResetDeviceAsync(TestContext.Current.CancellationToken));
+    }
+
+    /// <summary>
+    ///     A real, fully constructed session over an inert connection: the disposal gate, connection, and
+    ///     logger are genuine, so <c>DisposeAsync</c> runs the production teardown rather than a simulation of
+    ///     it. Only initialization is skipped.
+    /// </summary>
+    private static ManagementSession CreateDisposableSession()
+    {
+        var session = (ManagementSession)Activator.CreateInstance(
+            typeof(ManagementSession),
+            BindingFlags.Instance | BindingFlags.NonPublic,
+            binder: null,
+            [new InertSmartCardConnection(), null],
+            culture: null)!;
+
+        typeof(ApplicationSession)
+            .GetProperty(nameof(ApplicationSession.FirmwareVersion))!
+            .SetValue(session, new FirmwareVersion(5, 6, 0));
+
+        return session;
+    }
+
     private static ManagementSession CreateSessionForBackend(IManagementBackend backend)
     {
         var session = (ManagementSession)RuntimeHelpers.GetUninitializedObject(typeof(ManagementSession));
@@ -121,9 +218,80 @@ public class ManagementSessionTests
 
         public ValueTask DeviceResetAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
+    }
+
+    private sealed class UnsupportedConnection : IConnection
+    {
+        public ConnectionType Type => ConnectionType.Unknown;
 
         public void Dispose()
         {
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    private sealed class ProbeSession(IConnection connection) : ApplicationSession(connection);
+
+    private sealed class RecordingSmartCardProtocol : ISmartCardProtocol
+    {
+        public List<ApduCommand> Commands { get; } = [];
+
+        public Task<ApduResponse> TransmitAndReceiveAsync(
+            ApduCommand command,
+            bool throwOnError = true,
+            CancellationToken cancellationToken = default)
+        {
+            Commands.Add(command);
+            return Task.FromResult(new ApduResponse([], unchecked((short)0x9000)));
+        }
+
+        public Task<ReadOnlyMemory<byte>> SelectAsync(
+            ReadOnlyMemory<byte> applicationId,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
+        {
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+
+    /// <summary>
+    ///     A structurally valid SmartCard connection that never answers. Enough for a session to be
+    ///     constructed and disposed for real; any actual exchange is a test bug.
+    /// </summary>
+    private sealed class InertSmartCardConnection : ISmartCardConnection
+    {
+        public Transport Transport => Transport.Usb;
+        public ConnectionType Type => ConnectionType.SmartCard;
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+            ReadOnlyMemory<byte> command,
+            CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("the disposal guard should have rejected this call");
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
+            NullConnectionDisposable.Instance;
+
+        public bool SupportsExtendedApdu() => false;
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => default;
+
+        private sealed class NullConnectionDisposable : IDisposable
+        {
+            public static NullConnectionDisposable Instance { get; } = new();
+
+            public void Dispose()
+            {
+            }
         }
     }
 

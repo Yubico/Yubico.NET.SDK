@@ -49,6 +49,8 @@ finally
 
 `PivSession.DefaultManagementKey` exposes the well-known 24-byte default value used by both
 Triple-DES and AES-192 defaults. Use `session.ManagementKeyType` to select the algorithm.
+`session.IsManagementKeyAuthenticated` reports PIV management-key authentication; it is distinct
+from the inherited `IsAuthenticated`, which reports application-protocol authentication such as SCP.
 
 ### Generate a Key
 
@@ -119,7 +121,7 @@ Unit tests should prefer fake SmartCard protocol or connection seams that assert
 Integration tests use `Tests.Shared` with standard xUnit `[Theory]` and `[WithYubiKey]`:
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(Capability = DeviceCapabilities.Piv)]
 public async Task GetPinMetadata_ReadOnly_Succeeds(YubiKeyTestState state)
 {
@@ -129,7 +131,7 @@ public async Task GetPinMetadata_ReadOnly_Succeeds(YubiKeyTestState state)
 }
 ```
 
-Do not run PIV reset, PIN/PUK mutation, management-key mutation, or key/certificate write integration tests without human-coordinated hardware approval.
+PIV reset, PIN/PUK mutation, management-key mutation, and key/certificate writes are expected against an allow-listed test device — that is what the harness is for. What needs a human is presence and timing, not destruction: touch-policy ceremonies and physical insert/remove. See [docs/TESTING.md](../../docs/TESTING.md#hardware-authorization).
 
 ## Related Example
 

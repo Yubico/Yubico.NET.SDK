@@ -16,7 +16,7 @@ public class OpenPgpMultiCurveTests
 
     // ── P-384 Key Generation and Signing ────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task GenerateEcKey_P384_ThenSign_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
@@ -45,7 +45,7 @@ public class OpenPgpMultiCurveTests
 
     // ── Brainpool P-256 R1 Key Generation ───────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task GenerateEcKey_BrainpoolP256R1_Succeeds(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
@@ -69,7 +69,7 @@ public class OpenPgpMultiCurveTests
 
     // ── PIN Attempt Limit Configuration ─────────────────────────────
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task SetPinAttempts_CustomValues_ReflectedInStatus(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(

@@ -23,7 +23,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Protocols.Otp.Hid;
 ///     command is a 70-byte frame written as ten sequenced 8-byte feature reports followed by a polled
 ///     multi-report read — the device assembles the frame by sequence number, so a foreign report
 ///     written mid-frame corrupts the frame (bad CRC at best, a mixed frame accepted at worst).
-///     Concurrent operations on one protocol must never interleave feature reports on the wire.
+///     Overlapping operations on one protocol are therefore refused immediately.
 /// </summary>
 public class OtpHidProtocolConcurrencyTests
 {
@@ -36,7 +36,7 @@ public class OtpHidProtocolConcurrencyTests
     private static readonly TimeSpan CompletionBound = TimeSpan.FromSeconds(5);
 
     [Fact]
-    public async Task SendAndReceiveAsync_ConcurrentOperations_DoNotInterleaveReportsOnTheWire()
+    public async Task SendAndReceiveAsync_OverlappingOperation_ThrowsImmediately()
     {
         var ct = TestContext.Current.CancellationToken;
         var fake = new FakeOtpHidDevice(new FirmwareVersion(5, 8, 0))
@@ -60,12 +60,14 @@ public class OtpHidProtocolConcurrencyTests
         var operationA = protocol.SendAndReceiveAsync(SlotCommandA, payloadA, ct);
         Assert.True(await fake.WaitForSendsAsync(1, ObservationWindow, ct));
 
-        var operationB = protocol.SendAndReceiveAsync(SlotCommandB, payloadB, ct);
-        await fake.WaitForSendsAsync(2, ObservationWindow, ct);
+        var refusal = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SendAndReceiveAsync(SlotCommandB, payloadB, ct));
+        Assert.Contains("one operation at a time", refusal.Message, StringComparison.Ordinal);
+        Assert.False(await fake.WaitForSendsAsync(2, ObservationWindow, ct));
 
         fake.ReleaseSends();
         var responseA = await operationA.WaitAsync(CompletionBound, ct);
-        var responseB = await operationB.WaitAsync(CompletionBound, ct);
+        var responseB = await protocol.SendAndReceiveAsync(SlotCommandB, payloadB, ct);
 
         // Both operations must see their own responses...
         Assert.Equal(CreateResponse(0xA0), responseA.ToArray());

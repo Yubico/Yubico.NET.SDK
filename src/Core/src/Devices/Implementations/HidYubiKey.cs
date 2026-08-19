@@ -30,7 +30,7 @@ namespace Yubico.YubiKit.Core.Devices;
 internal class HidYubiKey(
     IHidDevice hidDevice,
     ILogger<HidYubiKey> logger)
-    : IYubiKey, IDiscoveryConnectionProvider
+    : IYubiKey, IDiscoveryConnectionProvider, IScopedConnectionProvider
 {
     public string DeviceId { get; } =
         $"hid:{hidDevice.ReaderName}:{hidDevice.DescriptorInfo.Usage:X4}";
@@ -40,7 +40,18 @@ internal class HidYubiKey(
     /// </summary>
     public ConnectionType AvailableConnections => ConnectionTypeMapper.ToConnectionType(hidDevice.InterfaceType);
 
-    public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+    public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+        where TConnection : class, IConnection
+        => ConnectWithLeaseScopeAsync<TConnection>([DeviceId], cancellationToken);
+
+    Task<TConnection> IScopedConnectionProvider.ConnectWithLeaseScopeAsync<TConnection>(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken) =>
+        ConnectWithLeaseScopeAsync<TConnection>(interfaceIds, cancellationToken);
+
+    private async Task<TConnection> ConnectWithLeaseScopeAsync<TConnection>(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken)
         where TConnection : class, IConnection
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -51,8 +62,11 @@ internal class HidYubiKey(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
         }
 
+        // The connection claims this member's physical-device lease scope and releases it on disposal.
         var ownership = await DeviceConnectionRegistry
-            .AcquireSessionAsync(DeviceId, cancellationToken)
+            .AcquireConnectionAsync(
+                interfaceIds,
+                cancellationToken)
             .ConfigureAwait(false);
         try
         {

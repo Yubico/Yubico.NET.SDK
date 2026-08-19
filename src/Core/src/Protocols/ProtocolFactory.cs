@@ -24,7 +24,7 @@ namespace Yubico.YubiKit.Core.Protocols;
 /// <summary>
 ///     Creates Core protocol implementations from opened YubiKey connections.
 /// </summary>
-public static class ProtocolFactory
+internal static class ProtocolFactory
 {
     public static IProtocol Create(IConnection connection)
     {

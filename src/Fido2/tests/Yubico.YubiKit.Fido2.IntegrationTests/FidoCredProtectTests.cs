@@ -29,7 +29,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Extension", "credProtect")]
 public class FidoCredProtectTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task CredProtect_Level2_RequiresAllowListForDiscovery(YubiKeyTestState state) =>
@@ -163,7 +163,7 @@ public class FidoCredProtectTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task CredProtect_Level3_RequiresUserVerification(YubiKeyTestState state) =>

@@ -278,10 +278,12 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 // means the loop terminated unexpectedly; tear down the stale
                 // session state so monitoring can restart cleanly.
                 Logger.LogWarning("Previous monitoring loop terminated unexpectedly; restarting device monitoring");
+
+                // Retire BEFORE tearing listeners down. Teardown can block on listener Stop/Dispose, and
+                // until retirement completes the dead generation is still current, so a manual rescan
+                // holding it would pass admission for the whole of that teardown.
+                RetireCurrentGeneration(disposing: false);
                 TeardownListeners();
-                var deadGeneration = _current;
-                deadGeneration?.Cts.Cancel();
-                deadGeneration?.Signal.Complete();
 
                 _monitoringTask = null;
             }
@@ -300,8 +302,9 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             var smartCardListener = TryStartSmartCardListener(generation.Signal);
 
             // Swap the current generation BEFORE starting the loop so the loop's
-            // initial rescan passes admission. The predecessor (if any) was
-            // already retired; anything it still does fails admission.
+            // initial rescan passes admission. The predecessor (if any) was already retired AND
+            // swapped out of _current by RetireCurrentGeneration, so anything it still does has been
+            // failing admission since retirement rather than only from this point.
             lock (_publishLock)
             {
                 _current = generation;
@@ -444,6 +447,52 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         Logger.LogInformation("Device monitoring stopped");
     }
 
+    /// <summary>
+    /// Retires the current generation: cancels it, completes its signal, and swaps it out of
+    /// <see cref="_current"/> so nothing it still does can pass admission.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The swap is the load-bearing half, not the cancellation. A retired generation that is still
+    /// reachable through <see cref="_current"/> passes the admission check in
+    /// <see cref="PublishSnapshotAsync"/>, so a manual rescan that captured it can publish stale truth
+    /// after it was retired. Cancelling its token does not prevent that: <see cref="RescanAsync"/>
+    /// waits on the caller's token, not the generation's.
+    /// </para>
+    /// <para>
+    /// There is exactly one retirement path on purpose. The restart-after-loop-death branch in
+    /// <see cref="StartMonitoring"/> previously carried its own copy that cancelled and completed but
+    /// never swapped, leaving the dead generation current across listener teardown and startup - a far
+    /// wider window than the one here. A second "retire a generation" mechanism is precisely the
+    /// re-merge that <c>src/Core/CLAUDE.md</c> warns against; keep it single.
+    /// </para>
+    /// <para>
+    /// <paramref name="disposing"/> clears the slot outright. Every other caller installs a fresh
+    /// generation so manual rescans keep working after a plain stop or a restart.
+    /// </para>
+    /// <para>
+    /// <b>Precondition: the caller must hold <see cref="_monitorLock"/>.</b> This reads
+    /// <see cref="_current"/> before taking <see cref="_publishLock"/> to write it, which is only safe
+    /// because every write to <see cref="_current"/> after construction happens under
+    /// <see cref="_monitorLock"/>. Without that, the read and the write could straddle a concurrent swap
+    /// and this would retire one generation while replacing a different one.
+    /// </para>
+    /// </remarks>
+    private void RetireCurrentGeneration(bool disposing)
+    {
+        Debug.Assert(_monitorLock.IsHeldByCurrentThread, "RetireCurrentGeneration requires _monitorLock");
+
+        var generation = _current;
+
+        generation?.Cts.Cancel();
+        generation?.Signal.Complete();
+
+        lock (_publishLock)
+        {
+            _current = disposing ? null : new MonitorGeneration();
+        }
+    }
+
     private Task? StopMonitoringCore(bool disposing)
     {
         lock (_monitorLock)
@@ -466,20 +515,8 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             }
 
             var taskToAwait = _monitoringTask;
-            var generation = _current;
 
-            // Signal cancellation and retire the generation. Anything it still
-            // does - including a scan hung in native I/O that returns much later -
-            // fails admission and can never publish stale truth.
-            generation?.Cts.Cancel();
-            generation?.Signal.Complete();
-
-            lock (_publishLock)
-            {
-                // A fresh generation keeps manual rescans working after a plain
-                // stop; dispose clears it so admission has no current generation.
-                _current = disposing ? null : new MonitorGeneration();
-            }
+            RetireCurrentGeneration(disposing);
 
             _monitoringTask = null;
 
@@ -652,7 +689,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         }
     }
 
-    private static void SignalHidEvent(
+    private void SignalHidEvent(
         DeviceMonitorSignal signal,
         HidDeviceRescanHint hint)
     {
@@ -661,11 +698,19 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
             hint.ChangeKind,
             hint.PlatformDeviceId,
             hint.DevicePath);
+
+        // Hardware changed on this transport, so identity evidence cached from its interfaces may now
+        // describe a departed key (a same-slot swap reuses the interface id and is invisible to scan-time
+        // eviction). Invalidate BEFORE queueing, so the rescan this event triggers re-reads rather than
+        // reusing. See IFindYubiKeys.NotifyTransportActivity.
+        _findYubiKeys.NotifyTransportActivity(ConnectionType.Hid);
         QueueRescan(signal, "HID");
     }
 
-    private static void SignalSmartCardEvent(DeviceMonitorSignal signal)
+    private void SignalSmartCardEvent(DeviceMonitorSignal signal)
     {
+        // See SignalHidEvent: invalidate this transport's cached identity before the rescan runs.
+        _findYubiKeys.NotifyTransportActivity(ConnectionType.SmartCard);
         QueueRescan(signal, "SmartCard");
     }
 

@@ -139,9 +139,9 @@ public class IYubiKeyExtensionsTransportTests
     }
 
     // Phase 38.5 (ISC-10/ISC-14): the FIDO2 "no FIDO-capable connection" remap stays scoped to the
-    // ResolveSessionTransports call only. When ResolveSessionTransports succeeds but the HID FIDO connect
+    // ResolveSessionTransport call only. When resolution succeeds but the HID FIDO connect
     // fails with a non-held error, that error must surface unchanged — NOT be masked as the generic
-    // NotSupportedException — proving the remap did not widen around ConnectSessionTransportAsync.
+    // NotSupportedException — proving the remap did not widen around session connection creation.
     [Fact]
     public async Task CreateFidoSessionAsync_ConnectFailsNonHeld_SurfacesErrorNotGenericRemap()
     {
@@ -153,6 +153,17 @@ public class IYubiKeyExtensionsTransportTests
             () => device.CreateFidoSessionAsync(cancellationToken: Ct));
 
         Assert.Equal("transport boom", ex.Message);
+    }
+
+    [Fact]
+    public async Task CreateFidoSessionAsync_HidFidoHeld_DoesNotOpenSecondSessionOverSmartCard()
+    {
+        var device = new HeldHidProbeYubiKey();
+
+        _ = await Assert.ThrowsAsync<ConnectionInUseException>(
+            () => device.CreateFidoSessionAsync(cancellationToken: Ct));
+
+        Assert.Equal([typeof(IFidoHidConnection)], device.RequestedConnections);
     }
 
     private sealed class SelectionProbeYubiKey(ConnectionType available) : IYubiKey
@@ -169,7 +180,7 @@ public class IYubiKeyExtensionsTransportTests
         }
     }
 
-    // Resolves a candidate list successfully, then throws a caller-supplied exception from the connect itself.
+    // Resolves a transport successfully, then throws a caller-supplied exception from the connect itself.
     private sealed class ThrowingProbeYubiKey(ConnectionType available, Exception connectException) : IYubiKey
     {
         public string DeviceId => "throwing-probe";
@@ -178,6 +189,23 @@ public class IYubiKeyExtensionsTransportTests
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection =>
             throw connectException;
+    }
+
+    private sealed class HeldHidProbeYubiKey : IYubiKey
+    {
+        public string DeviceId => "held-hid-probe";
+        public ConnectionType AvailableConnections => ConnectionType.HidFido | ConnectionType.SmartCard;
+        public List<Type> RequestedConnections { get; } = [];
+
+        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+            where TConnection : class, IConnection
+        {
+            RequestedConnections.Add(typeof(TConnection));
+            if (typeof(TConnection) == typeof(IFidoHidConnection))
+                throw new ConnectionInUseException("The FIDO HID interface is already in use.");
+
+            throw new ConnectProbeException();
+        }
     }
 
     private sealed class ConnectProbeException : Exception;

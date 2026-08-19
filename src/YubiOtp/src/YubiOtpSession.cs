@@ -22,6 +22,8 @@ using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.YubiOtp.Backend;
 
 namespace Yubico.YubiKit.YubiOtp;
@@ -84,7 +86,6 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     ];
 
     private readonly ILogger _logger;
-    private readonly IConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
 
     private IProtocol _protocol = null!;
@@ -94,11 +95,22 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     private YubiOtpSession(
         IConnection connection,
         ScpKeyParameters? scpKeyParams = null)
+        : base(EnsureSupportedConnection(connection))
     {
         ArgumentNullException.ThrowIfNull(connection);
-        _connection = connection;
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
+    }
+
+    private static IConnection EnsureSupportedConnection(IConnection connection)
+    {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        return connection is ISmartCardConnection or IOtpHidConnection
+            ? connection
+            : throw new NotSupportedException(
+                $"Connection type {connection.GetType().Name} is not supported by YubiOtpSession. " +
+                "Supported types: ISmartCardConnection, IOtpHidConnection.");
     }
 
     /// <summary>
@@ -112,7 +124,9 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        var session = new YubiOtpSession(connection, scpKeyParams);
+        // A session that fails to initialize must not keep its claim on the connection: the connection
+        // outlives it, and the next session over it would otherwise be refused forever.
+        var session = Construct(connection, () => new YubiOtpSession(connection, scpKeyParams));
         try
         {
             await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
@@ -134,7 +148,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             return;
         }
 
-        var protocol = ProtocolFactory.Create(_connection);
+        var protocol = ProtocolFactory.Create(Connection);
         Protocol = protocol;
         var backend = CreateBackend(protocol);
 

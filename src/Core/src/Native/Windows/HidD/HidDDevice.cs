@@ -47,11 +47,66 @@ internal sealed class HidDDevice : IHidDDevice
     public short OutputReportByteLength { get; }
     public short FeatureReportByteLength { get; }
 
-    public void OpenIOConnection()
-        => OpenReportConnection();
+    // The two report paths below deliberately request DIFFERENT access, and are deliberately SEPARATE
+    // methods. Read the note on OpenFeatureConnection before changing either: the split is load-bearing,
+    // and it is what makes hidapi's retry-on-failure pattern unnecessary here.
 
+    /// <summary>
+    ///     Opens the handle used for input/output reports (FIDO).
+    /// </summary>
+    /// <remarks>
+    ///     Requires GENERIC_READ | GENERIC_WRITE because this path really does use ReadFile/WriteFile
+    ///     (see <see cref="GetInputReport" /> and <see cref="SetOutputReport" />), unlike the feature path.
+    ///     Do NOT add a fall back to a lesser access level here: a zero-access handle would open
+    ///     successfully and then fail on every subsequent ReadFile/WriteFile, turning one clear
+    ///     UnauthorizedAccessException at open time — which carries the elevation guidance a non-elevated
+    ///     Windows caller needs — into cryptic failures at each I/O call.
+    /// </remarks>
+    public void OpenIOConnection()
+        => OpenReportConnection(Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_READ |
+                                Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_WRITE);
+
+    /// <summary>
+    ///     Opens the handle used for feature reports (OTP), with no desired access.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         OTP feature-report I/O uses HidD_GetFeature/HidD_SetFeature, which are IOCTLs that succeed on
+    ///         a zero-access handle. The OTP interface is a keyboard top-level collection, and Windows
+    ///         refuses GENERIC_READ/GENERIC_WRITE on the system keyboard even for an elevated process
+    ///         (anti-keylogger restriction). Opening with no access sidesteps that while still permitting
+    ///         feature-report IOCTLs.
+    ///     </para>
+    ///     <para>
+    ///         Scope of the evidence, stated precisely: the constructor's metadata probe shows only that this
+    ///         same path OPENS with zero access (CreateFile + HidD_GetPreparsedData/HidP_GetCaps). It does not
+    ///         exercise HidD_GetFeature/HidD_SetFeature, so it is supporting evidence, not proof that feature
+    ///         I/O succeeds. Sufficiency for feature I/O rests on the Win32 contract for these IOCTLs plus the
+    ///         Windows hardware run recorded in docs/architecture/connection-ownership-and-contention.md (YubiOtp integration
+    ///         10/10, fw 5.8.0).
+    ///     </para>
+    ///     <para>
+    ///         <b>Why there is no "try read/write, fall back to none" retry, as hidapi does.</b> hidapi's
+    ///         Windows backend (<c>windows/hid.c</c>, <c>hid_open_path</c>) opens with
+    ///         GENERIC_READ | GENERIC_WRITE and, on failure, retries with zero access, commenting that system
+    ///         devices such as keyboards cannot be opened read/write because the system takes exclusive
+    ///         control to prevent keyloggers, but that feature reports still work. It needs that retry because
+    ///         it returns ONE handle serving both <c>hid_read</c>/<c>hid_write</c> (ReadFile/WriteFile) and
+    ///         <c>hid_get_feature_report</c> (IOCTL), so it must request the maximal access and degrade.
+    ///     </para>
+    ///     <para>
+    ///         This type splits those into two handles instead — <see cref="OpenIOConnection" /> for
+    ///         ReadFile/WriteFile, this method for feature IOCTLs — so each already requests exactly what its
+    ///         callers use. Adding the retry here would buy nothing and cost a syscall: read/write access
+    ///         grants no capability this path uses; on the keyboard-class OTP collection the first attempt
+    ///         always fails, so it would always fall through to zero access anyway; and zero access already
+    ///         succeeds in a superset of the cases read/write does, being the least restrictive request and
+    ///         not subject to share-mode conflicts. There is no case a read/write-first retry could rescue
+    ///         that this call does not already handle.
+    ///     </para>
+    /// </remarks>
     public void OpenFeatureConnection()
-        => OpenReportConnection();
+        => OpenReportConnection(Kernel32.NativeMethods.DESIRED_ACCESS.NONE);
 
     public byte[] GetFeatureReport()
     {
@@ -216,9 +271,9 @@ internal sealed class HidDDevice : IHidDDevice
         }
     }
 
-    private void OpenReportConnection()
+    private void OpenReportConnection(Kernel32.NativeMethods.DESIRED_ACCESS desiredAccess)
     {
-        var handle = OpenReadWriteHandle();
+        var handle = OpenHandleWithAccess(desiredAccess);
         _handle.Dispose();
         _handle = handle;
     }

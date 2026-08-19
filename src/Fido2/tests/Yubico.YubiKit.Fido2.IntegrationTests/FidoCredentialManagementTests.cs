@@ -32,7 +32,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Category", "Integration")]
 public class FidoCredentialManagementTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task EnumerateCredentials_WithResidentKeys_ReturnsCredentialList(YubiKeyTestState state) =>
@@ -113,7 +113,7 @@ public class FidoCredentialManagementTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task EnumerateCredentials_NoCredentials_ReturnsEmptyOrThrows(YubiKeyTestState state) =>
@@ -151,7 +151,7 @@ public class FidoCredentialManagementTests
             CryptographicOperations.ZeroMemory(pinToken);
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task DeleteCredential_ExistingCredential_RemovesFromDevice(YubiKeyTestState state) =>
@@ -249,7 +249,7 @@ public class FidoCredentialManagementTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task GetCredentialsMetadata_ReturnsValidCounts(YubiKeyTestState state) =>

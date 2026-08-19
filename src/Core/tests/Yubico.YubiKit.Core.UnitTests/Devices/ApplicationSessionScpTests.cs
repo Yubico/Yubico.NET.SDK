@@ -32,7 +32,7 @@ public class ApplicationSessionScpTests
     [Fact]
     public async Task InitializeProtocol_WithScpOnNonSmartCardProtocol_ThrowsNotSupported()
     {
-        var session = new TestSession();
+        var session = TestSession.Create(new InertConnection());
         using var protocol = new NonSmartCardProtocol();
         using var scp = Scp03KeyParameters.Default;
 
@@ -51,7 +51,7 @@ public class ApplicationSessionScpTests
     [Fact]
     public async Task InitializeProtocol_WithoutScpOnNonSmartCardProtocol_Succeeds()
     {
-        var session = new TestSession();
+        var session = TestSession.Create(new InertConnection());
         using var protocol = new NonSmartCardProtocol();
 
         await session.RunInitializeAsync(
@@ -67,7 +67,7 @@ public class ApplicationSessionScpTests
     [Fact]
     public async Task InitializeProtocol_WhenAlreadyInitialized_RejectsNullProtocol()
     {
-        using var session = new TestSession();
+        using var session = TestSession.Create(new InertConnection());
         using var protocol = new TrackingProtocol();
 
         await session.RunInitializeAsync(
@@ -87,7 +87,7 @@ public class ApplicationSessionScpTests
     [Fact]
     public async Task OwnedProtocol_ConfigurationFailure_IsDisposedExactlyOnce()
     {
-        using var session = new TestSession();
+        using var session = TestSession.Create(new InertConnection());
         var expected = new InvalidOperationException("configuration failure");
         var protocol = new TrackingProtocol(configureException: expected);
 
@@ -104,7 +104,7 @@ public class ApplicationSessionScpTests
     [Fact]
     public async Task OwnedProtocol_CancellationDuringInitialization_IsDisposedExactlyOnce()
     {
-        using var session = new TestSession();
+        using var session = TestSession.Create(new InertConnection());
         var protocol = new TrackingProtocol();
         using var cancellationSource = new CancellationTokenSource();
         cancellationSource.Cancel();
@@ -118,7 +118,11 @@ public class ApplicationSessionScpTests
     [Fact]
     public async Task CleanupFailure_PreservesOriginalInitializationException()
     {
-        using var session = new TestSession();
+        // Deliberately not `using`: DisposeAfterInitializationFailure already disposed this session, and
+        // that disposal FAILED. DisposalGate makes a failed teardown terminal and replays the same failure
+        // to every later caller, so a second dispose would rethrow the cleanup IOException. Upstream's
+        // version could use `using` because it has no DisposalGate; ours shares failed completions by design.
+        var session = TestSession.Create(new InertConnection());
         var expected = new InvalidOperationException("initialization failure");
         var protocol = new TrackingProtocol(disposeException: new IOException("cleanup failure"));
 
@@ -130,9 +134,9 @@ public class ApplicationSessionScpTests
     }
 
     [Fact]
-    public async Task ScpEstablishmentFailure_DisposesUnderlyingPcscProtocolExactlyOnce()
+    public async Task ScpEstablishmentFailure_DoesNotDisposeTheBorrowedConnection()
     {
-        using var session = new TestSession();
+        using var session = TestSession.Create(new InertConnection());
         var connection = new FakeSmartCardConnection();
         var protocol = new PcscProtocol(connection);
         using var scp = Scp03KeyParameters.Default;
@@ -144,13 +148,16 @@ public class ApplicationSessionScpTests
                 TestContext.Current.CancellationToken,
                 scp));
 
-        Assert.Equal(1, connection.DisposeCount);
+        // Borrowed: the session did not create this connection, so disposal is the caller's.
+        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        Assert.Equal(0, connection.DisposeCount);
     }
 
     [Fact]
     public async Task SuccessfulInitialization_RetainsProtocolUntilExactlyOneSessionDisposal()
     {
-        var session = new TestSession();
+        var session = TestSession.Create(new InertConnection());
         var protocol = new TrackingProtocol();
 
         await session.RunOwnedInitializeAsync(
@@ -166,8 +173,24 @@ public class ApplicationSessionScpTests
         Assert.Equal(1, protocol.DisposeCount);
     }
 
-    private sealed class TestSession : ApplicationSession
+    [Fact]
+    public async Task DisposeAsync_InvokesDerivedManagedCleanup()
     {
+        var session = TestSession.Create(new InertConnection());
+
+        await session.DisposeAsync();
+
+        Assert.True(session.ManagedCleanupInvoked);
+    }
+
+    private sealed class TestSession(IConnection connection) : ApplicationSession(connection)
+    {
+        public bool ManagedCleanupInvoked { get; private set; }
+
+        // Mirrors a production factory: binding happens in Construct, not in the constructor.
+        public static TestSession Create(IConnection connection)
+            => Construct(connection, () => new TestSession(connection));
+
         public Task RunInitializeAsync(
             IProtocol protocol,
             FirmwareVersion firmwareVersion,
@@ -227,6 +250,12 @@ public class ApplicationSessionScpTests
                 throw;
             }
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            ManagedCleanupInvoked |= disposing;
+            base.Dispose(disposing);
+        }
     }
 
     private sealed class TrackingProtocol(
@@ -247,6 +276,19 @@ public class ApplicationSessionScpTests
             if (disposeException is not null)
                 throw disposeException;
         }
+    }
+
+    // The session base binds to a connection at construction; these tests are about the SCP guard, so the
+    // connection only has to exist and be distinct per session.
+    private sealed class InertConnection : IConnection
+    {
+        public ConnectionType Type => ConnectionType.SmartCard;
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 
     // A protocol that is deliberately NOT an ISmartCardProtocol (mirrors a HID FIDO/OTP protocol for the

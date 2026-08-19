@@ -90,9 +90,4 @@ internal sealed class HidBackend : IYubiOtpBackend
 
         return response[..expectedLength];
     }
-
-    public void Dispose()
-    {
-        // Backend doesn't own the protocol - YubiOtpSession handles disposal
-    }
 }

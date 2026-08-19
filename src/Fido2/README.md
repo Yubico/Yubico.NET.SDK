@@ -297,20 +297,23 @@ Different features require specific firmware versions:
 | USB HID | `IFidoHidConnection` | Primary FIDO2 interface |
 | SmartCard | `ISmartCardConnection` | FIDO2 APDU path when the FIDO2 AID is exposed; NFC is allowed when the current PC/SC connection reports `Transport.Nfc`, while USB SmartCard requires firmware 5.8.0+; prefer HID for ordinary USB FIDO2 coverage |
 
+A grouped physical YubiKey admits one live SDK connection across all known interfaces. A second
+session throws `ConnectionInUseException` until the current session is disposed.
+
 ### Transport selection (smart default + override)
 
 On a physical YubiKey that exposes more than one FIDO2-capable transport, `CreateFidoSessionAsync`
 (and `CreateWebAuthnClientAsync`) selects a transport by an app-specific **smart default**, with an
 optional explicit **override** via the `preferredConnection` parameter:
 
-- Default order: **HID FIDO**, then **SmartCard FIDO2**.
+- Default selection: **HID FIDO** when exposed, otherwise **SmartCard FIDO2**. Once selected, a connection
+  failure propagates rather than switching transports and creating a second session on the same key.
 - `preferredConnection: ConnectionType.SmartCard` (or `HidFido`) forces a transport. It must be a
   transport FIDO2 can use and that the device exposes; otherwise it throws `ArgumentException`
   (not a valid FIDO2 transport, e.g. `HidOtp`) or `NotSupportedException` (valid but not on this device).
-- SCP applies only to SmartCard. Supplying `scpKeyParams` while a non-SmartCard transport is selected
-  (including the default HID FIDO first choice) throws `NotSupportedException` at session init
-  ("SCP is only supported on SmartCard protocols"); to use SCP, pass
-  `preferredConnection: ConnectionType.SmartCard`.
+- SCP applies only to SmartCard. Supplying `scpKeyParams` without an override selects SmartCard
+  automatically. Explicitly selecting HID FIDO with SCP parameters throws `NotSupportedException`
+  during session initialization ("SCP is only supported on SmartCard protocols").
 
 ```csharp
 // Force SmartCard FIDO2 with SCP on a dual-transport key

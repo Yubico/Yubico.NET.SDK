@@ -22,6 +22,8 @@ using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Management.Backend;
 
 namespace Yubico.YubiKit.Management;
@@ -38,7 +40,6 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         new("Device Reset", 5, 6, 0);
 
     private readonly ILogger _logger;
-    private readonly IConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
 
     private IProtocol _protocol = null!;
@@ -49,13 +50,45 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     private ManagementSession(
         IConnection connection,
         ScpKeyParameters? scpKeyParams = null)
+        : base(EnsureSupportedConnection(connection))
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        _connection = connection;
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
+
+        // Report what was actually opened. Upstream has no Transport concept, so this assignment lives
+        // only on this branch and must survive merges that restructure the constructor around it.
+        Transport = connection switch
+        {
+            ISmartCardConnection => ConnectionType.SmartCard,
+            IFidoHidConnection => ConnectionType.HidFido,
+            _ => ConnectionType.HidOtp
+        };
     }
+
+    private static IConnection EnsureSupportedConnection(IConnection connection)
+    {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        return connection is ISmartCardConnection or IFidoHidConnection or IOtpHidConnection
+            ? connection
+            : throw new NotSupportedException(
+                $"The connection type {connection.GetType().Name} is not supported by ManagementSession. " +
+                "Supported types: ISmartCardConnection, IFidoHidConnection, IOtpHidConnection.");
+    }
+
+    /// <summary>
+    ///     The transport this session actually runs over.
+    /// </summary>
+    /// <remarks>
+    ///     Management runs over SmartCard, HID FIDO, or HID OTP, and the transport is chosen by a default
+    ///     order or a caller override — so the same call site can land on different transports depending on
+    ///     what else holds the device. Capabilities differ: <see cref="ResetDeviceAsync" /> and SCP are
+    ///     SmartCard-only. This reports what was actually opened, not what was requested, so callers and
+    ///     diagnostics can tell the difference without inspecting the protocol.
+    /// </remarks>
+    public ConnectionType Transport { get; }
 
     public static async Task<ManagementSession> CreateAsync(
         IConnection connection,
@@ -65,7 +98,9 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        var session = new ManagementSession(connection, scpKeyParams);
+        // A session that fails to initialize must not keep its claim on the connection: the connection
+        // outlives it, and the next session over it would otherwise be refused forever.
+        var session = Construct(connection, () => new ManagementSession(connection, scpKeyParams));
         try
         {
             await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
@@ -85,7 +120,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create(_connection);
+        var protocol = ProtocolFactory.Create(Connection);
         Protocol = protocol;
         var backend = CreateBackend(protocol);
         _protocol = protocol;
@@ -112,8 +147,11 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
     }
 
-    public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default) =>
-        DeviceInfoReader.ReadAsync(_protocol, _version, cancellationToken);
+    public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        return DeviceInfoReader.ReadAsync(_protocol, _version, cancellationToken);
+    }
 
     public Task SetDeviceConfigAsync(
         DeviceConfig config,
@@ -122,6 +160,9 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         byte[]? newLockCode = null,
         CancellationToken cancellationToken = default)
     {
+        // Before the feature gate: a disposed session should say so, not report the firmware verdict of a
+        // session that no longer exists.
+        ThrowIfDisposed();
         EnsureSupports(FeatureSetConfig);
         ArgumentNullException.ThrowIfNull(config);
 
@@ -154,6 +195,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
 
     public Task ResetDeviceAsync(CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
         EnsureSupports(FeatureDeviceReset);
         return _backend.DeviceResetAsync(cancellationToken).AsTask();
     }

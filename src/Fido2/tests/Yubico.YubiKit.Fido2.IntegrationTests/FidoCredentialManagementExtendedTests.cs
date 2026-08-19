@@ -32,7 +32,7 @@ namespace Yubico.YubiKit.Fido2.IntegrationTests;
 [Trait("Feature", "CredentialManagement")]
 public class FidoCredentialManagementExtendedTests
 {
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task UpdateUserInformation_ChangesDisplayName(YubiKeyTestState state) =>
@@ -122,7 +122,7 @@ public class FidoCredentialManagementExtendedTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task EnumerateCredentials_MultipleUsersPerRp_ReturnsAll(YubiKeyTestState state) =>

@@ -24,6 +24,33 @@ namespace Yubico.YubiKit.Core.Devices;
 public interface IFindYubiKeys
 {
     Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Signals that hotplug activity was observed on a transport, so identity evidence cached from
+    ///     that transport's interfaces may describe hardware that is no longer there.
+    /// </summary>
+    /// <param name="transport">
+    ///     The transport family the activity was observed on — <see cref="ConnectionType.SmartCard" /> or
+    ///     <see cref="ConnectionType.Hid" />.
+    /// </param>
+    /// <remarks>
+    ///     <para>
+    ///         Scan-time eviction alone cannot catch a swap that completes <em>between</em> scans: a key
+    ///         unplugged and a same-model key plugged into the same slot can reuse the same per-interface
+    ///         identifier (PC/SC reader names are slot-derived), so the interface is never observed absent
+    ///         and a cached serial from the old key would be attributed to the new one. For an SDK whose
+    ///         consumers bind sessions to serial-derived identity, that is key substitution, not a stale
+    ///         cache entry. Hotplug events are the signal that physical topology changed; implementations
+    ///         discard cached identity for that transport and re-read on the next scan.
+    ///     </para>
+    ///     <para>
+    ///         Default is a no-op so that test fakes and custom implementations without an identity cache
+    ///         are unaffected. Callers must not rely on any synchronous effect.
+    ///     </para>
+    /// </remarks>
+    void NotifyTransportActivity(ConnectionType transport)
+    {
+    }
 }
 
 public class FindYubiKeys : IFindYubiKeys
@@ -57,10 +84,25 @@ public class FindYubiKeys : IFindYubiKeys
     // Serial-disambiguation identity cache (PID-count>1 / force-serial path), keyed by per-interface DeviceId.
     // Only successful reads are cached, so presence means the interface's identity was read successfully;
     // a failed or serial-disabled read is simply absent and is retried on the next scan.
-    private readonly ConcurrentDictionary<string, DeviceInfo> _identityCache = new();
+    //
+    // A cached identity is evidence about specific hardware in a specific configuration, and it expires
+    // with either:
+    //  - Configuration: the entry records the PID observed at read time, and a hit under a different PID
+    //    is a miss (see ReadIdentityAsync). On current platforms a reconfiguration usually changes the
+    //    interface id too, which self-evicts - the PID check pins the invariant for any id scheme where it
+    //    does not.
+    //  - Hardware: scan-time eviction (EvictAbsentIdentities) only catches interfaces observed absent. A
+    //    same-slot swap completing BETWEEN scans reuses the slot-derived interface id, so the old key's
+    //    serial would be attributed to the new key - key substitution. Hotplug events are the signal that
+    //    hardware changed; NotifyTransportActivity discards that transport's entries.
+    private readonly ConcurrentDictionary<string, CachedIdentity> _identityCache = new();
 
-    // Best-effort metadata cache, keyed by the merged device's stable interface-set key (NOT the composite
-    // DeviceId, which can flip between pid- and serial-forms). Evicted when any member interface disappears.
+    /// <summary>A successful identity read plus the evidence context that makes it reusable.</summary>
+    private readonly record struct CachedIdentity(DeviceInfo Info, ushort? Pid, ConnectionType Transport);
+
+    // Best-effort metadata cache, keyed by the merged device's stable interface-set key
+    // (CompositeYubiKey.PhysicalIdentityKey, NOT the composite DeviceId, which can flip between pid- and
+    // serial-forms). Evicted when any member interface disappears.
     private readonly ConcurrentDictionary<string, MetadataCacheEntry> _metadataCache = new();
 
     // Serializes discovery so two concurrent scans do not open connections to the same interface at once.
@@ -199,8 +241,10 @@ public class FindYubiKeys : IFindYubiKeys
 
     private async Task<DeviceInfo?> ReadIdentityAsync(InterfaceCandidate iface, CancellationToken cancellationToken)
     {
-        if (_identityCache.TryGetValue(iface.Device.DeviceId, out var cached))
-            return cached;
+        // A hit is valid only for the configuration it was read under: the PID is part of the evidence,
+        // not incidental metadata. A mismatch is a miss, and a successful re-read overwrites below.
+        if (_identityCache.TryGetValue(iface.Device.DeviceId, out var cached) && cached.Pid == iface.Pid)
+            return cached.Info;
 
         var info = await DiscoveryIdentityReader
             .TryReadAsync(iface.Device, iface.Connection, Logger, cancellationToken)
@@ -208,9 +252,29 @@ public class FindYubiKeys : IFindYubiKeys
 
         // Cache only successful reads so a transient failure is retried on the next scan (not poisoned).
         if (info is { } identity)
-            _identityCache[iface.Device.DeviceId] = identity;
+            _identityCache[iface.Device.DeviceId] = new CachedIdentity(identity, iface.Pid, iface.Connection);
 
         return info;
+    }
+
+    /// <inheritdoc />
+    public void NotifyTransportActivity(ConnectionType transport)
+    {
+        // Coarse per-transport eviction, deliberately. The events carry no reliable per-interface identity
+        // (the PC/SC listener is payload-less; HID hints are diagnostic-only), and hotplug is rare enough
+        // that re-reading one transport's serials on the next scan is the proportionate price for never
+        // attributing a departed key's serial to its same-slot successor. Scoped per transport because a
+        // removal observed on HID says nothing about what is in the PC/SC slots.
+        //
+        // Races with an in-flight scan are benign: entries are re-added only by a successful fresh read,
+        // and the event that triggered this also triggers a rescan, so a stale value consumed by an
+        // overlapping scan is corrected by the next one.
+        foreach (var entry in _identityCache)
+        {
+            // Matches expands the Hid group filter to HidFido|HidOtp; a raw & would not (Hid is its own bit).
+            if (transport.Matches(entry.Value.Transport))
+                _ = _identityCache.TryRemove(entry.Key, out _);
+        }
     }
 
     private async Task PopulateMetadataAsync(
@@ -230,7 +294,7 @@ public class FindYubiKeys : IFindYubiKeys
         // the merge result which is already computed).
         var reads = composites.Select(async composite =>
         {
-            var key = MetadataKey(composite);
+            var key = composite.PhysicalIdentityKey;
             if (_metadataCache.TryGetValue(key, out var cached))
             {
                 composite.DeviceInfo = cached.Info;
@@ -249,16 +313,6 @@ public class FindYubiKeys : IFindYubiKeys
         });
 
         await Task.WhenAll(reads).ConfigureAwait(false);
-    }
-
-    // Collision-free key over the (already sorted) member ids: length-prefixing each part makes the
-    // boundaries unambiguous even if a reader name / device path contains delimiter characters.
-    private static string MetadataKey(CompositeYubiKey composite)
-    {
-        var builder = new StringBuilder();
-        foreach (var id in composite.MemberDeviceIds)
-            builder.Append(id.Length).Append(':').Append(id);
-        return builder.ToString();
     }
 
     private void EvictAbsentIdentities(IReadOnlyList<InterfaceCandidate> interfaces)

@@ -47,8 +47,14 @@ public static class IYubiKeyExtensions
 
         try
         {
-            return await PivSession.CreateAsync(connection, configuration, scpKeyParams, cancellationToken)
+            var session = await PivSession
+                .CreateAsync(connection, configuration, scpKeyParams, cancellationToken)
                 .ConfigureAwait(false);
+
+            // This entry point created the connection, so the session it returns is the only thing that can
+            // close it. A caller-created connection is never owned this way.
+            session.OwnConnection();
+            return session;
         }
         catch
         {

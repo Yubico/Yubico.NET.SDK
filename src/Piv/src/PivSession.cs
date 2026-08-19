@@ -48,7 +48,6 @@ public sealed class PivSession : ApplicationSession, IPivSession
     private const byte P2Pin = 0x80;
     private const byte P2Puk = 0x81;
 
-    private readonly IConnection _connection;
     private readonly ScpKeyParameters? _scpKeyParams;
     private IPivBackend? _backend;
     private bool _isAuthenticated;
@@ -68,8 +67,11 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// <summary>
     /// Gets whether the session has been authenticated with the management key.
     /// </summary>
-    // TODO Disambiguate with IsAuthenticated
-    public new bool IsAuthenticated => _isAuthenticated;
+    /// <remarks>
+    /// This is distinct from <see cref="ApplicationSession.IsAuthenticated"/>, which reports
+    /// application-protocol authentication such as SCP. Returns <c>false</c> once disposal begins.
+    /// </remarks>
+    public bool IsManagementKeyAuthenticated => !IsDisposalStarted && Volatile.Read(ref _isAuthenticated);
 
     /// <summary>
     /// Gets or sets the callback invoked when a YubiKey operation may require physical touch.
@@ -101,15 +103,18 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// Initializes a new PivSession with the specified connection.
     /// </summary>
     /// <remarks>
-    /// This constructor should typically not be used directly. Use 
-    /// <see cref="CreateAsync(ISmartCardConnection, ProtocolConfiguration?, ScpKeyParameters?, CancellationToken)"/> 
-    /// to create initialized sessions.
+    ///     Not public: construction must go through
+    ///     <see cref="CreateAsync(ISmartCardConnection, ProtocolConfiguration?, ScpKeyParameters?, CancellationToken)" />,
+    ///     which routes through <c>ApplicationSession.Construct</c> so the session is bound to its
+    ///     connection and the one-live-session-per-connection rule is enforced. PivSession was the only
+    ///     one of the eight applet sessions exposing a public constructor, and that door let a caller
+    ///     create an unbound session that bypassed the guard.
     /// </remarks>
     /// <param name="connection">The connection to use for PIV operations.</param>
     /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
-    public PivSession(IConnection connection, ScpKeyParameters? scpKeyParams)
+    internal PivSession(IConnection connection, ScpKeyParameters? scpKeyParams)
+        : base(connection)
     {
-        _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         _scpKeyParams = scpKeyParams;
     }
 
@@ -131,7 +136,9 @@ public sealed class PivSession : ApplicationSession, IPivSession
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        var session = new PivSession(connection, scpKeyParams);
+        // A session that fails to initialize must not keep its claim on the connection: the connection
+        // outlives it, and the next session over it would otherwise be refused forever.
+        var session = Construct(connection, () => new PivSession(connection, scpKeyParams));
         try
         {
             await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
@@ -151,9 +158,9 @@ public sealed class PivSession : ApplicationSession, IPivSession
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create((ISmartCardConnection)_connection);
+        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
         Protocol = protocol;
-        IPivBackend backend = new PivBackend(protocol);
+        var backend = new PivBackend(protocol);
 
         try
         {
@@ -276,7 +283,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         }
 
         // Reset authentication state
-        _isAuthenticated = false;
+        SetManagementKeyAuthenticationState(false);
 
         // RESET changed the physical applet even if the metadata refresh below fails. Establish a
         // conservative post-reset type before querying: only a non-sentinel >=5.7 version reliably
@@ -375,10 +382,10 @@ public sealed class PivSession : ApplicationSession, IPivSession
     {
         EnsureBackend();
 
-        _isAuthenticated = false;
+        SetManagementKeyAuthenticationState(false);
         await PivAuthenticationProtocol.AuthenticateAsync(_backend, Logger, ManagementKeyType, managementKey, cancellationToken)
             .ConfigureAwait(false);
-        _isAuthenticated = true;
+        SetManagementKeyAuthenticationState(true);
     }
 
     public async Task VerifyPinAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default)
@@ -493,6 +500,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         Logger.LogDebug("PIV: SignOrDecryptAsync auto-detecting algorithm for slot 0x{Slot:X2}", (byte)slot);
 
         if (!IsSupported(PivFeatures.Metadata))
@@ -739,7 +748,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         }
         catch (ApduException exception) when (exception.SW == SWConstants.SecurityStatusNotSatisfied)
         {
-            _isAuthenticated = false;
+            SetManagementKeyAuthenticationState(false);
             throw;
         }
     }
@@ -819,13 +828,26 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
     private void EnsureInitialized()
     {
+        ThrowIfDisposed();
+
         if (!IsInitialized)
             throw new InvalidOperationException("Session is not initialized. Use PivSession.CreateAsync() to create a session.");
     }
 
+    protected override void Dispose(bool disposing)
+    {
+        SetManagementKeyAuthenticationState(false);
+        base.Dispose(disposing);
+    }
+
+    private void SetManagementKeyAuthenticationState(bool isAuthenticated) =>
+        Volatile.Write(ref _isAuthenticated, isAuthenticated);
+
     [MemberNotNull(nameof(_backend))]
     private void EnsureBackend()
     {
+        ThrowIfDisposed();
+
         if (_backend is null)
         {
             throw new InvalidOperationException("PIV session is not initialized. Call InitializeAsync first.");

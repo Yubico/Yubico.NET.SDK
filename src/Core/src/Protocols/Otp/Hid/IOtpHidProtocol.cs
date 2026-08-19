@@ -22,13 +22,11 @@ namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
 /// Supports YubiKey Management operations over the OTP/Keyboard HID interface.
 /// </summary>
 /// <remarks>
-///     Implementations are safe for concurrent calls: full logical exchanges (multi-report frame
-///     writes and polled reads, including lazy initialization) are serialized internally, so
-///     concurrent operations execute sequentially rather than interleaving reports on the wire.
-///     Cancellation tokens cancel only the wait for a turn — an exchange already in flight runs to
-///     completion to avoid stranding the device mid-frame.
+///     Implementations admit one full logical exchange at a time. An overlapping operation throws
+///     <see cref="InvalidOperationException" /> immediately. A token is checked before entry; an exchange already
+///     in flight runs to completion to avoid stranding the device mid-frame.
 /// </remarks>
-public interface IOtpHidProtocol : IProtocol
+internal interface IOtpHidProtocol : IProtocol
 {
     /// <summary>
     /// Sends a slot command and receives the response.

@@ -14,8 +14,10 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
-using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
@@ -27,6 +29,94 @@ namespace Yubico.YubiKit.Core.Devices;
 public static class YubiKeyConnectionExtensions
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger(nameof(YubiKeyConnectionExtensions));
+
+    /// <summary>Opens exactly the SmartCard transport and creates a raw APDU session that owns it.</summary>
+    /// <remarks>No application is selected. The returned session must be disposed.</remarks>
+    public static Task<RawSmartCardSession> CreateRawSmartCardSessionAsync(
+        this IYubiKey yubiKey,
+        CancellationToken cancellationToken = default) =>
+        yubiKey.CreateSessionOverTransportAsync(
+            ConnectionType.SmartCard,
+            async (connection, token) =>
+            {
+                RawSmartCardSession session = await RawSmartCardSession.CreateAsync(
+                        (ISmartCardConnection)connection,
+                        token)
+                    .ConfigureAwait(false);
+                session.OwnConnection();
+                return session;
+            },
+            cancellationToken);
+
+    /// <summary>
+    ///     Opens exactly the SmartCard transport, configures APDU framing, establishes SCP, and returns a raw
+    ///     session that owns the connection.
+    /// </summary>
+    /// <remarks>
+    ///     Configuration is applied before SCP establishment. The caller retains ownership of
+    ///     <paramref name="scpKeyParameters" />.
+    /// </remarks>
+    public static Task<RawSmartCardSession> CreateRawSmartCardSessionAsync(
+        this IYubiKey yubiKey,
+        ScpKeyParameters scpKeyParameters,
+        FirmwareVersion firmwareVersion,
+        ProtocolConfiguration? configuration = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(scpKeyParameters);
+        ArgumentNullException.ThrowIfNull(firmwareVersion);
+        return yubiKey.CreateSessionOverTransportAsync(
+            ConnectionType.SmartCard,
+            async (connection, token) =>
+            {
+                RawSmartCardSession session = await RawSmartCardSession.CreateAsync(
+                        (ISmartCardConnection)connection,
+                        scpKeyParameters,
+                        firmwareVersion,
+                        configuration,
+                        token)
+                    .ConfigureAwait(false);
+                session.OwnConnection();
+                return session;
+            },
+            cancellationToken);
+    }
+
+    /// <summary>Opens exactly the FIDO HID transport and creates a raw CTAP HID session that owns it.</summary>
+    /// <remarks>No fallback transport is attempted. The returned session must be disposed.</remarks>
+    public static Task<RawFidoHidSession> CreateRawFidoHidSessionAsync(
+        this IYubiKey yubiKey,
+        CancellationToken cancellationToken = default) =>
+        yubiKey.CreateSessionOverTransportAsync(
+            ConnectionType.HidFido,
+            async (connection, token) =>
+            {
+                RawFidoHidSession session = await RawFidoHidSession.CreateAsync(
+                        (IFidoHidConnection)connection,
+                        token)
+                    .ConfigureAwait(false);
+                session.OwnConnection();
+                return session;
+            },
+            cancellationToken);
+
+    /// <summary>Opens exactly the OTP HID transport and creates a raw OTP HID session that owns it.</summary>
+    /// <remarks>No fallback transport is attempted. The returned session must be disposed.</remarks>
+    public static Task<RawOtpHidSession> CreateRawOtpHidSessionAsync(
+        this IYubiKey yubiKey,
+        CancellationToken cancellationToken = default) =>
+        yubiKey.CreateSessionOverTransportAsync(
+            ConnectionType.HidOtp,
+            async (connection, token) =>
+            {
+                RawOtpHidSession session = await RawOtpHidSession.CreateAsync(
+                        (IOtpHidConnection)connection,
+                        token)
+                    .ConfigureAwait(false);
+                session.OwnConnection();
+                return session;
+            },
+            cancellationToken);
 
     /// <summary>
     ///     Returns the first connection in <paramref name="preferenceOrder" /> that this device supports, or
@@ -70,16 +160,10 @@ public static class YubiKeyConnectionExtensions
     /// </param>
     /// <param name="sessionName">The application/session name, used only for diagnostic messages.</param>
     /// <param name="defaultOrder">
-    ///     The application's ordered default candidate list. It also defines the set of transports that are
-    ///     valid for this session (used to validate an explicit override). Kept explicit at the call site so a
-    ///     later held-transport fallback can iterate the remaining candidates without reshaping callers.
+    ///     The application's ordered defaults. It also defines the transports valid for an explicit override.
     /// </param>
     /// <returns>
-    ///     The ordered, non-empty list of concrete transports to attempt, most-preferred first. For an
-    ///     explicit override this is a single element (an override never falls back). For the default path it
-    ///     is the device-supported subset of <paramref name="defaultOrder" />, in order. Callers open the first
-    ///     element today; the full ordered list is returned so a later held-transport fallback (Phase 38.5) can
-    ///     iterate the remaining candidates without reshaping callers.
+    ///     The explicit override, or the first supported concrete transport in <paramref name="defaultOrder" />.
     /// </returns>
     /// <exception cref="ArgumentException">
     ///     <paramref name="preferredConnection" /> is not exactly one concrete transport (e.g. a group flag,
@@ -90,7 +174,7 @@ public static class YubiKeyConnectionExtensions
     ///     An override that is valid for the session is not exposed by the device, or — for the default path —
     ///     the device exposes none of the session's candidate transports.
     /// </exception>
-    public static IReadOnlyList<ConnectionType> ResolveSessionTransports(
+    public static ConnectionType ResolveSessionTransport(
         this IYubiKey yubiKey,
         ConnectionType? preferredConnection,
         string sessionName,
@@ -121,164 +205,83 @@ public static class YubiKeyConnectionExtensions
                     $"This YubiKey does not expose the requested {requested} connection for a {sessionName} " +
                     $"session (available: {yubiKey.AvailableConnections}).");
 
-            // An explicit override never falls back: exactly one candidate.
-            return [requested];
+            return requested;
         }
 
-        // Default path: the device-supported subset of the ordered candidate list, preference order preserved.
-        var candidates = new List<ConnectionType>(defaultOrder.Length);
-        foreach (var candidate in defaultOrder)
-        {
-            if (candidate is ConnectionType.SmartCard or ConnectionType.HidFido or ConnectionType.HidOtp
-                && yubiKey.SupportsConnection(candidate))
-                candidates.Add(candidate);
-        }
+        var resolved = yubiKey.ResolvePreferredConnection(defaultOrder);
+        if (resolved != ConnectionType.Unknown)
+            return resolved;
 
-        if (candidates.Count == 0)
-            throw new NotSupportedException(
-                $"This YubiKey exposes no connection usable for a {sessionName} session " +
-                $"(available: {yubiKey.AvailableConnections}).");
-
-        return candidates;
+        throw new NotSupportedException(
+            $"This YubiKey exposes no connection usable for a {sessionName} session " +
+            $"(available: {yubiKey.AvailableConnections}).");
     }
 
     /// <summary>
-    ///     Opens the first transport in <paramref name="candidates" /> that connects, falling back to the next
-    ///     candidate only when a <see cref="ConnectionType.SmartCard" /> connect fails because another process
-    ///     is holding the card (PC/SC <c>SCARD_E_SHARING_VIOLATION</c> / <c>SCARD_E_SERVER_TOO_BUSY</c>).
+    ///     Opens exactly one selected transport and creates a session-shaped result over it.
     /// </summary>
     /// <remarks>
-    ///     This is the connect half of the resolve→connect seam: callers pass the ordered, validated candidate
-    ///     list produced by <see cref="ResolveSessionTransports" /> and receive an opened connection. The
-    ///     "default-path-only fallback" and "override-never-falls-back" guarantees are properties of the applet
-    ///     entry points (which pass a single-element list for an explicit override, so the loop rethrows on the
-    ///     first failure); this helper simply follows the list it is given. Held-transport fallback is gated to
-    ///     the SmartCard transport: a held-coded error on any other transport propagates unchanged (a held HID
-    ///     transport is out of scope). Any non-held error, and <see cref="OperationCanceledException" />,
-    ///     propagates immediately. The helper does not re-validate device capability; a transport the device
-    ///     does not expose surfaces its own connect error.
+    ///     No fallback is attempted. Connection and session-creation failures propagate unchanged. If opening
+    ///     succeeds but <paramref name="createAsync" /> fails, the connection is disposed before the failure is
+    ///     rethrown. If disposal also fails, that cleanup failure is logged and the original creation failure
+    ///     still propagates unchanged.
     /// </remarks>
     /// <param name="yubiKey">The physical device.</param>
-    /// <param name="candidates">
-    ///     The ordered, non-empty list of concrete transports to attempt, most-preferred first (typically the
-    ///     output of <see cref="ResolveSessionTransports" />). Every element must be a single concrete transport
-    ///     (<see cref="ConnectionType.SmartCard" />, <see cref="ConnectionType.HidFido" />, or
-    ///     <see cref="ConnectionType.HidOtp" />) and no transport may appear more than once.
-    /// </param>
-    /// <param name="sessionName">The application/session name, used only for diagnostic logging.</param>
-    /// <param name="cancellationToken">A token to cancel the operation. Checked before each attempt.</param>
-    /// <returns>The opened <see cref="IConnection" />; the caller owns its disposal.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="yubiKey" /> or <paramref name="candidates" /> is null.</exception>
-    /// <exception cref="ArgumentException">
-    ///     <paramref name="candidates" /> is empty, contains a non-concrete transport, or contains a duplicate.
-    /// </exception>
-    public static async Task<IConnection> ConnectSessionTransportAsync(
+    /// <param name="transport">The single concrete transport selected for the session.</param>
+    /// <param name="createAsync">Creates the result over the opened connection.</param>
+    /// <param name="cancellationToken">A token to cancel connection opening or session creation.</param>
+    /// <returns>The result created over the opened connection.</returns>
+    /// <exception cref="ArgumentException"><paramref name="transport" /> is not one concrete transport.</exception>
+    /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
+    public static Task<TResult> CreateSessionOverTransportAsync<TResult>(
         this IYubiKey yubiKey,
-        IReadOnlyList<ConnectionType> candidates,
-        string sessionName,
+        ConnectionType transport,
+        Func<IConnection, CancellationToken, Task<TResult>> createAsync,
         CancellationToken cancellationToken = default) =>
-        await yubiKey.ConnectSessionTransportAsync(
-                candidates,
-                sessionName,
-                static (connection, _, _) => Task.FromResult(connection),
-                cancellationToken)
-            .ConfigureAwait(false);
+        CreateSessionOverTransportAsync(yubiKey, transport, createAsync, Logger, cancellationToken);
 
-    /// <summary>
-    ///     Opens candidate transports in order and invokes <paramref name="createAsync" /> for the selected
-    ///     connection, falling back past a held SmartCard error raised either while opening the connection or
-    ///     while creating the session over it.
-    /// </summary>
-    public static async Task<TResult> ConnectSessionTransportAsync<TResult>(
+    internal static async Task<TResult> CreateSessionOverTransportAsync<TResult>(
         this IYubiKey yubiKey,
-        IReadOnlyList<ConnectionType> candidates,
-        string sessionName,
-        Func<IConnection, ConnectionType, CancellationToken, Task<TResult>> createAsync,
+        ConnectionType transport,
+        Func<IConnection, CancellationToken, Task<TResult>> createAsync,
+        ILogger logger,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(yubiKey);
         ArgumentNullException.ThrowIfNull(createAsync);
-        ValidateSessionTransportCandidates(candidates);
+        ArgumentNullException.ThrowIfNull(logger);
+        if (transport is not (ConnectionType.SmartCard or ConnectionType.HidFido or ConnectionType.HidOtp))
+            throw new ArgumentException(
+                $"Connection '{transport}' is not a single concrete transport.", nameof(transport));
+        cancellationToken.ThrowIfCancellationRequested();
 
-        for (var i = 0; i < candidates.Count; i++)
+        var connection = await yubiKey.OpenSessionConnectionAsync(transport, cancellationToken)
+            .ConfigureAwait(false);
+        try
         {
-            // Check before every attempt (including the first) and, by re-entering the loop, again after a
-            // fallback: a token canceled between attempts must stop us rather than open a fallback transport.
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var transport = candidates[i];
-            IConnection? connection = null;
+            return await createAsync(connection, cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
             try
             {
-                connection = await yubiKey.OpenSessionConnectionAsync(transport, cancellationToken)
-                    .ConfigureAwait(false);
-
-                Logger.LogDebug(
-                    "Opened {Transport} connection for a {SessionName} session.", transport, sessionName);
-
-                var result = await createAsync(connection, transport, cancellationToken).ConfigureAwait(false);
-                connection = null;
-                return result;
+                await connection.DisposeAsync().ConfigureAwait(false);
             }
-            // Fall back ONLY when a held SmartCard transport failed AND a further candidate remains. The
-            // SmartCard gate keeps held-HID out of scope; the index gate makes the last candidate's held
-            // error (and an override's single element) propagate unchanged. Non-held errors and cancellation
-            // never match this filter, so they propagate immediately.
-            catch (Exception ex) when (
-                transport == ConnectionType.SmartCard
-                && IsHeldTransportError(ex)
-                && i < candidates.Count - 1)
+            catch (Exception cleanupException)
             {
-                if (connection is not null)
-                    await connection.DisposeAsync().ConfigureAwait(false);
-
-                Logger.LogDebug(
-                    ex,
-                    "The {Transport} transport for a {SessionName} session is held by another process; " +
-                    "falling back to the next supported transport.",
-                    transport,
-                    sessionName);
+                try
+                {
+                    logger.LogWarning(
+                        cleanupException,
+                        "Failed to dispose {Transport} connection after session creation failed",
+                        transport);
+                }
+                catch
+                {
+                    // Session creation is already failing. Logging must not replace that original exception.
+                }
             }
-            catch
-            {
-                if (connection is not null)
-                    await connection.DisposeAsync().ConfigureAwait(false);
-                throw;
-            }
-        }
-
-        // Unreachable: the loop returns on success, and the catch filter cannot swallow the final candidate
-        // (it requires a further candidate), so the final candidate's failure always propagates from the try.
-        throw new NotSupportedException(
-            $"This YubiKey exposes no connection usable for a {sessionName} session.");
-    }
-
-    private static void ValidateSessionTransportCandidates(IReadOnlyList<ConnectionType> candidates)
-    {
-        ArgumentNullException.ThrowIfNull(candidates);
-
-        if (candidates.Count == 0)
-            throw new ArgumentException(
-                "At least one candidate transport is required.", nameof(candidates));
-
-        // Validate every element is a single concrete transport and that none repeats: the helper attempts
-        // each transport at most once, so a duplicate would be a same-transport retry, which is not its job.
-        var seen = ConnectionType.Unknown;
-        foreach (var candidate in candidates)
-        {
-            if (candidate is not (ConnectionType.SmartCard or ConnectionType.HidFido or ConnectionType.HidOtp))
-                throw new ArgumentException(
-                    $"Candidate '{candidate}' is not a single concrete transport. Each candidate must be one " +
-                    $"of {ConnectionType.SmartCard}, {ConnectionType.HidFido}, or {ConnectionType.HidOtp}.",
-                    nameof(candidates));
-
-            if ((seen & candidate) != 0)
-                throw new ArgumentException(
-                    $"Candidate transport '{candidate}' appears more than once; each transport is attempted " +
-                    "at most once.",
-                    nameof(candidates));
-
-            seen |= candidate;
+            throw;
         }
     }
 
@@ -291,20 +294,9 @@ public static class YubiKeyConnectionExtensions
                 .ConfigureAwait(false),
             ConnectionType.HidFido => await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken)
                 .ConfigureAwait(false),
-            _ => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
-                .ConfigureAwait(false)
+            ConnectionType.HidOtp => await yubiKey.ConnectAsync<IOtpHidConnection>(cancellationToken)
+                .ConfigureAwait(false),
+            _ => throw new InvalidOperationException("Concrete transport validation did not select a connection type.")
         };
 
-    /// <summary>
-    ///     Returns <see langword="true" /> when <paramref name="exception" /> indicates the smart card is held
-    ///     by another process — a PC/SC <c>SCARD_E_SHARING_VIOLATION</c> or <c>SCARD_E_SERVER_TOO_BUSY</c>
-    ///     carried by an <see cref="SCardException" />. <see cref="SCardException" /> stores the PC/SC status in
-    ///     <see cref="System.Exception.HResult" /> (as <c>(int)errorCode</c>), so the round-trip compares
-    ///     <c>(uint)HResult</c>. Detection is intentionally narrow: no other exception type or status code
-    ///     counts as held.
-    /// </summary>
-    private static bool IsHeldTransportError(Exception exception) =>
-        exception is SCardException scardException
-        && (uint)scardException.HResult is ErrorCode.SCARD_E_SHARING_VIOLATION
-            or ErrorCode.SCARD_E_SERVER_TOO_BUSY;
 }

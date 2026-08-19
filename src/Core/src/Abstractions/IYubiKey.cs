@@ -24,6 +24,43 @@ namespace Yubico.YubiKit.Core.Abstractions;
 /// </summary>
 public interface IYubiKey
 {
+    /// <summary>
+    ///     An identifier for this physical device, suitable for correlating devices <em>within one
+    ///     discovery session</em>. It is not a durable identity and must not be persisted, parsed, or
+    ///     compared across processes or platforms.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         The value is derived from whatever grouping evidence discovery had available, so it takes
+    ///         one of several shapes: <c>ykphysical:topology:{key}</c> (Windows Container ID),
+    ///         <c>ykphysical:{serial}</c>, or <c>ykphysical:pid:{PID}</c>. The shape is an implementation
+    ///         detail, is platform-dependent, and may change.
+    ///     </para>
+    ///     <para>
+    ///         <strong>The same physical key can present different values.</strong> Evidence depends on what
+    ///         else is attached: a key alone may group by PID, while inserting a second key of the same
+    ///         product ID forces serial evidence to tell them apart. Measured on macOS hardware, one key
+    ///         reported <c>ykphysical:pid:0407</c> alone and <c>ykphysical:103</c> once a same-PID sibling
+    ///         was inserted. The device did not change; the available evidence did.
+    ///     </para>
+    ///     <para>
+    ///         <strong>A live repository and a fresh scan can legitimately disagree.</strong> When an
+    ///         evidence-only tier change occurs, the repository keeps publishing the object it already
+    ///         handed out rather than churning subscribers, so a concurrent independent scan may report a
+    ///         different identifier for the same key. Both are correct.
+    ///     </para>
+    ///     <para>
+    ///         For a durable key — persistence, audit logs, allow lists — use the device serial number from
+    ///         <c>DeviceInfo.SerialNumber</c> instead. Note that reading it costs a connection and a
+    ///         Management exchange, and that it is <see langword="null" /> on devices which do not report a
+    ///         serial (for example Security Key series). Firmware version is deliberately not part of
+    ///         identity: it can differ per applet on the same key and is not a disambiguator.
+    ///     </para>
+    ///     <para>
+    ///         Distinct from the per-interface identifier (<c>hid:*</c>, <c>pcsc:*</c>) used by the
+    ///         connection registry. That one names a single interface; this one names a physical key.
+    ///     </para>
+    /// </remarks>
     string DeviceId { get; }
 
     /// <summary>
@@ -43,6 +80,10 @@ public interface IYubiKey
     bool SupportsConnection(ConnectionType connectionType) =>
         AvailableConnections.SupportsConnection(connectionType);
 
+    /// <summary>
+    ///     Opens the requested interface after claiming the physical YubiKey's known member interface IDs.
+    /// </summary>
+    /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
     Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection;
 

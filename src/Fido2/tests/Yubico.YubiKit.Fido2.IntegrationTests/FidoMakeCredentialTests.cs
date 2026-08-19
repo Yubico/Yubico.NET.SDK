@@ -39,7 +39,7 @@ public class FidoMakeCredentialTests
     /// <summary>
     /// Tests that MakeCredential creates a non-resident credential successfully.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_NonResidentKey_ReturnsValidAttestation(YubiKeyTestState state) =>
@@ -98,7 +98,7 @@ public class FidoMakeCredentialTests
     /// <summary>
     /// Tests that MakeCredential creates a resident (discoverable) credential.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_ResidentKey_ReturnsCredentialId(YubiKeyTestState state) =>
@@ -165,7 +165,7 @@ public class FidoMakeCredentialTests
     /// <summary>
     /// Tests that MakeCredential with exclude list throws CredentialExcluded when credential exists.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_WithExcludeList_ThrowsCredentialExcluded(YubiKeyTestState state) =>

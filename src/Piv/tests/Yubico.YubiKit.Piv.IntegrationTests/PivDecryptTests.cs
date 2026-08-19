@@ -58,7 +58,7 @@ public class PivDecryptTests
     /// Verifies that DecryptAsync strips PKCS#1 v1.5 encryption padding and
     /// returns the exact original plaintext — mirroring Python's session.decrypt().
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task DecryptAsync_Rsa2048Pkcs1_ReturnsExactPlaintext(YubiKeyTestState state)
     {
@@ -75,7 +75,7 @@ public class PivDecryptTests
     /// Verifies OAEP SHA-256 padding is also correctly stripped at the session layer.
     /// OAEP is the recommended modern padding; PKCS#1 v1.5 is provided for legacy compatibility.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task DecryptAsync_Rsa2048OaepSha256_ReturnsExactPlaintext(YubiKeyTestState state)
     {
@@ -92,7 +92,7 @@ public class PivDecryptTests
     /// Verifies that DecryptAsync rejects ECC slots with ArgumentException before
     /// sending any APDU to the YubiKey, matching the Python API's slot validation.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     // ECC P256 is supported since firmware 4.0.0 (no MinFirmware constraint needed — ECC is universally available)
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.0.0")]
     public async Task DecryptAsync_EccSlot_ThrowsArgumentException(YubiKeyTestState state)
@@ -116,7 +116,7 @@ public class PivDecryptTests
     /// Verifies that DecryptAsync rejects ciphertext whose length does not match
     /// the RSA key size, preventing malformed inputs from reaching the YubiKey.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]
     public async Task DecryptAsync_WrongCiphertextLength_ThrowsArgumentException(YubiKeyTestState state)
     {
@@ -139,7 +139,7 @@ public class PivDecryptTests
     /// Verifies DecryptAsync works for RSA 4096 keys, exercising the key-size branch in
     /// the session-layer padding removal (complementary to the RSA 2048 round-trip tests).
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task DecryptAsync_Rsa4096Pkcs1_ReturnsExactPlaintext(YubiKeyTestState state)

@@ -41,7 +41,7 @@ This module showcases the most **powerful test filtering system** in the SDK. Un
 /// - Transport requirements (USB/NFC)
 /// - FIPS status filtering
 /// </summary>
-[Theory]
+[SkippableTheory]
 [WithYubiKey(
     MinFirmware = "5.3.0",        // Only firmware >= 5.3.0
     FormFactor = FormFactor.UsbAKeychain,  // Only USB-A keychains
@@ -63,12 +63,12 @@ Tests execute **once per matching device**:
 ```csharp
 // appsettings.json has: [12345678, 23456789, 34567890]
 // Test runs 3 times (once per device)
-[Theory]
+[SkippableTheory]
 [WithYubiKey]
 public async Task AllDevices_Test(YubiKeyTestState state) { }
 
 // If only device 12345678 is USB-C, test runs once
-[Theory]
+[SkippableTheory]
 [WithYubiKey(FormFactor = FormFactor.UsbCKeychain)]
 public async Task UsbC_Test(YubiKeyTestState state) { }
 ```
@@ -78,7 +78,7 @@ public async Task UsbC_Test(YubiKeyTestState state) { }
 Use multiple `[WithYubiKey]` attributes to test across different configurations:
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
 [WithYubiKey(FormFactor = FormFactor.UsbCKeychain)]
 [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
@@ -130,7 +130,7 @@ public static class IYubiKeyExtensions
         public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken ct = default)
         {
             // 'yubiKey' parameter is implicitly the extension target
-            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: ct);
+            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: ct);
             return await mgmtSession.GetDeviceInfoAsync(ct);
         }
     }
@@ -156,8 +156,8 @@ The extension class provides three levels of abstraction:
 var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken);
 
 // Equivalent manual code:
-using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
-using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
+await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+await using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
 var deviceInfo = await mgmt.GetDeviceInfoAsync(cancellationToken);
 ```
 
@@ -194,8 +194,8 @@ await yubiKey.SetDeviceConfigAsync(
     cancellationToken: cancellationToken);
 
 // Equivalent manual code:
-using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
-using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
+await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+await using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
 await mgmt.SetDeviceConfigAsync(config, reboot, lockCode, null, cancellationToken);
 ```
 
@@ -217,7 +217,7 @@ await mgmt.SetDeviceConfigAsync(config, reboot, lockCode, null, cancellationToke
 
 ```csharp
 // Manual session management for multiple operations
-using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
+await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
     configuration: customProtocolConfig,       // Optional protocol config
     scpKeyParams: Scp03KeyParameters.Default,  // Optional SCP
     cancellationToken: cancellationToken);
@@ -234,7 +234,8 @@ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
 - Creates connection (managed by session)
 - Creates session
 - **Caller owns session** - must dispose
-- Session owns connection - disposes it when session disposes
+- The connection was opened by this entry point, so the session owns it and disposes it when the session disposes. A connection you opened yourself and passed to `ManagementSession.CreateAsync` stays yours.
+- Use `await using`; a missing disposal can retain the physical-device lease and block later opens.
 
 **Tradeoffs:**
 - ✅ Reuse session for multiple operations (more efficient)
@@ -262,7 +263,7 @@ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
 
 ```csharp
 // DON'T DO THIS - unnecessary complexity
-using var mgmtSession = await yubiKey.CreateManagementSessionAsync();
+await using var mgmtSession = await yubiKey.CreateManagementSessionAsync();
 var info = await mgmtSession.GetDeviceInfoAsync();
 // (end of method, session disposed)
 
@@ -300,16 +301,32 @@ await mgmt.SetDeviceConfigAsync(config, reboot: true);
 
 ### Implementation Details
 
-All three extension methods follow the same pattern internally:
+Management extensions that create their own session use the same transport/session pipeline internally:
 
-1. **Connection creation**: `await yubiKey.ConnectAsync<ISmartCardConnection>()`
-2. **Session creation**: `await ManagementSession.CreateAsync(connection, ...)`
-3. **Operation**: Call session method
-4. **Disposal**: `using` ensures cleanup even on exceptions
+1. **Transport resolution**: `ResolveSessionTransport` selects exactly one supported transport from
+   `SmartCard -> HidFido -> HidOtp`, or uses an explicit valid override. Supplying SCP parameters without
+   an override forces SmartCard because SCP is not available over HID.
+2. **One-shot connection opening**: `CreateSessionOverTransportAsync` opens exactly one typed connection —
+   `ISmartCardConnection`, `IFidoHidConnection`, or `IOtpHidConnection` — for the selected transport.
+3. **Session creation**: `await ManagementSession.CreateAsync(connection, ...)`
+4. **Operation**: Call the requested session method.
+5. **Disposal**: The high-level operation disposes its session; a returned session owns the hidden connection
+   until its caller disposes that session.
 
 The difference is **who manages the session lifecycle**:
 - High-level extensions: Method manages lifecycle (automatic)
 - Low-level extension: Caller manages lifecycle (manual)
+
+Direct `ManagementSession.CreateAsync(connection)` validates that `connection` is SmartCard, FIDO
+HID, or OTP HID before the `ApplicationSession` base attaches its one-session guard. It borrows the
+connection and never disposes it. The creator must dispose the connection with `await using`; there
+is no finalizer backstop. One live session per connection is allowed, and sequential reuse after
+session disposal is supported.
+
+A grouped physical YubiKey admits one live connection across CCID, FIDO HID, and OTP HID. Management
+selects exactly one transport from `SmartCard -> HidFido -> HidOtp` (or an explicit override) and opens it
+once. `ConnectionInUseException`, PC/SC sharing errors, and initialization failures propagate without
+trying another interface.
 
 ### Testing Considerations
 
@@ -358,7 +375,7 @@ extension(YubiKeyTestState state)
 Usage pattern:
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.0.0")]
 public async Task MyTest(YubiKeyTestState state) =>
     await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
@@ -376,7 +393,7 @@ public async Task MyTest(YubiKeyTestState state) =>
 ### 1. Read-Only Device Information Tests
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey]
 public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestState state) =>
     await state.WithManagementAsync(async (mgmt, cachedInfo) =>
@@ -392,7 +409,7 @@ public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestState state) =>
 ### 2. Firmware Version-Specific Tests
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(MinFirmware = "5.7.0")]
 public async Task ModernFeature_Firmware57Plus_Works(YubiKeyTestState state) =>
     await state.WithManagementAsync(async (mgmt, cachedInfo) =>
@@ -409,7 +426,7 @@ public async Task ModernFeature_Firmware57Plus_Works(YubiKeyTestState state) =>
 ### 3. Form Factor-Specific Tests
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
 public async Task BiometricFeatures_BioKeys_Present(YubiKeyTestState state)
 {
@@ -429,7 +446,7 @@ public async Task BiometricFeatures_BioKeys_Present(YubiKeyTestState state)
 ### 4. Capability-Specific Tests
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(Capability = DeviceCapabilities.Piv)]
 public async Task PivCapability_EnabledDevices_Accessible(YubiKeyTestState state)
 {
@@ -450,7 +467,7 @@ public async Task PivCapability_EnabledDevices_Accessible(YubiKeyTestState state
 ### 5. FIPS Testing
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(FipsCapable = DeviceCapabilities.Piv)]
 public async Task FipsCapable_PivDevices_HasSupport(YubiKeyTestState state)
 {
@@ -463,7 +480,7 @@ public async Task FipsCapable_PivDevices_HasSupport(YubiKeyTestState state)
     });
 }
 
-[Theory]
+[SkippableTheory]
 [WithYubiKey(FipsApproved = DeviceCapabilities.Piv)]
 public async Task FipsApproved_PivDevices_InFipsMode(YubiKeyTestState state)
 {
@@ -480,7 +497,7 @@ public async Task FipsApproved_PivDevices_InFipsMode(YubiKeyTestState state)
 ### 6. Multi-Criteria Filtering
 
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey(
     MinFirmware = "5.0.0",
     RequireUsb = true,
@@ -511,7 +528,7 @@ public async Task AdvancedFiltering_ModernUsbPiv_Works(YubiKeyTestState state)
 
 ```csharp
 // ❌ NEVER DO THIS - Breaks other tests
-[Theory]
+[SkippableTheory]
 [WithYubiKey]
 public async Task BAD_TEST_DisableCapabilities(YubiKeyTestState state) =>
     await state.WithManagementAsync(async (mgmt, cachedInfo) =>
@@ -538,30 +555,22 @@ public async Task BAD_TEST_DisableCapabilities(YubiKeyTestState state) =>
 
 ### Safe Configuration Testing
 
-If you **must** test configuration changes:
+The problem with capability changes is **blast radius across the suite**, not destruction as such. An allow-listed device is a dedicated test device and destructive operations against it are expected — see [docs/TESTING.md](../../docs/TESTING.md#hardware-authorization), which is canonical: *"the allow list is the boundary, and adding a second one would only obscure it."* Do **not** gate these behind an extra environment variable.
 
-1. **Use a dedicated test device** not in the shared allowlist
-2. **Document the test** clearly as destructive
-3. **Reset configuration** at test end (if possible)
-4. **Skip by default** with `[SkippableFact]` or environment check
-5. **Test in isolation** - never in CI or shared environments
+What makes `SetDeviceConfigAsync` special is that it reboots the device and can disable applications other tests depend on. So the rule is restore-what-you-changed, not don't-run-it:
+
+1. **Restore configuration** in a `finally` — always, including on failure
+2. **Document the test** clearly as configuration-mutating
+3. **Account for the reboot** — the device disappears and re-enumerates
+4. **Avoid lock codes** in tests; a set lock code can make the change unrecoverable
 
 ```csharp
 // ✅ Safe pattern for configuration testing
-[SkippableFact]
-public async Task DESTRUCTIVE_ConfigurationChange_DedicatedDevice()
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
+public async Task ConfigurationChange_AppliesAndRestores(YubiKeyTestState state)
 {
-    // Check environment variable to explicitly enable
-    Skip.IfNot(Environment.GetEnvironmentVariable("YUBIKIT_ALLOW_DESTRUCTIVE_TESTS") == "1",
-        "Destructive tests disabled. Set YUBIKIT_ALLOW_DESTRUCTIVE_TESTS=1 to enable.");
-    
-    // Use specific device, not from shared allowlist
-    var dedicatedSerial = 12345678; // Document this requirement
-    var devices = await YubiKeyManager.FindAllAsync(forceRescan: true);
-    var device = devices.SingleOrDefault(device => device.SerialNumber == dedicatedSerial);
-    Skip.If(device == null, $"Dedicated test device {dedicatedSerial} not found");
-    
-    using var connection = await device.ConnectAsync<ISmartCardConnection>();
+    using var connection = await state.Device.ConnectAsync<ISmartCardConnection>();
     using var mgmt = await ManagementSession.CreateAsync(connection);
     
     // Save original config
@@ -770,32 +779,34 @@ ManagementSession uses the **Backend pattern** to abstract protocol differences 
 ### Internal Structure
 
 ```csharp
-// ManagementSession delegates all operations to a backend
-private readonly IManagementBackend _backend;
+// ManagementSession delegates transport-specific work to a backend
+private IManagementBackend _backend = null!;
 
-// Backend interface defines four operations
-internal interface IManagementBackend : IDisposable
+// Backend abstraction: deliberately NOT IDisposable
+internal interface IManagementBackend
 {
-    ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken cancellationToken);
+    ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken);
     ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken);
     ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken);
     ValueTask DeviceResetAsync(CancellationToken cancellationToken);
 }
 ```
 
+Device-info reads do not go through the backend; `ManagementSession` uses `DeviceInfoReader.ReadAsync(_protocol, ...)` directly.
+
 ### Implementations
 
 - **SmartCardBackend**: Encodes operations as ISO 7816 APDUs (INS: 0x1D, 0x1C, 0x16, 0x1F)
 - **FidoHidBackend**: Encodes operations as CTAP vendor commands (0xC2, 0xC3, 0xC0)
+- **OtpBackend**: Encodes operations as OTP HID slot commands with CRC validation
 
 ### Key Design Decisions
 
-1. **Backend is stateless**: Doesn't own the protocol or connection
-2. **ManagementSession owns disposal**: Backend.Dispose() is a no-op
-3. **SCP wrapping works**: Backend can be recreated with SCP-wrapped protocol without disposing connection
-4. **Zero branching**: All public methods delegate to `_backend.ReadConfigAsync()` etc.
+1. **Backend owns nothing**: it borrows the protocol and holds no disposable state, so it is not `IDisposable`. Ownership rule is Core's — see [Core CLAUDE.md](../Core/CLAUDE.md) gotcha #2 and the `IProtocol` doc comment: the session disposes the protocol, and whoever created the connection disposes it.
+2. **SCP wrapping works**: the backend can be recreated over an SCP-wrapped protocol without disposing anything.
+3. **Zero branching**: all public methods delegate to `_backend`, so no protocol-specific logic leaks into business operations, and the session is testable against a fake `IManagementBackend`.
 
-This matches the Java yubikit-android Backend pattern where Backend doesn't implement Closeable.
+This matches the Java yubikit-android Backend pattern where Backend doesn't implement Closeable. `ManagementBackendLifecycleTests` pins the non-disposable invariant.
 
 ### Why This Matters
 
@@ -809,10 +820,8 @@ else
 
 **After (backend delegation):**
 ```csharp
-result = await _backend.ReadConfigAsync(page, ct);
+await _backend.WriteConfigAsync(config, ct);
 ```
-
-Makes the code testable via `IManagementBackend` mocking and eliminates protocol-specific logic from business operations.
 
 ## TLV Encoding/Decoding
 

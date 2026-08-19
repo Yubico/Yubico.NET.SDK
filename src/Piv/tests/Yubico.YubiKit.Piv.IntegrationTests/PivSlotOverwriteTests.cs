@@ -53,7 +53,7 @@ public class PivSlotOverwriteTests
     /// slot metadata that the algorithm changed, and that the new ECC key is
     /// functional for signing.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task GenerateKey_RsaThenEcc_OverwritesWithEcc(YubiKeyTestState state)
     {
@@ -107,7 +107,7 @@ public class PivSlotOverwriteTests
     /// slot metadata that the algorithm changed, and that the new RSA key is
     /// functional for signing.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task GenerateKey_EccThenRsa_OverwritesWithRsa(YubiKeyTestState state)
     {

@@ -51,14 +51,6 @@ internal sealed class FidoHidBackend(IFidoHidProtocol hidProtocol) : IManagement
             .ConfigureAwait(false);
     }
 
-    public ValueTask DeviceResetAsync(CancellationToken cancellationToken)
-    {
-        // Device reset is only supported over CCID, not HID
+    public ValueTask DeviceResetAsync(CancellationToken cancellationToken) =>
         throw new NotSupportedException("Device reset is only available over SmartCard (CCID) connections.");
-    }
-
-    public void Dispose()
-    {
-        // Backend doesn't own the protocol - ManagementSession handles disposal
-    }
 }

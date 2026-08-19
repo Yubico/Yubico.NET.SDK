@@ -67,7 +67,6 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
     // ── Fields ────────────────────────────────────────────────────────
 
-    private readonly ISmartCardConnection _connection;
     private readonly ILogger _logger;
     private IOpenPgpBackend? _backend;
     private ApplicationRelatedData _appData = null!;
@@ -76,8 +75,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     // ── Constructor (private — use CreateAsync) ───────────────────────
 
     private OpenPgpSession(ISmartCardConnection connection)
+        : base(connection)
     {
-        _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         _logger = Logger;
     }
 
@@ -99,7 +98,9 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        var session = new OpenPgpSession(connection);
+        // A session that fails to initialize must not keep its claim on the connection: the connection
+        // outlives it, and the next session over it would otherwise be refused forever.
+        var session = Construct(connection, () => new OpenPgpSession(connection));
         try
         {
             await session.InitializeAsync(configuration, scpKeyParams, cancellationToken)
@@ -120,10 +121,12 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken)
     {
+        ThrowIfDisposed();
+
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create(_connection);
+        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
         Protocol = protocol;
         IOpenPgpBackend backend = new OpenPgpBackend(protocol);
 
@@ -160,6 +163,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     public async Task<ApplicationRelatedData> GetApplicationRelatedDataAsync(
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);
         return _appData;
@@ -176,8 +181,11 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     /// <inheritdoc />
     public Task<ReadOnlyMemory<byte>> GetDataAsync(
         DataObject dataObject,
-        CancellationToken cancellationToken = default) =>
-        GetDataCoreAsync(dataObject, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        return GetDataCoreAsync(dataObject, cancellationToken);
+    }
 
     /// <inheritdoc />
     public async Task PutDataAsync(
@@ -185,6 +193,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         var tag = (int)dataObject;
         var command = new ApduCommand
         {
@@ -204,6 +214,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         int length,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
 
         var command = new ApduCommand
@@ -225,6 +237,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     public async Task<int> GetSignatureCounterAsync(
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         var data = await GetDataCoreAsync(DataObject.SecuritySupportTemplate, cancellationToken)
             .ConfigureAwait(false);
         var sst = SecuritySupportTemplate.Parse(data.Span);
@@ -235,6 +249,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     public async Task<PwStatus> GetPinStatusAsync(
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         var data = await GetDataCoreAsync(DataObject.PwStatusBytes, cancellationToken)
             .ConfigureAwait(false);
         return PwStatus.Parse(data.Span);
@@ -332,12 +348,19 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
     protected override void Dispose(bool disposing)
     {
-        if (!disposing)
-            return;
-
-        _backend = null;
-        _kdf?.Dispose();
-        _kdf = null;
-        base.Dispose(disposing);
+        Kdf? kdf = null;
+        try
+        {
+            if (disposing)
+            {
+                kdf = _kdf;
+                _kdf = null;
+                kdf?.Dispose();
+            }
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
     }
 }

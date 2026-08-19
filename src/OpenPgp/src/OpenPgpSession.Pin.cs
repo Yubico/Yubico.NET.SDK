@@ -26,6 +26,8 @@ public sealed partial class OpenPgpSession
         bool extended = false,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         // P2: 0x81 (Pw.User) = signature verification only (per spec)
         //     0x82 (Pw.Reset) = extended mode (decrypt/authenticate/attest, NOT sign)
         // Matches ykman canonical: pw + mode where mode = 1 if extended else 0
@@ -41,6 +43,8 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> pinUtf8,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Verifying Admin PIN");
         await VerifyPwAsync(Pw.Admin, (byte)Pw.Admin, pinUtf8, cancellationToken)
             .ConfigureAwait(false);
@@ -50,6 +54,8 @@ public sealed partial class OpenPgpSession
     public async Task UnverifyPinAsync(
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         EnsureSupports(FeatureUnverify);
 
         // Unverify is VERIFY with empty data and P2=0x81 or 0x82
@@ -69,6 +75,8 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> newPinUtf8,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Changing User PIN");
         await ChangePwAsync(Pw.User, currentPinUtf8, newPinUtf8, cancellationToken)
             .ConfigureAwait(false);
@@ -80,6 +88,8 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> newPinUtf8,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Changing Admin PIN");
         await ChangePwAsync(Pw.Admin, currentPinUtf8, newPinUtf8, cancellationToken)
             .ConfigureAwait(false);
@@ -90,6 +100,8 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> resetCodeUtf8,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Setting Reset Code");
 
         byte[]? derivedBytes = null;
@@ -117,6 +129,8 @@ public sealed partial class OpenPgpSession
         bool useAdmin = false,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Resetting User PIN (useAdmin={UseAdmin})", useAdmin);
 
         byte[]? resetBytes = null;
@@ -167,6 +181,8 @@ public sealed partial class OpenPgpSession
         int adminAttempts,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(userAttempts);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(resetAttempts);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(adminAttempts);
@@ -193,6 +209,8 @@ public sealed partial class OpenPgpSession
         PinPolicy policy,
         CancellationToken cancellationToken = default)
     {
+        ThrowIfDisposed();
+
         _logger.LogDebug("Setting signature PIN policy to {Policy}", policy);
 
         // PW Status Bytes (DO C4): only byte 0 (policy) is writable via PUT DATA

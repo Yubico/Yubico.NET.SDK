@@ -1,5 +1,19 @@
 # Developer Guide
 
+## Stacked PR Workflow
+
+- Use GitHub stacked PRs (`gh stack`) for multi-step work that lands in layers.
+- Unrelated work must start a **new stack**. Do not mix unrelated concerns into an existing stack or PR.
+- Keep every PR focused and independently reviewable: one purpose per PR, minimal diff, clear review boundary.
+
+Minimal flow:
+```bash
+gh stack init          # bases on current branch by default
+gh stack add <branch>
+gh stack submit
+gh stack rebase && gh stack push && gh stack submit
+```
+
 ## Analyzer and Formatting Workflow
 
 - Roslyn analyzers are enabled via `Directory.Build.props` for every project. The solution defaults to `AnalysisLevel=latest` with `AnalysisMode=AllEnabledByDefault` so new rules surface automatically.
@@ -23,7 +37,7 @@
 
 1. Update `.editorconfig` (or add a scoped file) with the new rule or severity.
 2. If the change introduces a new analyzer package, add the dependency in `Directory.Build.targets`.
-3. Run `dotnet format` to apply any required code fixes.
+3. Run `dotnet format` (unscoped, across the whole solution) to apply the resulting fixes everywhere — this is the one case where full-solution formatting is expected, since a rule/editorconfig change affects every file. For routine feature work, scope `dotnet format` to your staged files instead (see `CLAUDE.md` Pre-Commit Checklist).
 4. Capture the resulting changes and update this guide or other docs if the workflow shifts.
 
 ## Continuous Integration Expectations

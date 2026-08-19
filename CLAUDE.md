@@ -76,7 +76,7 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 > Deep dive: `docs/CSHARP-PATTERNS.md` (load when designing new types, choosing property accessors, writing switch expressions, or using primary constructors / records).
 
 **Code Quality:**
-- ✅ ALWAYS follow `.editorconfig` (run `dotnet format` before commit)
+- ✅ ALWAYS follow `.editorconfig` (run `dotnet format` scoped to your staged files before commit — see Pre-Commit Checklist, never the whole solution)
 - ✅ ALWAYS handle `CancellationToken` in async methods
 - ✅ ALWAYS use `readonly` on fields that don't change
 - ❌ NEVER use `#region` (split large classes instead)
@@ -139,7 +139,8 @@ dotnet toolchain.cs -- pack --include-docs
 `codemapper .` generates the full surface map. The non-obvious patterns:
 
 - **Device discovery** — `IDeviceRepository` + `DeviceMonitorService` (hosted) + `DeviceListenerService` (background). Events flow as `IObservable<DeviceEvent>` via System.Reactive.
-- **Connection abstraction** — `IConnection` base, `IProtocol` per transport (e.g., `ISmartCardProtocol`). Factories: `ISmartCardConnectionFactory`, `ProtocolFactory`, `IYubiKeyFactory`.
+- **Access tiers** — Applet sessions are the golden path; public `RawSmartCardSession`, `RawFidoHidSession`, and `RawOtpHidSession` provide guarded low-level exchanges; public raw connection I/O is an explicitly unguarded expert escape hatch. `ProtocolFactory` and the `IProtocol` family are internal session machinery. See [Raw Access Tiers](docs/architecture/raw-access-tiers.md).
+- **Connection abstraction** — `IConnection` is the public transport base. Typed raw connections remain public; protocol implementations and factories are internal.
 - **APDU pipeline** — `IApduFormatter` (`Short`/`Extended`) → `IApduProcessor` decorators (`CommandChainingProcessor`, `ChainedResponseProcessor`, `ApduFormatProcessor`). Transparent size-limit + chaining handling.
 - **Application sessions** — `ApplicationSession` base; protocol-specific sessions like `ManagementSession<TConnection>` are generic over connection type.
 - **Device discovery entry point** — static `YubiKeyManager`; Core no longer requires a DI registration.
@@ -572,6 +573,16 @@ If you answered "no" to any of these, don't write the test.
 - Base branch for PRs: **`develop`** (not `main`)
 - Only commit files YOU created or modified in the current session
 - Stage explicitly with `git add path/to/file` — NEVER `git add .` or `git add -A`
+- Use GitHub stacked PRs (`gh stack`) for multi-layer work. Put unrelated work in a **separate stack**; do not piggyback unrelated changes into an existing stack/PR.
+- Keep each stack layer and PR narrow and independently reviewable (one concern per PR, no mixed unrelated diffs).
+
+Minimal stack flow:
+```bash
+gh stack init          # bases on current branch by default
+gh stack add <branch>
+gh stack submit
+gh stack rebase && gh stack push && gh stack submit
+```
 
 Full rules: `docs/COMMIT_GUIDELINES.md`. Skill: `.claude/skills/git-commit/SKILL.md`.
 
@@ -580,7 +591,11 @@ Full rules: `docs/COMMIT_GUIDELINES.md`. Skill: `.claude/skills/git-commit/SKILL
 1. ✅ `git status` — only your files staged
 2. ✅ Build clean: `dotnet toolchain.cs build`
 3. ✅ Tests pass: `dotnet toolchain.cs test`
-4. ✅ Formatted: `dotnet format`
+4. ✅ Formatted — scope `dotnet format` to your staged files, never the whole solution:
+   ```
+   dotnet format Yubico.YubiKit.sln --include $(git diff --name-only --cached -- '*.cs') --verify-no-changes
+   ```
+   Drop `--verify-no-changes` to actually apply fixes. Note: `--include` silently skips nonexistent/stale paths — re-run `git diff --cached --name-only` if a file seems to be missed.
 5. ✅ No nullable warnings
 6. ✅ Sensitive data zeroed (`ZeroMemory` / `Dispose`)
 7. ✅ No unnecessary allocations in hot paths

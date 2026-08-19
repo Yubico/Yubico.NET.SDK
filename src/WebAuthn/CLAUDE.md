@@ -258,7 +258,7 @@ Agents must not run WebAuthn User Presence, UV/PIN, reset, insert/remove, or des
 
 **Key Pattern:**
 ```csharp
-[Theory]
+[SkippableTheory]
 [WithYubiKey]
 public async Task Registration_WithPreviewSign_ReturnsGeneratedSigningKey(YubiKeyTestState state)
 {

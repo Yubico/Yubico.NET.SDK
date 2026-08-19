@@ -60,7 +60,7 @@ public class FidoSessionSimpleTests
         }
     }
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task CreateFidoSession_With_HidFido_CreateAsync(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -70,7 +70,7 @@ public class FidoSessionSimpleTests
             Assert.True(info.Versions.Count > 0, "AuthenticatorInfo.Versions should not be empty");
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfoAsync_Returns_CTAP2_Version(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -81,7 +81,7 @@ public class FidoSessionSimpleTests
             Assert.Contains("FIDO_2_0", info.Versions);
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfoAsync_Returns_AAGUID(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -93,7 +93,7 @@ public class FidoSessionSimpleTests
             Assert.False(info.Aaguid.Span.SequenceEqual(new byte[16]), "AAGUID should not be all zeros");
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfoAsync_Returns_Supported_Extensions(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -108,7 +108,7 @@ public class FidoSessionSimpleTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfoAsync_Returns_Supported_Algorithms(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -123,7 +123,7 @@ public class FidoSessionSimpleTests
             }
         });
 
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfoAsync_Returns_Options(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
@@ -141,7 +141,7 @@ public class FidoSessionSimpleTests
     /// <summary>
     /// Tests that the IYubiKey extension method for creating FIDO sessions works.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task CreateFidoSession_With_ExtensionMethod(YubiKeyTestState state)
     {
@@ -152,7 +152,19 @@ public class FidoSessionSimpleTests
         Assert.True(info.Versions.Count > 0);
     }
 
-    [Theory]
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    public async Task CreateFidoSession_SecondExplicitHidFidoSession_IsRefused(YubiKeyTestState state)
+    {
+        await using var first = await state.Device.CreateFidoSessionAsync(
+            preferredConnection: ConnectionType.HidFido);
+
+        _ = await Assert.ThrowsAsync<ConnectionInUseException>(() =>
+            state.Device.CreateFidoSessionAsync(
+                preferredConnection: ConnectionType.HidFido));
+    }
+
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetInfoAsync_With_YubiKeyExtensionMethod(YubiKeyTestState state)
     {
@@ -165,7 +177,7 @@ public class FidoSessionSimpleTests
     /// <summary>
     /// Tests SelectionAsync which requires user touch to confirm device selection.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task SelectionAsync_RequiresTouch(YubiKeyTestState state) =>
@@ -177,7 +189,7 @@ public class FidoSessionSimpleTests
     /// <summary>
     /// Tests ResetAsync which requires user presence within a short window after power-up.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task ResetAsync_RequiresUserPresence(YubiKeyTestState state) =>

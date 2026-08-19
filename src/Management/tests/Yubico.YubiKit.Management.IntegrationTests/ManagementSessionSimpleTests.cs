@@ -103,6 +103,18 @@ public class ManagementSessionSimpleTests
         Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
     }
 
+    [SkippableTheory]
+    [WithYubiKey(MinFirmware = "5.6.0", ConnectionType = ConnectionType.HidFido)]
+    public async Task ResetDeviceAsync_WithHidFidoPinnedSession_ThrowsNotSupportedException(
+        YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreateManagementSessionAsync(
+            preferredConnection: ConnectionType.HidFido);
+
+        Assert.Equal(ConnectionType.HidFido, session.Transport);
+        _ = await Assert.ThrowsAsync<NotSupportedException>(() => session.ResetDeviceAsync());
+    }
+
     /// <summary>
     ///     Verify device info can be retrieved from HID OTP device.
     /// </summary>

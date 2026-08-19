@@ -64,6 +64,10 @@ Migration review is required for code that:
 
 Every v2 applet package exposes an `IYubiKey.Create{Applet}SessionAsync(...)` extension method (for example `CreatePivSessionAsync`, `CreateFidoSessionAsync`, `CreateOathSessionAsync`, `CreateOpenPgpSessionAsync`, `CreateSecurityDomainSessionAsync`, `CreateHsmAuthSessionAsync`, `CreateYubiOtpSessionAsync`) and `Yubico.YubiKit.Management` exposes `CreateManagementSessionAsync`. These are the preferred v2 entry points: they open the correct connection/transport and construct the session in one call. Treat the underlying connection handling, transport selection defaults, and SCP key parameter plumbing as assisted rather than automatic until the specific v1 call site is reviewed.
 
+### Connection and Session Ownership
+
+V2 enforces in-process exclusivity that v1 did not: one physical YubiKey admits one live connection across all of its interfaces, and one connection admits one live `ApplicationSession`. A second concurrent connection or session throws `ConnectionInUseException` at acquisition, before any native open or applet `SELECT`, instead of the conflict surfacing later as an ordinary wire-level failure. Review v1 code that held more than one connection or session open against the same physical device at once (for example, a background device-info poll running alongside an open applet session) - dispose the current holder before acquiring the next one. This is in-process only; a different process holding the smart card still surfaces an ordinary platform `SCardException` such as `SCARD_E_SHARING_VIOLATION`. See [Connection Ownership and Contention](../architecture/connection-ownership-and-contention.md) and `connection-session-ownership-enforcement` in `v1-to-v2-map.yml`.
+
 ## Common Migration Recipes
 
 These examples show the shape of common v1 code and the closest v2 pattern. They are intentionally small and source-backed. Treat examples that write applet state, credential material, keys, PINs, PUKs, access codes, or slot configuration as human-reviewed migrations even when the session or member mapping is clear.
@@ -475,6 +479,8 @@ A dedicated `HsmAuthRetryException.RetriesRemaining` and an `HsmAuthSession.OnTo
 ## Manual Low-Level Command Cases
 
 Manual migration is required for code that builds APDUs, parses raw responses, relies on status-word behavior, preserves unknown protocol fields, or sends vendor-specific commands directly. These cases should be migrated against v2 command/session abstractions where possible. If direct command access remains necessary, verify byte-level behavior against both v1 and v2 sources.
+
+For v1 code that worked directly with HID reports (CTAP HID or OTP HID) or hand-built raw APDUs, prefer v2's Tier 1 raw sessions over the lower-level connection escape hatch: `IYubiKey.CreateRawSmartCardSessionAsync(...)`, `CreateRawFidoHidSessionAsync(...)`, and `CreateRawOtpHidSessionAsync(...)` return `RawSmartCardSession`, `RawFidoHidSession`, and `RawOtpHidSession`. These select no application and apply no applet feature gates, but they do supply guarded framing (APDU chaining, CTAP HID packet/keep-alive handling, OTP feature-report framing and outbound CRC) and participate in the normal connection/session ownership contract. `RawOtpHidSession` does not validate command-specific inbound CRC; the caller must do so. See [Raw Access Tiers](../architecture/raw-access-tiers.md) and `raw-access-tier-sessions` in `v1-to-v2-map.yml`. The lowest tier, direct `IConnection` transmit/receive, remains an unguarded expert escape hatch and still requires full manual review of framing, sequencing, and concurrency.
 
 ## Automation Note
 

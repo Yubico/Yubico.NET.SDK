@@ -227,13 +227,14 @@ mappings:
     confidence: high
     migration_kind: construction
     v1: v1 secure channel setup that constructed an SCP-wrapped connection or applied SCP state to an existing connection object
-    v2: await smartCardProtocol.WithScpAsync(scpKeyParameters, cancellationToken)
+    v2: await RawSmartCardSession.CreateAsync(connection, scpKeyParameters, firmwareVersion, cancellationToken: cancellationToken) or yubiKey.CreateRawSmartCardSessionAsync(scpKeyParameters, firmwareVersion, cancellationToken: cancellationToken)
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Scp/SecurityDomainSession.cs
-      - yubikit:src/Core/src/Protocols/SmartCard/Scp/ScpExtensions.cs
+      - yubikit:src/Core/src/Sessions/RawSmartCardSession.cs
+      - yubikit:src/Core/src/Devices/YubiKeyConnectionExtensions.cs
       - yubikit:src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs
-    notes: The v2 SCP wrapper type Yubico.YubiKit.Core.Protocols.SmartCard.Scp.PcscProtocolScp is still public, but its constructor is internal and new PcscProtocolScp(...) is not a caller-facing pattern. Use the ISmartCardProtocol.WithScpAsync(...) extension method instead. The wrapper must adopt the exchange gate of the concrete PcscProtocol whose connection its SCP processor drives, so plain and encrypted traffic cannot interleave on the wire; WithScpAsync is what guarantees that pairing. Applet sessions normally reach this path through SCP key parameters passed to Create{Applet}SessionAsync(...) rather than wrapping a protocol by hand.
-    last_reviewed_commit: c14d73338a647b85c50e6ec6f8e361aad13374ab
+    notes: The v2 SCP wrapper type Yubico.YubiKit.Core.Protocols.SmartCard.Scp.PcscProtocolScp is still public, but its constructor is internal and new PcscProtocolScp(...) is not a caller-facing pattern. As of this range, ISmartCardProtocol and ProtocolFactory are also internal (previously ISmartCardProtocol was public), so the earlier ISmartCardProtocol.WithScpAsync(...) extension method is no longer a caller-facing entry point. The supported advanced-caller path is now RawSmartCardSession's SCP-establishing CreateAsync overload (directly, or through the yubiKey.CreateRawSmartCardSessionAsync(scpKeyParameters, ...) extension), which configures APDU framing before establishing SCP and reuses Core's SCP processor and exchange guard. Applet sessions normally reach SCP through key parameters passed to Create{Applet}SessionAsync(...) rather than using a raw session directly.
+    last_reviewed_commit: d37ae99143fa6e7bf64b6c1c65477e2d555614e6
   - id: recipe-device-discovery-find-by-transport
     status: assisted
     confidence: high
@@ -460,6 +461,33 @@ mappings:
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
     notes: The initial v2 snapshot had zero dedicated OpenPGP exception types (historical gap 9). The `yubikit-gaps` remediation effort added `OpenPgpInvalidPinException` (derives from `ApduException`), thrown by `IOpenPgpSession.VerifyPinAsync`/`VerifyAdminAsync` for every PIN rejection shape observed across firmware (standard SW 0x63Cx, SW 0x6982 on some 5.8.0-alpha firmware, and SW 0x6983 for an already-blocked PIN), exposing a typed nullable `RetriesRemaining` instead of requiring callers to parse the message or separately call `GetPinStatusAsync`.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: connection-session-ownership-enforcement
+    status: manual
+    confidence: high
+    migration_kind: behavior
+    v1: v1 code that opened more than one device/session handle to the same physical YubiKey concurrently; in-process contention was not enforced, so conflicts surfaced (if at all) as an ordinary wire-level failure on the next operation rather than at acquisition
+    v2: ConnectionInUseException thrown at acquisition by DeviceConnectionRegistry / ConnectionSessionGuard
+    evidence:
+      - yubikit:src/Core/src/Devices/ConnectionInUseException.cs
+      - yubikit:src/Core/src/Devices/DeviceConnectionRegistry.cs
+      - yubikit:src/Core/src/Sessions/ConnectionSessionGuard.cs
+      - yubikit:docs/architecture/connection-ownership-and-contention.md
+    notes: This range added in-process connection/session ownership enforcement. One physical YubiKey admits one live connection across all of its interfaces, and one connection admits one live ApplicationSession; both are refused at acquisition, before any native open or applet SELECT, instead of failing later on the wire. A second concurrent connection or session throws ConnectionInUseException immediately; dispose the current holder before acquiring the next one. Review any v1 call site that held overlapping connections or sessions against one physical device (for example a background device-info poll running alongside an open applet session); this is unchanged for v1 code that already used one connection/session at a time. Enforcement is in-process only; a different process holding the smart card still surfaces an ordinary platform SCardException such as SCARD_E_SHARING_VIOLATION.
+    last_reviewed_commit: d37ae99143fa6e7bf64b6c1c65477e2d555614e6
+  - id: raw-access-tier-sessions
+    status: assisted
+    confidence: high
+    migration_kind: construction
+    v1: v1 direct low-level access, such as Yubico.Core.Devices.Hid IHidDevice report I/O for CTAP HID / OTP HID, or hand-built InterIndustry raw APDU commands
+    v2: IYubiKey.CreateRawSmartCardSessionAsync(...) / CreateRawFidoHidSessionAsync(...) / CreateRawOtpHidSessionAsync(...) returning RawSmartCardSession / RawFidoHidSession / RawOtpHidSession
+    evidence:
+      - yubikit:src/Core/src/Sessions/RawSmartCardSession.cs
+      - yubikit:src/Core/src/Sessions/RawFidoHidSession.cs
+      - yubikit:src/Core/src/Sessions/RawOtpHidSession.cs
+      - yubikit:src/Core/src/Devices/YubiKeyConnectionExtensions.cs
+      - yubikit:docs/architecture/raw-access-tiers.md
+    notes: This range added a new supported "Tier 1: Raw Sessions" access level (docs/architecture/raw-access-tiers.md) that did not previously exist. RawSmartCardSession supplies guarded APDU formatting, chaining, and optional SCP; RawFidoHidSession supplies CTAP HID channel/packet framing, keep-alive handling, and final-command correlation; RawOtpHidSession supplies OTP feature-report framing and outbound CRC generation but does not validate command-specific inbound CRC (the caller must do so). All three select no application, apply no applet feature gates, refuse overlapping operations, and still participate in the connection-session-ownership-enforcement contract. Prefer these over the lower "Tier 2" raw IConnection escape hatch (see low-level-commands) when v1 code built raw APDUs or HID reports by hand; still verify byte-level command/response semantics against v1 and v2 sources before migrating.
+    last_reviewed_commit: d37ae99143fa6e7bf64b6c1c65477e2d555614e6
 manual_review:
   - device discovery call sites
   - low-level HID listener DeviceEvent callback signatures

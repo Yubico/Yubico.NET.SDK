@@ -20,14 +20,14 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 ///     Concurrency: CTAP HID permits one transaction at a time per channel — a request is an init
 ///     packet plus continuation packets, and a foreign init packet mid-transaction aborts it on the
 ///     device. This class serializes full logical exchanges (including lazy channel initialization)
-///     through an internal gate: concurrent calls are safe but execute sequentially. Cancellation
-///     tokens cancel only the wait for a turn; an exchange in flight runs to completion.
+///     through an internal guard: overlapping calls are refused immediately. An exchange in flight runs to
+///     completion.
 /// </remarks>
 internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidProtocol>? logger = null)
     : IFidoHidProtocol
 {
     private readonly IFidoHidConnection _connection = connection ?? throw new ArgumentNullException(nameof(connection));
-    private readonly AsyncExchangeGate _exchangeGate = new();
+    private readonly ExchangeGuard _exchangeGuard = new();
     private readonly ILogger<FidoHidProtocol> _logger = logger ?? NullLogger<FidoHidProtocol>.Instance;
     private uint? _channelId;
     private FirmwareVersion? _firmwareVersion;
@@ -47,7 +47,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        await _exchangeGate.RunExclusiveAsync(
+        await _exchangeGuard.RunAsync(
                 async exchangeToken =>
                 {
                     await EnsureChannelInitializedAsync(exchangeToken).ConfigureAwait(false);
@@ -67,7 +67,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
         _logger.LogTrace("Sending CTAP vendor command 0x{Command:X2} with {Length} bytes",
             command, data.Length);
 
-        var response = await _exchangeGate.RunExclusiveAsync(
+        var response = await _exchangeGuard.RunAsync(
                 async exchangeToken =>
                 {
                     await EnsureChannelInitializedAsync(exchangeToken).ConfigureAwait(false);
@@ -87,7 +87,7 @@ internal class FidoHidProtocol(IFidoHidConnection connection, ILogger<FidoHidPro
 
     /// <summary>
     /// Initializes the CTAP HID channel if not already done. Must be called from within the
-    /// exchange gate (or single-threaded initialization) — the INIT handshake is itself an
+    /// exchange guard (or single-threaded initialization) — the INIT handshake is itself an
     /// exchange that must not interleave with other traffic.
     /// </summary>
     private async Task EnsureChannelInitializedAsync(CancellationToken cancellationToken)

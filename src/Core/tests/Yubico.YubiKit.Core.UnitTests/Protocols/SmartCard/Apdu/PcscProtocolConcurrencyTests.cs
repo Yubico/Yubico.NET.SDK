@@ -20,11 +20,10 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu;
 
 /// <summary>
-///     Proves and guards the serialization contract of <see cref="PcscProtocol" />: two concurrent
-///     operations on one protocol must never interleave APDUs on the shared connection. A smart card is a
+///     Proves and guards the single-exchange contract of <see cref="PcscProtocol" />. A smart card is a
 ///     stateful sequential peer — a foreign command transmitted in the middle of another operation's
-///     chained-response exchange (SW1=0x61 → SEND REMAINING) destroys the pending response data; the same
-///     holds for command chaining and SCP MAC chaining.
+///     chained-response exchange (SW1=0x61 → SEND REMAINING) destroys the pending response data; overlapping
+///     operations are therefore refused rather than queued.
 /// </summary>
 public class PcscProtocolConcurrencyTests
 {
@@ -35,7 +34,7 @@ public class PcscProtocolConcurrencyTests
     private static readonly TimeSpan ObservationWindow = TimeSpan.FromMilliseconds(300);
 
     [Fact]
-    public async Task TransmitAndReceiveAsync_ConcurrentOperations_DoNotInterleaveApdusOnTheWire()
+    public async Task TransmitAndReceiveAsync_OverlappingOperation_ThrowsImmediately()
     {
         var ct = TestContext.Current.CancellationToken;
         var fake = new HoldingFakeConnection
@@ -58,37 +57,31 @@ public class PcscProtocolConcurrencyTests
         var operationA = protocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationA }, true, ct);
         Assert.True(await fake.WaitForArrivalsAsync(1, ObservationWindow, ct));
 
-        // Start operation B while A's exchange is open.
-        var operationB = protocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationB }, true, ct);
-        await fake.WaitForArrivalsAsync(2, ObservationWindow, ct);
+        // Operation B must be refused while A's exchange is open, without reaching the wire.
+        var refusal = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationB }, true, ct)
+                .WaitAsync(ObservationWindow, ct));
+        Assert.Contains("one operation at a time", refusal.Message, StringComparison.Ordinal);
+        Assert.False(await fake.WaitForArrivalsAsync(2, ObservationWindow, ct));
 
-        // Let everything flow and both operations complete.
+        // Let A complete, then prove sequential reuse still works.
         fake.ReleaseTransmits();
         var responseA = await operationA.WaitAsync(TimeSpan.FromSeconds(5), ct);
-        var responseB = await operationB.WaitAsync(TimeSpan.FromSeconds(5), ct);
+        var responseB = await protocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationB }, true, ct);
 
         // Both operations must see their own, correctly assembled responses...
         Assert.Equal(new byte[] { 0xDE, 0xAD, 0xBE, 0xEF }, responseA.Data.ToArray());
         Assert.Equal(new byte[] { 0xCA, 0xFE }, responseB.Data.ToArray());
 
-        // ...and operation B's APDU must not have hit the wire inside operation A's exchange.
-        var order = fake.WireOrder;
-        var firstA = order.IndexOf(InsOperationA);
-        var sendRemaining = order.IndexOf(InsSendRemaining);
-        var firstB = order.IndexOf(InsOperationB);
-        Assert.False(
-            firstA < firstB && firstB < sendRemaining,
-            $"Operation B's APDU interleaved operation A's chained-response exchange (wire order: {string.Join(", ", order.Select(i => $"0x{i:X2}"))}). " +
-            "A real card would have discarded A's pending response data.");
+        Assert.Equal(new byte[] { InsOperationA, InsSendRemaining, InsOperationB }, fake.WireOrder);
     }
 
     /// <summary>
     ///     The SCP wrapper bypasses the base protocol's public methods and drives the same connection
-    ///     through its own processor chain — it must therefore share the base protocol's gate, or gated
-    ///     plain traffic and SCP traffic interleave on the wire.
+    ///     through its own processor chain — it must therefore share the base protocol's guard.
     /// </summary>
     [Fact]
-    public async Task ScpWrapper_SharesGateWithBaseProtocol_PlainAndScpTrafficDoNotInterleave()
+    public async Task ScpWrapper_SharesGuardWithBaseProtocol_OverlappingTrafficThrows()
     {
         var ct = TestContext.Current.CancellationToken;
         var fake = new HoldingFakeConnection
@@ -111,26 +104,20 @@ public class PcscProtocolConcurrencyTests
         var plainOperation = baseProtocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationA }, true, ct);
         Assert.True(await fake.WaitForArrivalsAsync(1, ObservationWindow, ct));
 
-        var scpOperation = scpProtocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationB }, true, ct);
-        await fake.WaitForArrivalsAsync(2, ObservationWindow, ct);
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            scpProtocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationB }, true, ct));
+        Assert.False(await fake.WaitForArrivalsAsync(2, ObservationWindow, ct));
 
         fake.ReleaseTransmits();
         await plainOperation.WaitAsync(TimeSpan.FromSeconds(5), ct);
-        await scpOperation.WaitAsync(TimeSpan.FromSeconds(5), ct);
-
-        var order = fake.WireOrder;
-        var firstA = order.IndexOf(InsOperationA);
-        var sendRemaining = order.IndexOf(InsSendRemaining);
-        var firstB = order.IndexOf(InsOperationB);
-        Assert.True(firstB >= 0);
-        Assert.False(
-            firstA < firstB && firstB < sendRemaining,
-            $"SCP traffic interleaved the base protocol's chained-response exchange (wire order: {string.Join(", ", order.Select(i => $"0x{i:X2}"))}).");
+        var scpResponse = await scpProtocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationB }, true, ct);
+        Assert.True(scpResponse.IsOK());
+        Assert.Equal(new byte[] { InsOperationA, InsSendRemaining, InsOperationB }, fake.WireOrder);
     }
 
-    /// <summary>A failed exchange must release the gate — the protocol must not wedge.</summary>
+    /// <summary>A failed exchange must reset the guard so the protocol does not wedge.</summary>
     [Fact]
-    public async Task TransmitAndReceiveAsync_ExchangeThrows_GateIsReleasedForNextOperation()
+    public async Task TransmitAndReceiveAsync_ExchangeThrows_GuardResetsForNextOperation()
     {
         var ct = TestContext.Current.CancellationToken;
         var fake = new HoldingFakeConnection
@@ -144,10 +131,11 @@ public class PcscProtocolConcurrencyTests
         };
         var protocol = new PcscProtocol(fake);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(
+        var failure = await Assert.ThrowsAsync<InvalidOperationException>(
             () => protocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationA }, true, ct));
+        Assert.Equal("Simulated transport failure.", failure.Message);
 
-        // A wedged gate would hang here; the bounded wait turns that into a failure.
+        // A wedged guard would hang here; the bounded wait turns that into a failure.
         var response = await protocol
             .TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationB }, true, ct)
             .WaitAsync(TimeSpan.FromSeconds(2), ct);
@@ -155,7 +143,7 @@ public class PcscProtocolConcurrencyTests
     }
 
     /// <summary>
-    ///     Cancellation must gate entry only: a token canceled after an exchange has entered the gate
+    ///     Cancellation applies at entry only: a token canceled after an exchange has claimed the guard
     ///     must not abort the exchange between its constituent transmits. Aborting mid-exchange would
     ///     release the gate while the card still owes chained-response data, poisoning the next operation.
     /// </summary>
@@ -182,27 +170,27 @@ public class PcscProtocolConcurrencyTests
             new ApduCommand { Ins = InsOperationA }, true, operationACancellation.Token);
         Assert.True(await fake.WaitForArrivalsAsync(1, ObservationWindow, ct));
 
-        // Cancel A's token while its exchange is in flight, with a second operation queued behind it.
+        // Cancel A's token while its exchange is in flight. The in-flight exchange must ignore it.
         await operationACancellation.CancelAsync();
-        var operationB = protocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationB }, true, ct);
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationB }, true, ct));
 
         fake.ReleaseTransmits();
 
         // A must complete its full exchange (not observe the cancellation) with intact data...
         var responseA = await operationA.WaitAsync(TimeSpan.FromSeconds(5), ct);
         Assert.Equal(new byte[] { 0xDE, 0xAD, 0xBE, 0xEF }, responseA.Data.ToArray());
-        await operationB.WaitAsync(TimeSpan.FromSeconds(5), ct);
+        await protocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationB }, true, ct);
 
         // ...and the wire must show A's exchange atomic: SEND REMAINING before B's first APDU.
         Assert.Equal(new byte[] { InsOperationA, InsSendRemaining, InsOperationB }, fake.WireOrder);
     }
 
     /// <summary>
-    ///     The flip side of the entry-only cancellation contract: a caller canceled while still waiting
-    ///     for its turn must throw and never reach the wire, and the gate must stay usable.
+    ///     A token already canceled at entry must throw before claiming the guard or touching the wire.
     /// </summary>
     [Fact]
-    public async Task TransmitAndReceiveAsync_CancelledWhileWaitingForGate_ThrowsWithoutTransmitting()
+    public async Task TransmitAndReceiveAsync_PreCanceledToken_ThrowsWithoutClaimingGuard()
     {
         var ct = TestContext.Current.CancellationToken;
         var fake = new HoldingFakeConnection
@@ -217,21 +205,13 @@ public class PcscProtocolConcurrencyTests
         };
         var protocol = new PcscProtocol(fake);
 
-        fake.HoldTransmits();
-        var operationA = protocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationA }, true, ct);
-        Assert.True(await fake.WaitForArrivalsAsync(1, ObservationWindow, ct));
-
-        // Operation B queues behind A's held exchange, then is canceled while waiting.
         using var operationBCancellation = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        var operationB = protocol.TransmitAndReceiveAsync(
-            new ApduCommand { Ins = InsOperationB }, true, operationBCancellation.Token);
         await operationBCancellation.CancelAsync();
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => operationB);
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            protocol.TransmitAndReceiveAsync(
+                new ApduCommand { Ins = InsOperationB }, true, operationBCancellation.Token));
 
-        fake.ReleaseTransmits();
-        await operationA.WaitAsync(TimeSpan.FromSeconds(5), ct);
-
-        // B never touched the wire, and the gate is free for the next operation.
+        // The canceled call never touched the wire, and the guard is free for the next operation.
         Assert.DoesNotContain(InsOperationB, fake.WireOrder);
         var nextOperation = await protocol
             .TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationB }, true, ct)

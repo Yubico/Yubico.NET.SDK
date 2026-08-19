@@ -24,7 +24,7 @@ internal partial class PcscProtocol
     {
         ArgumentNullException.ThrowIfNull(keyParams);
 
-        var (scpProcessor, encryptor) = await ExchangeGate.RunExclusiveAsync(
+        var (scpProcessor, encryptor) = await ExchangeGuard.RunAsync(
                 exchangeToken => ScpInitializer.InitializeScpAsync(
                     GetBaseProcessor(),
                     GetBaseCommandProcessor(),

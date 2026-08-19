@@ -1,6 +1,6 @@
 # Raw Access Tiers
 
-YubiKit exposes three deliberate access tiers. Choose the highest tier that can express the operation.
+YubiKit exposes three deliberate access tiers. Choose the highest-level tier that can express the operation.
 Dropping a tier removes SDK guarantees; it does not merely make the API more verbose.
 
 ## Tier 0: Applet Sessions
@@ -27,21 +27,22 @@ Raw sessions are the supported power-user path:
 - `RawOtpHidSession` supplies OTP feature-report framing, sequencing, polling, outbound CRC generation, and
   overlap refusal. It cannot validate command-specific inbound CRC without caller-supplied response semantics.
 
-They intentionally do **not** select an applet during creation, apply applet feature gates, or interpret
-application-specific payloads. Bypassing applet checks does not bypass physical transport safety: raw sessions
-still participate in the one-live-connection-per-physical-key and one-live-session-per-connection contracts.
+They intentionally do **not** select an applet during creation, apply applet-operation feature gates, or interpret
+application-specific payloads. Transport and protocol prerequisites still apply; for example, SCP establishment
+enforces its minimum firmware version. Bypassing applet checks does not bypass physical transport safety: raw
+sessions still participate in the one-live-connection-per-physical-key and one-live-session-per-connection
+contracts.
 
 ### SmartCard/APDU
 
 ```csharp
-await using ISmartCardConnection connection =
-    await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
 await using RawSmartCardSession raw =
-    await RawSmartCardSession.CreateAsync(connection, cancellationToken);
+    await yubiKey.CreateRawSmartCardSessionAsync(cancellationToken);
+
+// Optional when the firmware version is known. Configure before the first APDU.
+raw.Configure(firmwareVersion);
 
 await raw.SelectAsync(applicationId, cancellationToken);
-raw.Configure(firmwareVersion, new ProtocolConfiguration { ForceShortApdus = true });
-
 ApduResponse response = await raw.TransmitAndReceiveAsync(
     new ApduCommand(cla, ins, p1, p2, commandData),
     throwOnError: false,
@@ -49,6 +50,26 @@ ApduResponse response = await raw.TransmitAndReceiveAsync(
 ```
 
 When `throwOnError` is `false`, inspect `response.Data`, `response.SW1`, and `response.SW2` directly.
+The `IYubiKey` extension opens exactly the SmartCard transport and transfers ownership of the hidden connection
+to the returned session. Disposing the session therefore disposes that connection.
+
+Use the connection-taking factory when the caller needs to reuse one connection sequentially across sessions:
+
+```csharp
+await using ISmartCardConnection connection =
+    await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+
+await using (RawSmartCardSession raw =
+    await RawSmartCardSession.CreateAsync(connection, cancellationToken))
+{
+    raw.Configure(firmwareVersion);
+    await raw.SelectAsync(applicationId, cancellationToken);
+    await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
+}
+
+// RawSmartCardSession borrowed the connection, so it remains available for the next session.
+await using PivSession piv = await PivSession.CreateAsync(connection, cancellationToken);
+```
 
 ### FIDO HID
 
@@ -99,8 +120,7 @@ using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();
 await using RawSmartCardSession raw = await yubiKey.CreateRawSmartCardSessionAsync(
     scpParameters,
     firmwareVersion,
-    new ProtocolConfiguration { ForceShortApdus = true },
-    cancellationToken);
+    cancellationToken: cancellationToken);
 
 await raw.SelectAsync(applicationId, cancellationToken);
 ApduResponse response = await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
@@ -110,6 +130,8 @@ Configuration is applied to the base APDU processor before SCP establishment. An
 reconfigured afterward because replacing or partially updating the established processor graph would invalidate
 the secure-channel framing assumptions. The existing Core SCP processor owns secure-channel session material.
 The caller retains the normal ownership obligations of the supplied key-parameter type and source key buffers.
+Pass a `ProtocolConfiguration` during creation only when the target requires a non-default framing option, such as
+forcing short APDUs.
 
 ## Tier 2: Raw Connections
 

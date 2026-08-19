@@ -31,15 +31,14 @@ namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
 ///     Concurrency: a slot command is a 70-byte frame written as ten sequenced feature reports
 ///     followed by a polled multi-report read — a foreign report written mid-frame corrupts the frame.
 ///     This class serializes full logical exchanges (including lazy initialization) through an
-///     internal gate: concurrent calls are safe but execute sequentially. Cancellation tokens cancel
-///     only the wait for a turn; an exchange in flight runs to completion. The initialization path
-///     itself issues a slot command on NEO (firmware 3.x), so it runs inside the caller's gated
-///     exchange via the ungated core methods — it must never call the public gated methods.
+///     internal guard: overlapping calls are refused immediately. An exchange in flight runs to completion.
+///     The initialization path itself issues a slot command on NEO (firmware 3.x), so it runs inside the caller's guarded
+///     exchange via the unguarded core methods — it must never call the public guarded methods.
 /// </remarks>
 internal sealed class OtpHidProtocol : IOtpHidProtocol
 {
     private readonly IOtpHidConnection _connection;
-    private readonly AsyncExchangeGate _exchangeGate = new();
+    private readonly ExchangeGuard _exchangeGuard = new();
     private readonly ILogger<OtpHidProtocol> _logger;
     private FirmwareVersion? _firmwareVersion;
     private bool _initialized;
@@ -55,9 +54,9 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
 
     public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
     {
-        // Initialization touches the wire, so it must hold the gate like any exchange.
-        _exchangeGate.RunExclusiveAsync(
-                EnsureInitializedUnderGateAsync,
+        // Initialization touches the wire, so it must hold the guard like any exchange.
+        _exchangeGuard.RunAsync(
+                EnsureInitializedUnderGuardAsync,
                 CancellationToken.None)
             .GetAwaiter()
             .GetResult();
@@ -67,10 +66,10 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
 
     /// <summary>
     /// Ensures the protocol is initialized by reading the initial status. Must be called from within
-    /// the exchange gate (or single-threaded initialization) — on NEO it issues a slot command via the
-    /// ungated core.
+    /// the exchange guard (or single-threaded initialization) — on NEO it issues a slot command via the
+    /// unguarded core.
     /// </summary>
-    private async Task EnsureInitializedUnderGateAsync(CancellationToken cancellationToken)
+    private async Task EnsureInitializedUnderGuardAsync(CancellationToken cancellationToken)
     {
         if (_initialized)
             return;
@@ -90,7 +89,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
             Array.Fill(scanMap, (byte)'c');
             try
             {
-                await SendAndReceiveCoreUnderGateAsync(0x12, scanMap, cancellationToken).ConfigureAwait(false);
+                await SendAndReceiveCoreUnderGuardAsync(0x12, scanMap, cancellationToken).ConfigureAwait(false);
             }
             catch
             {
@@ -114,21 +113,21 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
             throw new ArgumentException($"Payload too large for HID frame! Max {OtpConstants.SlotDataSize} bytes.", nameof(data));
         }
 
-        return await _exchangeGate.RunExclusiveAsync(
+        return await _exchangeGuard.RunAsync(
                 async exchangeToken =>
                 {
-                    await EnsureInitializedUnderGateAsync(exchangeToken).ConfigureAwait(false);
-                    return await SendAndReceiveCoreUnderGateAsync(slot, data, exchangeToken).ConfigureAwait(false);
+                    await EnsureInitializedUnderGuardAsync(exchangeToken).ConfigureAwait(false);
+                    return await SendAndReceiveCoreUnderGuardAsync(slot, data, exchangeToken).ConfigureAwait(false);
                 },
                 cancellationToken)
             .ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Performs one slot command exchange (frame write + response read) without entering the gate.
-    /// Callers must already hold the gate.
+    /// Performs one slot command exchange (frame write + response read) without entering the guard.
+    /// Callers must already hold the guard.
     /// </summary>
-    private async Task<ReadOnlyMemory<byte>> SendAndReceiveCoreUnderGateAsync(
+    private async Task<ReadOnlyMemory<byte>> SendAndReceiveCoreUnderGuardAsync(
         byte slot,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken)
@@ -322,10 +321,10 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        var featureReport = await _exchangeGate.RunExclusiveAsync(
+        var featureReport = await _exchangeGuard.RunAsync(
                 async exchangeToken =>
                 {
-                    await EnsureInitializedUnderGateAsync(exchangeToken).ConfigureAwait(false);
+                    await EnsureInitializedUnderGuardAsync(exchangeToken).ConfigureAwait(false);
                     return await ReadFeatureReportAsync(exchangeToken).ConfigureAwait(false);
                 },
                 cancellationToken)

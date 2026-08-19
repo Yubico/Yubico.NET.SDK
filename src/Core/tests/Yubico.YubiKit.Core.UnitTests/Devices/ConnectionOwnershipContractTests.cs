@@ -161,24 +161,69 @@ public class ConnectionOwnershipContractTests
     }
 
     /// <summary>
-    ///     INVARIANT PIN (must pass before and after). The independent interfaces of one physical key remain
-    ///     independent: a held CCID interface must not block that key's HID interface. Management-over-HID
-    ///     fallback is achieved through held-transport exception detection in YubiKeyConnectionExtensions,
-    ///     not through concurrent connection sharing. A held FIDO interface triggers fallback to OTP if
-    ///     present.
+    ///     A connection through one member of a grouped physical key claims every known member interface.
+    ///     The refusal happens before a second native handle is opened, and the first connection stays usable.
     /// </summary>
     [Fact]
-    public async Task ConnectAsync_CcidHeld_SameKeysHidInterfaceStillConnects()
+    public async Task ConnectAsync_CcidHeld_GroupedKeysHidInterfaceIsRefused()
     {
-        var smartCard = CreateSmartCardDevice(new CountingFactory());
-        var hid = CreateHidDevice(new FakeHidDevice(
+        var factory = new CountingFactory();
+        var smartCard = CreateSmartCardDevice(factory);
+        var hidDevice = new FakeHidDevice(
+            $"ownership-fido-{Guid.NewGuid():N}",
+            HidInterfaceType.Fido);
+        var hid = CreateHidDevice(hidDevice);
+        var composite = new CompositeYubiKey($"composite:{Guid.NewGuid():N}", [smartCard, hid], null);
+
+        await using var ccid = await composite.ConnectAsync<ISmartCardConnection>(Ct);
+        var refusal = await Assert.ThrowsAsync<ConnectionInUseException>(
+            () => composite.ConnectAsync<IFidoHidConnection>(Ct));
+
+        Assert.Contains(hid.DeviceId, refusal.Message, StringComparison.Ordinal);
+        Assert.Equal(0, hidDevice.IoReportConnectCalls);
+        _ = await ccid.TransmitAndReceiveAsync(new byte[] { 0x00 }, Ct);
+        Assert.Equal(1, factory.CreateCalls);
+
+        await ccid.DisposeAsync();
+        await using var fido = await composite.ConnectAsync<IFidoHidConnection>(Ct);
+        Assert.Equal(1, hidDevice.IoReportConnectCalls);
+    }
+
+    [Fact]
+    public async Task ConnectAsync_AliasedMembersRegroupedLater_OlderCompositeScopeRemainsStable()
+    {
+        var firstSmartCardFactory = new CountingFactory();
+        var firstSmartCard = CreateSmartCardDevice(firstSmartCardFactory);
+        var firstHidDevice = new FakeHidDevice(
+            $"ownership-fido-{Guid.NewGuid():N}",
+            HidInterfaceType.Fido);
+        var firstHid = CreateHidDevice(firstHidDevice);
+        var olderComposite = new CompositeYubiKey(
+            $"composite:{Guid.NewGuid():N}",
+            [firstSmartCard, firstHid],
+            null);
+
+        var laterHid = CreateHidDevice(new FakeHidDevice(
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido));
+        _ = new CompositeYubiKey(
+            $"composite:{Guid.NewGuid():N}",
+            [firstSmartCard, laterHid],
+            null);
 
-        await using var ccid = await smartCard.ConnectAsync<ISmartCardConnection>(Ct);
-        await using var fido = await hid.ConnectAsync<IFidoHidConnection>(Ct);
+        var laterSmartCard = CreateSmartCardDevice(new CountingFactory());
+        _ = new CompositeYubiKey(
+            $"composite:{Guid.NewGuid():N}",
+            [laterSmartCard, firstHid],
+            null);
 
-        Assert.NotNull(fido);
+        await using var ccid = await olderComposite.ConnectAsync<ISmartCardConnection>(Ct);
+
+        _ = await Assert.ThrowsAsync<ConnectionInUseException>(
+            () => olderComposite.ConnectAsync<IFidoHidConnection>(Ct));
+
+        Assert.Equal(0, firstHidDevice.IoReportConnectCalls);
+        Assert.Equal(1, firstSmartCardFactory.CreateCalls);
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -278,7 +323,8 @@ public class ConnectionOwnershipContractTests
 
     private static void AssertExclusiveInterfaceRefusal(ConnectionInUseException refusal, string deviceId)
     {
-        Assert.Contains($"exclusive interface '{deviceId}'", refusal.Message, StringComparison.Ordinal);
+        Assert.Contains($"held interface: '{deviceId}'", refusal.Message, StringComparison.Ordinal);
+        Assert.Contains("one live connection at a time across all interfaces", refusal.Message, StringComparison.Ordinal);
         Assert.DoesNotContain("SmartCard", refusal.Message, StringComparison.Ordinal);
         Assert.DoesNotContain("CCID", refusal.Message, StringComparison.Ordinal);
     }

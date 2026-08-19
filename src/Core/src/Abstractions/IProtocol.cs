@@ -34,9 +34,9 @@ namespace Yubico.YubiKit.Core.Abstractions;
 ///         such as SCP.
 ///     </para>
 ///     <para>
-///         Implementations serialize full logical exchanges internally. Concurrent callers are safe, but
-///         work executes sequentially because YubiKey transports maintain chained APDU, CTAP HID, OTP HID,
-///         or SCP state across packets.
+///         Implementations admit one logical exchange at a time. An overlapping operation throws
+///         <see cref="InvalidOperationException" /> immediately because YubiKey transports maintain chained
+///         APDU, CTAP HID, OTP HID, or SCP state across packets.
 ///     </para>
 ///     <para>
 ///         Application sessions keep the effective protocol for the session lifetime and dispose it when

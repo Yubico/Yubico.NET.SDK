@@ -85,11 +85,11 @@ public class PivSessionContentionTests
     ///     whose default transport order puts SmartCard first. Pre-fix it opened a second CCID handle and
     ///     issued SELECT Management, which on the card's basic logical channel deselected PIV and destroyed
     ///     the verified-PIN state — so the next PIN-gated sign failed with SW=0x6D00.
-    ///     Post-fix the call must route around the held CCID interface and leave the victim session intact.
+    ///     The second ownership attempt is refused and leaves the victim session intact.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task GetDeviceInfoAsync_WhilePivSessionHasVerifiedPin_DoesNotClobberSessionState(
+    public async Task GetDeviceInfoAsync_WhilePivSessionHasVerifiedPin_IsRefusedWithoutClobberingState(
         YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -102,41 +102,29 @@ public class PivSessionContentionTests
         Assert.NotEqual(0, before.Length);
 
         // The third line of the motivating sequence. Ordinary public API, no exotic conditions.
-        var info = await state.Device.GetDeviceInfoAsync();
-        Assert.Equal(state.SerialNumber, info.SerialNumber);
+        _ = await Assert.ThrowsAsync<ConnectionInUseException>(() => state.Device.GetDeviceInfoAsync());
 
-        // The fourth line. Pre-fix this throws: PIV was deselected (SW 6D00/6E00) or its PIN state
-        // was reset (SW 6982).
+        // The existing holder must remain usable after the second ownership attempt is refused.
         var after = await session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest);
         Assert.NotEqual(0, after.Length);
     }
 
     /// <summary>
-    ///     The mechanism behind the test above: Management prefers SmartCard, but when a PIV session holds
-    ///     the CCID interface it must fall back to a transport that does not conflict rather than take CCID
-    ///     or throw. Asserting <see cref="ManagementSession.Transport" /> — what was actually opened, not
-    ///     what was requested — is what stops this from silently passing over SmartCard.
+    ///     Management selects SmartCard first. When a PIV session already holds the physical key, session
+    ///     creation is refused rather than silently opening another interface.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task CreateManagementSessionAsync_WhilePivHoldsCcid_OpensOverANonSmartCardTransport(
+    public async Task CreateManagementSessionAsync_WhilePivHoldsCcid_IsRefusedWithoutFallback(
         YubiKeyTestState state)
     {
-        Skip.If(state.Device.AvailableConnections == ConnectionType.SmartCard,
-            "Requires a key exposing a HID transport alongside SmartCard; a SmartCard-only device " +
-            "has no route around the held CCID interface and is expected to throw instead.");
-
         await using var session = await state.Device.CreatePivSessionAsync();
         await ArmPinGatedSigningAsync(session, state.FirmwareVersion);
 
-        await using var management = await state.Device.CreateManagementSessionAsync();
+        _ = await Assert.ThrowsAsync<ConnectionInUseException>(
+            () => state.Device.CreateManagementSessionAsync());
 
-        Assert.NotEqual(ConnectionType.SmartCard, management.Transport);
-
-        var info = await management.GetDeviceInfoAsync();
-        Assert.Equal(state.SerialNumber, info.SerialNumber);
-
-        // Routing around the lease is only correct if the lease holder is still healthy afterwards.
+        // Refusal is only correct if the lease holder is still healthy afterwards.
         var digest = SHA256.HashData("management fallback"u8);
         var signature = await session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest);
         Assert.NotEqual(0, signature.Length);

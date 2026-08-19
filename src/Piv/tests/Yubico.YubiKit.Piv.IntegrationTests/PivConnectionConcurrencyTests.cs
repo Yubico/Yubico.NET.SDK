@@ -20,9 +20,8 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Piv.IntegrationTests;
 
 /// <summary>
-///     Demonstrates on hardware that a single session is safe for concurrent calls: the protocol
-///     serializes logical exchanges, so overlapping operations never interleave APDUs on the shared
-///     connection (Bug C). The deterministic gate for this behavior is
+///     Demonstrates on hardware that a single session refuses concurrent calls before APDUs can
+///     interleave on the shared connection. The deterministic gate for this behavior is
 ///     <c>Core.UnitTests PcscProtocolConcurrencyTests</c>; this test shows the end-to-end effect on a
 ///     real card.
 /// </summary>
@@ -48,14 +47,12 @@ public class PivConnectionConcurrencyTests
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
     /// <summary>
-    ///     Concurrent PIN-gated signs and large-object reads on ONE session. Without exchange
-    ///     serialization the interleaved APDUs corrupt each other's chained responses (wrong data, 6100
-    ///     state errors); with it, every iteration must succeed and the object read must return exactly
-    ///     the stored bytes.
+    ///     Starts a large-object read, then verifies that a PIN-gated sign on the same session is refused
+    ///     while the read owns the logical exchange.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task ConcurrentSignAndObjectRead_OnOneSession_AllOperationsSucceed(
+    public async Task ConcurrentSignAndObjectRead_OnOneSession_SecondOperationIsRefused(
         YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -73,14 +70,10 @@ public class PivConnectionConcurrencyTests
 
         for (var iteration = 0; iteration < 10; iteration++)
         {
-            var signTask = session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest);
             var readTask = session.GetObjectAsync(PivDataObject.Retired1);
-
-            await Task.WhenAll(signTask, readTask);
-
-            var signature = await signTask;
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                async () => await session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest));
             var readBack = await readTask;
-            Assert.NotEqual(0, signature.Length);
             Assert.Equal(storedObject, readBack.ToArray());
         }
     }

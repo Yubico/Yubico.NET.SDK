@@ -15,28 +15,16 @@
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-///     Thrown when something in this process already holds the connection being requested.
+///     Thrown when this process already holds the physical YubiKey or connection being requested.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Four acquisitions raise this, and all are the same fact at different scopes:
+///         Connection and session acquisition raise this at two scopes:
 ///     </para>
 ///     <list type="bullet">
 ///         <item>
-///             Opening a second connection to a CCID (SmartCard) interface that already has a live one.
-///             A YubiKey's CCID interface holds exactly one selected applet, so a second connection's
-///             applet SELECT would deselect the first holder's applet and destroy its security state
-///             without either caller being told.
-///         </item>
-///         <item>
-///             Opening a second connection to a FIDO HID interface that already has a live one. The SDK
-///             permits one native FIDO HID handle per physical interface so reports cannot be consumed by
-///             competing host handles.
-///         </item>
-///         <item>
-///             Opening a second connection to an OTP HID interface that already has a live one. One logical
-///             OTP exchange spans multiple feature reports, so separate protocol instances must not interleave
-///             their reports on the same interface.
+///             Opening a second connection to any known interface of a grouped physical YubiKey. The first
+///             connection claims every stable member interface ID, so the refusal occurs before native open.
 ///         </item>
 ///         <item>
 ///             Creating a second session on a connection that already hosts a live one. Same mechanism,
@@ -44,10 +32,10 @@ namespace Yubico.YubiKit.Core.Devices;
 ///         </item>
 ///     </list>
 ///     <para>
-///         All four are refused at acquisition, before any command reaches the device, so the exception lands on
+///         Both are refused at acquisition, before any command reaches the device, so the exception lands on
 ///         the call that would have caused the damage rather than on the victim's next operation. Dispose the
 ///         current holder first; a connection may host any number of sessions in sequence, and an exclusive
-///         interface any number of connections in sequence.
+///         physical key any number of connections in sequence.
 ///     </para>
 ///     <para>
 ///         In-process only. A different process holding the card surfaces as a PC/SC sharing violation

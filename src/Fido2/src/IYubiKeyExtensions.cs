@@ -89,6 +89,7 @@ public static class IYubiKeyExtensions
         /// Thrown if <paramref name="preferredConnection"/> is not a single concrete transport or is a
         /// transport FIDO2 cannot use (for example <see cref="ConnectionType.HidOtp"/>).
         /// </exception>
+        /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
         /// <remarks>
         /// <para>
         /// FIDO2 sessions can be created over two transport types:
@@ -100,13 +101,10 @@ public static class IYubiKeyExtensions
         /// <paramref name="preferredConnection"/> = <see cref="ConnectionType.SmartCard"/> to force SmartCard.
         /// </para>
         /// <para>
-        /// SCP (Secure Channel Protocol) is only supported on the SmartCard transport. Supplying
-        /// <paramref name="scpKeyParams"/> while a non-SmartCard transport is selected — including the default
-        /// HID FIDO first choice — causes session initialization to throw <see cref="NotSupportedException"/>
-        /// ("SCP is only supported on SmartCard protocols"). To use SCP on a device that also exposes HID FIDO,
-        /// explicitly select SmartCard via <paramref name="preferredConnection"/>:
-        /// <c>ConnectionType.SmartCard</c>. (This phase does not change SCP semantics; transport selection is
-        /// independent of <paramref name="scpKeyParams"/>.)
+        /// SCP (Secure Channel Protocol) is supported only on SmartCard. Supplying
+        /// <paramref name="scpKeyParams"/> without an explicit override selects SmartCard automatically.
+        /// Explicitly selecting HID FIDO with SCP parameters causes session initialization to throw
+        /// <see cref="NotSupportedException"/> ("SCP is only supported on SmartCard protocols").
         /// </para>
         /// </remarks>
         /// <example>
@@ -127,13 +125,12 @@ public static class IYubiKeyExtensions
             ConnectionType? preferredConnection = null,
             CancellationToken cancellationToken = default)
         {
-            var candidates = yubiKey.ResolveFidoSessionTransports(
+            var transport = yubiKey.ResolveFidoSessionTransport(
                 scpKeyParams is not null && preferredConnection is null ? ConnectionType.SmartCard : preferredConnection);
 
-            return await yubiKey.ConnectSessionTransportAsync(
-                    candidates,
-                    "FIDO2",
-                    async (connection, _, ct) =>
+            return await yubiKey.CreateSessionOverTransportAsync(
+                    transport,
+                    async (connection, ct) =>
                     {
                         var session = await FidoSession
                             .CreateAsync(connection, configuration, scpKeyParams, cancellationToken: ct)
@@ -162,32 +159,29 @@ public static class IYubiKeyExtensions
             yubiKey.CreateFidoSessionAsync(scpKeyParams, configuration, null, cancellationToken);
 
         /// <summary>
-        /// Resolves the candidate transports for FIDO2.
+        /// Resolves the single transport selected for FIDO2.
         /// </summary>
         /// <param name="preferredConnection">Optional explicit transport override (see CreateFidoSessionAsync).</param>
-        /// <returns>Candidate transports suitable for FIDO2 operations.</returns>
-        private IReadOnlyList<ConnectionType> ResolveFidoSessionTransports(ConnectionType? preferredConnection)
+        /// <returns>The selected FIDO2 transport.</returns>
+        private ConnectionType ResolveFidoSessionTransport(ConnectionType? preferredConnection)
         {
             // FIDO2 is dual-transport (HID FIDO or SmartCard FIDO2). The app-specific smart default selects
             // the first exposed transport: HID FIDO, otherwise SmartCard (NFC, or USB on firmware 5.8.0+).
-            // Return one candidate so a held HID FIDO interface cannot silently create a second FidoSession
+            // Select one transport so a held HID FIDO interface cannot silently create a second FidoSession
             // over SmartCard on the same physical key. Callers can still force either transport explicitly.
             try
             {
-                var candidates = yubiKey.ResolveSessionTransports(
+                return yubiKey.ResolveSessionTransport(
                     preferredConnection,
                     "FIDO2",
                     FidoTransportOrder);
-
-                return [candidates[0]];
             }
             catch (NotSupportedException) when (preferredConnection is null)
             {
                 // The remap stays scoped to the resolve call ONLY: only the default path (no override) remaps
                 // to the FIDO-specific "no FIDO-capable connection" message. An explicit-override failure
-                // carries an accurate, override-specific diagnostic from ResolveSessionTransports (e.g. "does
-                // not expose the requested SmartCard connection"), and a connect/held/fallback error from
-                // ConnectSessionTransportAsync must surface unchanged — neither is masked by this message.
+                // carries an accurate, override-specific diagnostic from ResolveSessionTransport (e.g. "does
+                // not expose the requested SmartCard connection"). Connection failures surface unchanged.
                 throw new NotSupportedException(
                     $"This YubiKey does not expose a FIDO-capable connection (available: {yubiKey.AvailableConnections}). " +
                     "FIDO2 requires HID FIDO or SmartCard.");

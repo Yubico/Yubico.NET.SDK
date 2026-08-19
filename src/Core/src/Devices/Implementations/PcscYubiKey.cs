@@ -23,7 +23,7 @@ internal class PcscYubiKey(
     IPcscDevice pcscDevice,
     ISmartCardConnectionFactory connectionFactory,
     ILogger<PcscYubiKey> logger)
-    : IYubiKey, IDiscoveryConnectionProvider
+    : IYubiKey, IDiscoveryConnectionProvider, IScopedConnectionProvider
 {
     private readonly string _readerName = pcscDevice.ReaderName;
 
@@ -42,17 +42,27 @@ internal class PcscYubiKey(
     public string DeviceId { get; } = $"pcsc:{pcscDevice.ReaderName}";
     public ConnectionType AvailableConnections => ConnectionType.SmartCard;
 
-    public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+    public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+        where TConnection : class, IConnection
+        => ConnectWithLeaseScopeAsync<TConnection>([DeviceId], cancellationToken);
+
+    Task<TConnection> IScopedConnectionProvider.ConnectWithLeaseScopeAsync<TConnection>(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken) =>
+        ConnectWithLeaseScopeAsync<TConnection>(interfaceIds, cancellationToken);
+
+    private async Task<TConnection> ConnectWithLeaseScopeAsync<TConnection>(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken)
         where TConnection : class, IConnection
     {
         if (typeof(TConnection) != typeof(ISmartCardConnection))
             throw new NotSupportedException(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
 
-        // Exclusive: one live connection per CCID interface. The lease is held by the connection returned
-        // below and released when that connection is disposed.
+        // The connection claims this member's physical-device lease scope and releases it on disposal.
         var ownership = await DeviceConnectionRegistry
-            .AcquireConnectionAsync(DeviceId, cancellationToken)
+            .AcquireConnectionAsync(interfaceIds, cancellationToken)
             .ConfigureAwait(false);
         try
         {

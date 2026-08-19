@@ -120,7 +120,13 @@ internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
 
         if (TryResolveMember(requested, out var member))
-            return member.ConnectAsync<TConnection>(cancellationToken);
+        {
+            if (member is IScopedConnectionProvider provider)
+                return provider.ConnectWithLeaseScopeAsync<TConnection>(MemberDeviceIds, cancellationToken);
+
+            throw new InvalidOperationException(
+                $"The {member.GetType().Name} member does not support scoped connection acquisition.");
+        }
 
         throw new NotSupportedException(
             $"Connection type {typeof(TConnection).Name} ({requested}) is not available on this physical YubiKey " +
@@ -182,4 +188,5 @@ internal sealed class CompositeYubiKey : IYubiKey, IDiscoveryConnectionProvider
             return ConnectionType.HidOtp;
         return ConnectionType.Unknown;
     }
+
 }

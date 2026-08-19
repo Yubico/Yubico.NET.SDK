@@ -139,9 +139,9 @@ public class IYubiKeyExtensionsTransportTests
     }
 
     // Phase 38.5 (ISC-10/ISC-14): the FIDO2 "no FIDO-capable connection" remap stays scoped to the
-    // ResolveSessionTransports call only. When ResolveSessionTransports succeeds but the HID FIDO connect
+    // ResolveSessionTransport call only. When resolution succeeds but the HID FIDO connect
     // fails with a non-held error, that error must surface unchanged — NOT be masked as the generic
-    // NotSupportedException — proving the remap did not widen around ConnectSessionTransportAsync.
+    // NotSupportedException — proving the remap did not widen around session connection creation.
     [Fact]
     public async Task CreateFidoSessionAsync_ConnectFailsNonHeld_SurfacesErrorNotGenericRemap()
     {
@@ -180,7 +180,7 @@ public class IYubiKeyExtensionsTransportTests
         }
     }
 
-    // Resolves a candidate list successfully, then throws a caller-supplied exception from the connect itself.
+    // Resolves a transport successfully, then throws a caller-supplied exception from the connect itself.
     private sealed class ThrowingProbeYubiKey(ConnectionType available, Exception connectException) : IYubiKey
     {
         public string DeviceId => "throwing-probe";

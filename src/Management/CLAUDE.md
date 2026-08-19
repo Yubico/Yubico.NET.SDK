@@ -235,7 +235,7 @@ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
 - Creates session
 - **Caller owns session** - must dispose
 - The connection was opened by this entry point, so the session owns it and disposes it when the session disposes. A connection you opened yourself and passed to `ManagementSession.CreateAsync` stays yours.
-- Use `await using`; a missing disposal can retain an exclusive CCID or OTP HID lease and block later opens.
+- Use `await using`; a missing disposal can retain the physical-device lease and block later opens.
 
 **Tradeoffs:**
 - ✅ Reuse session for multiple operations (more efficient)
@@ -301,12 +301,17 @@ await mgmt.SetDeviceConfigAsync(config, reboot: true);
 
 ### Implementation Details
 
-All three extension methods follow the same pattern internally:
+Management extensions that create their own session use the same transport/session pipeline internally:
 
-1. **Connection creation**: `await yubiKey.ConnectAsync<ISmartCardConnection>()`
-2. **Session creation**: `await ManagementSession.CreateAsync(connection, ...)`
-3. **Operation**: Call session method
-4. **Disposal**: `using` ensures cleanup even on exceptions
+1. **Transport resolution**: `ResolveSessionTransport` selects exactly one supported transport from
+   `SmartCard -> HidFido -> HidOtp`, or uses an explicit valid override. Supplying SCP parameters without
+   an override forces SmartCard because SCP is not available over HID.
+2. **One-shot connection opening**: `CreateSessionOverTransportAsync` opens exactly one typed connection —
+   `ISmartCardConnection`, `IFidoHidConnection`, or `IOtpHidConnection` — for the selected transport.
+3. **Session creation**: `await ManagementSession.CreateAsync(connection, ...)`
+4. **Operation**: Call the requested session method.
+5. **Disposal**: The high-level operation disposes its session; a returned session owns the hidden connection
+   until its caller disposes that session.
 
 The difference is **who manages the session lifecycle**:
 - High-level extensions: Method manages lifecycle (automatic)
@@ -318,10 +323,10 @@ connection and never disposes it. The creator must dispose the connection with `
 is no finalizer backstop. One live session per connection is allowed, and sequential reuse after
 session disposal is supported.
 
-CCID, FIDO HID, and OTP HID connections are exclusive per interface. Management's default order still
-tries `SmartCard -> HidFido -> HidOtp`: an in-process `ConnectionInUseException` advances to the next
-candidate, so held CCID and FIDO interfaces can reach free OTP. An explicit preferred transport never
-falls back.
+A grouped physical YubiKey admits one live connection across CCID, FIDO HID, and OTP HID. Management
+selects exactly one transport from `SmartCard -> HidFido -> HidOtp` (or an explicit override) and opens it
+once. `ConnectionInUseException`, PC/SC sharing errors, and initialization failures propagate without
+trying another interface.
 
 ### Testing Considerations
 

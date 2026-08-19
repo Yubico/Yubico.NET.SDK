@@ -104,7 +104,7 @@ public class CompositeYubiKeyTests
 
     // FakeMember.ConnectAsync always throws a distinctive InvalidOperationException naming the connection it
     // backs, so a routing test can assert which member the composite dispatched to without full connection fakes.
-    private sealed class FakeMember : IYubiKey
+    private sealed class FakeMember : IYubiKey, IScopedConnectionProvider
     {
         private readonly ConnectionType _connection;
 
@@ -116,5 +116,11 @@ public class CompositeYubiKeyTests
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection
             => throw new InvalidOperationException($"routed-to:{_connection}:{typeof(TConnection).Name}");
+
+        public Task<TConnection> ConnectWithLeaseScopeAsync<TConnection>(
+            IReadOnlyCollection<string> interfaceIds,
+            CancellationToken cancellationToken)
+            where TConnection : class, IConnection
+            => ConnectAsync<TConnection>(cancellationToken);
     }
 }

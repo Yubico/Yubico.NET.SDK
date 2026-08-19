@@ -22,8 +22,8 @@ namespace Yubico.YubiKit.Core.UnitTests.Protocols.Fido.Hid;
 ///     Proves and guards the serialization contract of <see cref="FidoHidProtocol" />: CTAP HID allows
 ///     one transaction at a time per channel — a request is an init packet plus continuation packets,
 ///     and a foreign init packet transmitted mid-request aborts the transaction on a real device
-///     (CTAP1_ERR_INVALID_SEQ / ERR_CHANNEL_BUSY). Concurrent operations on one protocol must therefore
-///     never interleave packets on the wire, and lazy channel initialization must run exactly once.
+///     (CTAP1_ERR_INVALID_SEQ / ERR_CHANNEL_BUSY). Overlapping operations are therefore refused, and lazy
+///     channel initialization must run exactly once.
 /// </summary>
 public class FidoHidProtocolConcurrencyTests
 {
@@ -36,12 +36,13 @@ public class FidoHidProtocolConcurrencyTests
     private static readonly TimeSpan CompletionBound = TimeSpan.FromSeconds(5);
 
     [Fact]
-    public async Task SendVendorCommandAsync_ConcurrentOperations_DoNotInterleavePacketsOnTheWire()
+    public async Task SendVendorCommandAsync_OverlappingOperation_ThrowsImmediately()
     {
         var ct = TestContext.Current.CancellationToken;
         var fake = new FakeCtapHidDevice { Responder = (_, payload) => payload };
         using var protocol = new FidoHidProtocol(fake);
         protocol.Configure(new FirmwareVersion(5, 8, 0));
+        fake.ClearWireTags();
 
         // Payloads larger than one init packet (57 bytes) force multi-packet requests and responses.
         var payloadA = CreatePayload(PayloadTagA, 100);
@@ -52,12 +53,14 @@ public class FidoHidProtocolConcurrencyTests
         var operationA = protocol.SendVendorCommandAsync(VendorCommandA, payloadA, ct);
         Assert.True(await fake.WaitForSendsAsync(1, ObservationWindow, ct));
 
-        var operationB = protocol.SendVendorCommandAsync(VendorCommandB, payloadB, ct);
-        await fake.WaitForSendsAsync(2, ObservationWindow, ct);
+        var refusal = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SendVendorCommandAsync(VendorCommandB, payloadB, ct));
+        Assert.Contains("one operation at a time", refusal.Message, StringComparison.Ordinal);
+        Assert.False(await fake.WaitForSendsAsync(2, ObservationWindow, ct));
 
         fake.ReleaseSends();
         var responseA = await operationA.WaitAsync(CompletionBound, ct);
-        var responseB = await operationB.WaitAsync(CompletionBound, ct);
+        var responseB = await protocol.SendVendorCommandAsync(VendorCommandB, payloadB, ct);
 
         // Both operations must see their own echoed payloads...
         Assert.Equal(payloadA.ToArray(), responseA.ToArray());
@@ -75,7 +78,7 @@ public class FidoHidProtocolConcurrencyTests
     }
 
     [Fact]
-    public async Task SendVendorCommandAsync_ConcurrentFirstUse_InitializesChannelExactlyOnce()
+    public async Task SendVendorCommandAsync_OverlappingFirstUse_RefusesSecondAndInitializesOnce()
     {
         var ct = TestContext.Current.CancellationToken;
         var fake = new FakeCtapHidDevice { Responder = (_, payload) => payload };
@@ -89,22 +92,21 @@ public class FidoHidProtocolConcurrencyTests
         var operationA = Task.Run(() => protocol.SendVendorCommandAsync(VendorCommandA, payloadA, ct), ct);
         Assert.True(await fake.WaitForSendsAsync(1, ObservationWindow, ct));
 
-        var operationB = Task.Run(() => protocol.SendVendorCommandAsync(VendorCommandB, payloadB, ct), ct);
-        await fake.WaitForSendsAsync(2, ObservationWindow, ct);
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SendVendorCommandAsync(VendorCommandB, payloadB, ct));
+        Assert.False(await fake.WaitForSendsAsync(2, ObservationWindow, ct));
 
         fake.ReleaseSends();
         var responseA = await operationA.WaitAsync(CompletionBound, ct);
-        var responseB = await operationB.WaitAsync(CompletionBound, ct);
 
         // Exactly one CTAPHID_INIT exchange may reach the device; a second INIT mid-flight reassigns
         // the channel and cross-delivers nonces.
         Assert.Equal(1, fake.InitExchangeCount);
         Assert.Equal(payloadA.ToArray(), responseA.ToArray());
-        Assert.Equal(payloadB.ToArray(), responseB.ToArray());
     }
 
     [Fact]
-    public async Task Configure_RacingFirstUseOperation_InitializesChannelExactlyOnce()
+    public async Task Configure_OverlapsFirstUseOperation_ThrowsWithoutSecondInitialization()
     {
         var ct = TestContext.Current.CancellationToken;
         var fake = new FakeCtapHidDevice { Responder = (_, payload) => payload };
@@ -112,26 +114,18 @@ public class FidoHidProtocolConcurrencyTests
 
         var payloadA = CreatePayload(PayloadTagA, 4);
 
-        // Operation A enters the gate first and starts the lazy CTAPHID_INIT handshake.
+        // Operation A enters the guard first and starts the lazy CTAPHID_INIT handshake.
         fake.HoldSends();
         var operationA = Task.Run(() => protocol.SendVendorCommandAsync(VendorCommandA, payloadA, ct), ct);
         Assert.True(await fake.WaitForSendsAsync(1, ObservationWindow, ct));
 
         // Configure() is sync-over-async; pre-fix it initialized the channel outside the gate and
         // raced a second CTAPHID_INIT onto the wire mid-transaction.
-        var configure = Task.Run(() => protocol.Configure(new FirmwareVersion(5, 8, 0)), ct);
-
-        // Operation A is parked inside SendAsync with _channelId still unset, so pre-fix Configure
-        // unconditionally starts its own ungated INIT — its packet is recorded as a second held send
-        // within milliseconds. Post-fix Configure blocks on the gate and nothing reaches the wire.
-        var secondInitObserved = await fake.WaitForSendsAsync(2, TimeSpan.FromSeconds(1), ct);
-        Assert.False(
-            secondInitObserved,
-            "Configure raced a second ungated CTAPHID_INIT onto the wire while a first-use operation held the gate mid-INIT.");
+        Assert.Throws<InvalidOperationException>(() => protocol.Configure(new FirmwareVersion(5, 8, 0)));
+        Assert.False(await fake.WaitForSendsAsync(2, ObservationWindow, ct));
 
         fake.ReleaseSends();
         var responseA = await operationA.WaitAsync(CompletionBound, ct);
-        await configure.WaitAsync(CompletionBound, ct);
 
         Assert.Equal(1, fake.InitExchangeCount);
         Assert.True(protocol.IsChannelInitialized);
@@ -186,6 +180,16 @@ public class FidoHidProtocolConcurrencyTests
 
         public void HoldSends() =>
             _hold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public void ClearWireTags()
+        {
+            lock (_lock)
+                _wireTags.Clear();
+
+            while (_sendArrivals.Wait(0))
+            {
+            }
+        }
 
         public void ReleaseSends()
         {

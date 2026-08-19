@@ -30,7 +30,7 @@ namespace Yubico.YubiKit.Core.Devices;
 internal class HidYubiKey(
     IHidDevice hidDevice,
     ILogger<HidYubiKey> logger)
-    : IYubiKey, IDiscoveryConnectionProvider
+    : IYubiKey, IDiscoveryConnectionProvider, IScopedConnectionProvider
 {
     public string DeviceId { get; } =
         $"hid:{hidDevice.ReaderName}:{hidDevice.DescriptorInfo.Usage:X4}";
@@ -40,7 +40,18 @@ internal class HidYubiKey(
     /// </summary>
     public ConnectionType AvailableConnections => ConnectionTypeMapper.ToConnectionType(hidDevice.InterfaceType);
 
-    public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+    public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+        where TConnection : class, IConnection
+        => ConnectWithLeaseScopeAsync<TConnection>([DeviceId], cancellationToken);
+
+    Task<TConnection> IScopedConnectionProvider.ConnectWithLeaseScopeAsync<TConnection>(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken) =>
+        ConnectWithLeaseScopeAsync<TConnection>(interfaceIds, cancellationToken);
+
+    private async Task<TConnection> ConnectWithLeaseScopeAsync<TConnection>(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken)
         where TConnection : class, IConnection
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -51,14 +62,10 @@ internal class HidYubiKey(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
         }
 
-        // Both OTP HID and FIDO HID are exclusive: one physical YubiKey HID interface admits exactly one
-        // SDK connection/native HID handle at a time. OTP HID exchanges span multiple feature reports.
-        // FIDO HID is exclusive to ensure one native handle per interface. Management-over-HID fallback
-        // while CCID is held is achieved through held-transport exception detection in
-        // YubiKeyConnectionExtensions, not through concurrent connection sharing.
+        // The connection claims this member's physical-device lease scope and releases it on disposal.
         var ownership = await DeviceConnectionRegistry
             .AcquireConnectionAsync(
-                DeviceId,
+                interfaceIds,
                 cancellationToken)
             .ConfigureAwait(false);
         try

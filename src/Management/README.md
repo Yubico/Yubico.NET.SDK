@@ -94,9 +94,9 @@ await using var mgmtOverOtp = await yubiKey.CreateManagementSessionAsync(
     preferredConnection: ConnectionType.HidOtp);
 ```
 
-Management may fall through `SmartCard -> HidFido -> HidOtp` only on the default path. CCID, FIDO HID,
-and OTP HID are exclusive per interface. If CCID and FIDO are held but OTP is free, fallback reaches
-OTP; if OTP is also held, the final attempt is refused. An explicit preferred transport never falls back.
+Management selects exactly one transport: the explicit override, or the first supported transport in
+`SmartCard -> HidFido -> HidOtp`. A grouped physical YubiKey admits one live connection across all known
+interfaces. Connection and initialization failures propagate without trying another interface.
 
 ### Form Factors
 
@@ -187,7 +187,7 @@ caller never sees, and the returned session owns that hidden connection.
 
 Only one live application session may use a connection. Dispose the first session before creating a
 second over the same caller-owned connection; sequential reuse is supported without reconnecting.
-Failing to dispose a caller-created connection can retain an exclusive CCID or OTP HID lease for the
+Failing to dispose a caller-created connection can retain the physical-device lease for the
 connection/process lifetime and block later opens. There is no finalizer backstop.
 
 ### Getting Device Information

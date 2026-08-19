@@ -68,18 +68,11 @@ extensions (e.g. `CreateManagementSessionAsync`) select a transport via a docume
 optional `preferredConnection` override — see [Physical Device Model](../../docs/architecture/physical-device-model.md).
 
 ```csharp
-using Yubico.YubiKit.Core.Protocols.Fido.Hid;
-using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
-// Open SmartCard connection
+// Choose one interface for this connection. Dispose it before opening another
+// interface on the same physical YubiKey.
 await using var smartCardConnection = await device.ConnectAsync<ISmartCardConnection>();
-
-// Open HID FIDO connection
-await using var fidoConnection = await device.ConnectAsync<IFidoHidConnection>();
-
-// Open HID OTP connection
-await using var otpConnection = await device.ConnectAsync<IOtpHidConnection>();
 ```
 
 ### Protocol Communication

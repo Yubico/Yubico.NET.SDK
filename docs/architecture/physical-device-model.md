@@ -107,9 +107,20 @@ using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
-await using var smartCard = await device.ConnectAsync<ISmartCardConnection>();
-await using var fido = await device.ConnectAsync<IFidoHidConnection>();
-await using var otp = await device.ConnectAsync<IOtpHidConnection>();
+await using (var smartCard = await device.ConnectAsync<ISmartCardConnection>())
+{
+    // Use SmartCard, then dispose it before opening another interface.
+}
+
+await using (var fido = await device.ConnectAsync<IFidoHidConnection>())
+{
+    // Use FIDO HID, then dispose it before opening another interface.
+}
+
+await using (var otp = await device.ConnectAsync<IOtpHidConnection>())
+{
+    // Use OTP HID.
+}
 ```
 
 The parameterless `ConnectAsync()` is only for single-interface devices; on a composite device it throws

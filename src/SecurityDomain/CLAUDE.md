@@ -211,7 +211,7 @@ private async Task InitializeAsync(
     ProtocolConfiguration? configuration = null,
     CancellationToken cancellationToken = default)
 {
-    // 1. Create protocol (uses global YubiKit logging)
+    // 1. Create the internal protocol (uses global YubiKit logging)
     var smartCardProtocol = ProtocolFactory.Create(connection);
     var backend = new SecurityDomainBackend(smartCardProtocol);
 
@@ -221,6 +221,7 @@ private async Task InitializeAsync(
 
     // 3. Establish SCP if keys provided
     await InitializeProtocolAsync(smartCardProtocol, firmwareVersion, configuration, scpKeyParams, cancellationToken);
+    // Protocol and ISmartCardProtocol are Core-internal implementation seams.
     var selectedProtocol = Protocol as ISmartCardProtocol;
     if (selectedProtocol is null)
         throw new InvalidOperationException();
@@ -230,6 +231,10 @@ private async Task InitializeAsync(
 ```
 
 **Pattern:** Factory method `CreateAsync()` combines both phases.
+
+`ProtocolFactory`, `IProtocol`, and `ISmartCardProtocol` are not consumer extension points. External low-level
+code should use `RawSmartCardSession`; SecurityDomain uses these types only as friend-assembly implementation
+machinery for its applet session.
 
 ### Error Handling
 

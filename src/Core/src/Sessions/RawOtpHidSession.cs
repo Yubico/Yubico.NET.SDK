@@ -18,6 +18,12 @@ using Yubico.YubiKit.Core.Transports.Hid;
 
 namespace Yubico.YubiKit.Core.Sessions;
 
+/// <summary>Provides guarded, application-agnostic OTP HID logical exchanges.</summary>
+/// <remarks>
+///     The session supplies feature-report framing, sequencing, polling, and CRC handling, but no OTP applet
+///     or slot-configuration semantics. It borrows a directly supplied connection. Direct connection
+///     <c>SendAsync</c>/<c>ReceiveAsync</c> calls bypass the session's overlap guard.
+/// </remarks>
 public sealed class RawOtpHidSession : ApplicationSession
 {
     private IOtpHidProtocol OtpProtocol =>
@@ -28,6 +34,8 @@ public sealed class RawOtpHidSession : ApplicationSession
     {
     }
 
+    /// <summary>Creates a raw OTP HID session that borrows <paramref name="connection" />.</summary>
+    /// <remarks>OTP status initialization is deferred until the first operation.</remarks>
     public static Task<RawOtpHidSession> CreateAsync(
         IOtpHidConnection connection,
         CancellationToken cancellationToken = default)
@@ -47,6 +55,7 @@ public sealed class RawOtpHidSession : ApplicationSession
         }
     }
 
+    /// <summary>Sends one caller-defined command or slot byte and returns the complete response payload.</summary>
     public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
         byte command,
         ReadOnlyMemory<byte> payload,

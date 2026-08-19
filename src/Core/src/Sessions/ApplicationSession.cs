@@ -20,6 +20,20 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 namespace Yubico.YubiKit.Core.Sessions;
 
+/// <summary>
+///     Base class for applet and raw sessions that attach to one opened YubiKey connection.
+/// </summary>
+/// <remarks>
+///     <para>
+///         One connection admits one live session. A direct session factory borrows its caller's connection;
+///         only an <c>IYubiKey.Create*SessionAsync</c> convenience entry point can transfer ownership of a
+///         hidden connection to the returned session.
+///     </para>
+///     <para>
+///         Protocol construction and initialization are internal SDK seams. External derived classes cannot
+///         inject or replace Core protocol implementations; compose over a public raw session for low-level work.
+///     </para>
+/// </remarks>
 public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 {
     private readonly DisposalGate _disposalGate = new();

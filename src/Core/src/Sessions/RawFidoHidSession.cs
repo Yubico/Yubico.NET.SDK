@@ -17,6 +17,12 @@ using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 
 namespace Yubico.YubiKit.Core.Sessions;
 
+/// <summary>Provides guarded, application-agnostic CTAP HID logical exchanges.</summary>
+/// <remarks>
+///     The session supplies channel initialization, framing, continuation, keep-alive, and response handling,
+///     but no FIDO2 or WebAuthn operation semantics. It borrows a directly supplied connection. Direct
+///     connection <c>SendAsync</c>/<c>ReceiveAsync</c> calls bypass the session's overlap guard.
+/// </remarks>
 public sealed class RawFidoHidSession : ApplicationSession
 {
     private IFidoHidProtocol FidoProtocol =>
@@ -27,6 +33,8 @@ public sealed class RawFidoHidSession : ApplicationSession
     {
     }
 
+    /// <summary>Creates a raw FIDO HID session that borrows <paramref name="connection" />.</summary>
+    /// <remarks>CTAP HID channel initialization is deferred until the first operation.</remarks>
     public static Task<RawFidoHidSession> CreateAsync(
         IFidoHidConnection connection,
         CancellationToken cancellationToken = default)
@@ -46,6 +54,7 @@ public sealed class RawFidoHidSession : ApplicationSession
         }
     }
 
+    /// <summary>Sends one caller-defined CTAP HID command and returns its complete response payload.</summary>
     public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
         byte command,
         ReadOnlyMemory<byte> payload,

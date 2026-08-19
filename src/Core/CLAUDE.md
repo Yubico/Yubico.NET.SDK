@@ -24,7 +24,7 @@ Core is the **foundational library** for the entire SDK. It provides:
 **Key Directories:**
 ```
 src/
-├── Abstractions/        # Shared public contracts: IYubiKey, IConnection, IProtocol
+├── Abstractions/        # Public device/connection contracts; internal protocol contracts
 ├── Devices/             # Physical YubiKey model, discovery, monitoring, metadata
 ├── Sessions/            # ApplicationSession and ApplicationIds
 ├── Transports/          # HID and SmartCard device/connection/listener implementations
@@ -298,18 +298,18 @@ public class MyTests : IntegrationTestBase
 
 ## Common Operations
 
-### Creating a Protocol
+### Creating a Raw Session
 
 ```csharp
-// From connection
-using var connection = await connectionFactory.CreateAsync(reader, ct);
-using ISmartCardProtocol protocol = ProtocolFactory.Create(connection);
+// From a caller-owned connection
+await using var connection = await connectionFactory.CreateAsync(reader, ct);
+await using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection, ct);
 
 // Select application
-await protocol.SelectAsync(ApplicationIds.Piv, ct);
+await raw.SelectAsync(ApplicationIds.Piv, ct);
 
 // Configure for firmware
-protocol.Configure(firmwareVersion);
+raw.Configure(firmwareVersion);
 ```
 
 ### Sending APDUs
@@ -324,12 +324,12 @@ var command = new ApduCommand
     P2 = 0x00,
     Data = applicationId
 };
-var responseData = await protocol.TransmitAndReceiveAsync(command, ct);
+var responseData = await raw.TransmitAndReceiveAsync(command, cancellationToken: ct);
 
 // Sensitive command (PIN, key material) — caller zeroes source buffer after transmission
 // ApduCommand is a readonly record struct: it stores a reference, not a clone.
 var command = new ApduCommand(0x00, InsVerify, 0x00, 0x80, pinnedPin.AsMemory(0, 8));
-var response = await protocol.TransmitAndReceiveAsync(command, ct);
+var response = await raw.TransmitAndReceiveAsync(command, cancellationToken: ct);
 CryptographicOperations.ZeroMemory(pinnedPin); // zeroes what command.Data referenced
 ```
 
@@ -398,7 +398,7 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
 4. **TLV Disposal**: `TlvBuilder` and `DisposableTlvList` must be disposed
 5. **Platform-Specific Behavior**: PC/SC APIs behave differently across platforms; test on all three
 6. **Chained Response Assembly**: `INS_SEND_REMAINING` (0xC0) is used by default; some apps use custom values
-7. **Connection Sharing**: Protocols refuse overlapping exchanges (see Concurrency Model), but raw `IConnection` calls bypass that guard — do not drive a connection directly from multiple threads
+7. **Access Tiers**: Applet sessions are the golden path. Raw sessions bypass applet checks but retain session ownership and overlap guards. Raw `IConnection` calls bypass both session and exchange guards; do not interleave them, and dispose/reopen after an interrupted exchange. See [Raw Access Tiers](../../docs/architecture/raw-access-tiers.md)
 
 ## Related Modules
 

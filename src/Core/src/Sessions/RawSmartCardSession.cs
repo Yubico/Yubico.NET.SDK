@@ -20,6 +20,15 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Sessions;
 
+/// <summary>
+///     Provides guarded, application-agnostic APDU exchanges over one SmartCard connection.
+/// </summary>
+/// <remarks>
+///     Creation performs no application selection or applet feature checks. The session borrows a connection
+///     passed to <see cref="CreateAsync(ISmartCardConnection,CancellationToken)" />; an
+///     <see cref="Abstractions.IYubiKey" /> convenience factory owns its hidden connection. Operations refuse overlap,
+///     while direct <see cref="ISmartCardConnection.TransmitAndReceiveAsync" /> calls bypass that guard.
+/// </remarks>
 public sealed class RawSmartCardSession : ApplicationSession
 {
     private readonly bool _usesScp;
@@ -32,6 +41,8 @@ public sealed class RawSmartCardSession : ApplicationSession
         _usesScp = usesScp;
     }
 
+    /// <summary>Creates a raw APDU session that borrows <paramref name="connection" />.</summary>
+    /// <remarks>No APDU is transmitted and no application is selected during creation.</remarks>
     public static Task<RawSmartCardSession> CreateAsync(
         ISmartCardConnection connection,
         CancellationToken cancellationToken = default) =>
@@ -42,6 +53,12 @@ public sealed class RawSmartCardSession : ApplicationSession
             configuration: null,
             cancellationToken);
 
+    /// <summary>Creates a configured raw APDU session and establishes SCP.</summary>
+    /// <remarks>
+    ///     APDU framing is configured before the secure channel is established. The session borrows
+    ///     <paramref name="connection" />. Dispose <paramref name="scpKeyParameters" /> according to its
+    ///     ownership contract.
+    /// </remarks>
     public static Task<RawSmartCardSession> CreateAsync(
         ISmartCardConnection connection,
         ScpKeyParameters scpKeyParameters,
@@ -102,6 +119,7 @@ public sealed class RawSmartCardSession : ApplicationSession
         }
     }
 
+    /// <summary>Selects exactly the supplied application identifier.</summary>
     public Task<ReadOnlyMemory<byte>> SelectAsync(
         ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default)
@@ -110,6 +128,13 @@ public sealed class RawSmartCardSession : ApplicationSession
         return SmartCardProtocol.SelectAsync(applicationId, cancellationToken);
     }
 
+    /// <summary>Transmits one complete APDU logical exchange.</summary>
+    /// <param name="command">The caller-defined APDU.</param>
+    /// <param name="throwOnError">
+    ///     Whether a non-success status word throws <see cref="ApduException" />. When <see langword="false" />,
+    ///     the returned response preserves both data and status bytes.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation checked before the stateful exchange is admitted.</param>
     public Task<ApduResponse> TransmitAndReceiveAsync(
         ApduCommand command,
         bool throwOnError = true,
@@ -119,6 +144,11 @@ public sealed class RawSmartCardSession : ApplicationSession
         return SmartCardProtocol.TransmitAndReceiveAsync(command, throwOnError, cancellationToken);
     }
 
+    /// <summary>Configures APDU formatting for a known device firmware version.</summary>
+    /// <remarks>
+    ///     This does not apply applet capability or feature gates. SCP sessions must provide configuration during
+    ///     creation and cannot be reconfigured after the secure channel is established.
+    /// </remarks>
     public void Configure(
         FirmwareVersion firmwareVersion,
         ProtocolConfiguration? configuration = null)

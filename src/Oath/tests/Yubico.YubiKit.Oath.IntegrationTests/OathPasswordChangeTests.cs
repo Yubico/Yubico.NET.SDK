@@ -28,8 +28,9 @@ namespace Yubico.YubiKit.Oath.IntegrationTests;
 /// <remarks>
 ///     These tests observe lock state from a <em>fresh</em> session, which is the whole point — a
 ///     session that already holds the applet cannot tell you what a new caller would see. Each such
-///     session is therefore scoped and disposed before the next one opens: one live session per CCID
-///     interface is the contract, and overlapping them is refused with <c>ConnectionInUseException</c>.
+///     session is therefore scoped and disposed before the next one opens. Each convenience session owns a
+///     connection to the physical key, and overlapping connections are refused with
+///     <c>ConnectionInUseException</c>.
 /// </remarks>
 public class OathPasswordChangeTests
 {

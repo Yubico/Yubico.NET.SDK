@@ -22,7 +22,7 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
 /// <summary>
-///     Hardware-gated confirmation of the exclusive FIDO HID interface ownership contract.
+///     Hardware-gated confirmation of the physical-key ownership contract through the FIDO HID entry point.
 /// </summary>
 public class FidoHidOwnershipIntegrationTests
 {

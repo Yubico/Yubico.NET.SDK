@@ -35,7 +35,7 @@ public class YubiOtpSlotConfigTests
     {
         // The test creates the connection, so the test disposes it: YubiOtpSession.CreateAsync borrows a
         // caller-created connection and never closes it. Leaking it would hold the physical-device lease
-        // for the process lifetime and fail every later OTP HID open in this run.
+        // for the process lifetime and fail later opens through any known interface of this key.
         await using var connection = await state.Device.ConnectAsync<IOtpHidConnection>();
         await using var session = await YubiOtpSession.CreateAsync(connection);
 

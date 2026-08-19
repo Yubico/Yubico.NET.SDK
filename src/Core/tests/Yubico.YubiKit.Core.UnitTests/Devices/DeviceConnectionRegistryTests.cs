@@ -28,9 +28,9 @@ public class DeviceConnectionRegistryTests
     private static string NewId() => $"test:{Guid.NewGuid():N}";
 
     /// <summary>
-    ///     An interface admits one live connection and refuses the second immediately —
-    ///     refuse, never queue: waiting for an unbounded session to finish is worse than a clear error, and
-    ///     the caller usually has another transport. Releasing the holder makes the interface available again.
+    ///     A lease scope admits one live connection and refuses the second immediately — refuse, never queue:
+    ///     waiting for an unbounded session to finish is worse than a clear error. A grouped physical key's
+    ///     other transports belong to the same scope. Releasing the holder makes the scope available again.
     /// </summary>
     [Fact]
     public async Task AcquireConnection_ExclusiveInterface_SecondAcquisitionIsRefused()

@@ -145,14 +145,23 @@ public static class YubiKeyConnectionExtensions
     /// <param name="transport">The single concrete transport selected for the session.</param>
     /// <param name="createAsync">Creates the result over the opened connection.</param>
     /// <param name="cancellationToken">A token to cancel connection opening or session creation.</param>
-    public static async Task<TResult> CreateSessionOverTransportAsync<TResult>(
+    public static Task<TResult> CreateSessionOverTransportAsync<TResult>(
         this IYubiKey yubiKey,
         ConnectionType transport,
         Func<IConnection, CancellationToken, Task<TResult>> createAsync,
+        CancellationToken cancellationToken = default) =>
+        CreateSessionOverTransportAsync(yubiKey, transport, createAsync, Logger, cancellationToken);
+
+    internal static async Task<TResult> CreateSessionOverTransportAsync<TResult>(
+        this IYubiKey yubiKey,
+        ConnectionType transport,
+        Func<IConnection, CancellationToken, Task<TResult>> createAsync,
+        ILogger logger,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(yubiKey);
         ArgumentNullException.ThrowIfNull(createAsync);
+        ArgumentNullException.ThrowIfNull(logger);
         if (transport is not (ConnectionType.SmartCard or ConnectionType.HidFido or ConnectionType.HidOtp))
             throw new ArgumentException(
                 $"Connection '{transport}' is not a single concrete transport.", nameof(transport));
@@ -172,10 +181,17 @@ public static class YubiKeyConnectionExtensions
             }
             catch (Exception cleanupException)
             {
-                Logger.LogWarning(
-                    cleanupException,
-                    "Failed to dispose {Transport} connection after session creation failed",
-                    transport);
+                try
+                {
+                    logger.LogWarning(
+                        cleanupException,
+                        "Failed to dispose {Transport} connection after session creation failed",
+                        transport);
+                }
+                catch
+                {
+                    // Session creation is already failing. Logging must not replace that original exception.
+                }
             }
             throw;
         }

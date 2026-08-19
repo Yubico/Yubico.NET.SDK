@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
@@ -128,6 +129,34 @@ public class SessionTransportTests
         Assert.Same(creationFailure, exception);
         Assert.Equal(1, innerConnection.DisposeAsyncCalls);
         Assert.True(innerConnection.Disposed);
+        Assert.False(DeviceConnectionRegistry.IsInUse(leaseId));
+    }
+
+    [Fact]
+    public async Task CreateSessionOverTransportAsync_CleanupAndLoggingFail_PreservesOriginalCreationFailure()
+    {
+        var creationFailure = new InvalidOperationException("initialization failed");
+        var cleanupFailure = new IOException("cleanup failed");
+        var leaseId = $"cleanup-logging-failure-{Guid.NewGuid():N}";
+        var lease = await DeviceConnectionRegistry.AcquireConnectionAsync(leaseId, Ct);
+        var innerConnection = new RecordingConnection(ConnectionType.SmartCard)
+        {
+            DisposeAsyncException = cleanupFailure
+        };
+        var connection = new RegisteredSmartCardConnection(innerConnection, lease);
+        var device = new ProbeYubiKey().Returns(ConnectionType.SmartCard, connection);
+        var logger = new ThrowingLogger();
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            device.CreateSessionOverTransportAsync<object>(
+                ConnectionType.SmartCard,
+                (_, _) => Task.FromException<object>(creationFailure),
+                logger,
+                Ct));
+
+        Assert.Same(creationFailure, exception);
+        Assert.Equal(1, logger.LogCalls);
+        Assert.Equal(1, innerConnection.DisposeAsyncCalls);
         Assert.False(DeviceConnectionRegistry.IsInUse(leaseId));
     }
 
@@ -268,5 +297,25 @@ public class SessionTransportTests
 
         public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
+    }
+
+    private sealed class ThrowingLogger : ILogger
+    {
+        public int LogCalls { get; private set; }
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            LogCalls++;
+            throw new InvalidOperationException("logging failed");
+        }
     }
 }

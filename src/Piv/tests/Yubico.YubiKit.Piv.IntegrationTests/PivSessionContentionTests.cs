@@ -148,9 +148,11 @@ public class PivSessionContentionTests
             await using var second = await state.Device.ConnectAsync<ISmartCardConnection>();
         });
 
-        // Interface-scope acquisition knows the concrete member interface, not which applet/session holds it.
-        // Pin the non-empty PC/SC identity rather than accepting the constant word "SmartCard" as evidence.
-        Assert.Matches("(?i)'pcsc:[^']+'", exception.Message);
+        // A grouped connection claims every member in ordinal order, so the reported collision may be
+        // any held member of the physical key rather than the SmartCard route requested by this call.
+        Assert.Matches("(?i)held interface: '(?:pcsc|hid):[^']+'", exception.Message);
+        Assert.Contains("one live connection at a time across all interfaces", exception.Message,
+            StringComparison.Ordinal);
 
         // The refusal must be non-destructive: the victim keeps its verified-PIN state.
         var digest = SHA256.HashData("refused acquisition"u8);

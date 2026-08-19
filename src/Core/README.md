@@ -193,7 +193,7 @@ ApduResponse
 
 ### Concurrency
 
-- **Sessions/protocols refuse overlap.** SmartCard (APDU/SCP), FIDO HID, and OTP HID protocols admit one full logical exchange at a time. An overlapping operation throws immediately; an exchange already in flight runs to completion.
+- **Sessions/protocols refuse overlap.** SmartCard (APDU/SCP), FIDO HID, and OTP HID protocols admit one full logical exchange at a time. An overlapping operation on the same protocol instance throws immediately; an exchange already in flight runs to completion without caller cancellation so wire state cannot be stranded. Independently created raw protocol instances are not coordinated; the supported ownership contract admits one application session per connection.
 - **One connection per grouped physical key.** A connection atomically claims every known member interface ID before native open. Discovery skips claimed members, and a connect waits cancellably for active discovery. Conservative standalone records retain one-element scopes when grouping cannot be proven.
 - **One live session per connection.** A second session is refused before any wire operation. Sequential reuse is supported: dispose session A, then create session B over the same caller-owned connection.
 - **Connection ownership follows creation.** A direct `Session.CreateAsync(connection)` borrows the connection and does not dispose it. A `device.Create<App>SessionAsync()` convenience method owns its hidden connection and closes it with the returned session. Always use `await using`; leaking a caller-created connection can retain the physical-device lease and block later opens. There is no finalizer backstop.

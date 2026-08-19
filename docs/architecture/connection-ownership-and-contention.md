@@ -118,6 +118,12 @@ A token already canceled at entry throws before the guard is claimed. Once claim
 exchange receives `CancellationToken.None` and runs to completion so APDU chaining, CTAP/OTP frames,
 and SCP state cannot be stranded between constituent transmits. The guard resets in `finally`.
 
+The guard belongs to one protocol instance (the SCP wrapper shares its base PC/SC guard). Independently
+creating multiple raw protocol instances over one connection does not create a connection-wide guard;
+that lower-level usage is outside the one-application-session-per-connection ownership contract. After
+admission, liveness is bounded by the underlying native operation rather than caller cancellation. This is
+the deliberate tradeoff for never abandoning a stateful exchange halfway through its wire sequence.
+
 ## Platform notes
 
 - macOS FIDO opens remain non-seizing (`kIOHIDOptionsTypeNone`); the registry, not a platform seize

@@ -577,7 +577,7 @@ If you answered "no" to any of these, don't write the test.
 
 Minimal stack flow:
 ```bash
-gh stack init --base develop <branch>
+gh stack init          # bases on current branch by default
 gh stack add <branch>
 gh stack submit
 gh stack rebase && gh stack push && gh stack submit

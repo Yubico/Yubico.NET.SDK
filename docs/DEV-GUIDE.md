@@ -6,9 +6,9 @@
 - Unrelated work must start a **new stack**. Do not mix unrelated concerns into an existing stack or PR.
 - Keep every PR focused and independently reviewable: one purpose per PR, minimal diff, clear review boundary.
 
-Minimal flow (trunk is `develop`):
+Minimal flow:
 ```bash
-gh stack init --base develop <branch>
+gh stack init          # bases on current branch by default
 gh stack add <branch>
 gh stack submit
 gh stack rebase && gh stack push && gh stack submit

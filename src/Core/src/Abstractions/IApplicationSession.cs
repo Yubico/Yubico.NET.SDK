@@ -26,7 +26,8 @@ public interface IApplicationSession : IDisposable, IAsyncDisposable
     bool IsInitialized { get; }
 
     /// <summary>
-    ///     Gets a value indicating whether the session has established authentication.
+    ///     Gets a value indicating whether the session has established application-protocol authentication,
+    ///     such as SCP. Applet-specific authentication state is exposed by the respective session type.
     ///     Returns <c>false</c> once disposal begins.
     /// </summary>
     bool IsAuthenticated { get; }

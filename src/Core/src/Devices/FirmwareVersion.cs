@@ -14,6 +14,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Text.Unicode;
 using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Devices;
@@ -138,6 +139,9 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     /// </remarks>
     internal static FirmwareVersion? FromSelectResponse(ReadOnlySpan<byte> selectResponse)
     {
+        if (!Utf8.IsValid(selectResponse))
+            return null;
+
         string[] tokens = Encoding.UTF8.GetString(selectResponse)
             .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 

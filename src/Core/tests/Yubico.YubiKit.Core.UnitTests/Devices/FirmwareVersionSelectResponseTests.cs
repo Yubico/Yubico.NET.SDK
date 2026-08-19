@@ -51,4 +51,20 @@ public class FirmwareVersionSelectResponseTests
 
         Assert.Null(version);
     }
+
+    [Fact]
+    public void FromSelectResponse_InvalidUtf8PrefixBeforeValidVersion_ReturnsNull()
+    {
+        FirmwareVersion? version = FirmwareVersion.FromSelectResponse([0xff, .. " 5.7.2"u8]);
+
+        Assert.Null(version);
+    }
+
+    [Fact]
+    public void FromSelectResponse_InvalidUtf8SuffixAfterValidVersion_ReturnsNull()
+    {
+        FirmwareVersion? version = FirmwareVersion.FromSelectResponse([.. "5.7.2 "u8, 0xff]);
+
+        Assert.Null(version);
+    }
 }

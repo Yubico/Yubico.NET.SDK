@@ -35,6 +35,15 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// <summary>PIV management key type currently in use.</summary>
     PivManagementKeyType ManagementKeyType { get; }
 
+    /// <summary>
+    ///     Gets a value indicating whether the session has authenticated the PIV management key.
+    /// </summary>
+    /// <remarks>
+    ///     This is distinct from the inherited <see cref="IApplicationSession.IsAuthenticated"/>, which
+    ///     represents application-protocol authentication such as SCP. Returns <c>false</c> once disposal begins.
+    /// </remarks>
+    bool IsManagementKeyAuthenticated { get; }
+
     // Session management
 
     /// <summary>

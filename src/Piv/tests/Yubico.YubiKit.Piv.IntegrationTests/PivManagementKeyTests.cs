@@ -74,7 +74,7 @@ public class PivManagementKeyTests
 
             // New key should work
             await verification.AuthenticateAsync(newKey);
-            Assert.True(verification.IsAuthenticated);
+            Assert.True(verification.IsManagementKeyAuthenticated);
         }
         finally
         {
@@ -115,7 +115,7 @@ public class PivManagementKeyTests
             // Successive, not nested — see SetManagementKeyAsync_ChangesToNewKey.
             await using var verification = await state.Device.CreatePivSessionAsync();
             await verification.AuthenticateAsync(aes256Key);
-            Assert.True(verification.IsAuthenticated);
+            Assert.True(verification.IsManagementKeyAuthenticated);
         }
         finally
         {
@@ -154,7 +154,7 @@ public class PivManagementKeyTests
             // Successive, not nested — see SetManagementKeyAsync_ChangesToNewKey.
             await using var verification = await state.Device.CreatePivSessionAsync();
             await verification.AuthenticateAsync(aes128Key);
-            Assert.True(verification.IsAuthenticated);
+            Assert.True(verification.IsManagementKeyAuthenticated);
         }
         finally
         {
@@ -190,7 +190,7 @@ public class PivManagementKeyTests
             await session.SetManagementKeyAsync(PivManagementKeyType.Aes128, aes128Key);
 
             Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
-            Assert.True(session.IsAuthenticated);
+            Assert.True(session.IsManagementKeyAuthenticated);
 
             // Key generation is management-key privileged and proves SET left the new key
             // authenticated in this same physical card session without reauthentication.
@@ -202,12 +202,12 @@ public class PivManagementKeyTests
             var expectedResetType = state.FirmwareVersion >= new FirmwareVersion(5, 7, 0)
                 ? PivManagementKeyType.Aes192
                 : PivManagementKeyType.TripleDes;
-            Assert.False(session.IsAuthenticated);
+            Assert.False(session.IsManagementKeyAuthenticated);
             Assert.Equal(expectedResetType, session.ManagementKeyType);
             Assert.Equal(resetMetadata.KeyType, session.ManagementKeyType);
 
             await session.AuthenticateAsync(DefaultManagementKey);
-            Assert.True(session.IsAuthenticated);
+            Assert.True(session.IsManagementKeyAuthenticated);
         }
         finally
         {

@@ -119,6 +119,7 @@ public class ApplicationSessionDisposalTests
     {
         var connection = new TrackingConnection(pauseAsyncDisposal: true);
         var session = new ProbeSession(connection, ownsConnection: true);
+        session.SetInitializedAndAuthenticated();
 
         Task first = session.DisposeAsync().AsTask();
         Task? second = null;
@@ -129,6 +130,8 @@ public class ApplicationSessionDisposalTests
             second = session.DisposeAsync().AsTask();
 
             Assert.Throws<ObjectDisposedException>(session.AssertNotDisposed);
+            Assert.False(session.IsInitialized);
+            Assert.False(session.IsAuthenticated);
             Assert.False(first.IsCompleted);
             Assert.False(second.IsCompleted);
         }
@@ -181,6 +184,7 @@ public class ApplicationSessionDisposalTests
         var session = new ProbeSession(
             new TrackingConnection(),
             pauseAsyncBeforeBase: true);
+        session.SetInitializedAndAuthenticated();
 
         Task first = session.DisposeAsync().AsTask();
         Task? second = null;
@@ -191,6 +195,8 @@ public class ApplicationSessionDisposalTests
             second = session.DisposeAsync().AsTask();
 
             Assert.Throws<ObjectDisposedException>(session.AssertNotDisposed);
+            Assert.False(session.IsInitialized);
+            Assert.False(session.IsAuthenticated);
             Assert.False(first.IsCompleted);
             Assert.False(second.IsCompleted);
         }

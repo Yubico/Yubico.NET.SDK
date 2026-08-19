@@ -26,12 +26,15 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     // Guards reject calls that begin after disposal starts. Operations already in flight have no lifetime
     // admission lease and may complete, fail at a later guard, or race teardown.
     private int _disposalStarted;
+    private bool _isInitialized;
+    private bool _isAuthenticated;
     private bool _disposed;
     private int _released;
     private bool _ownsConnection;
 
     protected ILogger Logger { get; }
     protected IProtocol? Protocol { get; set; }
+    protected bool IsDisposalStarted => Volatile.Read(ref _disposalStarted) != 0;
 
     /// <summary>
     ///     The connection this session runs over. The session is a USER of it, not its owner: disposing the
@@ -40,8 +43,17 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     protected IConnection Connection { get; }
 
     public FirmwareVersion FirmwareVersion { get; protected set; } = new();
-    public bool IsInitialized { get; protected set; }
-    public bool IsAuthenticated { get; protected set; }
+    public bool IsInitialized
+    {
+        get => Volatile.Read(ref _disposalStarted) == 0 && _isInitialized;
+        protected set => _isInitialized = value;
+    }
+
+    public bool IsAuthenticated
+    {
+        get => Volatile.Read(ref _disposalStarted) == 0 && _isAuthenticated;
+        protected set => _isAuthenticated = value;
+    }
 
     /// <summary>
     ///     Records the connection this session will run over. Does NOT bind the session to it — see
@@ -203,16 +215,25 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 
     public void Dispose()
     {
-        Interlocked.Exchange(ref _disposalStarted, 1);
+        BeginDisposal();
         _disposalGate.Dispose(() => Dispose(disposing: true));
         GC.SuppressFinalize(this);
     }
 
     public async ValueTask DisposeAsync()
     {
-        Interlocked.Exchange(ref _disposalStarted, 1);
+        BeginDisposal();
         await _disposalGate.DisposeAsync(DisposeSessionAsync).ConfigureAwait(false);
         GC.SuppressFinalize(this);
+    }
+
+    private void BeginDisposal()
+    {
+        Interlocked.Exchange(ref _disposalStarted, 1);
+        // Clear the backing state as a teardown backstop. The public getters also observe
+        // _disposalStarted, so their result becomes false at the admission boundary.
+        IsAuthenticated = false;
+        IsInitialized = false;
     }
 
     private async ValueTask DisposeSessionAsync()

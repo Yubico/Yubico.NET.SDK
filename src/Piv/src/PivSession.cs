@@ -67,8 +67,11 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// <summary>
     /// Gets whether the session has been authenticated with the management key.
     /// </summary>
-    // TODO Disambiguate with IsAuthenticated
-    public new bool IsAuthenticated => _isAuthenticated;
+    /// <remarks>
+    /// This is distinct from <see cref="ApplicationSession.IsAuthenticated"/>, which reports
+    /// application-protocol authentication such as SCP. Returns <c>false</c> once disposal begins.
+    /// </remarks>
+    public bool IsManagementKeyAuthenticated => !IsDisposalStarted && Volatile.Read(ref _isAuthenticated);
 
     /// <summary>
     /// Gets or sets the callback invoked when a YubiKey operation may require physical touch.
@@ -280,7 +283,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         }
 
         // Reset authentication state
-        _isAuthenticated = false;
+        SetManagementKeyAuthenticationState(false);
 
         // RESET changed the physical applet even if the metadata refresh below fails. Establish a
         // conservative post-reset type before querying: only a non-sentinel >=5.7 version reliably
@@ -379,10 +382,10 @@ public sealed class PivSession : ApplicationSession, IPivSession
     {
         EnsureBackend();
 
-        _isAuthenticated = false;
+        SetManagementKeyAuthenticationState(false);
         await PivAuthenticationProtocol.AuthenticateAsync(_backend, Logger, ManagementKeyType, managementKey, cancellationToken)
             .ConfigureAwait(false);
-        _isAuthenticated = true;
+        SetManagementKeyAuthenticationState(true);
     }
 
     public async Task VerifyPinAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default)
@@ -745,7 +748,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         }
         catch (ApduException exception) when (exception.SW == SWConstants.SecurityStatusNotSatisfied)
         {
-            _isAuthenticated = false;
+            SetManagementKeyAuthenticationState(false);
             throw;
         }
     }
@@ -830,6 +833,15 @@ public sealed class PivSession : ApplicationSession, IPivSession
         if (!IsInitialized)
             throw new InvalidOperationException("Session is not initialized. Use PivSession.CreateAsync() to create a session.");
     }
+
+    protected override void Dispose(bool disposing)
+    {
+        SetManagementKeyAuthenticationState(false);
+        base.Dispose(disposing);
+    }
+
+    private void SetManagementKeyAuthenticationState(bool isAuthenticated) =>
+        Volatile.Write(ref _isAuthenticated, isAuthenticated);
 
     [MemberNotNull(nameof(_backend))]
     private void EnsureBackend()

@@ -49,6 +49,8 @@ finally
 
 `PivSession.DefaultManagementKey` exposes the well-known 24-byte default value used by both
 Triple-DES and AES-192 defaults. Use `session.ManagementKeyType` to select the algorithm.
+`session.IsManagementKeyAuthenticated` reports PIV management-key authentication; it is distinct
+from the inherited `IsAuthenticated`, which reports application-protocol authentication such as SCP.
 
 ### Generate a Key
 

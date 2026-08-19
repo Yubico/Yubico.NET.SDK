@@ -49,7 +49,7 @@ public class PivAuthenticationTests
 
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
-        Assert.True(session.IsAuthenticated);
+        Assert.True(session.IsManagementKeyAuthenticated);
     }
 
     [SkippableTheory]
@@ -66,7 +66,7 @@ public class PivAuthenticationTests
         await Assert.ThrowsAsync<ApduException>(
             () => session.AuthenticateAsync(wrongKey));
 
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
     }
 
     [SkippableTheory]

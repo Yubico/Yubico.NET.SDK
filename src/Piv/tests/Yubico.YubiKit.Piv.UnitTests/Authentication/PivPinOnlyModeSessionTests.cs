@@ -76,7 +76,7 @@ public class PivPinOnlyModeSessionTests
         // Represent a prior successful management-key authentication. The subsequent authentication
         // attempt runs through the real public-session and protocol flow using the queued APDU response.
         MarkAuthenticated(session);
-        Assert.True(session.IsAuthenticated);
+        Assert.True(session.IsManagementKeyAuthenticated);
         int initializationCommandCount = connection.TransmittedCommands.Count;
 
         var exception = await Assert.ThrowsAsync<ApduException>(() => session.SetPinOnlyModeAsync(
@@ -86,7 +86,7 @@ public class PivPinOnlyModeSessionTests
             TestContext.Current.CancellationToken));
 
         Assert.True(exception.SW == 0x6982);
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
 
         var operationCommands = connection.TransmittedCommands.Skip(initializationCommandCount).ToList();
         Assert.Single(operationCommands);
@@ -119,7 +119,7 @@ public class PivPinOnlyModeSessionTests
         var mode = await session.RecoverPinOnlyModeAsync("123456"u8.ToArray(), TestContext.Current.CancellationToken);
 
         Assert.Equal(PivPinOnlyMode.PinProtected, mode);
-        Assert.True(session.IsAuthenticated);
+        Assert.True(session.IsManagementKeyAuthenticated);
         Assert.Equal(3, connection.AuthenticationAttempts);
     }
 
@@ -132,7 +132,7 @@ public class PivPinOnlyModeSessionTests
         var mode = await session.RecoverPinOnlyModeAsync("123456"u8.ToArray(), TestContext.Current.CancellationToken);
 
         Assert.Equal(PivPinOnlyMode.None, mode);
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(3, connection.AuthenticationAttempts);
     }
 

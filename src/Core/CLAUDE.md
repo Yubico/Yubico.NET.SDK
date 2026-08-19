@@ -229,6 +229,10 @@ points that created a hidden connection call `OwnConnection()`. Whoever creates 
 connection/process lifetime and block later opens. There is no finalizer backstop. Dispose one session
 before creating the next session over the same connection; sequential reuse is supported.
 
+`IsInitialized` and `IsAuthenticated` become `false` when sync or async disposal is admitted, not
+only after teardown completes. `IsAuthenticated` describes application-protocol authentication (for
+example, SCP); applet-specific authentication is exposed by the concrete applet session.
+
 Prefer using `IsSupported(feature)` / `EnsureSupports(feature)` on `IApplicationSession` rather than duplicating firmware gates in each module.
 
 ## Test Infrastructure

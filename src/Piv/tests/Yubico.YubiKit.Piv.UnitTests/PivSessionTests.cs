@@ -101,6 +101,30 @@ public class PivSessionTests
     }
 
     [Fact]
+    public async Task DisposeAsync_AuthenticatedSession_ClearsManagementKeyAuthentication()
+    {
+        var connection = CreateInitializedConnection();
+        var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
+
+        await session.DisposeAsync();
+
+        Assert.False(session.IsManagementKeyAuthenticated);
+    }
+
+    [Fact]
+    public async Task ManagementKeyAuthenticationStateSetAfterDisposalAdmission_IsNotPublished()
+    {
+        var connection = CreateInitializedConnection();
+        var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.DisposeAsync();
+        MarkAuthenticated(session);
+
+        Assert.False(session.IsManagementKeyAuthenticated);
+    }
+
+    [Fact]
     public void DefaultManagementKey_Returns24ByteDefaultValue()
     {
         // Default PIV management key is 0x010203040506070801020304050607080102030405060708 (24 bytes)
@@ -398,7 +422,7 @@ public class PivSessionTests
         }
 
         Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
-        Assert.True(session.IsAuthenticated);
+        Assert.True(session.IsManagementKeyAuthenticated);
         Assert.Equal(0xFF, LastCommand(connection)[1]);
     }
 
@@ -423,7 +447,7 @@ public class PivSessionTests
         }
 
         Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
-        Assert.True(session.IsAuthenticated);
+        Assert.True(session.IsManagementKeyAuthenticated);
     }
 
     [Fact]
@@ -448,7 +472,7 @@ public class PivSessionTests
         }
 
         Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
     }
 
     [Fact]
@@ -471,7 +495,7 @@ public class PivSessionTests
             CryptographicOperations.ZeroMemory(managementKey);
         }
 
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
         Assert.Equal(0x87, LastCommand(connection)[1]);
     }
@@ -513,7 +537,7 @@ public class PivSessionTests
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
     }
 
@@ -533,7 +557,7 @@ public class PivSessionTests
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
     }
 
@@ -554,7 +578,7 @@ public class PivSessionTests
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
     }
 
@@ -580,7 +604,7 @@ public class PivSessionTests
             session.ResetAsync(TestContext.Current.CancellationToken));
 
         Assert.True(exception.SW == statusWord);
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
     }
 
@@ -600,7 +624,7 @@ public class PivSessionTests
 
         await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(TestContext.Current.CancellationToken));
 
-        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
     }
 

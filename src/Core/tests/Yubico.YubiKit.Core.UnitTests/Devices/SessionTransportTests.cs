@@ -106,6 +106,32 @@ public class SessionTransportTests
     }
 
     [Fact]
+    public async Task CreateSessionOverTransportAsync_CleanupFails_PreservesOriginalCreationFailure()
+    {
+        var creationFailure = new InvalidOperationException("initialization failed");
+        var cleanupFailure = new IOException("cleanup failed");
+        var leaseId = $"cleanup-failure-{Guid.NewGuid():N}";
+        var lease = await DeviceConnectionRegistry.AcquireConnectionAsync(leaseId, Ct);
+        var innerConnection = new RecordingConnection(ConnectionType.SmartCard)
+        {
+            DisposeAsyncException = cleanupFailure
+        };
+        var connection = new RegisteredSmartCardConnection(innerConnection, lease);
+        var device = new ProbeYubiKey().Returns(ConnectionType.SmartCard, connection);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            device.CreateSessionOverTransportAsync<object>(
+                ConnectionType.SmartCard,
+                (_, _) => Task.FromException<object>(creationFailure),
+                Ct));
+
+        Assert.Same(creationFailure, exception);
+        Assert.Equal(1, innerConnection.DisposeAsyncCalls);
+        Assert.True(innerConnection.Disposed);
+        Assert.False(DeviceConnectionRegistry.IsInUse(leaseId));
+    }
+
+    [Fact]
     public async Task CreateSessionOverTransportAsync_Succeeds_LeavesConnectionOwnedByResult()
     {
         var connection = new RecordingConnection(ConnectionType.HidOtp);
@@ -211,6 +237,8 @@ public class SessionTransportTests
     {
         public ConnectionType Type { get; } = type;
         public bool Disposed { get; private set; }
+        public int DisposeAsyncCalls { get; private set; }
+        public Exception? DisposeAsyncException { get; init; }
         public Transport Transport => Transport.Usb;
         public int PacketSize => 64;
         public int FeatureReportSize => 8;
@@ -220,6 +248,9 @@ public class SessionTransportTests
         public ValueTask DisposeAsync()
         {
             Disposed = true;
+            DisposeAsyncCalls++;
+            if (DisposeAsyncException is not null)
+                return ValueTask.FromException(DisposeAsyncException);
             return ValueTask.CompletedTask;
         }
 

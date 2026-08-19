@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Transports.Hid;
@@ -24,6 +25,8 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </summary>
 public static class YubiKeyConnectionExtensions
 {
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger(nameof(YubiKeyConnectionExtensions));
+
     /// <summary>
     ///     Returns the first connection in <paramref name="preferenceOrder" /> that this device supports, or
     ///     <see cref="ConnectionType.Unknown" /> when it supports none of them.
@@ -135,7 +138,8 @@ public static class YubiKeyConnectionExtensions
     /// <remarks>
     ///     No fallback is attempted. Connection and session-creation failures propagate unchanged. If opening
     ///     succeeds but <paramref name="createAsync" /> fails, the connection is disposed before the failure is
-    ///     rethrown.
+    ///     rethrown. If disposal also fails, that cleanup failure is logged and the original creation failure
+    ///     still propagates unchanged.
     /// </remarks>
     /// <param name="yubiKey">The physical device.</param>
     /// <param name="transport">The single concrete transport selected for the session.</param>
@@ -162,7 +166,17 @@ public static class YubiKeyConnectionExtensions
         }
         catch
         {
-            await connection.DisposeAsync().ConfigureAwait(false);
+            try
+            {
+                await connection.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception cleanupException)
+            {
+                Logger.LogWarning(
+                    cleanupException,
+                    "Failed to dispose {Transport} connection after session creation failed",
+                    transport);
+            }
             throw;
         }
     }

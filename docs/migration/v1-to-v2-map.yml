@@ -220,20 +220,23 @@ mappings:
       - yubikit:src/YubiOtp/src/IYubiKeyExtensions.cs
       - yubikit:src/Management/src/IYubiKeyExtensions.cs
       - yubikit:src/Piv/CLAUDE.md
-    notes: Every applet package exposes a Create{Applet}SessionAsync(...) extension method as the standard construction entry point, superseding manual ConnectAsync<TConnection>() plus direct session-constructor call sites shown in earlier session-pattern diffs. Underlying transport defaults, SCP key parameter handling, and connection disposal semantics still require manual review at each v1 call site.
-    last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
+    notes: Every applet package exposes a Create{Applet}SessionAsync(...) extension method as the standard construction entry point, superseding manual ConnectAsync<TConnection>() plus direct session-constructor call sites shown in earlier session-pattern diffs. Underlying transport defaults, SCP key parameter handling, and connection disposal semantics still require manual review at each v1 call site. PivSession was the last applet session with a public constructor; `refactor(piv)!: make the PivSession constructor internal` closed that gap, so every applet package now has this extension method as its only public construction entry point (BREAKING for any v1-to-v2 code calling `new PivSession(connection, scpKeyParams)` directly).
+    last_reviewed_commit: 9347ee29bb628d0904a968d70c9e06572d34a0d2
   - id: scp-protocol-construction
     status: assisted
     confidence: high
     migration_kind: construction
     v1: v1 secure channel setup that constructed an SCP-wrapped connection or applied SCP state to an existing connection object
-    v2: await smartCardProtocol.WithScpAsync(scpKeyParameters, cancellationToken)
+    v2: await yubiKey.CreateRawSmartCardSessionAsync(scpKeyParameters, firmwareVersion, protocolConfiguration, cancellationToken)
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Scp/SecurityDomainSession.cs
-      - yubikit:src/Core/src/Protocols/SmartCard/Scp/ScpExtensions.cs
       - yubikit:src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs
-    notes: The v2 SCP wrapper type Yubico.YubiKit.Core.Protocols.SmartCard.Scp.PcscProtocolScp is still public, but its constructor is internal and new PcscProtocolScp(...) is not a caller-facing pattern. Use the ISmartCardProtocol.WithScpAsync(...) extension method instead. The wrapper must adopt the exchange gate of the concrete PcscProtocol whose connection its SCP processor drives, so plain and encrypted traffic cannot interleave on the wire; WithScpAsync is what guarantees that pairing. Applet sessions normally reach this path through SCP key parameters passed to Create{Applet}SessionAsync(...) rather than wrapping a protocol by hand.
-    last_reviewed_commit: c14d73338a647b85c50e6ec6f8e361aad13374ab
+      - yubikit:src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs
+      - yubikit:src/Core/src/Protocols/ProtocolFactory.cs
+      - yubikit:src/Core/src/Devices/YubiKeyConnectionExtensions.cs
+      - yubikit:src/Core/src/Sessions/RawSmartCardSession.cs
+    notes: Superseded by `refactor(core): internalize protocol machinery`. ISmartCardProtocol, ProtocolFactory, and PcscProtocolScp are now all internal implementation machinery; PcscProtocolScp is no longer a public type and ISmartCardProtocol.WithScpAsync(...) is no longer a caller-facing extension method. The supported advanced-caller path is the public RawSmartCardSession, constructed via the IYubiKey.CreateRawSmartCardSessionAsync(scpKeyParameters, firmwareVersion, protocolConfiguration, cancellationToken) extension method, which reuses Core's SCP processor and exchange guard so plain and encrypted traffic cannot interleave on the wire. Applet sessions still normally reach SCP through key parameters passed to Create{Applet}SessionAsync(...) rather than any protocol- or raw-session-level API. See Raw Access Tiers (docs/architecture/raw-access-tiers.md), which already documents this in v1-to-v2.md.
+    last_reviewed_commit: 9347ee29bb628d0904a968d70c9e06572d34a0d2
   - id: recipe-device-discovery-find-by-transport
     status: assisted
     confidence: high

@@ -56,3 +56,8 @@
 - Reinforced the `session-creation-extension-methods` map entry: `refactor(piv)!: make the PivSession constructor internal` (e03d01bb) closed the one remaining gap where an applet session (`PivSession`) still had a public constructor, so `Create{Applet}SessionAsync(...)` is now the only public construction entry point across every applet package. `v1-to-v2.md`'s existing PIV recipes already showed `CreatePivSessionAsync(...)` rather than `new PivSession(...)`, so no guide prose changes were needed.
 - No new Common Migration Recipes were added; both updates reused existing, precise map entries per the anti-hallucination reuse rule rather than adding new ones for the same construction pattern.
 - Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `9347ee29bb628d0904a968d70c9e06572d34a0d2`.
+
+## 2026-08-20 - No migration impact
+
+- Analyzed range `9347ee29bb628d0904a968d70c9e06572d34a0d2..HEAD`; no migration-relevant source, package, namespace, or project-shape changes were found.
+- Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `5d22b610f09ae99f82c1071a2550f1a221ea46d0`.

@@ -10,7 +10,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: architecture-docs-yubikit
+  group: docs-yubikit
   cancel-in-progress: false
 
 jobs:

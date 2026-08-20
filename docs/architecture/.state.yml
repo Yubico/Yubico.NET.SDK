@@ -5,4 +5,4 @@ v2_branch: yubikit
 # docs-architecture is green. No-impact ranges do not advance the watermark or
 # open state-only PRs. NOT advanced when render fails or a finding is
 # manual-review; see .github/prompts/architecture-docs-post-merge.md.
-last_analyzed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+last_analyzed_commit: 9347ee29bb628d0904a968d70c9e06572d34a0d2

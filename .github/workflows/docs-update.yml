@@ -1,0 +1,312 @@
+name: Documentation Update
+
+on:
+  workflow_call:
+    inputs:
+      migration_reconciliation:
+        type: boolean
+        default: false
+  push:
+    branches: [ yubikit ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: docs-yubikit
+  cancel-in-progress: false
+
+jobs:
+  migration:
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.patch.outputs.has_changes }}
+    steps:
+      - name: Check out yubikit
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+          ref: yubikit
+      - name: Fetch migration baselines
+        run: |
+          git fetch origin +refs/heads/develop:refs/remotes/origin/develop
+          git fetch origin +refs/heads/yubikit:refs/remotes/origin/yubikit
+      - name: Resolve migration range
+        id: range
+        shell: bash
+        run: |
+          if [[ '${{ inputs.migration_reconciliation }}' == 'true' ]]; then
+            echo "base_range=origin/develop..HEAD" >> "$GITHUB_OUTPUT"
+            echo "Using full migration reconciliation range."
+          else
+            state_path='docs/migration/.state.yml'
+            last="$(sed -n 's/^last_analyzed_commit:[[:space:]]*//p' "$state_path" | head -n 1)"
+            [[ -n "$last" ]] || last='origin/yubikit^'
+            echo "base_range=$last..HEAD" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build migration context
+        shell: bash
+        run: |
+          bash ./scripts/migration/build-migration-context.sh \
+            --mode update --v1-baseline origin/develop --v2-branch origin/yubikit \
+            --base-range '${{ steps.range.outputs.base_range }}' --output-dir .migration-context
+      - name: Classify migration impact
+        id: impact
+        shell: bash
+        run: |
+          has_migration_impact=false
+          if [[ -s .migration-context/changed-files.txt ]]; then
+            while IFS= read -r path; do
+              case "$path" in
+                src/*|*.sln|*.slnx|Directory.Build.props|Directory.Build.targets|Directory.Packages.props|NuGet.config|global.json)
+                  has_migration_impact=true
+                  break
+                  ;;
+              esac
+            done < .migration-context/changed-files.txt
+            echo "has_range=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_range=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "has_migration_impact=$has_migration_impact" >> "$GITHUB_OUTPUT"
+      - name: Install Claude Code
+        if: ${{ steps.impact.outputs.has_migration_impact == 'true' }}
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash -s 2.1.199
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Update migration documentation
+        if: ${{ steps.impact.outputs.has_migration_impact == 'true' }}
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          printf '%s\n' \
+            'Read and follow `.github/prompts/migration-docs-post-merge.md`.' \
+            'The generated context is in `.migration-context/`.' \
+            'Update only the allowed migration documentation files.' \
+            | "$HOME/.local/bin/claude" -p --model sonnet --allowedTools Read,Grep,Glob,Edit,Write
+      - name: Record no-impact migration analysis
+        if: ${{ steps.impact.outputs.has_range == 'true' && steps.impact.outputs.has_migration_impact != 'true' }}
+        shell: bash
+        run: |
+          head_sha="$(git rev-parse HEAD)"
+          tmp="$(mktemp)"
+          awk -v sha="$head_sha" 'BEGIN{done=0} /^last_analyzed_commit:/ {print "last_analyzed_commit: " sha; done=1; next} {print} END{if(done==0) print "last_analyzed_commit: " sha}' docs/migration/.state.yml > "$tmp"
+          mv "$tmp" docs/migration/.state.yml
+          {
+            printf '\n## %s - No migration impact\n\n' "$(date -u +%F)"
+            printf '%s\n' "- Analyzed range \`${{ steps.range.outputs.base_range }}\`; no migration-relevant source, package, namespace, or project-shape changes were found."
+            printf '%s\n' "- Advanced \`docs/migration/.state.yml\` \`last_analyzed_commit\` to \`$head_sha\`."
+          } >> docs/migration/v1-to-v2-changelog.md
+      - name: Enforce migration-only edits
+        if: ${{ steps.impact.outputs.has_range == 'true' }}
+        shell: bash
+        run: |
+          outside="$(git status --porcelain --untracked-files=all | while IFS= read -r line; do
+            path="${line#???}"
+            case "$path" in
+              docs/migration/v1-to-v2.md|docs/migration/v1-to-v2-map.yml|docs/migration/v1-to-v2-changelog.md|docs/migration/.state.yml|.migration-context/*) ;;
+              *) printf '%s\n' "$path" ;;
+            esac
+          done)"
+          if [[ -n "$outside" ]]; then
+            echo "Migration docs automation edited files outside its allowed artifacts:" >&2
+            printf '%s\n' "$outside" >&2
+            exit 1
+          fi
+      - name: Set up .NET SDK
+        if: ${{ steps.impact.outputs.has_range == 'true' }}
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+      - name: Validate migration documentation
+        if: ${{ steps.impact.outputs.has_range == 'true' }}
+        run: dotnet toolchain.cs -- docs-qa
+      - name: Create migration patch
+        id: patch
+        if: ${{ steps.impact.outputs.has_range == 'true' }}
+        shell: bash
+        run: |
+          git add -N docs/migration
+          git diff --binary -- docs/migration > migration.patch
+          echo "has_changes=$([[ -s migration.patch ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - name: Upload migration patch
+        if: ${{ steps.patch.outputs.has_changes == 'true' }}
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: migration-docs-patch
+          path: migration.patch
+          if-no-files-found: error
+
+  architecture:
+    needs: migration
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.patch.outputs.has_changes }}
+    steps:
+      - name: Check out yubikit
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+          ref: yubikit
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+      - name: Install pinned Mermaid CLI
+        shell: bash
+        run: |
+          version="$(sed -n 's/^MERMAID_CLI_VERSION="\(.*\)"/\1/p' scripts/architecture/architecture-images.env | head -n 1)"
+          npm install -g "@mermaid-js/mermaid-cli@$version"
+          bash scripts/architecture/render-architecture.sh --check
+      - name: Fetch architecture baseline
+        run: git fetch origin +refs/heads/yubikit:refs/remotes/origin/yubikit
+      - name: Resolve architecture range
+        id: range
+        shell: bash
+        run: |
+          state_path='docs/architecture/.state.yml'
+          last="$(sed -n 's/^last_analyzed_commit:[[:space:]]*//p' "$state_path" | head -n 1)"
+          [[ -n "$last" && "$last" != "unset" ]] || last='origin/yubikit^'
+          echo "base_range=$last..HEAD" >> "$GITHUB_OUTPUT"
+      - name: Build architecture context
+        shell: bash
+        run: |
+          bash ./scripts/architecture/build-architecture-context.sh \
+            --mode update --v2-branch origin/yubikit \
+            --base-range '${{ steps.range.outputs.base_range }}' --output-dir .architecture-context
+      - name: Check architecture impact
+        id: impact
+        shell: bash
+        run: |
+          echo "has_affected=$([[ -s .architecture-context/affected-diagrams.txt ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - name: Install Claude Code
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash -s 2.1.199
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Update architecture documentation
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          printf '%s\n' \
+            'Read and follow `.github/prompts/architecture-docs-post-merge.md`.' \
+            'The generated context is in `.architecture-context/`.' \
+            'Update only the allowed architecture documentation files.' \
+            | "$HOME/.local/bin/claude" -p --model sonnet --allowedTools Read,Grep,Glob,Edit,Write,Bash
+      - name: Enforce architecture-only edits
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        shell: bash
+        run: |
+          if ! git diff --quiet -- docs/architecture/.state.yml; then
+            echo "Architecture docs automation must not edit docs/architecture/.state.yml directly; the workflow owns the watermark." >&2
+            exit 1
+          fi
+          outside="$(git status --porcelain --untracked-files=all | while IFS= read -r line; do path="${line#???}"; case "$path" in docs/architecture/*|.architecture-context/*) ;; *) printf '%s\n' "$path" ;; esac; done)"
+          if [[ -n "$outside" ]]; then
+            echo "Architecture docs automation edited files outside docs/architecture:" >&2
+            printf '%s\n' "$outside" >&2
+            exit 1
+          fi
+      - name: Render architecture images
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        shell: bash
+        run: |
+          if git diff --quiet -- docs/architecture/sdk-architecture-diagrams.md; then
+            echo "No Mermaid source changes; skipping render."
+          else
+            bash scripts/architecture/render-architecture.sh
+          fi
+      - name: Validate architecture documentation
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        run: dotnet toolchain.cs -- docs-architecture
+      - name: Advance architecture watermark
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        shell: bash
+        run: |
+          if grep -R -q --include='*.md' --include='*.yml' --exclude='architecture-docs-automation.md' 'MANUAL-REVIEW' docs/architecture 2>/dev/null; then
+            echo "MANUAL-REVIEW marker present; leaving docs/architecture/.state.yml unchanged."
+            exit 0
+          fi
+          head_sha="$(sed -n 's/^head_sha:[[:space:]]*//p' .architecture-context/state.txt | head -n 1)"
+          [[ -n "$head_sha" ]] || { echo "Could not resolve head_sha from .architecture-context/state.txt" >&2; exit 1; }
+          tmp="$(mktemp)"
+          awk -v sha="$head_sha" 'BEGIN{done=0} /^last_analyzed_commit:/ {print "last_analyzed_commit: " sha; done=1; next} {print} END{if(done==0) print "last_analyzed_commit: " sha}' docs/architecture/.state.yml > "$tmp"
+          mv "$tmp" docs/architecture/.state.yml
+      - name: Create architecture patch
+        id: patch
+        if: ${{ steps.impact.outputs.has_affected == 'true' }}
+        shell: bash
+        run: |
+          git add -N docs/architecture
+          git diff --binary -- docs/architecture > architecture.patch
+          echo "has_changes=$([[ -s architecture.patch ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - name: Upload architecture patch
+        if: ${{ steps.patch.outputs.has_changes == 'true' }}
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: architecture-docs-patch
+          path: architecture.patch
+          if-no-files-found: error
+
+  create-pr:
+    needs: [ migration, architecture ]
+    if: ${{ always() && needs.migration.result == 'success' && needs.architecture.result == 'success' && (needs.migration.outputs.has_changes == 'true' || needs.architecture.outputs.has_changes == 'true') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out yubikit
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+          ref: yubikit
+      - name: Download migration patch
+        if: ${{ needs.migration.outputs.has_changes == 'true' }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: migration-docs-patch
+          path: patches/migration
+      - name: Download architecture patch
+        if: ${{ needs.architecture.outputs.has_changes == 'true' }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: architecture-docs-patch
+          path: patches/architecture
+      - name: Apply documentation patches
+        shell: bash
+        run: |
+          for patch in patches/*/*.patch; do
+            [[ -e "$patch" ]] || continue
+            git apply --check --whitespace=error "$patch"
+            git apply --whitespace=error "$patch"
+          done
+          outside="$(git status --porcelain --untracked-files=all | while IFS= read -r line; do
+            path="${line#???}"
+            case "$path" in docs/migration/*|docs/architecture/*) ;; *) printf '%s\n' "$path" ;; esac
+          done)"
+          if [[ -n "$outside" ]]; then
+            echo "Documentation patches contain paths outside docs/migration and docs/architecture:" >&2
+            printf '%s\n' "$outside" >&2
+            exit 1
+          fi
+          git diff --check
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+      - name: Validate documentation
+        run: |
+          dotnet toolchain.cs -- docs-qa
+          dotnet toolchain.cs -- docs-architecture
+      - name: Create documentation PR
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        with:
+          branch: automation/docs-update
+          base: yubikit
+          title: Update generated documentation
+          commit-message: "docs: update generated documentation"
+          body: Automated migration and architecture documentation update.
+          add-paths: |
+            docs/migration/
+            docs/architecture/

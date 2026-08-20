@@ -12,7 +12,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: migration-docs-monthly-synthesis
+  group: docs-yubikit
   cancel-in-progress: false
 
 jobs:

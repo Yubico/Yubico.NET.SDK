@@ -283,7 +283,7 @@ jobs:
           done
           outside="$(git status --porcelain --untracked-files=all | while IFS= read -r line; do
             path="${line#???}"
-            case "$path" in docs/migration/*|docs/architecture/*) ;; *) printf '%s\n' "$path" ;; esac
+            case "$path" in docs/migration/*|docs/architecture/*|patches/*) ;; *) printf '%s\n' "$path" ;; esac
           done)"
           if [[ -n "$outside" ]]; then
             echo "Documentation patches contain paths outside docs/migration and docs/architecture:" >&2

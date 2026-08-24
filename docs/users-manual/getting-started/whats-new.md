@@ -18,6 +18,20 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.17.x Releases
 
+### 1.17.3
+
+Release date: August 24th, 2026
+
+Documentation:
+
+- Documentation has been updated to include a link to the v2 alpha release. ([#549](https://github.com/Yubico/Yubico.NET.SDK/pull/549))
+
+Dependencies:
+
+- Several dependencies across the project and GitHub Actions workflows have been updated to newer versions. ([#551](https://github.com/Yubico/Yubico.NET.SDK/pull/551), [#563](https://github.com/Yubico/Yubico.NET.SDK/pull/563), [#564](https://github.com/Yubico/Yubico.NET.SDK/pull/564))
+
+_________
+
 ### 1.17.2
 
 Release date: July 31st, 2026

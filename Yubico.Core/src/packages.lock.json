@@ -132,8 +132,8 @@
       "Yubico.NativeShims": {
         "type": "Direct",
         "requested": "[1.*-*, )",
-        "resolved": "1.16.1",
-        "contentHash": "odGky7RVjFwP+UfHIpk/XpREauuNhp3JjYbDXnDBg4ufnYE8CL+PLuN40IBhUwPCoxB1lhyxx0rt/CDuI3w4OA=="
+        "resolved": "1.17.2",
+        "contentHash": "i4qegUELIJKW7FrXPDFQnB2giJg4cUk1q4bAUOn32X0NGsNNyQxsTQI9xRI8gv2ma1hWo1oexDIevr1MRYuNtA=="
       },
       "Microsoft.Build.Tasks.Git": {
         "type": "Transitive",
@@ -494,8 +494,8 @@
       "Yubico.NativeShims": {
         "type": "Direct",
         "requested": "[1.*-*, )",
-        "resolved": "1.16.1",
-        "contentHash": "odGky7RVjFwP+UfHIpk/XpREauuNhp3JjYbDXnDBg4ufnYE8CL+PLuN40IBhUwPCoxB1lhyxx0rt/CDuI3w4OA=="
+        "resolved": "1.17.2",
+        "contentHash": "i4qegUELIJKW7FrXPDFQnB2giJg4cUk1q4bAUOn32X0NGsNNyQxsTQI9xRI8gv2ma1hWo1oexDIevr1MRYuNtA=="
       },
       "Microsoft.Build.Tasks.Git": {
         "type": "Transitive",
@@ -836,8 +836,8 @@
       "Yubico.NativeShims": {
         "type": "Direct",
         "requested": "[1.*-*, )",
-        "resolved": "1.16.1",
-        "contentHash": "odGky7RVjFwP+UfHIpk/XpREauuNhp3JjYbDXnDBg4ufnYE8CL+PLuN40IBhUwPCoxB1lhyxx0rt/CDuI3w4OA=="
+        "resolved": "1.17.2",
+        "contentHash": "i4qegUELIJKW7FrXPDFQnB2giJg4cUk1q4bAUOn32X0NGsNNyQxsTQI9xRI8gv2ma1hWo1oexDIevr1MRYuNtA=="
       },
       "Microsoft.Build.Tasks.Git": {
         "type": "Transitive",

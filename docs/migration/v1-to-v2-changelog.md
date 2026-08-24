@@ -66,3 +66,8 @@
 
 - Analyzed range `5d22b610f09ae99f82c1071a2550f1a221ea46d0..HEAD`; no migration-relevant source, package, namespace, or project-shape changes were found.
 - Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `2bc278899bbab87cc12793a4e9727c6e0622ad67`.
+
+## 2026-08-24 - No migration impact
+
+- Analyzed range `2bc278899bbab87cc12793a4e9727c6e0622ad67..HEAD`; no migration-relevant source, package, namespace, or project-shape changes were found.
+- Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `6608d9bc51748d9cdb771dafbae445bc8a9d82cf`.

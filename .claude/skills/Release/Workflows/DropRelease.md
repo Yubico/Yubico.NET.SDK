@@ -46,7 +46,7 @@ The state file is the single source of truth for resume. Update it before any op
 4. `AskUserQuestion`: "Confirm release version" — default option is `+1 patch` of `previousTag` (e.g., `1.16.0` → `1.16.1`); also offer `+1 minor`, `+1 major`, custom
 5. `AskUserQuestion`: "Release date" — default today (in `Month Dth, YYYY` format matching whats-new.md style)
 6. **Hardware test reminder** — print: "Before continuing, confirm you've tested PIV + SCP on real YubiKey hardware. The skill cannot do this for you." Gate with `AskUserQuestion`: "Hardware tests pass?" / "Skip (not recommended)"
-7. **Code-signing YubiKey safety gate** — `AskUserQuestion`: "⚠️ IMPORTANT: Your code-signing YubiKey must be UNPLUGGED from this machine during phases 1–4. Integration tests that enumerate YubiKeys can run PIV/PGP resets against any connected key. Only plug it back in when Phase 5 (sign+publish) explicitly asks for it — signtool and nuget-sign read the PIV certificate safely, but no other YubiKey operation should touch the key. Is the code-signing YubiKey unplugged?" Options: "Yes, it's unplugged" / "Let me unplug it now". If the operator needs to unplug, wait for confirmation before proceeding.
+7. **Code-signing YubiKey safety gate** — `AskUserQuestion`: "⚠️ IMPORTANT: Your code-signing YubiKey must be UNPLUGGED from this machine during phases 1–4. Integration tests that enumerate YubiKeys can run PIV/PGP resets against any connected key. Only plug it back in when Phase 5 (sign+publish) explicitly asks for it — the .NET Sign CLI reads the PIV certificate safely, but no other YubiKey operation should touch the key. Is the code-signing YubiKey unplugged?" Options: "Yes, it's unplugged" / "Let me unplug it now". If the operator needs to unplug, wait for confirmation before proceeding.
 8. Create `~/Releases/<version>/` and write initial `.state.json`
 
 ## Phase 2 — NativeShims gate (cross-platform, conditional)
@@ -236,9 +236,9 @@ Exit cleanly. Do NOT mark phase 5 complete.
 
 **5a. Pre-flight asserts** (each is a hard gate; on failure print fix instructions and stop):
 - `gh auth status` — authenticated with `repo` + `workflow` scope
-- `Get-Command signtool.exe` (PowerShell) — resolvable
-- `Get-Command nuget.exe` — resolvable
-- `$env:YUBICO_SIGNING_THUMBPRINT` — set; if not, AskUserQuestion to provide and persist for session
+- Sign CLI resolvable — `Get-Command sign` (the dotnet tool, `dotnet tool install --global sign --prerelease`). NOTE: the repo's `build/sign.ps1` shim can shadow it on PATH; if so, pass the tool executable via `-SignCliPath` to `Invoke-NuGetPackageSigningV2`.
+- `Get-Command nuget.exe` — resolvable (still used by the publish step)
+- `$env:YUBICO_SIGNING_SHA256_FINGERPRINT` — set (the **SHA-256** cert fingerprint, 64 hex, NOT the SHA-1 thumbprint); if not, AskUserQuestion to provide and persist for session. Derive from the cert: `[BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash((Get-ChildItem Cert:\CurrentUser\My | Where-Object Subject -match 'Yubico').RawData)).Replace('-','')`
 - YubiKey presence — best-effort: `Get-PnpDevice -Class SmartCard | Where-Object Status -eq 'OK'`. If empty, prompt: "No smart card detected — is YubiKey plugged in?"
 
 **5b. Staging**:
@@ -278,17 +278,17 @@ Never echo the API key. Never persist it to the state file.
    $outFile = "$staging\nativeshims\NativeShims-Package.zip"
    gh api "repos/Yubico/Yubico.NET.SDK/actions/artifacts/$($nsArtifact.id)/zip" > $outFile
    ```
-   **WARNING**: NEVER name a zip `*.nupkg.zip` — `GetFileNameWithoutExtension` produces a name ending in `.nupkg` which collides with `Get-ChildItem -Filter "*.nupkg"` inside sign.ps1.
+   **WARNING**: NEVER name a zip `*.nupkg.zip` — `GetFileNameWithoutExtension` produces a name ending in `.nupkg` which collides with `Get-ChildItem -Filter "*.nupkg"` inside sign-v2.ps1.
 2. Verify zip exists and is non-empty: `(Get-Item $outFile).Length -gt 0`
 3. Sign:
    ```powershell
-   . ./build/sign.ps1
-   Invoke-NuGetPackageSigning `
-     -Thumbprint $env:YUBICO_SIGNING_THUMBPRINT `
+   . ./build/sign-v2.ps1
+   Invoke-NuGetPackageSigningV2 `
+     -Fingerprint $env:YUBICO_SIGNING_SHA256_FINGERPRINT `
      -WorkingDirectory "$staging\nativeshims" `
      -NativeShimsZip "NativeShims-Package.zip"
    ```
-   YubiKey PIN prompt will surface; tell the operator to enter it.
+   YubiKey PIN prompt will surface once; tell the operator to enter it.
 4. Verify: `Get-ChildItem "$staging\nativeshims\signed\packages\*.nupkg"` non-empty.
 5. Publish:
    ```powershell
@@ -315,8 +315,9 @@ Never echo the API key. Never persist it to the state file.
    Verify both zips exist and are non-empty.
 2. Sign:
    ```powershell
-   Invoke-NuGetPackageSigning `
-     -Thumbprint $env:YUBICO_SIGNING_THUMBPRINT `
+   . ./build/sign-v2.ps1
+   Invoke-NuGetPackageSigningV2 `
+     -Fingerprint $env:YUBICO_SIGNING_SHA256_FINGERPRINT `
      -WorkingDirectory "$staging\core" `
      -NuGetPackagesZip "Nuget-Packages.zip" `
      -SymbolsPackagesZip "Symbols-Packages.zip"

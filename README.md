@@ -23,6 +23,13 @@ limitations under the License. -->
 
 Enterprise-grade cross-platform SDK for YubiKey integration, built on .NET.
 
+> **👀 A ground-up v2 is in the works.** We're building the next major version of
+> this SDK from scratch — a modern, type-safe API surface with first-class async,
+> spanning PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, Security Domain, and
+> YubiHSM Auth. It's an early **alpha** on the [`yubikit`](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit)
+> branch — not production-ready and pending a formal security review — but you can
+> try it today and help shape it. See the [alpha feed & preview](https://yubico.github.io/Yubico.NET.SDK/).
+
 ## Table of Contents
 - [.NET YubiKey SDK](#net-yubikey-sdk)
   - [Table of Contents](#table-of-contents)

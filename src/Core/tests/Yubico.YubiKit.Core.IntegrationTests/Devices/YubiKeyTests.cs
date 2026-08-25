@@ -66,13 +66,22 @@ public class YubiKeyTests : IAsyncLifetime
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
-        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
-
-        await foreach (var deviceEvent in YubiKeyManager.WatchAsync(cts.Token))
+        // Enumerate first: WatchAsync subscribes on the first MoveNextAsync, so starting the
+        // monitor beforehand could let the initial rescan's events land before anyone is listening.
+        var events = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
+        await using (events.ConfigureAwait(false))
         {
-            if (deviceEvent.Action == action)
+            var pending = events.MoveNextAsync();
+            YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
+
+            while (await pending)
             {
-                return deviceEvent;
+                if (events.Current.Action == action)
+                {
+                    return events.Current;
+                }
+
+                pending = events.MoveNextAsync();
             }
         }
 

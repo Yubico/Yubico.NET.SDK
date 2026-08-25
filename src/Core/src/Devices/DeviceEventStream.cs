@@ -77,12 +77,21 @@ internal static class DeviceEventStream
     /// </para>
     /// <para>The stream ends normally, without an exception, if the source completes.</para>
     /// </remarks>
-    internal static async IAsyncEnumerable<DeviceEvent> From(
+    internal static IAsyncEnumerable<DeviceEvent> From(
         IObservable<DeviceEvent> source,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
+        // Validated here rather than in the iterator below: an async iterator body does not run
+        // until first enumeration, which would defer the guard past the call that caused it.
         ArgumentNullException.ThrowIfNull(source);
 
+        return Iterate(source, cancellationToken);
+    }
+
+    private static async IAsyncEnumerable<DeviceEvent> Iterate(
+        IObservable<DeviceEvent> source,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
         var channel = Channel.CreateBounded<DeviceEvent>(
             new BoundedChannelOptions(BufferCapacity)
             {
@@ -116,19 +125,26 @@ internal static class DeviceEventStream
                 return;
             }
 
-            // Terminating a consumer's stream is a unilateral, hard-to-reproduce action, so it is
-            // logged as well as surfaced - otherwise "my app stopped seeing insertions" leaves no trace.
-            Logger.LogWarning(
-                "Device event stream overflowed its {Capacity}-event buffer; terminating that watcher. " +
-                "The consumer is not draining events fast enough.",
-                BufferCapacity);
-
-            // Deliberately does not throw: that would propagate into Publish and deny the event to
-            // other subscribers. Instead only this consumer's stream is faulted.
-            _ = writer.TryComplete(new InvalidOperationException(
+            // TryWrite also returns false for an ALREADY-COMPLETED channel, not just a full one, so
+            // the completion attempt is what distinguishes the two. Only a write that actually
+            // terminates the stream is a genuine overflow; otherwise this is a late event arriving
+            // after normal completion, or a repeat during the window before the consumer drains the
+            // buffer and observes the fault. Logging unconditionally here would emit a false
+            // "consumer too slow" warning on ordinary shutdown, and repeat it once per event.
+            var faulted = writer.TryComplete(new InvalidOperationException(
                 $"The device event stream fell more than {BufferCapacity} events behind and was " +
                 "terminated to avoid silently dropping events. Re-enumerate and resynchronise the " +
                 "device list via YubiKeyManager.FindAllAsync."));
+
+            if (faulted)
+            {
+                // Terminating a consumer's stream is a unilateral, hard-to-reproduce action, so it is
+                // logged as well as surfaced - otherwise "my app stopped seeing insertions" leaves no trace.
+                Logger.LogWarning(
+                    "Device event stream overflowed its {Capacity}-event buffer; terminating that watcher. " +
+                    "The consumer is not draining events fast enough.",
+                    BufferCapacity);
+            }
         }
 
         public void OnCompleted() => _ = writer.TryComplete();

@@ -24,7 +24,6 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <para><strong>Simple Device Discovery:</strong></para>
 /// <code>
 /// using System;
-/// using System.Reactive.Linq;
 /// using Yubico.YubiKit.Core;
 /// using Yubico.YubiKit.Core.Devices;
 ///
@@ -40,14 +39,21 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </code>
 /// <para><strong>Device Monitoring:</strong></para>
 /// <code>
-/// using var subscription = YubiKeyManager.DeviceChanges.Subscribe(e =>
+/// using var cts = new CancellationTokenSource();
+/// YubiKeyManager.StartMonitoring();
+///
+/// await foreach (var e in YubiKeyManager.WatchAsync(cts.Token))
 /// {
 ///     Console.WriteLine($"{e.Action}: {e.Device.DeviceId} ({e.Device.AvailableConnections})");
-/// });
-/// YubiKeyManager.StartMonitoring();
-/// // ... application runs ...
-/// await YubiKeyManager.ShutdownAsync();
+/// }
 /// </code>
+/// <para>
+/// <see cref="DeviceChanges"/> exposes the same events as an <see cref="IObservable{T}"/> for
+/// consumers who prefer that model. Note the SDK itself has no reactive dependency: the
+/// <c>Subscribe(Action&lt;T&gt;)</c> overload and operators such as <c>Where</c> or <c>ObserveOn</c>
+/// come from the <c>System.Reactive</c> package, which a consumer must reference explicitly. Without
+/// it, <see cref="IObservable{T}"/> offers only <c>Subscribe(IObserver&lt;DeviceEvent&gt;)</c>.
+/// </para>
 /// </example>
 public static class YubiKeyManager
 {

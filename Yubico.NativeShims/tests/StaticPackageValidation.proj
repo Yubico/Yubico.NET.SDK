@@ -11,6 +11,13 @@
 
     <Target Name="SetupOSSpecificProps" />
 
+    <Target Name="_ResolveCopyLocalAssetsForPublish">
+        <ItemGroup>
+            <_ResolvedCopyLocalPublishAssets Include="$(FakeSidecar)" />
+            <_ResolvedCopyLocalPublishAssets Include="$(FakeOtherAsset)" />
+        </ItemGroup>
+    </Target>
+
     <Target Name="Validate" DependsOnTargets="SetupOSSpecificProps">
         <Error Condition="'@(DirectPInvoke)' != 'Yubico.NativeShims'"
                Text="Expected one DirectPInvoke item for Yubico.NativeShims, got '@(DirectPInvoke)'." />
@@ -23,5 +30,10 @@
     <Target Name="ValidateNonAot">
         <Error Condition="'@(DirectPInvoke)' != '' OR '@(NativeLibrary)' != '' OR '@(LinkerArg)' != ''"
                Text="Native AOT items must not be added when PublishAot is false." />
+    </Target>
+
+    <Target Name="ValidatePublishAssets" DependsOnTargets="_ResolveCopyLocalAssetsForPublish">
+        <Error Condition="'@(_ResolvedCopyLocalPublishAssets)' != '$(FakeOtherAsset)'"
+               Text="Expected only '$(FakeOtherAsset)' to remain, got '@(_ResolvedCopyLocalPublishAssets)'." />
     </Target>
 </Project>

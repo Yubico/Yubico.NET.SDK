@@ -56,6 +56,16 @@ validate_rid linux-arm64 libYubico.NativeShims.a
 validate_rid osx-x64 libYubico.NativeShims.a
 validate_rid osx-arm64 libYubico.NativeShims.a
 
+dotnet msbuild "$TEST_PROJECT" \
+    -nologo \
+    -t:ValidatePublishAssets \
+    -p:TargetsPath="$TEMP_DIR/package/build/Yubico.NativeShims.targets" \
+    -p:TransitiveTargetsPath="$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets" \
+    -p:PublishAot=true \
+    -p:RuntimeIdentifier=osx-arm64 \
+    -p:FakeSidecar="$TEMP_DIR/libYubico.NativeShims.dylib" \
+    -p:FakeOtherAsset="$TEMP_DIR/keep.dylib"
+
 if dotnet msbuild "$TEST_PROJECT" \
     -nologo \
     -t:Validate \

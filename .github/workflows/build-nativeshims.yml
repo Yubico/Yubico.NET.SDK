@@ -529,7 +529,7 @@ jobs:
         id: package-metadata
         shell: pwsh
         run: |
-          if ($env:PACKAGE_VERSION -notmatch '^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$') {
+          if ($env:PACKAGE_VERSION -notmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?$') {
             throw "Version must use canonical three-component SemVer: $env:PACKAGE_VERSION"
           }
           "package-version=$env:PACKAGE_VERSION" >> $env:GITHUB_OUTPUT
@@ -757,16 +757,8 @@ jobs:
           $sharedCopies = @(Get-ChildItem -LiteralPath $outputPath -Recurse -File | Where-Object {
               $_.Name.Equals($sharedName, [StringComparison]::OrdinalIgnoreCase)
             })
-          foreach ($sharedCopy in $sharedCopies) {
-            Write-Host "Removing NuGet-copied shared shim: $($sharedCopy.FullName)"
-            Remove-Item -LiteralPath $sharedCopy.FullName -Force
-          }
-
-          $remainingSharedCopies = @(Get-ChildItem -LiteralPath $outputPath -Recurse -File | Where-Object {
-              $_.Name.Equals($sharedName, [StringComparison]::OrdinalIgnoreCase)
-            })
-          if ($remainingSharedCopies.Count -ne 0) {
-            throw "Shared NativeShims library remains in publish output."
+          if ($sharedCopies.Count -ne 0) {
+            throw "Shared NativeShims library remains in AOT publish output: $($sharedCopies.FullName -join ', ')"
           }
 
           if (Test-Path -LiteralPath (Join-Path $outputPath 'NativeAotProbe.dll')) {
@@ -775,7 +767,7 @@ jobs:
 
           "### Native AOT ${{ matrix.rid }}" >> $env:GITHUB_STEP_SUMMARY
           "* Executable bytes: $((Get-Item -LiteralPath $executable).Length)" >> $env:GITHUB_STEP_SUMMARY
-          "* Removed shared shim copies: $($sharedCopies.Count)" >> $env:GITHUB_STEP_SUMMARY
+          "* Shared shim copies: $($sharedCopies.Count)" >> $env:GITHUB_STEP_SUMMARY
 
       - name: Inspect dynamic dependencies
         shell: pwsh

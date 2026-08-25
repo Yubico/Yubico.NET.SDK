@@ -4,6 +4,9 @@
         <_YubicoNativeShimsPackageRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))</_YubicoNativeShimsPackageRoot>
         <_YubicoNativeShimsStaticArchive Condition="'$(RuntimeIdentifier)' == 'win-x64' OR '$(RuntimeIdentifier)' == 'win-x86' OR '$(RuntimeIdentifier)' == 'win-arm64'">$(_YubicoNativeShimsPackageRoot)/runtimes/$(RuntimeIdentifier)/native/static/Yubico.NativeShims.lib</_YubicoNativeShimsStaticArchive>
         <_YubicoNativeShimsStaticArchive Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64' OR '$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64'">$(_YubicoNativeShimsPackageRoot)/runtimes/$(RuntimeIdentifier)/native/static/libYubico.NativeShims.a</_YubicoNativeShimsStaticArchive>
+        <_YubicoNativeShimsSharedLibrary Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('win-'))">Yubico.NativeShims.dll</_YubicoNativeShimsSharedLibrary>
+        <_YubicoNativeShimsSharedLibrary Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('linux-'))">libYubico.NativeShims.so</_YubicoNativeShimsSharedLibrary>
+        <_YubicoNativeShimsSharedLibrary Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('osx-'))">libYubico.NativeShims.dylib</_YubicoNativeShimsSharedLibrary>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(PublishAot)' == 'true'">
@@ -36,6 +39,16 @@
                        Condition="'$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64'" />
             <LinkerArg Include="PCSC"
                        Condition="'$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64'" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="_YubicoNativeShimsRemoveAotSharedLibrary"
+            AfterTargets="_ResolveCopyLocalAssetsForPublish"
+            BeforeTargets="ComputeResolvedFilesToPublishList"
+            Condition="'$(PublishAot)' == 'true' AND '$(_YubicoNativeShimsSharedLibrary)' != ''">
+        <ItemGroup>
+            <_ResolvedCopyLocalPublishAssets Remove="@(_ResolvedCopyLocalPublishAssets)"
+                Condition="'%(_ResolvedCopyLocalPublishAssets.Filename)%(_ResolvedCopyLocalPublishAssets.Extension)' == '$(_YubicoNativeShimsSharedLibrary)'" />
         </ItemGroup>
     </Target>
 </Project>

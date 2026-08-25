@@ -529,6 +529,9 @@ jobs:
         id: package-metadata
         shell: pwsh
         run: |
+          if ($env:PACKAGE_VERSION -notmatch '^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$') {
+            throw "Version must use canonical three-component SemVer: $env:PACKAGE_VERSION"
+          }
           "package-version=$env:PACKAGE_VERSION" >> $env:GITHUB_OUTPUT
           mv nuspec/*.nuspec .
           mv nuspec/readme.md .
@@ -695,8 +698,7 @@ jobs:
             throw "Expected package '$expectedPackageName', found '$($nupkgs[0].Name)'."
           }
 
-          # Prime the Native AOT runtime packs during restore. The publish command
-          # intentionally omits PublishAot so the package targets must enable it.
+          # Prime the Native AOT runtime packs and evaluate the package's AOT assets.
           dotnet restore $project `
             -r '${{ matrix.rid }}' `
             --packages $packagesPath `
@@ -717,6 +719,14 @@ jobs:
             throw "Expected exact package '$expectedPackage'; resolved '$($resolvedPackages -join ', ')'."
           }
 
+          $expectedHash = [Convert]::ToBase64String(
+            [Security.Cryptography.SHA512]::HashData([IO.File]::ReadAllBytes($nupkgs[0].FullName)))
+          $installedHashPath = Join-Path $packagesPath "yubico.nativeshims/$($env:NATIVE_SHIMS_VERSION.ToLowerInvariant())/yubico.nativeshims.$($env:NATIVE_SHIMS_VERSION.ToLowerInvariant()).nupkg.sha512"
+          $installedHash = (Get-Content -LiteralPath $installedHashPath -Raw).Trim()
+          if ($installedHash -cne $expectedHash) {
+            throw "Restored NativeShims package does not match the current-run package artifact."
+          }
+
           dotnet publish $project `
             -c Release `
             -r '${{ matrix.rid }}' `
@@ -724,6 +734,7 @@ jobs:
             -o $outputPath `
             -p:NativeShimsVersion=$env:NATIVE_SHIMS_VERSION `
             -p:RestorePackagesPath=$packagesPath `
+            -p:PublishAot=true `
             -p:ContinuousIntegrationBuild=true
           if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed with exit code $LASTEXITCODE." }
 

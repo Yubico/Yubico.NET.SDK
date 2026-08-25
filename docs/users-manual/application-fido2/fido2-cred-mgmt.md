@@ -160,8 +160,8 @@ list of relying parties.
 ### Credentials with an unrecognized public key type
 
 A credential's public key can use a COSE algorithm that this SDK does not model. This
-happens with credentials created by the experimental `previewSign` extension, whose public
-key is an ARKG-P256 seed.
+happens with credentials created by an extension that introduces its own key type, and
+with algorithms registered after the version of the SDK you are using was released.
 
 Enumeration does not fail in that case. The credential's `CredentialPublicKey` will be a
 [CoseUnsupportedPublicKey](xref:Yubico.YubiKey.Fido2.Cose.CoseUnsupportedPublicKey), which

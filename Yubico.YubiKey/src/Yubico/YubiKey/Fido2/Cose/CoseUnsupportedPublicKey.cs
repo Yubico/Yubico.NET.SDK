@@ -30,9 +30,9 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// can decode it themselves.
     /// </para>
     /// <para>
-    /// An example is the ARKG-P256 seed public key produced by the experimental
-    /// <c>previewSign</c> extension, which uses a COSE key type and algorithm
-    /// outside the set the SDK models.
+    /// This typically arises with a credential created by an extension that
+    /// introduces its own key type, or with an algorithm registered after this
+    /// version of the SDK was released.
     /// </para>
     /// <para>
     /// Because the algorithm is not modeled, <see cref="CoseKey.Type"/> and
@@ -41,19 +41,19 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// <see cref="CoseAlgorithmIdentifier"/>. Compare them numerically rather
     /// than against named members.
     /// </para>
-        /// <para>
-        /// Instances of this class are created only by the SDK while decoding a
-        /// response from a YubiKey; it cannot be constructed by callers.
-        /// </para>
-        /// <para>
-        /// <see cref="EncodedKey"/> is fixed at construction. The inherited
-        /// <see cref="CoseKey.Type"/> and <see cref="CoseKey.Algorithm"/>
-        /// properties are settable, but changing them does not alter
-        /// <see cref="EncodedKey"/> or the result of <see cref="Encode"/>, and
-        /// will make the reported metadata disagree with the encoded key. Treat
-        /// them as read-only.
-        /// </para>
-        /// </remarks>
+    /// <para>
+    /// Instances of this class are created only by the SDK while decoding a
+    /// response from a YubiKey; it cannot be constructed by callers.
+    /// </para>
+    /// <para>
+    /// <see cref="EncodedKey"/> is fixed at construction. The inherited
+    /// <see cref="CoseKey.Type"/> and <see cref="CoseKey.Algorithm"/>
+    /// properties are settable, but changing them does not alter
+    /// <see cref="EncodedKey"/> or the result of <see cref="Encode"/>, and
+    /// will make the reported metadata disagree with the encoded key. Treat
+    /// them as read-only.
+    /// </para>
+    /// </remarks>
     public sealed class CoseUnsupportedPublicKey : CoseKey
     {
         /// <summary>

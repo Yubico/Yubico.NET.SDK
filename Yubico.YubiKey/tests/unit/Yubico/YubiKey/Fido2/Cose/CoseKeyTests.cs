@@ -94,25 +94,25 @@ namespace Yubico.YubiKey.Fido2.Cose
         }
 
         [Fact]
-        public void CreateOrUnsupported_ArkgSeedKey_ReturnsUnsupportedKeyWithReportedTypeAndAlgorithm()
+        public void CreateOrUnsupported_UnmodeledStructuredKey_ReturnsUnsupportedKeyWithReportedTypeAndAlgorithm()
         {
-            // The shape produced by the experimental previewSign extension: an
-            // ARKG-P256 seed, whose key type and algorithm are both outside the
-            // set this SDK models.
-            byte[] encodedKey = BuildArkgSeedKey();
+            // A key whose type and algorithm are both outside the set this SDK
+            // models, and whose value is itself structured rather than a flat
+            // point. Mirrors the shape of a real extension-defined key.
+            byte[] encodedKey = BuildUnmodeledStructuredKey();
 
             CoseKey key = CoseKey.CreateOrUnsupported(encodedKey);
 
             var unsupported = Assert.IsType<CoseUnsupportedPublicKey>(key);
-            Assert.Equal(ArkgPubKeyType, (int)unsupported.Type);
-            Assert.Equal(ArkgP256Algorithm, (int)unsupported.Algorithm);
+            Assert.Equal(UnmodeledKeyType, (int)unsupported.Type);
+            Assert.Equal(UnmodeledAlgorithm, (int)unsupported.Algorithm);
             Assert.Equal(encodedKey, unsupported.EncodedKey.ToArray());
         }
 
         [Fact]
         public void CreateOrUnsupported_UnsupportedAlgorithm_EncodeRoundTripsOriginalBytes()
         {
-            byte[] encodedKey = BuildArkgSeedKey();
+            byte[] encodedKey = BuildUnmodeledStructuredKey();
 
             CoseKey key = CoseKey.CreateOrUnsupported(encodedKey);
 
@@ -186,8 +186,12 @@ namespace Yubico.YubiKey.Fido2.Cose
             _ = Assert.Throws<Ctap2DataException>(() => CoseKey.CreateOrUnsupported(cbor.Encode()));
         }
 
-        private const int ArkgPubKeyType = -65537;
-        private const int ArkgP256Algorithm = -65700;
+        // Taken from a real extension-defined key type rather than invented, so
+        // the fixtures exercise a shape a YubiKey can actually return. The
+        // specific values do not matter; what matters is that they are outside
+        // the set the SDK models.
+        private const int UnmodeledKeyType = -65537;
+        private const int UnmodeledAlgorithm = -65700;
 
         private static byte[] BuildIndefiniteLengthMap()
         {
@@ -207,14 +211,14 @@ namespace Yubico.YubiKey.Fido2.Cose
             return cbor.Encode();
         }
 
-        private static byte[] BuildArkgSeedKey()
+        private static byte[] BuildUnmodeledStructuredKey()
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(4);
             cbor.WriteInt32(1);
-            cbor.WriteInt32(ArkgPubKeyType);
+            cbor.WriteInt32(UnmodeledKeyType);
             cbor.WriteInt32(3);
-            cbor.WriteInt32(ArkgP256Algorithm);
+            cbor.WriteInt32(UnmodeledAlgorithm);
             cbor.WriteInt32(-1);
             WriteEc2Point(cbor, 0x44);
             cbor.WriteInt32(-2);

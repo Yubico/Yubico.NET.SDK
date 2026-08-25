@@ -25,16 +25,21 @@ namespace Yubico.YubiKey.Fido2.Commands
     internal static class CredMgmtTestData
     {
         /// <summary>
-        /// The COSE key type reported by an ARKG-pub key, as used by the
-        /// experimental previewSign extension. Not a value this SDK models.
+        /// A COSE key type this SDK does not model.
         /// </summary>
-        public const int ArkgPubKeyType = -65537;
+        /// <remarks>
+        /// Taken from a real extension-defined key type rather than invented, so
+        /// the fixtures exercise a shape a YubiKey can actually return. The
+        /// specific value does not matter to these tests; what matters is that
+        /// it is outside the set the SDK models.
+        /// </remarks>
+        public const int UnmodeledKeyType = -65537;
 
         /// <summary>
-        /// The COSE algorithm reported by an ARKG-P256 key, as used by the
-        /// experimental previewSign extension. Not a value this SDK models.
+        /// A COSE algorithm this SDK does not model. See
+        /// <see cref="UnmodeledKeyType"/> for why these values were chosen.
         /// </summary>
-        public const int ArkgP256Algorithm = -65700;
+        public const int UnmodeledAlgorithm = -65700;
 
         public static readonly byte[] UserIdBytes = { 0x75, 0x73, 0x65, 0x72, 0x49, 0x64 };
         public static readonly byte[] CredentialIdBytes = { 0x31, 0x32, 0x33, 0x34 };
@@ -80,17 +85,19 @@ namespace Yubico.YubiKey.Fido2.Commands
             BuildEc2Key((int)CoseKeyType.Ec2, -70000);
 
         /// <summary>
-        /// An ARKG-P256 seed key, matching the shape produced by the
-        /// experimental previewSign extension.
+        /// A key whose type and algorithm are both outside the set this SDK
+        /// models, and whose value is itself structured (two nested EC2 points).
+        /// Mirrors the shape of a real extension-defined key rather than a
+        /// trivially malformed one.
         /// </summary>
-        public static byte[] BuildArkgSeedCoseKey()
+        public static byte[] BuildUnmodeledStructuredCoseKey()
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cbor.WriteStartMap(4);
             cbor.WriteInt32(1);
-            cbor.WriteInt32(ArkgPubKeyType);
+            cbor.WriteInt32(UnmodeledKeyType);
             cbor.WriteInt32(3);
-            cbor.WriteInt32(ArkgP256Algorithm);
+            cbor.WriteInt32(UnmodeledAlgorithm);
             cbor.WriteInt32(-1);
             cbor.WriteEncodedValue(BuildEc2Key((int)CoseKeyType.Ec2, (int)CoseAlgorithmIdentifier.ES256, 0x44));
             cbor.WriteInt32(-2);

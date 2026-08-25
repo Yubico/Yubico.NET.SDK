@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void BeginResponse_GetData_UnsupportedPublicKey_ReturnsCredentialWithRawKey()
         {
-            byte[] publicKey = CredMgmtTestData.BuildArkgSeedCoseKey();
+            byte[] publicKey = CredMgmtTestData.BuildUnmodeledStructuredCoseKey();
             var response = new EnumerateCredentialsBeginResponse(
                 BuildApdu(publicKey, totalCredentials: 2));
 
@@ -48,8 +48,8 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             var unsupported = Assert.IsType<CoseUnsupportedPublicKey>(userInfo.CredentialPublicKey);
             Assert.Equal(publicKey, unsupported.EncodedKey.ToArray());
-            Assert.Equal(CredMgmtTestData.ArkgPubKeyType, (int)unsupported.Type);
-            Assert.Equal(CredMgmtTestData.ArkgP256Algorithm, (int)unsupported.Algorithm);
+            Assert.Equal(CredMgmtTestData.UnmodeledKeyType, (int)unsupported.Type);
+            Assert.Equal(CredMgmtTestData.UnmodeledAlgorithm, (int)unsupported.Algorithm);
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void GetNextResponse_GetData_UnsupportedPublicKey_ReturnsCredentialWithRawKey()
         {
-            byte[] publicKey = CredMgmtTestData.BuildArkgSeedCoseKey();
+            byte[] publicKey = CredMgmtTestData.BuildUnmodeledStructuredCoseKey();
             var response = new EnumerateCredentialsGetNextResponse(BuildApdu(publicKey));
 
             CredentialUserInfo userInfo = response.GetData();
@@ -98,7 +98,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             var getNextResponses = new Queue<EnumerateCredentialsGetNextResponse>(
                 new[]
                 {
-                    new EnumerateCredentialsGetNextResponse(BuildApdu(CredMgmtTestData.BuildArkgSeedCoseKey())),
+                    new EnumerateCredentialsGetNextResponse(BuildApdu(CredMgmtTestData.BuildUnmodeledStructuredCoseKey())),
                     new EnumerateCredentialsGetNextResponse(BuildApdu(CredMgmtTestData.BuildEs256CoseKey())),
                 });
 

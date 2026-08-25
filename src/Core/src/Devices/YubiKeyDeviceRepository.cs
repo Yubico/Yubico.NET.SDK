@@ -44,6 +44,10 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
     public IObservable<DeviceEvent> DeviceChanges => _deviceChanges;
 
     /// <inheritdoc/>
+    public IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
+        _deviceChanges.WatchAsync(cancellationToken);
+
+    /// <inheritdoc/>
     public bool HasData => _hasData;
 
     /// <inheritdoc/>

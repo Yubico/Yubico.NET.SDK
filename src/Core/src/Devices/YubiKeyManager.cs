@@ -166,6 +166,45 @@ public static class YubiKeyManager
     public static IObservable<DeviceEvent> DeviceChanges => EnsureManager().DeviceChanges;
 
     /// <summary>
+    /// Gets an async sequence of device events (arrivals and removals), for consumers that prefer
+    /// <c>await foreach</c> over subscribing an observer.
+    /// </summary>
+    /// <param name="cancellationToken">Stops the stream. Cancelling is the normal way to stop watching.</param>
+    /// <returns>A sequence that ends when <paramref name="cancellationToken"/> fires or the SDK shuts down.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown from the enumeration if the consumer falls too far behind; re-enumerate and resynchronise
+    /// via <see cref="FindAllAsync(CancellationToken)"/>.
+    /// </exception>
+    /// <remarks>
+    /// <para>Events only flow while monitoring is active (see <see cref="StartMonitoring()"/>).</para>
+    /// <para>This is the dependency-free counterpart to <see cref="DeviceChanges"/>. Cancellation and
+    /// subscription lifetime are handled by the <c>await foreach</c> itself, so the usual
+    /// wait-for-a-device pattern needs no extra plumbing. Unlike an observer subscription, a slow
+    /// consumer here cannot stall device monitoring.</para>
+    /// <para>Each call gets an independent buffer, so multiple concurrent watchers do not interfere.</para>
+    /// </remarks>
+    /// <example>
+    /// <para><strong>Wait for the next YubiKey to be inserted, with a timeout:</strong></para>
+    /// <code>
+    /// using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+    /// YubiKeyManager.StartMonitoring();
+    ///
+    /// await foreach (var e in YubiKeyManager.WatchAsync(cts.Token))
+    /// {
+    ///     if (e.Action == DeviceAction.Added)
+    ///     {
+    ///         Console.WriteLine($"Inserted: {e.Device.DeviceId}");
+    ///         break;
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    /// <seealso cref="DeviceChanges"/>
+    /// <seealso cref="StartMonitoring()"/>
+    public static IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
+        EnsureManager().WatchAsync(cancellationToken);
+
+    /// <summary>
     /// Shuts down all YubiKeyManager resources asynchronously.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token to cancel the shutdown operation.</param>

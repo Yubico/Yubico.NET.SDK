@@ -19,6 +19,7 @@ using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.UnitTests.Devices;
+using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
 namespace Yubico.YubiKit.Core.UnitTests.Transports.SmartCard;
 
@@ -52,8 +53,8 @@ public class FindPcscDevicesTests
         var existingDevice = new FakeYubiKey("pcsc:existing", ConnectionType.SmartCard);
         repository.UpdateCache([existingDevice]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
         var api = new StatusBlockingSCardApi("Yubico YubiKey OTP+FIDO+CCID");
         var finder = new FindYubiKeys(
             new FindPcscDevices(NullLogger<FindPcscDevices>.Instance, api),

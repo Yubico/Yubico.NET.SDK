@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Reactive.Linq;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
+/// <summary>
+/// Hot-plug behaviour against real hardware. These double as the reference examples for how a
+/// consumer waits for a YubiKey — no third-party dependency required.
+/// </summary>
 public class YubiKeyTests : IAsyncLifetime
 {
     public Task InitializeAsync() => Task.CompletedTask;
@@ -35,23 +38,9 @@ public class YubiKeyTests : IAsyncLifetime
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     [Trait(TestCategories.Category, TestCategories.Slow)]
-    public async Task DeviceChanges_DetectsAddedDevice()
+    public async Task WatchAsync_DetectsAddedDevice()
     {
-        // Subscribe to device changes
-        var tcs = new TaskCompletionSource<DeviceEvent>();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        cts.Token.Register(() => tcs.TrySetCanceled());
-
-        using var subscription = YubiKeyManager.DeviceChanges
-            .Where(e => e.Action == DeviceAction.Added)
-            .Take(1)
-            .Subscribe(e => tcs.TrySetResult(e));
-
-        // Start monitoring
-        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
-
-        // Wait for device insertion (requires manual interaction)
-        var deviceEvent = await tcs.Task;
+        var deviceEvent = await WaitForActionAsync(DeviceAction.Added);
 
         Assert.NotNull(deviceEvent.Device);
         Assert.Equal(DeviceAction.Added, deviceEvent.Action);
@@ -60,25 +49,33 @@ public class YubiKeyTests : IAsyncLifetime
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     [Trait(TestCategories.Category, TestCategories.Slow)]
-    public async Task DeviceChanges_DetectsRemovedDevice()
+    public async Task WatchAsync_DetectsRemovedDevice()
     {
-        // Subscribe to device changes
-        var tcs = new TaskCompletionSource<DeviceEvent>();
+        // Device is populated for removals too, so the caller can correlate against the Added event.
+        var deviceEvent = await WaitForActionAsync(DeviceAction.Removed);
+
+        Assert.NotNull(deviceEvent.Device);
+        Assert.Equal(DeviceAction.Removed, deviceEvent.Action);
+    }
+
+    /// <summary>
+    /// Waits for the next device event of a given kind. This is the canonical "insert your YubiKey"
+    /// pattern: begin the enumeration first, then prompt the user, and let the token bound the wait.
+    /// </summary>
+    private static async Task<DeviceEvent> WaitForActionAsync(DeviceAction action)
+    {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        cts.Token.Register(() => tcs.TrySetCanceled());
 
-        using var subscription = YubiKeyManager.DeviceChanges
-            .Where(e => e.Action == DeviceAction.Removed)
-            .Take(1)
-            .Subscribe(e => tcs.TrySetResult(e));
-
-        // Start monitoring
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
 
-        // Wait for device removal (requires manual interaction)
-        var deviceEvent = await tcs.Task;
+        await foreach (var deviceEvent in YubiKeyManager.WatchAsync(cts.Token))
+        {
+            if (deviceEvent.Action == action)
+            {
+                return deviceEvent;
+            }
+        }
 
-        Assert.NotNull(deviceEvent.Device); // Device should be populated for removed events
-        Assert.Equal(DeviceAction.Removed, deviceEvent.Action);
+        throw new InvalidOperationException($"Device event stream ended before a {action} event arrived.");
     }
 }

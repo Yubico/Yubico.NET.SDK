@@ -27,7 +27,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Infrastructure;
 /// <para>Safe for concurrent <see cref="OnNext"/> calls.</para>
 /// </remarks>
 /// <param name="onNext">Optional callback invoked for each event, after it has been recorded.</param>
-internal sealed class RecordingObserver<T>(Action<T>? onNext = null) : IObserver<T>
+internal sealed class RecordingObserver<T>(Action<T>? onNext = null) : IObserver<T>, IEnumerable<T>
 {
     private readonly Lock _gate = new();
     private readonly List<T> _items = [];
@@ -58,6 +58,18 @@ internal sealed class RecordingObserver<T>(Action<T>? onNext = null) : IObserver
         }
     }
 
+    /// <summary>The event received at <paramref name="index"/>, in delivery order.</summary>
+    public T this[int index]
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _items[index];
+            }
+        }
+    }
+
     /// <summary>How many times <see cref="OnCompleted"/> fired; used to assert idempotency.</summary>
     public int CompletedCount => Volatile.Read(ref _completedCount);
 
@@ -81,4 +93,12 @@ internal sealed class RecordingObserver<T>(Action<T>? onNext = null) : IObserver
     public void OnCompleted() => Interlocked.Increment(ref _completedCount);
 
     public void OnError(Exception error) => Error = error;
+
+    /// <summary>
+    /// Enumerates a snapshot of the received events, so assertions can treat this observer as the
+    /// collection of what arrived.
+    /// </summary>
+    public IEnumerator<T> GetEnumerator() => Items.GetEnumerator();
+
+    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
 }

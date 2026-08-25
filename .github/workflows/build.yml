@@ -18,6 +18,7 @@ jobs:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_NOLOGO: 1
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      NuGetPackageSourceCredentials_yubico_internal: "Username=${{ github.actor }};Password=${{ secrets.GITHUB_TOKEN }};ValidAuthenticationTypes=Basic"
     steps:
       - name: Check out source
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
@@ -26,6 +27,28 @@ jobs:
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
         with:
           dotnet-version: "10.0.x"
+
+      - name: Configure internal NativeShims package source
+        shell: pwsh
+        run: |
+          dotnet nuget add source https://nuget.pkg.github.com/Yubico/index.json --name yubico_internal --configfile nuget.config
+
+          [xml]$config = Get-Content -Raw nuget.config
+          $mapping = $config.CreateElement("packageSourceMapping")
+          $publicSource = $config.CreateElement("packageSource")
+          $publicSource.SetAttribute("key", "nuget.org")
+          $publicPattern = $config.CreateElement("package")
+          $publicPattern.SetAttribute("pattern", "*")
+          [void]$publicSource.AppendChild($publicPattern)
+          [void]$mapping.AppendChild($publicSource)
+          $internalSource = $config.CreateElement("packageSource")
+          $internalSource.SetAttribute("key", "yubico_internal")
+          $internalPattern = $config.CreateElement("package")
+          $internalPattern.SetAttribute("pattern", "Yubico.NativeShims")
+          [void]$internalSource.AppendChild($internalPattern)
+          [void]$mapping.AppendChild($internalSource)
+          [void]$config.configuration.AppendChild($mapping)
+          $config.Save((Resolve-Path nuget.config).Path)
 
       - name: Cache NuGet packages
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5

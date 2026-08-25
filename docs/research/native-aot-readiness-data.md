@@ -525,5 +525,59 @@ binary that still talks to real hardware.
    linked against 12.0); a shipped build should align `CMAKE_OSX_DEPLOYMENT_TARGET` with the SDK's
    floor.
 
-Not implemented here: the fix belongs in `Yubico.NativeShims` on `develop`/`main` and requires a
-package release, so it is out of scope for a v2 SDK branch. Tracked as **AOT-B11**.
+At the time of Experiment 9, this was not implemented: the fix belonged in
+`Yubico.NativeShims` and required a package release, so it was out of scope for that v2 SDK branch.
+Experiment 10 records the follow-up package design and evidence.
+
+## Experiment 10 — Option B package wiring: merged NativeShims/OpenSSL static archive
+
+**Motivation:** Experiment 9 proved static linking manually but left the consumer responsible for a
+separate OpenSSL archive. The approved Option B moves that responsibility into
+`Yubico.NativeShims`: build the shim as a static archive, merge the OpenSSL crypto archive into it,
+pack one merged archive per supported RID, and activate package-owned AOT link targets only when
+`PublishAot=true`. Shared libraries remain in the package for non-AOT consumers.
+
+**Package under validation:** `Yubico.NativeShims` `1.17.4-prerelease.20260825.1`, restored from the
+internal Yubico GitHub Packages feed. The committed `nuget.config` remains nuget.org-only; workflows
+add the authenticated source and source mapping ephemerally.
+
+### M1 — Local artifact-size evidence (macOS companion work)
+
+| Artifact | Bytes | Relative to shared library |
+|---|---:|---:|
+| Shared `libYubico.NativeShims.dylib` | 3,528,408 | 1.00x |
+| Merged `libYubico.NativeShims.a` (shim + OpenSSL) | 8,594,560 | 2.44x |
+| Native AOT executable | 1,267,928 | 0.36x |
+
+These are measured local artifacts, not CI results. The merged archive is an input library; the
+final executable is smaller because the native linker includes only reachable objects and removes
+unused sections.
+
+### M2 — Local functional and dependency evidence (macOS companion work)
+
+- Direct Native_BN and SCard calls succeeded from the Native AOT executable.
+- The executable had no dynamic `Yubico.NativeShims` dependency.
+- The executable had no dynamic OpenSSL dependency.
+
+This closes the local design question: the merged archive supplies both NativeShims and its crypto
+objects while PC/SC remains an operating-system link dependency.
+
+### Package/CI measurement slots — pending integrator results
+
+Do not infer results for the remaining rows from M1/M2. The integrator must fill these after the
+internal package is published and the workflows run.
+
+| RID | Internal package restore | AOT publish | NativeShims sidecar absent | No dynamic NativeShims/OpenSSL dependency | Existing discovery path executes | Result/evidence |
+|---|---|---|---|---|---|---|
+| `osx-arm64` | Pending | Pending | Pending | Pending | Pending | `.github/workflows/native-aot.yml` run URL: _pending_ |
+| `osx-x64` | Pending | Pending | Pending | Pending | Pending | Package workflow/run URL: _pending_ |
+| `linux-x64` | Pending | Pending | Pending | Pending | Pending | Package workflow/run URL: _pending_ |
+| `linux-arm64` | Pending | Pending | Pending | Pending | Pending | Package workflow/run URL: _pending_ |
+| `win-x64` | Pending | Pending | Pending | Pending | Pending | Package workflow/run URL: _pending_ |
+| `win-x86` | Pending | Pending | Pending | Pending | Pending | Package workflow/run URL: _pending_ |
+| `win-arm64` | Pending | Pending | Pending | Pending | Pending | Package workflow/run URL: _pending_ |
+
+**Completion rule:** AOT-B11 is resolved by design and package wiring, but package validation is not
+complete until the internal package restores successfully, every packaged RID passes its static
+archive checks, and this repository's `osx-arm64` gate publishes and executes without a sidecar or
+dynamic NativeShims dependency.

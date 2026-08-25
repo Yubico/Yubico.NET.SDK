@@ -8,6 +8,10 @@ on:
         default: false
   push:
     branches: [ yubikit ]
+    # Generated documentation PRs modify only these paths and must not recurse on merge.
+    paths-ignore:
+      - docs/migration/**
+      - docs/architecture/**
   workflow_dispatch:
 
 permissions:

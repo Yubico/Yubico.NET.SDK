@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup Condition="'$(PublishAot)' == 'true'">
+        <_YubicoNativeShimsPackageRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))</_YubicoNativeShimsPackageRoot>
+        <_YubicoNativeShimsStaticArchive Condition="'$(RuntimeIdentifier)' == 'win-x64' OR '$(RuntimeIdentifier)' == 'win-x86' OR '$(RuntimeIdentifier)' == 'win-arm64'">$(_YubicoNativeShimsPackageRoot)/runtimes/$(RuntimeIdentifier)/native/static/Yubico.NativeShims.lib</_YubicoNativeShimsStaticArchive>
+        <_YubicoNativeShimsStaticArchive Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64' OR '$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64'">$(_YubicoNativeShimsPackageRoot)/runtimes/$(RuntimeIdentifier)/native/static/libYubico.NativeShims.a</_YubicoNativeShimsStaticArchive>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(PublishAot)' == 'true'">
+        <DirectPInvoke Include="Yubico.NativeShims" Exclude="@(DirectPInvoke)" />
+        <NativeLibrary Include="$(_YubicoNativeShimsStaticArchive)"
+                       Exclude="@(NativeLibrary)"
+                       Condition="'$(_YubicoNativeShimsStaticArchive)' != ''" />
+    </ItemGroup>
+
+    <Target Name="_YubicoNativeShimsConfigureAot"
+            AfterTargets="SetupOSSpecificProps"
+            Condition="'$(PublishAot)' == 'true'">
+        <Error Condition="'$(RuntimeIdentifier)' == ''"
+               Text="Yubico.NativeShims requires RuntimeIdentifier when PublishAot is true." />
+        <Error Condition="'$(_YubicoNativeShimsStaticArchive)' == ''"
+               Text="Yubico.NativeShims does not provide a static archive for RuntimeIdentifier '$(RuntimeIdentifier)'." />
+        <Error Condition="'$(_YubicoNativeShimsStaticArchive)' != '' AND !Exists('$(_YubicoNativeShimsStaticArchive)')"
+               Text="Yubico.NativeShims static archive is missing for RuntimeIdentifier '$(RuntimeIdentifier)': $(_YubicoNativeShimsStaticArchive)" />
+
+        <!-- SetupOSSpecificProps has already placed NativeLibrary items on the
+             linker command line. Append system dependencies after the archive. -->
+        <ItemGroup>
+            <LinkerArg Include="winscard.lib"
+                       Condition="'$(RuntimeIdentifier)' == 'win-x64' OR '$(RuntimeIdentifier)' == 'win-x86' OR '$(RuntimeIdentifier)' == 'win-arm64'" />
+            <LinkerArg Include="-lpcsclite"
+                       Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64'" />
+            <LinkerArg Include="-Wl,--exclude-libs,ALL"
+                       Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64'" />
+            <LinkerArg Include="-framework"
+                       Condition="'$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64'" />
+            <LinkerArg Include="PCSC"
+                       Condition="'$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64'" />
+        </ItemGroup>
+    </Target>
+</Project>

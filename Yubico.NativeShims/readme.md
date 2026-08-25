@@ -36,4 +36,10 @@ Yubico.NativeShims is a cross-platform C library designed to bridge the gap in n
 
 Refer to the provided scripts and GitHub Actions CI workflows for detailed building instructions across different platforms and architectures.
 
+## Native AOT
+
+The NuGet package includes a merged static archive for each supported runtime identifier. When `PublishAot` is `true`, package targets direct-link Yubico.NativeShims and its OpenSSL cryptography dependency, then link the platform smart-card library (`winscard`, `pcsclite`, or the macOS PCSC framework). Unsupported runtime identifiers and missing archives fail the publish with a clear error instead of falling back to dynamic loading.
+
+This support is additive. Existing shared libraries, dynamic P/Invoke behavior, and the .NET Framework 4.7.2 package targets remain unchanged.
+
 ---

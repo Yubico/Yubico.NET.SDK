@@ -125,6 +125,8 @@ fi
 cmake $CMAKE_ARGS
 
 cmake --build "$build_dir" -- -j $(nproc)
+test -f "$build_dir/static/libYubico.NativeShims.a"
+echo "Staged merged static archive: $build_dir/static/libYubico.NativeShims.a"
 
 # Verify glibc compatibility
 echo ""

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('win-'))">winscard.lib</ExpectedLinkerArgs>
+        <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('linux-'))">-lpcsclite|-Wl,--exclude-libs,ALL</ExpectedLinkerArgs>
+        <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('osx-'))">-framework|PCSC</ExpectedLinkerArgs>
+    </PropertyGroup>
+
+    <Import Project="$(TargetsPath)" />
+    <Import Project="$(TransitiveTargetsPath)" />
+
+    <Target Name="SetupOSSpecificProps" />
+
+    <Target Name="Validate" DependsOnTargets="SetupOSSpecificProps">
+        <Error Condition="'@(DirectPInvoke)' != 'Yubico.NativeShims'"
+               Text="Expected one DirectPInvoke item for Yubico.NativeShims, got '@(DirectPInvoke)'." />
+        <Error Condition="'@(NativeLibrary)' != '$(ExpectedArchive)'"
+               Text="Expected NativeLibrary '$(ExpectedArchive)', got '@(NativeLibrary)'." />
+        <Error Condition="'@(LinkerArg, '|')' != '$(ExpectedLinkerArgs)'"
+               Text="Expected LinkerArgs '$(ExpectedLinkerArgs)', got '@(LinkerArg, '|')'." />
+    </Target>
+
+    <Target Name="ValidateNonAot">
+        <Error Condition="'@(DirectPInvoke)' != '' OR '@(NativeLibrary)' != '' OR '@(LinkerArg)' != ''"
+               Text="Native AOT items must not be added when PublishAot is false." />
+    </Target>
+</Project>

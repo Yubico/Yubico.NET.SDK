@@ -19,12 +19,21 @@ public class CoreTests : IAsyncLifetime
     public async Task DeviceEvents_ArePublished()
     {
         var events = new List<DeviceEvent>();
-        using var subscription = YubiKeyManager.DeviceChanges.Subscribe(events.Add);
 
-        // Plug in or remove a YubiKey to trigger events
-        // You should see events appear in the 'events' list
-        // You have 10 seconds to do this
-        await Task.Delay(10000);
+        // Plug in or remove a YubiKey to trigger events. You have 10 seconds to do this.
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+        try
+        {
+            await foreach (var deviceEvent in YubiKeyManager.WatchAsync(cts.Token))
+            {
+                events.Add(deviceEvent);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected: the window closed. Whatever arrived in the meantime is what we assert on.
+        }
 
         Assert.True(events.Count > 0, $"Expected at least one device event to be published, but got {events.Count}.");
     }

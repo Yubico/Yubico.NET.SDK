@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
@@ -316,7 +317,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
         Assert.NotNull(observable);
 
         // Subscribe and immediately unsubscribe (no events expected)
-        var subscription = observable.Subscribe(_ => { });
+        var subscription = observable.Subscribe(new RecordingObserver<DeviceEvent>());
         subscription.Dispose();
 
         // Monitoring should not have auto-started
@@ -330,9 +331,9 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
         var observable = YubiKeyManager.DeviceChanges;
 
         // Multiple subscriptions should be allowed
-        var subscription1 = observable.Subscribe(_ => { });
-        var subscription2 = observable.Subscribe(_ => { });
-        var subscription3 = observable.Subscribe(_ => { });
+        var subscription1 = observable.Subscribe(new RecordingObserver<DeviceEvent>());
+        var subscription2 = observable.Subscribe(new RecordingObserver<DeviceEvent>());
+        var subscription3 = observable.Subscribe(new RecordingObserver<DeviceEvent>());
 
         // All subscriptions should be distinct
         Assert.NotNull(subscription1);
@@ -350,7 +351,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     {
         // Handle unsubscribe -> Does not affect other subscribers or monitoring
         var observable = YubiKeyManager.DeviceChanges;
-        var subscription = observable.Subscribe(_ => { });
+        var subscription = observable.Subscribe(new RecordingObserver<DeviceEvent>());
 
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
         Assert.True(YubiKeyManager.IsMonitoring);
@@ -460,7 +461,7 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
         var observable = YubiKeyManager.DeviceChanges;
         Assert.NotNull(observable);
 
-        var subscription = observable.Subscribe(_ => { });
+        var subscription = observable.Subscribe(new RecordingObserver<DeviceEvent>());
         subscription.Dispose();
     }
 }

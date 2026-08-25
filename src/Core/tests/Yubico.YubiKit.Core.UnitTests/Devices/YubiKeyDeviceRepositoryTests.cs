@@ -15,6 +15,7 @@
 using System.Reactive.Linq;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
@@ -29,8 +30,8 @@ public class YubiKeyDeviceRepositoryTests
     {
         // Arrange
         using var repository = new YubiKeyDeviceRepository();
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         var device1 = new FakeYubiKey("device-1", ConnectionType.SmartCard);
         var device2 = new FakeYubiKey("device-2", ConnectionType.HidFido);
@@ -54,8 +55,8 @@ public class YubiKeyDeviceRepositoryTests
         var device2 = new FakeYubiKey("device-2", ConnectionType.HidFido);
         repository.UpdateCache([device1, device2]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         // Act
         repository.UpdateCache([]);
@@ -76,8 +77,8 @@ public class YubiKeyDeviceRepositoryTests
         var deviceB = new FakeYubiKey("device-B", ConnectionType.HidFido);
         repository.UpdateCache([deviceA, deviceB]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         var deviceC = new FakeYubiKey("device-C", ConnectionType.SmartCard);
         var deviceD = new FakeYubiKey("device-D", ConnectionType.HidOtp);
@@ -108,8 +109,8 @@ public class YubiKeyDeviceRepositoryTests
         var device1 = new FakeYubiKey("device-1", ConnectionType.SmartCard);
         repository.UpdateCache([device1]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         // Act: Update with same device ID
         var device1Updated = new FakeYubiKey("device-1", ConnectionType.SmartCard);
@@ -128,8 +129,8 @@ public class YubiKeyDeviceRepositoryTests
         var deviceB = new FakeYubiKey("device-B", ConnectionType.HidFido);
         repository.UpdateCache([deviceA, deviceB]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         var deviceC = new FakeYubiKey("device-C", ConnectionType.SmartCard);
 
@@ -321,16 +322,14 @@ public class YubiKeyDeviceRepositoryTests
     {
         // Arrange
         var repository = new YubiKeyDeviceRepository();
-        var completed = false;
-        repository.DeviceChanges.Subscribe(
-            onNext: _ => { },
-            onCompleted: () => completed = true);
+        var observer = new RecordingObserver<DeviceEvent>();
+        repository.DeviceChanges.Subscribe(observer);
 
         // Act
         repository.Dispose();
 
         // Assert
-        Assert.True(completed);
+        Assert.True(observer.IsCompleted);
     }
 
     [Fact]
@@ -443,8 +442,8 @@ public class YubiKeyDeviceRepositoryTests
         using var repository = new YubiKeyDeviceRepository();
         repository.UpdateCache([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         // Act
         repository.Clear();

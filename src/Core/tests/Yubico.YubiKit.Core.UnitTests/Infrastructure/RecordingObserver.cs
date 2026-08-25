@@ -33,6 +33,7 @@ internal sealed class RecordingObserver<T>(Action<T>? onNext = null) : IObserver
     private readonly List<T> _items = [];
 
     private int _completedCount;
+    private Exception? _error;
 
     /// <summary>Snapshot of everything received so far, in delivery order.</summary>
     public IReadOnlyList<T> Items
@@ -77,7 +78,12 @@ internal sealed class RecordingObserver<T>(Action<T>? onNext = null) : IObserver
     public bool IsCompleted => CompletedCount > 0;
 
     /// <summary>The error passed to <see cref="OnError"/>, if any.</summary>
-    public Exception? Error { get; private set; }
+    /// <remarks>Volatile-backed so a cross-thread read observes it, matching the other members.</remarks>
+    public Exception? Error
+    {
+        get => Volatile.Read(ref _error);
+        private set => Volatile.Write(ref _error, value);
+    }
 
     public void OnNext(T value)
     {

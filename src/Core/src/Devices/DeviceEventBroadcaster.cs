@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
+
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
@@ -48,16 +50,34 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <para><strong>Scope:</strong> this type is only responsible for multicast delivery — who is
 /// subscribed and in what order they are notified. Buffering a slow consumer is a separate concern
 /// handled by <see cref="DeviceEventStream"/>.</para>
+/// <para><strong>Notification serialisation is the producer's job.</strong> <see cref="Publish"/>
+/// deliberately does not synchronise against <see cref="Complete"/>. A <see cref="Publish"/> that
+/// has already captured its snapshot when <see cref="Complete"/> runs will finish delivering, so an
+/// observer can in principle see <see cref="IObserver{T}.OnNext"/> after
+/// <see cref="IObserver{T}.OnCompleted"/>. This matches the <see cref="IObservable{T}"/> contract
+/// (and Rx's own <c>Subject&lt;T&gt;</c>), which requires the producer to serialise notifications.
+/// In this SDK the producer already does: publications are mutually exclusive under the monitor's
+/// publish gate. The residual window is a publication abandoned after the shutdown drain times out,
+/// which is already an exceptional, logged condition.</para>
+/// <para>
+/// Closing that window here would mean holding a lock across arbitrary subscriber code, which would
+/// let a blocking subscriber wedge start/stop/dispose — the opposite of the guarantee documented in
+/// <c>src/Core/CLAUDE.md</c> ("a blocking <c>DeviceChanges</c> subscriber cannot wedge
+/// start/stop/dispose"). Liveness wins; a per-observer gate was implemented, deadlocked the
+/// blocking-subscriber tests, and was reverted.
+/// </para>
 /// </remarks>
 internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDisposable
 {
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<DeviceEventBroadcaster>();
+
     private readonly Lock _gate = new();
 
     /// <summary>Immutable snapshot; only ever replaced, never mutated in place.</summary>
     private IObserver<DeviceEvent>[] _observers = [];
 
     /// <summary>Guarded by <see cref="_gate"/>; read without the lock only in <see cref="Subscribe"/>'s fast path.</summary>
-    private bool _completed;
+    private volatile bool _completed;
 
     /// <summary>
     /// Delivers an event to every current subscriber, synchronously and in subscription order.
@@ -71,6 +91,11 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
     {
         // Lock-free: the array is immutable once published, so this snapshot is stable for the whole
         // loop even if someone subscribes or unsubscribes while we are delivering.
+        if (_completed)
+        {
+            return;
+        }
+
         foreach (var observer in Volatile.Read(ref _observers))
         {
             observer.OnNext(deviceEvent);
@@ -105,7 +130,22 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
         // hold the gate, or a handler that subscribes/unsubscribes would deadlock.
         foreach (var observer in snapshot)
         {
-            observer.OnCompleted();
+            // Unlike OnNext - where a throwing subscriber deliberately propagates to the publisher -
+            // a terminal notification is isolated per observer. Completion runs during disposal,
+            // exactly when a subscriber is likely to be tearing down its own state and may throw
+            // ObjectDisposedException. Letting that escape would starve every later observer of its
+            // terminal signal (an async consumer would hang on a channel that never completes) and
+            // abort the caller's remaining cleanup.
+            try
+            {
+                observer.OnCompleted();
+            }
+#pragma warning disable CA1031 // Terminal cleanup must not be derailed by arbitrary subscriber code.
+            catch (Exception ex)
+#pragma warning restore CA1031
+            {
+                Logger.LogWarning(ex, "A device event subscriber threw from OnCompleted during shutdown.");
+            }
         }
     }
 
@@ -146,7 +186,11 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
     {
         lock (_gate)
         {
-            var index = Array.IndexOf(_observers, observer);
+            // Deliberately ReferenceEquals rather than Array.IndexOf: IndexOf uses
+            // EqualityComparer<T>.Default, so an observer type that overrides Equals (a record
+            // implementing IObserver, say - and DeviceChanges is public API) could have a sibling
+            // subscription removed instead of its own. Subscriptions are identity-based.
+            var index = Array.FindIndex(_observers, o => ReferenceEquals(o, observer));
             if (index < 0)
             {
                 return;

@@ -291,6 +291,107 @@ public class DeviceEventBroadcasterTests
         Assert.Equal(1, observer.CompletedCount);
     }
 
+    // ---------- Terminal-notification isolation ----------
+
+    [Fact]
+    public void Complete_WhenOneSubscriberThrows_StillNotifiesTheRest()
+    {
+        // Completion runs during disposal, exactly when a subscriber is likely tearing down its own
+        // state. A throwing observer must not starve the others of their terminal signal - an async
+        // consumer whose channel is never completed would hang.
+        using var broadcaster = new DeviceEventBroadcaster();
+        var throwing = new ThrowOnCompletedObserver();
+        var later = new RecordingObserver<DeviceEvent>();
+        using var s1 = broadcaster.Subscribe(throwing);
+        using var s2 = broadcaster.Subscribe(later);
+
+        broadcaster.Complete();
+
+        Assert.True(later.IsCompleted);
+    }
+
+    [Fact]
+    public void Dispose_WhenSubscriberThrowsFromOnCompleted_DoesNotPropagate()
+    {
+        // Disposal must not be derailed by arbitrary subscriber code.
+        var broadcaster = new DeviceEventBroadcaster();
+        using var subscription = broadcaster.Subscribe(new ThrowOnCompletedObserver());
+
+        broadcaster.Dispose();
+    }
+
+    // ---------- Observable grammar ----------
+
+    [Fact]
+    public void Publish_StartedAfterComplete_DeliversNothing()
+    {
+        // Serialised producers - which is what the monitor's publish gate guarantees - never see
+        // OnNext after OnCompleted. A publish that BEGINS after completion delivers nothing.
+        //
+        // The unsynchronised case (a publish that captured its snapshot before Complete ran) is
+        // deliberately NOT defended against: doing so requires holding a lock across arbitrary
+        // subscriber code, which would let a blocking subscriber wedge start/stop/dispose. See the
+        // remarks on DeviceEventBroadcaster and src/Core/CLAUDE.md.
+        using var broadcaster = new DeviceEventBroadcaster();
+        var observer = new GrammarCheckingObserver();
+        using var subscription = broadcaster.Subscribe(observer);
+
+        broadcaster.Complete();
+        broadcaster.Publish(Event());
+
+        Assert.False(observer.SawOnNextAfterOnCompleted);
+    }
+
+    [Fact]
+    public void Complete_WhileASubscriberIsBlockedInOnNext_DoesNotWedge()
+    {
+        // Guards the documented lifecycle invariant: a blocking DeviceChanges subscriber must not be
+        // able to wedge start/stop/dispose. This is the constraint that rules out serialising
+        // OnNext against OnCompleted inside the broadcaster.
+        using var broadcaster = new DeviceEventBroadcaster();
+        using var entered = new ManualResetEventSlim();
+        using var release = new ManualResetEventSlim();
+
+        var blocking = new RecordingObserver<DeviceEvent>(_ =>
+        {
+            entered.Set();
+            release.Wait(TimeSpan.FromSeconds(30));
+        });
+        using var subscription = broadcaster.Subscribe(blocking);
+
+        var publish = Task.Run(() => broadcaster.Publish(Event()), TestContext.Current.CancellationToken);
+        Assert.True(entered.Wait(TimeSpan.FromSeconds(10)), "subscriber never entered OnNext");
+
+        // Must return while the subscriber is still blocked inside OnNext.
+        broadcaster.Complete();
+
+        release.Set();
+        publish.Wait(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+    }
+
+    // ---------- Subscription identity ----------
+
+    [Fact]
+    public void Unsubscribe_WithObserversThatCompareEqual_RemovesOnlyTheDisposedSubscription()
+    {
+        // Subscriptions are identity-based. Array.IndexOf would use EqualityComparer<T>.Default and
+        // remove whichever instance compares equal first - and DeviceChanges is public API, so a
+        // consumer may well subscribe a record type that overrides Equals.
+        using var broadcaster = new DeviceEventBroadcaster();
+        var first = new EquatableObserver("same");
+        var second = new EquatableObserver("same");
+        Assert.Equal(first, second);
+
+        using var firstSubscription = broadcaster.Subscribe(first);
+        var secondSubscription = broadcaster.Subscribe(second);
+
+        secondSubscription.Dispose();
+        broadcaster.Publish(Event());
+
+        Assert.Equal(1, first.Count);
+        Assert.Equal(0, second.Count);
+    }
+
     // ---------- Concurrency ----------
 
     [Fact]
@@ -344,5 +445,58 @@ public class DeviceEventBroadcasterTests
         // Whether a subscription landed before or after completion, it must observe exactly one
         // terminal signal - never zero, never two.
         Assert.All(observers, o => Assert.Equal(1, o.CompletedCount));
+    }
+
+    private sealed class ThrowOnCompletedObserver : IObserver<DeviceEvent>
+    {
+        public void OnNext(DeviceEvent value)
+        {
+        }
+
+        public void OnCompleted() => throw new ObjectDisposedException("SubscriberOwnedResource");
+
+        public void OnError(Exception error)
+        {
+        }
+    }
+
+    /// <summary>Records whether it ever saw <c>OnNext</c> after <c>OnCompleted</c>.</summary>
+    private sealed class GrammarCheckingObserver : IObserver<DeviceEvent>
+    {
+        private int _completed;
+
+        public bool SawOnNextAfterOnCompleted { get; private set; }
+
+        public void OnNext(DeviceEvent value)
+        {
+            if (Volatile.Read(ref _completed) == 1)
+            {
+                SawOnNextAfterOnCompleted = true;
+            }
+        }
+
+        public void OnCompleted() => Volatile.Write(ref _completed, 1);
+
+        public void OnError(Exception error)
+        {
+        }
+    }
+
+    /// <summary>Two instances with the same key compare equal but are distinct references.</summary>
+    private sealed record EquatableObserver(string Key) : IObserver<DeviceEvent>
+    {
+        private int _count;
+
+        public int Count => Volatile.Read(ref _count);
+
+        public void OnNext(DeviceEvent value) => Interlocked.Increment(ref _count);
+
+        public void OnCompleted()
+        {
+        }
+
+        public void OnError(Exception error)
+        {
+        }
     }
 }

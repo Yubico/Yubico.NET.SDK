@@ -237,7 +237,9 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 // was admitted before disposal, outlived DisposeAsync's bounded drain,
                 // and resumed after the manager disposed the repository. Discarding it
                 // here is what makes "the repository silences any later emission" true -
-                // UpdateCache and the underlying subject both throw once disposed.
+                // UpdateCache throws once disposed. (The broadcaster underneath does not:
+                // publishing after completion is a silent no-op, so UpdateCache's own
+                // ThrowIfDisposed is the single source of that behaviour.)
                 // Nothing is lost: the repository is being torn down.
                 //
                 // The _disposed guard matters: UpdateCache invokes DeviceChanges

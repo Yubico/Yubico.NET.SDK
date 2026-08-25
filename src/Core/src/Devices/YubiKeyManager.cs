@@ -177,6 +177,11 @@ public static class YubiKeyManager
     /// </exception>
     /// <remarks>
     /// <para>Events only flow while monitoring is active (see <see cref="StartMonitoring()"/>).</para>
+    /// <para><strong>Subscription starts on first enumeration, not when this method is called.</strong>
+    /// Begin the <c>await foreach</c> before performing an action expected to produce an event —
+    /// events raised between calling this method and entering the loop are not observed. In practice
+    /// this means iterating directly, as in the example below, rather than storing the sequence and
+    /// enumerating it later.</para>
     /// <para>This is the dependency-free counterpart to <see cref="DeviceChanges"/>. Cancellation and
     /// subscription lifetime are handled by the <c>await foreach</c> itself, so the usual
     /// wait-for-a-device pattern needs no extra plumbing. Unlike an observer subscription, a slow

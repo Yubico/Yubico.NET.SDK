@@ -43,9 +43,17 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
     /// </remarks>
     public IObservable<DeviceEvent> DeviceChanges => _deviceChanges;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Async-sequence view of <see cref="DeviceChanges"/>, for <c>await foreach</c> consumers.
+    /// </summary>
+    /// <param name="cancellationToken">Stops the stream.</param>
+    /// <remarks>
+    /// Deliberately not on <see cref="IYubiKeyDeviceRepository"/>: that interface describes the pure
+    /// cache contract, and the only consumer reached through it needs just <see cref="UpdateCache"/>.
+    /// See <see cref="DeviceEventStream.From"/> for the buffering and overflow contract.
+    /// </remarks>
     public IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
-        _deviceChanges.WatchAsync(cancellationToken);
+        DeviceEventStream.From(_deviceChanges, cancellationToken);
 
     /// <inheritdoc/>
     public bool HasData => _hasData;

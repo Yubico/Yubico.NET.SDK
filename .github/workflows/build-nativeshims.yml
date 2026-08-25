@@ -687,6 +687,7 @@ jobs:
           $packageSource = (Resolve-Path (Join-Path $env:GITHUB_WORKSPACE 'artifacts/package-source')).Path
           $packagesPath = Join-Path $env:GITHUB_WORKSPACE 'artifacts/packages/${{ matrix.rid }}'
           $outputPath = Join-Path $env:GITHUB_WORKSPACE 'artifacts/publish/${{ matrix.rid }}'
+          $nugetConfig = Join-Path (Split-Path $project) 'package-sources.config'
           $nupkgs = @(Get-ChildItem -LiteralPath $packageSource -File -Filter '*.nupkg')
 
           if ($nupkgs.Count -ne 1) {
@@ -703,8 +704,7 @@ jobs:
             -r '${{ matrix.rid }}' `
             --packages $packagesPath `
             --no-cache `
-            --source $packageSource `
-            --source https://api.nuget.org/v3/index.json `
+            --configfile $nugetConfig `
             -p:NativeShimsVersion=$env:NATIVE_SHIMS_VERSION `
             -p:PublishAot=true
           if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed with exit code $LASTEXITCODE." }

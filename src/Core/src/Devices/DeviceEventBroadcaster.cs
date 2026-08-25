@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Runtime.CompilerServices;
+using System.Threading.Channels;
+
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
@@ -48,6 +51,16 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </remarks>
 internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDisposable
 {
+    /// <summary>
+    /// Per-consumer buffer depth for <see cref="WatchAsync"/>.
+    /// </summary>
+    /// <remarks>
+    /// Device events are driven by physical insertion and removal, so a realistic burst is a handful
+    /// of events. 256 is far beyond any human-generated burst: reaching it means the consumer has
+    /// stopped draining, which is reported rather than silently absorbed.
+    /// </remarks>
+    internal const int WatchBufferCapacity = 256;
+
     private readonly Lock _gate = new();
 
     /// <summary>Immutable snapshot; only ever replaced, never mutated in place.</summary>
@@ -134,6 +147,58 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
     }
 
     /// <summary>
+    /// Streams device events as an async sequence, for consumers that prefer <c>await foreach</c> over
+    /// implementing <see cref="IObserver{T}"/>.
+    /// </summary>
+    /// <param name="cancellationToken">Stops the stream. Cancelling is the normal way to stop watching.</param>
+    /// <returns>A sequence that ends when <paramref name="cancellationToken"/> fires or the broadcaster completes.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown from the enumeration when the consumer falls more than <see cref="WatchBufferCapacity"/>
+    /// events behind. See the remarks for why this faults rather than dropping.
+    /// </exception>
+    /// <remarks>
+    /// <para>
+    /// Each call gets its own independent buffer, so one slow consumer cannot affect another or the
+    /// publisher. Unlike an <see cref="IObserver{T}"/> subscription, delivery here is decoupled from
+    /// the publishing thread — a consumer that blocks cannot stall device monitoring.
+    /// </para>
+    /// <para>
+    /// <strong>Overflow faults instead of dropping.</strong> A <see cref="DeviceEvent"/> is a delta,
+    /// not a snapshot: consumers fold Added/Removed into their own view of what is connected.
+    /// Silently discarding one would permanently desynchronise that view — a removal for a device
+    /// never seen added, or a device pinned in the list forever. So an overflow ends the stream with
+    /// an exception, and the consumer should re-enumerate and resynchronise via
+    /// <c>YubiKeyManager.FindAllAsync</c>.
+    /// </para>
+    /// <para>The stream ends normally, without an exception, if the broadcaster completes.</para>
+    /// </remarks>
+    public async IAsyncEnumerable<DeviceEvent> WatchAsync(
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var channel = Channel.CreateBounded<DeviceEvent>(
+            new BoundedChannelOptions(WatchBufferCapacity)
+            {
+                SingleReader = true,
+                SingleWriter = false,
+
+                // Keep reader continuations off the publishing thread; otherwise a consumer would run
+                // inline inside Publish and could stall the monitor - the very hazard this API avoids.
+                AllowSynchronousContinuations = false,
+
+                // With Wait, TryWrite reports failure instead of blocking, which is what lets the
+                // publisher stay non-blocking while still detecting overflow.
+                FullMode = BoundedChannelFullMode.Wait
+            });
+
+        using var subscription = Subscribe(new ChannelObserver(channel.Writer));
+
+        await foreach (var deviceEvent in channel.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
+        {
+            yield return deviceEvent;
+        }
+    }
+
+    /// <summary>
     /// Terminates the sequence. Equivalent to <see cref="Complete"/>; provided so the broadcaster can
     /// participate in the owning type's disposal chain.
     /// </summary>
@@ -169,6 +234,29 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
                 owner.Unsubscribe(target);
             }
         }
+    }
+
+    /// <summary>Bridges the observer contract onto a <see cref="WatchAsync"/> consumer's channel.</summary>
+    private sealed class ChannelObserver(ChannelWriter<DeviceEvent> writer) : IObserver<DeviceEvent>
+    {
+        public void OnNext(DeviceEvent value)
+        {
+            if (writer.TryWrite(value))
+            {
+                return;
+            }
+
+            // Deliberately does not throw: that would propagate into Publish and deny the event to
+            // other subscribers. Instead only this consumer's stream is faulted.
+            _ = writer.TryComplete(new InvalidOperationException(
+                $"The device event stream fell more than {WatchBufferCapacity} events behind and was " +
+                "terminated to avoid silently dropping events. Re-enumerate and resynchronise the " +
+                "device list via YubiKeyManager.FindAllAsync."));
+        }
+
+        public void OnCompleted() => _ = writer.TryComplete();
+
+        public void OnError(Exception error) => _ = writer.TryComplete(error);
     }
 
     /// <summary>Returned to subscribers that arrived after completion; there is nothing to release.</summary>

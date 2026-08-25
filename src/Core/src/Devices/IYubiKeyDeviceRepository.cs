@@ -32,6 +32,16 @@ internal interface IYubiKeyDeviceRepository : IDisposable
     IObservable<DeviceEvent> DeviceChanges { get; }
 
     /// <summary>
+    /// Async-sequence view of the same device change events, for <c>await foreach</c> consumers.
+    /// </summary>
+    /// <param name="cancellationToken">Stops the stream.</param>
+    /// <remarks>
+    /// Each call gets an independent buffer. See <see cref="DeviceEventBroadcaster.WatchAsync"/> for
+    /// the buffering and overflow contract.
+    /// </remarks>
+    IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Indicates whether the cache contains any data.
     /// </summary>
     bool HasData { get; }

@@ -74,15 +74,19 @@ return 0;
 internal static class NativeShimsProbe
 {
     [DllImport("Yubico.NativeShims", EntryPoint = "Native_BN_new", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern IntPtr BnNew();
 
     [DllImport("Yubico.NativeShims", EntryPoint = "Native_BN_clear_free", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern void BnClearFree(IntPtr value);
 
     [DllImport("Yubico.NativeShims", EntryPoint = "Native_SCardEstablishContext", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern uint SCardEstablishContext(uint scope, out IntPtr context);
 
     [DllImport("Yubico.NativeShims", EntryPoint = "Native_SCardReleaseContext", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern uint SCardReleaseContext(IntPtr context);
 
     internal static int Run()

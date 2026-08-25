@@ -157,6 +157,32 @@ the specified relying party. You specify which relying party you are interested 
 supplying the `RelyingParty` object, which you likely retrieved during a call to obtain a
 list of relying parties.
 
+### Credentials with an unrecognized public key type
+
+A credential's public key can use a COSE algorithm that this SDK does not model. This
+happens with credentials created by the experimental `previewSign` extension, whose public
+key is an ARKG-P256 seed.
+
+Enumeration does not fail in that case. The credential's `CredentialPublicKey` will be a
+[CoseUnsupportedPublicKey](xref:Yubico.YubiKey.Fido2.Cose.CoseUnsupportedPublicKey), which
+carries the original COSE encoding in its `EncodedKey` property along with the key type
+and algorithm the YubiKey reported. Every other property of that credential, and every
+other credential belonging to the relying party, is returned as normal.
+
+```csharp
+    foreach (CredentialUserInfo info in credentialList)
+    {
+        if (info.CredentialPublicKey is CoseUnsupportedPublicKey unsupportedKey)
+        {
+            // This SDK has no strongly-typed representation for this key. Decode
+            // unsupportedKey.EncodedKey yourself, or skip the credential.
+            continue;
+        }
+
+        // ... use info.CredentialPublicKey normally
+    }
+```
+
 If you use the commands, you will need to use the `EnumerateCredentialsBeginCommand`
 command to obtain the first credential and the total count of credentials available, and
 then the `EnumerateCredentialsGetNextCommand` to get each successive credential.

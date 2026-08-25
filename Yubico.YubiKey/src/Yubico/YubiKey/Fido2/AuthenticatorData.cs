@@ -107,8 +107,17 @@ namespace Yubico.YubiKey.Fido2
         /// The Credential's public key. This is an optional value and can be null.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// When making a credential, this information will be provided, when
-        /// getting an assertion, it will not.
+        /// getting an assertion, it will not. This property is null if and only
+        /// if the authenticator data contained no attested credential data.
+        /// </para>
+        /// <para>
+        /// If the key uses a COSE algorithm this SDK does not model, this is a
+        /// <see cref="CoseUnsupportedPublicKey"/> carrying the original
+        /// encoding, rather than null. Callers that need to detect such a key
+        /// should test for that type rather than testing for null.
+        /// </para>
         /// </remarks>
         public CoseKey? CredentialPublicKey { get; private set; }
 
@@ -117,8 +126,8 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <remarks>
         /// This property is always populated when attested credential data is present,
-        /// regardless of whether the key was parsed into a <see cref="CoseKey"/> via
-        /// <see cref="CredentialPublicKey"/>.
+        /// regardless of whether the key was parsed into a modeled <see cref="CoseKey"/>
+        /// subclass via <see cref="CredentialPublicKey"/>.
         /// </remarks>
         public ReadOnlyMemory<byte>? EncodedCredentialPublicKey { get; private set; }
 
@@ -195,19 +204,10 @@ namespace Yubico.YubiKey.Fido2
                 // Always read the COSE key bytes to determine their length and store them
                 var coseKeyReader = new CborReader(EncodedAuthenticatorData[offset..], CborConformanceMode.Ctap2Canonical);
                 ReadOnlyMemory<byte> coseKeyBytes = coseKeyReader.ReadEncodedValue();
-                int bytesRead = coseKeyBytes.Length;
                 EncodedCredentialPublicKey = coseKeyBytes.ToArray();
+                CredentialPublicKey = CoseKey.CreateOrUnsupported(coseKeyBytes);
 
-                try
-                {
-                    CredentialPublicKey = CoseKey.Create(coseKeyBytes, out _);
-                }
-                catch (NotSupportedException)
-                {
-                    CredentialPublicKey = null;
-                }
-
-                offset += bytesRead;
+                offset += coseKeyBytes.Length;
             }
             // For some versions of the YubiKey, it is possible there is no
             // extensions data, yet the extensions bit is set. This generally

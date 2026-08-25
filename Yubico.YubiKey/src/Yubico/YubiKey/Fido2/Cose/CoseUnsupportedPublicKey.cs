@@ -1,0 +1,105 @@
+// Copyright 2026 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
+
+namespace Yubico.YubiKey.Fido2.Cose
+{
+    /// <summary>
+    /// A COSE public key whose algorithm this SDK does not model, preserved in
+    /// its original encoded form.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The SDK returns an instance of this class when a YubiKey reports a public
+    /// key using a COSE algorithm that has no strongly-typed representation in
+    /// this version of the SDK. Rather than failing, the SDK preserves the
+    /// original encoding in <see cref="EncodedKey"/> along with the key type and
+    /// algorithm the YubiKey reported, so callers that understand the algorithm
+    /// can decode it themselves.
+    /// </para>
+    /// <para>
+    /// An example is the ARKG-P256 seed public key produced by the experimental
+    /// <c>previewSign</c> extension, which uses a COSE key type and algorithm
+    /// outside the set the SDK models.
+    /// </para>
+    /// <para>
+    /// Because the algorithm is not modeled, <see cref="CoseKey.Type"/> and
+    /// <see cref="CoseKey.Algorithm"/> will generally hold values that are not
+    /// defined members of <see cref="CoseKeyType"/> or
+    /// <see cref="CoseAlgorithmIdentifier"/>. Compare them numerically rather
+    /// than against named members.
+    /// </para>
+        /// <para>
+        /// Instances of this class are created only by the SDK while decoding a
+        /// response from a YubiKey; it cannot be constructed by callers.
+        /// </para>
+        /// <para>
+        /// <see cref="EncodedKey"/> is fixed at construction. The inherited
+        /// <see cref="CoseKey.Type"/> and <see cref="CoseKey.Algorithm"/>
+        /// properties are settable, but changing them does not alter
+        /// <see cref="EncodedKey"/> or the result of <see cref="Encode"/>, and
+        /// will make the reported metadata disagree with the encoded key. Treat
+        /// them as read-only.
+        /// </para>
+        /// </remarks>
+    public sealed class CoseUnsupportedPublicKey : CoseKey
+    {
+        /// <summary>
+        /// The original COSE encoding of the key, exactly as the YubiKey
+        /// returned it.
+        /// </summary>
+        public ReadOnlyMemory<byte> EncodedKey { get; }
+
+        /// <summary>
+        /// Build a new instance from the given encoded key and the key type and
+        /// algorithm reported within it.
+        /// </summary>
+        /// <param name="encodedKey">
+        /// The COSE encoding of the key. The data is copied.
+        /// </param>
+        /// <param name="type">
+        /// The key type (COSE label 1) reported by the encoding. COSE requires
+        /// this label, so callers reject an encoding that omits it rather than
+        /// passing a placeholder.
+        /// </param>
+        /// <param name="algorithm">
+        /// The algorithm (COSE label 3) reported by the encoding.
+        /// </param>
+        internal CoseUnsupportedPublicKey(
+            ReadOnlyMemory<byte> encodedKey,
+            CoseKeyType type,
+            CoseAlgorithmIdentifier algorithm)
+        {
+            EncodedKey = encodedKey.ToArray();
+            Type = type;
+            Algorithm = algorithm;
+        }
+
+        /// <summary>
+        /// Return a new byte array containing the original COSE encoding of the
+        /// key.
+        /// </summary>
+        /// <remarks>
+        /// Because the SDK does not model this key's algorithm, it cannot
+        /// re-encode the key from decoded components. This method returns a copy
+        /// of <see cref="EncodedKey"/>, so the result is byte-for-byte identical
+        /// to what the YubiKey returned.
+        /// </remarks>
+        /// <returns>
+        /// The encoded key.
+        /// </returns>
+        public override byte[] Encode() => EncodedKey.ToArray();
+    }
+}

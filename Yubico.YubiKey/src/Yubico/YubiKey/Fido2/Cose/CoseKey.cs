@@ -108,6 +108,11 @@ namespace Yubico.YubiKey.Fido2.Cose
             // Set out-parameter
             bytesRead = cborMap.BytesRead;
 
+            return CreateFromMap(cborMap, coseEncodedKey);
+        }
+
+        private static CoseKey CreateFromMap(CborMap<int> cborMap, ReadOnlyMemory<byte> coseEncodedKey)
+        {
             var algorithm = GetAlgorithm(cborMap);
             return algorithm switch
             {
@@ -131,6 +136,93 @@ namespace Yubico.YubiKey.Fido2.Cose
                 _ => throw new NotSupportedException(
                     string.Format(CultureInfo.CurrentCulture, ExceptionMessages.UnsupportedAlgorithm))
             };
+        }
+
+        /// <summary>
+        /// Creates the COSE key representation for <paramref name="coseEncodedKey"/>,
+        /// tolerating algorithms this SDK does not model.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This never returns null. When the algorithm is one this SDK models,
+        /// the behavior is identical to <see cref="Create"/>. When the algorithm
+        /// is unrecognized, this returns a <see cref="CoseUnsupportedPublicKey"/>
+        /// carrying the original encoding plus the reported key type and
+        /// algorithm, instead of throwing <see cref="NotSupportedException"/>.
+        /// </para>
+        /// <para>
+        /// This still throws when the encoding is malformed, when the key type
+        /// or algorithm is missing, or when a recognized algorithm is paired
+        /// with the wrong key type. Those indicate corrupt data rather than a
+        /// future algorithm, so they are not tolerated. Malformed CBOR fails
+        /// here exactly as it does in <see cref="Create"/>, with the same
+        /// exception.
+        /// </para>
+        /// <para>
+        /// One case differs from <see cref="Create"/> by design. For an
+        /// algorithm this SDK does not model, <see cref="Create"/> never
+        /// inspects the key type, so it reports the unrecognized algorithm and
+        /// throws <see cref="NotSupportedException"/> whether or not a key type
+        /// is present. This method must read the key type in order to build the
+        /// result, so a missing one surfaces as <see cref="Ctap2DataException"/>
+        /// instead. Both reject the input; only the reported reason differs.
+        /// </para>
+        /// <para>
+        /// Use this when decoding a response field where an unrecognized key
+        /// must not abort decoding of the surrounding data.
+        /// </para>
+        /// </remarks>
+        /// <param name="coseEncodedKey">
+        /// A valid COSE key representation.
+        /// </param>
+        /// <returns>
+        /// A COSE key instance corresponding to the type described by the CBOR
+        /// data, or a <see cref="CoseUnsupportedPublicKey"/> if this SDK does
+        /// not model the algorithm.
+        /// </returns>
+        /// <exception cref="Ctap2DataException">
+        /// The encoding is not a correct COSE key encoding, or it is missing the
+        /// key type or the algorithm.
+        /// </exception>
+        internal static CoseKey CreateOrUnsupported(ReadOnlyMemory<byte> coseEncodedKey)
+        {
+            // Build the map outside the try, so that the only
+            // NotSupportedException the catch below can observe is the one the
+            // algorithm dispatch raises. CborMap also throws
+            // NotSupportedException for an indefinite-length map; that path is
+            // currently unreachable because the Ctap2Canonical reader rejects
+            // indefinite-length items first, but decoding failures are malformed
+            // data rather than an unrecognized algorithm, and must not be
+            // absorbed into an unsupported key if that ever changes.
+            var cborMap = new CborMap<int>(coseEncodedKey);
+
+            try
+            {
+                return CreateFromMap(cborMap, coseEncodedKey);
+            }
+            catch (NotSupportedException)
+            {
+                // Reaching here means CreateFromMap dispatched on an algorithm
+                // this SDK does not model, so GetAlgorithm already ran and the
+                // algorithm is present.
+                var algorithm = (CoseAlgorithmIdentifier)cborMap.ReadInt32(TagAlgorithm);
+
+                // The key type is not read on the unsupported algorithm path,
+                // because IsKeyType only runs for algorithms the SDK models.
+                // COSE requires it in every key, so a missing one is malformed;
+                // reject it here the same way IsKeyType would.
+                if (!cborMap.Contains(TagKeyType))
+                {
+                    throw new Ctap2DataException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.Ctap2MissingRequiredField));
+                }
+
+                var keyType = (CoseKeyType)cborMap.ReadInt32(TagKeyType);
+
+                return new CoseUnsupportedPublicKey(coseEncodedKey, keyType, algorithm);
+            }
         }
 
         private static CoseAlgorithmIdentifier GetAlgorithm(CborMap<int> map)

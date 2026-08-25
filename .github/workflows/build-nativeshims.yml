@@ -704,7 +704,7 @@ jobs:
             --packages $packagesPath `
             --no-cache `
             --source $packageSource `
-            --source 'https://api.nuget.org/v3/index.json' `
+            --source https://api.nuget.org/v3/index.json `
             -p:NativeShimsVersion=$env:NATIVE_SHIMS_VERSION `
             -p:PublishAot=true
           if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed with exit code $LASTEXITCODE." }
@@ -742,8 +742,8 @@ jobs:
         shell: pwsh
         run: |
           $outputPath = Join-Path $env:GITHUB_WORKSPACE 'artifacts/publish/${{ matrix.rid }}'
-          $isWindows = '${{ matrix.os }}' -eq 'windows'
-          $executable = Join-Path $outputPath $(if ($isWindows) { 'NativeAotProbe.exe' } else { 'NativeAotProbe' })
+          $isWindowsTarget = '${{ matrix.os }}' -eq 'windows'
+          $executable = Join-Path $outputPath $(if ($isWindowsTarget) { 'NativeAotProbe.exe' } else { 'NativeAotProbe' })
           $sharedName = switch ('${{ matrix.os }}') {
             'windows' { 'Yubico.NativeShims.dll' }
             'linux' { 'libYubico.NativeShims.so' }

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
@@ -345,16 +344,5 @@ public class DeviceEventBroadcasterTests
         // Whether a subscription landed before or after completion, it must observe exactly one
         // terminal signal - never zero, never two.
         Assert.All(observers, o => Assert.Equal(1, o.CompletedCount));
-    }
-
-    private sealed class StubYubiKey(string deviceId) : IYubiKey
-    {
-        public string DeviceId { get; } = deviceId;
-
-        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection =>
-            throw new NotSupportedException();
     }
 }

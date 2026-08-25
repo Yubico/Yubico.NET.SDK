@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
-/// Tests for <see cref="DeviceEventBroadcaster.WatchAsync"/> — the async-sequence surface that lets
+/// Tests for <see cref="DeviceEventStream.From"/> — the async-sequence surface that lets
 /// consumers observe device events without referencing <c>System.Reactive</c>.
 /// </summary>
-public class DeviceEventBroadcasterWatchAsyncTests
+public class DeviceEventStreamTests
 {
     private static DeviceEvent Added(string deviceId) =>
         new(DeviceAction.Added, new StubYubiKey(deviceId));
@@ -35,7 +35,7 @@ public class DeviceEventBroadcasterWatchAsyncTests
         var collected = new List<string>();
         var consumer = Task.Run(async () =>
         {
-            await foreach (var e in broadcaster.WatchAsync(cts.Token))
+            await foreach (var e in DeviceEventStream.From(broadcaster, cts.Token))
             {
                 collected.Add(e.Device.DeviceId);
                 if (collected.Count == 3)
@@ -65,7 +65,7 @@ public class DeviceEventBroadcasterWatchAsyncTests
         var count = 0;
         var consumer = Task.Run(async () =>
         {
-            await foreach (var _ in broadcaster.WatchAsync(cts.Token))
+            await foreach (var _ in DeviceEventStream.From(broadcaster, cts.Token))
             {
                 count++;
             }
@@ -87,7 +87,7 @@ public class DeviceEventBroadcasterWatchAsyncTests
         broadcaster.Complete();
 
         var count = 0;
-        await foreach (var _ in broadcaster.WatchAsync(TestContext.Current.CancellationToken))
+        await foreach (var _ in DeviceEventStream.From(broadcaster, TestContext.Current.CancellationToken))
         {
             count++;
         }
@@ -103,7 +103,7 @@ public class DeviceEventBroadcasterWatchAsyncTests
 
         var consumer = Task.Run(async () =>
         {
-            await foreach (var _ in broadcaster.WatchAsync(cts.Token))
+            await foreach (var _ in DeviceEventStream.From(broadcaster, cts.Token))
             {
                 // no-op
             }
@@ -123,7 +123,7 @@ public class DeviceEventBroadcasterWatchAsyncTests
 
         var consumer = Task.Run(async () =>
         {
-            await foreach (var _ in broadcaster.WatchAsync(cts.Token))
+            await foreach (var _ in DeviceEventStream.From(broadcaster, cts.Token))
             {
                 break;
             }
@@ -149,7 +149,7 @@ public class DeviceEventBroadcasterWatchAsyncTests
         async Task<List<string>> ConsumeTwoAsync()
         {
             var seen = new List<string>();
-            await foreach (var e in broadcaster.WatchAsync(cts.Token))
+            await foreach (var e in DeviceEventStream.From(broadcaster, cts.Token))
             {
                 seen.Add(e.Device.DeviceId);
                 if (seen.Count == 2)
@@ -186,7 +186,7 @@ public class DeviceEventBroadcasterWatchAsyncTests
         var consumer = Task.Run(async () =>
         {
             var stalled = false;
-            await foreach (var _ in broadcaster.WatchAsync(cts.Token))
+            await foreach (var _ in DeviceEventStream.From(broadcaster, cts.Token))
             {
                 // Stall once, letting the buffer fill behind us, then drain freely so the
                 // enumeration can reach the fault the overflow queued up.
@@ -201,7 +201,7 @@ public class DeviceEventBroadcasterWatchAsyncTests
         await WaitForSubscriberAsync(broadcaster, cts.Token);
 
         // One to get consumed, then far more than the buffer can hold.
-        for (var i = 0; i < DeviceEventBroadcaster.WatchBufferCapacity + 50; i++)
+        for (var i = 0; i < DeviceEventStream.BufferCapacity + 50; i++)
         {
             broadcaster.Publish(Added($"device-{i}"));
         }
@@ -220,14 +220,14 @@ public class DeviceEventBroadcasterWatchAsyncTests
         using var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
-        var healthy = new Infrastructure.RecordingObserver<DeviceEvent>();
+        var healthy = new RecordingObserver<DeviceEvent>();
         using var healthySubscription = broadcaster.Subscribe(healthy);
 
         var gate = new SemaphoreSlim(0, 1);
         var consumer = Task.Run(async () =>
         {
             var stalled = false;
-            await foreach (var _ in broadcaster.WatchAsync(cts.Token))
+            await foreach (var _ in DeviceEventStream.From(broadcaster, cts.Token))
             {
                 if (!stalled)
                 {
@@ -242,7 +242,7 @@ public class DeviceEventBroadcasterWatchAsyncTests
             cts.Token,
             "watcher did not subscribe");
 
-        const int total = DeviceEventBroadcaster.WatchBufferCapacity + 50;
+        const int total = DeviceEventStream.BufferCapacity + 50;
         for (var i = 0; i < total; i++)
         {
             broadcaster.Publish(Added($"device-{i}"));
@@ -289,16 +289,5 @@ public class DeviceEventBroadcasterWatchAsyncTests
             .GetField("_observers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
         return ((IObserver<DeviceEvent>[])field!.GetValue(broadcaster)!).Length;
-    }
-
-    private sealed class StubYubiKey(string deviceId) : IYubiKey
-    {
-        public string DeviceId { get; } = deviceId;
-
-        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection =>
-            throw new NotSupportedException();
     }
 }

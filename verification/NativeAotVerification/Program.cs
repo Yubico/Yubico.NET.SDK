@@ -3,6 +3,7 @@
 // not part of the recurring workflow. See docs/NATIVE-AOT.md for the evidence boundaries.
 
 using System.Globalization;
+using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
@@ -41,6 +42,11 @@ foreach (Type type in linkedModuleEntryTypes)
     Console.WriteLine($"  Linked module entry type: {type.FullName}");
 }
 
+if (args.Contains("--native-shims-probe", StringComparer.Ordinal))
+{
+    return NativeShimsProbe.Run();
+}
+
 // Real device discovery through Core's PC/SC + platform interop path — safe with zero attached
 // YubiKeys (returns an empty list rather than throwing).
 IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync(CancellationToken.None);
@@ -64,6 +70,43 @@ if (args.Contains("--monitor", StringComparer.Ordinal))
 
 Console.WriteLine("Native AOT verification host completed without crashing.");
 return 0;
+
+internal static class NativeShimsProbe
+{
+    [DllImport("Yubico.NativeShims", EntryPoint = "Native_BN_new", ExactSpelling = true)]
+    private static extern IntPtr BnNew();
+
+    [DllImport("Yubico.NativeShims", EntryPoint = "Native_BN_clear_free", ExactSpelling = true)]
+    private static extern void BnClearFree(IntPtr value);
+
+    [DllImport("Yubico.NativeShims", EntryPoint = "Native_SCardEstablishContext", ExactSpelling = true)]
+    private static extern uint SCardEstablishContext(uint scope, out IntPtr context);
+
+    [DllImport("Yubico.NativeShims", EntryPoint = "Native_SCardReleaseContext", ExactSpelling = true)]
+    private static extern uint SCardReleaseContext(IntPtr context);
+
+    internal static int Run()
+    {
+        IntPtr value = BnNew();
+        if (value == IntPtr.Zero)
+        {
+            Console.Error.WriteLine("Native_BN_new returned a null pointer.");
+            return 1;
+        }
+
+        BnClearFree(value);
+
+        uint result = SCardEstablishContext(2, out IntPtr context);
+        Console.WriteLine($"Native_SCardEstablishContext returned 0x{result:X8}.");
+        if (result == 0)
+        {
+            _ = SCardReleaseContext(context);
+        }
+
+        Console.WriteLine("Direct NativeShims OpenSSL and PC/SC calls succeeded.");
+        return 0;
+    }
+}
 
 /// <summary>
 /// Interactive device-monitoring protocol. Attaches every consumer surface simultaneously so one

@@ -87,11 +87,18 @@ jobs:
           fi
 
           OTOOL_OUTPUT="$(otool -L "$BIN")"
-          if [[ "$OTOOL_OUTPUT" == *"Yubico.NativeShims"* ]]; then
-            echo "NativeShims remains a dynamic dependency:"
+          if [[ "$OTOOL_OUTPUT" =~ Yubico.NativeShims|libcrypto|libssl ]]; then
+            echo "NativeShims or OpenSSL remains a dynamic dependency:"
             echo "$OTOOL_OUTPUT"
             exit 1
           fi
+
+      - name: Run direct NativeShims probe (no fallback)
+        working-directory: verification/NativeAotVerification/bin/Release/net10.0/${{ matrix.rid }}/publish
+        run: |
+          BIN="./Yubico.YubiKit.NativeAotVerification"
+          chmod +x "$BIN"
+          "$BIN" --native-shims-probe
 
       - name: Run published Native AOT binary (Core discovery entry point)
         working-directory: verification/NativeAotVerification/bin/Release/net10.0/${{ matrix.rid }}/publish

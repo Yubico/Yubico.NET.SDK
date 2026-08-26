@@ -175,6 +175,20 @@ The build script automatically discovers projects using glob patterns:
 
 This means you don't need to manually update the build script when adding new projects that follow the standard structure. Run `dotnet toolchain.cs -- --help` to see the current list of discovered projects.
 
+## Native AOT Publish Verification
+
+Native AOT publishing is **not** a `dotnet toolchain.cs` target — it is verified independently via
+[`.github/workflows/native-aot.yml`](.github/workflows/native-aot.yml), which runs
+`dotnet publish -p:PublishAot=true` directly against
+[`verification/NativeAotVerification`](verification/NativeAotVerification), a minimal internal
+console host that references every in-scope SDK library. See
+[`docs/NATIVE-AOT.md`](docs/NATIVE-AOT.md) for the full support contract. To reproduce locally:
+
+```bash
+dotnet publish verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj \
+  -c Release -r osx-arm64 --self-contained -p:PublishAot=true
+```
+
 ## Code Coverage
 
 The `coverage` target picks a collector per project, because the two test platforms need different mechanisms:

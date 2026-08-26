@@ -107,11 +107,20 @@ Console.WriteLine(string.Join(", ", info.Versions));
 - **Yubico.YubiKit.SecurityDomain** - Secure channel (SCP03/SCP11) and key management
 - **Yubico.YubiKit.YubiHsm** - YubiHSM Auth applet operations on YubiKey
 
+## Native AOT
+
+All SDK library packages (`Core`, `Management`, `Piv`, `Fido2`, `WebAuthn`, `Oath`, `OpenPgp`,
+`SecurityDomain`, `YubiOtp`, `YubiHsm`) are Native AOT compatible and macOS-first officially
+supported. See [`docs/NATIVE-AOT.md`](docs/NATIVE-AOT.md) for the support contract, platform
+matrix, and deployment guidance. CLI tools and test projects are out of scope for Native AOT
+support.
+
 ## Documentation
 
 - **[Developer Guide](docs/)** - Detailed documentation for each module
 - **[Physical Device Model](docs/architecture/physical-device-model.md)** - Discovery, transport selection, and session/connection ownership
 - **[Device Discovery Guarantees](docs/architecture/device-discovery-guarantees.md)** - Exact grouping guarantees, conservative splits, and platform bounds
+- **[Native AOT Support](docs/NATIVE-AOT.md)** - Native AOT support contract, platform matrix, and deployment guidance
 - **[API Reference](https://docs.yubico.com/yesdk/)** - Complete API documentation
 - Module examples live under `src/<Module>/examples/`
 

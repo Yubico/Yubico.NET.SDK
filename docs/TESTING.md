@@ -489,7 +489,7 @@ dotnet toolchain.cs -- test --filter "Category!=RequiresUserPresence"
 
 - **UnitTests** — xUnit, no hardware required
 - **IntegrationTests** — xUnit, requires physical YubiKey
-- **TestProject** — ASP.NET Core with NSubstitute, targets .NET 9 with AOT
+- **TestProject** — ASP.NET Core with NSubstitute, targets net10.0 with AOT
 
 ### Test All Public APIs
 

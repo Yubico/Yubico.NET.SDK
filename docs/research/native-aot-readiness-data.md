@@ -537,9 +537,14 @@ separate OpenSSL archive. The approved Option B moves that responsibility into
 pack one merged archive per supported RID, and activate package-owned AOT link targets only when
 `PublishAot=true`. Shared libraries remain in the package for non-AOT consumers.
 
-**Package under validation:** `Yubico.NativeShims` `1.17.4-prerelease.20260825.2`, restored from the
+**Validated package:** `Yubico.NativeShims` `1.17.4-prerelease.20260825.3`, restored from the
 internal Yubico GitHub Packages feed. The committed `nuget.config` remains nuget.org-only; workflows
 add the authenticated source and source mapping ephemerally.
+
+The preceding `.1` and `.2` prereleases exposed OpenSSL archive members tagged for macOS 14 while
+the AOT application targeted macOS 12. The `.3` build uses custom vcpkg triplets that set the
+dependency deployment target to 12.0. The package workflow rejects the actual linker diagnostic,
+so passing macOS jobs prove the merged archive respects the SDK's deployment floor.
 
 ### M1 — Local artifact-size evidence (macOS companion work)
 
@@ -553,6 +558,18 @@ These are measured local artifacts, not CI results. The merged archive is an inp
 final executable is smaller because the native linker includes only reachable objects and removes
 unused sections.
 
+The complete seven-RID package grows because Option B deliberately ships one merged
+NativeShims/OpenSSL archive for every RID alongside the existing shared libraries:
+
+| Package artifact | Bytes | Relative to shared-only baseline |
+|---|---:|---:|
+| `develop` shared-only package ([run 32914142010](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32914142010)) | 12,615,416 | 1.00x |
+| Option B `.3` prerelease ([run 32916784863](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32916784863)) | 83,677,266 | 6.63x |
+
+The increase is 71,061,850 bytes (563%). This package-size tradeoff was explicitly accepted for the
+single-package Option B design; the final AOT executable does not absorb unreachable archive
+members.
+
 ### M2 — Local functional and dependency evidence (macOS companion work)
 
 - Direct Native_BN and SCard calls succeeded from the Native AOT executable.
@@ -562,22 +579,34 @@ unused sections.
 This closes the local design question: the merged archive supplies both NativeShims and its crypto
 objects while PC/SC remains an operating-system link dependency.
 
-### Package/CI measurement slots — pending integrator results
+### Package and CI results
 
-Do not infer results for the remaining rows from M1/M2. The integrator must fill these after the
-internal package is published and the workflows run.
+The NativeShims workflow restored the exact package built in the same run, checked its hash,
+published and executed the direct OpenSSL/PCSC probe, rejected shared sidecars and dynamic
+NativeShims/OpenSSL dependencies, and published the prerelease internally only after every RID
+passed.
 
-| RID | Internal package restore | AOT publish | NativeShims sidecar absent | No dynamic NativeShims/OpenSSL dependency | Existing discovery path executes | Result/evidence |
+| RID | Exact package restore | AOT publish | NativeShims sidecar absent | No dynamic NativeShims/OpenSSL dependency | Direct native probe executes | Result/evidence |
 |---|---|---|---|---|---|---|
-| `osx-arm64` | Pending | Pending | Pending | Pending | Pending | `.github/workflows/native-aot.yml` run URL: _pending_ |
-| `osx-x64` | Pending | Pending | Pending | Pending | Pending | Package workflow/run URL: _pending_ |
-| `linux-x64` | Pending | Pending | Pending | Pending | Pending | Package workflow/run URL: _pending_ |
-| `linux-arm64` | Pending | Pending | Pending | Pending | Pending | Package workflow/run URL: _pending_ |
-| `win-x64` | Pending | Pending | Pending | Pending | Pending | Package workflow/run URL: _pending_ |
-| `win-x86` | Pending | Pending | Pending | Pending | Pending | Package workflow/run URL: _pending_ |
-| `win-arm64` | Pending | Pending | Pending | Pending | Pending | Package workflow/run URL: _pending_ |
+| `osx-arm64` | Pass | Pass | Pass | Pass | Pass | [NativeShims run 32916784863](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32916784863) |
+| `osx-x64` | Pass | Pass | Pass | Pass | Pass | [NativeShims run 32916784863](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32916784863) |
+| `linux-x64` | Pass | Pass | Pass | Pass | Pass | [NativeShims run 32916784863](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32916784863) |
+| `linux-arm64` | Pass | Pass | Pass | Pass | Pass | [NativeShims run 32916784863](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32916784863) |
+| `win-x64` | Pass | Pass | Pass | Pass | Pass | [NativeShims run 32916784863](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32916784863) |
+| `win-x86` | Pass | Pass | Pass | Pass | Pass | [NativeShims run 32916784863](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32916784863) |
+| `win-arm64` | Pass | Pass | Pass | Pass | Pass | [NativeShims run 32916784863](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32916784863) |
 
-**Completion rule:** AOT-B11 is resolved by design and package wiring, but package validation is not
-complete until the internal package restores successfully, every packaged RID passes its static
-archive checks, and this repository's `osx-arm64` gate publishes and executes without a sidecar or
-dynamic NativeShims dependency.
+The v2 consumer then restored the published `.3` prerelease from the internal feed. Its
+[`osx-arm64` AOT run](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32918324461) published
+without a sidecar or dynamic NativeShims/OpenSSL dependency, completed direct Native_BN and SCard
+calls, and ran the existing discovery path. The companion
+[ordinary build](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32918324469) passed
+documentation validation, build, unit tests, runtime resilience checks, package creation, and
+internal publication against the same NativeShims prerelease. Public-feed restores remain on stable
+NativeShims 1.17.2; both a clean local restore and the repository's
+[automatic dependency submission](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32918323911)
+passed without access to the internal feed.
+
+**Completion rule:** satisfied. The exact package passed static archive and execution checks on all
+seven RIDs, and the v2 internal-feed consumer published and executed without a NativeShims sidecar
+or dynamic NativeShims/OpenSSL dependency.

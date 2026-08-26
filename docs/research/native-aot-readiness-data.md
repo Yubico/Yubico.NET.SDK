@@ -410,7 +410,7 @@ Verified:
 | Composite USB key (CCID + HID FIDO + HID OTP) emits **one** event, not three | ✅ steps 2, 3 |
 | NFC key (SmartCard-only) emits one event — no over-merge/split vs composite | ✅ step 5 |
 | `Removed` correlates to the same device's `Added` while a sibling stays untouched | ✅ step 4 |
-| Rapid insert/remove ×3 coalesces with no duplicates or missed events | ✅ step 6 |
+| Rapid insert/remove activity produces both event directions and an identical sequence across all sinks | ✅ step 6 + cross-sink consistency |
 | Unsubscribed observer receives nothing further | ✅ step 7 |
 | All live sinks observe an **identical, identically-ordered** sequence | ✅ 8/8 events |
 | Every `Removed` correlates to a prior `Added` | ✅ |
@@ -419,7 +419,7 @@ Verified:
 | Monitoring restarts after shutdown (static state recreates) | ✅ step 9 |
 
 The cross-sink identity check is the load-bearing one: two observer subscribers and the async
-consumer agreed on all 8 events in the same order, across composite USB, NFC, a hot-plug storm, and
+consumer agreed on all 8 events in the same order, across composite USB, NFC, rapid transport activity, and
 a transport transition. That is direct evidence the hand-rolled multicast replacing Rx's
 `Subject<T>` is correct, and step 8 exercises the C3 fix that isolates terminal notification per
 observer.

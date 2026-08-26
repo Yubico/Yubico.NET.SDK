@@ -159,20 +159,33 @@ internal static class MonitorVerification
         Step(5, "Tap/hold the NFC key on the reader (SmartCard-only; contrast with composite USB). "
               + "Skip with Enter if unavailable.", sinkA, expected: -1, failures);
 
+        var rapidActivityStart = sinkA.Snapshot().Count;
         Step(6, "Rapidly insert and remove key B three times.", sinkA, expected: -1, failures);
+        var rapidActivity = sinkA.Snapshot().Skip(rapidActivityStart).ToList();
+        if (!rapidActivity.Any(e => e.StartsWith($"{DeviceAction.Added}|", StringComparison.Ordinal))
+            || !rapidActivity.Any(e => e.StartsWith($"{DeviceAction.Removed}|", StringComparison.Ordinal)))
+        {
+            failures.Add("step 6: rapid activity did not produce both Added and Removed events");
+            Console.WriteLine("  FAIL  step 6: expected both Added and Removed events");
+        }
+        else
+        {
+            Console.WriteLine("  ok    step 6: observed both Added and Removed events");
+        }
 
         subTransient.Dispose();
         var transientAtUnsubscribe = sinkTransient.Snapshot().Count;
+        var activeAtUnsubscribe = sinkA.Snapshot().Count;
 
         // Count is informational: with a two-key setup the operator may be moving one key between
         // transports, which legitimately produces a Removed and an Added.
         Step(7, "One observer just unsubscribed. Attach a key that is not currently attached "
               + "(moving one off the NFC reader to USB is fine).", sinkA, expected: -1, failures);
 
-        if (sinkA.Snapshot().Count == baseline)
+        if (sinkA.Snapshot().Count == activeAtUnsubscribe)
         {
-            failures.Add("step 7: no events observed at all");
-            Console.WriteLine("  FAIL  step 7: no events observed");
+            failures.Add("step 7: no event observed after transient observer unsubscribed");
+            Console.WriteLine("  FAIL  step 7: no post-unsubscribe event observed");
         }
 
         if (sinkTransient.Snapshot().Count != transientAtUnsubscribe)

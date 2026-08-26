@@ -804,8 +804,8 @@ jobs:
             throw "Dependency inspection failed with exit code $LASTEXITCODE.`n$dependencies"
           }
           Write-Host $dependencies
-          if ($dependencies -match '(?i)Yubico\.NativeShims') {
-            throw "Published executable dynamically depends on NativeShims."
+          if ($dependencies -match '(?i)(Yubico\.NativeShims|lib(?:crypto|ssl))') {
+            throw "Published executable dynamically depends on NativeShims or OpenSSL."
           }
 
       - name: Verify hardened Linux dynamic exports

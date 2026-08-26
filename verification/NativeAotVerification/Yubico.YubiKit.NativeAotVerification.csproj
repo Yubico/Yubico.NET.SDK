@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Native AOT publish/link verification host. NOT an SDK library, NOT part of Cli.Shared/Cli.Commands,
+    NOT a test project — it exists solely so CI can run `dotnet publish -p:PublishAot=true` against a
+    real executable that references every in-scope SDK library and touches representative public API
+    surface, so the ILC (IL Compiler) trimming/AOT analysis has real code paths to walk.
+
+    This project is intentionally excluded from the main solution and from `dotnet toolchain.cs` package
+    discovery (it lives outside `src/` and isn't named `Yubico.YubiKit.*`), and it is never packed or
+    published as a NuGet package. See docs/NATIVE-AOT.md for the support contract this verifies.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Yubico.YubiKit.NativeAotVerification</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.NativeAotVerification</AssemblyName>
+
+    <!-- Never pack/publish this internal verification host as a NuGet package. -->
+    <IsPackable>false</IsPackable>
+    <IsYubiKitSdkLibrary>false</IsYubiKitSdkLibrary>
+
+    <!-- Native AOT publish settings (only take effect when publishing, not on ordinary builds). -->
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Core/src/Yubico.YubiKit.Core.csproj" />
+    <ProjectReference Include="../../src/Management/src/Yubico.YubiKit.Management.csproj" />
+    <ProjectReference Include="../../src/Piv/src/Yubico.YubiKit.Piv.csproj" />
+    <ProjectReference Include="../../src/Fido2/src/Yubico.YubiKit.Fido2.csproj" />
+    <ProjectReference Include="../../src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" />
+    <ProjectReference Include="../../src/Oath/src/Yubico.YubiKit.Oath.csproj" />
+    <ProjectReference Include="../../src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" />
+    <ProjectReference Include="../../src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj" />
+    <ProjectReference Include="../../src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj" />
+    <ProjectReference Include="../../src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,59 @@
+name: Native AOT Publish Gate (2.0)
+
+# Publish-only verification that the in-scope SDK libraries (Core, Management, Piv, Fido2,
+# WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, YubiHsm) remain Native AOT compatible.
+#
+# This does NOT run tests and does NOT touch CLI projects — see docs/NATIVE-AOT.md for the
+# official support contract. verification/NativeAotVerification is a minimal internal publish
+# host (not a shipped package) that references every in-scope SDK library so the ILC (IL
+# Compiler) trimming/AOT analysis has real code to walk during publish.
+#
+# Phase 1 (current): macOS only, matching the macOS-first support rollout. Phase 2 will extend
+# the matrix to win-x64 and linux-x64 once their runtime verification matrix is closed.
+
+on:
+  push:
+    branches: [ yubikit*, yubikit/** ]
+  pull_request:
+    branches: [ yubikit*, yubikit/** ]
+
+jobs:
+  native-aot-publish:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            rid: osx-arm64
+    runs-on: ${{ matrix.os }}
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_NOLOGO: 1
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    steps:
+      - name: Check out source
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Publish Native AOT verification host (${{ matrix.rid }})
+        run: >
+          dotnet publish verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj
+          -c Release -r ${{ matrix.rid }} --self-contained -p:PublishAot=true
+
+      - name: Run published Native AOT binary (device discovery only; no hardware required)
+        run: |
+          BIN="verification/NativeAotVerification/bin/Release/net10.0/${{ matrix.rid }}/publish/Yubico.YubiKit.NativeAotVerification"
+          chmod +x "$BIN"
+          "$BIN"

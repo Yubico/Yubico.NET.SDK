@@ -727,7 +727,7 @@ jobs:
             throw "Restored NativeShims package does not match the current-run package artifact."
           }
 
-          dotnet publish $project `
+          $publishOutput = @(dotnet publish $project `
             -c Release `
             -r '${{ matrix.rid }}' `
             --no-restore `
@@ -735,8 +735,14 @@ jobs:
             -p:NativeShimsVersion=$env:NATIVE_SHIMS_VERSION `
             -p:RestorePackagesPath=$packagesPath `
             -p:PublishAot=true `
-            -p:ContinuousIntegrationBuild=true
-          if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed with exit code $LASTEXITCODE." }
+            -p:ContinuousIntegrationBuild=true 2>&1)
+          $publishExitCode = $LASTEXITCODE
+          $publishOutput | ForEach-Object { Write-Host $_ }
+          if ($publishExitCode -ne 0) { throw "dotnet publish failed with exit code $publishExitCode." }
+          if ('${{ matrix.os }}' -eq 'macos' -and
+              $publishOutput -match "built for newer 'macOS' version") {
+            throw "Static archive contains objects built for a newer macOS deployment target."
+          }
 
       - name: Remove shared shim and verify native output
         shell: pwsh

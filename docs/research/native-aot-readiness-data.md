@@ -537,7 +537,7 @@ separate OpenSSL archive. The approved Option B moves that responsibility into
 pack one merged archive per supported RID, and activate package-owned AOT link targets only when
 `PublishAot=true`. Shared libraries remain in the package for non-AOT consumers.
 
-**Package under validation:** `Yubico.NativeShims` `1.17.4-prerelease.20260825.1`, restored from the
+**Package under validation:** `Yubico.NativeShims` `1.17.4-prerelease.20260825.2`, restored from the
 internal Yubico GitHub Packages feed. The committed `nuget.config` remains nuget.org-only; workflows
 add the authenticated source and source mapping ephemerally.
 

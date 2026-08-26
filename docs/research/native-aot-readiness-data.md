@@ -597,14 +597,14 @@ passed.
 | `win-arm64` | Pass | Pass | Pass | Pass | Pass | [NativeShims run 32916784863](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32916784863) |
 
 The v2 consumer then restored the published `.3` prerelease from the internal feed. Its
-[`osx-arm64` AOT run](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32918324461) published
+[`osx-arm64` AOT run](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32943193054) published
 without a sidecar or dynamic NativeShims/OpenSSL dependency, completed direct Native_BN and SCard
 calls, and ran the existing discovery path. The companion
-[ordinary build](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32918324469) passed
+[ordinary build](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32943193053) passed
 documentation validation, build, unit tests, runtime resilience checks, package creation, and
 internal publication against the same NativeShims prerelease. Public-feed restores remain on the
 parent branch's stable NativeShims 1.16.1; both a clean local restore and the repository's
-[automatic dependency submission](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32918323911)
+[automatic dependency submission](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32943191939)
 passed without access to the internal feed.
 
 **Completion rule:** satisfied. The exact package passed static archive and execution checks on all

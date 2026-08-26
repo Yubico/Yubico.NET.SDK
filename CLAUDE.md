@@ -138,7 +138,7 @@ dotnet toolchain.cs -- pack --include-docs
 
 `codemapper .` generates the full surface map. The non-obvious patterns:
 
-- **Device discovery** — `IDeviceRepository` + `DeviceMonitorService` (hosted) + `DeviceListenerService` (background). Events flow as `IObservable<DeviceEvent>` via System.Reactive.
+- **Device discovery** — `IDeviceRepository` + `DeviceMonitorService` (hosted) + `DeviceListenerService` (background). Events flow through `DeviceEventBroadcaster` (multicast) and `DeviceEventStream` (buffering), surfaced as `YubiKeyManager.WatchAsync` (`IAsyncEnumerable`) and `DeviceChanges` (`IObservable`). No reactive dependency - see docs/NATIVE-AOT.md.
 - **Access tiers** — Applet sessions are the golden path; public `RawSmartCardSession`, `RawFidoHidSession`, and `RawOtpHidSession` provide guarded low-level exchanges; public raw connection I/O is an explicitly unguarded expert escape hatch. `ProtocolFactory` and the `IProtocol` family are internal session machinery. See [Raw Access Tiers](docs/architecture/raw-access-tiers.md).
 - **Connection abstraction** — `IConnection` is the public transport base. Typed raw connections remain public; protocol implementations and factories are internal.
 - **APDU pipeline** — `IApduFormatter` (`Short`/`Extended`) → `IApduProcessor` decorators (`CommandChainingProcessor`, `ChainedResponseProcessor`, `ApduFormatProcessor`). Transparent size-limit + chaining handling.

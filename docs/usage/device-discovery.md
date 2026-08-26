@@ -35,7 +35,8 @@ The `YubiKeyManager` class is a **static-only API** - no dependency injection or
 | `StartMonitoring(TimeSpan)` | Start monitoring with custom interval |
 | `StopMonitoring()` | Stop monitoring |
 | `IsMonitoring` | Check if monitoring is active |
-| `DeviceChanges` | Observable sequence of repository-diffed device events |
+| `WatchAsync(CancellationToken)` | Async sequence of repository-diffed device events (`await foreach`) |
+| `DeviceChanges` | The same events as an `IObservable<DeviceEvent>` |
 
 ### Lifecycle Methods
 
@@ -59,16 +60,21 @@ var hidDevices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
 
 ## Device Monitoring
 
-For applications that need to react to device connections/disconnections:
+For applications that need to react to device connections and disconnections. The SDK has **no
+reactive dependency** — both surfaces below use BCL types only.
+
+### `await foreach` (recommended)
 
 ```csharp
-using System;
-using System.Reactive.Linq;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 
-// Subscribe to device events
-using var subscription = YubiKeyManager.DeviceChanges.Subscribe(e =>
+using var cts = new CancellationTokenSource();
+
+// Start monitoring (events won't flow until this is called)
+YubiKeyManager.StartMonitoring();
+
+await foreach (var e in YubiKeyManager.WatchAsync(cts.Token))
 {
     var message = e.Action switch
     {
@@ -78,19 +84,70 @@ using var subscription = YubiKeyManager.DeviceChanges.Subscribe(e =>
     };
 
     Console.WriteLine($"Device {message}: {e.Device.DeviceId} ({e.Device.AvailableConnections})");
-});
-
-// Start monitoring (events won't flow until this is called)
-YubiKeyManager.StartMonitoring();
-
-// ... application runs ...
-
-// Clean up
-await YubiKeyManager.ShutdownAsync();
+}
 ```
 
+Cancel the token to stop watching; the loop ends and the subscription is released automatically.
+
+> **Start enumerating before the action you expect to trigger an event.** `WatchAsync` subscribes on
+> the first iteration, not when it is called, so events raised in between are not observed.
+
+#### Waiting for a specific device event
+
+The most common case — "insert your YubiKey" with a timeout — needs no extra plumbing:
+
+```csharp
+using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+YubiKeyManager.StartMonitoring();
+
+await foreach (var e in YubiKeyManager.WatchAsync(cts.Token))
+{
+    if (e.Action == DeviceAction.Added)
+    {
+        Console.WriteLine($"Got it: {e.Device.DeviceId}");
+        break;
+    }
+}
+```
+
+Each call to `WatchAsync` gets its own independent buffer, so several watchers can run concurrently
+without interfering. If a consumer stops draining and falls more than 256 events behind, its stream
+ends with an `InvalidOperationException` rather than silently dropping events — resynchronise with
+`FindAllAsync` and re-enumerate. Because `DeviceEvent` is a delta rather than a snapshot, dropping
+one would permanently desynchronise your device list, so the SDK reports it instead.
+
+### `IObservable<DeviceEvent>`
+
+`DeviceChanges` exposes the same events for observer-style consumers:
+
+```csharp
+using var subscription = YubiKeyManager.DeviceChanges.Subscribe(myObserver);
+```
+
+`IObservable<T>` is a BCL type, so this works with no extra packages — but the BCL only provides
+`Subscribe(IObserver<DeviceEvent>)`, meaning you supply an observer object.
+
+The familiar lambda overload and the query operators come from **Reactive Extensions**, which the
+SDK no longer references. Add it yourself if you want them:
+
+```xml
+<PackageReference Include="System.Reactive" Version="6.0.1" />
+```
+
+```csharp
+using System.Reactive.Linq;
+
+using var subscription = YubiKeyManager.DeviceChanges
+    .Where(e => e.Action == DeviceAction.Added)
+    .Subscribe(e => Console.WriteLine($"Connected: {e.Device.DeviceId}"));
+```
+
+> **Migrating from an earlier alpha?** `System.Reactive` used to arrive transitively through
+> `Yubico.YubiKit.Core`. It was removed because it was the SDK's only Native AOT compatibility
+> finding. Existing Rx code compiles unchanged after adding the package reference above.
+
 `StartMonitoring()` performs an initial repository rescan. Native SmartCard and HID listener notifications are
-treated as rescan triggers only. Public `DeviceChanges` events are emitted from repository diffs after discovery,
+treated as rescan triggers only. Public device events are emitted from repository diffs after discovery,
 so a raw HID listener notification is not itself authoritative evidence that a YubiKey physical device was added
 or removed.
 
@@ -103,18 +160,30 @@ YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(10));
 
 ### UI Thread Marshaling
 
-Events are raised on background threads. For UI applications, marshal to the UI thread:
+Events are raised on background threads, so UI applications must marshal before touching controls.
+
+With `await foreach`, capture the UI `SynchronizationContext` and post to it — no extra dependency:
 
 ```csharp
-// WPF example
+var ui = SynchronizationContext.Current!;
+
+await foreach (var e in YubiKeyManager.WatchAsync(cts.Token))
+{
+    ui.Post(_ => DevicesList.Add(e.Device), null);
+}
+```
+
+If you have already added `System.Reactive`, `ObserveOn` does the same for the observable surface:
+
+```csharp
 YubiKeyManager.DeviceChanges
     .ObserveOn(SynchronizationContext.Current!)
-    .Subscribe(e =>
-    {
-        // Safe to update UI here
-        DevicesList.Add(e.Device);
-    });
+    .Subscribe(myObserver);
 ```
+
+Note that observable subscribers are invoked **inline on the publishing thread**, so a handler that
+blocks will delay device monitoring. `WatchAsync` consumers are decoupled by their own buffer and do
+not have this property.
 
 ## Error Handling
 

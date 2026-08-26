@@ -148,8 +148,15 @@ YubiKeyDeviceMonitorService ──TrySignal──► DeviceMonitorSignal (capaci
 Single reader ──consume one occurrence──► 200ms quiet period (re-arms on new hints)
 Single reader ──cap reached or quiet period elapsed──► RescanCoreAsync()
 RescanCoreAsync() ──FindAllAsync snapshot──► YubiKeyDeviceRepository.UpdateCache()
-YubiKeyDeviceRepository ──diff──► DeviceChanges (DeviceAction.Added/Removed)
-Application subscription ◄──DeviceEvent── YubiKeyManager.DeviceChanges
+YubiKeyDeviceRepository ──diff──► DeviceEventBroadcaster (multicast)
+                                        │
+              ┌─────────────────────────┴─────────────────────────┐
+              ▼                                                   ▼
+   YubiKeyManager.DeviceChanges                    DeviceEventStream (bounded buffer)
+   (IObservable<DeviceEvent>)                                     │
+              │                                                   ▼
+              ▼                                      YubiKeyManager.WatchAsync(ct)
+   Application observer                              (IAsyncEnumerable<DeviceEvent>)
 ```
 
 ---
@@ -264,3 +271,22 @@ src/Core/src/
         ├── MacOS/MacOSHidDeviceListener.cs
         └── Linux/LinuxHidDeviceListener.cs
 ```
+
+---
+
+## Deferred design decisions
+
+Recorded when `System.Reactive` was removed from the SDK (see [`docs/NATIVE-AOT.md`](../NATIVE-AOT.md)).
+These were considered and consciously **not** done. Each lists the trigger that should reopen it, so
+they are revisited on evidence rather than on taste.
+
+| # | Deferred | Why not now | Reopen when |
+|---|---|---|---|
+| 1 | `WaitForDeviceAsync(...)` convenience helper | Purely additive; `await foreach` over `WatchAsync` already expresses it in three lines | Consumers repeatedly hand-roll the same wait loop |
+| 2 | Filtering overloads, e.g. `WatchAsync(DeviceAction)` | Additive; consumers filter inside the loop | The filter-in-loop boilerplate shows up across several consumers |
+| 3 | Classic `event EventHandler<DeviceEventArgs>` surface | Weakest of the three primitives: no cancellation, no composition, `async void` handlers, and a static event roots subscribers that forget `-=`. v1's `YubiKeyDeviceListener` had to hand-roll per-handler invocation and swallow exceptions to protect its background thread | v1 migrators ask for `Arrived`/`Removed` parity. Additive over the broadcaster; no door is closed |
+| 4 | Partial-delivery-on-throw for `OnNext` | A throwing observer aborts delivery to later observers. Inherited from Rx's `Subject<T>` and pinned by monitor-service tests; changing it is a behaviour change beyond the scope of a dependency removal | Someone deliberately revisits the delivery contract, with the pinning tests updated together |
+| 5 | Guaranteeing no `OnNext` after `OnCompleted` under concurrent publish/complete | Requires holding a lock across arbitrary subscriber code, which lets a blocking subscriber wedge start/stop/dispose. Implemented, deadlocked the blocking-subscriber tests, reverted. The `IObservable` contract puts serialisation on the producer, and the monitor's publish gate already provides it | The monitor stops serialising publications, or a non-blocking way to gate delivery is found |
+| 6 | Generic `Broadcaster<T>` / `ToAsyncEnumerable<T>` | One event stream, one call site — generalising it would be speculative surface. `DeviceEventStream` is concrete for the same reason | A second independent observable stream appears in the SDK. Two call sites is duplication; one is preference |
+| 7 | Re-adopting `System.Reactive` if it ever ships AOT metadata | The dependency is gone and nothing needs it back; consumers who want Rx add it themselves and it composes unchanged | Never, most likely — recorded so the decision is not relitigated. Rx would first need a `net10.0+` target, since `IsAotCompatible` was introduced in .NET 10 |
+| 8 | Static linking of `Yubico.NativeShims` into AOT binaries (GitHub [#60](https://github.com/Yubico/Yubico.NET.SDK/issues/60)) | Upstream packaging: NativeShims ships only shared libraries, so an AOT publish emits the shim beside the executable. Not fixable from this repository. Tracked as **AOT-B11** in [`native-aot-readiness.md`](../research/native-aot-readiness.md) with full analysis | A NativeShims release publishes static `.a`/`.lib` artifacts |

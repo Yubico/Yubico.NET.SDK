@@ -76,7 +76,7 @@ v2 location: `src/Core/src/**`
   **User impact**: Code catching `TlvException` specifically won't compile/catch correctly.
   **Severity**: Minor | **Confidence**: Medium
 
-**Verified parity/improvement, no gap**: device discovery/hot-plug (`YubiKeyManager.DeviceChanges` Rx-based, arguably richer than v1's event-based `YubiKeyDeviceListener`); USB HID/CCID/NFC transports; Windows/macOS/Linux platform interop; APDU chaining (`ApduException` gains `FromResponse`/`FromStatusWord` factories); crypto key-handling types (RSA/EC/Curve25519, ASN.1, HKDF) fully ported plus new COSE/ARKG types; `SCardException`/`PlatformApiException` parity.
+**Verified parity/improvement, no gap**: device discovery/hot-plug (`YubiKeyManager.WatchAsync` for `await foreach`, plus `DeviceChanges` as `IObservable<DeviceEvent>`; richer than v1's event-based `YubiKeyDeviceListener` and with no third-party dependency); USB HID/CCID/NFC transports; Windows/macOS/Linux platform interop; APDU chaining (`ApduException` gains `FromResponse`/`FromStatusWord` factories); crypto key-handling types (RSA/EC/Curve25519, ASN.1, HKDF) fully ported plus new COSE/ARKG types; `SCardException`/`PlatformApiException` parity.
 
 ---
 

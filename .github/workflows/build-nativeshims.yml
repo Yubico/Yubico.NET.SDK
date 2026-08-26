@@ -740,7 +740,7 @@ jobs:
           $publishOutput | ForEach-Object { Write-Host $_ }
           if ($publishExitCode -ne 0) { throw "dotnet publish failed with exit code $publishExitCode." }
           if ('${{ matrix.os }}' -eq 'macos' -and
-              $publishOutput -match "built for newer 'macOS' version") {
+              $publishOutput -match "built for newer.*macOS.*version") {
             throw "Static archive contains objects built for a newer macOS deployment target."
           }
 

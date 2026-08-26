@@ -17,7 +17,7 @@
     <!-- Test-only. The shipping SDK does not depend on System.Reactive; this exists purely so
          RxInteropTests can prove that a consumer who adds the package themselves still gets the
          full Rx operator surface over the SDK's IObservable<DeviceEvent>. Do not add this to any
-         project under src/*/src - see docs/NATIVE-AOT.md. -->
+         shipping project under src/*/src. -->
     <PackageReference Include="System.Reactive" />
   </ItemGroup>
 

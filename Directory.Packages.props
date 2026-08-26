@@ -5,6 +5,11 @@
     <!-- SDK Version - ALL packages ship with same version -->
     <YubiKitVersion>2.0.0-alpha.2</YubiKitVersion>
   </PropertyGroup>
+  <PropertyGroup>
+    <!-- Authenticated validation workflows override this with the internal static-link candidate. -->
+    <NativeShimsPackageVersion Condition="'$(NativeShimsPackageVersion)' == ''">1.17.2</NativeShimsPackageVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <!-- Microsoft Dependencies -->
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
@@ -21,7 +26,7 @@
     <!-- Third-party Dependencies -->
     <PackageVersion Include="System.Formats.Cbor" Version="10.0.2" />
     <PackageVersion Include="System.Reactive" Version="6.0.1" />
-    <PackageVersion Include="Yubico.NativeShims" Version="1.17.4-prerelease.20260825.2" />
+    <PackageVersion Include="Yubico.NativeShims" Version="$(NativeShimsPackageVersion)" />
     <!-- Test Dependencies -->
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.v3" Version="3.0.0" />

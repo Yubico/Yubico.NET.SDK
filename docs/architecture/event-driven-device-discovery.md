@@ -276,9 +276,9 @@ src/Core/src/
 
 ## Deferred design decisions
 
-Recorded when `System.Reactive` was removed from the SDK (see [`docs/NATIVE-AOT.md`](../NATIVE-AOT.md)).
-These were considered and consciously **not** done. Each lists the trigger that should reopen it, so
-they are revisited on evidence rather than on taste.
+Recorded when `System.Reactive` was removed from the SDK. These were considered and consciously
+**not** done. Each lists the trigger that should reopen it, so they are revisited on evidence rather
+than on taste.
 
 | # | Deferred | Why not now | Reopen when |
 |---|---|---|---|
@@ -289,4 +289,3 @@ they are revisited on evidence rather than on taste.
 | 5 | Guaranteeing no `OnNext` after `OnCompleted` under concurrent publish/complete | Requires holding a lock across arbitrary subscriber code, which lets a blocking subscriber wedge start/stop/dispose. Implemented, deadlocked the blocking-subscriber tests, reverted. The `IObservable` contract puts serialisation on the producer, and the monitor's publish gate already provides it | The monitor stops serialising publications, or a non-blocking way to gate delivery is found |
 | 6 | Generic `Broadcaster<T>` / `ToAsyncEnumerable<T>` | One event stream, one call site — generalising it would be speculative surface. `DeviceEventStream` is concrete for the same reason | A second independent observable stream appears in the SDK. Two call sites is duplication; one is preference |
 | 7 | Re-adopting `System.Reactive` if it ever ships AOT metadata | The dependency is gone and nothing needs it back; consumers who want Rx add it themselves and it composes unchanged | Never, most likely — recorded so the decision is not relitigated. Rx would first need a `net10.0+` target, since `IsAotCompatible` was introduced in .NET 10 |
-| 8 | Static linking of `Yubico.NativeShims` into AOT binaries (GitHub [#60](https://github.com/Yubico/Yubico.NET.SDK/issues/60)) | Upstream packaging: NativeShims ships only shared libraries, so an AOT publish emits the shim beside the executable. Not fixable from this repository. Tracked as **AOT-B11** in [`native-aot-readiness.md`](../research/native-aot-readiness.md) with full analysis | A NativeShims release publishes static `.a`/`.lib` artifacts |

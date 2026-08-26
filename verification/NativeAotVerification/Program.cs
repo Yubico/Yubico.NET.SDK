@@ -102,9 +102,18 @@ internal static class NativeShimsProbe
 
         uint result = SCardEstablishContext(2, out IntPtr context);
         Console.WriteLine($"Native_SCardEstablishContext returned 0x{result:X8}.");
-        if (result == 0)
+        if (result != 0)
         {
-            _ = SCardReleaseContext(context);
+            Console.Error.WriteLine("Native_SCardEstablishContext failed.");
+            return 1;
+        }
+
+        result = SCardReleaseContext(context);
+        Console.WriteLine($"Native_SCardReleaseContext returned 0x{result:X8}.");
+        if (result != 0)
+        {
+            Console.Error.WriteLine("Native_SCardReleaseContext failed.");
+            return 1;
         }
 
         Console.WriteLine("Direct NativeShims OpenSSL and PC/SC calls succeeded.");

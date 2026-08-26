@@ -602,8 +602,8 @@ without a sidecar or dynamic NativeShims/OpenSSL dependency, completed direct Na
 calls, and ran the existing discovery path. The companion
 [ordinary build](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32918324469) passed
 documentation validation, build, unit tests, runtime resilience checks, package creation, and
-internal publication against the same NativeShims prerelease. Public-feed restores remain on stable
-NativeShims 1.17.2; both a clean local restore and the repository's
+internal publication against the same NativeShims prerelease. Public-feed restores remain on the
+parent branch's stable NativeShims 1.16.1; both a clean local restore and the repository's
 [automatic dependency submission](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32918323911)
 passed without access to the internal feed.
 

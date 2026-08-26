@@ -31,6 +31,7 @@ jobs:
       DOTNET_NOLOGO: 1
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       NativeShimsPackageVersion: "1.17.4-prerelease.20260825.3"
+      NativeShimsPackageVersionExact: "true"
       NuGetPackageSourceCredentials_yubico_internal: "Username=${{ github.actor }};Password=${{ secrets.GITHUB_TOKEN }};ValidAuthenticationTypes=Basic"
     steps:
       - name: Check out source
@@ -75,6 +76,17 @@ jobs:
         run: >
           dotnet publish verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj
           -c Release -r ${{ matrix.rid }} --self-contained -p:PublishAot=true
+
+      - name: Verify exact NativeShims package version
+        shell: pwsh
+        run: |
+          $assetsPath = "verification/NativeAotVerification/obj/project.assets.json"
+          $assets = Get-Content -Raw $assetsPath | ConvertFrom-Json
+          $resolved = @($assets.libraries.PSObject.Properties.Name | Where-Object { $_ -like 'Yubico.NativeShims/*' })
+          $expected = "Yubico.NativeShims/$env:NativeShimsPackageVersion"
+          if ($resolved.Count -ne 1 -or $resolved[0] -ne $expected) {
+            throw "Expected $expected, resolved: $($resolved -join ', ')"
+          }
 
       - name: Verify NativeShims is statically linked
         run: |

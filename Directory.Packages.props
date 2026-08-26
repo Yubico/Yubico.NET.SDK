@@ -7,7 +7,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Authenticated validation workflows override this with the internal static-link candidate. -->
-    <NativeShimsPackageVersion Condition="'$(NativeShimsPackageVersion)' == ''">1.17.2</NativeShimsPackageVersion>
+    <NativeShimsPackageVersion Condition="'$(NativeShimsPackageVersion)' == ''">1.16.1</NativeShimsPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,7 +26,10 @@
     <!-- Third-party Dependencies -->
     <PackageVersion Include="System.Formats.Cbor" Version="10.0.2" />
     <PackageVersion Include="System.Reactive" Version="6.0.1" />
-    <PackageVersion Include="Yubico.NativeShims" Version="$(NativeShimsPackageVersion)" />
+    <PackageVersion Include="Yubico.NativeShims" Version="$(NativeShimsPackageVersion)"
+                    Condition="'$(NativeShimsPackageVersionExact)' != 'true'" />
+    <PackageVersion Include="Yubico.NativeShims" Version="[$(NativeShimsPackageVersion)]"
+                    Condition="'$(NativeShimsPackageVersionExact)' == 'true'" />
     <!-- Test Dependencies -->
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.v3" Version="3.0.0" />

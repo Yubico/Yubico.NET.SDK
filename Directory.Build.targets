@@ -1,4 +1,37 @@
 <Project>
+  <!--
+    Native AOT support surface (SDK libraries only).
+
+    IsYubiKitSdkLibrary is an explicit per-project opt-in (set in each of the 10 published SDK
+    library .csproj files: Core, Management, Piv, Fido2, WebAuthn, Oath, OpenPgp, SecurityDomain,
+    YubiOtp, YubiHsm). It defaults to false (Directory.Build.props) so CLI tools, example apps, and
+    test projects are never silently pulled into the AOT support envelope.
+
+    This block lives in Directory.Build.targets, not Directory.Build.props: props files are
+    imported before a project's own <PropertyGroup>, so a project-level
+    `<IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>` opt-in would not yet be visible to a
+    conditional block evaluated that early. Targets files are imported after the project body, so
+    the flag is guaranteed to be set by the time this condition is evaluated.
+
+    Setting IsAotCompatible=true automatically cascades IsTrimmable, EnableTrimAnalyzer,
+    EnableAotAnalyzer, and EnableSingleFileAnalyzer to true (see
+    https://learn.microsoft.com/dotnet/core/deploying/trimming/prepare-libraries-for-trimming) —
+    this was empirically confirmed via `-getProperty:EnableAotAnalyzer` during the readiness
+    assessment (see docs/research/native-aot-readiness-data.md), so those properties are not
+    re-declared individually here.
+
+    VerifyReferenceAotCompatibility=true surfaces IL3058 for any referenced dependency lacking
+    AOT-compatibility metadata. It is enforced for real: there is deliberately no IL3058
+    suppression here, and every dependency of every SDK library carries the metadata.
+
+    Do not introduce a NoWarn here to accommodate a dependency without AOT metadata: that would
+    trade the compatibility guarantee for the whole SDK to accommodate one package.
+  -->
+  <PropertyGroup Condition="'$(IsYubiKitSdkLibrary)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+    <VerifyReferenceAotCompatibility>true</VerifyReferenceAotCompatibility>
+  </PropertyGroup>
+
   <!-- Add common analyzer packages to all projects -->
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">

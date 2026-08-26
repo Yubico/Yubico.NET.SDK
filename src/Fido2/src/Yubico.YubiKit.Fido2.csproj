@@ -8,6 +8,11 @@
     <!-- Package Metadata -->
     <Description>FIDO2 and WebAuthn support for YubiKey devices including credential management, biometric authentication, and passwordless login.</Description>
     <PackageTags>yubikey;yubico;fido2;webauthn;ctap2;passwordless;biometric</PackageTags>
+
+    <!-- Native AOT: opts this SDK library into the shared AOT property block in
+         Directory.Build.props/Directory.Build.targets. See docs/NATIVE-AOT.md for the support
+         contract. -->
+    <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
   </PropertyGroup>
 
   <ItemGroup>

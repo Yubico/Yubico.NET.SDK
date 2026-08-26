@@ -8,6 +8,11 @@
     <!-- Package Metadata -->
     <Description>YubiOTP support for YubiKey devices including Yubico OTP slot configuration, challenge-response, and static password programming.</Description>
     <PackageTags>yubikey;yubico;yubiotp;otp;challenge-response;static-password</PackageTags>
+
+    <!-- Native AOT: opts this SDK library into the shared AOT property block in
+         Directory.Build.props/Directory.Build.targets. See docs/NATIVE-AOT.md for the support
+         contract. -->
+    <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
   </PropertyGroup>
 
   <ItemGroup>

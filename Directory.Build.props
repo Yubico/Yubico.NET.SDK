@@ -5,6 +5,16 @@
         <IsPackable Condition="'$(IsTestProject)' == 'true'">false</IsPackable>
     </PropertyGroup>
 
+    <!-- Native AOT: IsYubiKitSdkLibrary default (false). The actual AOT property block that reads
+         this flag lives in Directory.Build.targets, not here — Directory.Build.props is imported
+         before each project's own <PropertyGroup>, so a project's own
+         `<IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>` opt-in would not yet be visible to a
+         conditional block evaluated this early. See Directory.Build.targets for the real logic
+         and docs/NATIVE-AOT.md for the support contract. -->
+    <PropertyGroup>
+        <IsYubiKitSdkLibrary Condition="'$(IsYubiKitSdkLibrary)' == ''">false</IsYubiKitSdkLibrary>
+    </PropertyGroup>
+
     <PropertyGroup>
         <!-- Common Language Settings -->
         <LangVersion>14</LangVersion>

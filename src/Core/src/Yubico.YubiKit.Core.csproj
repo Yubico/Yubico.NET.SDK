@@ -12,6 +12,17 @@
 
     <!-- Allow unsafe code for performance-critical operations -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- Native AOT: opts this SDK library into the shared AOT property block in
+         Directory.Build.props/Directory.Build.targets, which sets IsAotCompatible and
+         VerifyReferenceAotCompatibility. See docs/NATIVE-AOT.md for the support contract.
+
+         Every dependency below carries the IsAotCompatible assembly metadata, so reference
+         verification is enforced for real - there is no IL3058 suppression. Keep it that way: a
+         new PackageReference that lacks the metadata will fail the build under
+         TreatWarningsAsErrors, which is the intended behaviour. Do not silence it with NoWarn;
+         either confirm the dependency is AOT-safe and raise it upstream, or avoid it. -->
+    <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
   </PropertyGroup>
 
   <ItemGroup>

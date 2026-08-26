@@ -90,10 +90,12 @@ pipeline on those platforms.
 
 ### No dependency-level exceptions remain
 
-Reference verification is enforced for real: every dependency of every in-scope SDK library
-carries the `IsAotCompatible` assembly metadata, and there is **no `IL3058` suppression anywhere in
-the build**. A new `PackageReference` that lacks the metadata will fail the build under
-`TreatWarningsAsErrors`, which is the intended behaviour.
+Reference verification is enforced for real: every managed dependency examined for every in-scope
+SDK library carries the `IsAotCompatible` assembly metadata, and there is **no `IL3058` suppression
+anywhere in the build**. NativeShims contains no managed assembly for this analyzer to inspect and is
+covered separately by publish and direct-call validation. A new managed `PackageReference` that
+lacks the metadata will fail the build under `TreatWarningsAsErrors`, which is the intended
+behaviour.
 
 > **History — do not reintroduce.** `Core` previously depended on `System.Reactive` for
 > `YubiKeyManager.DeviceChanges`, and it was the SDK's only dependency-level AOT finding. Rx does

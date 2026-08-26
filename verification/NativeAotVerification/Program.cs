@@ -160,7 +160,8 @@ internal static class MonitorVerification
               + "Skip with Enter if unavailable.", sinkA, expected: -1, failures);
 
         var rapidActivityStart = sinkA.Snapshot().Count;
-        Step(6, "Rapidly insert and remove key B three times.", sinkA, expected: -1, failures);
+        Step(6, "Remove key B and wait for Removed output, then reinsert it and wait for Added "
+              + "output. Repeat three times.", sinkA, expected: -1, failures);
         var rapidActivity = sinkA.Snapshot().Skip(rapidActivityStart).ToList();
         if (!rapidActivity.Any(e => e.StartsWith($"{DeviceAction.Added}|", StringComparison.Ordinal))
             || !rapidActivity.Any(e => e.StartsWith($"{DeviceAction.Removed}|", StringComparison.Ordinal)))

@@ -30,7 +30,7 @@ public class Pbkdf2DerivationTests
             HashAlgorithmName.SHA256,
             32);
 
-        var result = HsmAuthSession.DeriveKeys("password");
+        var result = HsmAuthSession.DeriveKeys("password"u8.ToArray());
 
         Assert.Equal(32, result.Length);
         Assert.True(CryptographicOperations.FixedTimeEquals(expected, result));
@@ -39,7 +39,7 @@ public class Pbkdf2DerivationTests
     [Fact]
     public void DeriveKeys_SplitsIntoEncAndMacKeys()
     {
-        var result = HsmAuthSession.DeriveKeys("password");
+        var result = HsmAuthSession.DeriveKeys("password"u8.ToArray());
 
         // First 16 bytes = K-ENC, last 16 bytes = K-MAC
         var keyEnc = result.AsSpan(0, 16);
@@ -56,8 +56,8 @@ public class Pbkdf2DerivationTests
     [Fact]
     public void DeriveKeys_SamePassword_ProducesSameResult()
     {
-        var result1 = HsmAuthSession.DeriveKeys("test-password");
-        var result2 = HsmAuthSession.DeriveKeys("test-password");
+        var result1 = HsmAuthSession.DeriveKeys("test-password"u8.ToArray());
+        var result2 = HsmAuthSession.DeriveKeys("test-password"u8.ToArray());
 
         Assert.True(CryptographicOperations.FixedTimeEquals(result1, result2));
     }
@@ -65,8 +65,8 @@ public class Pbkdf2DerivationTests
     [Fact]
     public void DeriveKeys_DifferentPasswords_ProduceDifferentResults()
     {
-        var result1 = HsmAuthSession.DeriveKeys("password1");
-        var result2 = HsmAuthSession.DeriveKeys("password2");
+        var result1 = HsmAuthSession.DeriveKeys("password1"u8.ToArray());
+        var result2 = HsmAuthSession.DeriveKeys("password2"u8.ToArray());
 
         Assert.False(CryptographicOperations.FixedTimeEquals(result1, result2));
     }

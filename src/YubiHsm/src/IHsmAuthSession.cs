@@ -37,9 +37,18 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
     /// <param name="keyEnc">The 16-byte encryption key (K-ENC).</param>
     /// <param name="keyMac">The 16-byte MAC key (K-MAC).</param>
-    /// <param name="credentialPassword">The credential password (string, padded to 16 bytes).</param>
+    /// <param name="credentialPasswordUtf8">
+    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes before transmission.
+    /// </param>
     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    ///     <b>Breaking change:</b> The <c>credentialPassword</c> parameter changed from
+    ///     <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers
+    ///     to zero sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c>
+    ///     and zero the resulting array when finished. Padding behavior is unchanged.
+    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining management key attempts.
@@ -49,7 +58,7 @@ public interface IHsmAuthSession : IApplicationSession
         string label,
         ReadOnlyMemory<byte> keyEnc,
         ReadOnlyMemory<byte> keyMac,
-        string credentialPassword,
+        ReadOnlyMemory<byte> credentialPasswordUtf8,
         bool touchRequired = false,
         CancellationToken cancellationToken = default);
 
@@ -58,10 +67,22 @@ public interface IHsmAuthSession : IApplicationSession
     /// </summary>
     /// <param name="managementKey">The 16-byte management key for authorization.</param>
     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
-    /// <param name="derivationPassword">The password to derive keys from.</param>
-    /// <param name="credentialPassword">The credential password (string, padded to 16 bytes).</param>
+    /// <param name="derivationPasswordUtf8">
+    ///     The UTF-8 encoded password to derive K-ENC and K-MAC from. Must not be empty.
+    /// </param>
+    /// <param name="credentialPasswordUtf8">
+    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes before transmission.
+    /// </param>
     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    ///     <b>Breaking change:</b> The <c>derivationPassword</c> and <c>credentialPassword</c>
+    ///     parameters changed from <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8
+    ///     encoded) to allow callers to zero sensitive material after use. Pass
+    ///     <c>Encoding.UTF8.GetBytes(password)</c> and zero the resulting array when finished.
+    ///     The PBKDF2 parameters and padding behavior are unchanged.
+    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining management key attempts.
@@ -69,8 +90,8 @@ public interface IHsmAuthSession : IApplicationSession
     Task PutCredentialDerivedAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        string derivationPassword,
-        string credentialPassword,
+        ReadOnlyMemory<byte> derivationPasswordUtf8,
+        ReadOnlyMemory<byte> credentialPasswordUtf8,
         bool touchRequired = false,
         CancellationToken cancellationToken = default);
 
@@ -94,10 +115,19 @@ public interface IHsmAuthSession : IApplicationSession
     /// </summary>
     /// <param name="label">The credential label.</param>
     /// <param name="context">The 16-byte host challenge concatenated with 16-byte HSM challenge.</param>
-    /// <param name="credentialPassword">The credential password.</param>
+    /// <param name="credentialPasswordUtf8">
+    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes before transmission.
+    /// </param>
     /// <param name="cardCryptogram">Optional card cryptogram for mutual authentication.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Session keys that must be disposed after use.</returns>
+    /// <remarks>
+    ///     <b>Breaking change:</b> The <c>credentialPassword</c> parameter changed from
+    ///     <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers
+    ///     to zero sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c>
+    ///     and zero the resulting array when finished. Padding behavior is unchanged.
+    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The credential password is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining credential password attempts.
@@ -105,7 +135,7 @@ public interface IHsmAuthSession : IApplicationSession
     Task<SessionKeys> CalculateSessionKeysSymmetricAsync(
         string label,
         ReadOnlyMemory<byte> context,
-        string credentialPassword,
+        ReadOnlyMemory<byte> credentialPasswordUtf8,
         ReadOnlyMemory<byte>? cardCryptogram = null,
         CancellationToken cancellationToken = default);
 
@@ -146,13 +176,22 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="publicKey">
     ///     The uncompressed EC P256 public key of the YubiHSM 2 device (65 bytes: 0x04 || X || Y).
     /// </param>
-    /// <param name="credentialPassword">The credential password.</param>
+    /// <param name="credentialPasswordUtf8">
+    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes before transmission.
+    /// </param>
     /// <param name="cardCryptogram">
     ///     The card cryptogram from the YubiHSM 2 device. Required for asymmetric session key calculation
     ///     as it is used for mutual authentication between the YubiKey and the YubiHSM 2.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Session keys that must be disposed after use.</returns>
+    /// <remarks>
+    ///     <b>Breaking change:</b> The <c>credentialPassword</c> parameter changed from
+    ///     <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers
+    ///     to zero sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c>
+    ///     and zero the resulting array when finished. Padding behavior is unchanged.
+    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The credential password is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining credential password attempts.
@@ -161,7 +200,7 @@ public interface IHsmAuthSession : IApplicationSession
         string label,
         ReadOnlyMemory<byte> context,
         ReadOnlyMemory<byte> publicKey,
-        string credentialPassword,
+        ReadOnlyMemory<byte> credentialPasswordUtf8,
         ReadOnlyMemory<byte> cardCryptogram,
         CancellationToken cancellationToken = default);
 
@@ -170,15 +209,22 @@ public interface IHsmAuthSession : IApplicationSession
     ///     for a credential. Requires firmware 5.6.0+.
     /// </summary>
     /// <param name="label">The credential label.</param>
-    /// <param name="credentialPassword">
-    ///     The credential password. Required for firmware &lt; 5.7.1;
+    /// <param name="credentialPasswordUtf8">
+    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes before transmission. Required for firmware &lt; 5.7.1;
     ///     optional for firmware &gt;= 5.7.1.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The challenge or ephemeral public key bytes.</returns>
+    /// <remarks>
+    ///     <b>Breaking change:</b> The <c>credentialPassword</c> parameter changed from
+    ///     <c>string?</c> to <c>ReadOnlyMemory&lt;byte&gt;?</c> (UTF-8 encoded) to allow callers
+    ///     to zero sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c>
+    ///     and zero the resulting array when finished. Padding behavior is unchanged.
+    /// </remarks>
     Task<ReadOnlyMemory<byte>> GetChallengeAsync(
         string label,
-        string? credentialPassword = null,
+        ReadOnlyMemory<byte>? credentialPasswordUtf8 = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -188,9 +234,18 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="managementKey">The 16-byte management key for authorization.</param>
     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
     /// <param name="privateKey">The 32-byte EC P256 private key.</param>
-    /// <param name="credentialPassword">The credential password (string, padded to 16 bytes).</param>
+    /// <param name="credentialPasswordUtf8">
+    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes before transmission.
+    /// </param>
     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    ///     <b>Breaking change:</b> The <c>credentialPassword</c> parameter changed from
+    ///     <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers
+    ///     to zero sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c>
+    ///     and zero the resulting array when finished. Padding behavior is unchanged.
+    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining management key attempts.
@@ -199,7 +254,7 @@ public interface IHsmAuthSession : IApplicationSession
         ReadOnlyMemory<byte> managementKey,
         string label,
         ReadOnlyMemory<byte> privateKey,
-        string credentialPassword,
+        ReadOnlyMemory<byte> credentialPasswordUtf8,
         bool touchRequired = false,
         CancellationToken cancellationToken = default);
 
@@ -210,9 +265,18 @@ public interface IHsmAuthSession : IApplicationSession
     /// </summary>
     /// <param name="managementKey">The 16-byte management key for authorization.</param>
     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
-    /// <param name="credentialPassword">The credential password (string, padded to 16 bytes).</param>
+    /// <param name="credentialPasswordUtf8">
+    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes before transmission.
+    /// </param>
     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    ///     <b>Breaking change:</b> The <c>credentialPassword</c> parameter changed from
+    ///     <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers
+    ///     to zero sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c>
+    ///     and zero the resulting array when finished. Padding behavior is unchanged.
+    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining management key attempts.
@@ -220,7 +284,7 @@ public interface IHsmAuthSession : IApplicationSession
     Task GenerateCredentialAsymmetricAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        string credentialPassword,
+        ReadOnlyMemory<byte> credentialPasswordUtf8,
         bool touchRequired = false,
         CancellationToken cancellationToken = default);
 
@@ -240,17 +304,30 @@ public interface IHsmAuthSession : IApplicationSession
     ///     Requires firmware 5.8.0+.
     /// </summary>
     /// <param name="label">The credential label.</param>
-    /// <param name="currentPassword">The current credential password.</param>
-    /// <param name="newPassword">The new credential password.</param>
+    /// <param name="currentPasswordUtf8">
+    ///     The UTF-8 encoded current credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes before transmission.
+    /// </param>
+    /// <param name="newPasswordUtf8">
+    ///     The UTF-8 encoded new credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes before transmission.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    ///     <b>Breaking change:</b> The <c>currentPassword</c> and <c>newPassword</c> parameters
+    ///     changed from <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to
+    ///     allow callers to zero sensitive material after use. Pass
+    ///     <c>Encoding.UTF8.GetBytes(password)</c> and zero the resulting array when finished.
+    ///     Padding behavior is unchanged.
+    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The current credential password is incorrect.
     ///     <see cref="HsmAuthRetryException.RetriesRemaining" /> reports the remaining attempts.
     /// </exception>
     Task ChangeCredentialPasswordAsync(
         string label,
-        string currentPassword,
-        string newPassword,
+        ReadOnlyMemory<byte> currentPasswordUtf8,
+        ReadOnlyMemory<byte> newPasswordUtf8,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -259,8 +336,17 @@ public interface IHsmAuthSession : IApplicationSession
     /// </summary>
     /// <param name="managementKey">The 16-byte management key for authorization.</param>
     /// <param name="label">The credential label.</param>
-    /// <param name="newPassword">The new credential password.</param>
+    /// <param name="newPasswordUtf8">
+    ///     The UTF-8 encoded new credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes before transmission.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    ///     <b>Breaking change:</b> The <c>newPassword</c> parameter changed from <c>string</c>
+    ///     to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers to zero
+    ///     sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c> and zero
+    ///     the resulting array when finished. Padding behavior is unchanged.
+    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining management key attempts.
@@ -268,6 +354,6 @@ public interface IHsmAuthSession : IApplicationSession
     Task ChangeCredentialPasswordAdminAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        string newPassword,
+        ReadOnlyMemory<byte> newPasswordUtf8,
         CancellationToken cancellationToken = default);
 }

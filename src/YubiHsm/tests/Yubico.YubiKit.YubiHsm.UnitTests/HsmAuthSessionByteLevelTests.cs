@@ -48,7 +48,7 @@ public class HsmAuthSessionByteLevelTests
             "cred",
             Sequence(0x20, 16),
             Sequence(0x30, 16),
-            "pass",
+            "pass"u8.ToArray(),
             touchRequired: true,
             TestContext.Current.CancellationToken);
 
@@ -81,7 +81,7 @@ public class HsmAuthSessionByteLevelTests
         using var keys = await session.CalculateSessionKeysSymmetricAsync(
             "cred",
             Sequence(0x40, 16),
-            "pass",
+            "pass"u8.ToArray(),
             Sequence(0x50, 8),
             TestContext.Current.CancellationToken);
 

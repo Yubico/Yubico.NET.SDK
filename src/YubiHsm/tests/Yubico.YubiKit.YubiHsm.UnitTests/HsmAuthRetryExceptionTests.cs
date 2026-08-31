@@ -51,7 +51,7 @@ public class HsmAuthRetryExceptionTests
             "cred",
             Sequence(0x20, 16),
             Sequence(0x30, 16),
-            "pass",
+            "pass"u8.ToArray(),
             cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(4, exception.RetriesRemaining);
@@ -91,7 +91,7 @@ public class HsmAuthRetryExceptionTests
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.CalculateSessionKeysSymmetricAsync(
             "cred",
             Sequence(0x40, 16),
-            "pass",
+            "pass"u8.ToArray(),
             cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(6, exception.RetriesRemaining);
@@ -110,8 +110,8 @@ public class HsmAuthRetryExceptionTests
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.ChangeCredentialPasswordAsync(
             "cred",
-            "oldpass",
-            "newpass",
+            "oldpass"u8.ToArray(),
+            "newpass"u8.ToArray(),
             TestContext.Current.CancellationToken));
 
         Assert.Equal(0, exception.RetriesRemaining);
@@ -132,7 +132,7 @@ public class HsmAuthRetryExceptionTests
             Sequence(0x10, 16),
             "cred",
             Sequence(0x20, 32),
-            "pass",
+            "pass"u8.ToArray(),
             cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(3, exception.RetriesRemaining);
@@ -153,7 +153,7 @@ public class HsmAuthRetryExceptionTests
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.GenerateCredentialAsymmetricAsync(
             Sequence(0x10, 16),
             "cred",
-            "pass",
+            "pass"u8.ToArray(),
             cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(7, exception.RetriesRemaining);
@@ -174,7 +174,7 @@ public class HsmAuthRetryExceptionTests
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.ChangeCredentialPasswordAdminAsync(
             Sequence(0x10, 16),
             "cred",
-            "newpass",
+            "newpass"u8.ToArray(),
             TestContext.Current.CancellationToken));
 
         Assert.Equal(2, exception.RetriesRemaining);
@@ -197,7 +197,7 @@ public class HsmAuthRetryExceptionTests
             "cred",
             Sequence(0x40, 16),
             Sequence(0x60, 65),
-            "pass",
+            "pass"u8.ToArray(),
             Sequence(0x70, 8),
             TestContext.Current.CancellationToken));
 
@@ -222,8 +222,8 @@ public class HsmAuthRetryExceptionTests
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.PutCredentialDerivedAsync(
             Sequence(0x10, 16),
             "cred",
-            "derivationPassword",
-            "pass",
+            "derivationPassword"u8.ToArray(),
+            "pass"u8.ToArray(),
             cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(9, exception.RetriesRemaining);

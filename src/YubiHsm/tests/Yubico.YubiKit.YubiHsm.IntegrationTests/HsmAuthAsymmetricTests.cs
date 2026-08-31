@@ -21,7 +21,7 @@ public class HsmAuthAsymmetricTests
 
     private static ReadOnlyMemory<byte> DefaultManagementKey => new byte[16];
     private const string TestLabel = "test-asymmetric";
-    private const string TestPassword = "password";
+    private static ReadOnlyMemory<byte> TestPassword => "password"u8.ToArray();
 
     // ─── Put Asymmetric Credential ──────────────────────────────────────────────
 

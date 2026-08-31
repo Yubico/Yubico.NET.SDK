@@ -4,6 +4,7 @@
 using Spectre.Console;
 using System.Security.Cryptography;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
+using SecureCredential = Yubico.YubiKit.Cli.Shared.Output.SecureCredential;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.HsmAuthExamples;
 
@@ -31,29 +32,37 @@ public static class CalculateSessionKeys
                 .Title("Select credential for session key calculation:")
                 .AddChoices(labels));
 
-        var credentialPassword = AnsiConsole.Prompt(
-            new TextPrompt<string>("Credential [green]password[/]:")
-                .Secret());
+        using var credentialPassword = SecureCredential.Prompt("Credential password");
+        if (credentialPassword is null)
+        {
+            OutputHelpers.WriteError("Credential password is required.");
+            return;
+        }
 
         // Generate random context (host challenge + HSM challenge)
         var context = RandomNumberGenerator.GetBytes(32);
-        OutputHelpers.WriteHex("Context (host[16] + HSM[16])", context);
+        try
+        {
+            OutputHelpers.WriteHex("Context (host[16] + HSM[16])", context);
 
-        using var keys = await session.CalculateSessionKeysSymmetricAsync(
-            label,
-            context,
-            credentialPassword,
-            cancellationToken: cancellationToken);
+            using var keys = await session.CalculateSessionKeysSymmetricAsync(
+                label,
+                context,
+                credentialPassword.Memory,
+                cancellationToken: cancellationToken);
 
-        AnsiConsole.WriteLine();
-        OutputHelpers.WriteSuccess("Session keys calculated successfully.");
+            AnsiConsole.WriteLine();
+            OutputHelpers.WriteSuccess("Session keys calculated successfully.");
 
-        // SECURITY NOTE: Session keys displayed for developer diagnostics only.
-        // Never display session key material in production applications.
-        OutputHelpers.WriteHex("S-ENC", keys.SEnc);
-        OutputHelpers.WriteHex("S-MAC", keys.SMac);
-        OutputHelpers.WriteHex("S-RMAC", keys.SRmac);
-
-        CryptographicOperations.ZeroMemory(context);
+            // SECURITY NOTE: Session keys displayed for developer diagnostics only.
+            // Never display session key material in production applications.
+            OutputHelpers.WriteHex("S-ENC", keys.SEnc);
+            OutputHelpers.WriteHex("S-MAC", keys.SMac);
+            OutputHelpers.WriteHex("S-RMAC", keys.SRmac);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(context);
+        }
     }
 }

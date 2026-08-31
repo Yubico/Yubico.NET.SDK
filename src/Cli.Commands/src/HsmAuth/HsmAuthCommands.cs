@@ -96,24 +96,6 @@ public sealed class HsmAuthCredentialsGenerateSettings : GlobalSettings
 
 public static class HsmAuthHelpers
 {
-    /// <summary>
-    /// Prompts for a YubiHSM Auth credential password.
-    /// </summary>
-    /// <returns>The password, or <see langword="null"/> if the user declined to supply one.</returns>
-    /// <remarks>
-    /// Returns a <see cref="string"/> because <c>IHsmAuthSession.PutCredentialDerivedAsync</c> and
-    /// <c>GenerateCredentialAsymmetricAsync</c> take credential passwords as <see cref="string"/>,
-    /// which cannot be zeroed. Prompting through <see cref="SecureCredential"/> at least zeroes the
-    /// input buffer; the secret is still unzeroable once it crosses the SDK boundary. Narrowing
-    /// those SDK signatures to <c>ReadOnlyMemory&lt;byte&gt;</c> is a breaking change to a shipping
-    /// package and is tracked separately.
-    /// </remarks>
-    public static string? PromptCredentialPassword()
-    {
-        using var prompted = PinPrompt.PromptForCredential("Credential password");
-        return prompted is null ? null : Encoding.UTF8.GetString(prompted.Memory.Span);
-    }
-
     public static byte[]? ResolveManagementKey(string? hex)
     {
         hex ??= "00000000000000000000000000000000";
@@ -303,22 +285,26 @@ public sealed class HsmAuthCredentialsAddCommand : YkCommandBase<HsmAuthCredenti
             return ExitCode.GenericError;
         }
 
-        var credentialPassword = settings.CredentialPassword ?? HsmAuthHelpers.PromptCredentialPassword();
-        if (credentialPassword is null)
-        {
-            OutputHelpers.WriteError("Credential password is required.");
-            return ExitCode.GenericError;
-        }
-
         try
         {
+            // Resolved inside the try so an aborted or rejected prompt still zeros mgmtKey.
+            using var credentialPassword =
+                PinPrompt.Resolve(settings.CredentialPassword, "Credential password");
+            if (credentialPassword is null)
+            {
+                OutputHelpers.WriteError("Credential password is required.");
+                return ExitCode.GenericError;
+            }
+
             await using var session = await deviceContext.Device.CreateHsmAuthSessionAsync();
 
             if (settings.DerivationPassword is not null)
             {
+                using var derivationPassword = SecureCredential.FromUtf8String(settings.DerivationPassword);
+
                 await session.PutCredentialDerivedAsync(
-                    mgmtKey, settings.Label, settings.DerivationPassword,
-                    credentialPassword, settings.Touch);
+                    mgmtKey, settings.Label, derivationPassword.Memory,
+                    credentialPassword.Memory, settings.Touch);
 
                 OutputHelpers.WriteSuccess($"Derived credential '{settings.Label}' stored successfully.");
             }
@@ -331,7 +317,7 @@ public sealed class HsmAuthCredentialsAddCommand : YkCommandBase<HsmAuthCredenti
                 {
                     await session.PutCredentialSymmetricAsync(
                         mgmtKey, settings.Label, keyEnc, keyMac,
-                        credentialPassword, settings.Touch);
+                        credentialPassword.Memory, settings.Touch);
 
                     OutputHelpers.WriteSuccess($"Symmetric credential '{settings.Label}' stored.");
                     OutputHelpers.WriteHex("K-ENC (generated)", keyEnc);
@@ -403,19 +389,21 @@ public sealed class HsmAuthCredentialsGenerateCommand : YkCommandBase<HsmAuthCre
             return ExitCode.GenericError;
         }
 
-        var credentialPassword = settings.CredentialPassword ?? HsmAuthHelpers.PromptCredentialPassword();
-        if (credentialPassword is null)
-        {
-            OutputHelpers.WriteError("Credential password is required.");
-            return ExitCode.GenericError;
-        }
-
         try
         {
+            // Resolved inside the try so an aborted or rejected prompt still zeros mgmtKey.
+            using var credentialPassword =
+                PinPrompt.Resolve(settings.CredentialPassword, "Credential password");
+            if (credentialPassword is null)
+            {
+                OutputHelpers.WriteError("Credential password is required.");
+                return ExitCode.GenericError;
+            }
+
             await using var session = await deviceContext.Device.CreateHsmAuthSessionAsync();
 
             await session.GenerateCredentialAsymmetricAsync(
-                mgmtKey, settings.Label, credentialPassword, settings.Touch);
+                mgmtKey, settings.Label, credentialPassword.Memory, settings.Touch);
 
             OutputHelpers.WriteSuccess($"Asymmetric credential '{settings.Label}' generated on device.");
             OutputHelpers.WriteInfo("Private key was generated on-device and never leaves the YubiKey.");

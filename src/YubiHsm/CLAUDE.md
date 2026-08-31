@@ -67,9 +67,38 @@ All communication uses ISO 7816-4 APDUs with CLA=0x00.
 ## Security Patterns
 
 ### Credential Password Handling
-- String passwords are UTF-8 encoded and null-padded to 16 bytes via `ParseCredentialPassword()`
-- Password bytes are always zeroed in `finally` blocks
-- Never log password values — log operation metadata only
+
+Credential passwords cross the public API as **UTF-8 `ReadOnlyMemory<byte>`**, never `string`.
+.NET strings are immutable and cannot be wiped, so a `string` parameter makes it impossible for
+the caller to zero the secret. This matches Fido2/OpenPgp/Oath, and the `...Utf8` parameter
+naming convention they use.
+
+- **The caller owns the input buffer** and is responsible for zeroing it. The SDK never zeroes a
+  buffer it does not own.
+- `ValidateCredentialPassword(ReadOnlySpan<byte>)` is the single guard: **at most** 16 bytes.
+- `ParseCredentialPassword(ReadOnlySpan<byte>)` validates, then copies into a fresh 16-byte
+  buffer, null-padding the remainder. **Padding is deliberate and load-bearing** — it preserves
+  the exact behavior of the retired `ParseCredentialPassword(string)` and matches the Python
+  canonical SDK's `str` path. Do not "tighten" this to require exactly 16 bytes; that would be a
+  silent behavior break for every short password.
+- The padded copy is always zeroed in a `finally` block.
+- Never log password values — log operation metadata only.
+
+```csharp
+// Caller side: own the bytes, zero them.
+var passwordUtf8 = Encoding.UTF8.GetBytes(password);
+try
+{
+    await session.PutCredentialSymmetricAsync(
+        managementKey, label, keyEnc, keyMac, passwordUtf8);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(passwordUtf8);
+}
+```
+
+`label` is **not** a secret — it is echoed back verbatim by the LIST command — and stays `string`.
 
 ### Management Key Verification
 - Failed management key attempts return SW 0x63Cx (x = remaining retries)
@@ -96,6 +125,9 @@ using var keys = await session.CalculateSessionKeysSymmetricAsync(label, context
 - Iterations: 10,000
 - Output: 32 bytes → K-ENC[0..16], K-MAC[16..32]
 - Derived key buffer zeroed in `finally`
+- `DeriveKeys(ReadOnlyMemory<byte>)` makes **no copy** of the derivation password — the caller
+  owns and zeros it. These constants are pinned by `Pbkdf2DerivationTests`, which recomputes the
+  known-answer vector independently; do not change them.
 
 ## Test Infrastructure
 

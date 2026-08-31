@@ -187,38 +187,43 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     }
 
     /// <summary>
-    ///     Parses a credential password string into a 16-byte buffer.
-    ///     The string is UTF-8 encoded and padded with null bytes to 16 bytes.
+    ///     Validates a UTF-8 encoded credential password.
     /// </summary>
-    /// <param name="password">The password string.</param>
-    /// <returns>A 16-byte array containing the padded password.</returns>
-    /// <exception cref="ArgumentException">Thrown when the UTF-8 encoding exceeds 16 bytes.</exception>
-    internal static byte[] ParseCredentialPassword(string password)
+    /// <param name="passwordUtf8">The UTF-8 encoded password bytes.</param>
+    /// <remarks>
+    ///     The applet wire format carries a fixed 16-byte credential password, but the SDK
+    ///     accepts <em>at most</em> 16 bytes and null-pads shorter values in
+    ///     <see cref="ParseCredentialPassword" />. This mirrors the padding the previous
+    ///     <c>string</c>-based API performed, and the Python canonical SDK's <c>str</c> path,
+    ///     so the byte-based API is a type change only — not a behavior change. Callers that
+    ///     want strict 16-byte input should length-check before calling.
+    /// </remarks>
+    /// <exception cref="ArgumentException">Thrown when the password exceeds 16 bytes.</exception>
+    internal static void ValidateCredentialPassword(ReadOnlySpan<byte> passwordUtf8)
     {
-        ArgumentNullException.ThrowIfNull(password);
-
-        var utf8Length = Encoding.UTF8.GetByteCount(password);
-        if (utf8Length > CredentialPasswordLength)
+        if (passwordUtf8.Length > CredentialPasswordLength)
             throw new ArgumentException(
-                $"Credential password UTF-8 encoding ({utf8Length} bytes) exceeds maximum of {CredentialPasswordLength} bytes.",
-                nameof(password));
-
-        var buffer = new byte[CredentialPasswordLength];
-        Encoding.UTF8.GetBytes(password, buffer);
-        return buffer;
+                $"Credential password UTF-8 encoding ({passwordUtf8.Length} bytes) exceeds maximum of {CredentialPasswordLength} bytes.",
+                nameof(passwordUtf8));
     }
 
     /// <summary>
-    ///     Validates a raw credential password byte array.
+    ///     Validates a UTF-8 encoded credential password and copies it into a 16-byte buffer,
+    ///     null-padding any remaining bytes.
     /// </summary>
-    /// <param name="password">The password bytes.</param>
-    /// <exception cref="ArgumentException">Thrown when the password is not exactly 16 bytes.</exception>
-    internal static void ValidateCredentialPassword(ReadOnlySpan<byte> password)
+    /// <param name="passwordUtf8">The UTF-8 encoded password bytes (at most 16).</param>
+    /// <returns>
+    ///     A newly allocated 16-byte array containing the padded password. The caller owns the
+    ///     buffer and must zero it with <see cref="CryptographicOperations.ZeroMemory(Span{byte})" />.
+    /// </returns>
+    /// <exception cref="ArgumentException">Thrown when the password exceeds 16 bytes.</exception>
+    internal static byte[] ParseCredentialPassword(ReadOnlySpan<byte> passwordUtf8)
     {
-        if (password.Length != CredentialPasswordLength)
-            throw new ArgumentException(
-                $"Credential password must be exactly {CredentialPasswordLength} bytes, got {password.Length}.",
-                nameof(password));
+        ValidateCredentialPassword(passwordUtf8);
+
+        var buffer = new byte[CredentialPasswordLength];
+        passwordUtf8.CopyTo(buffer);
+        return buffer;
     }
 
     /// <summary>
@@ -299,7 +304,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         string label,
         ReadOnlyMemory<byte> keyEnc,
         ReadOnlyMemory<byte> keyMac,
-        string credentialPassword,
+        ReadOnlyMemory<byte> credentialPasswordUtf8,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
@@ -321,7 +326,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword);
+            credPwBytes = ParseCredentialPassword(credentialPasswordUtf8.Span);
 
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
@@ -349,25 +354,28 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task PutCredentialDerivedAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        string derivationPassword,
-        string credentialPassword,
+        ReadOnlyMemory<byte> derivationPasswordUtf8,
+        ReadOnlyMemory<byte> credentialPasswordUtf8,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        ArgumentException.ThrowIfNullOrEmpty(derivationPassword);
+        if (derivationPasswordUtf8.IsEmpty)
+            throw new ArgumentException(
+                "Derivation password must not be empty.",
+                nameof(derivationPasswordUtf8));
 
         byte[]? derivedKey = null;
         try
         {
-            derivedKey = DeriveKeys(derivationPassword);
+            derivedKey = DeriveKeys(derivationPasswordUtf8);
 
             await PutCredentialSymmetricAsync(
                     managementKey,
                     label,
                     derivedKey.AsMemory(0, 16),
                     derivedKey.AsMemory(16, 16),
-                    credentialPassword,
+                    credentialPasswordUtf8,
                     touchRequired,
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -411,7 +419,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task<SessionKeys> CalculateSessionKeysSymmetricAsync(
         string label,
         ReadOnlyMemory<byte> context,
-        string credentialPassword,
+        ReadOnlyMemory<byte> credentialPasswordUtf8,
         ReadOnlyMemory<byte>? cardCryptogram = null,
         CancellationToken cancellationToken = default)
     {
@@ -424,7 +432,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword);
+            credPwBytes = ParseCredentialPassword(credentialPasswordUtf8.Span);
 
             var tlvs = new List<Tlv>
             {
@@ -530,7 +538,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         string label,
         ReadOnlyMemory<byte> context,
         ReadOnlyMemory<byte> publicKey,
-        string credentialPassword,
+        ReadOnlyMemory<byte> credentialPasswordUtf8,
         ReadOnlyMemory<byte> cardCryptogram,
         CancellationToken cancellationToken = default)
     {
@@ -544,7 +552,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword);
+            credPwBytes = ParseCredentialPassword(credentialPasswordUtf8.Span);
 
             // APDU payload order matches Python canonical SDK:
             // TAG_LABEL, TAG_CONTEXT, TAG_PUBLIC_KEY, TAG_RESPONSE, TAG_CREDENTIAL_PASSWORD
@@ -580,7 +588,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// <inheritdoc />
     public async Task<ReadOnlyMemory<byte>> GetChallengeAsync(
         string label,
-        string? credentialPassword = null,
+        ReadOnlyMemory<byte>? credentialPasswordUtf8 = null,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -595,16 +603,16 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
             // Firmware >= 5.7.1 does not require credential password.
             // Older firmware requires it.
-            if (credentialPassword is not null)
+            if (credentialPasswordUtf8 is { } credentialPassword)
             {
-                credPwBytes = ParseCredentialPassword(credentialPassword);
+                credPwBytes = ParseCredentialPassword(credentialPassword.Span);
                 tlvs.Add(new Tlv(TagCredentialPassword, credPwBytes));
             }
             else if (!IsSupported(FeatureGetChallengeNoPassword) && !FirmwareVersion.IsAlphaOrBeta)
             {
                 throw new ArgumentException(
                     "Credential password is required for firmware versions before 5.7.1.",
-                    nameof(credentialPassword));
+                    nameof(credentialPasswordUtf8));
             }
 
             data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
@@ -630,7 +638,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> managementKey,
         string label,
         ReadOnlyMemory<byte> privateKey,
-        string credentialPassword,
+        ReadOnlyMemory<byte> credentialPasswordUtf8,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
@@ -648,7 +656,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword);
+            credPwBytes = ParseCredentialPassword(credentialPasswordUtf8.Span);
 
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
@@ -675,7 +683,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task GenerateCredentialAsymmetricAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        string credentialPassword,
+        ReadOnlyMemory<byte> credentialPasswordUtf8,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
@@ -688,7 +696,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword);
+            credPwBytes = ParseCredentialPassword(credentialPasswordUtf8.Span);
 
             // TAG_PRIVATE_KEY with empty value signals on-device key generation.
             // Python canonical: _put_credential(management_key, label, b"", EC_P256, credential_password)
@@ -740,8 +748,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// <inheritdoc />
     public async Task ChangeCredentialPasswordAsync(
         string label,
-        string currentPassword,
-        string newPassword,
+        ReadOnlyMemory<byte> currentPasswordUtf8,
+        ReadOnlyMemory<byte> newPasswordUtf8,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -753,8 +761,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            currentPwBytes = ParseCredentialPassword(currentPassword);
-            newPwBytes = ParseCredentialPassword(newPassword);
+            currentPwBytes = ParseCredentialPassword(currentPasswordUtf8.Span);
+            newPwBytes = ParseCredentialPassword(newPasswordUtf8.Span);
 
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
@@ -780,7 +788,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task ChangeCredentialPasswordAdminAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        string newPassword,
+        ReadOnlyMemory<byte> newPasswordUtf8,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -792,7 +800,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            newPwBytes = ParseCredentialPassword(newPassword);
+            newPwBytes = ParseCredentialPassword(newPasswordUtf8.Span);
 
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
@@ -817,23 +825,22 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// <summary>
     ///     Derives AES-128 key pair (K-ENC, K-MAC) from a password using PBKDF2-HMAC-SHA256.
     /// </summary>
-    internal static byte[] DeriveKeys(string derivationPassword)
-    {
-        var passwordBytes = Encoding.UTF8.GetBytes(derivationPassword);
-        try
-        {
-            return Rfc2898DeriveBytes.Pbkdf2(
-                passwordBytes,
-                Pbkdf2Salt,
-                Pbkdf2Iterations,
-                HashAlgorithmName.SHA256,
-                Pbkdf2DerivedKeyLength);
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(passwordBytes);
-        }
-    }
+    /// <param name="derivationPasswordUtf8">The UTF-8 encoded derivation password.</param>
+    /// <returns>
+    ///     A newly allocated 32-byte array: K-ENC in <c>[0..16]</c>, K-MAC in <c>[16..32]</c>.
+    ///     The caller owns the buffer and must zero it.
+    /// </returns>
+    /// <remarks>
+    ///     The caller owns <paramref name="derivationPasswordUtf8" /> and is responsible for
+    ///     zeroing it; this method makes no copy of the input.
+    /// </remarks>
+    internal static byte[] DeriveKeys(ReadOnlyMemory<byte> derivationPasswordUtf8) =>
+        Rfc2898DeriveBytes.Pbkdf2(
+            derivationPasswordUtf8.Span,
+            Pbkdf2Salt,
+            Pbkdf2Iterations,
+            HashAlgorithmName.SHA256,
+            Pbkdf2DerivedKeyLength);
 
     /// <summary>
     ///     Transmits an APDU command with <c>throwOnError: false</c>, checks for retry failures

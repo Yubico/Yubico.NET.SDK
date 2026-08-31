@@ -17,6 +17,7 @@ using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Native.Linux.Libc;
+using Yubico.YubiKit.Core.Transports.Hid;
 using LibcNativeMethods = Yubico.YubiKit.Core.Native.Linux.Libc.NativeMethods;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
@@ -167,7 +168,7 @@ internal sealed class LinuxHidIOReportConnection : IHidConnection
         }
     }
 
-    private static (int InputSize, int OutputSize) ParseReportSizes(ReadOnlySpan<byte> descriptor)
+    internal static (int InputSize, int OutputSize) ParseReportSizes(ReadOnlySpan<byte> descriptor)
     {
         // Parse HID descriptor for report sizes
         // Looking for Input and Output main items with their associated Report Size and Report Count
@@ -177,50 +178,27 @@ internal sealed class LinuxHidIOReportConnection : IHidConnection
         int currentReportSize = 0;
         int currentReportCount = 0;
 
-        int i = 0;
-        while (i < descriptor.Length)
+        int position = 0;
+        while (HidReportDescriptorReader.TryReadItem(descriptor, ref position, out HidReportItem item))
         {
-            byte prefix = descriptor[i];
-            int size = prefix & 0x03;
-            if (size == 3)
+            // Global items
+            if (item.Type == HidReportDescriptorReader.TypeGlobal)
             {
-                size = 4;
-            }
-
-            int type = (prefix >> 2) & 0x03;
-            int tag = (prefix >> 4) & 0x0F;
-
-            i++;
-
-            if (i + size > descriptor.Length)
-            {
-                break;
-            }
-
-            uint value = 0;
-            for (int j = 0; j < size; j++)
-            {
-                value |= (uint)descriptor[i + j] << (8 * j);
-            }
-
-            // Global items (type = 1)
-            if (type == 1)
-            {
-                switch (tag)
+                switch (item.Tag)
                 {
                     case 7: // Report Size
-                        currentReportSize = (int)value;
+                        currentReportSize = (int)item.Value;
                         break;
                     case 9: // Report Count
-                        currentReportCount = (int)value;
+                        currentReportCount = (int)item.Value;
                         break;
                 }
             }
-            // Main items (type = 0)
-            else if (type == 0)
+            // Main items
+            else if (item.Type == HidReportDescriptorReader.TypeMain)
             {
                 int reportBytes = (currentReportSize * currentReportCount + 7) / 8;
-                switch (tag)
+                switch (item.Tag)
                 {
                     case 8: // Input
                         if (reportBytes > 0)
@@ -236,8 +214,6 @@ internal sealed class LinuxHidIOReportConnection : IHidConnection
                         break;
                 }
             }
-
-            i += size;
         }
 
         return (inputSize, outputSize);

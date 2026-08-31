@@ -17,6 +17,7 @@ using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Native.Linux.Libc;
 using Yubico.YubiKit.Core.Native.Linux.Udev;
+using Yubico.YubiKit.Core.Transports.Hid;
 using LibcNativeMethods = Yubico.YubiKit.Core.Native.Linux.Libc.NativeMethods;
 using UdevNativeMethods = Yubico.YubiKit.Core.Native.Linux.Udev.NativeMethods;
 
@@ -323,11 +324,9 @@ internal sealed class LinuxHidDevice : IHidDevice
         }
     }
 
-    private static (ushort UsagePage, ushort Usage) ParseHidDescriptorBytes(ReadOnlySpan<byte> descriptor)
+    internal static (ushort UsagePage, ushort Usage) ParseHidDescriptorBytes(ReadOnlySpan<byte> descriptor)
     {
         // HID descriptor parsing - looking for Usage Page and Usage items
-        // HID descriptor format: each item has a prefix byte followed by data
-        // Prefix: bits 0-1 = size (0,1,2,4 bytes), bits 2-3 = type (0=main, 1=global, 2=local), bits 4-7 = tag
 
         // IMPORTANT: We need to validate the UsagePage + Usage combination
         // Don't just return the first values found - parse both, then validate
@@ -337,47 +336,24 @@ internal sealed class LinuxHidDevice : IHidDevice
         bool usagePageFound = false;
         bool usageFound = false;
 
-        int i = 0;
-        while (i < descriptor.Length)
+        int position = 0;
+        while (HidReportDescriptorReader.TryReadItem(descriptor, ref position, out HidReportItem item))
         {
-            byte prefix = descriptor[i];
-            int size = prefix & 0x03;
-            if (size == 3)
+            // Global items
+            if (item.Type == HidReportDescriptorReader.TypeGlobal)
             {
-                size = 4; // Size encoding: 0=0, 1=1, 2=2, 3=4
-            }
-
-            int type = (prefix >> 2) & 0x03;
-            int tag = (prefix >> 4) & 0x0F;
-
-            i++; // Move past prefix
-
-            if (i + size > descriptor.Length)
-            {
-                break;
-            }
-
-            uint value = 0;
-            for (int j = 0; j < size; j++)
-            {
-                value |= (uint)descriptor[i + j] << (8 * j);
-            }
-
-            // Global items (type = 1)
-            if (type == 1)
-            {
-                if (tag == 0 && !usagePageFound) // Usage Page
+                if (item.Tag == 0 && !usagePageFound) // Usage Page
                 {
-                    usagePage = (ushort)value;
+                    usagePage = (ushort)item.Value;
                     usagePageFound = true;
                 }
             }
-            // Local items (type = 2)
-            else if (type == 2)
+            // Local items
+            else if (item.Type == HidReportDescriptorReader.TypeLocal)
             {
-                if (tag == 0 && !usageFound) // Usage
+                if (item.Tag == 0 && !usageFound) // Usage
                 {
-                    usage = (ushort)value;
+                    usage = (ushort)item.Value;
                     usageFound = true;
                 }
             }
@@ -387,8 +363,6 @@ internal sealed class LinuxHidDevice : IHidDevice
             {
                 break;
             }
-
-            i += size;
         }
 
         return (usagePage, usage);

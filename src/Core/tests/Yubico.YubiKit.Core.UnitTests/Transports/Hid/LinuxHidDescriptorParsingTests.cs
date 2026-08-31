@@ -95,16 +95,52 @@ public class LinuxHidDescriptorParsingTests
     // independent (each field is captured independently, not "first item wins overall").
     public static readonly byte[] UsageBeforeUsagePage = [0x09, 0x06, 0x05, 0x01];
 
-    // KNOWN DEFECT, PINNED DELIBERATELY. HID long items (prefix 0xFE) are not handled by
-    // either parser. 0xFE decodes via the short-item bit layout as size=2/type=3/tag=15, so
-    // its two payload bytes (0xAA, 0xBB) are consumed as an ordinary item value, the cursor
-    // then lands mid-stream at the long item's data-length/tag bytes, and the perfectly
-    // valid `05 01 09 06` keyboard descriptor that follows it is misread and lost, producing
-    // (0, 0) instead of (0x0001, 0x0006). YubiKeys do not emit long items in practice, so
-    // this is latent, not live. This test pins CURRENT behaviour for refactor safety only —
-    // it is NOT an endorsement of the defect and must not be "fixed" as part of any
-    // characterization or refactor work.
+    // HID long item (prefix 0xFE): bDataSize = 0x02, bLongItemTag = 0xAA, 2 data bytes
+    // (0xBB, 0xCC), for a total of 3 + 2 = 5 bytes (position 0 -> 5). TryReadItem skips the
+    // whole long item and resumes at position 5, where the perfectly valid `05 01 09 06`
+    // keyboard Usage Page + Usage pair is decoded normally, giving (0x0001, 0x0006). Neither
+    // Report Size, Report Count, Input, nor Output items are present, so the report-size
+    // parser's (64, 64) defaults are unaffected.
     public static readonly byte[] LongItem0xFE = [0xFE, 0x02, 0xAA, 0xBB, 0xCC, 0x05, 0x01, 0x09, 0x06];
+
+    // Long item with bDataSize == 0: prefix 0xFE, dataSize 0, tag 0xAA — exactly 3 bytes total
+    // (position 0 -> 3), the minimum legal long item. Followed by the same valid Usage Page +
+    // Usage pair, decoded normally: usage page = 0x0001, usage = 0x0006. No Report Size/Report
+    // Count/Input/Output items are present, so report sizes stay at the (64, 64) defaults.
+    public static readonly byte[] LongItemZeroDataSize = [0xFE, 0x00, 0xAA, 0x05, 0x01, 0x09, 0x06];
+
+    // Long item with a 4-byte payload: prefix 0xFE, dataSize 4, tag 0xAA, four data bytes
+    // (0xBB..0xEE), total 3 + 4 = 7 bytes (position 0 -> 7). Confirms the skip length is
+    // 3 + bDataSize, not a fixed size, before the same valid Usage Page + Usage pair is
+    // decoded: usage page = 0x0001, usage = 0x0006. Report sizes stay at (64, 64).
+    public static readonly byte[] LongItemFourByteDataSize =
+        [0xFE, 0x04, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0x05, 0x01, 0x09, 0x06];
+
+    // A valid Usage Page item (usage page = 0x0001) is read first (position 0 -> 2). Then a
+    // long-item header declares bDataSize = 5 (position 2 -> 5 reads FE 05 AA), but only 2
+    // data bytes remain (BB CC) instead of 5, so the bounds check at position 5
+    // (5 + 5 = 10 > length 7) fails and TryReadItem returns false. The walk stops there: the
+    // Usage Page already read survives (usage page = 0x0001), but Usage is never reached, so
+    // usage stays at its default 0x0000. No Report Size/Report Count/Input/Output items are
+    // present, so report sizes stay at (64, 64).
+    public static readonly byte[] TruncatedLongItemPayload = [0x05, 0x01, 0xFE, 0x05, 0xAA, 0xBB, 0xCC];
+
+    // Only the long-item prefix byte itself, nothing else: the header bounds check
+    // (0 + 3 > length 1) fails immediately, so TryReadItem returns false on the very first
+    // call. No items are ever produced; both parsers return their untouched defaults.
+    public static readonly byte[] LongItemPrefixOnly = [0xFE];
+
+    // The long-item prefix plus its bDataSize byte, but the bLongItemTag byte is missing: the
+    // header bounds check (0 + 3 > length 2) fails for the same reason. No items are ever
+    // produced; both parsers return their untouched defaults.
+    public static readonly byte[] LongItemHeaderTruncated = [0xFE, 0x02];
+
+    // A descriptor consisting solely of two back-to-back long items (bDataSize 1, then
+    // bDataSize 0), with no short items anywhere. Both are skipped in full
+    // (position 0 -> 4, then 4 -> 7); position then equals the descriptor length (7), so
+    // TryReadItem returns false and the walk terminates cleanly. Both parsers return their
+    // untouched defaults.
+    public static readonly byte[] AllLongItems = [0xFE, 0x01, 0xAA, 0xBB, 0xFE, 0x00, 0xCC];
 
     // Items with size 0 (bits 0-1 of prefix are both 0) still advance the cursor by exactly
     // one byte (the prefix itself) and the loop terminates cleanly once the bytes run out.
@@ -165,10 +201,16 @@ public class LinuxHidDescriptorParsingTests
         { nameof(GlobalsPersistAcrossMain), GlobalsPersistAcrossMain, 0x0000, 0x0000 },
         { nameof(SecondUsagePageIgnored), SecondUsagePageIgnored, 0x0001, 0x0006 },
         { nameof(UsageBeforeUsagePage), UsageBeforeUsagePage, 0x0001, 0x0006 },
-        { nameof(LongItem0xFE), LongItem0xFE, 0x0000, 0x0000 },
+        { nameof(LongItem0xFE), LongItem0xFE, 0x0001, 0x0006 },
         { nameof(ZeroSizeItemsOnly), ZeroSizeItemsOnly, 0x0000, 0x0000 },
         { nameof(TwoByteReportCount), TwoByteReportCount, 0x0000, 0x0000 },
-        { nameof(TwoByteReportSize), TwoByteReportSize, 0x0000, 0x0000 }
+        { nameof(TwoByteReportSize), TwoByteReportSize, 0x0000, 0x0000 },
+        { nameof(LongItemZeroDataSize), LongItemZeroDataSize, 0x0001, 0x0006 },
+        { nameof(LongItemFourByteDataSize), LongItemFourByteDataSize, 0x0001, 0x0006 },
+        { nameof(TruncatedLongItemPayload), TruncatedLongItemPayload, 0x0001, 0x0000 },
+        { nameof(LongItemPrefixOnly), LongItemPrefixOnly, 0x0000, 0x0000 },
+        { nameof(LongItemHeaderTruncated), LongItemHeaderTruncated, 0x0000, 0x0000 },
+        { nameof(AllLongItems), AllLongItems, 0x0000, 0x0000 }
     };
 
     public static TheoryData<string, byte[], int, int> ReportSizeVectors() => new()
@@ -189,6 +231,12 @@ public class LinuxHidDescriptorParsingTests
         { nameof(LongItem0xFE), LongItem0xFE, 64, 64 },
         { nameof(ZeroSizeItemsOnly), ZeroSizeItemsOnly, 64, 64 },
         { nameof(TwoByteReportCount), TwoByteReportCount, 256, 64 },
-        { nameof(TwoByteReportSize), TwoByteReportSize, 8, 64 }
+        { nameof(TwoByteReportSize), TwoByteReportSize, 8, 64 },
+        { nameof(LongItemZeroDataSize), LongItemZeroDataSize, 64, 64 },
+        { nameof(LongItemFourByteDataSize), LongItemFourByteDataSize, 64, 64 },
+        { nameof(TruncatedLongItemPayload), TruncatedLongItemPayload, 64, 64 },
+        { nameof(LongItemPrefixOnly), LongItemPrefixOnly, 64, 64 },
+        { nameof(LongItemHeaderTruncated), LongItemHeaderTruncated, 64, 64 },
+        { nameof(AllLongItems), AllLongItems, 64, 64 }
     };
 }

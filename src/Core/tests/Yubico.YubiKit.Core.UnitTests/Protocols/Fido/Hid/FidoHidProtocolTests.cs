@@ -426,6 +426,144 @@ public class FidoHidProtocolTests
         Assert.Equal(responsePayload, response.ToArray());
     }
 
+    /// <summary>
+    /// Abandoning a ceremony while the authenticator is asking for a touch must tell the
+    /// authenticator, or it keeps that request pending on a channel nobody is servicing and the
+    /// key stays unusable until it is physically re-plugged. The cancel is sent once, not on
+    /// every keep-alive frame that follows it, and the channel is left immediately reusable.
+    /// </summary>
+    /// <remarks>
+    /// The caller is abandoned mid-exchange rather than up front: <see cref="ExchangeGuard"/>
+    /// rejects an already-cancelled token before the exchange is admitted, so a pre-cancelled
+    /// token would never reach the keep-alive loop this covers.
+    /// </remarks>
+    [Theory]
+    [InlineData(1)]
+    [InlineData(3)]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task SendVendorCommandAsync_AbandonedDuringKeepAlive_SendsExactlyOneCancelAndLeavesChannelUsable(
+        int keepAliveCount)
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+        using var cts = new CancellationTokenSource();
+
+        // The authenticator reports it is waiting for a touch, then answers the cancel with
+        // CTAP2_ERR_KEEPALIVE_CANCEL (0x2D).
+        connection.QueueResponsePackets([
+            .. Enumerable.Range(0, keepAliveCount).Select(_ =>
+                CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded])),
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0x2D])
+        ]);
+
+        // Abandon the moment the authenticator says it is waiting for a touch.
+        connection.OnResponseDequeued = packet =>
+        {
+            if (IsCommand(packet, CtapConstants.CtapHidKeepAlive))
+                cts.Cancel();
+        };
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            protocol.SendVendorCommandAsync(
+                CtapConstants.CtapVendorFirst,
+                ReadOnlyMemory<byte>.Empty,
+                cts.Token));
+
+        Assert.Equal(
+            1,
+            connection.SentPacketSnapshots.Count(packet => IsCommand(packet, CtapConstants.CtapHidCancel)));
+
+        // The symptom the fix exists to prevent: before it, the abandoned user-presence request
+        // left the channel busy and the next exchange failed until the key was re-plugged.
+        connection.OnResponseDequeued = null;
+        connection.QueueResponsePackets(
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+
+        var afterCancel = await protocol.SendVendorCommandAsync(
+            CtapConstants.CtapVendorFirst,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(0xAA, afterCancel.Span[0]);
+    }
+
+    /// <summary>
+    /// A touch landing at the same moment the caller abandons makes the authenticator's answer a
+    /// real multi-packet response rather than the one-byte cancel acknowledgement. Every
+    /// continuation frame must still be drained before cancellation is surfaced, or the next
+    /// exchange reads the leftovers as its own response.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task SendVendorCommandAsync_AbandonedWhenAnswerIsMultiPacket_DrainsEveryFrame()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+        using var cts = new CancellationTokenSource();
+
+        var racedPayload = new byte[CtapConstants.InitDataSize + 20];
+        racedPayload.AsSpan().Fill(0x5A);
+
+        connection.QueueResponsePackets(
+            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, racedPayload),
+            CreateContinuationPacket(0x01020304, sequence: 0, racedPayload.AsSpan(CtapConstants.InitDataSize)));
+
+        connection.OnResponseDequeued = packet =>
+        {
+            if (IsCommand(packet, CtapConstants.CtapHidKeepAlive))
+                cts.Cancel();
+        };
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            protocol.SendVendorCommandAsync(
+                CtapConstants.CtapVendorFirst,
+                ReadOnlyMemory<byte>.Empty,
+                cts.Token));
+
+        // The continuation frame was consumed, so the next exchange sees its own response rather
+        // than the tail of the abandoned one.
+        connection.OnResponseDequeued = null;
+        connection.QueueResponsePackets(
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+
+        var afterCancel = await protocol.SendVendorCommandAsync(
+            CtapConstants.CtapVendorFirst,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, afterCancel.Length);
+        Assert.Equal(0xAA, afterCancel.Span[0]);
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task SendVendorCommandAsync_NotAbandoned_DoesNotSendCtapHidCancel()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+
+        connection.QueueResponsePackets(
+            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+
+        var response = await protocol.SendVendorCommandAsync(
+            CtapConstants.CtapVendorFirst,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(0xAA, response.Span[0]);
+        Assert.DoesNotContain(
+            connection.SentPacketSnapshots,
+            packet => IsCommand(packet, CtapConstants.CtapHidCancel));
+    }
+
+    /// <summary>CTAP HID keep-alive status byte meaning a touch is awaited.</summary>
+    private const byte KeepAliveUpNeeded = 0x02;
+
+    private static bool IsCommand(byte[] packet, byte command) =>
+        (packet[4] & ~CtapConstants.InitPacketMask) == command;
+
     private static byte[] CreateInitPacket(uint channelId, byte command, ReadOnlySpan<byte> payload)
     {
         var packet = new byte[CtapConstants.PacketSize];
@@ -460,6 +598,14 @@ public class FidoHidProtocolTests
 
         public int InitRequestCount { get; private set; }
         public bool ThrowOnNextSend { get; set; }
+
+        /// <summary>
+        /// Invoked as each queued packet is handed to the protocol, letting a test act at a
+        /// precise point mid-exchange — notably abandoning the caller while a keep-alive is
+        /// being processed.
+        /// </summary>
+        public Action<byte[]>? OnResponseDequeued { get; set; }
+
         public List<ReadOnlyMemory<byte>> RetainedSentPackets { get; } = [];
         public List<byte[]> SentPacketSnapshots { get; } = [];
 
@@ -507,7 +653,9 @@ public class FidoHidProtocolTests
                 return Task.FromResult<ReadOnlyMemory<byte>>(CreateInitResponse());
             }
 
-            return Task.FromResult<ReadOnlyMemory<byte>>(_responsePackets.Dequeue());
+            var packet = _responsePackets.Dequeue();
+            OnResponseDequeued?.Invoke(packet);
+            return Task.FromResult<ReadOnlyMemory<byte>>(packet);
         }
 
         public void Dispose()

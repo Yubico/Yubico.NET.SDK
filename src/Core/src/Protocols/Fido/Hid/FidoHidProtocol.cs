@@ -80,7 +80,8 @@ internal class FidoHidProtocol(
                             _channelId!.Value,
                             command,
                             data,
-                            exchangeToken)
+                            exchangeToken,
+                            cancellationToken)
                         .ConfigureAwait(false);
                 },
                 cancellationToken)
@@ -166,10 +167,11 @@ internal class FidoHidProtocol(
         uint channelId,
         byte command,
         ReadOnlyMemory<byte> data,
-        CancellationToken cancellationToken)
+        CancellationToken exchangeToken,
+        CancellationToken callerToken = default)
     {
-        await SendRequest(channelId, command, data, cancellationToken).ConfigureAwait(false);
-        return await ReceiveResponse(channelId, command, cancellationToken).ConfigureAwait(false);
+        await SendRequest(channelId, command, data, exchangeToken).ConfigureAwait(false);
+        return await ReceiveResponse(channelId, command, exchangeToken, callerToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -230,20 +232,42 @@ internal class FidoHidProtocol(
     /// <summary>
     /// Receives a CTAP HID response, handling keep-alive and multi-packet responses.
     /// </summary>
+    /// <remarks>
+    /// <paramref name="exchangeToken"/> governs the reads and is uncancellable inside an
+    /// exchange, so a partially framed response is never stranded. <paramref name="callerToken"/>
+    /// is signal-only: it never aborts a read, it makes this method send CTAPHID_CANCEL.
+    /// </remarks>
     private async Task<ReadOnlyMemory<byte>> ReceiveResponse(
         uint channelId,
         byte expectedCommand,
-        CancellationToken cancellationToken)
+        CancellationToken exchangeToken,
+        CancellationToken callerToken)
     {
         _logger.LogTrace("Receiving CTAP HID response");
 
+        var cancelRequested = false;
+
         // Get initialization packet, handling keep-alive
-        var initPacket = await _connection.ReceiveAsync(cancellationToken).ConfigureAwait(false);
+        var initPacket = await _connection.ReceiveAsync(exchangeToken).ConfigureAwait(false);
         while (IsKeepAlivePacket(initPacket.Span))
         {
             ValidateInitPacket(initPacket.Span, channelId);
+
+            // Abandoning a ceremony without telling the authenticator leaves it holding a
+            // user-presence request on a channel nobody is servicing: the key keeps asking for a
+            // touch that can no longer be consumed, and the busy channel blocks later opens until
+            // the key is physically re-plugged. CTAPHID_CANCEL is the protocol's way out, and is
+            // only meaningful while the authenticator is still working (that is, right here).
+            if (!cancelRequested && callerToken.IsCancellationRequested)
+            {
+                _logger.LogDebug("Operation abandoned during keep-alive; sending CTAPHID_CANCEL");
+                await SendRequest(channelId, CtapConstants.CtapHidCancel, ReadOnlyMemory<byte>.Empty, exchangeToken)
+                    .ConfigureAwait(false);
+                cancelRequested = true;
+            }
+
             _logger.LogTrace("Received keep-alive, waiting for response");
-            initPacket = await _connection.ReceiveAsync(cancellationToken).ConfigureAwait(false);
+            initPacket = await _connection.ReceiveAsync(exchangeToken).ConfigureAwait(false);
         }
 
         ValidateInitPacket(initPacket.Span, channelId);
@@ -280,7 +304,7 @@ internal class FidoHidProtocol(
             byte expectedSequence = 0;
             while (bytesReceived < responseLength)
             {
-                var contPacket = await _connection.ReceiveAsync(cancellationToken).ConfigureAwait(false);
+                var contPacket = await _connection.ReceiveAsync(exchangeToken).ConfigureAwait(false);
                 ValidateContinuationPacket(contPacket.Span, channelId, expectedSequence);
                 var contDataLength = Math.Min(
                     responseLength - bytesReceived,
@@ -294,6 +318,17 @@ internal class FidoHidProtocol(
             }
 
             _logger.LogTrace("Received {Length} bytes in response", responseLength);
+
+            // Only here is the channel provably clean. Throwing any earlier would strand the
+            // remaining frames for the next exchange to misread — the very failure this cancel
+            // exists to prevent — because a touch landing as the caller abandons makes the
+            // answer a real multi-packet response, not the one-byte cancel acknowledgement.
+            // Ownership stays untransferred, so the discarded buffer is zeroed by the finally.
+            if (cancelRequested)
+            {
+                callerToken.ThrowIfCancellationRequested();
+            }
+
             ownershipTransferred = true;
             return responseData;
         }

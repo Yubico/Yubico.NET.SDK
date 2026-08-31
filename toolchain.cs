@@ -679,10 +679,24 @@ List<(string Project, bool Passed, string? Error, bool Skipped)> RunTestProjects
             }
             else
             {
-                // xUnit v2 uses --filter directly
+                // xUnit v2 runs under VSTest, which takes --filter directly.
                 command = $"test {projectPath} -c {configuration} --logger \"console;verbosity=normal\"";
                 if (!string.IsNullOrEmpty(testFilter))
-                    command += $" --filter \"{testFilter}\"";
+                {
+                    var vsTestFilter = TranslateToVsTestFilter(testFilter);
+
+                    // Same preflight the MTP path gets. Without it a filter matching nothing makes
+                    // VSTest print "No test matches..." and still exit 0, which this method would
+                    // report as "All tests passed" — a green result from a run that never happened.
+                    if (!VsTestFilterHasMatches(projectPath, vsTestFilter))
+                    {
+                        results.Add((projectName, true, "No matching tests", true));
+                        PrintColored($"○ {projectName} - No matching tests", ConsoleColor.Yellow);
+                        continue;
+                    }
+
+                    command += $" --filter \"{vsTestFilter}\"";
+                }
             }
 
             Run("dotnet", command);
@@ -911,6 +925,39 @@ static (string Args, bool HasPositiveFilters, string[] PositiveArgs) TranslateTo
     }
 
     return (string.Join(" ", mtpArgs), hasPositiveFilters, [..positiveArgs]);
+}
+
+// Normalises a --filter expression for VSTest (xUnit v2, the integration projects).
+//
+// VSTest only understands FullyQualifiedName, DisplayName and trait properties. `Method` is an
+// MSTest/NUnit property, so `Method~Sign` silently matches nothing here even though the MTP path
+// translates it happily — the exact asymmetry that made documented commands no-op on the hardware
+// lanes. Map it onto the closest portable equivalent so one documented syntax works everywhere.
+//
+// FullyQualifiedName covers namespace.class.method, so the rewrite is slightly wider than a
+// method-only match: `Method~Sign` will also match a class named SignatureTests. That fails safe
+// (more tests, never fewer), and VsTestFilterHasMatches still catches a filter that matches none.
+static string TranslateToVsTestFilter(string vstestFilter) =>
+    Regex.Replace(vstestFilter, @"\b(Method|Name)\s*~", "FullyQualifiedName~");
+
+// True when the filter selects at least one test in the project.
+//
+// Discovery-only, so it never runs a ceremony or touches hardware.
+bool VsTestFilterHasMatches(string projectPath, string vsTestFilter)
+{
+    var (exitCode, output) = RunDotnetAndCapture(
+    [
+        "test", projectPath, "-c", configuration, "--list-tests", "--filter", vsTestFilter
+    ]);
+
+    // VSTest 18.x reports zero discovery matches with this text and still exits 0.
+    if (output.Contains("No test matches the given testcase filter", StringComparison.OrdinalIgnoreCase))
+        return false;
+
+    if (exitCode != 0)
+        throw new InvalidOperationException($"Failed to list tests for {projectPath}: {output}");
+
+    return true;
 }
 
 bool MtpFilterHasMatches(string projectPath, string[] positiveMtpFilterArgs)

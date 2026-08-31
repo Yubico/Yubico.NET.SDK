@@ -41,6 +41,34 @@ dotnet toolchain.cs -- test --filter "Method~Sign"
 dotnet toolchain.cs -- test --project Piv --filter "Method~Sign"
 ```
 
+### Reading filter results
+
+Two things routinely mislead people here, both worth knowing before you trust a green run.
+
+**`Method~` is not a VSTest property.** The unit projects run xUnit v3 / Microsoft Testing
+Platform; the integration projects run xUnit v2 under VSTest, where only `FullyQualifiedName`,
+`DisplayName` and traits exist. The toolchain normalises `Method~` and `Name~` to
+`FullyQualifiedName~` for those projects so one syntax works on both runners. `FullyQualifiedName~`
+is the precise form if you would rather be explicit.
+
+**A zero-match filter fails the target.** VSTest prints `No test matches the given testcase filter`
+and still exits `0`, so an unguarded run reports `✓ All tests passed` having executed nothing. The
+toolchain preflights both runners and fails with `No tests matched the specified filter` instead.
+
+**The closing summary counts projects, not tests.** This line:
+
+```
+Passed: 1 | Failed: 0 | Skipped: 1 | Total: 2
+```
+
+means two *projects*. Grepping for `Passed:` will read green off a run of zero tests. Assert on the
+per-project figure instead:
+
+```bash
+dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~FidoHidProtocol" \
+  | grep -E "total:|failed:"
+```
+
 ## Integration Test Strategy
 
 Integration tests require a physical YubiKey and can be slow (especially RSA keygen). Follow this tiered approach:

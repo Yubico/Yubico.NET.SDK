@@ -212,6 +212,8 @@ dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Yubico.Yub
   ```
 - Filter syntax: `FullyQualifiedName~Substring`, `Method~Name`, `Category!=Slow`
 - The toolchain auto-translates VSTest filter expressions to xUnit v3 native options (`--filter-method`, `--filter-trait`, etc.)
+- It also normalises `Method~` / `Name~` to `FullyQualifiedName~` for the xUnit v2 (VSTest) projects, which have no `Method` property. Without that, `Method~Sign` matches **zero** tests on every integration project while working fine on the unit projects. `FullyQualifiedName~` is the precise form if you want to be explicit
+- **A filter matching no tests is an error, not a pass.** The toolchain preflights both runners and fails with `No tests matched the specified filter`. Left unguarded, VSTest prints `No test matches the given testcase filter` and still exits `0`, which previously surfaced as `✓ All tests passed` from a run that never happened
 
 ### For AI Agents / Automation
 
@@ -221,3 +223,19 @@ When writing scripts or automation that runs tests:
 2. **Never assume** `dotnet test` will work for all projects
 3. **Use `--project`** to filter to specific projects: `dotnet toolchain.cs -- test --project Fido2`
 4. **Combine `--project` with `--filter`** for targeted test runs: `dotnet toolchain.cs -- test --project Fido2 --filter "Method~Sign"`
+5. **Read the per-project `total:` line, not the final summary line.** The closing
+   `Passed: 1 | Failed: 0 | Skipped: 1 | Total: 2` counts **projects**, not tests. Grepping for
+   `Passed:` therefore reads green off a run that executed nothing. Assert on the per-project
+   `total:` / `Total tests:` figure instead:
+
+   ```bash
+   dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~FidoHidProtocol" \
+     | grep -E "total:|failed:"
+   ```
+
+   A zero-match filter now fails the target outright, but the project-vs-test counting still
+   catches people out when a filter matches fewer tests than intended.
+6. **Add `--smoke` to any unattended hardware run.** It skips `Slow` and `RequiresUserPresence`,
+   so a missing human cannot leave a ceremony parked and wedge the key. Be aware it can thin
+   coverage sharply — on WebAuthn it reduces the integration lane to a single SmartCard test, so
+   check the `total:` figure before treating a smoke pass as meaningful validation.

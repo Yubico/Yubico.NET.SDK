@@ -100,9 +100,30 @@ public sealed class RSAPrivateKey : PrivateKey
     /// When the RSA key length is not supported.
     /// </exception>
     public static RSAPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
+        => CreateFromPkcs8(encodedKey, parametersDecoded: null);
+
+    internal static RSAPrivateKey CreateFromPkcs8(
+        ReadOnlyMemory<byte> encodedKey,
+        Action<RSAParameters>? parametersDecoded)
     {
         var parameters = AsnPrivateKeyDecoder.CreateRSAParameters(encodedKey);
-        return new RSAPrivateKey(parameters);
+        try
+        {
+            parametersDecoded?.Invoke(parameters);
+            return new RSAPrivateKey(parameters);
+        }
+        finally
+        {
+            // On success the constructor copied these values; on failure this factory is
+            // unwinding. Either way, the decoder's temporary private arrays are factory-owned.
+            // CreateFromParameters is deliberately different because its input remains caller-owned.
+            CryptographicOperations.ZeroMemory(parameters.D);
+            CryptographicOperations.ZeroMemory(parameters.P);
+            CryptographicOperations.ZeroMemory(parameters.Q);
+            CryptographicOperations.ZeroMemory(parameters.DP);
+            CryptographicOperations.ZeroMemory(parameters.DQ);
+            CryptographicOperations.ZeroMemory(parameters.InverseQ);
+        }
     }
 
     /// <summary>

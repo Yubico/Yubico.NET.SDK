@@ -95,10 +95,25 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// Thrown if the private key is invalid.
         /// </exception>
         public static ECPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
+            => CreateFromPkcs8(encodedKey, parametersDecoded: null);
+
+        internal static ECPrivateKey CreateFromPkcs8(
+            ReadOnlyMemory<byte> encodedKey,
+            Action<ECParameters>? parametersDecoded)
         {
             var parameters = AsnPrivateKeyDecoder.CreateECParameters(encodedKey);
-
-            return CreateFromParameters(parameters);
+            try
+            {
+                parametersDecoded?.Invoke(parameters);
+                return CreateFromParameters(parameters);
+            }
+            finally
+            {
+                // On success the constructor copied D; on failure this factory is unwinding.
+                // Either way, the decoder's temporary D is factory-owned. CreateFromParameters
+                // is deliberately different because its input remains caller-owned.
+                CryptographicOperations.ZeroMemory(parameters.D);
+            }
         }
 
         /// <summary>

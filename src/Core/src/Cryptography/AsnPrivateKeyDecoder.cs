@@ -59,13 +59,11 @@ internal class AsnPrivateKeyDecoder
                         seqAlgorithmIdentifier.ThrowIfNotEmpty();
                     }
 
-                    var rsaParameters = CreateRSAParameters(pkcs8EncodedKey);
-                    return RSAPrivateKey.CreateFromParameters(rsaParameters);
+                    return RSAPrivateKey.CreateFromPkcs8(pkcs8EncodedKey);
                 }
             case Oids.ECDSA:
                 {
-                    var ecParams = CreateECParameters(pkcs8EncodedKey);
-                    return ECPrivateKey.CreateFromParameters(ecParams);
+                    return ECPrivateKey.CreateFromPkcs8(pkcs8EncodedKey);
                 }
             case Oids.X25519:
             case Oids.Ed25519:
@@ -100,7 +98,12 @@ internal class AsnPrivateKeyDecoder
         return Curve25519PrivateKey.CreateFromValue(privateKeyHandle.Data, keyType);
     }
 
-    public static (byte[] privateKey, KeyType keyType) GetCurve25519PrivateKeyData(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    public static (byte[] privateKey, KeyType keyType) GetCurve25519PrivateKeyData(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
+        GetCurve25519PrivateKeyData(pkcs8EncodedKey, privateKeyDecoded: null);
+
+    internal static (byte[] privateKey, KeyType keyType) GetCurve25519PrivateKeyData(
+        ReadOnlyMemory<byte> pkcs8EncodedKey,
+        Action<byte[]>? privateKeyDecoded)
     {
         var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
         var seqPrivateKeyInfo = reader.ReadSequence();
@@ -124,15 +127,26 @@ internal class AsnPrivateKeyDecoder
         }
 
         var privateKey = seqPrivateKey.ReadOctetString();
-        if (privateKey.Length != 32)
+        try
         {
-            throw new CryptographicException("Invalid Curve25519 private key: incorrect length");
+            privateKeyDecoded?.Invoke(privateKey);
+            if (privateKey.Length != 32)
+            {
+                throw new CryptographicException("Invalid Curve25519 private key: incorrect length");
+            }
+
+            seqPrivateKeyInfo.ThrowIfNotEmpty();
+
+            var keyDefinition = KeyDefinitions.GetByOid(algorithmOid);
+            return (privateKey, keyDefinition.KeyType);
         }
-
-        seqPrivateKeyInfo.ThrowIfNotEmpty();
-
-        var keyDefinition = KeyDefinitions.GetByOid(algorithmOid);
-        return (privateKey, keyDefinition.KeyType);
+        catch
+        {
+            // This method owns the array unless it returns it successfully. On any exception the
+            // array is about to become unreachable, so no caller-owned buffer is cleared here.
+            CryptographicOperations.ZeroMemory(privateKey);
+            throw;
+        }
     }
 
     public static ECParameters CreateECParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
@@ -229,7 +243,12 @@ internal class AsnPrivateKeyDecoder
         };
     }
 
-    public static RSAParameters CreateRSAParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    public static RSAParameters CreateRSAParameters(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
+        CreateRSAParameters(pkcs8EncodedKey, parametersDecoded: null);
+
+    internal static RSAParameters CreateRSAParameters(
+        ReadOnlyMemory<byte> pkcs8EncodedKey,
+        Action<RSAParameters>? parametersDecoded)
     {
         var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
         var seqPrivateKeyInfo = reader.ReadSequence();
@@ -281,7 +300,22 @@ internal class AsnPrivateKeyDecoder
             InverseQ = coefficient.ToArray()
         };
 
-        return rsaParameters.NormalizeParameters();
+        try
+        {
+            parametersDecoded?.Invoke(rsaParameters);
+            return rsaParameters.NormalizeParameters();
+        }
+        finally
+        {
+            // NormalizeParameters returns a deep copy on success. On failure this decoder is
+            // unwinding. Either way, these locally allocated private arrays are not returned.
+            CryptographicOperations.ZeroMemory(rsaParameters.D);
+            CryptographicOperations.ZeroMemory(rsaParameters.P);
+            CryptographicOperations.ZeroMemory(rsaParameters.Q);
+            CryptographicOperations.ZeroMemory(rsaParameters.DP);
+            CryptographicOperations.ZeroMemory(rsaParameters.DQ);
+            CryptographicOperations.ZeroMemory(rsaParameters.InverseQ);
+        }
     }
 
     private static void ReadAndValidatePkcs8Version(AsnReader privateKeyInfo)

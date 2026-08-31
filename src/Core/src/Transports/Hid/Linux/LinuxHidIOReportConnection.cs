@@ -167,7 +167,7 @@ internal sealed class LinuxHidIOReportConnection : IHidConnection
         }
     }
 
-    private static (int InputSize, int OutputSize) ParseReportSizes(ReadOnlySpan<byte> descriptor)
+    internal static (int InputSize, int OutputSize) ParseReportSizes(ReadOnlySpan<byte> descriptor)
     {
         // Parse HID descriptor for report sizes
         // Looking for Input and Output main items with their associated Report Size and Report Count

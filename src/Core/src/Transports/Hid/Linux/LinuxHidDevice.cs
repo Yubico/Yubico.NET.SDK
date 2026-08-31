@@ -323,7 +323,7 @@ internal sealed class LinuxHidDevice : IHidDevice
         }
     }
 
-    private static (ushort UsagePage, ushort Usage) ParseHidDescriptorBytes(ReadOnlySpan<byte> descriptor)
+    internal static (ushort UsagePage, ushort Usage) ParseHidDescriptorBytes(ReadOnlySpan<byte> descriptor)
     {
         // HID descriptor parsing - looking for Usage Page and Usage items
         // HID descriptor format: each item has a prefix byte followed by data

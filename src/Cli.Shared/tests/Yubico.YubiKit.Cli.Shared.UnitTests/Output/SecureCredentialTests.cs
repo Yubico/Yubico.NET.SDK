@@ -1,6 +1,7 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
+using System.Buffers;
 using System.Text;
 using Yubico.YubiKit.Cli.Shared.Output;
 
@@ -56,6 +57,154 @@ public sealed class SecureCredentialTests
 
         using var credential = SecureCredential.FromConsoleKeysForTesting(keys);
 
+        Assert.NotNull(credential);
         Assert.Equal(Encoding.UTF8.GetBytes("1"), credential.Memory.ToArray());
+    }
+
+    [Fact]
+    public void FromConsoleKeysForTesting_EscapeDeclines()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('1', ConsoleKey.D1, shift: false, alt: false, control: false),
+            new('2', ConsoleKey.D2, shift: false, alt: false, control: false),
+            new('\u001b', ConsoleKey.Escape, shift: false, alt: false, control: false)
+        ];
+
+        Assert.Null(SecureCredential.FromConsoleKeysForTesting(keys));
+    }
+
+    [Fact]
+    public void FromConsoleKeysForTesting_EnterOnEmptyInputDeclines()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('\r', ConsoleKey.Enter, shift: false, alt: false, control: false)
+        ];
+
+        Assert.Null(SecureCredential.FromConsoleKeysForTesting(keys));
+    }
+
+    [Theory]
+    [InlineData("123456\n", "123456")]
+    [InlineData("123456\r\n", "123456")]
+    [InlineData("123456", "123456")]
+    [InlineData("123456\r", "123456")]
+    public void ReadRedirectedInput_StripsLineTerminators(string input, string expected)
+    {
+        Span<byte> buffer = new byte[128];
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+
+        var length = SecureCredential.ReadRedirectedInput(buffer, stream);
+
+        Assert.Equal(expected, Encoding.UTF8.GetString(buffer[..length]));
+    }
+
+    [Fact]
+    public void ReadRedirectedInput_CrLf_SecondReadSeesTheSecondLine()
+    {
+        // A carriage return must not terminate the read on its own: doing so leaves the line feed
+        // unread, and the next prompt in the same process reports a declined credential. That
+        // breaks every two-secret flow (confirmation, change-PIN) on CRLF input.
+        Span<byte> first = new byte[128];
+        Span<byte> second = new byte[128];
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes("alpha\r\nbeta\r\n"));
+
+        var firstLength = SecureCredential.ReadRedirectedInput(first, stream);
+        var secondLength = SecureCredential.ReadRedirectedInput(second, stream);
+
+        Assert.Equal("alpha", Encoding.UTF8.GetString(first[..firstLength]));
+        Assert.Equal("beta", Encoding.UTF8.GetString(second[..secondLength]));
+    }
+
+    [Fact]
+    public void ReadRedirectedInput_EmptyLineIsDeclined()
+    {
+        Span<byte> buffer = new byte[128];
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes("\r\n"));
+
+        Assert.Equal(0, SecureCredential.ReadRedirectedInput(buffer, stream));
+    }
+
+    [Theory]
+    [InlineData("123456\n")]
+    [InlineData("123456\r\n")]
+    [InlineData("123456")]
+    public void ReadRedirectedInput_AcceptsCredentialOfExactlyMaxLength(string input)
+    {
+        // The CRLF carriage return must not be counted against the buffer, or a credential of
+        // exactly the maximum length is wrongly rejected as over-long on Windows-style input.
+        Span<byte> buffer = new byte[6];
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+
+        var length = SecureCredential.ReadRedirectedInput(buffer, stream);
+
+        Assert.Equal("123456", Encoding.UTF8.GetString(buffer[..length]));
+    }
+
+    [Fact]
+    public void ReadRedirectedInput_ThrowsWhenCredentialExceedsMaxLength()
+    {
+        Span<byte> buffer = new byte[6];
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes("1234567\r\n"));
+
+        try
+        {
+            SecureCredential.ReadRedirectedInput(buffer, stream);
+            Assert.Fail("Expected an over-long credential to be rejected.");
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    [Fact]
+    public void MemoryIsSizedExactlyToTheSecret()
+    {
+        // The SDK transmits the whole of Memory, so a buffer longer than the secret would send
+        // trailing padding as part of the credential.
+        ConsoleKeyInfo[] keys =
+        [
+            new('1', ConsoleKey.D1, shift: false, alt: false, control: false),
+            new('\r', ConsoleKey.Enter, shift: false, alt: false, control: false)
+        ];
+
+        using var credential = SecureCredential.FromConsoleKeysForTesting(keys, maxByteLength: 128);
+
+        Assert.NotNull(credential);
+        Assert.Equal(1, credential.Memory.Length);
+        Assert.Equal(128, credential.DangerousGetBufferForTesting().Length);
+    }
+
+    [Fact]
+    public void ExposesItselfAsIMemoryOwnerSizedToTheSecret()
+    {
+        using var credential = SecureCredential.FromUtf8String("123456");
+
+        IMemoryOwner<byte> owner = credential;
+
+        Assert.Equal(Encoding.UTF8.GetBytes("123456"), owner.Memory.ToArray());
+    }
+
+    [Fact]
+    public void IMemoryOwnerMemory_ThrowsAfterDispose()
+    {
+        IMemoryOwner<byte> owner = SecureCredential.FromUtf8String("123456");
+
+        owner.Dispose();
+
+        Assert.Throws<ObjectDisposedException>((Action)(() => _ = owner.Memory));
+    }
+
+    [Fact]
+    public void DeclinedInteractiveInputLeavesNoSecretBehind()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('9', ConsoleKey.D9, shift: false, alt: false, control: false),
+            new('\u001b', ConsoleKey.Escape, shift: false, alt: false, control: false)
+        ];
+
+        Assert.Null(SecureCredential.FromConsoleKeysForTesting(keys));
     }
 }

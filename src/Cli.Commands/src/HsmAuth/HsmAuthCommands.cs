@@ -5,6 +5,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Core.Devices;
@@ -95,6 +96,24 @@ public sealed class HsmAuthCredentialsGenerateSettings : GlobalSettings
 
 public static class HsmAuthHelpers
 {
+    /// <summary>
+    /// Prompts for a YubiHSM Auth credential password.
+    /// </summary>
+    /// <returns>The password, or <see langword="null"/> if the user declined to supply one.</returns>
+    /// <remarks>
+    /// Returns a <see cref="string"/> because <c>IHsmAuthSession.PutCredentialDerivedAsync</c> and
+    /// <c>GenerateCredentialAsymmetricAsync</c> take credential passwords as <see cref="string"/>,
+    /// which cannot be zeroed. Prompting through <see cref="SecureCredential"/> at least zeroes the
+    /// input buffer; the secret is still unzeroable once it crosses the SDK boundary. Narrowing
+    /// those SDK signatures to <c>ReadOnlyMemory&lt;byte&gt;</c> is a breaking change to a shipping
+    /// package and is tracked separately.
+    /// </remarks>
+    public static string? PromptCredentialPassword()
+    {
+        using var prompted = PinPrompt.PromptForCredential("Credential password");
+        return prompted is null ? null : Encoding.UTF8.GetString(prompted.Memory.Span);
+    }
+
     public static byte[]? ResolveManagementKey(string? hex)
     {
         hex ??= "00000000000000000000000000000000";
@@ -284,8 +303,12 @@ public sealed class HsmAuthCredentialsAddCommand : YkCommandBase<HsmAuthCredenti
             return ExitCode.GenericError;
         }
 
-        var credentialPassword = settings.CredentialPassword
-                                 ?? PinPrompt.PromptForPin("Credential password");
+        var credentialPassword = settings.CredentialPassword ?? HsmAuthHelpers.PromptCredentialPassword();
+        if (credentialPassword is null)
+        {
+            OutputHelpers.WriteError("Credential password is required.");
+            return ExitCode.GenericError;
+        }
 
         try
         {
@@ -380,8 +403,12 @@ public sealed class HsmAuthCredentialsGenerateCommand : YkCommandBase<HsmAuthCre
             return ExitCode.GenericError;
         }
 
-        var credentialPassword = settings.CredentialPassword
-                                 ?? PinPrompt.PromptForPin("Credential password");
+        var credentialPassword = settings.CredentialPassword ?? HsmAuthHelpers.PromptCredentialPassword();
+        if (credentialPassword is null)
+        {
+            OutputHelpers.WriteError("Credential password is required.");
+            return ExitCode.GenericError;
+        }
 
         try
         {

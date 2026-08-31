@@ -115,16 +115,14 @@ public sealed class OpenPgpKeysSetTouchCommand : YkCommandBase<KeysSetTouchSetti
             return ExitCode.UserCancelled;
         }
 
-        var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        byte[] adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
-        try
+        using var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
+        if (adminPin is null)
         {
-            await session.VerifyAdminAsync(adminPinBytes);
+            OutputHelpers.WriteError("Admin PIN is required.");
+            return ExitCode.GenericError;
         }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(adminPinBytes);
-        }
+
+        await session.VerifyAdminAsync(adminPin.Memory);
 
         await session.SetUifAsync(keyRef, uif);
 
@@ -165,16 +163,14 @@ public sealed class OpenPgpKeysImportCommand : YkCommandBase<KeysImportSettings>
             return ExitCode.GenericError;
         }
 
-        var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        byte[] adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
-        try
+        using var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
+        if (adminPin is null)
         {
-            await session.VerifyAdminAsync(adminPinBytes);
+            OutputHelpers.WriteError("Admin PIN is required.");
+            return ExitCode.GenericError;
         }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(adminPinBytes);
-        }
+
+        await session.VerifyAdminAsync(adminPin.Memory);
 
         await AnsiConsole.Status()
             .StartAsync("Importing private key...", async _ =>
@@ -255,16 +251,14 @@ public sealed class OpenPgpKeysGenerateCommand : YkCommandBase<KeysGenerateSetti
         await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();
 
         var keyRef = ParseKeyRef(settings.Key);
-        var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        byte[] adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
-        try
+        using var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
+        if (adminPin is null)
         {
-            await session.VerifyAdminAsync(adminPinBytes);
+            OutputHelpers.WriteError("Admin PIN is required.");
+            return ExitCode.GenericError;
         }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(adminPinBytes);
-        }
+
+        await session.VerifyAdminAsync(adminPin.Memory);
 
         var alg = settings.Algorithm.ToUpperInvariant();
 

@@ -1,6 +1,7 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
+using System.Buffers;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Oath;
@@ -21,7 +22,7 @@ public static class OathHelpers
     internal static async Task<bool> UnlockIfNeededAsync(
         IOathSession session,
         string? password,
-        Func<SecureCredential> promptCredentialFactory)
+        Func<IMemoryOwner<byte>?> promptCredentialFactory)
     {
         if (!session.IsLocked)
         {
@@ -29,7 +30,7 @@ public static class OathHelpers
         }
 
         var hasArgvPassword = !string.IsNullOrEmpty(password);
-        SecureCredential? passwordBytes = null;
+        IMemoryOwner<byte>? passwordBytes = null;
         byte[]? key = null;
         try
         {
@@ -41,6 +42,12 @@ public static class OathHelpers
             else
             {
                 passwordBytes = promptCredentialFactory();
+            }
+
+            if (passwordBytes is null)
+            {
+                OutputHelpers.WriteError("No OATH password was supplied.");
+                return false;
             }
 
             key = session.DeriveKey(passwordBytes.Memory);

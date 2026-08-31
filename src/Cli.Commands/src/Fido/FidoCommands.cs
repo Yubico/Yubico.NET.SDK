@@ -5,7 +5,6 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Security.Cryptography;
-using System.Text;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Core.Devices;
@@ -215,18 +214,20 @@ public sealed class FidoAccessSetPinCommand : YkCommandBase<FidoPinSettings>
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, FidoPinSettings settings, YkDeviceContext deviceContext)
     {
-        var newPin = settings.NewPin ?? PinPrompt.PromptForPin("New PIN");
-        byte[]? newPinBytes = null;
+        using var newPin = PinPrompt.Resolve(settings.NewPin, "New PIN");
+        if (newPin is null)
+        {
+            OutputHelpers.WriteError("New PIN is required.");
+            return ExitCode.GenericError;
+        }
 
         try
         {
-            newPinBytes = Encoding.UTF8.GetBytes(newPin);
-
             await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            await clientPin.SetPinAsync(newPinBytes);
+            await clientPin.SetPinAsync(newPin.Memory);
 
             OutputHelpers.WriteSuccess("PIN set successfully.");
             return ExitCode.Success;
@@ -235,13 +236,6 @@ public sealed class FidoAccessSetPinCommand : YkCommandBase<FidoPinSettings>
         {
             OutputHelpers.WriteError(FidoHelpers.MapCtapPinError(ex));
             return ExitCode.AuthenticationFailed;
-        }
-        finally
-        {
-            if (newPinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(newPinBytes);
-            }
         }
     }
 }
@@ -254,21 +248,21 @@ public sealed class FidoAccessChangePinCommand : YkCommandBase<FidoPinSettings>
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, FidoPinSettings settings, YkDeviceContext deviceContext)
     {
-        var pin = settings.Pin ?? PinPrompt.PromptForPin("Current PIN");
-        var newPin = settings.NewPin ?? PinPrompt.PromptForPin("New PIN");
-        byte[]? pinBytes = null;
-        byte[]? newPinBytes = null;
+        using var pin = PinPrompt.Resolve(settings.Pin, "Current PIN");
+        using var newPin = PinPrompt.Resolve(settings.NewPin, "New PIN");
+        if (pin is null || newPin is null)
+        {
+            OutputHelpers.WriteError("Current and new PINs are required.");
+            return ExitCode.GenericError;
+        }
 
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-            newPinBytes = Encoding.UTF8.GetBytes(newPin);
-
             await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            await clientPin.ChangePinAsync(pinBytes, newPinBytes);
+            await clientPin.ChangePinAsync(pin.Memory, newPin.Memory);
 
             OutputHelpers.WriteSuccess("PIN changed successfully.");
             return ExitCode.Success;
@@ -277,18 +271,6 @@ public sealed class FidoAccessChangePinCommand : YkCommandBase<FidoPinSettings>
         {
             OutputHelpers.WriteError(FidoHelpers.MapCtapPinError(ex));
             return ExitCode.AuthenticationFailed;
-        }
-        finally
-        {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
-            if (newPinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(newPinBytes);
-            }
         }
     }
 }
@@ -301,19 +283,22 @@ public sealed class FidoAccessVerifyPinCommand : YkCommandBase<FidoVerifyPinSett
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, FidoVerifyPinSettings settings, YkDeviceContext deviceContext)
     {
-        var pin = settings.Pin ?? PinPrompt.PromptForPin("PIN");
-        byte[]? pinBytes = null;
+        using var pin = PinPrompt.Resolve(settings.Pin, "PIN");
+        if (pin is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return ExitCode.GenericError;
+        }
+
         byte[]? pinToken = null;
 
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            pinToken = await clientPin.GetPinTokenAsync(pinBytes);
+            pinToken = await clientPin.GetPinTokenAsync(pin.Memory);
 
             OutputHelpers.WriteSuccess("PIN is correct.");
             return ExitCode.Success;
@@ -325,11 +310,6 @@ public sealed class FidoAccessVerifyPinCommand : YkCommandBase<FidoVerifyPinSett
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -346,20 +326,23 @@ public sealed class FidoConfigToggleAlwaysUvCommand : YkCommandBase<FidoConfigSe
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, FidoConfigSettings settings, YkDeviceContext deviceContext)
     {
-        var pin = settings.Pin ?? PinPrompt.PromptForPin("PIN");
-        byte[]? pinBytes = null;
+        using var pin = PinPrompt.Resolve(settings.Pin, "PIN");
+        if (pin is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return ExitCode.GenericError;
+        }
+
         byte[]? pinToken = null;
 
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinBytes, PinUvAuthTokenPermissions.AuthenticatorConfig);
+                pin.Memory, PinUvAuthTokenPermissions.AuthenticatorConfig);
 
             var config = new AuthenticatorConfig(session, protocol, pinToken);
             await config.ToggleAlwaysUvAsync();
@@ -374,11 +357,6 @@ public sealed class FidoConfigToggleAlwaysUvCommand : YkCommandBase<FidoConfigSe
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -395,20 +373,23 @@ public sealed class FidoConfigEnableEpAttestationCommand : YkCommandBase<FidoCon
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, FidoConfigSettings settings, YkDeviceContext deviceContext)
     {
-        var pin = settings.Pin ?? PinPrompt.PromptForPin("PIN");
-        byte[]? pinBytes = null;
+        using var pin = PinPrompt.Resolve(settings.Pin, "PIN");
+        if (pin is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return ExitCode.GenericError;
+        }
+
         byte[]? pinToken = null;
 
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinBytes, PinUvAuthTokenPermissions.AuthenticatorConfig);
+                pin.Memory, PinUvAuthTokenPermissions.AuthenticatorConfig);
 
             var config = new AuthenticatorConfig(session, protocol, pinToken);
             await config.EnableEnterpriseAttestationAsync();
@@ -423,11 +404,6 @@ public sealed class FidoConfigEnableEpAttestationCommand : YkCommandBase<FidoCon
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -444,20 +420,23 @@ public sealed class FidoCredentialsListCommand : YkCommandBase<FidoCredentialsLi
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, FidoCredentialsListSettings settings, YkDeviceContext deviceContext)
     {
-        var pin = settings.Pin ?? PinPrompt.PromptForPin("PIN");
-        byte[]? pinBytes = null;
+        using var pin = PinPrompt.Resolve(settings.Pin, "PIN");
+        if (pin is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return ExitCode.GenericError;
+        }
+
         byte[]? pinToken = null;
 
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinBytes, PinUvAuthTokenPermissions.CredentialManagement);
+                pin.Memory, PinUvAuthTokenPermissions.CredentialManagement);
 
             var credMgmt = new Fido2.CredentialManagement.CredentialManagement(
                 session, protocol, pinToken);
@@ -483,7 +462,7 @@ public sealed class FidoCredentialsListCommand : YkCommandBase<FidoCredentialsLi
                 try
                 {
                     credToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        pinBytes, PinUvAuthTokenPermissions.CredentialManagement);
+                        pin.Memory, PinUvAuthTokenPermissions.CredentialManagement);
 
                     var innerCredMgmt = new Fido2.CredentialManagement.CredentialManagement(
                         session, protocol, credToken);
@@ -520,11 +499,6 @@ public sealed class FidoCredentialsListCommand : YkCommandBase<FidoCredentialsLi
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -561,20 +535,23 @@ public sealed class FidoCredentialsDeleteCommand : YkCommandBase<FidoCredentials
             }
         }
 
-        var pin = settings.Pin ?? PinPrompt.PromptForPin("PIN");
-        byte[]? pinBytes = null;
+        using var pin = PinPrompt.Resolve(settings.Pin, "PIN");
+        if (pin is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return ExitCode.GenericError;
+        }
+
         byte[]? pinToken = null;
 
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinBytes, PinUvAuthTokenPermissions.CredentialManagement);
+                pin.Memory, PinUvAuthTokenPermissions.CredentialManagement);
 
             var credMgmt = new Fido2.CredentialManagement.CredentialManagement(
                 session, protocol, pinToken);
@@ -592,11 +569,6 @@ public sealed class FidoCredentialsDeleteCommand : YkCommandBase<FidoCredentials
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -613,20 +585,23 @@ public sealed class FidoFingerprintsListCommand : YkCommandBase<FidoFingerprints
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, FidoFingerprintsListSettings settings, YkDeviceContext deviceContext)
     {
-        var pin = settings.Pin ?? PinPrompt.PromptForPin("PIN");
-        byte[]? pinBytes = null;
+        using var pin = PinPrompt.Resolve(settings.Pin, "PIN");
+        if (pin is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return ExitCode.GenericError;
+        }
+
         byte[]? pinToken = null;
 
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinBytes, PinUvAuthTokenPermissions.BioEnrollment);
+                pin.Memory, PinUvAuthTokenPermissions.BioEnrollment);
 
             var bio = new FingerprintBioEnrollment(session, protocol, pinToken);
             var templates = await bio.EnumerateEnrollmentsAsync();
@@ -654,11 +629,6 @@ public sealed class FidoFingerprintsListCommand : YkCommandBase<FidoFingerprints
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -675,20 +645,23 @@ public sealed class FidoFingerprintsAddCommand : YkCommandBase<FidoFingerprintsA
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, FidoFingerprintsAddSettings settings, YkDeviceContext deviceContext)
     {
-        var pin = settings.Pin ?? PinPrompt.PromptForPin("PIN");
-        byte[]? pinBytes = null;
+        using var pin = PinPrompt.Resolve(settings.Pin, "PIN");
+        if (pin is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return ExitCode.GenericError;
+        }
+
         byte[]? pinToken = null;
 
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinBytes, PinUvAuthTokenPermissions.BioEnrollment);
+                pin.Memory, PinUvAuthTokenPermissions.BioEnrollment);
 
             var bio = new FingerprintBioEnrollment(session, protocol, pinToken);
 
@@ -730,11 +703,6 @@ public sealed class FidoFingerprintsAddCommand : YkCommandBase<FidoFingerprintsA
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -771,20 +739,23 @@ public sealed class FidoFingerprintsDeleteCommand : YkCommandBase<FidoFingerprin
             }
         }
 
-        var pin = settings.Pin ?? PinPrompt.PromptForPin("PIN");
-        byte[]? pinBytes = null;
+        using var pin = PinPrompt.Resolve(settings.Pin, "PIN");
+        if (pin is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return ExitCode.GenericError;
+        }
+
         byte[]? pinToken = null;
 
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinBytes, PinUvAuthTokenPermissions.BioEnrollment);
+                pin.Memory, PinUvAuthTokenPermissions.BioEnrollment);
 
             var bio = new FingerprintBioEnrollment(session, protocol, pinToken);
             await bio.RemoveEnrollmentAsync(templateId);
@@ -799,11 +770,6 @@ public sealed class FidoFingerprintsDeleteCommand : YkCommandBase<FidoFingerprin
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);
@@ -831,20 +797,23 @@ public sealed class FidoFingerprintsRenameCommand : YkCommandBase<FidoFingerprin
             return ExitCode.GenericError;
         }
 
-        var pin = settings.Pin ?? PinPrompt.PromptForPin("PIN");
-        byte[]? pinBytes = null;
+        using var pin = PinPrompt.Resolve(settings.Pin, "PIN");
+        if (pin is null)
+        {
+            OutputHelpers.WriteError("PIN is required.");
+            return ExitCode.GenericError;
+        }
+
         byte[]? pinToken = null;
 
         try
         {
-            pinBytes = Encoding.UTF8.GetBytes(pin);
-
             await using var session = await deviceContext.Device.CreateFidoSessionAsync(preferredConnection: deviceContext.PreferredConnection);
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinBytes, PinUvAuthTokenPermissions.BioEnrollment);
+                pin.Memory, PinUvAuthTokenPermissions.BioEnrollment);
 
             var bio = new FingerprintBioEnrollment(session, protocol, pinToken);
             await bio.SetFriendlyNameAsync(templateId, settings.Name);
@@ -859,11 +828,6 @@ public sealed class FidoFingerprintsRenameCommand : YkCommandBase<FidoFingerprin
         }
         finally
         {
-            if (pinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(pinBytes);
-            }
-
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);

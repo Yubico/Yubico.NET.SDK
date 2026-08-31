@@ -5,7 +5,6 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Security.Cryptography;
-using System.Text;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Core.Devices;
@@ -232,28 +231,25 @@ public sealed class OathAccessChangePasswordCommand : YkCommandBase<OathAccessCh
             return ExitCode.Success;
         }
 
-        var newPassword = settings.NewPassword;
-        if (string.IsNullOrEmpty(newPassword))
+        using var newPassword = PinPrompt.Resolve(settings.NewPassword, "Enter new OATH password");
+
+        if (newPassword is null)
         {
-            newPassword = PinPrompt.PromptForPin("Enter new OATH password");
-            var confirm = PinPrompt.PromptForPin("Confirm new OATH password");
-            if (!string.Equals(newPassword, confirm, StringComparison.Ordinal))
-            {
-                OutputHelpers.WriteError("Passwords do not match.");
-                return ExitCode.GenericError;
-            }
+            OutputHelpers.WriteError("No new password was supplied. Use --clear to remove password protection.");
+            return ExitCode.GenericError;
         }
 
-        if (string.IsNullOrEmpty(newPassword))
+        if (string.IsNullOrEmpty(settings.NewPassword) &&
+            !PinPrompt.ConfirmMatches(newPassword, "Confirm new OATH password"))
         {
-            OutputHelpers.WriteError("New password cannot be empty. Use --clear to remove password protection.");
+            OutputHelpers.WriteError("Passwords do not match.");
             return ExitCode.GenericError;
         }
 
         byte[]? key = null;
         try
         {
-            key = session.DeriveKey(Encoding.UTF8.GetBytes(newPassword));
+            key = session.DeriveKey(newPassword.Memory);
             await session.SetKeyAsync(key);
             OutputHelpers.WriteSuccess("OATH access password set.");
             return ExitCode.Success;

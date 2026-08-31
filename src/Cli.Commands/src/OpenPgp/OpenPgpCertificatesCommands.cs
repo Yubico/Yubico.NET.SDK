@@ -135,16 +135,14 @@ public sealed class OpenPgpCertificatesImportCommand : YkCommandBase<Certificate
         OutputHelpers.WriteKeyValue("Issuer", cert.Issuer);
         OutputHelpers.WriteKeyValue("Thumbprint", cert.Thumbprint);
 
-        var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        byte[] adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
-        try
+        using var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
+        if (adminPin is null)
         {
-            await session.VerifyAdminAsync(adminPinBytes);
+            OutputHelpers.WriteError("Admin PIN is required.");
+            return ExitCode.GenericError;
         }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(adminPinBytes);
-        }
+
+        await session.VerifyAdminAsync(adminPin.Memory);
 
         await session.PutCertificateAsync(keyRef, cert);
 
@@ -170,16 +168,14 @@ public sealed class OpenPgpCertificatesDeleteCommand : YkCommandBase<Certificate
             return ExitCode.UserCancelled;
         }
 
-        var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        byte[] adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
-        try
+        using var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
+        if (adminPin is null)
         {
-            await session.VerifyAdminAsync(adminPinBytes);
+            OutputHelpers.WriteError("Admin PIN is required.");
+            return ExitCode.GenericError;
         }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(adminPinBytes);
-        }
+
+        await session.VerifyAdminAsync(adminPin.Memory);
 
         await session.DeleteCertificateAsync(keyRef);
 

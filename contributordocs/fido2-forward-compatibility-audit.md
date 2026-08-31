@@ -32,20 +32,51 @@ Reported by Jonas Markström: `Fido2Session.EnumerateCredentialsForRelyingParty`
 throws and aborts enumeration of *all* credentials for a relying party when any
 one credential's public key uses a COSE algorithm the SDK does not model.
 
-Two corrections to the original report, both confirmed by reading the code:
+Two corrections to the original report, both confirmed by reading the code and
+later by the reporter's stack trace:
 
 - The exception is `System.NotSupportedException` ("The requested algorithm is
   not supported"), **not** `Ctap2DataException`.
 - The message quoted in the report — `Ctap2CborUnexpectedKey`, *"An unexpected
   key was encountered in a CBOR map; expected to find {0} (name '{1}')"* — is
   thrown from exactly one place in the SDK: `Fido2/RelyingParty.cs:128`. That is
-  **not** on the reported code path. See defect D1 in section 5.
+  **not** on the reported code path, and was a red herring.
 
-The report quoted the unformatted resx template (`{0}`, `{1}`), which suggests
-source analysis rather than a captured stack trace. **A stack trace was
-requested and had not arrived when this document was written.** Whoever picks
-this up should chase it — it determines whether the user's actual problem is D1
-rather than the COSE issue.
+### The stack trace, and what it actually showed
+
+```text
+Yubico.YubiKey 1.17.2.0 · .NET 10.0.9 · YubiKey firmware 5.8.0
+
+System.NotSupportedException: The requested algorithm is not supported.
+   at Yubico.YubiKey.Fido2.Cose.CoseKey.Create(ReadOnlyMemory`1 coseEncodedKey, Int32& bytesRead)
+   at powershellYK.Cmdlets.Fido.TraceYubiKeyFIDO2CredentialManagementCommand.TryCoseKeyCreate(...)
+```
+
+**The fault is not in enumeration at all.** The caller had persisted an ARKG
+seed to disk (`previewsign-<serial>.json`) during an earlier previewSign
+registration, and on reload was calling the **public** `CoseKey.Create` on those
+bytes directly. No SDK response object is involved anywhere in that path.
+
+This matters for two reasons:
+
+1. It **confirms** the hardware non-reproduction in section 3. Enumeration was
+   never the failing path, which is why it could not be reproduced.
+2. It **refuted** the working hypothesis that D1 (`RelyingParty`) was the real
+   fault. It is not. D1 remains a genuine HIGH defect worth fixing, but it is
+   unrelated to this report.
+
+The reported 172-byte key is captured verbatim as a regression vector in
+`CoseKeyTests` (`RealWorldUnmodeledKeyHex`). Decoded:
+
+```text
+map(5) {
+   1: -65537,          key type this SDK does not model
+   3: -65700,          algorithm this SDK does not model
+  -1: EC2 P-256 key,   alg ES256 (-7)
+  -2: EC2 P-256 key,   alg ECDH-ES+HKDF-256 (-25)
+  -3: -9
+}
+```
 
 ---
 
@@ -57,8 +88,8 @@ Two commits on `bugfix/fido2-credmgmt-unsupported-cose-key`:
 - `94093fd9` — `docs(fido2): generalize wording for unmodeled COSE key types`
 
 **Change:** added `CoseUnsupportedPublicKey` (sealed, internal constructor,
-carries the original encoding plus the reported key type and algorithm) and an
-internal `CoseKey.CreateOrUnsupported`. Applied at all three data-bearing
+carries the original encoding plus the reported key type and algorithm) and a
+public `CoseKey.CreateOrUnsupported`. Applied at all three data-bearing
 `CoseKey.Create` call sites: `CredentialUserInfo.cs`,
 `Commands/CredentialManagementData.cs`, and `AuthenticatorData.cs`.
 `Commands/ClientPinResponse.cs` was deliberately left on strict `Create`.
@@ -110,8 +141,10 @@ What the hardware **disproved**:
 
 **Conclusion:** on firmware 5.8.0 there is no route via the public SDK API to a
 discoverable credential whose own public key is an unmodeled COSE type. The code
-defect is real and worth fixing regardless, but it is probably not what the
-reporter hit. D1 is the stronger candidate.
+defect is real and worth fixing regardless, but it is not what the reporter hit.
+The stack trace in section 1 later confirmed this: the failure was the strict
+public `CoseKey.Create` applied to a persisted key, with enumeration never
+involved.
 
 **Safety note for anyone re-running this:** `FidoSessionIntegrationTestBase`'s
 constructor (`Yubico.YubiKey/tests/integration/Yubico/YubiKey/Fido2/FidoIntegrationTestBase.cs`)
@@ -251,6 +284,23 @@ algorithm paired with the wrong key type are corrupt data, not future values.
 silently change a documented public throw contract. `Create` is strict;
 `CreateOrUnsupported` is lenient.
 
+**`CreateOrUnsupported` is public — this reverses an earlier decision.** It was
+originally `internal`, on the reasoning that callers obtain the sentinel through
+SDK response objects and therefore never need to invoke the lenient parse
+themselves. **The reporter's stack trace refuted that.** An application that
+persists a key and reloads it later holds only raw bytes; there is no SDK
+response object in that path, and the only public entry point available was the
+strict `Create`, which throws. Corroborating evidence that the surface was
+missing something: the SDK's own test utility
+`PreviewSignGeneratedKeyExtensions.ParseArkgCoseKey` hand-rolls roughly sixty
+lines of CBOR parsing, which at the time it was written was the only way to
+parse one of these keys. A caller can now use `CreateOrUnsupported` and read
+`CoseUnsupportedPublicKey.EncodedKey` instead; that utility could be simplified
+to match, though doing so is not required and is out of scope here.
+
+Both overloads are public: the plain form, and a `out int bytesRead` form for
+parity with `Create` so callers can parse a key embedded in a larger buffer.
+
 **No `TryCreate`.** With a sentinel the method cannot fail, so the boolean would
 duplicate `key is CoseUnsupportedPublicKey`; none of the three call sites branch
 on it; and every `Try*` method in this codebase pairs `false` with a null or
@@ -307,8 +357,20 @@ Criteria: an unmodeled curve, an unmodeled coordinate length, and a non-Ed25519
 OKP curve each yield the sentinel with raw bytes preserved; enumeration returns
 all credentials when one is affected; **anti:** public `Create` still throws for
 all three; **anti:** `CoseEcPublicKey.cs` and `CoseEdDsaPublicKey.cs` are
-unmodified; **anti:** null input still throws `ArgumentNullException` rather than
-being absorbed into a sentinel.
+unmodified; **anti:** every malformed-encoding rejection listed in
+`CreateOrUnsupported`'s exception contract still throws, so widening the catch
+absorbs the curve and coordinate-length cases only.
+
+Note that `ArgumentException` is currently documented on both
+`CreateOrUnsupported` overloads as the outcome for a modeled algorithm on an
+unmodeled curve. That documentation must be removed as part of this work, since
+the whole point of the change is that those cases stop throwing.
+
+Do not write a criterion about null input. `ReadOnlyMemory<byte>` is a struct and
+neither `Create` nor `CborMap` performs a null check, so `ArgumentNullException`
+is unreachable on these entry points — an earlier draft of this document claimed
+otherwise, and `Create`'s XML documentation carried the same false claim until it
+was removed.
 
 ### Stack 2 — unknown map keys (D1, D2, D4, D5, D9)
 
@@ -356,9 +418,9 @@ holding the sentinel does not throw.
 
 ## 9. Open items
 
-1. **Jonas's stack trace** — outstanding. It determines whether the real fault is
-   D1 rather than the COSE issue. Chase it before promising that PR #585 solves
-   his problem.
+1. ~~Jonas's stack trace~~ — **received and resolved.** See section 1. The fault
+   was the strict public `CoseKey.Create` applied to a persisted key, not
+   enumeration and not D1. Addressed by making `CreateOrUnsupported` public.
 2. **D3 reachability** — needs a firmware owner to confirm whether a non-`packed`
    attestation format is ever returned.
 3. **D6 tail case** — the sentinel approach was chosen, but "device advertises

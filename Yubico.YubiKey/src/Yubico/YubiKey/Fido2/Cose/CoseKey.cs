@@ -86,9 +86,6 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <returns>
         /// A COSE key instance corresponding to the type described by the CBOR data.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// The <paramref name="coseEncodedKey"/> parameter was null.
-        /// </exception>
         /// <exception cref="Ctap2DataException">
         /// <para>
         /// The CBOR reader is not in the correct position.
@@ -168,8 +165,16 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// instead. Both reject the input; only the reported reason differs.
         /// </para>
         /// <para>
-        /// Use this when decoding a response field where an unrecognized key
-        /// must not abort decoding of the surrounding data.
+        /// Use this in preference to <see cref="Create"/> whenever the encoding
+        /// came from an authenticator rather than from your own code. Two common
+        /// cases: decoding a response field where an unrecognized key must not
+        /// abort decoding of the surrounding data, and re-reading a key your
+        /// application persisted earlier, which may have been produced by an
+        /// extension whose algorithm this SDK does not model.
+        /// </para>
+        /// <para>
+        /// To decode the raw bytes of a <see cref="CoseUnsupportedPublicKey"/>,
+        /// read <see cref="CoseUnsupportedPublicKey.EncodedKey"/>.
         /// </para>
         /// </remarks>
         /// <param name="coseEncodedKey">
@@ -181,10 +186,69 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// not model the algorithm.
         /// </returns>
         /// <exception cref="Ctap2DataException">
-        /// The encoding is not a correct COSE key encoding, or it is missing the
-        /// key type or the algorithm.
+        /// The encoding is not a CBOR map, is missing the key type or the
+        /// algorithm, or pairs a modeled algorithm with the wrong key type.
         /// </exception>
-        internal static CoseKey CreateOrUnsupported(ReadOnlyMemory<byte> coseEncodedKey)
+        /// <exception cref="System.Formats.Cbor.CborContentException">
+        /// The encoding is not well-formed CBOR, or violates the CTAP2 canonical
+        /// encoding rules.
+        /// </exception>
+        /// <exception cref="InvalidCastException">
+        /// A field within the encoding is not of the expected CBOR type.
+        /// </exception>
+        /// <exception cref="System.Collections.Generic.KeyNotFoundException">
+        /// A modeled key type is missing a field that type requires.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The algorithm is one this SDK models, but the curve or a coordinate
+        /// length is not. Such a key is currently rejected rather than returned
+        /// as a <see cref="CoseUnsupportedPublicKey"/>.
+        /// </exception>
+        public static CoseKey CreateOrUnsupported(ReadOnlyMemory<byte> coseEncodedKey) =>
+            CreateOrUnsupported(coseEncodedKey, out _);
+
+        /// <summary>
+        /// Creates the COSE key representation for <paramref name="coseEncodedKey"/>,
+        /// tolerating algorithms this SDK does not model, and reports how many
+        /// bytes were consumed.
+        /// </summary>
+        /// <remarks>
+        /// This behaves exactly as
+        /// <see cref="CreateOrUnsupported(ReadOnlyMemory{byte})"/>. Use this
+        /// overload when the COSE key is embedded in a larger buffer and you
+        /// need to know where it ends.
+        /// </remarks>
+        /// <param name="coseEncodedKey">
+        /// A valid COSE key representation, possibly followed by further data.
+        /// </param>
+        /// <param name="bytesRead">
+        /// The method will return the number of bytes read in this argument.
+        /// </param>
+        /// <returns>
+        /// A COSE key instance corresponding to the type described by the CBOR
+        /// data, or a <see cref="CoseUnsupportedPublicKey"/> if this SDK does
+        /// not model the algorithm.
+        /// </returns>
+        /// <exception cref="Ctap2DataException">
+        /// The encoding is not a CBOR map, is missing the key type or the
+        /// algorithm, or pairs a modeled algorithm with the wrong key type.
+        /// </exception>
+        /// <exception cref="System.Formats.Cbor.CborContentException">
+        /// The encoding is not well-formed CBOR, or violates the CTAP2 canonical
+        /// encoding rules.
+        /// </exception>
+        /// <exception cref="InvalidCastException">
+        /// A field within the encoding is not of the expected CBOR type.
+        /// </exception>
+        /// <exception cref="System.Collections.Generic.KeyNotFoundException">
+        /// A modeled key type is missing a field that type requires.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The algorithm is one this SDK models, but the curve or a coordinate
+        /// length is not. Such a key is currently rejected rather than returned
+        /// as a <see cref="CoseUnsupportedPublicKey"/>.
+        /// </exception>
+        public static CoseKey CreateOrUnsupported(ReadOnlyMemory<byte> coseEncodedKey, out int bytesRead)
         {
             // Build the map outside the try, so that the only
             // NotSupportedException the catch below can observe is the one the
@@ -195,6 +259,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             // data rather than an unrecognized algorithm, and must not be
             // absorbed into an unsupported key if that ever changes.
             var cborMap = new CborMap<int>(coseEncodedKey);
+            bytesRead = cborMap.BytesRead;
 
             try
             {
@@ -221,7 +286,11 @@ namespace Yubico.YubiKey.Fido2.Cose
 
                 var keyType = (CoseKeyType)cborMap.ReadInt32(TagKeyType);
 
-                return new CoseUnsupportedPublicKey(coseEncodedKey, keyType, algorithm);
+                // Preserve the key alone. The caller's buffer may contain
+                // further data after it, which must not leak into EncodedKey or
+                // the result of Encode().
+                return new CoseUnsupportedPublicKey(
+                    coseEncodedKey.Slice(0, bytesRead), keyType, algorithm);
             }
         }
 

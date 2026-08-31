@@ -42,8 +42,11 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// than against named members.
     /// </para>
     /// <para>
-    /// Instances of this class are created only by the SDK while decoding a
-    /// response from a YubiKey; it cannot be constructed by callers.
+    /// This class has no public constructor. Instances are produced by the SDK
+    /// while decoding a response from a YubiKey, and by
+    /// <see cref="CoseKey.CreateOrUnsupported(System.ReadOnlyMemory{byte})"/>,
+    /// which callers can use to decode an encoding they hold themselves — for
+    /// example one their application persisted after an earlier registration.
     /// </para>
     /// <para>
     /// <see cref="EncodedKey"/> is fixed at construction. The inherited
@@ -57,9 +60,15 @@ namespace Yubico.YubiKey.Fido2.Cose
     public sealed class CoseUnsupportedPublicKey : CoseKey
     {
         /// <summary>
-        /// The original COSE encoding of the key, exactly as the YubiKey
-        /// returned it.
+        /// The original COSE encoding this key was decoded from, byte for byte.
         /// </summary>
+        /// <remarks>
+        /// When the key came from a YubiKey response this is exactly what the
+        /// YubiKey returned. When it came from
+        /// <see cref="CoseKey.CreateOrUnsupported(System.ReadOnlyMemory{byte})"/>
+        /// it is exactly the encoding the caller supplied, excluding any trailing
+        /// data that followed the key in the caller's buffer.
+        /// </remarks>
         public ReadOnlyMemory<byte> EncodedKey { get; }
 
         /// <summary>
@@ -95,7 +104,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// Because the SDK does not model this key's algorithm, it cannot
         /// re-encode the key from decoded components. This method returns a copy
         /// of <see cref="EncodedKey"/>, so the result is byte-for-byte identical
-        /// to what the YubiKey returned.
+        /// to the encoding this key was decoded from.
         /// </remarks>
         /// <returns>
         /// The encoded key.

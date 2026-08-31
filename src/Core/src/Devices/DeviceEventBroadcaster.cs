@@ -67,7 +67,7 @@ namespace Yubico.YubiKit.Core.Devices;
 /// blocking-subscriber tests, and was reverted.
 /// </para>
 /// </remarks>
-internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDisposable
+internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<DeviceEventBroadcaster>();
 
@@ -76,26 +76,22 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
     /// <summary>Immutable snapshot; only ever replaced, never mutated in place.</summary>
     private IObserver<DeviceEvent>[] _observers = [];
 
-    /// <summary>Guarded by <see cref="_gate"/>; read without the lock only in <see cref="Subscribe"/>'s fast path.</summary>
-    private volatile bool _completed;
+    /// <summary>Guarded by <see cref="_gate"/>.</summary>
+    private bool _completed;
 
     /// <summary>
     /// Delivers an event to every current subscriber, synchronously and in subscription order.
     /// </summary>
     /// <param name="deviceEvent">The event to deliver.</param>
     /// <remarks>
-    /// No-op once <see cref="Complete"/> has been called. Exceptions thrown by a subscriber are not
-    /// caught — see the type-level remarks.
+    /// No-op once <see cref="Complete"/> has been called: completion is terminal, so it empties the
+    /// observer array and <see cref="Subscribe"/> never refills it. Exceptions thrown by a subscriber
+    /// are not caught — see the type-level remarks.
     /// </remarks>
     public void Publish(DeviceEvent deviceEvent)
     {
         // Lock-free: the array is immutable once published, so this snapshot is stable for the whole
         // loop even if someone subscribes or unsubscribes while we are delivering.
-        if (_completed)
-        {
-            return;
-        }
-
         foreach (var observer in Volatile.Read(ref _observers))
         {
             observer.OnNext(deviceEvent);
@@ -152,7 +148,7 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
     /// <inheritdoc/>
     /// <remarks>
     /// Subscribing after <see cref="Complete"/> delivers <see cref="IObserver{T}.OnCompleted"/>
-    /// immediately and returns a no-op subscription, rather than throwing. A completed sequence
+    /// immediately and returns an inert subscription, rather than throwing. A completed sequence
     /// completing its late subscribers is the conventional observable contract, and it keeps the
     /// subscribe/complete race benign: whether a caller lands just before or just after completion,
     /// it observes a clean terminal signal either way.
@@ -161,26 +157,27 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
     {
         ArgumentNullException.ThrowIfNull(observer);
 
+        bool alreadyCompleted;
+
         lock (_gate)
         {
-            if (!_completed)
+            alreadyCompleted = _completed;
+            if (!alreadyCompleted)
             {
                 _observers = [.. _observers, observer];
-                return new Subscription(this, observer);
             }
         }
 
-        // Outside the lock, for the same reason as Complete().
-        observer.OnCompleted();
+        if (alreadyCompleted)
+        {
+            // Outside the lock, for the same reason as Complete(). Completion is terminal, so the
+            // observer array stays empty and this handle's Unsubscribe is already a no-op - a
+            // separate no-op subscription type would only add a second thing to reason about.
+            observer.OnCompleted();
+        }
 
-        return NoOpSubscription.Instance;
+        return new Subscription(this, observer);
     }
-
-    /// <summary>
-    /// Terminates the sequence. Equivalent to <see cref="Complete"/>; provided so the broadcaster can
-    /// participate in the owning type's disposal chain.
-    /// </summary>
-    public void Dispose() => Complete();
 
     private void Unsubscribe(IObserver<DeviceEvent> observer)
     {
@@ -215,21 +212,6 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
             {
                 owner.Unsubscribe(target);
             }
-        }
-    }
-
-    /// <summary>Returned to subscribers that arrived after completion; there is nothing to release.</summary>
-    private sealed class NoOpSubscription : IDisposable
-    {
-        internal static readonly NoOpSubscription Instance = new();
-
-        private NoOpSubscription()
-        {
-        }
-
-        public void Dispose()
-        {
-            // Intentionally empty.
         }
     }
 }
